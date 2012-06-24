@@ -59,6 +59,9 @@ R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
 #R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
 R8::Config[:repo][:git][:gitolite].set?(:admin_directory,"/root/r8_gitolite_admin")
 
+#for remote repo taht attach to
+R8::Config[:repo][:remote][:rest_port] = 7000
+R8::Config[:repo][:remote][:git_user] = "git"
 
 #Command and control related parameters
 #R8::Config[:command_and_control][:node_config].set?(:type,"mcollective")

@@ -11,7 +11,7 @@ module XYZ
     end
 
     def rest__list_remote()
-      rest_ok_response RepoRemote.list(model_handle(:repo))
+      rest_ok_response Repo::Remote.list(model_handle(:repo))
     end
 
     def rest__import()

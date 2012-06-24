@@ -10,14 +10,16 @@ module XYZ
       end
 
       #TODO: this might be done a priori
-      RepoRemote.authorize_dtk_instance(remote_module_name)
+      Repo::Remote.authorize_dtk_instance(remote_module_name)
 
       #create empty repo on local repo manager; 
       config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:delete_if_exists => true)
+      repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      
+      repo_obj.synchronize_with_remote_repo()
 
-      #add a remote to the remote repo and do a pull from the remote
+
       nil
     end
 

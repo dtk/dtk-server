@@ -13,7 +13,13 @@ module XYZ
 
     def self.create_empty_repo(model_handle,module_name,config_agent_type,repo_user_acls,opts={})
       repo_name = repo_name(config_agent_type,module_name)
-      repo_obj = create_repo_obj?(model_handle,repo_name)
+
+      extra_attrs = Hash.new
+      if opts[:remote_repo_name]
+        extra_attrs.merge!(:remote_repo_name => opts[:remote_repo_name])
+      end
+
+      repo_obj = create_repo_obj?(model_handle,repo_name,extra_attrs)
       repo_idh = model_handle.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify(repo_idh,repo_user_acls)
       RepoManager.create_repo(repo_obj,repo_user_acls,opts) 
@@ -26,25 +32,38 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
+    def synchronize_with_remote_repo()
+      update_object!(:remote_repo_name)
+      #TODO: stub
+      pp Remote.repo_url_ssh_access(remote_repo_name)
+    end
+
    private    
     def self.repo_name(config_agent_type,module_name)
       username = CurrentSession.get_username()
       RepoManager.repo_name(username,config_agent_type,module_name)
     end
 
-    def self.create_repo_obj?(model_handle,repo_name)
+    def self.create_repo_obj?(model_handle,repo_name,extra_attrs={})
       sp_hash = {
         :cols => common_columns(),
         :filter => [:eq,:repo_name,repo_name]
       }
       ret = get_obj(model_handle,sp_hash)
-      return ret if ret
+      if ret
+        unless extra_attrs.empty?
+          Log.info("TODO: does not check whether has changed #{extra_attrs.inspect}")
+        end
+        return ret 
+      end
       repo_hash = {
         :ref => repo_name,
         :display_name => repo_name,
         :repo_name => repo_name,
         :local_dir =>  "#{R8::Config[:repo][:base_directory]}/#{repo_name}" #TODO: should this be set by RepoManager instead
       }
+      repo_hash.merge!(extra_attrs)
+
       repo_idh = create_from_row(model_handle,repo_hash)
       repo_id = repo_idh.get_id()
       repo_idh.create_object().merge(repo_hash)

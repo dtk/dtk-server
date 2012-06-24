@@ -1,6 +1,6 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
- class RepoRemote < Repo
+ class Repo; module Remote
     class << self
       def list(repo_mh)
         remote_repo_names = client.list_repos()
@@ -17,9 +17,19 @@ module DTK
         remote_repo_name
       end
 
+      def repo_url_ssh_access(remote_repo_name)
+        remote = ::R8::Config[:repo][:remote]
+        "#{remote[:git_user]}@#{remote[:host]}:#{remote_module_name}"
+      end
+
      private
       def client()
-        @client ||= RepoManagerClient.new(::R8::Config[:repo][:remote][:rest_base_url])
+        @client ||= RepoManagerClient.new(rest_base_url())
+      end
+
+      def rest_base_url()
+        remote = ::R8::Config[:repo][:remote]
+        "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end
 
       def dtk_instance_rsa_pub_key()
@@ -30,5 +40,5 @@ module DTK
       end
     end
   end
-end
+end; end
 

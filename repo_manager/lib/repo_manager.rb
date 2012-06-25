@@ -18,14 +18,14 @@ module DTK::RepoManager
   class Error < NameError
   end
   module Log
-    def self.info(msg, out = $stdout)
-      ::XYZ::Log.info(msg, out)
+    def self.info(msg)
+      ::Ramaze::Log.info(msg)
     end
-    def self.debug(msg, out = $stdout)
-      ::XYZ::Log.debug(msg, out)
+    def self.debug(msg)
+      ::Ramaze::Log.debug(msg)
     end
-    def self.error(msg, out = $stdout)
-      ::XYZ::Log.error(msg, out)
+    def self.error(msg)
+      ::Ramaze::Log.error(msg)
     end
   end
 end

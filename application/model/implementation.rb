@@ -60,6 +60,22 @@ module XYZ
       [repo_obj, impl_obj]
     end
 
+    def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch)
+      impl_hash = {
+        :display_name => module_name,
+        :type => ImplementationType[config_agent_type],
+        :repo => repo_obj[:repo_name],
+        :repo_id => repo_obj[:id],
+        :module_name => module_name,
+        :library_library_id => library_idh.get_id(),
+        :version => branch,
+        :branch => branch
+      }
+      impl_ref = "#{config_agent_type}-#{module_name}-#{branch}"
+      impl_mh = library_idh.create_childMH(:implementation)
+      impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
+      impl_idh.create_object().merge(impl_hash)
+    end
 
     def self.delete_repos_and_implementations(model_handle,module_name)
       sp_hash = {
@@ -89,7 +105,7 @@ module XYZ
     end
 
     #TODO: this need s to be updated to rflect that can be on different branches
-    def add_library_files_from_directory(repo_obj)
+    def create_file_assets_from_dir_els(repo_obj)
       update_object!(:type)
       repo_obj.update_object!(:local_dir)
 
@@ -112,7 +128,7 @@ module XYZ
           :display_name => file_name,
           :file_name => file_name,
           :path => file_path,
-          :content => nil #TODO to clear model cache of content
+          :content => nil #TODO to cleary model cache of content
         }
       end
       #TODO: need to make create? from rows

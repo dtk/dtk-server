@@ -16,8 +16,10 @@ module XYZ
       config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
       repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
-      
       repo_obj.synchronize_with_remote_repo()
+
+      impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
+      impl_obj.create_file_assets_from_dir_els(repo_obj)
 
       nil
     end

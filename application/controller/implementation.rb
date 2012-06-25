@@ -25,7 +25,7 @@ module XYZ
       FileUtils.rm_rf source_git if File.directory?(source_git)
 
       #add file_assets
-      impl_obj.add_library_files_from_directory(repo_obj)
+      impl_obj.create_file_assets_from_dir_els(repo_obj)
 
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       require 'yaml'

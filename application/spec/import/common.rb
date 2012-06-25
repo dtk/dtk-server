@@ -36,10 +36,11 @@ class R8Server
     #TODO: hack; must unify; right now based on assumption on name that appears in import file
     if opts[:include_default_nodes]
       container_idh = pre_execute(:top)
-#      import_file = "#{Root}/spec/test_data/library_node_data.json" #TODO: hack
-#      Model.import_objects_from_file(container_idh,import_file)
-       hash_content = LibraryNodes.get_hash(:in_library => "public")
-       Model.import_objects_from_hash(container_idh,hash_content)
+      #import_file = "#{Root}/spec/test_data/library_node_data.json" #TODO: hack
+      #Model.import_objects_from_file(container_idh,import_file)
+      hash_content = LibraryNodes.get_hash(:in_library => "public")
+      hash_content["library"]["public"]["display_name"] ||= "public" 
+      Model.import_objects_from_hash(container_idh,hash_content)
     else
       library_mh = pre_execute(:library)
       Library.create_public_library?(library_mh)

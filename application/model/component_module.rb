@@ -21,6 +21,9 @@ module XYZ
       impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo_obj)
 
+      create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
+
+      #TODO: create component_module and cm_branch objects
       nil
     end
 
@@ -55,6 +58,13 @@ module XYZ
       }
       cms = get_objs(library_idh.createMH(:component_module),sp_hash)
       not cms.empty?
+    end
+
+    def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
+      local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
+      r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
+      r8meta_hash = YAML.load_file(r8meta_path)
+      add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
     end
   end
 end

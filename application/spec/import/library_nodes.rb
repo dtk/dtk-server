@@ -162,7 +162,7 @@ module XYZ
          if info[:ami] == nt[:image_id] and info[:size] == nt[:size]
            ret = "/node_binding_ruleset/#{k}"
            if opts[:in_library]
-             return {"library"=> {opts[:in_library] => ret}}
+             return "/library/#{opts[:in_library]}#{ret}"
            else
              return ret
            end
@@ -186,12 +186,19 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
      :image_id=>"ami-cc4eeda5",
      :size=>"m1.large",
      :region=>"us-east-1"}}]},
- "natty-small"=>{:type=>"clone",
+ "natty-micro"=>{:type=>"clone",
   :os_type=>"ubuntu",
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
      :image_id=>"ami-e7b1618e",
      :size=>"t1.micro",
+     :region=>"us-east-1"}}]},
+ "natty-small"=>{:type=>"clone",
+  :os_type=>"ubuntu",
+  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+    :node_template=>{:type=>"ec2_image",
+     :image_id=>"ami-e7b1618e",
+     :size=>"m11.small",
      :region=>"us-east-1"}}]},
  "centos-5.6-micro"=>{:type=>"clone",
   :os_type=>"centos",

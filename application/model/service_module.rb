@@ -1,12 +1,6 @@
-r8_require('service_or_component_module')
 module XYZ
   class ComponentModule < Model
-    include ServiceOrComponentModuleMixin
-    def self.import(library_idh,remote_module_name)
-      module_name = remote_module_name
-      if remote_already_imported?(library_idh,remote_module_name)
-        raise Error.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
-      end
+    def self.create(library_idh,module_name)
       if conflict_with_local_repo?(library_idh,module_name)
         raise Error.new("Import conflicts with local repo (#{module_name})")
       end
@@ -28,7 +22,40 @@ module XYZ
       #TODO: create component_module and cm_branch objects
       nil
     end
-   private
+
+    def self.create_empty_repo(library_idh,module_name,config_agent_type,opts={})
+      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
+      repo_user_acls = auth_repo_users.map do |repo_username|
+        {
+          :repo_username => repo_username,
+          :access_rights => "RW+"
+        }
+      end
+      Repo.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts)
+    end
+
+    private
+    def self.remote_already_imported?(library_idh,remote_module_name)
+      ret = nil
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
+                    [:eq, :remote_repo, remote_module_name]]
+      }
+      cms = get_objs(library_idh.createMH(:component_module),sp_hash)
+      not cms.empty?
+    end
+
+    def self.conflict_with_local_repo?(library_idh,module_name)
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
+                    [:eq, :display_name, module_name]]
+      }
+      cms = get_objs(library_idh.createMH(:component_module),sp_hash)
+      not cms.empty?
+    end
+
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
       local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"

@@ -1,5 +1,9 @@
 module XYZ
   class Service_moduleController < Controller
+    def rest__list_from_library()
+      rest_ok_response ServiceModule.list_from_library(model_handle)
+    end
+
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       library_id = ret_request_params(:library_id) 

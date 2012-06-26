@@ -3,7 +3,7 @@ module DTK::Client
     def self.pretty_print_cols()
       [:display_name, :id, :version]
     end
-    desc "list [library|workspace|remote]","List library, workspace, or remote modules"
+    desc "list [library|workspace|remote]","List library, workspace, or remote component modules"
     def list(parent)
       case parent
        when "library":

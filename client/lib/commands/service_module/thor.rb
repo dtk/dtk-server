@@ -3,6 +3,17 @@ module DTK::Client
     def self.pretty_print_cols()
       [:display_name, :id, :version]
     end
+    desc "list [library|remote]","List library, workspace,or remote service modules"
+    def list(parent)
+      case parent
+       when "library":
+         post rest_url("service_module/list_from_library")
+       when "remote":
+         post rest_url("service_module/list_remote")
+       else 
+         ResponseBadParams.new("module type" => parent)
+      end
+    end
 
     desc "create MODULE-NAME [library_id]", "Create an empty service module in library"
     def create(module_name,library_id=nil)

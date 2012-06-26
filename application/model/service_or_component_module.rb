@@ -11,6 +11,17 @@ module DTK
       Repo.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,module_type,opts)
     end
 
+    def list_from_library(impl_mh,opts={})
+      library_idh = opts[:library_idh]
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => lib_filter
+      }
+      get_objs(impl_mh,sp_hash)
+    end
+
+
    private
     def remote_already_imported?(library_idh,remote_module_name)
       ret = nil

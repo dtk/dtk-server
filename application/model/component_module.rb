@@ -7,8 +7,8 @@ module XYZ
       if remote_already_imported?(library_idh,remote_module_name)
         raise Error.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
       end
-      if conflict_with_local_repo?(library_idh,module_name)
-        raise Error.new("Import conflicts with local repo (#{module_name})")
+      if conflicts_with_library_module?(library_idh,module_name)
+        raise Error.new("Import conflicts with library module (#{module_name})")
       end
 
       #TODO: this might be done a priori
@@ -17,7 +17,7 @@ module XYZ
       #create empty repo on local repo manager; 
       config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:component_module,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo_obj.synchronize_with_remote_repo()
 
       impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")

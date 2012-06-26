@@ -3,14 +3,21 @@ module XYZ
   class ServiceModule < Model
     extend ServiceOrComponentModuleClassMixin
     def self.create(library_idh,module_name,config_agent_type)
-      if conflict_with_local_repo?(library_idh,module_name)
-        raise Error.new("Import conflicts with existing repo (#{module_name})")
+      if conflicts_with_library_module?(library_idh,module_name)
+        raise Error.new("Import conflicts with existing library module (#{module_name})")
       end
 
-      repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:delete_if_exists => true)
-
-      #TODO: create service_module and sm_branch objects
-      nil
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:service_module,:delete_if_exists => true)
+      create_service_module_obj?(library_idh,module_name)
+    end
+    private
+    def self.create_service_module_obj?(library_idh,module_name)
+      ref = module_name
+      assigns = {
+        :display_name => module_name,
+        :library_library_id => library_idh.get_id()
+      }
+      create_from_row?(library_idh.createMH(model_name),ref,assigns)
     end
   end
 end

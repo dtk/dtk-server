@@ -836,6 +836,8 @@ POSSIBLE CHANGES TO HASH
 
       if required_attr_list.length == 0
         tpl.assign(:no_required_attrs,'<tr><td class="label"><i>No Required Attributes Missing</i></td></tr>')
+      else
+        tpl.assign(:no_required_attrs,'<tr><td class="label"><i></i></td></tr>') #TODO: to get aroudn template bug
       end
       tpl.assign(:required_attr_list,required_attr_list)
 

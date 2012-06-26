@@ -11,6 +11,7 @@ module DTK
       Repo.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,module_type,opts)
     end
 
+    #TODO: change so get versions from cm or sm branches
     def list_from_library(impl_mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

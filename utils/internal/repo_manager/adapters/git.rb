@@ -5,7 +5,7 @@ module XYZ
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
 
-    def self.create_local_repo(repo_obj,opts)
+    def self.create_repo_clone(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
       if File.exists?(local_repo_dir)

@@ -29,7 +29,7 @@ module XYZ
       repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
       repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify(repo_idh,repo_user_acls)
-      RepoManager.create_repo(repo_obj,repo_user_acls,opts) 
+      RepoManager.create_repo_and_local_clone(repo_obj,repo_user_acls,opts) 
       repo_obj
     end
 

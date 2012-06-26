@@ -1,7 +1,7 @@
 r8_require('service_or_component_module')
 module XYZ
   class ComponentModule < Model
-    include ServiceOrComponentModuleMixin
+    extend ServiceOrComponentModuleClassMixin
     def self.import(library_idh,remote_module_name)
       module_name = remote_module_name
       if remote_already_imported?(library_idh,remote_module_name)

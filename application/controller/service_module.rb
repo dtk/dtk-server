@@ -7,8 +7,10 @@ module XYZ
       unless library_idh
         raise Error.new("No library specified and no default can be determined")
       end
-      service_module_idh = ServiceModule.create(library_idh,module_name)
-      rest_ok_response(:service_module_id => service_module_idh.get_id())
+      config_agent_type =  ret_request_params(:config_agent_type)|| :puppet
+      service_module_idh = ServiceModule.create(library_idh,module_name,config_agent_type)
+      rest_ok_response
+#      rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
   end
 end

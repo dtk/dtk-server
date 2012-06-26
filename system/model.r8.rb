@@ -362,7 +362,7 @@ module XYZ
     def get_obj(sp_hash_x,opts={})
       rows = get_objs(sp_hash_x,opts)
       if rows.size > 1
-        Log.error("call to get_obj (sp_hash=#{sp_hash_x.inspect} returned more than one row")
+        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash_x.inspect} returned more than one row")
       end
       rows.first
     end
@@ -414,7 +414,7 @@ module XYZ
     def self.get_obj(model_handle,sp_hash,opts={})
       rows = get_objs(model_handle,sp_hash,opts)
       if rows.size > 1
-        Log.error("call to get_obj (sp_hash=#{sp_hash.inspect} returned more than one row")
+        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row")
       end
       rows.first
     end

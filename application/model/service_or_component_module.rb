@@ -1,6 +1,6 @@
 module DTK
-  module ServiceOrComponentModuleMixin
-    def self.create_empty_repo(library_idh,module_name,config_agent_type,opts={})
+  module ServiceOrComponentModuleClassMixin
+    def create_empty_repo(library_idh,module_name,config_agent_type,opts={})
       auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
       repo_user_acls = auth_repo_users.map do |repo_username|
         {
@@ -12,7 +12,7 @@ module DTK
     end
 
    private
-    def self.remote_already_imported?(library_idh,remote_module_name)
+    def remote_already_imported?(library_idh,remote_module_name)
       ret = nil
       sp_hash = {
         :cols => [:id,:display_name],
@@ -23,7 +23,7 @@ module DTK
       not cms.empty?
     end
 
-    def self.conflict_with_local_repo?(library_idh,module_name)
+    def conflict_with_local_repo?(library_idh,module_name)
       sp_hash = {
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],

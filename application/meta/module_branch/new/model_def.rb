@@ -2,7 +2,7 @@
   :schema=>:module,
   :table=>:branch,
   :columns=>{
-    :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
+    :branch => {:type=>:varchar, :size => 50},
     :version => {:type=>:varchar, :size => 20},
     :is_workspace => {:type =>:boolean}
   },

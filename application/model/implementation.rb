@@ -4,6 +4,7 @@ r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
     include BranchNamesMixin
+    extend BranchNamesClassMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
 

@@ -48,7 +48,7 @@ module DTK
         raise Error.new("Version (#{self[:version]}) exists in library already")
       end
       if self[:updated]
-        new_branch = library_branch_name(new_version,library_idh)
+        new_branch = library_branch_name(library_idh,new_version)
         #TODO: assuming that implementaion files do not hvae any content that is not written to repo
         RepoManager.clone_branch(new_branch,{:implementation => self})
         override_attrs={:version => new_version,:branch => new_branch}

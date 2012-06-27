@@ -24,11 +24,14 @@ module XYZ
 
     def self.list_from_library(assembly_mh,opts={})
       library_idh = opts[:library_idh]
+      mb_idhs = opts[:module_branch_idhs]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      mb_idhs_filter = mb_idhs && [:one_of, :moduel_branch_id,mb_idhs.map{|idh|idh.get_id()}] 
       nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
         :cols => [:id, :display_name,nested_virtual_attr],
         :filter => [:and, [:eq, :type, "composite"], lib_filter]
+#        :filter => SQL::and([:eq, :type, "composite"], lib_filter, mb_idhs_filter)
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
       get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 

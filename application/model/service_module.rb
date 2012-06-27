@@ -1,7 +1,12 @@
 r8_require('service_or_component_module')
-module XYZ
+module DTK
   class ServiceModule < Model
     extend ServiceOrComponentModuleClassMixin
+    
+    def list_assemblies()
+      Assembly.list_from_library(model_handle(:component),:service_module_idh => id_handle())
+    end
+
     def self.create_library_obj(library_idh,module_name,config_agent_type)
       if conflicts_with_library_module?(library_idh,module_name)
         raise Error.new("Create conflicts with existing library module (#{module_name})")

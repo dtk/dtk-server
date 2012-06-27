@@ -1,5 +1,5 @@
 r8_require('branch_names')
-module XYZ
+module DTK
   class ModuleBranch < Model
     include BranchNamesMixin
     extend BranchNamesClassMixin

@@ -1,5 +1,5 @@
 r8_require('service_or_component_module')
-module XYZ
+module DTK
   class ComponentModule < Model
     extend ServiceOrComponentModuleClassMixin
     def self.import(library_idh,remote_module_name)

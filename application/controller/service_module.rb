@@ -3,6 +3,10 @@ module XYZ
     def rest__list_from_library()
       rest_ok_response ServiceModule.list_from_library(model_handle)
     end
+    
+    def rest__list_assemblies()
+#TODO: find module branches and set module_branch_idhs      service_module_id = ret_non_null_request_params(:service_module_id)
+    end
 
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)

@@ -8,13 +8,17 @@ module XYZ
       self[:version]||"master"
     end
     
-    def self.ret_hash_for_create(library_idh,version=nil)
-      ret = {
-        :branch => library_branch_name(library_idh,version),
+    def self.ret_create_hash(library_idh,repo_idh,version=nil)
+      branch =  library_branch_name(library_idh,version)
+      assigns = {
+        :display_name => branch,
+        :branch => branch,
+        :repo_id => repo_idh.get_id(),
         :is_workspace => false
       }
-      ret[:version] = version if version
-      ret
+      assigns[:version] = version if version
+      ref = branch
+      {ref => assigns}
     end
   end
 end

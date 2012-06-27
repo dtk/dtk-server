@@ -4,7 +4,13 @@
   :columns=>{
     :branch => {:type=>:varchar, :size => 50},
     :version => {:type=>:varchar, :size => 20},
-    :is_workspace => {:type =>:boolean}
+    :is_workspace => {:type =>:boolean},
+    :repo_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:repo,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    }
   },
   :virtual_columns=>{
     :prety_print_version=>{

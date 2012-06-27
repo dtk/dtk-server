@@ -3,7 +3,7 @@ module XYZ
   class DB
     module DataProcessingCreate
       #creates a new instance w/ref_num bumped if needed
-      #TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
+      #TODO: make more efficient by reducing or elimintaing class to id table as well as using bulk inserts
       #TODO: may eventually deprecate this
       def create_from_hash(id_handle,hash,opts={})
         if id_handle.is_top?()

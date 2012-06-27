@@ -1,10 +1,10 @@
-r8_nested_require('implementation','version')
+r8_require('version')
 r8_nested_require('implementation','branch_names')
 r8_nested_require('implementation','create_workspace')
 r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
-    include ImplVersionMixin
+    include VersionMixin
     include ImplBranchNamesMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin

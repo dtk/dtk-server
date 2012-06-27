@@ -1,5 +1,5 @@
 module XYZ
-  class SmBranch < Model
+  class ModuleBranch < Model
     #virtual columns
     def prety_print_version()
       self[:version]||"master"

@@ -1,6 +1,6 @@
 {
   :schema=>:module,
-  :table=>:component_branch,
+  :table=>:branch,
   :columns=>{
     :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
     :version => {:type=>:varchar, :size => 20},
@@ -10,8 +10,8 @@
     :prety_print_version=>{
       :type=>:varchar,
       :hidden=>true,
-      :local_dependencies => [:version]
+      :local_dependencies => [:branch,:version]
     }
   },
-  :many_to_one=>[:component_module]
+  :many_to_one=>[:component_module,:service_module]
 }

@@ -15,6 +15,14 @@ module DTK::Client
       end
     end
 
+    desc "list-assemblies SERVICE-MODULE-ID","List assemblies in teh service module"
+    def list_assemblies(service_module_id)
+      post_body = {
+       :service_module_id => service_module_id
+      }
+      post rest_url("service_module/list_assemblies"), post_body
+    end
+
     desc "create MODULE-NAME [library_id]", "Create an empty service module in library"
     def create(module_name,library_id=nil)
       post_body = {

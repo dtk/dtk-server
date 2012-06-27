@@ -5,7 +5,9 @@ module XYZ
     end
     
     def rest__list_assemblies()
-#TODO: find module branches and set module_branch_idhs      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module = id_handle(service_module_id).create_object() 
+      rest_ok_response service_module.list_assemblies()
     end
 
     def rest__create()

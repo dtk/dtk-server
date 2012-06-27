@@ -4,7 +4,11 @@ module DTK
     extend ServiceOrComponentModuleClassMixin
     
     def list_assemblies()
-      Assembly.list_from_library(model_handle(:component),:service_module_idh => id_handle())
+      sp_hash = {
+        :cols => [:module_branches]
+      }
+      mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
+      Assembly.list_from_library(model_handle(:component),:module_branch_idhs => mb_idhs)
     end
 
     def self.create_library_obj(library_idh,module_name,config_agent_type)

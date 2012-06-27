@@ -7,6 +7,21 @@ module XYZ
     include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin
+
+    def self.create_library_template_obj(library_idh,assembly_name,service_module_name,icon_info,version=nil)
+      module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
+      create_row = {
+        :library_library_id => library_idh.get_id(),
+        :ref => "#{service_module_name}-#{assembly_name}",
+        :display_name => assembly_name,
+        :ui => icon_info,
+        :type => "composite",
+        :module_branch_id => module_branch[:id]
+      }
+      assembly_mh = library_idh.create_childMH(:component)
+      create_from_row(assembly_mh,create_row, :convert => true)
+    end
+
     def self.list_from_library(assembly_mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

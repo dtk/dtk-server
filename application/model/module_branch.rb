@@ -14,7 +14,8 @@ module XYZ
         :display_name => branch,
         :branch => branch,
         :repo_id => repo_idh.get_id(),
-        :is_workspace => false
+        :is_workspace => false,
+        :type => "service_module"
       }
       assigns[:version] = version if version
       ref = branch

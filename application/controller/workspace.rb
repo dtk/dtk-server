@@ -1007,15 +1007,23 @@ POSSIBLE CHANGES TO HASH
       library_id = hash["library_id"].to_i
       library_idh = id_handle(library_id,:library)
       name = hash["name"] || "assembly"
-      create_row = {
-        :library_library_id => library_id,
-        :ref => name,
-        :display_name => name,
-        :ui => icon_info,
-        :type => "composite"
-      }
-      assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
-      assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
+      if ::R8::Config[:use_service_modules] and name.split("/").size == 2
+        service_module_name, assembly_name = name.split("/")
+        unless assembly_name and service_module_name
+          raise Error.new("Assembly name must be in form <assembly_name><service_module_name>")
+        end
+        assembly_idh = Assembly.create_library_template_obj(library_idh,assembly_name,service_module_name,icon_info)
+      else
+        create_row = {
+          :library_library_id => library_id,
+          :ref => name,
+          :display_name => name,
+          :ui => icon_info,
+          :type => "composite"
+        }
+        assembly_mh = library_idh.createMH(:model_name=>:component)
+        assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
+      end
 
       #TODO: getting json rather than hash
       item_list = JSON.parse(hash["item_list"])

@@ -5,6 +5,7 @@
     :branch => {:type=>:varchar, :size => 50},
     :version => {:type=>:varchar, :size => 20},
     :is_workspace => {:type =>:boolean},
+    :type => {:type=>:varchar, :size => 20}, #service_module or component_module
     :repo_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:repo,

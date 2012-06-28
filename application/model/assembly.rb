@@ -10,7 +10,6 @@ module XYZ
 
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
       module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
-      repo_idh = library_idh.createIDH(:id => module_branch[:repo_id], :module_name => :repo)
       assembly_idh = create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
 
       connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
@@ -23,7 +22,7 @@ module XYZ
       library_idh.create_object().clone_into_library_assembly(assembly_idh,id_handles)
 
       #serialize and store in repo
-      assembly_idh.create_object().serialize_and_save_to_repo(repo_idh)
+      assembly_idh.create_object().serialize_and_save_to_repo(module_branch)
     end
 
     def self.list_from_library(assembly_mh,opts={})

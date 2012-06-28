@@ -108,9 +108,7 @@ module XYZ
     
     ##########
     def self.get_repo(context)
-      #TODO: do we still need __top
-      repo = (context[:implementation]||{})[:repo]||"__top"
-      branch = (context[:implementation]||{})[:branch]
+      repo,branch = ret_repo_and_branch(context)
       raise Error.new("cannot find branch in context") unless branch
       CachedRepoObjects[repo] ||= Hash.new
       CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
@@ -118,6 +116,18 @@ module XYZ
 
    private
     CachedRepoObjects = Hash.new
+    def self.ret_repo_and_branch(context)
+      repo = branch = nil
+      if context.kind_of?(ModuleBranch)
+        repo,branch = context.repo_and_branch()
+      else
+        #assume that it has hash with :implementation key
+        #TODO: do we still need __top
+        repo = (context[:implementation]||{})[:repo]||"__top"
+        branch = (context[:implementation]||{})[:branch]
+      end
+      [repo,branch]
+    end
 
     def self.load_and_return_adapter_class()
       return @cached_adpater_class if @cached_adpater_class

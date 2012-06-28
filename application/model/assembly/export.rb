@@ -1,15 +1,19 @@
 #exports an assembly instance or template in serialized form
 module XYZ
   module AssemblyExportMixin
-    AssemblyMetaFile = "assembly.json"
     def serialize_and_save_to_repo(module_branch)
       serialized_hash = serialize()
       content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => serialized_hash[k]}}) )
 
-      RepoManager.add_file({:path => AssemblyMetaFile},content,module_branch)
-      AssemblyMetaFile
+      filename = assembly_meta_filename()
+      RepoManager.add_file({:path => filename},content,module_branch)
+      filename
     end
    private
+    def assembly_meta_filename()
+      update_object!(:display_name)
+      "#{self[:display_name]}.assembly.json"
+    end
     def serialize()
       nested_objs = AssemblyExportInternal.get_nested_objects_for_export(self)
       assembly_hash = AssemblyExportInternal.assembly_output_hash(self,nested_objs)

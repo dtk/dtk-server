@@ -21,5 +21,25 @@ module DTK
       ref = branch
       {ref => assigns}
     end
+
+    #in case we change what schema the module and branch objects under
+    def self.service_module_id_col()
+      :service_id
+    end
+    def service_module_id_col()
+      self.class.service_module_id_col()
+    end
+    def service_module_id()
+      self[service_module_id_col()]
+    end
+    def self.component_module_id_col()
+      :component_id
+    end
+    def component_module_id_col()
+      self.class.component_module_id_col()
+    end
+    def component_module_id()
+      self[component_module_id_col()]
+    end
   end
 end

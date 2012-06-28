@@ -40,6 +40,7 @@ module DTK
     end
 
     private
+
     def self.create_service_module_obj?(library_idh,repo_idh,module_name)
       ref = module_name
       create_hash = {

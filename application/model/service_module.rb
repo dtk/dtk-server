@@ -50,7 +50,9 @@ module DTK
           }
         }
       }
-      create_from_hash(library_idh,create_hash)
+      #TODO: double check that this returns just one item as opposed to one per child of service_module
+      service_module_id = create_from_hash(library_idh,create_hash).first[:id]
+      library_idh.createIDH(:id => service_module_id, :model_name => model_name)
     end
   end
 end

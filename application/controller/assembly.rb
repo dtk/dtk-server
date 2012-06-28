@@ -113,9 +113,9 @@ module XYZ
 
     #TODO: unify with clone(id)
     #clone assembly from library to target
-    def rest__clone()
+    def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_non_null_request_params(:assembly_id).to_i
+      assembly_id = ret_non_null_request_params(:assembly_template_id)
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null

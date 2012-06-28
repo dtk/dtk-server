@@ -18,7 +18,7 @@ module DTK::Client
       post_hash_body = Hash.new
       post_hash_body[:detail_level] = detail_level if detail_level
       post_hash_body[:task_id] = task_id if task_id
-      post rest_url("task/state_info"),post_hash_body
+      post rest_url("task/status"),post_hash_body
     end
 
     desc "commit-changes", "Commit changes"

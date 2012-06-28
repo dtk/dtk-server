@@ -54,19 +54,19 @@ module DTK::Client
       post rest_url("assembly/list_smoketests"), post_body
     end
 
-    desc "stage ASSEMBLY-ID", "Stage library assembly in target"
+    desc "stage ASSEMBLY-TEMPLATE-ID", "Stage library assembly in target"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create assembly in" 
-    def stage(assembly_id)
+    def stage(assembly_template_id)
       post_body = {
-        :assembly_id => assembly_id
+        :assembly_template_id => assembly_template_id
       }
       if target_id = options["in-target"]
         post_body.merge!(:target_id => target_id)
       end
-      post rest_url("assembly/clone"), post_body
+      post rest_url("assembly/stage"), post_body
     end
 
     desc "delete ASSEMBLY-ID", "Delete assembly"
@@ -87,20 +87,19 @@ module DTK::Client
       post rest_url("assembly/set_attributes"), post_body
     end
 
-
-    desc "deploy ASSEMBLY-ID", "Deploy assembly from library"
+    desc "deploy ASSEMBLY-TEMPLATE-ID", "Deploy assembly from library"
     method_option "in-target",:aliases => "-t" ,
       :type => :numeric, 
       :banner => "TARGET-ID",
       :desc => "Target (id) to create assembly in" 
-    def deploy(assembly_id)
+    def deploy(assembly_template_id)
       post_body = {
-        :assembly_id => assembly_id
+        :assembly_template_id => assembly_template_id
       }
       if target_id = options["in-target"]
         post_body.merge!(:target_id => target_id)
       end
-      response = post(rest_url("assembly/clone"),post_body)
+      response = post(rest_url("assembly/stage"),post_body)
       return response unless response.ok?
       assembly_id = response.data["assembly_id"]
       converge(assembly_id)

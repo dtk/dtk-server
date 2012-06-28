@@ -998,6 +998,7 @@ POSSIBLE CHANGES TO HASH
       library_object.clone_into_library_assembly(assembly_idh,id_handles)
       return {:content => nil}
     end
+
     def clone_assembly_ide(explicit_hash=nil)
       hash = explicit_hash || request.params
       name = hash["name"] || "assembly"
@@ -1031,20 +1032,7 @@ POSSIBLE CHANGES TO HASH
         id_handle(id,model)
       end
 
-      #TODO: replace below with 
-      #Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
-      assembly_idh = Assembly.create_library_template_obj(library_idh,assembly_name,service_module_name,icon_info)
-
-      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
-      #TODO: raise error to user if dangling link
-      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-      link_idhs = connected_links.map{|link|link.id_handle}
-
-      id_handles = node_idhs + link_idhs
-      library_object = library_idh.create_object()
-      #TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into_library_assembly(assembly_idh,id_handles)
-
+      Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
     end
 

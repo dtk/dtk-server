@@ -19,6 +19,7 @@ module DTK
       repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:service_module,:delete_if_exists => true)
       create_service_module_obj?(library_idh,repo_obj.id_handle(),module_name)
     end
+
     def self.get_module_branch(library_idh,service_module_name,version=nil)
       sp_hash = {
         :cols => [:id,:display_name,:module_branches],

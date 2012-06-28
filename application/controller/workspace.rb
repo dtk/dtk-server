@@ -999,6 +999,8 @@ POSSIBLE CHANGES TO HASH
       return {:content => nil}
     end
     def clone_assembly_ide(explicit_hash=nil)
+      hash = explicit_hash || request.params
+      name = hash["name"] || "assembly"
        if ::R8::Config[:use_service_modules] and name.split("/").size == 2
          clone_assembly_ide_new(explicit_hash)
        else

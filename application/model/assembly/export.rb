@@ -18,7 +18,8 @@ module XYZ
       nested_objs = AssemblyExportInternal.get_nested_objects_for_export(self)
       assembly_hash = AssemblyExportInternal.assembly_output_hash(self,nested_objs)
       node_bindings_hash = AssemblyExportInternal.node_bindings_output_hash(nested_objs)
-      {:node_bindings => node_bindings_hash, :assemblies => {assembly_hash[:name] => assembly_hash}}
+      ref = assembly_hash.delete(:ref)
+      {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
     end
     module AssemblyExportInternal
       include AssemblyImportExportCommon
@@ -83,7 +84,9 @@ module XYZ
 
       def self.assembly_output_hash(assembly,nested_objs)
         ret = SimpleOrderedHash.new()
-        ret[:name] = assembly.update_object!(:display_name)[:display_name]
+        assembly.update_object!(:display_name,:ref)
+        ret[:name] = assembly[:display_name]
+        ret[:ref] = assembly[:ref]
         #add modules
         ret[:modules] = nested_objs[:implementations].map do |impl|
           version = impl[:version]

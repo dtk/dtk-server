@@ -220,6 +220,7 @@ module XYZ
 
         #common fields
 	# fill in default display name if not there
+        #TODO: this does not work if dont retrive :display_name but get :ret
         qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
 	hash[:display_name] ||= qualified_ref if qualified_ref
 	

@@ -346,6 +346,7 @@ module XYZ
 
     def update_object!(*cols_x)
       cols = (cols_x.include?(:group_id) ? cols_x : cols_x + [:group_id]) #always good to get group_id
+      cols = (cols.include?(:display_name) ? cols : cols + [:display_name]) #always good to get display_name
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}

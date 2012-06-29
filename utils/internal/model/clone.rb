@@ -58,7 +58,7 @@ module XYZ
       end
 
       assembly_id_assign = {:assembly_id => assembly_idh.get_id()}
-      overrides = assembly_id_assign.merge(:component => assembly_id_assign)
+      overrides = assembly_id_assign.merge(:type => "stub",:component => assembly_id_assign)
       ndx_id_handle_groups.each_value do |child_id_handles|
         child_context = proc.child_context_lib_assembly_top_level(child_id_handles,id_handle(),overrides)
         proc.clone_copy_child_objects(child_context)

@@ -2,7 +2,7 @@ module XYZ
   class ChildContext < SimpleHashObject
     def clone_copy_child_objects(clone_proc,level)
       clone_model_handle = clone_model_handle()
-      field_set_to_copy = Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
+      field_set_to_copy = ret_field_set_to_copy()
       fk_info = clone_proc.fk_info
       fk_info.add_foreign_keys(clone_model_handle,field_set_to_copy)
       create_override_attrs = clone_proc.ret_real_columns(clone_model_handle,override_attrs)
@@ -59,6 +59,10 @@ module XYZ
     end
 
    private
+    def ret_field_set_to_copy()
+      Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
+    end
+
     def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
       ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
@@ -120,8 +124,8 @@ module XYZ
     end
 
     class AssemblyTemplateNode < ChildContext
-      def clone_copy_child_objects(clone_proc,level)
-        super
+      def ret_field_set_to_copy()
+        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
       end
     end
 

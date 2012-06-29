@@ -119,6 +119,11 @@ module XYZ
       self[:parent_objs_info]
     end
 
+    class AssemblyTemplateNode < ChildContext
+      def clone_copy_child_objects(clone_proc,level)
+        super
+      end
+    end
 
     class AssemblyNode < ChildContext
      private

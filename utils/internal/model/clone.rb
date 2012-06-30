@@ -334,7 +334,7 @@ module XYZ
         parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
 
         #TODO: more shortcuts above if ::R8::Config[:use_node_bindings] and model_name == :node
-        child_context_class = (::R8::Config[:use_node_bindings] and model_name == :node ? ChildContext::AssemblyTemplateNode : ChildContext)
+        child_context_class = ((::R8::Config[:use_node_bindings] and model_name == :node) ? ChildContext::AssemblyTemplateNode : ChildContext)
         child_context_class.create_from_hash(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
       end
 

@@ -13,15 +13,14 @@ module XYZ
       fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
       #iterate all nested children
-      ChildContext.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
+      self.class.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
     end
 
     def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[],&block)
       ret = Array.new
-      model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
-        next if omit_list.include?(child_mh[:model_name])
+      get_children_model_handles(model_handle,omit_list) do |child_mh|
         override_attrs = clone_proc.ret_child_override_attrs(child_mh,recursive_override_attrs)
         parent_id_col = child_mh.parent_id_field_name()
         old_parent_rel_col = ret_old_parent_rel_col(clone_proc,child_mh)
@@ -59,6 +58,13 @@ module XYZ
     end
 
    private
+    def self.get_children_model_handles(model_handle,omit_list=[],&block)
+      model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
+        next if omit_list.include?(child_mh[:model_name])
+        block.call(child_mh)
+      end
+    end
+
     def ret_field_set_to_copy()
       Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
     end
@@ -124,6 +130,12 @@ module XYZ
     end
 
     class AssemblyTemplateNode < ChildContext
+     private
+      def self.get_children_model_handles(model_handle,omit_list=[],&block)
+        child_mh = model_handle.create_childMH(:component)
+        block.call(child_mh)
+      end
+
       def ret_field_set_to_copy()
         Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
       end

@@ -137,11 +137,14 @@ module XYZ
       end
 
       def ret_field_set_to_copy()
-        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
+        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
       end
     end
 
     class AssemblyTemplateComponent < ChildContext
+      def clone_copy_child_objects(clone_proc,level)
+        super
+      end
     end
 
     class AssemblyNode < ChildContext

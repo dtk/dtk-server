@@ -43,7 +43,7 @@ module XYZ
     end
 
     def self.create_from_hash(clone_proc,hash)
-      unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
+      unless clone_proc.cloning_assembly?()
         return new(hash)
       end
 
@@ -53,7 +53,7 @@ module XYZ
 
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
       parent_model_name = Model.normalize_model(hash[:model_handle][:parent_model_name])
-      klass = (SpecialContext[parent_model_name]||{})[model_name] || self
+      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
       klass.new(hash)
     end
 
@@ -85,7 +85,7 @@ module XYZ
 
     def self.ret_old_parent_rel_col(clone_proc,model_handle)
       ret = :ancestor_id
-      unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
+      unless clone_proc.cloning_assembly? and clone_proc.clone_direction() == :library_to_target
         return ret
       end
 
@@ -139,6 +139,9 @@ module XYZ
       def ret_field_set_to_copy()
         Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
       end
+    end
+
+    class AssemblyTemplateComponent < ChildContext
     end
 
     class AssemblyNode < ChildContext
@@ -279,11 +282,17 @@ module XYZ
       end
     end
 
-    #index is parent and child
+    #index are clone_direction, parent, child
     SpecialContext = {
-      :target => {:node => AssemblyNode},
-      :node => {:component_ref => AssemblyComponentRef},
-      :component => {:attribute => AssemblyComponentAttribute}
+      :library_to_target => {
+        :target => {:node => AssemblyNode},
+        :node => {:component_ref => AssemblyComponentRef},
+        :component => {:attribute => AssemblyComponentAttribute}
+      },
+      :target_to_library => {
+        :library => {:node => AssemblyTemplateNode},
+        :node => {:component => AssemblyTemplateComponent}
+      }
     }
   end
 end

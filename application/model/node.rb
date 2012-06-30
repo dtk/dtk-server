@@ -2,6 +2,7 @@ r8_nested_require('node','clone')
 r8_nested_require('node','meta')
 module XYZ
   class Node < Model
+    r8_nested_require('node','content')
     include NodeClone
     set_relation_name(:node,:node)
     extend NodeMetaClassMixin 

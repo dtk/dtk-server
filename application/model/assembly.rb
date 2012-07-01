@@ -10,6 +10,7 @@ module XYZ
     extend AssemblyImportClassMixin
 
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+      #TODO: write instead using either Assembly::Instance.create_content or Node::AssemblyInstance.create_content(node_idhs)
       module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
       assembly_idh = create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
 

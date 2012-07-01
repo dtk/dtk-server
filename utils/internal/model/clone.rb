@@ -46,12 +46,6 @@ module XYZ
     end
 
     def clone_into_library_assembly(assembly_idh,id_handles)
-      Assembly::Instance.create_content(assembly_idh.createMH)
-      clone_into_library_assembly_old(assembly_idh,id_handles)
-    end
-
-    def clone_into_library_assembly_old(assembly_idh,id_handles)
-
       opts = {:include_children => true}
       proc = CloneCopyProcessor.create(self,assembly_idh.create_object(),opts)
       proc.add_id_handle(assembly_idh)

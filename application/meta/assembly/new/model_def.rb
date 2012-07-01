@@ -112,6 +112,15 @@ lambda__template_nodes_and_components =
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]
     },
+    :content_instance_nodes_cmps_attrs => {
+      :type => :json,
+      :hidden => true,
+      :remote_dependencies =>
+      [
+       lambda__segment_node.call(COMMON_REL_COLUMNS.keys + [:node_binding_rs_id]),
+       lambda__segment_nested_component.call(COMMON_REL_COLUMNS.keys)
+      ]
+    },
     :nested_nodes_and_cmps_for_export=> {
       :type => :json, 
       :hidden => true,

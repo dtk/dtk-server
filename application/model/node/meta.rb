@@ -201,9 +201,6 @@ module XYZ
            :cols => [:id,:display_name,:type]
          }]
 
-
-
-
       node_attrs_on_node_def = 
         [{
            :model_name => :attribute,
@@ -211,22 +208,28 @@ module XYZ
            :join_cond=>{:node_node_id => q(:node,:id)},
            :cols => [:id,:display_name]
          }]
-      cmp_attrs_on_node_def = 
+      lambda__components_and_attrs =
+        lambda{|attr_join_type,cmp_cols,attr_cols|
         [{
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name, :component_type, id(:node)]
+           :cols => cmp_cols
          },
          {
            :model_name => :attribute,
-           :join_type => :inner,
+           :join_type => attr_join_type,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name]
+           :cols => attr_cols
          }]
+      }
+      virtual_column :content_instance_cmps_attrs, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        lambda__components_and_attrs.call(:left_outer,COMMON_REL_COLUMNS.keys,COMMON_REL_COLUMNS.keys)
+        
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        cmp_attrs_on_node_def +
+        lambda__components_and_attrs.call(:inner,[:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,
@@ -248,7 +251,7 @@ module XYZ
          }]
       virtual_column :output_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        cmp_attrs_on_node_def +
+        lambda__components_and_attrs.call(:inner,[:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,

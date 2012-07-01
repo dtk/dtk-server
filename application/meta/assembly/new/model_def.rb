@@ -19,17 +19,6 @@ lambda__segment_nested_component =
     :cols => cmp_cols
   }
 }
-lambda__segment_nested_component_attribute =
-  lambda{|attr_cols|
-  {
-    :model_name => :attribute,
-    :convert => true,
-    :alias => :nested_component_attribute,
-    :join_type => :left_outer,
-    :join_cond=>{:component_component_id => q(:nested_component,:id)},
-    :cols => attr_cols
-  }
-}
 lambda__nodes_and_components = 
   lambda{|node_cols,cmp_cols|
   {
@@ -122,16 +111,6 @@ lambda__template_nodes_and_components =
            :join_cond=>{:component_component_id => q(:nested_component,:id)},
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]
-    },
-    :content_instance_nodes_cmps_attrs => {
-      :type => :json,
-      :hidden => true,
-      :remote_dependencies =>
-      [
-       lambda__segment_node.call(COMMON_REL_COLUMNS.keys + [:node_binding_rs_id]),
-       lambda__segment_nested_component.call(COMMON_REL_COLUMNS.keys),
-       lambda__segment_nested_component_attribute.call(COMMON_REL_COLUMNS.keys)
-      ]
     },
     :nested_nodes_and_cmps_for_export=> {
       :type => :json, 

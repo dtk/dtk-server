@@ -4,6 +4,7 @@ r8_nested_require('assembly','export')
 r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
+    r8_nested_require('assembly','content')
     include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin

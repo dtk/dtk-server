@@ -1,3 +1,24 @@
+lambda__segment_node =
+  lambda{|node_cols|
+  {
+    :model_name => :node,
+    :convert => true,
+    :join_type => :inner,
+    :join_cond=>{:assembly_id => q(:component,:id)},
+    :cols => node_cols
+  }
+}
+lambda__segment_nested_component =
+  lambda{|cmp_cols|
+  {
+    :model_name => :component,
+    :convert => true,
+    :alias => :nested_component,
+    :join_type => :inner,
+    :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
+    :cols => cmp_cols
+  }
+}
 lambda__nodes_and_components = 
   lambda{|node_cols,cmp_cols|
   {
@@ -5,21 +26,10 @@ lambda__nodes_and_components =
     :hidden => true,
     :remote_dependencies =>
     [
-     {
-       :model_name => :node,
-       :convert => true,
-       :join_type => :inner,
-       :join_cond=>{:assembly_id => q(:component,:id)},
-       :cols => node_cols
-     },
-     {
-       :model_name => :component,
-       :convert => true,
-       :alias => :nested_component,
-       :join_type => :inner,
-       :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
-       :cols => cmp_cols
-     }]}
+     lambda__segment_node.call(node_cols),
+     lambda__segment_nested_component.call(cmp_cols)
+    ]
+  }
 }
 lambda__template_nodes_and_components = 
   lambda{|node_cols,cmp_ref_cols,cmp_cols|
@@ -28,13 +38,7 @@ lambda__template_nodes_and_components =
     :hidden => true,
     :remote_dependencies =>
     [
-     {
-       :model_name => :node,
-       :convert => true,
-       :join_type => :inner,
-       :join_cond=>{:assembly_id => q(:component,:id)},
-       :cols => node_cols
-     },
+     lambda__segment_node.call(node_cols),
      {
        :model_name => :component_ref,
        :join_type => :inner,
@@ -85,13 +89,7 @@ lambda__template_nodes_and_components =
       :hidden => true,
       :remote_dependencies =>
         [
-         {
-           :model_name => :node,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name]
-         },
+         lambda__segment_node.call([:id,:display_name]),
          {
            :model_name => :component_ref,
            :join_type => :inner,
@@ -119,13 +117,7 @@ lambda__template_nodes_and_components =
       :hidden => true,
       :remote_dependencies =>
         [
-         {
-           :model_name => :node,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:external_ref,:node_binding_rs_id]
-         },
+         lambda__segment_node.call([:id,:display_name,:external_ref,:node_binding_rs_id]),
          {
            :model_name => :node_binding_ruleset,
            :convert => true,
@@ -133,14 +125,7 @@ lambda__template_nodes_and_components =
            :join_cond=>{:id => q(:node,:node_binding_rs_id)},
            :cols => [:id,:display_name,:ref]
          },
-         {
-           :model_name => :component,
-           :convert => true,
-           :alias => :nested_component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
-           :cols => [:id,:display_name,:component_type,:implementation_id]
-         },
+         lambda__segment_nested_component.call([:id,:display_name,:component_type,:implementation_id]),
          {
            :model_name => :implementation,
            :convert => true,
@@ -153,14 +138,7 @@ lambda__template_nodes_and_components =
     :nodes=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=>
-      [{
-         :model_name=>:node,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:assembly_id=>:component__id},
-         :cols=>[:id,:display_name,:ui,:type]
-       }]
+      :remote_dependencies=> [lambda__segment_node.call([:id,:display_name,:ui,:type])]
     },
     :components=> {
       :type=>:json,

@@ -11,6 +11,12 @@
       :foreign_key_rel_type=>:repo,
       :on_delete=>:set_null,
       :on_update=>:set_null
+    },
+    :project_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:project,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
   :virtual_columns=>{

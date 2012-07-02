@@ -9,6 +9,28 @@ module DTK
     end
 
     #####    
+    def create_component_workspace_branch?(project_idh)
+      cmp_module_id_col = component_module_id_col()
+      cmp_module_id = update_object!(cmp_module_id_col,:version)[cmp_module_id_col]
+      #check if there is a matching branch for workspace created already
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, 
+                    [:eq, cmp_module_id_col, cmp_module_id],
+                    [:eq, :project_id, project_idh.get_id()],
+                    [:eq, :vesrion, self[:version]]
+                   ]
+      }
+      matching_rows = Model.get_objs(model_handle(),sp_hash)
+      if matching_rows.size == 1
+        matching_rows.first.id_handle()
+      elsif matching_rows.size > 1
+        raise Error.new("Unexpected result: more than one match when looking for workspace")
+      else
+        raise Error.new("need to write creating new model branch")
+      end
+    end
+
     def self.get_workspace_module_branches(node_idhs)
       sp_hash = {
         :cols => [:id,:disply_name,:component_ws_module_branches],

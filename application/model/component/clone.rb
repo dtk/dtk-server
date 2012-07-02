@@ -32,6 +32,7 @@ module XYZ
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
+    #TODO: right now just grafted on module branches; change so that reasoning driven by module branches, not implementation
     def create_component_module_workspace?(proj)
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template
@@ -40,6 +41,10 @@ module XYZ
       update_object!(:module_branch_id,:implementation_id,:ancestor_id) 
 
       proj_idh = proj.id_handle()
+
+      #create module branch for work space if needed
+      library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
+      workspace_mb_id = library_mb.create_component_workspace_branch?(proj_idh).get_id()
 
       #create new project implementation if needed
       library_impl = id_handle(:model_name => :implementation,:id => self[:implementation_id]).create_object()

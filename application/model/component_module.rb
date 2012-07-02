@@ -2,6 +2,17 @@ r8_require('service_or_component_module')
 module DTK
   class ComponentModule < Model
     extend ServiceOrComponentModuleClassMixin
+    
+    def self.list(service_module_mh,opts={})
+      library_idh = opts[:library_idh]
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => lib_filter
+      }
+      get_objs(service_module_mh,sp_hash)
+    end
+
     def self.import(library_idh,remote_module_name)
       ret = nil
       module_name = remote_module_name
@@ -32,6 +43,9 @@ module DTK
       update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
       module_and_branch_idhs[:module_idh]
     end
+    def self.delete(idh)
+      delete_instance(idh)
+    end
    private
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
       local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
@@ -40,6 +54,10 @@ module DTK
       add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
     end
     def self.update_components_with_branch_info(component_idhs,module_branch_idh)
+      mb_id = module_branch_idh.get_id()
+      update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id}}
+      sample_cmp_idh = component_idhs.first 
+      update_from_rows(sample_cmp_idh.createMH(),update_rows)
     end
   end
 end

@@ -33,6 +33,14 @@ module DTK::Client
       }
       post rest_url("component_module/update_library"), post_body
     end
+    desc "delete COMPONENT-MODULE-ID", "Deleet component module and all items contained in it"
+    def delete(component_module_id)
+      post_body = {
+       :component_module_id => component_module_id
+      }
+      post rest_url("component_module/delete"), post_body
+    end
+
   end
 end
 

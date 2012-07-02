@@ -17,7 +17,8 @@ module DTK
       end
 
       repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:service_module,:delete_if_exists => true)
-      create_service_module_obj?(library_idh,repo_obj.id_handle(),module_name)
+      module_and_branch_idhs = create_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      module_and_branch_idhs[:module_idh]
     end
 
     def self.get_module_branch(library_idh,service_module_name,version=nil)
@@ -37,23 +38,6 @@ module DTK
         end
       end
       version_match_row && version_match_row[:module_branch]
-    end
-
-    private
-
-    def self.create_service_module_obj?(library_idh,repo_idh,module_name)
-      ref = module_name
-      create_hash = {
-        "service_module" => {
-          ref => {
-            :display_name => module_name,
-            :module_branch => ModuleBranch.ret_create_hash(library_idh,repo_idh)
-          }
-        }
-      }
-      #TODO: double check that this returns just one item as opposed to one per child of service_module
-      service_module_id = create_from_hash(library_idh,create_hash).first[:id]
-      library_idh.createIDH(:id => service_module_id, :model_name => model_name)
     end
   end
 end

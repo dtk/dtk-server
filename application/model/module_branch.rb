@@ -8,14 +8,14 @@ module DTK
       self[:version]||"master"
     end
     
-    def self.ret_create_hash(library_idh,repo_idh,version=nil)
+    def self.ret_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
       branch =  library_branch_name(library_idh,version)
       assigns = {
         :display_name => branch,
         :branch => branch,
         :repo_id => repo_idh.get_id(),
         :is_workspace => false,
-        :type => "service_module"
+        :type => parent_model_name.to_s
       }
       assigns[:version] = version if version
       ref = branch

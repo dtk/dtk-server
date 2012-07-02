@@ -75,6 +75,12 @@ module XYZ
       #process the link defs for remote components
       process_remote_link_defs!(cmps_hash,remote_link_defs,library_idh)
       input_hash_content_into_model(library_idh,{"component" => cmps_hash})
+      sp_hash =  {
+        :cols => [:id,:display_name], 
+        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:library_library_id,library_idh.get_id()]]
+      }
+      component_idhs = get_objs(library_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
+      component_idhs
     end
 
     #### private helpers

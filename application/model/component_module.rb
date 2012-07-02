@@ -3,6 +3,7 @@ module DTK
   class ComponentModule < Model
     extend ServiceOrComponentModuleClassMixin
     def self.import(library_idh,remote_module_name)
+      ret = nil
       module_name = remote_module_name
       if remote_already_imported?(library_idh,remote_module_name)
         raise Error.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
@@ -23,10 +24,13 @@ module DTK
       impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo_obj)
 
-      create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
-
-      #TODO: create component_module and cm_branch objects
-      nil
+      component_idhs = create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
+      unless ::R8::Config[:use_modules]
+        return ret
+      end
+      module_and_branch_idhs = create_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
+      module_and_branch_idhs[:module_idh]
     end
    private
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
@@ -34,6 +38,8 @@ module DTK
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
       add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+    end
+    def self.update_components_with_branch_info(component_idhs,module_branch_idh)
     end
   end
 end

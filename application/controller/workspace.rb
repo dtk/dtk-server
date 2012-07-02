@@ -1002,7 +1002,7 @@ POSSIBLE CHANGES TO HASH
     def clone_assembly_ide(explicit_hash=nil)
       hash = explicit_hash || request.params
       name = hash["name"] || "assembly"
-       if ::R8::Config[:use_service_modules] and name.split("/").size == 2
+       if ::R8::Config[:use_modules] and name.split("/").size == 2
          clone_assembly_ide_new(explicit_hash)
        else
          clone_assembly_ide_deprecate(explicit_hash)

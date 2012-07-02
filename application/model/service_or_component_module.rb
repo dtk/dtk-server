@@ -44,5 +44,28 @@ module DTK
       cms = get_objs(library_idh.createMH(model_name),sp_hash)
       not cms.empty?
     end
+
+    def self.create_module_and_branch_obj?(library_idh,repo_idh,module_name)
+      ref = module_name
+      mb_create__hash = ModuleBranch.ret_create_hash(module_name,library_idh,repo_idh)
+      create_hash = {
+        model_name.to_s => {
+          ref => {
+            :display_name => module_name,
+            :module_branch => mb_create__hash
+          }
+        }
+      }
+      #TODO: double check that this returns just one item as opposed to one per child of service_module
+      module_id = create_from_hash(library_idh,create_hash).first[:id]
+      module_idh = library_idh.createIDH(:id => module_id, :model_name => model_name)
+      parent_col = (model_name == :service_module ? ModuleBranch.service_module_id_col() : ModuleBranch.component_module_id_col())
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, parent_col, module_idh.get_id()], [:eq, :ref, mb_create__hash.keys.first]]
+      }
+      module_branch_idh = get_objs(library_idh.createMH(:module_branch),sp_hash).map{|r|r.id_handle()}.first
+      {:module_idh => module_idh,:module_branch_idh => module_branch_idh}
+    end
   end
 end

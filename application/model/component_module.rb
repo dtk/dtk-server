@@ -46,6 +46,7 @@ module DTK
     def self.delete(idh)
       delete_instance(idh)
     end
+
    private
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
       local_dir = repo_obj.update_object!(:local_dir)[:local_dir]

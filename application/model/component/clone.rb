@@ -32,13 +32,12 @@ module XYZ
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
-    #handles copying over if needed component template and implementation into project
-    def update_implementation_and_template?(proj)
+    def create_component_module_workspace?(proj)
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template
       #need to search project to see if has implementation that matches (same repo)
       #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
-      update_object!(:implementation_id,:ancestor_id) #just to be safe
+      update_object!(:module_branch_id,:implementation_id,:ancestor_id) 
 
       proj_idh = proj.id_handle()
 

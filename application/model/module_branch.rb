@@ -7,7 +7,18 @@ module DTK
     def prety_print_version()
       self[:version]||"master"
     end
-    
+
+    #####    
+    def self.get_workspace_module_branches(node_idhs)
+      sp_hash = {
+        :cols => [:id,:disply_name,:component_ws_module_branches],
+        :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
+      }
+      sample_node_idh = node_idhs.first()
+      node_rows = get_obj(sample_node_idh.createMH(),sp_hash)
+      node_rows.map{|r|r[:module_branch].id_handle()}
+    end
+
     def self.ret_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
       branch =  library_branch_name(library_idh,version)
       assigns = {

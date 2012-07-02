@@ -14,6 +14,14 @@ module XYZ
         return create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
       end
 
+      #first make sure that all referenced components have updated modules in the library
+      ws_module_branch_idhs = ModuleBranch.get_ws_component_module_branches(node_idhs)
+      component_template_idhs = ModuleComponent.update_or_create_component_templates?(ws_module_branch_idhs)
+
+
+      #1) get a content object, 2) modify, and 3) persist
+
+
       connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
@@ -92,7 +100,7 @@ module XYZ
     end
 
     class << self
-      private
+     private
       def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
         create_row = {
           :library_library_id => library_idh.get_id(),

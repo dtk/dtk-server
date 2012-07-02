@@ -208,14 +208,19 @@ module XYZ
            :join_cond=>{:node_node_id => q(:node,:id)},
            :cols => [:id,:display_name]
          }]
-      lambda__components_and_attrs =
-        lambda{|cmp_cols,attr_cols|
-        [{
+
+      lambda__segment_component =
+        lambda{|cmp_cols|
+        {
            :model_name => :component,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
            :cols => cmp_cols
-         },
+        }
+      }
+      lambda__components_and_attrs =
+        lambda{|cmp_cols,attr_cols|
+        [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
            :join_type => :inner,
@@ -225,12 +230,7 @@ module XYZ
       }
       lambda__components_and_non_default_attrs =
         lambda{|cmp_cols,attr_cols|
-        [{
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => cmp_cols
-         },
+        [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
            :join_type => :left_outer,
@@ -239,6 +239,18 @@ module XYZ
            :cols => attr_cols
          }]
       }
+      virtual_column :component_ws_module_branches, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        [lambda__segment_component.call([:id,:display_name,:module_branch_id]),
+         {
+           :model_name => :module_branch,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :filter => [:eq, :is_workspace, true],
+           :cols => [:id,:display_name,:type,:component_id] 
+         }]         
+
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(COMMON_REL_COLUMNS.keys,COMMON_REL_COLUMNS.keys)

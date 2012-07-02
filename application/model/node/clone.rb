@@ -21,9 +21,9 @@ module XYZ
         component.update(:assembly_id => assembly_id)
       end
 
-      #handles copying over if needed component template and implementation into project
+      #handles creating a component module workspace if needed)
       unless opts[:use_source_impl_and_template]
-        component.update_implementation_and_template?(get_project())
+        component.create_component_module_workspace?(get_project())
       end
 
       component_idh = component.id_handle

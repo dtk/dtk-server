@@ -10,8 +10,19 @@ module XYZ
     extend AssemblyImportClassMixin
 
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
-      Node::Instance.create_content_for_assembly_clone(node_idhs)
-      self.create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
+      unless R8::Config[:use_node_bindings]
+        return create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
+      end
+
+      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+      link_idhs = connected_links.map{|link|link.id_handle}
+
+      module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
+
+      assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,module_branch,icon_info)
+      assembly_instance.add_content_for_clone(node_idhs,link_idhs)
     end
 
     def self.create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)

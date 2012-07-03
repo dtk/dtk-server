@@ -24,7 +24,7 @@ module DTK
         lib_branch_obj = r[:library_module_branch]
         ws_branch_name = r[:branch]
 x=        RepoManager.diff(ws_branch_name,lib_branch_obj)
-pp        x
+pp        [x.ret_diff_types_summary(),x]
       end
       ret
     end

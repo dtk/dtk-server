@@ -15,8 +15,8 @@ module XYZ
       end
 
       #first make sure that all referenced components have updated modules in the library
-      ws_module_branch_idhs = ModuleBranch.get_ws_component_module_branches(node_idhs)
-      component_template_idhs = ModuleComponent.update_or_create_component_templates?(ws_module_branch_idhs)
+      ws_branch_idhs = ModuleBranch.get_component_workspace_branches(node_idhs)
+      component_template_idhs = ComponentModule.update_or_create_component_templates?(ws_branch_idhs)
 
 
       #1) get a content object, 2) modify, and 3) persist

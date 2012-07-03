@@ -30,7 +30,7 @@ module DTK
       Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
     end
 
-    def self.get_workspace_module_branches(node_idhs)
+    def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
         :cols => [:id,:disply_name,:component_ws_module_branches],
         :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]

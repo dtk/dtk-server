@@ -3,12 +3,7 @@ module DTK
   class ModuleBranch < Model
     include BranchNamesMixin
     extend BranchNamesClassMixin
-    #virtual columns
-    def prety_print_version()
-      self[:version]||"master"
-    end
 
-    #####    
     def self.update_library_from_workspace?(ws_branches)
       ret = Array.new
       return ret if ws_branches.empty?
@@ -54,7 +49,8 @@ pp [:matching_lib_branches, matching_lib_branches]
       node_rows = get_objs(sample_node_idh.createMH(),sp_hash)
       #get rid of dups 
       node_rows.inject(Hash.new) do |h,r|
-        h[r[:id]] ||= r
+        module_branch = r[:module_branch]
+        h[module_branch[:id]] ||= module_branch
         h
       end.values
     end
@@ -68,7 +64,7 @@ pp [:matching_lib_branches, matching_lib_branches]
         :is_workspace => false,
         :type => parent_model_name.to_s
       }
-      assigns[:version] = version if version
+      assigns[:version] = version||BranchNameDefaultVersion
       ref = branch
       {ref => assigns}
     end

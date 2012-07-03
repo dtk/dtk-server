@@ -8,10 +8,10 @@ lambda__matching_library_branches =
     [{
        :model_name => :module_branch,
        :convert => true,
-       :alias => :library_moudle_branch,
+       :alias => :library_module_branch,
        :join_type => :inner,
        :join_cond=>{:version => q(:module_branch,:version),parent_col => q(:module_branch,parent_col)},
-       :filter => [:neq,:library_library_id,nil],
+       :filter => [:eq,:is_workspace,false],
        :cols => [:id,:display_name,:repo_id,:branch,:version]
      }]
   }

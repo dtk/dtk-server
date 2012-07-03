@@ -15,7 +15,7 @@ module DTK
 
       ref = branch = workspace_branch_name(project)
       match_assigns = {
-        cmp_module_id_col => component_module_id(),
+        cmp_module_id_col => self[cmp_module_id_col],
         :project_id =>  project.id_handle.get_id(),
         :version => self[:version]
       }
@@ -27,7 +27,7 @@ module DTK
         :type => self[:type]
 
       }
-      Model.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
+      Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
     end
 
     def self.get_workspace_module_branches(node_idhs)
@@ -40,7 +40,7 @@ module DTK
       node_rows.map{|r|r[:module_branch].id_handle()}
     end
 
-    def self.ret_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
+    def self.ret_lib_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
       branch =  library_branch_name(library_idh,version)
       assigns = {
         :display_name => branch,

@@ -45,9 +45,9 @@ module DTK
       not cms.empty?
     end
 
-    def create_module_and_branch_obj?(library_idh,repo_idh,module_name)
+    def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name)
       ref = module_name
-      mb_create__hash = ModuleBranch.ret_create_hash(module_name,library_idh,repo_idh)
+      mb_create__hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh)
       create_hash = {
         model_name.to_s => {
           ref => {

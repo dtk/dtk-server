@@ -39,7 +39,7 @@ module DTK
       unless ::R8::Config[:use_modules]
         return ret
       end
-      module_and_branch_idhs = create_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
       update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
       module_and_branch_idhs[:module_idh]
     end

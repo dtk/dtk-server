@@ -9,26 +9,25 @@ module DTK
     end
 
     #####    
-    def create_component_workspace_branch?(project_idh)
+    def create_component_workspace_branch?(project)
       cmp_module_id_col = component_module_id_col()
-      cmp_module_id = update_object!(cmp_module_id_col,:version)[cmp_module_id_col]
-      #check if there is a matching branch for workspace created already
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, 
-                    [:eq, cmp_module_id_col, cmp_module_id],
-                    [:eq, :project_id, project_idh.get_id()],
-                    [:eq, :vesrion, self[:version]]
-                   ]
+      update_object!(cmp_module_id_col,:version,:repo_id,:type)
+
+      ref = branch = workspace_branch_name(project)
+      match_assigns = {
+        cmp_module_id_col => component_module_id(),
+        :project_id =>  project.id_handle.get_id(),
+        :version => self[:version]
       }
-      matching_rows = Model.get_objs(model_handle(),sp_hash)
-      if matching_rows.size == 1
-        matching_rows.first.id_handle()
-      elsif matching_rows.size > 1
-        raise Error.new("Unexpected result: more than one match when looking for workspace")
-      else
-        raise Error.new("need to write creating new model branch")
-      end
+      other_assigns = {
+        :display_name => branch,
+        :branch => branch,
+        :repo_id => self[:repo_id],
+        :is_workspace => true,
+        :type => self[:type]
+
+      }
+      Model.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
     end
 
     def self.get_workspace_module_branches(node_idhs)

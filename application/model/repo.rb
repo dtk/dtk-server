@@ -1,6 +1,8 @@
 module XYZ
   class Repo < Model
     r8_nested_require('repo','remote')
+    r8_nested_require('repo','diff')
+    r8_nested_require('repo','diffs')
 
     ###virtual columns
     def base_dir()

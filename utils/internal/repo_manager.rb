@@ -19,7 +19,7 @@ module XYZ
       def respond_to?(name)
         !!(defined_method?(name) || super)
       end
-
+      
      private
       def defined_method?(name)
         RepoMethods.include?(name) or !!class_if_admin_method?(name)

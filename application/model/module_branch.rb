@@ -15,12 +15,16 @@ module DTK
         :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
       }
       matching_lib_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
-pp [:matching_lib_branches, matching_lib_branches]
+      if matching_lib_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
+        raise Error.new("Not implemented: case when ws and library branch being diffed in different repos")
+      end
+
       #determine if there is any diffs between workspace and library branches
       matching_lib_branches.each do |r|
         lib_branch_obj = r[:library_module_branch]
         ws_branch_name = r[:branch]
-pp        RepoManager.diff(ws_branch_name,lib_branch_obj)
+x=        RepoManager.diff(ws_branch_name,lib_branch_obj)
+pp        x
       end
       ret
     end

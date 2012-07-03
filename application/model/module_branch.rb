@@ -9,6 +9,21 @@ module DTK
     end
 
     #####    
+    def self.update_library_from_workspace?(ws_branches)
+      ret = Array.new
+      return ret if ws_branches.empty?
+      sample_ws_branch = ws_branches.first
+      type = sample_ws_branch.update_object!(:type)[:type]
+      matching_lib_branches_col = (type == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
+      sp_hash = {
+        :cols => [:id,:repo_id,component_module_id_col(),matching_lib_branches_col],
+        :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
+      }
+      matching_lib_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
+pp [:matching_lib_branches, matching_lib_branches]
+       matching_lib_branches
+    end
+
     def create_component_workspace_branch?(project)
       cmp_module_id_col = component_module_id_col()
       update_object!(cmp_module_id_col,:version,:repo_id,:type)
@@ -36,8 +51,12 @@ module DTK
         :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
       }
       sample_node_idh = node_idhs.first()
-      node_rows = get_obj(sample_node_idh.createMH(),sp_hash)
-      node_rows.map{|r|r[:module_branch].id_handle()}
+      node_rows = get_objs(sample_node_idh.createMH(),sp_hash)
+      #get rid of dups 
+      node_rows.inject(Hash.new) do |h,r|
+        h[r[:id]] ||= r
+        h
+      end.values
     end
 
     def self.ret_lib_create_hash(parent_model_name,library_idh,repo_idh,version=nil)

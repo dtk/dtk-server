@@ -1,3 +1,21 @@
+lambda__matching_library_branches =
+  lambda{|type|
+  parent_col = (type == :service_module ? :service_id : :component_id)
+  {
+    :type => :json, 
+    :hidden => true,
+    :remote_dependencies =>
+    [{
+       :model_name => :module_branch,
+       :convert => true,
+       :alias => :library_moudle_branch,
+       :join_type => :inner,
+       :join_cond=>{:version => q(:module_branch,:version),parent_col => q(:module_branch,parent_col)},
+       :filter => [:neq,:library_library_id,nil],
+       :cols => [:id,:display_name,:repo_id,:branch,:version]
+     }]
+  }
+}
 {
   :schema=>:module,
   :table=>:branch,
@@ -24,7 +42,9 @@
       :type=>:varchar,
       :hidden=>true,
       :local_dependencies => [:branch,:version]
-    }
+    },
+    :matching_component_library_branches=> lambda__matching_library_branches.call(:component_module),
+    :matching_service_library_branches=> lambda__matching_library_branches.call(:service_module)
   },
   :many_to_one=>[:component_module,:service_module]
 }

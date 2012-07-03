@@ -12,7 +12,8 @@ module DTK
 
    private
     def has_default_version?()
-      update_object!(:version)[:version] == BranchNameDefaultVersion
+      version = update_object!(:version)[:version]
+      version.nil? or  (version == BranchNameDefaultVersion)
     end
   end
   module BranchNamesClassMixin

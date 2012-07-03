@@ -107,6 +107,10 @@ module XYZ
         git_command__commit(message)
       end
     end
+    
+    def diff(other_branch)
+      @grit_repo.diff(@branch,other_branch)
+    end
 
     def add_remote(remote_name,remote_url)
       git_command__remote_add(remote_name,remote_url)

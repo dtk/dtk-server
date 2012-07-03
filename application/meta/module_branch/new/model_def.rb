@@ -13,7 +13,15 @@ lambda__matching_library_branches =
        :join_cond=>{:version => q(:module_branch,:version),parent_col => q(:module_branch,parent_col)},
        :filter => [:eq,:is_workspace,false],
        :cols => [:id,:display_name,:repo_id,:branch,:version]
-     }]
+     },
+     {
+       :model_name => type,
+       :convert => true,
+       :join_type => :inner,
+       :join_cond=>{:id => q(:library_module_branch,parent_col)},
+       :cols => [:id,:display_name,:library_library_id]
+     }
+    ]
   }
 }
 {

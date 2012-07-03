@@ -11,12 +11,18 @@ module DTK
       type = sample_ws_branch.update_object!(:type)[:type]
       matching_lib_branches_col = (type == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
       sp_hash = {
-        :cols => [:id,:repo_id,component_module_id_col(),matching_lib_branches_col],
+        :cols => [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col],
         :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
       }
       matching_lib_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
 pp [:matching_lib_branches, matching_lib_branches]
-       matching_lib_branches
+      #determine if there is any diffs between workspace and library branches
+      matching_lib_branches.each do |r|
+        lib_branch_obj = r[:library_module_branch]
+        ws_branch_name = r[:branch]
+pp        RepoManager.diff(ws_branch_name,lib_branch_obj)
+      end
+      ret
     end
 
     def create_component_workspace_branch?(project)

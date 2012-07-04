@@ -8,6 +8,32 @@ module XYZ
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
 
+    def modify_file_assets(diff_summary)
+      paths_to_delete = diff_summary.paths_to_delete
+      paths_to_add = diff_summary.paths_to_add
+
+      #find relevant existing files
+      sp_hash = {
+        :cols => [:id,:display_name,:path],
+          :filter => [:and,[:eq,:implementation_implementation_id,id()], [:oneof,:path,paths_to_delete+paths_to_add]]
+      }
+      file_assets = Model.get_objs(model_handle(:file_asset),sp_hash)
+      #delete relevant files
+      files_to_delete = file_assets.select{|r|paths_to_delete.include?(r[:path])}
+      unless files_to_delete.empty?
+        Model.delete_instances(files_to_delete.map{|r|r.id_handle()})
+      end
+      
+      #add files not already added
+      existing_paths = file_assets.map{|r|r[:path]}
+      paths_to_add.reject!{|path|existing_paths.include?(path)}
+      unless paths_to_add.empty?
+        type = "puppet_file" #TODO: hard coded
+        create_rows =  paths_to_add.map{|path|FileAsset.create_hash(self,type,path)}
+        Model.create_from_rows(model_handle(:file_asset),create_rows)
+      end
+    end
+
     def self.list_from_workspace(impl_mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:version],

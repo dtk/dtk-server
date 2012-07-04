@@ -20,6 +20,13 @@ lambda__matching_library_branches =
        :join_type => :inner,
        :join_cond=>{:id => q(:library_module_branch,parent_col)},
        :cols => [:id,:display_name,:library_library_id]
+     },
+     {
+       :model_name => :implementation,
+       :convert => true,
+       :join_type => :inner,
+       :join_cond=>{:repo_id => q(:library_module_branch,:repo_id),:branch => q(:library_module_branch,:branch)},
+       :cols => [:id,:group_id,:display_name]
      }
     ]
   }

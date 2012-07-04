@@ -35,9 +35,8 @@ pp augmented_branch[:component_module][:display_name]
         end
 pp 'some change'
         unless diff_summary.no_added_or_deleted_files?()
-          #find matching implementation and modeify file assets
-          #augmented_lib_branch[:implementation].modify_file_assets(diff_summary)
-          pp diff_summary
+          #find matching implementation and modify file assets
+          augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         ret
       end

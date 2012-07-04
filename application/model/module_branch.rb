@@ -14,19 +14,33 @@ module DTK
         :cols => [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col],
         :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
       }
-      matching_lib_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
-      if matching_lib_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
+      matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
+      if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
         raise Error.new("Not implemented: case when ws and library branch being diffed in different repos")
       end
+      matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
+    end
 
-      #determine if there is any diffs between workspace and library branches
-      matching_lib_branches.each do |r|
-        lib_branch_obj = r[:library_module_branch]
-        ws_branch_name = r[:branch]
-x=        RepoManager.diff(ws_branch_name,lib_branch_obj)
-pp        [x.ret_diff_types_summary(),x]
+    class << self
+      private
+      def update_library_from_workspace_aux?(augmented_branch)
+pp augmented_branch[:component_module][:display_name]
+        ret = lib_branch_obj = augmented_branch[:library_module_branch]
+        ws_branch_name = augmented_branch[:branch]
+        #determine if there is any diffs between workspace and library branches
+        diff = RepoManager.diff(ws_branch_name,lib_branch_obj)
+        diff_summary = diff.ret_summary()
+        if diff_summary.no_diffs?()
+          return ret
+        end
+pp 'some change'
+        unless diff_summary.no_added_or_deleted_files?()
+          #find matching implementation and modeify file assets
+          #augmented_lib_branch[:implementation].modify_file_assets(diff_summary)
+          pp diff_summary
+        end
+        ret
       end
-      ret
     end
 
     def create_component_workspace_branch?(project)

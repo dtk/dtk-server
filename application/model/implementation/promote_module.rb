@@ -15,19 +15,6 @@ module DTK
       ret
     end
 
-    #self is a project implementation; returns library implementation idh
-    def update_library_module_with_workspace()
-      ret = nil
-      impl_objs_info = get_obj(:cols=>[:linked_library_implementation,:repo,:branch])
-      raise Error.new("Cannot find associated library implementation") unless impl_objs_info
-      library_impl = impl_objs_info[:library_implementation]
-      project_impl = impl_objs_info
-      RepoManager.merge_from_branch(project_impl[:branch],{:implementation => library_impl})
-      RepoManager.push_implementation(:implementation => library_impl)
-      Log.info("TODO: need to see if anything in component types changed")
-      library_impl
-    end
-
    private
     def matching_library_template_exists?(version,library_idh)
       update_object!(:repo)

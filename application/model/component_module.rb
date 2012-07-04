@@ -2,6 +2,19 @@ r8_require('service_or_component_module')
 module DTK
   class ComponentModule < Model
     extend ServiceOrComponentModuleClassMixin
+
+    def update_library_module_with_workspace()
+      #find augmented workspace branch
+      sp_hash = {
+        :cols => ModuleBranch.cols_for_matching_library_branches(model_name),
+        :filter => [:and, [:eq, ModuleBranch.component_module_id_col(),id()],[:eq,:is_workspace,true]]
+      }
+      aug_ws_branch_rows = Model.get_objs(model_handle(:module_branch),sp_hash)
+      if aug_ws_branch_rows.size != 1
+        raise Error.new("error in finding unique workspace branch from component module")
+      end
+      ModuleBranch.update_library_from_workspace?(aug_ws_branch_rows,:augmented => true)
+    end
     
     def self.list(service_module_mh,opts={})
       library_idh = opts[:library_idh]

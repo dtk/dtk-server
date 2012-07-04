@@ -53,11 +53,6 @@ lambda__matching_library_branches =
     }
   },
   :virtual_columns=>{
-    :prety_print_version=>{
-      :type=>:varchar,
-      :hidden=>true,
-      :local_dependencies => [:branch,:version]
-    },
     :matching_component_library_branches=> lambda__matching_library_branches.call(:component_module),
     :matching_service_library_branches=> lambda__matching_library_branches.call(:service_module)
   },

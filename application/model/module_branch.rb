@@ -4,21 +4,30 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
-    def self.update_library_from_workspace?(ws_branches)
+    def self.update_library_from_workspace?(ws_branches,opts={})
+      ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new
       return ret if ws_branches.empty?
-      sample_ws_branch = ws_branches.first
-      type = sample_ws_branch.update_object!(:type)[:type]
-      matching_lib_branches_col = (type == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
-      sp_hash = {
-        :cols => [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col],
-        :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
-      }
-      matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
+      if opts[:augmented]
+        matching_branches = ws_branches
+      else
+        sample_ws_branch = ws_branches.first
+        type = sample_ws_branch.update_object!(:type)[:type]
+        sp_hash = {
+          :cols => cols_for_matching_library_branches(type),
+          :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
+        }
+        matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
+      end
       if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
         raise Error.new("Not implemented: case when ws and library branch being diffed in different repos")
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
+    end
+
+    def self.cols_for_matching_library_branches(type)
+      matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
+      [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col]
     end
 
     class << self
@@ -39,6 +48,10 @@ module DTK
         if diff_summary.meta_file_changed?()
           raise Error.new("Not implemented yet: processing of meta file changes")
         end
+
+        #update the repo
+        RepoManager.merge_from_branch(ws_branch_name,lib_branch_obj)
+        RepoManager.push_implementation(lib_branch_obj)
         ret
       end
     end

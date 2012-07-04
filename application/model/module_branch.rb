@@ -24,7 +24,6 @@ module DTK
     class << self
       private
       def update_library_from_workspace_aux?(augmented_branch)
-pp augmented_branch[:component_module][:display_name]
         ret = lib_branch_obj = augmented_branch[:library_module_branch]
         ws_branch_name = augmented_branch[:branch]
         #determine if there is any diffs between workspace and library branches
@@ -33,10 +32,12 @@ pp augmented_branch[:component_module][:display_name]
         if diff_summary.no_diffs?()
           return ret
         end
-pp 'some change'
         unless diff_summary.no_added_or_deleted_files?()
           #find matching implementation and modify file assets
           augmented_branch[:implementation].modify_file_assets(diff_summary)
+        end
+        if diff_summary.meta_file_changed?()
+          raise Error.new("Not implemented yet: processing of meta file changes")
         end
         ret
       end

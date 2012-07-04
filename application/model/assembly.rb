@@ -16,7 +16,8 @@ module XYZ
 
       #first make sure that all referenced components have updated modules in the library
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
-      lib_branch_idhs = ModuleBranch.update_library_from_workspace?(ws_branches)
+      augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
+pp augmented_lib_branches
 return nil
       #1) get a content object, 2) modify, and 3) persist
 

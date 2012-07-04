@@ -8,6 +8,10 @@ class DTK::Repo
         not (self[:files_renamed] or self[:files_added] or self[:files_deleted])
       end
 
+      def meta_file_changed?()
+        self[:files_modified] and !!self[:files_modified].find{|r|r[:path] =~ /^r8meta/}
+      end
+
       #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
       def paths_to_add()
         (self[:files_added]||[]).map{|r|r[:path]} + (self[:files_renamed]||[]).map{|r|r[:new_path]}

@@ -17,20 +17,18 @@ module XYZ
       #first make sure that all referenced components have updated modules in the library
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
       augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
-pp augmented_lib_branches
-return nil
+
       #1) get a content object, 2) modify, and 3) persist
-
-
       connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
       link_idhs = connected_links.map{|link|link.id_handle}
 
-      module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
+      service_module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
 
-      assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,module_branch,icon_info)
-      assembly_instance.add_content_for_clone(node_idhs,link_idhs)
+      assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_instance.add_content_for_clone!(node_idhs,link_idhs)
+      assembly_instance.create_assembly_template(library_idh,augmented_lib_branches)
     end
 
     def self.create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)

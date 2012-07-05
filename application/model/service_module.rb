@@ -30,13 +30,8 @@ module DTK
       if rows.empty?
         raise Error.new("Service module (#{service_module_name}) does not exist")
       end
-      version_match_row = rows.find do |r|
-        if version.nil?
-          r[:module_branch][:version].nil?
-        else
-          r[:module_branch][:version] == version
-        end
-      end
+      version ||= BranchNameDefaultVersion
+      version_match_row = rows.find{|r|r[:module_branch][:version] == version}
       version_match_row && version_match_row[:module_branch]
     end
   end

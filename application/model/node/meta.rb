@@ -233,6 +233,7 @@ module XYZ
         [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
+           :alias => :non_default_attribute,
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)},
            :filter => [:eq,:is_instance_value,true],
@@ -250,10 +251,9 @@ module XYZ
            :filter => [:eq, :is_workspace, true],
            :cols => [:id,:display_name,:type,:component_id] 
          }]         
-
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
-        lambda__components_and_non_default_attrs.call(COMMON_REL_COLUMNS.keys,COMMON_REL_COLUMNS.keys)
+        lambda__components_and_non_default_attrs.call(ContentObject::CommonCols+[:module_branch_id],ContentObject::CommonCols)
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 

@@ -253,7 +253,7 @@ module XYZ
          }]         
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
-        lambda__components_and_non_default_attrs.call(ContentObject::CommonCols+[:module_branch_id],ContentObject::CommonCols)
+        lambda__components_and_non_default_attrs.call(ContentObject::CommonCols+[:module_branch_id,:component_type],ContentObject::CommonCols)
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 

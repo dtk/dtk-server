@@ -19,14 +19,14 @@ module XYZ
       augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
 
       #1) get a content object, 2) modify, and 3) persist
-      augmented_port_links,dangling_links = Node.get_conn_port_links(node_idhs,:augmented => true)
+      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
       #TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
       service_module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
 
       assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-      assembly_instance.add_content_for_clone!(library_idh,node_idhs,augmented_port_links,augmented_lib_branches)
+      assembly_instance.add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
       assembly_instance.create_assembly_template(library_idh)
     end
 

@@ -13,20 +13,39 @@ module DTK
         assembly_mh = library_idh.create_childMH(:component)
         create(assembly_mh,hash_values)
       end
-      def add_content_for_clone!(library_idh,node_idhs,augmented_port_links,augmented_lib_branches)
+      def add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
         node_scalar_cols = ContentObject::CommonCols + [:node_binding_rs_id]
-        sp_hash = {
-          :cols => node_scalar_cols + [:cmps_and_non_default_attrs],
-          :filter => [:oneof,:id,node_idhs.map{|idh|idh.get_id()}]
-        }
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
-        content_rows = Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true)
-        cmp_scalar_cols = content_rows.first[:component].keys - [:non_default_attribute]
+        node_ids = node_idhs.map{|idh|idh.get_id()}
+
+        #get contained ports
+        sp_hash = {
+          :cols => [:id,:display_name,:external_ports_for_clone],
+          :filter => [:oneof,:id,node_ids]
+        }
+        @ndx_ports = Hash.new
+        node_port_mapping = Hash.new
+        Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true).each do |r|
+          port = r[:port]
+          (node_port_mapping[r[:id]] ||= Array.new) << port
+          @ndx_ports[port[:id]] = port
+        end
+
+        #get contained components-non-default attributes
+        sp_hash = {
+          :cols => node_scalar_cols + [:cmps_and_non_default_attrs],
+          :filter => [:oneof,:id,node_ids]
+        }
+
+        node_cmp_attr_rows = Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true)
+
+        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attribute]
         ndx_nodes = Hash.new
-        content_rows.each do | r|
+        node_cmp_attr_rows.each do | r|
           node_id = r[:id]
-          cmps = (ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new))[:components]
+          ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new,:ports => node_port_mapping[node_id])
+          cmps = ndx_nodes[node_id][:components]
           cmp_id = r[:component][:id]
           unless matching_cmp = cmps.find{|cmp|cmp[:id] == cmp_id}
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(:non_default_attributes => Array.new)
@@ -37,6 +56,7 @@ module DTK
           end
         end
         self[:nodes] = ndx_nodes.values
+        self[:port_links] = port_links
         @component_template_mapping = get_component_template_mapping(library_idh,augmented_lib_branches)
         self
       end
@@ -72,13 +92,21 @@ module DTK
 
       def create_node_content(node)
         node_ref = "#{self[:ref]}-#{node[:display_name]}"
-        cmp_ref = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
-        node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_ref)
+        cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
+        ports = node[:ports].inject(Hash.new){|h,p|h.merge(create_port_content(p))}
+        node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_refs, :port => ports)
         node_hash.merge!(:type => "stub")
         {node_ref => node_hash}
       end
+
+      def create_port_content(port)
+        port_ref = self.class.qualified_ref(port)
+        port_hash = Aux::hash_subset(port,[:display_name,:description,:type])
+        {port_ref => port_hash}
+      end
+
       def create_component_ref_content(cmp)
-        cmp_ref_ref = "#{cmp[:ref]}#{cmp[:ref_num] ? "-#{cmp[:ref_num].to_s}" : ""}"
+        cmp_ref_ref = self.class.qualified_ref(cmp)
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)

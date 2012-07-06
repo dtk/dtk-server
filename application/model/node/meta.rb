@@ -108,28 +108,30 @@ module XYZ
            :cols => [:id,:display_name,:type,:connected]
          }]
 
+      lambda__segment_port =
+        lambda{|port_cols,opts|
+        segment = {
+          :model_name => :port,
+          :convert => true,
+          :join_type => :inner,
+          :join_cond=>{:node_node_id => q(:node,:id)},
+          :cols => port_cols
+        }
+        segment.merge!(opts) if (opts and not opts.empty?)
+        segment
+      }
+
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
-        [
-         {
-           :model_name => :port,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description] #TODO: should we unify with Port.common_columns
-         }]
+        [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns
+      virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [lambda__segment_port.call([:id,:display_name,:description,:ref,:ref_num,:type],{:filter => [:eq,:type,"component_external"]})]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
-         {
-           :model_name => :port,
-           :alias => :port_external_output,
-           :join_type => :inner,
-           :filter => [:eq,:type,"external"],
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,id(:node),:containing_port_id,:external_attribute_id]
-         },
+         lambda__segment_port.call([:id,id(:node),:containing_port_id,:external_attribute_id],{:alias => :port_external_output,:filter => [:eq,:type,"external"]}), #TODO: what about component_external
          {
            :model_name => :port_link,
            :alias => :port_link_l4,
@@ -150,7 +152,7 @@ module XYZ
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:type,:ref,:ref_num,:node_node_id]
+           :cols => [:id,:display_name,:type]
          },
         {
            :model_name => :port_link,
@@ -178,7 +180,7 @@ module XYZ
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:type,:ref,:ref_num,:node_node_id]
+           :cols => [:id,:display_name,:type]
          },
         {
            :model_name => :port_link,

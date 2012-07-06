@@ -26,10 +26,10 @@ module DTK
         ndx_nodes = Hash.new
         content_rows.each do | r|
           node_id = r[:id]
-          cmps = (ndx_nodes[node_id] ||= Aux.hash_subset(r,node_scalar_cols).merge(:components => Array.new))[:components]
+          cmps = (ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new))[:components]
           cmp_id = r[:component][:id]
           unless matching_cmp = cmps.find{|cmp|cmp[:id] == cmp_id}
-            matching_cmp = Aux.hash_subset(r[:component],cmp_scalar_cols).merge(:non_default_attributes => Array.new)
+            matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(:non_default_attributes => Array.new)
             cmps << matching_cmp
           end
           if attr = r[:non_default_attribute]
@@ -37,8 +37,7 @@ module DTK
           end
         end
         self[:nodes] = ndx_nodes.values
-        @augmented_lib_branches = augmented_lib_branches
-        @component_templates = get_component_templates(library_idh,augmented_lib_branches)
+        @component_template_mapping = get_component_template_mapping(library_idh,augmented_lib_branches)
         self
       end
       def create_assembly_template(library_idh)
@@ -47,7 +46,9 @@ module DTK
         ret
         end
      private
-      def get_component_templates(library_idh,augmented_lib_branches)
+      #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
+      def get_component_template_mapping(library_idh,augmented_lib_branches)
+        ret = Hash.new
         cmp_types = self[:nodes].map do |node|
           node[:components].map{|cmp|cmp[:component_type]}
         end.flatten
@@ -56,7 +57,15 @@ module DTK
           :cols => [:id, :display_name,:module_branch_id,:component_type,:library_library_id],
           :filter => [:and,[:oneof, :component_type,cmp_types],[:oneof, :module_branch_id, branch_ids]]
         }
-        Model.get_objs(library_idh.create_childMH(:component),sp_hash)
+        lib_to_ws_branches = augmented_lib_branches.inject(Hash.new) do |h,r|
+          h.merge(r[:id] => r[:workspace_module_branch][:id])
+        end
+        cmp_tmpls = Model.get_objs(library_idh.create_childMH(:component),sp_hash)
+        cmp_tmpls.each do |cmp|
+          lib_branch_id = cmp[:module_branch_id]
+          (ret[cmp[:component_type]] ||= Hash.new).merge!(lib_to_ws_branches[lib_branch_id] => cmp[:id])
+        end
+        ret
       end
 
       def create_node_content(node)
@@ -65,9 +74,12 @@ module DTK
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_ref)
         {node_ref => node_hash}
       end
-      def create_component_ref_content(component)
-        #TODO: stub
-        {}
+      def create_component_ref_content(cmp)
+        cmp_ref_ref = "#{cmp[:ref]}#{cmp[:ref_num] ? "-#{cmp[:ref_num].to_s}" : ""}"
+        cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
+        cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
+        cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
+        {cmp_ref_ref => cmp_ref_hash}
       end
     end
   end

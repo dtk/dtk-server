@@ -212,10 +212,11 @@ module XYZ
       lambda__segment_component =
         lambda{|cmp_cols|
         {
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => cmp_cols
+          :model_name => :component,
+          :convert => true,
+          :join_type => :inner,
+          :join_cond=>{:node_node_id => q(:node,:id)},
+          :cols => cmp_cols
         }
       }
       lambda__components_and_attrs =
@@ -233,6 +234,7 @@ module XYZ
         [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
+           :convert => true,
            :alias => :non_default_attribute,
            :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:component,:id)},

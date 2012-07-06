@@ -41,10 +41,10 @@ module DTK
         self
       end
       def create_assembly_template(library_idh)
-        ret = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
-        pp ret
-        ret
-        end
+        template_output = self[:nodes].inject(TemplateOutput.new){|h,node|h.merge(create_node_content(node))}
+        template_output.create()
+        template_output.serialize_and_save()
+      end
      private
       #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
       def get_component_template_mapping(library_idh,augmented_lib_branches)
@@ -70,8 +70,9 @@ module DTK
 
       def create_node_content(node)
         node_ref = "#{self[:ref]}-#{node[:display_name]}"
-        cmp_ref = node[:components].inject(Hash.new){|h,cmp|create_component_ref_content(cmp)}
+        cmp_ref = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_ref)
+        node_hash.merge!(:type => "stub")
         {node_ref => node_hash}
       end
       def create_component_ref_content(cmp)
@@ -80,6 +81,14 @@ module DTK
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}
+      end
+      
+      class TemplateOutput < Hash
+        def create()
+          pp self
+        end
+        def serialize_and_save()
+        end
       end
     end
   end

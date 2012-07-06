@@ -350,21 +350,24 @@ module XYZ
 
     #return ports links 
     #returns [connected_links,dangling_links]
-    def self.get_conn_port_links(id_handles)
+    def self.get_conn_port_links(id_handles,opts={})
       ret = [Array.new,Array.new]
-
       in_port_cols = [:id, :display_name, :input_port_links]
       ndx_in_links = Hash.new
-      get_objs_in_set(id_handles,:columns => in_port_cols).each do |r|
+      ndx_in_ports = Hash.new
+      get_objs_in_set(id_handles,{:columns => in_port_cols},:keep_ref_cols => true).each do |r|
         link = r[:port_link]
         ndx_in_links[link[:id]] = link 
+        ndx_in_ports[r[:port][:id]] ||= r[:port]
       end
 
       out_port_cols = [:id, :display_name, :output_port_links]
       ndx_out_links = Hash.new
-      get_objs_in_set(id_handles,:columns => out_port_cols).each do |r|
+      ndx_out_ports = Hash.new
+      get_objs_in_set(id_handles,{:columns => out_port_cols},:keep_ref_cols => true).each do |r|
         link = r[:port_link]
         ndx_out_links[link[:id]] = link 
+        ndx_out_ports[r[:port][:id]] ||= r[:port]
       end
 
       return ret if ndx_in_links.empty? and ndx_out_links.empty?
@@ -373,6 +376,15 @@ module XYZ
 
       dangling_links = (ndx_in_links.keys - ndx_out_links.keys).map{|id|ndx_in_links[id]}
       dangling_links += (ndx_out_links.keys - ndx_in_links.keys).map{|id|ndx_out_links[id]}
+      if opts[:augmented]
+        connected_links = connected_links.map do |l|
+          {
+            :id => l[:id],
+            :input_port => ndx_in_ports[l[:input_id]], 
+            :output_port => ndx_out_ports[l[:input_id]] 
+          }
+        end
+      end
       [connected_links,dangling_links]
     end
 

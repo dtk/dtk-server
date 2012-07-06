@@ -13,7 +13,7 @@ module DTK
         assembly_mh = library_idh.create_childMH(:component)
         create(assembly_mh,hash_values)
       end
-      def add_content_for_clone!(library_idh,node_idhs,link_idhs,augmented_lib_branches)
+      def add_content_for_clone!(library_idh,node_idhs,augmented_port_links,augmented_lib_branches)
         node_scalar_cols = ContentObject::CommonCols + [:node_binding_rs_id]
         sp_hash = {
           :cols => node_scalar_cols + [:cmps_and_non_default_attrs],
@@ -41,8 +41,10 @@ module DTK
         self
       end
       def create_assembly_template(library_idh)
-        template_output = self[:nodes].inject(TemplateOutput.new){|h,node|h.merge(create_node_content(node))}
-        template_output.create()
+        nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
+        template_output = TemplateOutput.new
+        template_output.merge!(:component => {self[:ref] => {:node => nodes}})
+        template_output.create(library_idh)
         template_output.serialize_and_save()
       end
      private
@@ -80,11 +82,14 @@ module DTK
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
+        unless cmp[:non_default_attributes].empty?
+          raise Error.new("TODO: implement non default attttributes")
+        end
         {cmp_ref_ref => cmp_ref_hash}
       end
       
       class TemplateOutput < Hash
-        def create()
+        def create(library_idh)
           pp self
         end
         def serialize_and_save()

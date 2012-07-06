@@ -150,7 +150,7 @@ module XYZ
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:type]
+           :cols => [:id,:display_name,:type,:ref,:ref_num,:node_node_id]
          },
         {
            :model_name => :port_link,
@@ -178,7 +178,7 @@ module XYZ
            :model_name => :port,
            :join_type => :inner,
            :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name,:type]
+           :cols => [:id,:display_name,:type,:ref,:ref_num,:node_node_id]
          },
         {
            :model_name => :port_link,

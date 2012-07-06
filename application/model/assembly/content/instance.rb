@@ -41,11 +41,11 @@ module DTK
         node_cmp_attr_rows = Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true)
 
         cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attribute]
-        ndx_nodes = Hash.new
+        @ndx_nodes = Hash.new
         node_cmp_attr_rows.each do | r|
           node_id = r[:id]
-          ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new,:ports => node_port_mapping[node_id])
-          cmps = ndx_nodes[node_id][:components]
+          @ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new,:ports => node_port_mapping[node_id])
+          cmps = @ndx_nodes[node_id][:components]
           cmp_id = r[:component][:id]
           unless matching_cmp = cmps.find{|cmp|cmp[:id] == cmp_id}
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(:non_default_attributes => Array.new)
@@ -55,15 +55,19 @@ module DTK
             matching_cmp[:non_default_attributes] << attr
           end
         end
-        self[:nodes] = ndx_nodes.values
+        self[:nodes] = @ndx_nodes.values
         self[:port_links] = port_links
         @component_template_mapping = get_component_template_mapping(library_idh,augmented_lib_branches)
         self
       end
       def create_assembly_template(library_idh)
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
+        port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
+
         template_output = TemplateOutput.new
-        template_output.merge!(:component => {self[:ref] => {:node => nodes}})
+        template_output.merge!(Aux::hash_subset(self,[:display_name,:type]))
+        template_output.merge!(:component => {self[:ref] => {:node => nodes,:port_links => port_links}})
+
         template_output.create(library_idh)
         template_output.serialize_and_save()
       end
@@ -90,8 +94,27 @@ module DTK
         ret
       end
 
+      def create_port_link_content(port_link)
+        in_port = @ndx_ports[port_link[:input_id]]
+        in_node_ref = node_ref(@ndx_nodes[in_port[:node_node_id]])
+        in_port_ref = qualified_ref(in_port)
+        out_port = @ndx_ports[port_link[:output_id]]
+        out_node_ref = node_ref(@ndx_nodes[out_port[:node_node_id]])
+        out_port_ref = qualified_ref(out_port)
+
+        port_link_ref = "#{in_port_ref}-#{out_port_ref}"
+        port_link_hash = {
+          "*input_id".to_sym => "#{in_node_ref}/#{in_port_ref}",
+          "*output_id".to_sym => "#{out_node_ref}/#{out_port_ref}",
+        }
+        {port_link_ref => port_link_hash}
+      end
+      
+      def node_ref(node)
+        "#{self[:ref]}-#{node[:display_name]}"
+      end
       def create_node_content(node)
-        node_ref = "#{self[:ref]}-#{node[:display_name]}"
+        node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
         ports = node[:ports].inject(Hash.new){|h,p|h.merge(create_port_content(p))}
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_refs, :port => ports)
@@ -100,13 +123,13 @@ module DTK
       end
 
       def create_port_content(port)
-        port_ref = self.class.qualified_ref(port)
+        port_ref = qualified_ref(port)
         port_hash = Aux::hash_subset(port,[:display_name,:description,:type])
         {port_ref => port_hash}
       end
 
       def create_component_ref_content(cmp)
-        cmp_ref_ref = self.class.qualified_ref(cmp)
+        cmp_ref_ref = qualified_ref(cmp)
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)

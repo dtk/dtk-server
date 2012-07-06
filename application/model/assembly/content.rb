@@ -3,6 +3,7 @@ module DTK
   class Assembly
     class Content < Assembly
       extend ContentObjectClassMixin
+      include ContentObjectMixin
       r8_nested_require('content','instance')
     end
   end

@@ -381,7 +381,7 @@ module XYZ
           {
             :id => l[:id],
             :input_port => ndx_in_ports[l[:input_id]], 
-            :output_port => ndx_out_ports[l[:input_id]] 
+            :output_port => ndx_out_ports[l[:output_id]] 
           }
         end
       end

@@ -28,6 +28,8 @@ module XYZ
 
       assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
       assembly_instance.add_content_for_clone!(node_idhs,link_idhs)
+  pp [:augmented_lib_branches,augmented_lib_branches]
+
       assembly_instance.create_assembly_template(library_idh,augmented_lib_branches)
     end
 

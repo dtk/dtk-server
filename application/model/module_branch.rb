@@ -33,7 +33,9 @@ module DTK
     class << self
       private
       def update_library_from_workspace_aux?(augmented_branch)
-        ret = lib_branch_obj = augmented_branch[:library_module_branch]
+        lib_branch_obj = augmented_branch[:library_module_branch]
+        ret = lib_branch_obj.merge(:workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]))
+                                                                              
         ws_branch_name = augmented_branch[:branch]
         #determine if there is any diffs between workspace and library branches
         diff = RepoManager.diff(ws_branch_name,lib_branch_obj)

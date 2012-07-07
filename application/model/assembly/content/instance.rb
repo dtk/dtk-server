@@ -27,7 +27,7 @@ module DTK
         @ndx_ports = Hash.new
         node_port_mapping = Hash.new
         Model.get_objs(node_mh,sp_hash,:keep_ref_cols => true).each do |r|
-          port = r[:port]
+          port = r[:port].merge(:link_def => r[:link_def])
           (node_port_mapping[r[:id]] ||= Array.new) << port
           @ndx_ports[port[:id]] = port
         end

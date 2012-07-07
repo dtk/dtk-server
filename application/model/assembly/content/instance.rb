@@ -66,8 +66,9 @@ module DTK
 
         template_output = TemplateOutput.new
         assembly_ref = self[:ref]
-        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id]).merge(:port_link => port_links)
-        template_output.merge!(:node => nodes, :component => {assembly_ref => assembly_hash})
+        #TODO: consider moving port link so it is conatined under assembly rather than being contained in library and points to assembly
+        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id])
+        template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
 
         template_output.create(library_idh)
         template_output.serialize_and_save()
@@ -107,6 +108,7 @@ module DTK
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
+          "*assembly_id" => "/component/#{self[:ref]}"
         }
         {port_link_ref => port_link_hash}
       end

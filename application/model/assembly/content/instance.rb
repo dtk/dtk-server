@@ -66,7 +66,7 @@ module DTK
 
         template_output = TemplateOutput.new
         template_output.merge!(Aux::hash_subset(self,[:display_name,:type]))
-        template_output.merge!(:component => {self[:ref] => {:node => nodes,:port_links => port_links}})
+        template_output.merge!(:node => nodes, :component => {self[:ref] => {:port_links => port_links}})
 
         template_output.create(library_idh)
         template_output.serialize_and_save()
@@ -104,8 +104,8 @@ module DTK
 
         port_link_ref = "#{in_port_ref}-#{out_port_ref}"
         port_link_hash = {
-          "*input_id".to_sym => "#{in_node_ref}/#{in_port_ref}",
-          "*output_id".to_sym => "#{out_node_ref}/#{out_port_ref}",
+          "*input_id".to_sym => "node/#{in_node_ref}/port/#{in_port_ref}",
+          "*output_id".to_sym => "node/#{out_node_ref}/port/#{out_port_ref}",
         }
         {port_link_ref => port_link_hash}
       end
@@ -117,7 +117,8 @@ module DTK
         node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
         ports = node[:ports].inject(Hash.new){|h,p|h.merge(create_port_content(p))}
-        node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id]).merge(:component_ref => cmp_refs, :port => ports)
+        node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
+        node_hash.merge!("*assembly_id".to_sym => "component/#{self[:ref]}",:component_ref => cmp_refs, :port => ports)
         node_hash.merge!(:type => "stub")
         {node_ref => node_hash}
       end
@@ -141,7 +142,7 @@ module DTK
       
       class TemplateOutput < Hash
         def create(library_idh)
-          pp self
+          Model.import_objects_from_hash(library_idh,self)
         end
         def serialize_and_save()
         end

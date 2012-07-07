@@ -53,7 +53,8 @@ module XYZ
 
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
       parent_model_name = Model.normalize_model(hash[:model_handle][:parent_model_name])
-      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
+#TODO: thing this is wrong since calss AssemblyNode in middle of run      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
+      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || ChildContext
       klass.new(hash)
     end
 

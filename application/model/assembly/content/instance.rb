@@ -104,11 +104,12 @@ module DTK
         out_node_ref = node_ref(@ndx_nodes[out_port[:node_node_id]])
         out_port_ref = qualified_ref(out_port)
 
-        port_link_ref = "#{in_port_ref}-#{out_port_ref}"
+        assembly_ref = self[:ref]
+        port_link_ref = "#{assembly_ref}-#{in_port_ref}-#{out_port_ref}"
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
-          "*assembly_id" => "/component/#{self[:ref]}"
+          "*assembly_id" => "/component/#{assembly_ref}"
         }
         {port_link_ref => port_link_hash}
       end

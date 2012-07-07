@@ -198,7 +198,8 @@ module XYZ
     end
    private
     def self.delete_template(assembly_idh)
-      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are teh nodes
+      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
+      #do not need to delete port links which use a cascade foreign keyy
       sp_hash = {
         :cols => [:id, :nodes],
         :filter => [:eq, :id, assembly_idh.get_id]

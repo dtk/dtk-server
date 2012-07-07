@@ -126,7 +126,15 @@ module XYZ
         [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns
       virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
         :remote_dependencies => 
-        [lambda__segment_port.call([:id,:display_name,:description,:ref,:ref_num,:type],{:filter => [:eq,:type,"component_external"]})]
+        [
+         lambda__segment_port.call(ContentObject::CommonCols+[:type,:link_def_id,:direction],{:filter => [:eq,:type,"component_external"]}),
+         {
+          :model_name => :link_def,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:port,:link_def_id)},
+           :cols => [:id,:ancestor_id]
+         }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
         :remote_dependencies =>

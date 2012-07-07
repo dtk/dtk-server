@@ -1,3 +1,4 @@
+#TODO: may deprecate all the SpecialContext dealing with target_to_library (AssemblyTemplateNode,AssemblyTemplateComponent
 module XYZ
   class ChildContext < SimpleHashObject
     def clone_copy_child_objects(clone_proc,level)
@@ -129,24 +130,6 @@ module XYZ
     end
     def parent_objs_info()
       self[:parent_objs_info]
-    end
-
-    class AssemblyTemplateNode < ChildContext
-     private
-      def self.get_children_model_handles(model_handle,omit_list=[],&block)
-        child_mh = model_handle.create_childMH(:component)
-        block.call(child_mh)
-      end
-
-      def ret_field_set_to_copy()
-        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
-      end
-    end
-
-    class AssemblyTemplateComponent < ChildContext
-      def clone_copy_child_objects(clone_proc,level)
-        super
-      end
     end
 
     class AssemblyNode < ChildContext
@@ -284,6 +267,24 @@ module XYZ
         select_ds = attr_override_ds.join_table(:inner,cmp_mapping_ds,[:component_ref_id]).join_table(:inner,attr_mapping_ds,[:component_component_id,:display_name])
         update_set_fs = Model::FieldSet.new(:attribute,[:value_asserted])
         Model.update_from_select(model_handle.createMH(:attribute),update_set_fs,select_ds,:constant_set_values => {:is_instance_value => true})
+      end
+    end
+
+    class AssemblyTemplateNode < ChildContext
+     private
+      def self.get_children_model_handles(model_handle,omit_list=[],&block)
+        child_mh = model_handle.create_childMH(:component)
+        block.call(child_mh)
+      end
+
+      def ret_field_set_to_copy()
+        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
+      end
+    end
+
+    class AssemblyTemplateComponent < ChildContext
+      def clone_copy_child_objects(clone_proc,level)
+        super
       end
     end
 

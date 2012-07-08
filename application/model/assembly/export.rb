@@ -1,3 +1,4 @@
+#TODO: deprecate, replaced by Assembly::Instance::TemplateOutput methods
 #exports an assembly instance or template in serialized form
 module XYZ
   module AssemblyExportMixin

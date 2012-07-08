@@ -1,6 +1,7 @@
 module DTK
   class Assembly
     class Instance < Content
+      r8_nested_require('instance','template_output')
       def self.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         hash_values = {
           :library_library_id => library_idh.get_id(),
@@ -60,7 +61,7 @@ module DTK
         @component_template_mapping = get_component_template_mapping(library_idh,augmented_lib_branches)
         self
       end
-      def create_assembly_template(library_idh)
+      def create_assembly_template(library_idh,service_module_branch)
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
@@ -71,7 +72,7 @@ module DTK
         template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
 
         template_output.create(library_idh)
-        template_output.serialize_and_save()
+        template_output.serialize_and_save_to_repo(service_module_branch)
       end
      private
       #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
@@ -143,14 +144,6 @@ module DTK
           raise Error.new("TODO: implement non default attttributes")
         end
         {cmp_ref_ref => cmp_ref_hash}
-      end
-      
-      class TemplateOutput < Hash
-        def create(library_idh)
-          Model.import_objects_from_hash(library_idh,self)
-        end
-        def serialize_and_save()
-        end
       end
     end
   end

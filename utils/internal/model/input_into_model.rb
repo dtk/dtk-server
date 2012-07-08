@@ -10,6 +10,9 @@ module XYZ
         container_id_info = IDInfoTable.get_row_from_id_handle(container_id_handle)
         ret_global_fks = update_with_id_values(fks,container_id_handle[:c],prefixes,container_id_info[:uri],opts)
       end
+      if opts[:preserve_input_hash]
+        insert_fks_back_in_hash!(hash_with_assocs,fks)
+      end
       ret_global_fks
     end
 
@@ -27,7 +30,7 @@ module XYZ
     end 
 
     class ForeignKeyAttr 
-      attr_reader :create_ref_object, :attr
+      attr_reader :create_ref_object, :attribute
       def initialize(attribute,opts={})
         @attribute=attribute
         @create_ref_object=opts[:create_ref_object]
@@ -54,6 +57,36 @@ module XYZ
       end
       obj
     end  
+
+    def insert_fks_back_in_hash!(hash,fks)
+      fks.each do |string_path,fk_info|
+        path = string_path.split("/")
+        path.shift if path.first.empty?
+        assign = fk_info.inject(Hash.new) do |h,(fk_attr,v)|
+          h.merge("*#{fk_attr.attribute}" => v)
+        end
+        insert_assign_at_path!(hash,path,assign)
+      end
+    end
+    def insert_assign_at_path!(hash,path,assign)
+      first = path.shift
+      if hash.has_key?(first.to_s)
+        key = first.to_s
+      elsif hash.has_key?(first.to_sym)
+        key = first.to_sym
+      else
+        raise Error.new("Unexpecetd path element (#{first})")
+      end
+      if path.empty?
+        if hash[key].nil?
+          hash[key] = assign
+        else
+          hash[key].merge!(assign)
+        end
+      else
+        insert_assign_at_path!(hash[key],path,assign)
+      end
+    end
 
     def update_with_id_values(fks,c,prefixes,container_uri,opts={})
       ret_global_fks = nil

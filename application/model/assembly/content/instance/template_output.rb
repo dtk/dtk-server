@@ -3,7 +3,7 @@ module DTK
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
       def create(library_idh)
-        Model.import_objects_from_hash(library_idh,self)
+        Model.input_hash_content_into_model(library_idh,self,:preserve_input_hash=>true)
       end
       def serialize_and_save_to_repo(service_module_branch)
         serialized_hash = serialize()
@@ -50,13 +50,12 @@ return
         end
 
         #add port links
-        # ndx_ports = nested_objs[:ports].inject(Hash.new){|h,p|h.merge(p[:id] => p)}
-        # ret[:port_links] = nested_objs[:port_links].map do |pl|
-        #   input_port = ndx_ports[pl[:input_id]]
-        #   output_port = ndx_ports[pl[:output_id]]
-        #   {port_output_form(input_port,:input) => port_output_form(output_port,:output)}
-        # end
-        # ret
+        ret[:port_links] = self[:port_link].values.map do |pl|
+           input_qual_port_ref = pl["*input_id"]
+           output_qual_port_ref = pl["*output_id"]
+           {port_output_form(input_qual_port_ref,:input) => port_output_form(output_qual_port_ref,:output)}
+         end
+        ret
       end
 
       def component_output_form(component_hash)
@@ -69,6 +68,15 @@ return
       end
       def component_name_output_form(internal_format)
         internal_format.gsub(/__/,Seperators[:module_component])
+      end
+
+      def port_output_form(qualified_port_ref,dir)
+        #TODO: does this need fixing up in case a component can appear multiple times
+        #TODO: assumption that port_ref == display_name
+        port_ref = qualified_port_ref.split("/").last
+        p = Port.parse_external_port_display_name(port_ref)
+        #TODO: think need the node info (which is in qualified_port_ref)
+        "#{p[:module]}#{Seperators[:module_component]}#{p[:component]}#{Seperators[:component_port]}#{p[:link_def_ref]}"
       end
     end
   end

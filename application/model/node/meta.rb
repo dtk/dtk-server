@@ -108,28 +108,38 @@ module XYZ
            :cols => [:id,:display_name,:type,:connected]
          }]
 
+      lambda__segment_port =
+        lambda{|port_cols,opts|
+        segment = {
+          :model_name => :port,
+          :convert => true,
+          :join_type => :inner,
+          :join_cond=>{:node_node_id => q(:node,:id)},
+          :cols => port_cols
+        }
+        segment.merge!(opts) if (opts and not opts.empty?)
+        segment
+      }
+
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
+        [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns
+      virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
+        :remote_dependencies => 
         [
+         lambda__segment_port.call(ContentObject::CommonCols+[:type,:link_def_id,:direction],{:filter => [:eq,:type,"component_external"]}),
          {
-           :model_name => :port,
+          :model_name => :link_def,
            :convert => true,
            :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description] #TODO: should we unify with Port.common_columns
+           :join_cond=>{:id => q(:port,:link_def_id)},
+           :cols => [:id,:ancestor_id]
          }]
 
       virtual_column :output_attrs_to_l4_input_ports, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
-         {
-           :model_name => :port,
-           :alias => :port_external_output,
-           :join_type => :inner,
-           :filter => [:eq,:type,"external"],
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,id(:node),:containing_port_id,:external_attribute_id]
-         },
+         lambda__segment_port.call([:id,id(:node),:containing_port_id,:external_attribute_id],{:alias => :port_external_output,:filter => [:eq,:type,"external"]}), #TODO: what about component_external
          {
            :model_name => :port_link,
            :alias => :port_link_l4,
@@ -201,9 +211,6 @@ module XYZ
            :cols => [:id,:display_name,:type]
          }]
 
-
-
-
       node_attrs_on_node_def = 
         [{
            :model_name => :attribute,
@@ -211,22 +218,58 @@ module XYZ
            :join_cond=>{:node_node_id => q(:node,:id)},
            :cols => [:id,:display_name]
          }]
-      cmp_attrs_on_node_def = 
-        [{
-           :model_name => :component,
-           :join_type => :inner,
-           :join_cond=>{:node_node_id => q(:node,:id)},
-           :cols => [:id,:display_name, :component_type, id(:node)]
-         },
+
+      lambda__segment_component =
+        lambda{|cmp_cols|
+        {
+          :model_name => :component,
+          :convert => true,
+          :join_type => :inner,
+          :join_cond=>{:node_node_id => q(:node,:id)},
+          :cols => cmp_cols
+        }
+      }
+      lambda__components_and_attrs =
+        lambda{|cmp_cols,attr_cols|
+        [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
-           :cols => [:id,:display_name]
+           :cols => attr_cols
          }]
+      }
+      lambda__components_and_non_default_attrs =
+        lambda{|cmp_cols,attr_cols|
+        [lambda__segment_component.call(cmp_cols),
+         {
+           :model_name => :attribute,
+           :convert => true,
+           :alias => :non_default_attribute,
+           :join_type => :left_outer,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :filter => [:eq,:is_instance_value,true],
+           :cols => attr_cols
+         }]
+      }
+      virtual_column :component_ws_module_branches, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        [lambda__segment_component.call([:id,:display_name,:module_branch_id]),
+         {
+           :model_name => :module_branch,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :filter => [:eq, :is_workspace, true],
+           :cols => [:id,:display_name,:type,:component_id] 
+         }]         
+      virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        lambda__components_and_non_default_attrs.call(ContentObject::CommonCols+[:module_branch_id,:component_type],ContentObject::CommonCols)
+        
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        cmp_attrs_on_node_def +
+        lambda__components_and_attrs.call([:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,
@@ -248,7 +291,7 @@ module XYZ
          }]
       virtual_column :output_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        cmp_attrs_on_node_def +
+        lambda__components_and_attrs.call([:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,

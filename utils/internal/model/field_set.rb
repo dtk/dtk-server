@@ -131,6 +131,12 @@ module XYZ
         end
       end
 
+      def self.common(model_name)
+        ret_fieldset(model_name,:default) do |db_rel|
+          non_hidden_columns(COMMON_REL_COLUMNS)
+        end
+      end
+               
       def self.all_real(model_name)
         ret_fieldset(model_name,:all_real) do |db_rel|
           real_cols(db_rel) + many_to_one_cols(db_rel)

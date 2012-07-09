@@ -346,6 +346,7 @@ module XYZ
 
     def update_object!(*cols_x)
       cols = (cols_x.include?(:group_id) ? cols_x : cols_x + [:group_id]) #always good to get group_id
+      cols = (cols.include?(:display_name) ? cols : cols + [:display_name]) #always good to get display_name
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
@@ -362,7 +363,7 @@ module XYZ
     def get_obj(sp_hash_x,opts={})
       rows = get_objs(sp_hash_x,opts)
       if rows.size > 1
-        Log.error("call to get_obj (sp_hash=#{sp_hash_x.inspect} returned more than one row")
+        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash_x.inspect} returned more than one row")
       end
       rows.first
     end
@@ -414,7 +415,7 @@ module XYZ
     def self.get_obj(model_handle,sp_hash,opts={})
       rows = get_objs(model_handle,sp_hash,opts)
       if rows.size > 1
-        Log.error("call to get_obj (sp_hash=#{sp_hash.inspect} returned more than one row")
+        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row")
       end
       rows.first
     end

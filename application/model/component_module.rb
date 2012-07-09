@@ -1,12 +1,39 @@
-module XYZ
+r8_require('service_or_component_module')
+module DTK
   class ComponentModule < Model
+    extend ServiceOrComponentModuleClassMixin
+
+    def update_library_module_with_workspace()
+      #find augmented workspace branch
+      sp_hash = {
+        :cols => ModuleBranch.cols_for_matching_library_branches(model_name),
+        :filter => [:and, [:eq, ModuleBranch.component_module_id_col(),id()],[:eq,:is_workspace,true]]
+      }
+      aug_ws_branch_rows = Model.get_objs(model_handle(:module_branch),sp_hash)
+      if aug_ws_branch_rows.size != 1
+        raise Error.new("error in finding unique workspace branch from component module")
+      end
+      ModuleBranch.update_library_from_workspace?(aug_ws_branch_rows,:augmented => true)
+    end
+    
+    def self.list(service_module_mh,opts={})
+      library_idh = opts[:library_idh]
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => lib_filter
+      }
+      get_objs(service_module_mh,sp_hash)
+    end
+
     def self.import(library_idh,remote_module_name)
+      ret = nil
       module_name = remote_module_name
       if remote_already_imported?(library_idh,remote_module_name)
         raise Error.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
       end
-      if conflict_with_local_repo?(library_idh,module_name)
-        raise Error.new("Import conflicts with local repo (#{module_name})")
+      if conflicts_with_library_module?(library_idh,module_name)
+        raise Error.new("Import conflicts with library module (#{module_name})")
       end
 
       #TODO: this might be done a priori
@@ -15,56 +42,36 @@ module XYZ
       #create empty repo on local repo manager; 
       config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo_obj = create_empty_repo(library_idh,module_name,config_agent_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:component_module,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo_obj.synchronize_with_remote_repo()
 
       impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo_obj)
 
-      create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
-
-      #TODO: create component_module and cm_branch objects
-      nil
-    end
-
-    def self.create_empty_repo(library_idh,module_name,config_agent_type,opts={})
-      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
-      repo_user_acls = auth_repo_users.map do |repo_username|
-        {
-          :repo_username => repo_username,
-          :access_rights => "RW+"
-        }
+      component_idhs = create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
+      unless ::R8::Config[:use_modules]
+        return ret
       end
-      Repo.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts)
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
+      module_and_branch_idhs[:module_idh]
+    end
+    def self.delete(idh)
+      delete_instance(idh)
     end
 
-    private
-    def self.remote_already_imported?(library_idh,remote_module_name)
-      ret = nil
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
-                    [:eq, :remote_repo, remote_module_name]]
-      }
-      cms = get_objs(library_idh.createMH(:component_module),sp_hash)
-      not cms.empty?
-    end
-
-    def self.conflict_with_local_repo?(library_idh,module_name)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
-                    [:eq, :display_name, module_name]]
-      }
-      cms = get_objs(library_idh.createMH(:component_module),sp_hash)
-      not cms.empty?
-    end
-
+   private
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
       local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
       add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+    end
+    def self.update_components_with_branch_info(component_idhs,module_branch_idh)
+      mb_id = module_branch_idh.get_id()
+      update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id}}
+      sample_cmp_idh = component_idhs.first 
+      update_from_rows(sample_cmp_idh.createMH(),update_rows)
     end
   end
 end

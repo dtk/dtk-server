@@ -4,16 +4,58 @@ r8_nested_require('assembly','export')
 r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
+    r8_nested_require('assembly','content')
     include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin
+
+    def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+      unless R8::Config[:use_node_bindings]
+        return create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
+      end
+
+      #first make sure that all referenced components have updated modules in the library
+      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
+      augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
+
+      #1) get a content object, 2) modify, and 3) persist
+      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+
+      service_module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
+
+      assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_instance.add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
+      assembly_instance.create_assembly_template(library_idh,service_module_branch)
+    end
+
+    def self.create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+      module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
+      assembly_idh = create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
+
+      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+      link_idhs = connected_links.map{|link|link.id_handle}
+
+      #clone the meta information
+      id_handles = node_idhs + link_idhs
+      library_idh.create_object().clone_into_library_assembly(assembly_idh,id_handles)
+
+      #serialize and store in repo
+      assembly_idh.create_object().serialize_and_save_to_repo(module_branch)
+    end
+
     def self.list_from_library(assembly_mh,opts={})
       library_idh = opts[:library_idh]
+      mb_idhs = opts[:module_branch_idhs]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      mb_idhs_filter = mb_idhs && [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}] 
       nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
         :cols => [:id, :display_name,nested_virtual_attr],
-        :filter => [:and, [:eq, :type, "composite"], lib_filter]
+        :filter => [:and, [:eq, :type, "composite"], lib_filter, mb_idhs_filter].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
       get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
@@ -55,7 +97,20 @@ module XYZ
     end
 
     class << self
-      private
+     private
+      def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
+        create_row = {
+          :library_library_id => library_idh.get_id(),
+          :ref => "#{service_module_name}-#{assembly_name}",
+          :display_name => assembly_name,
+          :ui => icon_info,
+          :type => "composite",
+          :module_branch_id => module_branch[:id]
+        }
+        assembly_mh = library_idh.create_childMH(:component)
+        create_from_row(assembly_mh,create_row, :convert => true)
+      end
+
       def get_template_component_attributes(assembly_mh,template_assembly_rows,opts={})
         #get attributes on templates (these are defaults)
         ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
@@ -143,7 +198,8 @@ module XYZ
     end
    private
     def self.delete_template(assembly_idh)
-      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are teh nodes
+      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
+      #do not need to delete port links which use a cascade foreign keyy
       sp_hash = {
         :cols => [:id, :nodes],
         :filter => [:eq, :id, assembly_idh.get_id]

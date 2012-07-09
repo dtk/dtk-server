@@ -1,13 +1,7 @@
 module XYZ
   class Component_moduleController < Controller
     def rest__list_from_library()
-      #TODO: update to call ComponentModule method
-      rest_ok_response Implementation.list_from_library(model_handle(:implementation))
-    end
-
-    def rest__list_from_workspace()
-      #TODO: update to call ComponentModule method
-      rest_ok_response Implementation.list_from_workspace(model_handle(:implementation))
+      rest_ok_response ComponentModule.list_from_library(model_handle)
     end
 
     def rest__list_remote()
@@ -26,10 +20,15 @@ module XYZ
     end
 
     def rest__update_library()
-      #TODO: update to call ComponentModule method
-      workspace_impl_id = ret_non_null_request_params(:implementation_id)
-      workspace_impl = id_handle(workspace_impl_id,:implementation).create_object()
-      workspace_impl.update_library_module_with_workspace()
+      component_module_id = ret_non_null_request_params(:component_module_id)
+      component_module = id_handle(component_module_id).create_object()
+      component_module.update_library_module_with_workspace()
+      rest_ok_response
+    end
+
+    def rest__delete()
+      component_module_id = ret_non_null_request_params(:component_module_id)
+      ComponentModule.delete(id_handle(component_module_id))
       rest_ok_response
     end
   end

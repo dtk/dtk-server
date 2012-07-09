@@ -3,13 +3,11 @@ module DTK::Client
     def self.pretty_print_cols()
       [:display_name, :id, :version]
     end
-    desc "list [library|workspace|remote]","List library, workspace, or remote modules"
+    desc "list [library|workspace|remote]","List library, workspace, or remote component modules"
     def list(parent)
       case parent
        when "library":
          post rest_url("component_module/list_from_library")
-       when "workspace":
-         post rest_url("component_module/list_from_workspace")
        when "remote":
          post rest_url("component_module/list_remote")
        else 
@@ -26,13 +24,22 @@ module DTK::Client
       post rest_url("component_module/import"), post_body
     end
 
-    desc "update-library WORKSPACE-MODULE-ID", "Updates library module with workspace module"
-    def update_library(module_id)
+    desc "update-library COMPONENT-MODULE-ID", "Updates library module with workspace module"
+    def update_library(component_module_id)
       post_body = {
-       :implementation_id => module_id
+       :component_module_id => component_module_id
       }
       post rest_url("component_module/update_library"), post_body
     end
+
+    desc "delete COMPONENT-MODULE-ID", "Deleet component module and all items contained in it"
+    def delete(component_module_id)
+      post_body = {
+       :component_module_id => component_module_id
+      }
+      post rest_url("component_module/delete"), post_body
+    end
+
   end
 end
 

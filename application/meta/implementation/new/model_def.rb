@@ -7,7 +7,7 @@
     :module_name => {:type=>:varchar, :size => 50}, 
     :parse_state => {:type=>:varchar, :size => 25},
     :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
-    :version => {:type=>:varchar, :size => 20, :default => Implementation::DefaultVersion},
+    :version => {:type=>:varchar, :size => 20, :default => "master"},
     :updated => {:type=>:boolean, :default => false},
     :repo_id=>{
       :type=>:bigint,

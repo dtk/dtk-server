@@ -28,7 +28,7 @@ module XYZ
       end
 
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
-      proc = CloneCopyProcessor.create(clone_source_object,opts.merge(:include_children => true))
+      proc = CloneCopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
@@ -47,7 +47,7 @@ module XYZ
 
     def clone_into_library_assembly(assembly_idh,id_handles)
       opts = {:include_children => true}
-      proc = CloneCopyProcessor.create(assembly_idh.create_object(),opts)
+      proc = CloneCopyProcessor.create(self,assembly_idh.create_object(),opts)
       proc.add_id_handle(assembly_idh)
 
       #group id handles by model type
@@ -58,9 +58,9 @@ module XYZ
       end
 
       assembly_id_assign = {:assembly_id => assembly_idh.get_id()}
-      overrides = assembly_id_assign.merge(:component => assembly_id_assign)
+      overrides = assembly_id_assign.merge(:type => "stub",:component => assembly_id_assign)
       ndx_id_handle_groups.each_value do |child_id_handles|
-        child_context = proc.ret_child_context(child_id_handles,id_handle(),overrides)
+        child_context = proc.child_context_lib_assembly_top_level(child_id_handles,id_handle(),overrides)
         proc.clone_copy_child_objects(child_context)
       end
 
@@ -177,7 +177,14 @@ module XYZ
     end
 
     class CloneCopyProcessorAssembly < CloneCopyProcessor
-      private
+      def cloning_assembly?()
+        true
+      end
+      def clone_direction()
+        :library_to_target
+      end
+
+     private
       def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
         ret = Array.new
         raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
@@ -214,10 +221,20 @@ module XYZ
       end
     end
 
+    class CloneCopyProcessorAssemblyTemplate < CloneCopyProcessorAssembly
+      def clone_direction()
+        :target_to_library
+      end
+    end
+
     class CloneCopyProcessor
-      def self.create(source_obj,opts={})
+      def self.create(target_obj,source_obj,opts={})
         if source_obj.is_assembly?
-          CloneCopyProcessorAssembly.new(source_obj,opts)
+          if target_obj.kind_of?(Library)
+            CloneCopyProcessorAssemblyTemplate.new(source_obj,opts)
+          else
+            CloneCopyProcessorAssembly.new(source_obj,opts)
+          end
         else
           new(source_obj,opts)
         end
@@ -307,7 +324,7 @@ module XYZ
         end
       end
 
-      def ret_child_context(id_handles,target_idh,existing_override_attrs={})
+      def child_context_lib_assembly_top_level(id_handles,target_idh,existing_override_attrs={})
         #TODO: push this into ChildContext.create_from_hash
         #assuming all id_handles have same model_handle
         sample_idh = id_handles.first
@@ -325,7 +342,7 @@ module XYZ
         end
         create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
         parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
-        
+
         ChildContext.create_from_hash(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
       end
 
@@ -344,6 +361,12 @@ module XYZ
         recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
       end
 
+      def cloning_assembly?()
+        nil
+      end
+      def clone_direction()
+        nil
+      end
      private
       def create_opts_for_top()
         dups_allowed_for_cmp = true #TODO stub

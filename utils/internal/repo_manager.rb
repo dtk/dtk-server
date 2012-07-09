@@ -3,7 +3,7 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes]
+      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_name]
 
       def method_missing(name,*args,&block)
@@ -19,7 +19,7 @@ module XYZ
       def respond_to?(name)
         !!(defined_method?(name) || super)
       end
-
+      
      private
       def defined_method?(name)
         RepoMethods.include?(name) or !!class_if_admin_method?(name)
@@ -108,9 +108,7 @@ module XYZ
     
     ##########
     def self.get_repo(context)
-      #TODO: do we still need __top
-      repo = (context[:implementation]||{})[:repo]||"__top"
-      branch = (context[:implementation]||{})[:branch]
+      repo,branch = ret_repo_and_branch(context)
       raise Error.new("cannot find branch in context") unless branch
       CachedRepoObjects[repo] ||= Hash.new
       CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
@@ -118,6 +116,18 @@ module XYZ
 
    private
     CachedRepoObjects = Hash.new
+    def self.ret_repo_and_branch(context)
+      repo = branch = nil
+      if context.kind_of?(ModuleBranch)
+        repo,branch = context.repo_and_branch()
+      else
+        #assume that it has hash with :implementation key
+        #TODO: do we still need __top
+        repo = (context[:implementation]||{})[:repo]||"__top"
+        branch = (context[:implementation]||{})[:branch]
+      end
+      [repo,branch]
+    end
 
     def self.load_and_return_adapter_class()
       return @cached_adpater_class if @cached_adpater_class

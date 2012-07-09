@@ -1001,6 +1001,44 @@ POSSIBLE CHANGES TO HASH
 
     def clone_assembly_ide(explicit_hash=nil)
       hash = explicit_hash || request.params
+      name = hash["name"] || "assembly"
+       if ::R8::Config[:use_modules] and name.split("/").size == 2
+         clone_assembly_ide_new(explicit_hash)
+       else
+         clone_assembly_ide_deprecate(explicit_hash)
+       end
+    end
+
+    def clone_assembly_ide_new(explicit_hash=nil)
+      hash = explicit_hash || request.params
+      #TODO: stub
+      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
+
+      library_id = hash["library_id"].to_i
+      library_idh = id_handle(library_id,:library)
+      name = hash["name"] || "assembly"
+      service_module_name, assembly_name = name.split("/")
+      unless assembly_name and service_module_name
+        raise Error.new("Assembly name must be in form <assembly_name><service_module_name>")
+      end
+      
+      #TODO: getting json rather than hash
+      item_list = JSON.parse(hash["item_list"])
+
+      #TODO remove DEMOHACK
+      node_idhs = item_list.map do |item|
+        id = item["id"].to_i
+        model = (item["model"].nil? or item["model"].empty?) ? :node : item["model"].to_sym
+        id_handle(id,model)
+      end
+
+      Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
+      return {:content => nil}
+    end
+
+    #TODO: deprecate
+    def clone_assembly_ide_deprecate(explicit_hash=nil)
+      hash = explicit_hash || request.params
       #TODO: stub
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
@@ -1014,7 +1052,7 @@ POSSIBLE CHANGES TO HASH
         :ui => icon_info,
         :type => "composite"
       }
-      assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
+      assembly_mh = library_idh.createMH(:model_name=>:component)
       assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
 
       #TODO: getting json rather than hash

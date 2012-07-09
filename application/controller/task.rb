@@ -18,7 +18,12 @@ module XYZ
       end
     end
 ### end temp for mocking
+    #TODO: deprecate rest__state_info
     def rest__state_info()
+      rest__status()
+    end
+
+    def rest__status()
       if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
         return rest_ok_response(debug_mock_replay())
       end

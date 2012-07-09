@@ -1,8 +1,9 @@
+#TODO: may deprecate all the SpecialContext dealing with target_to_library (AssemblyTemplateNode,AssemblyTemplateComponent
 module XYZ
   class ChildContext < SimpleHashObject
     def clone_copy_child_objects(clone_proc,level)
       clone_model_handle = clone_model_handle()
-      field_set_to_copy = Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
+      field_set_to_copy = ret_field_set_to_copy()
       fk_info = clone_proc.fk_info
       fk_info.add_foreign_keys(clone_model_handle,field_set_to_copy)
       create_override_attrs = clone_proc.ret_real_columns(clone_model_handle,override_attrs)
@@ -13,15 +14,14 @@ module XYZ
       fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
       #iterate all nested children
-      ChildContext.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
+      self.class.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
     end
 
     def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[],&block)
       ret = Array.new
-      model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
-        next if omit_list.include?(child_mh[:model_name])
+      get_children_model_handles(model_handle,omit_list) do |child_mh|
         override_attrs = clone_proc.ret_child_override_attrs(child_mh,recursive_override_attrs)
         parent_id_col = child_mh.parent_id_field_name()
         old_parent_rel_col = ret_old_parent_rel_col(clone_proc,child_mh)
@@ -44,7 +44,7 @@ module XYZ
     end
 
     def self.create_from_hash(clone_proc,hash)
-      unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
+      unless clone_proc.cloning_assembly?()
         return new(hash)
       end
 
@@ -54,11 +54,24 @@ module XYZ
 
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
       parent_model_name = Model.normalize_model(hash[:model_handle][:parent_model_name])
-      klass = (SpecialContext[parent_model_name]||{})[model_name] || self
+#TODO: think this is wrong since calls AssemblyNode in middle of run      
+#klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
+      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || ChildContext
       klass.new(hash)
     end
 
    private
+    def self.get_children_model_handles(model_handle,omit_list=[],&block)
+      model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
+        next if omit_list.include?(child_mh[:model_name])
+        block.call(child_mh)
+      end
+    end
+
+    def ret_field_set_to_copy()
+      Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
+    end
+
     def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
       ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
 
@@ -75,7 +88,7 @@ module XYZ
 
     def self.ret_old_parent_rel_col(clone_proc,model_handle)
       ret = :ancestor_id
-      unless clone_proc.kind_of?(Model::CloneCopyProcessorAssembly)
+      unless clone_proc.cloning_assembly? and clone_proc.clone_direction() == :library_to_target
         return ret
       end
 
@@ -118,7 +131,6 @@ module XYZ
     def parent_objs_info()
       self[:parent_objs_info]
     end
-
 
     class AssemblyNode < ChildContext
      private
@@ -258,11 +270,35 @@ module XYZ
       end
     end
 
-    #index is parent and child
+    class AssemblyTemplateNode < ChildContext
+     private
+      def self.get_children_model_handles(model_handle,omit_list=[],&block)
+        child_mh = model_handle.create_childMH(:component)
+        block.call(child_mh)
+      end
+
+      def ret_field_set_to_copy()
+        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
+      end
+    end
+
+    class AssemblyTemplateComponent < ChildContext
+      def clone_copy_child_objects(clone_proc,level)
+        super
+      end
+    end
+
+    #index are clone_direction, parent, child
     SpecialContext = {
-      :target => {:node => AssemblyNode},
-      :node => {:component_ref => AssemblyComponentRef},
-      :component => {:attribute => AssemblyComponentAttribute}
+      :library_to_target => {
+        :target => {:node => AssemblyNode},
+        :node => {:component_ref => AssemblyComponentRef},
+        :component => {:attribute => AssemblyComponentAttribute}
+      },
+      :target_to_library => {
+        :library => {:node => AssemblyTemplateNode},
+        :node => {:component => AssemblyTemplateComponent}
+      }
     }
   end
 end

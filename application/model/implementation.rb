@@ -1,22 +1,37 @@
-r8_nested_require('implementation','version')
-r8_nested_require('implementation','branch_names')
+r8_require('branch_names')
 r8_nested_require('implementation','create_workspace')
 r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
-    include ImplVersionMixin
-    include ImplBranchNamesMixin
+    include BranchNamesMixin
+    extend BranchNamesClassMixin
     include ImplCreateWorkspaceMixin
     include ImplPromoteModuleMixin
 
-    def self.list_from_library(impl_mh,opts={})
-      library_idh = opts[:library_idh]
-      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+    def modify_file_assets(diff_summary)
+      paths_to_delete = diff_summary.paths_to_delete
+      paths_to_add = diff_summary.paths_to_add
+
+      #find relevant existing files
       sp_hash = {
-        :cols => [:id, :display_name,:version],
-        :filter => lib_filter
+        :cols => [:id,:display_name,:path],
+          :filter => [:and,[:eq,:implementation_implementation_id,id()], [:oneof,:path,paths_to_delete+paths_to_add]]
       }
-      get_objs(impl_mh,sp_hash)
+      file_assets = Model.get_objs(model_handle(:file_asset),sp_hash)
+      #delete relevant files
+      files_to_delete = file_assets.select{|r|paths_to_delete.include?(r[:path])}
+      unless files_to_delete.empty?
+        Model.delete_instances(files_to_delete.map{|r|r.id_handle()})
+      end
+      
+      #add files not already added
+      existing_paths = file_assets.map{|r|r[:path]}
+      paths_to_add.reject!{|path|existing_paths.include?(path)}
+      unless paths_to_add.empty?
+        type = "puppet_file" #TODO: hard coded
+        create_rows =  paths_to_add.map{|path|FileAsset.create_hash(self,type,path)}
+        Model.create_from_rows(model_handle(:file_asset),create_rows)
+      end
     end
 
     def self.list_from_workspace(impl_mh,opts={})
@@ -43,7 +58,7 @@ module XYZ
           :access_rights => "RW+"
         }
       end
-      repo_obj = Repo.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts)
+      repo_obj = Repo.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,:component_module,opts)
 
       impl_hash = {
         :display_name => module_name,

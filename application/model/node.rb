@@ -350,19 +350,18 @@ module XYZ
 
     #return ports links 
     #returns [connected_links,dangling_links]
-    def self.get_conn_port_links(id_handles)
+    def self.get_conn_port_links(id_handles,opts={})
       ret = [Array.new,Array.new]
-
       in_port_cols = [:id, :display_name, :input_port_links]
       ndx_in_links = Hash.new
-      get_objs_in_set(id_handles,:columns => in_port_cols).each do |r|
+      get_objs_in_set(id_handles,{:columns => in_port_cols}).each do |r|
         link = r[:port_link]
         ndx_in_links[link[:id]] = link 
       end
 
       out_port_cols = [:id, :display_name, :output_port_links]
       ndx_out_links = Hash.new
-      get_objs_in_set(id_handles,:columns => out_port_cols).each do |r|
+      get_objs_in_set(id_handles,{:columns => out_port_cols}).each do |r|
         link = r[:port_link]
         ndx_out_links[link[:id]] = link 
       end

@@ -49,6 +49,7 @@ module XYZ
 
       #TODO: change if multiple implementations per component
       foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
+      foreign_key :module_branch_id, :module_branch, FK_CASCADE_OPT #treated as containment
 
       column :link_defs, :json
       #deprecate below for above

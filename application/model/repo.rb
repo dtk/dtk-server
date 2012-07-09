@@ -1,6 +1,8 @@
 module XYZ
   class Repo < Model
     r8_nested_require('repo','remote')
+    r8_nested_require('repo','diff')
+    r8_nested_require('repo','diffs')
 
     ###virtual columns
     def base_dir()
@@ -11,13 +13,13 @@ module XYZ
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end
 
-    def self.create_empty_repo(library_idh,module_name,config_agent_type,repo_user_acls,opts={})
+    def self.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,module_type,opts={})
       #find repo name
       public_lib = Library.get_public_library(library_idh.createMH())
       if (public_lib && public_lib[:id]) == library_idh.get_id()
-        repo_name = public_repo_name(config_agent_type,module_name)
+        repo_name = public_repo_name(config_agent_type,module_name,module_type)
       else
-        repo_name = private_user_repo_name(config_agent_type,module_name)
+        repo_name = private_user_repo_name(config_agent_type,module_name,module_type)
       end 
 
       extra_attrs = Hash.new
@@ -48,12 +50,19 @@ module XYZ
 
    private    
 
-    def self.private_user_repo_name(config_agent_type,module_name)
+    def self.private_user_repo_name(config_agent_type,module_name,module_type)
       username = CurrentSession.get_username()
-      "#{username}-#{config_agent_type}-#{module_name}"
+      #incorporate_module_type(module_type,"#{username}-#{config_agent_type}-#{module_name}"
+      incorporate_module_type(module_type,"#{username}-#{module_name}")
+
     end
-    def self.public_repo_name(config_agent_type,module_name)
-      "public-#{config_agent_type}-#{module_name}"
+    def self.public_repo_name(config_agent_type,module_name,module_type)
+      #incorporate_module_type(module_type,"public-#{config_agent_type}-#{module_name}")
+      incorporate_module_type(module_type,"public-#{module_name}")
+    end
+
+    def self.incorporate_module_type(module_type,repo_name)
+      module_type == :service_module ? "sm-#{repo_name}" : repo_name
     end
 
     def self.create_repo_obj?(model_handle,repo_name,extra_attrs={})
@@ -62,12 +71,8 @@ module XYZ
         :filter => [:eq,:repo_name,repo_name]
       }
       ret = get_obj(model_handle,sp_hash)
-      if ret
-        unless extra_attrs.empty?
-          Log.info("TODO: does not check whether has changed #{extra_attrs.inspect}")
-        end
-        return ret 
-      end
+      return ret if ret 
+
       repo_hash = {
         :ref => repo_name,
         :display_name => repo_name,

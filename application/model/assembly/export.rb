@@ -1,15 +1,27 @@
-#exports an assembly isnatnce or template in serialized form
+#TODO: deprecate, replaced by Assembly::Instance::TemplateOutput methods
+#exports an assembly instance or template in serialized form
 module XYZ
   module AssemblyExportMixin
-    def export(opts={})
+    def serialize_and_save_to_repo(module_branch)
+      serialized_hash = serialize()
+      content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => serialized_hash[k]}}) )
+
+      filename = assembly_meta_filename()
+      RepoManager.add_file({:path => filename},content,module_branch)
+      filename
+    end
+   private
+    def assembly_meta_filename()
+      update_object!(:display_name)
+      "#{self[:display_name]}.assembly.json"
+    end
+    def serialize()
       nested_objs = AssemblyExportInternal.get_nested_objects_for_export(self)
       assembly_hash = AssemblyExportInternal.assembly_output_hash(self,nested_objs)
       node_bindings_hash = AssemblyExportInternal.node_bindings_output_hash(nested_objs)
-File.open("/tmp/t2","w"){|f| f << JSON.pretty_generate(nested_objs)}
-out = SimpleOrderedHash.new([{:node_bindings => node_bindings_hash}, {:assemblies => {assembly_hash[:name] => assembly_hash}}])
-File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
+      ref = assembly_hash.delete(:ref)
+      {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
     end
-   private
     module AssemblyExportInternal
       include AssemblyImportExportCommon
       def self.get_nested_objects_for_export(assembly)
@@ -73,7 +85,9 @@ File.open("/tmp/t3","w"){|f| f << JSON.pretty_generate(out)}
 
       def self.assembly_output_hash(assembly,nested_objs)
         ret = SimpleOrderedHash.new()
-        ret[:name] = assembly.update_object!(:display_name)[:display_name]
+        assembly.update_object!(:display_name,:ref)
+        ret[:name] = assembly[:display_name]
+        ret[:ref] = assembly[:ref]
         #add modules
         ret[:modules] = nested_objs[:implementations].map do |impl|
           version = impl[:version]

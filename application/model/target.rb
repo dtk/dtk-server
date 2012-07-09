@@ -38,6 +38,11 @@ module XYZ
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
+    def get_project()
+      project_id = update_object!(:project_id)[:project_id]
+      id_handle(:id => project_id,:model_name => :project).create_object()
+    end
+
     def get_node_config_changes()
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       ndx_changes = StateChange.get_ndx_node_config_changes(id_handle)

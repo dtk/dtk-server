@@ -75,6 +75,12 @@ module XYZ
       #process the link defs for remote components
       process_remote_link_defs!(cmps_hash,remote_link_defs,library_idh)
       input_hash_content_into_model(library_idh,{"component" => cmps_hash})
+      sp_hash =  {
+        :cols => [:id,:display_name], 
+        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:library_library_id,library_idh.get_id()]]
+      }
+      component_idhs = get_objs(library_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
+      component_idhs
     end
 
     #### private helpers
@@ -151,14 +157,14 @@ module XYZ
       global_fks = Hash.new
       unless target_id_handle.is_top?
         #TODO: do we need to factor in opts[:username] here?
-        global_fks = input_into_model(target_id_handle,hash_content) 
+        global_fks = input_into_model(target_id_handle,hash_content,opts) 
       else
         hash_content.each do |relation_type,info|
           info.each do |ref,child_hash_content|
             child_uri = uri_qualified_by_username(relation_type,ref,opts[:username])
             child_target_id_handle = target_id_handle.createIDH(:uri => child_uri)
             create_prefix_object_if_needed(child_target_id_handle,opts)
-            input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not k == :username})
+            input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not [:username,:preserve_input_hash].include?(k)})
             r = input_into_model(child_target_id_handle,child_hash_content,input_opts)
             global_fks.merge!(r) if r
           end

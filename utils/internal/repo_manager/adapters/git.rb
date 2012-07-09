@@ -107,6 +107,17 @@ module XYZ
         git_command__commit(message)
       end
     end
+    DiffAttributes = [:new_file,:renamed_file,:deleted_file,:a_path,:b_path,:diff]
+    def diff(other_branch)
+      grit_diffs = @grit_repo.diff(@branch,other_branch)
+      array_diff_hashes = grit_diffs.map do |diff|
+        DiffAttributes.inject(Hash.new) do |h,a|
+          val = diff.send(a)
+          val ?  h.merge(a => val) : h
+        end
+      end
+      ::DTK::Repo::Diffs.new(array_diff_hashes)
+    end
 
     def add_remote(remote_name,remote_url)
       git_command__remote_add(remote_name,remote_url)

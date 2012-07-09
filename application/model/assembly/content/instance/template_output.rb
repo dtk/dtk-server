@@ -19,7 +19,7 @@ module DTK
       end
      private
       def assembly_meta_filename()
-        "#{self[:display_name]}.assembly.json"
+        "#{assembly_hash()[:display_name]}.assembly.json"
       end
       def serialize()
         assembly_hash = assembly_output_hash()

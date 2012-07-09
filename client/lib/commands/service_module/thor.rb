@@ -1,3 +1,4 @@
+#TODO: may be consistent on whether service module id or service module name used as params
 module DTK::Client
   class ServiceModuleCommand < CommandBaseThor
     def self.pretty_print_cols()
@@ -15,7 +16,24 @@ module DTK::Client
       end
     end
 
-    desc "list-assemblies SERVICE-MODULE-ID","List assemblies in teh service module"
+    desc "import REMOTE-SERVICE-MODULE-NAME [library_id]", "Import remote service module into library"
+    def import(service_module_name,library_id=nil)
+      post_body = {
+       :remote_module_name => service_module_name
+      }
+      post_body.merge!(:library_id => library_id) if library_id
+      post rest_url("service_module/import"), post_body
+    end
+
+    desc "export LIBRARY-SERVICE-MODULE-ID", "Export library service module to remote repo"
+    def export(service_module_id,library_id=nil)
+      post_body = {
+       :service_module_id => service_module_id
+      }
+      post rest_url("service_module/export"), post_body
+    end
+
+    desc "list-assemblies SERVICE-MODULE-ID","List assemblies in the service module"
     def list_assemblies(service_module_id)
       post_body = {
        :service_module_id => service_module_id

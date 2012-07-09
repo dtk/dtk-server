@@ -2,10 +2,24 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
  class Repo; module Remote
     class << self
-      def list(repo_mh)
-        remote_repo_names = client.list_repos()
+      def list(repo_mh,type=nil)
+        remote_repos = client.list_repos()
         #TODO: might also indicate if any of these are synced with remote repo
-        remote_repo_names.map{|name|{:display_name => name}}
+        ret = Array.new
+        remote_repos.map do |repo|
+          repo_type = repo["type"]
+          if repo_type and type
+            if type == :component_module and not repo_type.is_component_module?()
+              next
+            elsif type == :service_module and not repo_type.is_service_module?()
+              next
+            end
+          end
+          el = {:display_name => repo["repo_name"]}
+          el[:type] = repo_type if repo_type and not type
+          ret << el
+        end
+        ret
       end
 
       def authorize_dtk_instance(remote_repo_name)

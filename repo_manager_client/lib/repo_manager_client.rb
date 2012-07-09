@@ -1,6 +1,15 @@
 #TODO: need requires if used standalone
 r8_require_common_lib('rest_client_wrapper')
 module DTK
+  #TODO: RepoType should be in common
+  class RepoType < String
+    def is_component_module?()
+      self =~ /^component_module/
+    end
+    def is_service_module?()
+      self =~ /^service_module/
+    end
+  end
   class RepoManagerClient
     def initialize(rest_base_url)
       @rest_base_url = rest_base_url
@@ -14,7 +23,9 @@ module DTK
     def list_repos()
       route = "/rest/admin/list_repos"
       response_data = get_rest_request_data(route,:raise_error => true)
-      response_data["repos"]
+      repos = response_data["repos"]
+      repos.each{|repo|repo["type"] = RepoType.new(repo["type"]) if repo["type"]}
+      repos
     end
 
     def add_user(username,rsa_pub_key,opts={})

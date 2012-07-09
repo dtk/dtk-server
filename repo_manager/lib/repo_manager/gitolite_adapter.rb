@@ -4,7 +4,8 @@ module DTK::RepoManager; class GitoliteAdapter
   class Admin 
     class << self
       def list_repos()
-        repo_config_file_paths().map{|fn|repo_name_from_repo_config_file(fn)} - ['testing']
+        repo_names = repo_config_file_paths().map{|fn|repo_name_from_repo_config_file(fn)} - ['testing']
+        repo_names.map{|repo_name|{:repo_name => repo_name, :type => Repo.get_type(repo_name)}}
       end
 
       def create_repo(repo_name,repo_user_acls,opts={})

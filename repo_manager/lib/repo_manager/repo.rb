@@ -27,6 +27,19 @@ module DTK::RepoManager
       end
     end
 
+    #TODO: put /^r8meta\.puppet/, "component_module_puppet", etc in lib common 
+    def self.get_type(repo_name)
+      level = 1
+      first_level_files = new(repo_name).ls_r(level) 
+      if first_level_files.find{|p|p =~ /^r8meta\.puppet/}
+        "component_module_puppet"
+      elsif first_level_files.find{|p|p =~ /^r8meta\.puppet/}
+        "component_module_chef"
+      else
+        "service_module"
+      end
+    end
+
     #'pass' all these methods to @repo
     RepoMethods = [:add_or_replace_file,:branches,:create_branch,:file_content,:ls_r,:commit_context]
     def method_missing(name,*args,&block)

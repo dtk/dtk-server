@@ -2,15 +2,19 @@ module DTK
   class Assembly::Instance
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
-      def create(library_idh)
-        Model.input_hash_content_into_model(library_idh,self,:preserve_input_hash=>true)
+      def initialize(library_idh,service_module_branch)
+        super()
+        @library_idh = library_idh
+        @service_module_branch = service_module_branch
       end
-      def serialize_and_save_to_repo(service_module_branch)
-        serialized_hash = serialize()
-return
-        content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => serialized_hash[k]}}) )
+      def save_to_model()
+        Model.input_hash_content_into_model(@library_idh,self,:preserve_input_hash=>true)
+      end
+      def serialize_and_save_to_repo()
+        hash_to_serialize = serialize()
+        content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}}) )
         filename = assembly_meta_filename()
-        RepoManager.add_file({:path => filename},content,module_branch)
+        RepoManager.add_file({:path => filename},content,@service_module_branch)
         filename
       end
      private
@@ -19,8 +23,6 @@ return
       end
       def serialize()
         assembly_hash = assembly_output_hash()
-pp assembly_hash
-return
         node_bindings_hash = node_bindings_output_hash()
         ref = assembly_hash.delete(:ref)
         {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
@@ -28,10 +30,8 @@ return
 
       def assembly_output_hash()
         ret = SimpleOrderedHash.new()
-        assembly_ref = self[:component].keys.first
-        assembly_hash = self[:component].values.first 
-        ret[:name] = assembly_hash[:display_name]
-        ret[:ref] = assembly_ref
+        ret[:name] = assembly_hash()[:display_name]
+        ret[:ref] = assembly_ref()
         #TODO
         #add modules
         #ret[:modules] = nested_objs[:implementations].map do |impl|
@@ -56,6 +56,27 @@ return
            {port_output_form(input_qual_port_ref,:input) => port_output_form(output_qual_port_ref,:output)}
          end
         ret
+      end
+
+      def assembly_ref()
+        self[:component].keys.first
+      end
+      def assembly_hash()
+        self[:component].values.first
+      end
+
+      def node_bindings_output_hash()
+        sp_hash = {
+          :cols => [:id,:ref],
+          :filter => [:oneof, :id, self[:node].values.map{|n|n[:node_binding_rs_id]}]
+        }
+        #TODO: may get this info in earlier phase
+        node_binding_rows = Model.get_objs(@library_idh.create_childMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+        node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
+        assembly_ref = assembly_ref()
+        self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|
+          h.merge("#{assembly_ref}#{Seperators[:assembly_node]}#{node_hash[:display_name]}" => node_binding_id_to_ref[node_hash[:node_binding_rs_id]])
+        end
       end
 
       def component_output_form(component_hash)

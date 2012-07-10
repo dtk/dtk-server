@@ -4,13 +4,18 @@ module DTK
     extend ServiceOrComponentModuleClassMixin
     #export to remote
     def export()
+      repo = get_library_repo()
       module_name = update_object!(:display_name)[:display_name]
-      #check if exists already
-      remotes = Repo::Remote.list(model_handle(:repo),:service_module)
-      if remotes.find{|r|r[:display_name] == module_name}
-        raise ErrorUsage.new("Cannot export service module (#{module_name}) because it has been exported already")
+      if repo[:remote_repo_name]
+        raise ErrorUsage.new("Cannot export service module (#{module_name} because it is has been exported already")
       end
-      Repo::Remote.export(self)
+
+      #create remote repo
+      Repo::Remote.create_repo(module_name)
+
+      #link and push to remote repo
+      #repo.link_to_remote(module_name)
+      #repo.push_to_remote()
       module_name
     end
 
@@ -44,6 +49,16 @@ module DTK
       version ||= BranchNameDefaultVersion
       version_match_row = rows.find{|r|r[:module_branch][:version] == version}
       version_match_row && version_match_row[:module_branch]
+    end
+   private
+    def get_library_repo()
+      sp_hash = {
+        :cols => [:id,:display_name,:library_repo]
+      }
+      row = get_obj(sp_hash)
+      #opportunisticall set display name on service_module
+      self[:display_name] ||= row[:display_name]
+      row[:repo]
     end
   end
 end

@@ -48,6 +48,10 @@ module XYZ
       RepoManager.synchronize_with_remote_repo(self[:repo_name],remote_name,remote_url)
     end
 
+    def link_to_remote(remote_module_name)
+      self[:remote_module_name] = remote_module_name
+    end
+
    private    
 
     def self.private_user_repo_name(config_agent_type,module_name,module_type)

@@ -40,9 +40,9 @@ module DTK
       Repo::Remote.authorize_dtk_instance(remote_module_name)
 
       #create empty repo on local repo manager; 
-      config_agent_type = :puppet #TODO: hard wired
+      module_specific_type = config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:component_module,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo_obj.synchronize_with_remote_repo()
 
       impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
@@ -56,6 +56,7 @@ module DTK
       update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
       module_and_branch_idhs[:module_idh]
     end
+
     def self.delete(idh)
       delete_instance(idh)
     end

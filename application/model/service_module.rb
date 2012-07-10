@@ -2,6 +2,35 @@ r8_require('service_or_component_module')
 module DTK
   class ServiceModule < Model
     extend ServiceOrComponentModuleClassMixin
+
+    #import from remote
+    def self.import(library_idh,remote_module_name)
+      ret = nil
+      module_name = remote_module_name
+      if remote_already_imported?(library_idh,remote_module_name)
+        raise ErrorUsage.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
+      end
+      if conflicts_with_library_module?(library_idh,module_name)
+        raise ErrorUsage.new("Import conflicts with library module (#{module_name})")
+      end
+
+      #TODO: this might be done a priori
+      Repo::Remote.authorize_dtk_instance(remote_module_name)
+
+      #create empty repo on local repo manager; 
+      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+      module_specific_type = :service_module
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo_obj.synchronize_with_remote_repo()
+
+      unless ::R8::Config[:use_modules]
+        return ret
+      end
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
+      module_and_branch_idhs[:module_idh]
+    end
+
     #export to remote
     def export()
       repo = get_library_repo()
@@ -14,12 +43,11 @@ module DTK
       Repo::Remote.create_repo(module_name)
 
       #link and push to remote repo
-      #TODO: remote_repo_name might isnated be something like "sm-#{module_name}"
-      remote_repo_name = module_name
+      remote_repo_name = ret_remote_repo_name(module_name)
       repo.link_to_remote(remote_repo_name)
       repo.push_to_remote(remote_repo_name)
 
-      #update last for idempotency
+      #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name)
       remote_repo_name
     end
@@ -37,7 +65,8 @@ module DTK
         raise Error.new("Create conflicts with existing library module (#{module_name})")
       end
 
-      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,:service_module,:delete_if_exists => true)
+      module_specific_type = :service_module
+      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:delete_if_exists => true)
       module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
       module_and_branch_idhs[:module_idh]
     end
@@ -56,6 +85,11 @@ module DTK
       version_match_row && version_match_row[:module_branch]
     end
    private
+    def ret_remote_repo_name(module_name)
+      #TODO: remote_repo_name might isnated be something like "sm-#{module_name}"
+      module_name
+    end
+
     def get_library_repo()
       sp_hash = {
         :cols => [:id,:display_name,:library_repo]

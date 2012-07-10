@@ -58,7 +58,8 @@ module XYZ
           :access_rights => "RW+"
         }
       end
-      repo_obj = Repo.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,:component_module,opts)
+      module_specific_type = config_agent_type
+      repo_obj = Repo.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,:component_module,opts)
 
       impl_hash = {
         :display_name => module_name,

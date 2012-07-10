@@ -1,6 +1,6 @@
 module DTK
   module ServiceOrComponentModuleClassMixin
-    def create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,module_type,opts={})
+    def create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,opts={})
       auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
       repo_user_acls = auth_repo_users.map do |repo_username|
         {
@@ -8,7 +8,7 @@ module DTK
           :access_rights => "RW+"
         }
       end
-      Repo.create_empty_repo_and_local_clone(library_idh,module_name,config_agent_type,repo_user_acls,module_type,opts)
+      Repo.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 
     #TODO: change so get versions from cm or sm branches

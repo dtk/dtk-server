@@ -7,7 +7,7 @@ module DTK
       module_name = update_object!(:display_name)[:display_name]
       #check if exists already
       remotes = Repo::Remote.list(model_handle(:repo),:service_module)
-      if remotes.find{|r|r[:display_name] == repo_name}
+      if remotes.find{|r|r[:display_name] == module_name}
         raise ErrorUsage.new("Cannot export service module (#{module_name}) because it has been exported already")
       end
       Repo::Remote.export(self)

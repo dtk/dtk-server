@@ -2,7 +2,9 @@
 module XYZ
   class RestError  
     def self.create(err)
-      if NotFound.match?(err)
+      if RestUsageError.match?(err)
+        RestUsageError.new(err)
+      elsif NotFound.match?(err)
         NotFound.new(err)
       else
         Internal.new(err)
@@ -29,9 +31,16 @@ module XYZ
         @message = "#{err.to_s} (#{err.backtrace.first})"
       end
     end
-    class Usage < RestError
+    class RestUsageError < RestError
+      def initialize(err)
+        super
+        @message = err.to_s
+      end
+      def self.match?(err)
+        err.kind_of?(ErrorUsage)
+      end
     end
-    class NotFound < Usage
+    class NotFound < RestUsageError
       def self.match?(err)
         err.kind_of?(::NoMethodError) and is_controller_method(err)
       end

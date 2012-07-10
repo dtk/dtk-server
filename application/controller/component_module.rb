@@ -21,7 +21,7 @@ module XYZ
 
     def rest__update_library()
       component_module_id = ret_non_null_request_params(:component_module_id)
-      component_module = id_handle(component_module_id).create_object()
+      component_module = create_object_from_id(component_module_id)
       component_module.update_library_module_with_workspace()
       rest_ok_response
     end

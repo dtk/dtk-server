@@ -74,6 +74,6 @@ module XYZ
     end
   end
 
-  class PortLinkError < ErrorForUser
+  class PortLinkError < ErrorUsage
   end
 end

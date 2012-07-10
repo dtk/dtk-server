@@ -24,10 +24,10 @@ module XYZ
       super(msg)
     end
   end
-  class ErrorForUser < Error
+  class ErrorUsage < Error
   end
 
-  class ErrorConstraintViolations < ErrorForUser
+  class ErrorConstraintViolations < ErrorUsage
     def initialize(violations)
        super(msg(violations),:ConstraintViolations)
     end
@@ -46,7 +46,7 @@ module XYZ
     end
   end
 
-  class ErrorUserInputNeeded < ErrorForUser
+  class ErrorUserInputNeeded < ErrorUsage
     def initialize(needed_inputs)
       super()
       @needed_inputs = needed_inputs

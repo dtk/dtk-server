@@ -3,10 +3,21 @@ module XYZ
     def rest__list_from_library()
       rest_ok_response ServiceModule.list_from_library(model_handle)
     end
+
+    def rest__list_remote()
+      rest_ok_response Repo::Remote.list(model_handle(:repo),:service_module)
+    end
+    
+    def rest__export()
+      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module = create_object_from_id(service_module_id)
+      service_module.export()
+      rest_ok_response 
+    end
     
     def rest__list_assemblies()
       service_module_id = ret_non_null_request_params(:service_module_id)
-      service_module = id_handle(service_module_id).create_object() 
+      service_module = create_object_from_id(service_module_id)
       rest_ok_response service_module.list_assemblies()
     end
 
@@ -15,7 +26,7 @@ module XYZ
       library_id = ret_request_params(:library_id) 
       library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
       unless library_idh
-        raise Error.new("No library specified and no default can be determined")
+        raise ErrorUsage.new("No library specified and no default can be determined")
       end
       config_agent_type =  ret_request_params(:config_agent_type)|| :puppet
       service_module_idh = ServiceModule.create_library_obj(library_idh,module_name,config_agent_type)

@@ -2,7 +2,17 @@ r8_require('service_or_component_module')
 module DTK
   class ServiceModule < Model
     extend ServiceOrComponentModuleClassMixin
-    
+    #export to remote
+    def export()
+      module_name = update_object!(:display_name)[:display_name]
+      #check if exists already
+      remotes = Repo::Remote.list(model_handle(:repo),:service_module)
+      if remotes.find{|r|r[:display_name] == repo_name}
+        raise ErrorUsage.new("Cannot export service module (#{module_name}) because it has been exported already")
+      end
+      module_name
+    end
+
     def list_assemblies()
       sp_hash = {
         :cols => [:module_branches]

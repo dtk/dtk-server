@@ -30,10 +30,10 @@ module DTK
       ret = nil
       module_name = remote_module_name
       if remote_already_imported?(library_idh,remote_module_name)
-        raise Error.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
+        raise ErrorUsage.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
       end
       if conflicts_with_library_module?(library_idh,module_name)
-        raise Error.new("Import conflicts with library module (#{module_name})")
+        raise ErrorUsage.new("Import conflicts with library module (#{module_name})")
       end
 
       #TODO: this might be done a priori

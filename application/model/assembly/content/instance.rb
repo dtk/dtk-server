@@ -121,7 +121,7 @@ module DTK
       def create_node_content(node)
         node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
-        ports = node[:ports].inject(Hash.new){|h,p|h.merge(create_port_content(p))}
+        ports = (node[:ports]||[]).inject(Hash.new){|h,p|h.merge(create_port_content(p))}
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
         node_hash.merge!("*assembly_id" => "/component/#{self[:ref]}",:component_ref => cmp_refs, :port => ports)
         node_hash.merge!(:type => "stub")

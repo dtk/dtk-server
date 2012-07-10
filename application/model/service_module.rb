@@ -10,6 +10,7 @@ module DTK
       if remotes.find{|r|r[:display_name] == repo_name}
         raise ErrorUsage.new("Cannot export service module (#{module_name}) because it has been exported already")
       end
+      Repo::Remote.export(self)
       module_name
     end
 

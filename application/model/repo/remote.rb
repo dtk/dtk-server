@@ -22,6 +22,11 @@ module DTK
         ret
       end
 
+      def export(repo_name)
+        #create remote repo
+        create_repo(repo_name)
+      end
+
       def authorize_dtk_instance(remote_repo_name)
         username = dtk_instance_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
@@ -39,6 +44,15 @@ module DTK
      private
       def client()
         @client ||= RepoManagerClient.new(rest_base_url())
+      end
+
+      def create_repo(repo_name)
+        username = dtk_instance_username()
+        rsa_pub_key = dtk_instance_rsa_pub_key()
+        access_rights = "RW+"
+        client.add_user(username,rsa_pub_key,:noop_if_exists => true)
+        client.create_repo(username,remote_repo_name,access_rights)
+        repo_name
       end
 
       def rest_base_url()

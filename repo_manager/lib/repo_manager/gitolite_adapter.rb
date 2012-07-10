@@ -193,6 +193,10 @@ module DTK::RepoManager; class GitoliteAdapter
         ret
       end
 
+      def ret_repo_user_acls(username,access_rights)
+        [{:repo_username => username,:access_rights => access_rights}]
+      end
+
       def generate_config_file_content(repo_name,repo_user_acls)
         #group users by user rights
         users_rights = Hash.new

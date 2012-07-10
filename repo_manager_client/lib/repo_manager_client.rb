@@ -37,6 +37,12 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    def create_repo(username,repo_name,access_rights="R")
+      route = "/rest/admin/create_repo"
+      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/set_user_rights_in_repo"
       body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}

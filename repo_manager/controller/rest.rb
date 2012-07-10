@@ -12,11 +12,6 @@ class RestController < Controller
   class AdminController < self
     map "/rest/admin"
 
-    def list_repos()
-      repos = Admin.list_repos()
-      rest_ok_response :repos => repos
-    end
-
     def add_user()
       username,rsa_pub_key = ret_non_null_request_params(:username,:rsa_pub_key)
       noop_if_exists,delete_if_exists = ret_request_params(:noop_if_exists,:delete_if_exists)
@@ -34,12 +29,29 @@ class RestController < Controller
       rest_ok_response :usename => username
     end
 
+    def create_repo()
+      repo_name,username = ret_non_null_request_params(:repo_name,:username)
+      access_rights = ret_request_params(:access_rights) || "R" 
+      repo_user_acls = Admin.ret_repo_user_acls(username,access_rights)
+      repo_created = Admin.create_repo(repo_name,repo_user_acls,:noop_if_exists => true)
+      unless repo_created
+        Log.info("repo (#{repo_name}) created already")
+      end
+      rest_ok_response
+    end
+
     def set_user_rights_in_repo()
       repo_name,username = ret_non_null_request_params(:repo_name,:username)
       access_rights = ret_request_params(:access_rights) || "R" 
       Admin.set_user_rights_in_repo(username,repo_name,access_rights)
       rest_ok_response :repo_name => repo_name
     end
+
+    def list_repos()
+      repos = Admin.list_repos()
+      rest_ok_response :repos => repos
+    end
+
 
     def delete_repo()
       repo_name = ret_non_null_request_params(:repo_name)

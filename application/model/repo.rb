@@ -87,7 +87,7 @@ module XYZ
 
     def self.incorporate_module_type(module_specific_type,repo_name)
       #module_specfic_type can be :service_module, :puppet or :chef
-      module_specfic_type == :service_module ? "sm-#{repo_name}" : repo_name
+      module_specific_type == :service_module ? "sm-#{repo_name}" : repo_name
     end
 
     def self.create_repo_obj?(model_handle,repo_name,extra_attrs={})

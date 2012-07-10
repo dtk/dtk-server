@@ -7,16 +7,21 @@ module DTK
       repo = get_library_repo()
       module_name = update_object!(:display_name)[:display_name]
       if repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot export service module (#{module_name} because it is has been exported already")
+        raise ErrorUsage.new("Cannot export service module (#{module_name}) because it is has been exported already")
       end
 
       #create remote repo
       Repo::Remote.create_repo(module_name)
 
       #link and push to remote repo
-      #repo.link_to_remote(module_name)
-      #repo.push_to_remote()
-      module_name
+      #TODO: remote_repo_name might isnated be something like "sm-#{module_name}"
+      remote_repo_name = module_name
+      repo.link_to_remote(remote_repo_name)
+      repo.push_to_remote(remote_repo_name)
+
+      #update last for idempotency
+      repo.update(:remote_repo_name => remote_repo_name)
+      remote_repo_name
     end
 
     def list_assemblies()

@@ -68,6 +68,20 @@ module XYZ
       repo_name
     end
 
+    def self.push_to_remote_repo(repo_name,remote_name)
+      context = {:implementation => {:repo => repo_name, :branch => "master"}}
+      repo = get_repo(context)      
+      repo.push_changes(remote_name)
+      repo_name
+    end
+
+    def self.link_to_remote_repo(repo_name,remote_name,remote_url)
+      context = {:implementation => {:repo => repo_name, :branch => "master"}}
+      repo = get_repo(context)      
+      repo.add_remote(remote_name,remote_url)
+      repo_name
+    end
+
     ###### for repo admin functions, such as creating and deleting repositories
 
     def self.create_repo_and_local_clone(repo_obj,repo_user_acls,opts={})

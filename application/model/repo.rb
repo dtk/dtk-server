@@ -43,16 +43,38 @@ module XYZ
 
     def synchronize_with_remote_repo()
       update_object!(:repo_name,:remote_repo_name)
+      unless self[:remote_repo_name]
+        raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
+      end
       remote_url = Remote.repo_url_ssh_access(self[:remote_repo_name])
-      remote_name = "remote"
+      remote_name = remote_name_for_push_pull()
       RepoManager.synchronize_with_remote_repo(self[:repo_name],remote_name,remote_url)
     end
 
-    def link_to_remote(remote_module_name)
-      self[:remote_module_name] = remote_module_name
+    def push_to_remote(remote_repo_name=nil)
+      update_cols = [:repo_name] + (remote_repo_name ? [] : [:remote_repo_name])
+      update_object!(*update_cols)
+      remote_repo_name ||= self[:remote_repo_name]
+      unless remote_repo_name
+        raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
+      end
+      remote_name = remote_name_for_push_pull()
+      RepoManager.push_to_remote_repo(self[:repo_name],remote_name)
+    end
+
+    def link_to_remote(remote_repo_name)
+      update_object!(:repo_name)
+      remote_url = Remote.repo_url_ssh_access(remote_repo_name)
+      remote_name = remote_name_for_push_pull()
+      RepoManager.link_to_remote_repo(self[:repo_name],remote_name,remote_url)
+      remote_repo_name
     end
 
    private    
+
+    def remote_name_for_push_pull()
+      "remote"
+    end
 
     def self.private_user_repo_name(config_agent_type,module_name,module_type)
       username = CurrentSession.get_username()

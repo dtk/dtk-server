@@ -18,6 +18,7 @@ module DTK
         filename
       end
      private
+      #TODO: put pattern <name.assembly.json" in common place
       def assembly_meta_filename()
         "#{assembly_hash()[:display_name]}.assembly.json"
       end

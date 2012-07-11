@@ -14,7 +14,7 @@ module DTK
     def delete(idh)
       repos = idh.create_object().get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
-      delete_instances(repos.each{|repo|repo.id_handle()})
+      delete_instances(repos.map{|repo|repo.id_handle()})
       delete_instance(idh)
     end
 

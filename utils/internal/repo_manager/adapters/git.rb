@@ -57,6 +57,28 @@ module XYZ
       end
     end
 
+    def ls_r(depth=nil,opts={})
+      Dir.chdir(@path) do
+        if depth.nil?
+          all_paths = Dir["**/*"]
+        else
+          pattern = "*"
+          all_paths = Array.new
+          depth.times do 
+            all_paths += Dir[pattern]
+            pattern = "#{pattern}/*"
+          end
+        end
+        if opts[:file_only]
+          all_paths.select{|p|File.file?(p)}
+        elsif opts[:directory_only]
+          all_paths.select{|p|File.directory?(p)}
+        else
+          all_paths
+        end  
+      end
+    end
+
     def get_file_content(file_asset)
       ret = nil
       checkout(@branch) do

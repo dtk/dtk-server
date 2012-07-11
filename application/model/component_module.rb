@@ -59,6 +59,7 @@ module DTK
     end
 
    private
+    #TODO: rewrite in terams of RepoManager functions
     def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
       local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"

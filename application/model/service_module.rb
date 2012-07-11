@@ -21,8 +21,9 @@ module DTK
       #create empty repo on local repo manager; 
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
       module_specific_type = :service_module
-      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
-      repo_obj.synchronize_with_remote_repo()
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo.synchronize_with_remote_repo()
+      create_meta_info?(library_idh,repo)
     end
 
     #export to remote
@@ -60,8 +61,8 @@ module DTK
       end
 
       module_specific_type = :service_module
-      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:delete_if_exists => true)
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:delete_if_exists => true)
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       module_and_branch_idhs[:module_idh]
     end
 
@@ -79,6 +80,18 @@ module DTK
       version_match_row && version_match_row[:module_branch]
     end
    private
+    def self.create_meta_info?(library_idh,repo)
+      depth = 1
+      #TODO: put pattern <name.assembly.json" in common place
+      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ /assembly.json$/}
+      meta_files.each do |meta_file|
+        json_content = RepoManager.get_file_content({:path => meta_file},repo)
+        hash_content = JSON.parse(json_content)
+        #TODO: copy and use: server.create_private_library_assemblies(hash["assemblies"],hash["node_bindings"])
+      end
+      nil
+    end
+
     def ret_remote_repo_name(module_name)
       #TODO: remote_repo_name might isnated be something like "sm-#{module_name}"
       module_name

@@ -82,8 +82,8 @@ lambda__template_nodes_and_components =
        }]
     },
     :nested_nodes_and_cmps=> lambda__nodes_and_components.call(Node.common_columns,Component.common_columns),
-    :nested_nodes_and_cmps_summary=> lambda__nodes_and_components.call([:id,:display_name,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
-    :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),
+    :nested_nodes_and_cmps_summary=> lambda__nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
+    :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name,:os_type],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_link_defs_info=> {
       :type => :json, 
       :hidden => true,

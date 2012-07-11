@@ -20,6 +20,7 @@ module XYZ
       opts[:detail_level] = detail_level if detail_level
       rest_ok_response Assembly.list_from_library(model_handle(),opts)
     end
+
     def rest__list_from_target()
       detail_level = ret_request_params(:detail_level)
       opts = Hash.new

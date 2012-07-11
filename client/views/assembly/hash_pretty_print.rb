@@ -12,6 +12,7 @@ module DTK::Client::ViewMeta
       [
        :node_name, 
        :node_id, 
+       :os_type,
        {:external_ref => {:type => :external_ref, :only_explicit_cols => true}},
        {:components => {:type => :component, :is_array => true}}
       ],

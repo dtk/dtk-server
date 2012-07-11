@@ -1,6 +1,6 @@
 r8_nested_require('assembly','attribute_pattern')
 r8_nested_require('assembly','import_export_common')
-r8_nested_require('assembly','export')
+#TODO: deprecate: r8_nested_require('assembly','export')
 r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
@@ -54,7 +54,7 @@ module XYZ
       mb_idhs_filter = mb_idhs && [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}] 
       nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
-        :cols => [:id, :display_name,nested_virtual_attr],
+        :cols => [:id, :display_name,:component_type,nested_virtual_attr],
         :filter => [:and, [:eq, :type, "composite"], lib_filter, mb_idhs_filter].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
@@ -106,9 +106,8 @@ module XYZ
     def self.ret_component_type(service_module_name,assembly_name)
       "#{service_module_name}__#{assembly_name}"
     end
-    def pretty_print_name()
-      update_object!(:component_type)
-      self[:component_type].gsub(/__/,"::")
+    def self.pretty_print_name(assembly)
+      assembly[:component_type] ? assembly[:component_type].gsub(/__/,"::") : assembly[:display_name]
     end
 
     class << self
@@ -170,9 +169,17 @@ module XYZ
         assembly_rows.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r[:display_name], :ndx_nodes => Hash.new)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :ndx_nodes => Hash.new)
           node_id = r[:node][:id]
-          node = pntr[:ndx_nodes][node_id] ||= {:node_name => r[:node][:display_name], :os_type => r[:node][:os_type], :node_id => node_id, :components => Array.new}.merge(r[:node][:external_ref] ? {:external_ref => r[:node][:external_ref]} : {})
+          unless node = pntr[:ndx_nodes][node_id] 
+            node = pntr[:ndx_nodes][node_id] = {
+              :node_name => r[:node][:display_name], 
+              :node_id => node_id, 
+              :components => Array.new
+            }
+            node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
+            node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
+          end
           cmp_hash = r[:nested_component]
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             if attrs = ndx_attrs[r[:nested_component][:id]]

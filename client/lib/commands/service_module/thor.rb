@@ -5,7 +5,7 @@ module DTK::Client
       [:display_name, :id, :version]
     end
     desc "list [library|remote]","List library, workspace,or remote service modules"
-    def list(parent)
+    def list(parent="library")
       case parent
        when "library":
          post rest_url("service_module/list_from_library")

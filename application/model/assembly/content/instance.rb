@@ -9,7 +9,8 @@ module DTK
           :display_name => assembly_name,
           :ui => icon_info,
           :type => "composite",
-          :module_branch_id => service_module_branch[:id]
+          :module_branch_id => service_module_branch[:id],
+          :component_type => Assembly(service_module_name,assembly_name)
         }
         assembly_mh = library_idh.create_childMH(:component)
         create(assembly_mh,hash_values)

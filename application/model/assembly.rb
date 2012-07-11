@@ -5,7 +5,7 @@ r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
     r8_nested_require('assembly','content')
-    include AssemblyExportMixin
+    #TODO: deprecate include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin
 
@@ -94,6 +94,21 @@ module XYZ
       }
       nodes_and_cmps = get_objs(sp_hash)
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
+    end
+
+    def self.meta_filename(assembly_name)
+      "#{assembly_name}.assembly.json"
+    end
+    def self.meta_filename_regexp()
+      /assembly.json$/
+    end
+
+    def self.ret_component_type(service_module_name,assembly_name)
+      "#{service_module_name}__#{assembly_name}"
+    end
+    def pretty_print_name()
+      update_object!(:component_type)
+      self[:component_type].gsub(/__/,"::")
     end
 
     class << self

@@ -23,7 +23,9 @@ module DTK
       module_specific_type = :service_module
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo.synchronize_with_remote_repo()
-      create_assembly_meta_info?(library_idh,repo)
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      create_assembly_meta_info?(library_idh,module_and_branch_idhs[:module_branch_idh],module_name,repo)
+      module_and_branch_idhs[:module_idh]
     end
 
     #export to remote
@@ -80,16 +82,16 @@ module DTK
       version_match_row && version_match_row[:module_branch]
     end
    private
-    def self.create_assembly_meta_info?(library_idh,repo)
+    def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
       depth = 1
-      #TODO: put pattern <name.assembly.json" in common place
-      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ /assembly.json$/}
+      meta_filename_regexp = Assembly.meta_filename_regexp()
+      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ meta_filename_regexp}
       meta_files.map do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},repo)
         hash_content = JSON.parse(json_content)
         assemblies_hash = hash_content["assemblies"]
         node_bindings_hash = hash_content["node_bindings"]
-        Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
+        Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
       end
     end
 

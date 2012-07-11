@@ -32,7 +32,6 @@ module DTK
         repo_name
       end
 
-
       def authorize_dtk_instance(remote_repo_name)
         username = dtk_instance_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
@@ -61,6 +60,7 @@ module DTK
         @dtk_instance_rsa_pub_key ||= AuxCommon.get_ssh_rsa_pub_key()
       end
       def dtk_instance_username()
+        #TODO: looks like mac might be changing on ec2 instance in which case might switch to instance id
         @dtk_instance_username ||= "dtk-#{AuxCommon.get_macaddress().gsub(/:/,'-')}"
       end
     end

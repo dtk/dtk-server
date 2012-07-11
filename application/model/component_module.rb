@@ -43,25 +43,25 @@ module DTK
       #create empty repo on local repo manager; 
       module_specific_type = config_agent_type = :puppet #TODO: hard wired
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
-      repo_obj.synchronize_with_remote_repo()
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo.synchronize_with_remote_repo()
 
-      impl_obj = Implementation.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,"master")
-      impl_obj.create_file_assets_from_dir_els(repo_obj)
+      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,"master")
+      impl_obj.create_file_assets_from_dir_els(repo)
 
-      component_idhs = create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
+      component_idhs = create_component_meta_info?(library_idh,impl_obj,repo,config_agent_type)
       unless ::R8::Config[:use_modules]
         return ret
       end
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
+      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
       module_and_branch_idhs[:module_idh]
     end
 
    private
-    #TODO: rewrite in terams of RepoManager functions
-    def self.create_meta_info?(library_idh,impl_obj,repo_obj,config_agent_type)
-      local_dir = repo_obj.update_object!(:local_dir)[:local_dir]
+    def self.create_component_meta_info?(library_idh,impl_obj,repo,config_agent_type)
+      #TODO: rewrite in terams of RepoManager functions
+      local_dir = repo.update_object!(:local_dir)[:local_dir]
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
       add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)

@@ -12,6 +12,16 @@ lambda__segment_module_branches =
   ret[:filter] = optional_filter if optional_filter
   ret
 }
+lambda__segment_repos =
+  lambda{|cols|
+  {
+    :model_name=>:repo,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:id =>:module_branch__repo_id},
+    :cols=>cols
+  }
+}
 {
   :schema=>:module,
   :table=>:service,
@@ -29,13 +39,14 @@ lambda__segment_module_branches =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call([:id,:repo_id],[:eq,:is_workspace,false]),
-       {
-         :model_name=>:repo,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:id =>:module_branch__repo_id},
-         :cols=>[:id,:display_name,:repo_name,:local_dir,:remote_repo_name]
-       }]
+       lambda__segment_repos.call([:id,:display_name,:repo_name,:local_dir,:remote_repo_name])]
+    },
+    :repos=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call([:id,:repo_id]),
+       lambda__segment_repos.call([:id,:display_name,:repo_name,:local_dir,:remote_repo_name])]
     }
   },
   :many_to_one=>[:library],

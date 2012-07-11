@@ -42,5 +42,11 @@ module XYZ
       service_module_idh = ServiceModule.create_library_obj(library_idh,module_name,config_agent_type)
       rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
+    
+    def rest__delete()
+      service_module_id = ret_non_null_request_params(:service_module_id)
+      ServiceModule.delete(id_handle(service_module_id))
+      rest_ok_response
+    end
   end
 end

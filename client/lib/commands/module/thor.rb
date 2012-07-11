@@ -4,7 +4,7 @@ module DTK::Client
     def self.pretty_print_cols()
       [:display_name, :id, :version]
     end
-    desc "list [library|workspace|remote]","List library, workspace, or remote component modules"
+    desc "list [library|remote]","List library or remote component modules"
     def list(parent)
       case parent
        when "library":
@@ -40,7 +40,6 @@ module DTK::Client
       }
       post rest_url("component_module/delete"), post_body
     end
-
   end
 end
 

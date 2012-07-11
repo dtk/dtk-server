@@ -2,6 +2,7 @@ r8_require('service_or_component_module')
 module DTK
   class ServiceModule < Model
     extend ServiceOrComponentModuleClassMixin
+    include ServiceOrComponentModuleMixin
 
     #import from remote
     def self.import(library_idh,remote_module_name)
@@ -22,13 +23,6 @@ module DTK
       module_specific_type = :service_module
       repo_obj = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo_obj.synchronize_with_remote_repo()
-
-      unless ::R8::Config[:use_modules]
-        return ret
-      end
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
-      update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
-      module_and_branch_idhs[:module_idh]
     end
 
     #export to remote

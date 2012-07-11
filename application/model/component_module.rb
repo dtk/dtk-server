@@ -2,6 +2,7 @@ r8_require('service_or_component_module')
 module DTK
   class ComponentModule < Model
     extend ServiceOrComponentModuleClassMixin
+    include ServiceOrComponentModuleMixin
 
     def update_library_module_with_workspace()
       #find augmented workspace branch
@@ -55,10 +56,6 @@ module DTK
       module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo_obj.id_handle(),module_name)
       update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
       module_and_branch_idhs[:module_idh]
-    end
-
-    def self.delete(idh)
-      delete_instance(idh)
     end
 
    private

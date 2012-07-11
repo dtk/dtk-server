@@ -1,5 +1,23 @@
 module DTK
+  module ServiceOrComponentModuleMixin
+    def get_repos()
+      repos = get_objs(:cols => [:repos])
+      repos.inject(Hash.new) do |h,r|
+        repo = r[:repo]
+        repo_id =  repo[:id]
+        h[repo_id] ? h : h.merge(repo_id => repo)
+      end.values
+    end
+  end
+
   module ServiceOrComponentModuleClassMixin
+    def delete(idh)
+      repos = idh.create_object().get_repos()
+      repos.each{|repo|RepoManager.delete_repo(repo)}
+      delete_instances(repos.each{|repo|repo.id_handle()})
+      delete_instance(idh)
+    end
+
     def create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,opts={})
       auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
       repo_user_acls = auth_repo_users.map do |repo_username|

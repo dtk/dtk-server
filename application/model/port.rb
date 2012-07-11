@@ -201,7 +201,7 @@ module XYZ
         ndx_port_node = get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
           h.merge(r[:id] => r[:node])
         end
-        new_rows.each{|r|r.merge(:node => ndx_port_node[r[:id]])}
+        new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
       end
       ret + new_rows
     end

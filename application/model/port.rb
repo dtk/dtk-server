@@ -196,7 +196,7 @@ module XYZ
       unless new_rows.empty?
         sp_hash = {
           :cols => [:id,:node],
-          :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:node_node_id]}]
+          :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:parent_id]}]
         }
         ndx_port_node = get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
           h.merge(r[:id] => r[:node])

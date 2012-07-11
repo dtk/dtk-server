@@ -16,8 +16,13 @@ module DTK::Client
       end
     end
 
-    desc "import REMOTE-MODULE-NAME [library_id]", "Import remote module into library"
-    def import(module_name,library_id=nil)
+    desc "import REMOTE-MODULE-NAME[,REMOTE-MODULE-NAME2..] [library_id]", "Import remote module(s) into library"
+    def import(module_name_x,library_id=nil)
+      module_names = module_name_x.split(",")
+      if module_names.size > 1
+        return module_names.map{|module_name|import(module_name,library_id)}
+      end
+      module_name = module_names.first
       post_body = {
        :remote_module_name => module_name
       }

@@ -23,7 +23,7 @@ module DTK
       module_specific_type = :service_module
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo.synchronize_with_remote_repo()
-      create_meta_info?(library_idh,repo)
+      create_assembly_meta_info?(library_idh,repo)
     end
 
     #export to remote
@@ -80,16 +80,17 @@ module DTK
       version_match_row && version_match_row[:module_branch]
     end
    private
-    def self.create_meta_info?(library_idh,repo)
+    def self.create_assembly_meta_info?(library_idh,repo)
       depth = 1
       #TODO: put pattern <name.assembly.json" in common place
       meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ /assembly.json$/}
-      meta_files.each do |meta_file|
+      meta_files.map do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},repo)
         hash_content = JSON.parse(json_content)
-        #TODO: copy and use: server.create_private_library_assemblies(hash["assemblies"],hash["node_bindings"])
+        assemblies_hash = hash_content["assemblies"]
+        node_bindings_hash = hash_content["node_bindings"]
+        Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
       end
-      nil
     end
 
     def ret_remote_repo_name(module_name)

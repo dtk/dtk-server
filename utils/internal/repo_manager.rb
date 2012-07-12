@@ -148,10 +148,10 @@ module XYZ
     end
 
     def self.load_and_return_adapter_class()
-      return @cached_adpater_class if @cached_adpater_class
+      return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo]||{})[:type]
       raise Error.new("No repo adapter specified") unless adapter_name
-      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
 
     def self.load_and_create(repo,branch)
@@ -166,9 +166,9 @@ module XYZ
 
   class RemoteRepoManager < RepoManager 
     def self.load_and_return_adapter_class()
-      return @cached_adpater_class if @cached_adpater_class
+      return @cached_adapter_class if @cached_adapter_class
       adapter_name = "remote_repo"
-      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
   end
 end

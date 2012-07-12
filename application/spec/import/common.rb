@@ -47,14 +47,6 @@ class R8Server
     end
   end
 
-  def create_private_library_assemblies(assemblies_hash,node_bindings_hash)
-    library_mh = pre_execute(:library)
-    library_idh = Library.create_users_private_library?(library_mh)
-    Model.import_objects_from_hash(library_idh,LibraryNodes.get_hash())
-    Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
-  end
-
-
   def create_users_private_library?()
     library_mh = pre_execute(:library)
     Library.create_users_private_library?(library_mh)

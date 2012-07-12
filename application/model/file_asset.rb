@@ -1,7 +1,5 @@
-r8_nested_require('file_asset','r8_meta_file')
 module XYZ
   class FileAsset < Model
-    include FileAssetR8MetaFile
     #model apis
     def get_content()
       #if content stored in db then return that
@@ -26,7 +24,7 @@ module XYZ
       impl_obj.set_to_indicate_updated()
 
       #special processing if this the meta file
-      if r8_meta = R8MetaFile.isa?(self,content)
+      if r8_meta = ComponentMetaFile.isa?(self,content)
         r8_meta.process()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)

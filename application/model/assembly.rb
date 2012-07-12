@@ -11,7 +11,7 @@ module XYZ
 
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
       unless R8::Config[:use_node_bindings]
-        return create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
+        return create_library_template_deprecate(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version)
       end
 
       #first make sure that all referenced components have updated modules in the library
@@ -30,7 +30,7 @@ module XYZ
       assembly_instance.create_assembly_template(library_idh,service_module_branch)
     end
 
-    def self.create_library_template_old(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+    def self.create_library_template_deprecate(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
       module_branch = ServiceModule.get_module_branch(library_idh,service_module_name,version)
       assembly_idh = create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
 
@@ -73,6 +73,7 @@ module XYZ
       assembly_rows = get_objs(assembly_mh,sp_hash)
       get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
       attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
+      add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
       list_aux(assembly_rows,attr_rows)
     end
 
@@ -112,6 +113,25 @@ module XYZ
 
     class << self
      private
+      def add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
+        sp_hash = {
+          :cols => [:id,:started_at,:assembly_id,:status],
+          :filter => [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
+        }
+        ndx_task_rows = Hash.new
+        get_objs(assembly_mh.createMH(:task),sp_hash).each do |task|
+          assembly_id = task[:assembly_id]
+          if pntr = ndx_task_rows[assembly_id]
+            if task[:started_at] > pntr[:started_at] 
+              ndx_task_rows[assembly_id] =  task.slice(:status,:started_at)
+            end
+          else
+            ndx_task_rows[assembly_id] = task.slice(:status,:started_at)
+          end
+        end
+        assembly_rows.each{|r|r[:execution_status] = (ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status])||"staged"} 
+        assembly_rows
+      end
       def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
         create_row = {
           :library_library_id => library_idh.get_id(),
@@ -169,7 +189,7 @@ module XYZ
         assembly_rows.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :ndx_nodes => Hash.new)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
             node = pntr[:ndx_nodes][node_id] = {
@@ -199,7 +219,7 @@ module XYZ
         end
         
         ndx_ret.values.map do |r|
-          {:id => r[:id], :display_name => r[:display_name], :nodes => r[:ndx_nodes].values}
+          r.slice(:id,:display_name,:execution_status).merge(:nodes => r[:ndx_nodes].values)
         end
       end
     end

@@ -6,6 +6,7 @@ module DTK::Client::ViewMeta
       [
        :display_name,
        :id,
+       :execution_status,
        {:nodes  => {:type => :node, :is_array => true}}
       ],
       :node_def => 

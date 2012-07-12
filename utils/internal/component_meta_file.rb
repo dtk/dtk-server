@@ -1,6 +1,8 @@
 #TODO" unify with generate_meta
+r8_nested_require('component_meta_file','update_model')
 module DTK
   class ComponentMetaFile
+    include ComponentMetaFileUpdateModelMixin
     #creates if file_obj is a r8meta file
     def self.isa?(file_obj,content)
       return nil unless file_obj[:path] =~ /^r8meta\.([a-z]+)\.([a-z]+$)/
@@ -21,14 +23,6 @@ module DTK
       @hash_content = version_normalize(version_specific_hash_content)
       @impl_idh = impl_idh
     end
-    def process()
-      #TODO: right now just processing changes to link defs
-      ndx_cmps_to_update = Hash.new
-      process_external_link_defs!(ndx_cmps_to_update)
-      unless ndx_cmps_to_update.empty?
-        Model.update_from_rows(@impl_idh.createMH(:component),ndx_cmps_to_update.values,:partial_value=>true)
-      end
-    end
    private
     def version_normalize(version_specific_hash_content)
       version = version_specific_hash_content["version"]||"not_specified"
@@ -46,34 +40,6 @@ module DTK
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = "v#{version_integer.to_s}"
       @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
-    end
-
-    def process_external_link_defs!(ndx_cmps_to_update)
-      link_defs = @hash_content.inject({}) do |h,(cmp_type,info)|
-        ext_link_defs = info["external_link_defs"]
-        ext_link_defs ? h.merge(cmp_type => ext_link_defs) : h
-      end
-      return if link_defs.empty?
-      #get the matching components in the project implementation and their instantaions
-      updates = get_matching_components(link_defs.keys)
-      if updates.empty?
-        Log.error("unexpected that cant find any components that match")
-        return 
-      end
-      updates.each do |r|
-        p = ndx_cmps_to_update[r[:id]] ||= {:id => r[:id]} 
-        p[:link_defs] ||= Hash.new
-        p[:link_defs]["external"] = link_defs[r[:component_type]]
-      end
-    end
-    def get_matching_components(cmp_type_array)
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:and, [:eq, :implementation_id, @impl_idh.get_id()],
-                    [:oneof, :component_type, cmp_type_array]],
-        :cols => [:id,:component_type]
-      }
-      Model.get_objs(@impl_idh.createMH(:component),sp_hash)
     end
 
     def self.convert_to_hash(format_type,content)

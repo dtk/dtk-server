@@ -25,7 +25,7 @@ module XYZ
 
       #special processing if this the meta file
       if r8_meta = ComponentMetaFile.isa?(self,content)
-        r8_meta.process()
+        r8_meta.update_model()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end

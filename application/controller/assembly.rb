@@ -91,7 +91,8 @@ module XYZ
         body_value = ''
         component_list[index][:ui] ||= {}
         component_list[index][:ui][:images] ||= {}
-        name = component_list[index][:display_name]
+#        name = component_list[index][:display_name]
+        name = Assembly.pretty_print_name(component_list[index])
         title = name.nil? ? "" : i18n_string(i18n,:component,name)
         
 #TODO: change after implementing all the new types and making generic icons for them

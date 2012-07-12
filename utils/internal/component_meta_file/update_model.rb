@@ -17,7 +17,7 @@ module DTK
       end
       return if link_defs.empty?
       #get the matching components in the project implementation and their instantaions
-      updates = get_matching_components(link_defs.keys)
+      updates = get_matching_component_ws_templates(link_defs.keys)
       if updates.empty?
         Log.error("unexpected that cant find any components that match")
         return 
@@ -29,10 +29,12 @@ module DTK
       end
     end
 
-    def get_matching_components(cmp_type_array)
+    def get_matching_component_ws_templates(cmp_type_array)
       sp_hash = {
         :model_name => :component,
-        :filter => [:and, [:eq, :implementation_id, @impl_idh.get_id()],
+        :filter => [:and, 
+                    [:eq, :implementation_id, @impl_idh.get_id()],
+                    [:eq, :project_project_id, @project_idh.get_id()], #to make sure that this is a workspace template not an instance 
                     [:oneof, :component_type, cmp_type_array]],
         :cols => [:id,:component_type]
       }

@@ -36,7 +36,7 @@ module DTK::Client
 
     #TODO: put in flag to control detail level
     desc "list [library|target]","List asssemblies in library or target"
-    def list(parent)
+    def list(parent="library")
       case parent
         when "library":
           post rest_url("assembly/list_from_library")

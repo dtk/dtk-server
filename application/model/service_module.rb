@@ -75,7 +75,7 @@ module DTK
       }
       rows =  get_objs(library_idh.create_childMH(:service_module),sp_hash)
       if rows.empty?
-        raise Error.new("Service module (#{service_module_name}) does not exist")
+        raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
       end
       version ||= BranchNameDefaultVersion
       version_match_row = rows.find{|r|r[:module_branch][:version] == version}

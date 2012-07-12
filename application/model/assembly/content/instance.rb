@@ -10,7 +10,7 @@ module DTK
           :ui => icon_info,
           :type => "composite",
           :module_branch_id => service_module_branch[:id],
-          :component_type => Assembly(service_module_name,assembly_name)
+          :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
         }
         assembly_mh = library_idh.create_childMH(:component)
         create(assembly_mh,hash_values)
@@ -69,7 +69,7 @@ module DTK
         template_output = TemplateOutput.new(library_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in library and points to assembly
-        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id])
+        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
         template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
 
         template_output.save_to_model()

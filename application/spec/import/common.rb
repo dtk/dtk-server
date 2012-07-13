@@ -100,7 +100,7 @@ class R8Server
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
 
-      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
       
       impl_obj.add_contained_files_and_push_to_repo()
       ret << impl_obj

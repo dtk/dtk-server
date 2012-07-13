@@ -64,7 +64,7 @@ module DTK
       local_dir = repo.update_object!(:local_dir)[:local_dir]
       r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
-      add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
     end
     def self.update_components_with_branch_info(component_idhs,module_branch_idh,version)
       mb_id = module_branch_idh.get_id()

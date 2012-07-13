@@ -1,5 +1,9 @@
-module DTK
-  module ComponentMetaFileUpdateModelMixin
+class DTK::ComponentMetaFile
+  module UpdateModelClassMixin
+    r8_nested_require('update_model','add_to_model')
+    include AddToModelClassMixin
+  end
+  module UpdateModelMixin
     def update_model()
       #partition into to_add, to_delete,a dn to_modify
       existing_cmps = get_existing_component_ws_templates(@impl_idh.createMH(:component),@impl_idh,@project_idh)

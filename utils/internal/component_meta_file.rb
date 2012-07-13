@@ -1,8 +1,9 @@
-#TODO" unify with generate_meta
+#TODO" unfify with generate_meta and import_export/import by moving these under component_meta_file
 r8_nested_require('component_meta_file','update_model')
 module DTK
   class ComponentMetaFile
-    include ComponentMetaFileUpdateModelMixin
+    extend UpdateModelClassMixin
+    include UpdateModelMixin
     #creates if file_obj is a r8meta file
     def self.isa?(file_obj,content)
       return nil unless file_obj[:path] =~ /^r8meta\.([a-z]+)\.([a-z]+$)/

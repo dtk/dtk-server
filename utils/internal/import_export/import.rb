@@ -49,8 +49,12 @@ module XYZ
       end
     end
 
-    #TODO: make this version dependent
     def add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
+      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
+    end
+
+    def add_library_components_from_r8meta_deprecate(config_agent_type,library_idh,impl_idh,r8meta_hash)
+    #TODO: make this version dependent
       impl_id = impl_idh.get_id()
       remote_link_defs = Hash.new
       cmps_hash = r8meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|

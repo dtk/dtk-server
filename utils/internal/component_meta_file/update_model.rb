@@ -1,3 +1,7 @@
+#TODO: move add_to_model into this fiel since will use this for both add and update.
+#Need to wrap @input_hash when created as HashObject and set is_complete?
+#see /root/R8Server/utils/internal/db/data_processing/update.rb line 109
+
 module DTK; class ComponentMetaFile
   module UpdateModelClassMixin
     r8_nested_require('update_model','add_to_model')
@@ -46,13 +50,14 @@ return
 
     def add_new_components(input_cmps)
       return if input_cmps.empty?
-      
-      #TODO: stub call  add_components_from_r8meta
+      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,input_cmps)
     end
 
     #TODO: this might be subsumed by using  add_components_from_r8meta
     def modify_existing_components(input_cmps,existing_cmps)
       return if input_cmps.empty?
+      #TODO: make sure that below deltes for example attributes that have been removed
+      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,input_cmps)
     end
 
     #TODO: might depcate process_external_link_defs; find out how field :link_defs is used

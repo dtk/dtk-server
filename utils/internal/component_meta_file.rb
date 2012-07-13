@@ -23,7 +23,7 @@ module DTK
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
-      @project_idh = impl_idh.get_parent_id_handle()
+      @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
       unless @project_idh[:model_name] == :project
         raise Error.new("Unexpected parent type of implementation object (#{@project_idh[:model_name]})")
       end

@@ -1,4 +1,4 @@
-class DTK::ComponentMetaFile
+module DTK; class ComponentMetaFile
   module UpdateModelClassMixin
     r8_nested_require('update_model','add_to_model')
     include AddToModelClassMixin
@@ -21,11 +21,19 @@ class DTK::ComponentMetaFile
           input_cmps_to_add.merge!(ref => content)
         end
       end
-      cmp_idhs_to_delete = existing_cmp_info.values.reject{|cmp|cmp[:found]}.map{|cmp|cmp[:component].id_handle()}  
+      cmp_idhs_to_delete = Array.new
+      cmps_to_modify = Array.new
+      existing_cmp_info.each_value do |cmp_info|
+        if cmp_info[:found]
+          cmps_to_modify << cmp_info[:component]
+        else
+          cmp_idhs_to_delete << cmp_info[:component].id_handle()
+        end
+      end
 
       delete_removed_components(cmp_idhs_to_delete)
       add_new_components(input_cmps_to_add)
-      modify_existing_components(input_cmps_to_modify)
+      modify_existing_components(input_cmps_to_modify,cmps_to_modify)
     end
 
    private
@@ -38,31 +46,40 @@ return
 
     def add_new_components(input_cmps)
       return if input_cmps.empty?
-      #TODO: stub
+      
+      #TODO: stub call  add_components_from_r8meta
     end
 
-    def modify_existing_components(input_cmps)
+    #TODO: this might be subsumed by using  add_components_from_r8meta
+    def modify_existing_components(input_cmps,existing_cmps)
+      return if input_cmps.empty?
+    end
+
+    #TODO: might depcate process_external_link_defs; find out how field :link_defs is used
+=begin
+    def modify_existing_components(input_cmps,existing_cmps)
       return if input_cmps.empty?
       ndx_cmps_to_update = Hash.new
-      process_external_link_defs!(ndx_cmps_to_update,input_cmps)
+
+      process_external_link_defs!(ndx_cmps_to_update,input_cmps,existing_cmps)
       unless ndx_cmps_to_update.empty?
         Model.update_from_rows(@impl_idh.createMH(:component),ndx_cmps_to_update.values,:partial_value=>true)
       end
     end
-
-    def process_external_link_defs!(ndx_cmps_to_update,input_cmps)
+    #TODO: might depcate process_external_link_defs; find out how field :link_defs is used
+    def process_external_link_defs!(ndx_cmps_to_update,input_cmps,existing_cmps)
       link_defs = input_cmps.inject({}) do |h,(cmp_type,info)|
         ext_link_defs = info["external_link_defs"]
         ext_link_defs ? h.merge(cmp_type => ext_link_defs) : h
       end
       return if link_defs.empty?
-      input_cmps.each do |r|
+      existing_cmps.each do |r|
         p = ndx_cmps_to_update[r[:id]] ||= {:id => r[:id]} 
         p[:link_defs] ||= Hash.new
         p[:link_defs]["external"] = link_defs[r[:component_type]]
       end
     end
-
+=end
     def get_existing_component_ws_templates(cmp_mh,impl_idh,project_idh)
       sp_hash = {
         :model_name => :component,
@@ -74,4 +91,5 @@ return
       Model.get_objs(cmp_mh,sp_hash)
     end
   end
-end
+end; end
+

@@ -26,6 +26,7 @@ module DTK
       unless @project_idh[:model_name] == :project
         raise Error.new("Unexpected parent type of implementation object (#{@project_idh[:model_name]})")
       end
+      @existing_ws_templates = get_existing_component_ws_templates(impl_idh.createMH(:component),impl_idh,@project_idh)
     end
    private
     def version_normalize(version_specific_hash_content)
@@ -56,6 +57,17 @@ module DTK
     def self.convert_to_hash_yaml(content)
       #TODO: raise parsing error to user
       YAML.load(content)
+    end
+
+    def get_existing_component_ws_templates(cmp_mh,impl_idh,project_idh)
+      sp_hash = {
+        :model_name => :component,
+        :filter => [:and, 
+                    [:eq, :implementation_id, impl_idh.get_id()],
+                    [:eq, :project_project_id, project_idh.get_id()]], #to make sure that this is a workspace template not an instance 
+        :cols => [:id,:component_type]
+      }
+      Model.get_objs(cmp_mh,sp_hash)
     end
   end
 end

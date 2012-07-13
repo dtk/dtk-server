@@ -52,7 +52,6 @@ class RestController < Controller
       rest_ok_response :repos => repos
     end
 
-
     def delete_repo()
       repo_name = ret_non_null_request_params(:repo_name)
       Admin.delete_repo(repo_name)

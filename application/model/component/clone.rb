@@ -45,7 +45,9 @@ module XYZ
       #create module branch for work space if needed
       if ::R8::Config[:use_modules] 
         library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
-        workspace_mb_id = library_mb.create_component_workspace_branch?(proj).get_id()
+        workspace_mb = library_mb.create_component_workspace_branch?(proj)
+        workspace_mb_id = workspace_mb[:id]
+        version = workspace_mb[:version]
       else
         workspace_mb_id = nil
       end
@@ -58,15 +60,15 @@ module XYZ
       #ok to do below because self and library_cmp_tmpl share attribute values
       library_cmp_tmpl =  library_cmp_tmpl_idh.create_object
       if ::R8::Config[:use_modules]
-        impl_mb_assigns = {:implementation_id => new_impl_id, :module_branch_id => workspace_mb_id}
+        to_add_mb_assigns = {:implementation_id => new_impl_id, :module_branch_id => workspace_mb_id, :version => version}
       else
-        impl_mb_assigns = {:implementation_id => new_impl_id}
+        to_add_mb_assigns = {:implementation_id => new_impl_id}
       end
       proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
 
-      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,impl_mb_assigns.merge(:extended_base => self[:extended_base]))
+      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,to_add_mb_assigns.merge(:extended_base => self[:extended_base]))
 
-      update_from_hash_assignments(impl_mb_assigns.merge(:ancestor_id => new_ancestor_id))
+      update_from_hash_assignments(to_add_mb_assigns.merge(:ancestor_id => new_ancestor_id))
     end
 
     def source_clone_info_opts()

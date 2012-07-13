@@ -29,6 +29,7 @@ module DTK
       end
     end
 
+    ##TODO: deprecate
     def get_matching_component_ws_templates(cmp_type_array)
       sp_hash = {
         :model_name => :component,

@@ -53,9 +53,9 @@ module DTK
       unless ::R8::Config[:use_modules]
         return ret
       end
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
-      update_components_with_branch_info(component_idhs,module_and_branch_idhs[:module_branch_idh])
-      module_and_branch_idhs[:module_idh]
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      update_components_with_branch_info(component_idhs,module_and_branch_info[:module_branch_idh],module_and_branch_info[:version])
+      module_and_branch_info[:module_idh]
     end
 
    private
@@ -66,9 +66,9 @@ module DTK
       r8meta_hash = YAML.load_file(r8meta_path)
       add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
     end
-    def self.update_components_with_branch_info(component_idhs,module_branch_idh)
+    def self.update_components_with_branch_info(component_idhs,module_branch_idh,version)
       mb_id = module_branch_idh.get_id()
-      update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id}}
+      update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id,:version=>version}}
       sample_cmp_idh = component_idhs.first 
       update_from_rows(sample_cmp_idh.createMH(),update_rows)
     end

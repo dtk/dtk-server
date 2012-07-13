@@ -23,9 +23,9 @@ module DTK
       module_specific_type = :service_module
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo.synchronize_with_remote_repo()
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
-      create_assembly_meta_info?(library_idh,module_and_branch_idhs[:module_branch_idh],module_name,repo)
-      module_and_branch_idhs[:module_idh]
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      create_assembly_meta_info?(library_idh,module_and_branch_info[:module_branch_idh],module_name,repo)
+      module_and_branch_info[:module_idh]
     end
 
     #export to remote
@@ -64,8 +64,8 @@ module DTK
 
       module_specific_type = :service_module
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:delete_if_exists => true)
-      module_and_branch_idhs = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
-      module_and_branch_idhs[:module_idh]
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      module_and_branch_info[:module_idh]
     end
 
     def self.get_module_branch(library_idh,service_module_name,version=nil)
@@ -96,7 +96,7 @@ module DTK
     end
 
     def ret_remote_repo_name(module_name)
-      #TODO: remote_repo_name might isnated be something like "sm-#{module_name}"
+      #TODO: remote_repo_name might instead be something like "sm-#{module_name}"
       module_name
     end
 

@@ -76,7 +76,8 @@ module DTK
         :type => self[:type]
 
       }
-      Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
+      mb_idh = Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
+      mb_idh.create_object().merge(match_assigns).merge(other_assigns)
     end
 
     def self.get_component_workspace_branches(node_idhs)

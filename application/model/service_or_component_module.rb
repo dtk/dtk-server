@@ -65,12 +65,13 @@ module DTK
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name)
       ref = module_name
-      mb_create__hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh)
+      mb_create_hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh)
+      version = mb_create_hash.values.first[:version]
       create_hash = {
         model_name.to_s => {
           ref => {
             :display_name => module_name,
-            :module_branch => mb_create__hash
+            :module_branch => mb_create_hash
           }
         }
       }
@@ -80,10 +81,10 @@ module DTK
       parent_col = (model_name == :service_module ? ModuleBranch.service_module_id_col() : ModuleBranch.component_module_id_col())
       sp_hash = {
         :cols => [:id,:display_name],
-        :filter => [:and, [:eq, parent_col, module_idh.get_id()], [:eq, :ref, mb_create__hash.keys.first]]
+        :filter => [:and, [:eq, parent_col, module_idh.get_id()], [:eq, :ref, mb_create_hash.keys.first]]
       }
       module_branch_idh = get_objs(library_idh.createMH(:module_branch),sp_hash).map{|r|r.id_handle()}.first
-      {:module_idh => module_idh,:module_branch_idh => module_branch_idh}
+      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch_idh}
     end
   end
 end

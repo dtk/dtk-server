@@ -11,31 +11,32 @@ module DTK
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension
       impl_idh = file_obj[:implementation].id_handle()
-      hash_content = convert_to_hash(format_type,content)
-      self.new(config_agent_type,impl_idh,hash_content)
+      input_hash = convert_to_hash(format_type,content)
+      self.new(config_agent_type,impl_idh,input_hash)
     end
     ExtensionToType = {
       "yml" => :yaml
     }
 
-    def initialize(config_agent_type,impl_idh,version_specific_hash_content)
+    def initialize(config_agent_type,impl_idh,version_specific_input_hash)
       @config_agent_type = config_agent_type
-      @hash_content = version_normalize(version_specific_hash_content)
+      @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
       @project_idh = impl_idh.get_parent_id_handle()
       unless @project_idh[:model_name] == :project
         raise Error.new("Unexpected parent type of implementation object (#{@project_idh[:model_name]})")
       end
-      @existing_ws_templates = get_existing_component_ws_templates(impl_idh.createMH(:component),impl_idh,@project_idh)
     end
    private
-    def version_normalize(version_specific_hash_content)
-      version = version_specific_hash_content["version"]||"not_specified"
+    def version_parse_check_and_normalize(version_specific_input_hash)
+      version = version_specific_input_hash["version"]||"not_specified"
       unless version_integer = VersionToVersionInteger[version]
         raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
       end
       klass = self.class.load_and_return_version_adapter_class(version_integer)
-      klass.normalize(version_specific_hash_content)
+      #parse_check raises errors if any errors found
+      klass.parse_check(version_specific_input_hash)
+      klass.normalize(version_specific_input_hash)
     end
     VersionToVersionInteger = {
       "not_specified" => 1
@@ -59,15 +60,6 @@ module DTK
       YAML.load(content)
     end
 
-    def get_existing_component_ws_templates(cmp_mh,impl_idh,project_idh)
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:and, 
-                    [:eq, :implementation_id, impl_idh.get_id()],
-                    [:eq, :project_project_id, project_idh.get_id()]], #to make sure that this is a workspace template not an instance 
-        :cols => [:id,:component_type]
-      }
-      Model.get_objs(cmp_mh,sp_hash)
-    end
+
   end
 end

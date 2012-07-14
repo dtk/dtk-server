@@ -20,7 +20,7 @@ module DTK
         matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
       end
       if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
-        raise Error.new("Not implemented: case when ws and library branch being diffed in different repos")
+        raise Error.new("Not implemented: case when ws and library branch being differ in refering to distinct repos")
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
     end
@@ -48,6 +48,8 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
+          #TODO: put in call to ComponentModule.create_component_meta_info?(library_idh,impl_obj,repo)
+          #or higher level function on ComponentModule instance
           raise Error.new("Not implemented yet: processing of meta file changes")
         end
 

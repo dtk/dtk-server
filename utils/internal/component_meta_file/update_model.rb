@@ -1,15 +1,16 @@
 module DTK; class ComponentMetaFile
   module UpdateModelMixin
     def update_model()
-      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,@input_hash)
+      self.class.add_components_from_r8meta(@container_idh,@config_agent_type,@impl_idh,@input_hash)
     end
   end
 
   module UpdateModelClassMixin
-    def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,r8meta_hash)
+    #TODO: make private after removing all non class references to it
+    def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,meta_hash)
       impl_id = impl_idh.get_id()
       remote_link_defs = Hash.new
-      cmps_hash = r8meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
+      cmps_hash = meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
         info = Hash.new
         cmp_info.each do |k,v|
           case k

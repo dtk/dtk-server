@@ -58,14 +58,13 @@ module DTK
       module_and_branch_info[:module_idh]
     end
 
-   private
+    #TODO: remove config_agent_type and all calling references to it
     def self.create_component_meta_info?(library_idh,impl_obj,repo,config_agent_type)
-      #TODO: rewrite in terams of RepoManager functions
-      local_dir = repo.update_object!(:local_dir)[:local_dir]
-      r8meta_path = "#{local_dir}/r8meta.#{config_agent_type}.yml"
-      r8meta_hash = YAML.load_file(r8meta_path)
-      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
+      component_meta_file = ComponentMetaFile.get_meta_file(repo,impl_obj.id_handle())
+      component_meta_file.update_model()
     end
+
+   private
     def self.update_components_with_branch_info(component_idhs,module_branch_idh,version)
       mb_id = module_branch_idh.get_id()
       update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id,:version=>version}}

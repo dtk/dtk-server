@@ -4,17 +4,46 @@ module DTK
   class ComponentMetaFile
     extend UpdateModelClassMixin
     include UpdateModelMixin
-    #creates if file_obj is a r8meta file
-    def self.isa?(file_obj,content)
-      return nil unless file_obj[:path] =~ /^r8meta\.([a-z]+)\.([a-z]+$)/
-      config_agent_type = $1.to_sym
-      file_extension = $2
+
+    def self.get_meta_file(repo,impl_idh)
+      depth = 1
+      meta_filename_regexp = meta_filename_regexp()
+      meta_filename = RepoManager.ls_r(depth,{:file_only => true},repo).find{|f|f =~ MetaFilenameRegexp}
+      unless meta_filename
+        raise Error.new("No component meta file found")
+      end
+      file_obj_hash = {:path => meta_filename,:impl_idh => impl_idh}
+      content = RepoManager.get_file_content(file_obj_hash,repo)
+      create_from_file_obj_hash?(file_obj_hash,content,impl_idh)
+    end
+
+    #creates a ComponentMetaFile if file_obj_hash is a r8meta file
+    def self.create_from_file_obj_hash?(file_obj_hash,content)
+      filename =  file_obj_hash[:path]
+      return nil unless isa_meta_filename?(filename)
+      config_agent_type,file_extension = parse_meta_filename(filename)
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension
-      impl_idh = file_obj[:implementation].id_handle()
+      impl_idh = file_obj_hash[:impl_idh]||file_obj_hash[:implementation].id_handle()
       input_hash = convert_to_hash(format_type,content)
       self.new(config_agent_type,impl_idh,input_hash)
     end
+
+    class << self
+     private
+      #returns [config_agent_type,file_extension]
+      def isa_meta_filename?(filename)
+        filename =~ MetaFilenameRegexp
+      end
+      def parse_meta_filename(filename)
+        if filename =~ MetaFilenameRegexp
+          [$1.to_sym,$2]
+        else
+          raise Error.new("Component filename (#{filename}) has illegal form")
+        end
+      end
+    end
+    MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
     ExtensionToType = {
       "yml" => :yaml
     }
@@ -23,9 +52,9 @@ module DTK
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
-      @project_idh = impl_idh.get_parent_id_handle_with_auth_info()
-      unless @project_idh[:model_name] == :project
-        raise Error.new("Unexpected parent type of implementation object (#{@project_idh[:model_name]})")
+      @container_idh = impl_idh.get_parent_id_handle_with_auth_info()
+      unless [:project,:library].include?(@container_idh[:model_name])
+        raise Error.new("Unexpected parent type of implementation object (#{@container_idh[:model_name]})")
       end
     end
    private

@@ -24,8 +24,8 @@ module XYZ
       impl_obj.set_to_indicate_updated()
 
       #special processing if this the meta file
-      if r8_meta = ComponentMetaFile.isa?(self,content)
-        r8_meta.update_model()
+      if component_meta_file = ComponentMetaFile.create_from_file_obj_hash?(self,content)
+        component_meta_file.update_model()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end

@@ -1,99 +1,113 @@
-#TODO: move add_to_model into this fiel since will use this for both add and update.
-#Need to wrap @input_hash when created as HashObject and set is_complete?
-#see /root/R8Server/utils/internal/db/data_processing/update.rb line 109
-
 module DTK; class ComponentMetaFile
-  module UpdateModelClassMixin
-    r8_nested_require('update_model','add_to_model')
-    include AddToModelClassMixin
-  end
   module UpdateModelMixin
     def update_model()
-      #partition into to_add, to_delete,a dn to_modify
-      existing_cmps = get_existing_component_ws_templates(@impl_idh.createMH(:component),@impl_idh,@project_idh)
-      
-      existing_cmp_info = existing_cmps.inject(Hash.new){|h,cmp|h.merge(cmp[:component_type] => {:found => nil, :component => cmp})}
-      cmp_idhs_to_delete = Array.new
-      input_cmps_to_add = Hash.new
-      input_cmps_to_modify = Hash.new
-      @input_hash.each do |ref,content|
-        cmp_type = content["component_type"]
-        if pntr = existing_cmp_info[cmp_type]
-          input_cmps_to_modify.merge!(ref => content)
-          pntr[:found] = true
-        else
-          input_cmps_to_add.merge!(ref => content)
+      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,@input_hash)
+    end
+  end
+
+  module UpdateModelClassMixin
+    def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,r8meta_hash)
+      impl_id = impl_idh.get_id()
+      remote_link_defs = Hash.new
+      cmps_hash = r8meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
+        info = Hash.new
+        cmp_info.each do |k,v|
+          case k
+          when "external_link_defs"
+            v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+          when "link_defs" 
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+          else
+            info[k] = v
+          end
         end
+        info.merge!("implementation_id" => impl_id)
+        cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
+        h.merge(cmp_ref => info)
       end
-      cmp_idhs_to_delete = Array.new
-      cmps_to_modify = Array.new
-      existing_cmp_info.each_value do |cmp_info|
-        if cmp_info[:found]
-          cmps_to_modify << cmp_info[:component]
-        else
-          cmp_idhs_to_delete << cmp_info[:component].id_handle()
-        end
-      end
+      #process the link defs for remote components
+      process_remote_link_defs!(cmps_hash,remote_link_defs,container_idh)
 
-      delete_removed_components(cmp_idhs_to_delete)
-      add_new_components(input_cmps_to_add)
-      modify_existing_components(input_cmps_to_modify,cmps_to_modify)
-    end
-
-   private
-    def delete_removed_components(cmp_idhs_to_delete)
-#TODO: stub until make sure called with right values
-return
-      return if cmp_idhs_to_delete.empty?
-      Model.delete_instances(cmp_idhs_to_delete)  
-    end
-
-    def add_new_components(input_cmps)
-      return if input_cmps.empty?
-      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,input_cmps)
-    end
-
-    #TODO: this might be subsumed by using  add_components_from_r8meta
-    def modify_existing_components(input_cmps,existing_cmps)
-      return if input_cmps.empty?
-      #TODO: make sure that below deltes for example attributes that have been removed
-      self.class.add_components_from_r8meta(@project_idh,@config_agent_type,@impl_idh,input_cmps)
-    end
-
-    #TODO: might depcate process_external_link_defs; find out how field :link_defs is used
-=begin
-    def modify_existing_components(input_cmps,existing_cmps)
-      return if input_cmps.empty?
-      ndx_cmps_to_update = Hash.new
-
-      process_external_link_defs!(ndx_cmps_to_update,input_cmps,existing_cmps)
-      unless ndx_cmps_to_update.empty?
-        Model.update_from_rows(@impl_idh.createMH(:component),ndx_cmps_to_update.values,:partial_value=>true)
-      end
-    end
-    #TODO: might depcate process_external_link_defs; find out how field :link_defs is used
-    def process_external_link_defs!(ndx_cmps_to_update,input_cmps,existing_cmps)
-      link_defs = input_cmps.inject({}) do |h,(cmp_type,info)|
-        ext_link_defs = info["external_link_defs"]
-        ext_link_defs ? h.merge(cmp_type => ext_link_defs) : h
-      end
-      return if link_defs.empty?
-      existing_cmps.each do |r|
-        p = ndx_cmps_to_update[r[:id]] ||= {:id => r[:id]} 
-        p[:link_defs] ||= Hash.new
-        p[:link_defs]["external"] = link_defs[r[:component_type]]
-      end
-    end
-=end
-    def get_existing_component_ws_templates(cmp_mh,impl_idh,project_idh)
-      sp_hash = {
-        :model_name => :component,
-        :filter => [:and, 
-                    [:eq, :implementation_id, impl_idh.get_id()],
-                    [:eq, :project_project_id, project_idh.get_id()]], #to make sure that this is a workspace template not an instance 
-        :cols => [:id,:component_type]
+      #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items taht are removed
+      db_update_hash = db_update_form(cmps_hash)
+      Model.input_hash_content_into_model(container_idh,db_update_hash)
+      sp_hash =  {
+        :cols => [:id,:display_name], 
+        :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:library_library_id,container_idh.get_id()]]
       }
-      Model.get_objs(cmp_mh,sp_hash)
+      component_idhs = Model.get_objs(container_idh.create_childMH(:component),sp_hash).map{|r|r.id_handle()}
+      component_idhs
+    end
+   private
+    def db_update_form(cmps_input_hash)
+      cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
+        h.merge(ref => db_update_form_aux(:component,hash_assigns))
+      end.mark_as_complete()
+      {"component" => cmp_db_update_hash}
+    end
+
+    def db_update_form_aux(model_name,hash_assigns)
+      ret = DBUpdateHash.new
+      children_model_names = DB_REL_DEF[model_name][:one_to_many]||[]
+      hash_assigns.each do |key,child_hash|
+        if children_model_names.include?(key.to_sym)
+          child_model_name = key.to_sym
+          ret[key] = child_hash.inject(DBUpdateHash.new) do |h,(ref,child_hash_assigns)|
+            h.merge(ref => db_update_form_aux(child_model_name,child_hash_assigns))
+          end
+          ret[key].mark_as_complete()
+        else
+          ret[key] = child_hash
+        end
+      end
+      ret
+    end
+
+    def component_ref_from_cmp_type(config_agent_type,component_type)
+      "#{config_agent_type}-#{component_type}"
+    end
+    def component_ref(config_agent_type,r8_hash_cmp_ref)
+      #TODO: may be better to have these prefixes already in r8 meta file
+      "#{config_agent_type}-#{r8_hash_cmp_ref}"
+    end
+
+    #updates both cmps_hash and remote_link_defs
+    def process_remote_link_defs!(cmps_hash,remote_link_defs,library_idh)
+      return if remote_link_defs.empty?
+      #process all remote_link_defs in this module
+      remote_link_defs.each do |remote_cmp_type,remote_link_def|
+        config_agent_type = remote_link_def.values.first[:config_agent_type]
+        remote_cmp_ref = component_ref_from_cmp_type(config_agent_type,remote_cmp_type)
+        if cmp_pointer = cmps_hash[remote_cmp_ref]
+          (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
+          remote_link_defs.delete(remote_cmp_type)
+        end
+      end
+
+      #process remaining remote_link_defs to see if in stored modules
+      return if remote_link_defs.empty?
+      sp_hash = {
+        :cols => [:id,:ref,:component_type],
+        :filter => [:oneof,:component_type,remote_link_defs.keys]
+      }
+      stored_remote_cmps = library_idh.create_object().get_children_objs(:component,sp_hash,:keep_ref_cols=>true)
+      ndx_stored_remote_cmps = stored_remote_cmps.inject({}){|h,cmp|h.merge(cmp[:component_type] => cmp)}
+      remote_link_defs.each do |remote_cmp_type,remote_link_def|
+        if remote_cmp = ndx_stored_remote_cmps[remote_cmp_type]
+          remote_cmp_ref = remote_cmp[:ref]
+          cmp_pointer = cmps_hash[remote_cmp_ref] ||= {"link_def" => Hash.new}
+          cmp_pointer["link_def"].merge!(remote_link_def)
+          remote_link_defs.delete(remote_cmp_type)
+        end
+      end
+      
+      #if any remote_link_defs left they are dangling refs
+      remote_link_defs.keys.each do |remote_cmp_type|
+        Log.error("link def references a remote component (#{remote_cmp_type}) that does not exist")
+      end
     end
   end
 end; end

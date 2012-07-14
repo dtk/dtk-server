@@ -37,9 +37,10 @@ module DTK; class ComponentMetaFile
     end
    private
     def db_update_form(cmps_input_hash)
-      cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
+      cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
         h.merge(ref => db_update_form_aux(:component,hash_assigns))
       end.mark_as_complete()
+      {"component" => cmp_db_update_hash}
     end
 
     def db_update_form_aux(model_name,hash_assigns)

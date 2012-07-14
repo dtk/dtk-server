@@ -24,7 +24,10 @@ module DTK; class ComponentMetaFile
       end
       #process the link defs for remote components
       process_remote_link_defs!(cmps_hash,remote_link_defs,container_idh)
-      Model.input_hash_content_into_model(container_idh,{"component" => cmps_hash})
+
+      #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items taht are removed
+      db_update_hash = db_update_form(cmps_hash)
+      Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {
         :cols => [:id,:display_name], 
         :filter => [:and,[:oneof,:ref,cmps_hash.keys],[:eq,:library_library_id,container_idh.get_id()]]
@@ -33,6 +36,29 @@ module DTK; class ComponentMetaFile
       component_idhs
     end
    private
+    def db_update_form(cmps_input_hash)
+      cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
+        h.merge(ref => db_update_form_aux(:component,hash_assigns))
+      end.mark_as_complete()
+    end
+
+    def db_update_form_aux(model_name,hash_assigns)
+      ret = DBUpdateHash.new
+      children_model_names = DB_REL_DEF[model_name][:one_to_many]||[]
+      hash_assigns.each do |key,child_hash|
+        if children_model_names.include?(key.to_sym)
+          child_model_name = key.to_sym
+          ret[key] = child_hash.inject(DBUpdateHash.new) do |h,(ref,child_hash_assigns)|
+            h.merge(ref => db_update_form_aux(child_model_name,child_hash_assigns))
+          end
+          ret[key].mark_as_complete()
+        else
+          ret[key] = child_hash
+        end
+      end
+      ret
+    end
+
     def component_ref_from_cmp_type(config_agent_type,component_type)
       "#{config_agent_type}-#{component_type}"
     end

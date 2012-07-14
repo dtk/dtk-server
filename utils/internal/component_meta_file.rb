@@ -43,24 +43,26 @@ module DTK
       "not_specified" => 1
     }
 
-    def self.load_and_return_version_adapter_class(version_integer)
-      return @cached_adapter_class if @cached_adapter_class
-      adapter_name = "v#{version_integer.to_s}"
-      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
-    end
+    class << self
+      def load_and_return_version_adapter_class(version_integer)
+        return @cached_adapter_class if @cached_adapter_class
+        adapter_name = "v#{version_integer.to_s}"
+        @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
+      end
 
-    def self.convert_to_hash(format_type,content)
-      case format_type
-      when :yaml then convert_to_hash_yaml(content)
-      else
-        raise Error.new("cannot treat format type #{format_type}")
+      def convert_to_hash(format_type,content)
+        case format_type
+        when :yaml then 
+          convert_to_hash_yaml(content)
+        else
+          raise Error.new("cannot treat format type #{format_type}")
+        end
+      end
+
+      def convert_to_hash_yaml(content)
+        #TODO: raise parsing error to user
+        YAML.load(content)
       end
     end
-    def self.convert_to_hash_yaml(content)
-      #TODO: raise parsing error to user
-      YAML.load(content)
-    end
-
-
   end
 end

@@ -31,7 +31,7 @@ module DTK
     end
 
     class << self
-      private
+     private
       def update_library_from_workspace_aux?(augmented_branch)
         lib_branch_obj = augmented_branch[:library_module_branch]
         ret = lib_branch_obj.merge(:workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]))
@@ -48,9 +48,8 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          #TODO: put in call to ComponentModule.create_component_meta_info?(library_idh,impl_obj,repo)
-          #or higher level function on ComponentModule instance
-          raise Error.new("Not implemented yet: processing of meta file changes")
+          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:repo],augmented_branch[:implementation])
+          component_meta_file.update_model()
         end
 
         #update the repo

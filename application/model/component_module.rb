@@ -49,19 +49,16 @@ module DTK
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo)
 
-      component_idhs = create_component_meta_info?(library_idh,impl_obj,repo,config_agent_type)
+
+      component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)
+      component_idhs = component_meta_file.update_model()
+
       unless ::R8::Config[:use_modules]
         return ret
       end
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       update_components_with_branch_info(component_idhs,module_and_branch_info[:module_branch_idh],module_and_branch_info[:version])
       module_and_branch_info[:module_idh]
-    end
-
-    #TODO: remove config_agent_type and all calling references to it
-    def self.create_component_meta_info?(library_idh,impl_obj,repo,config_agent_type)
-      component_meta_file = ComponentMetaFile.get_meta_file(repo,impl_obj.id_handle())
-      component_meta_file.update_model()
     end
 
    private

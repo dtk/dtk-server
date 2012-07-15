@@ -5,16 +5,13 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    def self.get_meta_file(repo,impl_idh)
-      depth = 1
-      meta_filename_regexp = meta_filename_regexp()
-      meta_filename = RepoManager.ls_r(depth,{:file_only => true},repo).find{|f|f =~ MetaFilenameRegexp}
-      unless meta_filename
+    def self.create_meta_file_object(repo,impl)
+      unless meta_filename = meta_filename(repo)
         raise Error.new("No component meta file found")
       end
-      file_obj_hash = {:path => meta_filename,:impl_idh => impl_idh}
+      file_obj_hash = {:path => meta_filename,:implementation => impl}
       content = RepoManager.get_file_content(file_obj_hash,repo)
-      create_from_file_obj_hash?(file_obj_hash,content,impl_idh)
+      create_from_file_obj_hash?(file_obj_hash,content)
     end
 
     #creates a ComponentMetaFile if file_obj_hash is a r8meta file
@@ -24,13 +21,20 @@ module DTK
       config_agent_type,file_extension = parse_meta_filename(filename)
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension
-      impl_idh = file_obj_hash[:impl_idh]||file_obj_hash[:implementation].id_handle()
+      impl_idh = file_obj_hash[:implementation].id_handle()
       input_hash = convert_to_hash(format_type,content)
       self.new(config_agent_type,impl_idh,input_hash)
     end
+    ExtensionToType = {
+      "yml" => :yaml
+    }
 
     class << self
      private
+      def meta_filename(repo)
+        depth = 1
+        RepoManager.ls_r(depth,{:file_only => true},repo).find{|f|f =~ MetaFilenameRegexp}
+      end
       #returns [config_agent_type,file_extension]
       def isa_meta_filename?(filename)
         filename =~ MetaFilenameRegexp
@@ -42,11 +46,8 @@ module DTK
           raise Error.new("Component filename (#{filename}) has illegal form")
         end
       end
+      MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
     end
-    MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
-    ExtensionToType = {
-      "yml" => :yaml
-    }
 
     def initialize(config_agent_type,impl_idh,version_specific_input_hash)
       @config_agent_type = config_agent_type

@@ -38,6 +38,14 @@ module DTK::Client
       post rest_url("component_module/update_library"), post_body
     end
 
+    desc "revert-workspace COMPONENT-MODULE-ID", "Revert workspace (discarding changes) to library version"
+    def revert_workspace(component_module_id)
+      post_body = {
+       :component_module_id => component_module_id
+      }
+      post rest_url("component_module/revert_workspace"), post_body
+    end
+
     desc "delete COMPONENT-MODULE-ID", "Delete component module and all items contained in it"
     def delete(component_module_id)
       post_body = {

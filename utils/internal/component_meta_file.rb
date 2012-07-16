@@ -63,11 +63,12 @@ module DTK
       load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(old_version_hash)
     end
 
-    def version()
+    def self.version()
       VersionIntegerToVersion[version_integer()]
     end
-    def version_integer()
-     self.class.to_s = /V([0-9])+$/;$1.to_i
+    def self.version_integer()
+      to_s =~ /V([0-9]+$)/
+      $1.to_i
     end
 
    private

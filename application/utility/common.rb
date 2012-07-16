@@ -5,7 +5,6 @@ require 'optparse'
 require File.expand_path('library_nodes', File.dirname(__FILE__))
 Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'
-r8_nested_require('migrate_component_meta_to_v2','processor')
 
 class R8Server
   include XYZ
@@ -92,7 +91,7 @@ class R8Server
 
     cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
     new_version_integer = 2 
-    DTK::ComponentMetaFile::migrate_processor(new_version_integer,cmf.input_hash)
+    DTK::ComponentMetaFile::migrate_processor(new_version_integer,cmf.input_hash).generate_new_version_hash()
   end
 
   def ret_idhs(mn,hash_content,container_idh)

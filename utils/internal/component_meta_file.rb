@@ -62,6 +62,14 @@ module DTK
     def self.migrate_processor(new_version_integer,old_version_hash)
       load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(old_version_hash)
     end
+
+    def version()
+      VersionIntegerToVersion[version_integer()]
+    end
+    def version_integer()
+     self.class.to_s = /V([0-9])+$/;$1.to_i
+    end
+
    private
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["version"]||"not_specified"
@@ -74,8 +82,12 @@ module DTK
       klass.normalize(version_specific_input_hash)
     end
     VersionToVersionInteger = {
-      "not_specified" => 1
+      "not_specified" => 1,
+      "0.9" => 2
     }
+    VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|
+      h.merge(vi=>v)
+    end
 
     class << self
       def load_and_return_version_adapter_class(version_integer)

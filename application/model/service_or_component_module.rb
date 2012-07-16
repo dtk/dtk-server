@@ -8,11 +8,26 @@ module DTK
         h[repo_id] ? h : h.merge(repo_id => repo)
       end.values
     end
+    def get_implementations()
+      get_objs(:cols => [:implementations]).map{|r|r[:implementation]}
+    end
+    def get_target_instances()
+      if id_handle[:model_name] == :service_module
+        raise Error.new("TODO: not implemented yet")
+      end
+      get_objs(:cols => [:target_instances]).map{|r|r[:target_instance]}
+    end
   end
 
   module ServiceOrComponentModuleClassMixin
     def delete(idh)
-      repos = idh.create_object().get_repos()
+      module_obj = idh.create_object()
+      unless module_obj.get_target_instances().empty?
+        raise ErrorUsage.new("Cannot delete a module if one or more of its target instances exist")
+      end
+      impls = module_obj.get_implementations()
+      delete_instances(impls.map{|impl|impl.id_handle()})
+      repos = module_obj.get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})
       delete_instance(idh)

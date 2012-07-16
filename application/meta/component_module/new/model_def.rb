@@ -22,13 +22,16 @@ lambda__segment_repos =
 }
 lambda__segment_impls =
   lambda{|args|
-  {
+  ret={
     :model_name=>:implementation,
     :convert => true,
     :join_type=>:inner,
     :join_cond=>{:repo_id =>:module_branch__repo_id},
     :cols=>args[:cols]
   }
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
 }
 lambda__segment_components =
   lambda{|args|
@@ -64,6 +67,17 @@ lambda__segment_components =
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_impls.call(:cols => [:id,:display_name])]
     },
+    :library_implementations=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
+       lambda__segment_impls.call(
+         :cols => [:id,:display_name],
+         :alias => :library_implementation,
+         :filter => [:neq,:library_library_id,nil])
+      ]
+    },
     :target_instances=>{
       :type=>:json,
       :hidden=>true,
@@ -72,7 +86,8 @@ lambda__segment_components =
        lambda__segment_components.call(
         :cols => [:id,:display_name],
         :alias=>:target_instance,
-        :filter=>[:neq,:node_node_id,nil])]
+        :filter=>[:neq,:node_node_id,nil])
+      ]
     }
   },
   :many_to_one=>[:library],

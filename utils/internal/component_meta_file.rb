@@ -49,6 +49,7 @@ module DTK
       MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
     end
 
+    attr_reader :input_hash
     def initialize(config_agent_type,impl_idh,version_specific_input_hash)
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)

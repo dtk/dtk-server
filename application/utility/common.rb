@@ -5,6 +5,7 @@ require 'optparse'
 require File.expand_path('library_nodes', File.dirname(__FILE__))
 Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'
+r8_nested_require('migrate_component_meta_to_v2','processor')
 
 class R8Server
   include XYZ
@@ -68,6 +69,29 @@ class R8Server
       :target_idhs => ret_idhs("datacenter",hash_content,container_idh), 
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
+  end
+
+  def get_component_meta_file(module_name)
+    component_module_mh = pre_execute(:component_module)
+    sp_hash = {
+      :cols => [:id,:dispaly_name],
+      :filter => [:eq,:display_name,module_name]
+    }
+    cm = Model.get_obj(component_module_mh,sp_hash)
+    repos = cm.get_repos()
+    unless repos.size == 1
+      raise Error.new("Cannot find unique repo")
+    end
+    repo = repos.first
+
+    impls = cm.get_library_implementations()
+    unless impls.size == 1
+      raise Error.new("Cannot find unique implementation")
+    end
+    impl = impls.first
+
+    cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
+    DTK::UtilityMigrateProcV2.new(cmf.input_hash)
   end
 
   def ret_idhs(mn,hash_content,container_idh)

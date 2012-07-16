@@ -6,6 +6,9 @@ module DTK
     def get_implementations()
       get_objs_uniq(:implementations)
     end
+    def get_library_implementations()
+      get_objs_uniq(:library_implementations)
+    end
     def get_target_instances()
       if id_handle[:model_name] == :service_module
         raise Error.new("TODO: not implemented yet")

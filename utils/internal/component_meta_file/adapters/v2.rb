@@ -27,10 +27,20 @@ module DTK
         :component =>
         [
          :description,
-         {:external_ref => {:method => :migrate_external_ref}},
+         {:external_ref => {:method => :external_ref}},
          :basic_type,
          :ui
+        ],
+        :external_ref => 
+        [
+         :puppet_class,
+         :puppet_definition,
+         :recipe_name,
+         :type
         ]
+      }
+      AttrOmit = {
+        :component => %w{display_name component_type}
       }
       AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|
         proc_attrs = attrs_info.map do |attr_info|
@@ -39,9 +49,6 @@ module DTK
         h.merge(type => proc_attrs)
       end
       TypesTreated = AttrOrdered.keys
-      AttrOmit = {
-        :component => %w{display_name component_type}
-      }
 
       def raise_error_if_treated(type,ref,assigns)
         case type
@@ -75,7 +82,7 @@ module DTK
             end
           end
         end
-        rest_attrs = (assigns.keys - AttrOmit[type]) - AttrProcessed[type]
+        rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
         rest_attrs.each do |attr|
           ret[attr] = assigns[attr] if assigns[attr]
         end

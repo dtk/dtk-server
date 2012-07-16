@@ -1,21 +1,16 @@
 module DTK
   module ServiceOrComponentModuleMixin
     def get_repos()
-      repos = get_objs(:cols => [:repos])
-      repos.inject(Hash.new) do |h,r|
-        repo = r[:repo]
-        repo_id =  repo[:id]
-        h[repo_id] ? h : h.merge(repo_id => repo)
-      end.values
+      get_objs_uniq(:repos)
     end
     def get_implementations()
-      get_objs(:cols => [:implementations]).map{|r|r[:implementation]}
+      get_objs_uniq(:implementations)
     end
     def get_target_instances()
       if id_handle[:model_name] == :service_module
         raise Error.new("TODO: not implemented yet")
       end
-      get_objs(:cols => [:target_instances]).map{|r|r[:target_instance]}
+      get_objs_uniq(:target_instances)
     end
   end
 

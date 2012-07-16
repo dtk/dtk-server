@@ -26,7 +26,7 @@ lambda__segment_impls =
     :model_name=>:implementation,
     :convert => true,
     :join_type=>:inner,
-    :join_cond=>{:id =>:module_branch__repo_id},
+    :join_cond=>{:repo_id =>:module_branch__repo_id},
     :cols=>args[:cols]
   }
 }

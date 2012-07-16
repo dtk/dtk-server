@@ -377,6 +377,16 @@ module XYZ
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
     end
 
+    def get_objs_uniq(obj_col,col_in_result=nil)
+      col_in_result ||= obj_col.to_s.gsub(/s$/,"").to_sym
+      get_objs(:cols => [obj_col]).inject(Hash.new) do |h,r|
+        obj = r[col_in_result]
+        id = obj[:id]
+        h[obj[:id]] ||= obj
+        h
+      end.values
+    end
+
     def get_objs_col(sp_hash_x,col=nil,opts={})
       #if col not given assumption that sp_hash_x is of form {:cols => [col]} or symbol
       if sp_hash_x.kind_of?(Symbol)

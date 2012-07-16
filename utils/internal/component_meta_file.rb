@@ -59,6 +59,9 @@ module DTK
         raise Error.new("Unexpected parent type of implementation object (#{@container_idh[:model_name]})")
       end
     end
+    def self.migrate_processor(new_version_integer,old_version_hash)
+      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(old_version_hash)
+    end
    private
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["version"]||"not_specified"
@@ -76,9 +79,10 @@ module DTK
 
     class << self
       def load_and_return_version_adapter_class(version_integer)
-        return @cached_adapter_class if @cached_adapter_class
+        @cached_adapter_class ||= Hash.new
+        return @cached_adapter_class[version_integer] if @cached_adapter_class[version_integer]
         adapter_name = "v#{version_integer.to_s}"
-        @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
+        @cached_adapter_class[version_integer] = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
       end
 
       def convert_to_hash(format_type,content)

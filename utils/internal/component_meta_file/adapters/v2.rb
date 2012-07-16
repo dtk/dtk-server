@@ -27,15 +27,12 @@ module DTK
         :component =>
         [
          :description,
-         {:external_ref => {:method => :external_ref}},
+         {:external_ref => {:type => :external_ref}},
          :basic_type,
-         :ui
+         {:ui => {:custom_fn => :ui}}
         ],
         :external_ref => 
         [
-         :puppet_class,
-         :puppet_definition,
-         :recipe_name,
          :type
         ]
       }
@@ -65,21 +62,29 @@ module DTK
         end
         ret = PrettyPrintHash.new
         raise_error_if_treated(type,ref,assigns)
+        attr = migrate_type = custom_fn = has_ref = nil 
         AttrOrdered[type].each do |attr_assigns|
-          attr,migrate_type, has_ref = 
-            (attr_assigns.kind_of?(Hash) ? 
-             [attr_assigns.keys.first.to_s,attr_assigns.values.first[:method],attr_assigns.values.first[:has_ref]] : 
-             [attr_assigns.to_s,nil,nil])
+          if attr_assigns.kind_of?(Hash)  
+            attr = attr_assigns.keys.first.to_s
+            info = attr_assigns.values.first
+            migrate_type,lambda_fn,has_ref = Aux::hash_subset(info,[:type,:custom_fn,:has_ref]) 
+          else
+            attr = attr_assigns.to_s
+          end
+
           if val = assigns[attr]
             ref = nil
-            if migrate_type
+            if custom_fn
+              val = send("migrate__#{custom_fn}".to_sym,val)
+            else if migrate_type
               if has_ref
                 ref = val.keys.first
                 val = {ref => migrate(migrate_type,ref,val.keys.first)}
               else
-                val = migrate(migrate_type,nil,val.keys.first)
+                val = migrate(migrate_type,nil,val)
               end
             end
+            ret[attr] = val
           end
         end
         rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]

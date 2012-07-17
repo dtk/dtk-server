@@ -39,6 +39,9 @@ module DTK
       AttrOmit = {
         :component => %w{display_name component_type}
       }
+      ObjectContainer = {
+        :component => :components
+      }
       AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|
         proc_attrs = attrs_info.map do |attr_info|
           (attr_info.kind_of?(Hash) ? attr_info.keys.first.to_s : attr_info.to_s)
@@ -60,14 +63,14 @@ module DTK
         unless TypesTreated.include?(type)
           raise Error.new("Migration of type (#{type}) not yet treated")
         end
-        ret = PrettyPrintHash.new
+        converted_assigns = PrettyPrintHash.new
         raise_error_if_treated(type,ref,assigns)
-        attr = migrate_type = custom_fn = has_ref = nil 
         AttrOrdered[type].each do |attr_assigns|
+          attr = migrate_type = custom_fn = has_ref = nil 
           if attr_assigns.kind_of?(Hash)  
             attr = attr_assigns.keys.first.to_s
             info = attr_assigns.values.first
-            migrate_type,lambda_fn,has_ref = Aux::hash_subset(info,[:type,:custom_fn,:has_ref]) 
+            migrate_type,custom_fn,has_ref = [:type,:custom_fn,:has_ref].map{|k|info[k]} 
           else
             attr = attr_assigns.to_s
           end
@@ -76,7 +79,7 @@ module DTK
             ref = nil
             if custom_fn
               val = send("migrate__#{custom_fn}".to_sym,val)
-            else if migrate_type
+            elsif migrate_type
               if has_ref
                 ref = val.keys.first
                 val = {ref => migrate(migrate_type,ref,val.keys.first)}
@@ -84,14 +87,32 @@ module DTK
                 val = migrate(migrate_type,nil,val)
               end
             end
-            ret[attr] = val
+            converted_assigns[attr] = val
           end
         end
         rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
         rest_attrs.each do |attr|
-          ret[attr] = assigns[attr] if assigns[attr]
+          converted_assigns[attr] = assigns[attr] if assigns[attr]
         end
-        ret
+
+        if container = ObjectContainer[type]
+          {container => converted_assigns}
+        else
+          converted_assigns
+        end
+      end
+      def migrate__ui(assigns)
+        migrate__ui__single_png(assigns)||assigns
+      end
+      def migrate__ui__single_png(assigns)
+        return unless assigns.size == 1 and assigns.keys.first == "images"
+
+        image_assigns = assigns.values.first
+        return unless image_assigns.keys.sort == ["display","tiny","tnail"]
+
+        return unless image_assigns["tiny"].empty?
+        return unless image_assigns["tnail"] == image_assigns["display"]
+        {"image_icon" => image_assigns["tnail"]}
       end
     end
   end

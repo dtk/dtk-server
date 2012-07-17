@@ -43,7 +43,11 @@ module DTK; class ComponentMetaFileV2
             ret[new_key] = val
           else
             if ret[new_key].kind_of?(Array)
-              ret[new_key] << val
+              if val.kind_of?(Array)
+                ret[new_key] += val
+              else
+                ret[new_key] << val
+              end
             elsif ret[new_key].kind_of?(Hash) and val.kind_of?(Hash)
               ret[new_key].merge!(val)
             else
@@ -66,7 +70,8 @@ module DTK; class ComponentMetaFileV2
        {:basic_type => {:new_key => :type}},
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
-       {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}}
+       {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}},
+       {:component_order => {:new_key => :constraints,:custom_fn => :component_order_rels}}
       ]
     }
     AttrOmit = {
@@ -133,7 +138,7 @@ module DTK; class ComponentMetaFileV2
     end
 
     def migrate__dependencies(deps_assigns)
-      deps_assigns.map{|ref,dep_assign| migrate__dependency(ref,dep_assign)}
+      map_in_array_form(deps_assigns){|ref,dep_assign| migrate__dependency(ref,dep_assign)}
     end
     def migrate__dependency(ref,dep_assign)
       ret = migrate__dependency__requires(ref,dep_assign)
@@ -150,15 +155,31 @@ module DTK; class ComponentMetaFileV2
       {"requires_component" => require_cmp}
     end
 
+    def migrate__component_order_rels(assigns)
+      map_in_array_form(assigns){|ref,cmp_order_rel| migrate__component_order_rel(ref,cmp_order_rel)}
+    end
+    def migrate__component_order_rel(ref,cmp_order_rel)
+      ret = migrate__component_order_rel__after(ref,cmp_order_rel)
+
+      unless ret
+        raise Error.new("TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})")
+      end
+      ret
+    end
+    def migrate__component_order_rel__after(ref,cmp_order_rel)
+      return unless cmp_order_rel.keys == ["after"]
+      {"after_component" =>  qualified_component_ref(cmp_order_rel["after"])}
+    end
+
     ### aux methods
     def strip_module_name(cmp_ref)
-      cmp_ref.gsub(MatchesThisModuleRegexp,"")
+
+      cmp_ref.gsub(Regexp.new("^#{@module_name}__"),"")
     end
 
     def qualified_component_ref(cmp_ref)
-      cmp_ref.gsub(/"__"/,ModuleComponentSeperator)
+      cmp_ref.gsub(/__/,ModuleComponentSeperator)
     end
-    MatchesThisModuleRegexp = Regexp.new("^#{@module_name}__")
     ModuleComponentSeperator  = "::"
 
     def raise_error_if_treated(type,ref,assigns)
@@ -182,6 +203,30 @@ module DTK; class ComponentMetaFileV2
          ret[:new_key] = ret[:key] = attr_proc_info.to_s
        end
       ret
+    end
+
+    def map_in_array_form(assigns,&block)
+      ret_singleton_form = Array.new
+      ndx_ret = Hash.new
+      assigns.each do |ref,info|
+        el = block.call(ref,info)
+        if el.size == 1 
+          key = el.keys.first
+          val = el.values.first
+          if ndx_ret[key]
+            if ndx_ret[key][:single_el]
+              ndx_ret[key] = {:els => [ndx_ret[key][:els],val],:single_el => false} 
+            else
+              ndx_ret[key][:els] << val
+            end
+          else
+            ndx_ret[key] = {:els => val,:single_el => true}
+          end
+        else
+          ret_singleton_form << el
+        end
+      end
+      ret_singleton_form + ndx_ret.map{|k,v|{k => v[:els]}}
     end
   end
 end; end

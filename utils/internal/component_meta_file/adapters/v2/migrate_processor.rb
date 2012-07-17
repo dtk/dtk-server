@@ -37,13 +37,49 @@ module DTK; class ComponentMetaFileV2
               val = migrate(proc_vars[:migrate_type],nil,val)
             end
           end
-          ret[proc_vars[:new_key]] = val
+
+          new_key = proc_vars[:new_key]
+          if ret[new_key].nil?
+            ret[new_key] = val
+          else
+            if ret[new_key].kind_of?(Array)
+              ret[new_key] << val
+            elsif ret[new_key].kind_of?(Hash) and val.kind_of?(Hash)
+              ret[new_key].merge!(val)
+            else
+              raise Error.new("Need to 'merge' different attributes, but unexpected form")
+            end
+          end
         end
       end
+
       rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
       rest_attrs.each{|k|ret[k] = assigns[k] if assigns[k]}
       ret
     end
+
+    AttrOrdered = { 
+      :component =>
+      [
+       :description,
+       {:external_ref => {:custom_fn => :external_ref}},
+       {:basic_type => {:new_key => :type}},
+       {:ui => {:custom_fn => :ui}},
+       {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
+       {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}}
+      ]
+    }
+    AttrOmit = {
+      :component => %w{display_name component_type}
+    }
+
+    AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|
+      proc_attrs = attrs_info.map do |attr_info|
+        (attr_info.kind_of?(Hash) ? attr_info.keys.first.to_s : attr_info.to_s)
+      end
+      h.merge(type => proc_attrs)
+    end
+    TypesTreated = AttrOrdered.keys
 
     def migrate__external_ref(ext_ref_assigns)
       ret = PrettyPrintHash.new
@@ -96,11 +132,35 @@ module DTK; class ComponentMetaFileV2
       {"image_icon" => image_assigns["tnail"]}
     end
 
+    def migrate__dependencies(deps_assigns)
+      deps_assigns.map{|ref,dep_assign| migrate__dependency(ref,dep_assign)}
+    end
+    def migrate__dependency(ref,dep_assign)
+      ret = migrate__dependency__requires(ref,dep_assign)
+      unless ret
+        raise Error.new("TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
+      end
+      ret
+    end
+    def migrate__dependency__requires(ref,dep_assign)
+      return unless dep_assign["type"] == "component"
+      return unless filter = (dep_assign["search_pattern"]||{})[":filter"]
+      return unless filter[0] == ":eq" and filter[1] == ":component_type"
+      require_cmp = qualified_component_ref(filter[2])
+      {"requires_component" => require_cmp}
+    end
+
     ### aux methods
     def strip_module_name(cmp_ref)
-      cmp_ref.gsub(Regexp.new("^#{@module_name}__"),"")
+      cmp_ref.gsub(MatchesThisModuleRegexp,"")
     end
-    
+
+    def qualified_component_ref(cmp_ref)
+      cmp_ref.gsub(/"__"/,ModuleComponentSeperator)
+    end
+    MatchesThisModuleRegexp = Regexp.new("^#{@module_name}__")
+    ModuleComponentSeperator  = "::"
+
     def raise_error_if_treated(type,ref,assigns)
       case type
       when :component
@@ -123,29 +183,5 @@ module DTK; class ComponentMetaFileV2
        end
       ret
     end
-
-    AttrOrdered = { 
-      :component =>
-      [
-       :description,
-       {:external_ref => {:custom_fn => :external_ref}},
-       {:basic_type => {:new_key => :type}},
-       {:ui => {:custom_fn => :ui}},
-       {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
-      ]
-    }
-    AttrOmit = {
-      :component => %w{display_name component_type}
-    }
-
-    AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|
-      proc_attrs = attrs_info.map do |attr_info|
-        (attr_info.kind_of?(Hash) ? attr_info.keys.first.to_s : attr_info.to_s)
-      end
-      h.merge(type => proc_attrs)
-    end
-    TypesTreated = AttrOrdered.keys
-
-
   end
 end; end

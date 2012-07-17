@@ -59,8 +59,8 @@ module DTK
         raise Error.new("Unexpected parent type of implementation object (#{@container_idh[:model_name]})")
       end
     end
-    def self.migrate_processor(new_version_integer,old_version_hash)
-      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(old_version_hash)
+    def self.migrate_processor(module_name,new_version_integer,old_version_hash)
+      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(module_name,old_version_hash)
     end
 
     def self.version()

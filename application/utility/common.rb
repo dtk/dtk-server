@@ -91,7 +91,7 @@ class R8Server
 
     cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
     new_version_integer = 2 
-    DTK::ComponentMetaFile::migrate_processor(new_version_integer,cmf.input_hash).generate_new_version_hash()
+    DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
   end
 
   def ret_idhs(mn,hash_content,container_idh)

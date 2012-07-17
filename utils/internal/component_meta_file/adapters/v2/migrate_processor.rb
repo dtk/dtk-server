@@ -1,20 +1,24 @@
 module DTK; class ComponentMetaFileV2
   class MigrateProcessor
-    def initialize(parent,old_version_hash)
-      super()
+    def initialize(module_name,parent,old_version_hash)
+      @module_name = module_name
       @old_version_hash = old_version_hash
       @parent = parent
     end
     def generate_new_version_hash()
       ret = PrettyPrintHash.new
+      ret["module_name"] = @module_name
       ret["version"] = @parent.version()
       cmps = ret["components"] = PrettyPrintHash.new
       @old_version_hash.each do |cmp_ref,cmp_info|
-        cmps[cmp_ref] = migrate(:component,cmp_ref,cmp_info)
+        cmps.merge!(strip_module_name(cmp_ref)=> migrate(:component,cmp_ref,cmp_info))
       end
       ret
     end
    private
+    def strip_module_name(cmp_ref)
+      cmp_ref.gsub(Regexp.new("^#{@module_name}__"),"")
+    end
     AttrOrdered = { 
       :component =>
       [

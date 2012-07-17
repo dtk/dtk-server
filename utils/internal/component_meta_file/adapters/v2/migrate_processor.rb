@@ -26,7 +26,7 @@ module DTK; class ComponentMetaFileV2
        {:external_ref => {:type => :external_ref}},
        :basic_type,
        {:ui => {:custom_fn => :ui}},
-       {:attribute => {:custom_fn => :attribute}},
+       {:attribute => {:key => :attributes,:custom_fn => :attributes}},
       ],
       :external_ref => 
       [
@@ -61,16 +61,18 @@ module DTK; class ComponentMetaFileV2
       ret = PrettyPrintHash.new
       raise_error_if_treated(type,ref,assigns)
       AttrOrdered[type].each do |attr_assigns|
-        attr = migrate_type = custom_fn = has_ref = nil 
+        key = migrate_type = custom_fn = has_ref = nil 
         if attr_assigns.kind_of?(Hash)  
-          attr = attr_assigns.keys.first.to_s
+          key = attr_assigns.keys.first.to_s
           info = attr_assigns.values.first
-          migrate_type,custom_fn,has_ref = [:type,:custom_fn,:has_ref].map{|k|info[k]} 
+          new_key,migrate_type,custom_fn,has_ref = [:key,:type,:custom_fn,:has_ref].map{|k|info[k]} 
+          new_key ||= key
+          new_key = new_key.to_s
         else
-          attr = attr_assigns.to_s
+          new_key = key = attr_assigns.to_s
         end
 
-        if val = assigns[attr]
+        if val = assigns[key]
           ref = nil
           if custom_fn
             val = send("migrate__#{custom_fn}".to_sym,val)
@@ -82,7 +84,7 @@ module DTK; class ComponentMetaFileV2
               val = migrate(migrate_type,nil,val)
             end
           end
-          ret[attr] = val
+          ret[new_key] = val
         end
       end
       rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
@@ -90,11 +92,17 @@ module DTK; class ComponentMetaFileV2
       ret
     end
 
-    def migrate__attribute(assigns)
+    def migrate__attributes(attrs_assigns)
+      #TODO: may sort alphabetically (same for othetr lists)
+      attrs_assigns.inject(PrettyPrintHash.new) do |h,(attr,attr_info)|
+        h.merge(attr => migrate__attribute(attr_info))
+      end
+    end
+    def migrate__attribute(attr_info)
       ret = PrettyPrintHash.new
-      %w{description data_type}.each{|k|ret[k] = assigns[k] if assigns[k]}
-      ret["default"] = assigns["value_asserted"] if assigns["value_asserted"]
-      ext_ref = assigns["external_ref"]
+      %w{description data_type}.each{|k|ret[k] = attr_info[k] if attr_info[k]}
+      ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
+      ext_ref = attr_info["external_ref"]
       ret_ext_ref = ret["external_ref"] = PrettyPrintHash.new
       type = ret_ext_ref["type"] = ext_ref["type"]
       case type

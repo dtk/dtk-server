@@ -25,7 +25,8 @@ module DTK; class ComponentMetaFileV2
        :description,
        {:external_ref => {:type => :external_ref}},
        :basic_type,
-       {:ui => {:custom_fn => :ui}}
+       {:ui => {:custom_fn => :ui}},
+       {:attribute => {:custom_fn => :attribute}},
       ],
       :external_ref => 
       [
@@ -57,7 +58,7 @@ module DTK; class ComponentMetaFileV2
       unless TypesTreated.include?(type)
         raise Error.new("Migration of type (#{type}) not yet treated")
       end
-      converted_assigns = PrettyPrintHash.new
+      ret = PrettyPrintHash.new
       raise_error_if_treated(type,ref,assigns)
       AttrOrdered[type].each do |attr_assigns|
         attr = migrate_type = custom_fn = has_ref = nil 
@@ -81,16 +82,32 @@ module DTK; class ComponentMetaFileV2
               val = migrate(migrate_type,nil,val)
             end
           end
-          converted_assigns[attr] = val
+          ret[attr] = val
         end
       end
       rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
-      rest_attrs.each do |attr|
-        converted_assigns[attr] = assigns[attr] if assigns[attr]
-      end
-
-      converted_assigns
+      rest_attrs.each{|k|ret[k] = assigns[k] if assigns[k]}
+      ret
     end
+
+    def migrate__attribute(assigns)
+      ret = PrettyPrintHash.new
+      %w{description data_type}.each{|k|ret[k] = assigns[k] if assigns[k]}
+      ret["default"] = assigns["value_asserted"] if assigns["value_asserted"]
+      ext_ref = assigns["external_ref"]
+      ret_ext_ref = ret["external_ref"] = PrettyPrintHash.new
+      type = ret_ext_ref["type"] = ext_ref["type"]
+      case type
+       when "puppet_attribute"
+        attr_name = (ext_ref["path"] =~ /node\[[^\]]+\]\[([^\]]+)\]/;$1)
+        ret_ext_ref["attribute_name"] = attr_name
+        (ret_ext_ref.keys - ["type","path"]).each{|k|ret_ext_ref[k] = ext_ref[k]}
+       else
+        raise Error.new("Do not treat attribute type: #{type}")
+      end
+      ret
+    end
+
     def migrate__ui(assigns)
       migrate__ui__single_png(assigns)||assigns
     end

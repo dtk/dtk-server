@@ -47,8 +47,7 @@ module DTK; class ComponentMetaFileV2
 
     def migrate__external_ref(ext_ref_assigns)
       ret = PrettyPrintHash.new
-      type = ext_ref_assigns["type"]
-      key = type
+      key = type = ext_ref_assigns["type"]
       val_attr = nil
       override_val = nil
       case type
@@ -58,11 +57,13 @@ module DTK; class ComponentMetaFileV2
         val_attr = "definition_name"
        when "puppet_attribute"
         val_attr = "path"
-        override_val = (ext_ref_assigns["path"] =~ /node\[[^\]]+\]\[([^\]]+)\]/;$1)
+        override_val = (ext_ref_assigns["path"] =~ /node\[[^\]]+\]\[([^\]]+)/; $1)
        else
         raise Error.new("Do not treat external ref type: #{type}")
       end
-      ret[val_attr] = override_val||ext_ref_assigns[val_attr]
+      ret[key] = override_val||ext_ref_assigns[val_attr]
+
+      #get any other attributes in ext_ref
       (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
       ret
     end

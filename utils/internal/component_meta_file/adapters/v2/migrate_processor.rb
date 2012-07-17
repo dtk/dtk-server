@@ -6,12 +6,13 @@ module DTK; class ComponentMetaFileV2
       @parent = parent
     end
     def generate_new_version_hash()
-      top = PrettyPrintHash.new
-      top["version"] = @parent.version()
-      cmps = top["components"] = PrettyPrintHash.new
-      @old_version_hash.inject(cmps) do |h,(cmp_ref,cmp_info)|
-        h.merge(cmp_ref=>migrate(:component,cmp_ref,cmp_info))
+      ret = PrettyPrintHash.new
+      ret["version"] = @parent.version()
+      cmps = ret["components"] = PrettyPrintHash.new
+      @old_version_hash.each do |cmp_ref,cmp_info|
+        cmps[cmp_ref] = migrate(:component,cmp_ref,cmp_info)
       end
+      ret
     end
    private
     AttrOrdered = { 

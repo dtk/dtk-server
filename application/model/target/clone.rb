@@ -40,6 +40,11 @@ module XYZ
 
       def self.assembly(target,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
+
+        #adjust link_def_id on ports
+        #TODO: betetr if did this by default in fk - key_shift
+        set_ports_link_def_ids(clone_copy_output)
+
         level = 1
         if R8::Config[:use_node_bindings]
           port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
@@ -55,9 +60,6 @@ module XYZ
 
 
         level = 2
-        #adjust link_def_id on ports
-        #TODO: betetr if did this by default in fk - key_shift
-        set_port_link_def_ids(clone_copy_output)
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         project = target.get_project()
         #TODO: more efficient to do in bulk
@@ -73,7 +75,7 @@ module XYZ
         StateChange.create_pending_change_items(component_new_items)
       end
 
-      def self.set_port_link_def_ids(clone_copy_output)
+      def self.set_ports_link_def_ids(clone_copy_output)
         ports = clone_copy_output.children_hash_form(2,:port).map{|r|r[:obj_info]}
         return if ports.empty?
         cmps = clone_copy_output.children_hash_form(2,:component).map{|r|r[:obj_info]}
@@ -82,7 +84,7 @@ module XYZ
           cmp_type = Port.parse_external_port_display_name(port[:display_name])[:component_type]
           node_node_id = port[:node_node_id]
           #TODO: check display name will always be same as component_type
-          cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] = node_node_id}
+          cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] == node_node_id}
           unless cmp_match
             Log.error("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
             next

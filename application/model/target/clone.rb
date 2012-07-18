@@ -58,8 +58,8 @@ module XYZ
         #adjust link_def_id on ports
         #TODO: betetr of ddid this by default in fk - key_shift
         port_child_hashes = clone_copy_output.children_hash_form(level,:port)
-        #set_port_link_def_ids(port_child_hashes)
-        #component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
+        set_port_link_def_ids(port_child_hashes)
+        component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         project = target.get_project()
         #TODO: more efficient to do in bulk
         component_child_hashes.each do |child_hash|

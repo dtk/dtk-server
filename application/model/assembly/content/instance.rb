@@ -107,7 +107,8 @@ module DTK
         out_port_ref = qualified_ref(out_port)
 
         assembly_ref = self[:ref]
-        port_link_ref = "#{assembly_ref}-#{in_port_ref}-#{out_port_ref}"
+        #TODO: make port_link_ref and port_refs shorter
+        port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",

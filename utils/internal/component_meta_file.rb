@@ -21,9 +21,10 @@ module DTK
       config_agent_type,file_extension = parse_meta_filename(filename)
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension
-      impl_idh = file_obj_hash[:implementation].id_handle()
+      impl = file_obj_hash[:implementation]
+      module_branch_idh = impl.get_module_branch().id_handle()
       input_hash = convert_to_hash(format_type,content)
-      self.new(config_agent_type,impl_idh,input_hash)
+      self.new(config_agent_type,impl.id_handle(),module_branch_idh,input_hash)
     end
     ExtensionToType = {
       "yml" => :yaml
@@ -50,7 +51,7 @@ module DTK
     end
 
     attr_reader :input_hash
-    def initialize(config_agent_type,impl_idh,version_specific_input_hash)
+    def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash)
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh

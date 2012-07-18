@@ -32,8 +32,9 @@ module DTK; class ComponentMetaFile
       #process the link defs for remote components
       process_remote_link_defs!(cmps_hash,remote_link_defs,container_idh)
 
-      #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items taht are removed
-      db_update_hash = db_update_form(cmps_hash)
+      #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items that are removed
+      module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()
+      db_update_hash = db_update_form(cmps_hash,module_branch_idh)
       Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {
         :cols => [:id,:display_name], 
@@ -43,10 +44,11 @@ module DTK; class ComponentMetaFile
       component_idhs
     end
    private
-    def db_update_form(cmps_input_hash)
+    def db_update_form(cmps_input_hash,module_branch_idh)
+      mark_as_complete_constraint = {:module_branch_id=>module_branch_idh.get_id()} #so only delete extra components that belong to same module
       cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
         h.merge(ref => db_update_form_aux(:component,hash_assigns))
-      end.mark_as_complete()
+      end.mark_as_complete(mark_as_complete_constraint)
       {"component" => cmp_db_update_hash}
     end
 

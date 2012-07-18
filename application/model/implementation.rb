@@ -168,6 +168,10 @@ module XYZ
     end
     private :repo_manager_context
 
+    def get_module_branch()
+      get_obj(:cols => [:repo_id,:branch,:module_branch])[:module_branch]
+    end
+
     #TODO: unify with project#get_module_tree()
     def get_module_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:type,:project_project_id,:component_template]}

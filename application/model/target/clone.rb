@@ -53,8 +53,13 @@ module XYZ
         indexed_node_info = Hash.new #TODO: may have state create this as output
         node_sc_idhs.each_with_index{|sc_idh,i|indexed_node_info[node_idhs[i].get_id()] = sc_idh}
 
+
         level = 2
-        component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
+        #adjust link_def_id on ports
+        #TODO: betetr of ddid this by default in fk - key_shift
+        port_child_hashes = clone_copy_output.children_hash_form(level,:port)
+        #set_port_link_def_ids(port_child_hashes)
+        #component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         project = target.get_project()
         #TODO: more efficient to do in bulk
         component_child_hashes.each do |child_hash|
@@ -67,6 +72,9 @@ module XYZ
         end
         return if component_new_items.empty?
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def set_port_link_def_ids(port_child_hashes)
       end
 
       def self.assembly__port_links(target,clone_copy_output,port_link_idhs,opts)

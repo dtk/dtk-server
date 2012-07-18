@@ -56,9 +56,8 @@ module XYZ
 
         level = 2
         #adjust link_def_id on ports
-        #TODO: betetr of ddid this by default in fk - key_shift
-        port_child_hashes = clone_copy_output.children_hash_form(level,:port)
-        set_port_link_def_ids(port_child_hashes)
+        #TODO: betetr if did this by default in fk - key_shift
+        set_port_link_def_ids(clone_copy_output)
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         project = target.get_project()
         #TODO: more efficient to do in bulk
@@ -74,7 +73,30 @@ module XYZ
         StateChange.create_pending_change_items(component_new_items)
       end
 
-      def set_port_link_def_ids(port_child_hashes)
+      def self.set_port_link_def_ids(clone_copy_output)
+        ports = clone_copy_output.children_hash_form(2,:port).map{|r|r[:obj_info]}
+        return if ports.empty?
+        cmps = clone_copy_output.children_hash_form(2,:component).map{|r|r[:obj_info]}
+        link_defs = clone_copy_output.children_hash_form(3,:link_def).map{|r|r[:obj_info]}
+        update_rows = ports.map do |port|
+          cmp_type = Port.parse_external_port_display_name(port[:display_name])[:component_type]
+          node_node_id = port[:node_node_id]
+          #TODO: check display name will always be same as component_type
+          cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] = node_node_id}
+          unless cmp_match
+            Log.error("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
+            next
+          end
+          cmp_id = cmp_match[:id]
+          link_def_match = link_defs.find{|ld|ld[:component_component_id] ==  cmp_id}
+          unless link_def_match
+            Log.error("Cannot find matching link def for component with id (#{cmp_id})")
+            next
+          end
+          {:id => port[:id], :link_def_id => link_def_match[:id]}
+        end.compact
+        port_mh = clone_copy_output.children_id_handles(2,:port).first.createMH()
+        Model.update_from_rows(port_mh,update_rows)
       end
 
       def self.assembly__port_links(target,clone_copy_output,port_link_idhs,opts)

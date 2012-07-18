@@ -1,4 +1,3 @@
-#TODO: may deprecate all the SpecialContext dealing with target_to_library (AssemblyTemplateNode,AssemblyTemplateComponent
 module XYZ
   class ChildContext < SimpleHashObject
     def clone_copy_child_objects(clone_proc,level)
@@ -32,7 +31,7 @@ module XYZ
             raise Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
           end
         end
-        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
+        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => returning_sql_cols(parent_id_col)}
         child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts, :parent_objs_info => objs_info})
         if block
           block.call(child_context)
@@ -41,6 +40,10 @@ module XYZ
         end
       end
       ret unless block
+    end
+
+    def self.returning_sql_cols(parent_id_col)
+      [:ancestor_id,parent_id_col]
     end
 
     def self.create_from_hash(clone_proc,hash)
@@ -270,24 +273,6 @@ module XYZ
       end
     end
 
-    class AssemblyTemplateNode < ChildContext
-     private
-      def self.get_children_model_handles(model_handle,omit_list=[],&block)
-        child_mh = model_handle.create_childMH(:component)
-        block.call(child_mh)
-      end
-
-      def ret_field_set_to_copy()
-        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
-      end
-    end
-
-    class AssemblyTemplateComponent < ChildContext
-      def clone_copy_child_objects(clone_proc,level)
-        super
-      end
-    end
-
     #index are clone_direction, parent, child
     SpecialContext = {
       :library_to_target => {
@@ -295,9 +280,10 @@ module XYZ
         :node => {:component_ref => AssemblyComponentRef},
         :component => {:attribute => AssemblyComponentAttribute}
       },
+      #TODO: remove
       :target_to_library => {
-        :library => {:node => AssemblyTemplateNode},
-        :node => {:component => AssemblyTemplateComponent}
+        #:library => {:node => AssemblyTemplateNode},
+        #:node => {:component => AssemblyTemplateComponent}
       }
     }
   end

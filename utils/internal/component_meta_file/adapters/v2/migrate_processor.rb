@@ -9,6 +9,7 @@ module DTK; class ComponentMetaFileV2
       ret = PrettyPrintHash.new
       ret["module_name"] = @module_name
       ret["version"] = @parent.version()
+      ret["module_type"] = "puppet_module" #TODO: hard-wired
       cmps = ret["components"] = PrettyPrintHash.new
       @old_version_hash.each do |cmp_ref,cmp_info|
         cmps.merge!(strip_module_name(cmp_ref)=> migrate(:component,cmp_ref,cmp_info))
@@ -71,7 +72,8 @@ module DTK; class ComponentMetaFileV2
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
        {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}},
-       {:component_order => {:new_key => :constraints,:custom_fn => :component_order_rels}}
+       {:component_order => {:new_key => :constraints,:custom_fn => :component_order_rels}},
+       {:external_link_defs => {:custom_fn => :external_link_defs}}
       ]
     }
     AttrOmit = {
@@ -121,6 +123,49 @@ module DTK; class ComponentMetaFileV2
       ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
       ret["external_ref"] =  migrate__external_ref(attr_info["external_ref"])
       ret
+    end
+
+    def migrate__external_link_defs(external_link_defs)
+      ret = PrettyPrintHash.new
+      external_link_defs.each do |external_link_def|
+        type = external_link_def["type"]
+        if ret[type]
+          raise Error.new("Unexpected that more than one instance of link def type (#{type})")
+        end
+        ret[type] = migrate__external_link_def(external_link_def)
+      end
+      ret
+    end
+
+    def migrate__external_link_def(assigns)
+      ret = PrettyPrintHash.new
+      ret["required"] = true if assigns["required"]
+      ret["possible_links"] = assigns["possible_links"].map{|pl| migrate__possible_link(pl)}
+      ret
+    end
+
+    def migrate__possible_link(assigns)
+      remote_cmp_ref = qualified_component_ref(assigns.keys.first)
+      info = assigns.values.first
+      unless info.keys == ["attribute_mappings"]
+        raise Error.new("TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
+      end
+      possible_link_info = PrettyPrintHash.new
+      possible_link_info["attribute_mappings"] = info["attribute_mappings"].map{|am|migrate__attribute_mapping(am)}
+      {remote_cmp_ref => possible_link_info}
+    end
+
+    def migrate__attribute_mapping(assigns)
+      unless assigns.kind_of?(Hash) and assigns.size == 1
+        raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
+      end
+      {migrate__atriibute_mapping_attr(assigns.keys.first) => migrate__atriibute_mapping_attr(assigns.values.first)}
+    end
+
+    def migrate__atriibute_mapping_attr(var)
+      parts = var.split(".")
+      parts[0] = ([":remote_node",":local_node"].include?(parts[0]) ? parts[0] : qualified_component_ref(parts[0])).gsub(/^:/,"")
+      parts.join(".")
     end
 
     def migrate__ui(assigns)

@@ -66,6 +66,10 @@ module DTK; class ComponentMetaFile
           ret[key] = child_hash
         end
       end
+      #mark as complete any child taht does not appear in hash_assigns
+      (children_model_names.map{|r|r.to_s} - hash_assigns.keys).each do |key|
+        ret[key] = DBUpdateHash.new().mark_as_complete()
+      end
       ret
     end
 

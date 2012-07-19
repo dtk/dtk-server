@@ -59,7 +59,10 @@ module DTK; class ComponentMetaFileV2
       end
 
       rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
-      rest_attrs.each{|k|ret[k] = assigns[k] if assigns[k]}
+      unless rest_attrs.empty?
+        raise Error.new("TODO: not yet implemented component keys (#{rest_attrs.jsoin(",")})")
+      end
+#      rest_attrs.each{|k|ret[k] = assigns[k] if assigns[k]}
       ret
     end
 

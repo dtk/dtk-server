@@ -81,8 +81,8 @@ module DTK
 
       def component_output_form(component_hash)
         name = component_name_output_form(component_hash[:component_type])
-        if component_hash[:attributes]
-          {name => component_hash[:attributes].inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
+        if attr_overrides = component_hash[:attribute_override]
+          {name => attr_overrides.values.inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
         else
           name 
         end

@@ -142,10 +142,28 @@ module DTK
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
-        unless cmp[:non_default_attributes].empty?
-          raise Error.new("TODO: implement non default attttributes")
-        end
+        add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}
+      end
+
+      def add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
+        attrs = cmp[:non_default_attributes]
+        return if attrs.nil? or attrs.empty?
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:and,[:eq,:component_component_id,cmp_template_id],[:oneof,:display_name,attrs.map{|a|a[:display_name]}]]
+        }
+        ndx_attrs = Model.get_objs(model_handle(:attribute),sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:display_name] => r)
+        end
+        attr_override = cmp_ref_hash[:attribute_override] = Hash.new
+        attrs.each do |attr|
+          attr_ref =  attr[:ref]
+          attr_hash =  Aux::hash_subset(attr,[:display_name,:description])
+          attr_hash[:attribute_value] = attr[:attribute_value] #TODO: wasnt sure if Aux::hash_subset works for virtual attributes
+          attr_hash[:attribute_template_id] = ndx_attrs[attr[:display_name]][:id]
+          attr_override[attr_ref] = attr_hash
+        end
       end
     end
   end

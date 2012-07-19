@@ -120,6 +120,12 @@ module XYZ
       Model.delete_instances(impls.map{|impl|impl.id_handle()})
     end
 
+    def add_file_and_push_to_repo(file_path,content,opts={})
+      update_object!(:type,:repo,:branch)
+      file_type = ImplTypeToFileType[self[:type]]
+      FileAsset.add_and_push_to_repo(self,file_type,file_path,content,opts)
+    end
+
     #TODO: this need s to be updated to rflect that can be on different branches
     def create_file_assets_from_dir_els(repo_obj)
       update_object!(:type)
@@ -133,19 +139,9 @@ module XYZ
       end
 
       file_type = ImplTypeToFileType[self[:type]]
-      impl_id = id()
       file_asset_rows = file_paths.map do |file_path|
-        file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
-        file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
-        {
-          :ref => file_asset_ref,
-          :implementation_implementation_id => impl_id,
-          :type => file_type,
-          :display_name => file_name,
-          :file_name => file_name,
-          :path => file_path,
-          :content => nil #TODO to cleary model cache of content
-        }
+        content = nil #TODO to clear model cache of content
+        FileAsset.ret_create_hash(self,file_type,file_path,content)
       end
       #TODO: need to make create? from rows
       Model.modify_children_from_rows(model_handle(:file_asset),id_handle,file_asset_rows)

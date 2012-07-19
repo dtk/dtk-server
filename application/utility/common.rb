@@ -70,7 +70,7 @@ class R8Server
     }
   end
 
-  def get_component_meta_file(module_name)
+  def migrate_metafile(module_name)
     component_module_mh = pre_execute(:component_module)
     sp_hash = {
       :cols => [:id,:dispaly_name],
@@ -91,7 +91,11 @@ class R8Server
 
     cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
     new_version_integer = 2 
-    DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
+    hash_content = DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
+    content = JSON.pretty_generate(hash_content)
+    new_path = "dtk-meta.puppet.json"
+    impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
+    "#{repo[:local_dir]}/#{new_path}"
   end
 
   def ret_idhs(mn,hash_content,container_idh)

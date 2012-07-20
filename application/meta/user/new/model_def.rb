@@ -9,7 +9,8 @@
     :is_admin_user=> {:type=>:boolean},
     :email_addresses_primary => {:type=>:varchar, :size => 50},
     :settings => {:type=>:json},
-    :status => {:type=>:varchar, :size => 50}
+    :status => {:type=>:varchar, :size => 50},
+    :ssh_rsa_pub_keys => {:type=>:json}
   },
   :virtual_columns=>{
     :user_groups=>{

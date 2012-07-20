@@ -95,15 +95,15 @@ module XYZ
       end
     end
 
-    def add_file(file_asset,content)
+    def add_file(file_asset,content,commit_msg=nil)
       content ||= String.new
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        message = "Adding #{file_asset[:path]} in #{@branch}"
+        commit_msg ||= "Adding #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
-        git_command__commit(message)
+        git_command__commit(commit_msg)
       end
     end
 

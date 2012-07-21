@@ -23,41 +23,24 @@ module DTK
       return if new_repo_user.empty?
 
       repos = get_all_repos(model_handle)
-      return if repos.empty?
-      repo_names = repos.map{|r|r[:repo_name]}
-      RepoManager.set_user_rights_in_repos(new_repo_user[:username],repo_names,DefaultAccessRights)
+      unless repos.empty?
+        repo_names = repos.map{|r|r[:repo_name]}
+        RepoManager.set_user_rights_in_repos(new_repo_user[:username],repo_names,DefaultAccessRights)
 
-      repos.map{|repo|RepoUserAcl.update_model(repo,new_repo_user,DefaultAccessRights)}
+        repos.map{|repo|RepoUserAcl.update_model(repo,new_repo_user,DefaultAccessRights)}
+      end
     end
     DefaultAccessRights = "RW+"
 
-    def add_user_direct_access_old(rsa_pub_key)
-      user_obj = CurrentSession.new.get_user_object()
-      #block called only if key is not already there; calls update model at end to be more idempotent
-      user_obj.add_ssh_rsa_pub_key?(rsa_pub_key) do |first_key_for_user|
-        username = user_obj[:username]
-        if first_key_for_user
-          RepoManager.add_user(username,rsa_pub_key,:noop_if_exists => true)
-        end
-
-        model_handle = user_obj.id_handle().createMH(model_name)
-        repo_names = get_all_repos(model_handle).map{|r|r[:repo_name]}
-        unless repo_names.empty?
-          RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
-        end
-      end
-    end
-
-    def remove_user_direct_access(rsa_pub_key)
-      user_obj = CurrentSession.new.get_user_object()
-      #block called only if key is already there; calls update model at end to be more idempotent
-      user_obj.remove_ssh_rsa_pub_key?(rsa_pub_key) do 
-        username = user_obj[:username]
+    def remove_user_direct_access(model_handle,rsa_pub_key)
+      RepoUser.delete_repo_user?(model_handle.createMH(:repo_user),rsa_pub_key) do |repo_user_to_delete|
+        username = repo_user_to_delete[:username]
         RepoManager.delete_user(username)
-        model_handle = user_obj.id_handle().createMH(model_name)
-        repo_names = get_all_repos(model_handle).map{|r|r[:repo_name]}
-        unless repo_names.empty?
+        repos = get_all_repos(model_handle)
+        unless repos.empty?
+          repo_names = repos.map{|r|r[:repo_name]}
           RepoManager.remove_user_rights_in_repos(username,repo_names)
+          #repo user acls deleted by foriegn key cascade
         end
       end
     end

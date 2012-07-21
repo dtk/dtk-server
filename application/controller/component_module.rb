@@ -40,7 +40,7 @@ module XYZ
 
     def rest__remove_user_direct_access()
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      ComponentModule.remove_user_direct_access(rsa_pub_key)
+      ComponentModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
       rest_ok_response
     end
   end

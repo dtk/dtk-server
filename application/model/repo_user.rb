@@ -30,6 +30,22 @@ module XYZ
       create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
     end
 
+    #returns or calss as blcok argument repo_user_to_delete
+    def self.delete_repo_user?(repo_user_mh,ssh_rsa_pub_key,&block)
+      ret = nil
+      repo_users = get_existing_repo_users(repo_user_mh,:ssh_rsa_pub_key => ssh_rsa_pub_key)
+      case repo_users.size
+       when 0
+        return ret
+       when 1
+        ret = repo_users.first
+       else
+        raise Error.new("Unexpected to have multiple matches of repo user when matching on ssh key")
+      end
+      block.call(ret) if block
+      delete_instance(ret.id_handle())
+    end
+
     def self.get_by_repo_username(model_handle,repo_username)
       sp_hash = {
         :cols => [:id,:username],
@@ -41,7 +57,7 @@ module XYZ
    private
     def self.get_existing_repo_users(repo_user_mh,filter_keys={})
       sp_hash = {
-        :cols => [:id,:username,:type,:index,:ssh_rsa_pub_key]
+        :cols => [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key]
       }
       unless filter_keys.empty?
         filter_list = filter_keys.map{|k,v|[:eq,k,v]}

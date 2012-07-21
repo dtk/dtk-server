@@ -28,7 +28,7 @@ module DTK
         end
 
         model_handle = user_obj.id_handle().createMH(model_name)
-        repo_names = get_objs(model_handle,{:cols => [:repos]}).map{|r|r[:repo][:repo_name]}
+        repo_names = get_all_repos(model_handle).map{|r|r[:repo][:repo_name]}
         unless repo_names.empty?
           RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
         end
@@ -72,6 +72,13 @@ module DTK
 
 
    private
+    def get_all_repos(mh)
+      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
+        h[r[:id]] ||= r
+        h
+      end.values
+    end
+
     def remote_already_imported?(library_idh,remote_module_name)
       ret = nil
       sp_hash = {

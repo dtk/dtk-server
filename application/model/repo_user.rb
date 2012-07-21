@@ -1,6 +1,7 @@
 module XYZ
   class RepoUser < Model
-    #TODO: stub that gets all repo users
+
+    #TODO: stub that gets all repo users that are visbile; may restrict by filter on owner
     def self.authorized_users(model_handle)
       get_objs(model_handle, :cols => [:id,:username]).map{|r|r[:username]}
     end
@@ -9,24 +10,34 @@ module XYZ
     def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_pub_key=nil)
       repo_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key
-        return false if repo_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
+        match = repo_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
+        return match if match
       else
         case repo_users.size
          when 0
          when 1
-          return false
+          return repo_users.first
          else
           raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
         end
       end
       
       repo_username,index =  ret_new_repo_username_and_index(repo_user_type,repo_users)
+      if ssh_rsa_pub_key
+        RepoManager.add_user(repo_username,ssh_rsa_pub_key,:noop_if_exists => true)
+      end
       create(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
-      true
+    end
+
+    def self.get_by_repo_username(model_handle,repo_username)
+      sp_hash = {
+        :cols => [:id,:username],
+        :filter => [:eq,:username,repo_username]
+      }
+      get_obj(model_handle,sp_hash)
     end
 
    private
-    
     def self.get_existing_repo_users(repo_user_mh,filter_keys={})
       sp_hash = {
         :cols => [:id,:username,:type,:index,:ssh_rsa_pub_key]
@@ -70,16 +81,8 @@ module XYZ
       if ssh_rsa_pub_key
         create_row[:ssh_rsa_pub_key] = ssh_rsa_pub_key
       end
-      create_from_row(model_handle,create_row)
-    end
-
-#TODO: deprecate?
-    def self.get_by_repo_username(model_handle,username)
-      sp_hash = {
-        :cols => [:id,:username],
-        :filter => [:eq,:username,username]
-      }
-      get_obj(model_handle,sp_hash)
+      new_idh = create_from_row(model_handle,create_row)
+      new_idh.create_object.merge(create_row)
     end
   end
 end

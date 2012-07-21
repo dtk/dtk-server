@@ -4,7 +4,7 @@ module XYZ
     class << self
       #admin and repo methods that just pass to lower level object or class
       RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r]
-      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_name,:set_user_rights_in_repos,:add_ser,:delete_user]
+      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_name,:set_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)
@@ -25,12 +25,7 @@ module XYZ
         RepoMethods.include?(name) or !!class_if_admin_method?(name)
       end
       def class_if_admin_method?(name)
-        if AdminMethods.include?(name) 
-          klass = load_and_return_adapter_class()
-          if klass.public_methods(false).include?(name.to_s)
-            klass
-          end
-        end
+        load_and_return_adapter_class() if AdminMethods.include?(name)
       end
     end
 

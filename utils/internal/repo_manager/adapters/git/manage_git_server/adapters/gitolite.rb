@@ -85,8 +85,8 @@ module XYZ
           commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"
           admin_repo.add_file({:path => repo_config_file_path},content,commit_msg)
         end
-        admin_repo.push_changes() unless update_repos.empty?
-        update_repos
+        admin_repo.push_changes() unless updated_repos.empty?
+        updated_repos
       end
 
      private

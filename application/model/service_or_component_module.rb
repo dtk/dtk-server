@@ -20,17 +20,18 @@ module DTK
   module ServiceOrComponentModuleClassMixin
     def add_user_direct_access(rsa_pub_key)
       user_obj = CurrentSession.new.get_user_object()
-      key_added,first_key_for_user = user_obj.add_ssh_rsa_pub_key?(rsa_pub_key)
-      return if key_added
+      #block called only if key is not already there; calls update model at end to be more idempotent
+      user_obj.add_ssh_rsa_pub_key?(rsa_pub_key) do |first_key_for_user|
+        username = user_obj[:username]
+        if first_key_for_user
+          RepoManager.add_user(username,rsa_pub_key,:noop_if_exists => true)
+        end
 
-      username = user_obj[:username]
-      if first_key_for_user
-        RepoManager.add_user(username,rsa_pub_key,:noop_if_exists => true)
-      end
-
-      repo_names = get_objs(model_handle,{:cols => [:repos]}).map{|r|r[:repo][:repo_name]}
-      unless repo_names.empty?
-        RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
+        model_handle = user_obj.id_handle().createMH(model_name)
+        repo_names = get_objs(model_handle,{:cols => [:repos]}).map{|r|r[:repo][:repo_name]}
+        unless repo_names.empty?
+          RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
+        end
       end
     end
 

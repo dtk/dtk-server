@@ -18,14 +18,18 @@ module DTK
   end
 
   module ServiceOrComponentModuleClassMixin
-    def add_user_direct_access(rsa_pub_key)
-      model_handle = user_obj.id_handle().createMH(model_name)
-      repo_user = RepoUser.dd_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
-      repo_names = get_all_repos(model_handle).map{|r|r[:repo][:repo_name]}
-      unless repo_names.empty?
-        RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
-      end
+    def add_user_direct_access(model_handle,rsa_pub_key)
+      new_repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
+      return unless new_repo_user.empty?
+
+      repos = get_all_repos(model_handle)
+      return if repo.empty?
+      repo_names = repos.map{|r|r[:repo_name]}
+      RepoManager.set_user_rights_in_repos(new_repo_user[:username],repo_names,DefaultAccessRights)
+
+      repos.map{|repo|RepoUserAcl.update_model(repo,new_repo_user,DefaultAccessRights)}
     end
+    DefaultAccessRights = "RW+"
 
     def add_user_direct_access_old(rsa_pub_key)
       user_obj = CurrentSession.new.get_user_object()

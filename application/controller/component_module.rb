@@ -34,7 +34,7 @@ module XYZ
 
     def rest__add_user_direct_access()
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      ComponentModule.add_user_direct_access(rsa_pub_key)
+      ComponentModule.add_user_direct_access(model_handle,rsa_pub_key)
       rest_ok_response
     end
 

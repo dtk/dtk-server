@@ -13,6 +13,14 @@ module XYZ
       get_objs(model_handle,:cols => [:repo_name]).map{|r|r[:repo_name]}
     end
 
+    def get_acesss_rights(repo_user_idh)
+      sp_hash = {
+        :cols => [:access_rights,:repo_usel_id,:repo_id],
+        :filter => [:and [:eq,:repo_id,id()],[:eq,:repo_user_id,repo_user_idh.get_id()]]
+      }
+      Model.get_obj(model_handle(:repo_user_acl),sp_hash)
+    end
+
     def self.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name
       public_lib = Library.get_public_library(library_idh.createMH())
@@ -30,7 +38,7 @@ module XYZ
       repo_mh = library_idh.createMH(:repo)
       repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
       repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
-      RepoUserAcl.modify(repo_idh,repo_user_acls)
+      RepoUserAcl.modify_model(repo_idh,repo_user_acls)
       RepoManager.create_repo_and_local_clone(repo_obj,repo_user_acls,opts) 
       repo_obj
     end

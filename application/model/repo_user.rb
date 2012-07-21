@@ -27,7 +27,7 @@ module XYZ
       if ssh_rsa_pub_key
         RepoManager.add_user(repo_username,ssh_rsa_pub_key,:noop_if_exists => true)
       end
-      create(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
+      create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
     end
 
     def self.get_by_repo_username(model_handle,repo_username)
@@ -72,7 +72,7 @@ module XYZ
       [new_repo_username,new_index]
     end
 
-    def self.create(model_handle,type,repo_username,index,ssh_rsa_pub_key)
+    def self.create_instance(model_handle,type,repo_username,index,ssh_rsa_pub_key)
       create_row = {
         :ref => repo_username,
         :display_name => repo_username,

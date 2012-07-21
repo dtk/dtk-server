@@ -21,6 +21,13 @@ module Ramaze::Helper
       ModelHandle.create_from_user(user_obj,model_name_x)
     end
 
+    def model_handle_with_private_group(model_name_x=model_name())
+      user_obj = user_object()
+      ret = ModelHandle.create_from_user(user_obj,model_name_x)
+      group_obj = UserGroup.get_private_group(ret.createMH(:user_group),user_obj[:username])
+      ret.merge(:group_id => group_obj[:id])
+    end
+
     #looks for default if no target is given
     def target_idh_with_default(target_id=nil)
       if target_id

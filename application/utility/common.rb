@@ -24,12 +24,12 @@ class R8Server
   ###actions
   def create_repo_user_r8server?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.create_r8server?(repo_user_mh)
+    RepoUser.add_repo_user?(:system,repo_user_mh)
   end
 
-  def create_repo_user_client?()
+  def create_repo_user_for_nodes?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.create_r8client?(repo_user_mh,username)
+    RepoUser.add_repo_user?(:node,repo_user_mh)
   end
 
   def create_public_library?(opts={})

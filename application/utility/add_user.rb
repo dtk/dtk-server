@@ -15,7 +15,7 @@ end.parse!
 username = ARGV[0]
 server = R8Server.new(username)
 
-server.create_repo_user_client?()
+server.create_repo_user_for_nodes?()
 
 server.create_users_private_library?() if options[:create_private]
 

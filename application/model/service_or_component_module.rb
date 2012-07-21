@@ -20,10 +20,10 @@ module DTK
   module ServiceOrComponentModuleClassMixin
     def add_user_direct_access(model_handle,rsa_pub_key)
       new_repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
-      return unless new_repo_user.empty?
+      return if new_repo_user.empty?
 
       repos = get_all_repos(model_handle)
-      return if repo.empty?
+      return if repos.empty?
       repo_names = repos.map{|r|r[:repo_name]}
       RepoManager.set_user_rights_in_repos(new_repo_user[:username],repo_names,DefaultAccessRights)
 
@@ -41,7 +41,7 @@ module DTK
         end
 
         model_handle = user_obj.id_handle().createMH(model_name)
-        repo_names = get_all_repos(model_handle).map{|r|r[:repo][:repo_name]}
+        repo_names = get_all_repos(model_handle).map{|r|r[:repo_name]}
         unless repo_names.empty?
           RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
         end
@@ -55,7 +55,7 @@ module DTK
         username = user_obj[:username]
         RepoManager.delete_user(username)
         model_handle = user_obj.id_handle().createMH(model_name)
-        repo_names = get_all_repos(model_handle).map{|r|r[:repo][:repo_name]}
+        repo_names = get_all_repos(model_handle).map{|r|r[:repo_name]}
         unless repo_names.empty?
           RepoManager.remove_user_rights_in_repos(username,repo_names)
         end
@@ -101,7 +101,8 @@ module DTK
    private
     def get_all_repos(mh)
       get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
-        h[r[:id]] ||= r
+        repo = r[:repo]
+        h[repo[:id]] ||= repo
         h
       end.values
     end

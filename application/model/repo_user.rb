@@ -7,7 +7,7 @@ module XYZ
     end
 
     #ssh_rsa_pub_key.nil? means that expected that key already exists in the gitolite admin db 
-    #returns an object only it a new one craeted
+    #returns an object or calss block (with new object) only it a new one craeted
     def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_pub_key=nil)
       repo_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key

@@ -58,7 +58,7 @@ lambda__segment_components =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_repos.call(:cols => [:id,:display_name,:repo_name,:local_dir,:remote_repo_name])]
+       lambda__segment_repos.call(:cols => [:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
     :implementations=>{
       :type=>:json,

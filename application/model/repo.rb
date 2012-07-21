@@ -16,7 +16,7 @@ module XYZ
     def get_acesss_rights(repo_user_idh)
       sp_hash = {
         :cols => [:access_rights,:repo_usel_id,:repo_id],
-        :filter => [:and [:eq,:repo_id,id()],[:eq,:repo_user_id,repo_user_idh.get_id()]]
+        :filter => [:and, [:eq,:repo_id,id()],[:eq,:repo_user_id,repo_user_idh.get_id()]]
       }
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end

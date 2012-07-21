@@ -35,6 +35,20 @@ module DTK
       end
     end
 
+    def remove_user_direct_access(rsa_pub_key)
+      user_obj = CurrentSession.new.get_user_object()
+      #block called only if key is already there; calls update model at end to be more idempotent
+      user_obj.remove_ssh_rsa_pub_key?(rsa_pub_key) do 
+        username = user_obj[:username]
+        RepoManager.delete_user(username)
+        model_handle = user_obj.id_handle().createMH(model_name)
+        repo_names = get_all_repos(model_handle).map{|r|r[:repo][:repo_name]}
+        unless repo_names.empty?
+          RepoManager.remove_user_rights_in_repos(username,repo_names)
+        end
+      end
+    end
+
     def delete(idh)
       module_obj = idh.create_object()
       unless module_obj.get_target_instances().empty?

@@ -108,7 +108,9 @@ module XYZ
     end
 
     def delete_file?(file_path)
-      delete_file(file_path) if File.exists?("#{@path}/#{file_path}")
+      ret = File.exists?("#{@path}/#{file_path}")
+      delete_file(file_path) if ret
+      ret
     end
 
     def delete_file(file_path)

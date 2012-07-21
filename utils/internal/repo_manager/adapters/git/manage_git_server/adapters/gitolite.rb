@@ -37,8 +37,8 @@ module XYZ
       def delete_server_repo(repo_name,opts={})
         admin_repo.pull_changes() unless opts[:do_not_pull_changes]
         file_path = repo_config_file_relative_path(repo_name)
-        admin_repo.delete_file?(file_path)
-        admin_repo.push_changes() unless opts[:do_not_push_changes]
+        file_deleted = admin_repo.delete_file?(file_path)
+        admin_repo.push_changes() unless opts[:do_not_push_changes] or not file_deleted
       end
 
       def add_user(username,rsa_pub_key,opts={})
@@ -64,22 +64,39 @@ module XYZ
         #TODO: may want to remove all refs to user in .conf files
         ret = username
         key_path = repo_user_public_key_relative_path(username)
-        admin_repo.delete_file(key_path)
-        admin_repo.push_changes()
+        file_deleted = admin_repo.delete_file?(key_path)
+        if file_deleted
+          admin_repo.push_changes()
+        end
         ret
       end
 
+      def remove_user_rights_in_repos(username,repo_names)
+        set_user_rights_in_repos(username,repo_names,"")
+      end
+
+      #access_rights="" means remove access rights
       def set_user_rights_in_repos(username,repo_names,access_rights="R")
         repo_names = [repo_names] unless repo_names.kind_of?(Array)
         updated_repos = Array.new
         repo_names.each do |repo_name|
           repo_user_acls = get_existing_repo_user_acls(repo_name)
-          if match = repo_user_acls.find{|r|r[:repo_username] == username}
+          match = repo_user_acls.find{|r|r[:repo_username] == username}
+          if match
+            #no op if username has specified rights
             next if match[:access_rights] == access_rights
             repo_user_acls.reject!{|r|r[:repo_username] == username}
+          else
+            #no op if username does not appear in repo and access_rights="", meaning remove access rights
+            next if access_rights.empty?
           end
           updated_repos << repo_name
-          augmented_repo_user_acls = repo_user_acls + [{:repo_username => username, :access_rights => access_rights}]
+
+          augmented_repo_user_acls = repo_user_acls
+          unless access_rights.empty?
+            augmented_repo_user_acls << {:repo_username => username, :access_rights => access_rights}
+          end
+
           content = generate_config_file_content(repo_name,augmented_repo_user_acls)
           repo_config_file_path = repo_config_file_relative_path(repo_name)
           commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"

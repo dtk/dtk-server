@@ -31,5 +31,11 @@ module XYZ
       ComponentModule.delete(id_handle(component_module_id))
       rest_ok_response
     end
+
+    def rest__add_user_direct_access()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      ComponentModule.add_user_direct_access(rsa_pub_key)
+      rest_ok_response
+    end
   end
 end

@@ -69,26 +69,27 @@ module XYZ
         ret
       end
 
-      def set_user_rights_in_repo(username,repo_name,access_rights="R")
-        ret = repo_name
-        repo_user_acls = get_existing_repo_user_acls(repo_name)
-        if match = repo_user_acls.find{|r|r[:repo_username] == username}
-          return ret if match[:access_rights] == access_rights
-          repo_user_acls.reject!{|r|r[:repo_username] == username}
+      def set_user_rights_in_repos(username,repo_names,access_rights="R")
+        repo_names = [repo_names] unless repo_names.kind_of?(Array)
+        updated_repos = Array.new
+        repo_names.each do |repo_name|
+          repo_user_acls = get_existing_repo_user_acls(repo_name)
+          if match = repo_user_acls.find{|r|r[:repo_username] == username}
+            next if match[:access_rights] == access_rights
+            repo_user_acls.reject!{|r|r[:repo_username] == username}
+          end
+          updated_repos << repo_name
+          augmented_repo_user_acls = repo_user_acls + [{:repo_username => username, :access_rights => access_rights}]
+          content = generate_config_file_content(repo_name,augmented_repo_user_acls)
+          repo_config_file_path = repo_config_file_relative_path(repo_name)
+          commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"
+          admin_repo.add_file({:path => repo_config_file_path},content,commit_msg)
         end
-        
-        augmented_repo_user_acls = repo_user_acls + [{:repo_username => username, :access_rights => access_rights}]
-        content = generate_config_file_content(repo_name,augmented_repo_user_acls)
-        repo_config_file_path = repo_config_file_relative_path(repo_name)
-
-        commit_msg = "updating repo (#{repo_name}) to give access to user (#{username})"
-        admin_repo.add_file({:path => repo_config_file_path},content,commit_msg)
-        admin_repo.push_changes()
-        ret
+        admin_repo.push_changes() unless update_repos.empty?
+        update_repos
       end
 
      private
-
       def admin_directory()
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 
       end

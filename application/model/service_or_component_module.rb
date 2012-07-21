@@ -18,6 +18,22 @@ module DTK
   end
 
   module ServiceOrComponentModuleClassMixin
+    def add_user_direct_access(rsa_pub_key)
+      user_obj = CurrentSession.new.get_user_object()
+      key_added,first_key_for_user = user_obj.add_ssh_rsa_pub_key?(rsa_pub_key)
+      return if key_added
+
+      username = user_obj[:username]
+      if first_key_for_user
+        RepoManager.add_user(username,rsa_pub_key,:noop_if_exists => true)
+      end
+
+      repo_names = get_objs(model_handle,{:cols => [:repos]}).map{|r|r[:repo][:repo_name]}
+      unless repo_names.empty?
+        RepoManager.set_user_rights_in_repos(username,repo_names,"RW+")
+      end
+    end
+
     def delete(idh)
       module_obj = idh.create_object()
       unless module_obj.get_target_instances().empty?

@@ -20,7 +20,7 @@ module DTK
   module ServiceOrComponentModuleClassMixin
     def add_user_direct_access(model_handle,rsa_pub_key)
       new_repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
-      return if new_repo_user.empty?
+      return if new_repo_user.nil?
 
       repos = get_all_repos(model_handle)
       unless repos.empty?

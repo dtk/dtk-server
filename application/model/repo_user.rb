@@ -93,7 +93,8 @@ module XYZ
         :ref => repo_username,
         :display_name => repo_username,
         :username => repo_username,
-        :index => index
+        :index => index,
+        :type => type.to_s
       }
       if ssh_rsa_pub_key
         create_row[:ssh_rsa_pub_key] = ssh_rsa_pub_key

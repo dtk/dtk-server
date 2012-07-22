@@ -35,8 +35,15 @@ module XYZ
     def rest__add_user_direct_access()
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       ComponentModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
-      
       rest_ok_response(:repo_manager_footprint => RepoManager.footprint(), :repo_manager_dns => RepoManager.repo_server_dns())
+    end
+
+    def rest__repo_manager_info(component_module_id)
+      component_module = create_object_from_id(component_module_id)
+      ws_branch_info = component_module.get_workspace_branch_info()
+      repo_url = RepoManager.repo_url(ws_branch_info[:repo_name])
+      repo_manager_info = Aux::hash_subset(ws_branch_info,[:branch,:component_module_name]).merge(:repo_url => repo_url)
+      rest_ok_response repo_manager_info
     end
 
     def rest__remove_user_direct_access()

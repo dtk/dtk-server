@@ -4,17 +4,18 @@ module DTK
     extend ServiceOrComponentModuleClassMixin
     include ServiceOrComponentModuleMixin
 
-    def update_library_module_with_workspace()
-      #find augmented workspace branch
-      sp_hash = {
-        :cols => ModuleBranch.cols_for_matching_library_branches(model_name),
-        :filter => [:and, [:eq, ModuleBranch.component_module_id_col(),id()],[:eq,:is_workspace,true]]
+    def get_workspace_branch_info()
+      row = get_augmented_workspace_branch()
+      {
+        :repo_name => row[:workspace_repo][:repo_name],
+        :branch => row[:branch],
+        :component_module_name => row[:component_module][:display_name]
       }
-      aug_ws_branch_rows = Model.get_objs(model_handle(:module_branch),sp_hash)
-      if aug_ws_branch_rows.size != 1
-        raise Error.new("error in finding unique workspace branch from component module")
-      end
-      ModuleBranch.update_library_from_workspace?(aug_ws_branch_rows,:augmented => true)
+    end
+
+    def update_library_module_with_workspace()
+      aug_ws_branch_row = get_augmented_workspace_branch()
+      ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:augmented => true)
     end
     
     def self.list(service_module_mh,opts={})
@@ -60,6 +61,18 @@ module DTK
     end
 
    private
+    def get_augmented_workspace_branch()
+      sp_hash = {
+        :cols => ModuleBranch.cols_for_matching_library_branches(model_name),
+        :filter => [:and, [:eq, ModuleBranch.component_module_id_col(),id()],[:eq,:is_workspace,true]]
+      }
+      aug_ws_branch_rows = Model.get_objs(model_handle(:module_branch),sp_hash)
+      if aug_ws_branch_rows.size != 1
+        raise Error.new("error in finding unique workspace branch from component module")
+      end
+      aug_ws_branch_rows.first
+    end
+
     def self.update_components_with_branch_info(component_idhs,module_branch_idh,version)
       mb_id = module_branch_idh.get_id()
       update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id,:version=>version}}

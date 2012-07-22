@@ -40,8 +40,13 @@ module XYZ
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end
 
-    def self.repo_url()
+    def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
+      if repo_name
+        "#{@git_url}:#{repo_name}"
+      else
+        @git_url
+      end
     end
     def repo_url()
       @git_url ||= self.class.repo_url()

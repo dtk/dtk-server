@@ -19,29 +19,40 @@ module DTK
 
   module ServiceOrComponentModuleClassMixin
     def add_user_direct_access(model_handle,rsa_pub_key)
-      new_repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
-      return if new_repo_user.nil?
-
+      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
+      model_name = model_handle[:model_name]
+      return if repo_user.has_direct_access?(model_name,:donot_update => true)
+      repo_user.update_direct_access(model_name,true)
       repos = get_all_repos(model_handle)
       unless repos.empty?
         repo_names = repos.map{|r|r[:repo_name]}
-        RepoManager.set_user_rights_in_repos(new_repo_user[:username],repo_names,DefaultAccessRights)
+        RepoManager.set_user_rights_in_repos(repo_user[:username],repo_names,DefaultAccessRights)
 
-        repos.map{|repo|RepoUserAcl.update_model(repo,new_repo_user,DefaultAccessRights)}
+        repos.map{|repo|RepoUserAcl.update_model(repo,repo_user,DefaultAccessRights)}
       end
     end
     DefaultAccessRights = "RW+"
 
     def remove_user_direct_access(model_handle,rsa_pub_key)
-      RepoUser.delete_repo_user?(model_handle.createMH(:repo_user),rsa_pub_key) do |repo_user_to_delete|
-        username = repo_user_to_delete[:username]
-        RepoManager.delete_user(username)
-        repos = get_all_repos(model_handle)
-        unless repos.empty?
-          repo_names = repos.map{|r|r[:repo_name]}
-          RepoManager.remove_user_rights_in_repos(username,repo_names)
-          #repo user acls deleted by foriegn key cascade
-        end
+      repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:ssh_rsa_pub_key => rsa_pub_key)
+      return unless repo_user
+
+      model_name = model_handle[:model_name]
+      return unless repo_user.has_direct_access?(model_name)
+
+      username = repo_user[:username]
+      RepoManager.delete_user(username)
+      repos = get_all_repos(model_handle)
+      unless repos.empty?
+        repo_names = repos.map{|r|r[:repo_name]}
+        RepoManager.remove_user_rights_in_repos(username,repo_names)
+        #repo user acls deleted by foriegn key cascade
+      end
+
+      if repo_user.any_direct_access_except?(model_name)
+        repo_user.update_direct_access(model_name,false)
+      else
+        delete_instance(repo_user.id_handle())
       end
     end
 

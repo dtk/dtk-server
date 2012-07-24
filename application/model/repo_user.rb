@@ -7,17 +7,17 @@ module XYZ
     end
 
     #ssh_rsa_pub_key.nil? means that expected that key already exists in the gitolite admin db 
-    #returns an object or calss block (with new object) only it a new one craeted
+    #returns an object or calls block (with new or existing object) 
     def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_pub_key=nil)
       repo_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key
         match = repo_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
-        return nil if match
+        return match if match
       else
         case repo_users.size
          when 0
          when 1
-          return nil
+          return repo_users.first
          else
           raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
         end
@@ -30,20 +30,13 @@ module XYZ
       create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
     end
 
-    #returns or calss as blcok argument repo_user_to_delete
-    def self.delete_repo_user?(repo_user_mh,ssh_rsa_pub_key,&block)
+    def self.get_matching_repo_user(repo_user_mh,filters_keys)
       ret = nil
-      repo_users = get_existing_repo_users(repo_user_mh,:ssh_rsa_pub_key => ssh_rsa_pub_key)
-      case repo_users.size
-       when 0
-        return ret
-       when 1
-        ret = repo_users.first
-       else
-        raise Error.new("Unexpected to have multiple matches of repo user when matching on ssh key")
+      repo_users = get_existing_repo_users(repo_user_mh,filters_keys)
+      if repo_users.size > 1
+        raise Error.new("Unexpected to have multiple matches of repo user when matching on (#{filters_keys.inspect})")
       end
-      block.call(ret) if block
-      delete_instance(ret.id_handle())
+      repo_users.first
     end
 
     def self.get_by_repo_username(model_handle,repo_username)
@@ -54,10 +47,39 @@ module XYZ
       get_obj(model_handle,sp_hash)
     end
 
+    def has_direct_access?(module_model_name,opts={})
+      direct_access_col = direct_access_col(module_model_name)
+      update_object!(direct_access_col) unless opts[:donot_update]
+      self[direct_access_col]
+    end
+
+    def any_direct_access_except?(module_model_name)
+       case module_model_name
+        when :component_module then has_direct_access?(:service_module)
+        when :service_module then has_direct_access?(:component_module)
+        else raise Error.new("Illegal module model name (#{module_model_name})")
+      end
+    end
+
+    def update_direct_access(module_model_name,val)
+      direct_access_col = direct_access_col(module_model_name)
+      update(direct_access_col => val)
+      self[direct_access_col] = val
+      self
+    end
+
    private
+    def direct_access_col(module_model_name)
+      case module_model_name
+       when :component_module then :component_module_direct_access
+       when :service_module then :service_module_direct_access
+       else raise Error.new("Illegal module model name (#{module_model_name})")
+      end
+    end
+
     def self.get_existing_repo_users(repo_user_mh,filter_keys={})
       sp_hash = {
-        :cols => [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key]
+        :cols => [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
       }
       unless filter_keys.empty?
         filter_list = filter_keys.map{|k,v|[:eq,k,v]}

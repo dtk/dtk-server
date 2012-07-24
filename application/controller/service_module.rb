@@ -49,6 +49,18 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__add_user_direct_access()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      ServiceModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      rest_ok_response(:repo_manager_footprint => RepoManager.footprint(), :repo_manager_dns => RepoManager.repo_server_dns())
+    end
+
+    def rest__remove_user_direct_access()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      ServiceModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      rest_ok_response
+    end
+
     def rest__workspace_branch_info(service_module_id)
       #TODO: stub using library branch until put in service module workspace mechanism
       service_module = create_object_from_id(service_module_id)

@@ -81,6 +81,17 @@ module DTK
       version_match_row = rows.find{|r|r[:module_branch][:version] == version}
       version_match_row && version_match_row[:module_branch]
     end
+
+    def get_library_repo()
+      sp_hash = {
+        :cols => [:id,:display_name,:library_repo]
+      }
+      row = get_obj(sp_hash)
+      #opportunisticall set display name on service_module
+      self[:display_name] ||= row[:display_name]
+      row[:repo]
+    end
+
    private
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
       depth = 1
@@ -98,16 +109,6 @@ module DTK
     def ret_remote_repo_name(module_name)
       #TODO: remote_repo_name might instead be something like "sm-#{module_name}"
       module_name
-    end
-
-    def get_library_repo()
-      sp_hash = {
-        :cols => [:id,:display_name,:library_repo]
-      }
-      row = get_obj(sp_hash)
-      #opportunisticall set display name on service_module
-      self[:display_name] ||= row[:display_name]
-      row[:repo]
     end
   end
 end

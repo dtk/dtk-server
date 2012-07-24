@@ -48,5 +48,18 @@ module XYZ
       ServiceModule.delete(id_handle(service_module_id))
       rest_ok_response
     end
+
+    def rest__workspace_branch_info(service_module_id)
+      #TODO: stub using library branch until put in service module workspace mechanism
+      service_module = create_object_from_id(service_module_id)
+      repo = service_module.get_library_repo()
+      service_module_name = service_module.update_object!(:display_name)[:display_name] 
+      workspace_branch_info = {
+        :branch => "master", 
+        :module_name => service_module_name,
+        :repo_url => RepoManager.repo_url(repo[:repo_name])
+      }
+      rest_ok_response workspace_branch_info
+    end
   end
 end

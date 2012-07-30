@@ -57,11 +57,15 @@ module DTK
       end
 
       def dtk_instance_rsa_pub_key()
-        @dtk_instance_rsa_pub_key ||= AuxCommon.get_ssh_rsa_pub_key()
+        @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
       def dtk_instance_username()
-        #TODO: looks like mac might be changing on ec2 instance in which case might switch to instance id
-        @dtk_instance_username ||= "dtk-#{AuxCommon.get_macaddress().gsub(/:/,'-')}"
+        @dtk_instance_username ||= dtk_instance_username_aux()
+      end
+      def dtk_instance_username_aux()
+        #on ec2 changing mac addresses; so selectively pick instance id on ec2
+        id_handle = Common::Aux.get_ec2_instance_id() || Common::Aux.get_macaddress().gsub(/:/,'-')
+        "dtk-#{id_handle}"
       end
     end
   end

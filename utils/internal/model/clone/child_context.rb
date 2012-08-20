@@ -211,14 +211,20 @@ module XYZ
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
-        ndx_template_to_ref = Hash.new
+        nhx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
+        ndx_node_template_to_ref = Hash.new
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          ndx_template_to_ref[m[:component_template_id]] = m[:id]
+         
+          #set  ndx_node_template_to_ref
+          #first index is the associated node instance, second is teh component template
+          pntr = ndx_node_template_to_ref[nhx_node_stub_to_instance[old_par_id]] ||= Hash.new 
+          pntr[m[:component_template_id]] = m[:id]
+
           {:ancestor_id => m[:component_template_id],
             :component_template_id => m[:component_template_id],
             :node_node_id =>  node_node_id,
@@ -236,7 +242,9 @@ module XYZ
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
         ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         ret.each do |r|
-          r.merge!(:component_ref_id => ndx_template_to_ref[r[:ancestor_id]], :component_template_id => r[:ancestor_id])
+          component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
+          raise Error.new("Variable component_ref_id shoudl not be null") if component_ref_id.nil?
+          r.merge!(:component_ref_id => component_ref_id, :component_template_id => r[:ancestor_id])
         end 
         ret
       end

@@ -52,13 +52,14 @@ module XYZ
       self[:display_name].split(RefDelim)[3].to_i
     end
 
-    #example internal form component_external___hdp-hadoop__namenode___namenode_conn
-    ExternalPortRegexp = Regexp.new("component_external#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
     def self.parse_external_port_display_name(port_display_name)
-      if port_display_name =~ ExternalPortRegexp
+      #example internal form component_external___hdp-hadoop__namenode___namenode_conn
+      if port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
         {:module => $1,:component => $2,:link_def_ref => $3,:component_type => "#{$1}__#{$2}"}
+      elsif  port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)#{RefDelim}(.+$)")
+        {:module => $1,:component => $1,:link_def_ref => $2,:component_type => $1}
       else
-        ralse Error.new("unexpected display name #{port[:display_name]}")
+        raise Error.new("unexpected display name (#{port_display_name})")
       end
     end
 

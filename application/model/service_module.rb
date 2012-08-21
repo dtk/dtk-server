@@ -54,7 +54,8 @@ module DTK
         :cols => [:module_branches]
       }
       mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
-      Assembly.list_from_library(model_handle(:component),:module_branch_idhs => mb_idhs)
+      filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+      Assembly.list_from_library(model_handle(:component),:filter => filter)
     end
 
     def self.create_library_obj(library_idh,module_name,config_agent_type)

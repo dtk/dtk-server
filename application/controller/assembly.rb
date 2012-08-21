@@ -16,15 +16,19 @@ module XYZ
     #TODO: might change so is just 'list'; and bahvior varies whether object template or instance
     def rest__list_from_library()
       detail_level = ret_request_params(:detail_level)
+      filter = ret_request_params_filter()
       opts = Hash.new
       opts[:detail_level] = detail_level if detail_level
+      opts[:filter] = filter if filter
       rest_ok_response Assembly.list_from_library(model_handle(),opts)
     end
 
     def rest__list_from_target()
       detail_level = ret_request_params(:detail_level)
+      filter = ret_request_params_filter()
       opts = Hash.new
       opts[:detail_level] = detail_level if detail_level
+      opts[:filter] = filter if filter
       rest_ok_response Assembly.list_from_target(model_handle(),opts)
     end
 

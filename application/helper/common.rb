@@ -212,6 +212,14 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
+    def ret_request_param_id_from_name_or_id(param,model_class=nil)
+      id_or_name = ret_non_null_request_params(param)
+      return id_or_name if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
+
+      model_class ||= model_class(model_name)
+      model_class.name_to_id(model_handle,id_or_name)
+    end
+
     def ret_request_params(*params)
       return nil unless request_method_is_post?()
       return request.params if params.size == 0

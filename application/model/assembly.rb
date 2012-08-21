@@ -5,6 +5,8 @@ r8_nested_require('assembly','import')
 module XYZ
   class Assembly < Component
     r8_nested_require('assembly','content')
+    r8_nested_require('assembly','template')
+    r8_nested_require('assembly','instance')
     #TODO: deprecate include AssemblyExportMixin
     include AssemblyImportMixin
     extend AssemblyImportClassMixin

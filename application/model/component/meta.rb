@@ -110,6 +110,17 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
+
+    virtual_column :library, :type => :json, :hidden => true,
+      :remote_dependencies =>
+      [
+       {
+         :model_name => :library,
+         :join_type => :inner,
+         :join_cond=>{:id => :component__library_library_id},
+         :cols => [:id,:display_name]
+       }]
+
     virtual_column :node_for_state_change_info, :type => :json, :hidden => true,
       :remote_dependencies =>
       [

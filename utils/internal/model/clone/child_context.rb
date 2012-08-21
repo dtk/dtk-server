@@ -211,7 +211,7 @@ module XYZ
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
-        nhx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
+        ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_node_template_to_ref = Hash.new
         mapping_rows = matches.map do |m|
           node = m[:node]
@@ -222,7 +222,7 @@ module XYZ
          
           #set  ndx_node_template_to_ref
           #first index is the associated node instance, second is teh component template
-          pntr = ndx_node_template_to_ref[nhx_node_stub_to_instance[old_par_id]] ||= Hash.new 
+          pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
           pntr[m[:component_template_id]] = m[:id]
 
           {:ancestor_id => m[:component_template_id],

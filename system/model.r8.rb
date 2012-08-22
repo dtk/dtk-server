@@ -306,6 +306,39 @@ module XYZ
       def has_group_id_col?(model_handle)
         not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
       end
+
+      #helpers for check_valid_id and name_to_id
+      def check_valid_id_helper(model_handle,id,filter)
+        sp_hash = {
+          :cols => [:id],
+          :filter => filter
+        }
+        rows = get_objs(model_handle,sp_hash)
+        raise ErrorIdInvalid.new(id,pp_object_type())
+        id
+      end
+
+      def name_to_id_helper(model_handle,name,augmented_sp_hash)
+        post_filter = augmented_sp_hash.delete(:post_filter)
+        augmented_sp_hash[:cols] ||= [:id]
+
+        rows_raw = get_objs(model_handle,augmented_sp_hash)
+        rows = (post_filter ? rows_raw.select{|r|post_filter.call(r)} : rows_raw)
+        if rows.size == 0
+          raise ErrorNameDoesNotExist.new(name,pp_object_type())
+        elsif rows.size > 1
+          raise ErrorNameAmbiguous.new(name,pp_object_type())
+        end
+        rows.first[:id]
+      end
+
+      def pp_object_type()
+        case self.to_s
+          when "AssemblyTemplate" then "assembly template"
+          when "AssemblyInstance" then "assembly"
+          else self.to_s
+        end
+      end
     end
 
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)

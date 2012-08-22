@@ -8,8 +8,9 @@ module XYZ
     end
 
     def rest__delete()
-      assembly_id = ret_non_null_request_params(:assembly_id)
-      Assembly.delete(id_handle(assembly_id))
+      subtype = ret_request_params(:subtype)||:instance
+      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
+      Assembly.delete(id_handle(assembly_id),subtype)
       rest_ok_response 
     end
 
@@ -35,7 +36,7 @@ module XYZ
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance
-      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyInstance)
       task = Task.create_from_assembly_instance(id_handle(assembly_id))
       task.save!()
       rest_ok_response :task_id => task.id
@@ -121,7 +122,7 @@ module XYZ
     #clone assembly from library to target
     def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_request_param_id_from_name_or_id(:assembly_template_id,::DTK::AssemblyTemplate)
+      assembly_id = ret_request_param_id(:assembly_template_id,::DTK::AssemblyTemplate)
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null

@@ -222,8 +222,9 @@ module XYZ
       end
     end
 
-    def self.delete(assembly_idh)
-      if is_template?(assembly_idh)
+    def self.delete(assembly_idh,subtype=nil)
+      subtype ||= (is_template?(assembly_idh) ? :template : :instance) 
+      if subtype == :template
         delete_template(assembly_idh)
       else
         delete_instance_and_destroy_its_nodes(assembly_idh)

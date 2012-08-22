@@ -212,12 +212,16 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
-    def ret_request_param_id_from_name_or_id(param,model_class=nil)
-      id_or_name = ret_non_null_request_params(param)
-      return id_or_name if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
-
+    #param value can be id or name
+    def ret_request_param_id(param,model_class=nil)
       model_class ||= model_class(model_name)
-      model_class.name_to_id(model_handle,id_or_name)
+      id_or_name = ret_non_null_request_params(param)
+      if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
+        id = id_or_name.to_i
+        model_class.check_valid_id(model_handle,id)
+      else
+        model_class.name_to_id(model_handle,id_or_name)
+      end
     end
 
     def ret_request_params(*params)

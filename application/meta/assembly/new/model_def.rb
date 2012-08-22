@@ -56,6 +56,18 @@ lambda__template_nodes_and_components =
 }
 {
   :virtual_columns=>{
+    :target=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:datacenter,
+         :alias => :target,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__datacenter_datacenter_id},
+         :cols=>[:id,:display_name]
+       }]
+    },
     :node_assembly_attributes=> {
       :type=>:json,
       :hidden=>true,

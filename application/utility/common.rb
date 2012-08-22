@@ -52,14 +52,14 @@ class R8Server
     Library.create_users_private_library?(library_mh)
   end
 
-  def create_users_private_target?(import_file=nil)
+  def create_users_private_target?(import_file=nil,ec2_region=nil)
     #TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
     template_path ||= "#{Root}/spec/test_data/target_data_template.erb" 
     template = File.open(template_path){|f|f.read}
     erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref)
+    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref,:ec2_region => ec2_region||"us-east-1")
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 

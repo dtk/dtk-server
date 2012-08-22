@@ -21,6 +21,44 @@ module XYZ
        Bindings
      end
      NodesInfo = {
+       ## for EU west
+       "ami-b7d4eec3-small"=> {
+         :ami => "ami-b7d4eec3",
+         :display_name =>"CentOS 5.6 small",
+         :os_type =>"centos",
+         :size => "m1.small",
+         :png => "centos.png"
+       },
+       "ami-b7d4eec3-micro"=> {
+         :ami => "ami-b7d4eec3",
+         :display_name =>"CentOS 5.6 micro",
+         :os_type =>"centos",
+         :size => "t1.micro",
+         :png => "centos.png"
+       },
+       "ami-5949732d-micro"=> {
+         :ami => "ami-5949732d",
+         :display_name => "RH5.7 64 micro",
+         :os_type =>"redhat",
+         :size => "t1.micro",
+         :png => "redhat.png"
+       },
+       "ami-5949732d-medium"=> {
+         :ami => "ami-5949732d",
+         :display_name => "RH5.7 64 medium",
+         :os_type =>"redhat",
+         :size => "m1.medium",
+         :png => "redhat.png"
+       },
+       "ami-5949732d-large"=> {
+         :ami => "ami-5949732d",
+         :display_name => "RH5.7 64 large",
+         :os_type =>"redhat",
+         :size => "m1.large",
+         :png => "redhat.png"
+       },
+
+       ## for US east
        "ami-9bce1ef2-small"=> {
          :ami => "ami-9bce1ef2",
          :display_name =>"CentOS 5.6 small",
@@ -216,11 +254,21 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
      :region=>"us-east-1"}}]},
  "rh5.7-64-medium"=>{:type=>"clone",
   :os_type=>"redhat",    
-  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
-    :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-cc4eeda5",
-     :size=>"m1.medium",
-     :region=>"us-east-1"}}]}}
+  :rules=>
+       [
+        {:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+          :node_template=>{:type=>"ec2_image",
+            :image_id=>"ami-cc4eeda5",
+            :size=>"m1.medium",
+            :region=>"us-east-1"}},
+        {:conditions=>{:type=>"ec2_image", :region=>"us-west-1"},
+          :node_template=>{:type=>"ec2_image",
+            :image_id=>"ami-5949732d",
+            :size=>"m1.medium",
+            :region=>"eu-west-1"}}
+       ]
+     }
+   }
    Bindings.each{|k,v|v[:display_name] = k.gsub(/-/,' ')}
   end
 end

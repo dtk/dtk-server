@@ -12,8 +12,8 @@
       "description": "Staging East1",
       "iaas_type" : "ec2",
       "iaas_properties" : {
-        "region" : "us-east-1",
-        "availability_zone" : "us-east-1a",
+        "region" : "<%= ec2_region %>",
+        "availability_zone" : "<%= ec2_region %>a",
 	"security_group_set" : ["default"] 
       },     
       "type": "staging",

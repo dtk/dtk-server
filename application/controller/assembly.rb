@@ -8,7 +8,7 @@ module XYZ
     end
 
     def rest__delete()
-      subtype = ret_request_params(:subtype)||:instance
+      subtype = (ret_request_params(:subtype)||:instance).to_sym
       assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
       Assembly.delete(id_handle(assembly_id),subtype)
       rest_ok_response 

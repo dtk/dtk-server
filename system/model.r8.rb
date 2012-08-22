@@ -314,7 +314,7 @@ module XYZ
           :filter => filter
         }
         rows = get_objs(model_handle,sp_hash)
-        raise ErrorIdInvalid.new(id,pp_object_type())
+        raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
         id
       end
 
@@ -333,10 +333,9 @@ module XYZ
       end
 
       def pp_object_type()
-        case self.to_s
-          when "AssemblyTemplate" then "assembly template"
-          when "AssemblyInstance" then "assembly"
-          else self.to_s
+        if self == AssemblyTemplate then "assembly template"
+        elsif self == AssemblyInstance then "assembly"
+        else to_s.split("::").last.downcase 
         end
       end
     end

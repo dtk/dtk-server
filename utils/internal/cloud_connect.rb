@@ -18,7 +18,12 @@ module XYZ
     end
     class EC2 < Top
       def initialize()             
-        @conn = Fog::Compute::AWS.new(Fog.credentials())
+        compute_params = Fog.credentials()
+        #TODO: fix up by basing on current target's params
+        if region = R8::Config[:ec2][:region]
+          compute_params[:region] = region
+        end
+        @conn = Fog::Compute::AWS.new(compute_params)
       end
 
       def servers_all()

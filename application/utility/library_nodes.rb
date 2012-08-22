@@ -247,11 +247,20 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
      :region=>"us-east-1"}}]},
  "rh5.7-64-micro"=>{:type=>"clone",
   :os_type=>"redhat",    
-  :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
-    :node_template=>{:type=>"ec2_image",
-     :image_id=>"ami-cc4eeda5",
-     :size=>"t1.micro",
-     :region=>"us-east-1"}}]},
+  :rules=>
+       [
+        {:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
+          :node_template=>{:type=>"ec2_image",
+            :image_id=>"ami-cc4eeda5",
+            :size=>"t1.micro",
+            :region=>"us-east-1"}},
+        {:conditions=>{:type=>"ec2_image", :region=>"eu-west-1"},
+          :node_template=>{:type=>"ec2_image",
+            :image_id=>"ami-5949732d",
+            :size=>"t1.micro",
+            :region=>"eu-west-1"}}
+       ]
+     },
  "rh5.7-64-medium"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>

@@ -36,10 +36,10 @@ module XYZ
 
     def get_node_template(node_template_ref)
       sp_hash = {
-        :cols => [:id, :display_name, :group_id],
+        :cols => [:id, :display_name, :external_ref, :group_id],
         :filter => [:and, [:eq,:node_binding_rs_id,id()], [:eq,:type,"image"]]
       }
-      ret = Model.get_obj(id_handle.createMH(:node),sp_hash)
+      ret = Model.get_objs(id_handle.createMH(:node),sp_hash).find{|r|r[:external_ref][:image_id] == node_template_ref[:image_id]}
       raise Error.new("Cannot find associated node template") unless ret
       ret
     end

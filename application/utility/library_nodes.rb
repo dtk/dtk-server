@@ -73,22 +73,22 @@ module XYZ
          :size => "t1.micro",
          :png => "centos.png"
        },
-       " ami-0f42f666-micro"=> {
-         :ami => " ami-0f42f666",
+       "ami-0f42f666-micro"=> {
+         :ami => "ami-0f42f666",
          :display_name => "RH5.7 64 micro",
          :os_type =>"redhat",
          :size => "t1.micro",
          :png => "redhat.png"
        },
-       " ami-0f42f666-medium"=> {
-         :ami => " ami-0f42f666",
+       "ami-0f42f666-medium"=> {
+         :ami => "ami-0f42f666",
          :display_name => "RH5.7 64 medium",
          :os_type =>"redhat",
          :size => "m1.medium",
          :png => "redhat.png"
        },
-       " ami-0f42f666-large"=> {
-         :ami => " ami-0f42f666",
+       "ami-0f42f666-large"=> {
+         :ami => "ami-0f42f666",
          :display_name => "RH5.7 64 large",
          :os_type =>"redhat",
          :size => "m1.large",
@@ -221,7 +221,7 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
   :os_type=>"redhat",    
   :rules=>[{:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
     :node_template=>{:type=>"ec2_image",
-     :image_id=>" ami-0f42f666",
+     :image_id=>"ami-0f42f666",
      :size=>"m1.large",
      :region=>"us-east-1"}}]},
  "natty-micro"=>{:type=>"clone",
@@ -251,7 +251,7 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
        [
         {:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
           :node_template=>{:type=>"ec2_image",
-            :image_id=>" ami-0f42f666",
+            :image_id=>"ami-0f42f666",
             :size=>"t1.micro",
             :region=>"us-east-1"}},
         {:conditions=>{:type=>"ec2_image", :region=>"eu-west-1"},
@@ -267,7 +267,7 @@ Bindings = {"centos-5.6-small"=>{:type=>"clone",
        [
         {:conditions=>{:type=>"ec2_image", :region=>"us-east-1"},
           :node_template=>{:type=>"ec2_image",
-            :image_id=>" ami-0f42f666",
+            :image_id=>"ami-0f42f666",
             :size=>"m1.medium",
             :region=>"us-east-1"}},
         {:conditions=>{:type=>"ec2_image", :region=>"eu-west-1"},

@@ -49,10 +49,18 @@ module XYZ
       assembly_idh.create_object().serialize_and_save_to_repo(module_branch)
     end
 
-    def self.list_from_library(assembly_mh,opts={})
-      nested_virtual_attr = (R8::Config[:use_node_bindings] ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
+    def info(subtype)
+      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {
-        :cols => [:id, :display_name,:component_type,nested_virtual_attr],
+        :cols => [:id, :display_name,:component_type,nested_virtual_attr]
+      }
+      assembly_info = get_objs(sp_hash)
+      self.class.list_aux(assembly_info).first
+    end
+
+    def self.list_from_library(assembly_mh,opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:template_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
@@ -110,6 +118,50 @@ module XYZ
     end
 
     class << self
+      def list_aux(assembly_rows,attr_rows=[])
+        ndx_attrs = Hash.new
+        attr_rows.each do |attr|
+          if attr[:attribute_value]
+            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr
+          end
+        end
+        ndx_ret = Hash.new
+        assembly_rows.each do |r|
+          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+          #get_objs do this (using possibly option flag for subtype processing)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          node_id = r[:node][:id]
+          unless node = pntr[:ndx_nodes][node_id] 
+            node = pntr[:ndx_nodes][node_id] = {
+              :node_name => r[:node][:display_name], 
+              :node_id => node_id, 
+              :components => Array.new
+            }
+            node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
+            node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
+          end
+          cmp_hash = r[:nested_component]
+          if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
+            if attrs = ndx_attrs[r[:nested_component][:id]]
+              processed_attrs = attrs.map do |attr|
+                proc_attr = {:attribute_name => attr[:display_name], :value => attr[:attribute_value]}
+                proc_attr[:override] = true if attr[:is_instance_value]
+                proc_attr
+              end
+              cmp = {:component_name => cmp_type, :attributes => processed_attrs}
+            elsif not attr_rows.empty?
+              cmp = {:component_name => cmp_type}
+            else
+              cmp = cmp_type
+            end
+            node[:components] << cmp
+          end
+        end
+
+        ndx_ret.values.map do |r|
+          r.slice(:id,:display_name,:execution_status).merge(:nodes => r[:ndx_nodes].values)
+        end
+      end
      private
       def add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
         sp_hash = {
@@ -130,6 +182,7 @@ module XYZ
         assembly_rows.each{|r|r[:execution_status] = (ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status])||"staged"} 
         assembly_rows
       end
+
       def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
         create_row = {
           :library_library_id => library_idh.get_id(),
@@ -174,51 +227,6 @@ module XYZ
           :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
         }
         Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
-      end
-
-      def list_aux(assembly_rows,attr_rows=[])
-        ndx_attrs = Hash.new
-        attr_rows.each do |attr|
-          if attr[:attribute_value]
-            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr
-          end
-        end
-        ndx_ret = Hash.new
-        assembly_rows.each do |r|
-          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
-          #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
-          node_id = r[:node][:id]
-          unless node = pntr[:ndx_nodes][node_id] 
-            node = pntr[:ndx_nodes][node_id] = {
-              :node_name => r[:node][:display_name], 
-              :node_id => node_id, 
-              :components => Array.new
-            }
-            node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
-            node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
-          end
-          cmp_hash = r[:nested_component]
-          if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
-            if attrs = ndx_attrs[r[:nested_component][:id]]
-              processed_attrs = attrs.map do |attr|
-                proc_attr = {:attribute_name => attr[:display_name], :value => attr[:attribute_value]}
-                proc_attr[:override] = true if attr[:is_instance_value]
-                proc_attr
-              end
-              cmp = {:component_name => cmp_type, :attributes => processed_attrs}
-            elsif not attr_rows.empty?
-              cmp = {:component_name => cmp_type}
-            else
-              cmp = cmp_type
-            end
-            node[:components] << cmp
-          end
-        end
-        
-        ndx_ret.values.map do |r|
-          r.slice(:id,:display_name,:execution_status).merge(:nodes => r[:ndx_nodes].values)
-        end
       end
     end
 

@@ -14,6 +14,13 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__info()
+      subtype = (ret_request_params(:subtype)||:instance).to_sym
+      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
+      assembly = id_handle(assembly_id,:component).create_object()
+      rest_ok_response assembly.info(subtype) 
+    end
+
     #TODO: might change so is just 'list'; and bahvior varies whether object template or instance
     def rest__list_from_library()
       detail_level = ret_request_params(:detail_level)

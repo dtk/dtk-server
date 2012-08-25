@@ -43,7 +43,7 @@ module DTK
       end
 
       #TODO: this might be done a priori
-      Repo::Remote.authorize_dtk_instance(remote_module_name)
+      Repo::Remote.new.authorize_dtk_instance(remote_module_name)
 
       #create empty repo on local repo manager; 
       module_specific_type = config_agent_type = :puppet #TODO: hard wired

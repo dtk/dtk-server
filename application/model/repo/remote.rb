@@ -1,7 +1,11 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
- class Repo; module Remote
-    class << self
+ class Repo
+    class Remote
+      def initialize(rest_base_url=default_rest_base_url())
+        @client = RepoManagerClient.new(rest_base_url)
+      end
+
       def list(repo_mh,type=nil)
         remote_repos = client.list_repos()
         #TODO: might also indicate if any of these are synced with remote repo
@@ -47,11 +51,12 @@ module DTK
       end
 
      private
+      attr_reader :client
       def client()
         @client ||= RepoManagerClient.new(rest_base_url())
       end
 
-      def rest_base_url()
+      def default_rest_base_url()
         remote = ::R8::Config[:repo][:remote]
         "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end
@@ -69,5 +74,5 @@ module DTK
       end
     end
   end
-end; end
+end
 

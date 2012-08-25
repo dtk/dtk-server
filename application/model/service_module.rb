@@ -23,7 +23,7 @@ module DTK
       end
 
       #TODO: this might be done a priori
-      Repo::Remote.authorize_dtk_instance(remote_module_name)
+      Repo::Remote.new.authorize_dtk_instance(remote_module_name)
 
       #create empty repo on local repo manager; 
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -44,7 +44,7 @@ module DTK
       end
 
       #create remote repo
-      Repo::Remote.create_repo(module_name)
+      Repo::Remote.new.create_repo(module_name)
 
       #link and push to remote repo
       remote_repo_name = ret_remote_repo_name(module_name)
@@ -56,7 +56,6 @@ module DTK
       remote_repo_name
     end
 
-    
     def list_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]

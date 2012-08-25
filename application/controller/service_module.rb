@@ -44,7 +44,7 @@ module XYZ
     end
     
     def rest__delete()
-      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module_id = ret_request_param_id(:service_module_id)
       ServiceModule.delete(id_handle(service_module_id))
       rest_ok_response
     end

@@ -4,6 +4,10 @@ module DTK
     extend ServiceOrComponentModuleClassMixin
     include ServiceOrComponentModuleMixin
 
+    def self.check_valid_id(model_handle,id)
+      check_valid_id_default(model_handle,id)
+    end
+
     #import from remote
     def self.import(library_idh,remote_module_name)
       ret = nil

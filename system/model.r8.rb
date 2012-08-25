@@ -308,6 +308,11 @@ module XYZ
       end
 
       #helpers for check_valid_id and name_to_id
+      def check_valid_id_default(model_handle,id)
+        filter = [:eq, :id, id]
+        check_valid_id_helper(model_handle,id,filter)
+      end
+
       def check_valid_id_helper(model_handle,id,filter)
         sp_hash = {
           :cols => [:id],
@@ -333,9 +338,8 @@ module XYZ
       end
 
       def pp_object_type()
-        if self == AssemblyTemplate then "assembly template"
-        elsif self == AssemblyInstance then "assembly"
-        else to_s.split("::").last.downcase 
+        if self == AssemblyInstance then "assembly"
+        else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
         end
       end
     end

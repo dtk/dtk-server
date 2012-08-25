@@ -28,7 +28,7 @@ module XYZ
     def rest__list_assemblies()
       service_module_id = ret_non_null_request_params(:service_module_id)
       service_module = create_object_from_id(service_module_id)
-      rest_ok_response service_module.list_assemblies()
+      rest_ok_response service_module.list_assembly_templates()
     end
 
     def rest__create()

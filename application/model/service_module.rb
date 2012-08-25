@@ -56,7 +56,8 @@ module DTK
       remote_repo_name
     end
 
-    def list_assemblies()
+    
+    def list_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]
       }
@@ -64,6 +65,18 @@ module DTK
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
       Assembly.list_from_library(model_handle(:component),:filter => filter)
     end
+
+    def get_associated_target_instances()
+      ret = Array.new
+      assembly_templates = list_assembly_templates()
+      return ret if assembly_templates.empty?
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:oneof, :ancestor_id, assembly_templates.map{|r|r[:id]}]
+      }
+      Model.get_objs(model_handle(:component),sp_hash)
+    end 
+
 
     def self.create_library_obj(library_idh,module_name,config_agent_type)
       if conflicts_with_library_module?(library_idh,module_name)

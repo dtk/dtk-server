@@ -13,6 +13,10 @@ module DTK
       }
     end
 
+    def get_associated_target_instances()
+      get_objs_uniq(:target_instances)
+    end
+
     def update_library_module_with_workspace()
       aug_ws_branch_row = get_augmented_workspace_branch()
       ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:augmented => true)

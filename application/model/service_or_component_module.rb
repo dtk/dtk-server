@@ -9,12 +9,6 @@ module DTK
     def get_library_implementations()
       get_objs_uniq(:library_implementations)
     end
-    def get_target_instances()
-      if id_handle[:model_name] == :service_module
-        raise Error.new("TODO: not implemented yet")
-      end
-      get_objs_uniq(:target_instances)
-    end
   end
 
   module ServiceOrComponentModuleClassMixin
@@ -58,8 +52,8 @@ module DTK
 
     def delete(idh)
       module_obj = idh.create_object()
-      unless module_obj.get_target_instances().empty?
-        raise ErrorUsage.new("Cannot delete a module if one or more of its target instances exist")
+      unless module_obj.get_associated_target_instances().empty?
+        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target")
       end
       impls = module_obj.get_implementations()
       delete_instances(impls.map{|impl|impl.id_handle()})

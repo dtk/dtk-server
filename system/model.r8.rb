@@ -323,6 +323,14 @@ module XYZ
         id
       end
 
+      def name_to_id_default(model_handle,name)
+        sp_hash =  {
+          :cols => [:id],
+          :filter => [:eq, :display_name, name]
+        }
+        name_to_id_helper(model_handle,name,sp_hash)
+      end
+
       def name_to_id_helper(model_handle,name,augmented_sp_hash)
         post_filter = augmented_sp_hash.delete(:post_filter)
         augmented_sp_hash[:cols] ||= [:id]

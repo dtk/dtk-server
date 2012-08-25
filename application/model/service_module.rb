@@ -7,6 +7,9 @@ module DTK
     def self.check_valid_id(model_handle,id)
       check_valid_id_default(model_handle,id)
     end
+    def self.name_to_id(model_handle,name)
+      name_to_id_default(model_handle,name)
+    end
 
     #import from remote
     def self.import(library_idh,remote_module_name)

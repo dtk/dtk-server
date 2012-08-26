@@ -54,7 +54,7 @@ module XYZ
       unless self[:remote_repo_name]
         raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
       end
-      remote_url = Remote.repo_url_ssh_access(self[:remote_repo_name])
+      remote_url = Remote.new.repo_url_ssh_access(self[:remote_repo_name])
       remote_name = remote_name_for_push_pull()
       RepoManager.synchronize_with_remote_repo(self[:repo_name],remote_name,remote_url)
     end
@@ -72,14 +72,13 @@ module XYZ
 
     def link_to_remote(remote_repo_name)
       update_object!(:repo_name)
-      remote_url = Remote.repo_url_ssh_access(remote_repo_name)
+      remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
       remote_name = remote_name_for_push_pull()
       RepoManager.link_to_remote_repo(self[:repo_name],remote_name,remote_url)
       remote_repo_name
     end
 
    private    
-
     def remote_name_for_push_pull()
       "remote"
     end

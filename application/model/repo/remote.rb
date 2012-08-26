@@ -46,15 +46,11 @@ module DTK
       end
 
       def repo_url_ssh_access(remote_repo_name)
-        remote = ::R8::Config[:repo][:remote]
-        "#{remote[:git_user]}@#{remote[:host]}:#{remote_repo_name}"
+        client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
       end
 
      private
       attr_reader :client
-      def client()
-        @client ||= RepoManagerClient.new(rest_base_url())
-      end
 
       def default_rest_base_url()
         remote = ::R8::Config[:repo][:remote]
@@ -65,12 +61,7 @@ module DTK
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
       def dtk_instance_username()
-        @dtk_instance_username ||= dtk_instance_username_aux()
-      end
-      def dtk_instance_username_aux()
-        #on ec2 changing mac addresses; so selectively pick instance id on ec2
-        id_handle = Common::Aux.get_ec2_instance_id() || Common::Aux.get_macaddress().gsub(/:/,'-')
-        "dtk-#{id_handle}"
+        @dtk_instance_username ||= Common::Aux.dtk_instance_repo_username()
       end
     end
   end

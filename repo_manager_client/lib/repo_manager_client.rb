@@ -13,7 +13,20 @@ module DTK
   class RepoManagerClient
     def initialize(rest_base_url)
       @rest_base_url = rest_base_url
+      if rest_base_url =~ Regexp.new("^http://(.+):[0-9]+$")
+        @host = $1
+      elsif rest_base_url =~ Regexp.new("^http://(.+)$")
+        @host = $1
+      else
+        raise Error.new("Cannot determine hostname from url")
+      end
     end
+
+    def repo_url_ssh_access(remote_repo_name,git_user=nil)
+      remote = ::R8::Config[:repo][:remote]
+      "#{git_user||GitUser}@#{@host}:#{remote_repo_name}"
+    end
+    DefaultGitUser = 'git'
 
     def self.create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)

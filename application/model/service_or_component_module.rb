@@ -12,6 +12,13 @@ module DTK
   end
 
   module ServiceOrComponentModuleClassMixin
+    def check_valid_id(model_handle,id)
+      check_valid_id_default(model_handle,id)
+    end
+    def name_to_id(model_handle,name)
+      name_to_id_default(model_handle,name)
+    end
+
     def add_user_direct_access(model_handle,rsa_pub_key)
       repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
       model_name = model_handle[:model_name]

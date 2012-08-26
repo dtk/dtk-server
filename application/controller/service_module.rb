@@ -19,14 +19,14 @@ module XYZ
     end
     
     def rest__export()
-      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_object_from_id(service_module_id)
       service_module.export()
       rest_ok_response 
     end
     
     def rest__list_assemblies()
-      service_module_id = ret_non_null_request_params(:service_module_id)
+      service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_object_from_id(service_module_id)
       rest_ok_response service_module.list_assembly_templates()
     end

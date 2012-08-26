@@ -19,15 +19,22 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__push_to_mirror()
+      component_module_id = ret_request_param_id(:component_module_id)
+      mirror_host = ret_non_null_request_params(:mirror_host)
+      component_module = create_object_from_id(component_module_id)
+      component_module.push_to_mirror(mirror_host)
+    end
+
     def rest__update_library()
-      component_module_id = ret_non_null_request_params(:component_module_id)
+      component_module_id = ret_request_param_id(:component_module_id)
       component_module = create_object_from_id(component_module_id)
       component_module.update_library_module_with_workspace()
       rest_ok_response
     end
 
     def rest__delete()
-      component_module_id = ret_non_null_request_params(:component_module_id)
+      component_module_id = ret_request_param_id(:component_module_id)
       ComponentModule.delete(id_handle(component_module_id))
       rest_ok_response
     end
@@ -54,5 +61,6 @@ module XYZ
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
       rest_ok_response
     end
+
   end
 end

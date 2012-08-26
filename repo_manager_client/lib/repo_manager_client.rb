@@ -11,14 +11,20 @@ module DTK
     end
   end
   class RepoManagerClient
-    def initialize(rest_base_url)
-      @rest_base_url = rest_base_url
-      if rest_base_url =~ Regexp.new("^http://(.+):[0-9]+$")
-        @host = $1
-      elsif rest_base_url =~ Regexp.new("^http://(.+)$")
-        @host = $1
+    def initialize(rest_base_url_or_host)
+      if rest_base_url_or_host =~ /^http:/
+        #input is rest_base_url
+        @rest_base_url = rest_base_url_or_host
+        if @rest_base_url =~ Regexp.new("^http://(.+):[0-9]+$")
+          @host = $1
+        elsif @rest_base_url =~ Regexp.new("^http://(.+)$")
+          @host = $1
+        end
       else
-        raise Error.new("Cannot determine hostname from url")
+        #input is host
+        @host = rest_base_url_or_host
+        port = DefaultRestServicePort #TODO: may put in provision that this can be omitted or explicitly passed
+        @rest_base_url = "http://#{@host}#{port && ":#{port.to_s}"}"
       end
     end
 
@@ -27,6 +33,7 @@ module DTK
       "#{git_user||GitUser}@#{@host}:#{remote_repo_name}"
     end
     DefaultGitUser = 'git'
+    DefaultRestServicePort = 7000
 
     def self.create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)

@@ -24,7 +24,41 @@ module XYZ
       super(msg)
     end
   end
+
   class ErrorUsage < Error
+  end
+
+  class ErrorIdInvalid <  ErrorUsage
+    def initialize(id,object_type)
+      super(msg(id,object_type))
+    end
+     def msg(id,object_type)
+       "Illegal id (#{id}) for #{object_type}"
+     end
+  end
+  class ErrorNameInvalid <  ErrorUsage
+    def initialize(name,object_type)
+      super(msg(name,object_type))
+    end
+     def msg(name,object_type)
+       "Illegal name (#{name}) for #{object_type}"
+     end
+  end
+  class ErrorNameAmbiguous <  ErrorUsage
+    def initialize(name,object_type)
+      super(msg(name,object_type))
+    end
+     def msg(name,object_type)
+       "Ambiguous name (#{name}) for #{object_type}"
+     end
+  end
+  class ErrorNameDoesNotExist <  ErrorUsage
+    def initialize(name,object_type)
+      super(msg(name,object_type))
+    end
+     def msg(name,object_type)
+       "No objects of type #{object_type} with name (#{name}) exist"
+     end
   end
 
   class ErrorConstraintViolations < ErrorUsage

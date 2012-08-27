@@ -40,6 +40,11 @@ module XYZ
 
       def self.assembly(target,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
+
+        #adjust link_def_id on ports
+        #TODO: betetr if did this by default in fk - key_shift
+        set_ports_link_def_ids(clone_copy_output)
+
         level = 1
         if R8::Config[:use_node_bindings]
           port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
@@ -52,6 +57,7 @@ module XYZ
         
         indexed_node_info = Hash.new #TODO: may have state create this as output
         node_sc_idhs.each_with_index{|sc_idh,i|indexed_node_info[node_idhs[i].get_id()] = sc_idh}
+
 
         level = 2
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
@@ -67,6 +73,32 @@ module XYZ
         end
         return if component_new_items.empty?
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.set_ports_link_def_ids(clone_copy_output)
+        ports = clone_copy_output.children_hash_form(2,:port).map{|r|r[:obj_info]}
+        return if ports.empty?
+        cmps = clone_copy_output.children_hash_form(2,:component).map{|r|r[:obj_info]}
+        link_defs = clone_copy_output.children_hash_form(3,:link_def).map{|r|r[:obj_info]}
+        update_rows = ports.map do |port|
+          cmp_type = Port.parse_external_port_display_name(port[:display_name])[:component_type]
+          node_node_id = port[:node_node_id]
+          #TODO: check display name will always be same as component_type
+          cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] == node_node_id}
+          unless cmp_match
+            Log.error("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
+            next
+          end
+          cmp_id = cmp_match[:id]
+          link_def_match = link_defs.find{|ld|ld[:component_component_id] ==  cmp_id}
+          unless link_def_match
+            Log.error("Cannot find matching link def for component with id (#{cmp_id})")
+            next
+          end
+          {:id => port[:id], :link_def_id => link_def_match[:id]}
+        end.compact
+        port_mh = clone_copy_output.children_id_handles(2,:port).first.createMH()
+        Model.update_from_rows(port_mh,update_rows)
       end
 
       def self.assembly__port_links(target,clone_copy_output,port_link_idhs,opts)

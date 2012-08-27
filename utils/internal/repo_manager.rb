@@ -3,8 +3,8 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff]
-      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_name]
+      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r]
+      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:footprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)
@@ -25,12 +25,7 @@ module XYZ
         RepoMethods.include?(name) or !!class_if_admin_method?(name)
       end
       def class_if_admin_method?(name)
-        if AdminMethods.include?(name) 
-          klass = load_and_return_adapter_class()
-          if klass.public_methods(false).include?(name.to_s)
-            klass
-          end
-        end
+        load_and_return_adapter_class() if AdminMethods.include?(name)
       end
     end
 
@@ -65,6 +60,20 @@ module XYZ
       repo.add_remote(remote_name,remote_url)
       repo.pull_changes(remote_name)
       repo.push_changes()
+      repo_name
+    end
+
+    def self.push_to_remote_repo(repo_name,remote_name)
+      context = {:implementation => {:repo => repo_name, :branch => "master"}}
+      repo = get_repo(context)      
+      repo.push_changes(remote_name)
+      repo_name
+    end
+
+    def self.link_to_remote_repo(repo_name,remote_name,remote_url)
+      context = {:implementation => {:repo => repo_name, :branch => "master"}}
+      repo = get_repo(context)      
+      repo.add_remote(remote_name,remote_url)
       repo_name
     end
 
@@ -120,6 +129,10 @@ module XYZ
       repo = branch = nil
       if context.kind_of?(ModuleBranch)
         repo,branch = context.repo_and_branch()
+      elsif context.kind_of?(Repo)
+        context.update_object!(:repo_name)
+        repo = context[:repo_name]
+        branch = "master"
       else
         #assume that it has hash with :implementation key
         #TODO: do we still need __top
@@ -130,10 +143,10 @@ module XYZ
     end
 
     def self.load_and_return_adapter_class()
-      return @cached_adpater_class if @cached_adpater_class
+      return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo]||{})[:type]
       raise Error.new("No repo adapter specified") unless adapter_name
-      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
 
     def self.load_and_create(repo,branch)
@@ -148,9 +161,9 @@ module XYZ
 
   class RemoteRepoManager < RepoManager 
     def self.load_and_return_adapter_class()
-      return @cached_adpater_class if @cached_adpater_class
+      return @cached_adapter_class if @cached_adapter_class
       adapter_name = "remote_repo"
-      @cached_adpater_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
   end
 end

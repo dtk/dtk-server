@@ -160,6 +160,31 @@ module XYZ
       {:content => {}}
     end
 
+    #TODO: templk hack
+    def rest__get_logs()
+      task_id = ret_request_params(:task_id) 
+      #first time call can have no data because it is going to db and launching background call to nodes
+      num_tries = 1
+      max_tries = 5
+      done = false
+      while done or num_tries < max_tries do 
+        data = get_logs(task_id)[:data]
+        if data.values.find{|node_log| node_log[:summary] and node_log[:summary][:type] == "no_data"}
+          sleep 0.5
+          num_tries += 1
+        else
+          done = true
+        end
+      end
+      data_reformulated = Array.new
+      data.each do |node_id,info|
+        #TODO: :complete is misleading
+        info.delete(:complete)
+        data_reformulated << info.merge(:node_id => node_id)
+      end
+      rest_ok_response data_reformulated
+    end
+
     def get_logs(task_id=nil)
       node_id = request.params["node_id"]
       node_id = node_id && node_id.to_i

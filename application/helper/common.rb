@@ -21,6 +21,13 @@ module Ramaze::Helper
       ModelHandle.create_from_user(user_obj,model_name_x)
     end
 
+    def model_handle_with_private_group(model_name_x=model_name())
+      user_obj = user_object()
+      ret = ModelHandle.create_from_user(user_obj,model_name_x)
+      group_obj = UserGroup.get_private_group(ret.createMH(:user_group),user_obj[:username])
+      ret.merge(:group_id => group_obj[:id])
+    end
+
     #looks for default if no target is given
     def target_idh_with_default(target_id=nil)
       if target_id
@@ -134,13 +141,37 @@ limit = TestOveride if TestOveride
       field_set.cols.inject({}){|ret,field|ret.merge(field => request_params[field]||'')}
     end
 
-    def ret_saved_search_in_request()
-      json_form = (ret_request_params()||{})["saved_search"]
-      return nil if json_form.nil? or json_form.empty?
-      #TODO: temp hack to convert from ' to " in query params
-      JSON.parse(json_form.gsub(/'/,'"'))
+    def ret_request_params_filter()
+      json_form = (ret_request_params()||{})["search"]
+      search = convert_search_item_from_json(json_form)
+      search && check_and_convert_filter_form(search["filter"])
     end
 
+    def ret_saved_search_in_request()
+      json_form = (ret_request_params()||{})["saved_search"]
+      convert_search_item_from_json(json_form)
+    end
+
+    def convert_search_item_from_json(item)
+      unless item.nil? or item.empty?
+        JSON.parse(item)
+      end
+    end
+
+    def check_and_convert_filter_form(filter)
+      ret = convert_filter_form(filter)
+      raise ErrorUsage.new("Filter having form (#{filter.inspect}) not treated") if ret.nil?
+      ret
+    end
+
+    def convert_filter_form(filter)
+      ret = nil
+      if filter.kind_of?(Array) and filter.size == 3
+        if filter[0].to_sym == :eq and filter[2].to_s =~ /^[0-9]+$/
+          [filter[0].to_sym, filter[1].to_sym, filter[2].to_i]
+        end
+      end
+    end
 
     def ret_hash_for_where_clause()
       request_method_is_get?() ? ret_parsed_query_string_when_get() : ret_request_params()
@@ -179,6 +210,18 @@ limit = TestOveride if TestOveride
 
     def ret_query_string()
       request.env["QUERY_STRING"]
+    end
+
+    #param value can be id or name
+    def ret_request_param_id(param,model_class=nil)
+      model_class ||= model_class(model_name)
+      id_or_name = ret_non_null_request_params(param)
+      if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
+        id = id_or_name.to_i
+        model_class.check_valid_id(model_handle,id)
+      else
+        model_class.name_to_id(model_handle,id_or_name)
+      end
     end
 
     def ret_request_params(*params)

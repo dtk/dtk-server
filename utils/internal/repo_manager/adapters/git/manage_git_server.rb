@@ -1,5 +1,17 @@
 module XYZ
   module RepoGitManageClassMixin
+    def method_missing(name,*args,&block)
+      if git_server_class.respond_to?(name)
+        git_server_class.send(name,*args,&block)
+      else
+        super
+      end
+    end
+    def respond_to?(name)
+      !!(git_server_class.respond_to?(name) || super)
+    end
+
+    #TODO: should use method missing for below
     def create_server_repo(repo_obj,repo_user_acls,opts={})
       git_server_class().create_server_repo(repo_obj,repo_user_acls,opts)
     end

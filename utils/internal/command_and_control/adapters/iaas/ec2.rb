@@ -23,12 +23,15 @@ module XYZ
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
           create_options.merge!(:groups => external_ref[:security_group_set]||DefaultSecurityGroupSet)
-          #TODO: patch
-          create_options.merge!(:key_name => "rich-east")
-          avail_zone = external_ref[:availability_zone]
+
+          #TODO: fix up
+          create_options.merge!(:key_name => R8::Config[:ec2][:keypair])
+          avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)
           end
+          #end fix up
+
           unless create_options.has_key?(:user_data)
             user_data = default_user_data()
             create_options[:user_data] = user_data if user_data

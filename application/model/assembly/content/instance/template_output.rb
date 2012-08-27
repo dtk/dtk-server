@@ -19,7 +19,7 @@ module DTK
       end
      private
       def assembly_meta_filename()
-        "#{assembly_hash()[:display_name]}.assembly.json"
+        Assembly.meta_filename(assembly_hash()[:display_name])
       end
       def serialize()
         assembly_hash = assembly_output_hash()
@@ -81,8 +81,8 @@ module DTK
 
       def component_output_form(component_hash)
         name = component_name_output_form(component_hash[:component_type])
-        if component_hash[:attributes]
-          {name => component_hash[:attributes].inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
+        if attr_overrides = component_hash[:attribute_override]
+          {name => attr_overrides.values.inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
         else
           name 
         end
@@ -96,8 +96,13 @@ module DTK
         #TODO: assumption that port_ref == display_name
         port_ref = qualified_port_ref.split("/").last
         p = Port.parse_external_port_display_name(port_ref)
-        #TODO: think need the node info (which is in qualified_port_ref)
-        "#{p[:module]}#{Seperators[:module_component]}#{p[:component]}#{Seperators[:component_port]}#{p[:link_def_ref]}"
+        node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)
+        unless matching_node = self[:node].find{|ref,hash|ref == node_ref}
+          raise Error.new("Cannot find matching node for node ref #{node_ref})")
+        end
+        node_name = matching_node[1][:display_name]
+        sep = Seperators #just for succinctness
+        "#{node_name}#{sep[:node_component]}#{p[:module]}#{sep[:module_component]}#{p[:component]}#{sep[:component_port]}#{p[:link_def_ref]}"
       end
     end
   end

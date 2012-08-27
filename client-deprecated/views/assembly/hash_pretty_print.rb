@@ -6,12 +6,14 @@ module DTK::Client::ViewMeta
       [
        :display_name,
        :id,
+       :execution_status,
        {:nodes  => {:type => :node, :is_array => true}}
       ],
       :node_def => 
       [
        :node_name, 
        :node_id, 
+       :os_type,
        {:external_ref => {:type => :external_ref, :only_explicit_cols => true}},
        {:components => {:type => :component, :is_array => true}}
       ],

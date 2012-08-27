@@ -1,7 +1,11 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
- class Repo; module Remote
-    class << self
+ class Repo
+    class Remote
+      def initialize(rest_base_url=default_rest_base_url())
+        @client = RepoManagerClient.new(rest_base_url)
+      end
+
       def list(repo_mh,type=nil)
         remote_repos = client.list_repos()
         #TODO: might also indicate if any of these are synced with remote repo
@@ -22,10 +26,14 @@ module DTK
         ret
       end
 
-      def export(service_or_component_module)
-        repo_name = service_or_component_module.update_object!(:display_name)[:display_name]
-        #create remote repo
-        create_repo(repo_name)
+      #create remote repo
+      def create_repo(repo_name)
+        username = dtk_instance_username()
+        rsa_pub_key = dtk_instance_rsa_pub_key()
+        access_rights = "RW+"
+        client.add_user(username,rsa_pub_key,:noop_if_exists => true)
+        client.create_repo(username,repo_name,access_rights)
+        repo_name
       end
 
       def authorize_dtk_instance(remote_repo_name)
@@ -38,36 +46,24 @@ module DTK
       end
 
       def repo_url_ssh_access(remote_repo_name)
-        remote = ::R8::Config[:repo][:remote]
-        "#{remote[:git_user]}@#{remote[:host]}:#{remote_repo_name}"
+        client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
       end
 
      private
-      def client()
-        @client ||= RepoManagerClient.new(rest_base_url())
-      end
+      attr_reader :client
 
-      def create_repo(repo_name)
-        username = dtk_instance_username()
-        rsa_pub_key = dtk_instance_rsa_pub_key()
-        access_rights = "RW+"
-        client.add_user(username,rsa_pub_key,:noop_if_exists => true)
-        client.create_repo(username,repo_name,access_rights)
-        repo_name
-      end
-
-      def rest_base_url()
+      def default_rest_base_url()
         remote = ::R8::Config[:repo][:remote]
         "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end
 
       def dtk_instance_rsa_pub_key()
-        @dtk_instance_rsa_pub_key ||= AuxCommon.get_ssh_rsa_pub_key()
+        @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
       def dtk_instance_username()
-        @dtk_instance_username ||= "dtk-#{AuxCommon.get_macaddress().gsub(/:/,'-')}"
+        @dtk_instance_username ||= Common::Aux.dtk_instance_repo_username()
       end
     end
   end
-end; end
+end
 

@@ -1,3 +1,4 @@
+#TODO: change HashObject so taht it does not have extra overhead of checking if frozen and then introduce variant that deals with frozen for config vars
 module XYZ
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places
   class SimpleHashObject < Hash

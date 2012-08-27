@@ -102,7 +102,7 @@ module XYZ
             if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
               #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
               #once set cnnot change
-              unless val
+              if val.nil?
                 #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
                 dyn_attr = {:name => array_form_path[1], :id => attr[:id]}
                 if ext_ref[:type] == "puppet_exported_resource"
@@ -115,7 +115,7 @@ module XYZ
                 end
                 dynamic_attrs << dyn_attr
               end
-            elsif val
+            elsif not val.nil?
               add_attribute!(ndx_attributes,array_form_path,val,ext_ref)
               #info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]

@@ -9,7 +9,8 @@ module DTK
           :display_name => assembly_name,
           :ui => icon_info,
           :type => "composite",
-          :module_branch_id => service_module_branch[:id]
+          :module_branch_id => service_module_branch[:id],
+          :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
         }
         assembly_mh = library_idh.create_childMH(:component)
         create(assembly_mh,hash_values)
@@ -68,7 +69,7 @@ module DTK
         template_output = TemplateOutput.new(library_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in library and points to assembly
-        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id])
+        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
         template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
 
         template_output.save_to_model()
@@ -106,7 +107,8 @@ module DTK
         out_port_ref = qualified_ref(out_port)
 
         assembly_ref = self[:ref]
-        port_link_ref = "#{assembly_ref}-#{in_port_ref}-#{out_port_ref}"
+        #TODO: make port_link_ref and port_refs shorter
+        port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
           "*output_id" => "/node/#{out_node_ref}/port/#{out_port_ref}",
@@ -140,10 +142,28 @@ module DTK
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
-        unless cmp[:non_default_attributes].empty?
-          raise Error.new("TODO: implement non default attttributes")
-        end
+        add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}
+      end
+
+      def add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
+        attrs = cmp[:non_default_attributes]
+        return if attrs.nil? or attrs.empty?
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:and,[:eq,:component_component_id,cmp_template_id],[:oneof,:display_name,attrs.map{|a|a[:display_name]}]]
+        }
+        ndx_attrs = Model.get_objs(model_handle(:attribute),sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:display_name] => r)
+        end
+        attr_override = cmp_ref_hash[:attribute_override] = Hash.new
+        attrs.each do |attr|
+          attr_ref =  attr[:ref]
+          attr_hash =  Aux::hash_subset(attr,[:display_name,:description])
+          attr_hash[:attribute_value] = attr[:attribute_value] #TODO: wasnt sure if Aux::hash_subset works for virtual attributes
+          attr_hash[:attribute_template_id] = ndx_attrs[attr[:display_name]][:id]
+          attr_override[attr_ref] = attr_hash
+        end
       end
     end
   end

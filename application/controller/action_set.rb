@@ -107,7 +107,11 @@ module XYZ
        result = call_action(action,parent_model_name)
        rescue Exception => e
         #TODO: put bactrace info in response
-        pp [e,e.backtrace[0..20]]
+        if e.kind_of?(ErrorUsage)
+          pp [e,e.backtrace[0]]
+        else
+          pp [e,e.backtrace[0..20]]
+        end
         result = rest_notok_response(RestError.create(e).hash_form())
       end
       @ctrl_results = ControllerResultsRest.new(result)

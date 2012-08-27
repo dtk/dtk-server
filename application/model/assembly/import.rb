@@ -1,10 +1,10 @@
 #converts serialized form into object form
 module XYZ
   module AssemblyImportClassMixin
-    def import(library_idh,assemblies_hash,node_bindings_hash)
+    def import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
       import_hash = {"component" => Hash.new,"node" => Hash.new}
       assemblies_hash.each do |ref,assem|
-        import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem))
+        import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem,module_branch_idh,module_name))
         import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
       end
       import_objects_from_hash(library_idh,import_hash)
@@ -18,15 +18,22 @@ module XYZ
       end
 
       import_objects_from_hash(library_idh,{"component" => pl_import_hash})
-
-      ret = Array.new
-      ret
     end
-    private
+
+   private
     module AssemblyImportInternal
       include AssemblyImportExportCommon
-      def self.import_assembly_top(assembly_ref,assembly_hash)
-        {assembly_ref => {"display_name" => assembly_hash["name"], "type" => "composite"}}
+      def self.import_assembly_top(assembly_ref,assembly_hash,module_branch_idh,module_name)
+ret = nil
+ret =        {
+          assembly_ref => {
+            "display_name" => assembly_hash["name"], 
+            "type" => "composite",
+            "module_branch_id" => module_branch_idh.get_id(),
+            "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
+          }
+        }
+ret
       end
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name

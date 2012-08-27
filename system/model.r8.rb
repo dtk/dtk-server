@@ -306,6 +306,50 @@ module XYZ
       def has_group_id_col?(model_handle)
         not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
       end
+
+      #helpers for check_valid_id and name_to_id
+      def check_valid_id_default(model_handle,id)
+        filter = [:eq, :id, id]
+        check_valid_id_helper(model_handle,id,filter)
+      end
+
+      def check_valid_id_helper(model_handle,id,filter)
+        sp_hash = {
+          :cols => [:id],
+          :filter => filter
+        }
+        rows = get_objs(model_handle,sp_hash)
+        raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
+        id
+      end
+
+      def name_to_id_default(model_handle,name)
+        sp_hash =  {
+          :cols => [:id],
+          :filter => [:eq, :display_name, name]
+        }
+        name_to_id_helper(model_handle,name,sp_hash)
+      end
+
+      def name_to_id_helper(model_handle,name,augmented_sp_hash)
+        post_filter = augmented_sp_hash.delete(:post_filter)
+        augmented_sp_hash[:cols] ||= [:id]
+
+        rows_raw = get_objs(model_handle,augmented_sp_hash)
+        rows = (post_filter ? rows_raw.select{|r|post_filter.call(r)} : rows_raw)
+        if rows.size == 0
+          raise ErrorNameDoesNotExist.new(name,pp_object_type())
+        elsif rows.size > 1
+          raise ErrorNameAmbiguous.new(name,pp_object_type())
+        end
+        rows.first[:id]
+      end
+
+      def pp_object_type()
+        if self == AssemblyInstance then "assembly"
+        else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+        end
+      end
     end
 
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
@@ -375,6 +419,16 @@ module XYZ
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
+    end
+
+    def get_objs_uniq(obj_col,col_in_result=nil)
+      col_in_result ||= obj_col.to_s.gsub(/s$/,"").to_sym
+      get_objs(:cols => [obj_col]).inject(Hash.new) do |h,r|
+        obj = r[col_in_result]
+        id = obj[:id]
+        h[obj[:id]] ||= obj
+        h
+      end.values
     end
 
     def get_objs_col(sp_hash_x,col=nil,opts={})

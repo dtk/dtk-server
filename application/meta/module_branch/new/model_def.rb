@@ -1,6 +1,6 @@
 lambda__matching_library_branches =
-  lambda{|type|
-  parent_col = (type == :service_module ? :service_id : :component_id)
+  lambda{|args|
+  parent_col = (args[:type] == :service_module ? :service_id : :component_id)
   {
     :type => :json, 
     :hidden => true,
@@ -15,7 +15,7 @@ lambda__matching_library_branches =
        :cols => [:id,:display_name,:repo_id,:branch,:version]
      },
      {
-       :model_name => type,
+       :model_name => args[:type],
        :convert => true,
        :join_type => :inner,
        :join_cond=>{:id => q(:library_module_branch,parent_col)},
@@ -27,6 +27,21 @@ lambda__matching_library_branches =
        :join_type => :inner,
        :join_cond=>{:repo_id => q(:library_module_branch,:repo_id),:branch => q(:library_module_branch,:branch)},
        :cols => [:id,:group_id,:display_name]
+     },
+     {
+       :model_name => :repo,
+       :convert => true,
+       :join_type => :inner,
+       :join_cond=>{:id => q(:library_module_branch,:repo_id)},
+       :cols => [:id,:group_id,:repo_name,:local_dir]
+     },
+     {
+       :model_name => :repo,
+       :alias => :workspace_repo,
+       :convert => true,
+       :join_type => :inner,
+       :join_cond=>{:id => q(:module_branch,:repo_id)},
+       :cols => [:id,:group_id,:repo_name,:local_dir]
      }
     ]
   }
@@ -53,8 +68,8 @@ lambda__matching_library_branches =
     }
   },
   :virtual_columns=>{
-    :matching_component_library_branches=> lambda__matching_library_branches.call(:component_module),
-    :matching_service_library_branches=> lambda__matching_library_branches.call(:service_module)
+    :matching_component_library_branches=> lambda__matching_library_branches.call(:type => :component_module),
+    :matching_service_library_branches=> lambda__matching_library_branches.call(:type => :service_module)
   },
   :many_to_one=>[:component_module,:service_module]
 }

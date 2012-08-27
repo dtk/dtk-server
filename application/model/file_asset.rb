@@ -1,7 +1,5 @@
-r8_nested_require('file_asset','r8_meta_file')
 module XYZ
   class FileAsset < Model
-    include FileAssetR8MetaFile
     #model apis
     def get_content()
       #if content stored in db then return that
@@ -26,24 +24,30 @@ module XYZ
       impl_obj.set_to_indicate_updated()
 
       #special processing if this the meta file
-      if r8_meta = R8MetaFile.isa?(self,content)
-        r8_meta.process()
+      if component_meta_file = ComponentMetaFile.create_from_file_obj_hash?(self,content)
+        component_meta_file.update_model()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end
 
-    def self.add(impl_obj,type,path,content)
-      hash = create_hash(impl_obj,type,path,content)
+    def self.add_and_push_to_repo(impl_obj,type,path,content,opts={})
+      add(impl_obj,type,path,content,opts)
+      RepoManager.push_implementation(:implementation => impl_obj)
+    end
+    def self.add(impl_obj,type,path,content,opts={})
+      hash = ret_create_hash(impl_obj,type,path,content)
       file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
       new_file_asset_idh = create_from_row(file_asset_mh,hash)
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
       RepoManager.add_file(new_file_asset_obj,content,{:implementation => impl_obj})
-      impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
+      unless opts[:is_metafile]
+        impl_obj.create_pending_changes_and_clear_dynamic_attrs(new_file_asset_obj)
+      end
     end
 
-    def self.create_hash(impl_obj,type,path,content=nil)
+    def self.ret_create_hash(impl_obj,type,path,content=nil)
       file_name = (path =~ Regexp.new("/([^/]+$)")) ? $1 : path
-      hash = {
+      {
         :type => type,
         :ref => file_asset_ref(path),
         :file_name => file_name,

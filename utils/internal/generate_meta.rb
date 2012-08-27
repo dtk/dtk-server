@@ -66,7 +66,7 @@ module XYZ
       object_form = meta_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
 
-      r8meta_hash.delete("version") #TODO: currently version not handled in add_library_components_from_r8meta
+      r8meta_hash.delete("version") #TODO: currently version not handled in add_components_from_r8meta
 
       r8meta_path = "#{repo_obj[:local_dir]}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)
@@ -75,7 +75,7 @@ module XYZ
       #this wil add any file_assets that have not been yet added (this will include the r8meta file
       impl_obj.create_file_assets_from_dir_els(repo_obj)
 
-      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_idh,r8meta_hash)
+      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
 
       impl_obj.add_contained_files_and_push_to_repo()
     end

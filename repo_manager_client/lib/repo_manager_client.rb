@@ -11,11 +11,31 @@ module DTK
     end
   end
   class RepoManagerClient
-    def initialize(rest_base_url)
-      @rest_base_url = rest_base_url
+    def initialize(rest_base_url_or_host)
+      if rest_base_url_or_host =~ /^http:/
+        #input is rest_base_url
+        @rest_base_url = rest_base_url_or_host
+        if @rest_base_url =~ Regexp.new("^http://(.+):[0-9]+$")
+          @host = $1
+        elsif @rest_base_url =~ Regexp.new("^http://(.+)$")
+          @host = $1
+        end
+      else
+        #input is host
+        @host = rest_base_url_or_host
+        port = DefaultRestServicePort #TODO: may put in provision that this can be omitted or explicitly passed
+        @rest_base_url = "http://#{@host}#{port && ":#{port.to_s}"}"
+      end
     end
 
-    def self.create_branch_instance(repo,branch,opts={})
+    def repo_url_ssh_access(remote_repo_name,git_user=nil)
+      remote = ::R8::Config[:repo][:remote]
+      "#{git_user||GitUser}@#{@host}:#{remote_repo_name}"
+    end
+    DefaultGitUser = 'git'
+    DefaultRestServicePort = 7000
+
+    def create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)
     end
 
@@ -102,6 +122,13 @@ module DTK
         body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
         post_rest_request_data(route,body,:raise_error => true)
       end
+
+      def push_to_mirror(mirror_host)
+        route = "/rest/repo/push_to_mirror"
+        body = {:repo_name => @repo,:mirror_host => mirror_host}
+        post_rest_request_data(route,body,:raise_error => true)
+      end 
+
     end
   end
 end

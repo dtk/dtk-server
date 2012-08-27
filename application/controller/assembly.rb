@@ -8,29 +8,42 @@ module XYZ
     end
 
     def rest__delete()
-      assembly_id = ret_non_null_request_params(:assembly_id)
-      Assembly.delete(id_handle(assembly_id))
+      subtype = (ret_request_params(:subtype)||:instance).to_sym
+      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
+      Assembly.delete(id_handle(assembly_id),subtype)
       rest_ok_response 
+    end
+
+    def rest__info()
+      subtype = (ret_request_params(:subtype)||:instance).to_sym
+      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
+      assembly = id_handle(assembly_id,:component).create_object()
+      rest_ok_response assembly.info(subtype) 
     end
 
     #TODO: might change so is just 'list'; and bahvior varies whether object template or instance
     def rest__list_from_library()
       detail_level = ret_request_params(:detail_level)
+      filter = ret_request_params_filter()
       opts = Hash.new
       opts[:detail_level] = detail_level if detail_level
+      opts[:filter] = filter if filter
       rest_ok_response Assembly.list_from_library(model_handle(),opts)
     end
+
     def rest__list_from_target()
       detail_level = ret_request_params(:detail_level)
+      filter = ret_request_params_filter()
       opts = Hash.new
       opts[:detail_level] = detail_level if detail_level
+      opts[:filter] = filter if filter
       rest_ok_response Assembly.list_from_target(model_handle(),opts)
     end
 
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance
-      assembly_id = ret_non_null_request_params(:assembly_id)
+      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyInstance)
       task = Task.create_from_assembly_instance(id_handle(assembly_id))
       task.save!()
       rest_ok_response :task_id => task.id
@@ -90,7 +103,8 @@ module XYZ
         body_value = ''
         component_list[index][:ui] ||= {}
         component_list[index][:ui][:images] ||= {}
-        name = component_list[index][:display_name]
+#        name = component_list[index][:display_name]
+        name = Assembly.pretty_print_name(component_list[index])
         title = name.nil? ? "" : i18n_string(i18n,:component,name)
         
 #TODO: change after implementing all the new types and making generic icons for them
@@ -115,7 +129,7 @@ module XYZ
     #clone assembly from library to target
     def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_non_null_request_params(:assembly_template_id)
+      assembly_id = ret_request_param_id(:assembly_template_id,::DTK::AssemblyTemplate)
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null

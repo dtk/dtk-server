@@ -20,7 +20,7 @@ module DTK
         matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
       end
       if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
-        raise Error.new("Not implemented: case when ws and library branch being diffed in different repos")
+        raise Error.new("Not implemented: case when ws and library branch being differ in refering to distinct repos")
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
     end
@@ -31,7 +31,7 @@ module DTK
     end
 
     class << self
-      private
+     private
       def update_library_from_workspace_aux?(augmented_branch)
         lib_branch_obj = augmented_branch[:library_module_branch]
         ret = lib_branch_obj.merge(:workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]))
@@ -48,7 +48,8 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          raise Error.new("Not implemented yet: processing of meta file changes")
+          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:repo],augmented_branch[:implementation])
+          component_meta_file.update_model()
         end
 
         #update the repo
@@ -76,7 +77,8 @@ module DTK
         :type => self[:type]
 
       }
-      Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
+      mb_idh = Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
+      mb_idh.create_object().merge(match_assigns).merge(other_assigns)
     end
 
     def self.get_component_workspace_branches(node_idhs)

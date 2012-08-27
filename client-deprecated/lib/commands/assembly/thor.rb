@@ -1,7 +1,7 @@
 module DTK::Client
   class AssemblyCommand < CommandBaseThor
     def self.pretty_print_cols()
-      [:display_name, :type,:id, :description, :external_ref]
+      [:display_name, :execution_status, :type, :id, :description, :external_ref]
     end
 
     desc "export ASSEMBLY-ID", "Exports assembly instance or template"
@@ -36,7 +36,7 @@ module DTK::Client
 
     #TODO: put in flag to control detail level
     desc "list [library|target]","List asssemblies in library or target"
-    def list(parent)
+    def list(parent="library")
       case parent
         when "library":
           post rest_url("assembly/list_from_library")

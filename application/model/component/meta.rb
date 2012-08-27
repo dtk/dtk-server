@@ -14,7 +14,7 @@ module XYZ
       
       #columns related to version
       #TODO: think we want to deprecate these; versioning is at module level
-      column :version, :varchar, :size => 25, :default => "0.0.1" # version of underlying component (not chef recipe .... version)
+      column :version, :varchar, :size => 25 #non-normalized: comes from module_branch
       column :updated, :boolean, :default => false
 
       #columns related to type
@@ -110,6 +110,17 @@ module XYZ
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs
+
+    virtual_column :library, :type => :json, :hidden => true,
+      :remote_dependencies =>
+      [
+       {
+         :model_name => :library,
+         :join_type => :inner,
+         :join_cond=>{:id => :component__library_library_id},
+         :cols => [:id,:display_name]
+       }]
+
     virtual_column :node_for_state_change_info, :type => :json, :hidden => true,
       :remote_dependencies =>
       [

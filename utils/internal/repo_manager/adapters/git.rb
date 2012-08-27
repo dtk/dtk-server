@@ -40,8 +40,13 @@ module XYZ
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end
 
-    def self.repo_url()
+    def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
+      if repo_name
+        "#{@git_url}:#{repo_name}"
+      else
+        @git_url
+      end
     end
     def repo_url()
       @git_url ||= self.class.repo_url()
@@ -54,6 +59,28 @@ module XYZ
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
       Dir.chdir(@path) do
         git_command__commit("initial empty commit","--allow-empty")
+      end
+    end
+
+    def ls_r(depth=nil,opts={})
+      Dir.chdir(@path) do
+        if depth.nil?
+          all_paths = Dir["**/*"]
+        else
+          pattern = "*"
+          all_paths = Array.new
+          depth.times do 
+            all_paths += Dir[pattern]
+            pattern = "#{pattern}/*"
+          end
+        end
+        if opts[:file_only]
+          all_paths.select{|p|File.file?(p)}
+        elsif opts[:directory_only]
+          all_paths.select{|p|File.directory?(p)}
+        else
+          all_paths
+        end  
       end
     end
 
@@ -73,20 +100,22 @@ module XYZ
       end
     end
 
-    def add_file(file_asset,content)
+    def add_file(file_asset,content,commit_msg=nil)
       content ||= String.new
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        message = "Adding #{file_asset[:path]} in #{@branch}"
+        commit_msg ||= "Adding #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
-        git_command__commit(message)
+        git_command__commit(commit_msg)
       end
     end
 
     def delete_file?(file_path)
-      delete_file(file_path) if File.exists?("#{@path}/#{file_path}")
+      ret = File.exists?("#{@path}/#{file_path}")
+      delete_file(file_path) if ret
+      ret
     end
 
     def delete_file(file_path)

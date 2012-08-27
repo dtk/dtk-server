@@ -230,7 +230,9 @@ module XYZ
         }
       }
       lambda__components_and_attrs =
-        lambda{|cmp_cols,attr_cols|
+        lambda{|args|
+        cmp_cols = args[:cmp_cols]
+        attr_cols = args[:attr_cols]
         [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
@@ -240,7 +242,9 @@ module XYZ
          }]
       }
       lambda__components_and_non_default_attrs =
-        lambda{|cmp_cols,attr_cols|
+        lambda{|args|
+        cmp_cols = args[:cmp_cols]
+        attr_cols = args[:attr_cols]
         [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
@@ -265,11 +269,13 @@ module XYZ
          }]         
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
-        lambda__components_and_non_default_attrs.call(ContentObject::CommonCols+[:module_branch_id,:component_type],ContentObject::CommonCols)
+        lambda__components_and_non_default_attrs.call(
+          :cmp_cols=>ContentObject::CommonCols+[:module_branch_id,:component_type],
+          :attr_cols=>ContentObject::CommonCols+[:attribute_value])
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        lambda__components_and_attrs.call([:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
+        lambda__components_and_attrs.call(:cmp_cols=>[:id,:display_name, :component_type, id(:node)],:attr_cols=>[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,
@@ -291,7 +297,7 @@ module XYZ
          }]
       virtual_column :output_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 
-        lambda__components_and_attrs.call([:id,:display_name, :component_type, id(:node)],[:id,:display_name]) +
+        lambda__components_and_attrs.call(:cmp_cols=>[:id,:display_name, :component_type, id(:node)],:attr_cols=>[:id,:display_name]) +
         [
          {
            :model_name => :attribute_link,

@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'optparse'
 require File.expand_path('library_nodes', File.dirname(__FILE__))
-Root = File.expand_path('../../', File.dirname(__FILE__))
+Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'
 
 class R8Server
@@ -24,12 +24,12 @@ class R8Server
   ###actions
   def create_repo_user_r8server?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.create_r8server?(repo_user_mh)
+    RepoUser.add_repo_user?(:system,repo_user_mh)
   end
 
-  def create_repo_user_client?()
+  def create_repo_user_for_nodes?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.create_r8client?(repo_user_mh,username)
+    RepoUser.add_repo_user?(:node,repo_user_mh)
   end
 
   def create_public_library?(opts={})
@@ -47,27 +47,19 @@ class R8Server
     end
   end
 
-  def create_private_library_assemblies(assemblies_hash,node_bindings_hash)
-    library_mh = pre_execute(:library)
-    library_idh = Library.create_users_private_library?(library_mh)
-    Model.import_objects_from_hash(library_idh,LibraryNodes.get_hash())
-    Assembly.import(library_idh,assemblies_hash,node_bindings_hash)
-  end
-
-
   def create_users_private_library?()
     library_mh = pre_execute(:library)
     Library.create_users_private_library?(library_mh)
   end
 
-  def create_users_private_target?(import_file=nil)
+  def create_users_private_target?(import_file=nil,ec2_region=nil)
     #TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
     template_path ||= "#{Root}/spec/test_data/target_data_template.erb" 
     template = File.open(template_path){|f|f.read}
     erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref)
+    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref,:ec2_region => ec2_region||"us-east-1")
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
@@ -76,6 +68,34 @@ class R8Server
       :target_idhs => ret_idhs("datacenter",hash_content,container_idh), 
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
+  end
+
+  def migrate_metafile(module_name)
+    component_module_mh = pre_execute(:component_module)
+    sp_hash = {
+      :cols => [:id,:dispaly_name],
+      :filter => [:eq,:display_name,module_name]
+    }
+    cm = Model.get_obj(component_module_mh,sp_hash)
+    repos = cm.get_repos()
+    unless repos.size == 1
+      raise Error.new("Cannot find unique repo")
+    end
+    repo = repos.first
+
+    impls = cm.get_library_implementations()
+    unless impls.size == 1
+      raise Error.new("Cannot find unique implementation")
+    end
+    impl = impls.first
+
+    cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
+    new_version_integer = 2 
+    hash_content = DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
+    content = JSON.pretty_generate(hash_content)
+    new_path = "dtk-meta.puppet.json"
+    impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
+    "#{repo[:local_dir]}/#{new_path}"
   end
 
   def ret_idhs(mn,hash_content,container_idh)
@@ -108,7 +128,7 @@ class R8Server
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
 
-      Model.add_library_components_from_r8meta(config_agent_type,library_idh,impl_obj.id_handle,r8meta_hash)
+      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
       
       impl_obj.add_contained_files_and_push_to_repo()
       ret << impl_obj

@@ -1,4 +1,3 @@
-#TODO: may deprecate all the SpecialContext dealing with target_to_library (AssemblyTemplateNode,AssemblyTemplateComponent
 module XYZ
   class ChildContext < SimpleHashObject
     def clone_copy_child_objects(clone_proc,level)
@@ -32,7 +31,7 @@ module XYZ
             raise Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
           end
         end
-        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => [:ancestor_id,parent_id_col]}
+        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => returning_sql_cols(parent_id_col)}
         child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts, :parent_objs_info => objs_info})
         if block
           block.call(child_context)
@@ -41,6 +40,10 @@ module XYZ
         end
       end
       ret unless block
+    end
+
+    def self.returning_sql_cols(parent_id_col)
+      [:ancestor_id,parent_id_col]
     end
 
     def self.create_from_hash(clone_proc,hash)
@@ -208,14 +211,20 @@ module XYZ
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
-        ndx_template_to_ref = Hash.new
+        ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
+        ndx_node_template_to_ref = Hash.new
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          ndx_template_to_ref[m[:component_template_id]] = m[:id]
+         
+          #set  ndx_node_template_to_ref
+          #first index is the associated node instance, second is teh component template
+          pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
+          pntr[m[:component_template_id]] = m[:id]
+
           {:ancestor_id => m[:component_template_id],
             :component_template_id => m[:component_template_id],
             :node_node_id =>  node_node_id,
@@ -233,7 +242,9 @@ module XYZ
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
         ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         ret.each do |r|
-          r.merge!(:component_ref_id => ndx_template_to_ref[r[:ancestor_id]], :component_template_id => r[:ancestor_id])
+          component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
+          raise Error.new("Variable component_ref_id shoudl not be null") if component_ref_id.nil?
+          r.merge!(:component_ref_id => component_ref_id, :component_template_id => r[:ancestor_id])
         end 
         ret
       end
@@ -270,24 +281,6 @@ module XYZ
       end
     end
 
-    class AssemblyTemplateNode < ChildContext
-     private
-      def self.get_children_model_handles(model_handle,omit_list=[],&block)
-        child_mh = model_handle.create_childMH(:component)
-        block.call(child_mh)
-      end
-
-      def ret_field_set_to_copy()
-        Model::FieldSet.common(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id).with_added_cols(:ancestor_id,:type,:datacenter_datacenter_id,:library_library_id,:assembly_id,:node_binding_rs_id,:ref)
-      end
-    end
-
-    class AssemblyTemplateComponent < ChildContext
-      def clone_copy_child_objects(clone_proc,level)
-        super
-      end
-    end
-
     #index are clone_direction, parent, child
     SpecialContext = {
       :library_to_target => {
@@ -295,9 +288,10 @@ module XYZ
         :node => {:component_ref => AssemblyComponentRef},
         :component => {:attribute => AssemblyComponentAttribute}
       },
+      #TODO: remove
       :target_to_library => {
-        :library => {:node => AssemblyTemplateNode},
-        :node => {:component => AssemblyTemplateComponent}
+        #:library => {:node => AssemblyTemplateNode},
+        #:node => {:component => AssemblyTemplateComponent}
       }
     }
   end

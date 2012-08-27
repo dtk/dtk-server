@@ -5,7 +5,7 @@ module XYZ
     end
 
     def rest__list_remote()
-      rest_ok_response Repo::Remote.list(model_handle(:repo),:component_module)
+      rest_ok_response Repo::Remote.new.list(model_handle(:repo),:component_module)
     end
 
     def rest__import()
@@ -19,17 +19,48 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__push_to_mirror()
+      component_module_id = ret_request_param_id(:component_module_id)
+      mirror_host = ret_non_null_request_params(:mirror_host)
+      component_module = create_object_from_id(component_module_id)
+      component_module.push_to_mirror(mirror_host)
+    end
+
     def rest__update_library()
-      component_module_id = ret_non_null_request_params(:component_module_id)
+      component_module_id = ret_request_param_id(:component_module_id)
       component_module = create_object_from_id(component_module_id)
       component_module.update_library_module_with_workspace()
       rest_ok_response
     end
 
     def rest__delete()
-      component_module_id = ret_non_null_request_params(:component_module_id)
+      component_module_id = ret_request_param_id(:component_module_id)
       ComponentModule.delete(id_handle(component_module_id))
       rest_ok_response
     end
+
+    def rest__add_user_direct_access()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      ComponentModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      rest_ok_response(:repo_manager_footprint => RepoManager.footprint(), :repo_manager_dns => RepoManager.repo_server_dns())
+    end
+
+    def rest__workspace_branch_info(component_module_id)
+      component_module = create_object_from_id(component_module_id)
+      ws_branch_info = component_module.get_workspace_branch_info()
+      workspace_branch_info = {
+        :branch => ws_branch_info[:branch],
+        :module_name => ws_branch_info[:component_module_name],
+        :repo_url => RepoManager.repo_url(ws_branch_info[:repo_name])
+      }
+      rest_ok_response workspace_branch_info
+    end
+
+    def rest__remove_user_direct_access()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      ComponentModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      rest_ok_response
+    end
+
   end
 end

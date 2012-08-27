@@ -5,7 +5,7 @@ module DTK::Client
       [:display_name, :id, :version]
     end
     desc "list [library|remote]","List library, workspace,or remote service modules"
-    def list(parent)
+    def list(parent="library")
       case parent
        when "library":
          post rest_url("service_module/list_from_library")
@@ -48,6 +48,14 @@ module DTK::Client
       }
       post_body.merge!(:library_id => library_id) if library_id
       post rest_url("service_module/create"), post_body
+    end
+
+    desc "delete SERVICE-MODULE-ID", "Delete service module and all items contained in it"
+    def delete(service_module_id)
+      post_body = {
+       :service_module_id => service_module_id
+      }
+      post rest_url("service_module/delete"), post_body
     end
   end
 end

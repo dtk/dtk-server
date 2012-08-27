@@ -17,6 +17,18 @@
     }
   },
   :virtual_columns=>{
+    :module_branch=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:repo_id=>:implementation__repo_id,:branch=>:implementation__branch},
+         :cols=>[:id,:group_id,:display_name]
+       }]
+    },
     :component_summary_info=>{
       :type=>:json,
       :hidden=>true,

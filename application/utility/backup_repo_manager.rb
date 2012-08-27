@@ -13,11 +13,12 @@ mirror_base_url = "http://#{mirror_host}:7000"
 
 
 include DTK
-include DTK::Common
+
+remote_repo_client = RepoManagerClient.new(remote_repo_base_url)
+username = remote_repo_client.get_server_dtk_username()
+rsa_pub_key = remote_repo_client.get_ssh_rsa_pub_key()
 
 mirror_client = RepoManagerClient.new(mirror_base_url)
-username = Aux.dtk_instance_repo_username()
-rsa_pub_key = Aux.get_ssh_rsa_pub_key()
 pp mirror_client.add_user(username,rsa_pub_key,:noop_if_exists => true)
 
 remote_repo_client = RepoManagerClient.new(remote_repo_base_url)

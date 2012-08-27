@@ -6,6 +6,7 @@ module DTK::RepoManager
     end
     def initialize(repo_name,branch='master')
       #updating and querying from the bare repo   
+      @repo_name = repo_name
       @repo = adapter_class.new(bare_repo_dir(repo_name),branch)
     end
     
@@ -52,6 +53,14 @@ module DTK::RepoManager
     def respond_to?(name)
       !!(RepoMethods.include?(name) || super)
     end
+
+    def push_to_mirror(mirror_host)
+      #mirror repo has exact same name
+      mirror_repo = "#{DefaultGitUser}@#{mirror_host}:#{@repo_name}"
+      @repo.push_to_mirror_repo(mirror_repo)
+    end
+    DefaultGitUser = 'git'
+
    private
     def bare_repo_dir(repo_name)
       ::DTK::RepoManager::bare_repo_dir(repo_name)

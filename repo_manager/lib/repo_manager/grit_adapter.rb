@@ -45,6 +45,9 @@ module DTK::RepoManager
         git_command(:push,"origin", "#{@branch}:refs/heads/#{@branch}")
       end
     end
+    def push_to_mirror_repo(mirror_repo)
+      git_command(:push,"--mirror",mirror_repo)
+    end
     Git_command__push_mutex = Mutex.new
 
     def pull()

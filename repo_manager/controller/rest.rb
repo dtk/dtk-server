@@ -91,6 +91,12 @@ class RestController < Controller
       Repo.new(repo_name).create_branch(new_branch)
       rest_ok_response :branch => new_branch
     end
+    
+    def push_to_mirror()
+      repo_name,mirror_host = ret_non_null_request_params(:repo_name,:mirror_host)
+      Repo.new(repo_name).push_to_mirror(mirror_host)
+      rest_ok_response
+    end
   end
 
   def error

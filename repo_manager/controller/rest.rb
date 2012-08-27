@@ -69,6 +69,7 @@ class RestController < Controller
     def update_ssh_known_hosts()
       remote_host = ret_non_null_request_params(:remote_host)
       Admin.update_ssh_known_hosts(remote_host)
+      rest_ok_response
     end
   end
 

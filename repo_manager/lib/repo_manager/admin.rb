@@ -1,5 +1,5 @@
 r8_require('gitolite_adapter') #TODO: since just one adapter now not dynamically loading in
-module DTK::RepoManager
+module DTK; module RepoManager
   class Admin
     class << self
       def adapter_class()
@@ -17,6 +17,14 @@ module DTK::RepoManager
       def respond_to?(name)
         !!(AdminMethods.include?(name) || super)
       end
+
+      def dtk_username()
+        Common::Aux.dtk_instance_repo_username()
+      end
+
+      def get_ssh_rsa_pub_key()
+        Common::Aux.get_ssh_rsa_pub_key()
+      end
     end
   end
-end
+end; end

@@ -1,8 +1,9 @@
 #TODO: refering to common r8server apps, which will be made to a common gem
 #TODO: replace local copies of GritAdapter with common version
 require File.expand_path('../../application/require_first', File.dirname(__FILE__))
-require File.expand_path('../../utils/internal/errors/rest_error', File.dirname(__FILE__))
-require File.expand_path('../../utils/internal/log', File.dirname(__FILE__))
+dtk_require_common_lib('errors','aux')
+#require File.expand_path('../../utils/internal/errors/rest_error', File.dirname(__FILE__))
+#require File.expand_path('../../utils/internal/log', File.dirname(__FILE__))
 module DTK
   module RepoManager
     def self.bare_repo_dir(repo_name)
@@ -16,8 +17,8 @@ end
 end
 
 module DTK::RepoManager
-  class Error < NameError
-  end
+#  class Error < NameError
+#  end
   module Log
     def self.info(msg)
       ::Ramaze::Log.info(msg)

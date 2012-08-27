@@ -110,6 +110,6 @@ class RestController < Controller
   def error
     exception = request.env["rack.route_exceptions.exception"]
 pp [:error, exception,exception.backtrace[0..15]]
-    rest_notok_response XYZ::RestError.create(exception).hash_form()
+    rest_notok_response ::DTK::RestError.create(exception).hash_form()
   end
 end

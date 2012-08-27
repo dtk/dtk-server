@@ -69,6 +69,16 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    def get_server_dtk_username()
+      route = "/rest/admin/server_dtk_username"
+      get_rest_request_data(route,:raise_error => true)
+    end
+
+    def get_ssh_rsa_pub_key()
+      route = "/rest/admin/ssh_rsa_pub_key"
+      get_rest_request_data(route,:raise_error => true)
+    end
+
    private
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call

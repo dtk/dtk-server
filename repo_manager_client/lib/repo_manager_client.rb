@@ -35,7 +35,7 @@ module DTK
     DefaultGitUser = 'git'
     DefaultRestServicePort = 7000
 
-    def self.create_branch_instance(repo,branch,opts={})
+    def create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)
     end
 
@@ -122,6 +122,13 @@ module DTK
         body = {:repo_name => @repo,:path => file_asset[:path], :branch => @branch, :content => content}
         post_rest_request_data(route,body,:raise_error => true)
       end
+
+      def push_to_mirror(mirror_host)
+        route = "/rest/repo/push_to_mirror"
+        body = {:repo_name => @repo,:mirror_host => mirror_host}
+        post_rest_request_data(route,body,:raise_error => true)
+      end 
+
     end
   end
 end

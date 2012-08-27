@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+#TODO: fix up so that credential exchange is between repo managers not wrt to this client
+
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))
@@ -27,5 +29,6 @@ pp [:remote_modules,remote_modules]
 remote_modules.each do |repo_name|
   mirror_client.create_repo(username,repo_name,"RW+") #TODO: may make this part of component/push_to_mirror call
   pp "created or found mirror_repo  #{repo_name}"
-  pp response =  remote_repo_client.push_to_mirror(repo_name,mirror_host)
+  master_branch = remote_repo_client.create_branch_instance(repo_name,"master")
+  pp response =  master_branch.push_to_mirror(mirror_host)
 end

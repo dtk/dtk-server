@@ -71,12 +71,12 @@ module DTK
 
     def get_server_dtk_username()
       route = "/rest/admin/server_dtk_username"
-      get_rest_request_data(route,:raise_error => true)
+      get_rest_request_data(route,:raise_error => true)["dtk_username"]
     end
 
     def get_ssh_rsa_pub_key()
-      route = "/rest/admin/ssh_rsa_pub_key"
-      get_rest_request_data(route,:raise_error => true)
+      route = "/rest/admin/server_ssh_rsa_pub_key"
+      get_rest_request_data(route,:raise_error => true)["rsa_pub_key"]
     end
 
    private

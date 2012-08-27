@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#TODO: fix up so that credential exchange is between repo managers not wrt to this client
+#TODO: fix up so that remote updates known_hosts from mirror
 
 require 'rubygems'
 require 'pp'
@@ -15,6 +15,7 @@ mirror_base_url = "http://#{mirror_host}:7000"
 include DTK
 
 remote_repo_client = RepoManagerClient.new(remote_repo_base_url)
+
 username = remote_repo_client.get_server_dtk_username()
 rsa_pub_key = remote_repo_client.get_ssh_rsa_pub_key()
 

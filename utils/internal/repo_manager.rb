@@ -73,7 +73,7 @@ module XYZ
     def self.link_to_remote_repo(repo_name,remote_name,remote_url)
       context = {:implementation => {:repo => repo_name, :branch => "master"}}
       repo = get_repo(context)      
-      repo.add_remote(remote_name,remote_url)
+      repo.add_or_update_remote(remote_name,remote_url)
       repo_name
     end
 

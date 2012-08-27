@@ -36,11 +36,12 @@ module DTK
         raise ErrorUsage.new("Cannot export service module (#{module_name}) because it is has been exported already")
       end
 
+      remote_repo_name = ret_remote_repo_name(module_name)
+
       #create remote repo
-      Repo::Remote.new.create_repo(module_name)
+      Repo::Remote.new.create_repo(remote_repo_name)
 
       #link and push to remote repo
-      remote_repo_name = ret_remote_repo_name(module_name)
       repo.link_to_remote(remote_repo_name)
       repo.push_to_remote(remote_repo_name)
 
@@ -120,8 +121,7 @@ module DTK
     end
 
     def ret_remote_repo_name(module_name)
-      #TODO: remote_repo_name might instead be something like "sm-#{module_name}"
-      module_name
+      "sm-#{module_name}"
     end
   end
 end

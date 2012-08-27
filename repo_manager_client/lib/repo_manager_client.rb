@@ -79,6 +79,12 @@ module DTK
       get_rest_request_data(route,:raise_error => true)["rsa_pub_key"]
     end
 
+    def update_ssh_known_hosts(remote_host)
+      route = "/rest/admin/update_ssh_known_hosts"
+      body = {:remote_host => remote_host}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
    private
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call

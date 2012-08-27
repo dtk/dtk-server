@@ -66,6 +66,10 @@ class RestController < Controller
       rest_ok_response :rsa_pub_key => Admin.get_ssh_rsa_pub_key()
     end
 
+    def update_ssh_known_hosts()
+      remote_host = ret_non_null_request_params(:remote_host)
+      Admin.update_ssh_known_hosts(remote_host)
+    end
   end
 
   class RepoController < self

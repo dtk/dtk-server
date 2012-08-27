@@ -25,6 +25,10 @@ module DTK; module RepoManager
       def get_ssh_rsa_pub_key()
         Common::Aux.get_ssh_rsa_pub_key()
       end
+
+      def update_ssh_known_hosts(remote_host)
+        Common::Aux.update_ssh_known_hosts(remote_host)
+      end
     end
   end
 end; end

@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-#TODO: fix up so that remote updates known_hosts from mirror
 #TODO: inner loop can stop because of timeouts; check whetehr on client side or server(s) side
 require 'rubygems'
 require 'pp'
@@ -18,6 +17,7 @@ remote_repo_client = RepoManagerClient.new(remote_repo_base_url)
 
 username = remote_repo_client.get_server_dtk_username()
 rsa_pub_key = remote_repo_client.get_ssh_rsa_pub_key()
+remote_repo_client.update_ssh_known_hosts(mirror_host)
 
 mirror_client = RepoManagerClient.new(mirror_base_url)
 pp mirror_client.add_user(username,rsa_pub_key,:noop_if_exists => true)
@@ -29,9 +29,10 @@ pp [:remote_modules,remote_modules]
 
 
 remote_modules.each do |repo_name|
-  #TODO: below is no up if repo exsits; so if different user the specfied users rights not included; so have explicit set users rights
-  mirror_client.create_repo(username,repo_name,"RW+") #TODO: may make this part of component/push_to_mirror call
+  #TODO: below is no-op if repo exsits; so if different user the specfied users rights not included; so have explicit set users rights
+  mirror_client.create_repo(username,repo_name,"RW+") 
   mirror_client.set_user_rights_in_repo(username,repo_name,"RW+")
+
   pp "created or found mirror_repo  #{repo_name}"
   master_branch = remote_repo_client.create_branch_instance(repo_name,"master")
   pp response =  master_branch.push_to_mirror(mirror_host)

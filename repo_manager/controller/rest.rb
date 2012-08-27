@@ -57,6 +57,15 @@ class RestController < Controller
       Admin.delete_repo(repo_name)
       rest_ok_response :repo_name => repo_name
     end
+
+    def server_dtk_username()
+      rest_ok_response :dtk_username => Admin.dtk_username()
+    end
+
+    def server_ssh_rsa_pub_key()
+      rest_ok_response :rsa_pub_key => Admin.get_ssh_rsa_pub_key()
+    end
+
   end
 
   class RepoController < self

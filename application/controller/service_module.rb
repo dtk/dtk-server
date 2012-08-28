@@ -5,8 +5,9 @@ module XYZ
     end
 
     def rest__list_remote()
-      rest_ok_response Repo::Remote.new.list(model_handle(:repo),:service_module)
+      rest_ok_response ServiceModule.list_remotes(model_handle)
     end
+
     def rest__import()
       remote_module_name = ret_non_null_request_params(:remote_module_name)
       library_id = ret_request_params(:library_id) 

@@ -106,6 +106,12 @@ module DTK
       row[:repo]
     end
 
+    def self.list_remotes(model_handle)
+      Repo::Remote.new.list_repo_names(:service_module).map do |r|
+        {:display_name => remote_repo_name_to_display_name(r[:repo_name])}
+      end
+    end
+
    private
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
       depth = 1
@@ -122,6 +128,13 @@ module DTK
 
     def ret_remote_repo_name(module_name)
       "sm-#{module_name}"
+    end
+    def self.remote_repo_name_to_display_name(repo_name)
+      if repo_name =~ /^sm-(.+$)/
+        $1
+      else
+        repo_name
+      end
     end
   end
 end

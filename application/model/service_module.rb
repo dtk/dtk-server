@@ -5,9 +5,9 @@ module DTK
     include ServiceOrComponentModuleMixin
 
     #import from remote
-    def self.import(library_idh,remote_module_name)
+    def self.import(library_idh,module_name)
       ret = nil
-      module_name = remote_module_name
+      remote_module_name = ret_remote_repo_name(module_name)
       if remote_already_imported?(library_idh,remote_module_name)
         raise ErrorUsage.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
       end
@@ -127,8 +127,13 @@ module DTK
     end
 
     def ret_remote_repo_name(module_name)
+      self.class.ret_remote_repo_name(module_name)
+    end
+
+    def self.ret_remote_repo_name(module_name)
       "sm-#{module_name}"
     end
+
     def self.remote_repo_name_to_display_name(repo_name)
       if repo_name =~ /^sm-(.+$)/
         $1

@@ -130,10 +130,16 @@ module XYZ
     def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
       assembly_id = ret_request_param_id(:assembly_template_id,::DTK::AssemblyTemplate)
+      
+      #TODO: if naem given and not unique either reject or generate a -n suffix
+      assembly_name = ret_request_params(:name) 
+
       id_handle = id_handle(assembly_id)
 
       #TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs = Hash.new
+      override_attrs[:display_name] = assembly_name if assembly_name
+
       target_object = target_idh.create_object()
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)

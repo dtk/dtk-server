@@ -60,7 +60,7 @@ module DTK
     def create_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/create_repo"
       body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
-      post_rest_request_data(route,body,:raise_error => true)
+      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
@@ -105,18 +105,26 @@ module DTK
       end
     end
 
-    DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
+
     def get_rest_request_data(route,opts={})
       handle_error(opts) do 
-        Common::Rest::ClientWrapper.get("#{@rest_base_url}#{route}",DefaultTimeoutOpts)
+        Common::Rest::ClientWrapper.get("#{@rest_base_url}#{route}",ret_opts(opts))
       end
     end
 
     def post_rest_request_data(route,body,opts={})
       handle_error(opts) do
-        Common::Rest::ClientWrapper.post("#{@rest_base_url}#{route}",body,DefaultTimeoutOpts)
+        Common::Rest::ClientWrapper.post("#{@rest_base_url}#{route}",body,ret_opts(opts))
       end
     end
+
+    def ret_opts(opts)
+      to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
+        opts[k] ? h.merge(k => opts[k]) : h
+      end
+      DefaultTimeoutOpts.merge(to_merge)
+    end
+    DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
 
     #repo access
     class BranchInstance < self

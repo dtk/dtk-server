@@ -84,6 +84,12 @@ module DTK
       body = {:remote_host => remote_host}
       post_rest_request_data(route,body,:raise_error => true)
     end
+    ## systsem access
+    def create_module(username,repo_name,access_rights="R",namespace="r8")
+      route = "/rest/system/module/create"
+      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights,:namespace => namespace}
+      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+    end
 
    private
     def handle_error(opts={},&rest_call_block)

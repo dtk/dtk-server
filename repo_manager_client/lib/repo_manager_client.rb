@@ -85,12 +85,20 @@ module DTK
       body = {:remote_host => remote_host}
       post_rest_request_data(route,body,:raise_error => true)
     end
+
     ## systsem access
-    def create_module(username,repo_name,access_rights="R",namespace="r8")
+    #required keys: [:username,:repo_name,:type]
+    #optional keys: [::namespace,access_rights]
+    def create_module(params_hash)
       route = "/rest/system/module/create"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights,:namespace => namespace}
+      body = DefaultsForCreateModule.merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
+    DefaultsForCreateModule = {
+      :namespace => "r8",
+      :access_rights => "R"
+    }
+
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"

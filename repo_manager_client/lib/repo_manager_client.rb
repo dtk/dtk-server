@@ -1,4 +1,4 @@
-#TODO: need requires if used standalone
+r8_require_common_lib('aux')
 r8_require_common_lib('rest_client_wrapper')
 module DTK
   #TODO: RepoType should be in common
@@ -40,6 +40,7 @@ module DTK
     end
 
     #admin access
+    #NOTE: mark better tah these are at git level
     def list_repos()
       route = "/rest/admin/list_repos"
       response_data = get_rest_request_data(route,:raise_error => true)
@@ -48,19 +49,19 @@ module DTK
       repos
     end
 
-    def add_user(username,rsa_pub_key,opts={})
+    def create_repo(username,repo_name,access_rights="R")
+      route = "/rest/admin/create_repo"
+      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+    end
+
+    def add_git_user(username,rsa_pub_key,opts={})
       route = "/rest/admin/add_user"
       body = {:username => username, :rsa_pub_key => rsa_pub_key}
       [:noop_if_exists,:delete_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
       post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    def create_repo(username,repo_name,access_rights="R")
-      route = "/rest/admin/create_repo"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
@@ -89,6 +90,16 @@ module DTK
       route = "/rest/system/module/create"
       body = {:repo_name => repo_name, :username => username, :access_rights => access_rights,:namespace => namespace}
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+    end
+
+    def create_user(username,rsa_pub_key,opts={})
+      route = "/rest/system/user/create"
+      dtk_instance_name = Common::Aux::dtk_instance_repo_username()
+      body = {:username => username, :rsa_pub_key => rsa_pub_key, :dtk_instance_name => dtk_instance_name}
+      [:update_if_exists].each do |opt_key|
+        body.merge!(opt_key => true) if opts[opt_key]
+      end
+      post_rest_request_data(route,body,:raise_error => true)
     end
 
    private

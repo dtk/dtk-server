@@ -99,11 +99,29 @@ module DTK
       :namespace => DefaultsNamespace,
       :access_rights => "R"
     }
-    def delete_module(name,namespace=nil)
+
+    #keys: [:name,namespace,:id]
+    #contraints :id or :name
+    def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      body = {:name => name, :namespace => namespace||DefaultsNamespace}
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+      body = {:namespace => DefaultsNamespace}.merge(params_hash)
+      post_rest_request_data(route,body,:raise_error => true)
     end
+
+    #keys: [:name,namespace,:id]
+    #contraints :id or :name
+    def display_module(params_hash)
+      route = "/rest/system/module/display"
+      body = {:namespace => DefaultsNamespace}.merge(params_hash)
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+    def list_modules(filter=nil)
+      route = "/rest/system/module/list"
+      body = (filter ? {:filter => filter} : {})
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"

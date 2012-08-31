@@ -87,18 +87,23 @@ module DTK
     end
 
     ## systsem access
-    #required keys: [:username,:repo_name,:type]
-    #optional keys: [::namespace,access_rights]
+    #required keys: [:username,:repo,:type]
+    #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
       body = DefaultsForCreateModule.merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
+    DefaultsNamespace = "r8"
     DefaultsForCreateModule = {
-      :namespace => "r8",
+      :namespace => DefaultsNamespace,
       :access_rights => "R"
     }
-
+    def delete_module(name,namespace=nil)
+      route = "/rest/system/module/delete"
+      body = {:name => name, :namespace => namespace||DefaultsNamespace}
+      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+    end
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"

@@ -133,6 +133,18 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    def delete_user(user_id)
+      route = "/rest/system/user/delete"
+      body = {:id => user_id}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+    def list_users()
+      route = "/rest/system/user/list"
+      body = {}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
    private
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call

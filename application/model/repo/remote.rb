@@ -36,7 +36,7 @@ module DTK
           :username => username,
           :name => name,
           :access_rights => "RW+", 
-          :type => type,
+          :type => type.to_s.gsub(/_module$/,""),
           :noop_if_exists => true
         } 
         response_data = client.create_module(create_module_params)

@@ -9,9 +9,36 @@ module DTK
     def get_library_implementations()
       get_objs_uniq(:library_implementations)
     end
+    def module_type()
+      self.class.module_type()
+    end
+
+    #export to remote
+    def export()
+      repo = get_library_repo()
+      module_name = update_object!(:display_name)[:display_name]
+      if repo[:remote_repo_name]
+        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
+      end
+
+      #create remote module
+      remote_repo_name = Repo::Remote.new.create_module(module_name,module_type())[:git_repo_name]
+
+      #link and push to remote repo
+      repo.link_to_remote(remote_repo_name)
+      repo.push_to_remote(remote_repo_name)
+
+      #update last for idempotency (i.e., this is idempotent check)
+      repo.update(:remote_repo_name => remote_repo_name)
+      remote_repo_name
+    end
   end
 
   module ServiceOrComponentModuleClassMixin
+    def module_type()
+      model_name()
+    end
+
     def check_valid_id(model_handle,id)
       check_valid_id_default(model_handle,id)
     end

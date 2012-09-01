@@ -20,32 +20,11 @@ module DTK
 
       #create empty repo on local repo manager; 
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      module_specific_type = :service_module
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => remote_module_name,:delete_if_exists => true)
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:remote_repo_name => remote_module_name,:delete_if_exists => true)
       repo.synchronize_with_remote_repo()
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       create_assembly_meta_info?(library_idh,module_and_branch_info[:module_branch_idh],module_name,repo)
       module_and_branch_info[:module_idh]
-    end
-
-    #export to remote
-    def export()
-      repo = get_library_repo()
-      module_name = update_object!(:display_name)[:display_name]
-      if repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot export service module (#{module_name}) because it is has been exported already")
-      end
-
-      #create remote module
-      remote_repo_name = Repo::Remote.new.create_module(module_name,:service)[:git_repo_name]
-
-      #link and push to remote repo
-      repo.link_to_remote(remote_repo_name)
-      repo.push_to_remote(remote_repo_name)
-
-      #update last for idempotency (i.e., this is idempotent check)
-      repo.update(:remote_repo_name => remote_repo_name)
-      remote_repo_name
     end
 
     def list_assembly_templates()
@@ -74,8 +53,7 @@ module DTK
         raise Error.new("Create conflicts with existing library module (#{module_name})")
       end
 
-      module_specific_type = :service_module
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:delete_if_exists => true)
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       module_and_branch_info[:module_idh]
     end
@@ -85,7 +63,7 @@ module DTK
         :cols => [:id,:display_name,:module_branches],
         :filter => [:and, [:eq, :display_name, service_module_name], [:eq, :library_library_id, library_idh.get_id()]]
       }
-      rows =  get_objs(library_idh.create_childMH(:service_module),sp_hash)
+      rows =  get_objs(library_idh.create_childMH(module_type()),sp_hash)
       if rows.empty?
         raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
       end
@@ -105,7 +83,7 @@ module DTK
     end
 
     def self.list_remotes(model_handle)
-      Repo::Remote.new.list_repo_names(:service_module).map do |r|
+      Repo::Remote.new.list_repo_names(module_type()).map do |r|
         {:display_name => remote_repo_name_to_display_name(r[:repo_name])}
       end
     end

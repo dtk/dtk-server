@@ -25,14 +25,22 @@ module DTK
         ret
       end
 
-      #create remote repo
-      def create_repo(repo_name)
+      #create (empty) remote module
+      def create_module(name,type)
         username = dtk_instance_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
-        access_rights = "RW+"
-        client.add_user(username,rsa_pub_key,:noop_if_exists => true)
-        client.create_repo(username,repo_name,access_rights)
-        repo_name
+
+        client.create_user(username,rsa_pub_key,:update_if_exists => true)
+
+        create_module_params = {
+          :username => username,
+          :name => name,
+          :access_rights => "RW+", 
+          :type => type,
+          :noop_if_exists => true
+        } 
+        response_data = client.create_module(create_module_params)
+        Aux.convert_keys_to_symbols(response_data)
       end
 
       def authorize_dtk_instance(remote_repo_name)

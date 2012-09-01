@@ -17,7 +17,17 @@ username='test_user'
 mod_name='test_repo2'
 rsa_pub_key = Common::Aux.get_ssh_rsa_pub_key()
 pp client.create_user(username,rsa_pub_key,:update_if_exists => true)
-pp client.create_module(:username => username,:name => mod_name,:access_rights => "RW+", :type => :component, :tags => {:internal_id => 1},:noop_if_exists => true) 
+
+create_module_params = {
+  :username => username,
+  :name => mod_name,
+  :access_rights => "RW+", 
+  :type => :component, 
+  :tags => {:internal_id => 1},
+  :noop_if_exists => true, 
+#  :enable_all_users => true
+}
+pp client.create_module(create_module_params)
 pp client.list_modules()
 users = client.list_users()
 pp users

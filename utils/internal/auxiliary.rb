@@ -41,6 +41,10 @@ module XYZ
         #TODO: change to use app server clock
       end
 
+      def convert_keys_to_symbols(hash)
+        hash.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => hash[k])}
+      end
+
       def ordered_hash(array_with_hashes)
         array_with_hashes.inject(ActiveSupport::OrderedHash.new) do |h,x|
           h.merge(x.keys.first => x.values.first)

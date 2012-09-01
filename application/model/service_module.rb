@@ -36,10 +36,8 @@ module DTK
         raise ErrorUsage.new("Cannot export service module (#{module_name}) because it is has been exported already")
       end
 
-      remote_repo_name = ret_remote_repo_name(module_name)
-
-      #create remote repo
-      Repo::Remote.new.create_repo(remote_repo_name)
+      #create remote module
+      remote_repo_name = Repo::Remote.new.create_module(module_name,:service)[:git_repo_name]
 
       #link and push to remote repo
       repo.link_to_remote(remote_repo_name)
@@ -123,22 +121,6 @@ module DTK
         assemblies_hash = hash_content["assemblies"]
         node_bindings_hash = hash_content["node_bindings"]
         Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
-      end
-    end
-
-    def ret_remote_repo_name(module_name)
-      self.class.ret_remote_repo_name(module_name)
-    end
-
-    def self.ret_remote_repo_name(module_name)
-      "sm-#{module_name}"
-    end
-
-    def self.remote_repo_name_to_display_name(repo_name)
-      if repo_name =~ /^sm-(.+$)/
-        $1
-      else
-        repo_name
       end
     end
   end

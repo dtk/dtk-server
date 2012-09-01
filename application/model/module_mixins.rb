@@ -1,5 +1,22 @@
 module DTK
   module ModuleMixin
+    #export to remote
+    def export()
+      repo = get_library_repo(:raise_error_if_linked => true)
+      module_name = update_object!(:display_name)[:display_name]
+
+      #create remote module
+      remote_repo_name = Repo::Remote.new.create_module(module_name,module_type())[:git_repo_name]
+
+      #link and push to remote repo
+      repo.link_to_remote(remote_repo_name)
+      repo.push_to_remote(remote_repo_name)
+
+      #update last for idempotency (i.e., this is idempotent check)
+      repo.update(:remote_repo_name => remote_repo_name)
+      remote_repo_name
+    end
+
     def get_repos()
       get_objs_uniq(:repos)
     end
@@ -13,34 +30,19 @@ module DTK
       self.class.module_type()
     end
 
-    def get_library_repo()
+    def get_library_repo(opts={})
       sp_hash = {
         :cols => [:id,:display_name,:library_repo]
       }
       row = get_obj(sp_hash)
       #opportunisticall set display name on module
       self[:display_name] ||= row[:display_name]
-      row[:repo]
-    end
-
-    #export to remote
-    def export()
-      repo = get_library_repo()
-      module_name = update_object!(:display_name)[:display_name]
-      if repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
+      repo = row[:repo]
+      if opts[:raise_error_if_linked] and repo[:remote_repo_name]
+        module_name = update_object!(:display_name)[:display_name]
+        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
       end
-
-      #create remote module
-      remote_repo_name = Repo::Remote.new.create_module(module_name,module_type())[:git_repo_name]
-
-      #link and push to remote repo
-      repo.link_to_remote(remote_repo_name)
-      repo.push_to_remote(remote_repo_name)
-
-      #update last for idempotency (i.e., this is idempotent check)
-      repo.update(:remote_repo_name => remote_repo_name)
-      remote_repo_name
+      repo
     end
   end
 
@@ -143,25 +145,16 @@ module DTK
       end.values
     end
 
-    def remote_already_imported?(library_idh,remote_module_name)
-      ret = nil
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
-                    [:eq, :remote_repo, remote_module_name]]
-      }
-      cms = get_objs(library_idh.createMH(model_name),sp_hash)
-      not cms.empty?
-    end
-
-    def conflicts_with_library_module?(library_idh,module_name)
+    def raise_error_if_library_module_exists(library_idh,module_name)
       sp_hash = {
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      cms = get_objs(library_idh.createMH(model_name),sp_hash)
-      not cms.empty?
+      module_object = get_obj(library_idh.createMH(model_name),sp_hash)
+      if module_object
+        raise ErrorUsage.new("Import conflicts with existing library module (#{module_name})")
+      end
     end
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name)

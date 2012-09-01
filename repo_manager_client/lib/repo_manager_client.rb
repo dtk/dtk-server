@@ -40,7 +40,7 @@ module DTK
     end
 
     #admin access
-    #NOTE: mark better tah these are at git level
+    #NOTE: mark better tht these are at git level
     def list_repos()
       route = "/rest/admin/list_repos"
       response_data = get_rest_request_data(route,:raise_error => true)
@@ -94,9 +94,7 @@ module DTK
       body = DefaultsForCreateModule.merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
-    DefaultsNamespace = "r8"
     DefaultsForCreateModule = {
-      :namespace => DefaultsNamespace,
       :access_rights => "R"
     }
 
@@ -104,15 +102,15 @@ module DTK
     #contraints :id or :name
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      body = {:namespace => DefaultsNamespace}.merge(params_hash)
+      body = params_hash
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    #keys: [:name,namespace,:id]
-    #contraints :id or :name
-    def display_module(params_hash)
-      route = "/rest/system/module/display"
-      body = {:namespace => DefaultsNamespace}.merge(params_hash)
+    #keys: [:name,namespace,:type,:id]
+    #contraints :id or (:name, :namespace, and :type)
+    def get_module_info(params_hash)
+      route = "/rest/system/module/info"
+      body = params_hash
       post_rest_request_data(route,body,:raise_error => true)
     end
 

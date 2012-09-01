@@ -6,6 +6,35 @@ module DTK
         @client = RepoManagerClient.new(rest_base_url)
       end
 
+      #create (empty) remote module
+      def create_module(name,type)
+        username = dtk_instance_username()
+        rsa_pub_key = dtk_instance_rsa_pub_key()
+
+        client.create_user(username,rsa_pub_key,:update_if_exists => true)
+
+        params = {
+          :username => username,
+          :name => name,
+          :access_rights => "RW+", 
+          :type => type_for_remote_module(type),
+          :namespace => self.class.default_namespace(),
+          :noop_if_exists => true
+        } 
+        response_data = client.create_module(params)
+        Aux.convert_keys_to_symbols(response_data)
+      end
+
+      def get_module_info(name,type,namespace=nil)
+        params = {
+          :name => name,
+          :type => type_for_remote_module(type),
+          :namespace => namespace || self.class.default_namespace()
+        } 
+        response_data = client.get_module_info(params)
+        Aux.convert_keys_to_symbols(response_data)
+      end
+
       def list_module_qualified_names(type=nil)
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter)
@@ -14,24 +43,6 @@ module DTK
           namespace = r["namespace"] && "#{r["namespace"]}/"
           el.merge(:name => "#{namespace}#{r["name"]}")
         end
-      end
-
-      #create (empty) remote module
-      def create_module(name,type)
-        username = dtk_instance_username()
-        rsa_pub_key = dtk_instance_rsa_pub_key()
-
-        client.create_user(username,rsa_pub_key,:update_if_exists => true)
-
-        create_module_params = {
-          :username => username,
-          :name => name,
-          :access_rights => "RW+", 
-          :type => type_for_remote_module(type),
-          :noop_if_exists => true
-        } 
-        response_data = client.create_module(create_module_params)
-        Aux.convert_keys_to_symbols(response_data)
       end
 
       def authorize_dtk_instance(remote_repo_name)
@@ -45,6 +56,17 @@ module DTK
 
       def repo_url_ssh_access(remote_repo_name)
         client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
+      end
+
+      def self.default_namespace()
+        DefaultsNamespace
+      end
+      DefaultsNamespace = "r8" #TODO: have this obtained from config file
+
+      #returns name, namespace
+      def self.split_qualified_name(qualified_name)
+        name,namespace = qualified_name.split("/")
+        [name,namespace||default_namespace()]
       end
 
      private

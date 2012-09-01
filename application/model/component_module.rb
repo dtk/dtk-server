@@ -32,17 +32,17 @@ module DTK
       get_objs(service_module_mh,sp_hash)
     end
 
-    def self.import(library_idh,remote_module_name)
+    def self.import(library_idh,remote_module_name,remote_namespace)
       ret = nil
       module_name = remote_module_name
-      if remote_already_imported?(library_idh,remote_module_name)
-        raise ErrorUsage.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
-      end
-      if conflicts_with_library_module?(library_idh,module_name)
-        raise ErrorUsage.new("Import conflicts with library module (#{module_name})")
-      end
+      raise_error_if_library_module_exists(library_idh,module_name)
 
-      #TODO: this might be done a priori
+      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+      end
+      raise Error.new("Got here")
+
+      #TODO: this will be done a priori
       Repo::Remote.new.authorize_dtk_instance(remote_module_name)
 
       #create empty repo on local repo manager; 
@@ -59,7 +59,7 @@ module DTK
       component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)
       component_idhs = component_meta_file.update_model()
 
-      #TODO: remove beloq and put this log in component_meta_file.update_model()
+      #TODO: remove below and put this log in component_meta_file.update_model()
       update_components_with_branch_info(component_idhs,module_and_branch_info[:module_branch_idh],module_and_branch_info[:version])
       module_and_branch_info[:module_idh]
     end

@@ -19,6 +19,13 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__export()
+      component_module_id = ret_request_param_id(:component_module_id)
+      component_module = create_object_from_id(component_module_id)
+      component_module.export()
+      rest_ok_response 
+    end
+
     def rest__push_to_mirror()
       component_module_id = ret_request_param_id(:component_module_id)
       mirror_host = ret_non_null_request_params(:mirror_host)

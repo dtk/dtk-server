@@ -1,8 +1,8 @@
-r8_require('service_or_component_module')
+r8_require('module_mixins')
 module DTK
   class ServiceModule < Model
-    extend ServiceOrComponentModuleClassMixin
-    include ServiceOrComponentModuleMixin
+    extend ModuleClassMixin
+    include ModuleMixin
 
     #import from remote
     def self.import(library_idh,module_name)
@@ -70,16 +70,6 @@ module DTK
       version ||= BranchNameDefaultVersion
       version_match_row = rows.find{|r|r[:module_branch][:version] == version}
       version_match_row && version_match_row[:module_branch]
-    end
-
-    def get_library_repo()
-      sp_hash = {
-        :cols => [:id,:display_name,:library_repo]
-      }
-      row = get_obj(sp_hash)
-      #opportunisticall set display name on service_module
-      self[:display_name] ||= row[:display_name]
-      row[:repo]
     end
 
     def self.list_remotes(model_handle)

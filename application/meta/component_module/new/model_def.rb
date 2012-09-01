@@ -53,6 +53,13 @@ lambda__segment_components =
     :remote_repo => {:type=>:varchar, :size => 100} #non null if points to remote component module
   },
   :virtual_columns=>{
+    :library_repo=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols =>[:id,:repo_id],:filter=>[:eq,:is_workspace,false]),
+       lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
+    },
     :repos=>{
       :type=>:json,
       :hidden=>true,

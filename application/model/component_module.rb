@@ -1,8 +1,8 @@
-r8_require('service_or_component_module')
+r8_require('module_mixins')
 module DTK
   class ComponentModule < Model
-    extend ServiceOrComponentModuleClassMixin
-    include ServiceOrComponentModuleMixin
+    extend ModuleClassMixin
+    include ModuleMixin
 
     def get_workspace_branch_info()
       row = get_augmented_workspace_branch()

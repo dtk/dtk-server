@@ -1,5 +1,5 @@
 module DTK
-  module ServiceOrComponentModuleMixin
+  module ModuleMixin
     def get_repos()
       get_objs_uniq(:repos)
     end
@@ -11,6 +11,16 @@ module DTK
     end
     def module_type()
       self.class.module_type()
+    end
+
+    def get_library_repo()
+      sp_hash = {
+        :cols => [:id,:display_name,:library_repo]
+      }
+      row = get_obj(sp_hash)
+      #opportunisticall set display name on module
+      self[:display_name] ||= row[:display_name]
+      row[:repo]
     end
 
     #export to remote
@@ -34,7 +44,7 @@ module DTK
     end
   end
 
-  module ServiceOrComponentModuleClassMixin
+  module ModuleClassMixin
     def module_type()
       model_name()
     end

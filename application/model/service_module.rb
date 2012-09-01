@@ -72,12 +72,6 @@ module DTK
       version_match_row && version_match_row[:module_branch]
     end
 
-    def self.list_remotes(model_handle)
-      Repo::Remote.new.list_repo_names(module_type()).map do |r|
-        {:display_name => remote_repo_name_to_display_name(r[:repo_name])}
-      end
-    end
-
    private
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
       depth = 1

@@ -45,6 +45,10 @@ module DTK
   end
 
   module ModuleClassMixin
+    def list_remotes(model_handle)
+      Repo::Remote.new.list_repo_names(module_type())
+    end
+
     def module_type()
       model_name()
     end

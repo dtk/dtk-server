@@ -64,17 +64,6 @@ module DTK
       module_and_branch_info[:module_idh]
     end
 
-    def self.list_remotes(model_handle)
-      Repo::Remote.new.list_repo_names(:component_module).map do |r|
-        {:display_name => remote_repo_name_to_display_name(r[:repo_name])}
-      end
-    end
-
-   private
-    def self.remote_repo_name_to_display_name(repo_name)
-      repo_name
-    end
-
     def get_augmented_workspace_branch()
       sp_hash = {
         :cols => ModuleBranch.cols_for_matching_library_branches(model_name),

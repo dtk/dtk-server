@@ -122,7 +122,6 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"
       dtk_instance_name = Common::Aux::dtk_instance_repo_username()

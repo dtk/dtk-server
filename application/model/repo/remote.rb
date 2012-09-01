@@ -6,23 +6,14 @@ module DTK
         @client = RepoManagerClient.new(rest_base_url)
       end
 
-      def list_repo_names(type=nil)
-        remote_repos = client.list_repos()
-        ret = Array.new
-        remote_repos.map do |repo|
-          repo_type = repo["type"]
-          if repo_type and type
-            if type == :component_module and not repo_type.is_component_module?()
-              next
-            elsif type == :service_module and not repo_type.is_service_module?()
-              next
-            end
-          end
-          el = {:repo_name => repo["repo_name"]}
-          el[:type] = repo_type if repo_type and not type
-          ret << el
+      def list_module_qualified_names(type=nil)
+        filter = type && {:type => type_for_remote_module(type)}
+        remote_modules = client.list_modules(filter)
+        remote_modules.map do |r|
+          el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
+          namespace = r["namespace"] && "#{r["namespace"]}/"
+          el.merge(:name => "#{namespace}#{r["name"]}")
         end
-        ret
       end
 
       #create (empty) remote module
@@ -36,7 +27,7 @@ module DTK
           :username => username,
           :name => name,
           :access_rights => "RW+", 
-          :type => type.to_s.gsub(/_module$/,""),
+          :type => type_for_remote_module(type),
           :noop_if_exists => true
         } 
         response_data = client.create_module(create_module_params)
@@ -58,6 +49,10 @@ module DTK
 
      private
       attr_reader :client
+
+      def type_for_remote_module(module_type)
+        module_type.to_s.gsub(/_module$/,"")
+      end
 
       def default_rest_base_url()
         remote = ::R8::Config[:repo][:remote]

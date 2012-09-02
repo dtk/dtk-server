@@ -35,3 +35,11 @@ pp client.list_modules()
 pp client.get_module_info(module_name_params)
 pp client.delete_module(module_name_params)
 
+users = client.list_users()
+
+user_match = users.select{|u|u["username"] == username}
+if user_match.size != 1
+  raise Error.new("Unexpected selet on users found (#{user_match.inspect}")
+end
+pp user_match.first
+pp client.delete_user(user_match.first["id"])

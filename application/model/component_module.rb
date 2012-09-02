@@ -35,24 +35,9 @@ module DTK
     def self.import(library_idh,remote_module_name,remote_namespace)
       ret = nil
       module_name = remote_module_name
-      raise_error_if_library_module_exists(library_idh,module_name)
+      repo = common_import_steps(library_idh,remote_module_name,remote_namespace)
 
-      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
-        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
-      end
-      unless git_repo_name = remote_module_info[:git_repo_name]
-        raise Error.new("Remote repo info does not have field (git_repo_name)") 
-      end
-
-      #TODO: this will be done a priori
-      Repo::Remote.new.authorize_dtk_instance(git_repo_name)
-
-      #create empty repo on local repo manager; 
-      module_specific_type = config_agent_type = :puppet #TODO: hard wired
-      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,:remote_repo_name => git_repo_name,:delete_if_exists => true)
-      repo.synchronize_with_remote_repo()
-
+      config_agent_type = :puppet #TODO: hard wired
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo)
 

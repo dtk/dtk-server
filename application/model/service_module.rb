@@ -5,23 +5,11 @@ module DTK
     include ModuleMixin
 
     #import from remote
-    def self.import(library_idh,module_name)
+    def self.import(library_idh,remote_module_name,remote_namespace)
       ret = nil
-      remote_module_name = ret_remote_repo_name(module_name)
-      if remote_already_imported?(library_idh,remote_module_name)
-        raise ErrorUsage.new("Cannot import remote repo (#{remote_module_name}) which has been imported already")
-      end
-      if conflicts_with_library_module?(library_idh,module_name)
-        raise ErrorUsage.new("Import conflicts with library module (#{module_name})")
-      end
+      module_name = remote_module_name
+      repo = common_import_steps(library_idh,remote_module_name,remote_namespace)
 
-      #TODO: this might be done a priori
-      Repo::Remote.new.authorize_dtk_instance(remote_module_name)
-
-      #create empty repo on local repo manager; 
-      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:remote_repo_name => remote_module_name,:delete_if_exists => true)
-      repo.synchronize_with_remote_repo()
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
       create_assembly_meta_info?(library_idh,module_and_branch_info[:module_branch_idh],module_name,repo)
       module_and_branch_info[:module_idh]

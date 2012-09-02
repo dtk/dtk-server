@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 #TODO: should be made a rspec procedure
-raise Error.new("Looks liek deleting things in remote schema")
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))
@@ -33,8 +32,6 @@ create_module_params = {
 
 client.create_module(create_module_params)
 pp client.list_modules()
-users = client.list_users()
-user = users.find{|u|u["username"] == username}
 pp client.get_module_info(module_name_params)
 pp client.delete_module(module_name_params)
-pp client.delete_user(user[:id])
+

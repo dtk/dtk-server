@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 #TODO: should be made a rspec procedure
+raise Error.new("Looks liek deleting things in remote schema")
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))

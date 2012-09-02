@@ -162,7 +162,6 @@ module DTK
       end
     end
 
-
     def get_rest_request_data(route,opts={})
       handle_error(opts) do 
         Common::Rest::ClientWrapper.get("#{@rest_base_url}#{route}",ret_opts(opts))

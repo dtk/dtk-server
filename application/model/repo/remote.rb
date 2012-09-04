@@ -55,7 +55,7 @@ module DTK
           :namespace => DefaultsNamespace,
           :type => type_for_remote_module(type),
           :username => username,
-          :accesss_rights => access_rights
+          :access_rights => access_rights
         }
         client.grant_user_access_to_module(grant_user_rights_params)
         remote_repo_name

@@ -58,7 +58,7 @@ module DTK
           :access_rights => access_rights
         }
         client.grant_user_access_to_module(grant_user_rights_params)
-        remote_repo_name
+        module_name
       end
 
       def repo_url_ssh_access(remote_repo_name)

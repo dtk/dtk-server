@@ -48,7 +48,7 @@ module DTK
 
   module ModuleClassMixin
     def list_remotes(model_handle)
-      Repo::Remote.new.list_module_qualified_names(module_type())
+      Repo::Remote.new.list_module_qualified_names(module_type()).map{|r|{:display_name => r[:name]}}
     end
 
     def module_type()

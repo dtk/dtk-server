@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class LibraryController < Controller
 
 #TODO: see which of below should be deprecated

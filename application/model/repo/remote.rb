@@ -45,12 +45,19 @@ module DTK
         end
       end
 
-      def authorize_dtk_instance(remote_repo_name)
+      def authorize_dtk_instance(remote_repo_name,type)
         username = dtk_instance_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
-        client.set_user_rights_in_repo(username,remote_repo_name,access_rights)
+        grant_user_rights_params = {
+          :name => remote_repo_name,
+          :namespace => DefaultsNamespace,
+          :type => type_for_remote_module(type),
+          :username => username,
+          :accesss_rights => access_rights
+        }
+        client.grant_user_access_to_module(grant_user_rights_params)
         remote_repo_name
       end
 

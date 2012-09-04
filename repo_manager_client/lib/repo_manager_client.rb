@@ -120,6 +120,14 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    #require_keys => [:name,namespace,:type,username,accesss_rights]
+    def grant_user_access_to_module(params_hash)
+      route = "/rest/system/module/grant_user_access"
+      dtk_instance_name = Common::Aux::dtk_instance_repo_username()
+      body = params_hash.merge(:dtk_instance_name => dtk_instance_name)
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"
       dtk_instance_name = Common::Aux::dtk_instance_repo_username()

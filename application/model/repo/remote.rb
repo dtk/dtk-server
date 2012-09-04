@@ -45,7 +45,7 @@ module DTK
         end
       end
 
-      def authorize_dtk_instance(remote_repo_name,type)
+      def authorize_dtk_instance(module_name,type)
         username = dtk_instance_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"

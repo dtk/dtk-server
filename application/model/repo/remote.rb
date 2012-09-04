@@ -51,7 +51,7 @@ module DTK
         access_rights = "RW+"
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
         grant_user_rights_params = {
-          :name => remote_repo_name,
+          :name => module_name,
           :namespace => DefaultsNamespace,
           :type => type_for_remote_module(type),
           :username => username,

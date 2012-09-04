@@ -319,7 +319,8 @@ module XYZ
           :filter => filter
         }
         rows = get_objs(model_handle,sp_hash)
-        raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
+#        raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
+        raise Error.new(id,pp_object_type()) unless rows.size == 1
         id
       end
 

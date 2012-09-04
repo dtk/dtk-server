@@ -176,7 +176,7 @@ module DTK
       }
       module_object = get_obj(library_idh.createMH(model_name),sp_hash)
       if module_object
-        raise ErrorUsage.new("Import conflicts with existing library module (#{module_name})")
+        raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
       end
     end
 

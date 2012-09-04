@@ -37,9 +37,7 @@ module DTK
 
 
     def self.create_library_obj(library_idh,module_name,config_agent_type)
-      if conflicts_with_library_module?(library_idh,module_name)
-        raise Error.new("Create conflicts with existing library module (#{module_name})")
-      end
+      raise_error_if_library_module_exists(library_idh,module_name)
 
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)

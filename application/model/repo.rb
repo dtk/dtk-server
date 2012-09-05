@@ -30,9 +30,8 @@ module XYZ
         repo_name = private_user_repo_name(module_name,module_specific_type)
       end 
 
-      extra_attrs = Hash.new
-      if opts[:remote_repo_name]
-        extra_attrs.merge!(:remote_repo_name => opts[:remote_repo_name])
+      extra_attrs = [:remote_repo_name,:remote_repo_namespace].inject(Hash.new) do |h,k|
+        opts[k] ? h.merge(k => opts[k]) : h
       end
 
       repo_mh = library_idh.createMH(:repo)

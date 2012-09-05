@@ -19,7 +19,7 @@ module DTK
 
     def update_library_module_with_workspace()
       aug_ws_branch_row = get_augmented_workspace_branch()
-      ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:augmented => true)
+      ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:ws_branch_augmented => true)
     end
     
     def self.list(service_module_mh,opts={})

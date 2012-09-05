@@ -8,7 +8,7 @@ module DTK
       ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new
       return ret if ws_branches.empty?
-      if opts[:augmented]
+      if opts[:ws_branch_augmented]
         matching_branches = ws_branches
       else
         sample_ws_branch = ws_branches.first
@@ -20,7 +20,7 @@ module DTK
         matching_branches =  get_objs(sample_ws_branch.model_handle(),sp_hash)
       end
       if matching_branches.find{|r|r[:library_module_branch][:repo_id] != r[:repo_id]}
-        raise Error.new("Not implemented: case when ws and library branch being differ in refering to distinct repos")
+        raise Error.new("Not implemented: case when ws and library branch differ in refering to distinct repos")
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
     end
@@ -34,8 +34,11 @@ module DTK
      private
       def update_library_from_workspace_aux?(augmented_branch)
         lib_branch_obj = augmented_branch[:library_module_branch]
-        ret = lib_branch_obj.merge(:workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]))
-                                                                              
+        lib_branch_augment = {
+          :workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]),
+          :component_module => augmented_branch[:component_module].merge(:remote_repo_namespace => augmented_branch[:repo][:remote_repo_namespace])
+        }
+        ret = lib_branch_obj.merge(lib_branch_augment)
         ws_branch_name = augmented_branch[:branch]
         #determine if there is any diffs between workspace and library branches
         diff = RepoManager.diff(ws_branch_name,lib_branch_obj)

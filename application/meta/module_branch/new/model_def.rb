@@ -33,7 +33,7 @@ lambda__matching_library_branches =
        :convert => true,
        :join_type => :inner,
        :join_cond=>{:id => q(:library_module_branch,:repo_id)},
-       :cols => [:id,:group_id,:repo_name,:local_dir]
+       :cols => [:id,:group_id,:repo_name,:local_dir,:remote_repo_name,:remote_repo_namespace]
      },
      {
        :model_name => :repo,

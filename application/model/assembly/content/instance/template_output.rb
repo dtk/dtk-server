@@ -2,10 +2,11 @@ module DTK
   class Assembly::Instance
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
-      def initialize(library_idh,service_module_branch)
+      def initialize(library_idh,service_module_branch,modules)
         super()
         @library_idh = library_idh
         @service_module_branch = service_module_branch
+        @modules = modules
       end
       def save_to_model()
         Model.input_hash_content_into_model(@library_idh,self,:preserve_input_hash=>true)

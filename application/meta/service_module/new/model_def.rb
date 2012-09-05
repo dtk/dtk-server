@@ -33,9 +33,6 @@ lambda__segment_impls =
 {
   :schema=>:module,
   :table=>:service,
-  :columns=>{
-    :remote_repo => {:type=>:varchar, :size => 100} #non null if points to remote service module
-  },
   :virtual_columns=>{
     :module_branches=>{
       :type=>:json,

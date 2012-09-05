@@ -49,9 +49,6 @@ lambda__segment_components =
 {
   :schema=>:module,
   :table=>:component,
-  :columns=>{
-    :remote_repo => {:type=>:varchar, :size => 100} #non null if points to remote component module
-  },
   :virtual_columns=>{
     :library_repo=>{
       :type=>:json,

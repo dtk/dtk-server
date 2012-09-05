@@ -6,5 +6,5 @@ Sequel.migration do
     alter_table(:module__service) do
       drop_column :remote_repo
     end
-  end`
+  end
 end

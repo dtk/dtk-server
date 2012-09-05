@@ -101,8 +101,9 @@ module DTK
           raise Error.new("Cannot find matching node for node ref #{node_ref})")
         end
         node_name = matching_node[1][:display_name]
+        cmp_name = component_name_output_form(p[:component_type])
         sep = Seperators #just for succinctness
-        "#{node_name}#{sep[:node_component]}#{p[:module]}#{sep[:module_component]}#{p[:component]}#{sep[:component_port]}#{p[:link_def_ref]}"
+        "#{node_name}#{sep[:node_component]}#{cmp_name}#{sep[:component_port]}#{p[:link_def_ref]}"
       end
     end
   end

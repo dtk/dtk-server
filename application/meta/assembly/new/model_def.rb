@@ -124,6 +124,27 @@ lambda__template_nodes_and_components =
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]
     },
+    :component_templates=> { 
+      :type => :json, 
+      :hidden => true,
+      :remote_dependencies =>
+        [
+         lambda__segment_node.call([:id,:display_name]),
+         {
+           :model_name => :component_ref,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id => q(:node,:id)},
+           :cols => [:id,:display_name,:component_template_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :alias => :component_template,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component_ref,:component_template_id)},
+           :cols => [:id,:display_name,:module_branch_id]
+         }]
+    },
     :nested_nodes_and_cmps_for_export=> {
       :type => :json, 
       :hidden => true,

@@ -62,6 +62,15 @@ module XYZ
       list_aux(assembly_rows,attr_rows)
     end
 
+    def self.get_component_templates(assembly_mh,filter=nil)
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:component_templates],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], filter].compact
+      }
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      assembly_rows.map{|r|r[:component_template]}
+    end
+
     def set_attributes(pattern,value)
       ret = Array.new
       pattern = AssemblyAttributePattern.create(pattern)

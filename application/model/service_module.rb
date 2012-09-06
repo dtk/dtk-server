@@ -59,7 +59,21 @@ module DTK
     end
 
     def export_preprocess()
-      pp "TODO: need to write out or update global module refs"
+      #get module info for every component in an assembly in teh service module
+      sp_hash = {
+        :cols => [:module_branches]
+      }
+      mb_ids = get_objs(sp_hash).map{|r|r[:module_branch][:id]}
+      unless  mb_ids.size == 1
+        raise Error.new("Expecting only one module_branch returned")
+      end
+      mb_id = mb_ids.first
+
+      filter = [:eq, :module_branch_id,mb_id]
+      component_templates = Assembly.get_component_templates(model_handle(:component),filter)
+      cmp_module_branch_ids = component_templates.map{|r|r[:module_branch_id]}.uniq
+
+      raise Error.new("TODO: need to write out or update global module refs")
     end
 
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)

@@ -5,7 +5,9 @@ module DTK
       repo = get_library_repo(:raise_error_if_linked => true)
       module_name = update_object!(:display_name)[:display_name]
 
-      #create remote module
+      export_preprocess()
+
+      #create module on remote repo manager
       remote_repo_name = Repo::Remote.new.create_module(module_name,module_type())[:git_repo_name]
 
       #link and push to remote repo
@@ -47,6 +49,38 @@ module DTK
   end
 
   module ModuleClassMixin
+    #import from remote repo
+    def import(library_idh,remote_module_name,remote_namespace)
+      module_name = remote_module_name
+      raise_error_if_library_module_exists(library_idh,module_name)
+
+      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+      end
+      unless git_repo_name = remote_module_info[:git_repo_name]
+        raise Error.new("Remote repo info does not have field (git_repo_name)") 
+      end
+
+      #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
+      Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
+
+      #create empty repo on local repo manager; 
+      module_specific_type = 
+        case module_type() 
+         when :service_module
+          :service_module
+         when :component_module
+          :puppet #TODO: hard wired
+        end
+
+      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+      create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+      repo.synchronize_with_remote_repo()
+      module_branch_idh = import_postprocess(repo,library_idh,remote_module_name,remote_namespace)
+      module_branch_idh
+    end
+
     def list_remotes(model_handle)
       Repo::Remote.new.list_module_qualified_names(module_type()).map{|r|{:display_name => r[:name]}}
     end
@@ -137,37 +171,6 @@ module DTK
 
 
    private
-    #common for service and component modules; returns repo
-    def common_import_steps(library_idh,remote_module_name,remote_namespace)
-      module_name = remote_module_name
-      raise_error_if_library_module_exists(library_idh,module_name)
-
-      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
-        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
-      end
-      unless git_repo_name = remote_module_info[:git_repo_name]
-        raise Error.new("Remote repo info does not have field (git_repo_name)") 
-      end
-
-      #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
-      Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
-
-      #create empty repo on local repo manager; 
-      module_specific_type = 
-        case module_type() 
-         when :service_module
-          :service_module
-         when :component_module
-          :puppet #TODO: hard wired
-        end
-
-      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
-      repo.synchronize_with_remote_repo()
-      repo 
-    end
-
     def get_all_repos(mh)
       get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
         repo = r[:repo]

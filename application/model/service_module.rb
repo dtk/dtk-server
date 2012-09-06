@@ -4,17 +4,6 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
-    #import from remote
-    def self.import(library_idh,remote_module_name,remote_namespace)
-      ret = nil
-      module_name = remote_module_name
-      repo = common_import_steps(library_idh,remote_module_name,remote_namespace)
-
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
-      create_assembly_meta_info?(library_idh,module_and_branch_info[:module_branch_idh],module_name,repo)
-      module_and_branch_info[:module_idh]
-    end
-
     def list_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]
@@ -59,6 +48,20 @@ module DTK
     end
 
    private
+    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace)
+      module_name = remote_module_name
+
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+
+      create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
+      module_branch_idh
+    end
+
+    def export_preprocess()
+      pp "TODO: need to write out or update global module refs"
+    end
+
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
       info = Assembly.meta_filename_path_info()
       regexp = info[:regexp]

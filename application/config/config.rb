@@ -59,7 +59,7 @@ R8::Config[:repo][:base_directory_test] = "/root/r8server-repo-test"
 #R8::Config[:repo][:git][:gitolite][:hostname] = "127.0.0.1"
 R8::Config[:repo][:git][:gitolite].set?(:admin_directory,"/root/r8_gitolite_admin")
 
-#for remote repo taht attach to
+#for remote repo that attach to
 R8::Config[:repo][:remote][:rest_port] = 7000
 R8::Config[:repo][:remote][:git_user] = "git"
 

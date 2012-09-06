@@ -149,14 +149,21 @@ module DTK
         raise Error.new("Remote repo info does not have field (git_repo_name)") 
       end
 
-      #TODO: this will be done a priori (or not at all where during create owner sets rights)
+      #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
       Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
 
       #create empty repo on local repo manager; 
-      module_specific_type = :puppet #TODO: hard wired
+      module_specific_type = 
+        case module_type() 
+         when :service_module
+          :service_module
+         when :component_module
+          :puppet #TODO: hard wired
+        end
+
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
       create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,opts)
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       repo.synchronize_with_remote_repo()
       repo 
     end

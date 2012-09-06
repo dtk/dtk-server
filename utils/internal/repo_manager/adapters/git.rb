@@ -103,11 +103,13 @@ module XYZ
     def add_file(file_asset,content,commit_msg=nil)
       content ||= String.new
       checkout(@branch) do
-        File.open(file_asset[:path],"w"){|f|f << content}
+        path = file_asset[:path]
+        recursive_create_dir?(path)
+        File.open(path,"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         #should see if we can do more efficient job using @index.add(file_name,content)
-        commit_msg ||= "Adding #{file_asset[:path]} in #{@branch}"
-        git_command__add(file_asset[:path])
+        commit_msg ||= "Adding #{path} in #{@branch}"
+        git_command__add(path)
         git_command__commit(commit_msg)
       end
     end
@@ -243,7 +245,15 @@ module XYZ
     def git_command()
       @grit_repo ? @grit_repo.git : Grit::Git.new("")
     end
+
+    def recursive_create_dir?(path)
+      if path =~ Regexp.new("(^.+)/[^/]+$")
+        dir = $1
+        FileUtils.mkdir_p(dir)
+      end
+    end
   end
+
   class RepomanagerGitLinux < RepoManagerGit
    private
     def git_command__clone(remote_repo,local_dir)

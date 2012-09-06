@@ -60,14 +60,13 @@ module DTK
         self[:nodes] = @ndx_nodes.values
         self[:port_links] = port_links
         @component_template_mapping = get_component_template_mapping(library_idh,augmented_lib_branches)
-        @modules = :stub
         self
       end
       def create_assembly_template(library_idh,service_module_branch)
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        template_output = TemplateOutput.new(library_idh,service_module_branch,@modules)
+        template_output = TemplateOutput.new(library_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in library and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])

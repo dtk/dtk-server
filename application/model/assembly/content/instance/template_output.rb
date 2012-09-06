@@ -2,11 +2,10 @@ module DTK
   class Assembly::Instance
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
-      def initialize(library_idh,service_module_branch,modules)
+      def initialize(library_idh,service_module_branch)
         super()
         @library_idh = library_idh
         @service_module_branch = service_module_branch
-        @modules = modules
       end
       def save_to_model()
         Model.input_hash_content_into_model(@library_idh,self,:preserve_input_hash=>true)
@@ -14,13 +13,13 @@ module DTK
       def serialize_and_save_to_repo()
         hash_to_serialize = serialize()
         content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}}) )
-        filename = assembly_meta_filename()
-        RepoManager.add_file({:path => filename},content,@service_module_branch)
-        filename
+        path = assembly_meta_filename_path()
+        RepoManager.add_file({:path => path},content,@service_module_branch)
+        path
       end
      private
-      def assembly_meta_filename()
-        Assembly.meta_filename(assembly_hash()[:display_name])
+      def assembly_meta_filename_path()
+        Assembly.meta_filename_path(assembly_hash()[:display_name])
       end
       def serialize()
         assembly_hash = assembly_output_hash()
@@ -33,10 +32,7 @@ module DTK
         ret = SimpleOrderedHash.new()
         ret[:name] = assembly_hash()[:display_name]
         ret[:ref] = assembly_ref()
-        #TODO
-        #add modules
-        #ret[:modules] = nested_objs[:implementations].map do |impl|
-        #  version = impl[:version]
+        #TODO: may put in version info
         #  "#{impl[:module_name]}-#{version}"
         #end
 

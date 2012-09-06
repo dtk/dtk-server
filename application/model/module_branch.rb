@@ -36,7 +36,6 @@ module DTK
         lib_branch_obj = augmented_branch[:library_module_branch]
         lib_branch_augment = {
           :workspace_module_branch => Aux::hash_subset(augmented_branch,[:id,:repo_id]),
-          :component_module => augmented_branch[:component_module].merge(:remote_repo_namespace => augmented_branch[:repo][:remote_repo_namespace])
         }
         ret = lib_branch_obj.merge(lib_branch_augment)
         ws_branch_name = augmented_branch[:branch]

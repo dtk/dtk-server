@@ -82,11 +82,14 @@ module XYZ
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
-    def self.meta_filename(assembly_name)
-      "#{assembly_name}.assembly.json"
+    def self.meta_filename_path(assembly_name)
+      "assemblies/#{assembly_name}/assembly.json"
     end
-    def self.meta_filename_regexp()
-      /assembly.json$/
+    def self.meta_filename_path_info()
+      {
+        :regexp => Regexp.new("assembly.json$"),
+        :path_depth => 3
+      }
     end
 
     def self.ret_component_type(service_module_name,assembly_name)

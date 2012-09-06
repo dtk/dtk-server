@@ -60,9 +60,10 @@ module DTK
 
    private
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
-      depth = 1
-      meta_filename_regexp = Assembly.meta_filename_regexp()
-      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ meta_filename_regexp}
+      info = Assembly.meta_filename_path_info()
+      regexp = info[:regexp]
+      depth = info[:path_depth]
+      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ regexp}
       meta_files.map do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},repo)
         hash_content = JSON.parse(json_content)

@@ -30,6 +30,19 @@ module DTK
       [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col]
     end
 
+    def self.get_component_modules_info(module_branch_idhs)
+      ret = Array.new
+      return ret if module_branch_idhs.nil?
+      sp_hash = {
+        :cols => [:component_module_info],
+        :filter => [:oneof,:id,module_branch_idhs.map{|idh|idh.get_id()}]
+      }
+      sample_mb_idh = module_branch_idhs.first
+      get_objs(sample_mb_idh.createMH(),sp_hash).map do |r|
+        r[:component_module].merge(:repo => r[:repo])
+      end
+    end
+
     class << self
      private
       def update_library_from_workspace_aux?(augmented_branch)

@@ -60,6 +60,18 @@ module DTK
 
     def export_preprocess()
       #get module info for every component in an assembly in teh service module
+      module_info = get_component_modules_info()
+
+      #check that all compoennt modules are linked to a remote component module
+      unlinked_mods = module_info.select{|r|r[:repo][:remote_repo_name].nil?}
+      unless unlinked_mods.empty?
+        raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
+      end
+
+      raise Error.new("TODO: need to write out or update global module refs")
+    end
+
+    def get_component_modules_info()
       sp_hash = {
         :cols => [:module_branches]
       }
@@ -71,9 +83,9 @@ module DTK
 
       filter = [:eq, :module_branch_id,mb_id]
       component_templates = Assembly.get_component_templates(model_handle(:component),filter)
-      cmp_module_branch_ids = component_templates.map{|r|r[:module_branch_id]}.uniq
-
-      raise Error.new("TODO: need to write out or update global module refs")
+      mb_mh = model_handle(:module_branch)
+      cmp_module_branch_idhs = component_templates.map{|r|r[:module_branch_id]}.uniq.map{|id|mb_mh.createIDH(:id => id)}
+      ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
     end
 
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)

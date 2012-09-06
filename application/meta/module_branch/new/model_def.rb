@@ -69,7 +69,26 @@ lambda__matching_library_branches =
   },
   :virtual_columns=>{
     :matching_component_library_branches=> lambda__matching_library_branches.call(:type => :component_module),
-    :matching_service_library_branches=> lambda__matching_library_branches.call(:type => :service_module)
+    :matching_service_library_branches=> lambda__matching_library_branches.call(:type => :service_module),
+    :component_module_info =>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name => :repo,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:module_branch,:repo_id)},
+         :cols => [:id,:remote_repo_name,:remote_repo_namespace]
+       },
+       {
+         :model_name => :component_module,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:module_branch,:component_id)},
+         :cols => [:id,:display_name]
+       }]
+    }
   },
   :many_to_one=>[:component_module,:service_module]
 }

@@ -4,6 +4,11 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def serialize_and_save_to_repo(file_path,hash_content)
+      content = JSON.pretty_generate(hash_content)
+      RepoManager.add_file({:path => file_path},content,self)
+    end
+
     def self.update_library_from_workspace?(ws_branches,opts={})
       ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new

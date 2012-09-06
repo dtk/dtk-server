@@ -1,6 +1,8 @@
 r8_require('module_mixins')
 module DTK
   class ServiceModule < Model
+    r8_nested_require('service_module','global_module_refs')
+
     extend ModuleClassMixin
     include ModuleMixin
 
@@ -23,7 +25,6 @@ module DTK
       }
       Model.get_objs(model_handle(:component),sp_hash)
     end 
-
 
     def self.create_library_obj(library_idh,module_name,config_agent_type)
       raise_error_if_library_module_exists(library_idh,module_name)
@@ -60,32 +61,33 @@ module DTK
 
     def export_preprocess()
       #get module info for every component in an assembly in teh service module
-      module_info = get_component_modules_info()
+      module_branch,module_info = get_component_modules_info()
 
       #check that all compoennt modules are linked to a remote component module
       unlinked_mods = module_info.select{|r|r[:repo][:remote_repo_name].nil?}
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       end
-
-      raise Error.new("TODO: need to write out or update global module refs")
+      GlobalModelRefs.serialize_and_save_to_repo(module_info,module_branch)
     end
 
+    #returns [module_branch,component_modules]
     def get_component_modules_info()
       sp_hash = {
         :cols => [:module_branches]
       }
-      mb_ids = get_objs(sp_hash).map{|r|r[:module_branch][:id]}
-      unless  mb_ids.size == 1
+      module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
+      unless module_branches.size == 1
         raise Error.new("Expecting only one module_branch returned")
       end
-      mb_id = mb_ids.first
+      module_branch = module_branches.first
 
-      filter = [:eq, :module_branch_id,mb_id]
+      filter = [:eq, :module_branch_id,module_branch[:id]]
       component_templates = Assembly.get_component_templates(model_handle(:component),filter)
       mb_mh = model_handle(:module_branch)
       cmp_module_branch_idhs = component_templates.map{|r|r[:module_branch_id]}.uniq.map{|id|mb_mh.createIDH(:id => id)}
-      ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
+      component_modules =  ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
+      [module_branch,component_modules]
     end
 
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)

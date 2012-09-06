@@ -12,9 +12,9 @@ module DTK
       end
       def serialize_and_save_to_repo()
         hash_to_serialize = serialize()
-        content = JSON.pretty_generate(SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}}) )
+        ordered_hash_content = SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
         path = assembly_meta_filename_path()
-        RepoManager.add_file({:path => path},content,@service_module_branch)
+        @service_module_branch.serialize_and_save_to_repo(path,ordered_hash_content)
         path
       end
      private

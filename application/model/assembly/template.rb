@@ -1,4 +1,3 @@
-r8_nested_require('template','global_module_refs')
 module DTK
   class AssemblyTemplate < Assembly
     def self.check_valid_id(model_handle,id)

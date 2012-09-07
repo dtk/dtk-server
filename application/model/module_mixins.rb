@@ -8,14 +8,15 @@ module DTK
       export_preprocess()
 
       #create module on remote repo manager
-      remote_repo_name = Repo::Remote.new.create_module(module_name,module_type())[:git_repo_name]
+      module_info = Repo::Remote.new.create_module(module_name,module_type())
+      remote_repo_name = module_info[:git_repo_name]
 
       #link and push to remote repo
       repo.link_to_remote(remote_repo_name)
       repo.push_to_remote(remote_repo_name)
 
       #update last for idempotency (i.e., this is idempotent check)
-      repo.update(:remote_repo_name => remote_repo_name)
+      repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
       remote_repo_name
     end
 

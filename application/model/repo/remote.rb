@@ -12,17 +12,17 @@ module DTK
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
-
+        namespace = self.class.default_namespace()
         params = {
           :username => username,
           :name => name,
           :access_rights => "RW+", 
           :type => type_for_remote_module(type),
-          :namespace => self.class.default_namespace(),
+          :namespace => namespace,
           :noop_if_exists => true
         } 
         response_data = client.create_module(params)
-        Aux.convert_keys_to_symbols(response_data)
+        {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
       def get_module_info(name,type,namespace=nil)

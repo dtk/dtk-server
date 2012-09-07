@@ -51,14 +51,14 @@ module DTK
       update_from_rows(sample_cmp_idh.createMH(),update_rows)
     end
    private
-    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace)
+    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_name = remote_module_name
 
       config_agent_type = :puppet #TODO: hard wired
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,"master")
       impl_obj.create_file_assets_from_dir_els(repo)
 
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)

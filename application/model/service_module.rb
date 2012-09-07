@@ -26,11 +26,11 @@ module DTK
       Model.get_objs(model_handle(:component),sp_hash)
     end 
 
-    def self.create_library_obj(library_idh,module_name,config_agent_type)
+    def self.create_library_obj(library_idh,module_name,config_agent_type,version=nil)
       raise_error_if_library_module_exists(library_idh,module_name)
 
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
     end
 
@@ -49,10 +49,10 @@ module DTK
     end
 
    private
-    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace)
+    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_name = remote_module_name
 
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name)
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)

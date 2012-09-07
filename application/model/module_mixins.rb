@@ -69,6 +69,7 @@ module DTK
       library_idh = id_handle(:model_name => :library, :id => library_id)
       ModuleBranch.library_branch_name(library_idh,version)
     end
+
     def get_module_branch(branch)
       sp_hash = {
         :cols => [:module_branches]
@@ -80,7 +81,7 @@ module DTK
 
   module ModuleClassMixin
     #import from remote repo
-    def import(library_idh,remote_module_name,remote_namespace)
+    def import(library_idh,remote_module_name,remote_namespace,version=nil)
       module_name = remote_module_name
       raise_error_if_library_module_exists(library_idh,module_name)
 
@@ -106,8 +107,10 @@ module DTK
       #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
       create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
-      repo.synchronize_with_remote_repo()
-      module_branch_idh = import_postprocess(repo,library_idh,remote_module_name,remote_namespace)
+
+      branch = ModuleBranch.library_branch_name(library_idh,version)
+      repo.synchronize_with_remote_repo(branch)
+      module_branch_idh = import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_branch_idh
     end
 
@@ -221,9 +224,9 @@ module DTK
       end
     end
 
-    def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name)
+    def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)
       ref = module_name
-      mb_create_hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh)
+      mb_create_hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh,input_version)
       version = mb_create_hash.values.first[:version]
       create_hash = {
         model_name.to_s => {

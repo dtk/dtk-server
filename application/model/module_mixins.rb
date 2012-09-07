@@ -37,12 +37,19 @@ module DTK
       unless get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
       pp [:debug_merge_rel,merge_rel]
-#TODO: commenting out teh actual push to help test above
-#      repo.push_to_remote(remote_repo_name,branch)
-nil
+      case merge_rel
+       when :equal,:local_behind 
+        raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")
+       when :local_ahead
+        repo.push_to_remote(remote_repo_name,branch)
+       when :branchpoint
+        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge
+        raise ErrorUsage.new("Merge from remote repo is needed before can push changes to module (#{module_name})")
+       else 
+        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
+      end
     end
 
     def get_repos()

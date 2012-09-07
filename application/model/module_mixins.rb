@@ -3,8 +3,8 @@ module DTK
     #export to remote
     def export(version=nil)
       repo = get_library_repo()
+      module_name = update_object!(:display_name)[:display_name]
       if repo[:remote_repo_name]
-        module_name = update_object!(:display_name)[:display_name]
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
       end
 
@@ -29,15 +29,14 @@ module DTK
 
     def push_to_remote(version=nil)
       repo = get_library_repo()
-      unless repo[:remote_repo_name]
-        module_name = update_object!(:display_name)[:display_name]
+      module_name = update_object!(:display_name)[:display_name]
+      unless remote_repo_name = repo[:remote_repo_name]
         raise ErrorUsage.new("Cannot push module (#{module_name}) to remote because it is currently not linked to a remote module")
       end
       branch = library_branch(version)
-      unless module_info = get_module_branch(branch)
+      unless get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-      remote_repo_name = module_info[:git_repo_name]
       repo.push_to_remote(remote_repo_name,branch)
     end
 

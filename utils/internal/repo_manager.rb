@@ -3,7 +3,7 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r]
+      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:clone_branch,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:footprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
@@ -52,29 +52,32 @@ module XYZ
       end
     end
 
-
     ### for dealing with actual repos
-    def self.synchronize_with_remote_repo(repo_name,remote_name,remote_url)
-      context = {:implementation => {:repo => repo_name, :branch => "master"}}
-      repo = get_repo(context)      
-      repo.add_remote(remote_name,remote_url)
-      repo.pull_changes(remote_name)
-      repo.push_changes()
-      repo_name
-    end
+    class << self
+      def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url)
+        repo = get_repo(context(repo_name,branch))      
+        repo.add_remote(remote_name,remote_url)
+        repo.pull_changes(remote_name)
+        repo.push_changes()
+        repo_name
+      end
 
-    def self.push_to_remote_repo(repo_name,remote_name)
-      context = {:implementation => {:repo => repo_name, :branch => "master"}}
-      repo = get_repo(context)      
-      repo.push_changes(remote_name)
-      repo_name
-    end
+      def push_to_remote_repo(repo_name,branch,remote_name)
+        repo = get_repo(context(repo_name,branch))      
+        repo.push_changes(remote_name)
+        repo_name
+      end
 
-    def self.link_to_remote_repo(repo_name,remote_name,remote_url)
-      context = {:implementation => {:repo => repo_name, :branch => "master"}}
-      repo = get_repo(context)      
-      repo.add_or_update_remote(remote_name,remote_url)
-      repo_name
+      def link_to_remote_repo(repo_name,branch,remote_name,remote_url)
+        repo = get_repo(context(repo_name,branch))      
+        repo.add_or_update_remote(remote_name,remote_url)
+        repo_name
+      end
+
+      def context(repo_name,branch)
+        {:implementation => {:repo => repo_name, :branch => branch}}
+      end
+      private :context
     end
 
     ###### for repo admin functions, such as creating and deleting repositories

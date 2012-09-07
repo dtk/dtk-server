@@ -50,6 +50,11 @@ lambda__segment_components =
   :schema=>:module,
   :table=>:component,
   :virtual_columns=>{
+    :module_branches=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:id,:display_name,:branch,:version,:type,:repo_id])]
+    },
     :library_repo=>{
       :type=>:json,
       :hidden=>true,

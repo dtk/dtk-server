@@ -1,28 +1,60 @@
 module DTK
   module ModuleMixin
     #export to remote
-    def export()
-      repo = get_library_repo(:raise_error_if_linked => true)
-      module_name = update_object!(:display_name)[:display_name]
+    def export(version=nil)
+      repo = get_library_repo()
+      if repo[:remote_repo_name]
+        module_name = update_object!(:display_name)[:display_name]
+        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
+      end
 
-      export_preprocess()
+      branch = library_branch(version)
+      unless module_branch = get_module_branch(branch)
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
+      end
+      export_preprocess(module_branch)
 
       #create module on remote repo manager
       module_info = Repo::Remote.new.create_module(module_name,module_type())
       remote_repo_name = module_info[:git_repo_name]
 
       #link and push to remote repo
-      repo.link_to_remote(remote_repo_name)
-      repo.push_to_remote(remote_repo_name)
+      repo.link_to_remote(remote_repo_name,branch)
+      repo.push_to_remote(remote_repo_name,branch)
 
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
       remote_repo_name
     end
 
+    def push_to_remote(version=nil)
+      repo = get_library_repo()
+      unless repo[:remote_repo_name]
+        module_name = update_object!(:display_name)[:display_name]
+        raise ErrorUsage.new("Cannot push module (#{module_name}) to remote because it is currently not linked to a remote module")
+      end
+      branch = library_branch(version)
+      unless module_info = get_module_branch(branch)
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
+      end
+      remote_repo_name = module_info[:git_repo_name]
+      repo.push_to_remote(remote_repo_name,branch)
+    end
+
     def get_repos()
       get_objs_uniq(:repos)
     end
+    def get_library_repo()
+      sp_hash = {
+        :cols => [:id,:display_name,:library_repo,:library_library_id]
+      }
+      row = get_obj(sp_hash)
+      #opportunistically set display name and library_library_id on module
+      self[:display_name] ||= row[:display_name]
+      self[:library_library_id] ||= row[:library_library_id]
+      row[:repo]
+    end
+
     def get_implementations()
       get_objs_uniq(:implementations)
     end
@@ -32,20 +64,18 @@ module DTK
     def module_type()
       self.class.module_type()
     end
-
-    def get_library_repo(opts={})
+   private
+    def library_branch(version=nil)
+      library_id = update_object!(:library_library_id)[:library_library_id]
+      library_idh = id_handle(:model_name => :library, :id => library_id)
+      ModuleBranch.library_branch_name(library_idh,version)
+    end
+    def get_module_branch(branch)
       sp_hash = {
-        :cols => [:id,:display_name,:library_repo]
+        :cols => [:module_branches]
       }
-      row = get_obj(sp_hash)
-      #opportunisticall set display name on module
-      self[:display_name] ||= row[:display_name]
-      repo = row[:repo]
-      if opts[:raise_error_if_linked] and repo[:remote_repo_name]
-        module_name = update_object!(:display_name)[:display_name]
-        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
-      end
-      repo
+      module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
+      module_branches.find{|mb|mb[:branch] == branch}
     end
   end
 

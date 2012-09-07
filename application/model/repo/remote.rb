@@ -25,6 +25,7 @@ module DTK
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
+
       def get_module_info(name,type,namespace=nil)
         params = {
           :name => name,

@@ -58,6 +58,15 @@ module XYZ
       RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url)
     end
 
+    def ret_remote_merge_relationship(remote_repo_name,branch,opts={})
+      unless remote_repo_name
+        raise ErrorUsage.new("Cannot determine metge relationship if remote_repo_name is null")
+      end
+      update_object!(:repo_name)
+      remote_name = remote_name_for_push_pull()
+      RepoManager.ret_remote_merge_relationship(self[:repo_name],branch,remote_name,opts)
+    end
+
     def push_to_remote(remote_repo_name,branch)
       unless remote_repo_name
         raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")

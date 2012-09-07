@@ -62,6 +62,12 @@ module XYZ
         repo_name
       end
 
+      #returns :equal, :local_behind, :local_ahead, or :branchpoint 
+      def ret_remote_merge_relationship(repo_name,branch,remote_name,opts={})
+        repo = get_repo(context(repo_name,branch))      
+        repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{branch}")
+      end
+
       def push_to_remote_repo(repo_name,branch,remote_name)
         repo = get_repo(context(repo_name,branch))      
         repo.push_changes(remote_name)

@@ -166,6 +166,37 @@ module XYZ
       git_command__remote_rm(remote_name)
     end
 
+    #returns :equal, :local_behind, :local_ahead, or :branchpoint
+    #type can be :remote_branch or :local_branch
+    def ret_merge_relationship(type,ref,opts={})
+      fetch(ref) if (type == :remote_branch and opts[:fetch_if_needed])
+
+      other_grit_ref = 
+        case type
+         when :remote_branch
+          @grit_repo.remotes.find{|r|r.name == ref}
+         when :local_branch
+          @grit_repo.heads.find{|r|r.name == ref}
+         else
+          raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
+        end
+      unless other_grit_ref
+        raise Error.new("Cannot find git ref (#{ref})")
+      end
+      
+      other_sha = other_grit_ref.commit.id
+      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      
+      if other_sha == local_sha then :equal
+      else
+        merge_sha = git_command__merge_base(@branch,ref)
+        if merge_sha == local_sha then :local_behind
+         elsif merge_sha == other_sha then :lcoal_ahead
+         else :branchpoint
+        end
+      end
+    end
+
     def push_changes(remote_name="origin")
       git_command__push(@branch,remote_name)
     end
@@ -239,6 +270,15 @@ module XYZ
       end
     end
 
+    def fetch(ref)
+      split = ref.split("/")
+      unless split.szie == 2
+        raise Error.new("Git remote ref (#{ref}) is ill-formed")
+      end
+      #TODO: throw specfic error if fetch fails because remote does not exist
+      git_command__fetch(*split)
+    end
+
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
@@ -283,6 +323,14 @@ module XYZ
 
     def git_command__remote_rm(remote_name)
       git_command.remote(cmd_opts(),:rm,remote_name)
+    end
+
+    def git_command__fetch(remote_name,branch)
+      git_command.fetch(cmd_opts(),remote_name,branch)
+    end
+
+    def git_command__merge_base(ref1,ref2)
+      git_command.merge_base(cmd_opts(),ref1,ref2)
     end
 
     #TODO: see what other commands needs mutex and whetehr mutex across what boundaries

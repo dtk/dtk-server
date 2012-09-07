@@ -37,7 +37,12 @@ module DTK
       unless get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-      repo.push_to_remote(remote_repo_name,branch)
+
+      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
+      pp [:debug_merge_rel,merge_rel]
+#TODO: commenting out teh actual push to help test above
+#      repo.push_to_remote(remote_repo_name,branch)
+nil
     end
 
     def get_repos()

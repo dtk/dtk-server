@@ -150,13 +150,30 @@ module XYZ
       ::DTK::Repo::Diffs.new(array_diff_hashes)
     end
 
+    def synchronize_with_remote_repo(remote_name,remote_url,opts={})
+      if remote_exists?(remote_name)
+        git_command__fetch(remote_name)
+      else
+        add_remote(remote_name,remote_url)
+      end
+      pull_changes(remote_name)
+      push_changes()
+      remote_name
+    end
+
+    def add_remote?(remote_name,remote_url)
+      unless remote_exists?(remote_name)
+        add_remote(remote_name,remote_url)
+      end
+    end
+
     def add_remote(remote_name,remote_url)
       git_command__remote_add(remote_name,remote_url)
     end
 
     def add_or_update_remote(remote_name,remote_url)
       #TODO: may be way to do this in one step with rename
-      if ret_config_keys().include?("remote.#{remote_name}.url")
+      if remote_exists?(remote_name)
         remove_remote(remote_name)
       end
       add_remote(remote_name,remote_url)
@@ -164,6 +181,10 @@ module XYZ
 
     def remove_remote(remote_name)
       git_command__remote_rm(remote_name)
+    end
+
+    def remote_exists?(remote_name)
+      ret_config_keys().include?("remote.#{remote_name}.url")
     end
 
     #returns :equal, :local_behind, :local_ahead, or :branchpoint

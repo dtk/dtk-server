@@ -56,10 +56,7 @@ module XYZ
     class << self
       def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url,opts={})
         repo = get_repo(context(repo_name,branch))      
-        repo.add_remote(remote_name,remote_url) unless opts[:remote_alraedy_added]
-        repo.pull_changes(remote_name)
-        repo.push_changes()
-        repo_name
+        repo.synchronize_with_remote_repo(remote_name,remote_url,opts)
       end
 
       #returns :equal, :local_behind, :local_ahead, or :branchpoint 

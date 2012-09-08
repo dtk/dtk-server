@@ -137,8 +137,7 @@ module DTK
         repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       end
 
-      sync_opts = (module_obj ? {:remote_alraedy_added => true} : {})
-      repo.synchronize_with_remote_repo(branch,sync_opts)
+      repo.synchronize_with_remote_repo(branch)
       module_branch_idh = import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_branch_idh
     end

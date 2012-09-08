@@ -26,6 +26,8 @@
    :data_source,
    :constraints,
    :component_relation,
-   :implementation
+   :implementation,
+   :component_module,
+   :service_module
   ]
 }

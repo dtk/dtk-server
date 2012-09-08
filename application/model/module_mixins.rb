@@ -241,7 +241,7 @@ module DTK
       end
       branch = ModuleBranch.library_branch_name(library_idh,version)
       version_match_row = rows.find{|r|r[:module_branch][:branch] == branch}
-      version_match_row && version_match_row[:module_branch]
+      version_match_row && version_match_row[:module_branch].merge(:module_id => version_match_row[:id])
     end
 
    private
@@ -278,16 +278,11 @@ module DTK
           }
         }
       }
-      #TODO: double check that this returns just one item as opposed to one per child of service_module
-      module_id = create_from_hash(library_idh,create_hash).first[:id]
-      module_idh = library_idh.createIDH(:id => module_id, :model_name => model_name)
-      parent_col = (model_name == :service_module ? ModuleBranch.service_module_id_col() : ModuleBranch.component_module_id_col())
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, parent_col, module_idh.get_id()], [:eq, :ref, mb_create_hash.keys.first]]
-      }
-      module_branch_idh = get_objs(library_idh.createMH(:module_branch),sp_hash).map{|r|r.id_handle()}.first
-      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch_idh}
+      input_hash_content_into_model(library_idh,create_hash)
+
+      module_branch = get_library_module_branch(library_idh,module_name,version)
+      module_idh =  library_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
+      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
   end
 end

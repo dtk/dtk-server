@@ -71,12 +71,15 @@ module DTK
       config_agent_type = :puppet #TODO: hard wired
       branch = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch)
+      #TODO: create_file_assets_from_dir_els needs to take into account impl_obj version (checkout this branch when discovering files)
       impl_obj.create_file_assets_from_dir_els(repo)
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)
+      #TODO: component_meta_file.update_model() needs to incorporate version info and use different refs for second version imported
+      #but need to check impact of having multiple items with same component_type
       component_idhs = component_meta_file.update_model()
 
       #TODO: remove below and put this in component_meta_file.update_model()

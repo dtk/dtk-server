@@ -49,16 +49,16 @@ module XYZ
       end
     end
 
-    #assumption is that target_id_handle is in uri form
-    def import_objects_from_file(target_id_handle,json_file,opts={})
+    #assumption is that container_id_handle is in uri form
+    def import_objects_from_file(container_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       hash_content = Aux::hash_from_file_with_json(json_file) 
-      import_objects_from_hash(target_id_handle,hash_content,opts)
+      import_objects_from_hash(container_id_handle,hash_content,opts)
     end
 
-    #assumption is that target_id_handle is in uri form
-    def import_objects_from_hash(target_id_handle,hash_content,opts={})
-      create_prefix_object_if_needed(target_id_handle,opts)
+    #assumption is that container_id_handle is in uri form
+    def import_objects_from_hash(container_id_handle,hash_content,opts={})
+      create_prefix_object_if_needed(container_id_handle,opts)
       return nil unless hash_content
       type_info = Hash.new
       add_r8meta!(hash_content,opts[:r8meta]) if opts[:r8meta]
@@ -69,36 +69,36 @@ module XYZ
         version = impl_info[:version]
         add_implementations!(hash_content,version,library_ref,base_dir)
       end
-      input_hash_content_into_model(target_id_handle,hash_content,opts)
+      input_hash_content_into_model(container_id_handle,hash_content,opts)
     end
 
-    def input_hash_content_into_model(target_id_handle,hash_content,opts={})
+    def input_hash_content_into_model(container_id_handle,hash_content,opts={})
       global_fks = Hash.new
-      unless target_id_handle.is_top?
+      unless container_id_handle.is_top?
         #TODO: do we need to factor in opts[:username] here?
-        global_fks = input_into_model(target_id_handle,hash_content,opts) 
+        global_fks = input_into_model(container_id_handle,hash_content,opts) 
       else
         hash_content.each do |relation_type,info|
           info.each do |ref,child_hash_content|
             child_uri = uri_qualified_by_username(relation_type,ref,opts[:username])
-            child_target_id_handle = target_id_handle.createIDH(:uri => child_uri)
-            create_prefix_object_if_needed(child_target_id_handle,opts)
+            child_container_id_handle = container_id_handle.createIDH(:uri => child_uri)
+            create_prefix_object_if_needed(child_container_id_handle,opts)
             input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not [:username,:preserve_input_hash].include?(k)})
-            r = input_into_model(child_target_id_handle,child_hash_content,input_opts)
+            r = input_into_model(child_container_id_handle,child_hash_content,input_opts)
             global_fks.merge!(r) if r
           end
         end
       end
-      process_global_keys(global_fks,target_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
+      process_global_keys(global_fks,container_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
     end
 
-    def create_prefix_object_if_needed(target_id_handle,opts={})
-      return nil if exists? target_id_handle 
+    def create_prefix_object_if_needed(container_id_handle,opts={})
+      return nil if exists? container_id_handle 
       if opts[:delete]
-        Log.info("deleting #{target_id_handle}")
-        delete_instance(target_id_handle)
+        Log.info("deleting #{container_id_handle}")
+        delete_instance(container_id_handle)
       end
-      create_simple_instance?(target_id_handle)
+      create_simple_instance?(container_id_handle)
     end
 
     def add_r8meta!(hash,r8meta)

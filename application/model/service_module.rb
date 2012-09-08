@@ -26,26 +26,14 @@ module DTK
       Model.get_objs(model_handle(:component),sp_hash)
     end 
 
-    def self.create_library_obj(library_idh,module_name,config_agent_type,version=nil)
-      raise_error_if_library_module_exists(library_idh,module_name)
+    def self.create_library_module_obj(library_idh,module_name,config_agent_type,version=nil)
+      if module_exists?(library_idh,module_name)
+        raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
+      end
 
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
-    end
-
-    def self.get_module_branch(library_idh,service_module_name,version=nil)
-      sp_hash = {
-        :cols => [:id,:display_name,:module_branches],
-        :filter => [:and, [:eq, :display_name, service_module_name], [:eq, :library_library_id, library_idh.get_id()]]
-      }
-      rows =  get_objs(library_idh.create_childMH(module_type()),sp_hash)
-      if rows.empty?
-        raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
-      end
-      version ||= BranchNameDefaultVersion
-      version_match_row = rows.find{|r|r[:module_branch][:version] == version}
-      version_match_row && version_match_row[:module_branch]
     end
 
    private

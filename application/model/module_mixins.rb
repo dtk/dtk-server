@@ -75,12 +75,6 @@ module DTK
     def module_type()
       self.class.module_type()
     end
-   private
-    def library_branch(version=nil)
-      library_id = update_object!(:library_library_id)[:library_library_id]
-      library_idh = id_handle(:model_name => :library, :id => library_id)
-      ModuleBranch.library_branch_name(library_idh,version)
-    end
 
     def get_module_branch(branch)
       sp_hash = {
@@ -89,6 +83,13 @@ module DTK
       module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
       module_branches.find{|mb|mb[:branch] == branch}
     end
+
+   private
+    def library_branch(version=nil)
+      library_id = update_object!(:library_library_id)[:library_library_id]
+      library_idh = id_handle(:model_name => :library, :id => library_id)
+      ModuleBranch.library_branch_name(library_idh,version)
+    end
   end
 
   module ModuleClassMixin
@@ -96,10 +97,14 @@ module DTK
     def import(library_idh,remote_module_name,remote_namespace,version=nil)
       module_name = remote_module_name
 
-      if module_version_exists?(library_idh,module_name,version)
-        raise ErrorUsage.new("Conflicts with existing library module (#{pp_module(module_name,version)})")
+      if module_obj = module_exists?(library_idh,module_name)
+        branch = ModuleBranch.library_branch_name(library_idh,version)
+        if module_obj.get_module_branch(branch)
+          raise ErrorUsage.new("Conflicts with existing library module (#{pp_module(module_name,version)})")
+        end
       end
 
+      #TODO: check also that requested version exists too
       unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
       end
@@ -217,6 +222,19 @@ module DTK
       get_objs(impl_mh,sp_hash)
     end
 
+    def get_library_module_branch(library_idh,module_name,version=nil)
+      sp_hash = {
+        :cols => [:id,:display_name,:module_branches],
+        :filter => [:and, [:eq, :display_name, module_name], [:eq, :library_library_id, library_idh.get_id()]]
+      }
+      rows =  get_objs(library_idh.create_childMH(module_type()),sp_hash)
+      if rows.empty?
+        raise ErrorUsage.new("Module (#{module_name}) does not exist")
+      end
+      branch = ModuleBranch.library_branch_name(library_idh,version)
+      version_match_row = rows.find{|r|r[:module_branch][:branch] == branch}
+      version_match_row && version_match_row[:module_branch]
+    end
 
    private
     def get_all_repos(mh)
@@ -227,20 +245,17 @@ module DTK
       end.values
     end
 
-    def module_version_exists?(library_idh,module_name,version=nil)
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-
+    def module_exists?(library_idh,module_name)
       sp_hash = {
-        :cols => [:id,:display_name,:module_branches],
+        :cols => [:id,:display_name],
         :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      module_branches = get_objs(library_idh.createMH(model_name()),sp_hash).map{|r|r[:module_branch]}
-      module_branches.find{|mb|mb[:branch] == branch}
+      module_branches = get_obj(library_idh.createMH(model_name()),sp_hash)
     end
 
     def pp_module(module_name,version=nil)
-      version ? module_name : "#{module_name} (#{version})"
+      version ? "#{module_name} (#{version})" : module_name
     end
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)

@@ -40,7 +40,7 @@ module XYZ
         raise ErrorUsage.new("No library specified and no default can be determined")
       end
       config_agent_type =  ret_request_params(:config_agent_type)|| :puppet
-      service_module_idh = ServiceModule.create_library_obj(library_idh,module_name,config_agent_type)
+      service_module_idh = ServiceModule.create_library_module_obj(library_idh,module_name,config_agent_type)
       rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
     

@@ -95,7 +95,10 @@ module DTK
     #import from remote repo
     def import(library_idh,remote_module_name,remote_namespace,version=nil)
       module_name = remote_module_name
-      raise_error_if_library_module_exists(library_idh,module_name)
+
+      if module_version_exists?(library_idh,module_name,version)
+        raise ErrorUsage.new("Conflicts with existing library module (#{pp_module(module_name,version)})")
+      end
 
       unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
@@ -224,16 +227,20 @@ module DTK
       end.values
     end
 
-    def raise_error_if_library_module_exists(library_idh,module_name)
+    def module_version_exists?(library_idh,module_name,version=nil)
+      branch = ModuleBranch.library_branch_name(library_idh,version)
+
       sp_hash = {
-        :cols => [:id,:display_name],
+        :cols => [:id,:display_name,:module_branches],
         :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      module_object = get_obj(library_idh.createMH(model_name),sp_hash)
-      if module_object
-        raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
-      end
+      module_branches = get_objs(library_idh.createMH(model_name()),sp_hash).map{|r|r[:module_branch]}
+      module_branches.find{|mb|mb[:branch] == branch}
+    end
+
+    def pp_module(module_name,version=nil)
+      version ? module_name : "#{module_name} (#{version})"
     end
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)

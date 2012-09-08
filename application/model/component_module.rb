@@ -4,6 +4,10 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def promote_to_library(new_version=nil)
+      raise Error.new("TODO: new implemented yet #{self.inspect}, version = #{new_version.inspect}")
+    end
+
     def get_workspace_branch_info()
       row = get_augmented_workspace_branch()
       {

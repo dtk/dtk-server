@@ -26,6 +26,13 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__promote_to_library()
+      component_module = create_obj(:component_module_id)
+      new_version = ret_request_params(:new_version)
+      component_module.promote_to_library(new_version)
+      rest_ok_response
+    end
+
     def rest__push_to_remote()
       component_module_id = ret_request_param_id(:component_module_id)
       component_module = create_object_from_id(component_module_id)

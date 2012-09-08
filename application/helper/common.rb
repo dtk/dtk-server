@@ -212,6 +212,11 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
+    #create object given symbol that is id/name param
+    def create_obj(id_or_name_param,model_class=nil)
+      create_object_from_id(ret_request_param_id(id_or_name_param,model_class))
+    end
+
     #param value can be id or name
     def ret_request_param_id(param,model_class=nil)
       model_class ||= model_class(model_name)

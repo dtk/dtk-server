@@ -5,6 +5,16 @@ module DTK
     include ModuleMixin
 
     def promote_to_library(new_version=nil)
+      #TODO: if new_version.nil? then do merge, check if meta data changed and if so update meta
+      # if version is non null then check if verion exists, if does not leevrage code for import
+=begin
+     fragment to modify for creating new version
+      repo = get repo associated with this
+
+      branch = ModuleBranch.library_branch_name(library_idh,new_version)
+      repo.synchronize_with_local_branch(branch)
+      leverage component#create_component_module_workspace?(proj) and do reverse of it from proj to libray
+=end
       raise Error.new("TODO: new implemented yet #{self.inspect}, version = #{new_version.inspect}")
     end
 
@@ -68,7 +78,7 @@ module DTK
       component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)
       component_idhs = component_meta_file.update_model()
 
-      #TODO: remove below and put this log in component_meta_file.update_model()
+      #TODO: remove below and put this in component_meta_file.update_model()
       update_components_with_branch_info(component_idhs,module_branch_idh,module_and_branch_info[:version])
       module_branch_idh
     end

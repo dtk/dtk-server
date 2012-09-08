@@ -97,8 +97,8 @@ module DTK
     def import(library_idh,remote_module_name,remote_namespace,version=nil)
       module_name = remote_module_name
 
+      branch = ModuleBranch.library_branch_name(library_idh,version)
       if module_obj = module_exists?(library_idh,module_name)
-        branch = ModuleBranch.library_branch_name(library_idh,version)
         if module_obj.get_module_branch(branch)
           raise ErrorUsage.new("Conflicts with existing library module (#{pp_module(module_name,version)})")
         end
@@ -112,24 +112,33 @@ module DTK
         raise Error.new("Remote repo info does not have field (git_repo_name)") 
       end
 
-      #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
-      Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
-
-      #create empty repo on local repo manager; 
-      module_specific_type = 
-        case module_type() 
-         when :service_module
-          :service_module
-         when :component_module
-          :puppet #TODO: hard wired
+      #case on whether the mdoule is craeted already
+      if module_obj
+        repos = module_obj.get_repos()
+        unless repos.size == 1
+          raise Error.new("unexpected that number of matching repos is not equal to 1")
         end
+        repo = repos.first()
+      else
+        #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
+        Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
 
-      #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-      create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+        #create empty repo on local repo manager; 
+        module_specific_type = 
+          case module_type() 
+          when :service_module
+            :service_module
+          when :component_module
+            :puppet #TODO: hard wired
+          end
 
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      repo.synchronize_with_remote_repo(branch)
+        #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+        create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
+        repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+      end
+
+      sync_opts = (module_obj ? {:remote_alraedy_added => true} : {})
+      repo.synchronize_with_remote_repo(branch,sync_opts)
       module_branch_idh = import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_branch_idh
     end

@@ -48,14 +48,14 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
-    def synchronize_with_remote_repo(branch)
+    def synchronize_with_remote_repo(branch,opts={})
       update_object!(:repo_name,:remote_repo_name)
       unless self[:remote_repo_name]
         raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
       end
       remote_url = Remote.new.repo_url_ssh_access(self[:remote_repo_name])
       remote_name = remote_name_for_push_pull()
-      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url)
+      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts)
     end
 
     def ret_remote_merge_relationship(remote_repo_name,branch,opts={})

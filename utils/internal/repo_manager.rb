@@ -54,9 +54,9 @@ module XYZ
 
     ### for dealing with actual repos
     class << self
-      def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url)
+      def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url,opts={})
         repo = get_repo(context(repo_name,branch))      
-        repo.add_remote(remote_name,remote_url)
+        repo.add_remote(remote_name,remote_url) unless opts[:remote_alraedy_added]
         repo.pull_changes(remote_name)
         repo.push_changes()
         repo_name

@@ -18,9 +18,11 @@ module DTK
   end
   module BranchNamesClassMixin
     def library_branch_name(library_idh,version=nil)
+      #TODO: when have multiple libraries that can host same module will need to refine
       #      library = library_idh.create_object().update_object!(:ref)
       #     "library-#{library[:ref]}-v#{new_version.to_s}"
-      version ? "v#{version}" : BranchNameDefaultVersion
+      #version ? "v#{version}" : BranchNameDefaultVersion
+      version || BranchNameDefaultVersion
     end
   end
 end

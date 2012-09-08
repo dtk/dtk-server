@@ -71,10 +71,15 @@ module DTK
       end
       DefaultsNamespace = "r8" #TODO: have this obtained from config file
 
-      #returns name, namespace
+      #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
-        name,namespace = qualified_name.split("/")
-        [name,namespace||default_namespace()]
+        split = qualified_name.split("/")
+        case split.size
+         when 1 then [default_namespace(),qualified_name]
+         when 2,3 then split
+        else
+          raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
+        end
       end
 
      private

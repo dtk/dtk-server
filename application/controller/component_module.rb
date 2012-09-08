@@ -9,13 +9,15 @@ module XYZ
     end
 
     def rest__import()
-      remote_module_name,remote_namespace = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       library_id = ret_request_params(:library_id) 
       library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
       unless library_idh
         raise Error.new("No library specified and no default can be determined")
       end
-      ComponentModule.import(library_idh,remote_module_name,remote_namespace)
+      ret_non_null_request_params(:remote_module_names).each do |name|
+        remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+        ComponentModule.import(library_idh,remote_module_name,remote_namespace,version)
+      end
       rest_ok_response
     end
 

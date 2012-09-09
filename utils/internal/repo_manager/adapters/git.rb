@@ -63,8 +63,8 @@ module XYZ
     end
 
     def ls_r(depth=nil,opts={})
-      Dir.chdir(@path) do
-        if depth.nil?
+      checkout(@branch) do
+        if depth.nil? or (depth.kind_of?(String) and depth == '*')
           all_paths = Dir["**/*"]
         else
           pattern = "*"
@@ -85,11 +85,9 @@ module XYZ
     end
 
     def get_file_content(file_asset)
-      ret = nil
       checkout(@branch) do
-        ret = File.open(file_asset[:path]){|f|f.read}
+        File.open(file_asset[:path]){|f|f.read}
       end
-      ret
     end
 
     def add_all_files()
@@ -282,17 +280,19 @@ module XYZ
     end
 
     def checkout(branch_name,&block)
+      ret = nil
       Dir.chdir(@path) do 
         current_head = @grit_repo.head.name
         #TODO: when get index mechanisms to work subsiture cmmited out for below
         #@index.read_tree(branch_name)
         git_command__checkout(branch_name) unless current_head == branch_name
-        return unless block
-        yield
+        return ret unless block
+        ret = yield
         unless current_head == branch_name
           git_command__checkout(current_head)
         end
       end
+      ret
     end
 
     def branch_exists?(branch_name)

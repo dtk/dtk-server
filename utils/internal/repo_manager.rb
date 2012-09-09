@@ -139,7 +139,10 @@ module XYZ
         context.update_object!(:repo_name)
         repo = context[:repo_name]
         branch = "master"
-      else
+      elsif context.kind_of?(Implementation)
+        repo = context[:repo]
+        branch = context[:branch]
+      else #TODO: modify below and how args passed to just use hash with keys :repo,:branch
         #assume that it has hash with :implementation key
         #TODO: do we still need __top
         repo = (context[:implementation]||{})[:repo]||"__top"

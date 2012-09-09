@@ -71,7 +71,6 @@ module DTK
       config_agent_type = :puppet #TODO: hard wired
       branch = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch)
-      #TODO: create_file_assets_from_dir_els needs to take into account impl_obj version (checkout this branch when discovering files)
       impl_obj.create_file_assets_from_dir_els(repo)
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
@@ -88,6 +87,7 @@ module DTK
     end
 
     def export_preprocess(branch)
+      #noop
     end
   end
 end

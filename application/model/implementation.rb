@@ -126,19 +126,11 @@ module XYZ
       FileAsset.add_and_push_to_repo(self,file_type,file_path,content,opts)
     end
 
-    #TODO: this need s to be updated to rflect that can be on different branches
     def create_file_assets_from_dir_els(repo_obj)
-      update_object!(:type)
-      repo_obj.update_object!(:local_dir)
-
-      module_dir = repo_obj[:local_dir]
-      file_paths = Array.new
-      Dir.chdir(module_dir) do
-        pattern = "**/*"
-        file_paths = Dir[pattern].select{|item|File.file?(item)}
-      end
+      update_object!(:type,:repo,:branch)
 
       file_type = ImplTypeToFileType[self[:type]]
+      file_paths = RepoManager.ls_r('*',{:file_only=>true},self)
       file_asset_rows = file_paths.map do |file_path|
         content = nil #TODO to clear model cache of content
         FileAsset.ret_create_hash(self,file_type,file_path,content)

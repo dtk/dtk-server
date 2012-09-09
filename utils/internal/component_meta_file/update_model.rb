@@ -1,11 +1,56 @@
 module DTK; class ComponentMetaFile
   module UpdateModelMixin
-    def update_model()
-      self.class.add_components_from_r8meta(@container_idh,@config_agent_type,@impl_idh,@input_hash)
+    def update_model(opts={})
+      input_hash =
+        if opts.empty?
+          @input_hash
+        elsif opts[:version]
+          modify_for_version_and_override_attrs(@input_hash,opts[:version],opts[:override_attrs])
+        else
+          add_component_override_attrs(@input_hash,opts[:override_attrs])
+        end
+      
+      self.class.add_components_from_r8meta(@container_idh,@config_agent_type,@impl_idh,input_hash)
+    end
+
+   private
+    def add_component_override_attrs(input_hash,override_attrs)
+      if override_attrs
+        input_hash.keys.inject(Hash.new()) do |h,k|
+          h.merge(k => input_hash[k].merge(override_attrs))
+        end
+      else
+        input_hash
+      end
+    end
+
+    def modify_for_version_and_override_attrs(input_hash,version,override_attrs)
+      (override_attrs ||= {})["version"] ||= version
+
+      input_hash.keys.inject(Hash.new()) do |h,k|
+        cmp_info = input_hash[k]
+        modified_cmp_info = cmp_info.merge(override_attrs).merge("display_name" => component_display_name_with_version(cmp_info["display_name"],version))
+        h.merge(component_ref_with_version(k,version) => modified_cmp_info)
+      end
+    end
+
+    #TODO: move to more central place
+    def component_ref_with_version(ref,version)
+      "#{ref}__#{version}"
+    end
+    def component_display_name_with_version(display_name,version)
+      "#{display_name}(#{version})"
     end
   end
 
   module UpdateModelClassMixin
+    def update_model(repo,impl_obj,module_branch_idh,version)
+      component_meta_file_obj = create_meta_file_object(repo,impl_obj)
+      update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
+      update_opts.merge!(:version => version) if version
+      component_meta_file_obj.update_model(update_opts)
+    end
+
     #TODO: make private after removing all non class references to it
     def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,meta_hash)
       impl_id = impl_idh.get_id()

@@ -58,12 +58,6 @@ module DTK
       aug_ws_branch_rows.first
     end
 
-    def self.update_components_with_branch_info(component_idhs,module_branch_idh,version)
-      mb_id = module_branch_idh.get_id()
-      update_rows = component_idhs.map{|cmp_idh|{:id=> cmp_idh.get_id(), :module_branch_id =>mb_id,:version=>version}}
-      sample_cmp_idh = component_idhs.first 
-      update_from_rows(sample_cmp_idh.createMH(),update_rows)
-    end
    private
     def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
       module_name = remote_module_name
@@ -76,13 +70,7 @@ module DTK
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
-      component_meta_file = ComponentMetaFile.create_meta_file_object(repo,impl_obj)
-      #TODO: component_meta_file.update_model() needs to incorporate version info and use different refs for second version imported
-      #but need to check impact of having multiple items with same component_type
-      component_idhs = component_meta_file.update_model()
-
-      #TODO: remove below and put this in component_meta_file.update_model()
-      update_components_with_branch_info(component_idhs,module_branch_idh,module_and_branch_info[:version])
+      ComponentMetaFile.update_model(repo,impl_obj,module_branch_idh,version)
       module_branch_idh
     end
 

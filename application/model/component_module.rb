@@ -47,10 +47,21 @@ module DTK
       end
 
       unless lib_branch[:repo_id] == ws_branch[:repo_id]
-        raise Error.new("Not supporting case where promoting workspace to library branch when they are two different repos")
+        raise Error.new("Not supporting case where promoting workspace to library branch when branches are on two different repos")
       end
+
       repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
-      repo.synchronize_library_with_workspace_branch(lib_branch[:branch],ws_branch[:branch])
+      result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
+      case result
+      when :changed
+        nil #no op
+      when :no_change 
+        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
+      when :merge_needed
+        raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
+      else
+        raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
+      end
     end
 
     def get_workspace_branch_info()

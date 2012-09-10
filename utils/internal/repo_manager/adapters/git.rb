@@ -148,6 +148,24 @@ module XYZ
       ::DTK::Repo::Diffs.new(array_diff_hashes)
     end
 
+    #returns :no_change, :changed, :merge_needed
+    def fast_foward_merge_from_branch(branch_to_merge_from)
+      merge_rel = ret_merge_relationship(:local_branch,branch_to_merge_from)
+      ret = 
+        case merge_rel
+         when :equal then :no_change
+         when :branchpoint, :local_ahead then :merge_needed
+         when :local_behind then :changed  
+         else raise Error.new("Unexpected merge relation (#{merge_rel})")
+        end
+      return ret unless ret == :changed
+      checkout(@branch) do
+        git_command__merge(branch_to_merge_from) #TODO: should put in semantic commit message
+        push_changes()
+      end
+      ret
+    end
+
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)
         git_command__fetch(remote_name)

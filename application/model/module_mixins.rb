@@ -107,6 +107,10 @@ module DTK
       library_idh = id_handle(:model_name => :library, :id => library_id)
       ModuleBranch.library_branch_name(library_idh,version)
     end
+
+    def pp_module_name(version=nil)
+      self.class.pp_module_name(self[:display_name],version)
+    end
   end
 
   module ModuleClassMixin
@@ -117,7 +121,7 @@ module DTK
       branch = ModuleBranch.library_branch_name(library_idh,version)
       if module_obj = module_exists?(library_idh,module_name)
         if module_obj.get_module_branch(branch)
-          raise ErrorUsage.new("Conflicts with existing library module (#{pp_module(module_name,version)})")
+          raise ErrorUsage.new("Conflicts with existing library module (#{pp_module_name(module_name,version)})")
         end
       end
 
@@ -269,6 +273,10 @@ module DTK
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
     end
 
+    def pp_module_name(module_name,version=nil)
+      version ? "#{module_name} (#{version})" : module_name
+    end
+
    private
     def get_all_repos(mh)
       get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
@@ -285,10 +293,6 @@ module DTK
                     [:eq, :display_name, module_name]]
       }
       module_branches = get_obj(library_idh.createMH(model_name()),sp_hash)
-    end
-
-    def pp_module(module_name,version=nil)
-      version ? "#{module_name} (#{version})" : module_name
     end
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)

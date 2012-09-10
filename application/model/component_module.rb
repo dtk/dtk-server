@@ -8,6 +8,17 @@ module DTK
     #if version exists in library than update, otherwise create new version
     def promote_to_library(version=nil)
       matching_branches = get_module_branches_matching_version(version)
+      #check that there is a workspace branch
+      ws_branches = matching_branches.select{|r|r[:is_workspace]}
+      ws_branch = 
+        case ws_branches.size
+         when 0
+          raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
+         when 1
+          ws_branches.first
+         else
+          raise Error.new("Unexpectd that get_module_branches_matching_version(#{version}) returns more than two workspace branches") 
+        end
       pp matching_branches
        raise Error.new("TODO: Got here")
 

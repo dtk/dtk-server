@@ -143,7 +143,15 @@ module DTK
     end
 
     def list_remotes(model_handle)
-      Repo::Remote.new.list_module_qualified_names(module_type()).map{|r|{:display_name => r[:name]}}
+      Repo::Remote.new.list_module_info(module_type()).map do |r|
+        el = {:display_name => r[:name]}
+        branches = r[:branches]
+        if branches and not branches == ["master"]
+          versions = ["CURRENT"] + branches.reject{|b|b == "master"}.sort
+          el.merge!(:version => versions.join(", ")) #TODO: change to ':versions' afetr sync with client
+        end
+        el
+      end
     end
 
     def module_type()

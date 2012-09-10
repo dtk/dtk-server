@@ -36,13 +36,14 @@ module DTK
         Aux.convert_keys_to_symbols(response_data)
       end
 
-      def list_module_qualified_names(type=nil)
+      def list_module_info(type=nil)
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter)
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
           namespace = r["namespace"] && "#{r["namespace"]}/"
-          el.merge(:name => "#{namespace}#{r["name"]}")
+          qualified_name = "#{namespace}#{r["name"]}"
+          el.merge(:name => qualified_name, :branches => r["branches"])  
         end
       end
 

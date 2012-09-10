@@ -9,7 +9,7 @@ module DTK
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
       end
 
-      branch = library_branch(version)
+      branch = library_branch_name(version)
       unless module_branch = get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
@@ -34,7 +34,7 @@ module DTK
       unless remote_repo_name = repo[:remote_repo_name]
         raise ErrorUsage.new("Cannot push module (#{module_name}) to remote because it is currently not linked to a remote module")
       end
-      branch = library_branch(version)
+      branch = library_branch_name(version)
       unless get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
@@ -86,7 +86,23 @@ module DTK
     end
 
    private
-    def library_branch(version=nil)
+    def get_library_module_branch(version=nil)
+      update_object!(:display_name,:library_library_id)
+      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
+      module_name = self[:display_name]
+      self.class.get_library_module_branch(library_idh,module_name,version)
+    end
+
+    def get_module_branches_matching_version(version=nil)
+      update_object!(:display_name,:library_library_id)
+      module_name = self[:display_name]
+      filter = [:eq, :id, self[:id]]
+      version_in_mb = version || "master" #TODO: refer to a common constant or fn
+      post_filter = proc{|r|r[:version] == version_in_mb}
+      self.class.get_matching_module_branches(id_handle(),filter,post_filter)
+    end
+
+    def library_branch_name(version=nil)
       library_id = update_object!(:library_library_id)[:library_library_id]
       library_idh = id_handle(:model_name => :library, :id => library_id)
       ModuleBranch.library_branch_name(library_idh,version)
@@ -228,17 +244,29 @@ module DTK
     end
 
     def get_library_module_branch(library_idh,module_name,version=nil)
+      filter = [:and, [:eq, :display_name, module_name], [:eq, :library_library_id, library_idh.get_id()]]
+      branch = ModuleBranch.library_branch_name(library_idh,version)
+      post_filter = proc{|mb|mb[:branch] == branch}
+      matches = get_matching_module_branches(library_idh,filter,post_filter)
+      if matches.size == 1
+        matches.first
+      elsif matches.size > 2
+        raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
+      end
+    end
+
+    def get_matching_module_branches(mh_or_idh,filter,post_filter=nil)
       sp_hash = {
-        :cols => [:id,:display_name,:module_branches],
-        :filter => [:and, [:eq, :display_name, module_name], [:eq, :library_library_id, library_idh.get_id()]]
+        :cols => [:id,:display_name,:module_branches,:library_library_id],
+        :filter => filter
       }
-      rows =  get_objs(library_idh.create_childMH(module_type()),sp_hash)
+      rows =  get_objs(mh_or_idh.create_childMH(module_type()),sp_hash).map do |r|
+        r[:module_branch].merge(:module_id => r[:id],:library_id => r[:library_library_id])
+      end
       if rows.empty?
         raise ErrorUsage.new("Module (#{module_name}) does not exist")
       end
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      version_match_row = rows.find{|r|r[:module_branch][:branch] == branch}
-      version_match_row && version_match_row[:module_branch].merge(:module_id => version_match_row[:id])
+      post_filter ? rows.select{|r|post_filter.call(r)} : rows
     end
 
    private

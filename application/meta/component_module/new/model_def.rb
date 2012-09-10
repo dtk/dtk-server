@@ -53,7 +53,7 @@ lambda__segment_components =
     :module_branches=>{
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:id,:display_name,:branch,:version,:type,:repo_id])]
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:id,:display_name,:branch,:version,:type,:repo_id,:is_workspace])]
     },
     :library_repo=>{
       :type=>:json,

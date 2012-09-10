@@ -4,7 +4,23 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
-    def promote_to_library(new_version=nil)
+    #promotes workspace changes to library
+    #if version exists in library than update, otherwise create new version
+    def promote_to_library(version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      pp matching_branches
+       raise Error.new("TODO: Got here")
+
+      if matching_branches
+       repo = id_handle(:model_name => :repo, :id => matching_branch_obj[:repo_id]).create_object()
+       repo.synchronize_library_with_workspace_branch(matching_branch_obj[:branch])
+     else
+       pp :no_match
+       raise Error.new("TODO: Got here")
+     end
+
+      raise Error.new("TODO: Got here")
+#NEW: leverage work did on import; may update when new version by using component_meta_file
       #TODO: if new_version.nil? then do merge, check if meta data changed and if so update meta
       # if version is non null then check if verion exists, if does not leevrage code for import
 =begin
@@ -15,7 +31,6 @@ module DTK
       repo.synchronize_with_local_branch(branch)
       leverage component#create_component_module_workspace?(proj) and do reverse of it from proj to libray
 =end
-      raise Error.new("TODO: new implemented yet #{self.inspect}, version = #{new_version.inspect}")
     end
 
     def get_workspace_branch_info()

@@ -76,9 +76,9 @@ module XYZ
       [repo_obj, impl_obj]
     end
 
-    def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch)
+    def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
       impl_hash = {
-        :display_name => module_name,
+        :display_name => version ? "#{module_name}(#{version})" : module_name,
         :type => ImplementationType[config_agent_type],
         :repo => repo_obj[:repo_name],
         :repo_id => repo_obj[:id],

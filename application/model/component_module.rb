@@ -4,33 +4,22 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
-    #promotes workspace changes to library
-    #if version exists in library than update, otherwise create new version
-    def promote_to_library(version=nil)
-      matching_branches = get_module_branches_matching_version(version)
+    def create_new_version(new_version,existing_version=nil)
+      matching_branches = get_module_branches_matching_version(existing_version)
       #check that there is a workspace branch
-      ws_branches = matching_branches.select{|r|r[:is_workspace]}
-      ws_branch = 
-        case ws_branches.size
-         when 0
-          raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
-         when 1
-          ws_branches.first
-         else
-          raise Error.new("Unexpectd that get_module_branches_matching_version(#{version}) returns more than two workspace branches") 
+      unless ws_branch = find_branch(:workspace,matching_branches)
+        raise ErrorUsage.new("There is no module (#{pp_module_name(existing_version)}) in the workspace")
+      end
+
+      #make sure there is a not a library branch
+      if find_branch(:library,get_module_branches_matching_version(new_version))
+        if new_version == existing_version
+          raise ErrorUsage.new("Library version exists for module (#{pp_module_name(new_version)}); try using promote-to-library")
+        else
+          raise ErrorUsage.new("Library version exists for module (#{pp_module_name(new_version)})")
         end
-      pp matching_branches
-       raise Error.new("TODO: Got here")
+      end
 
-      if matching_branches
-       repo = id_handle(:model_name => :repo, :id => matching_branch_obj[:repo_id]).create_object()
-       repo.synchronize_library_with_workspace_branch(matching_branch_obj[:branch])
-     else
-       pp :no_match
-       raise Error.new("TODO: Got here")
-     end
-
-      raise Error.new("TODO: Got here")
 #NEW: leverage work did on import; may update when new version by using component_meta_file
       #TODO: if new_version.nil? then do merge, check if meta data changed and if so update meta
       # if version is non null then check if verion exists, if does not leevrage code for import
@@ -42,6 +31,26 @@ module DTK
       repo.synchronize_with_local_branch(branch)
       leverage component#create_component_module_workspace?(proj) and do reverse of it from proj to libray
 =end
+    end
+
+    #promotes workspace changes to library
+    def promote_to_library(version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      #check that there is a workspace branch
+      unless ws_branch = find_branch(:workspace,matching_branches)
+        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
+      end
+
+      #check that there is a library branch
+      unless lib_branch =  find_branch(:library,matching_branches)
+        raise Error.new("No library version exists for module (#{pp_module_name(version)}); try using create-new-version")
+      end
+
+      unless lib_branch[:repo_id] == ws_branch[:repo_id]
+        raise Error.new("Not supporting case where promoting workspace to library branch when they are two different repos")
+      end
+      repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
+      repo.synchronize_library_with_workspace_branch(lib_branch[:branch],ws_branch[:branch])
     end
 
     def get_workspace_branch_info()
@@ -121,6 +130,20 @@ module DTK
 
       ComponentMetaFile.update_model(repo,impl_obj,module_branch_idh,version)
       module_branch_idh
+    end
+
+    #type is :library or :workspace
+    def find_branch(type,branches)
+      matches =
+        case type
+          when :library then branches.reject{|r|r[:is_workspace]} 
+          when :workspace then branches.select{|r|r[:is_workspace]} 
+          else raise Error.new("Unexpected type (#{type})")
+        end
+      if matches.size > 1
+        Error.new("Unexpected that there is more than one matching #{type} branches")
+      end
+      matches.first
     end
 
     def export_preprocess(branch)

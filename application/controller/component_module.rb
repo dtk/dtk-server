@@ -22,36 +22,40 @@ module XYZ
     end
 
     def rest__export()
-      component_module_id = ret_request_param_id(:component_module_id)
-      component_module = create_object_from_id(component_module_id)
+      component_module = create_obj(:component_module_id)
       component_module.export()
       rest_ok_response 
     end
 
     def rest__promote_to_library()
       component_module = create_obj(:component_module_id)
-      new_version = ret_request_params(:new_version)
-      component_module.promote_to_library(new_version)
+      version = ret_request_params(:version)
+      component_module.promote_to_library(version)
+      rest_ok_response
+    end
+
+    def rest__create_new_version()
+      component_module = create_obj(:component_module_id)
+      new_version = ret_non_null_request_params(:new_version)
+      existing_version = ret_request_params(:existing_version)
+      component_module.create_new_version(new_version,existing_version)
       rest_ok_response
     end
 
     def rest__push_to_remote()
-      component_module_id = ret_request_param_id(:component_module_id)
-      component_module = create_object_from_id(component_module_id)
+      component_module = create_obj(:component_module_id)
       component_module.push_to_remote()
       rest_ok_response
     end
 
     def rest__push_to_mirror()
-      component_module_id = ret_request_param_id(:component_module_id)
+      component_module = create_obj(:component_module_id)
       mirror_host = ret_non_null_request_params(:mirror_host)
-      component_module = create_object_from_id(component_module_id)
       component_module.push_to_mirror(mirror_host)
     end
 
     def rest__update_library()
-      component_module_id = ret_request_param_id(:component_module_id)
-      component_module = create_object_from_id(component_module_id)
+      component_module = create_obj(:component_module_id)
       component_module.update_library_module_with_workspace()
       rest_ok_response
     end
@@ -84,6 +88,5 @@ module XYZ
       ComponentModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
       rest_ok_response
     end
-
   end
 end

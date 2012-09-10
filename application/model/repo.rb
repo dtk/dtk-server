@@ -48,9 +48,10 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
-    def synchronize_with_local_branch(branch,opts={})
-      update_object!(:repo_name)
-      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts)
+    def synchronize_library_with_workspace_branch(lib_branch_name,ws_branch_name)
+      pp [:synchronize_library_with_workspace_branc,self,lib_branch_name,ws_branch_name]
+#      update_object!(:repo_name)
+ #     RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts)
     end
     def synchronize_with_remote_repo(branch,opts={})
       update_object!(:repo_name,:remote_repo_name)

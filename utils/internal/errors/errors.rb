@@ -57,7 +57,7 @@ module XYZ
       super(msg(name,object_type))
     end
      def msg(name,object_type)
-       "No objects of type #{object_type} with name (#{name}) exist"
+       "No object of type #{object_type} with name (#{name}) exists"
      end
   end
 

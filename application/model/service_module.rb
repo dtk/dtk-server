@@ -6,6 +6,16 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def self.list(mh,opts={})
+      library_idh = opts[:library_idh]
+      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => lib_filter
+      }
+      get_objs(mh,sp_hash)
+    end
+
     def list_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]

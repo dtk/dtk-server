@@ -2,6 +2,7 @@ module DTK
   module ModuleMixin
     #export to remote
     def export(version=nil)
+      #TODO: put in version-specfic logic
       repo = get_library_repo()
       module_name = update_object!(:display_name)[:display_name]
       if repo[:remote_repo_name]
@@ -104,12 +105,11 @@ module DTK
         end
       end
 
-      #TODO: check also that requested version exists too
       unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
       end
-      unless git_repo_name = remote_module_info[:git_repo_name]
-        raise Error.new("Remote repo info does not have field (git_repo_name)") 
+      unless remote_module_info[:branches].include?(branch)
+        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not have version (#{version||"CURRENT"})")
       end
 
       #case on whether the mdoule is craeted already
@@ -133,7 +133,7 @@ module DTK
           end
 
         #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-        create_opts = {:remote_repo_name => git_repo_name,:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
+        create_opts = {:remote_repo_name => remote_module_info[:git_repo_name],:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
         repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       end
 
@@ -144,11 +144,11 @@ module DTK
 
     def list_remotes(model_handle)
       Repo::Remote.new.list_module_info(module_type()).map do |r|
-        el = {:display_name => r[:name]}
+        el = {:display_name => r[:qualified_name]}
         branches = r[:branches]
         if branches and not branches == ["master"]
-          versions = ["CURRENT"] + branches.reject{|b|b == "master"}.sort
-          el.merge!(:version => versions.join(", ")) #TODO: change to ':versions' afetr sync with client
+          version_array =(branches.include?("master") ? ["CURRENT"] : []) + branches.reject{|b|b == "master"}.sort
+          el.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
         end
         el
       end
@@ -225,17 +225,6 @@ module DTK
         }
       end
       Repo.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,opts)
-    end
-
-    #TODO: change so get versions from cm or sm branches
-    def list_from_library(impl_mh,opts={})
-      library_idh = opts[:library_idh]
-      lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
-      sp_hash = {
-        :cols => [:id, :display_name,:version],
-        :filter => lib_filter
-      }
-      get_objs(impl_mh,sp_hash)
     end
 
     def get_library_module_branch(library_idh,module_name,version=nil)

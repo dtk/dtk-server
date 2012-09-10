@@ -36,14 +36,37 @@ module DTK
       ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:ws_branch_augmented => true)
     end
     
-    def self.list(service_module_mh,opts={})
+    def self.list(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
         :cols => [:id, :display_name,:version],
         :filter => lib_filter
       }
-      get_objs(service_module_mh,sp_hash)
+      ndx_module_info = get_objs(mh,sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
+
+      #get version info
+      sp_hash = {
+        :cols => [:component_id,:version],
+        :filter => [:and,[:oneof, :component_id, ndx_module_info.keys], [:neq,:is_workspace,true]]
+      }
+      branch_info = get_objs(mh.createMH(:module_branch),sp_hash)
+      #join in version info
+      branch_info.each do |br|
+        mod = ndx_module_info[br[:component_id]]
+        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
+        mdl = ndx_module_info[br[:component_id]]
+        (mdl[:version_array] ||= Array.new) <<  version
+      end
+      #put version info in prin form
+      ndx_module_info.values.map do |mdl|
+        raw_va = mdl.delete(:version_array)
+        unless raw_va.nil? or raw_va == ["CURRENT"]
+          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
+          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        end
+        mdl
+      end
     end
 
     def get_augmented_workspace_branch()

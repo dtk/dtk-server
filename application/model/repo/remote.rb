@@ -43,7 +43,7 @@ module DTK
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
           namespace = r["namespace"] && "#{r["namespace"]}/"
           qualified_name = "#{namespace}#{r["name"]}"
-          el.merge(:name => qualified_name, :branches => r["branches"])  
+          el.merge(:qualified_name => qualified_name, :branches => r["branches"])  
         end
       end
 

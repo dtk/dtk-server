@@ -1,7 +1,7 @@
 module XYZ
   class Component_moduleController < Controller
-    def rest__list_from_library()
-      rest_ok_response ComponentModule.list_from_library(model_handle)
+    def rest__list()
+      rest_ok_response ComponentModule.list(model_handle)
     end
 
     def rest__list_remote()

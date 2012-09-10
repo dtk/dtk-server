@@ -1,7 +1,7 @@
 module XYZ
   class Service_moduleController < Controller
-    def rest__list_from_library()
-      rest_ok_response ServiceModule.list_from_library(model_handle)
+    def rest__list()
+      rest_ok_response ServiceModule.list(model_handle)
     end
 
     def rest__list_remote()

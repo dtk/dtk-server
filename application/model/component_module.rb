@@ -11,7 +11,7 @@ module DTK
         raise ErrorUsage.new("There is no module (#{pp_module_name(existing_version)}) in the workspace")
       end
 
-      #make sure there is a not a library branch
+      #make sure there is a not a library branch that exists already
       if find_branch(:library,get_module_branches_matching_version(new_version))
         if new_version == existing_version
           raise ErrorUsage.new("Library version exists for module (#{pp_module_name(new_version)}); try using promote-to-library")
@@ -128,9 +128,7 @@ module DTK
     end
 
    private
-    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
-      module_name = remote_module_name
-
+    def self.import_postprocess(repo,library_idh,module_name,version)
       config_agent_type = :puppet #TODO: hard wired
       branch = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch,version)

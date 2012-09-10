@@ -47,9 +47,7 @@ module DTK
     end
 
    private
-    def self.import_postprocess(repo,library_idh,remote_module_name,remote_namespace,version)
-      module_name = remote_module_name
-
+    def self.import_postprocess(repo,library_idh,module_name,version)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 

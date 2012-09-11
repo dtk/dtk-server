@@ -171,7 +171,7 @@ lambda__template_nodes_and_components =
     :nodes=> {
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=> [lambda__segment_node.call([:id,:display_name,:ui,:type])]
+      :remote_dependencies=> [lambda__segment_node.call([:id,:display_name,:ui,:type,:os_type,:external_ref])]
     },
     :components=> {
       :type=>:json,

@@ -2,14 +2,31 @@ module DTK
   class AssemblyInstance < Assembly
     def info_about(about)
       cols = post_process = nil
-      case 
-       when :components 
-        cols = [:components]
-        post_process = proc{|r|r[:component2].hash_subset(:id,:display_name)}
+      case about 
+       when :components
+        cols = [:nested_nodes_and_cmps_summary]
+        post_process = proc do |r|
+          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
+          r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
+        end
+       when :nodes
+        cols = [:nodes]
+        post_process = proc do |r|
+          node = r[:node]
+          type = node[:external_ref][:type]
+          external_ref = 
+            case type
+             when "ec2_instance"
+              Aux::hash_subset(node[:external_ref],[:type,:image_id,:size,:instance_id])
+             else {:type => type}
+            end
+          node.hash_subset(:id,:display_name,:os_type).merge(external_ref)
+        end
       end
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+
       rows = get_objs(:cols => cols)
       post_process ? rows.map{|r|post_process.call(r)} : rows
     end

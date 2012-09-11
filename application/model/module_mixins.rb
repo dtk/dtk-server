@@ -109,6 +109,7 @@ module DTK
     end
 
     def pp_module_name(version=nil)
+      update_object!(:display_name)
       self.class.pp_module_name(self[:display_name],version)
     end
   end

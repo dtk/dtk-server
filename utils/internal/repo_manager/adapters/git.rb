@@ -258,7 +258,20 @@ module XYZ
       end
     end
 
-    def clone_branch(new_branch)
+    def add_branch_and_push_to_origin?(new_branch)
+      add_branch?(new_branch)
+      checkout(new_branch) do
+        git_command__push(new_branch)
+      end
+    end
+
+    def add_branch?(new_branch)
+      unless get_branches().include?(new_branch)
+        add_branch(new_branch)
+      end
+    end
+
+    def add_branch(new_branch)
       checkout(@branch) do
         git_command__add_branch(new_branch)
       end
@@ -272,7 +285,11 @@ module XYZ
       git_command__delete_remote_branch(@branch)      
     end
 
-    #TODO: change so this is gotten from db to if want to put in hooks for per branch auth
+    def get_branches()
+      @grit_repo.branches.map{|b|b.name}
+    end
+
+    #TODO: deprecate
     def self.get_branches(repo)
       path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
       Grit::Repo.new(path).branches.map{|b|b.name}

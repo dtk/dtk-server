@@ -5,6 +5,10 @@ module DTK
     include ModuleMixin
 
     def create_new_version(new_version,existing_version=nil)
+      update_object!(:display_name,:library_library_id)
+      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
+      module_name = self[:display_name]
+
       matching_branches = get_module_branches_matching_version(existing_version)
       #check that there is a workspace branch
       unless ws_branch = find_branch(:workspace,matching_branches)
@@ -20,17 +24,10 @@ module DTK
         end
       end
 
-#NEW: leverage work did on import; may update when new version by using component_meta_file
-      #TODO: if new_version.nil? then do merge, check if meta data changed and if so update meta
-      # if version is non null then check if verion exists, if does not leevrage code for import
-=begin
-     fragment to modify for creating new version
-      repo = get repo associated with this
-
-      branch = ModuleBranch.library_branch_name(library_idh,new_version)
-      repo.synchronize_with_local_branch(branch)
-      leverage component#create_component_module_workspace?(proj) and do reverse of it from proj to libray
-=end
+      new_lib_branch_name = ModuleBranch.library_branch_name(library_idh,new_version)
+      repo = id_handle(:model_name => :repo, :id => ws_branch[:repo_id]).create_object()
+      repo.add_library_branch?(ws_branch,new_lib_branch_name)
+      self.class.create_objects_for_module_version(repo,library_idh,module_name,new_version)
     end
 
     #promotes workspace changes to library
@@ -128,10 +125,15 @@ module DTK
     end
 
    private
+    
     def self.import_postprocess(repo,library_idh,module_name,version)
+      create_objects_for_module_version(repo,library_idh,module_name,version)
+    end
+    
+    def self.create_objects_for_module_version(repo,library_idh,module_name,version)
       config_agent_type = :puppet #TODO: hard wired
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch,version)
+      branch_name = ModuleBranch.library_branch_name(library_idh,version)
+      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
       impl_obj.create_file_assets_from_dir_els(repo)
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)

@@ -38,7 +38,7 @@ module DTK
       if self[:updated]
         new_branch = library_branch_name(library_idh,new_version)
         #TODO: assuming that implementaion files do not hvae any content that is not written to repo
-        RepoManager.clone_branch(new_branch,{:implementation => self})
+        RepoManager.add_branch(new_branch,{:implementation => self})
         override_attrs={:version => new_version,:branch => new_branch}
         new_impl_id = library_idh.create_object.clone_into(self,override_attrs)
         ret = id_handle(:model_name => :implemntation, :id => new_impl_id)

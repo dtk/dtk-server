@@ -48,6 +48,10 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
+    def add_library_branch?(ws_branch,new_lib_branch_name)
+      RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,ws_branch)
+    end
+
     def synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       RepoManager.fast_foward_merge_from_branch(ws_branch[:branch],lib_branch)
     end

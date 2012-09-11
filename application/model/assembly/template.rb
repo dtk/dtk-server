@@ -1,5 +1,13 @@
 module DTK
   class AssemblyTemplate < Assembly
+    def info_about(about)
+      cols =
+        case about
+          when :components then :component_templates
+        end
+      get_objs(cols => cols)
+    end
+
     def self.check_valid_id(model_handle,id)
       filter =
         [:and,
@@ -30,6 +38,11 @@ module DTK
         raise ErrorNameInvalid.new(name,pp_object_type())
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
+    end
+   private
+    #TODO: probably move to Assembly
+    def model_handle()
+      super(:component)
     end
   end
 end

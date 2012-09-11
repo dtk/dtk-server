@@ -2,7 +2,8 @@ module Ramaze::Helper
   module AssemblyHelper
     def ret_assembly_params_object_and_subtype()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      [id_handle(assembly_id,:component).create_object(),subtype]
+      obj = id_handle(assembly_id,:component).create_object(:model_name => (subtype == :instance) ? :assembly_instance : :assembly_template) 
+      [obj,subtype]
     end
 
     def ret_assembly_params_id_and_subtype()

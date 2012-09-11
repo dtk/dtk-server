@@ -1,5 +1,19 @@
 module DTK
   class AssemblyInstance < Assembly
+    def info_about(about)
+      cols = post_process = nil
+      case 
+       when :components 
+        cols = [:components]
+        post_process = proc{|r|r[:component2].hash_subset(:id,:display_name)}
+      end
+      unless cols
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+      end
+      rows = get_objs(:cols => cols)
+      post_process ? rows.map{|r|post_process.call(r)} : rows
+    end
+
     def self.check_valid_id(model_handle,id)
       filter = 
         [:and,
@@ -30,6 +44,10 @@ module DTK
         raise ErrorNameInvalid.new(name,pp_object_type())
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
+    end
+    #TODO: probably move to Assembly
+    def model_handle()
+      super(:component)
     end
   end
 end

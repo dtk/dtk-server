@@ -249,6 +249,16 @@ limit = TestOveride if TestOveride
       ret.size == 1 ? ret.first : ret
     end
 
+    def ret_params_hash(*params)
+      ret = Hash.new
+      return ret unless request_method_is_post?()
+      return ret if params.size == 0
+      params.inject(Hash.new) do |h,p|
+        val = request.params[p.to_s]
+        (val ? h.merge(p.to_sym => val) : h)
+      end
+    end
+
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
         error_msg = (null_params.size == 1 ? "Parameter (#{null_params.first}) is missing" : "Parameters (#{null_params.join(',')} are missing")

@@ -1,45 +1,44 @@
-module XYZ
+module DTK
   class AssemblyController < Controller
-    def rest__export()
-      assembly_id = ret_non_null_request_params(:assembly_id)
-      assembly = id_handle(assembly_id,:component).create_object()
-      assembly.export()
-      rest_ok_response 
-    end
-
+    helper :assembly_helper
     def rest__delete()
-      subtype = (ret_request_params(:subtype)||:instance).to_sym
-      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
+      assembly_id,subtype = ret_assembly_params_id_and_subtype()
       Assembly.delete(id_handle(assembly_id),subtype)
       rest_ok_response 
     end
 
     def rest__info()
-      subtype = (ret_request_params(:subtype)||:instance).to_sym
-      assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)
-      assembly = id_handle(assembly_id,:component).create_object()
+      assembly,subtype = ret_assembly_params_object_and_subtype()
       rest_ok_response assembly.info(subtype) 
     end
 
-    #TODO: might change so is just 'list'; and bahvior varies whether object template or instance
-    def rest__list_from_library()
-      detail_level = ret_request_params(:detail_level)
-      filter = ret_request_params_filter()
-      opts = Hash.new
-      opts[:detail_level] = detail_level if detail_level
-      opts[:filter] = filter if filter
-      rest_ok_response Assembly.list_from_library(model_handle(),opts)
+    def rest__info_about()
+      assembly,subtype = ret_assembly_params_object_and_subtype()
+      about = ret_non_null_request_params(:about).to_sym
+       unless AboutEnum[subtype].include?(about)
+         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
+       end
+      opts = ret_params_hash(:filter,:detail_level)
+      rest_ok_response assembly.info_about(about)
+    end
+    AboutEnum = {
+      :instance => [:nodes,:components,:tasks],
+      :template => [:nodes,:components,:targets]
+    }
+
+    def rest__list()
+      subtype = ret_assembly_subtype()
+      opts = ret_params_hash(:filter,:detail_level)
+      result = 
+        if subtype == :instance 
+          Assembly.list_from_target(model_handle(),opts)
+        else 
+          Assembly.list_from_library(model_handle(),opts) 
+        end
+      rest_ok_response result 
     end
 
-    def rest__list_from_target()
-      detail_level = ret_request_params(:detail_level)
-      filter = ret_request_params_filter()
-      opts = Hash.new
-      opts[:detail_level] = detail_level if detail_level
-      opts[:filter] = filter if filter
-      rest_ok_response Assembly.list_from_target(model_handle(),opts)
-    end
-
+#TDODO: got heer in cleanup of rest calls
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance

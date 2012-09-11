@@ -26,8 +26,19 @@ module XYZ
   end
 
   class ErrorUsage < Error
+    #TODO: make second argument be polymorphic to handle things like wrong type, wrong rane
+    class BadParamValue < self
+      def initialize(param,enum_vals)
+        super(msg(param,enum_vals))
+      end
+     private
+      def msg(param,enum_vals)
+        "Paramater '#{param}' has an illegal value; most be one of (#{enum_vals.join(",")})"
+      end
+    end
   end
 
+  #TODO: move over to use nested classeslike above
   class ErrorIdInvalid <  ErrorUsage
     def initialize(id,object_type)
       super(msg(id,object_type))

@@ -1,7 +1,8 @@
 module DTK
   class AssemblyInstance < Assembly
     def info_about(about)
-      cols = post_process = nil
+      cols = post_process = order = nil
+      order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       case about 
        when :components
         cols = [:nested_nodes_and_cmps_summary]
@@ -12,23 +13,15 @@ module DTK
        when :nodes
         cols = [:nodes]
         post_process = proc do |r|
-          node = r[:node]
-          type = node[:external_ref][:type]
-          external_ref = 
-            case type
-             when "ec2_instance"
-              Aux::hash_subset(node[:external_ref],[:type,:image_id,:size,:instance_id])
-             else {:type => type}
-            end
-          node.hash_subset(:id,:display_name,:os_type).merge(external_ref)
+          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref)
         end
       end
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
-
       rows = get_objs(:cols => cols)
-      post_process ? rows.map{|r|post_process.call(r)} : rows
+      ret = post_process ? rows.map{|r|post_process.call(r)} : rows
+      order ? ret.sort(&order) : ret
     end
 
     def self.check_valid_id(model_handle,id)

@@ -21,6 +21,30 @@ module XYZ
         raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
       end
     end
+
+    def ret_common_fields_or_that_varies()
+      ret = Hash.new
+      return ret unless self[:rules]
+      first_time = true
+      self[:rules].each do |rule|
+        nt = rule[:node_template]
+        RuleSetFields.each do |k|
+          if ret[k] == :varies
+            #no op
+          elsif ret[k]
+            ret[k] = :varies if ret[k] != nt[k]
+          elsif first_time
+            ret[k] = nt[k]
+          else
+            ret[k] = :varies
+          end
+        end
+        first_time = false
+      end
+      ret
+    end
+    RuleSetFields = [:type,:image_id,:region,:size]
+
    private
     def match(target)
       raise Error.new("TODO: not implemented yet")

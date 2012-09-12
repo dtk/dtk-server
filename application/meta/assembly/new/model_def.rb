@@ -173,6 +173,20 @@ lambda__template_nodes_and_components =
       :hidden=>true,
       :remote_dependencies=> [lambda__segment_node.call([:id,:display_name,:ui,:type,:os_type,:external_ref])]
     },
+    :node_templates=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=> 
+      [lambda__segment_node.call([:id,:display_name,:os_type,:node_binding_rs_id]),
+       {
+         :model_name => :node_binding_ruleset,
+         :convert => true,
+         :alias => :node_binding,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:node,:node_binding_rs_id)},
+         :cols => [:id,:display_name,:os_type,:rules]
+       }]
+    },
     :components=> {
       :type=>:json,
       :hidden=>true,

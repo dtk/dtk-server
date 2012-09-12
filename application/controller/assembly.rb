@@ -128,7 +128,7 @@ module DTK
     #clone assembly from library to target
     def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_request_param_id(:assembly_template_id,::DTK::AssemblyTemplate)
+      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyTemplate)
       
       #TODO: if naem given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 

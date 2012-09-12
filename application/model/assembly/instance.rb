@@ -13,7 +13,7 @@ module DTK
        when :nodes
         cols = [:nodes]
         post_process = proc do |r|
-          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref)
+          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref, {:type => :node_type})
         end
       end
       unless cols

@@ -24,7 +24,8 @@ module XYZ
       elsif projects.size > 1
         raise Error.new("Not implemented yet: case when multiple projects")
       end
-      workspace_branch_info = create_workspace_branch?(proj,version)
+      project = projects.first
+      workspace_branch_info = component_module.create_workspace_branch?(project,version)
       rest_ok_response workspace_branch_info
     end
 

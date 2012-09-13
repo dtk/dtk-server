@@ -26,7 +26,7 @@ module DTK
 
       new_lib_branch_name = ModuleBranch.library_branch_name(library_idh,new_version)
       repo = id_handle(:model_name => :repo, :id => ws_branch[:repo_id]).create_object()
-      repo.add_library_branch?(ws_branch,new_lib_branch_name)
+      ws_branch.add_library_branch?(new_lib_branch_name)
       self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
     end
 
@@ -113,17 +113,17 @@ module DTK
 
       #create module branch for workspace if needed and pust it to repo server
       workspace_mb = library_mb.create_component_workspace_branch?(proj)
-      RepoManager.push_implementation(workspace_mb)
+      library_mb.add_workspace_branch?(workspace_mb[:branch])
       
       #create new project implementation if needed
       #  first get library implementation
       sp_hash = {
         :cols => [:id],
         :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
-                    [:eq, :branch, branch],
+                    [:eq, :branch, workspace_mb[:branch]],
                     [:eq, :module_name,self[:display_name]]]
       }
-      library_impl = Model.get_obj(model_handlle(:implementation),sp_hash)
+      library_impl = Model.get_obj(model_handle(:implementation),sp_hash)
       new_impl_idh = library_impl.clone_into_project_if_needed(proj)
 
       #get repo info

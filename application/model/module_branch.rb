@@ -4,6 +4,16 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    #this adds library branch from this, which is a workspace branch
+    def add_library_branch?(new_lib_branch_name)
+      RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,self)
+    end
+
+    #this adds workspace branch from this, which is a library branch
+    def add_workspace_branch?(new_ws_branch_name)
+      RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
+    end
+
     def serialize_and_save_to_repo(file_path,hash_content)
       content = JSON.pretty_generate(hash_content)
       RepoManager.add_file({:path => file_path},content,self)

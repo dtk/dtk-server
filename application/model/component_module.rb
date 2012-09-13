@@ -61,8 +61,8 @@ module DTK
       end
     end
 
-    def get_workspace_branch_info()
-      row = get_augmented_workspace_branch()
+    def get_workspace_branch_info(version=nil)
+      row = ModuleBranch.get_augmented_workspace_branch(self,version)
       {
         :repo_name => row[:workspace_repo][:repo_name],
         :branch => row[:branch],
@@ -74,8 +74,8 @@ module DTK
       get_objs_uniq(:target_instances)
     end
 
-    def update_library_module_with_workspace()
-      aug_ws_branch_row = get_augmented_workspace_branch()
+    def update_library_module_with_workspace(version=nil)
+      aug_ws_branch_row = ModuleBranch.get_augmented_workspace_branch(self,version)
       ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:ws_branch_augmented => true)
     end
     
@@ -110,18 +110,6 @@ module DTK
         end
         mdl
       end
-    end
-
-    def get_augmented_workspace_branch()
-      sp_hash = {
-        :cols => ModuleBranch.cols_for_matching_library_branches(model_name),
-        :filter => [:and, [:eq, ModuleBranch.component_module_id_col(),id()],[:eq,:is_workspace,true]]
-      }
-      aug_ws_branch_rows = Model.get_objs(model_handle(:module_branch),sp_hash)
-      if aug_ws_branch_rows.size != 1
-        raise Error.new("error in finding unique workspace branch from component module")
-      end
-      aug_ws_branch_rows.first
     end
 
    private

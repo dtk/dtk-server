@@ -85,6 +85,11 @@ module DTK
       module_branches.find{|mb|mb[:branch] == branch}
     end
 
+    def pp_module_name(version=nil)
+      update_object!(:display_name)
+      self.class.pp_module_name(self[:display_name],version)
+    end
+
    private
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
@@ -97,7 +102,7 @@ module DTK
       update_object!(:display_name,:library_library_id)
       module_name = self[:display_name]
       filter = [:eq, :id, self[:id]]
-      version_in_mb = version || "master" #TODO: refer to a common constant or fn
+      version_in_mb = ModuleBranch.version_field(version)
       post_filter = proc{|r|r[:version] == version_in_mb}
       self.class.get_matching_module_branches(id_handle(),filter,post_filter)
     end
@@ -106,11 +111,6 @@ module DTK
       library_id = update_object!(:library_library_id)[:library_library_id]
       library_idh = id_handle(:model_name => :library, :id => library_id)
       ModuleBranch.library_branch_name(library_idh,version)
-    end
-
-    def pp_module_name(version=nil)
-      update_object!(:display_name)
-      self.class.pp_module_name(self[:display_name],version)
     end
   end
 

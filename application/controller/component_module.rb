@@ -8,6 +8,18 @@ module XYZ
       rest_ok_response ComponentModule.list_remotes(model_handle)
     end
 
+    def rest__workspace_branch_info()
+      component_module = create_obj(:component_module_id)
+      version = ret_request_params(:version)
+      ws_branch_info = component_module.get_workspace_branch_info(version)
+      workspace_branch_info = {
+        :branch => ws_branch_info[:branch],
+        :module_name => ws_branch_info[:component_module_name],
+        :repo_url => RepoManager.repo_url(ws_branch_info[:repo_name])
+      }
+      rest_ok_response workspace_branch_info
+    end
+
     def rest__import()
       library_id = ret_request_params(:library_id) 
       library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
@@ -70,17 +82,6 @@ module XYZ
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       ComponentModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
       rest_ok_response(:repo_manager_footprint => RepoManager.footprint(), :repo_manager_dns => RepoManager.repo_server_dns())
-    end
-
-    def rest__workspace_branch_info(component_module_id)
-      component_module = create_object_from_id(component_module_id)
-      ws_branch_info = component_module.get_workspace_branch_info()
-      workspace_branch_info = {
-        :branch => ws_branch_info[:branch],
-        :module_name => ws_branch_info[:component_module_name],
-        :repo_url => RepoManager.repo_url(ws_branch_info[:repo_name])
-      }
-      rest_ok_response workspace_branch_info
     end
 
     def rest__remove_user_direct_access()

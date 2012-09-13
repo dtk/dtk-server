@@ -27,7 +27,7 @@ module DTK
       new_lib_branch_name = ModuleBranch.library_branch_name(library_idh,new_version)
       repo = id_handle(:model_name => :repo, :id => ws_branch[:repo_id]).create_object()
       repo.add_library_branch?(ws_branch,new_lib_branch_name)
-      self.class.create_objects_for_module_version(repo,library_idh,module_name,new_version)
+      self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
     end
 
     #promotes workspace changes to library
@@ -113,12 +113,11 @@ module DTK
     end
 
    private
-    
     def self.import_postprocess(repo,library_idh,module_name,version)
-      create_objects_for_module_version(repo,library_idh,module_name,version)
+      create_objects_for_library_module(repo,library_idh,module_name,version)
     end
     
-    def self.create_objects_for_module_version(repo,library_idh,module_name,version)
+    def self.create_objects_for_library_module(repo,library_idh,module_name,version)
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)

@@ -133,7 +133,7 @@ module DTK
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not have version (#{version||"CURRENT"})")
       end
 
-      #case on whether the mdoule is craeted already
+      #case on whether the module is created already
       if module_obj
         repos = module_obj.get_repos()
         unless repos.size == 1

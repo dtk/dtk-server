@@ -81,7 +81,7 @@
        {
          :model_name=>:component,
          :convert => true,
-         :join_type=>:inner,
+         :join_type=>:left_outer,
          :filter =>[:eq,:node_node_id,nil],
          :join_cond=>{:implementation_id=>:implementation__id},
          :cols=>Component.common_columns()

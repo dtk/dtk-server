@@ -32,7 +32,7 @@ module XYZ
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
-    #TODO: see if can align with ComponentModule.
+    #TODO: see if can align with ComponentModule.create_workspace_branch?
     def create_component_module_workspace?(proj)
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template
@@ -51,6 +51,11 @@ module XYZ
       #create new project implementation if needed
       library_impl = id_handle(:model_name => :implementation,:id => self[:implementation_id]).create_object()
       new_impl_id = library_impl.clone_into_project_if_needed(proj).get_id()
+
+      
+      #####=======
+      #TODO: may sepearte above which may eb subsumed by ComponentModule.create_workspace_branch? and below that cpopise 'on demand'
+      # a specfic component"
 
       #find new ancestor_id
       library_cmp_tmpl_idh = id_handle(:id => self[:ancestor_id])

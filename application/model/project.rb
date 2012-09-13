@@ -60,10 +60,12 @@ module XYZ
       unravelled_ret.each do |r|
         impl_id = r[:implementation][:id]
         cmps = (ndx_ret[impl_id] ||= r[:implementation].merge(:components => Array.new))[:components]
-        cmp = r[:component].materialize!(Component.common_columns())
-        #TODO: see if cleaner way to put in i18n names
-        cmp[:name] = i18n_string(i18n,:component, cmp[:name])
-        cmps << cmp
+        if r[:component]
+          cmp = r[:component].materialize!(Component.common_columns())
+          #TODO: see if cleaner way to put in i18n names
+          cmp[:name] = i18n_string(i18n,:component, cmp[:name])
+          cmps << cmp
+        end
       end
       ret = ndx_ret.values
       return ret unless opts[:include_file_assets]

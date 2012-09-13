@@ -32,7 +32,7 @@ module XYZ
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
-    #TODO: right now just grafted on module branches; change so that reasoning driven by module branches, not implementation
+    #TODO: see if can align with ComponentModule.
     def create_component_module_workspace?(proj)
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template

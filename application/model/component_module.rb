@@ -61,15 +61,6 @@ module DTK
       end
     end
 
-    def get_workspace_branch_info(version=nil)
-      row = ModuleBranch.get_augmented_workspace_branch(self,version)
-      {
-        :repo_name => row[:workspace_repo][:repo_name],
-        :branch => row[:branch],
-        :component_module_name => row[:component_module][:display_name]
-      }
-    end
-
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)
     end
@@ -111,6 +102,56 @@ module DTK
         mdl
       end
     end
+
+
+    #creates workspace branch (if needed) and related objects from library one
+    def create_workspace_branch?(proj,version=nil)
+      update_object!(:library_library_id,:display_name)
+
+      #get library branch
+      library_mb = get_library_module_branch(version)
+
+      #create module branch for workspace if needed and pust it to repo server
+      workspace_mb = library_mb.create_component_workspace_branch?(proj)
+      RepoManager.push_implementation(workspace_mb)
+      
+      #create new project implementation if needed
+      #  first get library implementation
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
+                    [:eq, :branch, branch],
+                    [:eq, :module_name,self[:display_name]]]
+      }
+      library_impl = Model.get_obj(model_handlle(:implementation),sp_hash)
+      new_impl_idh = library_impl.clone_into_project_if_needed(proj)
+
+      #get repo info
+      sp_hash = {
+        :cols => [:id, :repo_name],
+        :filter => [:eq, :id, workspace_mb[:repo_id]]
+      }
+      repo = Model.get_obj(model_handle(:repo),sp_hash)
+      repo_name = repo[:repo_name]
+      {
+        :repo_name => repo_name,
+        :branch => workspace_mb[:branch],
+        :module_name => self[:display_name],
+        :repo_url => RepoManager.repo_url(repo_name)
+      }
+    end
+
+    def get_workspace_branch_info(version=nil)
+      row = ModuleBranch.get_augmented_workspace_branch(self,version)
+      repo_name = row[:workspace_repo][:repo_name]
+      {
+        :repo_name => repo_name,
+        :branch => row[:branch],
+        :module_name => row[:component_module][:display_name],
+        :repo_url => RepoManager.repo_url(repo_name)
+      }
+    end
+
 
    private
     def self.import_postprocess(repo,library_idh,module_name,version)

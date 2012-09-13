@@ -11,12 +11,20 @@ module XYZ
     def rest__workspace_branch_info()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
-      ws_branch_info = component_module.get_workspace_branch_info(version)
-      workspace_branch_info = {
-        :branch => ws_branch_info[:branch],
-        :module_name => ws_branch_info[:component_module_name],
-        :repo_url => RepoManager.repo_url(ws_branch_info[:repo_name])
-      }
+      workspace_branch_info = component_module.get_workspace_branch_info(version)
+      rest_ok_response workspace_branch_info
+    end
+
+    def rest__create_workspace_branch()
+      component_module = create_obj(:component_module_id)
+      version = ret_request_params(:version)
+      projects = Project.get_all(model_handle(:project))
+      if projects.empty?
+        raise Error.new("Cannot find any projects")
+      elsif projects.size > 1
+        raise Error.new("Not implemented yet: case when multiple projects")
+      end
+      workspace_branch_info = create_workspace_branch?(proj,version)
       rest_ok_response workspace_branch_info
     end
 

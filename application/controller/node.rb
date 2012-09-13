@@ -378,14 +378,6 @@ ie: get_components(['language'])
     end
 
     def search
-      if R8::Config[:use_node_bindings]
-        search_new
-      else
-        search_old
-      end
-    end
-
-    def search_new
       search_cols = [:display_name]
 
       filter_conjuncts = request.params.map do |name,value|
@@ -407,56 +399,6 @@ ie: get_components(['language'])
       end
       {:data=>node_list}
     end
-
-    #TODO: old; new in terms of node_binding_ruleset
-    def search_old
-      params = request.params.dup
-      cols = model_class(:node).common_columns()
-
-      filter_conjuncts = params.map do |name,value|
-        [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
-      end.compact
-      #restrict results do not nested in assembly
-      filter_conjuncts << [:eq,:assembly_id,nil]
-      #including library forces join and filter on library; so makes sure only nodes from library returned and ones
-      #that the user is authorized to see
-      cols << :library unless cols.include?(:library)
-      sp_hash = {
-        :cols => cols,
-        :filter => [:and] + filter_conjuncts
-      }
-      node_list = Model.get_objs(model_handle(:node),sp_hash).each{|r|r.materialize!(cols)}
-
-      i18n = get_i18n_mappings_for_models(model_name)
-      node_list.each_with_index do |model,index|
-        node_list[index][:model_name] = model_name
-        body_value = ''
-        node_list[index][:ui] ||= {}
-        node_list[index][:ui][:images] ||= {}
-        name = node_list[index][:display_name]
-        title = name.nil? ? "" : i18n_string(i18n,:node,name)
-
-        #TDOO: temporary to distingusih between chef and puppet components
-        if model_name == :node
-          if config_agent_type = node_list[index][:config_agent_type]
-            title += " (#{config_agent_type[0].chr})" 
-          end
-        end
-        
-#TODO: change after implementing all the new types and making generic icons for them
-        model_type = 'service'
-        model_sub_type = 'db'
-        model_type_str = "#{model_type}-#{model_sub_type}"
-        prefix = "#{R8::Config[:base_images_uri]}/v1/nodeIcons"
-        png = node_list[index][:ui][:images][:tnail] || "unknown-#{model_type_str}.png"
-        node_list[index][:image_path] = "#{prefix}/#{png}"
-
-        node_list[index][:i18n] = title
-      end
-
-      return {:data=>node_list}
-    end
-
   end
 end
 

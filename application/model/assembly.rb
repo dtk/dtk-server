@@ -188,7 +188,7 @@ module XYZ
       def get_template_component_attributes(assembly_mh,template_assembly_rows,opts={})
         #get attributes on templates (these are defaults)
         ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
-        return ret unless R8::Config[:use_node_bindings]
+
         #get attribute overrides
         sp_hash = {
           :cols => [:id,:display_name,:attribute_value,:attribute_template_id],

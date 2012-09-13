@@ -13,6 +13,7 @@ module XYZ
         
         #TODO: getting out implemention info not needed if put module names in component ext refs
         impl_info = get_relevant_impl_info(config_node)
+        #TODO: see if this needed stil in that we are pushing at earlier stage
         #push implementation
         version_context = push_implementation(impl_info)
 

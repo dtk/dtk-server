@@ -51,10 +51,6 @@ module XYZ
         return new(hash)
       end
 
-      unless R8::Config[:use_node_bindings]
-        return new(hash)
-      end
-
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
       parent_model_name = Model.normalize_model(hash[:model_handle][:parent_model_name])
 #TODO: think this is wrong since calls AssemblyNode in middle of run      
@@ -95,9 +91,6 @@ module XYZ
         return ret
       end
 
-      unless R8::Config[:use_node_bindings]
-        return ret
-      end
       model_name = Model.normalize_model(model_handle[:model_name])
       parent_model_name = Model.normalize_model(model_handle[:parent_model_name])
       if parent_model_name == :node and not [:component_ref,:port].include?(model_name)

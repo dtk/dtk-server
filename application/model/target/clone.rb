@@ -46,10 +46,9 @@ module XYZ
         set_ports_link_def_ids(clone_copy_output)
 
         level = 1
-        if R8::Config[:use_node_bindings]
-          port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
-          assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
-        end
+        port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
+        assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
+        
         node_idhs = clone_copy_output.children_id_handles(level,:node)
         node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => target.id_handle()}}
         return if node_new_items.empty?

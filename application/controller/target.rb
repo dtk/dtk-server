@@ -194,7 +194,7 @@ pp request.params
       override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
 
       model_id_handle = id_handle(request.params["model_id"].to_i,request.params["model"].to_sym)
-      if R8::Config[:use_node_bindings] and request.params["model"] == "node"
+      if request.params["model"] == "node"
         node_binding_rs =  create_object_from_id(request.params["model_id"],:node_binding_ruleset)
         new_item_id = node_binding_rs.clone_or_match(target).get_id()
       else

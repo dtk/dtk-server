@@ -113,14 +113,13 @@ module DTK
 
       #create module branch for workspace if needed and pust it to repo server
       workspace_mb = library_mb.create_component_workspace_branch?(proj)
-      library_mb.add_workspace_branch?(workspace_mb[:branch])
       
       #create new project implementation if needed
       #  first get library implementation
       sp_hash = {
         :cols => [:id],
         :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
-                    [:eq, :branch, workspace_mb[:branch]],
+                    [:eq, :version, ModuleBranch.version_field(version)],
                     [:eq, :module_name,self[:display_name]]]
       }
       library_impl = Model.get_obj(model_handle(:implementation),sp_hash)

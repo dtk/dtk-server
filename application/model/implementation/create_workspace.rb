@@ -27,7 +27,7 @@ module DTK
 
       #if reach here; no match and need to clone
       new_branch = augmented_impl.workspace_branch_name(project)
-      RepoManager.add_branch(new_branch,{:implementation => augmented_impl})
+      RepoManager.add_branch_and_push_to_origin?(new_branch,{:implementation => augmented_impl})
       override_attrs={:branch => new_branch}
       new_impl_id = project.clone_into(self,override_attrs)
       id_handle(:id => new_impl_id, :model => :implementation)

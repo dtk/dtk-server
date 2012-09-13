@@ -117,7 +117,7 @@ module DTK
       #create new project implementation if needed
       #  first get library implementation
       sp_hash = {
-        :cols => [:id],
+        :cols => [:id,:group_id],
         :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
                     [:eq, :version, ModuleBranch.version_field(version)],
                     [:eq, :module_name,self[:display_name]]]

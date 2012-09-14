@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))
-r8_require_common_lib("aux","errors","log")
+r8_require_common_lib("auxiliary","errors","log")
 r8_require("../../repo_manager_client/lib/repo_manager_client.rb")
 
 repo_host = 'ec2-50-16-199-149.compute-1.amazonaws.com' #ARGV[0]

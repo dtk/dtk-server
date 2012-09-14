@@ -1,4 +1,4 @@
-r8_require_common_lib('aux')
+r8_require_common_lib('auxiliary')
 r8_require_common_lib('rest_client_wrapper')
 module DTK
   #TODO: RepoType should be in common

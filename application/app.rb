@@ -17,7 +17,7 @@ DTK = XYZ
 
 require 'require_first'
 r8_require('config/config.rb')
-r8_require_common_lib('aux')
+r8_require_common_lib('auxiliary')
 
 APPLICATION_DIR = File.expand_path('../' + R8::Config[:application_name], File.dirname(__FILE__))
 UTILS_DIR = File.expand_path('../utils', File.dirname(__FILE__))

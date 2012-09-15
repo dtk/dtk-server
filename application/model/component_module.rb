@@ -65,11 +65,6 @@ module DTK
       get_objs_uniq(:target_instances)
     end
 
-    def update_library_module_with_workspace(version=nil)
-      aug_ws_branch_row = ModuleBranch.get_augmented_workspace_branch(self,version)
-      ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:ws_branch_augmented => true)
-    end
-    
     def self.list(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

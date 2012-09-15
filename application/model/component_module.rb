@@ -4,6 +4,18 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def self.create_empty_repo(library_idh,project,module_name)
+      if module_exists?(library_idh,module_name)
+        raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
+      end
+      module_specific_type = :puppet  #TODO: hard wired
+      create_opts = {:delete_if_exists => true}
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+      repo_name = repo[:repo_name]
+      ws_branch_name = ModuleBranch.workspace_branch_name(project)
+      RepoBranchInfo.new(repo_name,module_name,ws_branch_name)
+    end
+
     def create_new_version(new_version,existing_version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
@@ -181,6 +193,19 @@ module DTK
 
     def export_preprocess(branch)
       #noop
+    end
+
+    class RepoBranchInfo < Hash
+      def initialize(repo_name,module_name,branch_name)
+        super()
+        hash = {
+          :repo_name => repo_name,
+          :branch => branch_name,
+          :module_name => module_name,
+          :repo_url => RepoManager.repo_url(repo_name)
+        }
+        replace(hash)
+      end
     end
   end
 end

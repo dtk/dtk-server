@@ -1,9 +1,14 @@
 module XYZ
   class Component_moduleController < Controller
+    helper :module_helper
+
     #### create and delete actions ###
     def create_empty()
-      raise Error.new("TODO: need to implement")
-      rest_ok_response
+      module_name = ret_non_null_request_params(:component_module_name)
+      library_idh = ret_library_idh_or_default()
+      project = get_default_project()
+      workspace_branch_info = ComponentModule.create_empty_repo(library_idh,project,module_name)
+      rest_ok_response workspace_branch_info
     end
 
     def add_meta_data()
@@ -38,11 +43,7 @@ module XYZ
     
     #### actions to interact with remote repo ###
     def rest__import()
-      library_id = ret_request_params(:library_id) 
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
-      unless library_idh
-        raise Error.new("No library specified and no default can be determined")
-      end
+      library_idh = ret_library_idh_or_default()
       ret_non_null_request_params(:remote_module_names).each do |name|
         remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
         ComponentModule.import(library_idh,remote_module_name,remote_namespace,version)
@@ -83,13 +84,7 @@ module XYZ
     def rest__create_workspace_branch()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
-      projects = Project.get_all(model_handle(:project))
-      if projects.empty?
-        raise Error.new("Cannot find any projects")
-      elsif projects.size > 1
-        raise Error.new("Not implemented yet: case when multiple projects")
-      end
-      project = projects.first
+      project = get_default_project()
       workspace_branch_info = component_module.create_workspace_branch?(project,version)
       rest_ok_response workspace_branch_info
     end

@@ -1,6 +1,6 @@
 module XYZ
   class ComponentController < Controller
-    helper :i18n_string_mapping
+    helper :i18n_string_mapping 
 
     def get_attributes_for_attr_mappings(component_id)
       component = create_object_from_id(component_id)

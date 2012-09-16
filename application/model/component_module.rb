@@ -13,7 +13,7 @@ module DTK
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       repo_name = repo[:repo_name]
       ws_branch_name = ModuleBranch.workspace_branch_name(project)
-      RepoBranchInfo.new(repo_name,module_name,ws_branch_name)
+      ModuleRepoBranchInfo.new(repo_name,module_name,ws_branch_name)
     end
 
     def create_new_version(new_version,existing_version=nil)
@@ -138,26 +138,16 @@ module DTK
         :filter => [:eq, :id, workspace_mb[:repo_id]]
       }
       repo = Model.get_obj(model_handle(:repo),sp_hash)
-      repo_name = repo[:repo_name]
-      {
-        :repo_name => repo_name,
-        :branch => workspace_mb[:branch],
-        :module_name => self[:display_name],
-        :repo_url => RepoManager.repo_url(repo_name)
-      }
+      module_name = self[:display_name]
+      ModuleRepoBranchInfo.new(repo_name,module_name,workspace_mb[:branch])
     end
 
     def get_workspace_branch_info(version=nil)
       row = ModuleBranch.get_augmented_workspace_branch(self,version)
       repo_name = row[:workspace_repo][:repo_name]
-      {
-        :repo_name => repo_name,
-        :branch => row[:branch],
-        :module_name => row[:component_module][:display_name],
-        :repo_url => RepoManager.repo_url(repo_name)
-      }
+      module_name = row[:component_module][:display_name]
+      ModuleRepoBranchInfo.new(repo_name,module_name,row[:branch])
     end
-
 
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
@@ -195,7 +185,7 @@ module DTK
       #noop
     end
 
-    class RepoBranchInfo < Hash
+    class ModuleRepoBranchInfo < Hash
       def initialize(repo_name,module_name,branch_name)
         super()
         hash = {

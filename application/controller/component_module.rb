@@ -3,7 +3,7 @@ module XYZ
     helper :module_helper
 
     #### create and delete actions ###
-    def create_empty()
+    def create_empty_repo()
       module_name = ret_non_null_request_params(:component_module_name)
       library_idh = ret_library_idh_or_default()
       project = get_default_project()
@@ -88,7 +88,6 @@ module XYZ
       workspace_branch_info = component_module.create_workspace_branch?(project,version)
       rest_ok_response workspace_branch_info
     end
-
     #### end: actions to manage workspace and promote changes from workspace to library ###
 
 

@@ -189,6 +189,7 @@ module XYZ
 
     def add_or_update_remote(remote_name,remote_url)
       #TODO: may be way to do this in one step with rename
+      #update": there is:  git remote set-url [--push] <name> <newurl> [<oldurl>]
       if remote_exists?(remote_name)
         remove_remote(remote_name)
       end

@@ -11,9 +11,11 @@ module DTK
       module_specific_type = :puppet  #TODO: hard wired
       create_opts = {:delete_if_exists => true}
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
-      repo_name = repo[:repo_name]
-      ws_branch_name = ModuleBranch.workspace_branch_name(project)
-      ModuleRepoBranchInfo.new(repo_name,module_name,ws_branch_name)
+      branch_info = {
+        :workspace_branch => ModuleBranch.workspace_branch_name(project),
+        :library_branch => ModuleBranch.library_branch_name(library_idh)
+      }
+      ModuleRepoInfo.new(repo,module_name,branch_info,library_idh)
     end
 
     def create_new_version(new_version,existing_version=nil)
@@ -114,7 +116,7 @@ module DTK
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version=nil)
       update_object!(:library_library_id,:display_name)
-
+      library_id = self[:library_library_id]
       #get library branch
       library_mb = get_library_module_branch(version)
 
@@ -125,7 +127,7 @@ module DTK
       #  first get library implementation
       sp_hash = {
         :cols => [:id,:group_id],
-        :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
+        :filter => [:and, [:eq, :library_library_id, library_id],
                     [:eq, :version, ModuleBranch.version_field(version)],
                     [:eq, :module_name,self[:display_name]]]
       }
@@ -139,14 +141,16 @@ module DTK
       }
       repo = Model.get_obj(model_handle(:repo),sp_hash)
       module_name = self[:display_name]
-      ModuleRepoBranchInfo.new(repo_name,module_name,workspace_mb[:branch])
+      module_info = {:workspace_branch => workspace_mb[:branch]}
+      library_idh = id_handle(:model_name => :library, :id => library_id)
+      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
     def get_workspace_branch_info(version=nil)
       row = ModuleBranch.get_augmented_workspace_branch(self,version)
       repo_name = row[:workspace_repo][:repo_name]
       module_name = row[:component_module][:display_name]
-      ModuleRepoBranchInfo.new(repo_name,module_name,row[:branch])
+      ModuleRepoInfo.new(repo_name,module_name,row[:branch])
     end
 
    private
@@ -185,15 +189,18 @@ module DTK
       #noop
     end
 
-    class ModuleRepoBranchInfo < Hash
-      def initialize(repo_name,module_name,branch_name)
+    class ModuleRepoInfo < Hash
+      def initialize(repo,module_name,branch_info,library_idh=nil)
         super()
+        repo.update_object!(:repo_name,:id)
+        repo_name = repo[:repo_name]
         hash = {
+          :repo_id => repo[:id],
           :repo_name => repo_name,
-          :branch => branch_name,
           :module_name => module_name,
           :repo_url => RepoManager.repo_url(repo_name)
-        }
+        }.merge(Aux::hash_subset(branch_info,[:workspace_branch,:library_branch]))
+        hash.merge!(:library_id => library_idh.get_id()) if library_idh
         replace(hash)
       end
     end

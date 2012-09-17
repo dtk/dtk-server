@@ -46,15 +46,6 @@ module XYZ
       update_object!(:repo_name)
       RepoManager.fetch_all(self)
       RepoManager.rebase_from_remote(self)
-      #TODO: this is not right command
-=begin
-one way:
-git fetch --all
-git checkout --track origin/workspace-private-joe
-git branch -D master
-git checkout --track origin/master
-=end
-#      RepoManager.pull_all(self[:repo_name])
     end
 
     def self.delete(repo_idh)

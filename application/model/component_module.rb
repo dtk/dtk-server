@@ -155,9 +155,9 @@ module DTK
 
     def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name)
       repo = repo_idh.create_object()
-      repo.update_for_new_repo() #TODO: have configuration option wheer do not haev to update clone and so this is not done
-#      create_objects_for_library_module(repo,library_idh,module_name)
-      #TODO: do we also have to create the ws meta data too?
+      repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
+      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els(repo)in create_objects_for_library_module
+      create_objects_for_library_module(repo,library_idh,module_name)
     end
    private
     def self.import_postprocess(repo,library_idh,module_name,version)

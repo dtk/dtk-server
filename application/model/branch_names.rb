@@ -25,8 +25,8 @@ module DTK
 
     def workspace_branch_name(project,version=nil)
       project.update_object!(:ref)
-      version_info = (version ?  "-v#{version}" : "")
-      "workspace-#{project[:ref]}#{version_info}"
+      version_prefix = ((version and version != BranchNameDefaultVersion)?  "-v#{version}" : "")
+      "workspace-#{project[:ref]}#{version_prefix}"
     end
   end
 end

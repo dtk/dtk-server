@@ -239,18 +239,24 @@ module XYZ
       end
     end
 
-    def push_changes(remote_name="origin")
+    def push_changes(remote_name=nil)
       git_command__push(@branch,remote_name)
     end
 
-    def pull_changes(remote_name="origin")
+    def pull_changes(remote_name=nil)
       checkout(@branch) do
         git_command__pull(@branch,remote_name)
       end
     end
 
-    def pull_all()
-      git_command__pull_all()
+    def rebase_from_remote(remote_name=nil)
+       checkout(@branch) do
+        git_command__rebase(@branch,remote_name)
+      end
+    end
+
+    def fetch_all()
+      git_command__fetch_all()
     end
 
     def push_implementation()
@@ -335,6 +341,10 @@ module XYZ
       ret
     end
 
+    def default_remote_name()
+      "origin"
+    end
+
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
@@ -384,6 +394,9 @@ module XYZ
     def git_command__fetch(remote_name)
       git_command.fetch(cmd_opts(),remote_name)
     end
+    def git_command__fetch_all()
+      git_command.fetch(cmd_opts(),"--all")
+    end
 
     def git_command__merge_base(ref1,ref2)
       #chomp added below because raw griot command has a cr at end of line
@@ -392,17 +405,21 @@ module XYZ
 
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
-    def git_command__push(branch_name,remote_name="origin")
+    def git_command__push(branch_name,remote_name=nil)
       Git_command__push_mutex.synchronize do 
+        remote_name ||= default_remote_name()
         git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{branch_name}")
       end
     end
 
-    def git_command__pull(branch_name,remote_name="origin")
+    def git_command__pull(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
       git_command.pull(cmd_opts(),remote_name,branch_name)
     end
-    def git_command__pull_all()
-      git_command.pull(cmd_opts(),"--all")
+
+    def git_command__rebase(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
+      git_command.rebase(cmd_opts(),"#{remote_name}/#{branch_name}")
     end
 
     def git_command__merge(branch_to_merge_from)
@@ -413,7 +430,7 @@ module XYZ
       git_command.branch(cmd_opts(),"-D",branch_name)
     end
     def git_command__delete_remote_branch(branch_name)
-      git_command.push(cmd_opts(),"origin",":refs/heads/#{branch_name}")
+      git_command.push(cmd_opts(),default_remote_name(),":refs/heads/#{branch_name}")
     end
     def cmd_opts()
       {:raise => true, :timeout => 60}

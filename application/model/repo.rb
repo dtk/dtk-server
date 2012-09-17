@@ -44,6 +44,8 @@ module XYZ
 
     def update_for_new_repo()
       update_object!(:repo_name)
+      RepoManager.fetch_all(self)
+      RepoManager.rebase_from_remote(self)
       #TODO: this is not right command
 =begin
 one way:

@@ -77,10 +77,15 @@ module XYZ
         repo_name
       end
 
+      def pull_all(repo_name)
+        repo = get_repo(context(repo_name,"master"))
+        repo.pull_all()
+      end
+
+     private
       def context(repo_name,branch)
         {:implementation => {:repo => repo_name, :branch => branch}}
       end
-      private :context
     end
 
     ###### for repo admin functions, such as creating and deleting repositories

@@ -42,6 +42,19 @@ module XYZ
       repo_obj
     end
 
+    def update_for_new_repo()
+      update_object!(:repo_name)
+      #TODO: this is not right command
+=begin
+one way:
+git fetch --all
+git checkout --track origin/workspace-private-joe
+git branch -D master
+git checkout --track origin/master
+=end
+#      RepoManager.pull_all(self[:repo_name])
+    end
+
     def self.delete(repo_idh)
       repo = repo_idh.create_object()
       RepoManager.delete_repo(repo)

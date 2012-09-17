@@ -249,6 +249,10 @@ module XYZ
       end
     end
 
+    def pull_all()
+      git_command__pull_all()
+    end
+
     def push_implementation()
       git_command__push(@branch)
     end
@@ -386,15 +390,19 @@ module XYZ
       git_command.merge_base(cmd_opts(),ref1,ref2).chomp
     end
 
-    #TODO: see what other commands needs mutex and whetehr mutex across what boundaries
+    #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
     def git_command__push(branch_name,remote_name="origin")
       Git_command__push_mutex.synchronize do 
         git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{branch_name}")
       end
     end
+
     def git_command__pull(branch_name,remote_name="origin")
       git_command.pull(cmd_opts(),remote_name,branch_name)
+    end
+    def git_command__pull_all()
+      git_command.pull(cmd_opts(),"--all")
     end
 
     def git_command__merge(branch_to_merge_from)

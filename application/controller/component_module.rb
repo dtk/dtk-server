@@ -7,12 +7,13 @@ module XYZ
       module_name = ret_non_null_request_params(:component_module_name)
       library_idh = ret_library_idh_or_default()
       project = get_default_project()
-      workspace_branch_info = ComponentModule.create_empty_repo(library_idh,project,module_name)
-      rest_ok_response workspace_branch_info
+      module_repo_info = ComponentModule.create_empty_repo(library_idh,project,module_name)
+      rest_ok_response module_repo_info
     end
 
-    def add_meta_data()
-      raise Error.new("TODO: need to implement")
+    def update_repo_and_add_meta_data()
+      repo_id,library_id,module_name =  ret_non_null_request_params(:repo_id,:library_id,:module_name)
+      ComponentModule.update_repo_and_add_meta_data(id_handle(repo_id,:repo),id_handle(library_id,:library),module_name)
       rest_ok_response
     end
 

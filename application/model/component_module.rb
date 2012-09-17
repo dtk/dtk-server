@@ -153,12 +153,18 @@ module DTK
       ModuleRepoInfo.new(repo_name,module_name,row[:branch])
     end
 
+    def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name)
+      repo = repo_idh.create_object()
+      repo.update_for_new_repo() #TODO: have configuration option wheer do not haev to update clone and so this is not done
+#      create_objects_for_library_module(repo,library_idh,module_name)
+      #TODO: do we also have to create the ws meta data too?
+    end
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
       create_objects_for_library_module(repo,library_idh,module_name,version)
     end
     
-    def self.create_objects_for_library_module(repo,library_idh,module_name,version)
+    def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil)
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)

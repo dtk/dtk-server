@@ -98,8 +98,8 @@ module DTK
       :access_rights => "R"
     }
 
-    #keys: [:name,namespace,:id]
-    #contraints :id or :name
+    #keys: [:name,namespace,:type,:id]
+    #contraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
       body = params_hash

@@ -196,6 +196,12 @@ module XYZ
       add_remote(remote_name,remote_url)
     end
 
+    def remove_remote?(remote_name)
+      if remote_exists?(remote_name)
+        remove_remote(remote_name)
+      end
+    end
+
     def remove_remote(remote_name)
       git_command__remote_rm(remote_name)
     end

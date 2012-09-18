@@ -94,6 +94,13 @@ module XYZ
       remote_repo_name
     end
 
+    def unlink_remote()
+      update_object!(:repo_name)
+      remote_name = remote_name_for_push_pull()
+      RepoManager.unlink_remote(self[:repo_name],remote_name)
+      update(:remote_repo_name => nil, :remote_repo_namespace => nil)
+    end
+
    private    
     def remote_name_for_push_pull()
       "remote"

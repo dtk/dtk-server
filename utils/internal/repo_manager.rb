@@ -77,6 +77,11 @@ module XYZ
         repo_name
       end
 
+      def unlink_remote(repo_name,remote_name)
+        adapter_repo = get_adapter_repo(context(repo_name,"master"))
+        adapter_repo.remove_remote?(remote_name)
+      end
+
      private
       def context(repo_name,branch)
         {:implementation => {:repo => repo_name, :branch => branch}}

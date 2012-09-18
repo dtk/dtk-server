@@ -30,10 +30,6 @@ module XYZ
       rest_ok_response ComponentModule.list(model_handle)
     end
 
-    def rest__list_remote()
-      rest_ok_response ComponentModule.list_remotes(model_handle)
-    end
-
     def rest__workspace_branch_info()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
@@ -50,6 +46,18 @@ module XYZ
         ComponentModule.import(library_idh,remote_module_name,remote_namespace,version)
       end
       rest_ok_response
+    end
+
+    def rest__delete_remote()
+      library_idh = ret_library_idh_or_default()
+      name = ret_non_null_request_params(:remote_module_name)
+      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+      ComponentModule.delete_remote(library_idh,remote_namespace,remote_module_name,version)
+      rest_ok_response 
+    end
+
+    def rest__list_remote()
+      rest_ok_response ComponentModule.list_remotes(model_handle)
     end
 
     def rest__export()

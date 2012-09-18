@@ -4,6 +4,10 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def self.model_type()
+      :component_module
+    end
+
     def self.create_empty_repo(library_idh,project,module_name)
       if module_exists?(library_idh,module_name)
         raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")

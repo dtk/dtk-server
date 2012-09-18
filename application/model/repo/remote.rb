@@ -25,6 +25,15 @@ module DTK
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
+      def delete_module(name,type)
+        namespace = self.class.default_namespace()
+        params = {
+          :name => name,
+          :namespace => namespace,
+          :type => type_for_remote_module(type)
+        }
+        client.delete_module(params)
+      end
 
       def get_module_info(name,type,namespace=nil)
         params = {

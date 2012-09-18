@@ -163,6 +163,30 @@ module DTK
       module_branch_idh
     end
 
+    def delete_remote(library_idh,remote_namespace,remote_module_name,version=nil)
+      #TODO: put in version specific logic
+      if version
+        raise Error.new("TODO: delete_remote when version given")
+      end
+
+      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+      end
+
+      #delete module on remote repo manager
+      Repo::Remote.new.delete_module(remote_module_name,module_type())
+
+      #if module is local; remove link to remote
+      module_name = remote_module_name
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :display_name, module_name], [:eq, :library_library_id,library_idh.get_id()]]
+      } 
+      if module_obj = get_obj(library_idh.createMH(model_type),sp_hash)
+        module_obj.get_repos().each{|repo|repo.unlink_remote()}
+      end
+    end
+
     def list_remotes(model_handle)
       Repo::Remote.new.list_module_info(module_type()).map do |r|
         el = {:display_name => r[:qualified_name]}

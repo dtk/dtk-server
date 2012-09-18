@@ -6,6 +6,10 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def self.model_type()
+      :service_module
+    end
+
     def self.list(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

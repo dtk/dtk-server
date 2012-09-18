@@ -16,7 +16,21 @@ end
 DTK = XYZ
 
 require 'require_first'
-r8_require('config/config.rb')
+
+#TODO: make that log  dont need config values 
+r8_require('../utils/internal/log')
+r8_require('../utils/internal/errors')
+r8_require('../utils/internal/hash_object')
+
+NEW_CONFIG = false
+if NEW_CONFIG
+  r8_require('../utils/internal/configuration')
+  DTK::Configuration.instance.set_configuration()
+else
+  #TODO: deprecate
+  r8_require('config/config.rb')
+end
+
 r8_require_common_lib('auxiliary')
 
 APPLICATION_DIR = File.expand_path('../' + R8::Config[:application_name], File.dirname(__FILE__))

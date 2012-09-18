@@ -39,10 +39,11 @@ module DTK
     }
 
     def update_config_value_aux!(base,internal_key,value)
+      index = internal_key.first.to_sym
       if internal_key.size == 1
-        base[internal_key.first] = value
+        base[index] = value
       else
-        update_config_value_aux!(base[internal_key.first],internal_key[1,internal_key.size-1],value)
+        update_config_value_aux!(base[index],internal_key[1,internal_key.size-1],value)
       end
     end
 

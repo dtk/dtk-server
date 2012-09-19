@@ -1,26 +1,33 @@
 module DTK
   class AssemblyInstance < Assembly
     def info_about(about)
-      cols = post_process = order = nil
+      cols = post_process_per_row = order = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
+      
       case about 
        when :components
         cols = [:nested_nodes_and_cmps_summary]
-        post_process = proc do |r|
+        post_process_per_row = proc do |r|
           display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
           r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
         end
        when :nodes
         cols = [:nodes]
-        post_process = proc do |r|
+        post_process_per_row = proc do |r|
           r[:node].hash_subset(:id,:display_name,:os_type,:external_ref, {:type => :node_type})
         end
+       when :tasks
+        cols = [:tasks]
+        post_process_per_row = proc do |r|
+          r[:task]
+        end
+        order = proc{|a,b|b[:started_at] <=> a[:started_at]}
       end
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
       rows = get_objs(:cols => cols)
-      ret = post_process ? rows.map{|r|post_process.call(r)} : rows
+      ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
       order ? ret.sort(&order) : ret
     end
 

@@ -168,6 +168,18 @@ lambda__template_nodes_and_components =
            :cols => [:id,:display_name,:module_name,:version]
          }]
     },
+    :tasks=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=> 
+      [{
+         :model_name => :task,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:assembly_id => q(:component,:id)},
+         :cols => [:id,:display_name,:status,:created_at,:started_at,:ended_at]
+       }]
+    },
     :nodes=> {
       :type=>:json,
       :hidden=>true,

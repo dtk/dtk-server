@@ -40,7 +40,7 @@ module DTK
 
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
-      Task.assembly_task_status(id_handle(assembly_id))
+      rest_ok_response Task.assembly_task_status(id_handle(assembly_id))
     end
 
 #TDODO: got here in cleanup of rest calls

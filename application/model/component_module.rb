@@ -7,6 +7,12 @@ module DTK
     def self.model_type()
       :component_module
     end
+    def self.component_type()
+      :puppet #hardwired
+    end
+    def component_type()
+      :puppet #hardwired
+    end
 
     def self.create_empty_repo(library_idh,project,module_name)
       if module_exists?(library_idh,module_name)
@@ -106,14 +112,15 @@ module DTK
         (mdl[:version_array] ||= Array.new) <<  version
       end
       #put version info in prin form
-      ndx_module_info.values.map do |mdl|
+      unsorted = ndx_module_info.values.map do |mdl|
         raw_va = mdl.delete(:version_array)
         unless raw_va.nil? or raw_va == ["CURRENT"]
           version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
           mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
         end
-        mdl
+        mdl.merge(:type => mdl.component_type())
       end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
 

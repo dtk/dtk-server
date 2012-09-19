@@ -145,22 +145,23 @@ module DTK
         Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
 
         #create empty repo on local repo manager; 
-        module_specific_type = 
-          case module_type() 
-          when :service_module
-            :service_module
-          when :component_module
-            :puppet #TODO: hard wired
-          end
-
         #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
         create_opts = {:remote_repo_name => remote_module_info[:git_repo_name],:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
-        repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+        repo = create_empty_repo_and_local_clone(library_idh,module_name,component_type,create_opts)
       end
 
       repo.synchronize_with_remote_repo(branch)
       module_branch_idh = import_postprocess(repo,library_idh,module_name,version)
       module_branch_idh
+    end
+
+    def component_type()
+      case module_type()
+       when :service_module
+        :service_module
+       when :component_module
+        :puppet #TODO: hard wired
+      end
     end
 
     def delete_remote(library_idh,remote_namespace,remote_module_name,version=nil)
@@ -188,8 +189,8 @@ module DTK
     end
 
     def list_remotes(model_handle)
-      Repo::Remote.new.list_module_info(module_type()).map do |r|
-        el = {:display_name => r[:qualified_name]}
+      unsorted = Repo::Remote.new.list_module_info(module_type()).map do |r|
+        el = {:display_name => r[:qualified_name],:type => component_type()} #TODO: hard coded
         branches = r[:branches]
         if branches and not branches == ["master"]
           version_array =(branches.include?("master") ? ["CURRENT"] : []) + branches.reject{|b|b == "master"}.sort
@@ -197,6 +198,7 @@ module DTK
         end
         el
       end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     def module_type()

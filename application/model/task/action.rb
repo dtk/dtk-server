@@ -484,7 +484,8 @@ module XYZ
      private
 
       def self.component_name(object)
-        (object[:component]||{})[:display_name]
+        ret = (object[:component]||{})[:display_name]
+        ret && ret.gsub(/__/,"::")
       end
 
       def self.component_state_info(object,opts)

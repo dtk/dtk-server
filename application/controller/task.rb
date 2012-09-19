@@ -30,6 +30,7 @@ module XYZ
       hash = request.params
       task_id = hash["task_id"] && hash["task_id"].to_i
       unless task_id
+        #TODO: use Task.get_top_level_most_recent_task(model_handle,filter=nil)
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end

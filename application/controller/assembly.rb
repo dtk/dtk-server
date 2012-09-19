@@ -38,7 +38,12 @@ module DTK
       rest_ok_response result 
     end
 
-#TDODO: got heer in cleanup of rest calls
+    def rest__task_status()
+      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      Task.assembly_task_status(id_handle(assembly_id))
+    end
+
+#TDODO: got here in cleanup of rest calls
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance

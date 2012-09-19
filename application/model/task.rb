@@ -4,7 +4,7 @@ module XYZ
   class Task < Model
     extend TaskCreateClassMixin
 
-    def self.assembly_task_status(assembly_idh)
+    def self.assembly_task_status(assembly_idh,detail_level=nil)
       task_mh = assembly_idh.createMH(:task)
       filter = [:eq, :assembly_id, assembly_idh.get_id()]
       unless task = get_top_level_most_recent_task(task_mh,filter)
@@ -13,9 +13,16 @@ module XYZ
       end
 
       task_structure = get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+
       opts = Task::StateInfoOpts.new
-      opts[:no_components] = true
-      #opts[:no_attributes] = true
+      if detail_level
+        #TODO: stub; treat passed in detail setting Task::StateInfoOpts as function of detail_level
+        opts[:no_components] = false
+        opts[:no_attributes] = true
+      else
+        opts[:no_components] = false
+        opts[:no_attributes] = true
+      end
       task_structure.state_info(opts)
     end
 
@@ -54,17 +61,22 @@ module XYZ
       ret
     end
 
-    def state_info(opts)
+    #TODO: may change method name to 'status'
+    def state_info(opts,level=1)
       set_and_return_types!()
       ret = PrettyPrintHash.new
-      ret.add(self,:type,:id,:status)
+      if level == 1
+        ret.add(self,:type,:id,:status)
+      else
+        ret.add(self,:type,:status)
+      end
       ret.add(self,:started_at?)
       ret.add(self,:ended_at?)
       num_subtasks = subtasks.size
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts)}
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts,level+1)}
         end
       end
       action_type = self[:executable_action_type]

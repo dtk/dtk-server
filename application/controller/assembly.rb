@@ -1,12 +1,16 @@
 module DTK
   class AssemblyController < Controller
     helper :assembly_helper
+    #### create and delete actions ###
     def rest__delete()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
       Assembly.delete(id_handle(assembly_id),subtype)
       rest_ok_response 
     end
 
+    #### end: create and delete actions ###
+
+    #### list and info actions ###
     def rest__info()
       assembly,subtype = ret_assembly_params_object_and_subtype()
       rest_ok_response assembly.info(subtype) 
@@ -37,6 +41,7 @@ module DTK
         end
       rest_ok_response result 
     end
+    #### end: list and info actions ###
 
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)

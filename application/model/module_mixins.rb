@@ -170,13 +170,18 @@ module DTK
         raise Error.new("TODO: delete_remote when version given")
       end
 
-      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
-        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+      error = nil
+      begin
+        remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+       rescue Exception 
+        error = ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
       end
 
       #delete module on remote repo manager
-      Repo::Remote.new.delete_module(remote_module_name,module_type())
-
+      unless error
+        Repo::Remote.new.delete_module(remote_module_name,module_type())
+      end
+        
       #if module is local; remove link to remote
       module_name = remote_module_name
       sp_hash = {
@@ -186,6 +191,7 @@ module DTK
       if module_obj = get_obj(library_idh.createMH(model_type),sp_hash)
         module_obj.get_repos().each{|repo|repo.unlink_remote()}
       end
+      raise error if error
     end
 
     def list_remotes(model_handle)

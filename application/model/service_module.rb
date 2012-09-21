@@ -29,6 +29,20 @@ module DTK
       Assembly.list_from_library(model_handle(:component),:filter => filter)
     end
 
+    def self.find(mh,service_module_name,library_idh=nil)
+      lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]
+      sp_hash = {
+        :cols => [:id,:display_name,:library_library_id],
+        :filter => [:and, [:eq, :display_name, service_module_name],lib_filter].compact
+      }
+      rows = get_objs(mh,sp_hash)
+      case rows.size
+       when 0 then nil
+       when 1 then rows.first
+       else raise ErrorUsage.new("Cannot find unique service module given service_module_name=#{service_module_name}")
+      end
+    end
+
     def get_associated_target_instances()
       ret = Array.new
       assembly_templates = list_assembly_templates()

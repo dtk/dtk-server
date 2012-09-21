@@ -14,6 +14,22 @@ module DTK
       create_library_template_from_assembly(library_idh)
     end
 
+    def create_new_template(service_module,new_template_name)
+      service_module.update_object!(:display_name,:library_library_id)
+      library_idh = id_handle(:model_name => :library, :id => service_module[:library_library_id])
+      service_module_name = service_module[:display_name]
+
+      if AssemblyTemplate.exists?(library_idh,service_module_name,new_template_name)
+        raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
+      end
+
+      name_info = {
+        :service_module_name => service_module_name,
+        :assembly_template_name => new_template_name
+      }
+      create_library_template_from_assembly(library_idh,name_info)
+    end      
+
     def info_about(about)
       cols = post_process_per_row = order = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
@@ -101,12 +117,17 @@ module DTK
       end
     end
 
-    def create_library_template_from_assembly(library_idh)
+    def create_library_template_from_assembly(library_idh,name_info=nil)
       update_object!(:component_type,:version,:ui)
       if self[:version]
         raise Error.new("TODO: not implemented yet AssemblyInstance#create_library_template when version no null")
       end
-      service_module_name,assembly_name = self[:component_type].split("__")
+      if name_info
+        service_module_name = name_info[:service_module_name]
+        template_name = name_info[:assembly_template_name]
+      else
+      service_module_name,template_name = AssemblyTemplate.parse_component_type(self[:component_type])
+      end
       ui = self[:ui]
       sp_hash = {
         :cols => [:id],
@@ -116,7 +137,7 @@ module DTK
       if node_idhs.empty?
         raise Error.new("Cannot find any nodes associated with assembly (#{self[:display_name]})")
       end
-      Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,ui)
+      Assembly.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
     end
   end
 end

@@ -41,7 +41,16 @@ module DTK
         end
       rest_ok_response result 
     end
+
     #### end: list and info actions ###
+
+    #### actions to promote changes from workspace to library ###
+    def rest__promote_to_library()
+      assembly = ret_assembly_instance_object()
+      assembly.promote_to_library()
+      rest_ok_response
+    end
+    #### end: actions to promote changes from workspace to library ###
 
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
@@ -52,7 +61,7 @@ module DTK
     #creates task to execute/converge assembly
     def rest__create_task()
       #assembly_id should be a target assembly instance
-      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyInstance)
+      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
       task = Task.create_from_assembly_instance(id_handle(assembly_id))
       task.save!()
       rest_ok_response :task_id => task.id

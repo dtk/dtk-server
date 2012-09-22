@@ -1,11 +1,11 @@
 module XYZ
   module LinkDefParseSerializedForm
-    def parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
+    def parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs,local_cmp_ref=nil)
       link_defs.inject({}) do |h,link_def|
         link_def_type = link_def["type"]
         ref = "local_#{link_def_type}"
         has_external_internal = Hash.new
-        possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,config_agent_type,remote_link_defs,has_external_internal)
+        possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,config_agent_type,remote_link_defs,has_external_internal,local_cmp_ref)
         el = {
           :display_name => ref,
           :local_or_remote => "local",
@@ -17,7 +17,7 @@ module XYZ
       end
     end
    private
-    def add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type)
+    def add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type,local_cmp_ref=nil)
       pointer = remote_link_defs[remote_component_type] ||= Hash.new
       ref = "remote_#{link_def_type}"
       pointer[ref] ||= {
@@ -28,16 +28,19 @@ module XYZ
       }
       pointer[ref][:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
       pointer[ref][:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
+      if local_cmp_ref and pointer[ref][:has_external_link]
+        pointer[ref].merge!(:local_cmp_ref => local_cmp_ref)
+      end
     end
 
-    def parse_possible_links_local(possible_links,link_def_type,config_agent_type,remote_link_defs,has_external_internal)
+    def parse_possible_links_local(possible_links,link_def_type,config_agent_type,remote_link_defs,has_external_internal,local_cmp_ref=nil)
       position = 0
       possible_links.inject({}) do |h,possible_link|
         remote_component_type = possible_link.keys.first
         possible_link_info = possible_link.values.first
         possible_link_type = possible_link_info["type"]
 
-        add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type)
+        add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type,local_cmp_ref)
 
         has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
         has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)

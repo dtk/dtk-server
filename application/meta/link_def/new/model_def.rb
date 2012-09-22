@@ -5,6 +5,7 @@
     :local_or_remote => {:type=>:varchar, :size => 10},
     :link_type => {:type=>:varchar, :size => 50},
     :required => {:type=>:boolean},
+    :dangling => {:type=>:boolean, :default=>false},
     :has_external_link => {:type => :boolean},
     :has_internal_link => {:type => :boolean}
   },

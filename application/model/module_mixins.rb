@@ -257,7 +257,8 @@ module DTK
     end
 
     def delete(idh)
-      module_obj = idh.create_object()
+      module_obj = idh.create_object().update_object!(:display_name)
+      module_name =  module_obj[:display_name]
       unless module_obj.get_associated_target_instances().empty?
         raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target")
       end
@@ -267,6 +268,7 @@ module DTK
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})
       delete_instance(idh)
+      {:module_name => module_name}
     end
 
     def create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,opts={})

@@ -19,8 +19,8 @@ module XYZ
 
     def rest__delete()
       component_module_id = ret_request_param_id(:component_module_id)
-      ComponentModule.delete(id_handle(component_module_id))
-      rest_ok_response
+      module_info = ComponentModule.delete(id_handle(component_module_id))
+      rest_ok_response module_info
     end
 
     #### end: create and delete actions ###

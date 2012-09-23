@@ -53,6 +53,16 @@ module DTK
       end
     end
 
+    #associated implementation
+    def implementation()
+      update_object!(:repo_id,:branch)
+      sp_hash = {
+        :cols => [:id,:display_name,:repo,:branch],
+        :filter => [:and,[:eq, :repo_id, self[:repo_id]],[:eq, :branch, self[:branch]]]
+      }
+      get_obj(sp_hash)
+    end
+
     class << self
       def version_field(version=nil)
         version || "master"

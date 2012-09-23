@@ -72,16 +72,26 @@ module DTK
       end
 
       repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
+
+      diffs = repo.diff_between_library_and_workspace(lib_branch,ws_branch).ret_summary()
+      if diffs.no_diffs?()
+        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
+      end
+
       result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       case result
       when :changed
         nil #no op
       when :no_change 
+        #TODO: with check before now in diffs this shoudl not be reached
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
       when :merge_needed
         raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
       else
         raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
+      end
+      if diffs.meta_file_changed?()
+        pp "TODO: need to call update module on library branch"
       end
     end
 

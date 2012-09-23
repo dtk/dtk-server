@@ -4,7 +4,7 @@ r8_nested_require('git','manage_git_server')
 module XYZ
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
-
+    
     def self.create_repo_clone(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]

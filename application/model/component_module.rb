@@ -79,7 +79,7 @@ module DTK
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
       end
       if diffs.meta_file_changed?()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(self,ws_branch.implementation())
+        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.implementation())
         component_meta_file.update_model()
       end
 

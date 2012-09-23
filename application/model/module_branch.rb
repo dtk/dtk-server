@@ -60,7 +60,7 @@ module DTK
         :cols => [:id,:display_name,:repo,:branch],
         :filter => [:and,[:eq, :repo_id, self[:repo_id]],[:eq, :branch, self[:branch]]]
       }
-      get_obj(sp_hash)
+      Model.get_obj(model_handle(:implementation),sp_hash)
     end
 
     class << self

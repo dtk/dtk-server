@@ -45,6 +45,7 @@ module DTK
       "remote_repo.host" => "repo.remote.host",
       "local_repo.host" => "repo.git.dns",
       "db.host" => "database.hostname",
+      "db.name" => "database.name",
       "mcollective.host" => "command_and_control.node_config.mcollective.host"
     }
 

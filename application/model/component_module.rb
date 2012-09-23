@@ -78,16 +78,20 @@ module DTK
       if diffs.no_diffs?()
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
       end
+      #want this here before any changes in case error in parsing meta file
       if diffs.meta_file_changed?()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.implementation())
+        library_idh = id_handle().get_parent_id_handle_with_auth_info()
+        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.implementation(),library_idh)
         component_meta_file.update_model()
       end
 
-      result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
+
+ 
+     result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       case result
-      when :changed
+       when :changed
         nil #no op
-      when :no_change 
+       when :no_change 
         #TODO: with check before now in diffs this shoudl not be reached
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
       when :merge_needed
@@ -95,6 +99,7 @@ module DTK
       else
         raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
       end
+
     end
 
     def get_associated_target_instances()

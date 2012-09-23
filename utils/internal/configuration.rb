@@ -7,18 +7,28 @@ module DTK
       config_file_location ||= default_config_file_location() 
       set_defaults()
       load_config_file(config_file_location)
+      set_combined_vars()
       validate()
       finalize()
     end
 
     private
     def default_config_file_location()
-      "/etc/dtk/server.conf"
+      username = ENV["USER"]||ENV["USERNAME"]
+      user_specific_config = "#{BaseConfigDir}/#{username}/server.conf"
+      File.file?(user_specific_config) ? user_specific_config : "#{BaseConfigDir}/server.conf"
     end
+    BaseConfigDir = "/etc/dtk"
+
     def set_defaults()
       #TODO: to modify
       r8_nested_require('configuration','defaults')
     end
+    
+    def set_combined_vars()
+      r8_nested_require('configuration','combined')
+    end
+
     def load_config_file(config_file_location)
       parsed_file = ParsedFile.new(config_file_location)
       parsed_file.each do |key,value|

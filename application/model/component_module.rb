@@ -197,7 +197,7 @@ module DTK
       aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
 
       #first update the server clone
-      merge_result = RepoManager.fast_foward_pull(aug_branch[:branch])
+      merge_result = RepoManager.fast_foward_pull(aug_branch[:branch],aug_branch)
       if merge_result == :merge_needed
         raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
       end 

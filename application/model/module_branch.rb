@@ -177,18 +177,20 @@ module DTK
       {ref => assigns}
     end
 
+    #TODO: clean up; complication is that an augmenetd branch can be passed
     def repo_and_branch()
+      repo = self[:repo]
       cols = (self[:repo] ? [:branch] : [:branch,:repo_id])
       update_object!(*cols)
-      unless self[:repo]
+      unless repo
         sp_hash = {
           :cols => [:id,:display_name],
           :filter => [:eq,:id,self[:repo_id]]
         }
         repo = Model.get_obj(model_handle(:repo),sp_hash)
-        self[:repo] = repo[:display_name]
       end
-      [self[:repo],self[:branch]]
+      repo_name = repo[:repo_name]||repo[:display_name]
+      [repo_name,self[:branch]]
     end
 
     #in case we change what schema the module and branch objects under

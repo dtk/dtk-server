@@ -107,7 +107,6 @@ module XYZ
     end
     #### end: actions to manage workspace and promote changes from workspace to library ###
 
-
     def rest__push_to_mirror()
       component_module = create_obj(:component_module_id)
       mirror_host = ret_non_null_request_params(:mirror_host)

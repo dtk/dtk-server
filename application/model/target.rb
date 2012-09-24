@@ -16,7 +16,7 @@ module XYZ
        :iaas_type,
        :iaas_properties,
        :project_id,
-       :is_target_default,
+       :is_default_target,
        :ui
       ]
     end
@@ -28,20 +28,21 @@ module XYZ
     ######### Model apis
 
     #takes values from default aside from ones specfically given in argument
-    def self.create_from_default(project_idh,disapl_name,params_hash)
+    def self.create_from_default(project_idh,display_name,params_hash)
       target_mh = project_idh.createMH(:target) 
-      default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
+      unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
+        raise ErrorUsage.new("Cannot find default target")
+      end
       ref = display_name.downcase.gsub(/ /,"-")
-      row = default.merge(:ref => ref, :display_name => display_name).merge(params_hash)
-      pp row
-#      create_from_row(taregt_mh,row,:convert => true)
+      row = default.merge(:ref => ref, :display_name => display_name, :description => nil).merge(params_hash)
+      create_from_row(target_mh,row,:convert => true)
     end
    
     def self.get_default_target(target_mh,cols=[]) 
       cols = [:id,:display_name,:group_id] if cols.empty?
       sp_hash = {
         :cols => cols,
-        :filter => [:eq,:is_default_template,true]
+        :filter => [:eq,:is_default_target,true]
       }
       Model.get_obj(target_mh,sp_hash)
     end

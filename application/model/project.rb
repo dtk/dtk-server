@@ -18,7 +18,7 @@ module XYZ
     end
 
     def self.get_all(model_handle)
-      sp_hash = {:cols => [:id,:display_name,:type]}
+      sp_hash = {:cols => [:id,:display_name,:group_id,:type]}
       get_objs(model_handle,sp_hash)
     end
 

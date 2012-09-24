@@ -1,7 +1,7 @@
 module XYZ
   class TargetController < Controller
     def rest__create()
-      display_name = ret_non_null_request_params(:name)
+      display_name = ret_non_null_request_params(:target_name)
       params_hash = ret_params_hash(:description,:iaas_type,:iaas_properties)
       project_idh = get_default_project().id_handle()
       target_idh = Target.create_from_default(project_idh,display_name,params_hash)

@@ -70,6 +70,23 @@ class R8Server
     }
   end
 
+  def create_new_target?(target_name,ec2_region=nil)
+    #TODO: this is hack that should be fixed up
+    container_idh = pre_execute(:top)
+    template_path ||= "#{Root}/spec/test_data/new_target.erb" 
+    template = File.open(template_path){|f|f.read}
+    erubis = Erubis::Eruby.new(template)
+    users_ref = "private-#{username}"
+    json_content = erubis.result(:target_name => target_name,:project_ref => users_ref,:target_ref => target_name,:ec2_region => ec2_region||"us-east-1")
+    hash_content = JSON.parse(json_content)
+    Model.import_objects_from_hash(container_idh,hash_content)
+
+    # return idhs of new targets 
+    {
+      :target_idhs => ret_idhs("datacenter",hash_content,container_idh)
+    }
+  end
+
   def migrate_metafile(module_name)
     component_module_mh = pre_execute(:component_module)
     sp_hash = {

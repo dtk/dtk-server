@@ -38,6 +38,16 @@ module Ramaze::Helper
         targets.first.id_handle()
       end
     end
+
+    def get_default_project()
+      projects = ::DTK::Project.get_all(model_handle(:project))
+      if projects.empty?
+        raise DTK::Error.new("Cannot find any projects")
+      elsif projects.size > 1
+        raise DTK::Error.new("Not implemented yet: case when multiple projects")
+      end
+      projects.first
+    end
    private
 
     #helpers that interact with model

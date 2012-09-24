@@ -16,6 +16,7 @@ module XYZ
        :iaas_type,
        :iaas_properties,
        :project_id,
+       :is_target_default,
        :ui
       ]
     end
@@ -25,6 +26,26 @@ module XYZ
     end
 
     ######### Model apis
+
+    #takes values from default aside from ones specfically given in argument
+    def self.create_from_default(project_idh,disapl_name,params_hash)
+      target_mh = project_idh.createMH(:target) 
+      default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
+      ref = display_name.downcase.gsub(/ /,"-")
+      row = default.merge(:ref => ref, :display_name => display_name).merge(params_hash)
+      pp row
+#      create_from_row(taregt_mh,row,:convert => true)
+    end
+   
+    def self.get_default_target(target_mh,cols=[]) 
+      cols = [:id,:display_name,:group_id] if cols.empty?
+      sp_hash = {
+        :cols => cols,
+        :filter => [:eq,:is_default_template,true]
+      }
+      Model.get_obj(target_mh,sp_hash)
+    end
+      
     def update_ui_for_new_item(new_item_id)
       update_object!(:ui)
       target_ui = self[:ui]||{:items=>{}}

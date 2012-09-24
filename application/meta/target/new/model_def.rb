@@ -22,6 +22,7 @@
     :iaas_properties=>{
       :type=>:json
     },
+    :is_default_target=>{:type=>:boolean,:default=>false},
     :project_id=> { #TODO: should project be a parent?
       :type=>:bigint,
       :foreign_key_rel_type=>:project,

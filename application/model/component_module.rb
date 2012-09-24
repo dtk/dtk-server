@@ -100,7 +100,9 @@ module DTK
 
     end
 
-    def update_model_from_clone_changes_aux?(diffs_hash,module_branch,repo,impl)
+    def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
+      repo = module_branch.get_repo()
+      impl = module_branch.get_implementation()
       #add/remove any needed file_asset objects
       impl.create_file_assets_from_dir_els(repo)
 
@@ -194,15 +196,16 @@ module DTK
     end
 
     def update_model_from_clone_changes?(diffs_hash,version=nil)
-      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+      matching_branches = get_module_branches_matching_version(version)
+      ws_branch = find_branch(:workspace,matching_branches)
 
       #first update the server clone
-      merge_result = RepoManager.fast_foward_pull(aug_branch[:branch],aug_branch)
+      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
       if merge_result == :merge_needed
         raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
       end 
 
-      update_model_from_clone_changes_aux?(diffs_hash,aug_branch,aug_branch[:repo],aug_branch[:implementation])
+      update_model_from_clone_changes_aux?(diffs_hash,ws_branch)
       #TODO: should we also update library?
     end
 

@@ -53,14 +53,26 @@ module DTK
       end
     end
 
-    #associated implementation
-    def implementation()
+    def get_implementation(*added_cols)
       update_object!(:repo_id,:branch)
+      cols = [:id,:display_name,:repo,:branch]
+      cols += added_cols unless added_cols.empty?
       sp_hash = {
-        :cols => [:id,:display_name,:repo,:branch],
+        :cols => cols,
         :filter => [:and,[:eq, :repo_id, self[:repo_id]],[:eq, :branch, self[:branch]]]
       }
       Model.get_obj(model_handle(:implementation),sp_hash)
+    end
+
+    def get_repo(*added_cols)
+      update_object!(:repo_id)
+      cols = [:id,:display_name]
+      cols += added_cols unless added_cols.empty?
+      sp_hash = {
+        :cols => cols,
+        :filter => [:eq, :id, self[:repo_id]]
+      }
+      Model.get_obj(model_handle(:repo),sp_hash)
     end
 
     class << self

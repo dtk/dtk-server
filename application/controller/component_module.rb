@@ -11,9 +11,17 @@ module XYZ
       rest_ok_response module_repo_info
     end
 
-    def update_repo_and_add_meta_data()
-      repo_id,library_id,module_name =  ret_non_null_request_params(:repo_id,:library_id,:module_name)
+    def rest__update_repo_and_add_meta_data()
+      repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
       ComponentModule.update_repo_and_add_meta_data(id_handle(repo_id,:repo),id_handle(library_id,:library),module_name)
+      rest_ok_response
+    end
+
+    def rest__update_model_from_clone()
+      component_module = create_obj(:component_module_id)
+      version = ret_request_params(:version)
+      diffs = ret_non_null_request_params(:diffs)
+      component_module.update_model_from_clone_changes?(diffs,version)
       rest_ok_response
     end
 

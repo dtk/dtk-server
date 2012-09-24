@@ -81,11 +81,9 @@ module DTK
       #want this here before any changes in case error in parsing meta file
       if diffs.meta_file_changed?()
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.implementation(),library_idh)
+        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.get_implementation(),library_idh)
         component_meta_file.update_model()
       end
-
-
  
      result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       case result
@@ -100,6 +98,13 @@ module DTK
         raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
       end
 
+    end
+
+    def update_model_from_clone_changes_aux?(diffs_hash,module_branch,repo,impl)
+      #add/remove any needed file_asset objects
+      impl.create_file_assets_from_dir_els(repo)
+
+      pp "TODO: update meta info if needed"
     end
 
     def get_associated_target_instances()
@@ -175,10 +180,10 @@ module DTK
     end
 
     def get_workspace_branch_info(version=nil)
-      row = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo_name = row[:workspace_repo][:repo_name]
-      module_name = row[:component_module][:display_name]
-      ModuleRepoInfo.new(repo_name,module_name,row[:branch])
+      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+      repo = aug_branch[:workspace_repo]
+      module_name = aug_branch[:component_module][:display_name]
+      ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
     def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name)
@@ -187,6 +192,20 @@ module DTK
       #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els(repo)in create_objects_for_library_module
       create_objects_for_library_module(repo,library_idh,module_name)
     end
+
+    def update_model_from_clone_changes?(diffs_hash,version=nil)
+      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+
+      #first update the server clone
+      merge_result = RepoManager.fast_foward_pull(aug_branch[:branch])
+      if merge_result == :merge_needed
+        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
+      end 
+
+      update_model_from_clone_changes_aux?(diffs_hash,aug_branch,aug_branch[:repo],aug_branch[:implementation])
+      #TODO: should we also update library?
+    end
+
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
       create_objects_for_library_module(repo,library_idh,module_name,version)

@@ -151,7 +151,8 @@ module XYZ
     #returns :no_change, :changed, :merge_needed
     def fast_foward_pull(remote_branch,remote_name=nil)
       remote_name ||= default_remote_name()
-      merge_rel = ret_merge_relationship(:remote_branch,"#{remote_name}/#{remote_branch}",:fetch_if_needed => true)
+      remote_ref = "#{remote_name}/#{remote_branch}"
+      merge_rel = ret_merge_relationship(:remote_branch,remote_ref,:fetch_if_needed => true)
       ret = 
         case merge_rel
          when :equal then :no_change
@@ -161,7 +162,7 @@ module XYZ
         end
       return ret unless ret == :changed
       checkout(@branch) do
-        git_command__merge(branch_to_merge_from) #TODO: should put in semantic commit message
+        git_command__merge(remote_ref) #TODO: should put in semantic commit message
       end
       ret
     end

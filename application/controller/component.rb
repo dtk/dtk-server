@@ -7,6 +7,11 @@ module XYZ
       Model.delete_instance(id_handle(id))
     end
 
+    def rest__delete()
+      delete()
+      rest_ok_response
+    end
+
     def get_attributes_for_attr_mappings(component_id)
       component = create_object_from_id(component_id)
       to_set = {}

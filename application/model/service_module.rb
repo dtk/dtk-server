@@ -38,7 +38,8 @@ module DTK
       mb_idhs = sm_rows.map{|r|r[:module_branch].id_handle()}
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
       assembly_mh = mh.createMH(:component)
-      Assembly.list_from_library(assembly_mh,:filter => filter)
+      assembly_info = AssemblyTemplate.list(assembly_mh,:filter => filter,:component_info=>true)
+pp assembly_info
     end
 
 

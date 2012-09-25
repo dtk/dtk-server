@@ -1,5 +1,9 @@
 module DTK
   class AssemblyTemplate < Assembly
+    def self.list(assembly_mh,opts={})
+      list_from_library(assembly_mh,opts)
+    end
+                  
     def info_about(about)
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}

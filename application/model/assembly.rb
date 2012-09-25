@@ -37,13 +37,13 @@ module XYZ
 
     def self.list_from_library(assembly_mh,opts={})
       sp_hash = {
-        :cols => [:id, :display_name,:component_type,:template_nodes_and_cmps_summary],
+        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
       get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
       attr_rows = get_attrs ? get_template_component_attributes(assembly_mh,assembly_rows) : []
-      list_aux(assembly_rows,attr_rows)
+      list_aux(assembly_rows,attr_rows,opts)
     end
 
     def self.list_from_target(assembly_mh,opts={})
@@ -107,7 +107,7 @@ module XYZ
     end
 
     class << self
-      def list_aux(assembly_rows,attr_rows=[])
+      def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new
         attr_rows.each do |attr|
           if attr[:attribute_value]
@@ -119,6 +119,7 @@ module XYZ
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
             node = pntr[:ndx_nodes][node_id] = {
@@ -131,24 +132,29 @@ module XYZ
           end
           cmp_hash = r[:nested_component]
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
+            cmp = 
+              if opts[:component_info] 
+                {:component_name => cmp_type,:component_id => cmp_hash[:id],:description => cmp_hash[:description]}
+              elsif not attr_rows.empty?
+                {:component_name => cmp_type}
+              else
+                cmp_type
+              end
+
             if attrs = ndx_attrs[r[:nested_component][:id]]
               processed_attrs = attrs.map do |attr|
                 proc_attr = {:attribute_name => attr[:display_name], :value => attr[:attribute_value]}
                 proc_attr[:override] = true if attr[:is_instance_value]
                 proc_attr
               end
-              cmp = {:component_name => cmp_type, :attributes => processed_attrs}
-            elsif not attr_rows.empty?
-              cmp = {:component_name => cmp_type}
-            else
-              cmp = cmp_type
+              cmp.merge!(:attributes => processed_attrs) if cmp.kind_of?(Hash)
             end
             node[:components] << cmp
           end
         end
 
         unsorted = ndx_ret.values.map do |r|
-          r.slice(:id,:display_name,:execution_status).merge(:nodes => r[:ndx_nodes].values)
+          r.slice(:id,:display_name,:execution_status,:module_branch_id).merge(:nodes => r[:ndx_nodes].values)
         end
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end

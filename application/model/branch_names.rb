@@ -3,15 +3,13 @@ module DTK
   BranchNameDefaultVersion = 'master'
 
   module BranchNamesMixin
-   protected
-    def workspace_branch_name(project)
-      self.class.workspace_branch_name(project,self[:version])
-    end
-
-   private
     def has_default_version?()
       version = update_object!(:version)[:version]
       version.nil? or  (version == BranchNameDefaultVersion)
+    end
+   protected
+    def workspace_branch_name(project)
+      self.class.workspace_branch_name(project,self[:version])
     end
   end
   module BranchNamesClassMixin

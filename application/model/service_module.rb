@@ -29,19 +29,47 @@ module DTK
       Assembly.list_from_library(model_handle(:component),:filter => filter)
     end
 
-
     def self.get_project_trees(mh)
+      #TODO: right now: putting in all targets for all service modules;
+      all_targets = Target.list(mh).map do |r|
+        SimpleOrderedHash.new([{:name => r[:display_name]},{:id => r[:id]},{:description => r[:description]}])
+      end
       sp_hash = {
         :cols => [:id,:display_name,:module_branches]
       }
-      sm_rows = get_objs(mh,sp_hash)
-      mb_idhs = sm_rows.map{|r|r[:module_branch].id_handle()}
+      mb_idhs = Array.new
+      ndx_ret = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        module_branch = r[:module_branch]
+        mb_idhs << module_branch.id_handle()
+        content = SimpleOrderedHash.new(
+         [
+          {:name => r.pp_module_branch_name(module_branch)},
+          {:id => module_branch[:id]},
+          {:targets => all_targets},
+          {:assemblies => Array.new}
+         ])
+        h.merge(module_branch[:id] => content) 
+      end
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
       assembly_mh = mh.createMH(:component)
-      assembly_info = AssemblyTemplate.list(assembly_mh,:filter => filter,:component_info=>true)
-pp assembly_info
+      AssemblyTemplate.list(assembly_mh,:filter => filter,:component_info=>true).each do |r|
+        index = r[:module_branch_id]
+        assemblies = ndx_ret[index][:assemblies]
+        assemblies  << SimpleOrderedHash.new([{:name => r[:display_name]}, {:id => r[:id]}, {:nodes => format_for_get_project_trees__nodes(r[:nodes])}])
+      end
+      ndx_ret.values
     end
+    #TODO: use of SimpleOrderedHash above and below was just used to print out in debuging and could be removed
+    class << self
+      private
+      def format_for_get_project_trees__nodes(nodes)
+        nodes.map{|n|SimpleOrderedHash.new([{:name => n[:node_name]},{:id => n[:node_id]},{:components => format_for_get_project_trees__cmps(n[:components])}])}
+      end
 
+      def format_for_get_project_trees__cmps(cmps)
+        cmps.map{|cmp|SimpleOrderedHash.new([{:name => cmp[:component_name]},{:id => cmp[:component_id]},{:description => cmp[:description]}])}
+      end
+    end
 
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]

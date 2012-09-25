@@ -197,6 +197,13 @@ module XYZ
     private :group_id
 
     #######
+    #can be overriten
+    def self.list(model_handle)
+      sp_hash = {
+        :cols => common_columns(),
+      }
+      get_objs(model_handle.createMH(model_name()),sp_hash)
+    end
 
     def self.update_from_rows(model_handle,rows,opts={})
       return nil if rows.empty?

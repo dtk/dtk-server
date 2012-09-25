@@ -90,6 +90,13 @@ module DTK
       self.class.pp_module_name(self[:display_name],version)
     end
 
+    def pp_module_branch_name(module_branch)
+      update_object!(:display_name)
+      module_branch.update_object!(:version)
+      version = (module_branch.has_default_version?() ? nil : module_branch[:version])
+      self.class.pp_module_name(self[:display_name],version)
+    end
+
    private
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)

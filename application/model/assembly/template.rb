@@ -7,7 +7,7 @@ module DTK
        when :components
         cols = [:template_nodes_and_cmps_summary]
         post_process = proc do |r|
-          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
+          display_name = "#{r[:node][:display_name]}/#{pp_display_name(r[:nested_component][:display_name])}"
           r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
         end
        when :nodes
@@ -31,6 +31,15 @@ module DTK
       order ? ret.sort(&order) : ret
     end
 
+    def self.exists?(library_idh,service_module_name,template_name)
+      component_type = component_type(service_module_name,template_name)
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :component_type, component_type], [:eq, :library_library_id, library_idh.get_id()]]
+      }
+      get_obj(library_idh.createMH(:component),sp_hash)
+    end
+
     def self.check_valid_id(model_handle,id)
       filter =
         [:and,
@@ -46,14 +55,14 @@ module DTK
         if parts.size == 1
           {:cols => [:id,:component_type],
            :filter => [:and,
-                      [:eq, :component_type, parts[0].gsub(/::/,"__")],
+                      [:eq, :component_type, pp_name_to_component_type(parts[0])],
                       [:eq, :type, "composite"],
                       [:neq, :library_library_id, nil]]
           }
         elsif parts.size == 2
           {:cols => [:id,:component_type,:library],
            :filter => [:and,
-                      [:eq, :component_type, parts[1].gsub(/::/,"__")],
+                      [:eq, :component_type, pp_name_to_component_type(parts[1])],
                       [:eq, :type, "composite"]],
            :post_filter => lambda{|r|r[:library][:display_name] ==  parts[0]}
           }
@@ -62,7 +71,24 @@ module DTK
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
+
+     #returns [service_module_name,assembly_name]
+    def self.parse_component_type(component_type)
+      component_type.split(ModuleTemplateSep)
+    end
    private
+    def pp_display_name(display_name)
+      display_name.gsub(Regexp.new(ModuleTemplateSep),"::")
+    end
+    def self.pp_name_to_component_type(pp_name)
+      pp_name.gsub(/::/,ModuleTemplateSep)
+    end
+     def self.component_type(service_module_name,template_name)
+       "#{service_module_name}#{ModuleTemplateSep}#{template_name}"
+     end
+
+    ModuleTemplateSep = "__"
+
     #TODO: probably move to Assembly
     def model_handle()
       super(:component)

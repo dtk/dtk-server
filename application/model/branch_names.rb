@@ -5,9 +5,7 @@ module DTK
   module BranchNamesMixin
    protected
     def workspace_branch_name(project)
-      project.update_object!(:ref)
-      version_info = (has_default_version?() ? "" : "-v#{self[:version]}")
-      "workspace-#{project[:ref]}#{version_info}"
+      self.class.workspace_branch_name(project,self[:version])
     end
 
    private
@@ -23,6 +21,12 @@ module DTK
       #     "library-#{library[:ref]}-v#{new_version.to_s}"
       #version ? "v#{version}" : BranchNameDefaultVersion
       version || BranchNameDefaultVersion
+    end
+
+    def workspace_branch_name(project,version=nil)
+      project.update_object!(:ref)
+      version_prefix = ((version and version != BranchNameDefaultVersion)?  "-v#{version}" : "")
+      "workspace-#{project[:ref]}#{version_prefix}"
     end
   end
 end

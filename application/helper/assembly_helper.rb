@@ -6,6 +6,11 @@ module Ramaze::Helper
       [obj,subtype]
     end
 
+    def ret_assembly_instance_object()
+      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyInstance)
+      id_handle(assembly_id,:component).create_object(:model_name => :assembly_instance)
+    end
+
     def ret_assembly_params_id_and_subtype()
       subtype = (ret_request_params(:subtype)||:instance).to_sym
       assembly_id = ret_request_param_id(:assembly_id,subtype == :instance ? ::DTK::AssemblyInstance : ::DTK::AssemblyTemplate)

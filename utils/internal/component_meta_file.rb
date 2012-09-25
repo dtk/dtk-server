@@ -5,17 +5,17 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    def self.create_meta_file_object(repo,impl)
+    def self.create_meta_file_object(repo,impl,container_idh=nil)
       unless meta_filename = meta_filename(repo)
         raise Error.new("No component meta file found")
       end
       file_obj_hash = {:path => meta_filename,:implementation => impl}
       content = RepoManager.get_file_content(file_obj_hash,repo)
-      create_from_file_obj_hash?(file_obj_hash,content)
+      create_from_file_obj_hash?(file_obj_hash,content,container_idh)
     end
 
     #creates a ComponentMetaFile if file_obj_hash is a r8meta file
-    def self.create_from_file_obj_hash?(file_obj_hash,content)
+    def self.create_from_file_obj_hash?(file_obj_hash,content,container_idh=nil)
       filename =  file_obj_hash[:path]
       return nil unless isa_meta_filename?(filename)
       config_agent_type,file_extension = parse_meta_filename(filename)
@@ -24,7 +24,7 @@ module DTK
       impl = file_obj_hash[:implementation]
       module_branch_idh = impl.get_module_branch().id_handle()
       input_hash = convert_to_hash(format_type,content)
-      self.new(config_agent_type,impl.id_handle(),module_branch_idh,input_hash)
+      self.new(config_agent_type,impl.id_handle(),module_branch_idh,input_hash,container_idh)
     end
     ExtensionToType = {
       "yml" => :yaml
@@ -51,11 +51,11 @@ module DTK
     end
 
     attr_reader :input_hash
-    def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash)
+    def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh = impl_idh
-      @container_idh = impl_idh.get_parent_id_handle_with_auth_info()
+      @container_idh = container_idh||impl_idh.get_parent_id_handle_with_auth_info()
       unless [:project,:library].include?(@container_idh[:model_name])
         raise Error.new("Unexpected parent type of implementation object (#{@container_idh[:model_name]})")
       end

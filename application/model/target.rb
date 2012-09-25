@@ -16,6 +16,7 @@ module XYZ
        :iaas_type,
        :iaas_properties,
        :project_id,
+       :is_default_target,
        :ui
       ]
     end
@@ -25,6 +26,27 @@ module XYZ
     end
 
     ######### Model apis
+
+    #takes values from default aside from ones specfically given in argument
+    def self.create_from_default(project_idh,display_name,params_hash)
+      target_mh = project_idh.createMH(:target) 
+      unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
+        raise ErrorUsage.new("Cannot find default target")
+      end
+      ref = display_name.downcase.gsub(/ /,"-")
+      row = default.merge(:ref => ref, :display_name => display_name, :description => nil).merge(params_hash)
+      create_from_row(target_mh,row,:convert => true)
+    end
+   
+    def self.get_default_target(target_mh,cols=[]) 
+      cols = [:id,:display_name,:group_id] if cols.empty?
+      sp_hash = {
+        :cols => cols,
+        :filter => [:eq,:is_default_target,true]
+      }
+      Model.get_obj(target_mh,sp_hash)
+    end
+      
     def update_ui_for_new_item(new_item_id)
       update_object!(:ui)
       target_ui = self[:ui]||{:items=>{}}
@@ -33,7 +55,10 @@ module XYZ
     end
 
     def get_ports(*types)
-      port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
+      port_list = get_objs(:cols => [:node_ports]).map do |r|
+        component_id = (r[:link_def]||{})[:component_component_id]
+        component_id ? r[:port].merge(:component_id => component_id) : r[:port]
+      end
       i18n = get_i18n_mappings_for_models(:component,:attribute)
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end

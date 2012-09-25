@@ -1,5 +1,5 @@
 r8_require_common_lib('auxiliary')
-r8_require_common_lib('rest_client_wrapper')
+r8_require_common_lib('response')
 module DTK
   #TODO: RepoType should be in common
   class RepoType < String
@@ -98,8 +98,8 @@ module DTK
       :access_rights => "R"
     }
 
-    #keys: [:name,namespace,:id]
-    #contraints :id or :name
+    #keys: [:name,namespace,:type,:id]
+    #contraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
       body = params_hash
@@ -170,15 +170,16 @@ module DTK
       end
     end
 
+    RestClientWrapper = Common::Response::RestClientWrapper
     def get_rest_request_data(route,opts={})
       handle_error(opts) do 
-        Common::Rest::ClientWrapper.get("#{@rest_base_url}#{route}",ret_opts(opts))
+        RestClientWrapper.get("#{@rest_base_url}#{route}",ret_opts(opts))
       end
     end
 
     def post_rest_request_data(route,body,opts={})
       handle_error(opts) do
-        Common::Rest::ClientWrapper.post("#{@rest_base_url}#{route}",body,ret_opts(opts))
+        RestClientWrapper.post("#{@rest_base_url}#{route}",body,ret_opts(opts))
       end
     end
 

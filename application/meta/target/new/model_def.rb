@@ -22,6 +22,7 @@
     :iaas_properties=>{
       :type=>:json
     },
+    :is_default_target=>{:type=>:boolean,:default=>false},
     :project_id=> { #TODO: should project be a parent?
       :type=>:bigint,
       :foreign_key_rel_type=>:project,
@@ -75,7 +76,13 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>Port.common_columns
+         :cols=>Port.common_columns+[:link_def_id]
+       },
+       {
+         :model_name=>:link_def,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port__link_def_id},
+         :cols=>[:component_component_id]
        }]
     },
     :violation_info=>{

@@ -4,6 +4,30 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
 
+    def self.model_type()
+      :component_module
+    end
+    def self.component_type()
+      :puppet #hardwired
+    end
+    def component_type()
+      :puppet #hardwired
+    end
+
+    def self.create_empty_repo(library_idh,project,module_name)
+      if module_exists?(library_idh,module_name)
+        raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
+      end
+      module_specific_type = :puppet  #TODO: hard wired
+      create_opts = {:delete_if_exists => true}
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
+      branch_info = {
+        :workspace_branch => ModuleBranch.workspace_branch_name(project),
+        :library_branch => ModuleBranch.library_branch_name(library_idh)
+      }
+      ModuleRepoInfo.new(repo,module_name,branch_info,library_idh)
+    end
+
     def create_new_version(new_version,existing_version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
@@ -32,6 +56,7 @@ module DTK
 
     #promotes workspace changes to library
     def promote_to_library(version=nil)
+      #TODO: unify with ModuleBranch#update_library_from_workspace_aux?(augmented_branch)
       matching_branches = get_module_branches_matching_version(version)
       #check that there is a workspace branch
       unless ws_branch = find_branch(:workspace,matching_branches)
@@ -48,28 +73,46 @@ module DTK
       end
 
       repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
-      result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
+
+      diffs = repo.diff_between_library_and_workspace(lib_branch,ws_branch).ret_summary()
+      if diffs.no_diffs?()
+        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
+      end
+      #want this here before any changes in case error in parsing meta file
+      if diffs.meta_file_changed?()
+        library_idh = id_handle().get_parent_id_handle_with_auth_info()
+        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,ws_branch.get_implementation(),library_idh)
+        component_meta_file.update_model()
+      end
+ 
+     result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       case result
-      when :changed
+       when :changed
         nil #no op
-      when :no_change 
+       when :no_change 
+        #TODO: with check before now in diffs this shoudl not be reached
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
       when :merge_needed
         raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
       else
         raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
       end
+
+    end
+
+    def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
+      repo = module_branch.get_repo()
+      impl = module_branch.get_implementation()
+      #add/remove any needed file_asset objects
+      impl.create_file_assets_from_dir_els(repo)
+
+      pp "TODO: update meta info if needed"
     end
 
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)
     end
 
-    def update_library_module_with_workspace(version=nil)
-      aug_ws_branch_row = ModuleBranch.get_augmented_workspace_branch(self,version)
-      ModuleBranch.update_library_from_workspace?([aug_ws_branch_row],:ws_branch_augmented => true)
-    end
-    
     def self.list(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
@@ -93,21 +136,22 @@ module DTK
         (mdl[:version_array] ||= Array.new) <<  version
       end
       #put version info in prin form
-      ndx_module_info.values.map do |mdl|
+      unsorted = ndx_module_info.values.map do |mdl|
         raw_va = mdl.delete(:version_array)
         unless raw_va.nil? or raw_va == ["CURRENT"]
           version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
           mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
         end
-        mdl
+        mdl.merge(:type => mdl.component_type())
       end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
 
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version=nil)
       update_object!(:library_library_id,:display_name)
-
+      library_id = self[:library_library_id]
       #get library branch
       library_mb = get_library_module_branch(version)
 
@@ -118,7 +162,7 @@ module DTK
       #  first get library implementation
       sp_hash = {
         :cols => [:id,:group_id],
-        :filter => [:and, [:eq, :library_library_id, self[:library_library_id]],
+        :filter => [:and, [:eq, :library_library_id, library_id],
                     [:eq, :version, ModuleBranch.version_field(version)],
                     [:eq, :module_name,self[:display_name]]]
       }
@@ -131,33 +175,46 @@ module DTK
         :filter => [:eq, :id, workspace_mb[:repo_id]]
       }
       repo = Model.get_obj(model_handle(:repo),sp_hash)
-      repo_name = repo[:repo_name]
-      {
-        :repo_name => repo_name,
-        :branch => workspace_mb[:branch],
-        :module_name => self[:display_name],
-        :repo_url => RepoManager.repo_url(repo_name)
-      }
+      module_name = self[:display_name]
+      module_info = {:workspace_branch => workspace_mb[:branch]}
+      library_idh = id_handle(:model_name => :library, :id => library_id)
+      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
     def get_workspace_branch_info(version=nil)
-      row = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo_name = row[:workspace_repo][:repo_name]
-      {
-        :repo_name => repo_name,
-        :branch => row[:branch],
-        :module_name => row[:component_module][:display_name],
-        :repo_url => RepoManager.repo_url(repo_name)
-      }
+      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+      repo = aug_branch[:workspace_repo]
+      module_name = aug_branch[:component_module][:display_name]
+      ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
+    def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name)
+      repo = repo_idh.create_object()
+      repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
+      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els(repo)in create_objects_for_library_module
+      create_objects_for_library_module(repo,library_idh,module_name)
+    end
+
+    def update_model_from_clone_changes?(diffs_hash,version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      ws_branch = find_branch(:workspace,matching_branches)
+
+      #first update the server clone
+      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
+      if merge_result == :merge_needed
+        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
+      end 
+
+      update_model_from_clone_changes_aux?(diffs_hash,ws_branch)
+      #TODO: should we also update library?
+    end
 
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
       create_objects_for_library_module(repo,library_idh,module_name,version)
     end
     
-    def self.create_objects_for_library_module(repo,library_idh,module_name,version)
+    def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil)
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
@@ -186,6 +243,22 @@ module DTK
 
     def export_preprocess(branch)
       #noop
+    end
+
+    class ModuleRepoInfo < Hash
+      def initialize(repo,module_name,branch_info,library_idh=nil)
+        super()
+        repo.update_object!(:repo_name,:id)
+        repo_name = repo[:repo_name]
+        hash = {
+          :repo_id => repo[:id],
+          :repo_name => repo_name,
+          :module_name => module_name,
+          :repo_url => RepoManager.repo_url(repo_name)
+        }.merge(Aux::hash_subset(branch_info,[:workspace_branch,:library_branch]))
+        hash.merge!(:library_id => library_idh.get_id()) if library_idh
+        replace(hash)
+      end
     end
   end
 end

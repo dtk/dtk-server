@@ -4,7 +4,7 @@ r8_nested_require('git','manage_git_server')
 module XYZ
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
-
+    
     def self.create_repo_clone(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
@@ -149,6 +149,25 @@ module XYZ
     end
 
     #returns :no_change, :changed, :merge_needed
+    def fast_foward_pull(remote_branch,remote_name=nil)
+      remote_name ||= default_remote_name()
+      remote_ref = "#{remote_name}/#{remote_branch}"
+      merge_rel = ret_merge_relationship(:remote_branch,remote_ref,:fetch_if_needed => true)
+      ret = 
+        case merge_rel
+         when :equal then :no_change
+         when :branchpoint, :local_ahead then :merge_needed
+         when :local_behind then :changed  
+         else raise Error.new("Unexpected merge relation (#{merge_rel})")
+        end
+      return ret unless ret == :changed
+      checkout(@branch) do
+        git_command__merge(remote_ref) #TODO: should put in semantic commit message
+      end
+      ret
+    end
+
+    #returns :no_change, :changed, :merge_needed
     def fast_foward_merge_from_branch(branch_to_merge_from)
       merge_rel = ret_merge_relationship(:local_branch,branch_to_merge_from)
       ret = 
@@ -166,6 +185,7 @@ module XYZ
       ret
     end
 
+    #TODO: update to use ret_merge_relationship
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)
         git_command__fetch(remote_name)
@@ -189,10 +209,17 @@ module XYZ
 
     def add_or_update_remote(remote_name,remote_url)
       #TODO: may be way to do this in one step with rename
+      #update": there is:  git remote set-url [--push] <name> <newurl> [<oldurl>]
       if remote_exists?(remote_name)
         remove_remote(remote_name)
       end
       add_remote(remote_name,remote_url)
+    end
+
+    def remove_remote?(remote_name)
+      if remote_exists?(remote_name)
+        remove_remote(remote_name)
+      end
     end
 
     def remove_remote(remote_name)
@@ -238,14 +265,24 @@ module XYZ
       end
     end
 
-    def push_changes(remote_name="origin")
+    def push_changes(remote_name=nil)
       git_command__push(@branch,remote_name)
     end
 
-    def pull_changes(remote_name="origin")
+    def pull_changes(remote_name=nil)
       checkout(@branch) do
         git_command__pull(@branch,remote_name)
       end
+    end
+
+    def rebase_from_remote(remote_name=nil)
+       checkout(@branch) do
+        git_command__rebase(@branch,remote_name)
+      end
+    end
+
+    def fetch_all()
+      git_command__fetch_all()
     end
 
     def push_implementation()
@@ -330,6 +367,10 @@ module XYZ
       ret
     end
 
+    def default_remote_name()
+      "origin"
+    end
+
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
@@ -379,21 +420,32 @@ module XYZ
     def git_command__fetch(remote_name)
       git_command.fetch(cmd_opts(),remote_name)
     end
+    def git_command__fetch_all()
+      git_command.fetch(cmd_opts(),"--all")
+    end
 
     def git_command__merge_base(ref1,ref2)
       #chomp added below because raw griot command has a cr at end of line
       git_command.merge_base(cmd_opts(),ref1,ref2).chomp
     end
 
-    #TODO: see what other commands needs mutex and whetehr mutex across what boundaries
+    #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
-    def git_command__push(branch_name,remote_name="origin")
+    def git_command__push(branch_name,remote_name=nil)
       Git_command__push_mutex.synchronize do 
+        remote_name ||= default_remote_name()
         git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{branch_name}")
       end
     end
-    def git_command__pull(branch_name,remote_name="origin")
+
+    def git_command__pull(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
       git_command.pull(cmd_opts(),remote_name,branch_name)
+    end
+
+    def git_command__rebase(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
+      git_command.rebase(cmd_opts(),"#{remote_name}/#{branch_name}")
     end
 
     def git_command__merge(branch_to_merge_from)
@@ -404,7 +456,7 @@ module XYZ
       git_command.branch(cmd_opts(),"-D",branch_name)
     end
     def git_command__delete_remote_branch(branch_name)
-      git_command.push(cmd_opts(),"origin",":refs/heads/#{branch_name}")
+      git_command.push(cmd_opts(),default_remote_name(),":refs/heads/#{branch_name}")
     end
     def cmd_opts()
       {:raise => true, :timeout => 60}

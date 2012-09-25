@@ -147,9 +147,10 @@ module XYZ
           end
         end
 
-        ndx_ret.values.map do |r|
+        unsorted = ndx_ret.values.map do |r|
           r.slice(:id,:display_name,:execution_status).merge(:nodes => r[:ndx_nodes].values)
         end
+        unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
      private
       def add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)

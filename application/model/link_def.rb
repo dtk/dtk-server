@@ -55,6 +55,10 @@ module XYZ
       #these are the ones for which the possible links shoudl be found
       node_link_defs_info.each do |r|
         port = r[:port]
+        if port.nil?
+          Log.info("TODO: Check if port.nil? is an error in .get_annotated_internal_link_defs")
+          next
+        end
         link_def = r[:link_def]
         component = r[:component]
         if %w{component_internal component_internal_external}.include?(port[:type]) and

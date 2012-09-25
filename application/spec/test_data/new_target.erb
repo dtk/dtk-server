@@ -1,17 +1,9 @@
 {
-  "project": {
-    "<%= project_ref %>": {
-      "display_name": "Project 1",
-      "description": "Project 1",
-      "type": "puppet"
-    }
-  },
   "datacenter": {
     "<%= target_ref %>": {
-      "display_name": "Staging East1",
-      "description": "Staging East1",
+      "display_name": "<%= target_name %>",
+      "description": "<%= target_name %>",
       "iaas_type" : "ec2",
-      "is_default_target": true,
       "iaas_properties" : {
         "region" : "<%= ec2_region %>",
         "availability_zone" : "<%= ec2_region %>a",

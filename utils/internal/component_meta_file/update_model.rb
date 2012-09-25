@@ -55,23 +55,24 @@ module DTK; class ComponentMetaFile
     def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,meta_hash)
       impl_id = impl_idh.get_id()
       remote_link_defs = Hash.new
+
       cmps_hash = meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
+        cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
         info = Hash.new
         cmp_info.each do |k,v|
           case k
           when "external_link_defs"
             v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
-            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs,cmp_ref)
             (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
           when "link_defs" 
-            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs)
+            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,remote_link_defs,cmp_ref)
             (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
           else
             info[k] = v
           end
         end
         info.merge!("implementation_id" => impl_id)
-        cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
         h.merge(cmp_ref => info)
       end
       #process the link defs for remote components
@@ -135,6 +136,7 @@ module DTK; class ComponentMetaFile
         config_agent_type = remote_link_def.values.first[:config_agent_type]
         remote_cmp_ref = component_ref_from_cmp_type(config_agent_type,remote_cmp_type)
         if cmp_pointer = cmps_hash[remote_cmp_ref]
+          remote_link_def.delete(:local_cmp_ref)
           (cmp_pointer["link_def"] ||= Hash.new).merge!(remote_link_def)
           remote_link_defs.delete(remote_cmp_type)
         end
@@ -152,14 +154,29 @@ module DTK; class ComponentMetaFile
         if remote_cmp = ndx_stored_remote_cmps[remote_cmp_type]
           remote_cmp_ref = remote_cmp[:ref]
           cmp_pointer = stored_cmps_hash[remote_cmp_ref] ||= {"link_def" => Hash.new}
+          remote_link_def.delete(:local_cmp_ref)
           cmp_pointer["link_def"].merge!(remote_link_def)
           remote_link_defs.delete(remote_cmp_type)
         end
       end
       
       #if any remote_link_defs left they are dangling refs
-      remote_link_defs.keys.each do |remote_cmp_type|
-        Log.error("link def references a remote component (#{remote_cmp_type}) that does not exist")
+      remote_link_defs.each do |remote_cmp_type,remote_cmp_info|
+        set_to_dangling_link?(cmps_hash,remote_cmp_type,remote_cmp_info)
+      end
+    end
+
+    def set_to_dangling_link?(cmps_hash,remote_cmp_type,remote_cmp_info)
+      #TODO: may see if can put :local_cmp_ref so can use remote_cmp_info[:local_cmp_ref]
+      if remote_cmp_info.size != 1
+        Log.error("remote_cmp_info has unexpected size (<>1)")
+        return
+      end
+      if local_cmp_ref = remote_cmp_info.values.first[:local_cmp_ref]
+        local_ld_type = "local_#{remote_cmp_type}"
+        if pntr = ((cmps_hash[local_cmp_ref]||{})["link_def"]||{})[local_ld_type]
+          pntr.merge!(:dangling => true)
+        end
       end
     end
   end

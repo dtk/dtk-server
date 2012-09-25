@@ -42,6 +42,12 @@ module XYZ
       repo_obj
     end
 
+    def update_for_new_repo()
+      update_object!(:repo_name)
+      RepoManager.fetch_all(self)
+      RepoManager.rebase_from_remote(self)
+    end
+
     def self.delete(repo_idh)
       repo = repo_idh.create_object()
       RepoManager.delete_repo(repo)
@@ -50,6 +56,10 @@ module XYZ
 
     def synchronize_library_with_workspace_branch(lib_branch,ws_branch)
       RepoManager.fast_foward_merge_from_branch(ws_branch[:branch],lib_branch)
+    end
+
+    def diff_between_library_and_workspace(lib_branch,ws_branch)
+      RepoManager.diff(ws_branch[:branch],lib_branch)
     end
 
     def synchronize_with_remote_repo(branch,opts={})
@@ -86,6 +96,13 @@ module XYZ
       remote_name = remote_name_for_push_pull()
       RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
       remote_repo_name
+    end
+
+    def unlink_remote()
+      update_object!(:repo_name)
+      remote_name = remote_name_for_push_pull()
+      RepoManager.unlink_remote(self[:repo_name],remote_name)
+      update(:remote_repo_name => nil, :remote_repo_namespace => nil)
     end
 
    private    

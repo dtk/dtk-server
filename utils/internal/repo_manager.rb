@@ -3,13 +3,13 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push_to_origin?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,]
+      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push_to_origin?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:footprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)
           context = args.pop
-          return get_repo(context).send(name,*args,&block)
+          return get_adapter_repo(context).send(name,*args,&block)
         end
         if klass = class_if_admin_method?(name) 
           return klass.send(name,*args,&block)
@@ -47,7 +47,7 @@ module XYZ
             :branch => branch
             }
           }
-          get_repo(context).delete_branch()
+          get_adapter_repo(context).delete_branch()
         end
       end
     end
@@ -55,32 +55,37 @@ module XYZ
     ### for dealing with actual repos
     class << self
       def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url,opts={})
-        repo = get_repo(context(repo_name,branch))      
-        repo.synchronize_with_remote_repo(remote_name,remote_url,opts)
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.synchronize_with_remote_repo(remote_name,remote_url,opts)
       end
 
       #returns :equal, :local_behind, :local_ahead, or :branchpoint 
       def ret_remote_merge_relationship(repo_name,branch,remote_name,opts={})
-        repo = get_repo(context(repo_name,branch))      
-        repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{branch}",opts)
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{branch}",opts)
       end
 
       def push_to_remote_repo(repo_name,branch,remote_name)
-        repo = get_repo(context(repo_name,branch))      
-        repo.push_changes(remote_name)
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.push_changes(remote_name)
         repo_name
       end
 
       def link_to_remote_repo(repo_name,branch,remote_name,remote_url)
-        repo = get_repo(context(repo_name,branch))      
-        repo.add_or_update_remote(remote_name,remote_url)
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.add_or_update_remote(remote_name,remote_url)
         repo_name
       end
 
+      def unlink_remote(repo_name,remote_name)
+        adapter_repo = get_adapter_repo(context(repo_name,"master"))
+        adapter_repo.remove_remote?(remote_name)
+      end
+
+     private
       def context(repo_name,branch)
         {:implementation => {:repo => repo_name, :branch => branch}}
       end
-      private :context
     end
 
     ###### for repo admin functions, such as creating and deleting repositories
@@ -122,33 +127,33 @@ module XYZ
     end
     
     ##########
-    def self.get_repo(context)
-      repo,branch = ret_repo_and_branch(context)
+    def self.get_adapter_repo(context)
+      repo_dir,branch = ret_repo_dir_and_branch(context)
       raise Error.new("cannot find branch in context") unless branch
-      CachedRepoObjects[repo] ||= Hash.new
-      CachedRepoObjects[repo][branch] ||= load_and_create(repo,branch)
+      CachedRepoObjects[repo_dir] ||= Hash.new
+      CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir,branch)
     end
 
    private
     CachedRepoObjects = Hash.new
-    def self.ret_repo_and_branch(context)
-      repo = branch = nil
+    def self.ret_repo_dir_and_branch(context)
+      repo_dir = branch = nil
       if context.kind_of?(ModuleBranch)
-        repo,branch = context.repo_and_branch()
+        repo_dir,branch = context.repo_and_branch()
       elsif context.kind_of?(Repo)
         context.update_object!(:repo_name)
-        repo = context[:repo_name]
+        repo_dir = context[:repo_name]
         branch = "master"
       elsif context.kind_of?(Implementation)
-        repo = context[:repo]
+        repo_dir = context[:repo]
         branch = context[:branch]
-      else #TODO: modify below and how args passed to just use hash with keys :repo,:branch
+      else #TODO: modify below and how args passed to just use hash with keys :repo_dir,:branch
         #assume that it has hash with :implementation key
         #TODO: do we still need __top
-        repo = (context[:implementation]||{})[:repo]||"__top"
+        repo_dir = (context[:implementation]||{})[:repo]||"__top"
         branch = (context[:implementation]||{})[:branch]
       end
-      [repo,branch]
+      [repo_dir,branch]
     end
 
     def self.load_and_return_adapter_class()
@@ -158,9 +163,9 @@ module XYZ
       @cached_adapter_class = DynamicLoader.load_and_return_adapter_class("repo_manager",adapter_name)
     end
 
-    def self.load_and_create(repo,branch)
+    def self.load_and_create(repo_dir,branch)
       klass = load_and_return_adapter_class() 
-      klass.create(repo,branch)
+      klass.create(repo_dir,branch)
     end
 
     def self.get_all_repo_names(model_handle)

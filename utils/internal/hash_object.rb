@@ -22,6 +22,15 @@ module XYZ
     def set_unless_nil(k,v)
       self[k] = v unless v.nil?
     end
+
+    def set?(*kv_array)
+      kv_array.each do |kv|
+        k = kv.keys.first
+        v = kv.values.first
+        set_unless_nil(k,v)
+      end
+      self
+    end
   end
 
   class PrettyPrintHash < SimpleOrderedHash

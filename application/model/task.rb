@@ -4,6 +4,28 @@ module XYZ
   class Task < Model
     extend TaskCreateClassMixin
 
+    def self.assembly_task_status(assembly_idh,detail_level=nil)
+      task_mh = assembly_idh.createMH(:task)
+      filter = [:eq, :assembly_id, assembly_idh.get_id()]
+      unless task = get_top_level_most_recent_task(task_mh,filter)
+        assembly = assembly_idh.create_object().update_object!(:display_name)
+        raise ErrorUsage.new("No tasks found for assembly (#{assembly[:display_name]})")
+      end
+
+      task_structure = get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+
+      opts = Task::StateInfoOpts.new
+      if detail_level
+        #TODO: stub; treat passed in detail setting Task::StateInfoOpts as function of detail_level
+        opts[:no_components] = false
+        opts[:no_attributes] = true
+      else
+        opts[:no_components] = false
+        opts[:no_attributes] = true
+      end
+      task_structure.state_info(opts)
+    end
+
     #returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new
@@ -39,17 +61,22 @@ module XYZ
       ret
     end
 
-    def state_info(opts)
+    #TODO: may change method name to 'status'
+    def state_info(opts,level=1)
       set_and_return_types!()
       ret = PrettyPrintHash.new
-      ret.add(self,:type,:id,:status)
+      if level == 1
+        ret.add(self,:type,:id,:status)
+      else
+        ret.add(self,:type,:status)
+      end
       ret.add(self,:started_at?)
       ret.add(self,:ended_at?)
       num_subtasks = subtasks.size
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts)}
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts,level+1)}
         end
       end
       action_type = self[:executable_action_type]
@@ -247,10 +274,17 @@ module XYZ
       end
     end
 
-    def self.get_top_level_tasks(model_handle)
+    def self.get_top_level_most_recent_task(model_handle,filter=nil)
+      #TODO: can be more efficient if do sql query with order and limit 1
+      tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
+      tasks && tasks.first
+    end
+
+    def self.get_top_level_tasks(model_handle,filter=nil)
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:status,:updated_at,:executable_action_type],
-        :filter => [:eq,:task_id,nil] #so this is a top level task
+        :filter => [:and,[:eq,:task_id,nil], #so this is a top level task
+                    filter].compact
       }
       get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
     end

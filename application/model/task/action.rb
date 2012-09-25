@@ -121,6 +121,7 @@ module XYZ
       end
 
       private
+      #generic; can be overwritten
       def self.node_state_info(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
@@ -239,9 +240,23 @@ module XYZ
         end
       end
 
-
       def create_node_config_agent_type
         self[:config_agent_type]
+      end
+
+      private
+      def self.node_state_info(object,opts)
+        node = object[:node]||{}
+        ext_ref = node[:external_ref]||{}
+        #TODO: want to include os type and instance id when tasks upadted with this
+        kv_array = 
+          [{:name => node[:display_name]},
+           {:id => node[:id]},
+           {:type => ext_ref[:type]},
+           {:image_id => ext_ref[:image_id]},
+           {:size => ext_ref[:size]},
+          ]
+        PrettyPrintHash.new.set?(*kv_array)
       end
     end
 
@@ -250,7 +265,7 @@ module XYZ
         ret = PrettyPrintHash.new
         ret[:node] = node_state_info(object,opts)
         unless opts[:no_components]
-          ret[:component_actions] = (object[:component_actions]||[]).map do |component_action|
+          ret[:components] = (object[:component_actions]||[]).map do |component_action|
             ComponentAction.state_info(component_action,opts)
           end
         end
@@ -418,10 +433,14 @@ module XYZ
 
     class ComponentAction < HashObject
       def self.state_info(object,opts)
-        ret = PrettyPrintHash.new
-        ret[:component] = component_state_info(object,opts) 
-        ret[:attributes] = attributes_state_info(object,opts) unless opts[:no_attributes]
-        ret
+        if opts[:no_attributes]
+          component_name(object)
+        else
+          ret = PrettyPrintHash.new
+          ret[:component] = component_state_info(object,opts) 
+          ret[:attributes] = attributes_state_info(object,opts) unless opts[:no_attributes]
+          ret
+        end
       end
 
       #for debugging
@@ -462,18 +481,25 @@ module XYZ
         self[:attributes] << attr
       end
 
-      private
+     private
+
+      def self.component_name(object)
+        ret = (object[:component]||{})[:display_name]
+        ret && ret.gsub(/__/,"::")
+      end
+
       def self.component_state_info(object,opts)
         ret = PrettyPrintHash.new
-        component = object[:component]||{}
-        if name = component[:display_name]
+        if name = component_name(object)
           ret[:name] = name
         end
+        component = object[:component]||{}
         if id = component[:id]  
           ret[:id] = id
         end
         ret
       end
+
       def self.attributes_state_info(object,opts)
         #need to query db to get up to date values
         (object[:attributes]||[]).map do |attr|

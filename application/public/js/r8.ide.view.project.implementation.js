@@ -31,6 +31,7 @@ if (!R8.IDE.View.project.implementation) {
 				_leafBodyNode = R8.Utils.Y.one('#'+_leafBodyNodeId);
 				_childrenListNode = R8.Utils.Y.one('#'+_childrenListNodeId);
 
+/*
 				_componentsLeafNode = R8.Utils.Y.one('#implementation-components-'+_implementation.get('id'));
 				_componentsListNode = R8.Utils.Y.one('#implementation-components-list-'+_implementation.get('id'));
 
@@ -38,7 +39,7 @@ if (!R8.IDE.View.project.implementation) {
 				for(var c in components) {
 					components[c].getView('project').init();
 				}
-
+*/
 				this.setupEvents();
 				_initialized = true;
 			},
@@ -72,6 +73,7 @@ if (!R8.IDE.View.project.implementation) {
 				_childrenListNode = R8.Utils.Y.Node.create('<ul id="implementation-'+_implementation.get('id')+'-children"></ul>');
 				_childrenListNodeId = _childrenListNode.get('id');
 
+/*
 				var componentsLeaf = {
 					'node_id': 'implementation-components-'+_implementation.get('id'),
 					'type': 'component_list',
@@ -96,7 +98,7 @@ if (!R8.IDE.View.project.implementation) {
 					_componentsLeafNode.prepend('<ins class="jstree-icon">&nbsp;</ins>');
 				}
 				_childrenListNode.append(_componentsLeafNode);
-
+*/
 				//Need to pass _childrenListNode to renderFileTree b/c of recursive behavior to render files and folders
 				this.renderFileTree(_implementation.get('file_assets'),_childrenListNode,newImplementation);
 
@@ -136,7 +138,7 @@ if (!R8.IDE.View.project.implementation) {
 			},
 			renderFileTree: function(file_assets,listNode,newImplementation) {
 //DEBUG
-console.log('Inside renderFileTree, listNode is:'+listNode);
+//console.log('Inside renderFileTree, listNode is:'+listNode);
 //console.log(arguments);
 				file_assets.sort(this.sortAssetTree);
 

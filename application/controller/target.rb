@@ -210,6 +210,11 @@ pp request.params
 #TODO: any way to update a model from its object once an instance is created?
       update_from_hash(id,{:ui=>dc_ui})
 
+
+pp '++++++++++++++++++++++++++++++++++++++'
+pp 'SHOULD HAVE UPDATED FROM HASH FOR TARGET OBJECT:'
+pp dc_ui
+
 #TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 

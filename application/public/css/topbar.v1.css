@@ -43,7 +43,8 @@
 	border-right: 1px solid red;
 */
 	height: inherit;
-	width: 350px;
+/*	width: 350px;*/
+	width: 173px;
 }
 
 .menu-bar .item {
@@ -272,6 +273,7 @@
 	float: left;
 	height: 24px;
 	width: 179px;
+	margin: 0;
 /*
 	background-color: #BCC7D8;
 	border-top: 1px solid #D5DCE8;

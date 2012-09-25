@@ -149,7 +149,7 @@ if (!R8.Target) {
 			},
 			hasNode: function(nodeId) {
 //DEBUG
-console.log(_nodes);
+//console.log(_nodes);
 
 				for(var n in _nodes) {
 					if(_nodes[n].get('id') == nodeId) return true;
@@ -199,6 +199,9 @@ console.log(_nodes);
 
 				this.addNode(e.nodeDef,true);
 				//----------------------------------------------------------------------
+//DEBUG
+//console.log('instantiating node for target..., checking ui params...');
+//console.log(_def.ui.items);
 
 				var ui = {};
 				ui[this.get('id')] = nodePos;
@@ -296,6 +299,10 @@ console.log(_nodes);
 //WHY is node always initialized during render??????
 			addNode: function(nodeDef,newNode) {
 				_nodes[nodeDef.id] = new R8.Node(nodeDef,this);
+
+//DEBUG
+//console.log('adding node to target with id:'+nodeDef.id);
+//console.log(this.get('ui'));
 
 				for(var v in _views) {
 					_views[v].addNode(_nodes[nodeDef.id],newNode);

@@ -1,14 +1,13 @@
 <html>
 <head>
+    <meta charset="utf-8"/>
+
 <!--
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.2.0/build/cssreset/reset.css&3.2.0/build/cssfonts/fonts.css">
 -->
 
 <link rel="SHORTCUT ICON" href="{%=_app[:base_images_uri]%}/icon-black.ico" />
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssreset/reset.css">
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssfonts/fonts.css">
-<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/yui/build/cssgrids/grids.css">
-
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/bootstrap/css/bootstrap.css">
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_js_uri]%}/external/jstree/themes/r8/style.css">
 
 <!--//TODO: revisit to variablize the path of the founcation css-->
@@ -33,6 +32,7 @@
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/editor.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/target.css" />
+<link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/project.css" />
 
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/list.css" />
 <link rel="stylesheet" type="text/css" href="{%=_app[:base_css_uri]%}/search.css" />
@@ -42,7 +42,6 @@
 {%for css_include in _app[:css_includes]%}
 	<link rel="stylesheet" type="text/css" href="{%=css_include%}" />
 {%end%}
-
 </head>
 
 	<body class="yui3-skin-sam  yui-skin-sam" style="overflow: hidden;">
@@ -63,17 +62,7 @@
 							</div>
 						</div>
 						<div class="item-divider"></div>
-						<div class="item"><a href="{%=_app[:base_uri]%}/xyz/component/list">Library</a></div>
-						<div class="item-divider"></div>
-						<div class="item disabled"><a href="{%=_app[:base_uri]%}/xyz/datacenter/list">Dashboard</a></div>
 					</div>
-					<div class="nav-divider"></div>
-<!--					<div class="sub-item"><a href="javascript:R8.Editor.saveFile();">Save</a></div>-->
-<!--
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('debug');">Refresh Chef Debug</a></div>
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('info');">Refresh Chef Info</a></div>
-					<div class="sub-item"><a href="javascript:R8.IDE.refreshChefDebug('summary');">Refresh Chef Summary</a></div>
--->
 					<div style="float: right; margin:5px; 10px;"><a href="{%=_app[:base_uri]%}/xyz/user/logout">Logout</a></div>
 				</div>
 				<div class="yui3-u right-cap"></div>
@@ -229,14 +218,29 @@ YUI_config = {
 </script>
 
 <!-- JS -->
-
+<!--
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/yui/yui.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/external/yui/build/loader/loader.js"></script>
+-->
 
-<script src="{%=_app[:base_js_uri]%}/external/jquery-1.6.2.js"></script>
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.7.1/build/cssgrids/cssgrids-min.css&3.7.1/build/cssfonts/cssfonts-min.css&3.7.1/build/cssreset/cssreset-min.css&3.7.1/build/widget-base/assets/skins/sam/widget-base.css&3.7.1/build/widget-stack/assets/skins/sam/widget-stack.css&3.7.1/build/overlay/assets/skins/sam/overlay.css">
+
+<!-- JS -->
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.7.1/build/yui-base/yui-base-min.js&3.7.1/build/oop/oop-min.js&3.7.1/build/event-custom-base/event-custom-base-min.js&3.7.1/build/features/features-min.js&3.7.1/build/dom-core/dom-core-min.js&3.7.1/build/dom-base/dom-base-min.js&3.7.1/build/selector-native/selector-native-min.js&3.7.1/build/selector/selector-min.js&3.7.1/build/node-core/node-core-min.js&3.7.1/build/node-base/node-base-min.js&3.7.1/build/event-base/event-base-min.js&3.7.1/build/event-delegate/event-delegate-min.js&3.7.1/build/event-custom-complex/event-custom-complex-min.js&3.7.1/build/event-synthetic/event-synthetic-min.js&3.7.1/build/event-mousewheel/event-mousewheel-min.js&3.7.1/build/event-mouseenter/event-mouseenter-min.js&3.7.1/build/event-key/event-key-min.js&3.7.1/build/event-focus/event-focus-min.js&3.7.1/build/event-resize/event-resize-min.js&3.7.1/build/event-hover/event-hover-min.js&3.7.1/build/event-outside/event-outside-min.js&3.7.1/build/event-touch/event-touch-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.7.1/build/event-move/event-move-min.js&3.7.1/build/event-flick/event-flick-min.js&3.7.1/build/event-valuechange/event-valuechange-min.js&3.7.1/build/event-tap/event-tap-min.js&3.7.1/build/querystring-stringify-simple/querystring-stringify-simple-min.js&3.7.1/build/io-base/io-base-min.js&3.7.1/build/datatype-xml-parse/datatype-xml-parse-min.js&3.7.1/build/io-xdr/io-xdr-min.js&3.7.1/build/io-form/io-form-min.js&3.7.1/build/io-upload-iframe/io-upload-iframe-min.js&3.7.1/build/queue-promote/queue-promote-min.js&3.7.1/build/io-queue/io-queue-min.js&3.7.1/build/node-event-delegate/node-event-delegate-min.js&3.7.1/build/pluginhost-base/pluginhost-base-min.js&3.7.1/build/pluginhost-config/pluginhost-config-min.js&3.7.1/build/node-pluginhost/node-pluginhost-min.js&3.7.1/build/dom-style/dom-style-min.js&3.7.1/build/dom-screen/dom-screen-min.js&3.7.1/build/node-screen/node-screen-min.js&3.7.1/build/node-style/node-style-min.js&3.7.1/build/get/get-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.7.1/build/loader-base/loader-base-min.js&3.7.1/build/loader-rollup/loader-rollup-min.js&3.7.1/build/loader-yui3/loader-yui3-min.js&3.7.1/build/attribute-core/attribute-core-min.js&3.7.1/build/base-core/base-core-min.js&3.7.1/build/attribute-events/attribute-events-min.js&3.7.1/build/attribute-extras/attribute-extras-min.js&3.7.1/build/attribute-base/attribute-base-min.js&3.7.1/build/attribute-complex/attribute-complex-min.js&3.7.1/build/base-base/base-base-min.js&3.7.1/build/base-pluginhost/base-pluginhost-min.js&3.7.1/build/base-build/base-build-min.js&3.7.1/build/yui-throttle/yui-throttle-min.js&3.7.1/build/classnamemanager/classnamemanager-min.js&3.7.1/build/dd-ddm-base/dd-ddm-base-min.js&3.7.1/build/dd-ddm/dd-ddm-min.js&3.7.1/build/dd-ddm-drop/dd-ddm-drop-min.js&3.7.1/build/dd-drag/dd-drag-min.js&3.7.1/build/dd-proxy/dd-proxy-min.js&3.7.1/build/dd-constrain/dd-constrain-min.js&3.7.1/build/dd-drop/dd-drop-min.js&3.7.1/build/dd-scroll/dd-scroll-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.7.1/build/dd-drop-plugin/dd-drop-plugin-min.js&3.7.1/build/dd-delegate/dd-delegate-min.js&3.7.1/build/cookie/cookie-min.js&3.7.1/build/json-parse/json-parse-min.js&3.7.1/build/json-stringify/json-stringify-min.js&3.7.1/build/event-contextmenu/event-contextmenu-min.js&3.7.1/build/widget-base/widget-base-min.js&3.7.1/build/widget-base-ie/widget-base-ie-min.js&3.7.1/build/widget-htmlparser/widget-htmlparser-min.js&3.7.1/build/widget-skin/widget-skin-min.js&3.7.1/build/widget-uievents/widget-uievents-min.js&3.7.1/build/widget-stdmod/widget-stdmod-min.js&3.7.1/build/widget-position/widget-position-min.js&3.7.1/build/widget-position-align/widget-position-align-min.js&3.7.1/build/widget-stack/widget-stack-min.js&3.7.1/build/widget-position-constrain/widget-position-constrain-min.js&3.7.1/build/overlay/overlay-min.js&3.7.1/build/dd-plugin/dd-plugin-min.js"></script>
+
+
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/jquery.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jquery.cookie.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/jquery.jstree.js"></script>
 <script src="{%=_app[:base_js_uri]%}/external/jstree/_lib/jquery.hotkeys.js"></script>
+
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-tooltip.js"></script>
+<script src="{%=_app[:base_js_uri]%}/external/bootstrap/js/bootstrap-popover.js"></script>
 
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/ctrl.r8.js"></script>
 <script type="text/javascript" src="{%=_app[:base_js_uri]%}/model.r8.js"></script>

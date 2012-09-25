@@ -141,15 +141,15 @@ if (!R8.IDE.View.target.editor) {
 						if(typeof(this.data[key]) !='undefined')
 							delete(this.data[key]);
 					}
-				},
-				'task-viewer': {
+				}
+/*				'task-viewer': {
 					'id': 'task-viewer',
 					'type':'tasks',
 					'default_height': 200,
 					'resizeable': false,
 					'i18n': 'Tasks',
 				}
-/*				'logging': {
+				'logging': {
 					'default_height': 200,
 					'resizeable': false,
 					'i18n': 'Logging',
@@ -217,6 +217,10 @@ if (!R8.IDE.View.target.editor) {
 //					_plugins[p].node = R8.Utils.Y.one('#'+this.get('id')+'-plugin-'+p);
 				}
 
+//DEBUG
+//console.log('Checking UI in target init for target:'+_target.id);
+//console.log(_ui);
+
 				if(_ui == null) _ui = {"items":{}};
 				var nodes = _target.get('nodes');
 
@@ -278,8 +282,9 @@ if (!R8.IDE.View.target.editor) {
 //				_contentNode.append(R8.Dock.render({'display':'block','top':_topbarNode.get('region').bottom}));
 //				_contentNode.append(R8.Dock2.render({'display':'block','top':_contentNode.get('region').top}));
 
-				_contentNode.append(R8.Dock2.render({'display':'block','top':40}));
-				R8.Dock2.init(_contentNode.get('id'));
+//DEBUG - removing for public beta 1
+//				_contentNode.append(R8.Dock2.render({'display':'block','top':40}));
+//				R8.Dock2.init(_contentNode.get('id'));
 
 //				R8.Utils.Y.one('#editor-panel-content').append(R8.Dock2.render({'display':'block','top':40}));
 //				R8.Dock2.init('editor-panel-content');
@@ -1029,11 +1034,18 @@ if (!R8.IDE.View.target.editor) {
 					_uiCookie[itemId]['top'] = itemNode.getStyle('top');
 					_uiCookie[itemId]['left'] = itemNode.getStyle('left');
 
+//DEBUG
+//console.log('Checking UI cookie value...');
+//console.log(_uiCookie);
+
 					var top = itemNode.getStyle('top');
 					var left = itemNode.getStyle('left');
 					_ui.items[itemId]['top'] = parseInt(top.replace('px',''));
 					_ui.items[itemId]['left'] = parseInt(left.replace('px',''));
 				}
+//DEBUG
+//console.log('Going to set uiCookie for cookie key:'+_cookieKey);
+
 				YUI().use('json','cookie', function(Y){
 					var _uiCookieJSON = Y.JSON.stringify(_uiCookie);
 					Y.Cookie.set(_cookieKey, _uiCookieJSON);

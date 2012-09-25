@@ -193,6 +193,13 @@ if (!R8.IDE.View.node.editor_target) {
 			addComponent: function() {
 
 			},
+//TODO: make remove evented like add using IDE event framework
+			removeComponent: function(componentId) {
+
+				//Remove the ports related to the component
+//				_node.removePort(portId);
+
+			},
 
 		//--------------------------------------
 		//PORT FUNCTIONS

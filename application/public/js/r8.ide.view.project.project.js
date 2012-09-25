@@ -20,6 +20,10 @@ if (!R8.IDE.View.project.project) {
 			_implementationLeafNode = null,
 			_implementationListNode = null,
 
+			_contextShimNodeId = '',
+			_contextShimNode = null,
+			_contextMenuOverlay = null,
+
 			_leafDef = {
 				'node_id': 'project-'+_project.get('id'),
 				'type': 'project',
@@ -36,10 +40,12 @@ if (!R8.IDE.View.project.project) {
 				$('#project-tree-'+_project.get('id')).jstree({
 //					'plugins': ["ui","themes","html_data","hotkeys","crrm","contextmenu"],
 //					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","hotkeys","contextmenu"],
-					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","contextmenu"],
+//					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search","contextmenu"],
+					'plugins': ["themes","json_data","html_data","ui","crrm","cookies","search"],
 
 					"contextmenu":{
 						"items": {
+/*
 							"rename":{
 								"label": "Rename",
 								"action": function(obj) {
@@ -47,31 +53,33 @@ if (!R8.IDE.View.project.project) {
 console.log('should be renaming this tree node now.....');
 								}
 							},
+*/
+							"rename":{},
 							"remove":{
 								"label": "Delete",
 								"action": function(obj) {
-//console.log(obj.attr('id'));
-var splitter = obj.attr('id').split('-');
-if(splitter.length === 3) {
-	var model = splitter[0];
-	var modelId = splitter[2];
-}
-switch(model) {
-	case "node":
-//DEBUG
-//console.log('should be deleting node.....');
-		var targets = _project.get('targets');
-		for(var t in targets) {
-			if(targets[t].hasNode(modelId)) {
-				targets[t].deleteNode(modelId);
-			}
-//console.log('have target:'+t);
-		}
-		break;
-}
+									//console.log(obj.attr('id'));
+									var splitter = obj.attr('id').split('-');
+									if(splitter.length === 3) {
+										var model = splitter[0];
+										var modelId = splitter[2];
+									}
+									switch(model) {
+										case "node":
+									//DEBUG
+									//console.log('should be deleting node.....');
+											var targets = _project.get('targets');
+											for(var t in targets) {
+												if(targets[t].hasNode(modelId)) {
+													targets[t].deleteNode(modelId);
+												}
+									//console.log('have target:'+t);
+											}
+											break;
+									}
 								}
-							},
-							"create":{
+							}
+/*							"create":{
 								"label": "Create",
 								"separator_flase": false,
 								"separator_after": true,
@@ -82,6 +90,7 @@ this.create(obj);
 //console.log('should be creating tree node now.....');
 								}
 							}
+*/
 						}
 					},
 
@@ -114,6 +123,7 @@ this.create(obj);
 				_initialized = true;
 			},
 			setupEvents: function() {
+/*
 				_events['leaf_dblclick'] = _leafBodyNode.on('dblclick',function(e){
 					var leafNodeId = e.currentTarget.get('id'),
 						leafType = e.currentTarget.getAttribute('type'),
@@ -126,6 +136,44 @@ this.create(obj);
 					e.halt();
 					e.stopImmediatePropagation();
 				},this);
+*/
+
+				_events['leaf_rtClick'] = R8.Utils.Y.delegate('contextmenu',function(e) {
+					var targetNode = e.target.get('parentNode'),
+						leafNodeId = targetNode.get('id'),
+						leafType = targetNode.getAttribute('type'),
+						leafObjectId = leafNodeId.replace('leaf-body-'+leafType+'-leaf-',''),
+						leafLabel = targetNode.get('children').item(1).get('innerHTML');
+
+					_contextShimNodeId = R8.Utils.Y.guid();
+					var pageContainerNode = R8.Utils.Y.one('#page-container'),
+						pageNodeRegion = pageContainerNode.get('region'),
+						height = pageNodeRegion.height,
+						width = pageNodeRegion.width;
+
+					pageContainerNode.append('<div id="'+_contextShimNodeId+'" style="position: absolute; z-index: 1000; top:0px; height:'+height+'px; width:'+width+'px;"></div>');
+					_contextShimNode = R8.Utils.Y.one('#'+_contextShimNodeId);
+					_events['contextShimClick'] = _contextShimNode.on('click',function(e){
+						this.clearContextMenu();
+					},this);
+
+					if(_contextMenuOverlay == null) {
+						_contextMenuOverlay = new R8.Utils.Y.Overlay({
+							bodyContent: '',
+							visible: false,
+							constrain: true,
+							zIndex: 1001
+						});
+					}
+					_contextMenuOverlay.render(R8.Utils.Y.one("body"));
+					this.setContextMenu(leafType,leafObjectId);
+					_contextMenuOverlay.set("xy", [e.pageX, e.pageY]);
+					_contextMenuOverlay.show();
+
+//					e.preventDefault();
+//					e.halt();
+//					e.stopImmediatePropagation();
+				},_leafNode,'.leaf-body',this);
 
 				_events['t_leaf_dblclick'] = R8.Utils.Y.delegate('dblclick',function(e) {
 					var leafNodeId = e.currentTarget.get('id'),
@@ -169,6 +217,93 @@ break;
 				},_leafNode,'.leaf-body',this);
 
 			},
+			clearContextMenu: function() {
+				_events['contextShimClick'].detach();
+				delete(_events['contextShimClick']);
+
+				_contextShimNode.remove(true);
+				_contextShimNode = null;
+				_contextMenuOverlay.hide();
+			},
+			setContextMenu: function(contextModel,contextModelId) {
+				var nodeContextDef = {
+						"delete":{
+							"label": "Delete",
+							"clickCallback": function(e) {
+								var model = e.target.getAttribute('data-model'),
+									modelId = e.target.getAttribute('data-id');
+
+								var targets = _project.get('targets');
+								for(var t in targets) {
+									if(targets[t].hasNode(modelId)) {
+										targets[t].deleteNode(modelId);
+									}
+								}
+							}
+						}
+					};
+
+				var componentContextDef = {
+						"delete":{
+							"label": "Delete",
+							"clickCallback": function(e) {
+								var model = e.target.getAttribute('data-model'),
+									modelId = e.target.getAttribute('data-id');
+
+								var targets = _project.get('targets');
+								for(var t in targets) {
+									var nodes = targets[t].get('nodes');
+									for(var n in nodes) {
+										if(nodes[n].hasComponent(modelId)) {
+											nodes[n].deleteComponent(modelId);
+										}
+									}
+								}
+							}
+						}
+					};
+
+				switch(contextModel) {
+					case "node":
+						var contextDef = nodeContextDef,
+							modelLabel = 'Node';
+						break;
+					case "component":
+						var contextDef = componentContextDef,
+							modelLabel = 'Component';
+						break;
+					default:
+						_contextMenuOverlay.hide();
+						this.clearContextMenu();
+						return;
+						break;
+				}
+
+				var bodyContent = '<div id="tree-context-menu" class="tree-context-menu">\
+									  <ul id="tree-context-menu-actions">\
+										<li><b>'+modelLabel+' Actions</b></li>\
+										<li class="seperator"></li>\
+									  </ul>\
+								  </div>';
+
+				_contextMenuOverlay.set('bodyContent',bodyContent);
+
+				var actionsListNode = R8.Utils.Y.one('#tree-context-menu-actions');
+				for(var action in contextDef) {
+					var actionNodeId = action+'-'+contextModel+'-'+contextModelId,
+						actionDef = contextDef[action];
+
+					actionsListNode.append('<li><a id="'+actionNodeId+'" href="#" data-model="'+contextModel+'" data-id="'+contextModelId+'">'+actionDef.label+'</a></li>');
+
+					R8.Utils.Y.one('#'+actionNodeId).on('click',actionDef.clickCallback,this);
+
+					R8.Utils.Y.one('#'+actionNodeId).on('mouseup',function(e){
+						_contextMenuOverlay.hide();
+						this.clearContextMenu();
+						R8.Utils.Y.one('#tree-context-menu').remove(true);
+					},this);
+				}
+			},
 			render: function() {
 				var treeNodeTpl = '<div id="project-tree-'+_project.get('id')+'" class="project-view-content jstree jstree-default jstree-r8">\
 								  </div>';
@@ -208,7 +343,7 @@ break;
 					'node_id': 'project-'+_project.get('id')+'-implementation',
 					'type': 'implementations',
 					'basic_type': 'implementations',
-					'name': 'Implementations'
+					'name': 'Modules'
 				};
 				_implementationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': projectImplementationsLeaf}));
 				_implementationsLeafNodeId = _implementationsLeafNode.get('id');

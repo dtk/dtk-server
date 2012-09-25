@@ -18,7 +18,6 @@ module XYZ
       return {:data=>node.get_obj_with_common_cols()}
     end
 
-    ###TODO test
     #TODO: this should be a post; so transitioning over
     def destroy_and_delete(id=nil)
       id ||= request.params["id"]
@@ -26,6 +25,14 @@ module XYZ
       return {:data => {:id=>id,:result=>true}}
     end
     ######
+
+    def delete_component(id=nil)
+      component_id ||= request.params["component_id"]
+#TODO: implement component remove on the back end
+#STUB HERE
+#      create_object_from_id(id).delete_component()
+      return {:data => {:id=>component_id,:result=>true}}
+    end
 
     def actest
       tpl = R8Tpl::TemplateR8.new("node/actest",user_context())

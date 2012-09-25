@@ -80,6 +80,30 @@ module DTK
     def self.parse_component_type(component_type)
       component_type.split(ModuleTemplateSep)
     end
+
+    def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
+      #get attributes on templates (these are defaults)
+      ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
+
+      #get attribute overrides
+      sp_hash = {
+        :cols => [:id,:display_name,:attribute_value,:attribute_template_id],
+        :filter => [:oneof, :component_ref_id,template_assembly_rows.map{|r|r[:component_ref][:id]}]
+      }
+      attr_override_rows = Model.get_objs(assembly_mh.createMH(:attribute_override),sp_hash)
+      unless attr_override_rows.empty?
+        ndx_attr_override_rows = attr_override_rows.inject(Hash.new) do |h,r|
+          h.merge(r[:attribute_template_id] => r)
+        end
+        ret.each do |r|
+          if override = ndx_attr_override_rows[r[:id]]
+            r.merge!(:attribute_value => override[:attribute_value], :is_instance_value => true)
+          end
+        end
+      end
+      ret
+    end
+
    private
     def pp_display_name(display_name)
       display_name.gsub(Regexp.new(ModuleTemplateSep),"::")

@@ -31,8 +31,9 @@ module XYZ
       sp_hash = {
         :cols => [:id, :display_name,:component_type,nested_virtual_attr]
       }
-      assembly_info = get_objs(sp_hash)
-      self.class.list_aux(assembly_info).first
+      assembly_rows = get_objs(sp_hash)
+      attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
+      self.class.list_aux(assembly_rows,attr_rows).first
     end
 
     def self.list_from_library(assembly_mh,opts={})
@@ -42,7 +43,7 @@ module XYZ
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
       get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_template_component_attributes(assembly_mh,assembly_rows) : []
+      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
       list_aux(assembly_rows,attr_rows,opts)
     end
 
@@ -192,28 +193,11 @@ module XYZ
         create_from_row(assembly_mh,create_row, :convert => true)
       end
 
-      def get_template_component_attributes(assembly_mh,template_assembly_rows,opts={})
-        #get attributes on templates (these are defaults)
-        ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
-
-        #get attribute overrides
-        sp_hash = {
-          :cols => [:id,:display_name,:attribute_value,:attribute_template_id],
-          :filter => [:oneof, :component_ref_id,template_assembly_rows.map{|r|r[:component_ref][:id]}]
-        }
-        attr_override_rows = Model.get_objs(assembly_mh.createMH(:attribute_override),sp_hash)
-        unless attr_override_rows.empty?
-          ndx_attr_override_rows = attr_override_rows.inject(Hash.new) do |h,r|
-            h.merge(r[:attribute_template_id] => r)
-          end
-          ret.each do |r|
-            if override = ndx_attr_override_rows[r[:id]]
-              r.merge!(:attribute_value => override[:attribute_value], :is_instance_value => true)
-            end
-          end
-        end
-        ret
+      #this can be overwritten
+      def get_component_attributes(assembly_mh,template_assembly_rows,opts={})
+        Array.new
       end
+      public :get_component_attributes
 
       def get_default_component_attributes(assembly_mh,assembly_rows,opts={})
         #by defualt do not include derived values

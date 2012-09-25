@@ -55,7 +55,10 @@ module XYZ
     end
 
     def get_ports(*types)
-      port_list = get_objs(:cols => [:node_ports]).map{|r|r[:port]}
+      port_list = get_objs(:cols => [:node_ports]).map do |r|
+        component_id = (r[:link_def]||{})[:component_component_id]
+        component_id ? r[:port].merge(:component_id => component_id) : r[:port]
+      end
       i18n = get_i18n_mappings_for_models(:component,:attribute)
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end

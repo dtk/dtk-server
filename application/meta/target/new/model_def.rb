@@ -76,7 +76,13 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>Port.common_columns
+         :cols=>Port.common_columns+[:link_def_id]
+       },
+       {
+         :model_name=>:link_def,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port__link_def_id},
+         :cols=>[:component_component_id]
        }]
     },
     :violation_info=>{

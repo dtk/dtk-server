@@ -70,6 +70,11 @@ module XYZ
       assembly_rows.map{|r|r[:component_template]}
     end
 
+    #this can be overwritten
+    def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
+      Array.new
+    end
+
     def set_attributes(pattern,value)
       ret = Array.new
       pattern = AssemblyAttributePattern.create(pattern)
@@ -192,12 +197,6 @@ module XYZ
         assembly_mh = library_idh.create_childMH(:component)
         create_from_row(assembly_mh,create_row, :convert => true)
       end
-
-      #this can be overwritten
-      def get_component_attributes(assembly_mh,template_assembly_rows,opts={})
-        Array.new
-      end
-      public :get_component_attributes
 
       def get_default_component_attributes(assembly_mh,assembly_rows,opts={})
         #by defualt do not include derived values

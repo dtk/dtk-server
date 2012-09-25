@@ -48,8 +48,6 @@ if (!R8.IDE.View.port.editor_target) {
 
 				return _node;
 			},
-			resize: function() {
-			},
 			get: function(key) {
 				switch(key) {
 					case "id":
@@ -72,18 +70,11 @@ if (!R8.IDE.View.port.editor_target) {
 						break;
 				}
 			},
-			focus: function() {
-				this.resize();
-			},
 			blur: function() {
 			},
 			close: function() {
 			},
-//--------------------------------------
-//TARGET VIEW FUNCTIONS
-//--------------------------------------
-			addNode: function(node) {
-				_nodesListNode.append(node.renderView('project'));
+			purge: function() {
 			}
 		}
 	};

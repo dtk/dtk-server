@@ -18,7 +18,6 @@ module XYZ
       return {:data=>node.get_obj_with_common_cols()}
     end
 
-    ###TODO test
     #TODO: this should be a post; so transitioning over
     def destroy_and_delete(id=nil)
       id ||= request.params["id"]

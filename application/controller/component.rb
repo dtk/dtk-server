@@ -5,6 +5,8 @@ module XYZ
     def delete()
       id = ret_non_null_request_params(:id)
       Model.delete_instance(id_handle(id))
+
+      return {:data => {:id=>id,:result=>true}}
     end
 
     def rest__delete()

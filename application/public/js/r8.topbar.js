@@ -44,6 +44,7 @@ if(!R8.Topbar2) {
 
 		var toolbarDef = {
 				tools:[
+/*
 					{id:'add-users',type:'modal',i18n:'Create User',contentLoader:function(contentNode){
 						var route = 'user/edit',
 							params = {
@@ -53,7 +54,7 @@ if(!R8.Topbar2) {
 							};
 						R8.Ctrl.call(route,params);
 					}},
-/*
+
 					{id:'add-environments',i18n:'Add Target',contentLoader:function(contentNode){
 						var route = 'datacenter/wspace_edit',
 							params = {

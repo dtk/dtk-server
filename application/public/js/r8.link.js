@@ -203,6 +203,9 @@ if (monitorNode == null) {
 					case "id":
 						return _def.id;
 						break;
+					case "def":
+						return _def;
+						break;
 					case "type":
 						return _def.ui.type;
 						break;

@@ -165,6 +165,9 @@ if (!R8.IDE.View.node.editor_target) {
 					case "portDefs":
 						return _ports;
 						break;
+					case "ports":
+						return _ports;
+						break;
 					case "port_by_node_id":
 						for(var p in _ports) {
 							if(_ports[p].get('node_id') == param) return _ports[p];
@@ -191,6 +194,13 @@ if (!R8.IDE.View.node.editor_target) {
 //--------------------------------------
 
 			addComponent: function() {
+
+			},
+//TODO: make remove evented like add using IDE event framework
+			removeComponent: function(componentId) {
+
+				//Remove the ports related to the component
+//				_node.removePort(portId);
 
 			},
 
@@ -661,7 +671,7 @@ console.log('not a valid link.., mis-matched types...');
 			},
 			updateStatus: function(oldStatus,newStatus) {
 //DEBUG
-console.log('updating status on a node...');
+//console.log('updating status on a node...');
 				_contentNode.addClass(newStatus);
 				_contentNode.removeClass(oldStatus);
 			},
@@ -699,14 +709,55 @@ return;
 				});
 			},
 			removePort: function(portId) {
-				for(var p in _portDefs) {
-					if(portId == ('port-'+_portDefs[p].id)) {
-						var portNode = R8.Utils.Y.one('#'+_ports[portId].nodeId);
+//					var portId = ports[p].get('id');
+//					_ports[portId] = ports[p].getView('editor_target');
+
+				var viewPorts = this.get('ports');
+				for(var p in viewPorts) {
+					var pDef = viewPorts[p].get('def'),
+						pNodeId = viewPorts[p].get('id'),
+						pId = pNodeId.replace('port-','');
+
+					if(portId == pId) {
+						var portNode = R8.Utils.Y.one('#'+pNodeId);
 							portNode.purge(true);
 							portNode.remove();
-						R8.Utils.arrayRemove(_portDefs,p);
-						delete(_ports[portId]);
-						this.removeLinkByPortId(portId);
+//						R8.Utils.arrayRemove(_ports,p);
+
+						switch(pDef.location) {
+							case "north":
+								for(var i in _northPorts) {
+									if(_northPorts[i] == p) {
+										R8.Utils.arrayRemove(_northPorts,i);
+									}
+								}
+								break;
+							case "south":
+								for(var i in _southPorts) {
+									if(_southPorts[i] == p) {
+										R8.Utils.arrayRemove(_southPorts,i);
+									}
+								}
+								break;
+							case "west":
+								for(var i in _westPorts) {
+									if(_westPorts[i] == p) {
+										R8.Utils.arrayRemove(_westPorts,i);
+									}
+								}
+								break;
+							case "east":
+								for(var i in _eastPorts) {
+									if(_eastPorts[i] == p) {
+										R8.Utils.arrayRemove(_eastPorts,i);
+									}
+								}
+								break;
+						}
+
+						_ports[p].purge();
+						delete(_ports[p]);
+//						this.removeLinkByPortId(p);
 						this.reflowPorts();
 						return;
 					}
@@ -945,7 +996,6 @@ return;
 					});
 					_portDragDelegate.on('drag:drag', function(e) {
 						e.stopPropagation();
-console.log(this.get('currentNode'));
 						R8.Canvas.renderDragWire(this.get('currentNode'),this.get('dragNode'));
 					});
 					_portDragDelegate.on('drag:dropmiss', function(e) {

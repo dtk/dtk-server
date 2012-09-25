@@ -2,6 +2,96 @@ module XYZ
   class WorkspaceController < Controller
     helper :i18n_string_mapping
 
+    def index()
+      projects = Project.get_all(model_handle(:project))
+      pp [:projects,projects]
+
+      projects.each_with_index { |p,i|
+        projects[i][:tree] = {}
+        projects[i][:tree][:targets] = p.get_target_tree()
+        projects[i][:tree][:implementations] = p.get_module_tree(:include_file_assets => true)
+        projects[i][:name] = projects[i][:display_name]
+      }
+      tpl = R8Tpl::TemplateR8.new("ide/project_tree_leaf",user_context())
+      tpl.set_js_tpl_name("project_tree_leaf")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("ide/l_panel",user_context())
+      tpl.set_js_tpl_name("l_panel")
+#      tpl = R8Tpl::TemplateR8.new("ide/panel_frame",user_context())
+#      tpl.set_js_tpl_name("ide_panel_frame")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("ide/editor_panel",user_context())
+      tpl.set_js_tpl_name("editor_panel")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+#==========================
+#Include target specific js that will be needed
+#TODO: move out of here eventually
+      tpl_info_hash = Hash.new
+
+      tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
+      tpl.set_js_tpl_name("ng_wspace_display")
+      tpl_info_hash[:node_group] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node_group][:src])
+
+      tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
+      tpl.set_js_tpl_name("node_wspace_display_ide")
+      tpl_info_hash[:node] = tpl.render()
+      include_js_tpl(tpl_info_hash[:node][:src])
+
+      tpl = R8Tpl::TemplateR8.new("datacenter/wspace_monitor_display",user_context())
+      tpl.set_js_tpl_name("wspace_monitor_display")
+      tpl_info_hash[:monitor] = tpl.render()
+      include_js_tpl(tpl_info_hash[:monitor][:src])
+
+      tpl = R8Tpl::TemplateR8.new("workspace/notification_list_ide",user_context())
+      tpl.set_js_tpl_name("notification_list_ide")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("component/library_search",user_context())
+      tpl.set_js_tpl_name("component_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("node/library_search",user_context())
+      tpl.set_js_tpl_name("node_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+
+      tpl = R8Tpl::TemplateR8.new("assembly/library_search",user_context())
+      tpl.set_js_tpl_name("assembly_library_search")
+      tpl_info = tpl.render()
+      include_js_tpl(tpl_info[:src])
+#==========================
+
+#      include_js('plugins/search.cmdhandler2')
+      include_js('plugins/r8.cmdbar.assemblies')
+      include_js('plugins/r8.cmdbar.components')
+      include_js('plugins/r8.cmdbar.nodes')
+      include_js('plugins/r8.cmdbar.tasks')
+
+      projects_json = JSON.generate(projects)
+#TODO: figure out why this user init isnt firing inside of bundle and return
+#DEBUG
+      run_javascript("R8.User.init();")
+      run_javascript("R8.IDE.init(#{projects_json});")
+
+#      run_javascript("R8.IDE.addProjects(#{projects_json});")
+
+#      tpl = R8Tpl::TemplateR8.new("ide/test_tree2",user_context())
+#      run_javascript("R8.IDE.testTree();")
+
+      return {:content=>tpl.render(),:panel=>'project_panel'}
+
+#      return {:content=>''}
+    end
+
 #TODO: move to viewspace controller
     def update_pos(ws_id)
       items_to_save = JSON.parse(request.params["item_list"])
@@ -53,7 +143,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       return {}
     end
 
-
+=begin
     def index
 #TODO: make call to load the users/system already in use plugins,cmds,etc
 #      include_js('plugins/search.cmdhandler')
@@ -67,6 +157,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         :panel=>'viewspace'
       }
     end
+=end
 
     def loaddatacenter(id,parsed_query_string=nil)
 #TODO: make call to load the users/system already in use plugins,cmds,etc
@@ -953,6 +1044,26 @@ POSSIBLE CHANGES TO HASH
         lib_num = lib_num+1
       end
       tpl.assign(:library_list,library_list)
+
+#      service_list = get_objects(:service,nil)
+#	  service_list = ServiceModule.list(model_handle(:service_module))
+
+	  service_list = ServiceModule.list(model_handle(:service_module)).map do |r|
+		{
+			:id => r[:id],
+			:name => "#{r[:display_name]}#{r[:version] && "-#{r[:version]}"}"
+		}
+	  end
+pp "}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"
+pp service_list
+=begin
+	  service_list = Array.new
+	  service_list = [
+	  	{:id=>1234,:name=>'Service One'},
+	  	{:id=>1235,:name=>'Service Two'}
+	  ]
+=end
+      tpl.assign(:service_list,service_list)
 
       include_js('plugins/assembly.tool2')
 #      include_js('external/jquery.treeview')

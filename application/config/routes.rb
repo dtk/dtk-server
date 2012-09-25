@@ -141,7 +141,8 @@ R8::Routes["workspace"] = {
   :layout => 'workspace'
 }
 R8::Routes["workspace/index"] = {
-  :layout => 'workspace'
+#  :layout => 'workspace'
+  :layout => 'workspace2'
 }
 R8::Routes["workspace/loaddatacenter"] = {
   :layout => 'workspace'

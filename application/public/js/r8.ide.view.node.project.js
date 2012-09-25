@@ -89,7 +89,7 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 					'node_id': 'node-applications-'+_node.get('id'),
 					'type': 'applications',
 					'basic_type': 'components',
-					'name': 'Applications',
+					'name': 'Components',
 //					'class': 'jstree-closed'
 				};
 				_applicationsLeafNode = R8.Utils.Y.Node.create(R8.Rtpl['project_tree_leaf']({'leaf_item': applicationsLeaf}));
@@ -138,7 +138,11 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 //--------------------------------------
 			refresh: function() {
 				_leafNode.set('id',_idPrefix+_node.get('id'));
-				_leafBodyNode.set('id','leaf-body-node-leaf-'+_idPrefix+_node.get('id'));
+//				_leafBodyNode.set('id','leaf-body-node-leaf-'+_idPrefix+_node.get('id'));
+				_leafBodyNode.set('id','leaf-body-node-leaf-'+_node.get('id'));
+
+				_leafBodyNode.setAttribute('date-model','node');
+				_leafBodyNode.setAttribute('date-id',_node.get('id'));
 
 				_leafBodyNode.get('children').item(1).set('innerHTML',_node.get('name'));
 			},
@@ -171,7 +175,23 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 //TODO: revisit to see best way to render types of components likes apps, languages, etc
 			addComponent: function(component,newComponent) {
 				this.addApplication(component,newComponent);
+			},
+//TODO: make remove evented like add using IDE event framework
+			removeComponent: function(componentRemoveId) {
+				_applicationsListNode.get('children').each(function(){
+					var compLeafId = this.get('id'),
+						compId = compLeafId.replace('component-leaf-','');
+
+//console.log('checking leaf id:'+compLeafId+'     to compoent Id:'+componentRemoveId);
+					if(compId == componentRemoveId) {
+						this.purge(true);
+						this.remove();
+					}
+				});
+			},
+			removePort: function(portRemoveId) {
 			}
+
 /*
 			addApp: function(app) {
 				var appId = app.id;

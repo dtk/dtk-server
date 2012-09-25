@@ -52,17 +52,27 @@ if (!R8.Component) {
 			},
 
 //------------------------------------
-//NODE RELATED METHODS
+//COMPONENT RELATED METHODS
 //------------------------------------
 			refresh: function(newComponentDef) {
 				_def = newComponentDef;
 //DEBUG
-console.log('going to refresh component...,');
-console.log(newComponentDef);
+//console.log('going to refresh component...,');
+//console.log(newComponentDef);
 				for(var v in _views) {
 					_views[v].refresh();
 				}
-			}
+			},
+			purge: function() {
+/*
+				for(var l in _links) {
+					delete(_links[l]);
+				}
+				for(var p in _ports) {
+					delete(_ports[p]);
+				}
+*/
+			}			
 		}
 	};
 }

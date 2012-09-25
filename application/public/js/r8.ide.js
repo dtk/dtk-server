@@ -900,8 +900,19 @@ if (!R8.IDE) {
 						_loadedProjects[_projects[p].id].init();
 */
 						contentNode.append(_projects[p].getView('project').render());
+
+//DEBUG : hack to see about rendering a new style of tree
+//						contentNode.append(this.renderProjectTreeR8());
+
 						_projects[p].getView('project').init();
 					}
+				},
+				renderProjectTreeR8: function() {
+					var tpl = '<div class="r8-project-tree">\
+									<ul id="project-foo" class="project-container"></div>\
+								</div>';
+
+					return tpl;
 				},
 			    renderChefDebugger: function(contentNode,level) {
 //contentNode.set('innerHTML','fooooooooooooo!!!!');

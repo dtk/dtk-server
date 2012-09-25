@@ -58,6 +58,9 @@ if (!R8.Node) {
 					case "applications":
 						return _components;
 						break;
+					case "components":
+						return _components;
+						break;
 					case "links":
 						return _links;
 						break;
@@ -177,6 +180,12 @@ if (!R8.Node) {
 					}
 				});
 			},
+			hasComponent: function(componentId) {
+				for(var c in _components) {
+					if(_components[c].get('id') == componentId) return true;
+				}
+				return false;
+			},
 			refresh: function(newNodeDef) {
 				R8.IDE.clearEvent('node-'+this.get('id')+'-component-add');
 				R8.IDE.clearEvent('node-'+this.get('id')+'-name-change');
@@ -218,7 +227,7 @@ if (!R8.Node) {
 				_portDefs.push(portDef);
 				var newIndex = _portDefs.length-1;
 				_ports.push(new R8.Port(_portDefs[newIndex],this));
-				_ports[newIndex].init();
+				_ports[(_ports.length-1)].init();
 //DEBUG
 //console.log('just added  new port..need to refresh myself now');
 				this.refresh();
@@ -280,6 +289,68 @@ if (!R8.Node) {
 				for(var p in _ports) {
 					delete(_ports[p]);
 				}
+			},
+			//------------------------------------------
+			//Component Related Actions
+			//------------------------------------------
+			deleteComponent: function(componentId) {
+				if(!this.hasComponent(componentId)) return false;
+
+				var _this=this;
+				var removeComponentFromViews = function(ioId,responseObj) {
+					eval("var response =" + responseObj.responseText);
+					var delete_result = response.application_component_delete.content[0].data;
+
+					if(delete_result.result == true) _this.purgeComponent(delete_result.id);
+				}
+				var params = {
+					'cfg':{
+						'data':'id='+componentId
+					},
+					'callbacks': {
+						'io:success': removeComponentFromViews
+					}
+				};
+				R8.Ctrl.call('component/delete',params);
+			},
+			deletePort: function(portId) {
+				var ports = this.get('ports');
+				for(var p in ports) {
+					if(ports[p].get('id') == portId) {
+						ports[p].purge();
+						R8.Utils.arrayRemove(_ports,p);
+					}
+				}
+
+				for(var v in _views) {
+					_views[v].removePort(portId);
+				}
+			},
+			purgeComponent: function(componentId) {
+				var links = this.get('links'),
+					ports = this.get('ports'),
+					portsToRemove = [];
+
+				for(var p in ports) {
+					var pDef = ports[p].get('def');
+					if(pDef.component_id == componentId) {
+						for(var l in links) {
+							var lDef = links[l].get('def');
+							if(lDef.input_id == pDef.id || lDef.output_id == pDef.id) {
+								_target.removeLink(lDef.id);
+							}
+						}
+						//remove port now
+						this.deletePort(pDef.id);
+					}
+				}
+
+				for(var v in _views) {
+					_views[v].removeComponent(componentId);
+				}
+
+				_components[componentId].purge();
+				delete(_components[componentId]);
 			}
 		}
 	};

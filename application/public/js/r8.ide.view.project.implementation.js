@@ -100,7 +100,9 @@ if (!R8.IDE.View.project.implementation) {
 				_childrenListNode.append(_componentsLeafNode);
 */
 				//Need to pass _childrenListNode to renderFileTree b/c of recursive behavior to render files and folders
-				this.renderFileTree(_implementation.get('file_assets'),_childrenListNode,newImplementation);
+				var file_assets = _implementation.get('file_assets');
+				if(typeof(file_assets) != 'undefined')
+					this.renderFileTree(file_assets,_childrenListNode,newImplementation);
 
 				_leafNode.append(_childrenListNode);
 				return _leafNode;

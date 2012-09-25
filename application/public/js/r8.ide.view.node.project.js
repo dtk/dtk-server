@@ -188,6 +188,8 @@ console.log('double clicked on node leaf:'+_node.get('id'));
 						this.remove();
 					}
 				});
+			},
+			removePort: function(portRemoveId) {
 			}
 
 /*

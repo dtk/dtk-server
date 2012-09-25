@@ -64,9 +64,6 @@ if (!R8.Component) {
 				}
 			},
 			purge: function() {
-//DEBUG
-console.log('going to purge component:'+this.get('id'));
-
 /*
 				for(var l in _links) {
 					delete(_links[l]);

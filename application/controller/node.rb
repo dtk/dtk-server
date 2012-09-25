@@ -26,14 +26,6 @@ module XYZ
     end
     ######
 
-    def delete_component(id=nil)
-      component_id ||= request.params["component_id"]
-#TODO: implement component remove on the back end
-#STUB HERE
-#      create_object_from_id(id).delete_component()
-      return {:data => {:id=>component_id,:result=>true}}
-    end
-
     def actest
       tpl = R8Tpl::TemplateR8.new("node/actest",user_context())
       tpl.assign(:_app,app_common())

@@ -227,7 +227,7 @@ if (!R8.Node) {
 				_portDefs.push(portDef);
 				var newIndex = _portDefs.length-1;
 				_ports.push(new R8.Port(_portDefs[newIndex],this));
-				_ports[newIndex].init();
+				_ports[(_ports.length-1)].init();
 //DEBUG
 //console.log('just added  new port..need to refresh myself now');
 				this.refresh();
@@ -299,58 +299,58 @@ if (!R8.Node) {
 				var _this=this;
 				var removeComponentFromViews = function(ioId,responseObj) {
 					eval("var response =" + responseObj.responseText);
-					var delete_result = response.application_node_delete_component.content[0].data;
-//DEBUG
-console.log(delete_result);
+					var delete_result = response.application_component_delete.content[0].data;
 
 					if(delete_result.result == true) _this.purgeComponent(delete_result.id);
 				}
 				var params = {
 					'cfg':{
-						'data':'component_id='+componentId
+						'data':'id='+componentId
 					},
 					'callbacks': {
 						'io:success': removeComponentFromViews
 					}
 				};
-				R8.Ctrl.call('node/delete_component/'+_this.get('id'),params);
+				R8.Ctrl.call('component/delete',params);
+			},
+			deletePort: function(portId) {
+				var ports = this.get('ports');
+				for(var p in ports) {
+					if(ports[p].get('id') == portId) {
+						ports[p].purge();
+						R8.Utils.arrayRemove(_ports,p);
+					}
+				}
+
+				for(var v in _views) {
+					_views[v].removePort(portId);
+				}
 			},
 			purgeComponent: function(componentId) {
-//DEBUG
-console.log('should remove component from views....');
+				var links = this.get('links'),
+					ports = this.get('ports'),
+					portsToRemove = [];
+
+				for(var p in ports) {
+					var pDef = ports[p].get('def');
+					if(pDef.component_id == componentId) {
+						for(var l in links) {
+							var lDef = links[l].get('def');
+							if(lDef.input_id == pDef.id || lDef.output_id == pDef.id) {
+								_target.removeLink(lDef.id);
+							}
+						}
+						//remove port now
+						this.deletePort(pDef.id);
+					}
+				}
+
 				for(var v in _views) {
 					_views[v].removeComponent(componentId);
 				}
 
-				//Remove the links related to the component
-				var links = this.get('links');
-
-				for(var l in links) {
-					var inputPort = links[l].get('inputPort'),
-						outputPort = links[l].get('outputPort');
-
-console.log('---------------------------------------');
-console.log('have link:'+l);
-console.log(links[l].get('def'));
-console.log('output port:');
-console.log(outputPort.get('def'));
-console.log('input port:');
-console.log(inputPort.get('def'));
-console.log('---------------------------------------');
-
-//					_node.get('target').removeLink(l);
-				}
-
 				_components[componentId].purge();
 				delete(_components[componentId]);
-//TODO: revisit for removing links
-/*
-				for(var l in _links) {
-					for(var v in _views) {
-						_views[v].removeLink(nodeId);
-					}
-				}
-*/
 			}
 		}
 	};

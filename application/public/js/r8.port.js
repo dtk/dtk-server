@@ -65,7 +65,8 @@ if (!R8.Port) {
 			initView: function(viewType) {
 				return _views[viewType].init();
 			},
-
+			purge: function() {
+			},
 //------------------------------------
 //PORT RELATED METHODS
 //------------------------------------

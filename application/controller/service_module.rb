@@ -1,5 +1,10 @@
 module XYZ
   class Service_moduleController < Controller
+    def rest__debug_get_project_trees()
+      ret = ServiceModule.get_project_trees(model_handle)
+      pp ret
+      rest_ok_response
+    end
     def rest__list()
       rest_ok_response ServiceModule.list(model_handle)
     end

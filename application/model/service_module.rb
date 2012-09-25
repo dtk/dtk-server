@@ -29,6 +29,19 @@ module DTK
       Assembly.list_from_library(model_handle(:component),:filter => filter)
     end
 
+
+    def self.get_project_trees(mh)
+      sp_hash = {
+        :cols => [:id,:display_name,:module_branches]
+      }
+      sm_rows = get_objs(mh,sp_hash)
+      mb_idhs = sm_rows.map{|r|r[:module_branch].id_handle()}
+      filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+      assembly_mh = mh.createMH(:component)
+      Assembly.list_from_library(assembly_mh,:filter => filter)
+    end
+
+
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]
       sp_hash = {

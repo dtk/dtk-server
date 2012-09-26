@@ -30,26 +30,27 @@ module DTK
     end
 
     def self.get_project_trees(mh)
-      #TODO: right now: putting in all targets for all service modules;
-      all_targets = Target.list(mh).map do |r|
-        SimpleOrderedHash.new([{:name => r[:display_name]},{:id => r[:id]},{:description => r[:description]}])
-      end
       sp_hash = {
         :cols => [:id,:display_name,:module_branches]
       }
+      sm_branch_info = get_objs(mh,sp_hash)
+
+      ndx_targets = get_ndx_targets(sm_branch_info.map{|r|r[:module_branch].id_handle()})
       mb_idhs = Array.new
-      ndx_ret = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+      ndx_ret = sm_branch_info.inject(Hash.new) do |h,r|
         module_branch = r[:module_branch]
         mb_idhs << module_branch.id_handle()
+        mb_id = module_branch[:id]
         content = SimpleOrderedHash.new(
          [
           {:name => r.pp_module_branch_name(module_branch)},
-          {:id => module_branch[:id]},
-          {:targets => all_targets},
+          {:id => mb_id},
+          {:targets => ndx_targets[mb_id]||Array.new},
           {:assemblies => Array.new}
          ])
-        h.merge(module_branch[:id] => content) 
+        h.merge(mb_id => content) 
       end
+
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
       assembly_mh = mh.createMH(:component)
       AssemblyTemplate.list(assembly_mh,:filter => filter,:component_info=>true).each do |r|
@@ -57,6 +58,7 @@ module DTK
         assemblies = ndx_ret[index][:assemblies]
         assemblies  << SimpleOrderedHash.new([{:name => r[:display_name]}, {:id => r[:id]}, {:nodes => format_for_get_project_trees__nodes(r[:nodes])}])
       end
+      File.open("/tmp/t4","w"){|f|PP.pp(ndx_ret.values,f)}
       ndx_ret.values
     end
     #TODO: use of SimpleOrderedHash above and below was just used to print out in debuging and could be removed
@@ -69,6 +71,33 @@ module DTK
       def format_for_get_project_trees__cmps(cmps)
         cmps.map{|cmp|SimpleOrderedHash.new([{:name => cmp[:component_name]},{:id => cmp[:component_id]},{:description => cmp[:description]}])}
       end
+    end
+=begin
+    def get_ports()
+      module_branches = get_module_branches()
+      ndx_targets = self.class.get_ndx_targets(module_branches.map{|r|r.id_handle()})
+      ndx_ret = Hash.new
+      ndx_targets.each_value do |t|
+
+"component_external","component_internal_external")
+    end
+=end
+    #targets indexed by service_module
+    def self.get_ndx_targets(sm_branch_idhs)
+      #TODO: right now: putting in all targets for all service modules;
+      ret = Array.new
+      return ret if sm_branch_idhs.empty?
+      sm_branch_mh = sm_branch_idhs.first.createMH()
+      all_targets = Target.list(sm_branch_mh).map do |r|
+        SimpleOrderedHash.new([{:name => r[:display_name]},{:id => r[:id]},{:description => r[:description]}])
+      end
+      sm_branch_idhs.inject(Hash.new) do |h,sm_branch_idh|
+        h.merge(sm_branch_idh.get_id => all_targets)
+      end
+    end
+
+    def get_module_branches()
+      Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
     end
 
     def self.find(mh,service_module_name,library_idh=nil)

@@ -1,9 +1,20 @@
 module XYZ
   class Service_moduleController < Controller
+    #TODO: for debugging; will be removed
+
     def rest__debug_get_project_trees()
       ServiceModule.get_project_trees(model_handle)
       rest_ok_response
     end
+
+    def rest__debug_get_ports(service_module_id)
+      service_module = create_object_from_id(service_module_id)
+      service_module.get_ports()
+      rest_ok_response
+    end
+
+    #end: for debugging; will be removed
+
     def rest__list()
       rest_ok_response ServiceModule.list(model_handle)
     end

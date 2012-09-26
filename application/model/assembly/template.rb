@@ -7,6 +7,7 @@ module DTK
     def info_about(about)
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
+      ret = nil
       case about 
        when :components
         cols = [:template_nodes_and_cmps_summary]
@@ -29,6 +30,7 @@ module DTK
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+      return rer if ret
 
       rows = get_objs(:cols => cols)
       ret = post_process ? rows.map{|r|post_process.call(r)} : rows

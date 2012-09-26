@@ -282,7 +282,7 @@ module XYZ
 
     def self.get_top_level_tasks(model_handle,filter=nil)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:status,:updated_at,:executable_action_type],
+        :cols => [:id,:group_id,:display_name,:status,:updated_at,:executable_action_type,:commit_message],
         :filter => [:and,[:eq,:task_id,nil], #so this is a top level task
                     filter].compact
       }
@@ -480,7 +480,7 @@ module XYZ
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :action_on_failure, :position, :temporal_order] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message] 
         cols.each{|col|row.merge!(col => hash_row[col])}
         row[:assembly_id] = hash_row[:assembly_id]||SQL::ColRef.null_id
         row

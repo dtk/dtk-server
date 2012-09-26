@@ -177,7 +177,7 @@ lambda__template_nodes_and_components =
          :convert => true,
          :join_type => :inner,
          :join_cond=>{:assembly_id => q(:component,:id)},
-         :cols => [:id,:display_name,:status,:created_at,:started_at,:ended_at]
+         :cols => [:id,:display_name,:status,:created_at,:started_at,:ended_at,:commit_message]
        }]
     },
     :nodes=> {

@@ -67,24 +67,25 @@ module DTK
       rest_ok_response Task.assembly_task_status(id_handle(assembly_id))
     end
 
-#TDODO: got here in cleanup of rest calls
     #creates task to execute/converge assembly
     def rest__create_task()
-      #assembly_id should be a target assembly instance
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
-      task = Task.create_from_assembly_instance(id_handle(assembly_id))
+      commit_msg = ret_request_params(:commit_msg)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id),:assembly,commit_msg)
       task.save!()
       rest_ok_response :task_id => task.id
     end
 
     #TODO: replace or given options to specify specific smoketests to run
     def rest__create_smoketests_task()
-      #assembly_id should be a target assembly instance
-      assembly_id = ret_non_null_request_params(:assembly_id)
-      task = Task.create_from_assembly_instance(id_handle(assembly_id),:smoketest)
+      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      commit_msg = ret_request_params(:commit_msg)
+      task = Task.create_from_assembly_instance(id_handle(assembly_id),:smoketest,commit_msg)
       task.save!()
       rest_ok_response :task_id => task.id
     end
+
+#TDODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()
       assembly_id = ret_non_null_request_params(:assembly_id)

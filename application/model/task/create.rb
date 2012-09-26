@@ -25,7 +25,7 @@ module XYZ
       end
     end
 
-    def create_from_assembly_instance(assembly_idh,component_type=nil)
+    def create_from_assembly_instance(assembly_idh,component_type,commit_msg=nil)
       target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
@@ -40,12 +40,12 @@ module XYZ
       config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh,component_type)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
-      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential")
+      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
       else
-        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one will be non null
       end
       ret
     end

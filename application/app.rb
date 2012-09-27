@@ -23,7 +23,7 @@ r8_require('../utils/internal/log')
 r8_require('../utils/internal/errors')
 r8_require('../utils/internal/hash_object')
 
-NEW_CONFIG = false
+NEW_CONFIG = true
 if NEW_CONFIG
   r8_require('../utils/internal/configuration')
   DTK::Configuration.instance.set_configuration()

@@ -58,7 +58,6 @@ module DTK
         assemblies = ndx_ret[index][:assemblies]
         assemblies  << SimpleOrderedHash.new([{:name => r[:display_name]}, {:id => r[:id]}, {:nodes => format_for_get_project_trees__nodes(r[:nodes])}])
       end
-      File.open("/tmp/t4","w"){|f|PP.pp(ndx_ret.values,f)}
       ndx_ret.values
     end
     #TODO: use of SimpleOrderedHash above and below was just used to print out in debuging and could be removed

@@ -61,7 +61,7 @@ module DTK
       modules = get_objs(mh,{:cols => [:id,:display_name]})
       modules.map do |module_obj|
         diffs = module_obj.workspace_library_diffs()
-        {:name => module_obj.pp_module_name(), :id => module_obj[:id], :is_diff => !diffs.empty?} if diffs
+        {:name => module_obj.pp_module_name(), :id => module_obj[:id], :has_diff => !diffs.empty?} if diffs
       end.compact.sort{|a,b|a[:name] <=> b[:name]}
     end
 

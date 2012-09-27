@@ -54,6 +54,36 @@ module DTK
       self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
     end
 
+
+    def self.get_all_workspace_library_diffs(mh)
+      #TODO: not treating versions yet and removing modules wheer component not in workspace
+      #TODO: much more efficeint is use bulk version 
+      modules = get_objs(mh,{:cols => [:id,:display_name]})
+      modules.map do |module_obj|
+        diffs = module_obj.workspace_library_diffs()
+        {:name => module_obj.pp_module_name(), :id => module_obj[:id], :is_diff => !diffs.empty?} if diffs
+      end.compact.sort{|a,b|a[:name] <=> b[:name]}
+    end
+
+    def workspace_library_diffs(version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      unless ws_branch = find_branch(:workspace,matching_branches)
+        return nil
+      end
+
+      #check that there is a library branch
+      unless lib_branch =  find_branch(:library,matching_branches)
+        raise Error.new("No library version exists for module (#{pp_module_name(version)}); try using create-new-version")
+      end
+
+      unless lib_branch[:repo_id] == ws_branch[:repo_id]
+        raise Error.new("Not supporting case where promoting workspace to library branch when branches are on two different repos")
+      end
+
+      repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
+      repo.diff_between_library_and_workspace(lib_branch,ws_branch)
+    end
+
     #promotes workspace changes to library
     def promote_to_library(version=nil)
       #TODO: unify with ModuleBranch#update_library_from_workspace_aux?(augmented_branch)

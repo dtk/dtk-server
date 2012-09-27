@@ -39,7 +39,6 @@ module DTK
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
-      pp [:debug_merge_rel,merge_rel]
       case merge_rel
        when :equal,:local_behind 
         raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")

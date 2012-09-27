@@ -44,6 +44,10 @@ module XYZ
       workspace_branch_info = component_module.get_workspace_branch_info(version)
       rest_ok_response workspace_branch_info
     end
+
+    def rest__get_all_workspace_library_diffs()
+      rest_ok_response ComponentModule.get_all_workspace_library_diffs(model_handle)
+    end
     #### end: list and info actions ###
     
     #### actions to interact with remote repo ###

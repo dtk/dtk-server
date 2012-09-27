@@ -1111,30 +1111,22 @@ pp service_list
     end
 
     def clone_assembly_ide(explicit_hash=nil)
-      hash = explicit_hash || request.params
-      name = hash["name"] || "assembly"
-       if name.split("/").size == 2
+
+      if name.split("/").size == 2
          clone_assembly_ide_new(explicit_hash)
        else
          clone_assembly_ide_deprecate(explicit_hash)
        end
     end
-
-    def clone_assembly_ide_new(explicit_hash=nil)
-      hash = explicit_hash || request.params
-      #TODO: stub
+    def clone_assembly_ide(explicit_hash=nil)
+      #TODO: temp hack
+      assembly_name, service_id = ret_non_null_request_params(:name,:service_id)
+      item_list = JSON.parse(ret_non_null_request_params(:item_list))
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
-      library_id = hash["library_id"].to_i
-      library_idh = id_handle(library_id,:library)
-      name = hash["name"] || "assembly"
-      service_module_name, assembly_name = name.split("/")
-      unless assembly_name and service_module_name
-        raise Error.new("Assembly name must be in form <assembly_name><service_module_name>")
-      end
-      
-      #TODO: getting json rather than hash
-      item_list = JSON.parse(hash["item_list"])
+      service = id_handle(service_id,:service_module).create_object.update_object!(:display_name,:library_library_id)
+      service_module_name = service[:display_name]
+      library_idh = id_handle(service[:library_library_id],:library)
 
       #TODO remove DEMOHACK
       node_idhs = item_list.map do |item|
@@ -1146,47 +1138,6 @@ pp service_list
       Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
     end
-
-    #TODO: deprecate
-    def clone_assembly_ide_deprecate(explicit_hash=nil)
-      hash = explicit_hash || request.params
-      #TODO: stub
-      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
-
-      library_id = hash["library_id"].to_i
-      library_idh = id_handle(library_id,:library)
-      name = hash["name"] || "assembly"
-      create_row = {
-        :library_library_id => library_id,
-        :ref => name,
-        :display_name => name,
-        :ui => icon_info,
-        :type => "composite"
-      }
-      assembly_mh = library_idh.createMH(:model_name=>:component)
-      assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
-
-      #TODO: getting json rather than hash
-      item_list = JSON.parse(hash["item_list"])
-      #TODO remove DEMOHACK
-      node_idhs = item_list.map do |item|
-        id = item["id"].to_i
-        model = (item["model"].nil? or item["model"].empty?) ? :node : item["model"].to_sym
-        id_handle(id,model)
-      end
-      connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
-      #TODO: raise error to user if dangling link
-      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-      link_idhs = connected_links.map{|link|link.id_handle}
-
-      id_handles = node_idhs + link_idhs
-      library_object = library_idh.create_object()
-      #TODO: encapsulate some of above so ca just call library_object.clone_into(...
-      library_object.clone_into_library_assembly(assembly_idh,id_handles)
-
-      return {:content => nil}
-    end
-
   end
 end
 

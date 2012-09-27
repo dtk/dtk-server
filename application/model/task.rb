@@ -66,7 +66,7 @@ module XYZ
       set_and_return_types!()
       ret = PrettyPrintHash.new
       if level == 1
-        ret.add(self,:type,:id,:status)
+        ret.add(self,:type,:id,:status,:commit_message?)
       else
         ret.add(self,:type,:status)
       end
@@ -455,7 +455,8 @@ module XYZ
        :temporal_order,
        :position,
        :executable_action_type,
-       :executable_action
+       :executable_action,
+       :commit_message
       ]
     end
 

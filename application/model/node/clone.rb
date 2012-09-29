@@ -10,6 +10,12 @@ module XYZ
       {:ret_new_obj_with_cols => [:id,:external_ref]}
     end
 
+    def clone_pre_copy_hook!(clone_source_object,opts={})
+      if clone_source_object.model_handle[:model_name] == :component
+        clone_source_object.clone_pre_copy_hook_into_node!(self,opts)
+      end
+    end
+
     def clone_post_copy_hook(clone_copy_output,opts={})
       component = clone_copy_output.objects.first
       clone_post_copy_hook__component(component,opts)

@@ -1,6 +1,17 @@
 #TODO: determine what in this file is deprecated
 module XYZ
   module ComponentClone
+    def clone_pre_copy_hook_into_node!(node,opts={})
+      #check constraints
+      unless opts[:no_constraint_checking]
+        if constraints = get_constraints!(:update_object => true)
+          target = {"target_node_id_handle" => node.id_handle_with_auth_info()}
+          constraint_opts = {:raise_error_when_error_violation => true, :update_object => self}
+          constraints.evaluate_given_target(target,constraint_opts)
+        end
+      end
+    end
+
     def determine_cloned_components_parent(specified_target_idh)
       #TODO: may deprecate if not using; previously mapped extensions to parents; now putting them with node as tehir parent
       return specified_target_idh if SubComponentComponentMapping.empty?

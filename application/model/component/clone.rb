@@ -2,6 +2,11 @@
 module XYZ
   module ComponentClone
     def clone_pre_copy_hook_into_node!(node,opts={})
+      #switch object to being matching workspace version of component, if it exists
+      workspace_component = create_component_module_workspace?(node.get_project(), :no_update_to_object => true)
+pp workspace_component
+
+raise Error.new("TODO: got here")
       #check constraints
       unless opts[:no_constraint_checking]
         if constraints = get_constraints!(:update_object => true)
@@ -44,14 +49,30 @@ module XYZ
     end
 
     #TODO: see if can align with ComponentModule.create_workspace_branch?
-    def create_component_module_workspace?(proj)
+    def create_component_module_workspace?(proj,opts={})
       #processing so that component's implementation and template are cloned to project
       #self will have implementation_id set to library implementation and ancestor_id set to library template
       #need to search project to see if has implementation that matches (same repo)
       #if match then set new_cmps impelemntation_id to this otehrwise need to clone implementaion in library to project
+
+      #This This should be no up unless this applied to library item of component instance with ancestor that points to a 
+      #library template
+      raise Error.new("NEED TO write")
+
       update_object!(:module_branch_id,:implementation_id,:ancestor_id,:version,:component_type) 
+      self[:version] ||= BranchNameDefaultVersion
 
       proj_idh = proj.id_handle()
+
+      #if match, tehn depening on opts uptade object to point to this; return teh workssapce compoennt templaet idh
+      if ws_cmp_tmp_idh  = find_match_in_project(proj_idh)
+        unless opts[:no_update_to_object]
+          new_ancestor_id = ws_cmp_tmp_idh.get_id()
+          #TODO: need top fix up and determine if below is needed; if so then must call later
+          update_from_hash_assignments(to_add_mb_assigns.merge(:ancestor_id => new_ancestor_id))
+        end
+        return ws_cmp_tmp_idh
+      end
 
       #create module branch for work space if needed
       library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
@@ -72,12 +93,14 @@ module XYZ
       library_cmp_tmpl_idh = id_handle(:id => self[:ancestor_id])
       #ok to do below because self and library_cmp_tmpl share attribute values
       library_cmp_tmpl =  library_cmp_tmpl_idh.create_object
+      
       to_add_mb_assigns = {:implementation_id => new_impl_id, :module_branch_id => workspace_mb_id, :version => version}
-      proj_cmp_tmpl_idh = find_match_in_project(proj_idh)
 
-      new_ancestor_id = proj_cmp_tmpl_idh ? proj_cmp_tmpl_idh.get_id() : proj.clone_into(library_cmp_tmpl,to_add_mb_assigns.merge(:extended_base => self[:extended_base]))
-
-      update_from_hash_assignments(to_add_mb_assigns.merge(:ancestor_id => new_ancestor_id))
+      new_ws_cmp_tmp_id = proj.clone_into(library_cmp_tmpl,to_add_mb_assigns.merge(:extended_base => self[:extended_base]))
+      unless opts[:no_update_to_object]
+        update_from_hash_assignments(to_add_mb_assigns.merge(:ancestor_id => new_ws_cmp_tmp_id))
+      end
+      proj_idh.createMH(:component).createIDH(:id => new_ws_cmp_tmp_id)
     end
 
     def source_clone_info_opts()

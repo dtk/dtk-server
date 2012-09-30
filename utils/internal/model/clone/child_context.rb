@@ -216,7 +216,6 @@ module XYZ
         #use workspace components, rather than lib components
         lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
         ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@clone_proc.project)
-pp ndx_workspace_templates
 
         mapping_rows = matches.map do |m|
           node = m[:node]
@@ -231,7 +230,7 @@ pp ndx_workspace_templates
           pntr[m[:component_template_id]] = m[:id]
 
           {:ancestor_id => m[:component_template_id],
-            :component_template_id => m[:component_template_id],
+            :component_template_id => ndx_workspace_templates[m[:component_template_id]].get_id(),
             :node_node_id =>  node_node_id,
             :assembly_id => node[:assembly_id]
           }

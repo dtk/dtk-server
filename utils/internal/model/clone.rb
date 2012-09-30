@@ -180,6 +180,11 @@ module XYZ
       end
 
      private
+      def initialize(target_obj,source_obj,opts={})
+        super(source_obj,opts)
+        @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
+      end
+
       def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
         ret = Array.new
         raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
@@ -228,7 +233,7 @@ module XYZ
           if target_obj.kind_of?(Library)
             CloneCopyProcessorAssemblyTemplate.new(source_obj,opts)
           else
-            CloneCopyProcessorAssembly.new(source_obj,opts)
+            CloneCopyProcessorAssembly.new(target_obj,source_obj,opts)
           end
         else
           new(source_obj,opts)

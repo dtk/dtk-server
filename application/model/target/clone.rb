@@ -60,13 +60,6 @@ module XYZ
 
         level = 2
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
-        project = target.get_project()
-        #TODO: more efficient to do in bulk
-        component_child_hashes.each do |child_hash|
-          cmp = child_hash[:id_handle].create_object()
-          #creates implementation adn module branches and updates component to point to these
-          cmp.create_component_module_workspace?(project)
-        end
         component_new_items = component_child_hashes.map do |child_hash| 
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end

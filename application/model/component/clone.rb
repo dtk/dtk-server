@@ -175,4 +175,12 @@ module XYZ
       row && row.id_handle()
     end
   end
+  module ComponentCloneClassMixin
+    def create_ndx_workspace_component_templates?(lib_cmps,proj,opts={})
+      #TODO: stub so can bulk this up in contrast to below which iterators instance by instance
+      lib_cmps.inject(Hash.new) do |h,lib_cmp|
+        h.merge(lib_cmp[:id] => lib_cmp.create_workspace_component_template?(proj,opts))
+      end
+    end
+  end
 end

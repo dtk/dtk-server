@@ -15,6 +15,7 @@ module XYZ
     include ComponentViewMetaProcessor
     include ComponentTemplate
     include ComponentClone
+    extend ComponentCloneClassMixin
     extend ComponentUserClassMixin
     set_relation_name(:component,:component)
     extend ComponentMetaClassMixin 

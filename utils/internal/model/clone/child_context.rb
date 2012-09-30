@@ -206,6 +206,12 @@ module XYZ
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_node_template_to_ref = Hash.new
+
+        #use workspace components, rather than lib components
+        lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
+        ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@project)
+pp ndx_workspace_templates
+
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]
@@ -224,6 +230,7 @@ module XYZ
             :assembly_id => node[:assembly_id]
           }
         end
+
         mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
       
         #all parent_rels will have same cols so taking a sample

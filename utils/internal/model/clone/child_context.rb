@@ -48,7 +48,7 @@ module XYZ
 
     def self.create_from_hash(clone_proc,hash)
       unless clone_proc.cloning_assembly?()
-        return new(hash)
+        return new(clone_proc,hash)
       end
 
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
@@ -56,10 +56,15 @@ module XYZ
 #TODO: think this is wrong since calls AssemblyNode in middle of run      
 #klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
       klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || ChildContext
-      klass.new(hash)
+      klass.new(clone_proc,hash)
     end
 
    private
+    def initialize(clone_proc,hash)
+      super(hash)
+      @clone_proc = clone_proc
+    end
+
     def self.get_children_model_handles(model_handle,omit_list=[],&block)
       model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
         next if omit_list.include?(child_mh[:model_name])
@@ -128,9 +133,10 @@ module XYZ
       self[:parent_objs_info]
     end
 
+
     class AssemblyNode < ChildContext
      private
-      def initialize(hash)
+      def initialize(clone_proc,hash)
         super
         assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
         find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh)
@@ -181,7 +187,7 @@ module XYZ
     end
     class AssemblyComponentRef < ChildContext
      private
-      def initialize(hash)
+      def initialize(clone_proc,hash)
         super
         find_component_templates_in_assembly!()
       end
@@ -209,7 +215,7 @@ module XYZ
 
         #use workspace components, rather than lib components
         lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
-        ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@project)
+        ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@clone_proc.project)
 pp ndx_workspace_templates
 
         mapping_rows = matches.map do |m|
@@ -251,7 +257,7 @@ pp ndx_workspace_templates
     end
     class AssemblyComponentAttribute < ChildContext
       private
-      def initialize(hash)
+      def initialize(clone_proc,hash)
         super
       end
       def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)

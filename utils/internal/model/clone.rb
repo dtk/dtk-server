@@ -179,6 +179,7 @@ module XYZ
         :library_to_target
       end
 
+      attr_reader :project
      private
       def initialize(target_obj,source_obj,opts={})
         super(source_obj,opts)

@@ -214,6 +214,7 @@ module XYZ
         ndx_node_template_to_ref = Hash.new
 
         #use workspace components, rather than lib components
+        #TODO: may instaed make this conversion when computing matches
         lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
         ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@clone_proc.project)
 
@@ -223,14 +224,14 @@ module XYZ
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-         
+          component_template_id = ndx_workspace_templates[m[:component_template_id]].get_id()
           #set  ndx_node_template_to_ref
           #first index is the associated node instance, second is teh component template
           pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
-          pntr[m[:component_template_id]] = m[:id]
+          pntr[component_template_id] = m[:id]
 
-          {:ancestor_id => m[:component_template_id],
-            :component_template_id => ndx_workspace_templates[m[:component_template_id]].get_id(),
+          {:ancestor_id => component_template_id,
+            :component_template_id =>  component_template_id,
             :node_node_id =>  node_node_id,
             :assembly_id => node[:assembly_id]
           }
@@ -248,7 +249,7 @@ module XYZ
         ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         ret.each do |r|
           component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
-          raise Error.new("Variable component_ref_id shoudl not be null") if component_ref_id.nil?
+          raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
           r.merge!(:component_ref_id => component_ref_id, :component_template_id => r[:ancestor_id])
         end 
         ret

@@ -10,9 +10,11 @@ module XYZ
       {:ret_new_obj_with_cols => [:id,:external_ref]}
     end
 
-    def clone_pre_copy_hook!(clone_source_object,opts={})
+    def clone_pre_copy_hook(clone_source_object,opts={})
       if clone_source_object.model_handle[:model_name] == :component
-        clone_source_object.clone_pre_copy_hook_into_node!(self,opts)
+        clone_source_object.clone_pre_copy_hook_into_node(self,opts)
+      else
+        clone_source_object
       end
     end
 
@@ -25,11 +27,6 @@ module XYZ
       #if node is in assembly put component in teh assembly
       if assembly_id = update_object!(:assembly_id)[:assembly_id]
         component.update(:assembly_id => assembly_id)
-      end
-
-      #handles creating a component module workspace if needed)
-      unless opts[:use_source_impl_and_template]
-        component.create_component_module_workspace?(get_project())
       end
 
       component_idh = component.id_handle

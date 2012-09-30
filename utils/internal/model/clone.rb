@@ -16,7 +16,7 @@ module XYZ
   module CloneInstanceMixins
     def clone_into(clone_source_object,override_attrs={},opts={})
       target_id_handle = id_handle_with_auth_info()
-      clone_pre_copy_hook!(clone_source_object,opts)
+      clone_source_object = clone_pre_copy_hook(clone_source_object,opts)
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
       proc = CloneCopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
@@ -77,7 +77,8 @@ module XYZ
     end
 
     # to be optionally overwritten by object representing the target
-    def clone_pre_copy_hook!(clone_source_object,opts={})
+    def clone_pre_copy_hook(clone_source_object,opts={})
+      clone_source_object
     end 
 
     # to be optionally overwritten by object representing the target

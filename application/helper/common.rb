@@ -9,9 +9,9 @@ module Ramaze::Helper
     def user_object()
       ret = user
       if ret.class == nil
-        if defined?(R8::EnvironmentConfig::TestUser)
+        if R8::Config[:development_test_user]
           c = ret_session_context_id()
-          ret = @test_user ||= XYZ::User.get_user(ModelHandle.new(c,:user),R8::EnvironmentConfig::TestUser)
+          ret = @test_user ||= XYZ::User.get_user(ModelHandle.new(c,:user),R8::Config[:development_test_user])
         end
       end
       ret

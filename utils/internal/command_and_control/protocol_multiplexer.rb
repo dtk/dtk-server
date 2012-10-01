@@ -33,6 +33,7 @@ module XYZ
             pp msg
           end
          rescue Exception => e
+pp e.backtrace
           #TODO: more advanced would set failyue state on (sub)task
           Log.error("error in proceess_response: #{e.inspect}")
         end

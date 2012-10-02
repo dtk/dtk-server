@@ -1,6 +1,7 @@
 module DTK
   class AssemblyInstance < Assembly
-
+    r8_nested_require('instance','action')
+    include ActionMixin
     def promote_to_library(library_idh=nil)
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 
@@ -92,6 +93,16 @@ module DTK
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
+
+    def get_nodes(*alt_cols)
+      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
+      sp_hash = {
+        :cols => cols,
+        :filter => [:eq, :assembly_id, self[:id]]
+      }
+      Model.get_objs(model_handle.createMH(:node),sp_hash)
+    end
+
     #TODO: probably move to Assembly
     def model_handle()
       super(:component)
@@ -129,11 +140,7 @@ module DTK
       service_module_name,template_name = AssemblyTemplate.parse_component_type(self[:component_type])
       end
       ui = self[:ui]
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:eq, :assembly_id, self[:id]]
-      }
-      node_idhs = Model.get_objs(model_handle.createMH(:node),sp_hash).map{|r|r.id_handle()}
+      node_idhs = get_nodes().map{|r|r.id_handle()}
       if node_idhs.empty?
         raise Error.new("Cannot find any nodes associated with assembly (#{self[:display_name]})")
       end

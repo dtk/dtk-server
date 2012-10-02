@@ -51,6 +51,17 @@ module XYZ
       klass.parse_response__get_logs(msg)
     end
 
+    def self.request__execute_action(agent,action,nodes,callbacks)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.request__execute_action(agent,action,nodes,callbacks)
+    end
+    def self.parse_response__execute_action(nodes,msg)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.parse_response__execute_action(nodes,msg)
+    end
+
     def self.poll_to_detect_node_ready(node,opts)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)

@@ -5,6 +5,8 @@ require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
+      r8_nested_require('mcollective','assembly_action')
+      extend AssemblyActionClassMixin
       def self.server_host()
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end

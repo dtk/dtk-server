@@ -210,7 +210,7 @@ module DTK; class ComponentMetaFileV2
       ret = migrate__component_order_rel__after(ref,cmp_order_rel)
 
       unless ret
-        raise Error.new("TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})")
+        ret = "TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
       end
       ret
     end

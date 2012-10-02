@@ -85,6 +85,15 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
+    ### mcollective actions
+    def get_netstats()
+      #TODO: stub
+      assembly = ret_assembly_instance_object()
+      assembly.execute_get_netstats()
+      rest_ok_response
+    end
+    ### end: mcollective actions
+
 #TDODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()

@@ -74,6 +74,7 @@ module XYZ
     end
 
     def self.pbuilderid(node)
+      node.update_object!(:external_ref)
       (node[:external_ref]||{})[:instance_id]
     end
     def pbuilderid()

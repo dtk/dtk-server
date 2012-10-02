@@ -26,7 +26,7 @@ module DTK
       rest_ok_response assembly.info_about(about)
     end
     AboutEnum = {
-      :instance => [:nodes,:components,:tasks],
+      :instance => [:nodes,:components,:tasks,:attributes],
       :template => [:nodes,:components,:targets]
     }
 

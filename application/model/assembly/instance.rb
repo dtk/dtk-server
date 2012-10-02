@@ -34,8 +34,18 @@ module DTK
     def info_about(about)
       cols = post_process_per_row = order = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
-      
       case about 
+       when :attributes
+        #TODO: include also assembly level attributes
+        cols = [:node_assembly_attributes]
+         post_process_per_row = proc do |r|
+          attr = r[:attribute]
+          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
+          value = attr[:attribute_value]
+          #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
+          attr.hash_subset(:id).merge(:display_name => display_name, :value => info_about_attr_value(value))
+        end
+
        when :components
         cols = [:nested_nodes_and_cmps_summary]
         post_process_per_row = proc do |r|
@@ -61,6 +71,27 @@ module DTK
       ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
       order ? ret.sort(&order) : ret
     end
+
+    def info_about_attr_value(value)
+      #TODO: handle complex attributes better 
+      if value
+        if value.kind_of?(Array)
+          #value.map{|el|info_about_attr_value(el)}
+          value.inspect
+        elsif value.kind_of?(Hash)
+          ret = Hash.new
+          value.each do |k,v|
+            ret[k] = info_about_attr_value(v)
+          end
+          ret
+        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
+          value
+        else
+          value.inspect
+        end
+      end
+    end
+    private :info_about_attr_value
 
     def self.check_valid_id(model_handle,id)
       filter = 

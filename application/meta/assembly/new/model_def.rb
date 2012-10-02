@@ -80,7 +80,7 @@ lambda__template_nodes_and_components =
        },
        {
          :model_name=>:component,
-         :alias=>:sub_component,
+         :alias=>:nested_component,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
          :cols=>[:id,:display_name,:component_type]
@@ -88,8 +88,8 @@ lambda__template_nodes_and_components =
        {
          :model_name=>:attribute,
          :convert => true,
-         :join_type=>:left_outer,
-         :join_cond=>{:component_component_id=>:sub_component__id},
+         :join_type=>:inner,
+         :join_cond=>{:component_component_id=>:nested_component__id},
          :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },

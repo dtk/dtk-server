@@ -11,12 +11,12 @@ module DTK
         async_agent_call(agent.to_s,action.to_s,params,filter,callbacks,async_context)
       end
       DefaultTimeout = 3
-      def parse_response__execute_action(node,msg)
+      def parse_response__execute_action(nodes,msg)
         ret = Hash.new
         #TODO: conditionalize on status
         return ret.merge(:status => :notok) unless body = msg[:body]
         payload = body[:data]
-        pp [:debug, payload,nodes.map{|n|{Node.pbuilderid(n) => n[:id]}}]
+        pp [:debug, msg,nodes.map{|n|{Node.pbuilderid(n) => n[:id]}}]
       end
     end
   end

@@ -104,8 +104,8 @@ module DTK
     end
 
     def rest__set_attributes()
-      assembly_id,pattern,value = ret_non_null_request_params(:assembly_id,:pattern,:value)
-      assembly = id_handle(assembly_id,:component).create_object()
+      assembly = ret_assembly_instance_object()
+      pattern,value = ret_non_null_request_params(:pattern,:value)
       assembly.set_attributes(pattern,value)
       rest_ok_response
     end

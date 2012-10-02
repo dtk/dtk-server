@@ -135,8 +135,8 @@ module DTK
     end
 
     #TODO: probably move to Assembly
-    def model_handle()
-      super(:component)
+    def model_handle(mn=nil)
+      super(mn||:component)
     end
     
    private

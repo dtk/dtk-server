@@ -54,6 +54,9 @@ module DTK; class ComponentMetaFile
     #TODO: make private after removing all non class references to it
     def add_components_from_r8meta(container_idh,config_agent_type,impl_idh,meta_hash)
       impl_id = impl_idh.get_id()
+      module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()
+      module_branch_id = module_branch_idh.get_id()
+
       remote_link_defs = Hash.new
 
       cmps_hash = meta_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
@@ -72,7 +75,7 @@ module DTK; class ComponentMetaFile
             info[k] = v
           end
         end
-        info.merge!("implementation_id" => impl_id)
+        info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
         h.merge(cmp_ref => info)
       end
       #process the link defs for remote components
@@ -80,7 +83,6 @@ module DTK; class ComponentMetaFile
       process_remote_link_defs!(cmps_hash,stored_cmps_hash,remote_link_defs,container_idh)
 
       #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items that are removed
-      module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()
       db_update_hash = db_update_form(cmps_hash,stored_cmps_hash,module_branch_idh)
       Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {

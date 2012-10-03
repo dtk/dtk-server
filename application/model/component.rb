@@ -8,7 +8,7 @@ files =
    'meta'
   ]
 r8_nested_require('component',files)
-
+r8_require('branch_names')
 module XYZ
   class Component < Model
     include ComponentModelDefProcessor
@@ -19,8 +19,7 @@ module XYZ
     extend ComponentUserClassMixin
     set_relation_name(:component,:component)
     extend ComponentMetaClassMixin 
-    class << self
-    end
+    extend BranchNamesClassMixin
 
     def self.common_columns()
       [
@@ -69,6 +68,10 @@ module XYZ
        :project_project_id,
        :library_library_id
       ]
+    end
+
+    def self.default_version()
+      branch_name_default_version()
     end
 
     ### virtual column defs

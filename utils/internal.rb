@@ -23,7 +23,8 @@ files =
    'eventmachine_helper',
    'extract',
    'generate_meta',
-   'component_meta_file'
+   'component_meta_file',
+   'action_results_queue'
   ]
 r8_nested_require('internal',files)
 

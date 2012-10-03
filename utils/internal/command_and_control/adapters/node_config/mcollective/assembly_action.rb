@@ -16,7 +16,10 @@ module DTK
         #TODO: conditionalize on status
         return ret.merge(:status => :notok) unless body = msg[:body]
         payload = body[:data]
-        pp [:debug, msg,nodes.map{|n|{Node.pbuilderid(n) => n[:id]}}]
+        ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok 
+        ret[:pbuilderid] = payload && payload[:pbuilderid]
+        ret[:data] = payload && payload[:data]
+        ret
       end
     end
   end

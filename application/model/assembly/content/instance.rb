@@ -140,6 +140,9 @@ module DTK
       def create_component_ref_content(cmp)
         cmp_ref_ref = qualified_ref(cmp)
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
+        unless @component_template_mapping[cmp[:component_type]]
+          raise Error.new("Cannot find component #{cmp[:component_type]} in @component_template_mapping")
+        end
         cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
         add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)

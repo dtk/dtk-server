@@ -54,6 +54,18 @@ module DTK
       self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
     end
 
+    def info_about(about)
+      case about
+       when :components
+        get_objs(:cols => [:components]).map do |r|
+          cmp = r[:component]
+          branch = r[:module_branch]
+          {:id => cmp[:id], :display_name => cmp[:display_name].gsub(/__/,"::"),:version => branch.pp_version }
+        end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
+       else
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
+      end
+    end
 
     def self.get_all_workspace_library_diffs(mh)
       #TODO: not treating versions yet and removing modules wheer component not in workspace

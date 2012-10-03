@@ -48,6 +48,17 @@ module XYZ
     def rest__get_all_workspace_library_diffs()
       rest_ok_response ComponentModule.get_all_workspace_library_diffs(model_handle)
     end
+
+    def rest__info_about()
+      component_module = create_obj(:component_module_id)
+      about = ret_non_null_request_params(:about).to_sym
+      unless AboutEnum.include?(about)
+        raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
+      end
+      rest_ok_response component_module.info_about(about)
+    end
+    AboutEnum = [:components]
+
     #### end: list and info actions ###
     
     #### actions to interact with remote repo ###

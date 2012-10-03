@@ -87,6 +87,16 @@ lambda__segment_components =
          :filter => [:neq,:library_library_id,nil])
       ]
     },
+    :components=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:version],:filter=>[:eq,:is_workspace,false]),
+       lambda__segment_components.call(
+        :cols => [:id,:display_name,:version],
+        :filter=>[:eq,:assembly_id,nil])
+      ]
+    },
     :target_instances=>{
       :type=>:json,
       :hidden=>true,

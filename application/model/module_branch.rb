@@ -4,6 +4,11 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def pp_version()
+      update_object!(:version)
+      (self[:version] == BranchNameDefaultVersion) ? nil : self[:version]
+    end
+
     #this adds library branch from this, which is a workspace branch
     def add_library_branch?(new_lib_branch_name)
       RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,self)

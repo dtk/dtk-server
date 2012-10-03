@@ -86,11 +86,32 @@ module DTK
     end
 
     ### mcollective actions
-    def get_netstats()
+    def rest__initiate_get_netstats()
       #TODO: stub
       assembly = ret_assembly_instance_object()
-      assembly.execute_get_netstats()
-      rest_ok_response
+      queue = ActionResultsQueue.new
+      assembly.initiate_get_netstats(queue)
+      rest_ok_response :action_results_id => queue.id
+    end
+    
+    def rest__get_action_results()
+      #TODO: to be safe need ti garbage collect on ActionResultsQueue
+      action_results_id = ret_non_null_request_params(:action_results_id)
+      ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
+      unless ret_only_if_complete
+        results = ActionResultsQueue[action_results_id].ret_whatever_is_complete
+        ActionResultsQueue.delete(action_results_id)
+        is_complete = true
+      else
+        results = ActionResultsQueue[action_results_id].all_if_complete()
+        if results
+          ActionResultsQueue.delete(action_results_id)
+          is_complete = true
+        else
+          is_complete = false
+        end
+      end
+      rest_ok_response(:is_complete => is_complete, :results => results)
     end
     ### end: mcollective actions
 

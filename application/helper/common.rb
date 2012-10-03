@@ -239,11 +239,17 @@ limit = TestOveride if TestOveride
       end
     end
 
+
     def ret_request_params(*params)
       return nil unless request_method_is_post?()
       return request.params if params.size == 0
       ret = params.map{|p|request.params[p.to_s]}
       ret.size == 1 ? ret.first : ret
+    end
+
+    def ret_request_param_boolean(param)
+      v = ret_request_params(param)
+      v.kind_of?(TrueClass) or (v.kind_of?(String) and v == "true")
     end
 
     def ret_non_null_request_params(*params)

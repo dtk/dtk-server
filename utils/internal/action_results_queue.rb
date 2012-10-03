@@ -4,7 +4,7 @@ module DTK
     Lock = Mutex.new
     Queues = Hash.new
     @@count = 0
-    def initiliaze(indexes)
+    def initialize(indexes=[])
       Lock.synchronize do
         @indexes = indexes
         @@count += 1
@@ -13,11 +13,20 @@ module DTK
         Queues[@id] = self
       end
     end
+
+    def set_indexes!(indexes)
+      @indexes = indexes
+    end
+
     attr_reader :id
     def self.delete(queue_id)
       Lock.synchronize do
-        Queues.delete(queue_id)
+        Queues.delete(queue_id.to_i)
       end
+    end
+
+    def self.[](queue_id)
+      Queues[queue_id.to_i]
     end
 
     def push(index,el)

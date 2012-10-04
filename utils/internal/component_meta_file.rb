@@ -13,6 +13,7 @@ module DTK
       end
       file_obj_hash = {:path => meta_filename,:implementation => source_impl}
       content = RepoManager.get_file_content(file_obj_hash,{:implementation => source_impl})
+      target_impl ||= source_impl
       create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh)
     end
 

@@ -49,6 +49,33 @@ module DTK
 
     #### end: list and info actions ###
 
+    #the body has an array each element of form
+    # {:pattern => PAT, :value => VAL}
+    #pat can be one of three forms
+    #1 - an id
+    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    #3 - a pattren (TODO: give syntax) that can pick out multiple vars
+    # this returns same output as info about attributes, pruned for just new ones set
+=begin
+    def rest__set_attributes()
+      assembly = ret_assembly_instance_object()
+      attr_val_pairs = ret_non_null_request_params(:attribute_value_pairs)
+      response = assembly.set_attributes(attr_val_pairs)
+      if response.empty?
+        raise ErrorUsage.new("No matching attributes")
+      end
+      rest_ok_response response 
+    end
+=end
+    def rest__set_attributes()
+      assembly = ret_assembly_instance_object()
+      pattern,value = ret_non_null_request_params(:pattern,:value)
+      assembly.set_attributes(pattern,value)
+      rest_ok_response
+    end
+
+
+
     #### actions to promote changes from workspace to library ###
     def rest__promote_to_library()
       assembly = ret_assembly_instance_object()
@@ -129,13 +156,6 @@ module DTK
       assembly = id_handle(assembly_id,:component).create_object()
       smoketests = assembly.list_smoketests()
       rest_ok_response smoketests
-    end
-
-    def rest__set_attributes()
-      assembly = ret_assembly_instance_object()
-      pattern,value = ret_non_null_request_params(:pattern,:value)
-      assembly.set_attributes(pattern,value)
-      rest_ok_response
     end
 
     def test_get_items(id)

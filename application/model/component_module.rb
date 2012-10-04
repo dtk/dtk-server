@@ -123,7 +123,9 @@ module DTK
       #want this here before any changes in case error in parsing meta file
       if diffs.meta_file_changed?()
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,lib_branch.get_implementation(),library_idh)
+        source_impl = ws_branch.get_implementation()
+        target_impl = lib_branch.get_implementation()
+        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,source_impl,library_idh,target_impl)
         component_meta_file.update_model()
       end
  

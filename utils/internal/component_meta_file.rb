@@ -5,26 +5,28 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    def self.create_meta_file_object(repo,impl,container_idh=nil)
+    #TODO: move create_meta_file_object and create_from_file_obj_hash? to take moudle branch objects, rather than impleemntation (which wil get more hidden and eventually deprecated
+    #source_impl is where content of file is gotten from, target_impl is where it is cloned to; if target_impl omitted then sourec and target the same
+    def self.create_meta_file_object(repo,source_impl,container_idh=nil,target_impl=nil)
       unless meta_filename = meta_filename(repo)
         raise Error.new("No component meta file found")
       end
-      file_obj_hash = {:path => meta_filename,:implementation => impl}
-      content = RepoManager.get_file_content(file_obj_hash,repo)
-      create_from_file_obj_hash?(file_obj_hash,content,container_idh)
+      file_obj_hash = {:path => meta_filename,:implementation => source_impl}
+      content = RepoManager.get_file_content(file_obj_hash,{:implementation => source_impl})
+      create_from_file_obj_hash?(file_obj_hash,content,container_idh,target_impl)
     end
 
     #creates a ComponentMetaFile if file_obj_hash is a r8meta file
-    def self.create_from_file_obj_hash?(file_obj_hash,content,container_idh=nil)
+    def self.create_from_file_obj_hash?(file_obj_hash,content,container_idh=nil,target_impl=nil)
       filename =  file_obj_hash[:path]
       return nil unless isa_meta_filename?(filename)
+      target_impl ||= file_obj_hash[:implementation]
       config_agent_type,file_extension = parse_meta_filename(filename)
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension
-      impl = file_obj_hash[:implementation]
-      module_branch_idh = impl.get_module_branch().id_handle()
+      module_branch_idh = target_impl.get_module_branch().id_handle()
       input_hash = convert_to_hash(format_type,content)
-      self.new(config_agent_type,impl.id_handle(),module_branch_idh,input_hash,container_idh)
+      self.new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
     end
     ExtensionToType = {
       "yml" => :yaml

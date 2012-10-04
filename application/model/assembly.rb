@@ -75,16 +75,22 @@ module XYZ
       Array.new
     end
 
-    def set_attributes(pattern,value)
+    def set_attributes(av_pairs)
       ret = Array.new
-      pattern = AssemblyAttributePattern.create(pattern)
-      attr_idhs = pattern.ret_attribute_idhs(id_handle())
-      return ret if attr_idhs.empty?
-
-      attr_mh = model_handle(:attribute)
-      attribute_rows = attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => value}}
-      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
-      attr_idhs
+      attribute_rows = Array.new
+      #TDOO: more efficient if can bulk up
+      av_pairs.each do |av_pair|
+        pattern = AssemblyAttributePattern.create(av_pair["pattern"])
+        attr_idhs = pattern.ret_attribute_idhs(id_handle())
+        unless attr_idhs.empty?
+          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair["value"]}}
+        end
+      end
+      return ret if attribute_rows.empty?
+      Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
+      attr_ids = attribute_rows.map{|r|r[:id]}
+      filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
+      info_about(:attributes,:filter_proc => filter_proc)
     end
 
     def list_smoketests()

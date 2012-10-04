@@ -31,12 +31,12 @@ module DTK
       create_library_template_from_assembly(library_idh,name_info)
     end      
 
-    def info_about(about)
+    def info_about(about,opts={})
       cols = post_process_per_row = order = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       case about 
        when :attributes
-        ret = get_attributes().map do |a|
+        ret = get_attributes(opts[:filter_proc]).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value])
         end.sort(&order)
         return ret
@@ -85,15 +85,18 @@ module DTK
       end
     end
 
-    def get_attributes()
+    def get_attributes(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
         attr = r[:attribute]
-        display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
-        value = attr[:attribute_value]
-        #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
-        attr.hash_subset(:id,:required,:data_type,:description).merge(:display_name => display_name, :value => info_about_attr_value(value))
-      end
+        #TODO: more efficient to have sql query do filtering
+        if filter_proc.nil? or filter_proc.call(attr)
+          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
+          value = attr[:attribute_value]
+          #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
+          attr.hash_subset(:id,:required,:data_type,:description).merge(:display_name => display_name, :value => info_about_attr_value(value))
+        end
+      end.compact
       assembly_attrs + component_attrs
     end
     def info_about_attr_value(value)

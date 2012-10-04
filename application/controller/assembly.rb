@@ -56,25 +56,19 @@ module DTK
     #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
     #3 - a pattren (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
-=begin
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
-      attr_val_pairs = ret_non_null_request_params(:attribute_value_pairs)
-      response = assembly.set_attributes(attr_val_pairs)
-      if response.empty?
-        raise ErrorUsage.new("No matching attributes")
+      pattern,value,av_list = ret_request_params(:pattern,:value,:av_list)
+      av_list ||= [{"pattern" => pattern, "value" => value}]
+      unless av_list.first["pattern"] and av_list.first["value"]
+        raise ErrorUsage.new("Missing parameters")
       end
-      rest_ok_response response 
+      response = assembly.set_attributes(av_list)
+      if response.empty?
+        raise ErrorUsage.new("No attributes match")
+      end
+      rest_ok_response response
     end
-=end
-    def rest__set_attributes()
-      assembly = ret_assembly_instance_object()
-      pattern,value = ret_non_null_request_params(:pattern,:value)
-      assembly.set_attributes(pattern,value)
-      rest_ok_response
-    end
-
-
 
     #### actions to promote changes from workspace to library ###
     def rest__promote_to_library()

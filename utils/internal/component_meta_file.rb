@@ -13,14 +13,13 @@ module DTK
       end
       file_obj_hash = {:path => meta_filename,:implementation => source_impl}
       content = RepoManager.get_file_content(file_obj_hash,{:implementation => source_impl})
-      create_from_file_obj_hash?(file_obj_hash,content,container_idh,target_impl)
+      create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh)
     end
 
     #creates a ComponentMetaFile if file_obj_hash is a r8meta file
-    def self.create_from_file_obj_hash?(file_obj_hash,content,container_idh=nil,target_impl=nil)
+    def self.create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh=nil)
       filename =  file_obj_hash[:path]
       return nil unless isa_meta_filename?(filename)
-      target_impl ||= file_obj_hash[:implementation]
       config_agent_type,file_extension = parse_meta_filename(filename)
       format_type = ExtensionToType[file_extension]
       raise Error.new("illegal file extension #{file_extension}") unless file_extension

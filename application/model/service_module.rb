@@ -165,6 +165,7 @@ module DTK
     end
 
     def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
+      Log.error("TODO: check if class to RepoManager.ls_r and RepoManager.get_file_content using right branch; since repo passed as last arg, using master (kuibrary branch)")
       info = Assembly.meta_filename_path_info()
       regexp = info[:regexp]
       depth = info[:path_depth]

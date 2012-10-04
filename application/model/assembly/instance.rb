@@ -36,16 +36,10 @@ module DTK
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       case about 
        when :attributes
-        #TODO: include also assembly level attributes
-        cols = [:node_assembly_attributes]
-         post_process_per_row = proc do |r|
-          attr = r[:attribute]
-          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
-          value = attr[:attribute_value]
-          #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
-          attr.hash_subset(:id).merge(:display_name => display_name, :value => info_about_attr_value(value))
-        end
-
+        ret = get_attributes().map do |a|
+          Aux::hash_subset(a,[:id,:display_name,:value])
+        end.sort(&order)
+        return ret
        when :components
         cols = [:nested_nodes_and_cmps_summary]
         post_process_per_row = proc do |r|
@@ -73,13 +67,35 @@ module DTK
     end
 
     def get_missing_parameters()
-      #TODO: include also assembly level params
-      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
-        r[:attribute]
+      get_attributes().select do |a|
+        a[:required] #and not a[:value]
+      end.map do |a|
+        datatype = 
+          case a[:data_type]
+            when "integer" then "integer"
+            when "boolean" then "boolean"
+          else "string"
+          end
+        {
+          :id => a[:id],
+          :display_name => a[:display_name],
+          :datatype => datatype,
+          :description => a[:description]
+        }
       end
-      
     end
 
+    def get_attributes()
+      assembly_attrs = Array.new #TODO: stub
+      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
+        attr = r[:attribute]
+        display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
+        value = attr[:attribute_value]
+        #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
+        attr.hash_subset(:id,:required,:data_type,:description).merge(:display_name => display_name, :value => info_about_attr_value(value))
+      end
+      assembly_attrs + component_attrs
+    end
     def info_about_attr_value(value)
       #TODO: handle complex attributes better 
       if value
@@ -99,7 +115,7 @@ module DTK
         end
       end
     end
-    private :info_about_attr_value
+    private :get_attributes,:info_about_attr_value
 
     def self.check_valid_id(model_handle,id)
       filter = 

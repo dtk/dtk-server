@@ -72,6 +72,14 @@ module DTK
       order ? ret.sort(&order) : ret
     end
 
+    def get_missing_parameters()
+      #TODO: include also assembly level params
+      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
+        r[:attribute]
+      end
+      
+    end
+
     def info_about_attr_value(value)
       #TODO: handle complex attributes better 
       if value

@@ -30,6 +30,11 @@ module DTK
       :template => [:nodes,:components,:targets]
     }
 
+    def rest__get_missing_parameters()
+      assembly,subtype = ret_assembly_params_object_and_subtype()
+      rest_ok_response assembly.get_missing_parameters()
+    end
+
     def rest__list()
       subtype = ret_assembly_subtype()
       opts = ret_params_hash(:filter,:detail_level)
@@ -73,6 +78,8 @@ module DTK
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(id_handle(assembly_id),:assembly,commit_msg)
       task.save!()
+#TODO: this was call from gui commit window
+#pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
 

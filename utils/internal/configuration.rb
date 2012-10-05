@@ -1,5 +1,6 @@
 #TODO: this is in midst of converting from old form to new form
 require 'singleton'
+require 'etc'
 module DTK
   class Configuration
     include Singleton
@@ -20,7 +21,7 @@ module DTK
     BaseConfigDir = "/etc/dtk"
 
     def process_user()
-      ENV["USER"]||ENV["USERNAME"] #TODO: may instead look at the Process fns
+      Etc.getpwuid(Process.uid).name
     end
 
     def set_defaults()

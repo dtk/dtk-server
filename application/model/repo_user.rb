@@ -91,20 +91,20 @@ module XYZ
 
     #returns [new_repo_username,new_index]
     def self.ret_new_repo_username_and_index(type,existing_matches)
-      max = 0
-      existing_matches.each do |m|
-        if m[:index] > max
-          max = m[:index]
-        end
-      end
-      new_index = max+1
-      suffix = (new_index == 1 ? "" : "-#{new_index.to_s}")
-
-      username = CurrentSession.new.get_user_object()[:username]
-      #TODO: temp until rename the server key
-      if type == :system
-        new_repo_username = "r8server"
+      if type == :admin
+        #TODO: r8sserver will eb deprecated
+        new_repo_username = R8::Config[:repo_user][:admin]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
+        new_index = 1
       else
+        max = 0
+        existing_matches.each do |m|
+          if m[:index] > max
+            max = m[:index]
+          end
+        end
+        new_index = max+1
+        suffix = (new_index == 1 ? "" : "-#{new_index.to_s}")
+        username = CurrentSession.new.get_user_object()[:username]
         new_repo_username = "dtk-#{type}-#{username}#{suffix}"
       end
       [new_repo_username,new_index]

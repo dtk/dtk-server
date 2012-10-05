@@ -14,15 +14,18 @@ module DTK
 
     private
     def default_config_file_location()
-      username = ENV["USER"]||ENV["USERNAME"]
-      user_specific_config = "#{BaseConfigDir}/#{username}/server.conf"
+      user_specific_config = "#{BaseConfigDir}/#{process_user()}/server.conf"
       File.file?(user_specific_config) ? user_specific_config : "#{BaseConfigDir}/server.conf"
     end
     BaseConfigDir = "/etc/dtk"
 
+    def process_user()
+      ENV["USER"]||ENV["USERNAME"] #TODO: may instead look at the Process fns
+    end
+
     def set_defaults()
-      #TODO: to modify
       r8_nested_require('configuration','defaults')
+      R8::Config[:dtk_instance_user] = process_user()
     end
     
     def set_combined_vars()

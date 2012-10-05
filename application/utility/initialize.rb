@@ -12,7 +12,7 @@ OptionParser.new do|opts|
 end.parse!
 
 server = R8Server.new("superuser","all")
-server.create_repo_user_r8server?()
+server.create_repo_user_instance_admin?()
 server.create_public_library?(:include_default_nodes => true)
 
 #TODO: not sure if better to go in bootstrap or clear

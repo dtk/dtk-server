@@ -22,9 +22,9 @@ class R8Server
   end
 
   ###actions
-  def create_repo_user_r8server?()
+  def create_repo_user_instance_admin?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.add_repo_user?(:system,repo_user_mh)
+    RepoUser.add_repo_user?(:admin,repo_user_mh)
   end
 
   def create_repo_user_for_nodes?()

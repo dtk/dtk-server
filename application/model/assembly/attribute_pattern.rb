@@ -3,7 +3,9 @@ module XYZ
   class AssemblyAttributePattern
     def self.create(pattern)
       #can be an assembly, node or component level attribute
-      if pattern =~ /^attribute/
+      if pattern =~ /^[0-9]+$/
+        ExplicitId.new(pattern)
+      elsif pattern =~ /^attribute/
         AssemblyLevel.new(pattern)
       elsif pattern  =~ /^node[^\/]*\/component/
         ComponentLevel.new(pattern)
@@ -17,8 +19,18 @@ module XYZ
     def ret_attribute_idhs(assembly_idh)
       raise Error.new("Should be overwritten")
     end
-    
-    class AssemblyLevel < AssemblyAttributePattern
+
+    class ExplicitId < self
+      def ret_attribute_idhs(assembly_idh)
+        [assembly_idh.createIDH(:model_name => :attribute, :id => id())]
+      end
+     private
+      def id()
+        @pattern
+      end
+    end
+
+    class AssemblyLevel < self
       def ret_attribute_idhs(assembly_idh)
         ret = ret_matching_attribute_idhs([assembly_idh],pattern)
         #if does not exist then create the attribute
@@ -35,7 +47,7 @@ module XYZ
       end
     end
 
-    class ComponentLevel < AssemblyAttributePattern
+    class ComponentLevel < self
       def ret_attribute_idhs(assembly_idh)
         ret = Array.new
         node_idhs = ret_matching_node_idhs(assembly_idh)

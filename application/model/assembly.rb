@@ -80,10 +80,10 @@ module XYZ
       attribute_rows = Array.new
       #TDOO: more efficient if can bulk up
       av_pairs.each do |av_pair|
-        pattern = AssemblyAttributePattern.create(av_pair["pattern"])
+        pattern = AssemblyAttributePattern.create(av_pair[:pattern])
         attr_idhs = pattern.ret_attribute_idhs(id_handle())
         unless attr_idhs.empty?
-          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair["value"]}}
+          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end
       end
       return ret if attribute_rows.empty?

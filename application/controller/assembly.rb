@@ -58,12 +58,8 @@ module DTK
     # this returns same output as info about attributes, pruned for just new ones set
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
-      pattern,value,av_list = ret_request_params(:pattern,:value,:av_list)
-      av_list ||= [{"pattern" => pattern, "value" => value}]
-      unless av_list.first["pattern"] and av_list.first["value"]
-        raise ErrorUsage.new("Missing parameters")
-      end
-      response = assembly.set_attributes(av_list)
+      av_pairs = ret_params_av_pairs()
+      response = assembly.set_attributes(av_pairs)
       if response.empty?
         raise ErrorUsage.new("No attributes match")
       end

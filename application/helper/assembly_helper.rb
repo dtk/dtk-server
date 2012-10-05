@@ -20,5 +20,18 @@ module Ramaze::Helper
     def ret_assembly_subtype()
       (ret_request_params(:subtype)||:instance).to_sym
     end
+
+    def ret_params_av_pairs()
+      pattern,value,av_pairs_hash = ret_request_params(:pattern,:value,:av_pairs_hash)
+      ret = Array.new
+      if av_pairs_hash
+        av_pairs_hash.each{|k,v|ret << {:pattern => k, :value => v}}
+      elsif pattern and value
+        ret = [{:pattern => pattern, :value => value}]
+      else
+        raise ::DTK::ErrorUsage.new("Missing parameters")
+      end
+      ret
+    end
   end
 end

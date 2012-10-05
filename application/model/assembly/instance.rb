@@ -67,8 +67,9 @@ module DTK
     end
 
     def get_missing_parameters()
+      Log.error("TODO: also need to make sure this is not a derived value not yet populated")
       get_attributes().select do |a|
-        a[:required] #and not a[:value]
+        a[:required] and not a[:value] 
       end.map do |a|
         datatype = 
           case a[:data_type]

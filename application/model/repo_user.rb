@@ -93,7 +93,7 @@ module XYZ
     def self.ret_new_repo_username_and_index(type,existing_matches)
       if type == :admin
         #TODO: r8sserver will eb deprecated
-        new_repo_username = R8::Config[:repo_user][:admin]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
+        new_repo_username = R8::Config[:admin_repo_user]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
         new_index = 1
       else
         max = 0

@@ -15,7 +15,8 @@ module DTK
 
     private
     def default_config_file_location()
-      user_specific_config = "#{BaseConfigDir}/#{process_user()}/server.conf"
+      process_user = Common::Aux.running_process_user()
+      user_specific_config = "#{BaseConfigDir}/#{process_user}/server.conf"
       File.file?(user_specific_config) ? user_specific_config : "#{BaseConfigDir}/server.conf"
     end
     BaseConfigDir = "/etc/dtk"

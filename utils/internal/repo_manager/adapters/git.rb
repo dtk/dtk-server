@@ -379,7 +379,7 @@ module XYZ
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
     def git_command()
-      @git_command ||= GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
+      GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
     end
 
     def recursive_create_dir?(path)

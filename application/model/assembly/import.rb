@@ -110,7 +110,7 @@ ret
         end
         #error if one or more matches
         unless non_matches.empty?
-          raise Error.new("No component matches for (#{non_matches.join(",")})")
+          raise ErrorUsage.new("No component matches for (#{non_matches.join(",")})")
         end
         augment_cmps
       end

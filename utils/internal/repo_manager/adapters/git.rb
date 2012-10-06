@@ -379,7 +379,10 @@ module XYZ
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
     def git_command()
-      GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
+      #TODO: not sure why this does not work:
+      #GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
+      #only thing losing with below is visbility into failure on clone commands (where @grit_repo.nil? is true)
+      @grit_repo ? GitCommand.new(@grit_repo.git) : Grit::Git.new("")
     end
 
     def recursive_create_dir?(path)

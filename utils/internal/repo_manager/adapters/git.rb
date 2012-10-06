@@ -371,17 +371,40 @@ module XYZ
       "origin"
     end
 
+    def default_author()
+      @default_author ||= Common::Aux.running_process_user()
+    end
+
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
     def git_command()
-      @grit_repo ? @grit_repo.git : Grit::Git.new("")
+      @git_command ||= GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
     end
 
     def recursive_create_dir?(path)
       if path =~ Regexp.new("(^.+)/[^/]+$")
         dir = $1
         FileUtils.mkdir_p(dir)
+      end
+    end
+
+    class GitCommand
+      def initialize(grit_git)
+        @grit_git=grit_git
+      end
+      def method_missing(name,*args,&block)
+        begin
+          @grit_git.send(name,*args,&block)
+        rescue ::Grit::Git::CommandFailed => e
+          error_msg = "Grit error: #{e.err}; exitstatus=#{e.exitstatus}; command='#{e.command}'"
+          raise Error.new(error_msg)
+         rescue => e
+          raise e
+        end
+      end
+      def respond_to?(name)
+        !!(@grit_git.respond_to?(name) || super)
       end
     end
   end
@@ -406,7 +429,16 @@ module XYZ
       #took out because could not pass in command opts @grit_repo.remove(file_path)
     end
     def git_command__commit(message,*array_opts)
-      git_command.commit({},'-m',message,*array_opts)
+=begin
+TODO: remove
+      array_opts =
+        if array_opts_x.find{|opt|opt =~ /^--author/}
+          array_opts_x
+        else
+          array_opts_x + ["--author=#{default_author()}"]
+        end
+=end
+      git_command.commit(cmd_opts(),'-m',message,*array_opts)
     end
 
     def git_command__remote_add(remote_name,remote_url)

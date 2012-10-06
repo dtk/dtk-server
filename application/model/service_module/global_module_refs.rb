@@ -4,7 +4,7 @@ module DTK
       def self.serialize_and_save_to_repo(module_info,service_module_branch)
         path = meta_filename_path()
         service_module_branch.serialize_and_save_to_repo(meta_filename_path(),hash_content(module_info))
-        raise Error.new("working on this")
+        Log.error("TODO: more to do for serialize_and_save_to_repo")
         path
       end
      private

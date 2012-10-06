@@ -86,7 +86,8 @@ module DTK
 
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
-      rest_ok_response Task.assembly_task_status(id_handle(assembly_id))
+      format = (ret_request_params(:format)||:hash).to_sym
+      rest_ok_response Task.assembly_task_status(id_handle(assembly_id),:format => format)
     end
 
     #creates task to execute/converge assembly

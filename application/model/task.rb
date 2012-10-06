@@ -14,44 +14,14 @@ module XYZ
       task_ids.map{|task_id|id_handle(:id => task_id)}
     end
 
-    def add_task_errors!(ret,opts)
+    def get_errors()
       sp_hash = {
         :cols => [:content],
         :filter => [:eq,:task_id,id()]
       }
-      errors = Model.get_objs(model_handle(:task_error),sp_hash).map{|r|r[:content]}
-      ret[:errors] = errors unless errors.empty?
+      Model.get_objs(model_handle(:task_error),sp_hash).map{|r|r[:content]}
     end
 
-    #TODO: probably better to set when creating
-    def set_and_return_types!()
-      type = nil
-      if self[:task_id].nil?
-        #TODO: stub that gets changed when different ways to generate tasks
-        type = "commit_cfg_changes"
-      else
-        if action_type = self[:executable_action_type]
-          type = ActionTypeCodes[action_type.to_s]
-        else
-          #assumption that all subtypes some type
-          if sample_st = subtasks.first
-            if sample_st[:executable_action_type]
-              sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
-              type = (sample_type && "#{sample_type}s") #make plural
-            end
-          end 
-        end
-      end
-      subtasks.each{|st|st.set_and_return_types!()}
-      self[:type] = type
-    end
-    protected :set_and_return_types!
-
-    ActionTypeCodes = {
-      "ConfigNode" => "configure_node",
-      "CreateNode" => "create_node"
-    }
-    
     def get_events()
       sp_hash = {:cols => [:created_at, :type, :content]}
       get_children_objs(:task_event,sp_hash).sort{|a,b| a[:created_at] <=> b[:created_at]}

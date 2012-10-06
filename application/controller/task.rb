@@ -30,14 +30,14 @@ module XYZ
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end
-      opts = Task::StateInfoOpts.new
+      opts = Task::StatusOpts.new
       if :summary == (hash["detail_level"]||:summary).to_sym
         opts[:no_components] = true
         opts[:no_attributes] = true
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
-      state_info = task_structure.status(opts)
+      state_info = task_structure.status_hash(opts)
       debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info
     end

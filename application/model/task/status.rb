@@ -5,7 +5,7 @@ module DTK
     end
 
     module ClassMethods
-      def assembly_task_status(assembly_idh,detail_level=nil)
+      def assembly_task_status(assembly_idh,opts={})
         task_mh = assembly_idh.createMH(:task)
         filter = [:eq, :assembly_id, assembly_idh.get_id()]
         unless task = get_top_level_most_recent_task(task_mh,filter)
@@ -15,29 +15,35 @@ module DTK
 
         task_structure = get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
 
-        opts = StatusOpts.new
-        if detail_level
-          #TODO: stub; treat passed in detail setting StatusOpts as function of detail_level
-          opts[:no_components] = false
-          opts[:no_attributes] = true
+        status_opts = StatusOpts.new
+        if status_opts[:detail_level]
+          #TODO: stub; treat passed in detail setting status_optss as function of detail_level
+          status_opts[:no_components] = false
+          status_opts[:no_attributes] = true
         else
-          opts[:no_components] = false
-          opts[:no_attributes] = true
+          status_opts[:no_components] = false
+          status_opts[:no_attributes] = true
         end
-#TODO: swap for line below        pp task_structure.status_table_form(opts)
-       task_structure.status(opts)
+        if opts[:format] == :table
+          task_structure.status_table_form(status_opts)
+        else
+          task_structure.status(status_opts)
+        end
       end
     end
 
     def status_table_form(opts,level=1)
       set_and_return_types!()
       ret = Array.new
+      el = hash_subset(:started_at,:ended_at)
+      el[:status] = self[:status] unless self[:status] == 'created'
       if level == 1
-        #no op
+        errors = get_errors()
+        el[:type] = :assembly_converge
+        el[:errors] = errors unless errors.empty?
       else
-        action_type = self[:executable_action_type]
-        el = hash_subset(:type,:status,:started_at,:ended_at)
-        case action_type
+        el[:type] = self[:type]
+        case self[:executable_action_type]
          when "ConfigNode" 
           if ea = self[:executable_action]
             el.merge!(TaskAction::ConfigNode.status(ea,opts))
@@ -47,20 +53,18 @@ module DTK
             el.merge!(TaskAction::CreateNode.status(ea,opts))
           end
         end
-        ret << el
       end
+      ret << el
 
       num_subtasks = subtasks.size
       #ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1)}.flatten(1)
       end
-
-#      add_task_errors!(ret,opts)
       ret
     end
 
-    def status(opts,level=1)
+    def status_hash_form(opts,level=1)
       set_and_return_types!()
       ret = PrettyPrintHash.new
       if level == 1
@@ -77,8 +81,7 @@ module DTK
           subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status(opts,level+1)}
         end
       end
-      action_type = self[:executable_action_type]
-      case action_type
+      case self[:executable_action_type]
        when "ConfigNode" 
         if ea = self[:executable_action]
           ret.merge!(TaskAction::ConfigNode.status(ea,opts))
@@ -88,9 +91,38 @@ module DTK
           ret.merge!(TaskAction::CreateNode.status(ea,opts))
         end
       end
-      add_task_errors!(ret,opts)
+      errors = get_errors()
+      ret[:errors] = errors unless errors.empty?
       ret
     end
+
+    #TODO: probably better to set when creating
+    def set_and_return_types!()
+      type = nil
+      if self[:task_id].nil?
+        #TODO: stub that gets changed when different ways to generate tasks
+        type = "commit_cfg_changes"
+      else
+        if action_type = self[:executable_action_type]
+          type = ActionTypeCodes[action_type.to_s]
+        else
+          #assumption that all subtypes some type
+          if sample_st = subtasks.first
+            if sample_st[:executable_action_type]
+              sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
+              type = (sample_type && "#{sample_type}s") #make plural
+            end
+          end 
+        end
+      end
+      subtasks.each{|st|st.set_and_return_types!()}
+      self[:type] = type
+    end
+    protected :set_and_return_types!
+    ActionTypeCodes = {
+      "ConfigNode" => "configure_node",
+      "CreateNode" => "create_node"
+    }
 
     #for debugging
     def pretty_print_hash()

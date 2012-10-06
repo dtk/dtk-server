@@ -58,7 +58,7 @@ module XYZ
       @grit_repo = Grit::Repo.new(@path) 
       @index = @grit_repo.index #creates new object so use @index, not grit_repo
       Dir.chdir(@path) do
-        git_command__commit("initial empty commit","--allow-empty")
+        commit("initial empty commit","--allow-empty")
       end
     end
 
@@ -94,7 +94,7 @@ module XYZ
       checkout(@branch) do
         git_command__add(".")
         message = "Adding . in #{@branch}"
-        git_command__commit(message)
+        commit(message)
       end
     end
 
@@ -108,7 +108,7 @@ module XYZ
         #should see if we can do more efficient job using @index.add(file_name,content)
         commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
-        git_command__commit(commit_msg)
+        commit(commit_msg)
       end
     end
 
@@ -122,7 +122,7 @@ module XYZ
       checkout(@branch) do
         message = "Deleting #{file_path} in #{@branch}"
         git_command__rm(file_path)
-        git_command__commit(message)
+        commit(message)
       end
     end
 
@@ -133,7 +133,7 @@ module XYZ
         #should see if we can do more efficient job using @index.add(file_name,content)
         message = "Updating #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
-        git_command__commit(message)
+        commit(message)
       end
     end
     DiffAttributes = [:new_file,:renamed_file,:deleted_file,:a_path,:b_path,:diff]
@@ -326,8 +326,7 @@ module XYZ
       @grit_repo.branches.map{|b|b.name}
     end
 
-    #TODO: deprecate
-    def self.get_branches(repo)
+    def self.get_branches(repo)     #TODO: deprecate
       path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
       Grit::Repo.new(path).branches.map{|b|b.name}
     end
@@ -338,6 +337,10 @@ module XYZ
 
     def ret_config_key_value(key)
       ::Grit::Config.new(@grit_repo).fetch(key)
+    end
+
+    def set_config_key_value(key,value)
+      ::Grit::Config.new(@grit_repo)[key] = value
     end
 
    private
@@ -366,13 +369,29 @@ module XYZ
       end
       ret
     end
+    def commit(message,*array_opts)
+      set_author?()
+      git_command.commit(cmd_opts(),'-m',message,*array_opts)
+    end
 
     def default_remote_name()
       "origin"
     end
 
-    def default_author()
-      @default_author ||= Common::Aux.running_process_user()
+    #sets author if not set already for repo
+    def set_author?(name=nil,email=nil)
+      return if @author_set
+      name ||= default_author_name()
+      email ||= default_author_email()
+      set_config_key_value('user.name',name)
+      set_config_key_value('user.email',email)
+    end
+
+    def default_author_name()
+      @default_author_name ||= Common::Aux.running_process_user()
+    end
+    def default_author_email()
+      "#{default_author_name()}@reactor8.com"
     end
 
     def branch_exists?(branch_name)
@@ -430,18 +449,6 @@ module XYZ
     def git_command__rm(file_path)
       git_command.rm(cmd_opts(),file_path)
       #took out because could not pass in command opts @grit_repo.remove(file_path)
-    end
-    def git_command__commit(message,*array_opts)
-=begin
-TODO: remove
-      array_opts =
-        if array_opts_x.find{|opt|opt =~ /^--author/}
-          array_opts_x
-        else
-          array_opts_x + ["--author=#{default_author()}"]
-        end
-=end
-      git_command.commit(cmd_opts(),'-m',message,*array_opts)
     end
 
     def git_command__remote_add(remote_name,remote_url)
@@ -513,11 +520,6 @@ TODO: remove
     end
     def git_command__add(file_path)
       `#{git} add #{file_path}`
-    end
-    def git_command__commit(message_x)
-      #TODO: looks like windows may not take spaces in message
-      message = message_x.gsub(' ','-')
-      `#{git} commit -m '#{message}'`
     end
     def git_command__push(branch_name)
       `#{git} push origin #{branch}:refs/heads/#{branch_name}`

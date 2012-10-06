@@ -1,5 +1,5 @@
-module DTK; class Task
-  module RenderMixin
+module DTK
+  class Task; module StatusMixin
     def self.included(base)
       base.extend(ClassMethods)
     end
@@ -15,21 +15,20 @@ module DTK; class Task
 
         task_structure = get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
 
-        opts = StateInfoOpts.new
+        opts = StatusOpts.new
         if detail_level
-          #TODO: stub; treat passed in detail setting Task::StateInfoOpts as function of detail_level
+          #TODO: stub; treat passed in detail setting StatusOpts as function of detail_level
           opts[:no_components] = false
           opts[:no_attributes] = true
         else
           opts[:no_components] = false
           opts[:no_attributes] = true
         end
-        task_structure.state_info(opts)
+        task_structure.status(opts)
       end
     end
 
-    #TODO: may change method name to 'status'
-    def state_info(opts,level=1)
+    def status(opts,level=1)
       set_and_return_types!()
       ret = PrettyPrintHash.new
       if level == 1
@@ -43,18 +42,18 @@ module DTK; class Task
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.state_info(opts,level+1)}
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status(opts,level+1)}
         end
       end
       action_type = self[:executable_action_type]
       case action_type
        when "ConfigNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::ConfigNode.state_info(ea,opts))
+          ret.merge!(TaskAction::ConfigNode.status(ea,opts))
         end
        when "CreateNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::CreateNode.state_info(ea,opts))
+          ret.merge!(TaskAction::CreateNode.status(ea,opts))
         end
       end
       add_task_errors!(ret,opts)
@@ -86,5 +85,11 @@ module DTK; class Task
       end
       ret
     end
-  end
-end; end
+    class StatusOpts < Hash
+      def initialize(hash_opts={})
+        super()
+        replace(hash_opts) unless hash_opts.empty?
+      end
+    end
+  end; end
+end

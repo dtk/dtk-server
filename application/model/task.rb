@@ -2,9 +2,9 @@ r8_nested_require('task','create')
 r8_nested_require('task','action')
 module XYZ
   class Task < Model
-    r8_nested_require('task','render')
+    r8_nested_require('task','status')
     extend TaskCreateClassMixin
-    include RenderMixin
+    include StatusMixin
     #returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new
@@ -634,12 +634,6 @@ module XYZ
         task[:children] << attr_task
       end
       task
-    end
-    class StateInfoOpts < Hash
-      def initialize(hash_opts={})
-        super()
-        replace(hash_opts) unless hash_opts.empty?
-      end
     end
   end
 end

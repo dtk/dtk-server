@@ -18,10 +18,6 @@ module XYZ
       end
     end
 ### end temp for mocking
-    #TODO: deprecate rest__state_info
-    def rest__state_info()
-      rest__status()
-    end
 
     def rest__status()
       if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
@@ -41,7 +37,7 @@ module XYZ
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
-      state_info = task_structure.state_info(opts)
+      state_info = task_structure.status(opts)
       debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info
     end

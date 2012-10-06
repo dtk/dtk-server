@@ -122,7 +122,7 @@ module XYZ
 
       private
       #generic; can be overwritten
-      def self.node_state_info(object,opts)
+      def self.node_status(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
         if name = node[:display_name]
@@ -155,9 +155,9 @@ module XYZ
       end
       private :initialize
 
-      def self.state_info(object,opts)
+      def self.status(object,opts)
         ret = PrettyPrintHash.new
-        ret[:node] = node_state_info(object,opts)
+        ret[:node] = node_status(object,opts)
         ret
       end
 
@@ -245,7 +245,7 @@ module XYZ
       end
 
       private
-      def self.node_state_info(object,opts)
+      def self.node_status(object,opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
         #TODO: want to include os type and instance id when tasks upadted with this
@@ -261,12 +261,12 @@ module XYZ
     end
 
     class ConfigNode < TaskActionNode
-      def self.state_info(object,opts)
+      def self.status(object,opts)
         ret = PrettyPrintHash.new
-        ret[:node] = node_state_info(object,opts)
+        ret[:node] = node_status(object,opts)
         unless opts[:no_components]
           ret[:components] = (object[:component_actions]||[]).map do |component_action|
-            ComponentAction.state_info(component_action,opts)
+            ComponentAction.status(component_action,opts)
           end
         end
         ret
@@ -432,13 +432,13 @@ module XYZ
     end
 
     class ComponentAction < HashObject
-      def self.state_info(object,opts)
+      def self.status(object,opts)
         if opts[:no_attributes]
           component_name(object)
         else
           ret = PrettyPrintHash.new
-          ret[:component] = component_state_info(object,opts) 
-          ret[:attributes] = attributes_state_info(object,opts) unless opts[:no_attributes]
+          ret[:component] = component_status(object,opts) 
+          ret[:attributes] = attributes_status(object,opts) unless opts[:no_attributes]
           ret
         end
       end
@@ -488,7 +488,7 @@ module XYZ
         ret && ret.gsub(/__/,"::")
       end
 
-      def self.component_state_info(object,opts)
+      def self.component_status(object,opts)
         ret = PrettyPrintHash.new
         if name = component_name(object)
           ret[:name] = name
@@ -500,7 +500,7 @@ module XYZ
         ret
       end
 
-      def self.attributes_state_info(object,opts)
+      def self.attributes_status(object,opts)
         #need to query db to get up to date values
         (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new

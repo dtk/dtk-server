@@ -37,7 +37,7 @@ module XYZ
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
-      state_info = task_structure.status_hash(opts)
+      state_info = task_structure.status_hash_form(opts)
       debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info
     end

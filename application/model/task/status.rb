@@ -33,16 +33,19 @@ module DTK
     end
 
     def status_table_form(opts,level=1)
-      set_and_return_types!()
       ret = Array.new
+      set_and_return_types!()
+
       el = hash_subset(:started_at,:ended_at)
       el[:status] = self[:status] unless self[:status] == 'created'
+      type = (level == 1 ? :assembly_converge : self[:type])
+      #putting idents in
+      el[:type] = "#{' '*(2*(level-1))}#{type}"
+
       if level == 1
         errors = get_errors()
-        el[:type] = :assembly_converge
         el[:errors] = errors unless errors.empty?
       else
-        el[:type] = self[:type]
         case self[:executable_action_type]
          when "ConfigNode" 
           if ea = self[:executable_action]
@@ -78,7 +81,7 @@ module DTK
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|
-          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status(opts,level+1)}
+          subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_hash_form(opts,level+1)}
         end
       end
       case self[:executable_action_type]

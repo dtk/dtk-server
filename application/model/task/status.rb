@@ -24,8 +24,40 @@ module DTK
           opts[:no_components] = false
           opts[:no_attributes] = true
         end
-        task_structure.status(opts)
+#TODO: swap for line below        pp task_structure.status_table_form(opts)
+       task_structure.status(opts)
       end
+    end
+
+    def status_table_form(opts,level=1)
+      set_and_return_types!()
+      ret = Array.new
+      if level == 1
+        #no op
+      else
+        action_type = self[:executable_action_type]
+        el = hash_subset(:type,:status,:started_at,:ended_at)
+        case action_type
+         when "ConfigNode" 
+          if ea = self[:executable_action]
+            el.merge!(TaskAction::ConfigNode.status(ea,opts))
+          end
+         when "CreateNode" 
+          if ea = self[:executable_action]
+            el.merge!(TaskAction::CreateNode.status(ea,opts))
+          end
+        end
+        ret << el
+      end
+
+      num_subtasks = subtasks.size
+      #ret.add(self,:temporal_order) if num_subtasks > 1
+      if num_subtasks > 0
+        ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1)}.flatten(1)
+      end
+
+#      add_task_errors!(ret,opts)
+      ret
     end
 
     def status(opts,level=1)

@@ -56,7 +56,6 @@ module XYZ
       remote_repo = "#{repo_url()}:#{repo_name}"
       git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
-      @index = @grit_repo.index #creates new object so use @index, not grit_repo
       Dir.chdir(@path) do
         commit("initial empty commit","--allow-empty")
       end
@@ -105,7 +104,6 @@ module XYZ
         recursive_create_dir?(path)
         File.open(path,"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
-        #should see if we can do more efficient job using @index.add(file_name,content)
         commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
         commit(commit_msg)
@@ -130,7 +128,6 @@ module XYZ
       checkout(@branch) do
         File.open(file_asset[:path],"w"){|f|f << content}
         #TODO: commiting because it looks like file change visible in otehr branches until commit
-        #should see if we can do more efficient job using @index.add(file_name,content)
         message = "Updating #{file_asset[:path]} in #{@branch}"
         git_command__add(file_asset[:path])
         commit(message)
@@ -350,7 +347,6 @@ module XYZ
       @path = path
       unless opts[:repo_does_not_exist]
         @grit_repo = Grit::Repo.new(path) 
-        @index = @grit_repo.index #creates new object so use @index, not grit_repo
       end
     end
 
@@ -358,8 +354,6 @@ module XYZ
       ret = nil
       Dir.chdir(@path) do 
         current_head = @grit_repo.head.name
-        #TODO: when get index mechanisms to work subsiture cmmited out for below
-        #@index.read_tree(branch_name)
         git_command__checkout(branch_name) unless current_head == branch_name
         return ret unless block
         ret = yield
@@ -371,6 +365,7 @@ module XYZ
     end
     def commit(message,*array_opts)
       set_author?()
+      #TODO: see why dont need "-a" here. Also may make resilient by checking if anything to commit
       git_command.commit(cmd_opts(),'-m',message,*array_opts)
     end
 

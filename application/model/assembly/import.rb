@@ -11,13 +11,16 @@ module XYZ
       #port links can only be imported in after ports created
       #add ports to assembly nodes
       pl_import_hash = Hash.new
+      port_info = Array.new
       assemblies_hash.each do |ref,assem|
         assembly_idh = library_idh.get_child_id_handle(:component,ref)
         ports = assembly_idh.create_object().add_ports_during_import()
         pl_import_hash.merge!(AssemblyImportInternal.import_port_links(assembly_idh,ref,assem,ports))
+        port_info << {:assembly_ref => ref, :assembly_id => assembly_idh.get_id(), :ports => ports}
       end
 
       import_objects_from_hash(library_idh,{"component" => pl_import_hash})
+      {:port_info => port_info}
     end
 
    private

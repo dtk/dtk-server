@@ -179,14 +179,15 @@ module DTK
         hash_content = JSON.parse(json_content)
         assemblies_hash = hash_content["assemblies"]
         node_bindings_hash = hash_content["node_bindings"]
-        Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
+        import_info = Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
+pp import_info
       end
 
       add_on_meta_files = files.select{|f| f =~ add_on_meta_info[:regexp]}
       add_on_meta_files.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
-        ServiceAddOn.import(library_idh,assemblies_hash,meta_file,hash_content)
+        ServiceAddOn.import(library_idh,meta_file,hash_content)
       end
     end
   end

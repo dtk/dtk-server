@@ -32,7 +32,7 @@ module DTK
       end
     end
 
-    def status_table_form(opts,level=1)
+    def status_table_form(opts,level=1,ndx_errors=nil)
       ret = Array.new
       set_and_return_types!()
 
@@ -41,10 +41,13 @@ module DTK
       type = (level == 1 ? :assembly_converge : self[:type])
       #putting idents in
       el[:type] = "#{' '*(2*(level-1))}#{type}"
+      ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
+      if ndx_errors[self[:id]]
+        el[:errors] = ndx_errors[self[:id]][:message] #TODO: there is other info we can include
+      end
 
       if level == 1
-        errors = get_errors()
-        el[:errors] = errors unless errors.empty?
+        #no op
       else
         case self[:executable_action_type]
          when "ConfigNode" 
@@ -62,7 +65,7 @@ module DTK
       num_subtasks = subtasks.size
       #ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
-        ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1)}.flatten(1)
+        ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
       end
       ret
     end
@@ -99,6 +102,10 @@ module DTK
       ret
     end
 
+    def hier_task_idhs()
+      [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
+    end
+
     #TODO: probably better to set when creating
     def set_and_return_types!()
       type = nil
@@ -126,6 +133,11 @@ module DTK
       "ConfigNode" => "configure_node",
       "CreateNode" => "create_node"
     }
+
+    def hier_task_idhs()
+      [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
+    end
+    protected :hier_task_idhs
 
     #for debugging
     def pretty_print_hash()

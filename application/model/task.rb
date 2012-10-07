@@ -16,10 +16,23 @@ module XYZ
 
     def get_errors()
       sp_hash = {
-        :cols => [:content],
-        :filter => [:eq,:task_id,id()]
+        :cols => [:content]
       }
-      Model.get_objs(model_handle(:task_error),sp_hash).map{|r|r[:content]}
+      get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
+    end
+
+    #indexed by tasks
+    def self.get_ndx_errors(task_idhs)
+      ret = Array.new
+      return ret if task_idhs.empty?
+      sp_hash = {
+        :cols => [:task_id,:content],
+        :filter => [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
+      }
+      task_error_mh = task_idhs.first.createMH(:task_error)
+      Model.get_objs(task_error_mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(r[:task_id] => r[:content])
+      end
     end
 
     def get_events()

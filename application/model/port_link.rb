@@ -21,6 +21,7 @@ module XYZ
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
+    #TODO: think need to change to use locgical rdns instaed of ids to support a more efficient service/pull_from_remote so can determine diffs
     def self.ref_from_ids(input_id,output_id)
       "port_link:#{input_id}-#{output_id}"
     end

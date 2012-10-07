@@ -139,8 +139,8 @@ module DTK
     def self.import_postprocess(repo,library_idh,module_name,version)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-
-      create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assembly_meta_info?
+      create_assembly_meta_info?(library_idh,module_branch,module_name)
       module_branch_idh
     end
 
@@ -165,18 +165,28 @@ module DTK
       ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
     end
 
-    def self.create_assembly_meta_info?(library_idh,module_branch_idh,module_name,repo)
-      Log.error("TODO: check if class to RepoManager.ls_r and RepoManager.get_file_content using right branch; since repo passed as last arg, using master (kuibrary branch)")
-      info = Assembly.meta_filename_path_info()
-      regexp = info[:regexp]
-      depth = info[:path_depth]
-      meta_files = RepoManager.ls_r(depth,{:file_only => true},repo).select{|f|f =~ regexp}
-      meta_files.map do |meta_file|
-        json_content = RepoManager.get_file_content({:path => meta_file},repo)
+    
+
+    def self.create_assembly_meta_info?(library_idh,module_branch,module_name)
+      module_branch_idh = module_branch.id_handle()
+      assembly_meta_info = Assembly.meta_filename_path_info()
+      add_on_meta_info = ServiceAddOn.meta_filename_path_info()
+      depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
+      files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+      meta_files = files.select{|f|f =~ assembly_meta_info[:regexp]}
+      meta_files.each do |meta_file|
+        json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
         assemblies_hash = hash_content["assemblies"]
         node_bindings_hash = hash_content["node_bindings"]
         Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
+      end
+
+      add_on_meta_files = files.select{|f| f =~ add_on_meta_info[:regexp]}
+      add_on_meta_files.each do |meta_file|
+        json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
+        hash_content = JSON.parse(json_content)
+        ServiceAddOn.import(library_idh,assemblies_hash,meta_file,hash_content)
       end
     end
   end

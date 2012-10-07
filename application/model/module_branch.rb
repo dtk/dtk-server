@@ -182,7 +182,7 @@ module DTK
       {ref => assigns}
     end
 
-    #TODO: clean up; complication is that an augmenetd branch can be passed
+    #TODO: clean up; complication is that an augmented branch can be passed
     def repo_and_branch()
       repo = self[:repo]
       cols = (self[:repo] ? [:branch] : [:branch,:repo_id])

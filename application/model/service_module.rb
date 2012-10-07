@@ -1,4 +1,5 @@
 r8_require('module_mixins')
+r8_nested_require('service_module','service_add_on')
 module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')

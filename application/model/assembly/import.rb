@@ -24,8 +24,7 @@ module XYZ
     module AssemblyImportInternal
       include AssemblyImportExportCommon
       def self.import_assembly_top(assembly_ref,assembly_hash,module_branch_idh,module_name)
-ret = nil
-ret =        {
+        {
           assembly_ref => {
             "display_name" => assembly_hash["name"], 
             "type" => "composite",
@@ -33,7 +32,6 @@ ret =        {
             "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
           }
         }
-ret
       end
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name

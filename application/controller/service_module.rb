@@ -40,6 +40,12 @@ module XYZ
       service_module.export()
       rest_ok_response 
     end
+
+    def rest__push_to_remote()
+      service_module = create_obj(:service_module_id)
+      service_module.push_to_remote()
+      rest_ok_response
+    end
     
     def rest__list_assemblies()
       service_module_id = ret_request_param_id(:service_module_id)

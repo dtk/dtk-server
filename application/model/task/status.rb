@@ -43,7 +43,7 @@ module DTK
       el[:type] = "#{' '*(2*(level-1))}#{type}"
       ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
       if ndx_errors[self[:id]]
-        el[:errors] = ndx_errors[self[:id]][:message] #TODO: there is other info we can include
+        el[:errors] = ndx_errors[self[:id]]
       end
 
       if level == 1

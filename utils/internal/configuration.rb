@@ -13,6 +13,12 @@ module DTK
       finalize()
     end
 
+    def default_config_base()
+      process_user = Common::Aux.running_process_user()
+      user_specific_base = "#{BaseConfigDir}/#{process_user}"
+      File.directory?(user_specific_base) ? user_specific_base : BaseConfigDir
+    end
+
     private
     def default_config_file_location()
       process_user = Common::Aux.running_process_user()

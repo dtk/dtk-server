@@ -11,16 +11,50 @@ module XYZ
    private
     def self.node_templates(opts={})
        ret = Hash.new
-       NodesInfo.each do |k,info|
+       nodes_info.each do |k,info|
          ret[k] = node_info(info,opts)
        end
        ret
      end
 
      def self.node_binding_rulesets()
-       Bindings
+       ret_node_bindings_from_config_file()||Bindings
      end
-     NodesInfo = {
+     def self.nodes_info()
+       ret_nodes_info_from_config_file()||NodesInfoDefault
+     end
+
+     def self.ret_nodes_info_from_config_file()
+       config_base = Configuration.instance.default_config_base()
+       node_config_file  = "#{config_base}/nodes_info.json" 
+       return nil unless File.file?(node_config_file)
+       content = JSON.parse(File.open(node_config_file).read)["nodes_info"]
+       ret = Hash.new
+       content.each do |ami,info|
+         info["sizes"].each do |ec2_size|
+           size = ec2_size.split(".").last
+           ref = "#{ami}-#{size}"
+           ret[ref] = {
+             :ami => info["ami"],
+             :display_name =>"#{info["display_name"]} #{size}", 
+             :os_type =>info["os_type"],
+             :size => ec2_size,
+             :png => info["png"]
+           }
+         end
+       end
+       ret
+     end
+
+     def self.ret_node_bindings_from_config_file()
+       config_base = Configuration.instance.default_config_base()
+       node_config_file  = "#{config_base}/node_bindings.json" 
+       return nil unless File.file?(node_config_file)
+       content = JSON.parse(File.open(node_config_file).read)
+     end
+
+
+     NodesInfoDefault = {
        ## for EU west
        "ami-b7d4eec3-small"=> {
          :ami => "ami-b7d4eec3",

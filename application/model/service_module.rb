@@ -165,8 +165,6 @@ module DTK
       ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
     end
 
-    
-
     def self.create_assembly_meta_info?(library_idh,module_branch,module_name)
       module_branch_idh = module_branch.id_handle()
       assembly_meta_info = Assembly.meta_filename_path_info()
@@ -178,7 +176,9 @@ module DTK
       files.select{|f|f =~ assembly_meta_info[:regexp]}.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
-        assemblies_hash = hash_content["assemblies"]
+        assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
+          h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
+        end
         node_bindings_hash = hash_content["node_bindings"]
         import_info = Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
         if import_info[:ndx_ports]
@@ -188,8 +188,15 @@ module DTK
       files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
-        ServiceAddOn.import(module_branch,ndx_ports.values,meta_file,hash_content)
+        ports = ndx_ports.values
+        ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports)
       end
+    end
+
+    def self.assembly_ref(module_name,assembly_name)
+      #TODO: right now cannot change because node bdings in assembly.json hard coded to this. Need to check if any ambiguity
+      #if have module name with hyphen
+      "#{module_name}-#{assembly_name}"
     end
   end
 end

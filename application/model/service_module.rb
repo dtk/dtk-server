@@ -185,11 +185,10 @@ module DTK
           ndx_ports.merge!(import_info[:ndx_ports])
         end
       end
-pp [:ports,ndx_ports.values]
       files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
-        ServiceAddOn.import(self,ndx_ports.values,meta_file,hash_content)
+        ServiceAddOn.import(module_branch,ndx_ports.values,meta_file,hash_content)
       end
     end
   end

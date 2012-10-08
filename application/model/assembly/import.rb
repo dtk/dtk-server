@@ -24,6 +24,10 @@ module XYZ
       {:ndx_ports => ndx_ports}
     end
 
+    def ret_add_on_port_links(ports,add_on_port_links)
+      AssemblyImportInternal.ret_add_on_port_links(ports,add_on_port_links)
+    end
+
    private
     module AssemblyImportInternal
       include AssemblyImportExportCommon
@@ -39,7 +43,7 @@ module XYZ
       end
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name
-        ports.each{|p|p.merge!(:parsed_port_name => Port.parse_external_port_display_name(p[:display_name]))}
+        augment_with_parsed_port_names!(ports)
 
         port_links = (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
@@ -51,6 +55,28 @@ module XYZ
           h.merge(pl_ref => pl_hash)
         end
         {assembly_ref => {"port_link" => port_links}}
+      end
+
+      def self.ret_add_on_port_links(ports,add_on_port_links)
+        ret = Array.new
+        return ret if (add_on_port_links||[]).empty?
+        #augment ports with parsed display_name
+        augment_with_parsed_port_names!(ports)
+
+        add_on_port_links.map do |ao_pl|
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(ao_pl.values.first)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(ao_pl.keys.first)
+          input_id = input_port.matching_id(ports)
+          output_id = output_port.matching_id(ports)
+          pl_hash = {"input_id" => input_id,"output_id" => output_id}
+          {:assembly_refs => {:input => input_assembly,:output => output_assembly}, :port_link => pl_hash}
+        end
+      end
+
+      def self.augment_with_parsed_port_names!(ports)
+        ports.each do |p|
+          p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
+        end
       end
 
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)

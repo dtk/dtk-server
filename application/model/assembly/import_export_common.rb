@@ -35,6 +35,15 @@ module XYZ
           raise Error.new("Connot find match to (#{self.inspect})")
         end
       end
+      class AddOn < self
+        #returns assembly ref, port_ref
+        def self.parse(add_on_port_ref)
+          assembly,port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1,$2])
+          [assembly,super(port_ref)]
+        end
+        AOSep = Seperators[:assembly_node]
+        AOPortRefRegex = Regexp.new("(^[^#{AOSep}]+)#{AOSep}(.+$)")
+      end
     end
   end
 end

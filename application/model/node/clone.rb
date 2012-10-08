@@ -47,7 +47,7 @@ module XYZ
       end.compact
 
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      new_cmp_ports = Port.create_needed_component_ports(component_link_defs,self,component,create_opts)
+      new_cmp_ports = Port.create_component_ports?(component_link_defs,self,component,create_opts)
 
       #update node_link_defs_info with new ports
       new_cmp_ports.each do |port|

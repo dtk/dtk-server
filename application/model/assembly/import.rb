@@ -11,16 +11,17 @@ module XYZ
       #port links can only be imported in after ports created
       #add ports to assembly nodes
       pl_import_hash = Hash.new
-      port_info = Array.new
+      ndx_ports = Hash.new
       assemblies_hash.each do |ref,assem|
         assembly_idh = library_idh.get_child_id_handle(:component,ref)
+        #TODO: more efficient if pass ndx_ports computed so far into add_ports_during_import() to avoid db lookups
         ports = assembly_idh.create_object().add_ports_during_import()
         pl_import_hash.merge!(AssemblyImportInternal.import_port_links(assembly_idh,ref,assem,ports))
-        port_info << {:assembly_ref => ref, :assembly_id => assembly_idh.get_id(), :ports => ports}
+        ports.each{|p|ndx_ports[p[:id]] = p}
       end
 
       import_objects_from_hash(library_idh,{"component" => pl_import_hash})
-      {:port_info => port_info}
+      {:ndx_ports => ndx_ports}
     end
 
    private
@@ -136,7 +137,7 @@ module XYZ
       #to determine if need to add internal links and for port processing
       link_defs_info = get_objs(:cols => [:template_link_defs_info])
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      Port.create_needed_assembly_template_ports(self,link_defs_info,create_opts)
+      Port.create_assembly_template_ports?(self,link_defs_info,create_opts)
     end
   end
 end

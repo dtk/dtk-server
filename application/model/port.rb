@@ -101,7 +101,7 @@ module XYZ
     end
 
     #creates need component Ports and updates node_link_defs_info
-    def self.create_needed_component_ports(component_link_defs,node,component,opts={})
+    def self.create_component_ports?(component_link_defs,node,component,opts={})
       ret = Array.new
       return ret if component_link_defs.empty?
 
@@ -135,7 +135,7 @@ module XYZ
       create_from_rows(port_mh,rows,opts)
     end
 
-    def self.create_needed_assembly_template_ports(assembly,link_defs_info,opts={})
+    def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
       ret = Array.new
       return ret if link_defs_info.empty?
 

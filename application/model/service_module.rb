@@ -173,21 +173,23 @@ module DTK
       add_on_meta_info = ServiceAddOn.meta_filename_path_info()
       depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
       files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-      meta_files = files.select{|f|f =~ assembly_meta_info[:regexp]}
-      meta_files.each do |meta_file|
+
+      ndx_ports = Hash.new
+      files.select{|f|f =~ assembly_meta_info[:regexp]}.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
         assemblies_hash = hash_content["assemblies"]
         node_bindings_hash = hash_content["node_bindings"]
         import_info = Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
-pp import_info
+        if import_info[:ndx_ports]
+          ndx_ports.merge!(import_info[:ndx_ports])
+        end
       end
-
-      add_on_meta_files = files.select{|f| f =~ add_on_meta_info[:regexp]}
-      add_on_meta_files.each do |meta_file|
+pp [:ports,ndx_ports.values]
+      files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
         json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
         hash_content = JSON.parse(json_content)
-        ServiceAddOn.import(library_idh,meta_file,hash_content)
+        ServiceAddOn.import(self,ndx_ports.values,meta_file,hash_content)
       end
     end
   end

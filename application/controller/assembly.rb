@@ -54,7 +54,7 @@ module DTK
     #pat can be one of three forms
     #1 - an id
     #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
-    #3 - a pattren (TODO: give syntax) that can pick out multiple vars
+    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
@@ -84,13 +84,17 @@ module DTK
     end
     #### end: actions to promote changes from workspace to library ###
 
-    def rest__task_status()
-      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
-      format = (ret_request_params(:format)||:hash).to_sym
-      rest_ok_response Task.assembly_task_status(id_handle(assembly_id),:format => format)
+    #### methods to modify the assembly instance
+    def rest__add_sub_assembly()
+      assembly = ret_assembly_instance_object()
+      add_on_type = ret_non_null_request_params(:add_on_type)
+      assembly.add_sub_assembly(add_on_type)
+      rest_ok_response 
     end
 
-    #creates task to execute/converge assembly
+    #### end: methods to modify the assembly instance
+
+    #### creates tasks to execute/converge assemblies and monitor status
     def rest__create_task()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
       commit_msg = ret_request_params(:commit_msg)
@@ -99,6 +103,13 @@ module DTK
 #TODO: this was call from gui commit window
 #pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
+    end
+
+
+    def rest__task_status()
+      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      format = (ret_request_params(:format)||:hash).to_sym
+      rest_ok_response Task.assembly_task_status(id_handle(assembly_id),:format => format)
     end
 
     #TODO: replace or given options to specify specific smoketests to run

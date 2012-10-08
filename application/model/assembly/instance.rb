@@ -2,6 +2,11 @@ module DTK
   class AssemblyInstance < Assembly
     r8_nested_require('instance','action')
     include ActionMixin
+
+    def add_sub_assembly(add_on_type)
+      pp get_service_add_ons()
+    end
+
     def promote_to_library(library_idh=nil)
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 
@@ -120,6 +125,13 @@ module DTK
       end
     end
     private :get_attributes,:info_about_attr_value
+
+
+    def get_service_add_ons()
+      get_objs(:cols => [:service_add_ons_from_instance])do |r|
+        r[:service_add_on].merge(:sub_assembly_template => r[:sub_assembly_template])
+      end
+    end
 
     def self.check_valid_id(model_handle,id)
       filter = 

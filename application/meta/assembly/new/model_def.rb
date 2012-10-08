@@ -210,7 +210,33 @@ lambda__template_nodes_and_components =
          :join_cond=>{:assembly_id=>:component__id},
          :cols=>[:id,:display_name,:ui,:type]
        }]
+    },
+    :service_add_ons_from_instance=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :alias => :template,
+         :join_type=>:inner,
+         :join_cond=>{:ancestor_id=>:component__id},
+         :cols=>[:id,:display_name]
+       },
+       {
+         :model_name=>:service_add_on,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:component_component_id=>:template__id},
+         :cols=>[:id,:display_name,:type,:sub_assembly_id]
+       },
+       {
+         :model_name=>:component,
+         :convert => true,
+         :alias => :sub_assembly_template,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:service_add_on__sub_assembly_id},
+         :cols=>[:id,:display_name]
+       }]
     }
   }
 }
-

@@ -219,7 +219,7 @@ lambda__template_nodes_and_components =
          :model_name=>:component,
          :alias => :template,
          :join_type=>:inner,
-         :join_cond=>{:ancestor_id=>:component__id},
+         :join_cond=>{:id=>:component__ancestor_id},
          :cols=>[:id,:display_name]
        },
        {

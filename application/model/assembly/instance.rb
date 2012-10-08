@@ -6,7 +6,18 @@ module DTK
     def add_sub_assembly(add_on_type)
       pp get_service_add_ons()
     end
-
+=begin
+[{:template=>{:display_name=>"hdfs", :id=>2147521085},
+  :service_add_on=>
+   {:type=>"slave",
+    :sub_assembly_id=>2147521088,
+    :display_name=>"slave",
+    :id=>2147521089,
+    :component_component_id=>2147521085},
+  :sub_assembly_template=>{:display_name=>"hdfs-slave", :id=>2147521088},
+  :ancestor_id=>2147521085,
+  :id=>2147521201}]
+=end
     def promote_to_library(library_idh=nil)
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 

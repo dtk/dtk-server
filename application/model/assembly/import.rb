@@ -63,16 +63,17 @@ module XYZ
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
         assembly_names = [assembly_name,sub_assembly_name]
-        add_on_port_links.inject(Hash.new) do |h,ao_pl|
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(ao_pl.values.first,assembly_names)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(ao_pl.keys.first,assembly_names)
+        add_on_port_links.each do |ao_pl_ref,ao_pl|
+          link = ao_pl["link"]
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
           output_is_local = (output_assembly == assembly_name) 
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local}
-          pl_ref = PortLink.ref_from_ids(input_id,output_id)
-          h.merge(pl_ref => pl_hash)
+          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
+          ret.merge!(ao_pl_ref => pl_hash)
         end
+        ret
       end
 
       def self.augment_with_parsed_port_names!(ports)

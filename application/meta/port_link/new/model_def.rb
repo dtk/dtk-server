@@ -14,15 +14,16 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    #TODO: assembly id seems redundant with component
+    #TODO: assembly id may be redundant with component; if so remove
     :assembly_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:component,
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    :output_is_local=>{:type=>:boolean} #used when this is on service_add_on parent
+    #these two used when parent is service_add_on
+    :required=>{:type=>:boolean}, 
+    :output_is_local=>{:type=>:boolean} 
   },
-#  :many_to_one=>[:library, :datacenter, :component, :service_add_on]
-  :many_to_one=>[:library, :datacenter, :component]
+  :many_to_one=>[:library, :datacenter, :component, :service_add_on]
 }

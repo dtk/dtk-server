@@ -25,17 +25,16 @@ module XYZ
      end
 
      def self.ret_nodes_info_from_config_file()
-       config_base = Configuration.instance.default_config_base()
-       node_config_file  = "#{config_base}/nodes_info.json" 
-       return nil unless File.file?(node_config_file)
-       content = JSON.parse(File.open(node_config_file).read)["nodes_info"]
+       unless content = ret_nodes_info_content_from_config_file()
+         return nil
+       end
        ret = Hash.new
        content.each do |ami,info|
          info["sizes"].each do |ec2_size|
            size = ec2_size.split(".").last
            ref = "#{ami}-#{size}"
            ret[ref] = {
-             :ami => info["ami"],
+             :ami => ami,
              :display_name =>"#{info["display_name"]} #{size}", 
              :os_type =>info["os_type"],
              :size => ec2_size,
@@ -45,15 +44,38 @@ module XYZ
        end
        ret
      end
-
      def self.ret_node_bindings_from_config_file()
-       config_base = Configuration.instance.default_config_base()
-       node_config_file  = "#{config_base}/node_bindings.json" 
-       return nil unless File.file?(node_config_file)
-       content = JSON.parse(File.open(node_config_file).read)
+       unless content = ret_nodes_info_content_from_config_file()
+         return nil
+       end
+       ret = Hash.new
+       content.each do |ami,info|
+         info["sizes"].each do |ec2_size|
+           size = ec2_size.split(".").last
+           ref = "#{info["type"]}-#{size}"
+           ret[ref] = {
+             :type=>"clone",
+             :os_type=>info["os_type"],
+             :rules=>
+             [{:conditions=>{:type=>"ec2_image", :region=>info["region"]},
+                :node_template=>{
+                  :type=>"ec2_image",:image_id=>ami,
+                  :size=>ec2_size,
+                  :region=>info["region"]
+                }
+              }]
+           }
+         end
+       end
+       ret 
      end
-
-
+     def self.ret_nodes_info_content_from_config_file()
+       return @content if @content
+       config_base = Configuration.instance.default_config_base()
+       node_config_file  = "#{config_base}/nodes_info.json" 
+       return nil unless File.file?(node_config_file)
+       @content = JSON.parse(File.open(node_config_file).read)["nodes_info"]
+     end
      NodesInfoDefault = {
        ## for EU west
        "ami-b7d4eec3-small"=> {
@@ -228,7 +250,7 @@ module XYZ
      ret
    end
    def self.node_info_binding_ruleset_id(info,opts={})
-     Bindings.each do |k,v|
+     node_binding_rulesets().each do |k,v|
        v[:rules].each_with_index do |r,i|
          nt = r[:node_template]
          if info[:ami] == nt[:image_id] and info[:size] == nt[:size]

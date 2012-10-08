@@ -37,8 +37,11 @@ module XYZ
       end
       class AddOn < self
         #returns assembly ref, port_ref
-        def self.parse(add_on_port_ref)
+        def self.parse(add_on_port_ref,assembly_names)
           assembly,port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1,$2])
+          unless assembly_names.include?(assembly)
+            raise ErrorUsage.new("Assembly name in add-on port link (#{assembly}) is illegal; must be one of (#{assembly_names.join(',')})")
+          end
           [assembly,super(port_ref)]
         end
         AOSep = Seperators[:assembly_node]

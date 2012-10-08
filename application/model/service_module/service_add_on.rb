@@ -22,38 +22,34 @@ module DTK
       end
       def import()
         type = (meta_file =~ MetaRegExp;$1)
-        pp [:debug,module_name,meta_file,hash_content]
-        assembly_id = ret_assembly_id(:assembly)
-        sub_assembly_id = ret_assembly_id(:add_on_sub_assembly)
-        pp [assembly_id,sub_assembly_id]
-        port_link_info = Assembly.ret_add_on_port_links(ports,hash_content["port_links"])
-        pp port_link_info
+        assembly_name,assembly_ref = ret_assembly_info(:assembly)
+        sub_assembly_name,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
+        ao_input_hash = {
+          :display_name => type,
+          :type => type,
+          :sub_assembly_id => sub_assembly_id
+        }
+        port_links = Assembly.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
+        ao_input_hash.merge!(:port_link => port_links)
+        input_hash = {:component => {assembly_ref => {:service_add_on => {type => ao_input_hash}}}}
+        pp input_hash
       end
      private
       attr_reader :library_idh, :module_name, :meta_file, :hash_content, :ports
 
-      def ret_assembly_id(field)
-        unless assembly_name = hash_content[field.to_s]
+      def import_port_link(port_link_info)
+      end
+      #returns [assembly_name,assembly_ref,assembly_id]
+      def ret_assembly_info(field)
+        unless name = hash_content[field.to_s]
           raise ErrorUsage("Field (#{field}) not given in the service add-on file #{meta_file}")
         end
-        ref = ServiceModule.assembly_ref(module_name,assembly_name)
-        unless ret = library_idh.get_child_id_handle(:component,ref).get_id()
-          raise ErrorUsage("Field (#{field}) has value (#{assembly_name}) which is not avlaid assembly refernce")
+        ref = ServiceModule.assembly_ref(module_name,name)
+        unless id = library_idh.get_child_id_handle(:component,ref).get_id()
+          raise ErrorUsage("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
         end
-        ret
+        [name,ref,id]
       end
     end
   end
 end
-=begin
- "test2",
- "assemblies/hdfs/add-ons/slave.json",
- {"add_on_sub_assembly"=>"hdfs-slave",
-  "description"=>"Adds slave node",
-  "assembly"=>"hdfs",
-  "port_links"=>
-   [{"hdfs/master/hdp-hadoop::namenode/namenode_conn"=>
-      "hdfs-slave/slave/hdp-hadoop::namenode-conn/namenode_conn"}]}]
-[{:port_link=>{"output_id"=>2147519602, "input_id"=>2147519601},
-  :assembly_refs=>{:output=>"hdfs", :input=>"hdfs-slave"}}]
-=end

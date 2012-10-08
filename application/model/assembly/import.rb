@@ -24,8 +24,8 @@ module XYZ
       {:ndx_ports => ndx_ports}
     end
 
-    def ret_add_on_port_links(ports,add_on_port_links)
-      AssemblyImportInternal.ret_add_on_port_links(ports,add_on_port_links)
+    def import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+      AssemblyImportInternal.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
     end
 
    private
@@ -57,19 +57,21 @@ module XYZ
         {assembly_ref => {"port_link" => port_links}}
       end
 
-      def self.ret_add_on_port_links(ports,add_on_port_links)
-        ret = Array.new
+      def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+        ret = Hash.new
         return ret if (add_on_port_links||[]).empty?
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-
-        add_on_port_links.map do |ao_pl|
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(ao_pl.values.first)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(ao_pl.keys.first)
+        assembly_names = [assembly_name,sub_assembly_name]
+        add_on_port_links.inject(Hash.new) do |h,ao_pl|
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(ao_pl.values.first,assembly_names)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(ao_pl.keys.first,assembly_names)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
-          pl_hash = {"input_id" => input_id,"output_id" => output_id}
-          {:assembly_refs => {:input => input_assembly,:output => output_assembly}, :port_link => pl_hash}
+          output_is_local = (output_assembly == assembly_name) 
+          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local}
+          pl_ref = PortLink.ref_from_ids(input_id,output_id)
+          h.merge(pl_ref => pl_hash)
         end
       end
 

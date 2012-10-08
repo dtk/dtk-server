@@ -3,7 +3,6 @@
   :table=>:add_on,
   :columns=>{
     :type => {:type=>:varchar, :size => 50},
-    :local_is_output => {:type => :boolean},
     :sub_assembly_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:component,

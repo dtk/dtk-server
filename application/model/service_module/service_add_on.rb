@@ -31,8 +31,8 @@ module DTK
         }
         port_links = Assembly.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
         ao_input_hash.merge!(:port_link => port_links)
-        input_hash = {:component => {assembly_ref => {:service_add_on => {type => ao_input_hash}}}}
-        pp input_hash
+        input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}
+        Model.import_objects_from_hash(library_idh,{"component" =>  input_hash})
       end
      private
       attr_reader :library_idh, :module_name, :meta_file, :hash_content, :ports

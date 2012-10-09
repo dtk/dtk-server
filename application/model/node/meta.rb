@@ -388,7 +388,7 @@ module XYZ
          {
            :model_name => :node_binding_ruleset,
            :convert => true,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:id =>:node__node_binding_rs_id},
            :cols => NodeBindingRuleset.common_columns()
          }]

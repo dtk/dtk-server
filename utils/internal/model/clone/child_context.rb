@@ -176,6 +176,13 @@ module XYZ
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
+
+        #check if all nodes have node bindings
+        if node_info.find{|r|r[:node_binding_ruleset].nil?}
+          cleanup_after_error()
+          raise ErrorUsage.new("Missing node binding for assembly template") #TODO: want more descriptive error
+        end
+
         target = target_idh.create_object()
         #TODO: may be more efficient to get these all at once
         matches = node_info.map do |r|
@@ -183,6 +190,10 @@ module XYZ
           {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template_idh}
         end
         merge!(:matches => matches)
+      end
+
+      def cleanup_after_error()
+        Model.delete_instance(model_handle.createIDH(:model_name => :component,:id => override_attrs[:assembly_id]))
       end
     end
     class AssemblyComponentRef < ChildContext

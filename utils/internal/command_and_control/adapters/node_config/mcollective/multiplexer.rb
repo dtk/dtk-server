@@ -4,7 +4,11 @@ module XYZ
   module CommandAndControlAdapter; class Mcollective
     class Multiplexer < ProtocolMultiplexer
       include Singleton
-      def initialize(mcollective_client)
+      def self.create(mcollective_client)
+        instance.set(mcollective_client)
+      end
+
+      def set(mcollective_client)
         @mcollective_client = mcollective_client
         @mcollective_client.r8_set_context(self)
         super(@mcollective_client)

@@ -1,12 +1,17 @@
 module XYZ
   module CommandAndControlAdapter
     class ProtocolMultiplexer
-      def initialize(protocol_handler)
+      def initialize(protocol_handler=nil)
         #TODO: might put operations on @protocol_handler in mutex
         @protocol_handler = protocol_handler
         @callbacks_list = Hash.new
         @count_info = Hash.new
         @lock = Mutex.new
+      end
+
+      def set(protocol_handler)
+        @protocol_handler = protocol_handler
+        self
       end
 
       #TODO: may model more closely to syntax of EM:defer future signature

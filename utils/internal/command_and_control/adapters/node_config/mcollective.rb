@@ -92,7 +92,7 @@ module XYZ
       BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       @@handler = nil
       def self.handler()
-        @@handler ||= Multiplexer.instance(Config.mcollective_client())
+        @@handler ||= Multiplexer.create(Config.mcollective_client())
       end
 
       def self.filter_single_fact(fact,value,operator=nil)

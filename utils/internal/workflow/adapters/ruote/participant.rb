@@ -144,13 +144,15 @@ module XYZ
               workflow.initiate_executable_action(task,receiver_context)
             else
               result = workflow.process_executable_action(task)
+              #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
               if result[:status] == "failed"
+                #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
                 event,errors = task.add_event_and_errors(:complete_failed,result)
-                pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                set_result_failed(workitem,result,task,action)
+                ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                ##set_result_failed(workitem,result,task,action)
                 if result[:error_object]
-                  #TODO: abort; there must be more gaceful way to do this
-                  raise result[:error_object]
+                  #TODO: abort; there must be more graceful way to do this
+                  raise ErrorUsage.new(result[:error_object].to_s)
                 end
               else
                 set_result_succeeded(workitem,result,task,action) if task_end 

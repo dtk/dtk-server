@@ -144,7 +144,17 @@ module XYZ
               workflow.initiate_executable_action(task,receiver_context)
             else
               result = workflow.process_executable_action(task)
-              set_result_succeeded(workitem,result,task,action) if task_end 
+              if result[:status] == "failed"
+                event,errors = task.add_event_and_errors(:complete_failed,result)
+                pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                set_result_failed(workitem,result,task,action)
+                if result[:error_object]
+                  #TODO: abort; there must be more gaceful way to do this
+                  raise result[:error_object]
+                end
+              else
+                set_result_succeeded(workitem,result,task,action) if task_end 
+              end
               reply_to_engine(workitem)
             end
           end

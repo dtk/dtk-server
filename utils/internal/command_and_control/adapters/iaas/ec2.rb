@@ -36,7 +36,12 @@ module XYZ
             user_data = default_user_data()
             create_options[:user_data] = user_data if user_data
           end
-          response = conn().server_create(create_options)
+          response = nil
+          begin
+            response = conn().server_create(create_options)
+          rescue => e
+            return {:status => "failed", :error_object => e}
+          end
           instance_id = response[:id]
           state = response[:state]
           external_ref = external_ref.merge({

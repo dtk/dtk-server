@@ -72,7 +72,6 @@ module XYZ
 
     class CompleteCreateNode < Event
       def initialize(action,status,result)
-        #TODO: stub
         node = action[:node]
         ext_ref = node[:external_ref]
         ext_ref_type = ext_ref[:type]
@@ -80,9 +79,22 @@ module XYZ
           :event => "completed_create_node",
           :node_name => node[:display_name],
           :node_type => ext_ref_type.to_s,
+          :status => status
         }
         hash.merge(attr_val_pairs(action[:attributes]))
+        if status == :complete_failed
+          if error_msg = error_msg(result)
+            hash.merge!(:error_msg =>  error_msg)
+          end
+        end
         super(hash)
+      end
+     private
+      def error_msg(result)
+        #TODO: stub
+        if error_obj = result[:error_object]
+          error_obj.to_s
+        end
       end
     end
 

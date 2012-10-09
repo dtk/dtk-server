@@ -1,9 +1,27 @@
 { 
   "nodes_info": {
     "ami-e0219d8" : {
+      "region" : "us-east-1",
+      "type": "oneric",
       "os_type": "ubuntu",
       "display_name": "Oneric",
       "png": "ubuntu.png",
+      "sizes": ["t1.micro","m1.small","m1.medium"]
+    },
+    "ami-e7b1618e" : {
+      "region" : "us-east-1",
+      "type": "natty",
+      "os_type": "ubuntu",
+      "display_name": "Natty",
+      "png": "ubuntu.png",
+      "sizes": ["t1.micro","m1.small","m1.medium"]
+    },
+    "ami-0f42f666" : {
+      "region" : "us-east-1",
+      "type": "rh5.7-64",
+      "os_type": "redhat",
+      "display_name": "RH5.7 64",
+      "png": "redhat.png",
       "sizes": ["t1.micro","m1.small","m1.medium"]
     }
   }

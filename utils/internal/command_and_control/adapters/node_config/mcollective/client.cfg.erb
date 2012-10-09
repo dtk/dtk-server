@@ -2,7 +2,7 @@ topicprefix = /topic/
 main_collective = mcollective
 collectives = mcollective
 libdir = /usr/share/mcollective/plugins
-logfile = /var/log/mcollective_client.log
+logfile = <%= logfile %>
 loglevel = info
 
 # Plugins
@@ -10,9 +10,7 @@ securityprovider = psk
 plugin.psk = unset
 
 connector = stomp_em
-#connector = r8stomp
-#connector = stomp
-plugin.stomp.host = localhost
+plugin.stomp.host = <%= stomp_host %>
 plugin.stomp.port = 6163
 plugin.stomp.user = mcollective
 plugin.stomp.password = marionette

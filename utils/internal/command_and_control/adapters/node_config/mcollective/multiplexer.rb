@@ -1,13 +1,11 @@
 require 'singleton'
 require File.expand_path('../../../protocol_multiplexer', File.dirname(__FILE__))
 module XYZ
-  module CommandAndControlAdapter
-    class MCollectiveMultiplexer < ProtocolMultiplexer
+  module CommandAndControlAdapter; class Mcollective
+    class Multiplexer < ProtocolMultiplexer
       include Singleton
-      def initialize()
-        config_file = File.expand_path("client.cfg", File.dirname(__FILE__))
-        @mcollective_client = MCollective::Client.new(config_file)
-        @mcollective_client.options = {}
+      def initialize(mcollective_client)
+        @mcollective_client = mcollective_client
         @mcollective_client.r8_set_context(self)
         super(@mcollective_client)
       end
@@ -28,5 +26,5 @@ module XYZ
         process_request(trigger,context_with_callbacks)
       end
     end
-  end
+  end; end
 end

@@ -1,11 +1,10 @@
 require 'mcollective'
-require File.expand_path('mcollective/multiplexer', File.dirname(__FILE__))
-require File.expand_path('mcollective/monkey_patches', File.dirname(__FILE__))
-
+r8_nested_require('mcollective','monkey_patches')
 module XYZ
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
       r8_nested_require('mcollective','assembly_action')
+      r8_nested_require('mcollective','multiplexer')
       extend AssemblyActionClassMixin
       def self.server_host()
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
@@ -93,7 +92,7 @@ module XYZ
       BlankFilter = {"identity"=>[], "fact"=>[], "agent"=>[], "cf_class"=>[]}
       @@handler = nil
       def self.handler()
-        @@handler ||= MCollectiveMultiplexer.instance
+        @@handler ||= Multiplexer.instance(Config.mcollective_client())
       end
 
       def self.filter_single_fact(fact,value,operator=nil)
@@ -137,6 +136,35 @@ module XYZ
           RepoManager.push_implementation(context)
         end
         ret
+      end
+
+      class Config
+        require 'tempfile'
+        require 'erubis'
+        def self.mcollective_client()
+          return @mcollective_client if @mcollective_client
+          erubis_content = File.open(File.expand_path("mcollective/client.cfg.erb", File.dirname(__FILE__))).read
+          config_file_content = ::Erubis::Eruby.new(erubis_content).result(
+           :logfile => logfile(),
+           :stomp_host => Mcollective.server_host()
+          )
+          ret = nil
+          #TODO: see if can pass args and not need to use tempfile
+          begin
+            config_file = Tempfile.new("client.cfg")
+            config_file.write(config_file_content)
+            config_file.close
+            ret = ::MCollective::Client.new(config_file.path)
+          ensure
+            config_file.unlink
+          end
+          ret.options = {}
+          @mcollective_client = ret
+        end
+       private
+        def self.logfile()
+          "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
+        end
       end
     end
   end

@@ -1,6 +1,10 @@
 module XYZ
   class NodeController < Controller
-    helper :i18n_string_mapping
+    helper :node_helper
+
+    def rest__list()
+      rest_ok_response ret_node_subtype_class().list(model_handle())
+    end
 
     def rest__add_to_group()
       node_id, node_group_id = ret_non_null_request_params(:node_id, :node_group_id)
@@ -12,6 +16,10 @@ module XYZ
       node_group.add_member(node,id_handle(parent_id,:target))
       rest_ok_response
     end
+
+
+##### TODO: below need scleanup
+    helper :i18n_string_mapping
 
     def get(id)
       node = create_object_from_id(id)

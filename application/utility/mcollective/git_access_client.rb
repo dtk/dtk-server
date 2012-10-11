@@ -11,7 +11,8 @@ class Params
   class << self
     require 'sshkey'
     def ret_params()
-      server_public_key = File.open("/root/.ssh/id_rsa.pub").read
+      git_server_dns = ::DTK::Common::Aux.get_ec2_public_dns() #TODO: just for this test; could be remote
+      server_ssh_rsa_fingerprint = `ssh-keyscan -H -t rsa #{git_server_dns}`
       new_key =  ::SSHKey.generate(:type => "rsa")
       agent_public_key = new_key.ssh_public_key
       agent_private_key = new_key.private_key
@@ -20,8 +21,7 @@ class Params
       {
         :agent_ssh_key_public => agent_public_key,
         :agent_ssh_key_private => agent_private_key,
-        :server_ssh_key_public => server_public_key,
-        :server_hostname => ::DTK::Common::Aux.get_ec2_public_dns()
+        :server_ssh_rsa_fingerprint => server_ssh_rsa_fingerprint
       }
     end
   end

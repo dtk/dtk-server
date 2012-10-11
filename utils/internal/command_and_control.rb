@@ -14,6 +14,10 @@ module XYZ
       end
     end
 
+    def self.existing_image?(image_id,image_type)
+      klass = load_iaas_for(:image_type => image_type)
+      klass.existing_image?(image_id)
+    end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)
       target.update_object!(:iaas_type,:iaas_properties)
@@ -70,25 +74,33 @@ module XYZ
 
    private
     def self.load_iaas_for(key_val)
-      if key_val[:node]
-        node = key_val[:node]
-        ext_ref_type = (node[:external_ref]||{})[:type]
-        adapter_name = 
-          case ext_ref_type
-            when "ec2_instance" then :ec2
-            when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
-           else raise Error.new("not treated")
+      key = key_val.keys.first
+      val = key_val.values.first
+      adapter_name = 
+        case key
+          when :node
+            node = val
+            ext_ref_type = (node[:external_ref]||{})[:type]
+            case ext_ref_type
+              when "ec2_instance" then :ec2
+              when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
+              else raise Error.new("not treated")
+            end
+          when :target
+            target =  val
+            case target[:iaas_type]
+              when "ec2" then :ec2
+              else raise Error.new("not treated")
+            end
+          when :image_type
+            image_type = val
+            case image_type
+              when :ec2_image then :ec2
+              else raise Error.new("image type (#{key_val[:image_type]}) not treated")
+            end
+          else
+            raise Error.new("#{key_val.inspect} not treated")
         end
-      elsif key_val[:target]
-        target =  key_val[:target]
-        adapter_name =
-          case target[:iaas_type]
-            when "ec2" then :ec2
-            else raise Error.new("not treated")
-          end
-      else
-        raise Error.new("not treated")
-      end
       adapter_type = :iaas
       load_for_aux(adapter_type,adapter_name)
     end

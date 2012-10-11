@@ -8,6 +8,10 @@ module XYZ
       end
     end
 
+    def self.existing_image?(image_id)
+      !!conn().image_get(image_id)
+    end
+
     def self.execute(task_idh,top_task_idh,task_action)
         node = task_action[:node]
         external_ref = node[:external_ref]||{}

@@ -1,22 +1,25 @@
 #!/usr/bin/env ruby
 require 'rubygems'
+require File.expand_path('../../require_first', File.dirname(__FILE__))
+r8_require_common_lib('auxiliary')
+require 'mcollective'
+require 'tempfile'
 require 'pp'
 
-require 'mcollective'
-
-require 'tempfile'
 include MCollective::RPC
 class Params
   class << self
     require 'sshkey'
     def ret_params()
-      ret = Hash.new
-      k =  ::SSHKey.generate(:type => "rsa")
+      server_public_key = File.open("/root/.ssh/id_rsa.pub").read
+      new_key =  ::SSHKey.generate(:type => "rsa")
+      agent_public_key = new_key.public_key
+      agent_private_key = new_key.private_key
       {
-        :agent_ssh_key_public => k.public_key,
-        :agent_ssh_key_private => k.private_key
-        #ret[:server_ssh_key_public]
-        #ret[:server_hostname]
+        :agent_ssh_key_public => agent_public_key,
+        :agent_ssh_key_private => agent_private_key,
+        :server_ssh_key_public => server_public_key,
+        :server_hostname => ::DTK::Common::Aux.get_ec2_public_dns()
       }
     end
   end

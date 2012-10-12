@@ -279,7 +279,7 @@ module DTK
       meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
       refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
       render_hash = refinement_hash.render_hash_form()
-temp_file = "/tmp/r8.yml"
+      temp_file = "/tmp/#{module_name}-r8meta.puppet.yml"
 Log.error("TODO: debug writing to templ file #{temp_file}")
 File.open(temp_file,"w"){|io|render_hash.write_yaml(io)}
     end

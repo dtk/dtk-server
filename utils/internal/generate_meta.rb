@@ -630,15 +630,18 @@ module XYZ
       io << "\n"
     end
   protected
-    #since zaml generator is beiung used waht to remove references so dont generate yaml with labels
-    def yaml_form()
-      ret = RenderHash.new
+    #since yaml generator is beiung used want to remove references so dont generate yaml with labels
+    def yaml_form(level=1)
+      ret = ::ActiveSupport::OrderedHash.new()
       each do |k,v|
+        if level == 1 and k == "version"
+          next
+        end
         converted_val = 
           if v.kind_of?(RenderHash)
-            v.yaml_form()
+            v.yaml_form(level+1)
           elsif v.kind_of?(Array)
-            v.map{|el|el.kind_of?(RenderHash) ? el.yaml_form() : el.dup?}
+            v.map{|el|el.kind_of?(RenderHash) ? el.yaml_form(level+1) : el.dup?}
           else 
             v.dup?
           end

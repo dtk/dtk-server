@@ -276,7 +276,7 @@ module XYZ
 
       def process_fn(ast_item,opts) 
         #TODO: make what is ignored and treated fn of opts
-        types_to_ignore = [:var_def]
+        types_to_ignore = [:var_def,:hostclass]
         types_to_process = [:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
         return nil if puppet_type?(ast_item,types_to_ignore)
         if type = puppet_type?(ast_item,types_to_process)
@@ -499,7 +499,10 @@ module XYZ
     class AttributePS < ParseStructure
       def initialize(arg,opts={})
         self[:name] = arg[0]
-        self[:default] =  default_value(arg[1]) if arg[1]
+        if arg[1]
+          default_val = default_value(arg[1])
+          self[:default] =  default_val if default_val
+        end
         self[:required] = opts[:required] if opts.has_key?(:required)
         super
       end
@@ -515,7 +518,8 @@ module XYZ
         if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:undef])
           TermPS.create(default_ast_obj)
         else
-          raise R8ParseError.new("unexpected type for an attribute default (#{default_ast_obj.class.to_s})")
+          Log.error("not treating type (#{default_ast_obj.class.to_s}) for an attribute default")
+          nil
         end
       end
     end
@@ -632,7 +636,8 @@ module XYZ
           elsif puppet_type?(child_ast_item,:case_statement)
             CaseStatementPS.flat_statement_iter(child_ast_item,opts,&block)
           else
-            raise R8ParseError.new("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
+            Log.error("unexpected statement in 'if statement' body having ast class (#{child_ast_item.class.to_s})")
+            Array.new
           end
         end
       end      

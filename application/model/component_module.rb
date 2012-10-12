@@ -263,7 +263,7 @@ module DTK
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
 
       if opts[:scaffold_if_no_meta]
-        parse_to_create_meta(config_agent_type,impl_obj)
+        parse_to_create_meta(module_name,config_agent_type,impl_obj)
       end
       impl_obj.create_file_assets_from_dir_els()
 
@@ -273,7 +273,7 @@ module DTK
       module_branch_idh
     end
 
-    def self.parse_to_create_meta(config_agent_type,impl_obj)
+    def self.parse_to_create_meta(module_name,config_agent_type,impl_obj)
       return if ComponentMetaFile.ret_meta_filename?(impl_obj)
       r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
       meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)

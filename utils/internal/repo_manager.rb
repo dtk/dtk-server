@@ -145,6 +145,7 @@ module XYZ
         repo_dir = context[:repo_name]
         branch = "master"
       elsif context.kind_of?(Implementation)
+        context.update_object!(:repo,:branch)
         repo_dir = context[:repo]
         branch = context[:branch]
       else #TODO: modify below and how args passed to just use hash with keys :repo_dir,:branch

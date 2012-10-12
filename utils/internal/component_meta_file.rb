@@ -8,7 +8,7 @@ module DTK
     #TODO: move create_meta_file_object and create_from_file_obj_hash? to take moudle branch objects, rather than impleemntation (which wil get more hidden and eventually deprecated
     #source_impl is where content of file is gotten from, target_impl is where it is cloned to; if target_impl omitted then sourec and target the same
     def self.create_meta_file_object(repo,source_impl,container_idh=nil,target_impl=nil)
-      unless meta_filename = meta_filename(repo)
+      unless meta_filename = ret_meta_filename?(source_impl)
         raise Error.new("No component meta file found")
       end
       file_obj_hash = {:path => meta_filename,:implementation => source_impl}
@@ -32,25 +32,23 @@ module DTK
       "yml" => :yaml
     }
 
-    class << self
-     private
-      def meta_filename(repo)
-        depth = 1
-        RepoManager.ls_r(depth,{:file_only => true},repo).find{|f|f =~ MetaFilenameRegexp}
-      end
+    def self.ret_meta_filename?(impl_obj)
+      depth = 1
+      RepoManager.ls_r(depth,{:file_only => true},impl_obj).find{|f|f =~ MetaFilenameRegexp}
+    end
+
       #returns [config_agent_type,file_extension]
-      def isa_meta_filename?(filename)
+    def self.isa_meta_filename?(filename)
         filename =~ MetaFilenameRegexp
       end
-      def parse_meta_filename(filename)
-        if filename =~ MetaFilenameRegexp
-          [$1.to_sym,$2]
-        else
-          raise Error.new("Component filename (#{filename}) has illegal form")
-        end
+    def self.parse_meta_filename(filename)
+      if filename =~ MetaFilenameRegexp
+        [$1.to_sym,$2]
+      else
+        raise Error.new("Component filename (#{filename}) has illegal form")
       end
-      MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
     end
+    MetaFilenameRegexp = /^r8meta\.([a-z]+)\.([a-z]+$)/
 
     attr_reader :input_hash
     def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)

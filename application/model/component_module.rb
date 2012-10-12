@@ -262,21 +262,29 @@ module DTK
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
+
+      if opts[:scaffold_if_no_meta]
+        parse_to_create_meta(config_agent_type,repo,impl_obj)
+      end
       impl_obj.create_file_assets_from_dir_els(repo)
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-pp module_and_branch_info
-raise "Got here"
-=begin
-if :scaffold_if_no_meta and no meta then
-      r8_parse = ConfigAgent.parse_given_module_directory(:puppet,ws_branch[:local_dir])
-      meta_generator = GenerateMeta.create("1.0")
-      meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle)
-=end
       ComponentMetaFile.update_model(repo,impl_obj,module_branch_idh,version)
       module_branch_idh
     end
+
+    def self.parse_to_create_meta(config_agent_type,repo,impl_obj)
+      return if ComponentMetaFile.ret_meta_filename?(repo)
+pp [repo,impl_obj]
+raise "got heer"
+
+      r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,ws_branch[:local_dir])
+      meta_generator = GenerateMeta.create(ComponentDSLVersion)
+      meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle)
+    end
+    ComponentDSLVersion = "1.0"
+
 
     #type is :library or :workspace
     def find_branch(type,branches)

@@ -277,9 +277,11 @@ module DTK
       return if ComponentMetaFile.ret_meta_filename?(impl_obj)
       r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
       meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
-      ret = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
-      pp ret
-      ret
+      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
+      render_hash = refinement_hash.render_hash_form()
+temp_file = "/tmp/r8.yml"
+Log.error("TODO: debug writing to templ file #{temp_file}")
+File.open(temp_file,"w"){|io|render_hash.write_yaml(io)}
     end
     ComponentMetaDSLVersion = "1.0"
 

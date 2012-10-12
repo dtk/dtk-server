@@ -131,13 +131,16 @@ module XYZ
       update_object!(:type,:repo,:branch)
 
       file_type = ImplTypeToFileType[self[:type]]
-      file_paths = RepoManager.ls_r('*',{:file_only=>true},self)
-      file_asset_rows = file_paths.map do |file_path|
+      file_asset_rows = all_file_paths().map do |file_path|
         content = nil #TODO to clear model cache of content
         FileAsset.ret_create_hash(self,file_type,file_path,content)
       end
       #TODO: need to make create? from rows
       Model.modify_children_from_rows(model_handle(:file_asset),id_handle,file_asset_rows)
+    end
+
+    def all_file_paths()
+      RepoManager.ls_r('*',{:file_only=>true},self)
     end
 
     def add_contained_files_and_push_to_repo()

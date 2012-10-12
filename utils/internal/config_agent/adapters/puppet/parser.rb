@@ -3,17 +3,16 @@ require 'puppet/parser'
 
 module XYZ
   module PuppetParser
-    def parse_given_module_directory(module_dir)
+    def parse_given_module_directory(impl_obj)
       #TODO: only handling parsing of .pp now
-      manifest_dir = "#{module_dir}/manifests"
-      manifest_file_names = Dir.chdir(manifest_dir){Dir["**/*"].select{|i|File.file?(i) and i =~ /\.pp$/}.map{|fn|"#{manifest_dir}/#{fn}"}}
+      manifest_file_names = impl_obj.all_file_paths().select{|path|path =~ /\.pp$/}
       ret = TopPS.new()
       opts = {:just_krt_code => true}
       all_errors = nil
       manifest_file_names.each do |filename|
         Log.info("calling puppet and r8 processor on file #{filename}")
         begin
-          krt_code = parse_given_file_path__manifest(filename,opts)
+          krt_code = parse_given_file_path__manifest(filename,impl_obj,opts)
           ret.add_children(krt_code) unless all_errors #short-circuiot once first error found
         rescue ConfigAgent::ParseErrors => errors
           all_errors = (all_errors ? all_errors.add(errors) : errors)
@@ -37,8 +36,8 @@ module XYZ
 
     PuppetParserLock = Mutex.new
 
-    def parse_given_file_path__manifest(file_path,opts={})
-      file_content = File.open(file_path,"r"){|f|f.read}
+    def parse_given_file_path__manifest(file_path,impl_obj,opts={})
+      file_content = RepoManager.get_file_content({:path => file_path},impl_obj)
       parse_given_file_content__manifest(file_content,opts.merge(:file_path => file_path))
     end
 

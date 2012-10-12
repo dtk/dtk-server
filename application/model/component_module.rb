@@ -275,15 +275,13 @@ module DTK
 
     def self.parse_to_create_meta(config_agent_type,impl_obj)
       return if ComponentMetaFile.ret_meta_filename?(impl_obj)
-
-raise "got heer"
-
-      r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,ws_branch[:local_dir])
-      meta_generator = GenerateMeta.create(ComponentDSLVersion)
-      meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle)
+      r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
+      meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
+      ret = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
+      pp ret
+      ret
     end
-    ComponentDSLVersion = "1.0"
-
+    ComponentMetaDSLVersion = "1.0"
 
     #type is :library or :workspace
     def find_branch(type,branches)

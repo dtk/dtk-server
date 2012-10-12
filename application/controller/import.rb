@@ -110,6 +110,7 @@ module XYZ
 
       #parsing
       begin
+        raise Error.new("ConfigAgent.parse_given_module_directory(config_agent_type,module_dir) needs to be converted to form ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj")
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ConfigAgent::ParseErrors => errors
         errors.set_file_asset_ids!(model_handle)

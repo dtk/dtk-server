@@ -13,7 +13,11 @@ module XYZ
 
     def rest__update_repo_and_add_meta_data()
       repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
-      ComponentModule.update_repo_and_add_meta_data(id_handle(repo_id,:repo),id_handle(library_id,:library),module_name)
+      version,scaffold = ret_request_params(:version,:scaffold_if_no_meta)
+      opts = {:scaffold_if_no_meta => scaffold}
+      repo_idh = id_handle(repo_id,:repo)
+      library_idh = id_handle(library_id,:library)
+      ComponentModule.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version,opts)
       rest_ok_response
     end
 

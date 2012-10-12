@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'pp'
-
 Root = File.expand_path('../../', File.dirname(__FILE__))
+require "#{Root}/application/require_first"
 ["auxiliary", "errors", "log","hash_object", "generate_meta", "config_agent/adapters/puppet/parser"].each do |f|
   require "#{Root}/utils/internal/#{f}.rb"
 end

@@ -232,11 +232,11 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
-    def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name)
+    def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
       repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
       #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els(repo)in create_objects_for_library_module
-      create_objects_for_library_module(repo,library_idh,module_name)
+      create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
     end
 
     def update_model_from_clone_changes?(diffs_hash,version=nil)
@@ -258,7 +258,7 @@ module DTK
       create_objects_for_library_module(repo,library_idh,module_name,version)
     end
     
-    def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil)
+    def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts={})
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
@@ -266,7 +266,14 @@ module DTK
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-
+pp module_and_branch_info
+raise "Got here"
+=begin
+if :scaffold_if_no_meta and no meta then
+      r8_parse = ConfigAgent.parse_given_module_directory(:puppet,ws_branch[:local_dir])
+      meta_generator = GenerateMeta.create("1.0")
+      meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle)
+=end
       ComponentMetaFile.update_model(repo,impl_obj,module_branch_idh,version)
       module_branch_idh
     end

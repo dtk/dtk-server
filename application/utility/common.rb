@@ -108,7 +108,7 @@ class R8Server
     end
     impl = impls.first
 
-    cmf = ComponentMetaFile.create_meta_file_object(repo,impl)
+    cmf = ComponentMetaFile.create_meta_file_object(impl)
     new_version_integer = 2 
     hash_content = DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)
@@ -142,7 +142,7 @@ class R8Server
       FileUtils.rm_rf source_git if File.directory?(source_git)
       
       #add file_assets
-      impl_obj.create_file_assets_from_dir_els(repo_obj)
+      impl_obj.create_file_assets_from_dir_els()
     
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)

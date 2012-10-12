@@ -21,7 +21,7 @@ module XYZ
     include CommonInputImport
     #assumption is that top_container_idh is in uri form
     #returns [library_idh,implementation_idh]
-    def create_file_assets_from_dir_els(top_container_idh,module_dir,module_name,config_agent_type)
+    def deprecate_create_file_assets_from_dir_els(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
       username = CurrentSession.get_user_username()
       users_private_lib_name = "private-#{username}"

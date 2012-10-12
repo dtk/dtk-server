@@ -127,7 +127,7 @@ module XYZ
       FileAsset.add_and_push_to_repo(self,file_type,file_path,content,opts)
     end
 
-    def create_file_assets_from_dir_els(repo_obj)
+    def create_file_assets_from_dir_els()
       update_object!(:type,:repo,:branch)
 
       file_type = ImplTypeToFileType[self[:type]]

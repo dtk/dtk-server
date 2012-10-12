@@ -18,7 +18,7 @@ module XYZ
       impls = Model.get_objs(model_handle(:implementation),sp_hash)
       raise Error.new("Expecting to just find one matching implementation") unless impls.size == 1
       impl = impls.first
-      impl.create_file_assets_from_dir_els(repo)
+      impl.create_file_assets_from_dir_els()
       impl.add_contained_files_and_push_to_repo()
       rest_ok_response
     end

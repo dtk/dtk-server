@@ -120,7 +120,7 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:repo],augmented_branch[:implementation])
+          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:implementation])
           component_meta_file.update_model()
         end
 

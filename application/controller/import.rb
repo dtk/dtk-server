@@ -106,7 +106,7 @@ module XYZ
         #raise e
       end
 
-      impl_obj.create_file_assets_from_dir_els(repo_obj)
+      impl_obj.create_file_assets_from_dir_els()
 
       #parsing
       begin

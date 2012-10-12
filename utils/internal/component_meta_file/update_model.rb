@@ -44,8 +44,8 @@ module DTK; class ComponentMetaFile
   end
 
   module UpdateModelClassMixin
-    def update_model(repo,impl_obj,module_branch_idh,version)
-      component_meta_file_obj = create_meta_file_object(repo,impl_obj)
+    def update_model(impl_obj,module_branch_idh,version)
+      component_meta_file_obj = create_meta_file_object(impl_obj)
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version
       component_meta_file_obj.update_model(update_opts)

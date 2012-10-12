@@ -7,7 +7,7 @@ module DTK
 
     #TODO: move create_meta_file_object and create_from_file_obj_hash? to take moudle branch objects, rather than impleemntation (which wil get more hidden and eventually deprecated
     #source_impl is where content of file is gotten from, target_impl is where it is cloned to; if target_impl omitted then sourec and target the same
-    def self.create_meta_file_object(repo,source_impl,container_idh=nil,target_impl=nil)
+    def self.create_meta_file_object(source_impl,container_idh=nil,target_impl=nil)
       unless meta_filename = ret_meta_filename?(source_impl)
         raise Error.new("No component meta file found")
       end

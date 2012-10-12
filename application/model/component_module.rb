@@ -125,7 +125,7 @@ module DTK
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
         target_impl = lib_branch.get_implementation()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(repo,source_impl,library_idh,target_impl)
+        component_meta_file = ComponentMetaFile.create_meta_file_object(source_impl,library_idh,target_impl)
         component_meta_file.update_model()
       end
  
@@ -145,10 +145,9 @@ module DTK
     end
 
     def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
-      repo = module_branch.get_repo()
       impl = module_branch.get_implementation()
       #add/remove any needed file_asset objects
-      impl.create_file_assets_from_dir_els(repo)
+      impl.create_file_assets_from_dir_els()
 
       pp "TODO: update meta info if needed"
     end
@@ -235,7 +234,7 @@ module DTK
     def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
       repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
-      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els(repo)in create_objects_for_library_module
+      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els()in create_objects_for_library_module
       create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
     end
 
@@ -264,19 +263,19 @@ module DTK
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
 
       if opts[:scaffold_if_no_meta]
-        parse_to_create_meta(config_agent_type,repo,impl_obj)
+        parse_to_create_meta(config_agent_type,impl_obj)
       end
-      impl_obj.create_file_assets_from_dir_els(repo)
+      impl_obj.create_file_assets_from_dir_els()
 
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      ComponentMetaFile.update_model(repo,impl_obj,module_branch_idh,version)
+      ComponentMetaFile.update_model(impl_obj,module_branch_idh,version)
       module_branch_idh
     end
 
-    def self.parse_to_create_meta(config_agent_type,repo,impl_obj)
-      return if ComponentMetaFile.ret_meta_filename?(repo)
-pp [repo,impl_obj]
+    def self.parse_to_create_meta(config_agent_type,impl_obj)
+      return if ComponentMetaFile.ret_meta_filename?(impl_obj)
+
 raise "got heer"
 
       r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,ws_branch[:local_dir])

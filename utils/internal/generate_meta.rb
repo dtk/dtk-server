@@ -73,7 +73,7 @@ module XYZ
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
 
       #this wil add any file_assets that have not been yet added (this will include the r8meta file
-      impl_obj.create_file_assets_from_dir_els(repo_obj)
+      impl_obj.create_file_assets_from_dir_els()
 
       ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
 

@@ -265,7 +265,7 @@ module DTK
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
 
       parsing_error = nil
-      meta_created = false
+      meta_created = nil
       if opts[:scaffold_if_no_meta]
         begin
           meta_created = parse_to_create_meta?(module_name,config_agent_type,impl_obj)
@@ -277,12 +277,13 @@ module DTK
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
-      ComponentMetaFile.update_model(impl_obj,module_branch_idh,version)
+      ComponentMetaFile.update_model(impl_obj,module_branch_idh,version) unless meta_created
       {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
     end
 
     def self.parse_to_create_meta?(module_name,config_agent_type,impl_obj)
-      return false if ComponentMetaFile.filename_if_exists?(impl_obj)
+      ret = nil
+      return nil if ComponentMetaFile.filename_if_exists?(impl_obj)
       
       parsing_error = nil
       render_hash = nil
@@ -299,10 +300,10 @@ module DTK
       if render_hash 
         content = YAML.dump(render_hash.yaml_form())
         meta_filename = ComponentMetaFile.filename(config_agent_type)
-        RepoManager.add_file(meta_filename,content,impl_obj)
+        ret = {:path => meta_filename, :content => content}
       end
       raise parsing_error if parsing_error
-      true
+      ret
     end
     ComponentMetaDSLVersion = "1.0"
 

@@ -8,7 +8,7 @@ module DTK
     #TODO: move create_meta_file_object and create_from_file_obj_hash? to take moudle branch objects, rather than impleemntation (which wil get more hidden and eventually deprecated
     #source_impl is where content of file is gotten from, target_impl is where it is cloned to; if target_impl omitted then sourec and target the same
     def self.create_meta_file_object(source_impl,container_idh=nil,target_impl=nil)
-      unless meta_filename = ret_meta_filename?(source_impl)
+      unless meta_filename = filename_if_exists?(source_impl)
         raise Error.new("No component meta file found")
       end
       file_obj_hash = {:path => meta_filename,:implementation => source_impl}
@@ -32,12 +32,19 @@ module DTK
       "yml" => :yaml
     }
 
-    def self.ret_meta_filename?(impl_obj)
+    def self.filename_if_exists?(impl_obj)
       depth = 1
       RepoManager.ls_r(depth,{:file_only => true},impl_obj).find{|f|f =~ MetaFilenameRegexp}
     end
 
-      #returns [config_agent_type,file_extension]
+    def self.filename(config_agent_type)
+      unless [:puppet,:chef].include?(config_agent_type.to_sym)
+        raise Error.new("Illegal config agent type (#{config_agent_type})")
+      end
+      "r8.#{config_agent_type}.yaml"
+    end
+
+    #returns [config_agent_type,file_extension]
     def self.isa_meta_filename?(filename)
         filename =~ MetaFilenameRegexp
       end

@@ -3,7 +3,7 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:get_file_content,:update_file_content,:add_file,:add_all_files,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push_to_origin?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull]
+      RepoMethods = [:add_all_files,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push_to_origin?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:footprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
@@ -18,6 +18,23 @@ module XYZ
       end
       def respond_to?(name)
         !!(defined_method?(name) || super)
+      end
+
+      def get_file_content(file_obj_or_path,context)
+        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        get_adapter_repo(context).get_file_content(file_obj_or_path)
+      end
+
+      #signature is effectively def add_file(file_obj_or_path,content,commit_msg=nil,context)
+      def add_file(*args)
+        context = args.pop
+        file_obj_or_path,content,commit_msg = args
+        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        get_adapter_repo(context).add_file(file_obj_or_path,content,commit_msg)
+      end
+      def update_file_content(file_obj_or_path,content,context)
+        file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
+        get_adapter_repo(context).update_file_content(file_obj_or_path,content)
       end
       
      private

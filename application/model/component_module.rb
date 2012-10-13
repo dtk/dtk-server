@@ -231,6 +231,7 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
+    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
     def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
       repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
@@ -254,34 +255,54 @@ module DTK
 
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
-      create_objects_for_library_module(repo,library_idh,module_name,version)
+      create_objects_for_library_module(repo,library_idh,module_name,version)[:module_branch_idh]
     end
     
+    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
     def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts={})
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.library_branch_name(library_idh,version)
       impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
 
+      parsing_error = nil
+      meta_created = false
       if opts[:scaffold_if_no_meta]
-        parse_to_create_meta(module_name,config_agent_type,impl_obj)
+        begin
+          meta_created = parse_to_create_meta?(module_name,config_agent_type,impl_obj)
+         rescue => e
+          parsing_error = e
+        end
       end
       impl_obj.create_file_assets_from_dir_els()
-
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
+      raise parsing_error if parsing_error
       ComponentMetaFile.update_model(impl_obj,module_branch_idh,version)
-      module_branch_idh
+      {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
     end
 
-    def self.parse_to_create_meta(module_name,config_agent_type,impl_obj)
-      return if ComponentMetaFile.ret_meta_filename?(impl_obj)
-      r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-      meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
-      refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
-      render_hash = refinement_hash.render_hash_form()
-      temp_file = "/tmp/#{module_name}-r8meta.puppet.yml"
-Log.error("TODO: debug writing to templ file #{temp_file}")
-File.open(temp_file,"w"){|io|render_hash.write_yaml(io)}
+    def self.parse_to_create_meta?(module_name,config_agent_type,impl_obj)
+      return false if ComponentMetaFile.filename_if_exists?(impl_obj)
+      
+      parsing_error = nil
+      render_hash = nil
+      begin
+        r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
+        meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
+        refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
+        render_hash = refinement_hash.render_hash_form()
+       rescue => e
+        #TODO: later distinguish between internal and parsing errors and leverage mechanism put place in parser to handle this
+        parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
+        pp [:parsing_error,e,e.backtrace[0..10]]
+      end
+      if render_hash 
+        content = YAML.dump(render_hash)
+        meta_filename = ComponentMetaFile.filename(config_agent_type)
+        RepoManager.add_file(meta_filename,content,impl_obj)
+      end
+      raise parsing_error if parsing_error
+      true
     end
     ComponentMetaDSLVersion = "1.0"
 

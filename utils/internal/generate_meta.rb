@@ -629,10 +629,9 @@ module XYZ
       YAML::dump(yaml_form(),io)
       io << "\n"
     end
-  protected
     #since yaml generator is beiung used want to remove references so dont generate yaml with labels
     def yaml_form(level=1)
-      ret = ::ActiveSupport::OrderedHash.new()
+      ret = RenderHash.new
       each do |k,v|
         if level == 1 and k == "version"
           next

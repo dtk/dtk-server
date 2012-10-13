@@ -297,7 +297,7 @@ module DTK
         pp [:parsing_error,e,e.backtrace[0..10]]
       end
       if render_hash 
-        content = YAML.dump(render_hash)
+        content = YAML.dump(render_hash.yaml_form())
         meta_filename = ComponentMetaFile.filename(config_agent_type)
         RepoManager.add_file(meta_filename,content,impl_obj)
       end

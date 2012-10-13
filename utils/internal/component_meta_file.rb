@@ -41,7 +41,7 @@ module DTK
       unless [:puppet,:chef].include?(config_agent_type.to_sym)
         raise Error.new("Illegal config agent type (#{config_agent_type})")
       end
-      "r8.#{config_agent_type}.yaml"
+      "r8meta.#{config_agent_type}.yml"
     end
 
     #returns [config_agent_type,file_extension]

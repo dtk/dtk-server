@@ -148,8 +148,13 @@ module DTK
       impl = module_branch.get_implementation()
       #add/remove any needed file_asset objects
       impl.create_file_assets_from_dir_els()
-
-      pp "TODO: update meta info if needed"
+      pp [:debug_diffs_hash,diffs_hash]
+      #TODO: may have to look for files added too
+      if modified = diffs_hash["files_modified"]
+        if modified.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])}
+          pp [:debug_diffs_hash,:update_meta]
+        end
+      end
     end
 
     def get_associated_target_instances()

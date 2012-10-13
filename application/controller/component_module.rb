@@ -24,7 +24,8 @@ module XYZ
     def rest__update_model_from_clone()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
-      diffs = ret_non_null_request_params(:diffs)
+      json_diffs = ret_request_params(:json_diffs)
+      diffs = (json_diffs && JSON.parse(json_diffs))||Hash.new
       component_module.update_model_from_clone_changes?(diffs,version)
       rest_ok_response
     end

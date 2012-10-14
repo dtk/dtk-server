@@ -39,10 +39,11 @@ module DTK
         :library_branch => ModuleBranch.library_branch_name(library_idh)
       }
       repo.update_for_new_repo(branch_info.values) 
-      library_mb_info = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
-      library_mb = library_mb_info[:module_branch_idh].create_object()
-      create_workspace_branch?(library_idh,library_mb,project)
-      {:meta_created => library_mb_info[:meta_created]}
+      module_and_mb_info = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+      library_mb = module_and_mb_info[:module_branch_idh].create_object()
+      module_obj = module_and_mb_info[:module_idh].create_object() 
+      module_obj.create_workspace_branch?(project,version,library_idh,library_mb)
+      {:meta_created => module_and_mb_info[:meta_created]}
     end
 
     def create_new_version(new_version,existing_version=nil)
@@ -212,17 +213,17 @@ module DTK
       unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+    #creates workspace branch (if needed) and related objects from library one
+    def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
+      needed_cols = (library_idh ? [:library_library_id,:display_name] : [:display_name])
+      update_object!(*needed_cols)
+      module_name = self[:display_name]
+      library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
 
-    def create_workspace_branch?(proj,version=nil)
-      update_object!(:library_library_id,:display_name)
-      library_mb = get_library_module_branch(version)
-      library_idh = id_hancle(:model_name => :library, :id => self[:library_library_id])
-      self.class.create_workspace_branch?(library_idh,library_mb,proj,version)
-    end
+      #get library branch if needed
+      library_mb ||= get_library_module_branch(version)
 
-    #creates workspace branch from library branch (if needed) and related objects from library one
-    def self.create_workspace_branch?(library_idh,library_mb,proj,version=nil)
-      #create module branch for workspace if needed and push it to repo server
+      #create module branch for workspace if needed and pust it to repo server
       workspace_mb = library_mb.create_component_workspace_branch?(proj)
       
       #create new project implementation if needed
@@ -231,7 +232,7 @@ module DTK
         :cols => [:id,:group_id],
         :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :version, ModuleBranch.version_field(version)],
-                    [:eq, :module_name,self[:display_name]]]
+                    [:eq, :module_name,module_name]]
       }
       library_impl = Model.get_obj(model_handle(:implementation),sp_hash)
       new_impl_idh = library_impl.clone_into_project_if_needed(proj)
@@ -242,7 +243,6 @@ module DTK
         :filter => [:eq, :id, workspace_mb[:repo_id]]
       }
       repo = Model.get_obj(model_handle(:repo),sp_hash)
-      module_name = self[:display_name]
       module_info = {:workspace_branch => workspace_mb[:branch]}
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
@@ -253,7 +253,6 @@ module DTK
       module_name = aug_branch[:component_module][:display_name]
       ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
-
 
     def update_model_from_clone_changes?(diffs_hash,version=nil)
       matching_branches = get_module_branches_matching_version(version)
@@ -294,7 +293,7 @@ module DTK
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
       ComponentMetaFile.update_model(impl_obj,module_branch_idh,version) unless meta_created
-      {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
+      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :meta_created => meta_created}
     end
 
     def self.parse_to_create_meta?(module_name,config_agent_type,impl_obj)

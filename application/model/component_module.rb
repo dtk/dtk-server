@@ -41,7 +41,7 @@ module DTK
       repo.update_for_new_repo(branch_info.values) 
       library_mb_info = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
       library_mb = library_mb_info[:module_branch_idh].create_object()
-      library_mb.create_component_workspace_branch?(project)
+      create_workspace_branch?(library_idh,library_mb,project)
       {:meta_created => library_mb_info[:meta_created]}
     end
 
@@ -213,13 +213,15 @@ module DTK
     end
 
 
-    #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version=nil)
       update_object!(:library_library_id,:display_name)
-      library_id = self[:library_library_id]
-      #get library branch
       library_mb = get_library_module_branch(version)
+      library_idh = id_hancle(:model_name => :library, :id => self[:library_library_id])
+      self.class.create_workspace_branch?(library_idh,library_mb,proj,version)
+    end
 
+    #creates workspace branch from library branch (if needed) and related objects from library one
+    def self.create_workspace_branch?(library_idh,library_mb,proj,version=nil)
       #create module branch for workspace if needed and push it to repo server
       workspace_mb = library_mb.create_component_workspace_branch?(proj)
       
@@ -227,7 +229,7 @@ module DTK
       #  first get library implementation
       sp_hash = {
         :cols => [:id,:group_id],
-        :filter => [:and, [:eq, :library_library_id, library_id],
+        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
                     [:eq, :version, ModuleBranch.version_field(version)],
                     [:eq, :module_name,self[:display_name]]]
       }
@@ -242,7 +244,6 @@ module DTK
       repo = Model.get_obj(model_handle(:repo),sp_hash)
       module_name = self[:display_name]
       module_info = {:workspace_branch => workspace_mb[:branch]}
-      library_idh = id_handle(:model_name => :library, :id => library_id)
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 

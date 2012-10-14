@@ -17,7 +17,8 @@ module XYZ
       opts = {:scaffold_if_no_meta => scaffold}
       repo_idh = id_handle(repo_id,:repo)
       library_idh = id_handle(library_id,:library)
-      meta_created = ComponentModule.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version,opts)[:meta_created]
+      project = get_default_project()
+      meta_created = ComponentModule.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version,opts)[:meta_created]
       rest_ok_response :meta_created => meta_created
     end
 

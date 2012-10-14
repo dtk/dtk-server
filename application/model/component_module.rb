@@ -237,11 +237,17 @@ module DTK
     end
 
     #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
-    def self.update_repo_and_add_meta_data(repo_idh,library_idh,module_name,version=nil,opts={})
+    def self.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
-      repo.update_for_new_repo() #TODO: have configuration option wheer do not have to update clone and so this is not done
+      repo.update_for_new_repo() #TODO: have configuration option where do not have to update clone and so this is not done
       #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els()in create_objects_for_library_module
-      create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+      ret = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+Log.error("need library_mb.create_component_workspace_branch? to create both implementation object and craete branch")
+=begin
+      library_mb = ret[:module_branch_idh].create_object()
+      library_mb.create_component_workspace_branch?(project)
+=end
+      ret
     end
 
     def update_model_from_clone_changes?(diffs_hash,version=nil)

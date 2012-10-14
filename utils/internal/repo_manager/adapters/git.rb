@@ -15,10 +15,13 @@ module XYZ
           raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
-
-      local_repo = create(local_repo_dir,"master",:absolute_path => true, :repo_does_not_exist => true)
+      local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.clone_from_git_server(repo_name)
+      if create_branches = opts[:create_branches]
+        (create_branches - [CreateMethodBranch]).each{|branch|local_repo.add_branch?(branch)}
+      end
     end
+    CreateMethodBranch = "master" #TODO: may make this so it could be changed
 
     #for binding to existing local repo
     def self.create(path,branch,opts={})

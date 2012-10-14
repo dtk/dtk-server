@@ -19,13 +19,28 @@ module DTK
         raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
       end
       module_specific_type = :puppet  #TODO: hard wired
-      create_opts = {:delete_if_exists => true}
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       branch_info = {
         :workspace_branch => ModuleBranch.workspace_branch_name(project),
         :library_branch => ModuleBranch.library_branch_name(library_idh)
       }
+      create_opts = {:delete_if_exists => true, :create_branches => branch_info.values}
+      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
       ModuleRepoInfo.new(repo,module_name,branch_info,library_idh)
+    end
+
+    #assumes library repo branch create; it updates this, creates workspace branch and then adds meta to workspace branch so it does
+    #not show up in library until user promotes it.
+    #TODO: check whetehr shoudl create only as ws branch; woudl need also to modify create_empty_repo to create ws, not library repo
+    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
+    def self.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version=nil,opts={})
+      repo = repo_idh.create_object()
+      repo.update_for_new_repo() #TODO: have configuration option where do not have to update clone and so this is not done
+      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els()in create_objects_for_library_module
+      ret = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+Log.error("need library_mb.create_component_workspace_branch? to create both implementation object and craete branch")
+      library_mb = ret[:module_branch_idh].create_object()
+      library_mb.create_component_workspace_branch?(project)
+      ret
     end
 
     def create_new_version(new_version,existing_version=nil)
@@ -203,7 +218,7 @@ module DTK
       #get library branch
       library_mb = get_library_module_branch(version)
 
-      #create module branch for workspace if needed and pust it to repo server
+      #create module branch for workspace if needed and push it to repo server
       workspace_mb = library_mb.create_component_workspace_branch?(proj)
       
       #create new project implementation if needed
@@ -236,19 +251,6 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
-    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
-    def self.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version=nil,opts={})
-      repo = repo_idh.create_object()
-      repo.update_for_new_repo() #TODO: have configuration option where do not have to update clone and so this is not done
-      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els()in create_objects_for_library_module
-      ret = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
-Log.error("need library_mb.create_component_workspace_branch? to create both implementation object and craete branch")
-=begin
-      library_mb = ret[:module_branch_idh].create_object()
-      library_mb.create_component_workspace_branch?(project)
-=end
-      ret
-    end
 
     def update_model_from_clone_changes?(diffs_hash,version=nil)
       matching_branches = get_module_branches_matching_version(version)

@@ -162,19 +162,6 @@ module DTK
 
     end
 
-    def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
-      impl = module_branch.get_implementation()
-      #add/remove any needed file_asset objects
-      impl.create_file_assets_from_dir_els()
-      pp [:debug_diffs_hash,diffs_hash]
-      #TODO: may have to look for files added too
-      if modified = diffs_hash["files_modified"]
-        if modified.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])}
-          pp [:debug_diffs_hash,:update_meta]
-        end
-      end
-    end
-
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)
     end
@@ -254,6 +241,7 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,aug_branch)
     end
 
+    #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
     def update_model_from_clone_changes?(diffs_hash,version=nil)
       matching_branches = get_module_branches_matching_version(version)
       ws_branch = find_branch(:workspace,matching_branches)
@@ -265,10 +253,25 @@ module DTK
       end 
 
       update_model_from_clone_changes_aux?(diffs_hash,ws_branch)
-      #TODO: should we also update library?
+      promote_to_library(version)
     end
 
    private
+    def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
+      impl = module_branch.get_implementation()
+      #add/remove any needed file_asset objects
+      impl.create_file_assets_from_dir_els()
+      update_meta = nil
+      if modified = diffs_hash["files_modified"]
+        update_meta = (modified.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])})
+      elsif added = diffs_hash["files_added"]
+        update_meta = (added.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])})
+      end
+      if update_meta
+        ComponentMetaFile.update_model(impl,module_branch.id_handle())
+      end
+    end
+
     def self.import_postprocess(repo,library_idh,module_name,version)
       create_objects_for_library_module(repo,library_idh,module_name,version)[:module_branch_idh]
     end

@@ -42,10 +42,10 @@ module XYZ
       repo_obj
     end
 
-    def update_for_new_repo()
+    def update_for_new_repo(branches)
       update_object!(:repo_name)
       RepoManager.fetch_all(self)
-      RepoManager.rebase_from_remote(self)
+      branches.each{|branch|RepoManager.rebase_from_remote(:repo_dir => self[:repo_name], :branch => branch)}
     end
 
     def self.delete(repo_idh)

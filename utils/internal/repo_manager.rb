@@ -165,7 +165,11 @@ module XYZ
         context.update_object!(:repo,:branch)
         repo_dir = context[:repo]
         branch = context[:branch]
-      else #TODO: modify below and how args passed to just use hash with keys :repo_dir,:branch
+      elsif context.kind_of?(Hash) and context[:repo_dir] and context[:branch]
+        repo_dir = context[:repo_dir]
+        branch = context[:branch]
+      else
+        #TODO: deprecate after replace use of this pattern
         #assume that it has hash with :implementation key
         #TODO: do we still need __top
         repo_dir = (context[:implementation]||{})[:repo]||"__top"

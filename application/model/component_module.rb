@@ -30,17 +30,19 @@ module DTK
 
     #assumes library repo branch create; it updates this, creates workspace branch and then adds meta to workspace branch so it does
     #not show up in library until user promotes it.
-    #TODO: check whetehr shoudl create only as ws branch; woudl need also to modify create_empty_repo to create ws, not library repo
-    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
+    #TODO: consider whether combined functionality of create_empty_repo and update_repo_and_add_meta_data shoudl just create ws branch
+    #returns  {:meta_created => meta_created}
     def self.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
-      repo.update_for_new_repo() #TODO: have configuration option where do not have to update clone and so this is not done
-      #TODO: more efficient alternative may be to have client pass the implementation files, rather than using impl_obj.create_file_assets_from_dir_els()in create_objects_for_library_module
-      ret = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
-Log.error("need library_mb.create_component_workspace_branch? to create both implementation object and craete branch")
-      library_mb = ret[:module_branch_idh].create_object()
+      branch_info = {
+        :workspace_branch => ModuleBranch.workspace_branch_name(project),
+        :library_branch => ModuleBranch.library_branch_name(library_idh)
+      }
+      repo.update_for_new_repo(branch_info.values) 
+      library_mb_info = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+      library_mb = library_mb_info[:module_branch_idh].create_object()
       library_mb.create_component_workspace_branch?(project)
-      ret
+      {:meta_created => library_mb_info[:meta_created]}
     end
 
     def create_new_version(new_version,existing_version=nil)

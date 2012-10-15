@@ -122,7 +122,7 @@ module XYZ
       Adapters[adapter_type] ||= Hash.new
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
-        require File.expand_path("#{UTILS_DIR}/internal/command_and_control/adapters/#{adapter_type}/#{adapter_name}", File.dirname(__FILE__))
+        r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
         Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
        rescue LoadError => e
         raise e

@@ -225,7 +225,7 @@ module DTK
     end
 
     def add_user_direct_access(model_handle,rsa_pub_key)
-      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),rsa_pub_key)
+      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
       model_name = model_handle[:model_name]
       return if repo_user.has_direct_access?(model_name,:donot_update => true)
       repo_user.update_direct_access(model_name,true)

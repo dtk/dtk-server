@@ -6,12 +6,14 @@ module XYZ
       get_objs(model_handle, :cols => [:id,:username]).map{|r|r[:username]}
     end
 
-    #ssh_rsa_pub_key.nil? means that expected that key already exists in the gitolite admin db 
     #returns an object or calls block (with new or existing object) 
-    def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_pub_key=nil)
-      repo_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
-      if ssh_rsa_pub_key
-        match = repo_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
+    def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={})
+      #for match on type; use following logic
+      # if ssh public key given look for match on this
+      #otherwise return error if there is multiple matches for node or admin type
+      existing_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
+      if ssh_rsa_keys[:public]
+        match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
         return match if match
       else
         case repo_users.size
@@ -19,15 +21,22 @@ module XYZ
          when 1
           return repo_users.first
          else
-          raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
+          if [:admin,:node].include?(repo_user_type)
+            raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")
+          end
         end
       end
-      
-      repo_username,index =  ret_new_repo_username_and_index(repo_user_type,repo_users)
-      if ssh_rsa_pub_key
-        RepoManager.add_user(repo_username,ssh_rsa_pub_key,:noop_if_exists => true)
+
+      add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users)
+    end
+
+    #ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db 
+    def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[])
+      repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users)
+      if ssh_rsa_keys[:public]
+        RepoManager.add_user(repo_username,ssh_rsa_keys[:public],:noop_if_exists => true)
       end
-      create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_pub_key)
+      create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_keys)
     end
 
     def self.get_matching_repo_user(repo_user_mh,filters_keys)
@@ -82,7 +91,7 @@ module XYZ
         :cols => [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
       }
       unless filter_keys.empty?
-        filter_list = filter_keys.map{|k,v|[:eq,k,v]}
+        filter_list = filter_keys.map{|k,v|[:eq,k,v.to_s]}
         sp_hash[:filter] = (filter_list.size == 1 ? filter_list.first : ([:and] + filter_list))
       end
       get_objs(repo_user_mh,sp_hash)
@@ -110,17 +119,17 @@ module XYZ
       [new_repo_username,new_index]
     end
 
-    def self.create_instance(model_handle,type,repo_username,index,ssh_rsa_pub_key)
+   private
+    def self.create_instance(model_handle,type,repo_username,index,ssh_rsa_keys={})
       create_row = {
         :ref => repo_username,
         :display_name => repo_username,
         :username => repo_username,
         :index => index,
-        :type => type.to_s
+        :type => type.to_s,
+        :ssh_rsa_pub_key => ssh_rsa_keys[:public],
+        :ssh_rsa_private_key => ssh_rsa_keys[:private]
       }
-      if ssh_rsa_pub_key
-        create_row[:ssh_rsa_pub_key] = ssh_rsa_pub_key
-      end
       new_idh = create_from_row(model_handle,create_row)
       new_idh.create_object.merge(create_row)
     end

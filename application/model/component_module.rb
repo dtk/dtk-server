@@ -242,7 +242,7 @@ module DTK
     end
 
     #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
-    def update_model_from_clone_changes?(diffs_hash,version=nil)
+    def update_model_from_clone_changes?(diffs_summary,version=nil)
       matching_branches = get_module_branches_matching_version(version)
       ws_branch = find_branch(:workspace,matching_branches)
 
@@ -252,22 +252,14 @@ module DTK
         raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
       end 
 
-      update_model_from_clone_changes_aux?(diffs_hash,ws_branch)
+      update_model_from_clone_changes_aux?(diffs_summary,ws_branch)
       promote_to_library(version)
     end
 
    private
-    def update_model_from_clone_changes_aux?(diffs_hash,module_branch)
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
       impl = module_branch.get_implementation()
-      #add/remove any needed file_asset objects
-      impl.create_file_assets_from_dir_els()
-      update_meta = nil
-      if modified = diffs_hash["files_modified"]
-        update_meta = (modified.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])})
-      elsif added = diffs_hash["files_added"]
-        update_meta = (added.find{|r|r["path"] && ComponentMetaFile.isa_meta_filename?(r["path"])})
-      end
-      if update_meta
+      if diffs_summary.meta_file_changed?()
         ComponentMetaFile.update_model(impl,module_branch.id_handle())
       end
     end

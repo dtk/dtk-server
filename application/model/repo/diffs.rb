@@ -1,6 +1,17 @@
-class DTK::Repo
+module DTK; class Repo
   class Diffs < Array
     class Summary < ::DTK::SimpleHashObject
+      def initialize(diffs_hash=nil)
+        super()
+        (diffs_hash||{}).each do |t,v|
+          t = t.to_sym
+          if DiffTypes.include?(t)
+            self[t] = v
+          else
+            Log.error("unexpected sumamry diff type (#{t})")
+          end
+        end
+      end
       def no_diffs?()
         keys().empty?
       end
@@ -9,7 +20,8 @@ class DTK::Repo
       end
 
       def meta_file_changed?()
-        self[:files_modified] and !!self[:files_modified].find{|r|r[:path] =~ /^r8meta/}
+        (self[:files_modified] and !!self[:files_modified].find{|r|r[:path] =~ /^r8meta/}) or
+        (self[:files_added] and !!self[:files_added].find{|r|r[:path] =~ /^r8meta/}) 
       end
 
       #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
@@ -19,6 +31,8 @@ class DTK::Repo
       def paths_to_delete()
         (self[:files_deleted]||[]).map{|r|r[:path]} + (self[:files_renamed]||[]).map{|r|r[:old_path]}
       end
+      DiffNames = [:renamed,:added,:deleted,:modified]
+      DiffTypes = DiffNames.map{|n|"files_#{n}".to_sym}
     end
 
     def initialize(array_diff_hashes)
@@ -27,10 +41,12 @@ class DTK::Repo
 
     #returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
     def ret_summary()
-      [:renamed,:added,:deleted,:modified].inject(Summary.new) do |h,cnd|
-        res = map{|diff|diff.send("file_#{cnd}".to_sym)}.compact
-        res.empty? ? h : h.merge("files_#{cnd}".to_sym => res)
+      DiffTypesAndMthods.inject(Summary.new) do |h,(diff_type, diff_method)|
+#        diff_type, diff_method = tm
+        res = map{|diff|diff.send(diff_method)}.compact
+        res.empty? ? h : h.merge(diff_type => res)
       end
     end
+    DiffTypesAndMthods = Summary::DiffNames.map{|n|["files_#{n}".to_sym,"file_#{n}".to_sym]}
   end
-end
+end; end

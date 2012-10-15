@@ -26,8 +26,8 @@ module XYZ
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
       json_diffs = ret_request_params(:json_diffs)
-      diffs = (json_diffs && JSON.parse(json_diffs))||Hash.new
-      component_module.update_model_from_clone_changes?(diffs,version)
+      diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
+      component_module.update_model_from_clone_changes?(diffs_summary,version)
       rest_ok_response
     end
 

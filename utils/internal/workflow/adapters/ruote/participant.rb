@@ -108,6 +108,9 @@ module XYZ
 
       class AuthorizeNode < NodeParticpants
         def consume(workitem)
+pp 'AuthorizeNode'
+
+
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           execution_context(task) do
@@ -126,7 +129,9 @@ module XYZ
               end
             }
             receiver_context = {:callbacks => callbacks, :expected_count => 1}
-            workflow.initiate_executable_action(task,receiver_context)
+
+           # workflow.initiate_executable_action(task,receiver_context)
+          return reply_to_engine(workitem)
           end
         end
       end

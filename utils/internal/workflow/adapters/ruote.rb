@@ -50,7 +50,8 @@ module XYZ
           end
          rescue Exception => e
           pp "error trap in ruote#execute"
-          pp [e,e.backtrace[0..3]]
+          pp [e,e.backtrace[0..10]]
+          #TODO: if do following Engine.cancel_process(wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean
         end

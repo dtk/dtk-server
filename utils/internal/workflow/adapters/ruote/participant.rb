@@ -89,7 +89,49 @@ module XYZ
         end
       end
 
-      class ExecuteOnNode < Top
+      class NodeParticpants < Top
+        def execution_context(task,&body)
+          debug_print_task_info = "task_id=#{task.id.to_s}"
+          begin
+            yield
+          rescue CommandAndControl::Error => e
+            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
+            pp [:task_failed,debug_print_task_info,e]
+            raise e
+          rescue Exception => e
+            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
+            pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
+            raise e
+          end
+        end
+      end
+
+      class AuthorizeNode < NodeParticpants
+        def consume(workitem)
+          params = get_params(workitem) 
+          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
+          execution_context(task) do
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                result = {:type => :authorized_node, :task_id => task_id} 
+                event = task.add_event(:complete_succeeded,result)
+                #task[:executable_action][:node].set_authorized()
+                set_result_succeeded(workitem,result,task,action) 
+                self.reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                result = {:type => :timeout_authorize_node, :task_id => task_id}
+                set_result_failed(workitem,result,task,action)
+                self.reply_to_engine(workitem)
+              end
+            }
+            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            workflow.initiate_executable_action(task,receiver_context)
+          end
+        end
+      end
+
+      class ExecuteOnNode < NodeParticpants
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
@@ -172,22 +214,6 @@ module XYZ
           }
           Model.get_objs(task.model_handle,sp_hash)
         end
-
-        def execution_context(task,&body)
-          debug_print_task_info = "task_id=#{task.id.to_s}"
-          begin
-            yield
-          rescue CommandAndControl::Error => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
-            pp [:task_failed,debug_print_task_info,e]
-            raise e
-          rescue Exception => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
-            pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
-            raise e
-          end
-        end
-
 
         #TODO: need to turn threading off for now because if dont can have two threads 
         #eat ech others messages; may solve with existing mechism or go straight to

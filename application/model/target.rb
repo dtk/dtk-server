@@ -26,6 +26,18 @@ module XYZ
     end
 
     ######### Model apis
+    def info_about(about)
+      case about
+        when :assemblies
+         Assembly.list_from_target(model_handle(:component),:target_idh => id_handle())
+      else
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+      end
+    end
+
+    def self.check_valid_id(model_handle,id)
+      check_valid_id_helper(model_handle,id,[:eq, :id, id])
+    end
 
     #takes values from default aside from ones specfically given in argument
     def self.create_from_default(project_idh,display_name,params_hash)

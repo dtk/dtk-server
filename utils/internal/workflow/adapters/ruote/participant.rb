@@ -97,11 +97,11 @@ module XYZ
           rescue CommandAndControl::Error => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
             pp [:task_failed,debug_print_task_info,e]
-            raise e
+#            raise e
           rescue Exception => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
             pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
-            raise e
+ #           raise e
           end
         end
       end
@@ -109,7 +109,7 @@ module XYZ
       class AuthorizeNode < NodeParticpants
         def consume(workitem)
 pp 'AuthorizeNode'
-
+return reply_to_engine(workitem)
 
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
@@ -130,8 +130,7 @@ pp 'AuthorizeNode'
             }
             receiver_context = {:callbacks => callbacks, :expected_count => 1}
 
-           # workflow.initiate_executable_action(task,receiver_context)
-          return reply_to_engine(workitem)
+           workflow.initiate_executable_action(task,receiver_context)
           end
         end
       end
@@ -171,7 +170,7 @@ pp 'AuthorizeNode'
                     set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
                   else
-                    event,errors = task.add_event_and_errors(:complete_failed,result)
+                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task,action)
                   end
@@ -179,9 +178,9 @@ pp 'AuthorizeNode'
                 end,
                 :on_timeout => proc do 
                   result = {
-                    "status" => "timeout" 
+                    :status => "timeout" 
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,result)
+                  event,errors = task.add_event_and_errors(:complete_timeout,:servere,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
                   reply_to_engine(workitem)
@@ -194,7 +193,7 @@ pp 'AuthorizeNode'
               #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
               if result[:status] == "failed"
                 #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
-                event,errors = task.add_event_and_errors(:complete_failed,result)
+                event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
                 ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                 ##set_result_failed(workitem,result,task,action)
                 if result[:error_object]
@@ -209,6 +208,11 @@ pp 'AuthorizeNode'
           end
         end
        private
+        def errors_in_result(result)
+          data = result[:data]||{}
+          data[:error] ? [data[:error]] : (data[:errors]||[])
+        end
+
         def ret_failed_precondition_tasks(task,external_guards)
           ret = Array.new
           guard_task_idhs = task.guarded_by(external_guards)

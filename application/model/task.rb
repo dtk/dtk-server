@@ -55,23 +55,22 @@ module XYZ
     end
     
     #returns [event,error-array]
-    def add_event_and_errors(event_type,result=nil)
+    def add_event_and_errors(event_type,error_source,errors_in_result)
       ret = [nil,nil]
       #process errors and strip out from what is passed to add event
-      #TODO: change client so just returns :errors not sither :error or :errors
-      error = ((result||{})[:data]||{})[:error]
-      if errors_in_result = (error ? [error] : ((result||{})[:data]||{})[:errors])
-        config_agent = get_config_agent
-        components = component_actions().map{|a|a[:component]}
-        normalized_errors = errors_in_result.map{|err|config_agent.interpret_error(err,components)}
-        ret[1] = add_errors(normalized_errors)
-        result_wo_errors = result.dup[:data]
-        result_wo_errors.delete(:errors)
-      else
-        result_wo_errors = result
-      end
-      ret[0] = add_event(event_type,result_wo_errors)
-      ret
+      normalized_errors = 
+        if error_source == :config_agent
+          config_agent = get_config_agent
+          components = component_actions().map{|a|a[:component]}
+          errors_in_result.map{|err|config_agent.interpret_error(err,components)}
+        else
+          #TODO: stub
+          errors_in_result.map{|err|{:content => err.to_s}} 
+        end
+      errors = add_errors(normalized_errors)
+      #TODO: want to remove calss in function below from needing to know result format
+      events = add_event(event_type,{:data => {:errors => errors_in_result}})
+      [errors,events]
     end
 
     def add_errors(normalized_errors)

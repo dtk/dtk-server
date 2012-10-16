@@ -178,6 +178,7 @@ module XYZ
         }
         ndx_task_rows = Hash.new
         get_objs(assembly_mh.createMH(:task),sp_hash).each do |task|
+          next unless task[:started_at]
           assembly_id = task[:assembly_id]
           if pntr = ndx_task_rows[assembly_id]
             if task[:started_at] > pntr[:started_at] 

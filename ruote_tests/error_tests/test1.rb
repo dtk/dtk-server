@@ -9,6 +9,7 @@ class DefaultParticipant
  
   def consume(workitem)
     puts "* #{workitem.participant_name}"
+    sleep 10
     reply_to_engine(workitem)
   end
 end
@@ -45,10 +46,20 @@ pdef = Ruote.process_definition do
     gamma
   end
 end
- 
+wfid = nil
+
+  threads = 
+  [
+   Thread.new() {wfid = engine.launch(pdef)},
+   Thread.new() { sleep 1; status = engine.process(wfid); pp status}
+  ]
+threads.each { |aThread|  aThread.join }
+=begin
 wfid = engine.launch(pdef)
- 
+status = engine.process(wfid)
+pp status 
 engine.wait_for(wfid)
+=end
   # blocks until the process terminates or gets into an error
  
 #err = engine.process(wfid).errors.first

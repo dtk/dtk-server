@@ -19,7 +19,8 @@ module XYZ
        :description,
        :status,
        :target_id,
-       :ui
+       :ui,
+       :external_ref
       ]
     end
 
@@ -44,6 +45,16 @@ module XYZ
 
     #######################
     ######### Model apis
+
+    def self.list(model_handle,opts={})
+      filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => filter
+      }
+      get_objs(model_handle,sp_hash)
+    end
+
     def get_and_update_status!()
       #shortcut
       if has_key?(:is_deployed)

@@ -28,8 +28,10 @@ module XYZ
     ######### Model apis
     def info_about(about)
       case about
-        when :assemblies
+       when :assemblies
          Assembly.list_from_target(model_handle(:component),:target_idh => id_handle())
+       when :nodes
+         Node.list(model_handle(:node),:target_idh => id_handle())
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end

@@ -34,6 +34,7 @@ module XYZ
 else            
 #TODO: for testing: move to be on create node
 authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node")
+#main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :on_timeout => 'error')
 main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
 sequence(authorize_action,main)
           end

@@ -29,6 +29,7 @@ module XYZ
      public
 
       def process_response(msg,request_id)
+        callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
           if callbacks
@@ -38,9 +39,7 @@ module XYZ
             pp msg
           end
          rescue Exception => e
-pp e.backtrace
-          #TODO: more advanced would set failyue state on (sub)task
-          Log.error("error in proceess_response: #{e.inspect}")
+          Callbacks.process_error(callbacks,e)
         end
       end
 
@@ -92,6 +91,14 @@ pp e.backtrace
           self.new(callbacks_info)
         end
 
+        def self.process_error(callbacks,error_obj)
+          unless callbacks and callbacks.process_error(error_obj)
+          #TODO: rmove need for this catchall          
+            pp error_obj.backtrace
+            Log.error("error in proceess_response: #{error_obj.inspect}")
+          end
+        end
+
         def process_msg(msg,request_id)
           callback = self[:on_msg_received]
           if callback
@@ -109,6 +116,14 @@ pp e.backtrace
         def cancel_timer()
           timer = self[:timer]
           R8EM.cancel_timer(timer) if timer
+        end
+
+        def process_error(error_object)
+          callback = self[:on_error]
+          if callback
+            callback.call()
+            true
+          end
         end
       end
     end

@@ -97,11 +97,11 @@ module XYZ
           rescue CommandAndControl::Error => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
             pp [:task_failed,debug_print_task_info,e]
-#            raise e
+            raise e
           rescue Exception => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
             pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
- #           raise e
+            raise e
           end
         end
       end

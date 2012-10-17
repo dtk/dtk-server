@@ -96,6 +96,7 @@ module XYZ
       end
 
       class NodeParticipants < Top
+        private
         def execution_context(task,task_start=nil,&body)
           if task_start
             set_task_to_executing(task)
@@ -115,40 +116,45 @@ module XYZ
             pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
           end
         end
+        def errors_in_result?(result)
+          #result[:statuscode] is for transport errors and data is for errors for agent
+          if result[:statuscode] != 0
+            ["transport_error"]
+          else
+            data = result[:data]||{}
+            data[:error] ? [data[:error]] : (data[:errors]||[])
+          end
+        end
       end
 
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
 pp 'AuthorizeNode'
-
+#TDO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-=begin
- pp msg
-{:senderid=>"ip-10-196-115-91",
- :body=>
-  {:statuscode=>0,
-   :data=>
-    {:status=>:failed,
-     :error=>{:message=>"File /root/.ssh/id_rsa already exists"}},
-   :statusmsg=>"OK"},
-=end
-                result = {:type => :authorized_node, :task_id => task_id} 
-                event = task.add_event(:complete_succeeded,result)
-                #task[:executable_action][:node].set_authorized()
-                set_result_succeeded(workitem,result,task,action) 
-                self.reply_to_engine(workitem)
+                result = msg[:body].merge("task_id" => task_id)
+                if errors = errors_in_result?(result)
+                  event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
+                  pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                  set_result_failed(workitem,result,task,action)
+                else
+                  pp ["task_complete_succeeded #{action.class.to_s}"]
+                  #task[:executable_action][:node].set_authorized()
+                  set_result_succeeded(workitem,result,task,action) if task_end 
+                end
+                reply_to_engine(workitem)
               end,
               :on_timeout => proc do 
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
                 set_result_failed(workitem,result,task,action)
-                self.reply_to_engine(workitem)
+                reply_to_engine(workitem)
               end,
               :on_error => proc do |error_obj|
-                pp [:on_error,error_obj,task]
+                pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
               end 
             }
             context = {:expected_count => 1}
@@ -181,17 +187,15 @@ pp 'AuthorizeNode'
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  #result[:statuscode] is for transport errors and data is for errors for agent
-                  succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
-                  if succeeded
+                  if errors_in_result = errors_in_result?(result)
+                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    set_result_failed(workitem,result,task,action)
+                  else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                     set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
-                  else
-                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    set_result_failed(workitem,result,task,action)
                   end
                   reply_to_engine(workitem)
                 end,
@@ -199,7 +203,7 @@ pp 'AuthorizeNode'
                   result = {
                     :status => "timeout" 
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,:servere,["timeout"])
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
                   reply_to_engine(workitem)
@@ -212,6 +216,7 @@ pp 'AuthorizeNode'
               #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
               if result[:status] == "failed"
                 #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
+                Log.error("TODO: see if errors_in_result works when not long running and get error")
                 event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
                 ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                 ##set_result_failed(workitem,result,task,action)
@@ -229,11 +234,6 @@ pp 'AuthorizeNode'
        private
         def add_start_task_event?(task)
           task.add_event(:start)
-        end
-
-        def errors_in_result(result)
-          data = result[:data]||{}
-          data[:error] ? [data[:error]] : (data[:errors]||[])
         end
 
         def ret_failed_precondition_tasks(task,external_guards)

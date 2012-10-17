@@ -65,10 +65,10 @@ module XYZ
           errors_in_result.map{|err|config_agent.interpret_error(err,components)}
         else
           #TODO: stub
-          errors_in_result.map{|err|{:content => err.to_s}} 
+          errors_in_result
         end
       errors = add_errors(normalized_errors)
-      #TODO: want to remove calss in function below from needing to know result format
+      #TODO: want to remove calls in function below from needing to know result format
       events = add_event(event_type,{:data => {:errors => errors_in_result}})
       [errors,events]
     end

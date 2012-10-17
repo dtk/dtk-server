@@ -29,6 +29,20 @@ module XYZ
         async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
       end
 
+      def self.authorize_node(node,callbacks,context_x={})
+        pbuilderid = Node.pbuilderid(node)
+        filter = filter_single_fact("pbuilderid",pbuilderid)
+        #TODO: stub
+        params = {
+          :agent_ssh_key_public => nil,
+          :agent_ssh_key_private => nil,
+          :server_ssh_rsa_fingerprint => nil
+        }
+        context = {:timeout =>  DefaultTimeoutAuthNode}.merge(context_x)
+        async_agent_call("git_access","add_rsa_info",params,filter,callbacks,context)
+      end
+      DefaultTimeoutAuthNode = 10
+
       #TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node,opts)
         count = opts[:count] || PollCountDefault

@@ -66,6 +66,12 @@ module XYZ
       klass.parse_response__execute_action(nodes,msg)
     end
 
+    def self.initiate_node_action(method,node,callbacks,context)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.send(method,node,callbacks,context)
+    end
+    #TODO: convert poll_to_detect_node_ready to use more general form above
     def self.poll_to_detect_node_ready(node,opts)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)

@@ -66,6 +66,10 @@ module XYZ
         CommandAndControl.execute_task_action(task,top_task_idh,opts)
       end
 
+      def initiate_node_action(method,node,callbacks,context)
+        CommandAndControl.initiate_node_action(method,node,callbacks,context)
+      end
+      #TODO: convert poll_to_detect_node_ready to use more general form above
       def poll_to_detect_node_ready(node,receiver_context,opts={})
         poll_opts = opts.merge({
           :receiver_context => receiver_context})

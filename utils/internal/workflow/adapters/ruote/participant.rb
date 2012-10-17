@@ -89,7 +89,7 @@ module XYZ
         end
       end
 
-      class NodeParticpants < Top
+      class NodeParticipants < Top
         def execution_context(task,&body)
           debug_print_task_info = "task_id=#{task.id.to_s}"
           begin
@@ -106,10 +106,9 @@ module XYZ
         end
       end
 
-      class AuthorizeNode < NodeParticpants
+      class AuthorizeNode < NodeParticipants
         def consume(workitem)
 pp 'AuthorizeNode'
-return reply_to_engine(workitem)
 
           params = get_params(workitem) 
           task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
@@ -128,14 +127,13 @@ return reply_to_engine(workitem)
                 self.reply_to_engine(workitem)
               end
             }
-            receiver_context = {:callbacks => callbacks, :expected_count => 1}
-
-           workflow.initiate_executable_action(task,receiver_context)
+            context = {:expected_count => 1}
+            workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
           end
         end
       end
 
-      class ExecuteOnNode < NodeParticpants
+      class ExecuteOnNode < NodeParticipants
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}

@@ -121,7 +121,7 @@ module XYZ
         def process_error(error_object)
           callback = self[:on_error]
           if callback
-            callback.call()
+            callback.call(error_object)
             true
           end
         end

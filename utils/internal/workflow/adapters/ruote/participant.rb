@@ -14,13 +14,19 @@ module XYZ
           params.merge!("workflow" => workflow)
           params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
+          params.merge!("task_start" => workitem.params["task_start"])
           params.merge!("task_end" => workitem.params["task_end"])
           params
         end
 
-        def set_task_to_executing_and_ret_event(task)
+        def set_task_to_executing(task)
           task.update_at_task_start()
         end
+        def add_start_task_event?(task)
+          #can be overwritten
+          nil
+        end
+
         def set_task_to_failed_preconditions(task,failed_antecedent_tasks)
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
@@ -90,18 +96,23 @@ module XYZ
       end
 
       class NodeParticipants < Top
-        def execution_context(task,&body)
+        def execution_context(task,task_start=nil,&body)
+          if task_start
+            set_task_to_executing(task)
+          end
+          pp ["executing #{self.class.to_s}",task[:id]]
+          if event = add_start_task_event?(task)
+            pp [:start_task_event, event]
+          end
           debug_print_task_info = "task_id=#{task.id.to_s}"
           begin
             yield
           rescue CommandAndControl::Error => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
             pp [:task_failed,debug_print_task_info,e]
-            raise e
           rescue Exception => e
             task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
             pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
-            raise e
           end
         end
       end
@@ -111,10 +122,20 @@ module XYZ
 pp 'AuthorizeNode'
 
           params = get_params(workitem) 
-          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-          execution_context(task) do
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          execution_context(task,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+=begin
+ pp msg
+{:senderid=>"ip-10-196-115-91",
+ :body=>
+  {:statuscode=>0,
+   :data=>
+    {:status=>:failed,
+     :error=>{:message=>"File /root/.ssh/id_rsa already exists"}},
+   :statusmsg=>"OK"},
+=end
                 result = {:type => :authorized_node, :task_id => task_id} 
                 event = task.add_event(:complete_succeeded,result)
                 #task[:executable_action][:node].set_authorized()
@@ -125,7 +146,10 @@ pp 'AuthorizeNode'
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
                 set_result_failed(workitem,result,task,action)
                 self.reply_to_engine(workitem)
-              end
+              end,
+              :on_error => proc do |error_obj|
+                pp [:on_error,error_obj,task]
+              end 
             }
             context = {:expected_count => 1}
             workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
@@ -138,7 +162,7 @@ pp 'AuthorizeNode'
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!()
 
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
@@ -152,10 +176,7 @@ pp 'AuthorizeNode'
           end
 
           task.add_internal_guards!(workflow.guards[:internal])
-          event = set_task_to_executing_and_ret_event(task)
-
-          pp ["executing #{action.class.to_s}",task_id,event] if event
-          execution_context(task) do
+          execution_context(task,task_start) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
@@ -206,6 +227,10 @@ pp 'AuthorizeNode'
           end
         end
        private
+        def add_start_task_event?(task)
+          task.add_event(:start)
+        end
+
         def errors_in_result(result)
           data = result[:data]||{}
           data[:error] ? [data[:error]] : (data[:errors]||[])

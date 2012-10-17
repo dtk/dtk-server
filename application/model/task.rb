@@ -95,11 +95,10 @@ module XYZ
       } 
       update(update_hash)
     end
-    def update_at_task_start()
+    def update_at_task_start(opts={})
       update(:status => "executing", :started_at => Aux::now_time_stamp())
-      add_event(:start)
     end
-
+        
     def update_when_failed_preconditions(failed_antecedent_tasks)
       ts = Aux::now_time_stamp()
       update(:status => "preconditions_failed", :started_at => ts, :ended_at => ts)

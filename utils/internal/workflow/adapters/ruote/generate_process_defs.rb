@@ -26,17 +26,18 @@ module XYZ
         elsif action.kind_of?(TaskAction::ConfigNode)
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
-            main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
+            main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :task_start => true)
             sequence(guards,main)
 #          end
 #=begin
 
 else            
 #TODO: for testing: move to be on create node
-authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node")
+authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
 #main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :on_timeout => 'error')
 main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
-sequence(authorize_action,main)
+#sequence(authorize_action,main)
+authorize_action
           end
 #=end
         end

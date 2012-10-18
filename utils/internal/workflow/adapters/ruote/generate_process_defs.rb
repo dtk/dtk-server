@@ -32,13 +32,12 @@ module XYZ
 #=begin
 
 else            
-return nil
 #TODO: for testing: move to be on create node
-authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true,:task_end => true)
+authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
 #main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :on_timeout => 'error')
 main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
 #sequence(authorize_action,main)
-authorize_action
+sequence(authorize_action,main)
           end
 #=end
         end

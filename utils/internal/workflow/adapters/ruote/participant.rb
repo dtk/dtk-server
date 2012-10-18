@@ -97,7 +97,7 @@ module XYZ
 
       class NodeParticipants < Top
         private
-        def execution_context(task,task_start=nil,&body)
+        def execution_context(task,workitem,task_start=nil,&body)
           if task_start
             set_task_to_executing(task)
           end
@@ -108,12 +108,10 @@ module XYZ
           debug_print_task_info = "task_id=#{task.id.to_s}"
           begin
             yield
-          rescue CommandAndControl::Error => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
-            pp [:task_failed,debug_print_task_info,e]
-          rescue Exception => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
-            pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
+           rescue Exception => e
+            event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
+            pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event and errors
+            reply_to_engine(workitem)
           end
         end
         def errors_in_result?(result)
@@ -133,7 +131,7 @@ pp 'AuthorizeNode'
 #TDO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          execution_context(task,task_start) do
+          execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
                 result = msg[:body].merge("task_id" => task_id)
@@ -182,7 +180,7 @@ pp 'AuthorizeNode'
           end
 
           task.add_internal_guards!(workflow.guards[:internal])
-          execution_context(task,task_start) do
+          execution_context(task,workflow,task_start) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|

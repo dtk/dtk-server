@@ -78,8 +78,7 @@ module XYZ
           git_server_url = RepoManager.repo_url()
           git_server_dns = RepoManager.repo_server_dns()
           node_config_server_host = CommandAndControl.node_config_server_host()
-          #TODO: to make more secure when gitserver different from this server will assume fingerprint put on server at installtime
-          fingerprint = `ssh-keyscan -H -t rsa #{git_server_dns}`
+          fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
           template_bindings = {
             :node_config_server_host => node_config_server_host,
             :git_server_url => git_server_url, 

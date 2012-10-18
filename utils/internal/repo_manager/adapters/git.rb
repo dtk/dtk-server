@@ -43,6 +43,14 @@ module XYZ
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end
 
+    def self.repo_server_ssh_rsa_fingerprint()
+      return @ssh_rsa_fingerprint if @ssh_rsa_fingerprint
+      unless R8::Config[:git_server_on_dtk_server]
+        raise Error.new("Not implemented yet: repo_server_footprin when R8::Config[:git_server_on_dtk_server] is not true")
+      end
+      @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
+    end
+
     def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
       if repo_name

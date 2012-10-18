@@ -1,6 +1,10 @@
 module XYZ
   class RepoUser < Model
 
+    def self.common_columns()
+      [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
+    end
+
     #TODO: stub that gets all repo users that are visbile; may restrict by filter on owner
     def self.authorized_users(model_handle)
       get_objs(model_handle, :cols => [:id,:username]).map{|r|r[:username]}
@@ -39,9 +43,9 @@ module XYZ
       create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_keys)
     end
 
-    def self.get_matching_repo_user(repo_user_mh,filters_keys)
+    def self.get_matching_repo_user(repo_user_mh,filters_keys,cols=nil)
       ret = nil
-      repo_users = get_existing_repo_users(repo_user_mh,filters_keys)
+      repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
       if repo_users.size > 1
         raise Error.new("Unexpected to have multiple matches of repo user when matching on (#{filters_keys.inspect})")
       end
@@ -86,9 +90,9 @@ module XYZ
       end
     end
 
-    def self.get_existing_repo_users(repo_user_mh,filter_keys={})
+    def self.get_existing_repo_users(repo_user_mh,filter_keys={},cols=nil)
       sp_hash = {
-        :cols => [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
+        :cols => cols ? (cols+[:id,:group_id]) : common_columns()
       }
       unless filter_keys.empty?
         filter_list = filter_keys.map{|k,v|[:eq,k,v.to_s]}

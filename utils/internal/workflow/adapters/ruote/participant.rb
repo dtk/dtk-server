@@ -36,7 +36,7 @@ module XYZ
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
-        def set_result_failed(workitem,new_result,task,action)
+        def set_result_failed(workitem,new_result,task)
           error = 
             if not new_result[:statuscode] == 0
               CommandAndControl::Error::Communication.new
@@ -69,7 +69,8 @@ module XYZ
             yield
            rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
-            pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event and errors
+            pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}] if event and errors
+            task.update_at_task_completion("failed",{:errors => errors})
             reply_to_engine(workitem)
           end
         end
@@ -92,25 +93,23 @@ module XYZ
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do
             result = workflow.process_executable_action(task)
-            #TODO: this needs fixing up to be consisetnt with what result look like in async processing above
-            if result[:status] == "failed"
-              #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
-              Log.error("TODO: see if errors_in_result works when not long running and get error")
-              event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
-              ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-              ##set_result_failed(workitem,result,task,action)
-              if result[:error_object]
-                #TODO: abort; there must be more graceful way to do this
-                raise ErrorUsage.new(result[:error_object].to_s)
-              end
+            if errors_in_result = errors_in_result?(result)
+              event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
+             pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+             set_result_failed(workitem,result,task)
             else
               set_result_succeeded(workitem,result,task,action) if task_end 
             end
             reply_to_engine(workitem)
           end
         end
+       private
+        def errors_in_result?(result)
+          if result[:status] == "failed"
+            result[:error_object] ? [{:message => result[:error_object].to_s}] : []
+          end
+        end    
       end
-    
 
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
@@ -129,7 +128,7 @@ module XYZ
             :on_timeout => proc do 
               Log.error("timeout detecting node is ready")
               result = {:type => :timeout_create_node, :task_id => task_id}
-              set_result_failed(workitem,result,task,action)
+              set_result_failed(workitem,result,task)
               reply_to_engine(workitem)
             end
           }
@@ -147,7 +146,6 @@ module XYZ
           #result[:statuscode] is for transport errors and data is for errors for agent
           if result[:statuscode] != 0
             ["transport_error"]
-            
           else
             data = result[:data]||{}
             unless data[:status] == :succeeded
@@ -169,7 +167,7 @@ module XYZ
                 if errors = errors_in_result?(result)
                   event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
                   pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  set_result_failed(workitem,result,task,action)
+                  set_result_failed(workitem,result,task)
                 else
                   pp ["task_complete_succeeded #{action.class.to_s}"]
                   #task[:executable_action][:node].set_authorized()
@@ -179,7 +177,7 @@ module XYZ
               end,
               :on_timeout => proc do 
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
-                set_result_failed(workitem,result,task,action)
+                set_result_failed(workitem,result,task)
                 reply_to_engine(workitem)
               end,
               :on_error => proc do |error_obj|
@@ -219,7 +217,7 @@ module XYZ
                   if errors_in_result = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    set_result_failed(workitem,result,task,action)
+                    set_result_failed(workitem,result,task)
                   else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event

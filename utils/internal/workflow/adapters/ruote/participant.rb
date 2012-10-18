@@ -78,13 +78,13 @@ module XYZ
               task[:executable_action][:node].update_operational_status!(:running)
               set_result_succeeded(workitem,result,task,action) 
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              self.reply_to_engine(workitem)
+              reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
               Log.error("timeout detecting node is ready")
               result = {:type => :timeout_create_node, :task_id => task_id}
               set_result_failed(workitem,result,task,action)
-              self.reply_to_engine(workitem)
+              reply_to_engine(workitem)
             end
           }
           num_poll_cycles = 25
@@ -114,13 +114,17 @@ module XYZ
             reply_to_engine(workitem)
           end
         end
+
         def errors_in_result?(result)
           #result[:statuscode] is for transport errors and data is for errors for agent
           if result[:statuscode] != 0
             ["transport_error"]
+            
           else
             data = result[:data]||{}
-            data[:error] ? [data[:error]] : (data[:errors]||[])
+            unless data[:status] == :succeeded
+              data[:error] ? [data[:error]] : (data[:errors]||[])
+            end
           end
         end
       end

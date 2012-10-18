@@ -91,9 +91,8 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do
-            task.update_input_attributes!() #TODO: is this needed?
             result = workflow.process_executable_action(task)
-            #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
+            #TODO: this needs fixing up to be consisetnt with what result look like in async processing above
             if result[:status] == "failed"
               #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
               Log.error("TODO: see if errors_in_result works when not long running and get error")
@@ -242,22 +241,7 @@ module XYZ
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
               workflow.initiate_executable_action(task,receiver_context)
             else
-              result = workflow.process_executable_action(task)
-              #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
-              if result[:status] == "failed"
-                #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
-                Log.error("TODO: see if errors_in_result works when not long running and get error")
-                event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
-                ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                ##set_result_failed(workitem,result,task,action)
-                if result[:error_object]
-                  #TODO: abort; there must be more graceful way to do this
-                  raise ErrorUsage.new(result[:error_object].to_s)
-                end
-              else
-                set_result_succeeded(workitem,result,task,action) if task_end 
-              end
-              reply_to_engine(workitem)
+              raise Error.new("TODO: if reach need to implement config node that is not long running")
             end
           end
         end

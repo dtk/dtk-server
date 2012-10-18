@@ -23,7 +23,7 @@ module XYZ
         TaskInfo.initialize_task_info()
         begin
           wfid = Engine.launch(process_def())
-          Engine.wait_for(wfid)
+          Engine.wait_for(wfid, :timeout => TopTaskDefualtTimeOut)
           
           #detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(wfid)
@@ -57,7 +57,9 @@ module XYZ
         end
         nil
       end
-      
+      #in seconds
+      TopTaskDefualtTimeOut = 60 * 10
+
       def initiate_executable_action(task,receiver_context)
         opts = {
           :initiate_only => true,

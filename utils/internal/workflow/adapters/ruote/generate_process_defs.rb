@@ -20,7 +20,7 @@ module XYZ
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(TaskAction::CreateNode)
-          main = participant_executable_action(:create_node,task,context, :task_start => true)
+          main = participant_executable_action(:create_node,task,context,:task_start => true)
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, :task_type => "post", :task_end => true)
           sequence(main,post_part)
         elsif action.kind_of?(TaskAction::ConfigNode)

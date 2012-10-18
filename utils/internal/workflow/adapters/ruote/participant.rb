@@ -55,7 +55,25 @@ module XYZ
           task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error::Timeout.new))
         end
 
-         private
+       private
+        def execution_context(task,workitem,task_start=nil,&body)
+          if task_start
+            set_task_to_executing(task)
+          end
+          pp ["executing #{self.class.to_s}",task[:id]]
+          if event = add_start_task_event?(task)
+            pp [:start_task_event, event]
+          end
+          debug_print_task_info = "task_id=#{task.id.to_s}"
+          begin
+            yield
+           rescue Exception => e
+            event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
+            pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event and errors
+            reply_to_engine(workitem)
+          end
+        end
+
         #if use must coordinate with concurrence merge type
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
@@ -65,6 +83,35 @@ module XYZ
           Ruote::TaskInfo.get_and_delete(params["task_id"],params["task_type"])
         end
       end
+
+      class CreateNode < Top
+        #LockforDebug = Mutex.new
+        def consume(workitem)
+          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+          params = get_params(workitem) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          execution_context(task,workitem,task_start) do
+            task.update_input_attributes!() #TODO: is this needed?
+            result = workflow.process_executable_action(task)
+            #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
+            if result[:status] == "failed"
+              #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
+              Log.error("TODO: see if errors_in_result works when not long running and get error")
+              event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result(result))
+              ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+              ##set_result_failed(workitem,result,task,action)
+              if result[:error_object]
+                #TODO: abort; there must be more graceful way to do this
+                raise ErrorUsage.new(result[:error_object].to_s)
+              end
+            else
+              set_result_succeeded(workitem,result,task,action) if task_end 
+            end
+            reply_to_engine(workitem)
+          end
+        end
+      end
+    
 
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
@@ -97,24 +144,6 @@ module XYZ
 
       class NodeParticipants < Top
         private
-        def execution_context(task,workitem,task_start=nil,&body)
-          if task_start
-            set_task_to_executing(task)
-          end
-          pp ["executing #{self.class.to_s}",task[:id]]
-          if event = add_start_task_event?(task)
-            pp [:start_task_event, event]
-          end
-          debug_print_task_info = "task_id=#{task.id.to_s}"
-          begin
-            yield
-           rescue Exception => e
-            event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
-            pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event and errors
-            reply_to_engine(workitem)
-          end
-        end
-
         def errors_in_result?(result)
           #result[:statuscode] is for transport errors and data is for errors for agent
           if result[:statuscode] != 0
@@ -131,8 +160,7 @@ module XYZ
 
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
-pp 'AuthorizeNode'
-#TDO succeed without sending node request if authorized already
+          #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do

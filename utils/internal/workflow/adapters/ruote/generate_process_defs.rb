@@ -16,6 +16,7 @@ module XYZ
       private
 
       ####semantic processing
+      #TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(TaskAction::CreateNode)
@@ -24,26 +25,16 @@ module XYZ
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, post_part_opts)
           sequence(main,post_part)
         elsif action.kind_of?(TaskAction::ConfigNode)
+          guards = nil
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
-            main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :task_start => true)
-            sequence(guards,main)
-#          end
-#=begin
-
-else            
-#TODO: for testing: move to be on create node
-authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
-#main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :on_timeout => 'error')
-main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
-#sequence(authorize_action,main)
-sequence(authorize_action,main)
           end
-#=end
+          authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
+          main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
+          sequence_tasks = [guards,authorize_action,main].compact
+          sequence(*sequence_tasks)
         end
       end
-
-      #TODO: make this data driven like .. TaskAction::CreateNode => [:execute_on_node,:detect_created_node_is_ready]
 
       ####synactic processing
       def compute_process_body(task,context)

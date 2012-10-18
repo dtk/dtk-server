@@ -32,6 +32,7 @@ module XYZ
 #=begin
 
 else            
+return nil
 #TODO: for testing: move to be on create node
 authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true,:task_end => true)
 #main = participant_executable_action(:execute_on_node,task,context,:task_end => true, :on_timeout => 'error')
@@ -71,7 +72,7 @@ authorize_action
       end
 
       def compute_process_executable_action(task,context)
-        decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_end => true)
+        decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_start => true, :task_end => true)
       end
       def participant_executable_action(name,task,context,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 

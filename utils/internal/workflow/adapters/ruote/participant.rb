@@ -30,6 +30,7 @@ module XYZ
         def set_task_to_failed_preconditions(task,failed_antecedent_tasks)
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
+
         def set_result_succeeded(workitem,new_result,task,action)
           task.update_at_task_completion("succeeded",TaskAction::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
@@ -160,6 +161,8 @@ module XYZ
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.update_input_attributes!() if task_start
+
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
@@ -196,7 +199,7 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.update_input_attributes!()
+          task.update_input_attributes!() if task_start
 
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 

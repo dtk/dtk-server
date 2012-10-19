@@ -202,7 +202,7 @@ module DTK
 
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
-      needed_cols = (library_idh ? [:library_library_id,:display_name] : [:display_name])
+      needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
       update_object!(*needed_cols)
       module_name = self[:display_name]
       library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])

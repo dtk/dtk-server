@@ -391,6 +391,7 @@ ie: get_components(['language'])
     end
 
     def search
+      #TODO: harmonize with rest__list
       search_cols = [:display_name]
 
       filter_conjuncts = request.params.map do |name,value|
@@ -398,16 +399,18 @@ ie: get_components(['language'])
       end.compact
       cols = NodeBindingRuleset.common_columns()
       sp_hash = {
-        :cols => cols
+        :cols => cols + [:ref]
       }
+
       unless filter_conjuncts.empty?
         sp_hash[:filter] = [:and] + filter_conjuncts
       end
-      node_list = Model.get_objs(model_handle(:node_binding_ruleset),sp_hash).each{|r|r.materialize!(cols)}
+      node_list = Model.get_objs(model_handle(:node_binding_ruleset),sp_hash,:keep_ref_cols => true).each{|r|r.materialize!(cols)}
       icon_dir = "#{R8::Config[:base_images_uri]}/v1/nodeIcons"
       node_list.each do |node|
         png = (node[:os_type] ? "#{node[:os_type]}.png" : "unknown-node.png")
         node[:image_path] = "#{icon_dir}/#{png}"
+        node[:display_name] ||= node[ref]
         node[:i18n] = node[:display_name]
       end
       {:data=>node_list}

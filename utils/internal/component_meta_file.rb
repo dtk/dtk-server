@@ -119,8 +119,12 @@ module DTK
       end
 
       def convert_to_hash_yaml(content)
-        #TODO: raise parsing error to user
-        YAML.load(content)
+        #TODO: see if ArgumentError catches all errors
+        begin
+          YAML.load(content)
+         rescue ArgumentError => e
+          raise ErrorUsage.new("Error parsing the r8 meta file; #{e.to_s}")
+        end
       end
     end
   end

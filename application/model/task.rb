@@ -30,9 +30,12 @@ module XYZ
         :filter => [:oneof,:task_id,task_idhs.map{|idh|idh.get_id()}]
       }
       task_error_mh = task_idhs.first.createMH(:task_error)
-      Model.get_objs(task_error_mh,sp_hash).inject(Hash.new) do |h,r|
-        h.merge(r[:task_id] => r[:content])
+      ret = Hash.new
+      Model.get_objs(task_error_mh,sp_hash).each do |r|
+        task_id = r[:task_id]
+        ret[task_id] = (ret[task_id]||Array.new) + [r[:content]]
       end
+      ret
     end
 
     def get_events()

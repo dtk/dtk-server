@@ -102,11 +102,13 @@ module DTK; class ComponentMetaFile
     end
 
     def db_update_form_aux(model_name,hash_assigns)
+      #TODO: think the key -> key.to_sym is not needed because they are keys
       ret = DBUpdateHash.new
       children_model_names = DB_REL_DEF[model_name][:one_to_many]||[]
       hash_assigns.each do |key,child_hash|
-        if children_model_names.include?(key.to_sym)
-          child_model_name = key.to_sym
+        key = key.to_sym
+        if children_model_names.include?(key)
+          child_model_name = key
           ret[key] = child_hash.inject(DBUpdateHash.new) do |h,(ref,child_hash_assigns)|
             h.merge(ref => db_update_form_aux(child_model_name,child_hash_assigns))
           end
@@ -115,8 +117,8 @@ module DTK; class ComponentMetaFile
           ret[key] = child_hash
         end
       end
-      #mark as complete any child taht does not appear in hash_assigns
-      (children_model_names.map{|r|r.to_s} - hash_assigns.keys).each do |key|
+      #mark as complete any child that does not appear in hash_assigns
+      (children_model_names - hash_assigns.keys.map{|k|k.to_sym}).each do |key|
         ret[key] = DBUpdateHash.new().mark_as_complete()
       end
       ret

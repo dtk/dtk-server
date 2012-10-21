@@ -9,7 +9,8 @@ msg_types = {
   :discovery => [],
   :chef_solo => [],
   :puppet_apply => [],
-  :git_access => []
+  :git_access => [],
+  :netstat => []
 }
 def listen_for(msg_types)
   host = 'localhost'

@@ -20,7 +20,7 @@ module DTK
             end
           end
         }
-        CommandAndControl.request__execute_action(:netstat,:nltpu,nodes,callbacks)
+        CommandAndControl.request__execute_action(:netstat,:get_tcp_udp,nodes,callbacks)
       end
     end
   end

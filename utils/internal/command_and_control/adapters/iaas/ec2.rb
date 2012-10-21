@@ -26,7 +26,7 @@ module XYZ
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
-          create_options.merge!(:groups => external_ref[:security_group_set]||DefaultSecurityGroupSet)
+          create_options.merge!(:groups => external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]])
 
           #TODO: fix up
           create_options.merge!(:key_name => R8::Config[:ec2][:keypair])
@@ -114,7 +114,6 @@ EOF
 
 eos
 #TODO: when put apt-get update in thing delying time it taks for the os to say it is ready /usr/bin/apt-get update
-      DefaultSecurityGroupSet = ["default"] 
       #destroys the node if it exists
       def self.destroy_node?(node)
         instance_id = (node[:external_ref]||{})[:instance_id]

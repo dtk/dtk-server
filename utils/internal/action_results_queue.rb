@@ -74,10 +74,19 @@ module DTK
           return results
         end
         ret = Array.new
-        results.each do |node_id,result|
+        #sort by node name
+        sorted_keys = results.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
+        sorted_keys.each do |node_id|
+          result = results[node_id]
           node_name = result.node_name
-          result.data.each do |r|
-            ret << r.merge(:node_id => node_id,:node_name => node_name)
+          first = true
+          result.data.sort{|a,b|a[:port] <=> b[:port]}.each do |r|
+            if first
+              ret << r.merge(:node_id => node_id,:node_name => node_name)
+              first = false
+            else
+              ret << r
+            end
           end
         end
         ret

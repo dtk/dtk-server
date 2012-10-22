@@ -61,16 +61,18 @@ module XYZ
           if task_start
             set_task_to_executing(task)
           end
-          pp ["executing #{self.class.to_s}",task[:id]]
+          Log.info ["executing #{self.class.to_s}",task[:id]].inspect
           if event = add_start_task_event?(task)
-            pp [:start_task_event, event]
+            Log.info [:start_task_event, event].inspect
           end
           debug_print_task_info = "task_id=#{task.id.to_s}"
           begin
             yield
            rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
-            pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}] if event and errors
+            if event and errors
+              Log.info ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}].inspect
+            end
             task.update_at_task_completion("failed",{:errors => errors})
             reply_to_engine(workitem)
           end

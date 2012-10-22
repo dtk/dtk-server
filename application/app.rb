@@ -15,7 +15,7 @@ module XYZ
 end
 DTK = XYZ
 
-require 'require_first'
+require File.expand_path('require_first', File.dirname(__FILE__))
 r8_require_common_lib('auxiliary')
 
 #TODO: make that log  dont need config values 

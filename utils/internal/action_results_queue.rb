@@ -74,9 +74,9 @@ module DTK
           return results
         end
         ret = Array.new
-        #sort by node name
-        sorted_keys = results.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
-        sorted_keys.each do |node_id|
+        #sort by node name and prune out keys with no results
+        pruned_sorted_keys = results.reject{|k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
+        pruned_sorted_keys.each do |node_id|
           result = results[node_id]
           node_name = result.node_name
           first = true

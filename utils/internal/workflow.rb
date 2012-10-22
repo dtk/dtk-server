@@ -39,7 +39,7 @@ module XYZ
     klass = self
     begin
       type = R8::Config[:workflow][:type]
-      require File.expand_path("#{UTILS_DIR}/internal/workflow/adapters/#{type}", File.dirname(__FILE__))
+      r8_nested_require("workflow","adapters/#{type}")
       klass = XYZ::WorkflowAdapter.const_get type.capitalize
      rescue LoadError => e
       pp [e,e.backtrace[0..5]]

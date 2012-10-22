@@ -20,19 +20,23 @@ module DTK; class Repo
       end
 
       def meta_file_changed?()
-        (self[:files_modified] and !!self[:files_modified].find{|r|r[:path] =~ /^r8meta/}) or
-        (self[:files_added] and !!self[:files_added].find{|r|r[:path] =~ /^r8meta/}) 
+        (self[:files_modified] and !!self[:files_modified].find{|r|path(r) =~ /^r8meta/}) or
+        (self[:files_added] and !!self[:files_added].find{|r|path(r) =~ /^r8meta/}) 
       end
 
       #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
       def paths_to_add()
-        (self[:files_added]||[]).map{|r|r[:path]} + (self[:files_renamed]||[]).map{|r|r[:new_path]}
+        (self[:files_added]||[]).map{|r|path(r)} + (self[:files_renamed]||[]).map{|r|r[:new_path]}
       end
       def paths_to_delete()
-        (self[:files_deleted]||[]).map{|r|r[:path]} + (self[:files_renamed]||[]).map{|r|r[:old_path]}
+        (self[:files_deleted]||[]).map{|r|path(r)} + (self[:files_renamed]||[]).map{|r|r[:old_path]}
       end
       DiffNames = [:renamed,:added,:deleted,:modified]
       DiffTypes = DiffNames.map{|n|"files_#{n}".to_sym}
+     private
+      def path(r)
+        r["path"]||r[:path]
+      end
     end
 
     def initialize(array_diff_hashes)

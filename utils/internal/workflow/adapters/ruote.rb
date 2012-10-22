@@ -23,7 +23,7 @@ module XYZ
         TaskInfo.initialize_task_info()
         begin
           wfid = Engine.launch(process_def())
-          Engine.wait_for(wfid)
+          Engine.wait_for(wfid, :timeout => TopTaskDefualtTimeOut)
           
           #detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(wfid)
@@ -50,13 +50,16 @@ module XYZ
           end
          rescue Exception => e
           pp "error trap in ruote#execute"
-          pp [e,e.backtrace[0..3]]
+          pp [e,e.backtrace[0..10]]
+          #TODO: if do following Engine.cancel_process(wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean
         end
         nil
       end
-      
+      #in seconds
+      TopTaskDefualtTimeOut = 60 * 10
+
       def initiate_executable_action(task,receiver_context)
         opts = {
           :initiate_only => true,
@@ -65,6 +68,10 @@ module XYZ
         CommandAndControl.execute_task_action(task,top_task_idh,opts)
       end
 
+      def initiate_node_action(method,node,callbacks,context)
+        CommandAndControl.initiate_node_action(method,node,callbacks,context)
+      end
+      #TODO: convert poll_to_detect_node_ready to use more general form above
       def poll_to_detect_node_ready(node,receiver_context,opts={})
         poll_opts = opts.merge({
           :receiver_context => receiver_context})

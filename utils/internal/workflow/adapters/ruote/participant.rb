@@ -14,23 +14,30 @@ module XYZ
           params.merge!("workflow" => workflow)
           params.merge!("task" => task_info["task"])
           params.merge!("action" => task_info["action"])
+          params.merge!("task_start" => workitem.params["task_start"])
           params.merge!("task_end" => workitem.params["task_end"])
           params
         end
 
-        def set_task_to_executing_and_ret_event(task)
+        def set_task_to_executing(task)
           task.update_at_task_start()
         end
+        def add_start_task_event?(task)
+          #can be overwritten
+          nil
+        end
+
         def set_task_to_failed_preconditions(task,failed_antecedent_tasks)
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
+
         def set_result_succeeded(workitem,new_result,task,action)
           task.update_at_task_completion("succeeded",TaskAction::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
 
-        def set_result_failed(workitem,new_result,task,action)
+        def set_result_failed(workitem,new_result,task)
           error = 
             if not new_result[:statuscode] == 0
               CommandAndControl::Error::Communication.new
@@ -49,7 +56,26 @@ module XYZ
           task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error::Timeout.new))
         end
 
-         private
+       private
+        def execution_context(task,workitem,task_start=nil,&body)
+          if task_start
+            set_task_to_executing(task)
+          end
+          pp ["executing #{self.class.to_s}",task[:id]]
+          if event = add_start_task_event?(task)
+            pp [:start_task_event, event]
+          end
+          debug_print_task_info = "task_id=#{task.id.to_s}"
+          begin
+            yield
+           rescue Exception => e
+            event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
+            pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}] if event and errors
+            task.update_at_task_completion("failed",{:errors => errors})
+            reply_to_engine(workitem)
+          end
+        end
+
         #if use must coordinate with concurrence merge type
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
@@ -58,6 +84,32 @@ module XYZ
           params = workitem.params
           Ruote::TaskInfo.get_and_delete(params["task_id"],params["task_type"])
         end
+      end
+
+      class CreateNode < Top
+        #LockforDebug = Mutex.new
+        def consume(workitem)
+          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+          params = get_params(workitem) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          execution_context(task,workitem,task_start) do
+            result = workflow.process_executable_action(task)
+            if errors_in_result = errors_in_result?(result)
+              event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
+             pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+             set_result_failed(workitem,result,task)
+            else
+              set_result_succeeded(workitem,result,task,action) if task_end 
+            end
+            reply_to_engine(workitem)
+          end
+        end
+       private
+        def errors_in_result?(result)
+          if result[:status] == "failed"
+            result[:error_object] ? [{:message => result[:error_object].to_s}] : []
+          end
+        end    
       end
 
       class DetectCreatedNodeIsReady < Top
@@ -72,13 +124,13 @@ module XYZ
               task[:executable_action][:node].update_operational_status!(:running)
               set_result_succeeded(workitem,result,task,action) 
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              self.reply_to_engine(workitem)
+              reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
               Log.error("timeout detecting node is ready")
               result = {:type => :timeout_create_node, :task_id => task_id}
-              set_result_failed(workitem,result,task,action)
-              self.reply_to_engine(workitem)
+              set_result_failed(workitem,result,task)
+              reply_to_engine(workitem)
             end
           }
           num_poll_cycles = 25
@@ -89,13 +141,65 @@ module XYZ
         end
       end
 
-      class ExecuteOnNode < Top
+      class NodeParticipants < Top
+        private
+        def errors_in_result?(result)
+          #result[:statuscode] is for transport errors and data is for errors for agent
+          if result[:statuscode] != 0
+            ["transport_error"]
+          else
+            data = result[:data]||{}
+            unless data[:status] == :succeeded
+              data[:error] ? [data[:error]] : (data[:errors]||[])
+            end
+          end
+        end
+      end
+
+      class AuthorizeNode < NodeParticipants
+        def consume(workitem)
+          #TODO succeed without sending node request if authorized already
+          params = get_params(workitem) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.update_input_attributes!() if task_start
+
+          execution_context(task,workitem,task_start) do
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                result = msg[:body].merge("task_id" => task_id)
+                if errors = errors_in_result?(result)
+                  event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
+                  pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                  set_result_failed(workitem,result,task)
+                else
+                  pp ["task_complete_succeeded #{action.class.to_s}"]
+                  #task[:executable_action][:node].set_authorized()
+                  set_result_succeeded(workitem,result,task,action) if task_end 
+                end
+                reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                result = {:type => :timeout_authorize_node, :task_id => task_id}
+                set_result_failed(workitem,result,task)
+                reply_to_engine(workitem)
+              end,
+              :on_error => proc do |error_obj|
+                pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
+              end 
+            }
+            context = {:expected_count => 1}
+            workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
+          end
+        end
+      end
+
+      class ExecuteOnNode < NodeParticipants
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
-          task_id,action,workflow,task,task_end = %w{task_id action workflow task task_end}.map{|k|params[k]}
-          task.update_input_attributes!()
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.update_input_attributes!() if task_start
 
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
@@ -108,33 +212,28 @@ module XYZ
           end
 
           task.add_internal_guards!(workflow.guards[:internal])
-          event = set_task_to_executing_and_ret_event(task)
-
-          pp ["executing #{action.class.to_s}",task_id,event] if event
-          execution_context(task) do
+          execution_context(task,workflow,task_start) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
                   result = msg[:body].merge("task_id" => task_id)
-                  #result[:statuscode] is for transport errors and data is for errors for agent
-                  succeeded = (result[:statuscode] == 0 and [:succeeded,:ok].include?((result[:data]||{})[:status]))
-                  if succeeded
+                  if errors_in_result = errors_in_result?(result)
+                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    set_result_failed(workitem,result,task)
+                  else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                     set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
-                  else
-                    event,errors = task.add_event_and_errors(:complete_failed,result)
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    set_result_failed(workitem,result,task,action)
                   end
                   reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 
                   result = {
-                    "status" => "timeout" 
+                    :status => "timeout" 
                   }
-                  event,errors = task.add_event_and_errors(:complete_timeout,result)
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
                   reply_to_engine(workitem)
@@ -143,25 +242,15 @@ module XYZ
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
               workflow.initiate_executable_action(task,receiver_context)
             else
-              result = workflow.process_executable_action(task)
-              #TODO: this needs fixing up to be consisetnt with what resulst look like in async processing above
-              if result[:status] == "failed"
-                #TODO: looks like events and errors processing was oriented towards configure node so not putting following in yet
-                event,errors = task.add_event_and_errors(:complete_failed,result)
-                ##pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                ##set_result_failed(workitem,result,task,action)
-                if result[:error_object]
-                  #TODO: abort; there must be more graceful way to do this
-                  raise ErrorUsage.new(result[:error_object].to_s)
-                end
-              else
-                set_result_succeeded(workitem,result,task,action) if task_end 
-              end
-              reply_to_engine(workitem)
+              raise Error.new("TODO: if reach need to implement config node that is not long running")
             end
           end
         end
        private
+        def add_start_task_event?(task)
+          task.add_event(:start)
+        end
+
         def ret_failed_precondition_tasks(task,external_guards)
           ret = Array.new
           guard_task_idhs = task.guarded_by(external_guards)
@@ -172,22 +261,6 @@ module XYZ
           }
           Model.get_objs(task.model_handle,sp_hash)
         end
-
-        def execution_context(task,&body)
-          debug_print_task_info = "task_id=#{task.id.to_s}"
-          begin
-            yield
-          rescue CommandAndControl::Error => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(e))
-            pp [:task_failed,debug_print_task_info,e]
-            raise e
-          rescue Exception => e
-            task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error.new))
-            pp [:task_failed_internal_error,debug_print_task_info,e,e.backtrace[0..15]]
-            raise e
-          end
-        end
-
 
         #TODO: need to turn threading off for now because if dont can have two threads 
         #eat ech others messages; may solve with existing mechism or go straight to

@@ -106,15 +106,6 @@ module XYZ
         updated_repos
       end
 
-
-      def footprint()
-        unless R8::Config[:git_server_on_dtk_server]
-          raise Error.new("Not implemented yet: repo_server_footprin when R8::Config[:git_server_on_dtk_server] is not true")
-        end
-        repo_server_dns = RepoManager.repo_server_dns()
-        `ssh-keyscan -H -t rsa #{repo_server_dns}`
-      end
-
      private
       def admin_directory()
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 

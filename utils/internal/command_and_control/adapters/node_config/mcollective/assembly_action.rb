@@ -10,7 +10,7 @@ module DTK
         #TODO: want this to be blocking call
         async_agent_call(agent.to_s,action.to_s,params,filter,callbacks,async_context)
       end
-      DefaultTimeout = 3
+      DefaultTimeout = 10
       def parse_response__execute_action(nodes,msg)
         ret = Hash.new
         #TODO: conditionalize on status

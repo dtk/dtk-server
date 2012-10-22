@@ -17,7 +17,7 @@ module XYZ
       klass = self
       begin
         Lock.synchronize do
-          require File.expand_path("#{UTILS_DIR}/internal/config_agent/adapters/#{type}", File.dirname(__FILE__))
+          r8_nested_require("config_agent","adapters/#{type}")
         end
         klass = XYZ::ConfigAgentAdapter.const_get type.to_s.capitalize
        rescue LoadError

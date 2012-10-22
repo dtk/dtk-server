@@ -7,6 +7,7 @@ module XYZ
 
       def generate(cmps_with_attrs,assembly_attrs=nil)
         ret = Array.new
+        add_default_extlookup_config!(ret)
         add_assembly_attributes!(ret,assembly_attrs||[])
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
@@ -63,6 +64,13 @@ module XYZ
         ret
       end
      private
+      def add_default_extlookup_config!(ret)
+        ret << "$extlookup_datadir = #{DefaultExtlookupDatadir}"
+        ret << "$extlookup_precedence = #{DefaultExtlookupPrecedence}"
+      end
+      DefaultExtlookupDatadir = "'/etc/puppet/manifests/extdata'"
+      DefaultExtlookupPrecedence = "['common']"
+
       def add_assembly_attributes!(ret,assembly_attrs)
         assembly_attrs.each do |attr|
           ret << "$#{attr['name']} = #{process_val(attr['value'])}"

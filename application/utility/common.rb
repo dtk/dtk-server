@@ -2,6 +2,7 @@
 #general initial
 require 'rubygems'
 require 'optparse'
+require 'sshkey'
 require File.expand_path('library_nodes', File.dirname(__FILE__))
 Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'
@@ -29,7 +30,14 @@ class R8Server
 
   def create_repo_user_for_nodes?()
     repo_user_mh = pre_execute(:repo_user)
-    RepoUser.add_repo_user?(:node,repo_user_mh)
+    unless RepoUser.get_matching_repo_user(repo_user_mh, :type => :node)
+      new_key =  ::SSHKey.generate(:type => "rsa")
+      ssh_rsa_keys = {
+        :public => new_key.ssh_public_key,
+        :private => new_key.private_key
+      }
+      RepoUser.add_repo_user(:node,repo_user_mh,ssh_rsa_keys)
+    end
   end
 
   def create_public_library?(opts={})

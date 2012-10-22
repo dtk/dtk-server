@@ -16,23 +16,24 @@ module XYZ
       private
 
       ####semantic processing
+      #TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(TaskAction::CreateNode)
-          main = participant_executable_action(:execute_on_node,task,context)
-          post_part_opts = {:task_type => "post", :task_end => true}
-          post_part = participant_executable_action(:detect_created_node_is_ready,task,context, post_part_opts)
+          main = participant_executable_action(:create_node,task,context,:task_start => true)
+          post_part = participant_executable_action(:detect_created_node_is_ready,task,context, :task_type => "post", :task_end => true)
           sequence(main,post_part)
         elsif action.kind_of?(TaskAction::ConfigNode)
+          guards = nil
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
-            main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
-            sequence(guards,main)
           end
+          authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
+          main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
+          sequence_tasks = [guards,authorize_action,main].compact
+          sequence(*sequence_tasks)
         end
       end
-
-      #TODO: make this data driven like .. TaskAction::CreateNode => [:execute_on_node,:detect_created_node_is_ready]
 
       ####synactic processing
       def compute_process_body(task,context)
@@ -60,7 +61,7 @@ module XYZ
       end
 
       def compute_process_executable_action(task,context)
-        decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_end => true)
+        decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_start => true, :task_end => true)
       end
       def participant_executable_action(name,task,context,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 

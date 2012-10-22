@@ -14,7 +14,7 @@ module XYZ
     end
     Adapters = Hash.new
     def self.get_adapter_aux(adapter_type)
-      require File.expand_path("#{UTILS_DIR}/internal/parse_log/adapters/#{adapter_type}", File.dirname(__FILE__))
+      r8_nested_require("parse_log","adapters/#{adapter_type}")
       XYZ::ParseLogAdapter.const_get adapter_type.to_s.capitalize
      rescue LoadError
       raise Error.new("cannot find log parser adapter")

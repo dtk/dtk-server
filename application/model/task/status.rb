@@ -43,7 +43,7 @@ module DTK
       el[:type] = "#{' '*(2*(level-1))}#{type}"
       ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
       if ndx_errors[self[:id]]
-        el[:errors] = ndx_errors[self[:id]]
+        el[:errors] = status_table_form_format_errors(ndx_errors[self[:id]])
       end
 
       if level == 1
@@ -66,6 +66,23 @@ module DTK
       #ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
+      end
+      ret
+    end
+
+
+    def status_table_form_format_errors(errors)
+      ret = nil
+      errors.each do |error|
+        if ret
+          ret[:message] << "\n\n"
+        else
+          ret = {:message => String.new}
+        end
+
+        error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
+        error_msg << (error[:message]||"error")
+        ret[:message] << error_msg
       end
       ret
     end

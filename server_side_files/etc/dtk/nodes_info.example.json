@@ -1,6 +1,6 @@
 { 
   "nodes_info": {
-    "ami-e0219d8" : {
+    "ami-5c1fa135" : {
       "region" : "us-east-1",
       "type": "oneric",
       "os_type": "ubuntu",
@@ -16,7 +16,7 @@
       "png": "ubuntu.png",
       "sizes": ["t1.micro","m1.small","m1.medium"]
     },
-    "ami-0f42f666" : {
+    "ami-4e299027" : {
       "region" : "us-east-1",
       "type": "rh5.7-64",
       "os_type": "redhat",

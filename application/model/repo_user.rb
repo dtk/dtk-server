@@ -20,10 +20,10 @@ module XYZ
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
         return match if match
       else
-        case repo_users.size
+        case existing_users.size
          when 0
          when 1
-          return repo_users.first
+          return existing_users.first
          else
           if [:admin,:node].include?(repo_user_type)
             raise Error.new("Unexpected to have multiple matches of repo user type (#{repo_user_type})")

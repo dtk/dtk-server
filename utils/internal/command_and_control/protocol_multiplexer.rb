@@ -94,7 +94,7 @@ module XYZ
         def self.process_error(callbacks,error_obj)
           unless callbacks and callbacks.process_error(error_obj)
           #TODO: rmove need for this catchall          
-            Log.error error_obj.backtrace
+            Log.error error_obj.backtrace.inspect
             Log.error("error in proceess_response: #{error_obj.inspect}")
           end
         end

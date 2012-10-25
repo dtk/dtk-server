@@ -34,7 +34,11 @@ module XYZ
       ret = String.new
       ret << "#{Time.now}: " if Config[:print_time]
       ret << "in fn: #{this_parent_method}: " if Config[:print_method]
-      ret << msg
+      if msg.kind_of?(String)
+        ret << msg
+      else
+        ret << msg.inspect
+      end
       ret << "\n"
     end
   end

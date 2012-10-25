@@ -1,19 +1,22 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-    def self.find_matching_node_binding_rule(node_binding_rules,target)
-      node_binding_rules.find do |r|
-        conditions = r[:conditions]
-        conditions[:region] == target[:iaas_properties][:region]
+      r8_nested_require('ec2','cloud_init')
+      def self.find_matching_node_binding_rule(node_binding_rules,target)
+        node_binding_rules.find do |r|
+          conditions = r[:conditions]
+          conditions[:region] == target[:iaas_properties][:region]
+        end
       end
-    end
 
-    def self.existing_image?(image_id)
-      !!conn().image_get(image_id)
-    end
+      def self.existing_image?(image_id)
+        !!conn().image_get(image_id)
+      end
 
-    def self.execute(task_idh,top_task_idh,task_action)
+      def self.execute(task_idh,top_task_idh,task_action)
         node = task_action[:node]
+        node.update_object!(:os_type,:external_ref)
+
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
 
@@ -37,7 +40,7 @@ module XYZ
           #end fix up
 
           unless create_options.has_key?(:user_data)
-            user_data = default_user_data()
+            user_data = CloudInit.user_data(node[:os_type])
             create_options[:user_data] = user_data if user_data
           end
           response = nil
@@ -70,49 +73,7 @@ module XYZ
           }
         }
       end
-      class << self
-       private 
-        #TODO: stub
-        #TODO: need sto be cased on os type; below assumes that ubuntu cloud-init being used
-        def default_user_data()
-          git_server_url = RepoManager.repo_url()
-          git_server_dns = RepoManager.repo_server_dns()
-          node_config_server_host = CommandAndControl.node_config_server_host()
-          fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
-          template_bindings = {
-            :node_config_server_host => node_config_server_host,
-            :git_server_url => git_server_url, 
-            :git_server_dns => git_server_dns,
-            :fingerprint => fingerprint
-          }
-          unbound_bindings = template_bindings.reject{|k,v|v}
-          raise Error.new("Unbound cloudint var(s) (#{unbound_bindings.values.join(",")}") unless unbound_bindings.empty?
-          UserDataTemplate.result(template_bindings)
-        end
-      end
 
-#TODO: put this as boothook because if not get race condition with start of mcollective
-#need to check if this now runs on every boot; if so might want to put provision in so only runs on first boot
-UserDataTemplate = Erubis::Eruby.new <<eos
-#cloud-boothook
-#!/bin/sh 
-
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-EOF
-
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-EOF
-
-ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
-cat << EOF >>/root/.ssh/known_hosts
-<%=fingerprint %>
-EOF
-
-eos
 #TODO: when put apt-get update in thing delying time it taks for the os to say it is ready /usr/bin/apt-get update
       #destroys the node if it exists
       def self.destroy_node?(node)

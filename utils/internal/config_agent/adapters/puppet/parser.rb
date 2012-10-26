@@ -5,7 +5,7 @@ module XYZ
   module PuppetParser
     def parse_given_module_directory(impl_obj)
       #TODO: only handling parsing of .pp now
-      manifest_file_names = impl_obj.all_file_paths().select{|path|path =~ /\.pp$/}
+      manifest_file_names = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
       ret = TopPS.new()
       opts = {:just_krt_code => true}
       all_errors = nil

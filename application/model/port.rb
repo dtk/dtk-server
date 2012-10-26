@@ -63,6 +63,30 @@ module XYZ
       end
     end
 
+    def self.set_ports_link_def_ids(port_mh,ports,cmps,link_defs)
+      update_rows = ports.map do |port|
+        parsed_port_name = parse_external_port_display_name(port[:display_name])
+        cmp_type =  parsed_port_name[:component_type]
+        link_def_ref = parsed_port_name[:link_def_ref]
+
+        node_node_id = port[:node_node_id]
+        #TODO: check display name will always be same as component_type
+        unless cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] == node_node_id}
+          raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
+        end
+        cmp_id = cmp_match[:id]
+        link_def_match = link_defs.find do |ld|
+            ld[:component_component_id] ==  cmp_id and
+            ld[:display_name].gsub(/^remote_/,"").gsub(/^local_/,"") == link_def_ref
+        end
+        unless link_def_match
+          raise Error.new("Cannot find matching link def for component with id (#{cmp_id})")
+        end
+        {:id => port[:id], :link_def_id => link_def_match[:id]}
+      end.compact
+      update_from_rows(port_mh,update_rows)
+    end
+
    private
     def self.port_ref(type,attr)
       ref_num = (attr[:component_ref_num]||1).to_s

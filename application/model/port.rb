@@ -92,11 +92,7 @@ module XYZ
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
         end
         cmp_id = cmp_match[:id]
-        link_def_match = link_defs.find do |ld|
-            ld[:component_component_id] ==  cmp_id and
-            ld[:display_name].gsub(/^remote_/,"").gsub(/^local_/,"") == link_def_ref
-        end
-        unless link_def_match
+        unless link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           raise Error.new("Cannot find matching link def for component with id (#{cmp_id})")
         end
         {:id => port[:id], :link_def_id => link_def_match[:id]}
@@ -105,6 +101,21 @@ module XYZ
     end
 
    private
+    def self.link_def_match?(ld,cmp_id,link_def_ref,dir)
+      if ld[:component_component_id] ==  cmp_id and
+          ld[:display_name].gsub(/^remote_/,"").gsub(/^local_/,"") == link_def_ref
+        if dir
+          if ld[:display_name] =~ /^remote_/
+            dir.to_s == direction_from_local_remote("remote")
+          elsif ld[:display_name] =~ /^local_/
+            dir.to_s == direction_from_local_remote("local")
+          end
+        else
+          true
+        end
+      end
+    end
+
     def self.port_ref(type,attr)
       ref_num = (attr[:component_ref_num]||1).to_s
       "#{type}#{RefDelim}#{attr[:component_ref]}#{RefDelim}#{attr[:display_name]}#{RefDelim}#{ref_num}"
@@ -157,8 +168,7 @@ module XYZ
             "component_internal"
           end
 
-        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        dir = direction_from_local_remote(link_def[:local_or_remote])
         ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
         display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         location_asserted = ret_location_asserted(component_type,link_def[:link_type])
@@ -174,6 +184,17 @@ module XYZ
         row
       end
       create_from_rows(port_mh,rows,opts)
+    end
+
+    class << self
+     private
+      def direction_from_local_remote(local_or_remote)
+        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+        case local_or_remote 
+          when "local" then "input" 
+          when "remote" then "output"
+        end
+      end
     end
 
     def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
@@ -206,8 +227,7 @@ module XYZ
             "component_internal"
           end
 
-        #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
-        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        dir = direction_from_local_remote(link_def[:local_or_remote])
         ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
         if existing = (ndx_existing_ports[node[:id]]||{})[ref]
           ret << existing

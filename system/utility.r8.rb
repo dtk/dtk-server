@@ -34,7 +34,7 @@ module R8Tpl
 
       def get_i18n_port_name(i18n,port)
         #TODO: this has implcit assumption that port is associated with a certain attribute and component
-        attr_name = port.attribute_name()
+        attr_name = port.link_def_name()
         cmp_name = port.component_name()
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
         cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name

@@ -41,23 +41,40 @@ module XYZ
     ###########
     RefDelim = "___"
    public
+
+    def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref,dir)
+      "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
+    end
+
     #TODO: assumption that ref and display_name are the same
     def component_name()
-      self[:display_name].split(RefDelim)[1]
+      self.class.parse_external_port_display_name(self[:display_name])[:component_type]
     end
-    def attribute_name()
-      self[:display_name].split(RefDelim)[2]
+    def link_def_name()
+      self.class.parse_external_port_display_name(self[:display_name])[:link_def_ref]
     end
+
+    #TODO: is this still used and right?
     def ref_num()
       self[:display_name].split(RefDelim)[3].to_i
     end
 
     def self.parse_external_port_display_name(port_display_name)
-      #example internal form component_external___hdp-hadoop__namenode___namenode_conn
+      ret = Hash.new
+      #example internal form ([output|input]___)component_external___hdp-hadoop__namenode___namenode_conn
+      #TODO: deprecate fotms with out input or output
+      if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
+        port_display_name = $1
+        ret.merge!(:direction => :input)
+      elsif port_display_name =~ Regexp.new("^output#{RefDelim}(.+$)")
+        port_display_name = $1
+        ret.merge!(:direction => :output)
+      end
+
       if port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
-        {:module => $1,:component => $2,:link_def_ref => $3,:component_type => "#{$1}__#{$2}"}
+        ret.merge(:module => $1,:component => $2,:link_def_ref => $3,:component_type => "#{$1}__#{$2}")
       elsif  port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)#{RefDelim}(.+$)")
-        {:module => $1,:component => $1,:link_def_ref => $2,:component_type => $1}
+        ret.merge(:module => $1,:component => $1,:link_def_ref => $2,:component_type => $1)
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
@@ -140,10 +157,10 @@ module XYZ
             "component_internal"
           end
 
-        ref = ref_from_component_and_link_def(type,component_type,link_def)
-        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
         dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
+        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
         location_asserted = ret_location_asserted(component_type,link_def[:link_type])
         row = {
           :ref => ref,
@@ -189,13 +206,13 @@ module XYZ
             "component_internal"
           end
 
-        ref = ref_from_component_and_link_def(type,component_type,link_def)
+        #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
+        dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
+        ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
         if existing = (ndx_existing_ports[node[:id]]||{})[ref]
           ret << existing
         else
           display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-          #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
-          dir = link_def[:local_or_remote] == "local" ?  "input" : "output"
           location_asserted = ret_location_asserted(component_type,link_def[:link_type])
           row = {
             :ref => ref,
@@ -231,12 +248,9 @@ module XYZ
       ret + new_rows
     end
 
-    def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref)
-      "#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
-    end
    private
-    def self.ref_from_component_and_link_def(type,component_type,link_def)
-      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type])
+    def self.ref_from_component_and_link_def(type,component_type,link_def,dir)
+      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
     end
 
     #TODO: this should be in link defs

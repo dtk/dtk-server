@@ -1111,14 +1111,6 @@ pp service_list
     end
 
     def clone_assembly_ide(explicit_hash=nil)
-
-      if name.split("/").size == 2
-         clone_assembly_ide_new(explicit_hash)
-       else
-         clone_assembly_ide_deprecate(explicit_hash)
-       end
-    end
-    def clone_assembly_ide(explicit_hash=nil)
       #TODO: temp hack
       assembly_name, service_id = ret_non_null_request_params(:name,:service_id)
       item_list = JSON.parse(ret_non_null_request_params(:item_list))

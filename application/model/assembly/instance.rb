@@ -97,7 +97,7 @@ module DTK
           :id => a[:id],
           :display_name => a[:display_name],
           :datatype => datatype,
-          :description => a[:description]
+          :description => a[:description]||a[:display_name]
         }
       end
     end

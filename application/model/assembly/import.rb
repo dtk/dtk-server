@@ -104,14 +104,14 @@ module XYZ
           else
             Log.info("assembly node(#{node_hash_ref}) without a matching node binding")
           end
-          cmps_output = import_component_refs(library_idh,module_refs,node_hash["components"])
+          cmps_output = import_component_refs(library_idh,assembly_hash["name"],module_refs,node_hash["components"])
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
           h.merge(node_ref => node_output)
         end
       end
-      def self.import_component_refs(library_idh,module_refs,components_hash)
+      def self.import_component_refs(library_idh,assembly_name,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules
         cmp_types = components_hash.map{|cmp|component_type(cmp)}
@@ -142,7 +142,7 @@ module XYZ
         end
         #error if one or more matches
         unless non_matches.empty?
-          raise ErrorUsage.new("No component matches for (#{non_matches.join(",")})")
+          raise ErrorUsage.new("No component matches for (#{non_matches.join(",")}) found in assembly (#{assembly_name})")
         end
         augment_cmps
       end

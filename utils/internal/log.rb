@@ -23,9 +23,17 @@ module XYZ
       out << format(msg)
     end
     def self.info_pp(obj, out = $stdout)
+      out << "info: "
       out << Aux::pp_form(obj)
+      obj
     end
     def self.debug_pp(obj, out = $stdout)
+      out << "debug: "
+      out << Aux::pp_form(obj)
+      obj
+    end
+    def self.error_pp(obj, out = $stdout)
+      out << "error: "
       out << Aux::pp_form(obj)
       obj
     end

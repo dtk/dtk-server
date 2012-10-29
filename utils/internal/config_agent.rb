@@ -35,7 +35,7 @@ module XYZ
     Lock = Mutex.new
     Agents = Hash.new
 
-    class ParseError < Error
+    class ParseError < ErrorUsage
       attr_reader :msg, :filename, :file_asset_id, :line
       def initialize(msg,file_path=nil,line=nil)
         @msg = msg
@@ -69,19 +69,15 @@ module XYZ
       end
       private
       def get_filename(file_path)
-        return nil unless file_path
-        if file_path =~ Regexp.new("#{R8::EnvironmentConfig::ImportTestBaseDir}/[^/]+/(.+$)")
-          $1
-        end
+        #TODO: stub
+        file_path
       end
       def get_repo(file_path)
-        return nil unless file_path
-        if file_path =~ Regexp.new("#{R8::EnvironmentConfig::ImportTestBaseDir}/([^/]+)")
-          $1
-        end
+        #TODO: stub
+        file_path
       end
     end
-    class ParseErrors < Error
+    class ParseErrors < ErrorUsage
       attr_reader :error_list
       def initialize()
         @error_list = Array.new
@@ -96,6 +92,9 @@ module XYZ
       end
       def set_file_asset_ids!(model_handle)
         @error_list.each{|e|e.set_file_asset_id!(model_handle)}
+      end
+      def to_s()
+        @error_list.map{|e|e.to_s}.join("\n")
       end
     end
   end

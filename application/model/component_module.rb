@@ -302,10 +302,12 @@ module DTK
         meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
-       rescue => e
-        #TODO: later distinguish between internal and parsing errors and leverage mechanism put place in parser to handle this
-        parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
-        pp [:parsing_error,e,e.backtrace[0..10]]
+       rescue ErrorUsage => e
+        #parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
+         parsing_error = e
+      rescue => e
+        Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
+        raise e
       end
       if render_hash 
         content = YAML.dump(render_hash.yaml_form())

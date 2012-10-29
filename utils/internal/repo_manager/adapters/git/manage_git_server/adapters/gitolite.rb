@@ -39,6 +39,23 @@ module XYZ
         file_path = repo_config_file_relative_path(repo_name)
         file_deleted = admin_repo.delete_file?(file_path)
         admin_repo.push_changes() unless opts[:do_not_push_changes] or not file_deleted
+         delete_bare_repo?(repo_name)
+      end
+
+      def delete_bare_repo?(repo_name)
+        unless R8::Config[:git_server_on_dtk_server]
+          Log.error("Not implemented yet: delete_bare_repo when R8::Config[:git_server_on_dtk_server] is not true")
+          return
+        end
+        begin
+          `sudo rm -r -f #{bare_repo_dir(repo_name)}` 
+         rescue => e
+          Log.error(e.inspect)
+        end
+      end
+
+      def bare_repo_dir(repo_name)
+        "#{R8::Config[:git_user_home]}/repositories/#{repo_name}.git"
       end
 
       def add_user(username,rsa_pub_key,opts={})

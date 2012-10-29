@@ -46,7 +46,7 @@ module XYZ
     def self.repo_server_ssh_rsa_fingerprint()
       return @ssh_rsa_fingerprint if @ssh_rsa_fingerprint
       unless R8::Config[:git_server_on_dtk_server]
-        raise Error.new("Not implemented yet: repo_server_footprin when R8::Config[:git_server_on_dtk_server] is not true")
+        raise Error.new("Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true")
       end
       @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
     end

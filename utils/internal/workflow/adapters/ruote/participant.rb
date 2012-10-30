@@ -214,7 +214,7 @@ module XYZ
           end
 
           task.add_internal_guards!(workflow.guards[:internal])
-          execution_context(task,workflow,task_start) do
+          execution_context(task,workitem,task_start) do
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|

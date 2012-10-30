@@ -72,8 +72,8 @@ module XYZ
         end
       errors = add_errors(normalized_errors)
       #TODO: want to remove calls in function below from needing to know result format
-      events = add_event(event_type,{:data => {:errors => errors_in_result}})
-      [errors,events]
+      event = add_event(event_type,{:data => {:errors => errors_in_result}})
+      [event,errors]
     end
 
     def add_errors(normalized_errors)

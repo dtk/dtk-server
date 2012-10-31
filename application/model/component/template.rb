@@ -1,6 +1,19 @@
 #TODO: should this instead by a subclass of Component
-module XYZ
-  module ComponentTemplate
+module DTK
+  module ComponentTemplateClassMixin
+    def list_templates(model_handle,opts={})
+      library_filter = (opts[:library_idh] ? [:eq, :library_library_id, opts[:library_idh].get_id()] : [:neq, :library_library_id, nil])
+      sp_hash = {
+        :cols => [:id, :type, :display_name, :description],
+        :filter => [:and, [:eq, :type, "template"], library_filter]
+      }
+      ret = get_objs(model_handle,sp_hash)
+      ret.each{|r|r[:display_name] = r[:display_name].gsub(/__/,"::")} #TODO: encapsulate where this is done
+      ret
+    end
+  end
+
+  module ComponentTemplateMixin
     def update_default(attribute_name,val,field_to_match=:display_name)
       tmpl_attr_obj =  get_virtual_attribute(attribute_name,[:id,:value_asserted],field_to_match)
       raise Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj

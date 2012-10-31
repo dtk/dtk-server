@@ -13,7 +13,8 @@ module XYZ
   class Component < Model
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
-    include ComponentTemplate
+    include ComponentTemplateMixin
+    extend ComponentTemplateClassMixin
     include ComponentClone
     extend ComponentCloneClassMixin
     extend ComponentUserClassMixin

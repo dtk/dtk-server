@@ -47,7 +47,8 @@ module XYZ
     ######### Model apis
 
     def self.list(model_handle,opts={})
-      filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
+      target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
+      filter = [:and, [:oneof, :type, ["instance","staged"]], target_filter]
       sp_hash = {
         :cols => common_columns(),
         :filter => filter

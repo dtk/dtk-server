@@ -1,5 +1,9 @@
 module XYZ
   class Node_groupController < Controller
+    def rest__list()
+      rest_ok_response NodeGroup.list(model_handle())
+    end
+
     def save()
       params = request.params
       unless params["parent_model_name"] == "target"

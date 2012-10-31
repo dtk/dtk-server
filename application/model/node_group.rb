@@ -2,6 +2,14 @@ r8_nested_require('node_group','clone')
 module XYZ
   class NodeGroup < Node
     include NodeGroupClone
+    def self.list(model_handle)
+      sp_hash = {
+        :cols => [:id, :display_name, :description],
+        :filter => [:eq, :type, "node_group_instance"]
+      }
+      get_objs(model_handle,sp_hash)
+    end
+
     def node_members()
       sp_hash = {
         :cols => [:node_member]

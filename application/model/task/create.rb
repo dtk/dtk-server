@@ -29,7 +29,7 @@ module XYZ
       target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
-      #smokettest should not create a node
+      #smoketest should not create a node
       if component_type == :smoketest
         create_nodes_task = nil
       else

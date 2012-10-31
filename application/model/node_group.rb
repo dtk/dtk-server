@@ -17,6 +17,26 @@ module XYZ
       get_objs(sp_hash).map{|r|r[:node_member]}
     end
 
+    def self.check_valid_id(model_handle,id)
+      filter = 
+        [:and,
+         [:eq, :id, id],
+         [:eq, :type, "node_group_instance"],
+         [:neq, :datacenter_datacenter_id, nil]]
+      check_valid_id_helper(model_handle,id,filter)
+    end
+
+    def self.name_to_id(model_handle,name)
+      sp_hash =  {
+        :cols => [:id],
+           :filter => [:and,
+                       [:eq, :display_name, name],
+                       [:eq, :type, "node_group_instance"],
+                       [:neq, :datacenter_datacenter_id, nil]]
+      }
+      name_to_id_helper(model_handle,name,sp_hash)
+    end
+
     def get_canonical_template_node()
       get_objs(:cols => [:canonical_template_node]).map{|r|r[:template_node]}.first
     end

@@ -1,7 +1,23 @@
 module XYZ
   class Node_groupController < Controller
+    helper :node_group_helper
+
     def rest__list()
       rest_ok_response NodeGroup.list(model_handle())
+    end
+
+    def rest__add_component_template()
+#      node_group = create_obj(:node_group_id,NodeGroup)
+      node_group = create_obj(:node_group_id)
+      component_template_id = ret_non_null_request_params(:component_template_id)
+      node_group.add_component_template(id_handle(component_template_id,:component))
+      rest_ok_response
+    end
+
+    #TODO: old methods that need to be re-evaluated
+    def rest__members(node_group_id)
+      node_group = create_object_from_id(node_group_id)
+      rest_ok_response node_group.node_members()
     end
 
     def save()
@@ -21,10 +37,6 @@ module XYZ
       end
     end
 
-    def rest__members(node_group_id)
-      node_group = create_object_from_id(node_group_id)
-      rest_ok_response node_group.node_members()
-    end
 
     def rest__set_default_template_node()
       node_group_id, template_node_id = ret_non_null_request_params(:node_group_id,:template_node_id)

@@ -20,7 +20,10 @@ module DTK
             nodes = nodes.select { |node| node[:id] == params[:node_identifier].to_i || node[:display_name] == params[:node_identifier] }
             
             # if nodes empty return error message, case where more nodes are matches should not happen
-            action_results_queue.push(:error, "No nodes matches with node identifier: #{params[:node_identifier]}") if nodes.empty?
+            if nodes.empty?
+              action_results_queue.push(:error, "No nodes mathed to node identifier: #{params[:node_identifier]}") 
+              return
+            end
 
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)

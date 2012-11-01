@@ -6,11 +6,10 @@ module XYZ
       rest_ok_response NodeGroup.list(model_handle())
     end
 
-    def rest__add_component_template()
-#      node_group = create_obj(:node_group_id,NodeGroup)
+    def rest__add_component()
       node_group = create_obj(:node_group_id)
       component_template_id = ret_non_null_request_params(:component_template_id)
-      node_group.add_component_template(id_handle(component_template_id,:component))
+      node_group.add_component(id_handle(component_template_id,:component))
       rest_ok_response
     end
 

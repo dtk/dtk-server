@@ -21,7 +21,7 @@ module DTK
             
             # if nodes empty return error message, case where more nodes are matches should not happen
             if nodes.empty?
-              action_results_queue.push(:error, "No nodes mathed to node identifier: #{params[:node_identifier]}") 
+              action_results_queue.push(:error, "No nodes have been mathed to node identifier: #{params[:node_identifier]}") 
               return
             end
 

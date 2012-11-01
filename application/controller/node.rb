@@ -6,6 +6,19 @@ module XYZ
       rest_ok_response ret_node_subtype_class().list(model_handle())
     end
 
+    def rest__info_about()
+      node,subtype = ret_node_params_object_and_subtype()
+      about = ret_non_null_request_params(:about).to_sym
+       unless AboutEnum[subtype].include?(about)
+         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
+       end
+      rest_ok_response node.info_about(about)
+    end
+    AboutEnum = {
+      :instance => [:components],
+#      :template => [:nodes,:components,:targets]
+    }
+
     def rest__image_upgrade()
       old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
       Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)

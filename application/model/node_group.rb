@@ -1,13 +1,19 @@
-r8_nested_require('node_group','clone')
 module XYZ
   class NodeGroup < Node
-    include NodeGroupClone
+    r8_nested_require('node_group','clone')
+    include CloneMixin
     def self.list(model_handle)
       sp_hash = {
         :cols => [:id, :display_name, :description],
         :filter => [:eq, :type, "node_group_instance"]
       }
       get_objs(model_handle,sp_hash)
+    end
+
+    def add_component(component_template_idh)
+      override_attrs = Hash.new
+      clone_opts = {:no_post_copy_hook => true}
+      clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
     end
 
     def node_members()

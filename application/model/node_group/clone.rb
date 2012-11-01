@@ -1,6 +1,7 @@
-module XYZ
-  module NodeGroupClone
+module DTK; class NodeGroup
+  module CloneMixin
     def clone_post_copy_hook(clone_copy_output,opts={})
+      return if opts[:no_post_copy_hook]
       super_opts = opts.merge(:donot_create_pending_changes => true, :donot_create_internal_links => true)
       super(clone_copy_output,super_opts)
       opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
@@ -92,7 +93,7 @@ module XYZ
       end
     end
   end
-end
+end; end
 
 =begin
 TODO: ***; may want to put in version of this for varaibles taht are not input ports; so change to var at node group level propagates to teh node members; for matching would not leverage the component ng_component_id

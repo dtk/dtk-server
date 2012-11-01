@@ -8,6 +8,7 @@ module DTK
       end
 
       def initiate_get_log(action_results_queue,params)
+        # start of get log functionality
         nodes = get_nodes(:id,:display_name,:external_ref)
         Action::GetLog.initiate(nodes,action_results_queue,params)
       end

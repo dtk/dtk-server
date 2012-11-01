@@ -3,7 +3,9 @@ module DTK
   class ActionResultsQueue
 
     #returns :is_complete => is_complete, :results => results
-    def self.get_results(queue_id,ret_only_if_complete)
+    # since action result queue post processing is specific to netstats results, 
+    # you can disable mentioned post processing via flag :disable_post_processing
+    def self.get_results(queue_id,ret_only_if_complete,disable_post_processing)
       is_complete = results = nil
       unless ret_only_if_complete
         results = self[queue_id].ret_whatever_is_complete
@@ -18,7 +20,7 @@ module DTK
           is_complete = false
         end
       end
-      {:is_complete => is_complete, :results => Result.post_process(results)}
+      {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results))}
     end
 
     Lock = Mutex.new

@@ -105,6 +105,14 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
+    def rest__initiate_get_log()
+      assembly = ret_assembly_instance_object()
+      params   = ret_params_hash(:node_identifier,:log_path, :start_line)
+      queue = ActionResultsQueue.new
+      assembly.initiate_get_log(queue, params)
+      rest_ok_response :action_results_id => queue.id
+    end
+
 
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
@@ -133,7 +141,8 @@ module DTK
       #TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
-      rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete)
+      disable_post_processing = ret_request_param_boolean(:disable_post_processing)
+      rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
     end
     ### end: mcollective actions
 

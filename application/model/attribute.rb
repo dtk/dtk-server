@@ -142,7 +142,7 @@ module XYZ
       update_from_rows(attr_mh,attr_port_info) unless attr_port_info.empty?
     end
 
-    def display_form(display_name_prefix=nil)
+    def print_form(display_name_prefix=nil)
       update_object!(*UpdateCols)
       #TODO: handle complex attributes better and omit derived attributes; may also indicate whether there is an override
       display_name = "#{display_name_prefix}#{self[:display_name]}"
@@ -166,7 +166,9 @@ module XYZ
 
     def self.required_unset_attribute_proc_filter()
       Log.error("TODO: also need to make sure this is not a derived value not yet populated")
-      proc{|a|a[:required] and not a[:attribute_value]}
+      proc do |a|
+        a[:required] and not a[:attribute_value]
+      end
     end
    private
     def info_about_attr_value(value)

@@ -102,7 +102,7 @@ module DTK
         #TODO: more efficient to have sql query do filtering
         if filter_proc.nil? or filter_proc.call(attr)
           display_name_prefix = "#{r[:node][:display_name]}/#{r[:nested_component].display_name_print_form()}/"
-          attr.display_form(display_name_prefix)
+          attr.print_form(display_name_prefix)
         end
       end.compact
       assembly_attrs + component_attrs

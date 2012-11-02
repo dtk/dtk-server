@@ -76,8 +76,9 @@ module XYZ
     end
 
     def display_name_print_form()
-      update_object!(:component_type)
-      self[:component_type] && self[:component_type].gsub(/__/,"::")
+      update_object!(:component_type,:ref_num)
+      component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
+      self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
     end
 
     ### virtual column defs

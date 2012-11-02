@@ -237,6 +237,7 @@ module XYZ
         [lambda__segment_component.call(cmp_cols),
          {
            :model_name => :attribute,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)},
            :cols => attr_cols
@@ -271,8 +272,8 @@ module XYZ
       virtual_column :components_and_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_attrs.call(
-          :cmp_cols=>ContentObject::CommonCols+[:module_branch_id,:component_type],
-          :attr_cols=>ContentObject::CommonCols+[:attribute_value])
+          :cmp_cols=>ContentObject::CommonCols+[:component_type],
+          :attr_cols=>ContentObject::CommonCols+[:attribute_value,:required])
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(

@@ -75,6 +75,11 @@ module XYZ
       branch_name_default_version()
     end
 
+    def display_name_print_form()
+      update_object!(:component_type)
+      self[:component_type] && self[:component_type].gsub(/::/,"")
+    end
+
     ### virtual column defs
     def name()
       self[:display_name]

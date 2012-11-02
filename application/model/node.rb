@@ -56,13 +56,12 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
-
     def info_about(about)
       case about
        when :components
         get_objs(:cols => [:components]).map do |r|
           cmp = r[:component]
-          cmp.hash_subset(:id,:dsecription).merge(:display_name => cmp[:component_type].gsub(/__/,"::")) 
+          cmp.hash_subset(:id,:dsecription).merge(:display_name => cmp.display_name_print_form())
         end.sort{|a,b|a[:display_name] <=> b[:display_name]}
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        

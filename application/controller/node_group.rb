@@ -10,7 +10,13 @@ module XYZ
       node_group = create_obj(:node_group_id)
       component_template_id = ret_non_null_request_params(:component_template_id)
       new_component = node_group.add_component(id_handle(component_template_id,:component))
-      rest_ok_response(:component_instance_id => new_component.id())
+      rest_ok_response(:component_id => new_component.id())
+    end
+
+    def rest__info_about()
+      node_group = create_obj(:node_group_id)
+      about = ret_non_null_request_params(:about).to_sym
+      rest_ok_response node_group.info_about(about)
     end
 
     #TODO: old methods that need to be re-evaluated

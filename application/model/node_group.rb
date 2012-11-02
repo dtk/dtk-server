@@ -17,6 +17,14 @@ module XYZ
     end
 
     def delete_component(component_idh)
+      #first check that component_idh belongs to this insatnce
+      sp_hash = {
+        :cols => [:id, :display_name],
+        :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
+      }
+      unless Model.get_obj(model_handle(:component),sp_hash)
+        raise ErrorIdInvalid.new(component_idh.get_id(),:component)
+      end
       Model.delete_instance(component_idh)
     end
 

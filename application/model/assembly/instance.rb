@@ -52,7 +52,7 @@ module DTK
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       case about 
        when :attributes
-        ret = get_attributes(opts[:filter_proc]).map do |a|
+        ret = get_attributes_aux(opts[:filter_proc]).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value])
         end.sort(&order)
         return ret
@@ -82,11 +82,20 @@ module DTK
       order ? ret.sort(&order) : ret
     end
 
-    def get_attributes_missing_values()
-      get_attributes(Attribute.required_unset_attribute_proc_filter())
+    def get_attributes(filter=nil)
+      if filter
+        case filter
+          when :required_unset_attributes
+            get_attributes_aux(Attribute.required_unset_attribute_proc_filter())
+          else 
+            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes")
+        end  
+      else
+        get_attributes_aux()
+      end
     end
 
-    def get_attributes(filter_proc=nil)
+    def get_attributes_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
         attr = r[:attribute]
@@ -98,62 +107,7 @@ module DTK
       end.compact
       assembly_attrs + component_attrs
     end
-    private :get_attributes
-=begin
-    def get_attributes_missing_values()
-  Log.error("TODO: also need to make sure this is not a derived value not yet populated")
-      get_attributes().select do |a|
-        a[:required] and not a[:value]
-      end.map do |a|
-        datatype =
-          case a[:data_type]
-            when "integer" then "integer"
-            when "boolean" then "boolean"
-          else "string"
-          end
-        {
-          :id => a[:id],
-          :display_name => a[:display_name],
-          :datatype => datatype,
-          :description => a[:description]||a[:display_name]
-        }
-      end
-    end
- def get_attributes(filter_proc=nil)
-      assembly_attrs = Array.new #TODO: stub
-      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
-        attr = r[:attribute]
-        #TODO: more efficient to have sql query do filtering
-        if filter_proc.nil? or filter_proc.call(attr)
-          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}/#{attr[:display_name]}"
-          value = attr[:attribute_value]
-          #TODO: handle complex attributes better and omit derived attributes; may also indiacte whether teher is an override
-          attr.hash_subset(:id,:required,:data_type,:description).merge(:display_name => display_name, :value => info_about_attr_value(value))
-        end
-      end.compact
-      assembly_attrs + component_attrs
-    end
-    def info_about_attr_value(value)
-      #TODO: handle complex attributes better
-      if value
-        if value.kind_of?(Array)
-          #value.map{|el|info_about_attr_value(el)}
-          value.inspect
-        elsif value.kind_of?(Hash)
-          ret = Hash.new
-          value.each do |k,v|
-            ret[k] = info_about_attr_value(v)
-          end
-          ret
-        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
-          value
-        else
-          value.inspect
-        end
-      end
-    end
-=end
-
+    private :get_attributes_aux
 
     def get_service_add_ons()
       get_objs(:cols => [:service_add_ons_from_instance])do |r|

@@ -30,9 +30,11 @@ module DTK
       :template => [:nodes,:components,:targets]
     }
 
-    def rest__get_attributes_missing_values()
+    def rest__get_attributes()
       assembly,subtype = ret_assembly_params_object_and_subtype()
-      rest_ok_response assembly.get_attributes_missing_values()
+      filter = ret_request_params(:filter)
+      filter = filter && filter.to_sym
+      rest_ok_response assembly.get_attributes(filter)
     end
 
     def rest__list()

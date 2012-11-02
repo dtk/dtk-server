@@ -68,6 +68,9 @@ module XYZ
       end
     end
 
+    def get_attributes(filter=nil)
+    end
+
     def self.check_valid_id(model_handle,id)
       filter = 
         [:and,

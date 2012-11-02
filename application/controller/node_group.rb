@@ -19,6 +19,13 @@ module XYZ
       rest_ok_response node_group.info_about(about)
     end
 
+    def rest__get_attributes()
+      assembly,subtype = ret_assembly_params_object_and_subtype()
+      filter = ret_request_params(:filter)
+      filter = filter && filter.to_sym
+      rest_ok_response assembly.get_attributes(filter)
+    end
+
     #TODO: old methods that need to be re-evaluated
     def rest__members(node_group_id)
       node_group = create_object_from_id(node_group_id)

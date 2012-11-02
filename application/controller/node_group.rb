@@ -13,6 +13,13 @@ module XYZ
       rest_ok_response(:component_id => new_component.id())
     end
 
+    def rest__delete_component()
+      node_group = create_obj(:node_group_id)
+      component_id = ret_non_null_request_params(:component_id)
+      node_group.delete_component(id_handle(component_id,:component))
+      rest_ok_response
+    end
+
     def rest__info_about()
       node_group = create_obj(:node_group_id)
       about = ret_non_null_request_params(:about).to_sym

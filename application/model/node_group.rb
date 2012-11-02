@@ -16,6 +16,10 @@ module XYZ
       clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
     end
 
+    def delete_component(component_idh)
+      Model.delete_instance(component_idh)
+    end
+
     def node_members()
       sp_hash = {
         :cols => [:node_member]

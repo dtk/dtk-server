@@ -1,7 +1,6 @@
-#TODO: should this instead by a subclass of Component
-module DTK
-  module ComponentTemplateClassMixin
-    def list_templates(model_handle,opts={})
+module DTK; class Component
+  class Template < self
+    def self.list(model_handle,opts={})
       library_filter = (opts[:library_idh] ? [:eq, :library_library_id, opts[:library_idh].get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
         :cols => [:id, :type, :display_name, :description],
@@ -13,7 +12,8 @@ module DTK
     end
   end
 
-  module ComponentTemplateMixin
+  #TODO: may move to be instance method on Template
+  module TemplateMixin
     def update_default(attribute_name,val,field_to_match=:display_name)
       tmpl_attr_obj =  get_virtual_attribute(attribute_name,[:id,:value_asserted],field_to_match)
       raise Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
@@ -44,4 +44,5 @@ module DTK
     end
 
   end
-end
+end; end
+

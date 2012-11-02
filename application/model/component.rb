@@ -2,7 +2,6 @@ files =
   [
    'model_def_processor', 
    'view_meta_processor', 
-   'template',  
    'clone',
    'user',  
    'meta'
@@ -11,10 +10,11 @@ r8_nested_require('component',files)
 r8_require('branch_names')
 module XYZ
   class Component < Model
+    r8_nested_require('component','template')
+    include TemplateMixin
+
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
-    include ComponentTemplateMixin
-    extend ComponentTemplateClassMixin
     include ComponentClone
     extend ComponentCloneClassMixin
     extend ComponentUserClassMixin

@@ -14,9 +14,8 @@ module XYZ
       rest_ok_response
     end
 
-
     def rest__list()
-      rest_ok_response Component.list_templates(model_handle())
+      rest_ok_response Component::Template.list(model_handle())
     end
 
     def get_attributes_for_attr_mappings(component_id)

@@ -268,6 +268,11 @@ module XYZ
            :filter => [:eq, :is_workspace, true],
            :cols => [:id,:display_name,:type,:component_id] 
          }]         
+      virtual_column :components_and_attrs, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        lambda__components_and_attrs.call(
+          :cmp_cols=>ContentObject::CommonCols+[:module_branch_id,:component_type],
+          :attr_cols=>ContentObject::CommonCols+[:attribute_value])
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(

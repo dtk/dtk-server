@@ -12,7 +12,7 @@ module XYZ
 
     def add_component(component_template_idh)
       override_attrs = Hash.new
-      clone_opts = {:no_post_copy_hook => true}
+      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
       clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
     end
 

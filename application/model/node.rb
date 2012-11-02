@@ -69,7 +69,32 @@ module XYZ
     end
 
     def get_attributes(filter=nil)
+      if filter
+        case filter
+          when :required_unset_attributes
+            get_attributes_aux(Attribute.required_unset_attribute_proc_filter())
+          else 
+            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes")
+        end  
+      else
+        get_attributes_aux()
+      end
     end
+
+    def get_attributes_aux(filter_proc=nil)
+      node_attrs = Array.new #TODO: stub
+      component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
+        attr = r[:attribute]
+        #TODO: more efficient to have sql query do filtering
+        if filter_proc.nil? or filter_proc.call(attr)
+          display_name_prefix = "#{r[:node][:display_name]}/#{r[:component].display_name_print_form()}/"
+          attr.display_form(display_name_prefix)
+        end
+      end.compact
+     component_attrs + node_attrs
+    end
+    private :get_attributes_aux
+
 
     def self.check_valid_id(model_handle,id)
       filter = 

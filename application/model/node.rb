@@ -56,6 +56,39 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
+
+    def info_about(about)
+      case about
+       when :components
+        get_objs(:cols => [:components]).map do |r|
+          cmp = r[:component]
+          cmp.hash_subset(:id,:dsecription).merge(:display_name => cmp[:component_type].gsub(/__/,"::")) 
+        end.sort{|a,b|a[:display_name] <=> b[:display_name]}
+       else
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
+      end
+    end
+
+    def self.check_valid_id(model_handle,id)
+      filter = 
+        [:and,
+         [:eq, :id, id],
+         [:oneof, :type, ["instance","staged"]],
+         [:neq, :datacenter_datacenter_id, nil]]
+      check_valid_id_helper(model_handle,id,filter)
+    end
+
+    def self.name_to_id(model_handle,name)
+      sp_hash =  {
+        :cols => [:id],
+           :filter => [:and,
+                       [:eq, :display_name, name],
+                       [:oneof, :type, ["instance","staged"]],
+                       [:neq, :datacenter_datacenter_id, nil]]
+      }
+      name_to_id_helper(model_handle,name,sp_hash)
+    end
+
     def get_and_update_status!()
       #shortcut
       if has_key?(:is_deployed)

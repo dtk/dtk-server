@@ -379,7 +379,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name,:group_id]
+           :cols => [:id,:display_name,:group_id,:description,:component_type]
          }]
 
       virtual_column :node_binding_ruleset, :type => :json, :hidden => true,

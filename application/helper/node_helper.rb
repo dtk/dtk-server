@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module NodeHelper
     def ret_node_subtype_class()
-      subtype = et_node_params_subtype()
+      subtype = ret_node_params_subtype()
       if subtype == :template
         ::DTK::Node::Template
       else
@@ -14,7 +14,7 @@ module Ramaze::Helper
     end
 
     def ret_node_params_object_and_subtype()
-      [create_obj(:node_id),ret_node_params_subtype()]
+      [create_obj(:node_id,ret_node_subtype_class()),ret_node_params_subtype()]
     end
   end
 end

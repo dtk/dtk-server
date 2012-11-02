@@ -23,7 +23,7 @@ module XYZ
       node_group = create_obj(:node_group_id)
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
-      rest_ok_response node_group.get_attributes(filter)
+      rest_ok_response node_group.get_attributes_print_form(filter)
     end
 
     #TODO: old methods that need to be re-evaluated

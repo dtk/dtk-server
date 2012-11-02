@@ -52,7 +52,7 @@ module DTK
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       case about 
        when :attributes
-        ret = get_attributes_aux(opts[:filter_proc]).map do |a|
+        ret = get_attributes_print_form_aux(opts[:filter_proc]).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value])
         end.sort(&order)
         return ret
@@ -82,20 +82,20 @@ module DTK
       order ? ret.sort(&order) : ret
     end
 
-    def get_attributes(filter=nil)
+    def get_attributes_print_form(filter=nil)
       if filter
         case filter
           when :required_unset_attributes
-            get_attributes_aux(Attribute.required_unset_attribute_proc_filter())
+            get_attributes_print_form_aux(Attribute.required_unset_attribute_proc_filter())
           else 
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes")
+            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
       else
-        get_attributes_aux()
+        get_attributes_print_form_aux()
       end
     end
 
-    def get_attributes_aux(filter_proc=nil)
+    def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
         attr = r[:attribute]
@@ -105,9 +105,9 @@ module DTK
           attr.print_form(display_name_prefix)
         end
       end.compact
-      assembly_attrs + component_attrs
+      (assembly_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
-    private :get_attributes_aux
+    private :get_attributes_print_form_aux
 
     def get_service_add_ons()
       get_objs(:cols => [:service_add_ons_from_instance])do |r|

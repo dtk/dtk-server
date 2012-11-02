@@ -8,8 +8,8 @@ module XYZ
 
     def rest__add_component()
       node_group = create_obj(:node_group_id)
-      component_template_id = ret_non_null_request_params(:component_template_id)
-      new_component = node_group.add_component(id_handle(component_template_id,:component))
+      component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
+      new_component = node_group.add_component(component_template_idh)
       rest_ok_response(:component_id => new_component.id())
     end
 

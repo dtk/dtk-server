@@ -7,8 +7,17 @@ module DTK; class Component
         :filter => [:and, [:eq, :type, "template"], library_filter]
       }
       ret = get_objs(model_handle,sp_hash)
-      ret.each{|r|r[:display_name] = r[:display_name].gsub(/__/,"::")} #TODO: encapsulate where this is done
+      ret.each{|r|r[:display_name] = r.display_name_print_form()}
       ret
+    end
+
+    def self.check_valid_id(model_handle,id)
+      filter = 
+        [:and,
+         [:eq, :id, id],
+         [:eq, :type, "template"],
+         [:neq, :library_library_id, nil]]
+      check_valid_id_helper(model_handle,id,filter)
     end
   end
 

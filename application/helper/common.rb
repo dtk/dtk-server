@@ -222,14 +222,22 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
-    #create object given symbol that is id/name param
-    def create_obj(id_or_name_param,model_class=nil)
-      create_object_from_id(ret_request_param_id(id_or_name_param,model_class))
+    #param refers to key that can have id or name value
+    def create_obj(param,model_class=nil)
+      create_object_from_id(ret_request_param_id(param,model_class))
     end
-
-    #param value can be id or name
+    #param refers to key that can have id or name value
+    def ret_request_param_id_handle(param,model_class=nil)
+      id = ret_request_param_id(param,model_class)
+      model_name = (model_class && OverrideModelName[model_class]) || model_name()
+      id_handle(id,model_name)
+    end
+    #param refers to key that can have id or name value
     def ret_request_param_id(param,model_class=nil)
+      model_name = (model_class && OverrideModelName[model_class]) || model_name()
       model_class ||= model_class(model_name)
+      model_handle = model_handle(model_name)
+
       id_or_name = ret_non_null_request_params(param)
       if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
         id = id_or_name.to_i
@@ -238,6 +246,9 @@ limit = TestOveride if TestOveride
         model_class.name_to_id(model_handle,id_or_name)
       end
     end
+    OverrideModelName = {
+      Component::Template => :component
+    }
 
 
     def ret_request_params(*params)

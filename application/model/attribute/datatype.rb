@@ -1,4 +1,4 @@
-#TODO: initially scafolds SemanticType then wil replace
+#TODO: initially scaffolds SemanticType then will remove semantic type
 #TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
 module XYZ
   module AttributeDatatype

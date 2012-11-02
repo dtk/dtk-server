@@ -82,12 +82,30 @@ module DTK
       order ? ret.sort(&order) : ret
     end
 
-    def get_missing_parameters()
-      Log.error("TODO: also need to make sure this is not a derived value not yet populated")
+    def get_attributes_missing_values()
+      get_attributes(Attribute.required_unset_attribute_proc_filter())
+    end
+
+    def get_attributes(filter_proc=nil)
+      assembly_attrs = Array.new #TODO: stub
+      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
+        attr = r[:attribute]
+        #TODO: more efficient to have sql query do filtering
+        if filter_proc.nil? or filter_proc.call(attr)
+          display_name_prefix = "#{r[:node][:display_name]}/#{r[:nested_component].display_name_print_form()}/"
+          attr.display_form(display_name_prefix)
+        end
+      end.compact
+      assembly_attrs + component_attrs
+    end
+    private :get_attributes
+=begin
+    def get_attributes_missing_values()
+  Log.error("TODO: also need to make sure this is not a derived value not yet populated")
       get_attributes().select do |a|
-        a[:required] and not a[:value] 
+        a[:required] and not a[:value]
       end.map do |a|
-        datatype = 
+        datatype =
           case a[:data_type]
             when "integer" then "integer"
             when "boolean" then "boolean"
@@ -101,8 +119,7 @@ module DTK
         }
       end
     end
-
-    def get_attributes(filter_proc=nil)
+ def get_attributes(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
         attr = r[:attribute]
@@ -117,7 +134,7 @@ module DTK
       assembly_attrs + component_attrs
     end
     def info_about_attr_value(value)
-      #TODO: handle complex attributes better 
+      #TODO: handle complex attributes better
       if value
         if value.kind_of?(Array)
           #value.map{|el|info_about_attr_value(el)}
@@ -135,7 +152,7 @@ module DTK
         end
       end
     end
-    private :get_attributes,:info_about_attr_value
+=end
 
 
     def get_service_add_ons()

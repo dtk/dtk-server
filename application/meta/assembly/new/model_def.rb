@@ -76,21 +76,22 @@ lambda__template_nodes_and_components =
          :model_name=>:node,
          :join_type=>:inner,
          :join_cond=>{:assembly_id=>:component__id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:display_name,:group_id]
        },
        {
          :model_name=>:component,
          :alias=>:nested_component,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:node_node_id=>:node__id},
-         :cols=>[:id,:display_name,:component_type]
+         :cols=>[:id,:display_name,:component_type,:group_id]
        },
        {
          :model_name=>:attribute,
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:component_component_id=>:nested_component__id},
-         :cols => [:id,:display_name,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
+         :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
     :nested_nodes_and_cmps=> lambda__nodes_and_components.call(Node.common_columns,Component.common_columns),

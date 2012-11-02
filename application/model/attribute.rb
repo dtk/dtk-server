@@ -142,7 +142,55 @@ module XYZ
       update_from_rows(attr_mh,attr_port_info) unless attr_port_info.empty?
     end
 
+    def display_form(display_name_prefix=nil)
+      update_object!(*UpdateCols)
+      #TODO: handle complex attributes better and omit derived attributes; may also indicate whether there is an override
+      display_name = "#{display_name_prefix}#{self[:display_name]}"
+      datatype =
+        case self[:data_type]
+         when "integer" then "integer"
+         when "boolean" then "boolean"
+         else "string"
+        end
+      value = info_about_attr_value(self[:attribute_value])
+      attr_info = {
+        :display_name => display_name, 
+        :datatype => datatype,
+        :description => self[:description]||self[:display_name]
+      }
+      attr_info.merge!(:value => value) if value
+      hash_subset(*UnchangedDisplayCols).merge(attr_info)
+    end
+    UnchangedDisplayCols = [:id,:required]
+    UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
+
+    def self.required_unset_attribute_proc_filter()
+      Log.error("TODO: also need to make sure this is not a derived value not yet populated")
+      proc{|a|a[:required] and not a[:attribute_value]}
+    end
    private
+    def info_about_attr_value(value)
+      #TODO: handle complex attributes better 
+      if value
+        if value.kind_of?(Array)
+          #value.map{|el|info_about_attr_value(el)}
+          value.inspect
+        elsif value.kind_of?(Hash)
+          ret = Hash.new
+          value.each do |k,v|
+            ret[k] = info_about_attr_value(v)
+          end
+          ret
+        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
+          value
+        else
+          value.inspect
+        end
+      end
+    end
+
+
+
     def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])
       config_agent && config_agent.ret_attribute_name_and_type(self)

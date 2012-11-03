@@ -26,6 +26,9 @@ module XYZ
 
       #TODO: this can be optimzed and simplified
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
+        unless model_handle[:parent_model_name]
+          Log.error("misising model_handle[:parent_model_name] in (#{model_handle.inspect}) in create_from_select")
+        end
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         overrides = override_attrs.dup #because can remove elements
         set_updated_at!(overrides)

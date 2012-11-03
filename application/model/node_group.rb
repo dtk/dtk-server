@@ -10,7 +10,8 @@ module XYZ
         :datacenter_datacenter_id => target_idh.get_id(),
         :type => "node_group_instance"
       }
-      new_ng_idh = create_from_row(target_idh.createMH(:node),create_row)
+      ng_mh = target_idh.create_childMH(:node)
+      new_ng_idh = create_from_row(ng_mh,create_row)
       if opts[:spans_target]
         NodeGroupRelation.create_to_span_target?(new_ng_idh,target_idh,:donot_check_if_exists => true)
       end

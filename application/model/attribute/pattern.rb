@@ -39,7 +39,7 @@ module DTK; class Attribute
     class Node < self
       def self.create(pattern)
         if pattern =~ /^[0-9]+$/
-          ExplicitId.new(pattern)
+          Type::ExplicitId.new(pattern)
         else
           raise ErrorParse.new(pattern)
         end

@@ -56,7 +56,7 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
-    def info_about(about)
+    def info_about(about,opts={})
       case about
        when :components
         get_objs(:cols => [:components]).map do |r|

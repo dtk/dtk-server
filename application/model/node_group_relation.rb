@@ -17,7 +17,7 @@ module XYZ
       target_id = target_idh.get_id()
       node_group_id = node_group_idh.get_id
 
-      ngr_mh = node_group_idh.createMH(:node_group_relation)
+      ngr_mh = node_group_idh.create_peerMH(:node_group_relation)
       
       #check if not created already
       unless opts[:donot_check_if_exists]

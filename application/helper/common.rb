@@ -286,6 +286,19 @@ limit = TestOveride if TestOveride
       end
     end
 
+    def ret_params_av_pairs()
+      pattern,value,av_pairs_hash = ret_request_params(:pattern,:value,:av_pairs_hash)
+      ret = Array.new
+      if av_pairs_hash
+        av_pairs_hash.each{|k,v|ret << {:pattern => k, :value => v}}
+      elsif pattern and value
+        ret = [{:pattern => pattern, :value => value}]
+      else
+        raise ::DTK::ErrorUsage.new("Missing parameters")
+      end
+      ret
+    end
+
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
         error_msg = (null_params.size == 1 ? "Parameter (#{null_params.first}) is missing" : "Parameters (#{null_params.join(',')} are missing")

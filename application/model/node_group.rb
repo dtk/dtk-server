@@ -44,6 +44,7 @@ module XYZ
       Model.delete_instance(component_idh)
     end
 
+    #TODO: change to having node group having explicit links or using a saved search
     def get_node_members()
       sp_hash = {
         :cols => [:node_members]
@@ -54,6 +55,35 @@ module XYZ
       else
         rows.map{|r|r[:node_member]}
       end
+    end
+
+    #for each member of node_idhs, returns the node groups it beongs to
+    # for is {node_id => {ng_id1 => ng1,..}
+    #TODO: this can potentially be expensive to compute without enhancements
+    def self.get_node_groups_containing_nodes(node_idhs)
+      ng_mh = node_idhs.first.createMH(:node)
+      node_ids = node_idhs.map{|n|n.get_id()}
+      #TODO: more efficient to filter on sql side
+      sp_hash = {
+        :cols => [:id,:group_id, :display_name,:node_members]
+      }
+      node_to_ng = Hash.new
+      target_nodes = Hash.new
+      get_objs(ng_mh,sp_hash).each do |r|
+        node_group = r.hash_subset(:id,:group_id,:display_name)
+        if target_idh = r[:node_group_relation].spans_target?
+          target_id = target_idh.get_id()
+          unless target_nodes[target_id] 
+            target_nodes[target_id] = (target_idh.create_object().get_node_members().map{|n|n[:id]} & node_ids)
+            target_nodes[target_id].each do |n_id|
+              (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
+            end
+          end
+        elsif node_ids.include?(r[:node_member][:id])
+          (node_to_ng[r[:node_member][:id]] ||= Hash.new)[node_group[:id]] ||= node_group
+        end
+      end
+      node_to_ng
     end
 
     def self.check_valid_id(model_handle,id)

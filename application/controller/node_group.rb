@@ -49,6 +49,23 @@ module XYZ
       rest_ok_response node_group.get_attributes_print_form(filter)
     end
 
+    #the body has an array each element of form
+    # {:pattern => PAT, :value => VAL}
+    #pat can be one of three forms
+    #1 - an id
+    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
+    # this returns same output as info about attributes, pruned for just new ones set
+    def rest__set_attributes()
+      node_group = create_obj(:node_group_id)
+      av_pairs = ret_params_av_pairs()
+      response = node_group.set_attributes(av_pairs)
+      if response.empty?
+        raise ErrorUsage.new("No attributes match")
+      end
+      rest_ok_response response
+    end
+
     def rest__get_members()
       node_group = create_obj(:node_group_id)
       rest_ok_response node_group.get_node_members()

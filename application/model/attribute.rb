@@ -12,6 +12,7 @@ files =
 r8_nested_require('attribute',files)
 module XYZ
   class Attribute < Model
+    r8_nested_require('attribute','pattern')
     include AttributeGroupInstanceMixin
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
@@ -170,6 +171,8 @@ module XYZ
         a[:required] and not a[:attribute_value]
       end
     end
+
+
    private
     def info_about_attr_value(value)
       #TODO: handle complex attributes better 

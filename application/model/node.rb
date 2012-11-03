@@ -97,6 +97,9 @@ module XYZ
     end
     private :get_attributes_print_form_aux
 
+    def set_attributes(av_pairs)
+      Attribute::Pattern::Node.set_attributes(self,av_pairs)
+    end
 
     def self.check_valid_id(model_handle,id)
       filter = 

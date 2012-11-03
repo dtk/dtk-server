@@ -1,4 +1,3 @@
-r8_nested_require('assembly','attribute_pattern')
 r8_nested_require('assembly','import_export_common')
 r8_nested_require('assembly','import')
 module XYZ
@@ -76,21 +75,7 @@ module XYZ
     end
 
     def set_attributes(av_pairs)
-      ret = Array.new
-      attribute_rows = Array.new
-      #TDOO: more efficient if can bulk up
-      av_pairs.each do |av_pair|
-        pattern = AssemblyAttributePattern.create(av_pair[:pattern])
-        attr_idhs = pattern.ret_attribute_idhs(id_handle())
-        unless attr_idhs.empty?
-          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
-        end
-      end
-      return ret if attribute_rows.empty?
-      Attribute.update_and_propagate_attributes(model_handle(:attribute),attribute_rows)
-      attr_ids = attribute_rows.map{|r|r[:id]}
-      filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
-      info_about(:attributes,:filter_proc => filter_proc)
+      Attribute::Pattern::Assembly.set_attributes(self,av_pairs)
     end
 
     def list_smoketests()

@@ -77,6 +77,10 @@ module XYZ
       port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
     end
 
+    def get_node_members()
+      get_objs(:cols => [:node_members]).map{|r|r[:node_member]}
+    end
+
     def get_project()
       project_id = update_object!(:project_id)[:project_id]
       id_handle(:id => project_id,:model_name => :project).create_object()

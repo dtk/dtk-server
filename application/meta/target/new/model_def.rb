@@ -61,6 +61,20 @@
          :cols=>Node.common_columns
        }]
     },
+    :node_members=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :convert => true,
+         :alias => :node_member,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id},
+         :filter => [:oneof, :type, ["staged","instance"]],
+         :cols=>[:id,:group_id,:display_name,:type,:external_ref,:os_type]
+       }]
+    },
     :node_ports=>{
       :type=>:json,
       :hidden=>true,

@@ -2,6 +2,22 @@ module XYZ
   class Node_groupController < Controller
     helper :node_group_helper
 
+    def rest__create()
+      display_name = ret_non_null_request_params(:display_name)
+      target_id,spans_target = ret_request_params(:target_id,:spans_target)
+      target_idh = target_idh_with_default(target_id)
+      opts = Hash.new
+      opts[:spans_target] = true if spans_target
+      new_ng_idh = NodeGroup.create_instance(target_idh,display_name,opts)
+      rest_ok_response(:node_group_id => new_ng_idh.get_id()) 
+    end
+
+    def rest__delete()
+      node_group = create_obj(:node_group_id)
+      node_group.delete()
+      rest_ok_response
+    end
+
     def rest__list()
       rest_ok_response NodeGroup.list(model_handle())
     end
@@ -9,8 +25,8 @@ module XYZ
     def rest__add_component()
       node_group = create_obj(:node_group_id)
       component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
-      new_component = node_group.add_component(component_template_idh)
-      rest_ok_response(:component_id => new_component.id())
+      new_component_idh = node_group.add_component(component_template_idh)
+      rest_ok_response(:component_id => new_component_idh.get_id())
     end
 
     def rest__delete_component()
@@ -33,11 +49,13 @@ module XYZ
       rest_ok_response node_group.get_attributes_print_form(filter)
     end
 
-    #TODO: old methods that need to be re-evaluated
-    def rest__members(node_group_id)
-      node_group = create_object_from_id(node_group_id)
-      rest_ok_response node_group.node_members()
+    def rest__get_members()
+      node_group = create_obj(:node_group_id)
+      rest_ok_response node_group.get_node_members()
     end
+
+    #TODO: old methods that need to be re-evaluated
+
 
     def save()
       params = request.params
@@ -79,11 +97,7 @@ module XYZ
       id = request.params["id"]
       node_group = create_object_from_id(id)
       node_group.delete()
-      if rest_request?()
-        rest_ok_response(:id => id)
-      else
-        {:data => {:id=>id,:result=>true}}
-      end
+      {:data => {:id=>id,:result=>true}}
     end
   end
 end

@@ -33,7 +33,7 @@ module Ramaze::Helper
       if target_id
         id_handle(target_id,:target)
       else
-        targets = Model.get_objs(model_handle(:target),:cols => [:id])
+        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id])
         raise Error.new("Cannot find a unique default target") unless targets.size == 1
         targets.first.id_handle()
       end

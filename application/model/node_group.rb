@@ -2,6 +2,21 @@ module XYZ
   class NodeGroup < Node
     r8_nested_require('node_group','clone')
     include CloneMixin
+
+    def self.create_instance(target_idh,display_name,opts={})
+      create_row = {
+        :ref => display_name,
+        :display_name => display_name,
+        :datacenter_datacenter_id => target_idh.get_id(),
+        :type => "node_group_instance"
+      }
+      new_ng_idh = create_from_row(target_idh.createMH(:node),create_row)
+      if opts[:spans_target]
+        NodeGroupRelation.create_to_span_target?(new_ng_idh,target_idh,:donot_check_if_exists => true)
+      end
+      new_ng_idh
+    end
+
     def self.list(model_handle)
       sp_hash = {
         :cols => [:id, :display_name, :description],
@@ -13,7 +28,8 @@ module XYZ
     def add_component(component_template_idh)
       override_attrs = Hash.new
       clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
-      clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
+      new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
+      new_cmp.id_handle()
     end
 
     def delete_component(component_idh)
@@ -28,11 +44,16 @@ module XYZ
       Model.delete_instance(component_idh)
     end
 
-    def node_members()
+    def get_node_members()
       sp_hash = {
-        :cols => [:node_member]
+        :cols => [:node_members]
       }
-      get_objs(sp_hash).map{|r|r[:node_member]}
+      rows = get_objs(sp_hash)
+      if target_idh = NodeGroupRelation.spans_target?(rows.map{|r|r[:node_group_relation]})
+        target_idh.create_object().get_node_members()
+      else
+        rows.map{|r|r[:node_member]}
+      end
     end
 
     def self.check_valid_id(model_handle,id)
@@ -98,7 +119,6 @@ module XYZ
     end
 
     def delete()
-      #TODO: stub
       Model.delete_instance(id_handle())
     end
     def destroy_and_delete

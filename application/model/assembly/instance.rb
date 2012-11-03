@@ -65,7 +65,7 @@ module DTK
        when :nodes
         cols = [:nodes]
         post_process_per_row = proc do |r|
-          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref, {:type => :node_type})
+          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref,:type)
         end
        when :tasks
         cols = [:tasks]

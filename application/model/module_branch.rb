@@ -149,7 +149,8 @@ module DTK
         :type => self[:type]
 
       }
-      mb_idh = Model.create_from_row?(model_handle,ref,match_assigns,other_assigns)
+      cmp_branch_mh = model_handle.merge(:parent_model_name => :component_module) 
+      mb_idh = Model.create_from_row?(cmp_branch_mh,ref,match_assigns,other_assigns)
       mb_idh.create_object().merge(match_assigns).merge(other_assigns)
     end
 

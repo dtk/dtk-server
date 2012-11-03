@@ -37,7 +37,7 @@ module XYZ
     end
     def self.add(impl_obj,type,path,content,opts={})
       hash = ret_create_hash(impl_obj,type,path,content)
-      file_asset_mh = impl_obj.model_handle.createMH(:file_asset)
+      file_asset_mh = impl_obj.model_handle.create_childMH(:file_asset)
       new_file_asset_idh = create_from_row(file_asset_mh,hash)
       new_file_asset_obj = new_file_asset_idh.create_object().merge(hash)
       RepoManager.add_file(new_file_asset_obj,content,{:implementation => impl_obj})

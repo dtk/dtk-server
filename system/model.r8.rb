@@ -191,6 +191,10 @@ module XYZ
       mh = ModelHandle.new(@c,@relation_type,nil,user_info)
       mn ? mh.createMH(mn) : mh
     end
+    def child_model_handle(child_mn)
+      model_handle().create_childMH(child_mn)
+    end
+
     def group_id()
       self[:group_id] || (@id_handle && @id_handle[:group_id])
     end

@@ -53,7 +53,7 @@ module XYZ
         :type => type.to_s,
         :task_id => id()
       }
-      Model.create_from_rows(model_handle(:task_event),[row],{:convert => true})
+      Model.create_from_rows(child_model_handle(:task_event),[row],{:convert => true})
       event
     end
     

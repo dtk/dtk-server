@@ -136,7 +136,8 @@ module XYZ
         FileAsset.ret_create_hash(self,file_type,file_path,content)
       end
       #TODO: need to make create? from rows
-      Model.modify_children_from_rows(model_handle(:file_asset),id_handle,file_asset_rows)
+      file_asset_mh = model_handle().create_childMH(:file_asset)
+      Model.modify_children_from_rows(file_asset_mh,id_handle,file_asset_rows)
     end
 
     def all_file_paths()

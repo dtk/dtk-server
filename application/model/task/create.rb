@@ -37,6 +37,9 @@ module XYZ
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
+=begin
+TODO: needs to be changed because config_nodes_task incorrectly evaluates node centric attributes (it does not look up what is on node group
+can eithr use difefrent task processing to do this or clone node group components to components
       node_centric_config_changes = Array.new
       unless create_nodes_changes.empty?
         nodes = create_nodes_changes.flatten(1).map{|r|r[:node]}
@@ -46,6 +49,9 @@ module XYZ
 
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
+=end
+      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)

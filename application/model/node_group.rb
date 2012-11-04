@@ -58,13 +58,13 @@ module XYZ
       end
     end
 
-    #for each member of node_idhs, returns the node groups it beongs to
+    #returns node group to node mapping for eachnode matching node filter
     # for is {node_id => {ng_id1 => ng1,..}
+    # possible that node_id does not appear meaning that this node does not belong to any group
     #TODO: this can potentially be expensive to compute without enhancements
-    def self.get_node_groups_containing_nodes(node_idhs)
-      ng_mh = node_idhs.first.createMH(:node)
-      node_ids = node_idhs.map{|n|n.get_id()}
-      #TODO: more efficient to filter on sql side
+    def self.get_node_groups_containing_nodes(mh,node_filter)
+      ng_mh = mh.createMH(:node)
+      #TODO: more efficient to push node_filte into sql query
       sp_hash = {
         :cols => [:id,:group_id, :display_name,:node_members]
       }
@@ -75,17 +75,18 @@ module XYZ
         if target_idh = r[:node_group_relation].spans_target?
           target_id = target_idh.get_id()
           unless target_nodes[target_id] 
-            target_nodes[target_id] = (target_idh.create_object().get_node_members().map{|n|n[:id]} & node_ids)
+            target_nodes[target_id] = node_filter.filter(target_idh.create_object().get_node_members()).map{|n|n[:id]}
             target_nodes[target_id].each do |n_id|
               (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
             end
           end
-        elsif node_ids.include?(r[:node_member][:id])
+        elsif node_filter.include?(r[:node_member])
           (node_to_ng[r[:node_member][:id]] ||= Hash.new)[node_group[:id]] ||= node_group
         end
       end
       node_to_ng
     end
+
 
     def self.check_valid_id(model_handle,id)
       filter = 

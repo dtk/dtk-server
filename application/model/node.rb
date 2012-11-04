@@ -3,6 +3,7 @@ r8_nested_require('node','meta')
 module XYZ
   class Node < Model
     r8_nested_require('node','template')
+    r8_nested_require('node','filter')
     include NodeClone
     
     set_relation_name(:node,:node)

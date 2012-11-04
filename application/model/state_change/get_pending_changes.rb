@@ -8,7 +8,6 @@ module DTK; class StateChange
     #TODO: need to refine how this interfacts with existing state changes
     #right now it just generates ruby objects and does not check existing state change objects
     def self.component_state_changes(assembly_idh,component_type=nil)
-x = self.db_rel()
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
@@ -62,7 +61,12 @@ x = self.db_rel()
   end
 
   class NodeCentric < self
-    def self.component_state_changes(target_idh)
+    #finds all node-centric components associated with the set of nodes meeting filter
+    #TODO: now just using components on node groups, not node-centric components on individual nodes
+    def self.component_state_changes(mh,node_filter)
+      pp NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
+raise "got here"
+=begin
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
@@ -90,6 +94,7 @@ x = self.db_rel()
         (ndx_ret[node_id] ||= Array.new) << sc
       end
       ndx_ret.values
+=end
     end
   end
 

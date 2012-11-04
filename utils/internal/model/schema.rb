@@ -56,7 +56,9 @@ module XYZ
     end
    public
     
-    attr_reader :db_rel
+    def db_rel()
+      @db_rel ||= (superclass.respond_to?(:db_rel) && superclass.db_rel())
+    end
 
     def many_to_one(*target_relation_types)
       @db_rel[:many_to_one] = target_relation_types

@@ -1,4 +1,4 @@
-#TODO: converting from module to class form
+#TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
 module DTK; class StateChange
   module PendingChanges
     ComponentCols = [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id]
@@ -8,6 +8,7 @@ module DTK; class StateChange
     #TODO: need to refine how this interfacts with existing state changes
     #right now it just generates ruby objects and does not check existing state change objects
     def self.component_state_changes(assembly_idh,component_type=nil)
+x = self.db_rel()
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
@@ -60,9 +61,8 @@ module DTK; class StateChange
     end
   end
 
-  class Target < self
+  class NodeCentric < self
     def self.component_state_changes(target_idh)
-=begin
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
@@ -90,10 +90,10 @@ module DTK; class StateChange
         (ndx_ret[node_id] ||= Array.new) << sc
       end
       ndx_ret.values
-=end
     end
   end
 
+#TODO: may convert to form above
   module GetPendingChangesClassMixin
     def get_ndx_node_config_changes(target_idh)
       #TODO: there is probably more efficient info to get; this provides too much

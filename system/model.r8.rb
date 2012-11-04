@@ -595,9 +595,8 @@ module XYZ
     def ret_info_if_is_virtual_column(col)
       virtual_columns[col]
     end
-    #TODO: clean up db_rel so the superclass call not needed
     def virtual_columns()
-      (self.class.db_rel||self.class.superclass.db_rel||{})[:virtual_columns]||{}
+      self.class.db_rel[:virtual_columns]||{}
     end
     private :virtual_columns
 

@@ -1,5 +1,9 @@
 #TODO: converting from module to class form
 module DTK; class StateChange
+  module PendingChanges
+    ComponentCols = [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id]
+  end
+
   class Assembly < self
     #TODO: need to refine how this interfacts with existing state changes
     #right now it just generates ruby objects and does not check existing state change objects
@@ -11,7 +15,7 @@ module DTK; class StateChange
         filter << [:neq, :basic_type, "smoketest"]
       end
       sp_hash = {
-        :cols => [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id],
+        :cols => PendingChanges::ComponentCols,
         :filter => filter
       }
       state_change_mh = assembly_idh.createMH(:state_change)
@@ -53,6 +57,40 @@ module DTK; class StateChange
       end
       ##group by node id (and using fact that each wil be unique id)
       changes.map{|ch|[ch]}
+    end
+  end
+
+  class Target < self
+    def self.component_state_changes(target_idh)
+=begin
+      filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
+      if (component_type == :smoketest)
+        filter << [:eq, :basic_type, "smoketest"]
+      else
+        filter << [:neq, :basic_type, "smoketest"]
+      end
+      sp_hash = {
+        :cols => PendingChanges::ComponentCols,
+        :filter => filter
+      }
+      state_change_mh = assembly_idh.createMH(:state_change)
+      changes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |cmp|
+        node = cmp.delete(:node)
+        hash = {
+          :type => "converge_component",
+          :component => cmp,
+          :node => node
+        }
+        create_stub(state_change_mh,hash)
+      end
+      ##group by node id
+      ndx_ret = Hash.new
+      changes.each do |sc|
+        node_id = sc[:node][:id]
+        (ndx_ret[node_id] ||= Array.new) << sc
+      end
+      ndx_ret.values
+=end
     end
   end
 

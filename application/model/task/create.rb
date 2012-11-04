@@ -37,13 +37,15 @@ module XYZ
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
+      node_centric_config_changes = Array.new
       unless create_nodes_changes.empty?
         nodes = create_nodes_changes.flatten(1).map{|r|r[:node]}
         node_mh = assembly_idh.createMH(:node)
-        node_centric_config_nodes_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
+        node_centric_config_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
       end
 
-      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
@@ -57,6 +59,19 @@ module XYZ
     end
 
    private
+    def combine_same_node_state_changes(sc_list_array)
+      #shortcut if one eleemnt is non-null
+      non_null = sc_list_array.reject{|sc_list|sc_list.empty?}
+      unless non_null.size > 1
+        return non_null.first||[]
+      end
+      ndx_ret = Hash.new
+      non_null.each do |sc_list|
+        sc_list.each{|list|list.each{|sc|(ndx_ret[sc[:node][:id]] ||= Array.new) << sc}}
+      end
+      ndx_ret.values
+    end
+
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element

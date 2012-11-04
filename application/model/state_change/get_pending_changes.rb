@@ -1,8 +1,5 @@
 #TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
 module DTK; class StateChange
-  module PendingChanges
-    ComponentCols = [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id]
-  end
 
   class Assembly < self
     #TODO: need to refine how this interfacts with existing state changes
@@ -15,7 +12,7 @@ module DTK; class StateChange
         filter << [:neq, :basic_type, "smoketest"]
       end
       sp_hash = {
-        :cols => PendingChanges::ComponentCols,
+        :cols => Component::pending_changes_cols,
         :filter => filter
       }
       state_change_mh = assembly_idh.createMH(:state_change)
@@ -63,20 +60,31 @@ module DTK; class StateChange
   class NodeCentric < self
     #finds all node-centric components associated with the set of nodes meeting filter
     #TODO: now just using components on node groups, not node-centric components on individual nodes
-    def self.component_state_changes(mh,node_filter)
-      pp NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
-raise "got here"
-=begin
-      filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
-      if (component_type == :smoketest)
-        filter << [:eq, :basic_type, "smoketest"]
-      else
-        filter << [:neq, :basic_type, "smoketest"]
+    def self.component_state_changes(mh,nodes)
+      ret = Array.new
+      node_filter = Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+      #find node to node_group mapping
+      node_to_ng = NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
+      if node_to_ng.empty?
+        return ret
       end
+
+      #find components associated with each node group      
+      ng_ndx = Hash.new
+      node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
       sp_hash = {
-        :cols => PendingChanges::ComponentCols,
-        :filter => filter
+        :cols => [:id,:display_name,:components_for_pending_changes],
+        :filter => [:oneof, :id, ng_ndx.keys]
       }
+      ng_mh = mh.createMH(:node)
+      ng_cmps = get_objs(ng_mh,sp_hash)
+      if ng_cmps.empty?
+        return ret
+      end
+
+      pp [:ng_cmps,ng_cmps]
+      raise "got here"
+=begin
       state_change_mh = assembly_idh.createMH(:state_change)
       changes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |cmp|
         node = cmp.delete(:node)

@@ -388,6 +388,17 @@ module XYZ
            :cols => [:id,:display_name,:group_id,:description,:component_type]
          }]
 
+      virtual_column :components_for_pending_changes, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:node_node_id =>:node__id},
+           :cols => Component.pending_changes_cols()
+         }]
+
       virtual_column :node_binding_ruleset, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

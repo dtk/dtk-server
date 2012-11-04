@@ -20,6 +20,7 @@ module XYZ
     extend ComponentUserClassMixin
     set_relation_name(:component,:component)
     extend ComponentMetaClassMixin 
+
     extend BranchNamesClassMixin
 
     def self.common_columns()
@@ -47,6 +48,11 @@ module XYZ
        :ui
       ]
     end
+
+    def self.pending_changes_cols()
+      [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id]
+    end
+
     #TODO: need to maintain relationship fro maintainability
     def self.common_real_columns()
       [

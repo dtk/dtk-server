@@ -38,10 +38,9 @@ module XYZ
       end
 
       unless create_nodes_changes.empty?
-        node_idhs = create_nodes_changes.flatten(1).map{|r|r[:node].id_handle()}
-        node_filter = Node::Filter::NodeList.new(node_idhs)
+        nodes = create_nodes_changes.flatten(1).map{|r|r[:node]}
         node_mh = assembly_idh.createMH(:node)
-#        node_centric_config_nodes_changes = StateChange::NodeCentric.component_state_changes(node_mh,node_filter)
+#        node_centric_config_nodes_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
       end
 
       config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)

@@ -1,8 +1,9 @@
-module XYZ
-  module GetPendingChangesClassMixin
+#TODO: converting from module to class form
+module DTK; class StateChange
+  class Assembly < self
     #TODO: need to refine how this interfacts with existing state changes
     #right now it just generates ruby objects and does not check existing state change objects
-    def assembly_component_state_changes(assembly_idh,component_type=nil)
+    def self.component_state_changes(assembly_idh,component_type=nil)
       filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
@@ -33,7 +34,7 @@ module XYZ
     end
 
     #no generate option needed for node state changes
-    def assembly_node_state_changes(assembly_idh,target_idh)
+    def self.node_state_changes(assembly_idh,target_idh)
       changes = Array.new
       sp_hash = {
         :cols => [:id,:display_name,:group_id],
@@ -53,7 +54,9 @@ module XYZ
       ##group by node id (and using fact that each wil be unique id)
       changes.map{|ch|[ch]}
     end
+  end
 
+  module GetPendingChangesClassMixin
     def get_ndx_node_config_changes(target_idh)
       #TODO: there is probably more efficient info to get; this provides too much
       changes = flat_list_pending_changes(target_idh)
@@ -187,5 +190,5 @@ module XYZ
       end
     end
   end
-end
+end; end
 

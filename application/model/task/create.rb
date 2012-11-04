@@ -33,11 +33,11 @@ module XYZ
       if component_type == :smoketest
         create_nodes_task = nil
       else
-        create_nodes_changes = StateChange.assembly_node_state_changes(assembly_idh,target_idh)
+        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly_idh,target_idh)
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
-      config_nodes_changes = StateChange.assembly_component_state_changes(assembly_idh,component_type)
+      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)

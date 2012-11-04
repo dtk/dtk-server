@@ -593,8 +593,13 @@ module XYZ
     end
 
     def ret_info_if_is_virtual_column(col)
-      (self.class.db_rel[:virtual_columns]||{})[col]
+      virtual_columns[col]
     end
+    #TODO: clean up db_rel so the superclass call not needed
+    def virtual_columns()
+      (self.class.db_rel||self.class.superclass.db_rel||{})[:virtual_columns]||{}
+    end
+    private :virtual_columns
 
     def ret_parent_name(possible_parents)
       #one complication is if parent is same type as self then looking for "p2", rather than p; this is due

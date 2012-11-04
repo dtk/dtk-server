@@ -155,11 +155,6 @@ module XYZ
     def destroy_and_delete
       delete()
     end
-    private
-    #TODO: can we avoid explicitly placing this here?
-     def self.db_rel()
-       Node.db_rel()
-     end
   end
 end
 

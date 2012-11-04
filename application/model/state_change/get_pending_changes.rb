@@ -63,6 +63,8 @@ module DTK; class StateChange
     def self.component_state_changes(mh,nodes)
       ret = Array.new
       node_filter = Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+      ndx_nodes = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
+
       #find node to node_group mapping
       node_to_ng = NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
       if node_to_ng.empty?
@@ -70,39 +72,45 @@ module DTK; class StateChange
       end
 
       #find components associated with each node group      
-      ng_ndx = Hash.new
-      node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
+      ndx_cmps_by_ng = Hash.new
+   
       sp_hash = {
         :cols => [:id,:display_name,:components_for_pending_changes],
-        :filter => [:oneof, :id, ng_ndx.keys]
+        :filter => [:oneof, :id, ret_node_group_ids(node_to_ng)]
       }
-      ng_mh = mh.createMH(:node)
-      ng_cmps = get_objs(ng_mh,sp_hash)
-      if ng_cmps.empty?
+      rows = get_objs(mh.createMH(:node),sp_hash)
+      if rows.empty?
         return ret
       end
 
-      pp [:ng_cmps,ng_cmps]
-      raise "got here"
-=begin
-      state_change_mh = assembly_idh.createMH(:state_change)
-      changes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |cmp|
-        node = cmp.delete(:node)
-        hash = {
-          :type => "converge_component",
-          :component => cmp,
-          :node => node
-        }
-        create_stub(state_change_mh,hash)
+      rows.each do |row|
+        (ndx_cmps_by_ng[row[:id]] ||= Array.new) << row[:component]
       end
-      ##group by node id
-      ndx_ret = Hash.new
-      changes.each do |sc|
-        node_id = sc[:node][:id]
-        (ndx_ret[node_id] ||= Array.new) << sc
+
+      #compute state changes
+      state_change_mh = mh.createMH(:state_change)
+      node_to_ng.each do |node_id,ng_info|
+        node = ndx_nodes[node_id]
+        node_cmps = Array.new
+        ng_info.each_key do |ng_id|
+          (ndx_cmps_by_ng[ng_id]||[]).each do |cmp|
+            hash = {
+              :type => "converge_component",
+              :component => cmp,
+              :node => node
+            }
+            node_cmps << create_stub(state_change_mh,hash)
+          end
+        end
+        ret << node_cmps
       end
-      ndx_ret.values
-=end
+      ret
+    end
+   private
+    def self.ret_node_group_ids(node_to_ng)
+      ng_ndx = Hash.new
+      node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
+      ng_ndx.keys
     end
   end
 

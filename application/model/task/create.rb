@@ -40,7 +40,7 @@ module XYZ
       unless create_nodes_changes.empty?
         nodes = create_nodes_changes.flatten(1).map{|r|r[:node]}
         node_mh = assembly_idh.createMH(:node)
-#        node_centric_config_nodes_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
+        node_centric_config_nodes_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
       end
 
       config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
@@ -79,6 +79,8 @@ module XYZ
       ret
     end
 
+    #TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure 
+    #so node is not repeated for each element corresponding to same node
     def config_nodes_task(task_mh,state_change_list,assembly_idh=nil)
       return nil unless state_change_list and not state_change_list.empty?
       ret = nil

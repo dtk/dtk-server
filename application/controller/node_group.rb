@@ -76,6 +76,10 @@ module XYZ
       node_group_idh = ret_request_param_id_handle(:node_group_id,NodeGroup)
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_node_group(node_group_idh,commit_msg)
+      unless task
+        node_group = node_group_idh.create_object().update_object!(:display_name)
+        raise ErrorUsage.new("No nodes belong to node group (#{node_group[:display_name]})")
+      end
       task.save!()
       rest_ok_response :task_id => task.id
     end

@@ -34,8 +34,8 @@ module XYZ
       target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
       node_mh = target_idh.create_childMH(:node)
-      config_node_changes = StateChange::NodeGroup.component_state_changes(:node_mh,:node_group => node_group_idh.create_object())
-      if config_node_changes.empty?
+      config_nodes_changes = StateChange::NodeGroup.component_state_changes(node_mh,:node_group => node_group_idh.create_object())
+      if config_nodes_changes.empty?
         return ret
       end
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)

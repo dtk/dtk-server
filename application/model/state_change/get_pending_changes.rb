@@ -135,7 +135,7 @@ module DTK; class StateChange
       nodes = node_group.get_node_members()
       ng_id = node_group[:id]
       node_to_ng = nodes.inject(Hash.new) do |h,n|
-        h.merge(n[:id] = {ng_id => true})
+        h.merge(n[:id] => {ng_id => true})
       end
       [nodes,node_to_ng]
     end

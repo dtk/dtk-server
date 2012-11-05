@@ -1,6 +1,5 @@
 #TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
 module DTK; class StateChange
-
   class Assembly < self
     #TODO: need to refine how this interfacts with existing state changes
     #right now it just generates ruby objects and does not check existing state change objects
@@ -124,7 +123,27 @@ module DTK; class StateChange
       ng_ndx.keys
     end
   end
+
   class NodeGroup < NodeCentric
+    def self.node_state_changes(target_idh,opts)
+      ret = Array.new
+      unless node_group = opts[:node_group]
+        raise Error.new("Expecting opts[:node_group]")
+      end
+      nodes = node_group.get_node_members()
+      return ret if nodes.empty?
+
+      added_state_change_filters = [[:oneof, :node_id, nodes.map{|r|r[:id]}]]
+      target_mh = target_idh.createMH()
+      last_level = pending_create_node(target_mh,[target_idh],:added_filters => added_state_change_filters)
+      state_change_mh = target_mh.create_childMH(:state_change)
+      while not last_level.empty?
+        ret += last_level
+        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
+      end
+      ##group by node id (and using fact that each wil be unique id)
+      ret.map{|ch|[ch]}
+    end
    private
     #returns [nodes, node_to_ng]
     #can be overrwitten

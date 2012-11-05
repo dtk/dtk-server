@@ -38,7 +38,7 @@ module XYZ
       end
 
 =begin
-#TODO: below is causing problems because putting in component that is on node group which is causing attribute lookup to fail in Task.get_hierarchical_structure
+#TODO: below is causing problems because set attributes is not working for components on node group
 #look to fixing this method or alternatively clonling node group components to components
       node_centric_config_changes = Array.new
       unless create_nodes_changes.empty?
@@ -51,7 +51,7 @@ module XYZ
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 =end
-#      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)

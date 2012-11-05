@@ -12,7 +12,7 @@ module DTK; class StateChange
         filter << [:neq, :basic_type, "smoketest"]
       end
       sp_hash = {
-        :cols => Component::pending_changes_cols,
+        :cols => DTK::Component::pending_changes_cols,
         :filter => filter
       }
       state_change_mh = assembly_idh.createMH(:state_change)
@@ -60,16 +60,14 @@ module DTK; class StateChange
   class NodeCentric < self
     #finds all node-centric components associated with the set of nodes meeting filter
     #TODO: now just using components on node groups, not node-centric components on individual nodes
-    def self.component_state_changes(mh,nodes)
+    def self.component_state_changes(mh,opts)
       ret = Array.new
-      node_filter = Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
-      ndx_nodes = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
-
-      #find node to node_group mapping
-      node_to_ng = NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
-      if node_to_ng.empty?
+      #find nodes and node_to_ng mapping
+      nodes,node_to_ng = get_nodes_and_node_to_ng_index(mh,opts)
+      if nodes.empty?
         return ret
       end
+      ndx_nodes = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
 
       #find components associated with each node group      
       ndx_cmps_by_ng = Hash.new
@@ -107,10 +105,39 @@ module DTK; class StateChange
       ret
     end
    private
+    #returns [nodes, node_to_ng]
+    #can be overrwitten
+    def self.get_nodes_and_node_to_ng_index(mh,opts)
+      unless nodes = opts[:nodes]
+        raise Error.new("Expecting opts[:nodes]")
+      end
+      node_filter = opts[:node_filter] || DTK::Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+      node_to_ng = DTK::NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
+      node_ids_to_include = node_to_ng.keys
+      nodes = nodes.select{|n|node_ids_to_include.include?(n[:id])}
+      [nodes,node_to_ng]
+    end
+
     def self.ret_node_group_ids(node_to_ng)
       ng_ndx = Hash.new
       node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
       ng_ndx.keys
+    end
+  end
+  class NodeGroup < NodeCentric
+   private
+    #returns [nodes, node_to_ng]
+    #can be overrwitten
+    def self.get_nodes_and_node_to_ng_index(mh,opts)
+      unless node_group = opts[:node_group]
+        raise Error.new("Expecting opts[:node_group]")
+      end
+      nodes = node_group.get_node_members()
+      ng_id = node_group[:id]
+      node_to_ng = nodes.inject(Hash.new) do |h,n|
+        h.merge(n[:id] = {ng_id => true})
+      end
+      [nodes,node_to_ng]
     end
   end
 

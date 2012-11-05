@@ -71,6 +71,16 @@ module XYZ
       rest_ok_response node_group.get_node_members()
     end
 
+
+    def rest__create_task()
+      node_group_idh = ret_request_param_id_handle(:node_group_id,NodeGroup)
+      commit_msg = ret_request_params(:commit_msg)
+      task = Task.create_from_node_group(node_group_idh,commit_msg)
+      task.save!()
+      rest_ok_response :task_id => task.id
+    end
+
+
     #TODO: old methods that need to be re-evaluated
 
 

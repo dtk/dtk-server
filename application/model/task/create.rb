@@ -1,5 +1,51 @@
 module XYZ
   module TaskCreateClassMixin
+    def create_from_assembly_instance(assembly_idh,component_type,commit_msg=nil)
+      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+
+      #smoketest should not create a node
+      if component_type == :smoketest
+        create_nodes_task = nil
+      else
+        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly_idh,target_idh)
+        create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
+      end
+
+      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      nodes = assembly_config_changes.flatten(1).map{|r|r[:node]}
+      node_mh = assembly_idh.createMH(:node)
+      node_centric_config_changes = StateChange::NodeCentric.component_state_changes(node_mh,:nodes => nodes)
+      config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
+
+      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
+      if create_nodes_task and config_nodes_task
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+      else
+        ret.add_subtask(create_nodes_task||config_nodes_task) #only one will be non null
+      end
+      ret
+    end
+
+    def create_from_node_group(node_group_idh,commit_msg=nil)
+      ret = nil
+      target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+      node_mh = target_idh.create_childMH(:node)
+      config_node_changes = StateChange::NodeGroup.component_state_changes(:node_mh,:node_group => node_group_idh.create_object())
+      if config_node_changes.empty?
+        return ret
+      end
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
+
+      ret = create_new_task(task_mh,:temporal_order => "sequential",:commit_message => commit_msg)
+      ret.add_subtask(config_nodes_task)
+      ret
+    end
+
+    #TODO: might deprecate
     def create_from_pending_changes(parent_idh,state_change_list)
       task_mh = parent_idh.create_childMH(:task)
       grouped_state_changes = group_by_node_and_type(state_change_list)
@@ -24,36 +70,6 @@ module XYZ
         ret
       end
     end
-
-    def create_from_assembly_instance(assembly_idh,component_type,commit_msg=nil)
-      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-
-      #smoketest should not create a node
-      if component_type == :smoketest
-        create_nodes_task = nil
-      else
-        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly_idh,target_idh)
-        create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
-      end
-
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
-      nodes = assembly_config_changes.flatten(1).map{|r|r[:node]}
-      node_mh = assembly_idh.createMH(:node)
-      node_centric_config_changes = StateChange::NodeCentric.component_state_changes(node_mh,nodes)
-      config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
-
-      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
-      if create_nodes_task and config_nodes_task
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-      else
-        ret.add_subtask(create_nodes_task||config_nodes_task) #only one will be non null
-      end
-      ret
-    end
-
    private
     def combine_same_node_state_changes(sc_list_array)
       #shortcut if one eleemnt is non-null

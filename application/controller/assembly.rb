@@ -98,9 +98,9 @@ module DTK
 
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__create_task()
-      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
       commit_msg = ret_request_params(:commit_msg)
-      task = Task.create_from_assembly_instance(id_handle(assembly_id),:assembly,commit_msg)
+      task = Task.create_from_assembly_instance(assembly_idh,:assembly,commit_msg)
       task.save!()
 #TODO: this was call from gui commit window
 #pp Attribute.augmented_attribute_list_from_task(task)

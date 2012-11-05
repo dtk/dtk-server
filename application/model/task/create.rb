@@ -37,9 +37,7 @@ module XYZ
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
-=begin
-#TODO: below is causing problems because set attributes is not working for components on node group
-#look to fixing this method or alternatively clonling node group components to components
+#### TODO: new addition with node centric
       node_centric_config_changes = Array.new
       unless create_nodes_changes.empty?
         nodes = create_nodes_changes.flatten(1).map{|r|r[:node]}
@@ -50,9 +48,9 @@ module XYZ
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
-=end
-      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
+#TODO: above still has problem in component order not working yet; it replaces below
+#      config_nodes_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+#      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
       ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task

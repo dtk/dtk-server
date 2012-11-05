@@ -218,9 +218,9 @@ module XYZ
       end
 
       def self.add_attributes!(attr_mh,action_list)
-        indexed_actions = Hash.new
-        action_list.each{|a|indexed_actions[a[:node][:id]] = a}
-        return nil if indexed_actions.empty?
+        ndx_actions = Hash.new
+        action_list.each{|a|ndx_actions[a[:node][:id]] = a}
+        return nil if ndx_actions.empty?
 
         node_ids = action_list.map{|x|x[:node][:id]}
         parent_field_name = DB.parent_field(:node,:attribute)
@@ -228,14 +228,14 @@ module XYZ
           :relation => :attribute,
           :filter => [:and,
                       [:eq, :dynamic, true],
-                      [:oneof, parent_field_name, indexed_actions.keys]],
+                      [:oneof, parent_field_name, ndx_actions.keys]],
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic]
         }
 
         attrs = Model.get_objs(attr_mh,sp_hash)
 
         attrs.each do |attr|
-          action = indexed_actions[attr[parent_field_name]]
+          action = ndx_actions[attr[parent_field_name]]
           action.add_attribute!(attr)
         end
       end
@@ -294,25 +294,27 @@ module XYZ
       end
 
       def self.add_attributes!(attr_mh,action_list)
-        indexed_actions = Hash.new
+        #ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
+        ndx_actions = Hash.new
         action_list.each do |config_node_action|
-          (config_node_action[:component_actions]||[]).each{|a|indexed_actions[a[:component][:id]] = a}
+          (config_node_action[:component_actions]||[]).each do |a|
+            (ndx_actions[a[:component][:id]] ||= Array.new) << a
+          end
         end
-        return nil if indexed_actions.empty?
+        return nil if ndx_actions.empty?
 
         parent_field_name = DB.parent_field(:component,:attribute)
         sp_hash = {
           :relation => :attribute,
-          :filter => [:oneof, parent_field_name, indexed_actions.keys],
+          :filter => [:oneof, parent_field_name, ndx_actions.keys],
           :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic,:port_type,:port_is_external, :data_type, :semantic_type, :hidden]
         }
         attrs = Model.get_objs(attr_mh,sp_hash)
 
         attrs.each do |attr|
-          action = indexed_actions[attr[parent_field_name]]
-          action.add_attribute!(attr)
+          actions = ndx_actions[attr[parent_field_name]]
+          actions.each{|action|action.add_attribute!(attr)}
         end
-
       end
 
       def add_internal_guards!(guards)

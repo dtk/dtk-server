@@ -43,7 +43,7 @@ module DTK
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_ahead 
-        raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")
+        raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
         library_idh = id_handle(:model_name => :library, :id => self[library_library_id])

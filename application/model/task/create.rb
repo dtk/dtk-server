@@ -19,7 +19,7 @@ module XYZ
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
-      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:temporal_order => "sequential",:commit_message => commit_msg)
+      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
@@ -42,7 +42,7 @@ module XYZ
       config_nodes_changes = StateChange::NodeGroup.component_state_changes(node_mh,:node_group => node_group)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
-      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_group_idh.get_id(),:commit_message => commit_msg)
+      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_group_idh.get_id(),:display_name => "node_group_converge", :commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)

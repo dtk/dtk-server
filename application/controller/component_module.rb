@@ -77,6 +77,12 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__pull_from_remote()
+      component_module = create_obj(:component_module_id)
+      component_module.pull_from_remote()
+      rest_ok_response
+    end
+
     def rest__delete_remote()
       library_idh = ret_library_idh_or_default()
       name = ret_non_null_request_params(:remote_module_name)

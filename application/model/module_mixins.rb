@@ -28,6 +28,35 @@ module DTK
       remote_repo_name
     end
 
+    def pull_from_remote(version=nil)
+      repo = get_library_repo()
+      update_object!(:display_name,:library_library_id)
+      module_name = self[:display_name]
+
+      unless remote_repo_name = repo[:remote_repo_name]
+        raise ErrorUsage.new("Cannot pull from remote because local module (#{module_name}) is not linked to a remote module; use import.")
+      end
+      branch = library_branch_name(version)
+      unless get_module_branch(branch)
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
+      end
+      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
+      case merge_rel
+       when :equal,:local_ahead 
+        raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")
+       when :local_behind
+        repo.synchronize_with_remote_repo(branch)
+        library_idh = id_handle(:model_name => :library, :id => self[library_library_id])
+        self.class.import_postprocess(repo,library_idh,module_name,version)
+       when :branchpoint
+        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
+        #mean discard local changes
+        raise ErrorUsage.new("Merge from remote repo is needed before can pull changes into module (#{module_name})")
+       else 
+        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
+      end
+    end
+
     def push_to_remote(version=nil)
       repo = get_library_repo()
       module_name = update_object!(:display_name)[:display_name]

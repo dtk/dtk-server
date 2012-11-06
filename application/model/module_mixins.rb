@@ -46,7 +46,7 @@ module DTK
         raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
-        library_idh = id_handle(:model_name => :library, :id => self[library_library_id])
+        library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
         self.class.import_postprocess(repo,library_idh,module_name,version)
        when :branchpoint
         #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 

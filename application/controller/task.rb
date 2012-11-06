@@ -30,7 +30,7 @@ module XYZ
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end
-      opts = Task::StatusOpts.new
+      opts = Task::Status::Opts.new
       if :summary == (hash["detail_level"]||:summary).to_sym
         opts[:no_components] = true
         opts[:no_attributes] = true

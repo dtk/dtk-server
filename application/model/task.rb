@@ -387,7 +387,9 @@ module XYZ
         }
         cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message] 
         cols.each{|col|row.merge!(col => hash_row[col])}
-        row[:assembly_id] = hash_row[:assembly_id]||SQL::ColRef.null_id
+        [:assembly_id,:node_id].each do |col|
+          row[col] = hash_row[col]||SQL::ColRef.null_id
+        end
         row
       end
       new_idhs = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})

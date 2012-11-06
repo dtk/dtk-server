@@ -1,31 +1,50 @@
 module DTK
   class Task; module StatusMixin
     class Status
+     private
+      def self.get_status_aux(task_obj_idh,task_obj_type,filter,opts={})
+        task_mh = task_obj_idh.createMH(:task)
+
+        unless task = Task.get_top_level_most_recent_task(task_mh,filter)
+          task_obj = task_obj_idh.create_object().update_object!(:display_name)
+          raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
+        end
+
+        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+        
+        status_opts = Opts.new
+        if status_opts[:detail_level]
+          #TODO: stub; treat passed in detail setting status_optss as function of detail_level
+          status_opts[:no_components] = false
+          status_opts[:no_attributes] = true
+        else
+          status_opts[:no_components] = false
+          status_opts[:no_attributes] = true
+        end
+        if opts[:format] == :table
+          task_structure.status_table_form(status_opts)
+        else
+          task_structure.status(status_opts)
+        end
+      end
       class Assembly < self
         def self.get_status(assembly_idh,opts={})
-          task_mh = assembly_idh.createMH(:task)
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
-          unless task = Task.get_top_level_most_recent_task(task_mh,filter)
-            assembly = assembly_idh.create_object().update_object!(:display_name)
-            raise ErrorUsage.new("No tasks found for assembly (#{assembly[:display_name]})")
-          end
+          get_status_aux(assembly_idh,:assembly,filter,opts)
+        end
+      end
 
-          task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-          
-          status_opts = StatusOpts.new
-          if status_opts[:detail_level]
-            #TODO: stub; treat passed in detail setting status_optss as function of detail_level
-            status_opts[:no_components] = false
-            status_opts[:no_attributes] = true
-          else
-            status_opts[:no_components] = false
-            status_opts[:no_attributes] = true
-          end
-          if opts[:format] == :table
-            task_structure.status_table_form(status_opts)
-          else
-            task_structure.status(status_opts)
-          end
+      class NodeGroup < self
+        def self.get_status(node_group_idh,opts={})
+          filter = [:eq, :node_id, node_group_idh.get_id()]
+          get_status_aux(node_group_idh,:node_group,filter,opts)
+        end
+      end
+
+      class Opts < Hash
+        def initialize(hash_opts={})
+          super()
+          replace(hash_opts) unless hash_opts.empty?
         end
       end
     end
@@ -178,12 +197,6 @@ module DTK
         ret.add(self,:executable_action_type?,:executable_action?)
       end
       ret
-    end
-    class StatusOpts < Hash
-      def initialize(hash_opts={})
-        super()
-        replace(hash_opts) unless hash_opts.empty?
-      end
     end
   end; end
 end

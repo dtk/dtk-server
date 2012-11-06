@@ -34,22 +34,6 @@ module XYZ
       target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
       node_mh = target_idh.create_childMH(:node)
-      config_nodes_changes = StateChange::NodeGroup.component_state_changes(node_mh,:node_group => node_group_idh.create_object())
-      if config_nodes_changes.empty?
-        return ret
-      end
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
-
-      ret = create_new_task(task_mh,:temporal_order => "sequential",:commit_message => commit_msg)
-      ret.add_subtask(config_nodes_task)
-      ret
-    end
-
-    def create_from_node_group(node_group_idh,commit_msg=nil)
-      ret = nil
-      target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-      node_mh = target_idh.create_childMH(:node)
       node_group = node_group_idh.create_object()
 
       create_nodes_changes = StateChange::NodeGroup.node_state_changes(target_idh,:node_group => node_group)
@@ -58,7 +42,7 @@ module XYZ
       config_nodes_changes = StateChange::NodeGroup.component_state_changes(node_mh,:node_group => node_group)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
-      ret = create_new_task(task_mh,:temporal_order => "sequential",:commit_message => commit_msg)
+      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_group_idh.get_id(),:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)

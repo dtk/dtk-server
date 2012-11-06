@@ -84,6 +84,12 @@ module XYZ
       rest_ok_response :task_id => task.id
     end
 
+    def rest__task_status()
+      node_group_idh = ret_request_param_id_handle(:node_group_id,NodeGroup)
+      format = (ret_request_params(:format)||:hash).to_sym
+      rest_ok_response Task::Status::NodeGroup.get_status(node_group_idh,:format => format)
+    end
+
 
     #TODO: old methods that need to be re-evaluated
 

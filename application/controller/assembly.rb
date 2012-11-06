@@ -115,7 +115,6 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
-
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
       format = (ret_request_params(:format)||:hash).to_sym

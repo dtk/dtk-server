@@ -33,6 +33,14 @@ module XYZ
         get_obj(model_handle,sp_hash)
       end
 
+      def check_valid_id(model_handle,id)
+        check_valid_id_default(model_handle,id)
+      end
+
+      def name_to_id(model_handle,name)
+        name_to_id_default(model_handle,name)
+      end
+
      private
       def users_private_library_name(username)
         "private"
@@ -44,6 +52,21 @@ module XYZ
       def public_library_name()
         "public"
       end
+    end
+
+    def info_about(about,opts={})
+      case about
+       when :assemblies
+        filter = [:eq, :library_library_id, id()]
+        Assembly.list_from_library(model_handle(:component),:filter => filter)
+       when :nodes
+        filter = [:eq, :library_library_id, id()]
+        Node::Template.list(model_handle,:filter => filter)
+      when :components
+        Component::Template.list(model_handle,:library_idh => id_handle())
+       else
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
+      end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     def clone_post_copy_hook(clone_copy_output,opts={})

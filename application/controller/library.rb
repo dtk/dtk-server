@@ -1,5 +1,10 @@
 module DTK
   class LibraryController < Controller
+    def rest__info_about()
+      library = create_obj(:library_id)
+      about = ret_non_null_request_params(:about).to_sym
+      rest_ok_response library.info_about(about)
+    end
 
 #TODO: see which of below should be deprecated
     def import_implementation(implementation_name)

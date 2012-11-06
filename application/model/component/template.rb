@@ -6,7 +6,7 @@ module DTK; class Component
         :cols => [:id, :type, :display_name, :description],
         :filter => [:and, [:eq, :type, "template"], library_filter]
       }
-      ret = get_objs(model_handle,sp_hash)
+      ret = get_objs(model_handle.createMH(:component),sp_hash)
       ret.each{|r|r[:display_name] = r.display_name_print_form()}
       ret
     end

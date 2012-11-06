@@ -61,7 +61,7 @@ if (!R8.IDE.View.component.project) {
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
 //DEBUG
-console.log('double clicked a compoennt:'+leafObjectId);
+console.log('double clicked a component:'+leafObjectId);
 //					R8.IDE.openEditorView(_component);
 
 					e.halt();
@@ -76,7 +76,7 @@ console.log('double clicked a compoennt:'+leafObjectId);
 						leafLabel = e.currentTarget.get('children').item(1).get('innerHTML');
 
 //DEBUG
-console.log('double clicked on compoennt link defs:'+leafObjectId);
+console.log('double clicked on component link defs:'+leafObjectId);
 					R8.IDE.openEditorView(_component,'linkDefsEditor');
 
 					e.halt();

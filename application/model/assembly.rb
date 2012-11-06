@@ -35,6 +35,7 @@ module XYZ
       self.class.list_aux(assembly_rows,attr_rows).first
     end
 
+    #TODO: should be moved to assembly/template
     def self.list_from_library(assembly_mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],

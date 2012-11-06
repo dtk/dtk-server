@@ -12,9 +12,15 @@
     :position => {:type => :integer, :default => 1},
     :executable_action_type => {:type => :varchar},
     :executable_action => {:type => :json}, #gets serialized version of TaskAction::Action
-    :assembly_id=>{
+    :assembly_id=>{ #points to assembly when assembly task
       :type=>:bigint,
       :foreign_key_rel_type=>:component,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    },
+    :node_id=>{ #points to node or node group when node-centric task
+      :type=>:bigint,
+      :foreign_key_rel_type=>:node,
       :on_delete=>:set_null,
       :on_update=>:set_null
     },

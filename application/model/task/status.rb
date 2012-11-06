@@ -1,33 +1,31 @@
 module DTK
   class Task; module StatusMixin
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
+    class Status
+      class Assembly < self
+        def self.get_status(assembly_idh,opts={})
+          task_mh = assembly_idh.createMH(:task)
+          filter = [:eq, :assembly_id, assembly_idh.get_id()]
+          unless task = Task.get_top_level_most_recent_task(task_mh,filter)
+            assembly = assembly_idh.create_object().update_object!(:display_name)
+            raise ErrorUsage.new("No tasks found for assembly (#{assembly[:display_name]})")
+          end
 
-    module ClassMethods
-      def assembly_task_status(assembly_idh,opts={})
-        task_mh = assembly_idh.createMH(:task)
-        filter = [:eq, :assembly_id, assembly_idh.get_id()]
-        unless task = get_top_level_most_recent_task(task_mh,filter)
-          assembly = assembly_idh.create_object().update_object!(:display_name)
-          raise ErrorUsage.new("No tasks found for assembly (#{assembly[:display_name]})")
-        end
-
-        task_structure = get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-
-        status_opts = StatusOpts.new
-        if status_opts[:detail_level]
-          #TODO: stub; treat passed in detail setting status_optss as function of detail_level
-          status_opts[:no_components] = false
-          status_opts[:no_attributes] = true
-        else
-          status_opts[:no_components] = false
-          status_opts[:no_attributes] = true
-        end
-        if opts[:format] == :table
-          task_structure.status_table_form(status_opts)
-        else
-          task_structure.status(status_opts)
+          task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+          
+          status_opts = StatusOpts.new
+          if status_opts[:detail_level]
+            #TODO: stub; treat passed in detail setting status_optss as function of detail_level
+            status_opts[:no_components] = false
+            status_opts[:no_attributes] = true
+          else
+            status_opts[:no_components] = false
+            status_opts[:no_attributes] = true
+          end
+          if opts[:format] == :table
+            task_structure.status_table_form(status_opts)
+          else
+            task_structure.status(status_opts)
+          end
         end
       end
     end

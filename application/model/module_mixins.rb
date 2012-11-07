@@ -44,16 +44,12 @@ module DTK
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_ahead 
-
-#TODO: temp for testing
-repo.synchronize_with_remote_repo(branch)
-self.class.import_postprocess(repo,library_idh,module_name,version)
-#update ws from library
-update_ws_branch_from_lib_branch?(version)
-# ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
+        raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
         self.class.import_postprocess(repo,library_idh,module_name,version)
+        #update ws from library
+        update_ws_branch_from_lib_branch?(version)
        when :branchpoint
         #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
         #mean discard local changes
@@ -147,7 +143,7 @@ update_ws_branch_from_lib_branch?(version)
       self.class.get_library_module_branch(library_idh,module_name,version)
     end
 
-    def get_module_branches_matching_version(version=nil)
+   def get_module_branches_matching_version(version=nil)
       update_object!(:display_name,:library_library_id)
       module_name = self[:display_name]
       filter = [:eq, :id, self[:id]]
@@ -345,7 +341,7 @@ update_ws_branch_from_lib_branch?(version)
 
     def get_matching_module_branches(mh_or_idh,filter,post_filter=nil)
       sp_hash = {
-        :cols => [:id,:display_name,:module_branches,:library_library_id],
+        :cols => [:id,:display_name,:group_id,:module_branches,:library_library_id],
         :filter => filter
       }
       rows =  get_objs(mh_or_idh.create_childMH(module_type()),sp_hash).map do |r|

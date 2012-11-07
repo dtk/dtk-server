@@ -74,7 +74,7 @@ lambda__segment_components =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_impls.call(:cols => [:id,:display_name,:repo,:branch])]
+       lambda__segment_impls.call(:cols => [:id,:display_name,:group_id,:repo,:branch])]
     },
     :library_implementations=>{
       :type=>:json,
@@ -82,7 +82,7 @@ lambda__segment_components =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_impls.call(
-         :cols => [:id,:display_name,:repo,:branch],
+         :cols => [:id,:display_name,:group_id,:repo,:branch],
          :alias => :library_implementation,
          :filter => [:neq,:library_library_id,nil])
       ]

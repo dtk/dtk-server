@@ -58,7 +58,7 @@ lambda__segment_impls =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_impls.call(:cols => [:id,:display_name])]
+       lambda__segment_impls.call(:cols => [:id,:display_name,:group_id])]
     }
   },
   :many_to_one=>[:library],

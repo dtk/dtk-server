@@ -30,7 +30,7 @@ module XYZ
       unless paths_to_add.empty?
         type = "puppet_file" #TODO: hard coded
         create_rows =  paths_to_add.map{|path|FileAsset.ret_create_hash(self,type,path)}
-        Model.create_from_rows(model_handle(:file_asset),create_rows)
+        Model.create_from_rows(child_model_handle(:file_asset),create_rows)
       end
     end
 

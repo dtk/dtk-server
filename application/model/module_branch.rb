@@ -70,7 +70,7 @@ module DTK
 
     def get_implementation(*added_cols)
       update_object!(:repo_id,:branch)
-      cols = [:id,:display_name,:repo,:branch]
+      cols = [:id,:display_name,:repo,:branch,:group_id]
       cols += added_cols unless added_cols.empty?
       sp_hash = {
         :cols => cols,

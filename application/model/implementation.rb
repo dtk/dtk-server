@@ -69,7 +69,9 @@ module XYZ
         :module_name => module_name,
         :library_library_id => library_idh.get_id()
       }
-      impl_ref = "#{config_agent_type}-#{module_name}"
+      #TODO: hard wired version = nil
+      branch = ModuleBranch.library_branch_name(library_idh,version)
+      impl_ref = ref(config_agent_type,module_name,branch)
       impl_mh = library_idh.create_childMH(:implementation)
       impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
       impl_obj = impl_idh.create_object().merge(impl_hash)
@@ -78,20 +80,25 @@ module XYZ
 
     def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
       repo_obj.update_object!(:repo_name)
+      impl_ref = ref(config_agent_type,module_name,branch)
       impl_hash = {
         :display_name => version ? "#{module_name}(#{version})" : module_name,
         :type => ImplementationType[config_agent_type],
         :repo => repo_obj[:repo_name],
         :repo_id => repo_obj[:id],
-        :module_name => module_name,
         :library_library_id => library_idh.get_id(),
-        :version => branch,
-        :branch => branch
+        :version => branch
       }
-      impl_ref = "#{config_agent_type}-#{module_name}-#{branch}"
       impl_mh = library_idh.create_childMH(:implementation)
-      impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
+      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
       impl_idh.create_object().merge(impl_hash)
+    end
+
+    class << self
+      private
+      def ref(config_agent_type,module_name,branch)
+        "#{config_agent_type}-#{module_name}-#{branch}"
+      end
     end
 
     def self.delete_repos_and_implementations(model_handle,module_name)

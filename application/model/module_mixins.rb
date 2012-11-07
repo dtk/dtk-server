@@ -32,6 +32,7 @@ module DTK
       repo = get_library_repo()
       update_object!(:display_name,:library_library_id)
       module_name = self[:display_name]
+      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
 
       unless remote_repo_name = repo[:remote_repo_name]
         raise ErrorUsage.new("Cannot pull from remote because local module (#{module_name}) is not linked to a remote module; use import.")
@@ -43,14 +44,15 @@ module DTK
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_ahead 
+
 #TODO: temp for testing
 repo.synchronize_with_remote_repo(branch)
-library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
 self.class.import_postprocess(repo,library_idh,module_name,version)
+#update ws from library
+update_ws_branch_from_lib_branch?(version)
 # ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
-        library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
         self.class.import_postprocess(repo,library_idh,module_name,version)
        when :branchpoint
         #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
@@ -60,6 +62,14 @@ self.class.import_postprocess(repo,library_idh,module_name,version)
         raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
       end
     end
+    
+    def update_ws_branch_from_lib_branch?(version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      ws_branch_obj = find_branch(:workspace,matching_branches)
+      lib_branch_obj = find_branch(:library,matching_branches)
+      ModuleBranch.update_workspace_from_library?(ws_branch_obj,lib_branch_obj)
+    end
+    private :update_ws_branch_from_lib_branch?
 
     def push_to_remote(version=nil)
       repo = get_library_repo()

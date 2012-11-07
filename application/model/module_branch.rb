@@ -39,6 +39,16 @@ module DTK
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
     end
+    #TODO: better collapse above and below
+    def self.update_workspace_from_library?(ws_branch_obj,lib_branch_obj,opts={})
+      ws_branch_obj.update_object!(:repo_id)
+      lib_branch_obj.update_object!(:repo_id,:branch)
+      if ws_branch_obj[:repo_id] != lib_branch_obj[:repo_id]
+        raise Error.new("Not implemented: case when ws and library branch differ in refering to distinct repos")
+      end
+      ws_impl = ws_branch_obj.get_implementation()
+      update_target_from_source?(ws_branch_obj,ws_impl,lib_branch_obj[:branch])
+    end
 
     def self.cols_for_matching_library_branches(type)
       matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
@@ -129,8 +139,28 @@ module DTK
         RepoManager.push_implementation(lib_branch_obj)
         ret
       end
-    end
+      #TODO: use below as basis to rewrite above
+      def update_target_from_source?(target_branch_obj,target_impl,source_branch_name)
+        #determine if there is any diffs between source and target branches
+        diff = RepoManager.diff(source_branch_name,target_branch_obj)
+        diff_summary = diff.ret_summary()
+        return if diff_summary.no_diffs?()
 
+        unless diff_summary.no_added_or_deleted_files?()
+          #find matching implementation and modify file assets
+          target_impl.modify_file_assets(diff_summary)
+        end
+        if diff_summary.meta_file_changed?()
+          component_meta_file = ComponentMetaFile.create_meta_file_object(target_impl)
+          component_meta_file.update_model()
+        end
+      
+        #update the repo
+        RepoManager.merge_from_branch(source_branch_name,target_branch_obj)
+        RepoManager.push_implementation(target_branch_obj)
+      end
+    end
+  
     def create_component_workspace_branch?(project)
       cmp_module_id_col = component_module_id_col()
       update_object!(cmp_module_id_col,:version,:repo_id,:type)

@@ -154,12 +154,11 @@ module DTK
        when :no_change 
         #TODO: with check before now in diffs this shoudl not be reached
         raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-      when :merge_needed
+       when :merge_needed
         raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
-      else
+       else
         raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
       end
-
     end
 
     def get_associated_target_instances()

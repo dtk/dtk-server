@@ -23,12 +23,17 @@ module XYZ
     #its either its a usage or and internal (application error) bug
     class Internal < RestError
       def hash_form()
-        super.merge(:internal => true)
+        ret = super.merge(:internal => true)
+        ret.merge!(:backtrace => @backtrace) if @backtrace
+        ret
       end 
      private
       def initialize(err)
         super
         @message = "#{err.to_s} (#{err.backtrace.first})"
+        if (R8::Config[:error_handling]||{})[:backtrace] 
+          @backtrace = err.backtrace
+        end
       end
     end
     class RestUsageError < RestError

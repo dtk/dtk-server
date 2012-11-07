@@ -108,9 +108,9 @@ module XYZ
        rescue Exception => e
         #TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)
-          pp [e,e.backtrace[0]]
+          Log.error_pp([e,e.backtrace[0]])
         else
-          pp [e,e.backtrace[0..20]]
+          Log.error_pp([e,e.backtrace[0..20]])
         end
         result = rest_notok_response(RestError.create(e).hash_form())
       end

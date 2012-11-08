@@ -24,6 +24,11 @@ module XYZ
        :external_ref
       ]
     end
+#TODO: stub for feature_node_admin_state
+    def persistent_hostname?()
+      true
+    end
+#TODO: end stub for feature_node_admin_state
 
     ### virtual column defs
     #######################

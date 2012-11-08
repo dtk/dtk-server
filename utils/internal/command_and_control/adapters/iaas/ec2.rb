@@ -13,9 +13,22 @@ module XYZ
         !!conn().image_get(image_id)
       end
 
+      def self.process_persistent_hostname__first_boot!(node)
+        Log.info("in process_persistent_hostname__first_boot! for node #{node[:display_name]}")
+        #TODO: stub for feature_node_admin_state
+      end
+      def self.process_persistent_hostname__restart(node)
+        Log.info("in process_persistent_hostname__restart for node #{node[:display_name]}")
+        #TODO: stub for feature_node_admin_state
+      end
+      def self.process_persistent_hostname__terminate(node)
+        Log.info("in process_persistent_hostname_terminate for node #{node[:display_name]}")
+        #TODO: stub for feature_node_admin_state
+      end
+
       def self.execute(task_idh,top_task_idh,task_action)
         node = task_action[:node]
-        node.update_object!(:os_type,:external_ref)
+        node.update_object!(:os_type,:external_ref,:hostname_external_ref)
 
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
@@ -67,6 +80,9 @@ module XYZ
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
+        if node.persistent_hostname?()
+          process_persistent_hostname__first_boot!(node)
+        end
         {:status => "succeeded",
           :node => {
             :external_ref => external_ref
@@ -81,6 +97,9 @@ module XYZ
         return true unless instance_id #return if instance does not exist
         response = conn().server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
+        if node.persistent_hostname?()
+          process_persistent_hostname__terminate(node)
+        end
         response
       end
 

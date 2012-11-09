@@ -10,15 +10,18 @@ module DTK
 
         node_bindings = get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_bindings.each do |nb|
+          #TODO: fix so taht have a unique id for each
+          unique_id = ((nb[:rules].size == 1) && nb[:id])
           nb[:rules].each do |r|
             el = {
               :display_name => nb[:display_name]||nb[:ref], #TODO: may just use display_name after fill in this column
               :os_type => nb[:os_type],
             }.merge(r[:node_template])
+            el.merge!(:id => unique_id) if unique_id
             ret << el
           end
         end
-        ret
+        ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
       def self.image_upgrade(model_handle,old_image_id,new_image_id)

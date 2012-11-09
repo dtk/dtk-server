@@ -29,12 +29,23 @@ module Ramaze::Helper
     end
 
     #looks for default if no target is given
+    def create_target_obj_with_default(target_id_field)
+      if target_id = ret_request_params(target_id_field)
+        id_handle(target_id,:target)
+      else
+        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id])
+        raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
+        targets.first
+      end
+    end
+    #TODO: below is old form; above new form
+    #looks for default if no target is given
     def target_idh_with_default(target_id=nil)
       if target_id
         id_handle(target_id,:target)
       else
         targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id])
-        raise Error.new("Cannot find a unique default target") unless targets.size == 1
+        raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
         targets.first.id_handle()
       end
     end
@@ -222,6 +233,7 @@ limit = TestOveride if TestOveride
       request.env["QUERY_STRING"]
     end
 
+    #TODO: these three methods below need some cleanup
     #param refers to key that can have id or name value
     def create_obj(param,model_class=nil)
       create_object_from_id(ret_request_param_id(param,model_class))
@@ -247,7 +259,8 @@ limit = TestOveride if TestOveride
       end
     end
     OverrideModelName = {
-      Component::Template => :component
+      Component::Template => :component,
+      NodeBindingRuleset  => :node_binding_ruleset
     }
 
 

@@ -58,6 +58,20 @@ module XYZ
       rest_ok_response response
     end
 
+    def rest__stage()
+      target = create_target_obj_with_default(:target_id)
+      #TODO: would like to use form, but need to fix these fns up to do so: node_binding_rs =  create_obj(:node_template_id,NodeBindingRuleset)
+      node_binding_rs_id = ret_request_param_id(:node_template_id,NodeBindingRuleset)
+      node_binding_rs = create_object_from_id(node_binding_rs_id,:node_binding_ruleset)
+
+      opts = Hash.new
+      if node_name = ret_request_params(:name)
+        opts[:override_attrs] = {:display_name => node_name}
+      end
+      node_instance_idh = node_binding_rs.clone_or_match(target)
+      rest_ok_response :node_id => node_instance_idh.get_id()
+    end
+
     def rest__image_upgrade()
       old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
       Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)

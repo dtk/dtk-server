@@ -4,19 +4,23 @@ module XYZ
       [:id,:display_name,:type,:os_type,:rules]
     end
 
+    def self.check_valid_id(model_handle,id)
+      check_valid_id_default(model_handle,id)
+    end
+
     def find_matching_node_template(target)
       match = CommandAndControl.find_matching_node_binding_rule(self[:rules],target)
       raise Error.new("No rules in the node being match the target") unless match
       get_node_template(match[:node_template])
     end
     
-    def clone_or_match(target)
+    def clone_or_match(target,opts={})
       update_object!(:type,:rules)
       case self[:type]
        when "clone"
-        clone(target)
+        clone(target,opts)
        when "match"
-        match(target)
+        match(target,opts)
       else
         raise Error.new("Unexpected type (#{self[:type]}) in node binding ruleset")
       end
@@ -46,13 +50,13 @@ module XYZ
     RuleSetFields = [:type,:image_id,:region,:size]
 
    private
-    def match(target)
+    def match(target,opts={})
       raise Error.new("TODO: not implemented yet")
     end
     
-    def clone(target)
+    def clone(target,opts={})
       node_template = find_matching_node_template(target)
-      override_attrs = Hash.new 
+      override_attrs = opts[:override_attrs]||Hash.new 
       clone_opts = node_template.source_clone_info_opts()
       new_obj = target.clone_into(node_template,override_attrs,clone_opts)
       new_obj && new_obj.id_handle()

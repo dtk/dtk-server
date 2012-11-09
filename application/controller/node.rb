@@ -27,11 +27,35 @@ module XYZ
     end
 
     def rest__delete_component()
-      node = create_obj(:node_id)
+      node = create_node_obj(:node_id)
       #not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
       node.delete_component(id_handle(component_id,:component))
       rest_ok_response
+    end
+
+    def rest__get_attributes()
+      node = create_node_obj(:node_id)
+      filter = ret_request_params(:filter)
+      filter = filter && filter.to_sym
+      rest_ok_response node.get_attributes_print_form(filter)
+    end
+
+    #the body has an array each element of form
+    # {:pattern => PAT, :value => VAL}
+    #pat can be one of three forms
+    #1 - an id
+    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
+    # this returns same output as info about attributes, pruned for just new ones set
+    def rest__set_attributes()
+      node = create_node_obj(:node_id)
+      av_pairs = ret_params_av_pairs()
+      response = node.set_attributes(av_pairs)
+      if response.empty?
+        raise ErrorUsage.new("No attributes match")
+      end
+      rest_ok_response response
     end
 
     def rest__image_upgrade()
@@ -40,7 +64,14 @@ module XYZ
       rest_ok_response 
     end
 
-##### TODO: below need scleanup
+    def rest__destroy_and_delete()
+      node = create_node_obj(:node_id)
+      node.destroy_and_delete()
+      rest_ok_response
+    end
+
+
+##### TODO: below needs cleanup
 
     def rest__add_to_group()
       node_id, node_group_id = ret_non_null_request_params(:node_id, :node_group_id)

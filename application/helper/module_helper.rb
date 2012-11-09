@@ -1,12 +1,11 @@
 module Ramaze::Helper
   module ModuleHelper
     def ret_library_idh_or_default()
-      library_id = ret_request_params(:library_id)
-      library_idh = (library_id && id_handle(library_id,:library)) || ::DTK::Library.get_public_library(model_handle(:library)).id_handle()
-      unless library_idh
-        raise ::DTK::Error.new("No library specified and no default can be determined")
+      if ret_request_params(:library_id)
+        ret_request_param_id_handle(:library_id,::DTK::Library)
+      else
+        ::DTK::Library.get_public_library(model_handle(:library)).id_handle()
       end
-      library_idh
     end
   end
 end

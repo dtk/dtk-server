@@ -68,7 +68,7 @@ module XYZ
       if node_name = ret_request_params(:name)
         opts[:override_attrs] = {:display_name => node_name}
       end
-      node_instance_idh = node_binding_rs.clone_or_match(target)
+      node_instance_idh = node_binding_rs.clone_or_match(target,opts)
       rest_ok_response :node_id => node_instance_idh.get_id()
     end
 

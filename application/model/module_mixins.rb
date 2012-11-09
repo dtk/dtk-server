@@ -44,6 +44,7 @@ module DTK
       merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_ahead 
+        #TODO: for reboust idempotency under errors may have under this same as under :local_behind
         raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
@@ -53,6 +54,11 @@ module DTK
        when :branchpoint
         #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
         #mean discard local changes
+        #the relevant steps for discard local changes are
+        #1 find merge base for  refs/heads/master and refs/remotes/remote/master; call it sha-mp
+        #2 execute  git reset --hard sha-mp
+        #3 execute  git push --force origin sha-mp:master
+        #4 execute code under case local_behind
         raise ErrorUsage.new("Merge from remote repo is needed before can pull changes into module (#{module_name})")
        else 
         raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")

@@ -86,7 +86,7 @@ module XYZ
           :task_id => id()
         }
       end
-      Model.create_from_rows(model_handle(:task_error),rows,{:convert => true})
+      Model.create_from_rows(child_model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
     end
 

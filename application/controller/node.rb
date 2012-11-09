@@ -19,11 +19,28 @@ module XYZ
 #      :template => [:nodes,:components,:targets]
     }
 
+    def rest__add_component()
+      node = create_node_obj(:node_id)
+      component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
+      new_component_idh = node.add_component(component_template_idh)
+      rest_ok_response(:component_id => new_component_idh.get_id())
+    end
+
+    def rest__delete_component()
+      node = create_obj(:node_id)
+      #not checking here if component_id points to valid object; check is in delete_component
+      component_id = ret_non_null_request_params(:component_id)
+      node.delete_component(id_handle(component_id,:component))
+      rest_ok_response
+    end
+
     def rest__image_upgrade()
       old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
       Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)
       rest_ok_response 
     end
+
+##### TODO: below need scleanup
 
     def rest__add_to_group()
       node_id, node_group_id = ret_non_null_request_params(:node_id, :node_group_id)
@@ -37,7 +54,7 @@ module XYZ
     end
 
 
-##### TODO: below need scleanup
+
     helper :i18n_string_mapping
 
     def get(id)

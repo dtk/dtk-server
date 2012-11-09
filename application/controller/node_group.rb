@@ -31,6 +31,7 @@ module XYZ
 
     def rest__delete_component()
       node_group = create_obj(:node_group_id)
+      #not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
       node_group.delete_component(id_handle(component_id,:component))
       rest_ok_response

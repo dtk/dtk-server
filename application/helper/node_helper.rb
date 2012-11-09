@@ -13,6 +13,14 @@ module Ramaze::Helper
       (ret_request_params(:subtype)||:instance).to_sym
     end
 
+    def create_node_obj(id_param)
+      create_obj(id_param,::DTK::Node)
+    end
+
+    def create_node_template_obj(id_param)
+      create_obj(id_param,::DTK::Node::Template)
+    end
+
     def ret_node_params_object_and_subtype()
       [create_obj(:node_id,ret_node_subtype_class()),ret_node_params_subtype()]
     end

@@ -14,12 +14,7 @@ module DTK; class StateChange
       end
       ##group by node id (and using fact that each wil be unique id)
       ret.map{|ch|[ch]}
-    end
 
-    #for components finds all components associated with a given nodes or a node group it belonds to
-    class AllMatchingNodes < self
-      #finds all node-centric components associated with the set of nodes meeting filter
-      #TODO: now just using components on node groups, not node-centric components on individual nodes
       def self.component_state_changes(mh,opts)
         ret = Array.new
         #find nodes and node_to_ng mapping
@@ -29,12 +24,12 @@ module DTK; class StateChange
         end
         ndx_nodes = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
 
-        #find components associated with each node group      
-        ndx_cmps_by_ng = Hash.new
+        #find components associated with each node or node group      
+        ndx_cmps = Hash.new
    
         sp_hash = {
           :cols => [:id,:display_name,:components_for_pending_changes],
-          :filter => [:oneof, :id, ret_node_group_ids(node_to_ng)]
+          :filter => [:oneof, :id, ret_node_group_ids(node_to_ng) + node.map{|n|n[:id]}]
         }
         rows = get_objs(mh.createMH(:node),sp_hash)
         if rows.empty?
@@ -42,20 +37,21 @@ module DTK; class StateChange
         end
 
         rows.each do |row|
-          (ndx_cmps_by_ng[row[:id]] ||= Array.new) << row[:component]
+          (ndx_cmps[row[:id]] ||= Array.new) << row[:component]
         end
 
         #compute state changes
         state_change_mh = mh.createMH(:state_change)
-        node_to_ng.each do |node_id,ng_info|
-          node = ndx_nodes[node_id]
+        nodes.each do |node|
           node_cmps = Array.new
-          ng_info.each_key do |ng_id|
-            (ndx_cmps_by_ng[ng_id]||[]).each do |cmp|
+          node_id = node[:id]
+          ng_ids = (node_to_ng[node_id]||{}).keys
+          (node_id + ng_ids).each do |n|
+            (ndx_cmps[n[:id]]||[]).each do |cmp|
               hash = {
                 :type => "converge_component",
                 :component => cmp,
-                :node => node
+                :node => n
               }
               node_cmps << create_stub(state_change_mh,hash)
             end
@@ -64,18 +60,19 @@ module DTK; class StateChange
         end
         ret
       end
-      private
+    end
+
+    #for components finds all components associated with a given nodes or a node group it belongs to
+    class AllMatchingNodes < self
+     private
       #returns [nodes, node_to_ng]
       #can be overrwitten
-      #this is for finding node - ng relation given a set of nodes
       def self.get_nodes_and_node_to_ng_index(mh,opts)
         unless nodes = opts[:nodes]
           raise Error.new("Expecting opts[:nodes]")
         end
         node_filter = opts[:node_filter] || DTK::Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
         node_to_ng = DTK::NodeGroup.get_node_groups_containing_nodes(mh,node_filter)
-        node_ids_to_include = node_to_ng.keys
-        nodes = nodes.select{|n|node_ids_to_include.include?(n[:id])}
         [nodes,node_to_ng]
       end
 
@@ -86,34 +83,17 @@ module DTK; class StateChange
       end
     end
 
-    class Node < AllMatchingNodes
-      def self.component_state_changes(mh,opts)
-#TODO: change to do: super(mh,:nodes => [opts[:node]])
-        ret = Array.new
+    class SingleNode < AllMatchingNodes
+     private
+      #returns [nodes, node_to_ng]
+      #can be overrwitten
+      def self.get_nodes_and_node_to_ng_index(mh,opts)
         unless node = opts[:node]
-          raise Error.new("Expecting opts[:node]")
+          raise Error.new("Expecting opts[:nodes]")
         end
-        sp_hash = {
-          :cols => [:id,:display_name,:components_for_pending_changes],
-          :filter => [:eq, :id, node[:id]]
-        }
-        rows = get_objs(mh.createMH(:node),sp_hash)
-        if rows.empty?
-          return ret
-        end
-
-        node_cmps = rows.map do |row|
-          hash = {
-            :type => "converge_component",
-            :component => row[:component],
-            :node => node
-          }
-          create_stub(state_change_mh,hash)
-        end
-        [node_cmps]
+        super(mh,:nodes => [node])
       end
 
-     private
       def self.ret_node_sc_filter(target_idh,opts)
         unless node = opts[:node]
           raise Error.new("Expecting opts[:node]")

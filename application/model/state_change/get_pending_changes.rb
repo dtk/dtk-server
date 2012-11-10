@@ -170,6 +170,32 @@ module DTK; class StateChange
   end
 
   class Node < NodeCentric
+    def self.component_state_changes(mh,opts)
+      ret = Array.new
+      unless node = opts[:node]
+        raise Error.new("Expecting opts[:node]")
+      end
+      sp_hash = {
+        :cols => [:id,:display_name,:components_for_pending_changes],
+        :filter => [:eq, :id, node[:id]]
+      }
+      rows = get_objs(mh.createMH(:node),sp_hash)
+      if rows.empty?
+        return ret
+      end
+
+      node_cmps = rows.map do |row|
+        hash = {
+          :type => "converge_component",
+          :component => row[:component],
+          :node => node
+        }
+        create_stub(state_change_mh,hash)
+      end
+      [node_cmps]
+    end
+
+   private
     def self.ret_node_sc_filter(target_idh,opts)
       unless node = opts[:node]
         raise Error.new("Expecting opts[:node]")

@@ -15,7 +15,7 @@ module XYZ
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
       nodes = assembly_config_changes.flatten(1).map{|r|r[:node]}
       node_mh = assembly_idh.createMH(:node)
-      node_centric_config_changes = StateChange::NodeCentric.component_state_changes(node_mh,:nodes => nodes)
+      node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
 
@@ -36,7 +36,7 @@ module XYZ
       node_mh = target_idh.create_childMH(:node)
       node_group = node_group_idh.create_object()
 
-      create_nodes_changes = StateChange::SingleNodeGroup.node_state_changes(target_idh,:node_group => node_group)
+      create_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.node_state_changes(target_idh,:node_group => node_group)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
       config_nodes_changes = StateChange::SingleNodeGroup.component_state_changes(node_mh,:node_group => node_group)

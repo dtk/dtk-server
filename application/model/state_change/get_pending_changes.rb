@@ -72,7 +72,10 @@ module DTK; class StateChange
       ##group by node id (and using fact that each wil be unique id)
       ret.map{|ch|[ch]}
     end
+  end
 
+  #abstract class to deal with finding all node groups that nodes belong to as well as single node group
+  class NodeGroup < NodeCentric
     #finds all node-centric components associated with the set of nodes meeting filter
     #TODO: now just using components on node groups, not node-centric components on individual nodes
     def self.component_state_changes(mh,opts)
@@ -141,7 +144,7 @@ module DTK; class StateChange
     end
   end
 
-  class NodeGroup < NodeCentric
+  class SingleNodeGroup < NodeGroup
    private
     def self.ret_node_sc_filter(target_idh,opts)
       unless node_group = opts[:node_group]

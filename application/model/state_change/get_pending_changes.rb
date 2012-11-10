@@ -57,6 +57,22 @@ module DTK; class StateChange
   end
 
   class NodeCentric < self
+    def self.node_state_changes(target_idh,opts)
+      ret = Array.new
+      unless added_sc_filter = ret_node_sc_filter(target_idh,opts)
+        return ret
+      end
+      target_mh = target_idh.createMH()
+      last_level = pending_create_node(target_mh,[target_idh],:added_filters => [added_sc_filter])
+      state_change_mh = target_mh.create_childMH(:state_change)
+      while not last_level.empty?
+        ret += last_level
+        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => [added_sc_filter])
+      end
+      ##group by node id (and using fact that each wil be unique id)
+      ret.map{|ch|[ch]}
+    end
+
     #finds all node-centric components associated with the set of nodes meeting filter
     #TODO: now just using components on node groups, not node-centric components on individual nodes
     def self.component_state_changes(mh,opts)
@@ -106,6 +122,7 @@ module DTK; class StateChange
    private
     #returns [nodes, node_to_ng]
     #can be overrwitten
+    #this is for finding node - ng relation given a set of nodes
     def self.get_nodes_and_node_to_ng_index(mh,opts)
       unless nodes = opts[:nodes]
         raise Error.new("Expecting opts[:nodes]")
@@ -125,28 +142,17 @@ module DTK; class StateChange
   end
 
   class NodeGroup < NodeCentric
-    def self.node_state_changes(target_idh,opts)
-      ret = Array.new
+   private
+    def self.ret_node_sc_filter(target_idh,opts)
       unless node_group = opts[:node_group]
         raise Error.new("Expecting opts[:node_group]")
       end
       nodes = node_group.get_node_members()
-      return ret if nodes.empty?
-
-      added_state_change_filters = [[:oneof, :node_id, nodes.map{|r|r[:id]}]]
-      target_mh = target_idh.createMH()
-      last_level = pending_create_node(target_mh,[target_idh],:added_filters => added_state_change_filters)
-      state_change_mh = target_mh.create_childMH(:state_change)
-      while not last_level.empty?
-        ret += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
-      end
-      ##group by node id (and using fact that each wil be unique id)
-      ret.map{|ch|[ch]}
+      (!nodes.empty?) && [:oneof, :node_id, nodes.map{|r|r[:id]}]
     end
-   private
+
     #returns [nodes, node_to_ng]
-    #can be overrwitten
+    #this is for finding node - ng relation given a specific ng
     def self.get_nodes_and_node_to_ng_index(mh,opts)
       unless node_group = opts[:node_group]
         raise Error.new("Expecting opts[:node_group]")
@@ -159,30 +165,15 @@ module DTK; class StateChange
       [nodes,node_to_ng]
     end
   end
-=begin
-  TODO: modify node group code
+
   class Node < NodeCentric
-    def self.node_state_changes(target_idh,opts)
-      ret = Array.new
+    def self.ret_node_sc_filter(target_idh,opts)
       unless node = opts[:node]
         raise Error.new("Expecting opts[:node]")
       end
-      nodes = node.get_node_members()
-      return ret if nodes.empty?
-
-      added_state_change_filters = [[:oneof, :node_id, nodes.map{|r|r[:id]}]]
-      target_mh = target_idh.createMH()
-      last_level = pending_create_node(target_mh,[target_idh],:added_filters => added_state_change_filters)
-      state_change_mh = target_mh.create_childMH(:state_change)
-      while not last_level.empty?
-        ret += last_level
-        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
-      end
-      ##group by node id (and using fact that each wil be unique id)
-      ret.map{|ch|[ch]}
+      [:eq, :node_id, node[:id]]
     end
   end
-=end
 
 #TODO: may convert to form above
   module GetPendingChangesClassMixin

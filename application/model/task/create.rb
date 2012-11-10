@@ -55,6 +55,33 @@ module XYZ
       end
       ret
     end
+    #TODO: might collapse these different creates for node, node_group, assembly
+    def create_from_node(node_idh,commit_msg=nil)
+      ret = nil
+      target_idh = node_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+      node_mh = target_idh.create_childMH(:node)
+      node = node_idh.create_object()
+
+      create_nodes_changes = StateChange::Node.node_state_changes(target_idh,:node => node)
+      create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
+
+      config_nodes_changes = StateChange::Node.component_state_changes(node_mh,:node => node)
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
+
+      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "node_converge", :commit_message => commit_msg)
+      if create_nodes_task and config_nodes_task
+        ret.add_subtask(create_nodes_task)
+        ret.add_subtask(config_nodes_task)
+      else
+        if sub_task = create_nodes_task||config_nodes_task
+          ret.add_subtask(create_nodes_task||config_nodes_task) 
+        else
+          ret = nil
+        end
+      end
+      ret
+    end
 
     #TODO: might deprecate
     def create_from_pending_changes(parent_idh,state_change_list)

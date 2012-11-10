@@ -159,6 +159,30 @@ module DTK; class StateChange
       [nodes,node_to_ng]
     end
   end
+=begin
+  TODO: modify node group code
+  class Node < NodeCentric
+    def self.node_state_changes(target_idh,opts)
+      ret = Array.new
+      unless node = opts[:node]
+        raise Error.new("Expecting opts[:node]")
+      end
+      nodes = node.get_node_members()
+      return ret if nodes.empty?
+
+      added_state_change_filters = [[:oneof, :node_id, nodes.map{|r|r[:id]}]]
+      target_mh = target_idh.createMH()
+      last_level = pending_create_node(target_mh,[target_idh],:added_filters => added_state_change_filters)
+      state_change_mh = target_mh.create_childMH(:state_change)
+      while not last_level.empty?
+        ret += last_level
+        last_level = pending_create_node(state_change_mh,last_level.map{|obj|obj.id_handle()},:added_filters => added_state_change_filters)
+      end
+      ##group by node id (and using fact that each wil be unique id)
+      ret.map{|ch|[ch]}
+    end
+  end
+=end
 
 #TODO: may convert to form above
   module GetPendingChangesClassMixin

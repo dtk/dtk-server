@@ -388,7 +388,7 @@ module XYZ
            :cols => [:id,:display_name,:group_id,:description,:component_type]
          }]
 
-      virtual_column :components_for_pending_changes, :type => :json, :hidden => true,
+      virtual_column :node_centric_components, :type => :json, :hidden => true,
       :remote_dependencies =>
         [
          {
@@ -396,6 +396,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
+           :filter => [:eq, :assembly_id, nil],
            :cols => Component.pending_changes_cols()
          }]
 

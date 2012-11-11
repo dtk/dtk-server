@@ -14,56 +14,55 @@ module DTK; class StateChange
       end
       ##group by node id (and using fact that each wil be unique id)
       ret.map{|ch|[ch]}
+    end
 
-      def self.component_state_changes(mh,opts)
-        ret = Array.new
-        #find nodes and node_to_ng mapping
-        nodes,node_to_ng = get_nodes_and_node_to_ng_index(mh,opts)
-        if nodes.empty?
-          return ret
-        end
-        ndx_nodes = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
-
-        #find components associated with each node or node group      
-        ndx_cmps = Hash.new
-   
-        sp_hash = {
-          :cols => [:id,:display_name,:components_for_pending_changes],
-          :filter => [:oneof, :id, ret_node_group_ids(node_to_ng) + node.map{|n|n[:id]}]
-        }
-        rows = get_objs(mh.createMH(:node),sp_hash)
-        if rows.empty?
-          return ret
-        end
-
-        rows.each do |row|
-          (ndx_cmps[row[:id]] ||= Array.new) << row[:component]
-        end
-
-        #compute state changes
-        state_change_mh = mh.createMH(:state_change)
-        nodes.each do |node|
-          node_cmps = Array.new
-          node_id = node[:id]
-          ng_ids = (node_to_ng[node_id]||{}).keys
-          (node_id + ng_ids).each do |n|
-            (ndx_cmps[n[:id]]||[]).each do |cmp|
-              hash = {
-                :type => "converge_component",
-                :component => cmp,
-                :node => n
-              }
-              node_cmps << create_stub(state_change_mh,hash)
-            end
-          end
-          ret << node_cmps
-        end
-        ret
+    def self.component_state_changes(mh,opts)
+      ret = Array.new
+      #find nodes and node_to_ng mapping
+      nodes,node_to_ng = get_nodes_and_node_to_ng_index(mh,opts)
+      if nodes.empty?
+        return ret
       end
+
+      #find components associated with each node or node group      
+      ndx_cmps = Hash.new
+   
+      sp_hash = {
+        :cols => [:id,:display_name,:node_centric_components],
+        :filter => [:oneof, :id, ret_node_group_ids(node_to_ng) + nodes.map{|n|n[:id]}]
+      }
+      rows = get_objs(mh.createMH(:node),sp_hash)
+      if rows.empty?
+        return ret
+      end
+
+      rows.each do |row|
+        (ndx_cmps[row[:id]] ||= Array.new) << row[:component]
+      end
+
+      #compute state changes
+      state_change_mh = mh.createMH(:state_change)
+      nodes.each do |node|
+        node_cmps = Array.new
+        node_id = node[:id]
+        ng_ids = (node_to_ng[node_id]||{}).keys
+        ([node_id] + ng_ids).each do |node_or_ng_id|
+          (ndx_cmps[node_or_ng_id]||[]).each do |cmp|
+            hash = {
+              :type => "converge_component",
+              :component => cmp,
+              :node => node,
+            }
+            node_cmps << create_stub(state_change_mh,hash)
+          end
+        end
+        ret << node_cmps
+      end
+      ret
     end
 
     #for components finds all components associated with a given nodes or a node group it belongs to
-    class AllMatchingNodes < self
+    class AllMatching < self
      private
       #returns [nodes, node_to_ng]
       #can be overrwitten
@@ -83,7 +82,7 @@ module DTK; class StateChange
       end
     end
 
-    class SingleNode < AllMatchingNodes
+    class SingleNode < AllMatching
      private
       #returns [nodes, node_to_ng]
       #can be overrwitten

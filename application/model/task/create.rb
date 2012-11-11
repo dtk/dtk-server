@@ -39,7 +39,7 @@ module XYZ
       create_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.node_state_changes(target_idh,:node_group => node_group)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
-      config_nodes_changes = StateChange::SingleNodeGroup.component_state_changes(node_mh,:node_group => node_group)
+      config_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.component_state_changes(node_mh,:node_group => node_group)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
       ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_group_idh.get_id(),:display_name => "node_group_converge", :commit_message => commit_msg)

@@ -61,6 +61,15 @@ module DTK; class StateChange
       ret
     end
 
+    class << self
+     private
+      def ret_node_group_ids(node_to_ng)
+        ng_ndx = Hash.new
+        node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
+        ng_ndx.keys
+      end
+    end
+
     #for components finds all components associated with a given nodes or a node group it belongs to
     class AllMatching < self
      private
@@ -75,11 +84,7 @@ module DTK; class StateChange
         [nodes,node_to_ng]
       end
 
-      def self.ret_node_group_ids(node_to_ng)
-        ng_ndx = Hash.new
-        node_to_ng.each_value{|h|h.each{|ng_id,ng|ng_ndx[ng_id] = true}}
-        ng_ndx.keys
-      end
+
     end
 
     class SingleNode < AllMatching

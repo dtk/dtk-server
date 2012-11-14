@@ -14,16 +14,19 @@ module XYZ
       end
 
       def self.process_persistent_hostname__first_boot!(node)
-        return
         Log.info("in process_persistent_hostname__first_boot! for node #{node[:display_name]}")
         # allocate elastic IP for this node
 
         begin 
           elastic_ip = conn().allocate_elastic_ip()
 
+          node.update({
+            :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
+          })
+=begin
           # cloud connect wrapper will log warn in case there is no allocate elastic ip
           unless elastic_ip.nil?
-=begin
+
             instance_id = node.instance_id
             associated_node, inst_state = nil, nil
             # by this time server is booting up and should be in pending state
@@ -48,12 +51,15 @@ module XYZ
             end
 
             e_thread.join()
-=end
 
             node.update({
               :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
             })
+
           end
+=end
+
+
         rescue Fog::Compute::AWS::Error => e
           Log.error "Not able to set Elastic IP, reason: #{e.message}"
           # TODO: Check with Rich if this is recovarable error, for now it is not

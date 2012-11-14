@@ -57,6 +57,39 @@ module XYZ
       def server_create(options)
         hash_form(@conn.servers.create(options))
       end
+
+      def allocate_elastic_ip
+        response = @conn.allocate_address()
+        if (response.status == 200)
+          return response.body['publicIp']
+        else
+          Log.warn("Unable to allocate elastic IP from AWS, response: #{hash_form(response)}")
+          return nil
+        end
+      end
+
+      def release_elastic_ip(elastic_ip)
+        # permently release elastic_ip
+        hash_form(@conn.release_address(elastic_ip))
+      end
+
+      def disassociate_elastic_ip(elastic_ip)
+        # removes elastic_ip from it's ec2 instance
+        hash_form(@conn.disassociate_address(elastic_ip))
+      end
+
+      def associate_elastic_ip(instance_id, elastic_ip)
+        hash_form(@conn.associate_address(instance_id, elastic_ip))
+      end
+
+      def server_start(instance_id)
+        hash_form(@conn.start_instances(ID))
+      end
+
+      def server_stop(instance_id)
+        hash_form(@conn.stop_instances(ID))
+      end
+
      private
       def wrap_servers_get(id)
         begin

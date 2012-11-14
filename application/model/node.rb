@@ -165,6 +165,10 @@ module XYZ
     def pbuilderid()
       Node.pbuilderid(self)
     end
+
+    def instance_id()
+      (self[:external_ref]||{})[:instance_id]
+    end
     
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
@@ -262,7 +266,7 @@ module XYZ
     end
 
     def destroy_and_delete()
-      update_object!(:external_ref)
+      update_object!(:external_ref,:hostname_external_ref)
       suceeeded = CommandAndControl.destroy_node?(self)
       if suceeeded
         update_dangling_links()

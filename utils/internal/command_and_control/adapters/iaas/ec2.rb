@@ -14,16 +14,66 @@ module XYZ
       end
 
       def self.process_persistent_hostname__first_boot!(node)
+        return
         Log.info("in process_persistent_hostname__first_boot! for node #{node[:display_name]}")
-        #TODO: stub for feature_node_admin_state
+        # allocate elastic IP for this node
+
+        begin 
+          elastic_ip = conn().allocate_elastic_ip()
+
+          # cloud connect wrapper will log warn in case there is no allocate elastic ip
+          unless elastic_ip.nil?
+=begin
+            instance_id = node.instance_id
+            associated_node, inst_state = nil, nil
+            # by this time server is booting up and should be in pending state
+            # for us to associate instance with elastic IP we need server to be 
+            # at pending/running state
+            e_thread = Thread.new do
+              number_of_retries, wait_time = 15, 8
+              # 20 tries to set elastic IP
+              number_of_retries.downto(1) do 
+                inst_state = conn().server_get(instance_id)[:state]
+
+                if (inst_state.match(/running/))
+                  associated_node = conn().associate_elastic_ip(instance_id, elastic_ip)
+                  Log.info("Successfully set elastic IP to #{elastic_ip} for #{node[:display_name]}")
+                  return
+                end
+                sleep(wait_time)
+              end
+
+              Log.error("Not able to set Elastic IP, timeout (cca. #{number_of_retries*wait_time} seconds) waiting for instance to move to running state.")
+              conn().release_elastic_ip(elastic_ip)
+            end
+
+            e_thread.join()
+=end
+
+            node.update({
+              :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
+            })
+          end
+        rescue Fog::Compute::AWS::Error => e
+          Log.error "Not able to set Elastic IP, reason: #{e.message}"
+          # TODO: Check with Rich if this is recovarable error, for now it is not
+          raise e
+        end
       end
+
       def self.process_persistent_hostname__restart(node)
         Log.info("in process_persistent_hostname__restart for node #{node[:display_name]}")
         #TODO: stub for feature_node_admin_state
       end
       def self.process_persistent_hostname__terminate(node)
-        Log.info("in process_persistent_hostname_terminate for node #{node[:display_name]}")
-        #TODO: stub for feature_node_admin_state
+        unless node[:hostname_external_ref].nil? 
+          elastic_ip = node[:hostname_external_ref][:elastic_ip]
+          # no need for dissasociation since that will be done when instance is destroyed
+          conn().release_elastic_ip(elastic_ip)
+          Log.info "Elastic IP #{elastic_ip} has been released."
+        else
+          Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+        end
       end
 
       def self.execute(task_idh,top_task_idh,task_action)

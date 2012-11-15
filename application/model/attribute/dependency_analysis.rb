@@ -35,6 +35,7 @@ module XYZ
         if attr[:id] == output_id
           case link[:function]
            when "eq" then true
+           when "array_append" then true
            when "select_one" 
             out_item_path = attr[:item_path]
             out_item_path and (attr_in[:item_path] == out_item_path[1,out_item_path.size-1])
@@ -81,7 +82,7 @@ module XYZ
     def index_match(link,item_path)
       ret = nil
       case link[:function]
-       when "eq","select_one"
+       when "eq","array_append","select_one"
         ret = true
        when "eq_indexed"
         if (link[:index_map]||[]).size > 1

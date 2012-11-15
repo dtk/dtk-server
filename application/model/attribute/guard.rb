@@ -45,7 +45,8 @@ module XYZ
       end
       #guarding attributes that are unset and 
       #TODO: should we assume that what gets here are only requierd attributes
-      unless guard_attr[:dynamic] and (not guard_attr[:attribute_value]) and (not guarded_attr[:attribute_value])
+      #TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
+      unless guard_attr[:dynamic] and unset_guarded_attr?(guarded_attr,link)
         return nil
       end
 
@@ -63,7 +64,38 @@ module XYZ
 
       new(:guarded => guarded, :guard => guard, :link => link)
     end
+
    private
+
+    #if dont know for certain better to err as being a guard
+    def self.unset_guarded_attr?(guarded_attr,link)
+      val = guarded_attr[:attribute_value]
+      if val.nil?
+        true
+      elsif link[:function] == "array_append"
+        unset_guarded_attr__array_append?(val,link)
+      end
+    end
+
+    def self.unset_guarded_attr__array_append?(guarded_attr_val,link)
+      if input_map = link[:index_map]
+        unless input_map.size == 1
+          raise Error.new("Not treating index map with more than one member")
+        end
+        input_index = input_map.first[:input]
+        unless input_index.size == 1
+          raise Error.new("Not treating input index with more than one member")
+        end
+        input_num = input_index.first
+        unless input_num.kind_of?(Fixnum)
+          raise Error.new("Not treating input index that is non-numeric")
+        end
+        guarded_attr_val.kind_of?(Array) and guarded_attr_val[input_num].nil?
+      else
+        true
+      end
+    end
+
     def self.attr_info(attr,keys=nil)
       ret = {
         :node => {

@@ -14,14 +14,17 @@ module XYZ
       
       matches = Array.new
       aug_attr_list.each do |attr|
-        link = find_matching_link(attr,links_to_trace)
-        matches << {:link => link, :attr => attr} if link
+        find_matching_links(attr,links_to_trace).each do |link|
+          #attr is input attribute
+          matches << {:link => link, :attr => attr} 
+        end
       end
       matches.each do |match|
         attr_in = match[:attr]
         link = match[:link]
-        attr_out = find_matching_output_attr(aug_attr_list,attr_in,link)
-        block.call(attr_in,link,attr_out)
+        if attr_out = find_matching_output_attr(aug_attr_list,attr_in,link)
+          block.call(attr_in,link,attr_out)
+        end
       end
     end
 
@@ -29,9 +32,8 @@ module XYZ
     def find_matching_output_attr(aug_attr_list,attr_in,link)
       #TODO: to make more efficient have other find_matching_output_attr__[link_fn]
       return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == "eq_indexed"
-      ret = nil
       output_id =  link[:output_id] 
-      ret = aug_attr_list.find do |attr|
+      aug_attr_list.find do |attr|
         if attr[:id] == output_id
           case link[:function]
            when "eq" then true
@@ -45,13 +47,13 @@ module XYZ
           end
         end
       end
-      ret
     end
 
     def find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link)
+      ret = nil
       if not (link[:index_map]||[]).size == 1
         Log.error("not treating index maps with multiple elements")
-        return nil
+        return ret
       end
       link_output_index_map =  link[:index_map].first[:output]||[]
       output_id = link[:output_id]
@@ -70,8 +72,8 @@ module XYZ
     end
 
 
-    def find_matching_link(attr,links)
-      links.find{|link|link[:input_id] == attr[:id] and index_match(link,attr[:item_path])}
+    def find_matching_links(attr,links)
+      links.select{|link|link[:input_id] == attr[:id] and index_match(link,attr[:item_path])}
     end
     
     def index_match(link,item_path)

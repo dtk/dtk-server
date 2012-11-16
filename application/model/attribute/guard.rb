@@ -3,6 +3,7 @@ module XYZ
     def ret_attribute_guards(top_level_task)
       ret = Array.new
       augmented_attr_list = augmented_attribute_list_from_task(top_level_task)
+      #augmented_attr_list does not contain node level attributes => attr_out can be null
       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
         if guard = GuardedAttribute.create(attr_in,link,attr_out)
           ret << guard
@@ -13,6 +14,7 @@ module XYZ
 
     def ret_attr_guards_and_violations(top_level_task)
       guards = Array.new
+      #augmented_attr_list does not contain node level attributes => attr_out can be null
       augmented_attr_list = augmented_attribute_list_from_task(top_level_task)
       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
         if guard = GuardedAttribute.create(attr_in,link,attr_out)
@@ -36,20 +38,20 @@ module XYZ
 
   class GuardedAttribute < HashObject
     def self.create(guarded_attr,link,guard_attr)
-      #TODO: shouldnt this be error? or instaed if ran already than this attribute should be set
-      unless guard_attr #this can happen if guard attribute is in component that ran already
-        unless guarded_attr[:attribute_value]
-          Log.error("unexpected: if guard_attr is null then guarded_attrib #{guarded_attr[:display_name]} should have a value set")
-        end
+      #guard_attr can be null if guard refers to node level attr
+      #TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
+      unless guard_attr 
+        #TODO: below works if guard is node level attr
         return nil 
       end
-      #guarding attributes that are unset and 
+      #guarding attributes that are unset and are feed by dynamic attribute 
       #TODO: should we assume that what gets here are only requierd attributes
       #TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
       unless guard_attr[:dynamic] and unset_guarded_attr?(guarded_attr,link)
         return nil
       end
 
+      #TODO: not sure if still needed
       guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? TaskAction::CreateNode : TaskAction::ConfigNode
       #right now only using config node to config node guards
       return nil if guard_task_type == TaskAction::CreateNode

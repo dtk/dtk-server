@@ -27,7 +27,7 @@ module XYZ
 
    private
     def find_matching_output_attr(aug_attr_list,attr_in,link)
-      #TODO: to make moer efficient have other ind_matching_output_attr__[link_fn]
+      #TODO: to make more efficient have other find_matching_output_attr__[link_fn]
       return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == "eq_indexed"
       ret = nil
       output_id =  link[:output_id] 
@@ -45,11 +45,6 @@ module XYZ
           end
         end
       end
-
-      #TODO: remove these debug statements
-      ##l = lambda{|a| [a[:display_name],a[:node][:display_name],a[:item_path]]}
-      ##pp [link[:function],link[:index_map],l.call(attr_in), ret && l.call(ret)]
-
       ret
     end
 

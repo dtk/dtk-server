@@ -368,8 +368,8 @@ module XYZ
       fs = Model::FieldSet.opt(cols,model_handle[:model_name])
       wc = SQL.in(:id,id_list)
       existing_rows = get_objects_just_dataset(model_handle,wc,fs).for_update().all()
-#TODO: debug
-pp ["**********************",existing_rows,"*********************"]
+#TODO: debug statement
+#pp ["**********************",existing_rows,"*********************"]
       modified_rows = block.call(existing_rows)
       #TODO: should check that every id in id_list appears in modified_rows
       update_from_rows(model_handle,modified_rows)

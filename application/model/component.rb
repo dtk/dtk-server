@@ -81,6 +81,10 @@ module XYZ
       branch_name_default_version()
     end
 
+    def self.component_type_from_user_friendly_name(user_friendly_name)
+      user_friendly_name.gsub(/::/,"__")
+    end
+
     def display_name_print_form()
       update_object!(:component_type,:ref_num)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")

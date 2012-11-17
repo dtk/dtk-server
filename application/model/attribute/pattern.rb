@@ -143,6 +143,9 @@ module DTK; class Attribute
       def ret_filter(fragment,type)
         if fragment =~ /[a-z]\[([^\]]+)\]/
           filter = $1
+          if type == :component
+            filter = Component.component_type_from_user_friendly_name(filter)
+          end
           if filter == "*"
             nil
           elsif filter =~ /^[a-z0-9_-]+$/
@@ -154,10 +157,10 @@ module DTK; class Attribute
             when :node
               [:eq,:display_name,filter]
             else
-              raise ErrorNotImplementedYet.new()
+              raise ErrorNotImplementedYet.new("Component filter of type (#{type})")
             end
           else
-            raise ErrorNotImplementedYet.new()
+            raise ErrorNotImplementedYet.new("Parsing of component fileter (#{filter})")
           end
         else
           nil #without qualification means all (no filter)
@@ -172,7 +175,7 @@ module DTK; class Attribute
     end
     class ErrorNotImplementedYet < Error
       def initialize(pattern)
-        super("not implemented yet")
+        super("not implemented yet: #{pattern}")
       end
     end
   end

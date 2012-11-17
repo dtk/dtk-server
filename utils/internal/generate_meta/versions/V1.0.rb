@@ -23,6 +23,7 @@ module XYZ
         ret.set_unless_nil("ui",value(:ui))
         ret.set_unless_nil("basic_type",value(:basic_type))
         ret["component_type"] = required_value(:component_type)
+        ret.set_unless_nil("only_one_per_node",value(:only_one_per_node))
         ret.set_unless_nil("dependency",converted_dependencies(opts))
         ret.set_unless_nil("attribute",converted_attributes(opts))
         ret.set_unless_nil("link_defs",converted_link_defs(opts))
@@ -119,6 +120,7 @@ module XYZ
         ret.set_unless_nil("description",value(:description))
         ret["data_type"] = required_value(:type)
         ret.set_unless_nil("value_asserted",value(:default_info))
+        ret.set_unless_nil("required",value(:required))
         ret.set_unless_nil("dynamic",value(:dynamic))
         ret["external_ref"] = converted_external_ref()
         ret

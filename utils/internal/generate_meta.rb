@@ -378,6 +378,9 @@ module XYZ
       self[:basic_type] = t("service") #TODO: stub
       self[:component_type] = t(processed_name)
       dependencies = dependencies(component_ps)
+      if component_ps.has_key?(:only_one_per_node)
+        self[:only_one_per_node] = t(component_ps[:only_one_per_node])
+      end
       self[:dependencies] = dependencies unless dependencies.empty?
       set_attributes(component_ps)
     end

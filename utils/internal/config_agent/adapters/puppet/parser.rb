@@ -87,7 +87,7 @@ module XYZ
       msg = strip_message(puppet_error.message)
       single_error = ConfigAgent::ParseError.new(msg,file_path,line)
       #TODO: change when handle multiple errors
-      ConfigAgent::ParseErrors.new().add(single_error)
+      ConfigAgent::ParseErrors.new(:puppet).add(single_error)
     end
 
     def find_file_path(msg)
@@ -244,6 +244,10 @@ module XYZ
           end
         self[:type] = type
         self[:name] = ast_item.name
+
+        if type == "definition"
+          self[:only_one_per_node] = false
+        end
 
         attributes = Array.new
         attributes << AttributePS.create_name_attribute() if puppet_type?(ast_item,:definition)
@@ -502,8 +506,10 @@ module XYZ
         if arg[1]
           default_val = default_value(arg[1])
           self[:default] =  default_val if default_val
+          self[:required] = opts[:required] if opts.has_key?(:required)
+        else
+          self[:required] = true
         end
-        self[:required] = opts[:required] if opts.has_key?(:required)
         super
       end
       def is_attribute?() 

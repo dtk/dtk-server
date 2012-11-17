@@ -79,7 +79,8 @@ module XYZ
     end
     class ParseErrors < ErrorUsage
       attr_reader :error_list
-      def initialize()
+      def initialize(config_agent_type)
+        @config_agent_type = config_agent_type
         @error_list = Array.new
       end
       def add(error_info)
@@ -94,7 +95,15 @@ module XYZ
         @error_list.each{|e|e.set_file_asset_id!(model_handle)}
       end
       def to_s()
-        @error_list.map{|e|e.to_s}.join("\n")
+        preamble = 
+          if @config_agent_type == :puppet
+            "Puppet manifest parse error"
+          else
+            "Parse error"
+          end
+        preamble << ((@error_list.size > 1) ? "s:\n" : ":\n")
+
+        "#{preamble}  #{@error_list.map{|e|e.to_s}.join('\n  ')}"
       end
     end
   end

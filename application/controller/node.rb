@@ -87,7 +87,9 @@ module XYZ
     def rest__create_task()
       node_idh = ret_request_param_id_handle(:node_id)
       commit_msg = ret_request_params(:commit_msg)
-      task = Task.create_from_node(node_idh,commit_msg)
+      unless task = Task.create_from_node(node_idh,commit_msg)
+        raise ErrorUsage.new("No changes to converge")
+      end
       task.save!()
       rest_ok_response :task_id => task.id
     end

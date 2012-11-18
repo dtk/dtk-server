@@ -34,6 +34,13 @@ module DTK
         end
       end
 
+      class Node < self
+        def self.get_status(node_idh,opts={})
+          filter = [:eq, :node_id, node_idh.get_id()]
+          get_status_aux(node_idh,:node,filter,opts)
+        end
+      end
+
       class NodeGroup < self
         def self.get_status(node_group_idh,opts={})
           filter = [:eq, :node_id, node_group_idh.get_id()]

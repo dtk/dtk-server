@@ -8,7 +8,7 @@ module DTK; class Component
       }
       ret = get_objs(model_handle.createMH(:component),sp_hash)
       ret.each{|r|r[:display_name] = r.display_name_print_form()}
-      ret
+      ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     def self.check_valid_id(model_handle,id)
@@ -18,6 +18,16 @@ module DTK; class Component
          [:eq, :type, "template"],
          [:neq, :library_library_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
+    end
+
+    def self.name_to_id(model_handle,name)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and,
+                    [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
+                    [:neq, :library_library_id, nil]]
+      }
+      name_to_id_helper(model_handle,name,sp_hash)
     end
   end
 

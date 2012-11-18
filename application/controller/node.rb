@@ -15,7 +15,7 @@ module XYZ
       rest_ok_response node.info_about(about)
     end
     AboutEnum = {
-      :instance => [:components],
+      :instance => [:components,:attributes],
 #      :template => [:nodes,:components,:targets]
     }
 
@@ -82,6 +82,14 @@ module XYZ
       node = create_node_obj(:node_id)
       node.destroy_and_delete()
       rest_ok_response
+    end
+
+    def rest__create_task()
+      node_idh = ret_request_param_id_handle(:node_id)
+      commit_msg = ret_request_params(:commit_msg)
+      task = Task.create_from_node(node_idh,commit_msg)
+      task.save!()
+      rest_ok_response :task_id => task.id
     end
 
 

@@ -63,10 +63,10 @@ module XYZ
       node_mh = target_idh.create_childMH(:node)
       node = node_idh.create_object()
 
-      create_nodes_changes = StateChange::Node.node_state_changes(target_idh,:node => node)
+      create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh,:node => node)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
-      config_nodes_changes = StateChange::Node.component_state_changes(node_mh,:node => node)
+      config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
       ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "node_converge", :commit_message => commit_msg)

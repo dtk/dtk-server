@@ -63,13 +63,9 @@ class R8Server
   end
 
   def create_users_private_target?(import_file=nil,ec2_region=nil)
-    #TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
-    template_path ||= "#{Root}/spec/test_data/target_data_template.erb" 
-    template = File.open(template_path){|f|f.read}
-    erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
-    json_content = erubis.result(:project_ref => users_ref,:target_ref => users_ref,:ec2_region => ec2_region||"us-east-1")
+    json_content = PrivateTargetTemplate.result(:project_ref => users_ref,:target_ref => users_ref,:ec2_region => ec2_region||"us-east-1")
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
@@ -79,6 +75,33 @@ class R8Server
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
   end
+
+  #TODO: this is hack that should be fixed up; no need to use josn here
+  PrivateTargetTemplate = Erubis::Eruby.new <<eos
+{
+  "project": {
+    "<%= project_ref %>": {
+      "display_name": "Project 1",
+      "description": "Project 1",
+      "type": "puppet"
+    }
+  },
+  "datacenter": {
+    "<%= target_ref %>": {
+      "display_name": "Staging East1",
+      "description": "Staging East1",
+      "iaas_type" : "ec2",
+      "is_default_target": true,
+      "iaas_properties" : {
+        "region" : "<%= ec2_region %>",
+	"security_group_set" : ["default"]
+      },     
+      "type": "staging",
+      "*project_id": "/project/<%= project_ref %>"
+    }
+  }
+}
+eos
 
   def create_new_target?(target_name,ec2_region=nil)
     #TODO: this is hack that should be fixed up

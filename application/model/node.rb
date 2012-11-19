@@ -57,24 +57,10 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
-    def add_component(component_template_idh)
-      override_attrs = Hash.new
-      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
-      new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
-      new_cmp.id_handle()
+    def info()
+      get_obj(:cols => InfoCols).hash_subset(*InfoCols)
     end
-
-    def delete_component(component_idh)
-      #first check that component_idh belongs to this insatnce
-      sp_hash = {
-        :cols => [:id, :display_name],
-        :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
-      }
-      unless Model.get_obj(model_handle(:component),sp_hash)
-        raise ErrorIdInvalid.new(component_idh.get_id(),:component)
-      end
-      Model.delete_instance(component_idh)
-    end
+    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref]
 
     def info_about(about,opts={})
       case about
@@ -119,6 +105,25 @@ module XYZ
 
     def set_attributes(av_pairs)
       Attribute::Pattern::Node.set_attributes(self,av_pairs)
+    end
+
+    def add_component(component_template_idh)
+      override_attrs = Hash.new
+      clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
+      new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
+      new_cmp.id_handle()
+    end
+
+    def delete_component(component_idh)
+      #first check that component_idh belongs to this insatnce
+      sp_hash = {
+        :cols => [:id, :display_name],
+        :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
+      }
+      unless Model.get_obj(model_handle(:component),sp_hash)
+        raise ErrorIdInvalid.new(component_idh.get_id(),:component)
+      end
+      Model.delete_instance(component_idh)
     end
 
     def self.check_valid_id(model_handle,id)

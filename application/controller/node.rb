@@ -1,24 +1,7 @@
 module XYZ
   class NodeController < Controller
     helper :node_helper
-
-    def rest__list()
-      rest_ok_response ret_node_subtype_class().list(model_handle())
-    end
-
-    def rest__info_about()
-      node,subtype = ret_node_params_object_and_subtype()
-      about = ret_non_null_request_params(:about).to_sym
-       unless AboutEnum[subtype].include?(about)
-         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
-       end
-      rest_ok_response node.info_about(about)
-    end
-    AboutEnum = {
-      :instance => [:components,:attributes],
-#      :template => [:nodes,:components,:targets]
-    }
-
+    #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)
       component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
@@ -33,6 +16,40 @@ module XYZ
       node.delete_component(id_handle(component_id,:component))
       rest_ok_response
     end
+
+    def rest__destroy_and_delete()
+      node = create_node_obj(:node_id)
+      node.destroy_and_delete()
+      rest_ok_response
+    end
+
+    #### end: create and delete actions ###
+
+    #### list and info actions ###
+    def rest__list()
+      rest_ok_response ret_node_subtype_class().list(model_handle())
+    end
+
+    def rest__info()
+      node,subtype = ret_node_params_object_and_subtype()
+       unless subtype == :instance
+         raise ErrorUsage::BadParamValue.new(:subtype,subtype)
+       end
+      rest_ok_response node.info()
+    end
+
+    def rest__info_about()
+      node,subtype = ret_node_params_object_and_subtype()
+      about = ret_non_null_request_params(:about).to_sym
+       unless AboutEnum[subtype].include?(about)
+         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
+       end
+      rest_ok_response node.info_about(about)
+    end
+    AboutEnum = {
+      :instance => [:components,:attributes],
+#      :template => [:nodes,:components,:targets]
+    }
 
     def rest__get_attributes()
       node = create_node_obj(:node_id)
@@ -58,6 +75,9 @@ module XYZ
       rest_ok_response response
     end
 
+    #### end: list and info actions ###
+
+    #### creates tasks to execute/converge assemblies and monitor status
     def rest__stage()
       target = create_target_obj_with_default(:target_id)
       #TODO: would like to use form, but need to fix these fns up to do so: node_binding_rs =  create_obj(:node_template_id,NodeBindingRuleset)
@@ -70,18 +90,6 @@ module XYZ
       end
       node_instance_idh = node_binding_rs.clone_or_match(target,opts)
       rest_ok_response :node_id => node_instance_idh.get_id()
-    end
-
-    def rest__image_upgrade()
-      old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
-      Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)
-      rest_ok_response 
-    end
-
-    def rest__destroy_and_delete()
-      node = create_node_obj(:node_id)
-      node.destroy_and_delete()
-      rest_ok_response
     end
 
     def rest__create_task()
@@ -99,6 +107,14 @@ module XYZ
       format = (ret_request_params(:format)||:hash).to_sym
       rest_ok_response Task::Status::Node.get_status(node_idh,:format => format)
     end
+    #### end: creates tasks to execute/converge assemblies and monitor status
+
+    def rest__image_upgrade()
+      old_image_id,new_image_id = ret_non_null_request_params(:old_image_id,:new_image_id)
+      Node::Template.image_upgrade(model_handle(),old_image_id,new_image_id)
+      rest_ok_response 
+    end
+
 
 ##### TODO: below needs cleanup
 

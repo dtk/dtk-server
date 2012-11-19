@@ -23,6 +23,7 @@ module XYZ
         TaskInfo.initialize_task_info()
         begin
           wfid = Engine.launch(process_def())
+          #TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
           Engine.wait_for(wfid, :timeout => TopTaskDefualtTimeOut)
           
           #detect if wait for finished due to normal execution or errors 

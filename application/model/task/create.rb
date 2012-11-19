@@ -61,7 +61,7 @@ module XYZ
       target_idh = node_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
       node_mh = target_idh.create_childMH(:node)
-      node = node_idh.create_object()
+      node = node_idh.create_object().update_object!(:display_name)
 
       create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh,:node => node)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)

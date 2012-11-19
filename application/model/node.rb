@@ -51,10 +51,15 @@ module XYZ
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
       filter = [:and, [:oneof, :type, ["instance","staged"]], target_filter]
       sp_hash = {
-        :cols => common_columns(),
+        :cols => common_columns() + [:assemblies],
         :filter => filter
       }
-      get_objs(model_handle,sp_hash)
+      cols_except_name = common_columns() - [:display_name]
+      get_objs(model_handle,sp_hash).map do |n|
+        el = n.hash_subset(*cols_except_name)
+        assembly_name = (n[:assembly]||{})[:display_name]
+        el.merge(:display_name => assembly_name ? "#{assembly_name}/#{n[:display_name]}" : n[:display_name])
+      end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     def info()

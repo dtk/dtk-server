@@ -377,6 +377,18 @@ module XYZ
 
       ##### end of for connection to ports and port links
 
+      virtual_column :assemblies, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :alias => :assembly,
+           :convert => true,
+           :join_type => :left_outer,
+           :join_cond=>{:id =>:node__assembly_id},
+           :cols => [:id,:display_name,:group_id,:description]
+         }]
+
       virtual_column :components, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

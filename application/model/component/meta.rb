@@ -172,6 +172,26 @@ module XYZ
            :cols => [:id,:search_pattern,:type,:description,:severity]
          }
         ]
+        #above is direct dependencies; below is inheited ones
+        virtual_column :inherited_dependencies, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :alias => :parent_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:ancestor_id)},
+           :cols => [:id]
+         },
+         {
+           :model_name => :dependency,
+           :alias => :dependencies,
+           :convert => true,
+           :join_type => :left_outer,
+           :join_cond=>{:component_component_id => q(:parent_component,:id)}, 
+           :cols => [:id,:search_pattern,:type,:description,:severity]
+         }
+        ]
 
         virtual_column :component_order_objs, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -181,6 +201,25 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:component_component_id => q(:component,:id)}, 
+           :cols => [:id,:after,:conditional,:component_component_id]
+         }
+        ]
+        #above is direct dependencies; below is inheited ones
+        virtual_column :inherited_component_order_objs, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :alias => :parent_component,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:ancestor_id)},
+           :cols => [:id]
+         },
+         {
+           :model_name => :component_order,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:parent_component,:id)}, 
            :cols => [:id,:after,:conditional,:component_component_id]
          }
         ]

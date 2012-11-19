@@ -3,8 +3,12 @@ module XYZ
     def self.update_with_applicable_dependencies!(component_deps,component_idhs)
       sample_idh = component_idhs.first
       cols_for_get_virtual_attrs_call = [:component_type,:implementation_id,:extended_base]
+      #TODO: switched to use inherited component_order_objs; later will allow component_order_objs directly on component instances and have
+        #them override
+        #TODO: should also modifying cloning so  component instances not getting the component_order_objs
       sp_hash = {
-        :cols => [:id,:component_order_objs]+cols_for_get_virtual_attrs_call,
+#        :cols => [:id,:component_order_objs]+cols_for_get_virtual_attrs_call,
+        :cols => [:id,:inherited_component_order_objs]+cols_for_get_virtual_attrs_call,
         :filter => [:oneof, :id, component_idhs.map{|idh|idh.get_id()}]
       }
       cmps_with_order_info = prune_if_not_applicable(get_objs(sample_idh.createMH,sp_hash))

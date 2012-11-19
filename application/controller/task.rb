@@ -1,23 +1,6 @@
 module XYZ
   class TaskController < Controller
     helper :task_helper
-###TODO temp for mocking
-    @@count = 0
-    def debug_mock_record(state_info)
-      @@count += 1
-      File.open("/tmp/save#{@@count.to_s}","w"){|f|f << JSON.pretty_generate(state_info)}
-    end
-    def debug_mock_replay()
-      dir = File.expand_path('../spec/task_mock_data', File.dirname(__FILE__))
-      Dir.chdir(dir) do
-        save_files = Dir["*"]
-        file = "save#{@@count.to_s}"
-        file = save_files.sort.last unless save_files.include?(file)
-        @@count += 1
-        JSON.parse(File.open(file){|f|f.read})
-      end
-    end
-### end temp for mocking
 
     def rest__status()
       if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
@@ -130,6 +113,23 @@ module XYZ
       rest_ok_response
     end
 
+###TODO temp for mocking
+    @@count = 0
+    def debug_mock_record(state_info)
+      @@count += 1
+      File.open("/tmp/save#{@@count.to_s}","w"){|f|f << JSON.pretty_generate(state_info)}
+    end
+    def debug_mock_replay()
+      dir = File.expand_path('../spec/task_mock_data', File.dirname(__FILE__))
+      Dir.chdir(dir) do
+        save_files = Dir["*"]
+        file = "save#{@@count.to_s}"
+        file = save_files.sort.last unless save_files.include?(file)
+        @@count += 1
+        JSON.parse(File.open(file){|f|f.read})
+      end
+    end
+### end temp for mocking
 
     #TODO: test stub
     def pretty_print(task_id=nil)

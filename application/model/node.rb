@@ -58,7 +58,7 @@ module XYZ
       get_objs(model_handle,sp_hash).map do |n|
         el = n.hash_subset(*cols_except_name)
         assembly_name = (n[:assembly]||{})[:display_name]
-        el.merge(:display_name => assembly_name ? "#{assembly_name}/#{n[:display_name]}" : n[:display_name])
+        el.merge(:display_name => user_friendly_name(n[:display_name],assembly_name))
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
@@ -66,6 +66,22 @@ module XYZ
       get_obj(:cols => InfoCols).hash_subset(*InfoCols)
     end
     InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref]
+
+    class << self
+     private
+      def user_friendly_name(node_name,assembly_name=nil)
+        assembly_name ? "#{assembly_name}::#{node_name}" : node_name
+      end
+      #returns [node_name, assembly_name] later which coudl be null
+      def parse_user_friendly_name(name)
+        if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
+          [$2,$1]
+        else
+          name
+        end
+      end
+      AssemblyNodeNameSep = '::'
+    end
 
     def info_about(about,opts={})
       case about
@@ -141,12 +157,15 @@ module XYZ
     end
 
     def self.name_to_id(model_handle,name)
+      node_name, assembly_name = parse_user_friendly_name(name)
+      assembly_id = assembly_name && AssemblyInstance.name_to_id(model_handle.createMH(:component),assembly_name)
       sp_hash =  {
-        :cols => [:id],
-           :filter => [:and,
-                       [:eq, :display_name, name],
-                       [:oneof, :type, ["instance","staged"]],
-                       [:neq, :datacenter_datacenter_id, nil]]
+        :cols => [:id,:assembly_id],
+        :filter => [:and,
+                    [:eq, :display_name, node_name],
+                    [:oneof, :type, ["instance","staged"]],
+                    [:neq, :datacenter_datacenter_id, nil],
+                    [:eq, :assembly_id, assembly_id]]
       }
       name_to_id_helper(model_handle,name,sp_hash)
     end

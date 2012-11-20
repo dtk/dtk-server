@@ -48,7 +48,7 @@ module XYZ
               else
                 CommandAndControl::Error.new 
               end
-          end
+            end
           task.update_at_task_completion("failed",TaskAction::Result::Failed.new(error))
         end
 
@@ -65,7 +65,7 @@ module XYZ
           if event = add_start_task_event?(task)
             Log.info_pp [:start_task_event, event]
           end
-          debug_print_task_info = "task_id=#{task.id.to_s}"
+  
           begin
             yield
            rescue Exception => e
@@ -121,9 +121,11 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :completed_create_node, :task_id => task_id} 
-              event = task.add_event(:complete_succeeded,result)
+ 
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
+              # assign elastic ip if present
+              task[:executable_action][:node].associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action) 
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               reply_to_engine(workitem)

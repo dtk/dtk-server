@@ -161,7 +161,7 @@ module XYZ
 
       def self.get_and_update_node_state!(node,attribute_names)
         ret = Hash.new
-        instance_id = (node[:external_ref]||{})[:instance_id]
+        instance_id = node.instance_id()
         unless instance_id
           Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
           return ret

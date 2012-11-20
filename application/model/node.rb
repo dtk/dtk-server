@@ -169,6 +169,10 @@ module XYZ
     def instance_id()
       (self[:external_ref]||{})[:instance_id]
     end
+
+    def elastic_ip()
+      (self[:hostname_external_ref]||{})[:elastic_ip]
+    end
     
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
@@ -409,6 +413,14 @@ module XYZ
         component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
         component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
         component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
+      end
+    end
+
+    # Method will take already allocated elastic IP and assign it deploy node.
+    # Keep in mind this can only happen when node is 'running' state
+    def associate_elastic_ip()
+      if persistent_hostname?
+        CloudConnect::EC2.new.associate_elastic_ip(instance_id(),elastic_ip())
       end
     end
 

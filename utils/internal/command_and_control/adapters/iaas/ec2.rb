@@ -14,15 +14,15 @@ module XYZ
       end
 
       def self.process_persistent_hostname__first_boot!(node)
-        Log.info("in process_persistent_hostname__first_boot! for node #{node[:display_name]}")
-        # allocate elastic IP for this node
-
         begin 
+          # allocate elastic IP for this node
           elastic_ip = conn().allocate_elastic_ip()
 
           node.update({
             :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
           })
+
+          Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
 =begin
           # cloud connect wrapper will log warn in case there is no allocate elastic ip
           unless elastic_ip.nil?

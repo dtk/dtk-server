@@ -136,7 +136,7 @@ module XYZ
     end
 
     def delete_component(component_idh)
-      #first check that component_idh belongs to this insatnce
+      #first check that component_idh belongs to this instance
       sp_hash = {
         :cols => [:id, :display_name],
         :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]

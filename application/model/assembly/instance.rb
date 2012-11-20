@@ -3,9 +3,35 @@ module DTK
     r8_nested_require('instance','action')
     include ActionMixin
 
+    def add_component(node_idh,component_template_idh)
+      #first check that node_idh belongs to this instance
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id],
+        :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
+      }
+      unless node = Model.get_obj(model_handle(:node),sp_hash)
+        raise ErrorIdInvalid.new(node_idh.get_id(),:node)
+      end
+      node.add_component(component_template_idh)
+    end
+
+    def delete_component(component_idh)
+      #first check that component_idh belongs to this instance
+      sp_hash = {
+        :cols => [:id, :display_name],
+        :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
+      }
+      unless Model.get_obj(model_handle(:component),sp_hash)
+        raise ErrorIdInvalid.new(component_idh.get_id(),:component)
+      end
+      Model.delete_instance(component_idh)
+    end
+
+
     def add_sub_assembly(add_on_type)
       pp get_service_add_ons()
     end
+
 =begin
 [{:template=>{:display_name=>"hdfs", :id=>2147521085},
   :service_add_on=>

@@ -8,6 +8,23 @@ module DTK
       rest_ok_response 
     end
 
+    def rest__add_component()
+      assembly = ret_assembly_instance_object()
+      component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
+      #not checking here if node_id points to valid object; check is in add_component
+      node_id = ret_non_null_request_params(:node_id)
+      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh)
+      rest_ok_response(:component_id => new_component_idh.get_id())
+    end
+
+    def rest__delete_component()
+      assembly = ret_assembly_instance_object()
+      #not checking here if component_id points to valid object; check is in delete_component
+      component_id = ret_non_null_request_params(:component_id)
+      assembly.delete_component(id_handle(component_id,:component))
+      rest_ok_response
+    end
+
     #### end: create and delete actions ###
 
     #### list and info actions ###

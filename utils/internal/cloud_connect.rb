@@ -83,11 +83,11 @@ module XYZ
       end
 
       def server_start(instance_id)
-        hash_form(@conn.start_instances(ID))
+        hash_form(@conn.start_instances(instance_id))
       end
 
       def server_stop(instance_id)
-        hash_form(@conn.stop_instances(ID))
+        hash_form(@conn.stop_instances(instance_id))
       end
 
      private

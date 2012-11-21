@@ -107,6 +107,13 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
+    def rest__stop()
+      assembly = ret_assembly_instance_object()
+      CommandAndControl.stop_instances(assembly.get_nodes(:id,:display_name,:external_ref))
+
+      rest_ok_response :status => :ok
+    end
+
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:node_identifier,:log_path, :start_line)
@@ -184,7 +191,6 @@ module DTK
       i18n = get_i18n_mappings_for_models(:component)
       component_list.each_with_index do |model,index|
         component_list[index][:model_name] = :component
-        body_value = ''
         component_list[index][:ui] ||= {}
         component_list[index][:ui][:images] ||= {}
 #        name = component_list[index][:display_name]

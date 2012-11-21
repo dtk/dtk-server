@@ -420,7 +420,7 @@ module XYZ
     # Keep in mind this can only happen when node is 'running' state
     def associate_elastic_ip()
       if persistent_hostname?
-        CloudConnect::EC2.new.associate_elastic_ip(instance_id(),elastic_ip())
+        CommandAndControl.associate_elastic_ip(self)
       end
     end
 

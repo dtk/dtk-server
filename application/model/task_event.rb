@@ -3,7 +3,10 @@ module XYZ
     def self.create_event?(event_type,task,result)
       action = task[:executable_action]
       return nil unless action
-      if action.kind_of?(TaskAction::CreateNode) 
+      if action.kind_of?(TaskAction::PowerOnNode)
+        # TODO: Look into this see if neccessery
+        Log.warn ">>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
+      elsif action.kind_of?(TaskAction::CreateNode) 
         case event_type
          when :start 
           StartCreateNode.create_start?(action)

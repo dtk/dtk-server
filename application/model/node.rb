@@ -158,6 +158,11 @@ module XYZ
       self[:operational_status] = op_status.to_s
     end
 
+    def update_admin_op_status!(op_status)
+      update(:admin_op_status => op_status.to_s)
+      self[:admin_op_status] = op_status.to_s
+    end
+
     def self.pbuilderid(node)
       node.update_object!(:external_ref)
       (node[:external_ref]||{})[:instance_id]

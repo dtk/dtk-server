@@ -19,9 +19,13 @@ module XYZ
       klass.existing_image?(image_id)
     end
 
+    def self.start_instances(nodes)
+      klass = load_iaas_for(:node => nodes.first)
+      klass.start_instances(nodes)
+    end
     def self.stop_instances(nodes)
       klass = load_iaas_for(:node => nodes.first)
-      klass.stop_ec2_instances(nodes)
+      klass.stop_instances(nodes)
     end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)

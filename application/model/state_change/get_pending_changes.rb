@@ -33,7 +33,7 @@ module DTK; class StateChange
       ndx_ret.values
     end
 
-    #no generate option needed for node state changes
+    # no generate option needed for node state changes
     def self.node_state_changes(assembly_idh,target_idh)
       changes = Array.new
       sp_hash = {

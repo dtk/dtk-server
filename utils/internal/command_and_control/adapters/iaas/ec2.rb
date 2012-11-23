@@ -13,15 +13,25 @@ module XYZ
         !!conn().image_get(image_id)
       end
 
-      def self.stop_ec2_instances(nodes)
+      def self.start_instances(nodes)
+        nodes.each do |node|
+          conn().server_start(node.instance_id())
+          Log.debug "Starting instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
+        end
+      end
+
+      def self.stop_instances(nodes)
         nodes.each do |node|
           conn().server_stop(node.instance_id())
-          Log.debug "Stopping instances #{node[:display_name]}, instance ID: #{node.instance_id()}"
+          node.update_admin_op_status!(:stopped)
+          Log.debug "Stopping instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
         end
       end
 
       def self.associate_elastic_ip(node)
+        node.update_object!(:hostname_external_ref, :admin_op_status)
         conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
+        node.update_admin_op_status!(:running)
       end
 
       def self.process_persistent_hostname__first_boot!(node)

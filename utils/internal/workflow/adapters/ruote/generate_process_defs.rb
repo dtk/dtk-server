@@ -19,7 +19,10 @@ module XYZ
       #TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
-        if action.kind_of?(TaskAction::CreateNode)
+        if action.kind_of?(TaskAction::PowerOnNode)
+          detect_when_ready = participant_executable_action(:power_on_node,task,context, :task_type => "power_on_node", :task_end => true)
+          sequence([detect_when_ready])
+        elsif action.kind_of?(TaskAction::CreateNode)
           main = participant_executable_action(:create_node,task,context,:task_start => true)
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, :task_type => "post", :task_end => true)
           sequence(main,post_part)

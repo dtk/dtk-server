@@ -4,7 +4,7 @@ module XYZ
       target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
-      #smoketest should not create a node
+      # smoketest should not create a node
       if component_type == :smoketest
         create_nodes_task = nil
       else
@@ -24,9 +24,23 @@ module XYZ
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)
       else
-        ret.add_subtask(create_nodes_task||config_nodes_task) #only one will be non null
+        # only one will be non null
+        ret.add_subtask(create_nodes_task||config_nodes_task) 
       end
       ret
+    end
+
+    def task_when_nodes_ready_from_assembly(assembly_idh, component_type)
+      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+
+      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      running_node_task = create_running_node_task(task_mh, assembly_config_changes)
+
+      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_nodes_ready", :temporal_order => "sequential",:commit_message => nil)
+      main_task.add_subtask(running_node_task)
+
+      return main_task
     end
 
     def create_from_node_group(node_group_idh,commit_msg=nil)
@@ -114,6 +128,28 @@ module XYZ
       end
       attr_mh = task_mh.createMH(:attribute)
       TaskAction::CreateNode.add_attributes!(attr_mh,all_actions)
+      ret
+    end
+
+    def create_running_node_task(task_mh,state_change_list)
+      return nil unless state_change_list and not state_change_list.empty?
+      #each element will be list with single element
+      ret = nil
+      all_actions = Array.new
+      if state_change_list.size == 1
+        executable_action = TaskAction::PowerOnNode.create_from_state_change(state_change_list.first.first)
+        all_actions << executable_action
+        ret = create_new_task(task_mh,:executable_action => executable_action) 
+      else
+        ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
+        state_change_list.each do |sc|
+          executable_action = TaskAction::PowerOnNode.create_from_state_change(sc.first)
+          all_actions << executable_action
+          ret.add_subtask_from_hash(:executable_action => executable_action)
+          end
+      end
+      attr_mh = task_mh.createMH(:attribute)
+      TaskAction::PowerOnNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 

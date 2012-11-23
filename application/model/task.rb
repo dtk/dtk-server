@@ -369,9 +369,9 @@ module XYZ
       [:node_config,nil]
     end
 
-    #persists to db this and its sub tasks
+    # persists to db this and its sub tasks
     def save!()
-      #no op if saved already as detected by whether has an id
+      # no op if saved already as detected by whether has an id
      return nil if id()
       set_positions!()
       #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids

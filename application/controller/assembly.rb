@@ -107,9 +107,28 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
+    def rest__start()
+      assembly = ret_assembly_instance_object()
+      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+
+      # filters only stopped nodes for this assembly
+      nodes    =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
+
+      # invoking command to start the nodes
+      CommandAndControl.start_instances(stopped_nodes)
+
+      # following task will when nodes ready assign elastic IP
+      task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
+      task.save!()
+
+      rest_ok_response :task_id => task.id
+    end
+
     def rest__stop()
       assembly = ret_assembly_instance_object()
-      CommandAndControl.stop_instances(assembly.get_nodes(:id,:display_name,:external_ref))
+      nodes =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      CommandAndControl.stop_instances(nodes)
 
       rest_ok_response :status => :ok
     end

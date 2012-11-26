@@ -209,7 +209,7 @@ module DTK
       #get library branch if needed
       library_mb ||= get_library_module_branch(version)
 
-      #create module branch for workspace if needed and pust it to repo server
+      #create module branch for workspace if needed and push it to repo server
       workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
       
       #create new project implementation if needed

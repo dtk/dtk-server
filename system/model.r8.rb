@@ -292,7 +292,8 @@ module XYZ
 
     #TODO: think may subsume below by above
     #creates if does not exist using match_assigns; in eitehr case returns id_handle 
-    def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={})
+    #if block is given, called only if new row is created
+    def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={},&pre_create_row_block)
       sp_hash = {
         :cols => (has_group_id_col?(model_handle) ? [:id,:group_id] : [:id])
       }
@@ -303,6 +304,9 @@ module XYZ
       if matching_obj = get_obj(model_handle,sp_hash)
         matching_obj.id_handle()
       else
+        if pre_create_row_block
+          yield
+        end
         create_from_row(model_handle,{:ref => ref}.merge(match_assigns).merge(other_assigns),opts.merge(:duplicate_refs => :no_check))
       end
     end

@@ -14,6 +14,11 @@ module DTK
       RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,self)
     end
 
+    #this adds ws branch from this, which is a lib branch
+    def add_workspace_branch?(new_ws_branch_name)
+      RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
+    end
+
     def serialize_and_save_to_repo(file_path,hash_content)
       content = JSON.pretty_generate(hash_content)
       RepoManager.add_file({:path => file_path},content,self)
@@ -179,8 +184,12 @@ module DTK
         :type => self[:type]
 
       }
-      cmp_branch_mh = model_handle.merge(:parent_model_name => :component_module) 
-      mb_idh = Model.create_from_row?(cmp_branch_mh,ref,match_assigns,other_assigns)
+      branch_mh = model_handle.merge(:parent_model_name => module_type)
+      mb_idh = Model.create_from_row?(branch_mh,ref,match_assigns,other_assigns) do
+        #called only if row is created
+        new_ws_branch_name = branch
+        add_workspace_branch?(new_ws_branch_name)
+      end
       mb_idh.create_object().merge(match_assigns).merge(other_assigns)
     end
 

@@ -57,7 +57,7 @@ module DTK
 
     def self.cols_for_matching_library_branches(type)
       matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
-      [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col]
+      [:id,:repo_id,:version,:branch,module_id_col(type),matching_lib_branches_col]
     end
 
     def self.get_component_modules_info(module_branch_idhs)
@@ -103,7 +103,7 @@ module DTK
       def get_augmented_workspace_branch(module_obj,version=nil)
         sp_hash = {
           :cols => cols_for_matching_library_branches(module_obj.model_name),
-          :filter => [:and,[:eq, ModuleBranch.component_module_id_col(),module_obj.id()], 
+          :filter => [:and,[:eq, module_id_col(module_obj.module_type()),module_obj.id()], 
                       [:eq,:is_workspace,true],
                       [:eq,:version,version_field(version)]]
         }
@@ -167,7 +167,7 @@ module DTK
     end
   
     def create_workspace_branch?(module_type,project)
-      module_id_col = (module_type == :component_module ? component_module_id_col() : service_module_id_col())
+      module_id_col = module_id_col(module_type)
       update_object!(module_id_col,:version,:repo_id,:type)
 
       ref = branch = workspace_branch_name(project)
@@ -239,23 +239,15 @@ module DTK
     end
 
     #in case we change what schema the module and branch objects under
-    def self.service_module_id_col()
-      :service_id
+    def self.module_id_col(module_type)
+      case module_type
+        when :service_module then :service_id
+        when :component_module then :component_id
+        else raise Error.new("Unexected module type (#{module_type})")
+      end
     end
-    def service_module_id_col()
-      self.class.service_module_id_col()
-    end
-    def service_module_id()
-      self[service_module_id_col()]
-    end
-    def self.component_module_id_col()
-      :component_id
-    end
-    def component_module_id_col()
-      self.class.component_module_id_col()
-    end
-    def component_module_id()
-      self[component_module_id_col()]
+    def module_id_col(module_type)
+      self.class.module_id_col(module_type)
     end
   end
 end

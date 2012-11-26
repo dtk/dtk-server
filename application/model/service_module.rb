@@ -101,6 +101,14 @@ module DTK
       Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
     end
 
+    def get_workspace_branch_info(version=nil)
+      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+      repo = aug_branch[:workspace_repo]
+      module_name = aug_branch[module_type()][:display_name]
+      ModuleRepoInfo.new(repo,module_name,aug_branch)
+    end
+
+
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
       needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])

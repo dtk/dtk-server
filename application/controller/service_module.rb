@@ -91,7 +91,14 @@ module XYZ
       rest_ok_response
     end
 
-    def rest__workspace_branch_info(service_module_id)
+     def rest__workspace_branch_info()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      workspace_branch_info = service_module.get_workspace_branch_info(version)
+      rest_ok_response workspace_branch_info
+    end
+
+    def rest__deprecate_workspace_branch_info(service_module_id)
       #TODO: stub using library branch until put in service module workspace mechanism
       service_module = create_object_from_id(service_module_id)
       repo = service_module.get_library_repo()

@@ -72,6 +72,7 @@ module DTK
         cmps.map{|cmp|SimpleOrderedHash.new([{:name => cmp[:component_name]},{:id => cmp[:component_id]},{:description => cmp[:description]}])}
       end
     end
+
 =begin
     def get_ports()
       module_branches = get_module_branches()
@@ -98,6 +99,40 @@ module DTK
 
     def get_module_branches()
       Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
+    end
+
+    #creates workspace branch (if needed) and related objects from library one
+    def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
+      needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
+      update_object!(*needed_cols)
+      module_name = self[:display_name]
+      library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
+
+      #get library branch if needed
+      library_mb ||= get_library_module_branch(version)
+
+      #create module branch for workspace if needed and pust it to repo server
+      workspace_mb = library_mb.create_workspace_branch?(:service_module,proj)
+      
+      #create new project implementation if needed
+      #  first get library implementation
+      sp_hash = {
+        :cols => [:id,:group_id],
+        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
+                    [:eq, :version, ModuleBranch.version_field(version)],
+                    [:eq, :module_name,module_name]]
+      }
+      library_impl = Model.get_obj(model_handle(:implementation),sp_hash)
+      new_impl_idh = library_impl.clone_into_project_if_needed(proj)
+
+      #get repo info
+      sp_hash = {
+        :cols => [:id, :repo_name],
+        :filter => [:eq, :id, workspace_mb[:repo_id]]
+      }
+      repo = Model.get_obj(model_handle(:repo),sp_hash)
+      module_info = {:workspace_branch => workspace_mb[:branch]}
+      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
     def self.find(mh,service_module_name,library_idh=nil)

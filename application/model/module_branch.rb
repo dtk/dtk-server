@@ -161,13 +161,13 @@ module DTK
       end
     end
   
-    def create_component_workspace_branch?(project)
-      cmp_module_id_col = component_module_id_col()
-      update_object!(cmp_module_id_col,:version,:repo_id,:type)
+    def create_workspace_branch?(module_type,project)
+      module_id_col = (module_type == :component_module ? component_module_id_col() : service_module_id_col())
+      update_object!(module_id_col,:version,:repo_id,:type)
 
       ref = branch = workspace_branch_name(project)
       match_assigns = {
-        cmp_module_id_col => self[cmp_module_id_col],
+        module_id_col => self[module_id_col],
         :project_id =>  project.id_handle.get_id(),
         :version => self[:version]
       }

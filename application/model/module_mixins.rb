@@ -1,4 +1,20 @@
 module DTK
+  class ModuleRepoInfo < Hash
+    def initialize(repo,module_name,branch_info,library_idh=nil)
+      super()
+      repo.update_object!(:repo_name,:id)
+      repo_name = repo[:repo_name]
+      hash = {
+        :repo_id => repo[:id],
+        :repo_name => repo_name,
+        :module_name => module_name,
+        :repo_url => RepoManager.repo_url(repo_name)
+      }.merge(Aux::hash_subset(branch_info,[:workspace_branch,:library_branch]))
+      hash.merge!(:library_id => library_idh.get_id()) if library_idh
+      replace(hash)
+    end
+  end
+
   module ModuleMixin
     #export to remote
     def export(version=nil)

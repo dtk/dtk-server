@@ -53,6 +53,14 @@ module XYZ
       rest_ok_response service_module.list_assembly_templates()
     end
 
+    def rest__create_workspace_branch()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      project = get_default_project()
+      workspace_branch_info = service_module.create_workspace_branch?(project,version)
+      rest_ok_response workspace_branch_info
+    end
+
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       library_id = ret_request_params(:library_id) 

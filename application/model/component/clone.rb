@@ -71,7 +71,7 @@ module XYZ
 
       #create module branch for work space if needed
       library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
-      workspace_mb = library_mb.create_component_workspace_branch?(proj)
+      workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
       workspace_mb_id = workspace_mb[:id]
       version = workspace_mb[:version]
       

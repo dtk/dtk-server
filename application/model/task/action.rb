@@ -219,7 +219,10 @@ module XYZ
       end
 
       def update_state_change_status(task_mh,status)
-        update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
+        #no op if no associated state change 
+        if self[:state_change_id]
+          update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
+        end
       end
 
       def self.add_attributes!(attr_mh,action_list)

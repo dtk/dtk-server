@@ -114,31 +114,7 @@ module DTK
       repo.diff_between_library_and_workspace(lib_branch,ws_branch)
     end
 
-    #promotes workspace changes to library
-    def promote_to_library(version=nil)
-      #TODO: unify with ModuleBranch#update_library_from_workspace_aux?(augmented_branch)
-      matching_branches = get_module_branches_matching_version(version)
-      #check that there is a workspace branch
-      unless ws_branch = find_branch(:workspace,matching_branches)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
-      end
-
-      #check that there is a library branch
-      unless lib_branch =  find_branch(:library,matching_branches)
-        raise Error.new("No library version exists for module (#{pp_module_name(version)}); try using create-new-version")
-      end
-
-      unless lib_branch[:repo_id] == ws_branch[:repo_id]
-        raise Error.new("Not supporting case where promoting workspace to library branch when branches are on two different repos")
-      end
-
-      repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
-
-      diffs = repo.diff_between_library_and_workspace(lib_branch,ws_branch).ret_summary()
-      if diffs.no_diffs?()
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-      end
-      #want this here before any changes in case error in parsing meta file
+    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
       if diffs.meta_file_changed?()
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
@@ -146,20 +122,8 @@ module DTK
         component_meta_file = ComponentMetaFile.create_meta_file_object(source_impl,library_idh,target_impl)
         component_meta_file.update_model()
       end
- 
-     result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
-      case result
-       when :changed
-        nil #no op
-       when :no_change 
-        #TODO: with check before now in diffs this shoudl not be reached
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-       when :merge_needed
-        raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
-       else
-        raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
-      end
     end
+    private :promote_to_library__meta_changes
 
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)

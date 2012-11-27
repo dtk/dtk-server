@@ -131,6 +131,10 @@ module DTK
     end
     private :update_model_from_clone_changes_aux?
 
+    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
+      Log.error("Need to write promote_to_library__meta_changes for service module")
+    end
+    private :promote_to_library__meta_changes
 
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]

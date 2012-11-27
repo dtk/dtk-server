@@ -233,28 +233,6 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
-    def get_workspace_branch_info(version=nil)
-      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo = aug_branch[:workspace_repo]
-      module_name = aug_branch[:component_module][:display_name]
-      ModuleRepoInfo.new(repo,module_name,aug_branch)
-    end
-
-    #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
-    def update_model_from_clone_changes?(diffs_summary,version=nil)
-      matching_branches = get_module_branches_matching_version(version)
-      ws_branch = find_branch(:workspace,matching_branches)
-
-      #first update the server clone
-      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
-      if merge_result == :merge_needed
-        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
-      end 
-
-      update_model_from_clone_changes_aux?(diffs_summary,ws_branch)
-      promote_to_library(version)
-    end
-
    private
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
       impl = module_branch.get_implementation()
@@ -318,19 +296,6 @@ module DTK
     end
     ComponentMetaDSLVersion = "1.0"
 
-    #type is :library or :workspace
-    def find_branch(type,branches)
-      matches =
-        case type
-          when :library then branches.reject{|r|r[:is_workspace]} 
-          when :workspace then branches.select{|r|r[:is_workspace]} 
-          else raise Error.new("Unexpected type (#{type})")
-        end
-      if matches.size > 1
-        Error.new("Unexpected that there is more than one matching #{type} branches")
-      end
-      matches.first
-    end
 
     def export_preprocess(branch)
       #noop

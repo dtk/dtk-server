@@ -83,6 +83,42 @@ module DTK
     end
     private :update_ws_branch_from_lib_branch?
 
+    def get_workspace_branch_info(version=nil)
+      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
+      repo = aug_branch[:workspace_repo]
+      module_name = aug_branch[module_type()][:display_name]
+      ModuleRepoInfo.new(repo,module_name,aug_branch)
+    end
+
+    #type is :library or :workspace
+    def find_branch(type,branches)
+      matches =
+        case type
+          when :library then branches.reject{|r|r[:is_workspace]} 
+          when :workspace then branches.select{|r|r[:is_workspace]} 
+          else raise Error.new("Unexpected type (#{type})")
+        end
+      if matches.size > 1
+        Error.new("Unexpected that there is more than one matching #{type} branches")
+      end
+      matches.first
+    end
+
+    #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
+    def update_model_from_clone_changes?(diffs_summary,version=nil)
+      matching_branches = get_module_branches_matching_version(version)
+      ws_branch = find_branch(:workspace,matching_branches)
+
+      #first update the server clone
+      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
+      if merge_result == :merge_needed
+        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
+      end 
+
+      update_model_from_clone_changes_aux?(diffs_summary,ws_branch)
+      promote_to_library(version)
+    end
+
     def push_to_remote(version=nil)
       repo = get_library_repo()
       module_name = update_object!(:display_name)[:display_name]
@@ -137,6 +173,10 @@ module DTK
       }
       module_branches = get_objs(sp_hash).map{|r|r[:module_branch]}
       module_branches.find{|mb|mb[:branch] == branch}
+    end
+
+    def module_name()
+      update_object!(:display_name)[:display_name]
     end
 
     def pp_module_name(version=nil)

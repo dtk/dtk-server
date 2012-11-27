@@ -101,19 +101,11 @@ module DTK
       Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
     end
 
-    def get_workspace_branch_info(version=nil)
-      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo = aug_branch[:workspace_repo]
-      module_name = aug_branch[module_type()][:display_name]
-      ModuleRepoInfo.new(repo,module_name,aug_branch)
-    end
-
-
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
       needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
       update_object!(*needed_cols)
-      module_name = self[:display_name]
+      module_name = module_name()
       library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
 
       #get library branch if needed
@@ -131,6 +123,14 @@ module DTK
       module_info = {:workspace_branch => workspace_mb[:branch]}
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
+
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
+      update_object!(:library_library_id,:display_name)
+      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
+      self.class.create_assembly_meta_info?(library_idh,module_branch,module_name())
+    end
+    private :update_model_from_clone_changes_aux?
+
 
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]

@@ -91,7 +91,16 @@ module XYZ
       rest_ok_response
     end
 
-     def rest__workspace_branch_info()
+    def rest__update_model_from_clone()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      json_diffs = ret_request_params(:json_diffs)
+      diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
+      service_module.update_model_from_clone_changes?(diffs_summary,version)
+      rest_ok_response
+    end
+
+    def rest__workspace_branch_info()
       service_module = create_obj(:service_module_id)
       version = ret_request_params(:version)
       workspace_branch_info = service_module.get_workspace_branch_info(version)

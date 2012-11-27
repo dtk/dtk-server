@@ -3,9 +3,11 @@ r8_nested_require('service_module','service_add_on')
 module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')
+    r8_nested_require('service_module','meta_info')
 
     extend ModuleClassMixin
     include ModuleMixin
+    extend MetaInfoClassMixin
 
     def self.model_type()
       :service_module
@@ -199,34 +201,6 @@ module DTK
       mb_mh = model_handle(:module_branch)
       cmp_module_branch_idhs = component_templates.map{|r|r[:module_branch_id]}.uniq.map{|id|mb_mh.createIDH(:id => id)}
       ModuleBranch.get_component_modules_info(cmp_module_branch_idhs)
-    end
-
-    def self.create_assembly_meta_info?(library_idh,module_branch,module_name)
-      module_branch_idh = module_branch.id_handle()
-      assembly_meta_info = Assembly::Template.meta_filename_path_info()
-      add_on_meta_info = ServiceAddOn.meta_filename_path_info()
-      depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
-      files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-
-      ndx_ports = Hash.new
-      files.select{|f|f =~ assembly_meta_info[:regexp]}.each do |meta_file|
-        json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
-        hash_content = JSON.parse(json_content)
-        assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
-          h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
-        end
-        node_bindings_hash = hash_content["node_bindings"]
-        import_info = Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
-        if import_info[:ndx_ports]
-          ndx_ports.merge!(import_info[:ndx_ports])
-        end
-      end
-      files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
-        json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
-        hash_content = JSON.parse(json_content)
-        ports = ndx_ports.values
-        ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports)
-      end
     end
 
     def self.assembly_ref(module_name,assembly_name)

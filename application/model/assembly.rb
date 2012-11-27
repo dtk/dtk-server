@@ -20,7 +20,7 @@ module XYZ
 
       service_module_branch = ServiceModule.get_library_module_branch(library_idh,service_module_name,version)
 
-      assembly_instance =  Assembly::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_instance =  Content::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
       assembly_instance.add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
       assembly_instance.create_assembly_template(library_idh,service_module_branch)
     end

@@ -237,5 +237,8 @@ module DTK; class  Assembly
       Assembly.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
     end
   end
-end; end
+end 
+#TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get
+AssemblyInstance = Assembly::Instance
+end
 

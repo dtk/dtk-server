@@ -68,6 +68,18 @@ lambda__template_nodes_and_components =
          :cols=>[:id,:display_name]
        }]
     },
+    :module_branch=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id => :component__module_branch_id},
+         :cols=>[:id,:group_id,:display_name,:branch,:repo_id]
+       }]
+    },
     :node_assembly_attributes=> {
       :type=>:json,
       :hidden=>true,

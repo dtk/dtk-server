@@ -19,7 +19,7 @@ module DTK
       end
      private
       def assembly_meta_filename_path()
-        Assembly::Template.meta_filename_path(assembly_hash()[:display_name])
+        ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])
       end
       def serialize()
         assembly_hash = assembly_output_hash()

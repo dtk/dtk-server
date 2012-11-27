@@ -121,17 +121,21 @@ module XYZ
       end
     end
 
-    def delete_file?(file_path)
+    def delete_file?(file_path,opts={})
       ret = File.exists?("#{@path}/#{file_path}")
       delete_file(file_path) if ret
       ret
     end
 
-    def delete_file(file_path)
+    def delete_file(file_path,opts={})
       checkout(@branch) do
         message = "Deleting #{file_path} in #{@branch}"
         git_command__rm(file_path)
         commit(message)
+        if opts[:push_changes]
+          pull_changes()
+          push_changes()
+        end
       end
     end
 

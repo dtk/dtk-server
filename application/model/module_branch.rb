@@ -102,14 +102,14 @@ module DTK
 
       def get_augmented_workspace_branch(module_obj,version=nil)
         sp_hash = {
-          :cols => cols_for_matching_library_branches(module_obj.model_name),
+          :cols => cols_for_matching_library_branches(module_obj.module_type()),
           :filter => [:and,[:eq, module_id_col(module_obj.module_type()),module_obj.id()], 
                       [:eq,:is_workspace,true],
                       [:eq,:version,version_field(version)]]
         }
         aug_ws_branch_rows = get_objs(module_obj.model_handle(:module_branch),sp_hash)
         if aug_ws_branch_rows.empty?
-          raise ErrorUsage.new("Component module workspace (#{module_obj.pp_module_name(version)}) does not exist")
+          raise ErrorUsage.new("Module workspace (#{module_obj.pp_module_name(version)}) does not exist")
         elsif aug_ws_branch_rows.size > 1
           raise Error.new("error in finding unique workspace branch from component module (#{module_obj.pp_module_name(version)})")
         end

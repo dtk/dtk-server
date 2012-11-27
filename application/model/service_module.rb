@@ -54,7 +54,7 @@ module DTK
 
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
       assembly_mh = mh.createMH(:component)
-      AssemblyTemplate.list(assembly_mh,:filter => filter,:component_info=>true).each do |r|
+      Assembly::Template.list(assembly_mh,:filter => filter,:component_info=>true).each do |r|
         index = r[:module_branch_id]
         assemblies = ndx_ret[index][:assemblies]
         assemblies  << SimpleOrderedHash.new([{:name => r[:display_name]}, {:id => r[:id]}, {:nodes => format_for_get_project_trees__nodes(r[:nodes])}])

@@ -163,7 +163,7 @@ module XYZ
 
     def self.name_to_id(model_handle,name)
       node_name, assembly_name = parse_user_friendly_name(name)
-      assembly_id = assembly_name && AssemblyInstance.name_to_id(model_handle.createMH(:component),assembly_name)
+      assembly_id = assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component),assembly_name)
       sp_hash =  {
         :cols => [:id,:assembly_id],
         :filter => [:and,

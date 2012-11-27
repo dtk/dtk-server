@@ -1,6 +1,6 @@
 module DTK
-  class Assembly
-    class Instance < Content
+  class Assembly; class Content
+    class Instance < self
       r8_nested_require('instance','template_output')
       def self.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         hash_values = {
@@ -169,5 +169,5 @@ module DTK
         end
       end
     end
-  end
+  end; end
 end

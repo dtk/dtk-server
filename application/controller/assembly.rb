@@ -115,7 +115,7 @@ module DTK
 
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__create_task()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(assembly_idh,:assembly,commit_msg)
       task.save!()
@@ -126,7 +126,7 @@ module DTK
 
     def rest__start()
       assembly = ret_assembly_instance_object()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
 
       # filters only stopped nodes for this assembly
       nodes    =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
@@ -159,14 +159,14 @@ module DTK
     end
 
     def rest__task_status()
-      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       format = (ret_request_params(:format)||:hash).to_sym
       rest_ok_response Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
     end
 
     #TODO: replace or given options to specify specific smoketests to run
     def rest__create_smoketests_task()
-      assembly_id = ret_request_param_id(:assembly_id,AssemblyInstance)
+      assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(id_handle(assembly_id),:smoketest,commit_msg)
       task.save!()
@@ -255,7 +255,7 @@ module DTK
     #clone assembly from library to target
     def rest__stage()
       target_idh = target_idh_with_default(request.params["target_id"])
-      assembly_id = ret_request_param_id(:assembly_id,::DTK::AssemblyTemplate)
+      assembly_id = ret_request_param_id(:assembly_id,::DTK::Assembly::Template)
       
       #TODO: if naem given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 

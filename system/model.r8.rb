@@ -361,7 +361,7 @@ module XYZ
       end
 
       def pp_object_type()
-        if self == AssemblyInstance then "assembly"
+        if kind_of?(Assembly::Instance) then "assembly"
         else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
         end
       end

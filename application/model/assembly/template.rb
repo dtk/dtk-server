@@ -1,5 +1,17 @@
-module DTK
-  class AssemblyTemplate < Assembly
+module DTK; class Assembly
+  class Template < self
+    def self.delete(assembly_idh)
+      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
+      #do not need to delete port links which use a cascade foreign keyy
+      sp_hash = {
+        :cols => [:id, :nodes],
+        :filter => [:eq, :id, assembly_idh.get_id]
+      }
+      node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
+      Model.delete_instances(node_idhs)
+      Model.delete_instance(assembly_idh)
+    end
+
     def self.list(assembly_mh,opts={})
       list_from_library(assembly_mh,opts)
     end
@@ -124,4 +136,4 @@ module DTK
       super(mn||:component)
     end
   end
-end
+end; end

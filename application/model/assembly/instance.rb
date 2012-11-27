@@ -1,7 +1,18 @@
-module DTK
-  class AssemblyInstance < Assembly
+module DTK; class  Assembly
+  class Instance < self
     r8_nested_require('instance','action')
     include ActionMixin
+    def self.delete_and_destroy_its_nodes(assembly_idh)
+      #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
+      #repo so can point to multiple assembly instances
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:eq, :assembly_id, assembly_idh.get_id]
+      }
+      assembly_nodes = get_objs(assembly_idh.createMH(:node),sp_hash)
+      assembly_nodes.map{|r|r.destroy_and_delete()}
+      Model.delete_instance(assembly_idh)
+    end
 
     def add_component(node_idh,component_template_idh)
       #first check that node_idh belongs to this instance
@@ -48,7 +59,7 @@ module DTK
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 
       if assembly_template = get_associated_template?(library_idh)
-        AssemblyTemplate.delete(assembly_template.id_handle())
+        Assembly::Template.delete(assembly_template.id_handle())
       end
       library_idh ||= assembly_template && id_handle(:model_name => :library,:id => assembly_template[:library_library_id])
       #if no library_idh is given and no matching template, use teh public library
@@ -62,7 +73,7 @@ module DTK
       library_idh = id_handle(:model_name => :library, :id => service_module[:library_library_id])
       service_module_name = service_module[:display_name]
 
-      if AssemblyTemplate.exists?(library_idh,service_module_name,new_template_name)
+      if Assembly::Template.exists?(library_idh,service_module_name,new_template_name)
         raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
       end
 
@@ -216,7 +227,7 @@ module DTK
         service_module_name = name_info[:service_module_name]
         template_name = name_info[:assembly_template_name]
       else
-      service_module_name,template_name = AssemblyTemplate.parse_component_type(self[:component_type])
+      service_module_name,template_name = Assembly::Template.parse_component_type(self[:component_type])
       end
       ui = self[:ui]
       node_idhs = get_nodes().map{|r|r.id_handle()}
@@ -226,5 +237,5 @@ module DTK
       Assembly.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
     end
   end
-end
+end; end
 

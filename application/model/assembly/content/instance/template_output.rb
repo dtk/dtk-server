@@ -1,5 +1,5 @@
 module DTK
-  class Assembly::Instance
+  class Assembly::Content::Instance
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
       def initialize(library_idh,service_module_branch)

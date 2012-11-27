@@ -1,6 +1,6 @@
 #TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
 module DTK
-  class AssemblyInstance
+  class Assembly::Instance
     module ActionMixin
       def initiate_get_netstats(action_results_queue)
         nodes = get_nodes(:id,:display_name,:external_ref)

@@ -203,7 +203,7 @@ module DTK
 
     def self.create_assembly_meta_info?(library_idh,module_branch,module_name)
       module_branch_idh = module_branch.id_handle()
-      assembly_meta_info = Assembly.meta_filename_path_info()
+      assembly_meta_info = Assembly::Template.meta_filename_path_info()
       add_on_meta_info = ServiceAddOn.meta_filename_path_info()
       depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
       files = RepoManager.ls_r(depth,{:file_only => true},module_branch)

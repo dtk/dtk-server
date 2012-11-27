@@ -1,6 +1,7 @@
 module DTK; class Assembly
   class Template < self
     def self.delete(assembly_idh)
+      #first delete the meta files
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
       #do not need to delete port links which use a cascade foreign keyy
       sp_hash = {
@@ -116,6 +117,16 @@ module DTK; class Assembly
         end
       end
       ret
+    end
+
+    def self.meta_filename_path(assembly_name)
+      "assemblies/#{assembly_name}/assembly.json"
+    end
+    def self.meta_filename_path_info()
+      {
+        :regexp => Regexp.new("assembly.json$"),
+        :path_depth => 3
+      }
     end
 
    private

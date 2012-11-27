@@ -19,6 +19,15 @@ module XYZ
       klass.existing_image?(image_id)
     end
 
+    def self.start_instances(nodes)
+      klass = load_iaas_for(:node => nodes.first)
+      klass.start_instances(nodes)
+    end
+    def self.stop_instances(nodes)
+      klass = load_iaas_for(:node => nodes.first)
+      klass.stop_instances(nodes)
+    end
+
     def self.find_matching_node_binding_rule(node_binding_rules,target)
       target.update_object!(:iaas_type,:iaas_properties)
       klass = load_iaas_for(:target => target)
@@ -29,9 +38,15 @@ module XYZ
       klass = load_config_node_adapter()
       klass.server_host()
     end
+
     def self.destroy_node?(node)
       klass = load_iaas_for(:node => node)
       klass.destroy_node?(node)
+    end
+
+    def self.associate_elastic_ip(node)
+      klass = load_iaas_for(:node => node)
+      klass.associate_elastic_ip(node)
     end
 
     def self.get_and_update_node_state!(node,attribute_names)

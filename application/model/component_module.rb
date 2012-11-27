@@ -114,31 +114,7 @@ module DTK
       repo.diff_between_library_and_workspace(lib_branch,ws_branch)
     end
 
-    #promotes workspace changes to library
-    def promote_to_library(version=nil)
-      #TODO: unify with ModuleBranch#update_library_from_workspace_aux?(augmented_branch)
-      matching_branches = get_module_branches_matching_version(version)
-      #check that there is a workspace branch
-      unless ws_branch = find_branch(:workspace,matching_branches)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
-      end
-
-      #check that there is a library branch
-      unless lib_branch =  find_branch(:library,matching_branches)
-        raise Error.new("No library version exists for module (#{pp_module_name(version)}); try using create-new-version")
-      end
-
-      unless lib_branch[:repo_id] == ws_branch[:repo_id]
-        raise Error.new("Not supporting case where promoting workspace to library branch when branches are on two different repos")
-      end
-
-      repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
-
-      diffs = repo.diff_between_library_and_workspace(lib_branch,ws_branch).ret_summary()
-      if diffs.no_diffs?()
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-      end
-      #want this here before any changes in case error in parsing meta file
+    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
       if diffs.meta_file_changed?()
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
@@ -146,20 +122,8 @@ module DTK
         component_meta_file = ComponentMetaFile.create_meta_file_object(source_impl,library_idh,target_impl)
         component_meta_file.update_model()
       end
- 
-     result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
-      case result
-       when :changed
-        nil #no op
-       when :no_change 
-        #TODO: with check before now in diffs this shoudl not be reached
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-       when :merge_needed
-        raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
-       else
-        raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
-      end
     end
+    private :promote_to_library__meta_changes
 
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)
@@ -209,8 +173,8 @@ module DTK
       #get library branch if needed
       library_mb ||= get_library_module_branch(version)
 
-      #create module branch for workspace if needed and pust it to repo server
-      workspace_mb = library_mb.create_component_workspace_branch?(proj)
+      #create module branch for workspace if needed and push it to repo server
+      workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
       
       #create new project implementation if needed
       #  first get library implementation
@@ -231,28 +195,6 @@ module DTK
       repo = Model.get_obj(model_handle(:repo),sp_hash)
       module_info = {:workspace_branch => workspace_mb[:branch]}
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
-    end
-
-    def get_workspace_branch_info(version=nil)
-      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo = aug_branch[:workspace_repo]
-      module_name = aug_branch[:component_module][:display_name]
-      ModuleRepoInfo.new(repo,module_name,aug_branch)
-    end
-
-    #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
-    def update_model_from_clone_changes?(diffs_summary,version=nil)
-      matching_branches = get_module_branches_matching_version(version)
-      ws_branch = find_branch(:workspace,matching_branches)
-
-      #first update the server clone
-      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
-      if merge_result == :merge_needed
-        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
-      end 
-
-      update_model_from_clone_changes_aux?(diffs_summary,ws_branch)
-      promote_to_library(version)
     end
 
    private
@@ -318,38 +260,9 @@ module DTK
     end
     ComponentMetaDSLVersion = "1.0"
 
-    #type is :library or :workspace
-    def find_branch(type,branches)
-      matches =
-        case type
-          when :library then branches.reject{|r|r[:is_workspace]} 
-          when :workspace then branches.select{|r|r[:is_workspace]} 
-          else raise Error.new("Unexpected type (#{type})")
-        end
-      if matches.size > 1
-        Error.new("Unexpected that there is more than one matching #{type} branches")
-      end
-      matches.first
-    end
 
     def export_preprocess(branch)
       #noop
-    end
-
-    class ModuleRepoInfo < Hash
-      def initialize(repo,module_name,branch_info,library_idh=nil)
-        super()
-        repo.update_object!(:repo_name,:id)
-        repo_name = repo[:repo_name]
-        hash = {
-          :repo_id => repo[:id],
-          :repo_name => repo_name,
-          :module_name => module_name,
-          :repo_url => RepoManager.repo_url(repo_name)
-        }.merge(Aux::hash_subset(branch_info,[:workspace_branch,:library_branch]))
-        hash.merge!(:library_id => library_idh.get_id()) if library_idh
-        replace(hash)
-      end
     end
   end
 end

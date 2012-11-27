@@ -13,9 +13,62 @@ module XYZ
         !!conn().image_get(image_id)
       end
 
+      def self.start_instances(nodes)
+        nodes.each do |node|
+          conn().server_start(node.instance_id())
+          Log.debug "Starting instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
+        end
+      end
+
+      def self.stop_instances(nodes)
+        nodes.each do |node|
+          conn().server_stop(node.instance_id())
+          node.update_admin_op_status!(:stopped)
+          Log.debug "Stopping instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
+        end
+      end
+
+      def self.associate_elastic_ip(node)
+        node.update_object!(:hostname_external_ref, :admin_op_status)
+        conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
+        node.update_admin_op_status!(:running)
+      end
+
+      def self.process_persistent_hostname__first_boot!(node)
+        begin 
+          # allocate elastic IP for this node
+          elastic_ip = conn().allocate_elastic_ip()
+
+          node.update({
+            :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
+          })
+
+          Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
+        rescue Fog::Compute::AWS::Error => e
+          Log.error "Not able to set Elastic IP, reason: #{e.message}"
+          # TODO: Check with Rich if this is recovarable error, for now it is not
+          raise e
+        end
+      end
+
+      def self.process_persistent_hostname__restart(node)
+        Log.info("in process_persistent_hostname__restart for node #{node[:display_name]}")
+        #TODO: stub for feature_node_admin_state
+      end
+      def self.process_persistent_hostname__terminate(node)
+        unless node[:hostname_external_ref].nil? 
+          elastic_ip = node[:hostname_external_ref][:elastic_ip]
+          # no need for dissasociation since that will be done when instance is destroyed
+          conn().release_elastic_ip(elastic_ip)
+          Log.info "Elastic IP #{elastic_ip} has been released."
+        else
+          Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+        end
+      end
+
       def self.execute(task_idh,top_task_idh,task_action)
         node = task_action[:node]
-        node.update_object!(:os_type,:external_ref)
+        node.update_object!(:os_type,:external_ref,:hostname_external_ref)
 
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
@@ -67,6 +120,9 @@ module XYZ
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
+        if node.persistent_hostname?()
+          process_persistent_hostname__first_boot!(node)
+        end
         {:status => "succeeded",
           :node => {
             :external_ref => external_ref
@@ -81,12 +137,15 @@ module XYZ
         return true unless instance_id #return if instance does not exist
         response = conn().server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
+        if node.persistent_hostname?()
+          process_persistent_hostname__terminate(node)
+        end
         response
       end
 
       def self.get_and_update_node_state!(node,attribute_names)
         ret = Hash.new
-        instance_id = (node[:external_ref]||{})[:instance_id]
+        instance_id = node.instance_id()
         unless instance_id
           Log.error("get_node_state called when #{node_print_form(node)} does not have instance id")
           return ret

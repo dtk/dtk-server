@@ -53,6 +53,14 @@ module XYZ
       rest_ok_response service_module.list_assembly_templates()
     end
 
+    def rest__create_workspace_branch()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      project = get_default_project()
+      workspace_branch_info = service_module.create_workspace_branch?(project,version)
+      rest_ok_response workspace_branch_info
+    end
+
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       library_id = ret_request_params(:library_id) 
@@ -83,7 +91,23 @@ module XYZ
       rest_ok_response
     end
 
-    def rest__workspace_branch_info(service_module_id)
+    def rest__update_model_from_clone()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      json_diffs = ret_request_params(:json_diffs)
+      diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
+      service_module.update_model_from_clone_changes?(diffs_summary,version)
+      rest_ok_response
+    end
+
+    def rest__workspace_branch_info()
+      service_module = create_obj(:service_module_id)
+      version = ret_request_params(:version)
+      workspace_branch_info = service_module.get_workspace_branch_info(version)
+      rest_ok_response workspace_branch_info
+    end
+
+    def rest__deprecate_workspace_branch_info(service_module_id)
       #TODO: stub using library branch until put in service module workspace mechanism
       service_module = create_object_from_id(service_module_id)
       repo = service_module.get_library_repo()

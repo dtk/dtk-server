@@ -32,6 +32,10 @@ module XYZ
       out << Aux::pp_form(obj)
       obj
     end
+    def self.warn(msg, out = $stdout)
+      out << "warn: "
+      out << format(msg)
+    end
     def self.error_pp(obj, out = $stdout)
       out << "error: "
       out << Aux::pp_form(obj)

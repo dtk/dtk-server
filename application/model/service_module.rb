@@ -72,6 +72,7 @@ module DTK
         cmps.map{|cmp|SimpleOrderedHash.new([{:name => cmp[:component_name]},{:id => cmp[:component_id]},{:description => cmp[:description]}])}
       end
     end
+
 =begin
     def get_ports()
       module_branches = get_module_branches()
@@ -99,6 +100,41 @@ module DTK
     def get_module_branches()
       Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
     end
+
+    #creates workspace branch (if needed) and related objects from library one
+    def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
+      needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
+      update_object!(*needed_cols)
+      module_name = module_name()
+      library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
+
+      #get library branch if needed
+      library_mb ||= get_library_module_branch(version)
+
+      #create module branch for workspace if needed and push it to repo server
+      workspace_mb = library_mb.create_workspace_branch?(:service_module,proj)
+      
+      #get repo info
+      sp_hash = {
+        :cols => [:id, :repo_name],
+        :filter => [:eq, :id, workspace_mb[:repo_id]]
+      }
+      repo = Model.get_obj(model_handle(:repo),sp_hash)
+      module_info = {:workspace_branch => workspace_mb[:branch]}
+      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
+    end
+
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
+      update_object!(:library_library_id,:display_name)
+      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
+      self.class.create_assembly_meta_info?(library_idh,module_branch,module_name())
+    end
+    private :update_model_from_clone_changes_aux?
+
+    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
+      Log.error("Need to write promote_to_library__meta_changes for service module")
+    end
+    private :promote_to_library__meta_changes
 
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]

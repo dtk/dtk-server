@@ -48,12 +48,23 @@ module XYZ
               else
                 CommandAndControl::Error.new 
               end
-          end
+            end
           task.update_at_task_completion("failed",TaskAction::Result::Failed.new(error))
         end
 
         def set_result_timeout(workitem,new_result,task)
           task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error::Timeout.new))
+        end
+
+       protected
+
+        def poll_to_detect_node_ready(workflow, node, callbacks)
+          # num_poll_cycles => number of times we are going to poll given node
+          # poll_cycles     => cycle of poll in seconds
+          num_poll_cycles, poll_cycle = 25, 6
+          receiver_context = {:callbacks => callbacks, :expected_count => 1}
+          opts = {:count => num_poll_cycles,:poll_cycle => poll_cycle}
+          workflow.poll_to_detect_node_ready(node,receiver_context,opts)
         end
 
        private
@@ -65,7 +76,7 @@ module XYZ
           if event = add_start_task_event?(task)
             Log.info_pp [:start_task_event, event]
           end
-          debug_print_task_info = "task_id=#{task.id.to_s}"
+  
           begin
             yield
            rescue Exception => e
@@ -106,12 +117,44 @@ module XYZ
             reply_to_engine(workitem)
           end
         end
+
        private
         def errors_in_result?(result)
           if result[:status] == "failed"
             result[:error_object] ? [{:message => result[:error_object].to_s}] : []
           end
         end    
+      end
+
+      class PowerOnNode < Top
+
+        def consume(workitem)
+          params = get_params(workitem) 
+          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
+
+          callbacks = {
+            :on_msg_received => proc do |msg|
+              result = {:type => :power_on_node, :task_id => task_id}
+              node = task[:executable_action][:node]
+              # TODO do both statuses at once
+              node.update_operational_status!(:running)
+              node.update_admin_op_status!(:running)
+              node.associate_elastic_ip()
+              set_result_succeeded(workitem,result,task,action)
+              Log.info "Successfully set elastic ip and started node with id '#{node.id}'"
+              reply_to_engine(workitem)
+            end,
+            :on_timeout => proc do 
+              Log.error("Timeout detecting node is ready to be powered on!")
+              result = {:type => :timeout_create_node, :task_id => task_id}
+              set_result_failed(workitem,result,task)
+              reply_to_engine(workitem)
+            end
+          }
+
+          poll_to_detect_node_ready(workflow, action[:node], callbacks)
+        end
+
       end
 
       class DetectCreatedNodeIsReady < Top
@@ -121,25 +164,25 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :completed_create_node, :task_id => task_id} 
-              event = task.add_event(:complete_succeeded,result)
+ 
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
-              set_result_succeeded(workitem,result,task,action) 
+              # assign elastic ip if present, this covers both cases when starting node or creating it
+              task[:executable_action][:node].associate_elastic_ip()
+              set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
-              Log.error("timeout detecting node is ready")
+              Log.error("Timeout detecting if node is ready")
               result = {:type => :timeout_create_node, :task_id => task_id}
               set_result_failed(workitem,result,task)
               reply_to_engine(workitem)
             end
           }
-          num_poll_cycles = 25
-          poll_cycle = 6 #in seconds
-          receiver_context = {:callbacks => callbacks, :expected_count => 1}
-          opts = {:count => num_poll_cycles,:poll_cycle => poll_cycle}
-          workflow.poll_to_detect_node_ready(action[:node],receiver_context,opts)
+
+          poll_to_detect_node_ready(workflow, action[:node], callbacks)
         end
       end
 

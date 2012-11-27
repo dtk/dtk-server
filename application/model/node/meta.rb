@@ -17,7 +17,12 @@ module XYZ
 
       #TODO: may replace is_deployed and operational_status with status
       column :is_deployed, :boolean, :default => false
-      column :operational_status, :varchar, :size => 50
+
+      column :admin_op_status, :varchar, :size => 20, :default => 'running'
+      column :operational_status, :varchar, :size => 20
+
+      column :hostname_external_ref, :json
+
       virtual_column :status, :type => :varchar, :local_dependencies => [:is_deployed,:operational_status]
       column :ui, :json
       foreign_key :assembly_id, :component, FK_SET_NULL_OPT

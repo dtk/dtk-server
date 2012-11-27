@@ -24,7 +24,7 @@ module XYZ
         end
         set_updated_at!(update_set_clause)
 
-        unless opts[:returning_cols] 
+        unless opts[:returning_cols]
           update_ds.update(update_set_clause)
           return nil
         end

@@ -41,8 +41,9 @@ module XYZ
       end
       def self.create_from_hash(task_action_type,hash,task_idh)
         case task_action_type
-          when "CreateNode" then CreateNode.new(:hash,hash,task_idh)
-          when "ConfigNode" then ConfigNode.new(:hash,hash,task_idh)
+          when "CreateNode"  then CreateNode.new(:hash,hash,task_idh)
+          when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
+          when "PowerOnNode" then PowerOnNode.new(:hash,hash,task_idh)
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
@@ -105,13 +106,15 @@ module XYZ
       end
       private :retry_get_dynamic_attributes, :values_non_null?
 
-      #virtual gets overwritten
-      #updates object and the tasks in the model
+      # virtual gets overwritten
+      # updates object and the tasks in the model
       def get_and_update_attributes!(task)
+        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
       end
 
-      #virtual gets overwritten
+      # virtual gets overwritten
       def add_internal_guards!(guards)
+        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
       end
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
@@ -134,6 +137,8 @@ module XYZ
         ret
       end
     end
+
+
 
     class CreateNode < TaskActionNode
       def initialize(type,item,task_idh=nil,assembly_idh=nil)
@@ -214,7 +219,10 @@ module XYZ
       end
 
       def update_state_change_status(task_mh,status)
-        update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
+        #no op if no associated state change 
+        if self[:state_change_id]
+          update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
+        end
       end
 
       def self.add_attributes!(attr_mh,action_list)
@@ -222,7 +230,6 @@ module XYZ
         action_list.each{|a|ndx_actions[a[:node][:id]] = a}
         return nil if ndx_actions.empty?
 
-        node_ids = action_list.map{|x|x[:node][:id]}
         parent_field_name = DB.parent_field(:node,:attribute)
         sp_hash = {
           :relation => :attribute,
@@ -258,6 +265,13 @@ module XYZ
           ]
         PrettyPrintHash.new.set?(*kv_array)
       end
+    end
+
+    ##
+    # Class we are using to execute code which is responsible for handling Node
+    # when she moves from pending state to running state.
+    ##
+    class PowerOnNode < CreateNode
     end
 
     class ConfigNode < TaskActionNode

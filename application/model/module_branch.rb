@@ -14,6 +14,11 @@ module DTK
       RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,self)
     end
 
+    #this adds ws branch from this, which is a lib branch
+    def add_workspace_branch?(new_ws_branch_name)
+      RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
+    end
+
     def serialize_and_save_to_repo(file_path,hash_content)
       content = JSON.pretty_generate(hash_content)
       RepoManager.add_file({:path => file_path},content,self)
@@ -52,7 +57,7 @@ module DTK
 
     def self.cols_for_matching_library_branches(type)
       matching_lib_branches_col = (type.to_s == "component_module" ? :matching_component_library_branches : :matching_service_library_branches)
-      [:id,:repo_id,:version,:branch,component_module_id_col(),matching_lib_branches_col]
+      [:id,:repo_id,:version,:branch,module_id_col(type),matching_lib_branches_col]
     end
 
     def self.get_component_modules_info(module_branch_idhs)
@@ -97,14 +102,14 @@ module DTK
 
       def get_augmented_workspace_branch(module_obj,version=nil)
         sp_hash = {
-          :cols => cols_for_matching_library_branches(module_obj.model_name),
-          :filter => [:and,[:eq, ModuleBranch.component_module_id_col(),module_obj.id()], 
+          :cols => cols_for_matching_library_branches(module_obj.module_type()),
+          :filter => [:and,[:eq, module_id_col(module_obj.module_type()),module_obj.id()], 
                       [:eq,:is_workspace,true],
                       [:eq,:version,version_field(version)]]
         }
         aug_ws_branch_rows = get_objs(module_obj.model_handle(:module_branch),sp_hash)
         if aug_ws_branch_rows.empty?
-          raise ErrorUsage.new("Component module workspace (#{module_obj.pp_module_name(version)}) does not exist")
+          raise ErrorUsage.new("Module workspace (#{module_obj.pp_module_name(version)}) does not exist")
         elsif aug_ws_branch_rows.size > 1
           raise Error.new("error in finding unique workspace branch from component module (#{module_obj.pp_module_name(version)})")
         end
@@ -161,13 +166,13 @@ module DTK
       end
     end
   
-    def create_component_workspace_branch?(project)
-      cmp_module_id_col = component_module_id_col()
-      update_object!(cmp_module_id_col,:version,:repo_id,:type)
+    def create_workspace_branch?(module_type,project)
+      module_id_col = module_id_col(module_type)
+      update_object!(module_id_col,:version,:repo_id,:type)
 
       ref = branch = workspace_branch_name(project)
       match_assigns = {
-        cmp_module_id_col => self[cmp_module_id_col],
+        module_id_col => self[module_id_col],
         :project_id =>  project.id_handle.get_id(),
         :version => self[:version]
       }
@@ -179,8 +184,12 @@ module DTK
         :type => self[:type]
 
       }
-      cmp_branch_mh = model_handle.merge(:parent_model_name => :component_module) 
-      mb_idh = Model.create_from_row?(cmp_branch_mh,ref,match_assigns,other_assigns)
+      branch_mh = model_handle.merge(:parent_model_name => module_type)
+      mb_idh = Model.create_from_row?(branch_mh,ref,match_assigns,other_assigns) do
+        #called only if row is created
+        new_ws_branch_name = branch
+        add_workspace_branch?(new_ws_branch_name)
+      end
       mb_idh.create_object().merge(match_assigns).merge(other_assigns)
     end
 
@@ -230,23 +239,15 @@ module DTK
     end
 
     #in case we change what schema the module and branch objects under
-    def self.service_module_id_col()
-      :service_id
+    def self.module_id_col(module_type)
+      case module_type
+        when :service_module then :service_id
+        when :component_module then :component_id
+        else raise Error.new("Unexected module type (#{module_type})")
+      end
     end
-    def service_module_id_col()
-      self.class.service_module_id_col()
-    end
-    def service_module_id()
-      self[service_module_id_col()]
-    end
-    def self.component_module_id_col()
-      :component_id
-    end
-    def component_module_id_col()
-      self.class.component_module_id_col()
-    end
-    def component_module_id()
-      self[component_module_id_col()]
+    def module_id_col(module_type)
+      self.class.module_id_col(module_type)
     end
   end
 end

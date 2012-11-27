@@ -150,8 +150,6 @@ module XYZ
       tpl = R8Tpl::TemplateR8.new("node/actest",user_context())
       tpl.assign(:_app,app_common())
       foo = tpl.render()
-pp foo
-pp '++++++++++++++++++++++++++++++'
 
       return {
         :content => foo

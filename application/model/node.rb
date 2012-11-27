@@ -24,6 +24,11 @@ module XYZ
        :external_ref
       ]
     end
+#TODO: stub for feature_node_admin_state
+    def persistent_hostname?()
+      true
+    end
+#TODO: end stub for feature_node_admin_state
 
     ### virtual column defs
     #######################
@@ -201,12 +206,25 @@ module XYZ
       self[:operational_status] = op_status.to_s
     end
 
+    def update_admin_op_status!(op_status)
+      update(:admin_op_status => op_status.to_s)
+      self[:admin_op_status] = op_status.to_s
+    end
+
     def self.pbuilderid(node)
       node.update_object!(:external_ref)
       (node[:external_ref]||{})[:instance_id]
     end
     def pbuilderid()
       Node.pbuilderid(self)
+    end
+
+    def instance_id()
+      (self[:external_ref]||{})[:instance_id]
+    end
+
+    def elastic_ip()
+      (self[:hostname_external_ref]||{})[:elastic_ip]
     end
     
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
@@ -305,7 +323,7 @@ module XYZ
     end
 
     def destroy_and_delete()
-      update_object!(:external_ref)
+      update_object!(:external_ref,:hostname_external_ref)
       suceeeded = CommandAndControl.destroy_node?(self)
       if suceeeded
         update_dangling_links()
@@ -448,6 +466,14 @@ module XYZ
         component_el = {:id => component[:id], :name =>  name, :i18n => cmp_i18n}
         component_icon_fn = ((component[:ui]||{})[:images]||{})[:tnail]
         component_el.merge(component_icon_fn ? {:component_icon_filename => component_icon_fn} : {})
+      end
+    end
+
+    # Method will take already allocated elastic IP and assign it deploy node.
+    # Keep in mind this can only happen when node is 'running' state
+    def associate_elastic_ip()
+      if persistent_hostname?
+        CommandAndControl.associate_elastic_ip(self)
       end
     end
 

@@ -32,7 +32,7 @@ module DTK
         matching_branches = ws_branches
       else
         sample_ws_branch = ws_branches.first
-        type = sample_ws_branch.update_object!(:type)[:type]
+        type = sample_ws_branch.update_object!(:type)[:type].to_sym
         sp_hash = {
           :cols => cols_for_matching_library_branches(type),
           :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]

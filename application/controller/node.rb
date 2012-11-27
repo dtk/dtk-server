@@ -15,7 +15,7 @@ module XYZ
       rest_ok_response node.info_about(about)
     end
     AboutEnum = {
-      :instance => [:components],
+      :instance => [:components]
 #      :template => [:nodes,:components,:targets]
     }
 
@@ -76,8 +76,8 @@ module XYZ
       node = create_object_from_id(id)
       node_service_checks = node.get_node_service_checks()
       component_service_checks = node.get_component_service_checks()
-pp [:node_service_checks,node_service_checks]
-pp [:component_service_checks,component_service_checks]
+      pp [:node_service_checks,node_service_checks]
+      pp [:component_service_checks,component_service_checks]
       tpl = R8Tpl::TemplateR8.new("dock/node_get_service_checks",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:node_service_checks,node_service_checks)

@@ -65,7 +65,7 @@ module DTK
        when :nodes
         cols = [:nodes]
         post_process_per_row = proc do |r|
-          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref,:type)
+          r[:node].hash_subset(:id,:display_name,:os_type,:external_ref,:type,:admin_op_status)
         end
        when :tasks
         cols = [:tasks]
@@ -77,6 +77,7 @@ module DTK
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+
       rows = get_objs(:cols => cols)
       ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
       order ? ret.sort(&order) : ret

@@ -17,6 +17,9 @@ module XYZ
       end
     end
     class EC2 < Top
+
+      WAIT_FOR_NODE = 6 # seconds
+
       def initialize()             
         compute_params = Fog.credentials()
         #TODO: fix up by basing on current target's params
@@ -83,7 +86,20 @@ module XYZ
       end
 
       def server_start(instance_id)
-        hash_form(@conn.start_instances(instance_id))
+         (tries=10).times do
+          begin
+            return hash_form(@conn.start_instances(instance_id))
+          rescue Fog::Compute::AWS::Error => e
+            # expected error in case node is not stopped, wait try again
+            if (e.message.include? 'IncorrectInstanceState')
+              Log.debug "Node with instance ID '#{instance_id}' is not yet ready, waiting #{WAIT_FOR_NODE} seconds ..."
+              sleep(WAIT_FOR_NODE)
+              next
+            end
+          raise e
+          end
+        end
+        raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries*WAIT_FOR_NODE} seconds."
       end
 
       def server_stop(instance_id)

@@ -114,8 +114,7 @@ module DTK
       stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
 
       if stopped_nodes.size == 0
-        # First need to test this TODO
-        # return rest_ok_response(:errors => ["There are no stopped nodes for assembly '#{assembly.display_name}'"])
+        return rest_ok_response(:errors => ["There are no stopped nodes for assembly '#{assembly[:id]}'"])
       end
 
       queue = SimpleActionQueue.new

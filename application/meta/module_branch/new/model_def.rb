@@ -70,6 +70,18 @@ lambda__matching_library_branches =
   :virtual_columns=>{
     :matching_component_library_branches=> lambda__matching_library_branches.call(:type => :component_module),
     :matching_service_library_branches=> lambda__matching_library_branches.call(:type => :service_module),
+    :service_module=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name => :service_module,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:id => q(:module_branch,:service_id)},
+         :cols => [:id,:group_id,:display_name]
+       }]
+    },
     :component_module_info =>{
       :type=>:json,
       :hidden=>true,

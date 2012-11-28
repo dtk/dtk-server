@@ -234,7 +234,7 @@ module DTK; class  Assembly
       if node_idhs.empty?
         raise Error.new("Cannot find any nodes associated with assembly (#{self[:display_name]})")
       end
-      Assembly.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
+      Assembly::Template.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
     end
   end
 end 

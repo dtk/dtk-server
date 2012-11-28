@@ -22,6 +22,7 @@ module DTK
     def serialize_and_save_to_repo(file_path,hash_content)
       content = JSON.pretty_generate(hash_content)
       RepoManager.add_file({:path => file_path},content,self)
+      RepoManager.push_changes(self)
     end
 
     def self.update_library_from_workspace?(ws_branches,opts={})
@@ -93,6 +94,11 @@ module DTK
         :filter => [:eq, :id, self[:repo_id]]
       }
       Model.get_obj(model_handle(:repo),sp_hash)
+    end
+
+    def get_service_module()
+      row = get_obj(:cols => [:service_module])
+      row && row[:service_module]
     end
 
     class << self

@@ -148,7 +148,6 @@ module XYZ
         end
         commit(message)
         if opts[:push_changes]
-          pull_changes()
           push_changes()
         end
       end

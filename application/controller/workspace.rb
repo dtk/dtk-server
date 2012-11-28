@@ -1127,7 +1127,7 @@ pp service_list
         id_handle(id,model)
       end
 
-      Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
+      Assembly::Template.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
     end
   end

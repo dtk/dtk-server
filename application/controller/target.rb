@@ -32,7 +32,7 @@ module XYZ
 
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
-      Assembly.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
+      Assembly::Template.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
       rest_ok_response 
     end
 

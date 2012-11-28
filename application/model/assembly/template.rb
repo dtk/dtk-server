@@ -1,11 +1,30 @@
 module DTK; class Assembly
   class Template < self
-    #TODO: no_assembly_template_ws
+    def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+      #first make sure that all referenced components have updated modules in the library
+      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
+      augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
+
+      #1) get a content object, 2) modify, and 3) persist
+      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+
+      service_module_branch = ServiceModule.get_library_module_branch(library_idh,service_module_name,version)
+
+      assembly_ci =  Content::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_ci.add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
+      assembly_ci.create_assembly_template(library_idh,service_module_branch)
+      #TODO: assembly_template_ws_item
+      assembly_ci.synchronize_workspace_with_library_branch()
+    end
+
+    #TODO: assembly_template_ws_item
     #TODO:   assembly_idh parent is library
     def self.delete(assembly_idh)
       #first delete the meta files
       ServiceModule.delete_assembly_meta_info?(assembly_idh)
-      #TODO: no_assembly_template_ws - so below synchronizes ws branch with library branch
+      #TODO: assembly_template_ws_item - so below synchronizes ws branch with library branch
       synchronize_workspace_with_library_branch(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
       #do not need to delete port links which use a cascade foreign keyy
@@ -23,8 +42,7 @@ module DTK; class Assembly
       service_module = module_info[:service_module]
       lib_branch = module_info[:module_branch]
       version=nil #TODO: stub
-      ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
-      if ws_branch
+      if ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
         repo = ws_branch[:workspace_repo]
         repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
       end

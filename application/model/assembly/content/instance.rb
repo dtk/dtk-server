@@ -66,14 +66,17 @@ module DTK
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        template_output = TemplateOutput.new(library_idh,service_module_branch)
+        @template_output = TemplateOutput.new(library_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in library and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
-        template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
+        @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
 
-        template_output.save_to_model()
-        template_output.serialize_and_save_to_repo()
+        @template_output.save_to_model()
+        @template_output.serialize_and_save_to_repo()
+      end
+      def synchronize_workspace_with_library_branch()
+        @template_output.synchronize_workspace_with_library_branch()
       end
      private
       #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id

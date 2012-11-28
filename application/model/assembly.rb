@@ -8,23 +8,6 @@ module XYZ
     include AssemblyImportMixin
     extend AssemblyImportClassMixin
 
-    def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
-      #first make sure that all referenced components have updated modules in the library
-      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
-      augmented_lib_branches = ModuleBranch.update_library_from_workspace?(ws_branches)
-
-      #1) get a content object, 2) modify, and 3) persist
-      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
-      #TODO: raise error to user if dangling link
-      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-
-      service_module_branch = ServiceModule.get_library_module_branch(library_idh,service_module_name,version)
-
-      assembly_instance =  Content::Instance.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-      assembly_instance.add_content_for_clone!(library_idh,node_idhs,port_links,augmented_lib_branches)
-      assembly_instance.create_assembly_template(library_idh,service_module_branch)
-    end
-
     def info(subtype)
       nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
       sp_hash = {

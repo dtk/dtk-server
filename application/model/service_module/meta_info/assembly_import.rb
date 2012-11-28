@@ -11,16 +11,13 @@ module DTK; class ServiceModule
     def add_assemblies(module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
       assemblies_hash.each do |ref,assem|
-        @db_updates_assemblies["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem,module_branch_idh,module_name))
-        @db_updates_assemblies["node"].merge!(AssemblyImportInternal.import_nodes(@library_idh,ref,assem,node_bindings_hash))
-      end
+        @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,module_name))
+        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@library_idh,ref,assem,node_bindings_hash))
 
-
-      assemblies_hash.each do |ref,assem|
         assembly_idh = @library_idh.get_child_id_handle(:component,ref)
         #TODO: more efficient if pass @ndx_ports computed so far into add_ports_during_import() to avoid db lookups
         ports = add_ports_during_import(assembly_idh)
-        @db_updates_port_links.merge!(AssemblyImportInternal.import_port_links(assembly_idh,ref,assem,ports))
+        @db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assem,ports))
         ports.each{|p|@ndx_ports[p[:id]] = p}
       end
     end
@@ -34,8 +31,12 @@ module DTK; class ServiceModule
       import_objects_from_hash(@library_idh,{"component" => @db_updates_port_links})
     end
 
-    def import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
-      AssemblyImportInternal.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+    def ports()
+      @ndx_ports.values()
+    end
+
+    def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+      Internal.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
     end
 
    private
@@ -47,7 +48,8 @@ module DTK; class ServiceModule
       Port.create_assembly_template_ports?(self,link_defs_info,create_opts)
     end
 
-    module AssemblyImportInternal
+    #TODO: now taht converted top level to a call; dont need these internal modules
+    module Internal
       include AssemblyImportExportCommon
       def self.import_assembly_top(assembly_ref,assembly_hash,module_branch_idh,module_name)
         {

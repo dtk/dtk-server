@@ -1,5 +1,7 @@
 r8_require('module_mixins')
 r8_nested_require('service_module','service_add_on')
+#TODO: until move import_export_common under service module
+r8_nested_require('assembly','import_export_common')
 module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')

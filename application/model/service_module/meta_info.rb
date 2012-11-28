@@ -1,6 +1,6 @@
 module DTK
   class ServiceModule
-#    r8_nested_require('meta_info','assembly_import')
+    r8_nested_require('meta_info','assembly_import')
     module MetaInfoClassMixin
       def delete_assembly_meta_info?(assembly_idh)
         delete_assemblies_meta_info?([assembly_idh])
@@ -31,7 +31,7 @@ module DTK
         depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         
-        ndx_ports = Hash.new
+        assembly_import_helper = AssemblyImport.new(library_idh)
         files.select{|f|f =~ assembly_meta_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
@@ -39,15 +39,13 @@ module DTK
             h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
           end
           node_bindings_hash = hash_content["node_bindings"]
-          import_info = Assembly.import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
-          if import_info[:ndx_ports]
-            ndx_ports.merge!(import_info[:ndx_ports])
-          end
+          assembly_import_helper.add_assemblies(module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
         end
+        assembly_import_helper.import()
+        ports = assembly_import_helper.ports()
         files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
-          ports = ndx_ports.values
           ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports)
         end
       end

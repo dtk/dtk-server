@@ -29,7 +29,7 @@ module DTK
           :type => type,
           :sub_assembly_id => sub_assembly_id
         }
-        port_links = Assembly.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
+        port_links = AssemblyImport.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
         ao_input_hash.merge!(:port_link => port_links)
         input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}
         Model.import_objects_from_hash(library_idh,{"component" =>  input_hash})

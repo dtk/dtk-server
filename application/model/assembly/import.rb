@@ -2,12 +2,15 @@
 module XYZ
   module AssemblyImportClassMixin
     def import(library_idh,module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
-      import_hash = {"component" => Hash.new,"node" => Hash.new}
+      db_update_hash = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       assemblies_hash.each do |ref,assem|
-        import_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem,module_branch_idh,module_name))
-        import_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
+        db_update_hash["component"].merge!(AssemblyImportInternal.import_assembly_top(ref,assem,module_branch_idh,module_name))
+        db_update_hash["node"].merge!(AssemblyImportInternal.import_nodes(library_idh,ref,assem,node_bindings_hash))
       end
-      import_objects_from_hash(library_idh,import_hash)
+      mark_as_complete_constraint = {:module_branch_id=>module_branch_idh.get_id()} #so only delete extra components that belong to same module
+      db_update_hash["component"].mark_as_complete(mark_as_complete_constraint)
+      import_objects_from_hash(library_idh,db_update_hash)
+
       #port links can only be imported in after ports created
       #add ports to assembly nodes
       pl_import_hash = Hash.new

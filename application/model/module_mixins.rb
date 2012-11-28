@@ -110,6 +110,7 @@ module DTK
       matches.first
     end
 
+    #TODO: assembly_template_ws_item
     #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
     def update_model_from_clone_changes?(diffs_summary,version=nil)
       matching_branches = get_module_branches_matching_version(version)

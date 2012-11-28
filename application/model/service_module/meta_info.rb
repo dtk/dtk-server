@@ -2,14 +2,28 @@ module DTK
   class ServiceModule
     module MetaInfoClassMixin
       def delete_assembly_meta_info?(assembly_idh)
-        assembly = assembly_idh.create_object().get_obj(:cols => [:display_name, :module_branch])
-        module_branch = assembly[:module_branch]
-        assembly_name = assembly[:display_name]
-        assembly_dir = assembly_meta_directory_path(assembly_name)
-        RepoManager.delete_directory?(assembly_dir,{:push_changes => true},module_branch)
+        delete_assemblies_meta_info?([assembly_idh])
+      end
+      def delete_assemblies_meta_info?(assembly_idh_list)
+        return if assembly_idh_list.empty?
+        sp_hash = {
+          :cols => [:display_name, :module_branch]
+        }
+        assembly_mh = assembly_idh_list.first.createMH()
+        ndx_module_branches = Hash.new
+        get_objs(assembly_mh,sp_hash).each do |r|
+          module_branch = r[:module_branch]
+          assembly_name = r[:display_name]
+          assembly_dir = assembly_meta_directory_path(assembly_name)
+          RepoManager.delete_directory?(assembly_dir,module_branch)
+          ndx_module_branches[module_branch[:id]] ||= module_branch
+        end
+        ndx_module_branches.each_value do |module_branch|
+          RepoManager.push_changes(module_branch)
+        end
       end
 
-      def create_assembly_meta_info?(library_idh,module_branch,module_name)
+      def create_assemblies_meta_info?(library_idh,module_branch,module_name)
         module_branch_idh = module_branch.id_handle()
         assembly_meta_info = assembly_meta_filename_path_info()
         add_on_meta_info = ServiceAddOn.meta_filename_path_info()
@@ -36,7 +50,7 @@ module DTK
           ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports)
         end
       end
-      
+
       def assembly_meta_directory_path(assembly_name)
         "assemblies/#{assembly_name}"
       end

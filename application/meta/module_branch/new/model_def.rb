@@ -100,6 +100,19 @@ lambda__matching_library_branches =
          :join_cond=>{:id => q(:module_branch,:component_id)},
          :cols => [:id,:display_name]
        }]
+    },
+    :assemblies=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name => :component,
+         :convert => true,
+         :join_type => :inner,
+         :join_cond=>{:module_branch_id => q(:module_branch,:id)},
+         :filter=>[:eq,:type,"composite"],
+         :cols => [:id,:group_id,:display_name]
+       }]
     }
   },
   :many_to_one=>[:component_module,:service_module]

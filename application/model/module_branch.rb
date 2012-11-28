@@ -101,6 +101,10 @@ module DTK
       row && row[:service_module]
     end
 
+    def get_assemblies()
+      get_objs(:cols => [:assemblies]).map{|r|r[:component]}
+    end
+
     class << self
       def version_field(version=nil)
         version || "master"

@@ -1,3 +1,4 @@
+#TODO: 'Instance' is a confusing name for this class
 module DTK
   class Assembly; class Content
     class Instance < self

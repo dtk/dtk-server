@@ -129,12 +129,14 @@ module DTK
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
       update_object!(:library_library_id,:display_name)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
-      self.class.create_assembly_meta_info?(library_idh,module_branch,module_name())
+      #TODO: for more efficiency can push in diffs_summary to below
+      self.class.create_assemblies_meta_info?(library_idh,module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
 
     def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
-      Log.error("Need to write promote_to_library__meta_changes for service module")
+      #TODO: assembly_template_ws_item
+      # no op until address item
     end
     private :promote_to_library__meta_changes
 
@@ -177,8 +179,8 @@ module DTK
     def self.import_postprocess(repo,library_idh,module_name,version)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assembly_meta_info?
-      create_assembly_meta_info?(library_idh,module_branch,module_name)
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_meta_info?
+      create_assemblies_meta_info?(library_idh,module_branch,module_name)
       module_branch_idh
     end
 

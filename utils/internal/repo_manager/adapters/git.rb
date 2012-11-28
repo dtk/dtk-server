@@ -122,15 +122,30 @@ module XYZ
     end
 
     def delete_file?(file_path,opts={})
-      ret = File.exists?("#{@path}/#{file_path}")
-      delete_file(file_path) if ret
+       delete_tree?(:file,file_path,opts)
+    end
+    def delete_file(file_path,opts={})
+      delete_tree(:file,file_path,opts)
+    end
+    def delete_directory?(dir,opts={})
+       delete_tree?(:directory,dir,opts)
+    end
+    def delete_directory(dir,opts={})
+      delete_tree(:directory,dir,opts)
+    end
+    def delete_tree?(type,tree_path,opts={})
+      ret = File.exists?("#{@path}/#{tree_path}")
+      delete_tree(type,tree_path,opts) if ret
       ret
     end
-
-    def delete_file(file_path,opts={})
+    def delete_tree(type,path,opts={})
       checkout(@branch) do
-        message = "Deleting #{file_path} in #{@branch}"
-        git_command__rm(file_path)
+        message = "Deleting #{path} in #{@branch}"
+        case type
+         when :file then git_command__rm(path)
+         when :directory then git_command__rm_r(path)
+         else raise Error.new("Unexpected type (#{type})")
+        end
         commit(message)
         if opts[:push_changes]
           pull_changes()
@@ -138,6 +153,7 @@ module XYZ
         end
       end
     end
+
 
     def update_file_content(file_asset,content)
       checkout(@branch) do
@@ -459,6 +475,9 @@ module XYZ
     def git_command__rm(file_path)
       git_command.rm(cmd_opts(),file_path)
       #took out because could not pass in command opts @grit_repo.remove(file_path)
+    end
+    def git_command__rm_r(dir)
+      git_command.rm(cmd_opts(),"-r",dir)
     end
 
     def git_command__remote_add(remote_name,remote_url)

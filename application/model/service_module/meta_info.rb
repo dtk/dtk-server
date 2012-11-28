@@ -5,8 +5,8 @@ module DTK
         assembly = assembly_idh.create_object().get_obj(:cols => [:display_name, :module_branch])
         module_branch = assembly[:module_branch]
         assembly_name = assembly[:display_name]
-        assembly_path = assembly_meta_filename_path(assembly_name)
-        RepoManager.delete_file?(assembly_path,{:push_changes => true},module_branch)
+        assembly_dir = assembly_meta_directory_path(assembly_name)
+        RepoManager.delete_directory?(assembly_dir,{:push_changes => true},module_branch)
       end
 
       def create_assembly_meta_info?(library_idh,module_branch,module_name)
@@ -37,8 +37,11 @@ module DTK
         end
       end
       
+      def assembly_meta_directory_path(assembly_name)
+        "assemblies/#{assembly_name}"
+      end
       def assembly_meta_filename_path(assembly_name)
-        "assemblies/#{assembly_name}/assembly.json"
+        "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
       end
       def assembly_meta_filename_path_info()
         {

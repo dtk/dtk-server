@@ -62,7 +62,7 @@ module DTK
 
     def self.get_component_modules_info(module_branch_idhs)
       ret = Array.new
-      return ret if module_branch_idhs.nil?
+      return ret if module_branch_idhs.nil? or module_branch_idhs.empty?
       sp_hash = {
         :cols => [:component_module_info],
         :filter => [:oneof,:id,module_branch_idhs.map{|idh|idh.get_id()}]

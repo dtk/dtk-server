@@ -24,7 +24,8 @@ files =
    'extract',
    'generate_meta',
    'component_meta_file',
-   'action_results_queue'
+   'action_results_queue',
+   'simple_action_queue'
   ]
 r8_nested_require('internal',files)
 

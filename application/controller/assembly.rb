@@ -22,7 +22,6 @@ module DTK
        unless AboutEnum[subtype].include?(about)
          raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
        end
-      opts = ret_params_hash(:filter,:detail_level)
       rest_ok_response assembly.info_about(about)
     end
     AboutEnum = {
@@ -31,7 +30,6 @@ module DTK
     }
 
     def rest__get_attributes()
-      assembly,subtype = ret_assembly_params_object_and_subtype()
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
       rest_ok_response assembly.get_attributes_print_form(filter)
@@ -112,17 +110,28 @@ module DTK
       assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
 
       # filters only stopped nodes for this assembly
-      nodes    =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      nodes = assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
       stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
 
-      # invoking command to start the nodes
-      CommandAndControl.start_instances(stopped_nodes)
+      if stopped_nodes.size == 0
+        # First need to test this TODO
+        # return rest_ok_response(:errors => ["There are no stopped nodes for assembly '#{assembly.display_name}'"])
+      end
 
-      # following task will when nodes ready assign elastic IP
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
-      task.save!()
+      queue = SimpleActionQueue.new
 
-      rest_ok_response :task_id => task.id
+      CreateThread.defer do
+        # invoking command to start the nodes
+        CommandAndControl.start_instances(stopped_nodes)
+
+        # following task will when nodes ready assign elastic IP
+        task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
+        task.save!()
+
+        queue.set_result(:task_id => task.id)
+      end
+
+      rest_ok_response :action_results_id => queue.id
     end
 
     def rest__stop()
@@ -169,7 +178,12 @@ module DTK
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
-      rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+
+      if ret_request_param_boolean(:using_simple_queue)
+        rest_ok_response SimpleActionQueue.get_results(action_results_id)
+      else
+        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+      end
     end
     ### end: mcollective actions
 

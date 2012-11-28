@@ -141,7 +141,7 @@ module XYZ
               node.update_admin_op_status!(:running)
               node.associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action)
-              Log.info "Successfully set elastic ip and started node with id '#{node.id}'"
+              Log.info "Successfully set elastic ip and started node with id '#{node.instance_id}'"
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

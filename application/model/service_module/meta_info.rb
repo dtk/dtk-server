@@ -1,5 +1,6 @@
 module DTK
   class ServiceModule
+#    r8_nested_require('meta_info','assembly_import')
     module MetaInfoClassMixin
       def delete_assembly_meta_info?(assembly_idh)
         delete_assemblies_meta_info?([assembly_idh])

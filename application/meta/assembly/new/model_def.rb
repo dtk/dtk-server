@@ -1,3 +1,13 @@
+lambda__segment_module_branch =
+  lambda{|module_branch_cols|
+  {
+    :model_name=>:module_branch,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:id => :component__module_branch_id},
+    :cols => module_branch_cols
+  }
+}
 lambda__segment_node =
   lambda{|node_cols|
   {
@@ -72,12 +82,20 @@ lambda__template_nodes_and_components =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [{
-         :model_name=>:module_branch,
+      [lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id])]
+    },
+    :service_module=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+       lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:service_id]),
+       {
+         :model_name=>:service_module,
          :convert => true,
          :join_type=>:inner,
-         :join_cond=>{:id => :component__module_branch_id},
-         :cols=>[:id,:group_id,:display_name,:branch,:repo_id]
+         :join_cond=>{:id=>:module_branch__service_id},
+         :cols=>[:id,:group_id,:display_name]
        }]
     },
     :node_assembly_attributes=> {

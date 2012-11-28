@@ -58,6 +58,10 @@ module XYZ
       RepoManager.fast_foward_merge_from_branch(ws_branch[:branch],lib_branch)
     end
 
+    def synchronize_workspace_with_library_branch(ws_branch,lib_branch)
+      RepoManager.fast_foward_merge_from_branch(lib_branch[:branch],ws_branch)
+    end
+
     def diff_between_library_and_workspace(lib_branch,ws_branch)
       RepoManager.diff(ws_branch[:branch],lib_branch)
     end

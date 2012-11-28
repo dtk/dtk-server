@@ -1,9 +1,12 @@
 module DTK; class Assembly
   class Template < self
+    #TODO: no_assembly_template_ws
+    #TODO:   assembly_idh parent is library
     def self.delete(assembly_idh)
       #first delete the meta files
       ServiceModule.delete_assembly_meta_info?(assembly_idh)
-      Log.error("TODO: merge changes to ws branch and push")
+      #TODO: no_assembly_template_ws - so below synchronizes ws branch with library branch
+      synchronize_workspace_with_library_branch(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
       #do not need to delete port links which use a cascade foreign keyy
       sp_hash = {
@@ -13,6 +16,18 @@ module DTK; class Assembly
       node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
       Model.delete_instances(node_idhs)
       Model.delete_instance(assembly_idh)
+    end
+
+    def self.synchronize_workspace_with_library_branch(assembly_idh)
+      module_info = assembly_idh.create_object().get_obj(:cols => [:service_module])
+      service_module = module_info[:service_module]
+      lib_branch = module_info[:module_branch]
+      version=nil #TODO: stub
+      ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
+      if ws_branch
+        repo = ws_branch[:workspace_repo]
+        repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
+      end
     end
 
     def self.list(assembly_mh,opts={})

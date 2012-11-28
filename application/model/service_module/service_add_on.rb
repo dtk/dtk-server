@@ -46,7 +46,7 @@ module DTK
         end
         ref = ServiceModule.assembly_ref(module_name,name)
         unless id = library_idh.get_child_id_handle(:component,ref).get_id()
-          raise ErrorUsage("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
+          raise ErrorUsage.new("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
         end
         [name,ref,id]
       end

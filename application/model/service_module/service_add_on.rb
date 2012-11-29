@@ -21,6 +21,7 @@ module DTK
         @ports = ports
       end
       def import()
+return #TODO: debugging
         type = (meta_file =~ MetaRegExp;$1)
         assembly_name,assembly_ref = ret_assembly_info(:assembly)
         sub_assembly_name,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
@@ -29,7 +30,7 @@ module DTK
           :type => type,
           :sub_assembly_id => sub_assembly_id
         }
-        port_links = AssemblyImport.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
+        port_links = ServiceModule::AssemblyImport.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
         ao_input_hash.merge!(:port_link => port_links)
         input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}
         Model.import_objects_from_hash(library_idh,{"component" =>  input_hash})
@@ -46,7 +47,8 @@ module DTK
         end
         ref = ServiceModule.assembly_ref(module_name,name)
         unless id = library_idh.get_child_id_handle(:component,ref).get_id()
-          raise ErrorUsage.new("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
+          Log.error("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
+#          raise ErrorUsage.new("Field (#{field}) has value (#{name}) which is not a valid assembly refernce")
         end
         [name,ref,id]
       end

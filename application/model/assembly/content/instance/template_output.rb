@@ -24,7 +24,10 @@ module DTK
         version=nil #TODO: stub
         if ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
           repo = ws_branch[:workspace_repo]
-          repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
+          sync_result = repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
+          if sync_result == :merge_needed
+            raise ErrorUsage.new("synchronize_workspace_with_library_branch needs merge")
+          end
         end
       end
      private

@@ -102,7 +102,7 @@ module DTK
     end
 
     def get_module_branches()
-      Model.get_objs(model_handle.createMH(:module_branch),{:cols => [:module_branches]}).map{|r|r[:module_branch]}
+      get_objs(:cols => [:module_branches]).map{|r|r[:module_branch]}
     end
 
     #creates workspace branch (if needed) and related objects from library one
@@ -129,6 +129,10 @@ module DTK
     end
 
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
+      #TODO: assembly_template_ws_item
+      #Being passed workspace branch, but before address this item putting assemblies on library branch
+      module_branch = find_branch(:library,get_module_branches())
+      
       update_object!(:library_library_id,:display_name)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
       #TODO: for more efficiency can push in diffs_summary to below

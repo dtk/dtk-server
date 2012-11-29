@@ -5,12 +5,13 @@ module DTK
       def delete_assembly_meta_info?(assembly_idh)
         delete_assemblies_meta_info?([assembly_idh])
       end
-      def delete_assemblies_meta_info?(assembly_idh_list)
-        return if assembly_idh_list.empty?
+      def delete_assemblies_meta_info?(assembly_idhs)
+        return if assembly_idhs.empty?
         sp_hash = {
-          :cols => [:display_name, :module_branch]
+          :cols => [:display_name, :module_branch],
+          :filter => [:oneof,:id,assembly_idhs.map{|idh|idh.get_id()}]
         }
-        assembly_mh = assembly_idh_list.first.createMH()
+        assembly_mh = assembly_idhs.first.createMH()
         ndx_module_branches = Hash.new
         get_objs(assembly_mh,sp_hash).each do |r|
           module_branch = r[:module_branch]

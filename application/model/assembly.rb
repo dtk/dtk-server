@@ -1,13 +1,10 @@
 #TODO: finish moving the fns and mixins that relate just to template or instance to these files
 r8_nested_require('assembly','import_export_common')
-r8_nested_require('assembly','import')
 module DTK
   class Assembly < Component
     r8_nested_require('assembly','content')
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
-    include AssemblyImportMixin
-    extend AssemblyImportClassMixin
 
     def info(subtype)
       nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)

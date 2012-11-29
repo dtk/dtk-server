@@ -4,8 +4,8 @@ module DTK; class ServiceModule
     def initialize(library_idh)
       @library_idh = library_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
-      @@ndx_ports = Hash.new
-      @db_updates_port_links = Hash.new
+      @ndx_ports = Hash.new
+      @ndx_assembly_hashes = Hash.new #indexed by ref
       @ndx_module_branch_ids = Hash.new
     end
     def add_assemblies(module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
@@ -13,22 +13,25 @@ module DTK; class ServiceModule
       assemblies_hash.each do |ref,assem|
         @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,module_name))
         @db_updates_assemblies["node"].merge!(Internal.import_nodes(@library_idh,ref,assem,node_bindings_hash))
-
-        assembly_idh = @library_idh.get_child_id_handle(:component,ref)
-        #TODO: more efficient if pass @ndx_ports computed so far into add_ports_during_import() to avoid db lookups
-        ports = add_ports_during_import(assembly_idh)
-        @db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assem,ports))
-        ports.each{|p|@ndx_ports[p[:id]] = p}
+        @ndx_assembly_hashes[ref] ||= assem
       end
     end
 
     def import()
-      mark_as_complete_constraint = {:module_branch_id=>@ndx_module_branch_ids.values} #so only delete extra components that belong to same module
+      mark_as_complete_constraint = {:module_branch_id=>@ndx_module_branch_ids.keys} #so only delete extra components that belong to same module
       @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_constraint)
       Model.import_objects_from_hash(@library_idh,@db_updates_assemblies)
+
       #port links can only be imported in after ports created
       #add ports to assembly nodes
-      import_objects_from_hash(@library_idh,{"component" => @db_updates_port_links})
+      db_updates_port_links = Hash.new
+      @ndx_assembly_hashes.each do |ref,assembly|
+        assembly_idh = @library_idh.get_child_id_handle(:component,ref)
+        ports = add_ports_during_import(assembly_idh)
+        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assembly,ports))
+        ports.each{|p|@ndx_ports[p[:id]] = p}
+      end
+      Model.import_objects_from_hash(@library_idh,{"component" => db_updates_port_links})
     end
 
     def ports()
@@ -43,9 +46,10 @@ module DTK; class ServiceModule
     def add_ports_during_import(assembly_idh)
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing
-      link_defs_info = assembly_idh.create_object().get_objs(:cols => [:template_link_defs_info])
+      assembly = assembly_idh.create_object()
+      link_defs_info = assembly.get_objs(:cols => [:template_link_defs_info])
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      Port.create_assembly_template_ports?(self,link_defs_info,create_opts)
+      Port.create_assembly_template_ports?(assembly,link_defs_info,create_opts)
     end
 
     #TODO: now taht converted top level to a call; dont need these internal modules

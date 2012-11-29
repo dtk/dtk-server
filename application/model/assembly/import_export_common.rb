@@ -32,7 +32,7 @@ module XYZ
         if match
           match[:id]
         else
-          raise Error.new("Connot find match to (#{self.inspect})")
+          raise Error.new("Cannot find match to (#{self.inspect})")
         end
       end
       class AddOn < self

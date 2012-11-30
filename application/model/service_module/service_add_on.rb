@@ -21,7 +21,6 @@ module DTK
         @ports = ports
       end
       def import()
-return #TODO: debugging
         type = (meta_file =~ MetaRegExp;$1)
         assembly_name,assembly_ref = ret_assembly_info(:assembly)
         sub_assembly_name,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)

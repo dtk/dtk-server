@@ -128,7 +128,9 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
-    def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
+      #TODO: because of assembly_template_ws_item doing &promote_to_library first
+      promote_to_library(version)
       #TODO: assembly_template_ws_item
       #Being passed workspace branch, but before address this item putting assemblies on library branch
       module_branch = find_branch(:library,get_module_branches())

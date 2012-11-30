@@ -122,8 +122,7 @@ module DTK
         raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
       end 
 
-      update_model_from_clone_changes_aux?(diffs_summary,ws_branch)
-      promote_to_library(version)
+      update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)
     end
 
     #promotes workspace changes to library

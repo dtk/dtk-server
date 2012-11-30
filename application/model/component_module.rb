@@ -198,11 +198,13 @@ module DTK
     end
 
    private
-    def update_model_from_clone_changes_aux?(diffs_summary,module_branch)
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,versions=nil)
       impl = module_branch.get_implementation()
       if diffs_summary.meta_file_changed?()
         ComponentMetaFile.update_model(impl,module_branch.id_handle())
       end
+      #TODO: assembly_template_ws_item
+      promote_to_library(version)
     end
 
     def self.import_postprocess(repo,library_idh,module_name,version)

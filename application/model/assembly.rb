@@ -127,6 +127,11 @@ module DTK
         end
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
+
+      def internal_assembly_ref(service_module_name,assembly_name)
+        "#{service_module_name}-#{assembly_name}"
+      end
+
      private
       def add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
         sp_hash = {
@@ -152,7 +157,7 @@ module DTK
       def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
         create_row = {
           :library_library_id => library_idh.get_id(),
-          :ref => "#{service_module_name}-#{assembly_name}",
+          :ref => internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
           :ui => icon_info,
           :type => "composite",

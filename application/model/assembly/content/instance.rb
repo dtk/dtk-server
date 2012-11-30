@@ -6,7 +6,7 @@ module DTK
       def self.create_container_for_clone(library_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         hash_values = {
           :library_library_id => library_idh.get_id(),
-          :ref => "#{service_module_name}-#{assembly_name}",
+          :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
           :ui => icon_info,
           :type => "composite",

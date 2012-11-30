@@ -52,10 +52,11 @@ module DTK; class ServiceModule
       Port.create_assembly_template_ports?(assembly,link_defs_info,create_opts)
     end
 
-    #TODO: now taht converted top level to a call; dont need these internal modules
+    #TODO: now that converted top level to a call; dont need these internal modules
     module Internal
       include AssemblyImportExportCommon
-      def self.import_assembly_top(assembly_ref,assembly_hash,module_branch_idh,module_name)
+      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch_idh,module_name)
+        assembly_ref = internal_assembly_ref(serialized_assembly_ref)
         {
           assembly_ref => {
             "display_name" => assembly_hash["name"], 
@@ -81,40 +82,19 @@ module DTK; class ServiceModule
         {assembly_ref => {"port_link" => port_links}}
       end
 
-      def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
-        ret = Hash.new
-        return ret if (add_on_port_links||[]).empty?
-        #augment ports with parsed display_name
-        augment_with_parsed_port_names!(ports)
-        assembly_names = [assembly_name,sub_assembly_name]
-        add_on_port_links.each do |ao_pl_ref,ao_pl|
-          link = ao_pl["link"]
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
-          input_id = input_port.matching_id(ports)
-          output_id = output_port.matching_id(ports)
-          output_is_local = (output_assembly == assembly_name) 
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
-          ret.merge!(ao_pl_ref => pl_hash)
-        end
-        ret
-      end
-
-      def self.augment_with_parsed_port_names!(ports)
-        ports.each do |p|
-          p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
-        end
-      end
-
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
-        node_to_nb_rs = node_bindings_hash.inject(Hash.new) do |h,(k,v)|
-          if k =~ Regexp.new("#{assembly_ref}#{Seperators[:assembly_node]}(.+$)")
-            node = $1
-            h.merge(node => v)
-          else
-            h
+        an_sep = Seperators[:assembly_node]
+        node_to_nb_rs = node_bindings_hash.inject(Hash.new) do |h,(ser_assem_node,v)|
+          merge_hash = Hash.new
+          if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
+            serialized_assembly_ref = $1
+            node = $2
+            if assembly_ref == internal_assembly_ref(serialized_assembly_ref)
+              merge_hash = {node => v}
+            end
           end
+          h.merge(merge_hash)
         end
         assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
           node_ref = "#{assembly_ref}--#{node_hash_ref}"
@@ -135,6 +115,50 @@ module DTK; class ServiceModule
           h.merge(node_ref => node_output)
         end
       end
+
+     private
+      def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+        ret = Hash.new
+        return ret if (add_on_port_links||[]).empty?
+        #augment ports with parsed display_name
+        augment_with_parsed_port_names!(ports)
+        assembly_names = [assembly_name,sub_assembly_name]
+        add_on_port_links.each do |ao_pl_ref,ao_pl|
+          link = ao_pl["link"]
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
+          input_id = input_port.matching_id(ports)
+          output_id = output_port.matching_id(ports)
+          output_is_local = (output_assembly == assembly_name) 
+          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
+          ret.merge!(ao_pl_ref => pl_hash)
+        end
+        ret
+      end
+
+     private
+      #return [module_name,assembly_name]
+      def self.parse_serialized_assembly_ref(ref)
+        if ref =~ /(^.+)::(.+$)/
+          [$1,$2]
+        elsif ref =~ /(^[^-]+)-(.+$)/ #TODO: this can be eventually deprecated
+          [$1,$2]
+        else
+          raise Error.new("Unexpected form for serialized assembly ref (#{ref})")
+        end
+      end
+
+      def self.internal_assembly_ref(serialized_assembly_ref)
+        module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
+        Assembly.internal_assembly_ref(module_name,assembly_name)
+      end
+
+      def self.augment_with_parsed_port_names!(ports)
+        ports.each do |p|
+          p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
+        end
+      end
+
       def self.import_component_refs(library_idh,assembly_name,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules

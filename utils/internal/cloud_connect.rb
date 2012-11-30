@@ -1,6 +1,6 @@
 require 'fog'
-#TODO get Fog to correct this
-#monkey patch
+# TODO get Fog to correct this
+# monkey patch
 class NilClass
   def blank?
    nil
@@ -11,30 +11,73 @@ end
 module XYZ
   module CloudConnect
     class Top
-     private
+      def get_compute_params()
+        compute_params = Fog.credentials()
+        
+        if region = R8::Config[:ec2][:region]
+          compute_params[:region] = region
+        end
+
+        return compute_params
+      end
+
+      private
       def hash_form(x)
         x && x.attributes 
       end
-    end
+    end  # => Top class
+
+    class Route53 < Top
+
+      DNS_DOMAIN = "r8network.com."
+
+      def initialize()
+        dns = Fog::DNS::AWS.new(get_compute_params())
+        @r8zone = dns.zones().find { |z| z.domain == DNS_DOMAIN }
+      end
+
+      def all_records()
+        @r8zone.records
+      end
+
+      def get(name, type=nil)
+        @r8zone.records.get(name,type)
+      end
+
+      def destroy(name, type=nil)
+        record = get(name,type)
+        return (record.nil? ? false : record.destroy)
+      end
+
+      ##
+      # name           => dns name
+      # value          => URL, DNS, IP, etc.. which it links to
+      # type           => DNS Record type supports A, AAA, CNAME, NS, etc.
+      #
+      def create(name, value, type = 'CNAME', ttl=300)
+        create_hash = { :type => type, :name => name, :value => value, :ttl => ttl }
+        @r8zone.records.create(create_hash)
+      end
+
+      ##
+      # New value for records to be linked to
+      #
+      def modify(name, value)
+        # record is changed via Fog's modify
+        get(name).modify(:value => value)
+      end
+
+      def get_dns(node)
+        return "#{node[:id]}.#{DNS_DOMAIN}"
+      end
+    end # => Route53 class
+
     class EC2 < Top
 
       WAIT_FOR_NODE = 6 # seconds
 
       def initialize()             
-        compute_params = Fog.credentials()
-        #TODO: fix up by basing on current target's params
-        if region = R8::Config[:ec2][:region]
-          compute_params[:region] = region
-        end
-        @conn = Fog::Compute::AWS.new(compute_params)
-      end
-
-      def servers_all()
-        @conn.servers.all.map{|x|hash_form(x)}
-      end
-
-      def security_groups_all()
-        @conn.security_groups.all.map{|x|hash_form(x)}
+        @conn = Fog::Compute::AWS.new(get_compute_params())
       end
 
       def flavor_get(id)
@@ -43,6 +86,14 @@ module XYZ
 
       def image_get(id)
         hash_form(@conn.images.get(id))
+      end
+
+      def servers_all()
+        @conn.servers.all.map{|x|hash_form(x)}
+      end
+
+      def security_groups_all()
+        @conn.security_groups.all.map{|x|hash_form(x)}
       end
 
       def server_get(id)
@@ -86,7 +137,7 @@ module XYZ
       end
 
       def server_start(instance_id)
-         (tries=10).times do
+        (tries=10).times do
           begin
             return hash_form(@conn.start_instances(instance_id))
           rescue Fog::Compute::AWS::Error => e
@@ -96,9 +147,10 @@ module XYZ
               sleep(WAIT_FOR_NODE)
               next
             end
-          raise e
+            raise e
           end
-        end
+        end # => 10 times loop end
+
         raise Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries*WAIT_FOR_NODE} seconds."
       end
 
@@ -106,11 +158,11 @@ module XYZ
         hash_form(@conn.stop_instances(instance_id))
       end
 
-     private
+      private
       def wrap_servers_get(id)
         begin
           @conn.servers.get(id)
-         rescue Fog::Compute::AWS::Error => e
+        rescue Fog::Compute::AWS::Error => e
           Log.info("fog error: #{e.message}")
           nil
         end 
@@ -118,3 +170,4 @@ module XYZ
     end
   end
 end
+

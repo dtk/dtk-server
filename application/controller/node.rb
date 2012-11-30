@@ -3,7 +3,8 @@ module XYZ
     helper :node_helper
 
     def rest__list()
-      rest_ok_response ret_node_subtype_class().list(model_handle())
+      response = ret_node_subtype_class().list(model_handle())
+      rest_ok_response response
     end
 
     def rest__info_about()

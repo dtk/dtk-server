@@ -22,7 +22,8 @@ module XYZ
        :target_id,
        :ui,
        :external_ref,
-       :admin_op_status
+       :admin_op_status,
+       :hostname_external_ref
       ]
     end
 #TODO: stub for feature_node_admin_state
@@ -176,8 +177,8 @@ module XYZ
       (self[:external_ref]||{})[:instance_id]
     end
 
-    def elastic_ip()
-      (self[:hostname_external_ref]||{})[:elastic_ip]
+    def persistent_dns()
+      (self[:hostname_external_ref]||{})[:persistent_dns]
     end
     
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
@@ -424,9 +425,9 @@ module XYZ
 
     # Method will take already allocated elastic IP and assign it deploy node.
     # Keep in mind this can only happen when node is 'running' state
-    def associate_elastic_ip()
+    def associate_persistent_dns()
       if persistent_hostname?
-        CommandAndControl.associate_elastic_ip(self)
+        CommandAndControl.associate_persistent_dns(self)
       end
     end
 

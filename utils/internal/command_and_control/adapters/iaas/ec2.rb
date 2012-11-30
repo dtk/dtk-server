@@ -16,7 +16,8 @@ module XYZ
       def self.start_instances(nodes)
         nodes.each do |node|
           conn().server_start(node.instance_id())
-          Log.debug "Starting instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
+          node.update_admin_op_status!(:pending)
+          Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end
 
@@ -24,45 +25,62 @@ module XYZ
         nodes.each do |node|
           conn().server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
-          Log.debug "Stopping instance #{node[:display_name]}, instance ID: #{node.instance_id()}"
+          Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end
 
-      def self.associate_elastic_ip(node)
-        node.update_object!(:hostname_external_ref, :admin_op_status)
-        conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
-        node.update_admin_op_status!(:running)
+      def self.associate_persistent_dns(node)
+        node.update_object!(:hostname_external_ref, :admin_op_status, :external_ref)
+        dns_name = node[:external_ref][:dns_name]
+        # TODO: Link it to IP, need ot speak to reach to see how to get IP data
+        # we add record to DNS which links node's DNS to perssistent DNS
+
+        record = dns().get(node.persistent_dns())
+
+        if record.nil?
+          # there is no record we need to create it (first boot)
+          record = dns().create(node.persistent_dns(),dns_name)
+        else
+          # we need to update it with new dns name
+          record = record.modify(:value => dns_name)
+        end
+
+        # in case there was no record created we raise error
+        raise Error, "Not able to set DNS hostname for node with ID '#{node[:id]}" if record.nil?
+
+        # if all sucess we update the database
+        node.update(
+          :external_ref => node[:external_ref].merge(:dns_name => node.persistent_dns()),
+          :hostname_external_ref => node[:hostname_external_ref].merge(:node_dns => dns_name),
+          :admin_op_status       => "running"
+        )
+
+        Log.info "Persistent DNS '#{node.persistent_dns()}' has been assigned to node and set as default DNS."
       end
 
       def self.process_persistent_hostname__first_boot!(node)
-        begin 
-          # allocate elastic IP for this node
-          elastic_ip = conn().allocate_elastic_ip()
+        persistent_dns = dns().get_dns(node)
 
-          node.update({
-            :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
-          })
-
-          Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
-        rescue Fog::Compute::AWS::Error => e
-          Log.error "Not able to set Elastic IP, reason: #{e.message}"
-          # TODO: Check with Rich if this is recovarable error, for now it is not
-          raise e
-        end
+        # we create it on node ready since we still do not have that data
+        node.update({
+          :hostname_external_ref => {:persistent_dns => persistent_dns, :iaas => :aws },
+          :admin_op_status       => 'pending'
+        })
+  
+        Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
       end
 
-      def self.process_persistent_hostname__restart(node)
-        Log.info("in process_persistent_hostname__restart for node #{node[:display_name]}")
-        #TODO: stub for feature_node_admin_state
-      end
       def self.process_persistent_hostname__terminate(node)
         unless node[:hostname_external_ref].nil? 
-          elastic_ip = node[:hostname_external_ref][:elastic_ip]
-          # no need for dissasociation since that will be done when instance is destroyed
-          conn().release_elastic_ip(elastic_ip)
-          Log.info "Elastic IP #{elastic_ip} has been released."
+          success = dns().destroy(node.persistent_dns())
+    
+          if success
+            Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
+          else
+            Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
+          end
         else
-          Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+          Log.warn "There is error in logic, persistent data not found on persistent node."
         end
       end
 
@@ -200,11 +218,18 @@ module XYZ
         "#{node[:display_name]} (#{node[:id]}"
       end
 
+      Conn    = Array.new
+      AwsDns = Array.new
+
       #TODO: sharing ec2 connection with ec2 datasource
       def self.conn()
         Conn[0] ||= CloudConnect::EC2.new
       end
-      Conn = Array.new
+
+      def self.dns()
+        AwsDns[0] ||= CloudConnect::Route53.new
+      end
+
     end
   end
 end

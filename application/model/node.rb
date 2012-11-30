@@ -22,8 +22,7 @@ module XYZ
        :target_id,
        :ui,
        :external_ref,
-       :admin_op_status,
-       :hostname_external_ref
+       :admin_op_status
       ]
     end
 #TODO: stub for feature_node_admin_state

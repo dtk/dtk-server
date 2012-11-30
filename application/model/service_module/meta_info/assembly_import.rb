@@ -85,7 +85,7 @@ module DTK; class ServiceModule
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
-        node_to_nb_rs = node_bindings_hash.inject(Hash.new) do |h,(ser_assem_node,v)|
+        node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
           merge_hash = Hash.new
           if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
             serialized_assembly_ref = $1
@@ -105,8 +105,6 @@ module DTK; class ServiceModule
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
             node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
-          else
-            Log.info("assembly node(#{node_hash_ref}) without a matching node binding")
           end
           cmps_output = import_component_refs(library_idh,assembly_hash["name"],module_refs,node_hash["components"])
           unless cmps_output.empty?

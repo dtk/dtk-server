@@ -28,13 +28,20 @@ module DTK; class Assembly
       synchronize_workspace_with_library_branch(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
       #do not need to delete port links which use a cascade foreign keyy
+      delete_assemblies_nodes([assembly_idh])
+      delete_instance(assembly_idh)
+    end
+
+    def self.delete_assemblies_nodes(assembly_idhs)
+      ret = Array.new
+      return ret if assembly_idhs.empty?
+      assembly_mh = assembly_idhs.first().createMH()
       sp_hash = {
         :cols => [:id, :nodes],
-        :filter => [:eq, :id, assembly_idh.get_id]
+        :filter => [:oneof, :id, assembly_idhs.map{|idh|idh.get_id()}]
       }
-      node_idhs = get_objs(assembly_idh.createMH(),sp_hash).map{|r|r[:node].id_handle()}
-      Model.delete_instances(node_idhs)
-      Model.delete_instance(assembly_idh)
+      node_idhs = get_objs(assembly_mh,sp_hash).map{|r|r[:node].id_handle()}
+      Model.delete_instances(node_idhs)    
     end
 
     def self.synchronize_workspace_with_library_branch(assembly_idh)

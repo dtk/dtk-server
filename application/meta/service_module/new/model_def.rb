@@ -53,12 +53,27 @@ lambda__segment_impls =
       [lambda__segment_module_branches.call(:cols =>[:id,:repo_id]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
+    #TODO: not sure if we haev implementations on service modules
     :implementations=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_impls.call(:cols => [:id,:display_name,:group_id])]
+    },
+    :assemblies=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+       lambda__segment_module_branches.call(:cols => [:id]),
+       {
+         :model_name=>:component,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:module_branch_id =>:module_branch__id},
+         :cols=>[:id,:group_id,:display_name]
+       }]
     }
   },
   :many_to_one=>[:library],

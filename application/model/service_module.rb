@@ -15,6 +15,26 @@ module DTK
       :service_module
     end
 
+    def self.delete(idh)
+      module_obj = idh.create_object().update_object!(:display_name)
+      module_name =  module_obj[:display_name]
+      unless module_obj.get_associated_target_instances().empty?
+        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target")
+      end
+
+      repos = module_obj.get_repos()
+      repos.each{|repo|RepoManager.delete_repo(repo)}
+      delete_instances(repos.map{|repo|repo.id_handle()})
+
+      assemblies = idh.create_object().get_assemblies()
+      #need to explicitly delete nodes since nodes' parents are not the assembly
+      Assembly::Template.delete_assemblies_nodes(assemblies.map{|a|a.id_handle()})
+
+      delete_instance(idh)
+      {:module_name => module_name}
+    end
+
+
     def self.list(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
@@ -181,6 +201,10 @@ module DTK
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
+    end
+
+    def get_assemblies()
+      get_objs(:cols =>[:assemblies]).map{|r|r[:component]}
     end
 
    private

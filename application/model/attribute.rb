@@ -13,6 +13,8 @@ r8_nested_require('attribute',files)
 module XYZ
   class Attribute < Model
     r8_nested_require('attribute','pattern')
+    r8_nested_require('attribute','legal_value')
+    r8_nested_require('attribute','special_processing')
     include AttributeGroupInstanceMixin
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin

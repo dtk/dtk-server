@@ -13,8 +13,13 @@ module DTK; class Attribute
         end
       end
       return ret if attribute_rows.empty?
-      Attribute.update_and_propagate_attributes(base_object.model_handle(:attribute),attribute_rows)
       attr_ids = attribute_rows.map{|r|r[:id]}
+      attr_mh = base_object.model_handle(:attribute)
+      LegalValue.raise_usage_errors?(attr_mh,attribute_rows)
+      #removes any elements taht need special processing from attribute_rows
+      SpecialProcessing::Update.handle_special_processing_attributes!(attr_mh,attribute_rows)
+      Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
+
       filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,:filter_proc => filter_proc)
     end

@@ -135,11 +135,11 @@ module DTK; class  Assembly
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_augmented_node_assembly_attributes(filter_proc).map do |aug_attr|
-        display_name_prefix = "#{aug_attr[:node][:display_name]}/#{aug_attr[:nested_component].display_name_print_form()}/"
+        display_name_prefix = "node[#{aug_attr[:node][:display_name]}]/cmp[#{aug_attr[:nested_component].display_name_print_form()}]/"
         aug_attr.print_form(display_name_prefix)
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        display_name_prefix = "#{aug_attr[:node][:display_name]}/"
+        display_name_prefix = "node[#{aug_attr[:node][:display_name]}]/"
         aug_attr.print_form(display_name_prefix)
       end
 

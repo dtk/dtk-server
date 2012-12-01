@@ -39,12 +39,16 @@ module DTK
        unless AboutEnum[subtype].include?(about)
          raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
        end
-      opts = ret_params_hash(:filter,:detail_level)
-      rest_ok_response assembly.info_about(about)
+      filter_proc = FilterProc[about]
+      opts = (filter_proc ? {:filter_proc => filter_proc} : {})
+      rest_ok_response assembly.info_about(about,opts)
     end
     AboutEnum = {
       :instance => [:nodes,:components,:tasks,:attributes],
       :template => [:nodes,:components,:targets]
+    }
+    FilterProc = {
+      :attributes => lambda{|attr|not attr[:hidden]}
     }
 
     def rest__get_attributes()

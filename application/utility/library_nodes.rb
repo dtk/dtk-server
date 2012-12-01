@@ -100,7 +100,7 @@ module XYZ
              "semantic_type_summary"=>"host_address_ipv4",
              "display_name"=>"host_addresses_ipv4",
              "dynamic"=>true,
-             "hidden"=>false,
+             "hidden"=>true,
              "semantic_type"=>{":array"=>"host_address_ipv4"}
           },
           "fqdn"=>
@@ -111,7 +111,7 @@ module XYZ
              "data_type"=>"string",
              "display_name"=>"fqdn",
              "dynamic"=>true,
-             "hidden"=>false,
+             "hidden"=>true,
           },
           "node_components"=>
             {"required"=>false,
@@ -121,7 +121,7 @@ module XYZ
              "data_type"=>"json",
              "display_name"=>"node_components",
              "dynamic"=>true,
-             "hidden"=>false,
+             "hidden"=>true,
           }
        },
        "node_interface"=>
@@ -145,23 +145,13 @@ module XYZ
      {
        "os_type"=>{
          "required"=>true,
-         "read_only"=>true,
-         "is_port"=>true,
-         "cannot_change"=>false,
          "data_type"=>"string",
-         "display_name"=>"os_type",
-         "dynamic"=>true,
-         "hidden"=>false,
+         "display_name"=>"os_type"
        },
        "memory_size"=>{
          "required"=>true,
-         "read_only"=>true,
-         "is_port"=>true,
-         "cannot_change"=>false,
          "data_type"=>"string",
          "display_name"=>"memory_size",
-         "dynamic"=>true,
-         "hidden"=>false,
        }
      }
    end

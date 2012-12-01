@@ -8,7 +8,7 @@ module DTK; class Attribute
       end
     end
     class Update < self
-      def self.handle_special_processing_attributes!(attr_mh,attribute_rows)
+      def self.handle_special_processing_attributes(attr_mh,attribute_rows)
         #TODO: stub
       end
     end

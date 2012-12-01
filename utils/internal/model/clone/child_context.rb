@@ -177,16 +177,16 @@ module XYZ
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
 
-        #check if all nodes have node bindings
-        if node_info.find{|r|r[:node_binding_ruleset].nil?}
-          cleanup_after_error()
-          raise ErrorUsage.new("Missing node binding for assembly template") #TODO: want more descriptive error
-        end
-
         target = target_idh.create_object()
+        node_mh = target_idh.createMH(:node)
         #TODO: may be more efficient to get these all at once
         matches = node_info.map do |r|
-          node_template_idh = r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
+          node_template_idh = 
+            if r[:node_binding_ruleset]
+              r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
+            else
+              Node::Template.null_node_template_idh(node_mh)
+            end
           {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template_idh}
         end
         merge!(:matches => matches)

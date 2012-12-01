@@ -24,6 +24,20 @@ module DTK
         ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
+      def self.null_node_template(model_handle)
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:eq,:display_name, "null-node-template"]
+        }
+        node_mh = model_handle.createMH(:node)
+        get_obj(node_mh,sp_hash)
+      end
+
+      def self.null_node_template_idh(model_handle)
+        null_node_template = null_node_template(model_handle)
+        null_node_template && null_node_template.id_handle()
+      end
+
       def self.image_upgrade(model_handle,old_image_id,new_image_id)
         nb_mh = model_handle.createMH(:node_binding_ruleset)
         matching_node_bindings = get_objs(nb_mh,:cols => [:id,:rules]).select do |nb| 

@@ -134,17 +134,26 @@ module DTK; class  Assembly
 
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
-      component_attrs = get_objs(:cols => [:node_assembly_attributes]).map do |r|
-        attr = r[:attribute]
-        #TODO: more efficient to have sql query do filtering
-        if filter_proc.nil? or filter_proc.call(attr)
-          display_name_prefix = "#{r[:node][:display_name]}/#{r[:nested_component].display_name_print_form()}/"
-          attr.print_form(display_name_prefix)
-        end
-      end.compact
-      (assembly_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
+      component_attrs = get_augmented_node_assembly_attributes(filter_proc).map do |aug_attr|
+        display_name_prefix = "#{aug_attr[:node][:display_name]}/#{aug_attr[:nested_component].display_name_print_form()}/"
+        aug_attr.print_form(display_name_prefix)
+      end
+      node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
+        display_name_prefix = "#{aug_attr[:node][:display_name]}/"
+        aug_attr.print_form(display_name_prefix)
+      end
+
+      (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
-    private :get_attributes_print_form_aux
+    def get_augmented_node_attributes(filter_proc=nil)
+      get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
+    end
+
+    def get_augmented_node_assembly_attributes(filter_proc=nil)
+      get_objs_helper(:node_assembly_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
+    end
+    private :get_attributes_print_form_aux, :get_augmented_node_attributes,:get_augmented_node_assembly_attributes
+
 
     def get_service_add_ons()
       get_objs(:cols => [:service_add_ons_from_instance])do |r|

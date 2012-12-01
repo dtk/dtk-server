@@ -19,6 +19,24 @@ module XYZ
       expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
     end
 
+    #TODO: looking to use this as step to transform to simpler object model calls
+    def get_objs_helper(virtual_attr,result_col,opts={})
+      rows = get_objs(:cols => [virtual_attr])
+      if filter_proc = opts[:filter_proc]
+        rows.map do |r|
+          el = r[result_col]
+          if filter_proc.call(el)
+            opts[:augmented] ? r : el 
+          end
+        end.compact
+      elsif opts[:augmented]
+        rows
+      else
+        rows.map{|r|r[result_col]}
+      end
+    end
+
+
     def self.model_name()
       model_name_x = Aux::underscore(Aux::demodulize(self.to_s)).to_sym
       SubClassRelations[model_name_x]|| model_name_x

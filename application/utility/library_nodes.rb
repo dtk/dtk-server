@@ -14,7 +14,7 @@ module XYZ
        nodes_info.each do |k,info|
          ret[k] = node_info(info,opts)
       end
-      ret["null-node-template"] = node_info({:display_name => "null-node-template"},opts)
+      ret["null-node-template"] = null_node_info(opts)
       ret
      end
 
@@ -123,48 +123,49 @@ module XYZ
              "dynamic"=>true,
              "hidden"=>false,
           }
-         },
-         "node_interface"=>
-          {"eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}},
-=begin
-#TODO: not used yet
-         "monitoring_item"=>
-          {"check_ping"=>
-            {"enabled"=>true,
-             "description"=>"ping",
-             "display_name"=>"check_ping"},
-           "check_mem"=>
-            {"enabled"=>true,
-             "description"=>"Free Memory",
-             "display_name"=>"check_mem"},
-           "check_local_procs"=>
-            {"enabled"=>true,
-             "description"=>"Processes",
-             "display_name"=>"check_local_procs"},
-           "check_all_disks"=>
-            {"enabled"=>true,
-             "description"=>"Free Space All Disks",
-             "display_name"=>"check_all_disks"},
-           "check_memory_profiler"=>
-            {"enabled"=>true,
-             "description"=>"Memory Profiler",
-             "display_name"=>"check_memory_profiler"},
-           "check_iostat"=>
-            {"enabled"=>true,
-             "description"=>"Iostat",
-             "display_name"=>"check_iostat"},
-           "check_ssh"=>
-            {"enabled"=>true,
-             "description"=>"SSH",
-             "display_name"=>"check_ssh"}
-         }
-=end
-       }
+       },
+       "node_interface"=>
+       {"eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}}
+     }
+   
      if node_binding_rs_id = node_info_binding_ruleset_id(info,opts)
        ret["*node_binding_rs_id"] =  node_binding_rs_id
      end
      ret
    end
+
+
+   def self.null_node_info(opts={})
+     ret = node_info({:display_name => "null-node-template"},opts)
+     (ret["attribute"] ||= Hash.new).merge!(null_node_info_attributes(opts))
+     ret
+   end
+ 
+   def self.null_node_info_attributes(opts={})
+     {
+       "os_type"=>{
+         "required"=>true,
+         "read_only"=>true,
+         "is_port"=>true,
+         "cannot_change"=>false,
+         "data_type"=>"string",
+         "display_name"=>"os_type",
+         "dynamic"=>true,
+         "hidden"=>false,
+       },
+       "memory_size"=>{
+         "required"=>true,
+         "read_only"=>true,
+         "is_port"=>true,
+         "cannot_change"=>false,
+         "data_type"=>"string",
+         "display_name"=>"memory_size",
+         "dynamic"=>true,
+         "hidden"=>false,
+       }
+     }
+   end
+
    def self.node_info_binding_ruleset_id(info,opts={})
      node_binding_rulesets().each do |k,v|
        v[:rules].each_with_index do |r,i|
@@ -181,6 +182,45 @@ module XYZ
      end
      nil
    end
+
+
+   def self.add_monitoring_info!(info)
+=begin
+#TODO: not used yet
+     (info["attribute"] ||= Hash.new)["monitoring_item"] =
+       {"check_ping"=>
+       {"enabled"=>true,
+         "description"=>"ping",
+         "display_name"=>"check_ping"},
+       "check_mem"=>
+       {"enabled"=>true,
+         "description"=>"Free Memory",
+         "display_name"=>"check_mem"},
+       "check_local_procs"=>
+       {"enabled"=>true,
+         "description"=>"Processes",
+         "display_name"=>"check_local_procs"},
+       "check_all_disks"=>
+       {"enabled"=>true,
+         "description"=>"Free Space All Disks",
+         "display_name"=>"check_all_disks"},
+       "check_memory_profiler"=>
+       {"enabled"=>true,
+         "description"=>"Memory Profiler",
+         "display_name"=>"check_memory_profiler"},
+       "check_iostat"=>
+       {"enabled"=>true,
+         "description"=>"Iostat",
+         "display_name"=>"check_iostat"},
+       "check_ssh"=>
+       {"enabled"=>true,
+         "description"=>"SSH",
+         "display_name"=>"check_ssh"}
+     }
+=end
+   end
+
+
 #TODO: deprecate below
      NodesInfoDefault = {
        ## for EU west

@@ -26,16 +26,24 @@ module XYZ
         rows.map do |r|
           el = r[result_col]
           if filter_proc.call(el)
-            opts[:augmented] ? r : el 
+            opts[:augmented] ? augmented_form(r,result_col) : el 
           end
         end.compact
       elsif opts[:augmented]
-        rows
+        augmented_form(rows,result_col)
       else
         rows.map{|r|r[result_col]}
       end
     end
-
+    def augmented_form(r,result_col)
+      if r.kind_of?(Hash)
+        r.delete(:id) #only left over column
+        r.delete(result_col).merge(r)
+      else # r.kind_of?(Array)
+        r.map{|el|augmented_form(el,result_col)}
+      end
+    end
+    private :augmented_form
 
     def self.model_name()
       model_name_x = Aux::underscore(Aux::demodulize(self.to_s)).to_sym

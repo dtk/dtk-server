@@ -18,9 +18,19 @@ module DTK; class ServiceModule
     end
 
     def import()
-      mark_as_complete_constraint = {:module_branch_id=>@ndx_module_branch_ids.keys} #so only delete extra components that belong to same module
-      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_constraint)
+      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_ids()} #so only delete extra components that belong to same module
+      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
+
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:oneof,:module_branch_id, module_branch_ids()]
+      }
+      existing_assembly_ids = Model.get_objs(@library_idh.createMH(:component),sp_hash).map{|r|r[:id]}
+      mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
+      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint)
+
       Model.import_objects_from_hash(@library_idh,@db_updates_assemblies)
+      
 
       #port links can only be imported in after ports created
       #add ports to assembly nodes
@@ -38,6 +48,9 @@ module DTK; class ServiceModule
       @ndx_ports.values()
     end
 
+    def module_branch_ids()
+      @ndx_module_branch_ids.keys
+    end
     def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
       Internal.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
     end

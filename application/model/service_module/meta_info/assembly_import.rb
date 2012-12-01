@@ -29,8 +29,7 @@ module DTK; class ServiceModule
       mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
       @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint)
 
-      Model.import_objects_from_hash(@library_idh,@db_updates_assemblies)
-      
+      Model.input_hash_content_into_model(@library_idh,@db_updates_assemblies)
 
       #port links can only be imported in after ports created
       #add ports to assembly nodes
@@ -41,7 +40,7 @@ module DTK; class ServiceModule
         db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assembly,ports))
         ports.each{|p|@ndx_ports[p[:id]] = p}
       end
-      Model.import_objects_from_hash(@library_idh,{"component" => db_updates_port_links})
+      Model.input_hash_content_into_model(@library_idh,{"component" => db_updates_port_links})
     end
 
     def ports()
@@ -95,6 +94,7 @@ module DTK; class ServiceModule
         {assembly_ref => {"port_link" => port_links}}
       end
 
+      #TODO: more efficient to resolve heer teh ids for *node_binding_rs_id
       def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
@@ -118,7 +118,10 @@ module DTK; class ServiceModule
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
             node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
+          else
+            node_output["node_binding_rs_id"] = nil
           end
+
           cmps_output = import_component_refs(library_idh,assembly_hash["name"],module_refs,node_hash["components"])
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
@@ -170,6 +173,7 @@ module DTK; class ServiceModule
         end
       end
 
+      #TODO: more efficient to resolve here the ids for *component_template_id
       def self.import_component_refs(library_idh,assembly_name,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules

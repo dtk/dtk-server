@@ -4,7 +4,7 @@ module DTK; class Attribute
     def self.set_attributes(base_object,av_pairs)
       ret = Array.new
       attribute_rows = Array.new
-      #TODO: more efficient if can bulk up
+      #TODO: more efficient if can bulk up; and also return existing_attrs
       av_pairs.each do |av_pair|
         pattern = create(av_pair[:pattern])
         attr_idhs = pattern.ret_attribute_idhs(base_object.id_handle())
@@ -15,10 +15,17 @@ module DTK; class Attribute
       return ret if attribute_rows.empty?
       attr_ids = attribute_rows.map{|r|r[:id]}
       attr_mh = base_object.model_handle(:attribute)
-      LegalValue.raise_usage_errors?(attr_mh,attribute_rows)
+
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:node_node_id,:component_component_id],
+        :filter => [:oneof,:id,attribute_rows.map{|a|a[:id]}]
+      }
+      existing_attrs = Model.get_objs(attr_mh,sp_hash)
+      ndx_new_vals = attribute_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:value_asserted])}
+      LegalValue.raise_usage_errors?(existing_attrs,ndx_new_vals)
 
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
-      SpecialProcessing::Update.handle_special_processing_attributes(attr_mh,attribute_rows)
+      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
 
       filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,:filter_proc => filter_proc)

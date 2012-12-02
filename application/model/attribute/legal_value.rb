@@ -1,11 +1,10 @@
 module DTK; class Attribute
-  class LegalValue
-    def self.raise_usage_errors?(attr_mh,attribute_rows)
-      #TODO: stub
-      pp attribute_rows
+  class LegalValue 
+    def self.raise_usage_errors?(existing_attrs,ndx_new_vals)
       errors = Array.new
-      attribute_rows.each do |av_pair|
-        special_processing,error = SpecialProcessing::ValueCheck.error_special_processing?(attr_mh,av_pair)
+      existing_attrs.each do |a|
+        new_val = ndx_new_vals[a[:id]]
+        special_processing,error = SpecialProcessing::ValueCheck.error_special_processing?(a,new_val)
         if special_processing
           if error
             errors << error 
@@ -13,6 +12,9 @@ module DTK; class Attribute
         else
           #TODO: stub for normal error processing
         end
+      end
+      unless errors.empty?
+        raise Errors.new(errors)
       end
     end
     class Errors < ErrorUsage

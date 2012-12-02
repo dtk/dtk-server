@@ -21,12 +21,27 @@ module DTK; class Attribute
       def initialize(errors)
         super(errors_to_msg(errors))
       end
-      private
+     private
       def errors_to_msg(errors)
         errors.map{|err|err.to_s}.join("\n")
       end
     end
-    class Error 
+    class Error < ErrorUsage 
+      def initialize(attr,new_val,info={})
+        super(error_msg(attr,new_val,info))
+      end
+     private
+      def error_msg(attr,new_val,info)
+        attr_name = attr[:display_name]
+        ret = "Attribute (#{attr}) has illegal value (#{new_val})" 
+        if legal_vals = info[:legal_values]
+          ident = " "*2;
+          sep = "--------------"
+          ret << "; legal values are: \n#{sep}\n#{ident}#{legal_vals.join("\n#{ident}")}" 
+          ret << "\n#{sep}\n"
+        end
+        ret
+      end
     end
   end
 end; end

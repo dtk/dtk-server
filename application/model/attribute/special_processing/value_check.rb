@@ -41,14 +41,11 @@ module DTK; class Attribute
           :filter => lambda{|a|a[:node_node_id]},
           :legal_values => lambda{|a|Node::Template.legal_memory_sizes(a.model_handle(:node))}
         },
-        :os_type =>{
+        :os_identifier =>{
           :filter => lambda{|a|a[:node_node_id]},
-          :legal_values => lambda{|a|node_os_type_legal_values(a)} 
+          :legal_values => lambda{|a|Node::Template.legal_os_identifiers(a.model_handle(:node))}
         } 
       }
-      def self.node_os_type_legal_values(attr)
-        Node::Template.list(attr.id_handle().createMH(:node)).map{|n|n[:display_name]}
-      end
     end
   end
 end; end

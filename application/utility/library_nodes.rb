@@ -35,6 +35,7 @@ module XYZ
            size = ec2_size.split(".").last
            ref = "#{ami}-#{size}"
            ret[ref] = {
+             :os_identifier => info["type"],
              :ami => ami,
              :display_name =>"#{info["display_name"]} #{size}", 
              :os_type =>info["os_type"],
@@ -81,6 +82,7 @@ module XYZ
    def self.node_info(info,opts={})
      ret = {
        "os_type"=>info[:os_type],
+       "os_identifier"=>info[:os_identifier],
        "type"=>"image",
        "display_name"=> info[:display_name],
        "external_ref"=>{
@@ -143,10 +145,10 @@ module XYZ
  
    def self.null_node_info_attributes(opts={})
      {
-       "os_type"=>{
+       "os_identifier"=>{
          "required"=>true,
          "data_type"=>"string",
-         "display_name"=>"os_type"
+         "display_name"=>"os_identifier"
        },
        "memory_size"=>{
          "required"=>true,

@@ -10,6 +10,7 @@ module XYZ
       column :type, :varchar, :size => 25, :default => "instance" # | "image" || "staged" || "stub"
       column :role, :varchar, :size => 50
       column :os_type, :varchar, :size => 25
+      column :os_identifier, :varchar, :size => 50 #augments os_type to identify specifics about os. From os_identier given region one can find unique ami
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
       #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
       #TBD: experimenting whetehr better to make this actual or virtual columns

@@ -28,10 +28,10 @@ module DTK
         return @legal_os_types if @legal_os_types
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
-          :cols => [:id,:os_identifer],
+          :cols => [:id,:os_identifier],
           :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
         }
-        @legal_os_types = get_objs(model_handle.createMH(:node),sp_hash).map{|r|r[:os_identifer]}.compact.uniq
+        @legal_os_types = get_objs(model_handle.createMH(:node),sp_hash).map{|r|r[:os_identifier]}.compact.uniq
       end
 
       def self.legal_memory_sizes(model_handle)

@@ -27,9 +27,8 @@ module DTK; class Attribute
         def self.process(attr,new_val)
           os_identifier = new_val
           node, target = get_node_and_target(attr)
-pp [os_identifier,target]
-          unless image_id = CommandAndControl.find_image_id_from_os_identifier(os_identifier,target)
-            target.update_object!(:display_name)
+          unless image_id = Node::Template.find_image_id_from_os_identifier(os_identifier,target)
+            target.update_object!(:display_name,:iaas_type,:iaas_properties)
             raise ErrorUsage.new("Cannot find image_id from os identifier (#{os_identifier}) in target (#{target[:display_name]})")
           end
           update_external_ref_field(node,:image_id,image_id)
@@ -43,6 +42,8 @@ pp [os_identifier,target]
 
       class MemorySize < self
         def self.process(attr,new_val)
+          node = get_node(attr)
+          update_external_ref_field(node,:size,new_val)
         end
       end
 
@@ -52,7 +53,7 @@ pp [os_identifier,target]
       end
 
       def self.update_external_ref_field(node,field,value)
-        update_hash = {:id => attribute[:id],:asserted_value => {field => value}}
+        update_hash = {:id => node[:id],:external_ref => {field => value}}
         Model.update_from_rows(node.model_handle(),[update_hash],:partial_value=>true)
       end
     end

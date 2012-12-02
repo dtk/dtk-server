@@ -5,7 +5,7 @@ module XYZ
       def self.find_matching_node_binding_rule(node_binding_rules,target)
         node_binding_rules.find do |r|
           conditions = r[:conditions]
-          conditions[:region] == target[:iaas_properties][:region]
+          (conditions[:type] == "ec2_image") and (conditions[:region] == target[:iaas_properties][:region])
         end
       end
 
@@ -76,9 +76,10 @@ module XYZ
         if instance_id.nil?
           ami = external_ref[:image_id]
           unless ami
-            raise Error.new("cannot find ami")
+            node.update_object!(:display_name)
+            raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
           end
-          raise ErrorCannotCreateNode.new unless ami
+
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 

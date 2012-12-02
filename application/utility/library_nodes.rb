@@ -58,6 +58,7 @@ module XYZ
            ret[ref] = {
              :type=>"clone",
              :os_type=>info["os_type"],
+             :os_identifier=>info["type"],
              :rules=>
              [{:conditions=>{:type=>"ec2_image", :region=>info["region"]},
                 :node_template=>{

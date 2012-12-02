@@ -11,11 +11,6 @@ module DTK; class Attribute
       end
 
      private
-      def self.needs_special_processing?(attr)
-        if attr_info = attr_info(attr)
-          attr_info[:filter].call(attr)
-        end
-      end
       def self.error?(attr,new_val)
         if legal_values = legal_values(attr)
           unless legal_values.include?(new_val)
@@ -31,11 +26,10 @@ module DTK; class Attribute
           legal_values_proc.call(attr)
         end
       end
-      
-      def self.attr_info(attr)
-        SpecialProcessingInfo[attr[:display_name].to_sym]
-      end
 
+      def self.ret_special_processing_info()
+        SpecialProcessingInfo
+      end
       SpecialProcessingInfo = {
         :memory_size => {
           :filter => lambda{|a|a[:node_node_id]},

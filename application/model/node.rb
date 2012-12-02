@@ -35,23 +35,36 @@ module XYZ
     #######################
     #TODO: write as sql fn for efficiency
     def has_pending_change()
+      update_object!(:action)
       ((self[:action]||{})[:count]||0) > 0
     end
 
     def status()
+      #assumes :is_deployed and :operational_status are set
       (not self[:is_deployed]) ? "staged" : self[:operational_status]
     end
 
     def target_id()
-      self[:datacenter_datacenter_id]
+      update_object!(:datacenter_datacenter_id)[:datacenter_datacenter_id]
     end
 
     def name()
-      self[:display_name]
+      update_object!(:display_name)[:display_name]
     end
 
     #######################
+    # gets
+
+    def get_target()
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name],
+        :filter => [:eq,:id,target_id()]
+      }
+      Model.get_obj(model_handle(:target),sp_hash)
+    end
+
     ######### Model apis
+
 
     def self.list(model_handle,opts={})
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])

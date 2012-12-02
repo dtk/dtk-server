@@ -24,6 +24,21 @@ module DTK
         ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
+      def self.legal_memory_sizes(model_handle)
+        return @legal_memory_sizes if @legal_memory_sizes
+        public_library = Library.get_public_library(model_handle.createMH(:library))
+        sp_hash = {
+          :cols => [:id,:external_ref],
+          :filter => [:and,[:eq,:type,"image"],[:eq,:library_library_id,public_library[:id]]]
+        }
+        @legal_memory_sizes = get_objs(model_handle.createMH(:node),sp_hash).map do |r|
+pp r[:external_ref]
+          if external_ref = r[:external_ref]
+            external_ref[:size]
+          end
+        end.compact.uniq
+      end
+
       def self.null_node_template(model_handle)
         sp_hash = {
           :cols => [:id,:group_id,:display_name],

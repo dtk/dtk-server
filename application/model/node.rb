@@ -63,6 +63,13 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
+    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
+
+    def info()
+      get_obj(:cols => InfoCols).hash_subset(*InfoCols)
+    end
+    
+
     def info_about(about,opts={})
       case about
        when :components

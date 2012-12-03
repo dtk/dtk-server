@@ -108,11 +108,20 @@ module DTK
     def rest__start()
       assembly = ret_assembly_instance_object()
       assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+      node_pattern = ret_request_params(:node_pattern)
 
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
 
-      stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
+      unless node_pattern.nil?
+        regex = Regexp.new(node_pattern)
+        nodes = nodes.select { |node| regex =~ node.id.to_s}
+        if nodes.size == 0
+          return rest_ok_response(:errors => ["No nodes have been matched via ID ~ '#{node_pattern}'"])
+        end
+      end
+
+      stopped_nodes = nodes.select { |node| node[:admin_op_status] =~ /stopped|pending/}
 
       if stopped_nodes.size == 0
         return rest_ok_response(:errors => ["There are no stopped nodes for assembly '#{assembly[:id]}'"])
@@ -136,7 +145,23 @@ module DTK
 
     def rest__stop()
       assembly = ret_assembly_instance_object()
+      node_pattern = ret_request_params(:node_pattern)
       nodes =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+
+      unless node_pattern.nil?
+        regex = Regexp.new(node_pattern)
+        nodes = nodes.select { |node| regex =~ node.id.to_s}
+        if nodes.size == 0
+          return rest_ok_response(:errors => ["No nodes have been matched via ID ~ '#{node_pattern}'"])
+        end
+      end
+
+      started_nodes = nodes.select { |node| node[:admin_op_status] =~ /running|pending/ }
+
+      if started_nodes.size == 0
+        return rest_ok_response(:errors => ["There are no started nodes for assembly '#{assembly[:id]}'"])
+      end
+
       CommandAndControl.stop_instances(nodes)
 
       rest_ok_response :status => :ok

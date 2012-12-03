@@ -14,6 +14,8 @@ module XYZ
       
       matches = Array.new
       aug_attr_list.each do |attr|
+        #ignore any node attribute
+        next unless attr[:component]
         find_matching_links(attr,links_to_trace).each do |link|
           #attr is input attribute
           matches << {:link => link, :attr => attr} 

@@ -8,7 +8,7 @@ module DTK
           #TODO: need to distingusih between legitimate nil value and unset
           if attr[:required] and attr[:attribute_value].nil? and (not attr[:port_type] == "input") and (not attr[:dynamic])
             aug_attr = attr.merge(:nested_component => action[:component], :node => action[:node])
-            errors <<  MissingRequiredAttribute.new(level,aug_attr)
+            errors <<  MissingRequiredAttribute.new(aug_attr)
           end
         end
       end
@@ -148,9 +148,9 @@ module DTK
     class ErrorViolation < ErrorUsage
     end
     class MissingRequiredAttribute < ErrorViolation
-      def initialize(level,aug_attr)
+      def initialize(aug_attr)
         @aug_attr = aug_attr
-        super(Attribute::Pattern::Display.new(level,aug_attr).print_form())
+        super(Attribute::Pattern::Display.new(aug_attr).print_form())
       end
     end
 

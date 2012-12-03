@@ -73,6 +73,31 @@ module XYZ
       has_req_fields ? false : true
     end
 
+    def self.augmented_attribute_list_from_task(task,opts={})
+      component_actions = task.component_actions
+      ret = Array.new 
+      ndx_nodes = Hash.new
+      component_actions.each do |action|
+        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
+          ret << attr.merge(:component => action[:component], :node => action[:node],:task_id => task[:id])
+        end
+        if opts[:include_node_attributes]
+          node = action[:node]
+          ndx_nodes[node[:id]] ||= node
+        end
+      end
+      if opts[:include_node_attributes]
+        #TODO: none need flattening now
+        node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
+        add_filter = [:eq,:required,true]
+        cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:port_type,:dynamic]
+        Node.get_node_level_attributes(node_idhs,cols,add_filter).each do |attr|
+          ret << attr.merge(:node => ndx_nodes[attr[:node_node_id]],:task_id => task[:id])
+        end
+      end
+      ret
+    end
+
     def unraveled_attribute_id()
       qualified_attribute_id_aux()
     end
@@ -193,13 +218,10 @@ module XYZ
       end
     end
 
-
-
     def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])
       config_agent && config_agent.ret_attribute_name_and_type(self)
     end
-
 
     def self.attr_def_to_internal_form(hash)
       ret = Hash.new

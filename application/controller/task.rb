@@ -66,7 +66,9 @@ module XYZ
       task = Task.get_hierarchical_structure(id_handle(task_id))
 
       guards,violations = Attribute.ret_attr_guards_and_violations(task)
-      task.raise_errors_if_violations?(violations)
+      if violations
+        raise violations
+      end
 
       workflow = Workflow.create(task,guards)
       workflow.defer_execution()

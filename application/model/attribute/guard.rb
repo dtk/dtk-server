@@ -15,7 +15,7 @@ module XYZ
     def ret_attr_guards_and_violations(top_level_task)
       guards = Array.new
       #augmented_attr_list does not contain node level attributes => attr_out can be null
-      augmented_attr_list = augmented_attribute_list_from_task(top_level_task)
+      augmented_attr_list = augmented_attribute_list_from_task(top_level_task,:include_node_attributes => true)
       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
         if guard = GuardedAttribute.create(attr_in,link,attr_out)
           guards << guard
@@ -27,12 +27,16 @@ module XYZ
    private
     def ret_required_attrs_without_values(augmented_attr_list,guards)
       guarded_ids = nil
-      augmented_attr_list.select do |attr|
-        if attr[:required] and attr[:attribute_value].nil? 
+      violations = Array.new
+      augmented_attr_list.each do |aug_attr|
+        if aug_attr[:required] and aug_attr[:attribute_value].nil? 
           guarded_ids ||= guards.map{|g|g[:guarded][:attribute][:id]}.uniq
-          not guarded_ids.include?(attr[:id])
+          unless guarded_ids.include?(aug_attr[:id])
+           violations << Violation::MissingRequiredAttribute.new(aug_attr)
+          end
         end
-      end.map{|attr|ValidationError::MissingRequiredAttribute.create_from_augmented_attr(attr)}
+      end
+      violations.empty? ? nil : Violation::ErrorViolations.new(violations)
     end
   end
 

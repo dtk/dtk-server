@@ -12,16 +12,6 @@ module XYZ
       end
       ret
     end
-    def augmented_attribute_list_from_task(task)
-      component_actions = task.component_actions
-      ret = Array.new 
-      component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          ret << attr.merge(:component => action[:component], :node => action[:node],:task_id => task[:id])
-        end
-      end
-      ret
-    end
    private
     #adds port type info and required
     def add_missing_info_for_group_attrs!(augmented_attr_list)

@@ -143,6 +143,19 @@ module XYZ
     end
     private :get_attributes_print_form_aux
 
+    def self.get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
+      if add_filter
+        filter = [:and,filter,add_filter]
+      end
+      sp_hash = {
+        :cols => cols||[:id,:group_id,:display_name,:required],
+        :filter => filter,
+      }
+      attr_mh = node_idhs.first.createMH(:attribute)
+      get_objs(attr_mh,sp_hash)
+    end
+
     def set_attributes(av_pairs)
       Attribute::Pattern::Node.set_attributes(self,av_pairs)
     end

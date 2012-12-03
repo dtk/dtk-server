@@ -13,7 +13,7 @@ module XYZ
       target_parent_obj = target.values.first.get_parent_id_handle().create_object
       violations = ret_violations(target)
       if opts[:raise_error_when_any_violation]
-        all_violations = ViolationExpression(violations["error"],violations["warning"])
+        all_violations = Violation::Expression(violations["error"],violations["warning"])
         raise ErrorConstraintViolations.new(all_violations.pp_form)
       elsif opts[:raise_error_when_error_violation] 
         pp [:warnings, violations["warning"].pp_form]
@@ -46,7 +46,7 @@ module XYZ
     end
    public
     def ret_violations(target)
-      ret = {"error" => ViolationExpression.new(target,@logical_op), "warning" => ViolationExpression.new(target,@logical_op)}
+      ret = {"error" => Violation::Expression.new(target,@logical_op), "warning" => Violation::Expression.new(target,@logical_op)}
         
       self.each do |constraint|
         next if constraint.evaluate_given_target(target)

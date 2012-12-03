@@ -1,69 +1,24 @@
-module XYZ
-  class ViolationExpression < HashObject 
-    def initialize(violation_target,logical_op)
-      hash = {
-        :violation_target => ViolationTarget.new(violation_target),
-        :logical_op => logical_op,
-        :elements => Array.new
-      }
-      super(hash)
-    end
-
-    def <<(expr)
-      self[:elements] << expr
-      self
-    end
-
-    def constraint_list()
-      self[:elements].map do |e|
-        e.kind_of?(Constraint) ? e : e.constraint_list() 
-      end.flatten
-    end
-
-    def self.and(*exprs)
-      vt = exprs.first.violation_target
-      exprs[1..exprs.size-1].map do |e|
-        unless vt == e[:violation_target]
-          raise Error.new("Not supported conjunction of expressions with different violation_targets")
+module DTK
+  class Violation < Model
+    def self.find_missing_required_attributes(level,commit_task)
+      component_actions = commit_task.component_actions
+      errors = Array.new 
+      component_actions.each do |action|
+        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
+          #TODO: need to distingusih between legitimate nil value and unset
+          if attr[:required] and attr[:attribute_value].nil? and (not attr[:port_type] == "input") and (not attr[:dynamic])
+            aug_attr = attr.merge(:nested_component => action[:component], :node => action[:node])
+            errors <<  MissingRequiredAttribute.new(level,aug_attr)
+          end
         end
       end
-      ret = new(vt,:and)
-      exprs.each{|e|ret << e}
-      ret
+      errors.empty? ? nil : ErrorViolations.new(errors)
     end
 
-    def empty?()
-      self[:elements].empty?()
-    end
-
-    def pp_form()
-      Array.new if self[:elements].empty?
-      args = self[:elements].map{|x|x.kind_of?(Constraint) ? x[:description] : x.pp_form}
-      args.size == 1 ? args.first : [self[:logical_op]] + args 
-    end
-  end
-
-  class ViolationTarget < HashObject
-    def initialize(key_idh)
-      hash = {
-        :type => key_idh.keys.first,
-        :id_handle => key_idh.values.first,
-        :id => key_idh.values.first.get_id()
-      }
-      super(hash)
-    end
-
-    def ==(vt2)
-      (self[:type] == vt2[:type]) and  (self[:id] == vt2[:id])
-    end
-  end
-
-  class Violation < Model
     def self.save(parent,violation_expression,opts={})
       expression_list = ret_expression_list(violation_expression)
       save_list(parent,expression_list,opts)
     end
-
    
     def self.ret_violations(target_node_id_handles)
       ret = Array.new
@@ -178,64 +133,85 @@ module XYZ
         end
       end
     end
-  end
 
-  #TODO: unify with Violation class
-  class ValidationError < HashObject 
-    #TODO: deprecate
-
-    extend R8Tpl::Utility::I18n
-    def self.find_missing_required_attributes(commit_task)
-      component_actions = commit_task.component_actions
-      ret = Array.new 
-      i18n = get_i18n_mappings_for_models(:attribute,:component)
-      component_actions.each do |action|
-        component_name = i18n_string(i18n,:component, (action[:component]||{})[:display_name])
-        node_name = (action[:node]||{})[:display_name]
-        node_id = (action[:node]||{})[:id]
-        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          #TODO: need to distingusih between legitimate nil value and unset
-          next unless attr[:required] and attr[:attribute_value].nil? and (not attr[:port_type] == "input") and (not attr[:dynamic])
-          error_input = {
-            :attribute_name => i18n_string(i18n,:attribute,attr[:display_name]),
-            :component_name => component_name,
-            :node_name => node_name,
-            :node_id => node_id
-          }
-          ret <<  MissingRequiredAttribute.new(error_input)
-        end
+   public 
+    class ErrorViolations < ErrorUsage
+      def initialize(violation_errs)
+        @errors = violation_errs
+        super(errors_to_msg(violation_errs))
       end
-      ret.empty? ? nil : ret
+      private
+      def errors_to_msg(errors)
+        errors.map{|err|err.to_s}.join("\n")
+      end
+    end
+    class ErrorViolation < ErrorUsage
+    end
+    class MissingRequiredAttribute < ErrorViolation
+      def initialize(level,aug_attr)
+        @aug_attr = aug_attr
+        super(Attribute::Pattern::Display.new(level,aug_attr).print_form())
+      end
     end
 
-    def self.debug_inspect(error_list)
-      ret = ""
-      error_list.each{|e| ret << "#{e.class.to_s}: #{e.inspect}\n"}
-      ret
-    end
-   private
-    def initialize(hash)
-      super(error_fields.inject({}){|ret,f|hash.has_key?(f) ? ret.merge(f => hash[f]) : ret})
-    end
-    def error_fields()
-      Array.new
-    end
-   public
-    class MissingRequiredAttribute < ValidationError
-      def self.create_from_augmented_attr(attr)
-        error_hash = {
-          :attribute_id => attr[:id],
-          :attribute_name => attr[:display_name],
-          :component_name => attr[:component][:display_name],
-          :component_id => attr[:component][:id],
-          :node_name =>  attr[:node][:display_name],
-          :node_id => attr[:node][:id]
+    class Expression < HashObject 
+      def initialize(violation_target,logical_op)
+        hash = {
+          :violation_target => Target.new(violation_target),
+          :logical_op => logical_op,
+          :elements => Array.new
         }
-        new(error_hash)
+        super(hash)
       end
-      def error_fields()
-        [:node_id,:node_name,:component_name,:component_id,:attribute_name,:attribute_id]
+
+      def <<(expr)
+        self[:elements] << expr
+        self
+      end
+
+      def constraint_list()
+        self[:elements].map do |e|
+          e.kind_of?(Constraint) ? e : e.constraint_list() 
+        end.flatten
+      end
+
+      def self.and(*exprs)
+        vt = exprs.first.violation_target
+        exprs[1..exprs.size-1].map do |e|
+          unless vt == e[:violation_target]
+            raise Error.new("Not supported conjunction of expressions with different violation_targets")
+          end
+        end
+        ret = new(vt,:and)
+        exprs.each{|e|ret << e}
+        ret
+      end
+      
+      def empty?()
+        self[:elements].empty?()
+      end
+      
+      def pp_form()
+        Array.new if self[:elements].empty?
+        args = self[:elements].map{|x|x.kind_of?(Constraint) ? x[:description] : x.pp_form}
+        args.size == 1 ? args.first : [self[:logical_op]] + args 
+      end
+    end
+
+    class Target < HashObject
+      def initialize(key_idh)
+        hash = {
+          :type => key_idh.keys.first,
+          :id_handle => key_idh.values.first,
+          :id => key_idh.values.first.get_id()
+        }
+        super(hash)
+      end
+
+      def ==(vt2)
+        (self[:type] == vt2[:type]) and  (self[:id] == vt2[:id])
       end
     end
   end
 end
+

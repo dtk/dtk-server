@@ -167,13 +167,10 @@ module XYZ
     UnchangedDisplayCols = [:id,:required]
     UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
 
-    def self.required_unset_attribute_proc_filter()
-      Log.error("TODO: also need to make sure this is not a derived value not yet populated")
-      proc do |a|
-        a[:required] and not a[:attribute_value]
-      end
+    def required_unset_attribute?()
+      update_object!(:required,:value_derived,:value_asserted,:port_type,:dynamic)
+      self[:required] and self[:attribute_value].nil? and (not self[:port_type] == "input") and (not self[:dynamic])
     end
-
 
    private
     def info_about_attr_value(value)

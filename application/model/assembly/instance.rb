@@ -123,7 +123,7 @@ module DTK; class  Assembly
       if filter
         case filter
           when :required_unset_attributes
-            get_attributes_print_form_aux(Attribute.required_unset_attribute_proc_filter())
+          get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
@@ -135,12 +135,10 @@ module DTK; class  Assembly
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_augmented_node_assembly_attributes(filter_proc).map do |aug_attr|
-        display_name_prefix = "node[#{aug_attr[:node][:display_name]}]/cmp[#{aug_attr[:nested_component].display_name_print_form()}]/"
-        aug_attr.print_form(display_name_prefix)
+        Attribute::Pattern::Display.new(:component,aug_attr).print_form()
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        display_name_prefix = "node[#{aug_attr[:node][:display_name]}]/"
-        aug_attr.print_form(display_name_prefix)
+        Attribute::Pattern::Display.new(:node,aug_attr).print_form()
       end
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

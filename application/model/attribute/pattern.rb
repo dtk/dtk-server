@@ -30,6 +30,25 @@ module DTK; class Attribute
       filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,:filter_proc => filter_proc)
     end
+
+    class Display
+      def initialize(level,aug_attr)
+        @level = level
+        @aug_attr = aug_attr
+      end
+      def print_form()
+        display_name_prefix = 
+          case @level
+           when :assembly
+            ""
+           when :node
+            "node[#{@aug_attr[:node][:display_name]}]/"
+           when :component
+            "node[#{@aug_attr[:node][:display_name]}]/cmp[#{@aug_attr[:nested_component].display_name_print_form()}]/"
+          end
+        @aug_attr.print_form(display_name_prefix)
+      end
+    end
   
     class Assembly < self
       def self.create(pattern)

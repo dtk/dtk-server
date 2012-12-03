@@ -21,6 +21,35 @@ module XYZ
       get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
     end
 
+    def raise_errors_if_violations?(violations)
+=begin
+#TODO: rewrite
+      return if violations.empty?
+      #TODO: also need to look for missing required components
+      pp [:violations,violations.map{|v|v.merge(:violation => Aux::demodulize(v.class.to_s))}]
+      error_list = []
+      #TODO: stub
+      error_codes = {
+        "MissingRequiredAttribute"=>:missing_required_attribute
+      }
+      error_list = violations.map do |e|
+        error_name = Aux::demodulize(e.class.to_s)
+        error_description = error_name
+        case error_name
+        when "MissingRequiredAttribute"
+          error_description = "Component(#{e[:component_name]}) on node (#{e[:node_name]}) is missing required attribute #{e[:attribute_name]}"
+        end
+        {
+          :code => error_codes[error_name] || :error,
+          :node_id => e[:node_id],
+          :description => error_description
+        }
+      end
+      pp error_codes
+      raise "got here"
+=end
+    end
+
     #indexed by tasks
     def self.get_ndx_errors(task_idhs)
       ret = Array.new

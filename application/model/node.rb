@@ -119,10 +119,10 @@ module XYZ
     def get_attributes_print_form(filter=nil)
       if filter
         case filter
-          when :required_unset_attributes
-            get_attributes_print_form_aux(Attribute.required_unset_attribute_proc_filter())
-          else 
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
+        when :required_unset_attributes
+          get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
+         else 
+          raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
       else
         get_attributes_print_form_aux()

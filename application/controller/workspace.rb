@@ -682,7 +682,7 @@ pp datacenter
       top_level_task = create_task_from_pending_changes(pending_changes)
 
       #TODO: need to sync ValidationError with analysis done in group by
-      errors = ValidationError.find_missing_required_attributes(top_level_task)
+      errors = Violation.find_missing_required_attributes(top_level_task)
 #TODO: removing for time being
 #      if errors
       pp [:errors,errors] if errors
@@ -755,9 +755,9 @@ pp datacenter
 
       top_level_task = Task.create_from_pending_changes(target_idh,pending_changes)
 
-      #TODO: need to sync ValidationError with analysis done in group by
+      #TODO: need to sync Violation with analysis done in group by
       #TODO: just need to check if anything returned missing values
-      errors = ValidationError.find_missing_required_attributes(top_level_task)
+      errors = Violation.find_missing_required_attributes(top_level_task)
       #TODO: removing for time being
       #      if errors
       if false #errors

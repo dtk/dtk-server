@@ -40,8 +40,19 @@ module XYZ
         @r8zone.records
       end
 
+      Lock = Mutex.new
+      # We need to synchronize this method since there is issue Excon library. Issue has been addressed
+      # many times but it seems we need to find correct version of Fog library to resolve it.
+      # #<Excon::Errors::SocketError: undefined method `[]' for nil:NilClass (NoMethodError)
+      # /usr/lib/ruby/gems/1.8/gems/excon-0.16.7/lib/excon/response.rb:21:...
+      #
+      # Excon gem seems not to be thread save, sync resolve issue but leaves is to use to find 
+      # better version of this gem. Overhead is very little but still this should be resolved.
+      # TODO: Find Fog/Excon gems which do not have conurrency issues
       def get(name, type=nil)
-        @r8zone.records.get(name,type)
+        Lock.synchronize do
+          return @r8zone.records.get(name,type)
+        end
       end
 
       def destroy(name, type=nil)

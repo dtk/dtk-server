@@ -110,7 +110,8 @@ module DTK
       assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
 
       # filters only stopped nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      nodes = assembly.get_nodes(:id,:display_name,:external_ref,:hostname_external_ref, :admin_op_status)
+
       stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
 
       if stopped_nodes.size == 0

@@ -34,17 +34,20 @@ module DTK
         @legal_os_types = get_objs(model_handle.createMH(:node),sp_hash).map{|r|r[:os_identifier]}.compact.uniq
       end
 
-      def self.find_image_id_from_os_identifier(os_identifier,target)
+      #returns [image_id, os_type]
+      def self.find_image_id_and_os_type(os_identifier,target)
         public_library = Library.get_public_library(target.model_handle(:library))
         sp_hash = {
-          :cols => [:id,:rules],
+          :cols => [:id,:rules,:os_type],
           :filter => [:and,[:eq,:os_identifier,os_identifier],[:eq,:library_library_id,public_library[:id]]]
         }
-        matching_rule = nil 
-        get_objs(target.model_handle(:node_binding_ruleset),sp_hash).find do |node_binding_rules|
-          matching_rule = CommandAndControl.find_matching_node_binding_rule(node_binding_rules[:rules],target)
+        ret = nil
+        get_objs(target.model_handle(:node_binding_ruleset),sp_hash).find do |nb_rs|
+          if matching_rule = CommandAndControl.find_matching_node_binding_rule(nb_rs[:rules],target)
+            ret = [matching_rule[:node_template][:image_id],nb_rs[:os_type]]
+          end
         end
-        matching_rule && matching_rule[:node_template][:image_id]
+        ret
       end
 
       def self.legal_memory_sizes(model_handle)

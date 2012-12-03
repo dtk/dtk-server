@@ -27,11 +27,13 @@ module DTK; class Attribute
         def self.process(attr,new_val)
           os_identifier = new_val
           node, target = get_node_and_target(attr)
-          unless image_id = Node::Template.find_image_id_from_os_identifier(os_identifier,target)
+          image_id, os_type = Node::Template.find_image_id_and_os_type(os_identifier,target)
+          unless image_id
             target.update_object!(:display_name,:iaas_type,:iaas_properties)
             raise ErrorUsage.new("Cannot find image_id from os identifier (#{os_identifier}) in target (#{target[:display_name]})")
           end
-          update_external_ref_field(node,:image_id,image_id)
+          update_node_external_ref(node,:image_id,image_id)
+          update_node(node,:os_type => os_type)
         end
        private
         def self.get_node_and_target(attr)
@@ -43,7 +45,7 @@ module DTK; class Attribute
       class MemorySize < self
         def self.process(attr,new_val)
           node = get_node(attr)
-          update_external_ref_field(node,:size,new_val)
+          update_node_external_ref(node,:size,new_val)
         end
       end
 
@@ -52,9 +54,11 @@ module DTK; class Attribute
         node_idh.create_object()
       end
 
-      def self.update_external_ref_field(node,field,value)
-        update_hash = {:id => node[:id],:external_ref => {field => value}}
-        Model.update_from_rows(node.model_handle(),[update_hash],:partial_value=>true)
+      def self.update_node_external_ref(node,extrenal_ref_field,new_val)
+        update_node(node,{:external_ref => {extrenal_ref_field => new_val}},:partial_value=>true)
+      end
+      def self.update_node(node,update_hash,opts={})
+        Model.update_from_rows(node.model_handle(),[update_hash.merge(:id => node[:id])],opts)
       end
     end
   end

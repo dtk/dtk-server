@@ -142,7 +142,7 @@ module DTK
       end
       private
       def errors_to_msg(errors)
-        errors.map{|err|err.to_s}.join("\n")
+        "\n"+errors.map{|err|err.to_s}.join("\n")
       end
     end
     class ErrorViolation < ErrorUsage
@@ -150,7 +150,11 @@ module DTK
     class MissingRequiredAttribute < ErrorViolation
       def initialize(aug_attr)
         @aug_attr = aug_attr
-        super(Attribute::Pattern::Display.new(aug_attr).print_form())
+        super(error_msg(aug_attr))
+      end
+     private
+      def error_msg(aug_attr)
+        "The attribute (#{Attribute::Pattern::Display.new(aug_attr).print_form()[:display_name]}) is required, but missing"
       end
     end
 

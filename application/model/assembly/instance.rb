@@ -135,10 +135,10 @@ module DTK; class  Assembly
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
       component_attrs = get_augmented_node_assembly_attributes(filter_proc).map do |aug_attr|
-        Attribute::Pattern::Display.new(:component,aug_attr).print_form()
+        Attribute::Pattern::Display.new(aug_attr,:component).print_form()
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        Attribute::Pattern::Display.new(:node,aug_attr).print_form()
+        Attribute::Pattern::Display.new(aug_attr,:node).print_form()
       end
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

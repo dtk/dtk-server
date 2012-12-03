@@ -46,7 +46,7 @@ module DTK; class Attribute
            when :component
             "node[#{@aug_attr[:node][:display_name]}]/cmp[#{@aug_attr[:nested_component].display_name_print_form()}]/"
           end
-        @aug_attr.print_form(display_name_prefix)[:display_name]
+        @aug_attr.print_form(display_name_prefix)
       end
      private
       def find_level(aug_attr)

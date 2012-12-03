@@ -90,7 +90,7 @@ module XYZ
         #TODO: none need flattening now
         node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
         add_filter = [:eq,:required,true]
-        cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:port_type,:dynamic]
+        cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:dynamic,:port_type_asserted,:is_port,:semantic_type_summary]
         Node.get_node_level_attributes(node_idhs,cols,add_filter).each do |attr|
           ret << attr.merge(:node => ndx_nodes[attr[:node_node_id]],:task_id => task[:id])
         end
@@ -193,7 +193,8 @@ module XYZ
     UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
 
     def required_unset_attribute?()
-      update_object!(:required,:value_derived,:value_asserted,:port_type,:dynamic)
+      #port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic
+      update_object!(:required,:value_derived,:value_asserted,:port_type_asserted,:is_port,:semantic_type_summary,:dynamic)
       self[:required] and self[:attribute_value].nil? and (not self[:port_type] == "input") and (not self[:dynamic])
     end
 

@@ -189,6 +189,10 @@ module XYZ
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
+    def update_external_ref_field(ext_ref_field,val)
+      update({:external_ref => {ext_ref_field => val}},{:partial_value=>true})
+    end
+
     def get_and_update_status!()
       #shortcut
       if has_key?(:is_deployed)

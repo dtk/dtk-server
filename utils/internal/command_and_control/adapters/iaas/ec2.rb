@@ -107,7 +107,8 @@ module XYZ
           state = response[:state]
           external_ref = external_ref.merge({
             :instance_id => instance_id,
-            :type => "ec2_instance"
+            :type => "ec2_instance",
+            :size => flavor_id
           })
           Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
           node_update_hash = {
@@ -116,7 +117,7 @@ module XYZ
             :is_deployed => true,
             :operational_status => "starting"
           }
-          node.merge!(node_update_hash)
+          node.merge!(node_update_hash) #TODO: dont think is needed anymore since update handles this
           node.update(node_update_hash)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")

@@ -33,8 +33,8 @@ module DTK; class Attribute
 
     class Display
       def initialize(aug_attr,level=nil)
-        @level = level||find_level(aug_attr)
-        @aug_attr = aug_attr
+        @aug_attr = aug_attr #needs to be done first
+        @level = level||find_level()
       end
       def print_form()
         display_name_prefix = 
@@ -42,16 +42,22 @@ module DTK; class Attribute
            when :assembly
             ""
            when :node
-            "node[#{@aug_attr[:node][:display_name]}]/"
+            "node[#{node[:display_name]}]/"
            when :component
-            "node[#{@aug_attr[:node][:display_name]}]/cmp[#{@aug_attr[:nested_component].display_name_print_form()}]/"
+            "node[#{node[:display_name]}]/cmp[#{component.display_name_print_form()}]/"
           end
         @aug_attr.print_form(display_name_prefix)
       end
      private
-      def find_level(aug_attr)
-        if aug_attr[:node]
-          aug_attr[:component] ? :component : :node
+      def node()
+        @aug_attr[:node]
+      end
+      def component()
+        @aug_attr[:component]||@aug_attr[:nested_component]
+      end
+      def find_level()
+        if node()
+          component() ? :component : :node
         else
           :assembly
         end

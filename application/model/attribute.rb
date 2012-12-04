@@ -195,10 +195,24 @@ module XYZ
     def required_unset_attribute?()
       #port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic
       update_object!(:required,:value_derived,:value_asserted,:port_type_asserted,:is_port,:semantic_type_summary,:dynamic)
-      self[:required] and self[:attribute_value].nil? and (not self[:port_type] == "input") and (not self[:dynamic])
+      if self[:required] and self[:attribute_value].nil? and not self[:dynamic]
+        if self[:port_type] == "input"
+          not has_input_link?()
+        else
+          true
+        end
+      end
+    end
+    
+   private
+    def has_input_link?()
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:eq,:input_id,id()]
+      }
+      not get_obj(model_handle(:attribute_link),sp_hash).empty?
     end
 
-   private
     def info_about_attr_value(value)
       #TODO: handle complex attributes better 
       if value

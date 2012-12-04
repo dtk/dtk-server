@@ -213,7 +213,7 @@ module DTK
     end
 
    private
-    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,versions=nil)
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
       impl = module_branch.get_implementation()
       if diffs_summary.meta_file_changed?()
         ComponentMetaFile.update_model(impl,module_branch.id_handle())

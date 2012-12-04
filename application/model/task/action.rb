@@ -232,11 +232,10 @@ module XYZ
 
         parent_field_name = DB.parent_field(:node,:attribute)
         sp_hash = {
-          :relation => :attribute,
+          :cols => [:id,:group_id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic],
           :filter => [:and,
                       [:eq, :dynamic, true],
-                      [:oneof, parent_field_name, ndx_actions.keys]],
-          :columns => [:id,:display_name,parent_field_name,:external_ref,:attribute_value,:required,:dynamic]
+                      [:oneof, parent_field_name, ndx_actions.keys]]
         }
 
         attrs = Model.get_objs(attr_mh,sp_hash)

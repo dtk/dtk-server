@@ -29,11 +29,11 @@ module XYZ
 
     class Route53 < Top
 
-      DNS_DOMAIN = "r8network.com."
+      DNS_DOMAIN = "r8network.com"
 
       def initialize()
         dns = Fog::DNS::AWS.new(get_compute_params())
-        @r8zone = dns.zones().find { |z| z.domain == DNS_DOMAIN }
+        @r8zone = dns.zones().find { |z| z.domain.include? DNS_DOMAIN }
       end
 
       def all_records()

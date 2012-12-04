@@ -26,13 +26,22 @@ module DTK
         sub_assembly_name,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
         ao_input_hash = {
           :display_name => type,
+          :description => hash_content["description"],
           :type => type,
           :sub_assembly_id => sub_assembly_id
         }
         port_links = ServiceModule::AssemblyImport.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
-        ao_input_hash.merge!(:port_link => port_links)
+        unless port_links.empty?
+          ao_input_hash.merge!(:port_link => port_links)
+        end
+        
+        node_bindings = ServiceNodeBinding.import_add_on_node_bindings(library_idh,hash_content["node_bindings"])
+        unless node_bindings.empty?
+          ao_input_hash.merge!(:node_binding => node_bindings)
+        end
+
         input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}
-        Model.import_objects_from_hash(library_idh,{"component" =>  input_hash})
+        Model.import_objects_from_hash(library_idh,"component" =>  input_hash)
       end
      private
       attr_reader :library_idh, :module_name, :meta_file, :hash_content, :ports

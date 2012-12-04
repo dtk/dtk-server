@@ -38,6 +38,27 @@ module XYZ
     end
   end
 
+  class ErrorsUsage < ErrorUsage
+    def initialize()
+      @errors = Array.new
+    end
+    def <<(err)
+      @errors << err
+    end
+    def empty?()
+      @errors.empty?()
+    end
+    def to_s()
+      if @errors.size == 1
+        @errors.first.to_s()
+      elsif @errors.size > 1
+        "\n"+@errors.map{|err|err.to_s}.join("\n")
+      else #no errors shoudl not be called 
+        "No errors"
+      end
+    end
+  end
+
   #TODO: move over to use nested classeslike above
   class ErrorIdInvalid <  ErrorUsage
     def initialize(id,object_type)

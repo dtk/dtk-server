@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class LegalValue 
     def self.raise_usage_errors?(existing_attrs,ndx_new_vals)
-      errors = Array.new
+      errors = ErrorsUsage.new
       existing_attrs.each do |a|
         new_val = ndx_new_vals[a[:id]]
         special_processing,error = SpecialProcessing::ValueCheck.error_special_processing?(a,new_val)
@@ -14,16 +14,7 @@ module DTK; class Attribute
         end
       end
       unless errors.empty?
-        raise Errors.new(errors)
-      end
-    end
-    class Errors < ErrorUsage
-      def initialize(errors)
-        super(errors_to_msg(errors))
-      end
-     private
-      def errors_to_msg(errors)
-        "\n"+errors.map{|err|err.to_s}.join("\n")
+        raise errors
       end
     end
     class Error < ErrorUsage 

@@ -2,7 +2,7 @@ module Ramaze::Helper
   module Rest
     def rest_response()
       unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
-        raise Error.new("controller results is in wrong form; it should have 'rest' form")
+        raise Error.new("controller results are in wrong form; it should have 'rest' form")
       end
       JSON.generate(@ctrl_results)
     end

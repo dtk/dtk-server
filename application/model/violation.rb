@@ -135,16 +135,6 @@ module DTK
     end
 
    public 
-    class ErrorViolations < ErrorUsage
-      def initialize(violation_errs)
-        @errors = violation_errs
-        super(errors_to_msg(violation_errs))
-      end
-      private
-      def errors_to_msg(errors)
-        "\n"+errors.map{|err|err.to_s}.join("\n")
-      end
-    end
     class ErrorViolation < ErrorUsage
     end
     class MissingRequiredAttribute < ErrorViolation

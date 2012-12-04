@@ -17,7 +17,7 @@ module DTK; class Attribute
             LegalValue::Error.new(attr,new_val,:legal_values => legal_values)
           end
         else
-          raise Error.new("Not Implemented yet error checking for special cases when no legal values defined")
+          raise Error.new("Not implemented yet error checking for special cases when no legal values defined")
         end
       end
 

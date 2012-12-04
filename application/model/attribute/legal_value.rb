@@ -23,7 +23,7 @@ module DTK; class Attribute
       end
      private
       def errors_to_msg(errors)
-        errors.map{|err|err.to_s}.join("\n")
+        "\n"+errors.map{|err|err.to_s}.join("\n")
       end
     end
     class Error < ErrorUsage 

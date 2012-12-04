@@ -152,7 +152,7 @@ module XYZ
          "display_name"=>"os_identifier"
        },
        "memory_size"=>{
-         "required"=>true,
+         "required"=>false,
          "data_type"=>"string",
          "display_name"=>"memory_size",
        }

@@ -1,11 +1,8 @@
 module DTK
   class ServiceNodeBinding < Model
-    def self.import_add_on_node_bindings(library_idh,node_bindings)
-      ret = Hash.new
-      return ret if (node_bindings||[]).empty?
-      #TODO: stub
-      pp [:node_bindings,node_bindings]
-      ret
+    r8_nested_require('service_node_binding','import')
+    def self.import_add_on_node_bindings(aug_assembly_nodes,node_bindings)
+      Import.new(aug_assembly_nodes).import(node_bindings)
     end
   end
 end

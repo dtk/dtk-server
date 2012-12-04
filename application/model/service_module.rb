@@ -11,6 +11,21 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
     extend MetaInfoClassMixin
+    
+    ### standard get methods
+    def get_assemblies()
+      get_objs_helper(:assemblies,:component)
+    end
+
+    def get_augmented_assembly_nodes()
+      get_objs_helper(:assembly_nodes,:node,:augmented => true)
+    end
+
+    def get_module_branches()
+      get_objs_helper(:module_branches,:module_branch)
+    end
+
+    ### end: get methods
 
     def self.model_type()
       :service_module
@@ -122,10 +137,6 @@ module DTK
       end
     end
 
-    def get_module_branches()
-      get_objs(:cols => [:module_branches]).map{|r|r[:module_branch]}
-    end
-
     #creates workspace branch (if needed) and related objects from library one
     def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
       needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
@@ -202,10 +213,6 @@ module DTK
       repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
-    end
-
-    def get_assemblies()
-      get_objs(:cols =>[:assemblies]).map{|r|r[:component]}
     end
 
    private

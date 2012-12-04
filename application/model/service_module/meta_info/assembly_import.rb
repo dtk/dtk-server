@@ -1,17 +1,19 @@
 #converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    def initialize(library_idh)
+    def initialize(library_idh,module_name)
       @library_idh = library_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
       @ndx_assembly_hashes = Hash.new #indexed by ref
       @ndx_module_branch_ids = Hash.new
+      @module_name = module_name
+      @service_module = get_service_module(library_idh,module_name)
     end
-    def add_assemblies(module_branch_idh,module_name,assemblies_hash,node_bindings_hash)
+    def add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
       assemblies_hash.each do |ref,assem|
-        @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,module_name))
+        @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
         @db_updates_assemblies["node"].merge!(Internal.import_nodes(@library_idh,ref,assem,node_bindings_hash))
         @ndx_assembly_hashes[ref] ||= assem
       end
@@ -47,6 +49,10 @@ module DTK; class ServiceModule
       @ndx_ports.values()
     end
 
+    def augmented_assembly_nodes()
+      @augmented_assembly_nodes ||= @service_module.get_augmented_assembly_nodes()
+    end
+
     def module_branch_ids()
       @ndx_module_branch_ids.keys
     end
@@ -55,6 +61,10 @@ module DTK; class ServiceModule
     end
 
    private
+    def get_service_module(library_idh,module_name)
+      library_idh.create_object().get_service_module(module_name)
+    end
+
     def add_ports_during_import(assembly_idh)
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing

@@ -6,9 +6,7 @@ module DTK; class Attribute
         new_val = ndx_new_vals[a[:id]]
         special_processing,error = SpecialProcessing::ValueCheck.error_special_processing?(a,new_val)
         if special_processing
-          if error
-            errors << error 
-          end
+          errors << error if error
         else
           #TODO: stub for normal error processing
         end

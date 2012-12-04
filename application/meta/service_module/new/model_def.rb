@@ -74,6 +74,29 @@ lambda__segment_impls =
          :join_cond=>{:module_branch_id =>:module_branch__id},
          :cols=>[:id,:group_id,:display_name]
        }]
+    },
+    :assembly_nodes=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+       lambda__segment_module_branches.call(:cols => [:id]),
+       {
+         :model_name=>:component,
+         :alias => :assembly,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:module_branch_id =>:module_branch__id},
+         :cols=>[:id,:group_id,:display_name]
+       },
+       {
+         :model_name=>:node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:assembly_id =>:assembly__id},
+         :cols=>[:id,:group_id,:display_name]
+       }
+      ]
     }
   },
   :many_to_one=>[:library],

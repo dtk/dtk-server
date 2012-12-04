@@ -1,5 +1,16 @@
 module XYZ
   class Library < Model
+    ### get methods
+    def get_service_module(module_name)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name],
+        :filter => [:and,[:eq,:library_library_id,id()],[:eq,:display_name,module_name]]
+      }
+      Model.get_obj(model_handle(:service_module),sp_hash)
+    end
+    
+    ### end: get methods
+
     class << self 
       def create_users_private_library?(model_handle)
         user_obj = CurrentSession.new.get_user_object()

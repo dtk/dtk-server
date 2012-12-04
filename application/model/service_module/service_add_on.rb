@@ -1,7 +1,7 @@
 module DTK
   class ServiceAddOn < Model
-    def self.import(library_idh,module_name,meta_file,hash_content,ports)
-      Import.new(library_idh,module_name,meta_file,hash_content,ports).import()
+    def self.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+      Import.new(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes).import()
     end
 
     def self.meta_filename_path_info()
@@ -13,12 +13,13 @@ module DTK
     MetaRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
 
     class Import 
-      def initialize(library_idh,module_name,meta_file,hash_content,ports)
+      def initialize(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
         @library_idh = library_idh
         @module_name = module_name
         @meta_file = meta_file
         @hash_content = hash_content
         @ports = ports
+        @aug_assembly_nodes = aug_assembly_nodes
       end
       def import()
         type = (meta_file =~ MetaRegExp;$1)
@@ -35,9 +36,9 @@ module DTK
           ao_input_hash.merge!(:port_link => port_links)
         end
         
-        node_bindings = ServiceNodeBinding.import_add_on_node_bindings(library_idh,hash_content["node_bindings"])
+        node_bindings = ServiceNodeBinding.import_add_on_node_bindings(@aug_assembly_nodes,hash_content["node_bindings"])
         unless node_bindings.empty?
-          ao_input_hash.merge!(:node_binding => node_bindings)
+          ao_input_hash.merge!(:service_node_binding => node_bindings)
         end
 
         input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}

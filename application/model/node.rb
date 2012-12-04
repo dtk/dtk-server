@@ -53,7 +53,7 @@ module XYZ
     end
 
     #######################
-    # gets
+    # standard get methods
 
     def get_target()
       sp_hash = {

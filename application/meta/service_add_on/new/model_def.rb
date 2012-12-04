@@ -11,5 +11,5 @@
     }
   },
   :many_to_one => [:component], #this is an assembly
-  :one_to_many => [:port_link]
+  :one_to_many => [:port_link,:service_node_binding]
 }

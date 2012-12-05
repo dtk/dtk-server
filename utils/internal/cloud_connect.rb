@@ -94,6 +94,7 @@ module XYZ
         @conn = Fog::Compute::AWS.new(get_compute_params())
       end
 
+
       def flavor_get(id)
         hash_form(@conn.flavors.get(id))
       end
@@ -108,6 +109,16 @@ module XYZ
 
       def security_groups_all()
         @conn.security_groups.all.map{|x|hash_form(x)}
+      end
+
+      def get_instance_status(id)
+        response = @conn.describe_instances('instance-id' => id)
+        unless response.nil?
+          status = response.body["reservationSet"].first["instancesSet"].first["instanceState"]["name"].to_sym
+          launch_time = response.body["reservationSet"].first["instancesSet"].first["launchTime"]
+          return { :status => status, :launch_time => launch_time, :up_time_hours => ((Time.now - launch_time)/1.hour).round }
+        end
+        return nil
       end
 
       def server_get(id)

@@ -53,8 +53,10 @@ module XYZ
 
     def augmented_form(r,result_col)
       if r.kind_of?(Hash)
-        r.delete(:id) #only left over column
-        r.delete(result_col).merge(r)
+        ret = r.delete(result_col)
+        result_col_keys = ret.keys
+        r.each{|k,v|ret[k] = v unless result_col_keys.include?(k)}
+        ret
       else # r.kind_of?(Array)
         r.map{|el|augmented_form(el,result_col)}
       end

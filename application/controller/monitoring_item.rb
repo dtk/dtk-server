@@ -28,7 +28,7 @@ module XYZ
       assemblies = assemblies.select { |a| a[:execution_status].eql? "succeeded"}
       str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')
 
-      Log.info "#{prefix_log} Monitor assemblies: #{str_identifer}"
+      Log.info "#{prefix_log} Monitoring assemblies: #{str_identifer}"
       aws_connection = CloudConnect::EC2.new
 
       # TODO Talk with rich to see how to get instance_id from nodes without additional calls

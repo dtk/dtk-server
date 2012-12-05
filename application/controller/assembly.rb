@@ -51,6 +51,11 @@ module DTK
       :attributes => lambda{|attr|not attr[:hidden]}
     }
 
+    def rest__list_possible_add_ons()
+      assembly = ret_assembly_instance_object()
+      rest_ok_response assembly.get_service_add_ons()
+    end
+
     def rest__get_attributes()
       assembly,subtype = ret_assembly_params_object_and_subtype()
       filter = ret_request_params(:filter)

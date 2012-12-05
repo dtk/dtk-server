@@ -2,6 +2,25 @@ module DTK; class  Assembly
   class Instance < self
     r8_nested_require('instance','action')
     include ActionMixin
+
+    ### standard get methods
+    def get_augmented_node_attributes(filter_proc=nil)
+      get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
+    end
+
+    def get_augmented_node_assembly_attributes(filter_proc=nil)
+      get_objs_helper(:node_assembly_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
+    end
+
+    def get_service_add_ons()
+      get_objs_helper(:service_add_ons_from_instance,:service_add_on)
+    end
+
+    def get_augmented_service_add_ons()
+      get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
+    end
+
+    ### end: standard get methods
     def self.delete_and_destroy_its_nodes(assembly_idh)
       #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
       #repo so can point to multiple assembly instances
@@ -143,21 +162,7 @@ module DTK; class  Assembly
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
-    def get_augmented_node_attributes(filter_proc=nil)
-      get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
-    end
-
-    def get_augmented_node_assembly_attributes(filter_proc=nil)
-      get_objs_helper(:node_assembly_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
-    end
-    private :get_attributes_print_form_aux, :get_augmented_node_attributes,:get_augmented_node_assembly_attributes
-
-
-    def get_service_add_ons()
-      get_objs(:cols => [:service_add_ons_from_instance])do |r|
-        r[:service_add_on].merge(:sub_assembly_template => r[:sub_assembly_template])
-      end
-    end
+    private :get_attributes_print_form_aux
 
     def self.check_valid_id(model_handle,id)
       filter = 

@@ -111,7 +111,7 @@ module DTK
       node_pattern = ret_request_params(:node_pattern)
 
       # filters only stopped nodes for this assembly
-      nodes = assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      nodes = assembly.get_nodes(:id,:display_name,:external_ref,:hostname_external_ref, :admin_op_status)
 
       unless node_pattern.nil?
         regex = Regexp.new(node_pattern)

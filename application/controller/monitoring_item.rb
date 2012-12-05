@@ -1,8 +1,8 @@
 module XYZ
   class Monitoring_itemController < Controller
 
-    # limit in hours how long can nodes run
-    UP_TIME_LIMIT = 0
+    # limit (hours) how long can nodes run
+    UP_TIME_LIMIT = 4
 
     def list_for_component_display()
       component_or_node_display()

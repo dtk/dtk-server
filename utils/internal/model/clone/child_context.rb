@@ -1,5 +1,8 @@
-module XYZ
+module DTK
   class ChildContext < SimpleHashObject
+    r8_nested_require('child_context','assembly_node')
+    r8_nested_require('child_context','assembly_component_ref')
+    r8_nested_require('child_context','assembly_component_attribute')
     def clone_copy_child_objects(clone_proc,level)
       clone_model_handle = clone_model_handle()
       field_set_to_copy = ret_field_set_to_copy()
@@ -60,6 +63,20 @@ module XYZ
     end
 
    private
+    #index are clone_direction, parent, child
+    SpecialContext = {
+      :library_to_target => {
+        :target => {:node => AssemblyNode},
+        :node => {:component_ref => AssemblyComponentRef},
+        :component => {:attribute => AssemblyComponentAttribute}
+      },
+      #TODO: remove
+      :target_to_library => {
+        #:library => {:node => AssemblyTemplateNode},
+        #:node => {:component => AssemblyTemplateComponent}
+      }
+    }
+
     def initialize(clone_proc,hash)
       super(hash)
       @clone_proc = clone_proc
@@ -132,184 +149,5 @@ module XYZ
     def parent_objs_info()
       self[:parent_objs_info]
     end
-
-
-    class AssemblyNode < ChildContext
-     private
-      def initialize(clone_proc,hash)
-        super
-        assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
-        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh)
-      end
-
-      #for processing node stubs in an assembly
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
-      
-        #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:display_name,:type,:ref] + parent_rels.first.keys
-        node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :node_template_id)
-        node_template_wc = nil
-        node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
-
-        #mapping from node stub to node template and overriding appropriate node template columns
-        mapping_rows = matches.map do |m|
-          {:type => "staged",
-            :ancestor_id => m[:node_stub_idh].get_id(),
-            :node_template_id => m[:node_template_idh].get_id(), 
-            :display_name => m[:node_stub_display_name],
-            :ref => m[:node_stub_display_name]
-          }
-        end
-        mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
-        
-        select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
-        ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-        ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
-        ret
-      end
-    
-      def find_node_templates_in_assembly!(target_idh,assembly_template_idh)
-        #find the assembly's stub nodes and then use the node binding to find the node templates
-        sp_hash = {
-          :cols => [:id,:display_name,:node_binding_ruleset],
-          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
-        }
-        node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
-
-        target = target_idh.create_object()
-        node_mh = target_idh.createMH(:node)
-        #TODO: may be more efficient to get these all at once
-        matches = node_info.map do |r|
-          node_template_idh = 
-            if r[:node_binding_ruleset]
-              r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
-            else
-              Node::Template.null_node_template_idh(node_mh)
-            end
-          {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template_idh}
-        end
-        merge!(:matches => matches)
-      end
-
-      def cleanup_after_error()
-        Model.delete_instance(model_handle.createIDH(:model_name => :component,:id => override_attrs[:assembly_id]))
-      end
-    end
-    class AssemblyComponentRef < ChildContext
-     private
-      def initialize(clone_proc,hash)
-        super
-        find_component_templates_in_assembly!()
-      end
-      def clone_model_handle()
-        model_handle().createMH(:component)
-      end
-
-      def find_component_templates_in_assembly!()
-        #find the component templates that each component ref is pointing to
-        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
-        sp_hash = {
-          :cols => [:id,:display_name,:node_with_assembly_id,:component_template_id],
-          :filter => [:oneof, :node_node_id, node_stub_ids]
-        }
-        matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
-        merge!(:matches => matches)
-      end
-
-      #for processing component refs in an assembly
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        #mapping from component ref to component template 
-        component_mh = model_handle.createMH(:component)
-        ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
-        ndx_node_template_to_ref = Hash.new
-
-        #use workspace components, rather than lib components
-        #TODO: may instaed make this conversion when computing matches
-        lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
-        ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@clone_proc.project)
-
-        mapping_rows = matches.map do |m|
-          node = m[:node]
-          old_par_id = node[:id]
-          unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
-            raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
-          end
-          component_template_id = ndx_workspace_templates[m[:component_template_id]].get_id()
-          #set  ndx_node_template_to_ref
-          #first index is the associated node instance, second is teh component template
-          pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
-          pntr[component_template_id] = m[:id]
-
-          {:ancestor_id => component_template_id,
-            :component_template_id =>  component_template_id,
-            :node_node_id =>  node_node_id,
-            :assembly_id => node[:assembly_id]
-          }
-        end
-
-        mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
-      
-        #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:assembly_id] + parent_rels.first.keys
-        cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
-        cmp_template_wc = nil
-        cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
-
-        select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
-        ret.each do |r|
-          component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
-          raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
-          r.merge!(:component_ref_id => component_ref_id, :component_template_id => r[:ancestor_id])
-        end 
-        ret
-      end
-    end
-    class AssemblyComponentAttribute < ChildContext
-      private
-      def initialize(clone_proc,hash)
-        super
-      end
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        new_objs_info = super
-        return new_objs_info if new_objs_info.empty?
-        process_attribute_overrides(db,new_objs_info)
-        new_objs_info
-      end
-
-      def process_attribute_overrides(db,new_objs_info)
-        #TODO: may see if can do more efficiently using attribute_override col assembly_template_id
-        #parent_objs_info has component info keys: :component_template_id, :component_ref_id and (which is the new component instance)
-
-        attr_override_fs = Model::FieldSet.new(:attribute_override,[:display_name,:component_ref_id,{:attribute_value => :value_asserted}])
-        attr_override_wc = nil
-        attr_override_ds = Model.get_objects_just_dataset(model_handle.createMH(:attribute_override),attr_override_wc,Model::FieldSet.opt(attr_override_fs))
-
-        cmp_mapping_rows = parent_objs_info.map{|r|Aux::hash_subset(r,[:component_ref_id,{:id => :component_component_id}])}
-        cmp_mapping_ds = SQL::ArrayDataset.create(db,cmp_mapping_rows,model_handle.createMH(:cmp_mapping))
-
-        attr_mapping_rows = new_objs_info.map{|r|Aux::hash_subset(r,[:component_component_id,:display_name,:id])}
-        attr_mapping_ds = SQL::ArrayDataset.create(db,attr_mapping_rows,model_handle.createMH(:attr_mapping))
-
-        select_ds = attr_override_ds.join_table(:inner,cmp_mapping_ds,[:component_ref_id]).join_table(:inner,attr_mapping_ds,[:component_component_id,:display_name])
-        update_set_fs = Model::FieldSet.new(:attribute,[:value_asserted])
-        Model.update_from_select(model_handle.createMH(:attribute),update_set_fs,select_ds,:constant_set_values => {:is_instance_value => true})
-      end
-    end
-
-    #index are clone_direction, parent, child
-    SpecialContext = {
-      :library_to_target => {
-        :target => {:node => AssemblyNode},
-        :node => {:component_ref => AssemblyComponentRef},
-        :component => {:attribute => AssemblyComponentAttribute}
-      },
-      #TODO: remove
-      :target_to_library => {
-        #:library => {:node => AssemblyTemplateNode},
-        #:node => {:component => AssemblyTemplateComponent}
-      }
-    }
   end
 end

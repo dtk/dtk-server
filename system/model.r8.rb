@@ -21,6 +21,12 @@ module XYZ
 
     #TODO: looking to use this as step to transform to simpler object model calls
     def get_objs_helper(virtual_attr,result_col,opts={})
+      sp_hash = {
+        :cols => [virtual_attr]
+      }
+      if opts[:sql_filter]
+        sp_hash.merge!(:filter => opts[:sql_filter])
+      end
       rows = get_objs(:cols => [virtual_attr])
       if filter_proc = opts[:filter_proc]
         rows.map do |r|
@@ -35,6 +41,16 @@ module XYZ
         rows.map{|r|r[result_col]}
       end
     end
+
+    def get_obj_helper(virtual_attr,result_col,opts={})
+      rows = get_objs_helper(virtual_attr,result_col,opts)
+      if rows.size > 1
+        filter = (opts[:sql_filter] ? " {opts[:sql_filter]} " : "") 
+        Log.error("call to get_obj for #{model_handle[:model_name]} (virtual_attr=#{virtual_attr}#{filter}) returned more than one row")
+      end
+      rows.first
+    end
+
     def augmented_form(r,result_col)
       if r.kind_of?(Hash)
         r.delete(:id) #only left over column

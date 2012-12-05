@@ -15,9 +15,12 @@ module DTK; class  Assembly
     def get_service_add_ons()
       get_objs_helper(:service_add_ons_from_instance,:service_add_on)
     end
-
     def get_augmented_service_add_ons()
       get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
+    end
+    def get_augmented_service_add_on(add_on_name)
+      filter_proc = lambda{|sao|sao[:display_name] == add_on_name}
+      get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
     ### end: standard get methods
@@ -58,8 +61,8 @@ module DTK; class  Assembly
     end
 
 
-    def add_sub_assembly(add_on_type)
-      pp get_service_add_ons()
+    def add_sub_assembly(add_on_name)
+      pp get_augmented_service_add_on(add_on_name)
     end
 
 =begin

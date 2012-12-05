@@ -116,8 +116,8 @@ module DTK
     def rest__add_sub_assembly()
       assembly = ret_assembly_instance_object()
       add_on_name = ret_non_null_request_params(:service_add_on_name)
-      assembly.add_sub_assembly(add_on_name)
-      rest_ok_response 
+      new_sub_assembly_idh = assembly.add_sub_assembly(add_on_name)
+      rest_ok_response(:sub_assembly_id => new_sub_assembly_idh.get_id()) 
     end
 
     #### end: methods to modify the assembly instance

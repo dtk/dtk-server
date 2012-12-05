@@ -78,6 +78,13 @@ module XYZ
       ]
     end
 
+
+    def copy_as_assembly_template()
+      ret = id_handle().create_object(:model_name => :assembly_template)
+      each{|k,v|ret[k]=v}
+      ret
+    end
+
     def self.default_version()
       branch_name_default_version()
     end

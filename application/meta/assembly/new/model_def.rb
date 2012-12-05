@@ -72,10 +72,11 @@ lambda__template_nodes_and_components =
       :remote_dependencies=>
       [{
          :model_name=>:datacenter,
-         :alias => :target,
+         :alias=>:target,
+         :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__datacenter_datacenter_id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:group_id,:display_name]
        }]
     },
     :module_branch=>{
@@ -288,14 +289,14 @@ lambda__template_nodes_and_components =
          :alias => :template,
          :join_type=>:inner,
          :join_cond=>{:id=>:component__ancestor_id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:group_id,:display_name]
        },
        {
          :model_name=>:service_add_on,
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:component_component_id=>:template__id},
-         :cols=>[:id,:display_name,:type,:sub_assembly_id]
+         :cols=>[:id,:group_id,:display_name,:type,:sub_assembly_id]
        },
        {
          :model_name=>:component,
@@ -303,7 +304,7 @@ lambda__template_nodes_and_components =
          :alias => :sub_assembly_template,
          :join_type=>:inner,
          :join_cond=>{:id=>:service_add_on__sub_assembly_id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:group_id,:display_name]
        }]
     }
   }

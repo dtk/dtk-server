@@ -23,6 +23,19 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def get_nodes(*alt_cols)
+      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
+      sp_hash = {
+        :cols => cols,
+        :filter => [:eq, :assembly_id, self[:id]]
+      }
+      Model.get_objs(model_handle.createMH(:node),sp_hash)
+    end
+
+    def get_target()
+      get_obj_helper(:target,:target)
+    end
+
     ### end: standard get methods
     def self.delete_and_destroy_its_nodes(assembly_idh)
       #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
@@ -61,22 +74,31 @@ module DTK; class  Assembly
     end
 
 
-    def add_sub_assembly(add_on_name)
-      pp get_augmented_service_add_on(add_on_name)
+    def add_sub_assembly(add_on_name, assembly_name=nil)
+      aug_service_add_on = get_augmented_service_add_on(add_on_name)
+      sub_assembly_template = aug_service_add_on[:sub_assembly_template].copy_as_assembly_template()
+
+      override_attrs = Hash.new
+      override_attrs[:display_name] = 
+        if assembly_name
+          assembly_name 
+        else
+          update_object!(:display_name)
+          #TODO: does not bump up name for multiple insatnces
+          "#{self[:display_name]}::#{sub_assembly_template[:display_name]}"
+        end
+      clone_opts = {
+        :ret_new_obj_with_cols => [:id,:type],
+        :service_add_on => {
+          :base_assembly => self,
+          :service_add_on => aug_service_add_on
+        }
+      }
+      target = get_target()
+      new_sub_assembly = target.clone_into(sub_assembly_template,override_attrs,clone_opts)
+      new_sub_assembly && new_sub_assembly.id_handle()
     end
 
-=begin
-[{:template=>{:display_name=>"hdfs", :id=>2147521085},
-  :service_add_on=>
-   {:type=>"slave",
-    :sub_assembly_id=>2147521088,
-    :display_name=>"slave",
-    :id=>2147521089,
-    :component_component_id=>2147521085},
-  :sub_assembly_template=>{:display_name=>"hdfs-slave", :id=>2147521088},
-  :ancestor_id=>2147521085,
-  :id=>2147521201}]
-=end
     def promote_to_library(library_idh=nil)
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 
@@ -197,15 +219,6 @@ module DTK; class  Assembly
         raise ErrorNameInvalid.new(name,pp_object_type())
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
-    end
-
-    def get_nodes(*alt_cols)
-      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
-      sp_hash = {
-        :cols => cols,
-        :filter => [:eq, :assembly_id, self[:id]]
-      }
-      Model.get_objs(model_handle.createMH(:node),sp_hash)
     end
 
     #TODO: probably move to Assembly

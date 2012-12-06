@@ -9,7 +9,7 @@ module DTK
       fk_info = clone_proc.fk_info
       fk_info.add_foreign_keys(clone_model_handle,field_set_to_copy)
       create_override_attrs = clone_proc.ret_real_columns(clone_model_handle,override_attrs)
-      new_objs_info = ret_new_objs_info(clone_proc.db,field_set_to_copy,create_override_attrs)
+      new_objs_info = ret_new_objs_info(field_set_to_copy,create_override_attrs)
       return if new_objs_info.empty?
 
       new_id_handles = clone_proc.add_new_children_objects(new_objs_info,clone_model_handle,clone_par_col,level)
@@ -82,6 +82,10 @@ module DTK
       @clone_proc = clone_proc
     end
 
+    def db()
+      @clone_proc.db()
+    end
+
     def self.get_children_model_handles(model_handle,omit_list=[],&block)
       model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
         next if omit_list.include?(child_mh[:model_name])
@@ -93,8 +97,8 @@ module DTK
       Model::FieldSet.all_real(clone_model_handle[:model_name]).with_removed_cols(:id,:local_id)
     end
 
-    def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-      ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
+    def ret_new_objs_info(field_set_to_copy,create_override_attrs)
+      ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
 
       #all parent_rels will have same cols so taking a sample
       remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}

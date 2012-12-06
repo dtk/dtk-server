@@ -22,7 +22,7 @@ module DTK
       end
 
       #for processing component refs in an assembly
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+      def ret_new_objs_info(field_set_to_copy,create_override_attrs)
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
@@ -52,7 +52,7 @@ module DTK
           }
         end
 
-        mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
+        mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
       
         #all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:assembly_id] + parent_rels.first.keys

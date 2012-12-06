@@ -10,8 +10,8 @@ module DTK
       end
 
       #for processing node stubs in an assembly
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
-        ancestor_rel_ds = SQL::ArrayDataset.create(db,parent_rels,model_handle.createMH(:target))
+      def ret_new_objs_info(field_set_to_copy,create_override_attrs)
+        ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
       
         #all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:display_name,:type,:ref] + parent_rels.first.keys
@@ -28,7 +28,7 @@ module DTK
             :ref => m[:node_stub_display_name]
           }
         end
-        mapping_ds = SQL::ArrayDataset.create(db,mapping_rows,model_handle.createMH(:mapping))
+        mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
         
         select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
         ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)

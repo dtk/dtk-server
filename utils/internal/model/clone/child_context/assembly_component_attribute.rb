@@ -1,18 +1,18 @@
 module XYZ
   class ChildContext 
     class AssemblyComponentAttribute < self
-      private
+     private
       def initialize(clone_proc,hash)
         super
       end
-      def ret_new_objs_info(db,field_set_to_copy,create_override_attrs)
+      def ret_new_objs_info(field_set_to_copy,create_override_attrs)
         new_objs_info = super
         return new_objs_info if new_objs_info.empty?
-        process_attribute_overrides(db,new_objs_info)
+        process_attribute_overrides(new_objs_info)
         new_objs_info
       end
 
-      def process_attribute_overrides(db,new_objs_info)
+      def process_attribute_overrides(new_objs_info)
         #TODO: may see if can do more efficiently using attribute_override col assembly_template_id
         #parent_objs_info has component info keys: :component_template_id, :component_ref_id and (which is the new component instance)
 

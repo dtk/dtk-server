@@ -1,5 +1,5 @@
-module XYZ
-  module ForeignKeyInfoMixin
+module DTK
+  class Clone; class CopyProcessor
     class ForeignKeyInfo
       def initialize(db)
         @info = Hash.new
@@ -37,7 +37,7 @@ module XYZ
         #TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
         fks = model_handle_info(model_handle)[:fks]
         #put in foreign keys that are not special keys like ancestor or assembly_id
-        omit = CloneGlobal::ForeignKeyOmissions[model_handle[:model_name]]||[]
+        omit = Global::ForeignKeyOmissions[model_handle[:model_name]]||[]
         field_set.foreign_key_info().each do |fk,fk_info|
           next if fk == :ancestor_id or omit.include?(fk)
           pointer = fks[fk_info[:foreign_key_rel_type]] ||= Array.new
@@ -84,5 +84,5 @@ module XYZ
         ((@info[mh[:c]]||{})[fk_model_name]||{})[:id_mappings] || Array.new
       end
     end
-  end
+  end; end
 end

@@ -1,9 +1,11 @@
 #TODO: this needs much cleanup: may spearete into parts fro assemblies and then teh rest which is containment based copying
 #TODO: try to move more to chidl context geenraizing to be object context and possibly using it to subsume cloneprocesseor
-r8_nested_require('clone','global')
-r8_nested_require('clone','child_context')
-r8_nested_require('clone','foreign_key_info')
-module XYZ
+r8_nested_require('clone','child_context') #TODO: move to inside class
+module DTK
+  class Clone
+    r8_nested_require('clone','copy_processor') #TODO: better to not need copy_processor and just make part of this class
+    r8_nested_require('clone','global')
+  end
   module CloneClassMixins
     #TODO: may just be temporary; this function takes into account that front end may not send teh actual target handle for componenst who parents
     # are on components not nodes
@@ -18,7 +20,7 @@ module XYZ
       target_id_handle = id_handle_with_auth_info()
       clone_source_object = clone_pre_copy_hook(clone_source_object,opts)
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
-      proc = CloneCopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
+      proc = Clone::CopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
@@ -37,7 +39,7 @@ module XYZ
 
     def clone_into_library_assembly(assembly_idh,id_handles)
       opts = {:include_children => true}
-      proc = CloneCopyProcessor.create(self,assembly_idh.create_object(),opts)
+      proc = Clone::CopyProcessor.create(self,assembly_idh.create_object(),opts)
       proc.add_id_handle(assembly_idh)
 
       #group id handles by model type
@@ -89,299 +91,6 @@ module XYZ
     #opts can be {:update_object => true} to update object
     def get_constraints!(opts={})
       nil
-    end
-
-    private
-    #TODO: slight refactor of CloneCopyOutput so each child is of form {:parent => <parent>,:child => <CloneCopyOutput>}
-    class CloneCopyOutput
-      def initialize(source_obj,opts={})
-        @source_object = source_obj
-        @id_handles = Array.new
-        @objects = nil
-        @children = Hash.new
-        #TODO: more efficient than making this Boolean is structure that indicates what depth to save children 
-        @include_children = opts[:include_children]
-        @ret_new_obj_with_cols = opts[:ret_new_obj_with_cols]
-        end
-
-      attr_reader :source_object, :id_handles, :ret_new_obj_with_cols, :objects
-      def model_name()
-        #all id handles wil be of same type
-        @id_handles.first && @id_handles.first[:model_name]
-      end
-
-      def get_children_object_info(level,model_name)
-        ((@children[level]||{})[model_name]||[]).map{|x|x[:obj_info]}
-      end
-
-      def children_hash_form(level,model_name)
-        unless @include_children
-          Log.error("children should not be called on object with @include_children set to false")
-          return Array.new
-        end
-        (@children[level]||{})[model_name]||[]
-      end
-
-      def children_id_handles(level,model_name)
-        children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
-      end
-
-      def is_assembly?()
-        #TODO: cleanup; this assumes that assembly call wil create an object
-        objects and objects.first and objects.first.is_assembly?
-      end
-
-      def set_new_objects!(objs_info,target_mh)
-        @id_handles = Model.ret_id_handles_from_create_returning_ids(target_mh,objs_info)
-        if @ret_new_obj_with_cols
-          @objects = Array.new
-          objs_info.each_with_index do |obj_hash,i|
-            obj = @id_handles[i].create_object()
-            @ret_new_obj_with_cols.each{|col|obj[col] ||= obj_hash[col] if obj_hash.has_key?(col)}
-            @objects << obj
-          end
-        end
-        @id_handles
-      end
-
-      def add_id_handle(id_handle)
-        @id_handles  << id_handle
-      end
-
-      def add_new_children_objects(objs_info,target_mh,parent_col,level)
-        child_idhs = Model.ret_id_handles_from_create_returning_ids(target_mh,objs_info)
-        return child_idhs unless @include_children
-        level_p =  @children[level] ||= Hash.new
-        objs_info.each_with_index do |child_obj,i|
-          idh = child_idhs[i] 
-          children = level_p[idh[:model_name]] ||= Array.new
-          #clone_parent_id can differ from parent_id if for example node is under an assembly
-          children << {:id_handle => idh, :clone_parent_id => child_obj[parent_col], :obj_info => child_obj}
-        end
-        child_idhs
-      end
-    end
-
-    class CloneCopyProcessor
-     private
-      include ForeignKeyInfoMixin
-
-      def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={},&block)
-        ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,&block)
-      end
-    end
-
-    class CloneCopyProcessorAssembly < CloneCopyProcessor
-      def cloning_assembly?()
-        true
-      end
-      def clone_direction()
-        :library_to_target
-      end
-
-      attr_reader :project
-     private
-      def initialize(target_obj,source_obj,opts={})
-        super(source_obj,opts)
-        @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-      end
-
-      def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
-        ret = Array.new
-        raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
-        assembly_obj_info = assembly_objs_info.first
-        ancestor_id = assembly_obj_info[:ancestor_id]
-        target_parent_mn = target_parent_mh[:model_name]
-        model_name = model_handle[:model_name]
-        new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
-        new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
-        CloneGlobal::AssemblyChildren.each do |nested_model_name|
-          #TODO: push this into ChildContext.create_from_hash
-          nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
-          override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
-          create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
-
-          #putting in nulls to null-out; more efficient to omit this columns in create
-          parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
-            hash.merge(Model.matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
-          end
-          if Model.matching_models?(nested_model_name,:node) 
-            unless (override_attrs[:component]||{})[:assembly_id]
-              override_attrs.merge!(:component => new_assembly_assign)
-            end
-          end
-          target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
-          child_context = ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
-          if block
-            block.call(child_context)
-          else
-            ret << child_context
-          end
-        end
-        ret unless block
-      end
-    end
-
-    class CloneCopyProcessorAssemblyTemplate < CloneCopyProcessorAssembly
-      def clone_direction()
-        :target_to_library
-      end
-    end
-
-    class CloneCopyProcessor
-      def self.create(target_obj,source_obj,opts={})
-        if source_obj.is_assembly?
-          if target_obj.kind_of?(Library)
-            CloneCopyProcessorAssemblyTemplate.new(source_obj,opts)
-          else
-            CloneCopyProcessorAssembly.new(target_obj,source_obj,opts)
-          end
-        else
-          new(source_obj,opts)
-        end
-      end
-
-      def initialize(source_obj,opts={})
-        @db = source_obj.class.db
-        @fk_info = ForeignKeyInfo.new(@db)
-        @model_name = source_obj.model_name()
-        @ret = CloneCopyOutput.new(source_obj,opts)
-      end
-      private :initialize
-      def output()
-        @ret
-      end
-
-      def shift_foregn_keys()
-        fk_info.shift_foregn_keys()
-      end
-
-      #copy part of clone
-      #targets is a list of id_handles, each with same model_name 
-      def clone_copy_top_level(source_id_handle,targets,recursive_override_attrs={})
-        return @ret if targets.empty?
-
-        source_model_name = source_id_handle[:model_name]
-        source_model_handle = source_id_handle.createMH()
-        source_parent_id_col = source_model_handle.parent_id_field_name()
-
-        #all targets will have same model handle
-        sample_target =  targets.first
-        target_parent_mh = sample_target.createMH()
-        target_mh = target_parent_mh.create_childMH(source_id_handle[:model_name])
-
-        target_parent_id_col = target_mh.parent_id_field_name()
-        targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}
-        targets_ds = SQL::ArrayDataset.create(db,targets_rows,ModelHandle.new(source_id_handle[:c],:target))
-
-        source_wc = {:id => source_id_handle.get_id()}
-
-        remove_cols = (source_parent_id_col == target_parent_id_col ? [:id,:local_id] : [:id,:local_id,source_parent_id_col])
-        field_set_to_copy = Model::FieldSet.all_real(source_model_name).with_removed_cols(*remove_cols)
-        fk_info.add_foreign_keys(source_model_handle,field_set_to_copy)
-        source_fs = Model::FieldSet.opt(field_set_to_copy.with_removed_cols(target_parent_id_col))
-        source_ds = Model.get_objects_just_dataset(source_model_handle,source_wc,source_fs)
-
-        select_ds = targets_ds.join_table(:inner,source_ds)
-
-        #process overrides
-        override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
-        override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh[:model_name],target_parent_id_col)
-        create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
-
-        new_objs_info = Model.create_from_select(target_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts_for_top())
-        return @ret if new_objs_info.empty?
-        new_id_handles = @ret.set_new_objects!(new_objs_info,target_mh)
-        fk_info.add_id_mappings(source_model_handle,new_objs_info, :top => true)
-
-        fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
-
-        #iterate over all nested objects which includes children object plus, for example, components for composite components
-        get_nested_objects_top_level(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs) do |child_context|
-          clone_copy_child_objects(child_context)
-        end
-        fk_info.shift_foregn_keys()
-        @ret
-      end
-
-      def clone_copy_child_objects(child_context,level=1)
-        child_context.clone_copy_child_objects(self,level)
-        @ret
-      end
-
-      def add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
-        @ret.add_new_children_objects(new_objs_info,child_model_handle,clone_par_col,level)
-      end
-
-      def add_to_overrides_null_other_parents(overrides,model_name,selected_par_id_col)
-        many_to_one = DB_REL_DEF[model_name][:many_to_one]||[]
-        many_to_one.inject(overrides) do |ret_hash,par_mn|
-          par_id_col = DB.parent_field(par_mn,model_name)
-          if selected_par_id_col == par_id_col or overrides.has_key?(par_id_col)
-            ret_hash
-          else
-            ret_hash.merge(par_id_col => SQL::ColRef.null_id)
-          end
-        end
-      end
-
-      def child_context_lib_assembly_top_level(id_handles,target_idh,existing_override_attrs={})
-        #TODO: push this into ChildContext.create_from_hash
-        #assuming all id_handles have same model_handle
-        sample_idh = id_handles.first
-        model_name = sample_idh[:model_name]
-        #so model_handle gets auth context from target_idh
-        model_handle = target_idh.create_childMH(model_name)
-
-        par_id_col = DB.parent_field(target_idh[:model_name],model_name)
-        override_attrs = add_to_overrides_null_other_parents(existing_override_attrs,model_name,par_id_col)
-        override_attrs.merge!(par_id_col => target_idh.get_id())
-
-        ret_sql_cols = [:ancestor_id]
-        case model_name
-          when :node then ret_sql_cols << :external_ref
-        end
-        create_opts = {:duplicate_refs => :allow, :returning_sql_cols => ret_sql_cols}
-        parent_rels = id_handles.map{|idh|{:old_par_id => idh.get_id()}}
-
-        ChildContext.create_from_hash(self,{:model_handle => model_handle, :clone_par_col => :id, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts})
-      end
-
-      def add_id_handle(id_handle)
-        @ret.add_id_handle(id_handle)
-      end
-
-      def ret_child_override_attrs(child_model_handle,recursive_override_attrs)
-        recursive_override_attrs[(child_model_handle[:model_name])]||{}
-      end
-
-      attr_reader :db,:fk_info, :model_name
-
-      def ret_real_columns(model_handle,recursive_override_attrs)
-        fs = Model::FieldSet.all_real(model_handle[:model_name])
-        recursive_override_attrs.reject{|k,v| not fs.include_col?(k)}
-      end
-
-      def cloning_assembly?()
-        nil
-      end
-      def clone_direction()
-        nil
-      end
-     private
-      def create_opts_for_top()
-        dups_allowed_for_cmp = true #TODO stub
-
-        returning_sql_cols = [:ancestor_id] 
-        #TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
-        case model_name
-          when :component then returning_sql_cols << :type
-        end
-
-        (@ret.ret_new_obj_with_cols||{}).each{|col| returning_sql_cols << col unless returning_sql_cols.include?(col)}
-        {:duplicate_refs => dups_allowed_for_cmp ? :allow : :prune_duplicates,:returning_sql_cols => returning_sql_cols}
-      end
-
     end
   end
 end

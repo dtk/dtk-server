@@ -14,6 +14,9 @@ module DTK
         def initialize(target_obj,source_obj,opts={})
           super(source_obj,opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
+           if opts[:service_add_on]
+             @service_add_on = opts[:service_add_on]
+          end
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)

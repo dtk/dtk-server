@@ -8,7 +8,7 @@ module DTK
       def self.create(target_obj,source_obj,opts={})
         if source_obj.is_assembly?
           if target_obj.kind_of?(Library)
-            #TODO: may deprecate
+            #TODO: probably deprecate; hanlded by using method that craetes full nested hash
             AssemblyTemplate.new(source_obj,opts)
           else
             Assembly.new(target_obj,source_obj,opts)

@@ -5,7 +5,8 @@ module DTK
       def initialize(clone_proc,hash)
         super
         assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
-        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh)
+        sao_node_bindings = clone_proc.service_add_on_node_bindings()
+        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh,sao_node_bindings)
       end
 
       #for processing node stubs in an assembly
@@ -35,13 +36,18 @@ module DTK
         ret
       end
     
-      def find_node_templates_in_assembly!(target_idh,assembly_template_idh)
+      def find_node_templates_in_assembly!(target_idh,assembly_template_idh,service_add_on_node_bindings)
         #find the assembly's stub nodes and then use the node binding to find the node templates
+        #as will as using, if non-empty, ervice_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           :cols => [:id,:display_name,:node_binding_ruleset],
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
+        stubs_to_omit = service_add_on_node_bindings.map{|r|r[:sub_assembly_node_id]}
+        unless stubs_to_omit.empty?
+          node_info.reject!{|n|stubs_to_omit.include?(n[:id])}
+        end
 
         target = target_idh.create_object()
         node_mh = target_idh.createMH(:node)

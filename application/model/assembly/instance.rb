@@ -89,7 +89,7 @@ module DTK; class  Assembly
         end
       clone_opts = {
         :ret_new_obj_with_cols => [:id,:type],
-        :service_add_on => {
+        :service_add_on_info => {
           :base_assembly => self,
           :service_add_on => aug_service_add_on
         }

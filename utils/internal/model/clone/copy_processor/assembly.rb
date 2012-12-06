@@ -9,14 +9,17 @@ module DTK
           :library_to_target
         end
         
-        attr_reader :project
+        attr_reader :project,:service_add_on_node_bindings
        private
         def initialize(target_obj,source_obj,opts={})
           super(source_obj,opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-           if opts[:service_add_on]
-             @service_add_on = opts[:service_add_on]
-          end
+          @service_add_on_node_bindings = 
+            if service_add_on = opts[:service_add_on_info]
+              service_add_on[:service_add_on].get_service_node_bindings()
+            else
+              Array.new()
+            end
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)

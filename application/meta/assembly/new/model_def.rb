@@ -29,6 +29,17 @@ lambda__segment_nested_component =
     :cols => cmp_cols
   }
 }
+lambda__nodes = 
+  lambda{|node_cols|
+  {
+    :type => :json, 
+    :hidden => true,
+    :remote_dependencies =>
+    [
+     lambda__segment_node.call(node_cols)
+    ]
+  }
+}
 lambda__nodes_and_components = 
   lambda{|node_cols,cmp_cols|
   {
@@ -142,6 +153,7 @@ lambda__template_nodes_and_components =
          :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
+    :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
     :nested_nodes_and_cmps=> lambda__nodes_and_components.call(Node.common_columns,Component.common_columns),
     :nested_nodes_and_cmps_summary=> lambda__nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name,:os_type],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),

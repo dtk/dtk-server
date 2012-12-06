@@ -2,6 +2,25 @@ module DTK; class  Assembly
   class Instance < self
     r8_nested_require('instance','action')
     include ActionMixin
+
+    def self.get_assemblies_with_nodes(mh,opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:nested_nodes_summary],
+        :filter => [:and, [:eq, :type, "composite"], target_filter]
+      }
+      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
+
+      ndx_ret = Hash.new
+      assembly_rows.each do |r|
+        node = r.delete(:node)
+        ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
+      end
+      ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
+      ndx_ret.values
+    end
+
     def self.delete_and_destroy_its_nodes(assembly_idh)
       #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
       #repo so can point to multiple assembly instances

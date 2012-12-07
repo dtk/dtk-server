@@ -8,8 +8,8 @@ module DTK; class  Assembly
       get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
     end
 
-    def get_augmented_node_assembly_attributes(filter_proc=nil)
-      get_objs_helper(:node_assembly_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
+    def get_augmented_nested_component_attributes(filter_proc=nil)
+      get_objs_helper(:instance_nested_component_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
     end
 
     def get_service_add_ons()
@@ -223,7 +223,7 @@ module DTK; class  Assembly
 
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = Array.new #TODO: stub
-      component_attrs = get_augmented_node_assembly_attributes(filter_proc).map do |aug_attr|
+      component_attrs = get_augmented_nested_component_attributes(filter_proc).map do |aug_attr|
         Attribute::Pattern::Display.new(aug_attr,:component).print_form()
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|

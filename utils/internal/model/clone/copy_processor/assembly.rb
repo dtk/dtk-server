@@ -9,17 +9,19 @@ module DTK
           :library_to_target
         end
         
-        attr_reader :project,:service_add_on_node_bindings
+        attr_reader :project
+        def service_add_on_node_bindings()
+          @service_add_on_proc.node_bindings()
+        end
+        def get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
+          @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
+        end
+
        private
         def initialize(target_obj,source_obj,opts={})
           super(source_obj,opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-          @service_add_on_node_bindings = 
-            if service_add_on = opts[:service_add_on_info]
-              service_add_on[:service_add_on].get_service_node_bindings()
-            else
-              Array.new()
-            end
+          @service_add_on_proc = ServiceAddOnProc.new(opts[:service_add_on_info])
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
@@ -55,6 +57,47 @@ module DTK
             end
           end
           ret unless block
+        end
+        class ServiceAddOnProc
+          def initialize(service_add_on_info)
+            if service_add_on_info
+              @node_bindings = service_add_on_info[:service_add_on].get_service_node_bindings()
+              @base_assembly = service_add_on_info[:base_assembly]
+            else
+              @node_bindings = Array.new
+              @base_assembly = nil
+            end
+          end
+          attr_reader :node_bindings
+
+          def get_mapped_nodes(create_override_attrs,create_opts)
+            ret = Array.new
+            return ret unless @base_assembly and @node_bindings and not @node_bindings.empty? 
+            cols_needed = (create_opts[:returning_sql_cols]||[]) - create_override_attrs.keys
+            unless missing = (cols_needed - [:ancestor_id]).empty?
+              raise Error.new("Not implemented: get_mapped_nodes returning cols (#{missing.join(",")})")
+            end
+            sp_hash = {
+              :cols => [:id,:group_id,:ancestor_id],
+              :filter => [:and, [:eq,:assembly_id,@base_assembly[:id]],
+                          [:oneof,:ancestor_id,@node_bindings.map{|nb|nb[:assembly_node_id]}]]
+              
+            }
+            node_mh = @base_assembly.model_handle(:node)
+            assembly_nodes = Model.get_objs(node_mh,sp_hash)
+            #now put in template_nodes swapping :sub_assembly_node_id for :assembly_node_id
+            ret
+          end
+=begin
+@base_assembly=
+  {:group_id=>2147483775, :display_name=>"test-pg_server", :id=>2147502606},
+ @node_bindings=
+  [{:group_id=>2147483650,
+    :sub_assembly_node_id=>2147501844,
+    :display_name=>nil,
+    :id=>2147501899,
+    :assembly_node_id=>2147501896}]>
+=end
         end
       end
     end

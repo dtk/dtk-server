@@ -11,6 +11,7 @@ module DTK
 
       #for processing node stubs in an assembly
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
+        ret = Array.new
         ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
       
         #all parent_rels will have same cols so taking a sample
@@ -20,19 +21,27 @@ module DTK
         node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
 
         #mapping from node stub to node template and overriding appropriate node template columns
-        mapping_rows = matches.map do |m|
-          {:type => "staged",
-            :ancestor_id => m[:node_stub_idh].get_id(),
-            :node_template_id => m[:node_template_idh].get_id(), 
-            :display_name => m[:node_stub_display_name],
-            :ref => m[:node_stub_display_name]
-          }
+        unless matches.empty?
+          mapping_rows = matches.map do |m|
+            {:type => "staged",
+              :ancestor_id => m[:node_stub_idh].get_id(),
+              :node_template_id => m[:node_template_idh].get_id(), 
+              :display_name => m[:node_stub_display_name],
+              :ref => m[:node_stub_display_name]
+            }
+          end
+          mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
+          
+          select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
+          ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         end
-        mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
-        
-        select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
-        ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
         ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
+
+        #add to ret rows for each service add node binding
+        service_add_additions = @clone_proc.get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
+        unless service_add_additions.empty?
+          ret += service_add_additions
+        end
         ret
       end
     

@@ -18,30 +18,6 @@ lambda__segment_node =
     :cols => node_cols
   }
 }
-lambda__segment_nested_component =
-  lambda{|cmp_cols|
-  {
-    :model_name => :component,
-    :convert => true,
-    :alias => :nested_component,
-    :join_type => :inner,
-    :join_cond=>{:node_node_id => q(:node,:id), :assembly_id => q(:component,:id)},
-    :cols => cmp_cols
-  }
-}
-lambda__nodes_and_components = 
-  lambda{|node_cols,cmp_cols|
-  {
-    :type => :json, 
-    :hidden => true,
-    :remote_dependencies =>
-    [
-     lambda__segment_node.call(node_cols),
-     lambda__segment_nested_component.call(cmp_cols)
-    ]
-  }
-}
-#TODO: above will be deprecated for below
 lambda__instance_nodes_and_components = 
   lambda{|node_cols,cmp_cols|
   {
@@ -167,9 +143,7 @@ lambda__template_nodes_and_components =
          :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
-    :nested_nodes_and_cmps=> lambda__nodes_and_components.call(Node.common_columns,Component.common_columns),
-    :nested_nodes_and_cmps_summary=> lambda__nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
-    #TODO: above wil be deprecated for below
+    :instance_nodes_and_cmps=> lambda__instance_nodes_and_components.call(Node.common_columns,Component.common_columns),
     :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name,:os_type],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_link_defs_info=> {
@@ -221,29 +195,6 @@ lambda__template_nodes_and_components =
            :cols => [:id,:display_name,:module_branch_id]
          }]
     },
-    :nested_nodes_and_cmps_for_export=> {
-      :type => :json, 
-      :hidden => true,
-      :remote_dependencies =>
-        [
-         lambda__segment_node.call([:id,:display_name,:external_ref,:node_binding_rs_id]),
-         {
-           :model_name => :node_binding_ruleset,
-           :convert => true,
-           :join_type => :inner,
-           :join_cond=>{:id => q(:node,:node_binding_rs_id)},
-           :cols => [:id,:display_name,:ref]
-         },
-         lambda__segment_nested_component.call([:id,:display_name,:component_type,:implementation_id]),
-         {
-           :model_name => :implementation,
-           :convert => true,
-           :alias => :implementation,
-           :join_type => :inner,
-           :join_cond=>{:id => q(:nested_component,:implementation_id)},
-           :cols => [:id,:display_name,:module_name,:version]
-         }]
-    },
     :tasks=> {
       :type=>:json,
       :hidden=>true,
@@ -255,11 +206,6 @@ lambda__template_nodes_and_components =
          :join_cond=>{:assembly_id => q(:component,:id)},
          :cols => [:id,:display_name,:status,:created_at,:started_at,:ended_at,:commit_message]
        }]
-    },
-    :nodes=> {
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=> [lambda__segment_node.call([:id,:display_name,:ui,:type,:os_type,:external_ref])]
     },
     :node_templates=> {
       :type=>:json,

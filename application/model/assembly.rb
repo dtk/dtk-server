@@ -7,7 +7,7 @@ module DTK
     r8_nested_require('assembly','instance')
 
     def info(subtype)
-      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :nested_nodes_and_cmps_summary)
+      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
       sp_hash = {
         :cols => [:id, :display_name,:component_type,nested_virtual_attr]
       }
@@ -36,7 +36,7 @@ module DTK
 
     def list_smoketests()
       sp_hash = {
-        :cols => [:nested_nodes_and_cmps_summary]
+        :cols => [:instance_nodes_and_cmps_summary]
       }
       nodes_and_cmps = get_objs(sp_hash)
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
@@ -158,7 +158,7 @@ module DTK
     #also make optional whether materialize
     def get_node_assembly_nested_objects()
       ndx_nodes = Hash.new
-      sp_hash = {:cols => [:nested_nodes_and_cmps]}
+      sp_hash = {:cols => [:instance_nodes_and_cmps]}
       node_col_rows = get_objs(sp_hash)
       node_col_rows.each do |r|
         n = r[:node].materialize!(Node.common_columns)

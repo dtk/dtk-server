@@ -62,9 +62,11 @@ module DTK
           def initialize(service_add_on_info)
             if service_add_on_info
               @node_bindings = service_add_on_info[:service_add_on].get_service_node_bindings()
+              @port_links = service_add_on_info[:service_add_on].get_port_links()
               @base_assembly = service_add_on_info[:base_assembly]
             else
               @node_bindings = Array.new
+              @port_links = Array.new
               @base_assembly = nil
             end
           end

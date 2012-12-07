@@ -1,6 +1,7 @@
 module DTK
   class ChildContext < SimpleHashObject
     r8_nested_require('child_context','assembly_node')
+    r8_nested_require('child_context','port_link')
     r8_nested_require('child_context','assembly_component_ref')
     r8_nested_require('child_context','assembly_component_attribute')
     def clone_copy_child_objects(clone_proc,level)
@@ -66,7 +67,7 @@ module DTK
     #index are clone_direction, parent, child
     SpecialContext = {
       :library_to_target => {
-        :target => {:node => AssemblyNode},
+        :target => {:node => AssemblyNode, :port_link => PortLink},
         :node => {:component_ref => AssemblyComponentRef},
         :component => {:attribute => AssemblyComponentAttribute}
       },

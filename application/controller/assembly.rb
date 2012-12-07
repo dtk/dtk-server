@@ -68,9 +68,9 @@ module DTK
       opts = ret_params_hash(:filter,:detail_level)
       result = 
         if subtype == :instance 
-          Assembly.list_from_target(model_handle(),opts)
+          Assembly::Instance.list(model_handle(),opts)
         else 
-          Assembly.list_from_library(model_handle(),opts) 
+          Assembly::Template.list(model_handle(),opts) 
         end
       rest_ok_response result 
     end

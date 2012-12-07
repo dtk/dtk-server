@@ -16,32 +16,6 @@ module DTK
       self.class.list_aux(assembly_rows,attr_rows).first
     end
 
-    #TODO: should be moved to assembly/template
-    def self.list_from_library(assembly_mh,opts={})
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
-      }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
-      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
-      list_aux(assembly_rows,attr_rows,opts)
-    end
-
-    def self.list_from_target(assembly_mh,opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      sp_hash = {
-        :cols => [:id, :display_name,:nested_nodes_and_cmps_summary],
-        :filter => [:and, [:eq, :type, "composite"], target_filter]
-      }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
-      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
-      add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
-      list_aux(assembly_rows,attr_rows)
-    end
-
     def self.get_component_templates(assembly_mh,filter=nil)
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:component_templates],
@@ -133,27 +107,6 @@ module DTK
       end
 
      private
-      def add_execution_status_to_list_from_target!(assembly_rows,assembly_mh)
-        sp_hash = {
-          :cols => [:id,:started_at,:assembly_id,:status],
-          :filter => [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
-        }
-        ndx_task_rows = Hash.new
-        get_objs(assembly_mh.createMH(:task),sp_hash).each do |task|
-          next unless task[:started_at]
-          assembly_id = task[:assembly_id]
-          if pntr = ndx_task_rows[assembly_id]
-            if task[:started_at] > pntr[:started_at] 
-              ndx_task_rows[assembly_id] =  task.slice(:status,:started_at)
-            end
-          else
-            ndx_task_rows[assembly_id] = task.slice(:status,:started_at)
-          end
-        end
-        assembly_rows.each{|r|r[:execution_status] = (ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status])||"staged"} 
-        assembly_rows
-      end
-
       def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
         create_row = {
           :library_library_id => library_idh.get_id(),

@@ -41,6 +41,30 @@ lambda__nodes_and_components =
     ]
   }
 }
+#TODO: above will be deprecated for below
+lambda__instance_nodes_and_components = 
+  lambda{|node_cols,cmp_cols|
+  {
+    :type => :json, 
+    :hidden => true,
+    :remote_dependencies =>
+    [
+     {
+       :model_name => :component,
+       :convert => true,
+       :alias => :nested_component,
+       :join_type => :inner,
+       :join_cond=>{:assembly_id => q(:component,:id)},
+       :cols => (cmp_cols + [:node_node_id]).uniq
+     },
+     {
+       :model_name => :node,
+       :convert => true,
+       :join_type => :inner,
+       :join_cond=>{:id => q(:nested_component,:node_node_id)},
+       :cols => node_cols
+     }]}
+}
 lambda__template_nodes_and_components = 
   lambda{|node_cols,cmp_ref_cols,cmp_cols|
   {
@@ -145,6 +169,8 @@ lambda__template_nodes_and_components =
     },
     :nested_nodes_and_cmps=> lambda__nodes_and_components.call(Node.common_columns,Component.common_columns),
     :nested_nodes_and_cmps_summary=> lambda__nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
+    #TODO: above wil be deprecated for below
+    :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name,:os_type],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_link_defs_info=> {
       :type => :json, 

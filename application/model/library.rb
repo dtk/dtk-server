@@ -69,7 +69,7 @@ module XYZ
       case about
        when :assemblies
         filter = [:eq, :library_library_id, id()]
-        Assembly.list_from_library(model_handle(:component),:filter => filter)
+        Assembly::Template.list(model_handle(:component),:filter => filter)
        when :nodes
         filter = [:eq, :library_library_id, id()]
         Node::Template.list(model_handle,:filter => filter)

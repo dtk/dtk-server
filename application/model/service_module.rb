@@ -67,7 +67,7 @@ module DTK
       }
       mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
-      Assembly.list_from_library(model_handle(:component),:filter => filter)
+      Assembly::Template.list(model_handle(:component),:filter => filter)
     end
 
     def self.get_project_trees(mh)

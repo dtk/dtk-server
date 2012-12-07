@@ -1,5 +1,17 @@
 module DTK; class Assembly
   class Template < self
+
+    def self.list(assembly_mh,opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
+      }
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
+      list_aux(assembly_rows,attr_rows,opts)
+    end
+
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
       #first make sure that all referenced components have updated modules in the library
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
@@ -55,10 +67,6 @@ module DTK; class Assembly
       end
     end
 
-    def self.list(assembly_mh,opts={})
-      list_from_library(assembly_mh,opts)
-    end
-                  
     def info_about(about)
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}

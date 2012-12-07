@@ -24,10 +24,19 @@ module DTK; class  Assembly
     end
 
     def get_nodes(*alt_cols)
+      sp_hash = {
+        :cols => [:id,:group_id,:node_node_id],
+        :filter => [:eq, :assembly_id, self[:id]]
+      }
+      ndx_nodes = Hash.new
+      Model.get_objs(model_handle(:component),sp_hash).each do |cmp|
+        ndx_nodes[cmp[:node_node_id]] ||= true
+      end
+
       cols = ([:id,:display_name,:group_id] + alt_cols).uniq
       sp_hash = {
         :cols => cols,
-        :filter => [:eq, :assembly_id, self[:id]]
+        :filter => [:oneof, :id, ndx_nodes.keys]
       }
       Model.get_objs(model_handle.createMH(:node),sp_hash)
     end
@@ -37,6 +46,45 @@ module DTK; class  Assembly
     end
 
     ### end: standard get methods
+
+    def self.list(assembly_mh,opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:instance_nodes_and_cmps_summary],
+        :filter => [:and, [:eq, :type, "composite"], target_filter]
+      }
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+      attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
+      add_execution_status!(assembly_rows,assembly_mh)
+      list_aux(assembly_rows,attr_rows)
+    end
+
+    class << self
+     private
+      def add_execution_status!(assembly_rows,assembly_mh)
+        sp_hash = {
+          :cols => [:id,:started_at,:assembly_id,:status],
+          :filter => [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
+        }
+        ndx_task_rows = Hash.new
+        get_objs(assembly_mh.createMH(:task),sp_hash).each do |task|
+          next unless task[:started_at]
+          assembly_id = task[:assembly_id]
+          if pntr = ndx_task_rows[assembly_id]
+            if task[:started_at] > pntr[:started_at] 
+              ndx_task_rows[assembly_id] =  task.slice(:status,:started_at)
+            end
+          else
+            ndx_task_rows[assembly_id] = task.slice(:status,:started_at)
+          end
+        end
+        assembly_rows.each{|r|r[:execution_status] = (ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status])||"staged"} 
+        assembly_rows
+      end
+    end
+
     def self.delete_and_destroy_its_nodes(assembly_idh)
       #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
       #repo so can point to multiple assembly instances

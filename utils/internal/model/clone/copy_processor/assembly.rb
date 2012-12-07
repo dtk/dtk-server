@@ -84,20 +84,15 @@ module DTK
               
             }
             node_mh = @base_assembly.model_handle(:node)
-            assembly_nodes = Model.get_objs(node_mh,sp_hash)
-            #now put in template_nodes swapping :sub_assembly_node_id for :assembly_node_id
+            ret = Model.get_objs(node_mh,sp_hash)
+            ndx_node_bindings = @node_bindings.inject(Hash.new){|h,nb|h.merge(nb[:assembly_node_id] => nb)}
+            ret.each do |a|
+              mapped_ancestor_id = ndx_node_bindings[a[:ancestor_id]][:sub_assembly_node_id]
+              a[:ancestor_id] = mapped_ancestor_id
+              a[:node_template_id] = mapped_ancestor_id
+            end
             ret
           end
-=begin
-@base_assembly=
-  {:group_id=>2147483775, :display_name=>"test-pg_server", :id=>2147502606},
- @node_bindings=
-  [{:group_id=>2147483650,
-    :sub_assembly_node_id=>2147501844,
-    :display_name=>nil,
-    :id=>2147501899,
-    :assembly_node_id=>2147501896}]>
-=end
         end
       end
     end

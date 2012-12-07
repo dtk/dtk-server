@@ -1,7 +1,7 @@
 module DTK; class StateChange
   class Assembly < self
-    def self.component_state_changes(assembly_idh,component_type=nil)
-      filter = [:and, [:eq, :assembly_id, assembly_idh.get_id()]]
+    def self.component_state_changes(assembly,component_type=nil)
+      filter = [:and, [:eq, :assembly_id, assembly[:id]]]
       if (component_type == :smoketest)
         filter << [:eq, :basic_type, "smoketest"]
       else
@@ -11,8 +11,8 @@ module DTK; class StateChange
         :cols => DTK::Component::pending_changes_cols,
         :filter => filter
       }
-      state_change_mh = assembly_idh.createMH(:state_change)
-      changes = get_objs(assembly_idh.createMH(:component),sp_hash).map do |cmp|
+      state_change_mh = assembly.model_handle(:state_change)
+      changes = get_objs(assembly.model_handle(:component),sp_hash).map do |cmp|
         node = cmp.delete(:node)
         hash = {
           :type => "converge_component",
@@ -31,13 +31,9 @@ module DTK; class StateChange
     end
 
     #no generate option needed for node state changes
-    def self.node_state_changes(assembly_idh,target_idh)
+    def self.node_state_changes(assembly,target_idh)
       changes = Array.new
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id],
-        :filter => [:eq, :assembly_id, assembly_idh.get_id()]
-      }
-      assembly_nodes = get_objs(assembly_idh.createMH(:node),sp_hash)
+      assembly_nodes = assembly.get_nodes()
       return changes if assembly_nodes.empty?
 
       added_state_change_filters = [[:oneof, :node_id, assembly_nodes.map{|r|r[:id]}]]

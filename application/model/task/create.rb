@@ -1,25 +1,25 @@
 module XYZ
   module TaskCreateClassMixin
-    def create_from_assembly_instance(assembly_idh,component_type,commit_msg=nil)
-      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+    def create_from_assembly_instance(assembly,component_type,commit_msg=nil)
+      target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
       # smoketest should not create a node
       if component_type == :smoketest
         create_nodes_task = nil
       else
-        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly_idh,target_idh)
+        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
       nodes = assembly_config_changes.flatten(1).map{|r|r[:node]}
-      node_mh = assembly_idh.createMH(:node)
+      node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly_idh)
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly.id_handle())
 
-      ret = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
+      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
         ret.add_subtask(config_nodes_task)

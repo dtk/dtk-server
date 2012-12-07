@@ -51,7 +51,13 @@ module DTK; class StateChange
         :cols => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id,:node_id].uniq
       }
       state_change_mh = parent_mh.createMH(:state_change)
-      get_objs(state_change_mh,sp_hash)
+      #using ndx_ret to remove duplicate pending changes fro same node
+      ndx_ret = Hash.new
+      get_objs(state_change_mh,sp_hash).each do |r|
+        node_id = r[:node][:id]
+        ndx_ret[node_id] ||= r
+      end
+      ndx_ret.values
     end
 
     def pending_changed_component(parent_mh,idh_list,opts={})

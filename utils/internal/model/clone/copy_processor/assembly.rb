@@ -17,8 +17,8 @@ module DTK
         def get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
           @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
         end
-        def get_matching_ports_link_hashes_in_target()
-          @service_add_on_proc.get_matching_ports_link_hashes_in_target()
+        def get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
+          @service_add_on_proc.get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
         end
 
        private

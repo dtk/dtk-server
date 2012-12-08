@@ -38,30 +38,31 @@ module DTK
         ret
       end
 
-      def get_matching_ports_link_hashes_in_target()
+      def get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
         ret = Array.new
         return ret unless @service_add_on
         port_links = @service_add_on.get_port_links()
         if port_links.empty?
           return ret
         end
-        @service_add_on.update_object!(:sub_assembly_id)
-        all_port_ids = port_links.map{|pl|[pl[:input_id],p[:output_id]]}.flatten
-        targeted_node_ids = {:sub_assembly_id => @service_add_on[:sub_assembly_id],:assembly_id => base_assembly[:id]}
+        all_port_ids = port_links.map{|pl|[pl[:input_id],pl[:output_id]]}.flatten
+        ndx_assembly_idhs = {:sub_assembly_idh => new_sub_assembly_idh,:assembly_idh => @base_assembly.id_handle()}
+        nodes = DTK::Assembly::Instance.get_nodes(ndx_assembly_idhs.values)
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:node_node_id,:anceestor_id],
-          :filter => [:and,[:one_of, :anceestor_id, all_port_ids],[:one_of, :node_node_ids, targeted_node_ids.values]]
+          :cols => [:id,:group_id,:display_name,:node_node_id,:ancestor_id],
+          :filter => [:and,[:oneof, :ancestor_id, all_port_ids],[:oneof, :node_node_id, nodes.map{|n|n[:id]}]]
         }
-        ndx_target_ports = Model.get_objs(model_handle(:port),sp_hash).inject(Hash.new) do |h,p|
+        port_mh = @base_assembly.model_handle(:port)
+        ndx_target_ports = Model.get_objs(port_mh,sp_hash).inject(Hash.new) do |h,p|
           h.merge(p[:anceestor_id] => p)
         end
         port_links.each do |pl|
           if input_is_sub_assembly = pl[:output_is_local]
-            in_assembly_id = targeted_node_ids[:sub_assembly_id]
-            out_assembly_id = targeted_node_ids[:assembly_id]
+            in_assembly_id = ndx_assembly_idhs[:sub_assembly_idh].get_id()
+            out_assembly_id = ndx_assembly_idhs[:assembly_idh].get_id()
           else
-            out_assembly_id = targeted_node_ids[:sub_assembly_id]
-            in_assembly_id = targeted_node_ids[:assembly_id]
+            out_assembly_id = ndx_assembly_idhs[:sub_assembly_idh].get_id()
+            in_assembly_id = ndx_assembly_idhs[:assembly_idh].get_id()
           end
           
           target_in_port = ndx_target_port[pl[:input_id]]

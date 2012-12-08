@@ -81,8 +81,8 @@ module DTK
         @ret
       end
 
-      #can be overwritten
-      def get_matching_ports_link_hashes_in_target()
+      #optionally overwritten
+      def get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
       end
 
       def shift_foregn_keys()

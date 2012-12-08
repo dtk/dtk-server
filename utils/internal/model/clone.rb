@@ -26,7 +26,7 @@ module DTK
       return nil unless new_id_handle
 
       #TODO: debug; this shoudl be used within clone_post_copy_hook
-      pp proc.get_matching_ports_link_hashes_in_target()
+      pp proc.get_matching_ports_link_hashes_in_target(new_id_handle)
       #calling with respect to target
       clone_post_copy_hook(clone_copy_output,opts)
 

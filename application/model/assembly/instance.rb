@@ -24,12 +24,19 @@ module DTK; class  Assembly
     end
 
     def get_nodes(*alt_cols)
+      self.get_nodes([id_handle],*alt_cols)
+    end
+
+    def self.get_nodes(assembly_idhs,*alt_cols)
+      ret = Array.new
+      return ret if assembly_idhs.empty?
       sp_hash = {
         :cols => [:id,:group_id,:node_node_id],
-        :filter => [:eq, :assembly_id, self[:id]]
+        :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       ndx_nodes = Hash.new
-      Model.get_objs(model_handle(:component),sp_hash).each do |cmp|
+      component_mh = assembly_idhs.first.createMH(:component) 
+      get_objs(component_mh,sp_hash).each do |cmp|
         ndx_nodes[cmp[:node_node_id]] ||= true
       end
 
@@ -38,7 +45,8 @@ module DTK; class  Assembly
         :cols => cols,
         :filter => [:oneof, :id, ndx_nodes.keys]
       }
-      Model.get_objs(model_handle.createMH(:node),sp_hash)
+      node_mh = assembly_idhs.first.createMH(:node)
+      get_objs(node_mh,sp_hash)
     end
 
     def get_target()

@@ -9,12 +9,16 @@ module XYZ
     }
 
     class AssemblyImportPortRef < SimpleHashObject
-      def self.parse(port_ref)
+      def self.parse(port_ref,assembly_id=nil)
         if port_ref =~ PortRefRegex
           node = $1; cmp_type_x = $2; link_def_ref = $3
           #TODO: global for "__"
           cmp_type = cmp_type_x.gsub(ModCompRegex,"__")
-          new(:node => node,:component_type => cmp_type, :link_def_ref => link_def_ref)
+          hash = {:node => node,:component_type => cmp_type, :link_def_ref => link_def_ref}
+          if assembly_id
+            hash.merge!(:assembly_id => assembly_id)
+          end
+          new(hash)
         else
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     
@@ -27,7 +31,9 @@ module XYZ
         match = aug_ports.find do |port|
           p = port[:parsed_port_name]
           node = port[:node][:display_name]
-          self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
+          if self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
+            self[:assembly_id].nil? or (self[:assembly_id] == port[:assembly_id])
+          end
         end
         if match
           match[:id]
@@ -37,13 +43,14 @@ module XYZ
       end
       class AddOn < self
         #returns assembly ref, port_ref
-        def self.parse(add_on_port_ref,assembly_names)
-          assembly,port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1,$2])
-          unless assembly_names.include?(assembly)
-            Log.error("Assembly name in add-on port link (#{assembly}) is illegal; must be one of (#{assembly_names.join(',')})")
-#            raise ErrorUsage.new("Assembly name in add-on port link (#{assembly}) is illegal; must be one of (#{assembly_names.join(',')})")
+        def self.parse(add_on_port_ref,assembly_list)
+          assembly_name,port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1,$2])
+          unless assembly_match = assembly_list.find{|a|a[:display_name] == assembly_name}
+            assembly_names = assembly_list.map{|a|a[:display_name]}
+            Log.error("Assembly name in add-on port link (#{assembly_name}) is illegal; must be one of (#{assembly_names.join(',')})")
+#            raise ErrorUsage.new("Assembly name in add-on port link (#{assembly_name}) is illegal; must be one of (#{assembly_names.join(',')})")
           end
-          [assembly,super(port_ref)]
+          [assembly_name,super(port_ref,assembly_match[:id])]
         end
         AOSep = Seperators[:assembly_node]
         AOPortRefRegex = Regexp.new("(^[^#{AOSep}]+)#{AOSep}(.+$)")

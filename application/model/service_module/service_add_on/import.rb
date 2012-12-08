@@ -48,11 +48,12 @@ module DTK
         return ret if (add_on_port_links||[]).empty?
         #augment ports with parsed display_name
         ServiceModule::AssemblyImport.augment_with_parsed_port_names!(ports)
+        augment_with_assembly_ids!(ports)
         assembly_names = [assembly_name,sub_assembly_name]
         add_on_port_links.each do |ao_pl_ref,ao_pl|
           link = ao_pl["link"]
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_list)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_list)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
           output_is_local = (output_assembly == assembly_name) 

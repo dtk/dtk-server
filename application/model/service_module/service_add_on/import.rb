@@ -55,7 +55,7 @@ module DTK
           output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_list)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
-          output_is_local = (output_assembly == assembly_name) 
+          output_is_local = (output_assembly == assembly[:display_name]) 
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
           ret.merge!(ao_pl_ref => pl_hash)
         end
@@ -85,7 +85,7 @@ module DTK
         ServiceModule::AssemblyImport.augment_with_parsed_port_names!(ports)
         ndx_node_assembly = aug_assembly_nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:assembly][:id])}
         ports.each do |p|
-          p[:assembly_id] ||= ndx_node_assembly[:node_node_id]
+          p[:assembly_id] ||= ndx_node_assembly[p[:node_node_id]]
         end
       end
 

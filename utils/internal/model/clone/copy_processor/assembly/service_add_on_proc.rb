@@ -54,32 +54,22 @@ module DTK
         }
         port_mh = @base_assembly.model_handle(:port)
         ndx_target_ports = Model.get_objs(port_mh,sp_hash).inject(Hash.new) do |h,p|
-          h.merge(p[:anceestor_id] => p)
+          h.merge(p[:ancestor_id] => p)
         end
         port_links.each do |pl|
-          if input_is_sub_assembly = pl[:output_is_local]
-            in_assembly_id = ndx_assembly_idhs[:sub_assembly_idh].get_id()
-            out_assembly_id = ndx_assembly_idhs[:assembly_idh].get_id()
-          else
-            out_assembly_id = ndx_assembly_idhs[:sub_assembly_idh].get_id()
-            in_assembly_id = ndx_assembly_idhs[:assembly_idh].get_id()
-          end
-          
-          target_in_port = ndx_target_port[pl[:input_id]]
-          check_port(target_in_port,pl[:input_id],:input,in_assembly_id)
-          target_out_port = ndx_target_port[pl[:output_id]]
-          check_port(target_out_port,pl[:output_id],:output,out_assembly_id)
-
-          ret << pl.hash_subset(:output_is_local,:required).mereg(:input_id => target_in_port[:id], :output_id => target_out_port[:id])
+          target_in_port = ndx_target_ports[pl[:input_id]]
+          check_port(target_in_port,pl[:input_id],:input)
+          target_out_port = ndx_target_ports[pl[:output_id]]
+          check_port(target_out_port,pl[:output_id],:output)
+          ret << pl.hash_subset(:output_is_local,:required).merge(:input_id => target_in_port[:id], :output_id => target_out_port[:id])
         end
         ret
       end
      private
-      def check_port(target_port,port_id,dir,assembly_id)
+      def check_port(target_port,port_id,dir)
         unless target_port
           Log.error("cannot find match for service add on port #{dir} input port with id (#{port_id})")
         end
-        #TODO: also check to make sure that it tied to the right assembly as given by assembly_id
       end
     end
   end; end; end

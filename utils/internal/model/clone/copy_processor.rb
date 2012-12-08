@@ -82,7 +82,8 @@ module DTK
       end
 
       #optionally overwritten
-      def get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
+      def service_add_on_proc?()
+        nil
       end
 
       def shift_foregn_keys()

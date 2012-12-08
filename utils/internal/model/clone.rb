@@ -25,9 +25,10 @@ module DTK
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
 
-      #TODO: debug; this shoudl be used within clone_post_copy_hook
-      pp proc.get_matching_ports_link_hashes_in_target(new_id_handle)
       #calling with respect to target
+      if service_add_on_proc = proc.service_add_on_proc?()
+        opts.merge!(:service_add_on_proc => service_add_on_proc)
+      end
       clone_post_copy_hook(clone_copy_output,opts)
 
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node

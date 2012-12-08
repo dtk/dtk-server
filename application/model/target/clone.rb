@@ -41,8 +41,10 @@ module XYZ
       def self.assembly(target,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
 
+        add_service_add_on_port_links?(clone_copy_output,opts)
+
         #adjust link_def_id on ports
-        #TODO: betetr if did this by default in fk - key_shift
+        #TODO: better if did this by default in fk - key_shift
         set_ports_link_def_ids(clone_copy_output)
 
         level = 1
@@ -65,6 +67,14 @@ module XYZ
         end
         return if component_new_items.empty?
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.add_service_add_on_port_links?(clone_copy_output,opts)
+        sao_proc = opts[:service_add_on_proc]
+        pl_hashes = sao_proc && sao_proc.get_matching_ports_link_hashes_in_target(clone_copy_output.id_handles.first)
+        if pl_hashes.nil? or pl_hashes.empty?
+          return
+        end
       end
 
       def self.set_ports_link_def_ids(clone_copy_output)

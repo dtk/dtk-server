@@ -56,8 +56,11 @@ module DTK; class ServiceModule
     def module_branch_ids()
       @ndx_module_branch_ids.keys
     end
-    def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
-      Internal.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+    
+    def self.augment_with_parsed_port_names!(ports)
+      ports.each do |p|
+        p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
+      end
     end
 
    private
@@ -90,7 +93,7 @@ module DTK; class ServiceModule
       end
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name
-        augment_with_parsed_port_names!(ports)
+        AssemblyImport.augment_with_parsed_port_names!(ports)
 
         port_links = (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
@@ -141,26 +144,6 @@ module DTK; class ServiceModule
       end
 
      private
-      def self.import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
-        ret = Hash.new
-        return ret if (add_on_port_links||[]).empty?
-        #augment ports with parsed display_name
-        augment_with_parsed_port_names!(ports)
-        assembly_names = [assembly_name,sub_assembly_name]
-        add_on_port_links.each do |ao_pl_ref,ao_pl|
-          link = ao_pl["link"]
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
-          input_id = input_port.matching_id(ports)
-          output_id = output_port.matching_id(ports)
-          output_is_local = (output_assembly == assembly_name) 
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
-          ret.merge!(ao_pl_ref => pl_hash)
-        end
-        ret
-      end
-
-     private
       #return [module_name,assembly_name]
       def self.parse_serialized_assembly_ref(ref)
         if ref =~ /(^.+)::(.+$)/
@@ -177,11 +160,6 @@ module DTK; class ServiceModule
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 
-      def self.augment_with_parsed_port_names!(ports)
-        ports.each do |p|
-          p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
-        end
-      end
 
       #TODO: more efficient to resolve here the ids for *component_template_id
       def self.import_component_refs(library_idh,assembly_name,module_refs,components_hash)
@@ -232,5 +210,6 @@ module DTK; class ServiceModule
         end       
       end
     end
+    
   end
 end; end

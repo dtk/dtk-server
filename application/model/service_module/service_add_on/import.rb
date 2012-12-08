@@ -20,7 +20,7 @@ module DTK
           :type => type,
           :sub_assembly_id => sub_assembly_id
         }
-        port_links = ServiceModule::AssemblyImport.import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
+        port_links = import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
         unless port_links.empty?
           ao_input_hash.merge!(:port_link => port_links)
         end
@@ -40,7 +40,28 @@ module DTK
           :path_depth => 4
         }
       end
+
      private
+      include AssemblyImportExportCommon
+      def import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+        ret = Hash.new
+        return ret if (add_on_port_links||[]).empty?
+        #augment ports with parsed display_name
+        ServiceModule::AssemblyImport.augment_with_parsed_port_names!(ports)
+        assembly_names = [assembly_name,sub_assembly_name]
+        add_on_port_links.each do |ao_pl_ref,ao_pl|
+          link = ao_pl["link"]
+          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_names)
+          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_names)
+          input_id = input_port.matching_id(ports)
+          output_id = output_port.matching_id(ports)
+          output_is_local = (output_assembly == assembly_name) 
+          pl_hash = {"input_id" => input_id,"output_id" => output_id, "output_is_local" => output_is_local, "required" => ao_pl["required"]}
+          ret.merge!(ao_pl_ref => pl_hash)
+        end
+        ret
+      end
+
       MetaRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
       attr_reader :library_idh, :module_name, :meta_file, :hash_content, :ports
 

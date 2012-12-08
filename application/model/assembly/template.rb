@@ -1,6 +1,18 @@
 module DTK; class Assembly
   class Template < self
+    ### standard get methods
+    def self.get_nodes(assembly_idhs)
+      ret = Array.new
+      return ret if assembly_idhs.empty?()
+      sp_hash = {
+        :cols => [:id, :group_id, :display_name],
+        :filter => [:oneof, :id, assembly_idhs.map{|idh|idh.get_id()}]
+      }
+      node_mh = assembly_idhs.first.createMH(:node)
+      get_objs(node_mh,sp_hash)
+    end
 
+    ### end: standard get methods
     def self.list(assembly_mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
@@ -47,12 +59,7 @@ module DTK; class Assembly
     def self.delete_assemblies_nodes(assembly_idhs)
       ret = Array.new
       return ret if assembly_idhs.empty?
-      assembly_mh = assembly_idhs.first().createMH()
-      sp_hash = {
-        :cols => [:id, :nodes],
-        :filter => [:oneof, :id, assembly_idhs.map{|idh|idh.get_id()}]
-      }
-      node_idhs = get_objs(assembly_mh,sp_hash).map{|r|r[:node].id_handle()}
+      node_idhs = get_nodes(assembly_idhs).map{|n|n.id_handle()}
       Model.delete_instances(node_idhs)    
     end
 

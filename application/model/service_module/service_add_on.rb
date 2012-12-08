@@ -17,7 +17,7 @@ module DTK
       }
       Model.get_objs(model_handle(:port_link),sp_hash)
     end
-    private :get_port_links
+
     ###end standard get methods
 
     def self.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)

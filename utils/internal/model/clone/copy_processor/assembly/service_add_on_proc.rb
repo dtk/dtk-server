@@ -41,13 +41,13 @@ module DTK
       def get_matching_ports_link_hashes_in_target()
         ret = Array.new
         return ret unless @service_add_on
-        port_links = get_port_links()
+        port_links = @service_add_on.get_port_links()
         if port_links.empty?
           return ret
         end
-        update_object!(:sub_assembly_id)
+        @service_add_on.update_object!(:sub_assembly_id)
         all_port_ids = port_links.map{|pl|[pl[:input_id],p[:output_id]]}.flatten
-        targeted_node_ids = {:sub_assembly_id => self[:sub_assembly_id],:assembly_id => base_assembly[:id]}
+        targeted_node_ids = {:sub_assembly_id => @service_add_on[:sub_assembly_id],:assembly_id => base_assembly[:id]}
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:node_node_id,:anceestor_id],
           :filter => [:and,[:one_of, :anceestor_id, all_port_ids],[:one_of, :node_node_ids, targeted_node_ids.values]]

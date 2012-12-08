@@ -2,6 +2,7 @@ module DTK
   class Clone
     class CopyProcessor
       class Assembly < self
+        r8_nested_require('assembly','service_add_on_proc')
         def cloning_assembly?()
           true
         end
@@ -15,6 +16,9 @@ module DTK
         end
         def get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
           @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
+        end
+        def get_matching_ports_link_hashes_in_target()
+          @service_add_on_proc.get_matching_ports_link_hashes_in_target()
         end
 
        private
@@ -57,44 +61,6 @@ module DTK
             end
           end
           ret unless block
-        end
-        class ServiceAddOnProc
-          def initialize(service_add_on_info)
-            if service_add_on_info
-              @node_bindings = service_add_on_info[:service_add_on].get_service_node_bindings()
-              @port_links = service_add_on_info[:service_add_on].get_port_links()
-              @base_assembly = service_add_on_info[:base_assembly]
-            else
-              @node_bindings = Array.new
-              @port_links = Array.new
-              @base_assembly = nil
-            end
-          end
-          attr_reader :node_bindings
-
-          def get_mapped_nodes(create_override_attrs,create_opts)
-            ret = Array.new
-            return ret unless @base_assembly and @node_bindings and not @node_bindings.empty? 
-            cols_needed = (create_opts[:returning_sql_cols]||[]) - create_override_attrs.keys
-            unless missing = (cols_needed - [:ancestor_id]).empty?
-              raise Error.new("Not implemented: get_mapped_nodes returning cols (#{missing.join(",")})")
-            end
-            sp_hash = {
-              :cols => [:id,:group_id,:ancestor_id],
-              :filter => [:and, [:eq,:assembly_id,@base_assembly[:id]],
-                          [:oneof,:ancestor_id,@node_bindings.map{|nb|nb[:assembly_node_id]}]]
-              
-            }
-            node_mh = @base_assembly.model_handle(:node)
-            ret = Model.get_objs(node_mh,sp_hash)
-            ndx_node_bindings = @node_bindings.inject(Hash.new){|h,nb|h.merge(nb[:assembly_node_id] => nb)}
-            ret.each do |a|
-              mapped_ancestor_id = ndx_node_bindings[a[:ancestor_id]][:sub_assembly_node_id]
-              a[:ancestor_id] = mapped_ancestor_id
-              a[:node_template_id] = mapped_ancestor_id
-            end
-            ret
-          end
         end
       end
     end

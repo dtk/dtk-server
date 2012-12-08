@@ -81,6 +81,10 @@ module DTK
         @ret
       end
 
+      #can be overwritten
+      def get_matching_ports_link_hashes_in_target()
+      end
+
       def shift_foregn_keys()
         fk_info.shift_foregn_keys()
       end

@@ -12,19 +12,21 @@ module DTK
 
     def get_port_links()
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:input_id,:output_id],
+        :cols => [:id,:group_id,:display_name,:input_id,:output_id,:output_is_local,:required],
         :filter => [:eq,:service_add_on_id,id()]
       }
       Model.get_objs(model_handle(:port_link),sp_hash)
     end
-
+    private :get_port_links
     ###end standard get methods
+
     def self.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
       Import.new(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes).import()
     end
-
     def self.dsl_filename_path_info()
       Import.dsl_filename_path_info()
     end
+
+
   end
 end

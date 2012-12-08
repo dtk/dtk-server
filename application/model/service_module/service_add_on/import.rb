@@ -15,12 +15,12 @@ module DTK
       def import()
         type = (dsl_file =~ DslRegExp;$1)
         assembly,assembly_ref = ret_assembly_info(:assembly)
-        sub_assembly,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
+        sub_assembly,sa_ref = ret_assembly_info(:add_on_sub_assembly)
         ao_input_hash = {
           :display_name => type,
           :description => hash_content["description"],
           :type => type,
-          :sub_assembly_id => sub_assembly_id
+          :sub_assembly_id => sub_assembly[:id]
         }
         port_links = import_add_on_port_links(ports,hash_content["port_links"],assembly,sub_assembly)
         unless port_links.empty?

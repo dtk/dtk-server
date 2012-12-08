@@ -155,7 +155,10 @@ module DTK; class  Assembly
 
 
     def add_sub_assembly(add_on_name, assembly_name=nil)
-      aug_service_add_on = get_augmented_service_add_on(add_on_name)
+      unless aug_service_add_on = get_augmented_service_add_on(add_on_name)
+        update_object!(:display_name)
+        raise ErrorUsage.new("Service add on (#{add_on_name}) is not a possible extension for assembly (#{self[:display_name]})")
+      end
       sub_assembly_template = aug_service_add_on[:sub_assembly_template].copy_as_assembly_template()
 
       override_attrs = Hash.new

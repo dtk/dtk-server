@@ -23,8 +23,8 @@ module DTK
       Import.new(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes).import()
     end
 
-    def self.meta_filename_path_info()
-      Import.meta_filename_path_info()
+    def self.dsl_filename_path_info()
+      Import.dsl_filename_path_info()
     end
   end
 end

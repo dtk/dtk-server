@@ -2,25 +2,27 @@ module DTK
   class ServiceAddOn
    private
     class Import 
-      def initialize(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+      def initialize(library_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
         @library_idh = library_idh
         @module_name = module_name
-        @meta_file = meta_file
+        @dsl_file = dsl_file
         @hash_content = hash_content
         @ports = ports
+        augmnent_with_parsed_nanems_and_assembly_ids!(@ports,aug_assembly_nodes)
         @aug_assembly_nodes = aug_assembly_nodes
+        @assemblies = find_assemblies(aug_assembly_nodes)
       end
       def import()
-        type = (meta_file =~ MetaRegExp;$1)
-        assembly_name,assembly_ref = ret_assembly_info(:assembly)
-        sub_assembly_name,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
+        type = (dsl_file =~ DslRegExp;$1)
+        assembly,assembly_ref = ret_assembly_info(:assembly)
+        sub_assembly,sa_ref,sub_assembly_id = ret_assembly_info(:add_on_sub_assembly)
         ao_input_hash = {
           :display_name => type,
           :description => hash_content["description"],
           :type => type,
           :sub_assembly_id => sub_assembly_id
         }
-        port_links = import_add_on_port_links(ports,hash_content["port_links"],assembly_name,sub_assembly_name)
+        port_links = import_add_on_port_links(ports,hash_content["port_links"],assembly,sub_assembly)
         unless port_links.empty?
           ao_input_hash.merge!(:port_link => port_links)
         end
@@ -34,22 +36,19 @@ module DTK
         Model.import_objects_from_hash(library_idh,"component" =>  input_hash)
       end
 
-      def self.meta_filename_path_info()
+      def self.dsl_filename_path_info()
         {
-          :regexp => MetaRegExp,
+          :regexp => DslRegExp,
           :path_depth => 4
         }
       end
 
      private
       include AssemblyImportExportCommon
-      def import_add_on_port_links(ports,add_on_port_links,assembly_name,sub_assembly_name)
+      def import_add_on_port_links(ports,add_on_port_links,assembly,sub_assembly)
         ret = Hash.new
         return ret if (add_on_port_links||[]).empty?
-        #augment ports with parsed display_name
-        ServiceModule::AssemblyImport.augment_with_parsed_port_names!(ports)
-        augment_with_assembly_ids!(ports)
-        assembly_names = [assembly_name,sub_assembly_name]
+        assembly_list = [assembly,sub_assembly]
         add_on_port_links.each do |ao_pl_ref,ao_pl|
           link = ao_pl["link"]
           input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_list)
@@ -62,23 +61,43 @@ module DTK
         end
         ret
       end
+      
+      def augment_with_assembly_ids!(ports)
+        nil
+      end
 
-      MetaRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
-      attr_reader :library_idh, :module_name, :meta_file, :hash_content, :ports
+      DslRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
+      attr_reader :library_idh, :module_name, :dsl_file, :hash_content, :ports
 
       def import_port_link(port_link_info)
       end
-      #returns [assembly_name,assembly_ref,assembly_id]
+
+      def find_assemblies(aug_assembly_nodes)
+        ndx_ret = Hash.new
+        aug_assembly_nodes.each do |n|
+          assembly = n[:assembly]
+          ndx_ret[assembly[:id]] ||= assembly
+        end
+        ndx_ret.values
+      end
+
+      def augmnent_with_parsed_nanems_and_assembly_ids!(ports,aug_assembly_nodes)
+        ServiceModule::AssemblyImport.augment_with_parsed_port_names!(ports)
+        ndx_node_assembly = aug_assembly_nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:assembly][:id])}
+        ports.each do |p|
+          p[:assembly_id] ||= ndx_node_assembly[:node_node_id]
+        end
+      end
+
+      #returns [assembly,assembly_ref]
       def ret_assembly_info(field)
         unless name = hash_content[field.to_s]
-          raise ErrorUsage("Field (#{field}) not given in the service add-on file #{meta_file}")
+          raise ErrorUsage("Field (#{field}) not given in the service add-on file #{dsl_file}")
         end
-        ref = ServiceModule.assembly_ref(module_name,name)
-        unless id = library_idh.get_child_id_handle(:component,ref).get_id()
+        unless assembly = @assemblies.find{|a|a[:display_name] == name}
           Log.error("Field (#{field}) has value (#{name}) which is not a valid assembly reference")
-#          raise ErrorUsage.new("Field (#{field}) has value (#{name}) which is not a valid assembly reference")
         end
-        [name,ref,id]
+        [assembly,ServiceModule.assembly_ref(module_name,name)]
       end
     end
   end

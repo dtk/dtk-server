@@ -1,11 +1,11 @@
 module DTK
   class ServiceModule
-    r8_nested_require('meta_info','assembly_import')
-    module MetaInfoClassMixin
-      def delete_assembly_meta_info?(assembly_idh)
-        delete_assemblies_meta_info?([assembly_idh])
+    r8_nested_require('dsl','assembly_import')
+    module DSLClassMixin
+      def delete_assembly_dsl?(assembly_idh)
+        delete_assemblies_dsl?([assembly_idh])
       end
-      def delete_assemblies_meta_info?(assembly_idhs)
+      def delete_assemblies_dsl?(assembly_idhs)
         return if assembly_idhs.empty?
         sp_hash = {
           :cols => [:display_name, :module_branch],
@@ -25,15 +25,15 @@ module DTK
         end
       end
 
-      def create_assemblies_meta_info?(library_idh,module_branch,module_name)
+      def create_assemblies_from_dsl?(library_idh,module_branch,module_name)
         module_branch_idh = module_branch.id_handle()
-        assembly_meta_info = assembly_meta_filename_path_info()
-        add_on_meta_info = ServiceAddOn.meta_filename_path_info()
-        depth = [assembly_meta_info[:path_depth],add_on_meta_info[:path_depth]].max
+        assembly_dsl_path_info = assembly_dsl_filename_path_info()
+        add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
+        depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         
         assembly_import_helper = AssemblyImport.new(library_idh,module_name)
-        files.select{|f|f =~ assembly_meta_info[:regexp]}.each do |meta_file|
+        files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
           assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
@@ -45,7 +45,7 @@ module DTK
         assembly_import_helper.import()
         ports = assembly_import_helper.ports()
         aug_assembly_nodes = assembly_import_helper.augmented_assembly_nodes()
-        files.select{|f| f =~ add_on_meta_info[:regexp]}.each do |meta_file|
+        files.select{|f| f =~ add_on_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
           ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
@@ -58,7 +58,7 @@ module DTK
       def assembly_meta_filename_path(assembly_name)
         "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
       end
-      def assembly_meta_filename_path_info()
+      def assembly_dsl_filename_path_info()
         {
           :regexp => Regexp.new("assembly.json$"),
           :path_depth => 3

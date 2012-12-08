@@ -6,11 +6,11 @@ r8_nested_require('assembly','import_export_common')
 module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')
-    r8_nested_require('service_module','meta_info')
+    r8_nested_require('service_module','dsl')
 
     extend ModuleClassMixin
     include ModuleMixin
-    extend MetaInfoClassMixin
+    extend DSLClassMixin
     
     ### standard get methods
     def get_assemblies()
@@ -170,7 +170,7 @@ module DTK
       update_object!(:library_library_id,:display_name)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
       #TODO: for more efficiency can push in diffs_summary to below
-      self.class.create_assemblies_meta_info?(library_idh,module_branch,module_name())
+      self.class.create_assemblies_from_dsl?(library_idh,module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
 
@@ -219,8 +219,8 @@ module DTK
     def self.import_postprocess(repo,library_idh,module_name,version)
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_meta_info?
-      create_assemblies_meta_info?(library_idh,module_branch,module_name)
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl?
+      create_assemblies_from_dsl?(library_idh,module_branch,module_name)
       module_branch_idh
     end
 

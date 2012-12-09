@@ -41,7 +41,7 @@ module XYZ
       def self.assembly(target,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
 
-        add_service_add_on_port_links?(clone_copy_output,opts)
+        add_service_add_on_port_links?(target,clone_copy_output,opts)
 
         #adjust link_def_id on ports
         #TODO: better if did this by default in fk - key_shift
@@ -69,11 +69,11 @@ module XYZ
         StateChange.create_pending_change_items(component_new_items)
       end
 
-      def self.add_service_add_on_port_links?(clone_copy_output,opts)
+      def self.add_service_add_on_port_links?(target,clone_copy_output,opts)
         sao_proc = opts[:service_add_on_proc]
         pl_hashes = sao_proc && sao_proc.get_matching_ports_link_hashes_in_target(clone_copy_output.id_handles.first)
-        if pl_hashes.nil? or pl_hashes.empty?
-          return
+        unless pl_hashes.nil? or pl_hashes.empty?
+          PortLink.create_from_links_hash(target.id_handle(),pl_hashes)
         end
       end
 

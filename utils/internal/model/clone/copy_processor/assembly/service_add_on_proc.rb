@@ -8,7 +8,7 @@ module DTK
           @base_assembly = service_add_on_info[:base_assembly]
         else
           @service_add_on = nil
-          @port_links = Array.new
+          @node_bindings = Array.new
           @base_assembly = nil
         end
       end

@@ -53,6 +53,14 @@ module DTK; class  Assembly
       get_obj_helper(:target,:target)
     end
 
+    def get_sub_assemblies()
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name],
+        :filter => [:and,[:eq,:assembly_id,id()],[:eq,:type,"composite"]]
+      }
+      Model.get_objs(model_handle,sp_hash).map{|a|a.copy_as_assembly_instance()}
+    end
+
     ### end: standard get methods
 
     def self.list(assembly_mh,opts={})
@@ -163,21 +171,17 @@ module DTK; class  Assembly
 
 
     def add_sub_assembly(add_on_name, assembly_name=nil)
+      update_object!(:display_name)
+
       unless aug_service_add_on = get_augmented_service_add_on(add_on_name)
-        update_object!(:display_name)
         raise ErrorUsage.new("Service add on (#{add_on_name}) is not a possible extension for assembly (#{self[:display_name]})")
       end
       sub_assembly_template = aug_service_add_on[:sub_assembly_template].copy_as_assembly_template()
 
-      override_attrs = Hash.new
-      override_attrs[:display_name] = 
-        if assembly_name
-          assembly_name 
-        else
-          update_object!(:display_name)
-          #TODO: does not bump up name for multiple insatnces
-          "#{self[:display_name]}::#{sub_assembly_template[:display_name]}"
-        end
+      override_attrs = { 
+        :display_name => assembly_name||aug_service_add_on.new_sub_assembly_name(self,sub_assembly_template),
+        :assembly_id => id()
+      }
       clone_opts = {
         :ret_new_obj_with_cols => [:id,:type],
         :service_add_on_info => {

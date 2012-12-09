@@ -1,3 +1,4 @@
+r8_nested_require('service_add_on','service_node_binding')
 module DTK
   class ServiceAddOn < Model
     r8_nested_require('service_add_on','import')
@@ -27,6 +28,23 @@ module DTK
       Import.dsl_filename_path_info()
     end
 
-
+    def new_sub_assembly_name(base_assembly,sub_assembly_template)
+      #TODO: race condition in time name generated and commited to db
+      existing_sub_assemblies = base_assembly.get_sub_assemblies()
+      name_prefix = "#{base_assembly[:display_name]}::#{sub_assembly_template[:display_name]}"
+      matching_instance_nums = Array.new
+      existing_sub_assemblies.each do |a|
+        if a[:display_name] =~ Regexp.new("^#{name_prefix}(.*$)")
+          suffix = $1
+          suffix_num  = (suffix.empty? ? 1 : (suffix =~ /^-([0-9]+$)/; $1))
+          matching_instance_nums << suffix_num.to_i
+        end
+      end
+      if matching_instance_nums.empty?
+        name_prefix
+      else
+        "#{name_prefix}-#{(matching_instance_nums.max+1).to_s}"
+      end
+    end
   end
 end

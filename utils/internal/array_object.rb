@@ -2,12 +2,16 @@ module XYZ
   class ArrayObject < Array
     def map(&block)
       ret = ArrayObject.new
-      self.each{|x|ret << block.call(x)}
+      each{|x|ret << block.call(x)}
       ret
     end
     def freeze()
-      self.each{|x|x.freeze}
+      each{|x|x.freeze}
       super
+    end
+
+    def id_handles()
+      map{|x|x.id_handle()}
     end
   end
 end

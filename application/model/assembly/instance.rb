@@ -53,12 +53,17 @@ module DTK; class  Assembly
       get_obj_helper(:target,:target)
     end
 
-    def get_sub_assemblies()
+    def self.get_sub_assemblies(assembly_idhs)
+      ret = Array.new
+      return ret if assembly_idhs.empty?
       sp_hash = {
         :cols => [:id,:group_id,:display_name],
-        :filter => [:and,[:eq,:assembly_id,id()],[:eq,:type,"composite"]]
+        :filter => [:and,[:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}],[:eq,:type,"composite"]]
       }
-      Model.get_objs(model_handle,sp_hash).map{|a|a.copy_as_assembly_instance()}
+      get_objs(assembly_idhs.first.createMH(),sp_hash).map{|a|a.copy_as_assembly_instance()}
+    end
+    def get_sub_assemblies()
+      self.class.get_sub_assemblies([id_handle()])
     end
 
     ### end: standard get methods
@@ -132,17 +137,30 @@ module DTK; class  Assembly
       order ? ret.sort(&order) : ret
     end
 
+    def self.delete(assembly_idhs)
+      if assembly_idhs.kind_of?(Array)
+        return if assembly_idhs.empty?
+      else
+        assembly_idhs = [assembly_idhs]
+      end
+      delete(get_sub_assemblies(assembly_idhs).id_handles())
+      delete_and_destroy_its_nodes(assembly_idhs)
+      delete_instances(assembly_idhs)
+    end
 
-    def self.delete_and_destroy_its_nodes(assembly_idh)
-      #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
-      #repo so can point to multiple assembly instances
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:eq, :assembly_id, assembly_idh.get_id]
-      }
-      assembly_nodes = get_objs(assembly_idh.createMH(:node),sp_hash)
-      assembly_nodes.map{|r|r.destroy_and_delete()}
-      Model.delete_instance(assembly_idh)
+    class << self
+     private
+      def delete_and_destroy_its_nodes(assembly_idhs)
+        return if assembly_idhs.empty?
+        #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+        }
+        node_mh = assembly_idhs.first.createMH(:node)
+        assembly_nodes = get_objs(node_mh,sp_hash)
+        assembly_nodes.map{|r|r.destroy_and_delete()}
+      end
     end
 
     def add_component(node_idh,component_template_idh)

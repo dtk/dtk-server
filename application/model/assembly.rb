@@ -136,7 +136,7 @@ module DTK
       if subtype == :template
         Assembly::Template.delete(assembly_idh)
       else
-        Assembly::Instance.delete_and_destroy_its_nodes(assembly_idh)
+        Assembly::Instance.delete(assembly_idh)
       end
     end
 

@@ -24,7 +24,7 @@ module DTK; class  Assembly
     end
 
     def get_nodes(*alt_cols)
-      self.get_nodes([id_handle],*alt_cols)
+      self.class.get_nodes([id_handle],*alt_cols)
     end
 
     def self.get_nodes(assembly_idhs,*alt_cols)

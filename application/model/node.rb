@@ -27,8 +27,8 @@ module XYZ
     end
 #TODO: stub for feature_node_admin_state
     def persistent_hostname?()
-      true
-#      false
+#      true
+      false
     end
 #TODO: end stub for feature_node_admin_state
 

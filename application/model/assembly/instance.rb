@@ -132,6 +132,7 @@ module DTK; class  Assembly
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+
       rows = get_objs(:cols => cols)
       ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
       order ? ret.sort(&order) : ret

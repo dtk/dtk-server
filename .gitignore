@@ -6,5 +6,5 @@ application/config/environment_config.rb
 application/public/js/cache/*.js
 metadata.json
 ruote_work/
-
+Gemfile.lock
 

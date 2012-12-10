@@ -19,7 +19,7 @@ module XYZ
       #TODO: may replace is_deployed and operational_status with status
       column :is_deployed, :boolean, :default => false
 
-      column :admin_op_status, :varchar, :size => 20, :default => 'running'
+      column :admin_op_status, :varchar, :size => 20, :default => 'pending'
       column :operational_status, :varchar, :size => 20
 
       column :hostname_external_ref, :json

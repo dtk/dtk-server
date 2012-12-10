@@ -135,13 +135,13 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :power_on_node, :task_id => task_id}
-              node = task[:executable_action][:node]
-              # TODO do both statuses at once
-              node.update_operational_status!(:running)
-              node.update_admin_op_status!(:running)
-              node.associate_elastic_ip()
+              
+              task[:executable_action][:node].update_operational_status!(:running)
+              
               set_result_succeeded(workitem,result,task,action)
-              Log.info "Successfully set elastic ip and started node with id '#{node.id}'"
+              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+              task[:executable_action][:node].associate_persistent_dns()
+              Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
@@ -168,9 +168,9 @@ module XYZ
               pp [:found,msg[:senderid]]
               task[:executable_action][:node].update_operational_status!(:running)
               # assign elastic ip if present, this covers both cases when starting node or creating it
-              task[:executable_action][:node].associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+              task[:executable_action][:node].associate_persistent_dns()
 
               reply_to_engine(workitem)
             end,

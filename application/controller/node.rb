@@ -27,7 +27,16 @@ module XYZ
 
     #### list and info actions ###
     def rest__list()
-      rest_ok_response ret_node_subtype_class().list(model_handle())
+      response = ret_node_subtype_class().list(model_handle())
+      rest_ok_response response
+    end
+
+    def rest__info()
+      node,subtype = ret_node_params_object_and_subtype()
+       unless subtype == :instance
+         raise ErrorUsage::BadParamValue.new(:subtype,subtype)
+       end
+      rest_ok_response node.info()
     end
 
     def rest__info()
@@ -169,8 +178,8 @@ module XYZ
       node = create_object_from_id(id)
       node_service_checks = node.get_node_service_checks()
       component_service_checks = node.get_component_service_checks()
-pp [:node_service_checks,node_service_checks]
-pp [:component_service_checks,component_service_checks]
+      pp [:node_service_checks,node_service_checks]
+      pp [:component_service_checks,component_service_checks]
       tpl = R8Tpl::TemplateR8.new("dock/node_get_service_checks",user_context())
       tpl.assign(:_app,app_common())
       tpl.assign(:node_service_checks,node_service_checks)

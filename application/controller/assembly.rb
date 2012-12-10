@@ -57,7 +57,6 @@ module DTK
     end
 
     def rest__get_attributes()
-      assembly,subtype = ret_assembly_params_object_and_subtype()
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
       rest_ok_response assembly.get_attributes_print_form(filter)
@@ -144,28 +143,86 @@ module DTK
 
     def rest__start()
       assembly = ret_assembly_instance_object()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+      node_pattern = ret_request_params(:node_pattern)
 
       # filters only stopped nodes for this assembly
-      nodes    =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
-      stopped_nodes = nodes.select { |node| node[:admin_op_status].eql?("stopped") }
+      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
 
-      # invoking command to start the nodes
-      CommandAndControl.start_instances(stopped_nodes)
+      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
 
-      # following task will when nodes ready assign elastic IP
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
-      task.save!()
+      unless is_valid
+        return rest_ok_response(:errors => [error_msg])
+      end
 
-      rest_ok_response :task_id => task.id
+      queue = SimpleActionQueue.new
+
+      CreateThread.defer do
+        # invoking command to start the nodes
+        CommandAndControl.start_instances(nodes)
+
+        # following task will when nodes ready assign elastic IP
+        task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
+        task.save!()
+
+        queue.set_result(:task_id => task.id)
+      end
+
+      rest_ok_response :action_results_id => queue.id
     end
 
     def rest__stop()
       assembly = ret_assembly_instance_object()
-      nodes =  assembly.get_nodes(:id,:display_name,:external_ref,:admin_op_status)
+      node_pattern = ret_request_params(:node_pattern)
+      nodes =  assembly.get_nodes(:id,:display_name,:type, :external_ref,:admin_op_status)
+
+      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :running)
+
+      unless is_valid
+        return rest_ok_response(:errors => [error_msg])
+      end
+      
       CommandAndControl.stop_instances(nodes)
 
       rest_ok_response :status => :ok
+    end
+
+    ##
+    # Method that will validate if nodes list is ready to started or stopped.
+    #
+    # * *Args*    :
+    #   - +assembly_id+     ->  assembly id
+    #   - +nodes+           ->  node list
+    #   - +node_pattern+    ->  match id regexp pattern
+    #   - +status_pattern+  ->  pattern to match node status
+    # * *Returns* :
+    #   - is valid flag
+    #   - filtered nodes by pattern (if pattern not nil)
+    #   - erorr message in case it is not valid
+    #
+    def nodes_valid_for_aws?(assembly_id, nodes, node_pattern, status_pattern)
+      # check for pattern
+      unless node_pattern.nil?
+        regex = Regexp.new(node_pattern)
+        nodes = nodes.select { |node| regex =~ node.id.to_s}
+        if nodes.size == 0
+          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'"
+        end
+      end
+      # check if staged
+      nodes.each do |node|
+        if node[:type] == "staged"
+          return nodes, false, "Nodes for assembly '#{assembly_id}' are 'staged' and as such cannot be started/stopped."
+        end
+      end
+
+      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
+      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
+      if filtered_nodes.size == 0
+        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_id}'"
+      end
+      
+      return filtered_nodes, true, nil      
     end
 
     def rest__initiate_get_log()
@@ -195,7 +252,12 @@ module DTK
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
-      rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+
+      if ret_request_param_boolean(:using_simple_queue)
+        rest_ok_response SimpleActionQueue.get_results(action_results_id)
+      else
+        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+      end
     end
     ### end: mcollective actions
 
@@ -207,6 +269,8 @@ module DTK
       smoketests = assembly.list_smoketests()
       rest_ok_response smoketests
     end
+
+
 
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()
@@ -401,3 +465,4 @@ module DTK
 
   end
 end
+

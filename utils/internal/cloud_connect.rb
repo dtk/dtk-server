@@ -88,7 +88,7 @@ module XYZ
 
     class EC2 < Top
 
-      WAIT_FOR_NODE = 6 # seconds
+      WAIT_FOR_NODE = 10 # seconds
 
       def initialize()             
         @conn = Fog::Compute::AWS.new(get_compute_params())

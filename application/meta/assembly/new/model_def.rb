@@ -37,6 +37,17 @@ lambda__segments_nodes_and_components =
        :cols => node_cols
      }]
 }
+lambda__nodes = 
+  lambda{|node_cols|
+  {
+    :type => :json, 
+    :hidden => true,
+    :remote_dependencies =>
+    [
+     lambda__segment_node.call(node_cols)
+    ]
+  }
+}
 lambda__instance_nodes_and_components = 
   lambda{|node_cols,cmp_cols|
   {
@@ -128,15 +139,16 @@ lambda__template_nodes_and_components =
       :hidden=>true,
       :remote_dependencies=>
         lambda__segments_nodes_and_components.call([:id,:display_name,:group_id],[:id,:display_name,:component_type,:group_id]) +
-       [{
-         :model_name=>:attribute,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:component_component_id=>:nested_component__id},
-         :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted, :is_port]
-        }]
-      },
+      [{
+        :model_name=>:attribute,
+        :convert => true,
+        :join_type=>:inner,
+        :join_cond=>{:component_component_id=>:nested_component__id},
+        :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted, :is_port]
+      }]
+    },
 
+    :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
     :template_nodes_and_cmps_summary=> lambda__template_nodes_and_components.call([:id,:display_name,:os_type],[:id,:display_name,:component_template_id],[:id,:display_name,:component_type,:basic_type,:description]),
     :template_link_defs_info=> {
       :type => :json, 

@@ -67,7 +67,6 @@ module DTK; class  Assembly
     end
 
     ### end: standard get methods
-
     def self.list(assembly_mh,opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
@@ -83,6 +82,38 @@ module DTK; class  Assembly
     end
 
     class << self
+      def get_assemblies_with_nodes(mh,opts={})
+        target_idh = opts[:target_idh]
+        target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+        sp_hash = {
+          :cols => [:id, :display_name,:nested_nodes_summary],
+          :filter => [:and, [:eq, :type, "composite"], target_filter]
+        }
+        assembly_rows = get_objs(mh.createMH(:component),sp_hash)
+
+        ndx_ret = Hash.new
+        assembly_rows.each do |r|
+          node = r.delete(:node)
+          next if node.nil?
+          ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
+        end
+        ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
+        ndx_ret.values
+      end
+
+      def delete_and_destroy_its_nodes(assembly_idh)
+        #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
+        #repo so can point to multiple assembly instances
+        sp_hash = {
+          :cols => [:id, :display_name,:instance_nodes_and_cmps_summary],
+          :filter => [:and, [:eq, :type, "composite"], target_filter]
+        }
+        assembly_rows = get_objs(assembly_mh,sp_hash)
+        get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+        attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
+        add_execution_status!(assembly_rows,assembly_mh)
+        list_aux(assembly_rows,attr_rows)
+      end
      private
       def add_execution_status!(assembly_rows,assembly_mh)
         sp_hash = {
@@ -294,9 +325,9 @@ module DTK; class  Assembly
                       [:eq, :type, "composite"]],
            :post_filter => lambda{|r|r[:target][:display_name] ==  parts[0]}
           }
-      else
-        raise ErrorNameInvalid.new(name,pp_object_type())
-      end
+        else
+          raise ErrorNameInvalid.new(name,pp_object_type())
+        end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 

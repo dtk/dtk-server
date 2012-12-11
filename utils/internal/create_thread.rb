@@ -16,7 +16,7 @@ module XYZ
           yield
         rescue Exception => e
           Log.error "[ERROR IN THREAD] #{e.message}"
-          Log.error e
+          pp e.backtrace
         end
       end
     end

@@ -135,9 +135,11 @@ module XYZ
           callbacks = {
             :on_msg_received => proc do |msg|
               result = {:type => :power_on_node, :task_id => task_id}
-              
-              task[:executable_action][:node].update_operational_status!(:running)
-              
+              node = task[:executable_action][:node]
+              # TODO do both statuses at once
+              node.update_operational_status!(:running)
+              node.update_admin_op_status!(:running)
+              node.associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               task[:executable_action][:node].associate_persistent_dns()
@@ -154,7 +156,6 @@ module XYZ
 
           poll_to_detect_node_ready(workflow, action[:node], callbacks)
         end
-
       end
 
       class DetectCreatedNodeIsReady < Top
@@ -165,12 +166,14 @@ module XYZ
             :on_msg_received => proc do |msg|
               result = {:type => :completed_create_node, :task_id => task_id} 
  
-              pp [:found,msg[:senderid]]
-              task[:executable_action][:node].update_operational_status!(:running)
+              Log.info_pp [:found,msg[:senderid]]
+              node = task[:executable_action][:node]
+              node.update_operational_status!(:running)
               # assign elastic ip if present, this covers both cases when starting node or creating it
+              node.associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              task[:executable_action][:node].associate_persistent_dns()
+              node.associate_persistent_dns()
 
               reply_to_engine(workitem)
             end,
@@ -347,3 +350,4 @@ module XYZ
     end
   end
 end
+

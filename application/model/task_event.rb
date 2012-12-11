@@ -3,17 +3,17 @@ module XYZ
     def self.create_event?(event_type,task,result)
       action = task[:executable_action]
       return nil unless action
-      if action.kind_of?(TaskAction::PowerOnNode)
+      if action.kind_of?(Task::Action::PowerOnNode)
         # TODO: Look into this see if neccessery
         Log.warn ">>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
-      elsif action.kind_of?(TaskAction::CreateNode) 
+      elsif action.kind_of?(Task::Action::CreateNode) 
         case event_type
          when :start 
           StartCreateNode.create_start?(action)
          when :complete_succeeded,:complete_failed,:complete_timeout
           CompleteCreateNode.create_complete?(action,event_type,result)
         end
-      elsif action.kind_of?(TaskAction::ConfigNode)
+      elsif action.kind_of?(Task::Action::ConfigNode)
         case event_type
          when :start 
           StartConfigNode.create_start?(action)

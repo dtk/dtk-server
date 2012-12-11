@@ -158,6 +158,8 @@ module XYZ
     private :get_attributes_print_form_aux
 
     def self.get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      ret = Array.new
+      return ret if node_idhs.empty?()
       filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
       if add_filter
         filter = [:and,filter,add_filter]

@@ -20,7 +20,7 @@ module DTK
       def ordered_components(components,&block)
         ndx_cmps = components.inject({}){|h,cmp|h.merge(cmp[:id] => cmp)}
         cmp_deps = find_component_dependencies(components)
-        TaskAction::ComponentAction.generate_component_order(cmp_deps).each do |(component_id,deps)|
+        Task::Action::OnComponent.generate_component_order(cmp_deps).each do |(component_id,deps)|
           block.call(ndx_cmps[component_id])
         end
       end

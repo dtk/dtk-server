@@ -57,16 +57,16 @@ module XYZ
       end
 
       #TODO: not sure if still needed
-      guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? TaskAction::CreateNode : TaskAction::ConfigNode
+      guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
       #right now only using config node to config node guards
-      return nil if guard_task_type == TaskAction::CreateNode
+      return nil if guard_task_type == Task::Action::CreateNode
 
       guard = {
         :task_type => guard_task_type
       }.merge(attr_info(guard_attr))
 
       guarded = {
-        :task_type => TaskAction::ConfigNode
+        :task_type => Task::Action::ConfigNode
       }.merge(attr_info(guarded_attr))
 
       new(:guarded => guarded, :guard => guard, :link => link)

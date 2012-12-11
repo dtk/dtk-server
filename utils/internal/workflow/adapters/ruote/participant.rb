@@ -32,7 +32,7 @@ module XYZ
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
-          task.update_at_task_completion("succeeded",TaskAction::Result::Succeeded.new())
+          task.update_at_task_completion("succeeded",Task::Action::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
         end
@@ -49,11 +49,11 @@ module XYZ
                 CommandAndControl::Error.new 
               end
             end
-          task.update_at_task_completion("failed",TaskAction::Result::Failed.new(error))
+          task.update_at_task_completion("failed",Task::Action::Result::Failed.new(error))
         end
 
         def set_result_timeout(workitem,new_result,task)
-          task.update_at_task_completion("failed",TaskAction::Result::Failed.new(CommandAndControl::Error::Timeout.new))
+          task.update_at_task_completion("failed",Task::Action::Result::Failed.new(CommandAndControl::Error::Timeout.new))
         end
 
        protected

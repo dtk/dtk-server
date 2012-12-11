@@ -1,8 +1,8 @@
 r8_nested_require('task','create')
-r8_nested_require('task','action')
 module XYZ
   class Task < Model
     r8_nested_require('task','status')
+    r8_nested_require('task','action')
     extend TaskCreateClassMixin
     include StatusMixin
     #returns list (possibly empty) of subtask idhs that guard this
@@ -165,7 +165,7 @@ module XYZ
     end
 
     def self.create_from_nodes_to_converge(node_idhs)
-      config_nodes_task = config_nodes_task(grouped_state_changes[TaskAction::ConfigNode])
+      config_nodes_task = config_nodes_task(grouped_state_changes[Action::ConfigNode])
       if create_nodes_task and config_nodes_task
         ret = create_new_task(:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task)
@@ -320,7 +320,7 @@ module XYZ
       ret
     end
     def reify!()
-      self[:executable_action] &&= TaskAction::TaskActionNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
+      self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end
     protected :reify!
 
@@ -408,9 +408,16 @@ module XYZ
     end
 
     #for special tasks that have component actions
-    #TODO: trie dto do this by having a class inherir from Task and hanging these fns off it, but this confused Ramaze
     def component_actions()
-      if self[:executable_action].kind_of?(TaskAction::ConfigNode)
+      if self[:executable_action].kind_of?(Action::ConfigNode)
+        action = self[:executable_action]
+        (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
+      else
+        subtasks.map{|obj|obj.component_actions()}.flatten
+      end
+    end
+    def node_level_actions()
+      if self[:executable_action].kind_of?(Action::ConfigNode)
         action = self[:executable_action]
         return (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
       end

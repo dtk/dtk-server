@@ -76,11 +76,11 @@ module DTK
         case self[:executable_action_type]
          when "ConfigNode" 
           if ea = self[:executable_action]
-            el.merge!(TaskAction::ConfigNode.status(ea,opts))
+            el.merge!(Action::ConfigNode.status(ea,opts))
           end
          when "CreateNode" 
           if ea = self[:executable_action]
-            el.merge!(TaskAction::CreateNode.status(ea,opts))
+            el.merge!(Action::CreateNode.status(ea,opts))
           end
         end
       end
@@ -131,11 +131,11 @@ module DTK
       case self[:executable_action_type]
        when "ConfigNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::ConfigNode.status(ea,opts))
+          ret.merge!(Action::ConfigNode.status(ea,opts))
         end
        when "CreateNode" 
         if ea = self[:executable_action]
-          ret.merge!(TaskAction::CreateNode.status(ea,opts))
+          ret.merge!(Action::CreateNode.status(ea,opts))
         end
       end
       errors = get_errors()
@@ -196,10 +196,10 @@ module DTK
       case action_type
        when "ConfigNode" 
         ret.add(self,:executable_action_type)
-        ret.add(self,:executable_action?){|ea|TaskAction::ConfigNode.pretty_print_hash(ea)}
+        ret.add(self,:executable_action?){|ea|Action::ConfigNode.pretty_print_hash(ea)}
        when "CreateNode" 
         ret.add(self,:executable_action_type)
-        ret.add(self,:executable_action?){|ea|TaskAction::CreateNode.pretty_print_hash(ea)}
+        ret.add(self,:executable_action?){|ea|Action::CreateNode.pretty_print_hash(ea)}
        else
         ret.add(self,:executable_action_type?,:executable_action?)
       end

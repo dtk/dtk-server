@@ -103,15 +103,15 @@ module XYZ
       task_mh = parent_idh.create_childMH(:task)
       grouped_state_changes = group_by_node_and_type(state_change_list)
       grouped_state_changes.each_key do |type|
-        unless [TaskAction::CreateNode,TaskAction::ConfigNode].include?(type)
+        unless [Task::Action::CreateNode,Task::Action::ConfigNode].include?(type)
           Log.error("treatment of task action type #{type.to_s} not yet treated; it will be ignored")
           grouped_state_changes.delete(type)
           next
         end
       end
       #if have both create_node and config node then top level has two stages create_node then config node
-      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[TaskAction::CreateNode])
-      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[TaskAction::ConfigNode])
+      create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[Task::Action::CreateNode])
+      config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[Task::Action::ConfigNode])
       if create_nodes_task and config_nodes_task
         ret = create_new_task(task_mh,:temporal_order => "sequential")
         ret.add_subtask(create_nodes_task)
@@ -143,19 +143,19 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::CreateNode.create_from_state_change(state_change_list.first.first)
+        executable_action = Task::Action::CreateNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::CreateNode.create_from_state_change(sc.first)
+          executable_action = Task::Action::CreateNode.create_from_state_change(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = task_mh.createMH(:attribute)
-      TaskAction::CreateNode.add_attributes!(attr_mh,all_actions)
+      Task::Action::CreateNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -165,19 +165,19 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::PowerOnNode.create_from_state_change(state_change_list.first.first)
+        executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::PowerOnNode.create_from_state_change(sc.first)
+          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = task_mh.createMH(:attribute)
-      TaskAction::PowerOnNode.add_attributes!(attr_mh,all_actions)
+      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -188,19 +188,19 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = TaskAction::ConfigNode.create_from_state_change(state_change_list.first,assembly_idh)
+        executable_action = Task::Action::ConfigNode.create_from_state_change(state_change_list.first,assembly_idh)
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
         state_change_list.each do |sc|
-          executable_action = TaskAction::ConfigNode.create_from_state_change(sc,assembly_idh)
+          executable_action = Task::Action::ConfigNode.create_from_state_change(sc,assembly_idh)
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
           end
       end
       attr_mh = task_mh.createMH(:attribute)
-      TaskAction::ConfigNode.add_attributes!(attr_mh,all_actions)
+      Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 
@@ -222,11 +222,11 @@ module XYZ
     
     def map_state_change_to_task_action(state_change)
       @mapping_sc_to_task_action ||= {
-        "create_node" => TaskAction::CreateNode,
-        "install_component" => TaskAction::ConfigNode,
-        "update_implementation" => TaskAction::ConfigNode,
-        "converge_component" => TaskAction::ConfigNode,
-        "setting" => TaskAction::ConfigNode
+        "create_node" => Task::Action::CreateNode,
+        "install_component" => Task::Action::ConfigNode,
+        "update_implementation" => Task::Action::ConfigNode,
+        "converge_component" => Task::Action::ConfigNode,
+        "setting" => Task::Action::ConfigNode
       }
       @mapping_sc_to_task_action[state_change]
     end

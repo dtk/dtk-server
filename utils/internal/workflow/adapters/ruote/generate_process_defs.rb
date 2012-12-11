@@ -19,14 +19,14 @@ module XYZ
       #TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
-        if action.kind_of?(TaskAction::PowerOnNode)
+        if action.kind_of?(Task::Action::PowerOnNode)
           detect_when_ready = participant_executable_action(:power_on_node,task,context, :task_type => "power_on_node", :task_end => true)
           sequence([detect_when_ready])
-        elsif action.kind_of?(TaskAction::CreateNode)
+        elsif action.kind_of?(Task::Action::CreateNode)
           main = participant_executable_action(:create_node,task,context,:task_start => true)
           post_part = participant_executable_action(:detect_created_node_is_ready,task,context, :task_type => "post", :task_end => true)
           sequence(main,post_part)
-        elsif action.kind_of?(TaskAction::ConfigNode)
+        elsif action.kind_of?(Task::Action::ConfigNode)
           guards = nil
           if guard_tasks = context.get_guard_tasks(action)
             guards = ret_guards(guard_tasks)
@@ -102,8 +102,8 @@ module XYZ
       def participants_for_tasks()
         @participants_for_tasks ||= {
           #TODO: need condition that signifies detect_created_node_is_ready succeeded
-          TaskAction::CreateNode => :detect_created_node_is_ready,
-          TaskAction::ConfigNode => :execute_on_node
+          Task::Action::CreateNode => :detect_created_node_is_ready,
+          Task::Action::ConfigNode => :execute_on_node
         }
       end
 

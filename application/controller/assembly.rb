@@ -39,9 +39,8 @@ module DTK
        unless AboutEnum[subtype].include?(about)
          raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
        end
-      filter_proc = FilterProc[about]
-      opts = (filter_proc ? {:filter_proc => filter_proc} : {})
-      rest_ok_response assembly.info_about(about,opts)
+       
+      rest_ok_response assembly.info_about(about)
     end
     AboutEnum = {
       :instance => [:nodes,:components,:tasks,:attributes],

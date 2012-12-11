@@ -142,7 +142,7 @@ module XYZ
               node.associate_elastic_ip()
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              task[:executable_action][:node].associate_persistent_dns()
+              node.associate_persistent_dns()
               Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
               reply_to_engine(workitem)
             end,

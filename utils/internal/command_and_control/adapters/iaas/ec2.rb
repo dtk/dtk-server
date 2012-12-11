@@ -35,29 +35,27 @@ module XYZ
       end
 
       def self.process_persistent_hostname__first_boot!(node)
-        raise Error.new("From Rich: need to puick one over the other not both")
-        begin 
-          # allocate elastic IP for this node
-          elastic_ip = conn().allocate_elastic_ip()
-
-          node.update({
-            :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
-          })
-
-          Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
-        rescue Fog::Compute::AWS::Error => e
-          Log.error "Not able to set Elastic IP, reason: #{e.message}"
+        hostname_external_ref = {:iaas => :aws }
+        if node.persistent_hostname?()
+          begin 
+            # allocate elastic IP for this node
+            elastic_ip = conn().allocate_elastic_ip()
+            hostname_external_ref.merge!(:elastic_ip => elastic_ip)
+            Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
+           rescue Fog::Compute::AWS::Error => e
+            Log.error "Not able to set Elastic IP, reason: #{e.message}"
           # TODO: Check with Rich if this is recovarable error, for now it is not
-          raise e
+            raise e
+          end
         end
-        persistent_dns = dns().get_dns(node)
-
-        # we create it on node ready since we still do not have that data
-        node.update({
-          :hostname_external_ref => {:persistent_dns => persistent_dns, :iaas => :ec2 }
-        })
-  
-        Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
+        if node.external_dns?()
+          persistent_dns = dns().get_dns(node)
+          
+          # we create it on node ready since we still do not have that data
+          hostname_external_ref.merge!(:persistent_dns => persistent_dns)
+          Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
+        end
+        node.update(:hostname_external_ref => hostname_external_ref)
       end
 
       def self.process_persistent_hostname__restart(node)
@@ -67,19 +65,23 @@ module XYZ
 
       def self.process_persistent_hostname__terminate(node)
         unless node[:hostname_external_ref].nil? 
-          elastic_ip = node[:hostname_external_ref][:elastic_ip]
-          # no need for dissasociation since that will be done when instance is destroyed
-          conn().release_elastic_ip(elastic_ip)
-          Log.info "Elastic IP #{elastic_ip} has been released."
-
-          success = dns().destroy(node.persistent_dns())
-          if success
-            Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
-          else
-            Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
+          if node.persistent_hostname?()
+            elastic_ip = node[:hostname_external_ref][:elastic_ip]
+            # no need for dissasociation since that will be done when instance is destroyed
+            conn().release_elastic_ip(elastic_ip)
+            Log.info "Elastic IP #{elastic_ip} has been released."
           end
-        else
-          Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+          
+          if node.external_dns?()
+            success = dns().destroy(node.persistent_dns())
+            if success
+              Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
+            else
+              Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
+            end
+          else
+            Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+          end
         end
       end
 
@@ -170,7 +172,8 @@ module XYZ
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
-        if node.persistent_hostname?()
+        if node.persistent_hostname?() || node.external_dns?()
+          #TODO: using process_persistent_hostname for both peristent hostname and external_dns; so shoudl change naem of this and related functions
           process_persistent_hostname__first_boot!(node)
         end
         {:status => "succeeded",
@@ -187,7 +190,7 @@ module XYZ
         return true unless instance_id #return if instance does not exist
         response = conn().server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
-        if node.persistent_hostname?()
+        if node.persistent_hostname?() || node.external_dns?()
           process_persistent_hostname__terminate(node)
         end
         response

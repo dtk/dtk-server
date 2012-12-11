@@ -30,6 +30,12 @@ module XYZ
 #      true
       false
     end
+
+    def external_dns?
+            true
+      #false
+    end
+
 #TODO: end stub for feature_node_admin_state
 
     ### virtual column defs
@@ -521,7 +527,7 @@ module XYZ
     end
 
     def associate_persistent_dns()
-      if persistent_hostname?
+      if external_dns?
         CommandAndControl.associate_persistent_dns(self)
       end
     end

@@ -30,11 +30,12 @@ module XYZ
       ret
     end
 
-    def task_when_nodes_ready_from_assembly(assembly_idh, component_type)
+    def task_when_nodes_ready_from_assembly(assembly, component_type)
+      assembly_idh = assembly.id_handle()
       target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly_idh,component_type)
+      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
       running_node_task = create_running_node_task(task_mh, assembly_config_changes)
 
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_nodes_ready", :temporal_order => "sequential",:commit_message => nil)

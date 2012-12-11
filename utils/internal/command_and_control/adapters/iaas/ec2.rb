@@ -28,6 +28,60 @@ module XYZ
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end
+      def self.associate_elastic_ip(node)
+        node.update_object!(:hostname_external_ref, :admin_op_status)
+        conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
+        node.update_admin_op_status!(:running)
+      end
+
+      def self.process_persistent_hostname__first_boot!(node)
+        raise Error.new("From Rich: need to puick one over the other not both")
+        begin 
+          # allocate elastic IP for this node
+          elastic_ip = conn().allocate_elastic_ip()
+
+          node.update({
+            :hostname_external_ref => {:elastic_ip => elastic_ip, :iaas => :ec2 } 
+          })
+
+          Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
+        rescue Fog::Compute::AWS::Error => e
+          Log.error "Not able to set Elastic IP, reason: #{e.message}"
+          # TODO: Check with Rich if this is recovarable error, for now it is not
+          raise e
+        end
+        persistent_dns = dns().get_dns(node)
+
+        # we create it on node ready since we still do not have that data
+        node.update({
+          :hostname_external_ref => {:persistent_dns => persistent_dns, :iaas => :ec2 }
+        })
+  
+        Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
+      end
+
+      def self.process_persistent_hostname__restart(node)
+        Log.info("in process_persistent_hostname__restart for node #{node[:display_name]}")
+        #TODO: stub for feature_node_admin_state
+      end
+
+      def self.process_persistent_hostname__terminate(node)
+        unless node[:hostname_external_ref].nil? 
+          elastic_ip = node[:hostname_external_ref][:elastic_ip]
+          # no need for dissasociation since that will be done when instance is destroyed
+          conn().release_elastic_ip(elastic_ip)
+          Log.info "Elastic IP #{elastic_ip} has been released."
+
+          success = dns().destroy(node.persistent_dns())
+          if success
+            Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
+          else
+            Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
+          end
+        else
+          Log.warn "There is error in logic, elastic_ip data not found on persistent node."
+        end
+      end
 
       def self.associate_persistent_dns(node)
         node.update_object!(:hostname_external_ref, :admin_op_status, :external_ref)
@@ -56,32 +110,6 @@ module XYZ
         )
 
         Log.info "Persistent DNS '#{node.persistent_dns()}' has been assigned to node and set as default DNS."
-      end
-
-      def self.process_persistent_hostname__first_boot!(node)
-        persistent_dns = dns().get_dns(node)
-
-        # we create it on node ready since we still do not have that data
-        node.update({
-          :hostname_external_ref => {:persistent_dns => persistent_dns, :iaas => :aws },
-          :admin_op_status       => 'pending'
-        })
-  
-        Log.info("Persistent DNS needed for node '#{node[:display_name]}', assigned '#{persistent_dns}'")
-      end
-
-      def self.process_persistent_hostname__terminate(node)
-        unless node[:hostname_external_ref].nil? 
-          success = dns().destroy(node.persistent_dns())
-    
-          if success
-            Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
-          else
-            Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
-          end
-        else
-          Log.warn "There is error in logic, persistent data not found on persistent node."
-        end
       end
 
       def self.execute(task_idh,top_task_idh,task_action)
@@ -133,9 +161,11 @@ module XYZ
             :external_ref => external_ref,
             :type => "instance",
             :is_deployed => true,
-            :operational_status => "starting"
+            #TODO: better unify these below
+            :operational_status => "starting",
+            :admin_op_status => "pending"
           }
-          node.merge!(node_update_hash) #TODO: dont think is needed anymore since update handles this
+          node.merge!(node_update_hash) 
           node.update(node_update_hash)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")

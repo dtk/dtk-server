@@ -161,7 +161,7 @@ module DTK
         CommandAndControl.start_instances(nodes)
 
         # following task will when nodes ready assign elastic IP
-        task = Task.task_when_nodes_ready_from_assembly(assembly_idh,:assembly)
+        task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
         task.save!()
 
         queue.set_result(:task_id => task.id)

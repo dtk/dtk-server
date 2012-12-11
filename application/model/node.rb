@@ -265,6 +265,10 @@ module XYZ
     def persistent_dns()
       (self[:hostname_external_ref]||{})[:persistent_dns]
     end
+
+    def elastic_ip()
+      (self[:hostname_external_ref]||{})[:elastic_ip]
+    end
     
     def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
       sp_hash = {
@@ -510,6 +514,12 @@ module XYZ
 
     # Method will take already allocated elastic IP and assign it deploy node.
     # Keep in mind this can only happen when node is 'running' state
+    def associate_elastic_ip()
+      if persistent_hostname?
+        CommandAndControl.associate_elastic_ip(self)
+      end
+    end
+
     def associate_persistent_dns()
       if persistent_hostname?
         CommandAndControl.associate_persistent_dns(self)

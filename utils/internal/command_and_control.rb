@@ -49,6 +49,11 @@ module XYZ
       klass.associate_persistent_dns(node)
     end
 
+    def self.associate_elastic_ip(node)
+      klass = load_iaas_for(:node => node)
+      klass.associate_elastic_ip(node)
+    end
+
     def self.get_and_update_node_state!(node,attribute_names)
       adapter_name = R8::Config[:command_and_control][:iaas][:type]
       klass = load_for_aux(:iaas,adapter_name)      

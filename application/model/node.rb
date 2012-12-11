@@ -32,8 +32,8 @@ module XYZ
     end
 
     def external_dns?
-            true
-      #false
+#     true
+      false
     end
 
 #TODO: end stub for feature_node_admin_state

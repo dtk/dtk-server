@@ -5,8 +5,14 @@
 
 require File.expand_path('app', File.dirname(__FILE__))
 
-rotating_logger = Logger.new('r8server.log', 'daily')
-Ramaze::Log.loggers = [rotating_logger]
-Ramaze::Log.level = Logger::WARN
+is_development = ARGV[0] || false
+
+unless is_development
+  rotating_logger = Logger.new('r8server.log', 'daily')
+  Ramaze::Log.loggers = [rotating_logger]
+  Ramaze::Log.level = Logger::WARN
+else
+  puts "**** DEVELOPMENT MODE - NO LOGS ****"
+end
 
 Ramaze.start(:adapter => :thin, :port => R8::Config[:server_port], :file => __FILE__)

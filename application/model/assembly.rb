@@ -5,7 +5,16 @@ module DTK
     r8_nested_require('assembly','content')
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
+    ### standard get methods
+    def get_assembly_level_attributes()
+      sp_hash = {
+        :cols => [:id,:display_name,:attribute_value,:data_type],
+        :filter => [:eq,:component_component_id, id()]
+      }
+      Model.get_objs(model_handle(:attribute),sp_hash)
+    end
 
+    ### standard get methods
     def info(subtype)
       nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
       sp_hash = {

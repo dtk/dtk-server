@@ -23,3 +23,5 @@ gem 'chef','10.16.2'
 gem 'puppet','2.7.6'
 gem 'stomp','1.1.9'
 gem 'grit','2.5.0'
+gem 'innate','2012.03' #version compatible with ramaze','2012.04.14
+gem 'ruby_parser', '2.3.1' #found bug with ruote listen expression unless degrade to this version

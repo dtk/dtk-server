@@ -416,14 +416,15 @@ module XYZ
         subtasks.map{|obj|obj.component_actions()}.flatten
       end
     end
+
     def node_level_actions()
-      if self[:executable_action].kind_of?(Action::ConfigNode)
+      if self[:executable_action].kind_of?(Action::NodeLevel)
         action = self[:executable_action]
         return (action[:component_actions]||[]).map{|ca| action[:node] ? ca.merge(:node => action[:node]) : ca}
+      else
+        subtasks.map{|obj|obj.node_level_actions()}.flatten
       end
-      subtasks.map{|obj|obj.component_actions()}.flatten
     end
-
 
     def add_subtask_from_hash(hash)
       defaults = {:status => "created", :action_on_failure => "abort"}

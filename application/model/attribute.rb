@@ -88,6 +88,11 @@ module XYZ
       end
       if opts[:include_node_attributes]
         #TODO: none need flattening now
+        #adding any nodes that are only node_level
+        task.node_level_actions().each do |action|
+          node = action[:node]
+          ndx_nodes[node[:id]] ||= node
+        end
         node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
         add_filter = [:eq,:required,true]
         cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:dynamic,:port_type_asserted,:is_port,:semantic_type_summary]

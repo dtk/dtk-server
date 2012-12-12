@@ -12,7 +12,7 @@ module DTK; class Task
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
-      def initialize(hash,task_idh=nil)
+      def initialize(type,hash,task_idh=nil,assembly_idh=nil)
         unless hash[:node].kind_of?(Node)
           hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node))
         end
@@ -107,22 +107,22 @@ module DTK; class Task
     end
 
     class CreateNode < NodeLevel
-      def initialize(type,item,task_idh=nil,assembly_idh=nil)
+      def initialize(type,hash,task_idh=nil,assembly_idh=nil)
         hash = 
           case type 
            when :state_change
             {
-              :state_change_id => item[:id],
-              :state_change_types => [item[:type]],
+              :state_change_id => hash[:id],
+              :state_change_types => [hash[:type]],
               :attributes => Array.new,
-              :node => item[:node]
+              :node => hash[:node]
             }
            when :hash
-            item
+            hash
            else
             raise Error.new("Unexpected CreateNode.initialize type")
           end
-        super(hash,task_idh)
+        super
       end
       private :initialize
 
@@ -236,7 +236,8 @@ module DTK; class Task
     # Class we are using to execute code which is responsible for handling Node
     # when she moves from pending state to running state.
     ##
-    class PowerOnNode < NodeLevel
+    #TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
+    class PowerOnNode < CreateNode
     end
 
     class ConfigNode < OnNode
@@ -386,28 +387,28 @@ module DTK; class Task
       end
 
      private
-      def initialize(type,item,task_idh=nil,assembly_idh=nil)
+      def initialize(type,hash,task_idh=nil,assembly_idh=nil)
          hash =
           case type
            when :state_change
-            sample_state_change = item.first
+            sample_state_change = hash.first
             node = sample_state_change[:node]
             h = {
               :node => node,
-              :state_change_types => item.map{|sc|sc[:type]}.uniq,
-              :config_agent_type => item.first.on_node_config_agent_type,
-              :component_actions => OnComponent.order_and_group_by_component(item)
+              :state_change_types => hash.map{|sc|sc[:type]}.uniq,
+              :config_agent_type => hash.first.on_node_config_agent_type,
+              :component_actions => OnComponent.order_and_group_by_component(hash)
             }
             assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
            when :hash
-            if component_actions = item[:component_actions]
+            if component_actions = hash[:component_actions]
               component_actions.each_with_index{|ca,i|component_actions[i] = OnComponent.create_from_hash(ca,task_idh)}
             end
-            item
+            hash
            else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
-        super(hash,task_idh)
+        super
       end
     end
   end

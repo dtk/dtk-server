@@ -7,5 +7,3 @@ application/public/js/cache/*.js
 metadata.json
 ruote_work/
 sftp-config.json
-Gemfile.lock
-

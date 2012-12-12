@@ -6,6 +6,7 @@
 
 #TODO: add all required gem includes here, or where appropriate
 require 'rubygems'
+require 'bundler/setup'
 require 'ramaze'
 require 'json'
 require 'yaml'

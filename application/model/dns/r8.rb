@@ -7,7 +7,7 @@ module DTK
           :cols => [:r8_dns_info,:id,:group_id,:display_name,:ref,:ref_num]
         }
         r8_dns_info = node.get_obj(sp_hash,:keep_ref_cols => true)
-        r8_dns_info && Assignment.new(generate_dns_address(r8_dns_info)
+        r8_dns_info && Assignment.new(generate_dns_address(r8_dns_info))
       end
      private
       def self.generate_dns_address(r8_dns_info)

@@ -445,7 +445,7 @@ module XYZ
            :convert => true,
            :alias => :attribute_r8_dns_enabled,
            :join_type => :inner,
-           :join_cond=>{:assembly_id =>:assembly__id},
+           :join_cond=>{:component_component_id =>:assembly__id},
            :filter=>[:eq,:display_name,"r8_dns_enabled"],
            :cols => [:id,:display_name,:group_id]
          }]

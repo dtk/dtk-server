@@ -13,12 +13,12 @@ module DTK
       def self.generate_dns_address(r8_dns_info)
         assembly_part = qualified_name(r8_dns_info[:assembly])
         node_part = qualified_name(r8_dns_info)
-        tenant = R8::Config[:dns][:tenant_id]
-        domain_name = R8::Config[:dns][:domain_naem]
-        "#{assembly_part}.#{node_part}.#{tenant_part}.#{domain_name}"
+        tenant_part = ::R8::Config[:dns][:r8][:tenant_name]
+        domain = ::R8::Config[:dns][:r8][:domain]
+        "#{assembly_part}.#{node_part}.#{tenant_part}.#{domain}"
       end
 
-      def qualified_name(obj)
+      def self.qualified_name(obj)
         obj[:ref] + (obj[:ref_num] ? "-#{obj[:ref_num]}" : "") 
       end
     end

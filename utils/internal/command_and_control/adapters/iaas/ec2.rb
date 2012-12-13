@@ -31,7 +31,6 @@ module XYZ
       def self.associate_elastic_ip(node)
         node.update_object!(:hostname_external_ref, :admin_op_status)
         conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
-        node.update_admin_op_status!(:running)
       end
 
       def self.process_addresses__first_boot?(node)

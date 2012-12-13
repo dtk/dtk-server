@@ -34,6 +34,24 @@ module DTK; class Task
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
       end
 
+      # virtual gets overwritten
+      # updates object and the tasks in the model
+      def get_and_update_attributes!(task)
+        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
+      end
+
+      # virtual gets overwritten
+      def add_internal_guards!(guards)
+        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
+      end
+
+      def update_state_change_status_aux(task_mh,status,state_change_ids)
+        rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
+        state_change_mh = task_mh.createMH(:state_change)
+        Model.update_from_rows(state_change_mh,rows)
+      end
+
+     private
       def get_dynamic_attributes_with_retry(result,opts={})
         ret = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]
@@ -43,7 +61,6 @@ module DTK; class Task
         end
         ret
       end
-      private :get_dynamic_attributes_with_retry
 
       def retry_get_dynamic_attributes(dyn_attr_val_info,non_null_attrs,count=1,&block)
         if values_non_null?(dyn_attr_val_info,non_null_attrs)
@@ -69,26 +86,7 @@ module DTK; class Task
         end
         true
       end
-      private :retry_get_dynamic_attributes, :values_non_null?
 
-      # virtual gets overwritten
-      # updates object and the tasks in the model
-      def get_and_update_attributes!(task)
-        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
-      end
-
-      # virtual gets overwritten
-      def add_internal_guards!(guards)
-        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
-      end
-
-      def update_state_change_status_aux(task_mh,status,state_change_ids)
-        rows = state_change_ids.map{|id|{:id => id, :status => status.to_s}}
-        state_change_mh = task_mh.createMH(:state_change)
-        Model.update_from_rows(state_change_mh,rows)
-      end
-
-      private
       #generic; can be overwritten
       def self.node_status(object,opts)
         ret = PrettyPrintHash.new
@@ -141,7 +139,6 @@ module DTK; class Task
 
       def get_dynamic_attributes(result)
         ret = Array.new
-        node = self[:node]
         attrs_to_set = attributes_to_set()
         attr_names = attrs_to_set.map{|a|a[:display_name].to_sym}
         av_pairs__node_components = get_dynamic_attributes__node_components!(attr_names)

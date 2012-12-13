@@ -31,11 +31,6 @@ module XYZ
       false
     end
 
-    def external_dns?
-#     true
-      false
-    end
-
 #TODO: end stub for feature_node_admin_state
 
     ### virtual column defs
@@ -522,16 +517,14 @@ module XYZ
 
     # Method will take already allocated elastic IP and assign it deploy node.
     # Keep in mind this can only happen when node is 'running' state
-    def associate_elastic_ip()
+    def associate_elastic_ip?()
       if persistent_hostname?
         CommandAndControl.associate_elastic_ip(self)
       end
     end
 
-    def associate_persistent_dns()
-      if external_dns?
-        CommandAndControl.associate_persistent_dns(self)
-      end
+    def associate_persistent_dns?()
+        CommandAndControl.associate_persistent_dns?(self)
     end
 
     def get_node_service_checks()

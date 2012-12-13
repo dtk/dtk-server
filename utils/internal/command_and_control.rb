@@ -44,9 +44,9 @@ module XYZ
       klass.destroy_node?(node)
     end
 
-    def self.associate_persistent_dns(node)
+    def self.associate_persistent_dns?(node)
       klass = load_iaas_for(:node => node)
-      klass.associate_persistent_dns(node)
+      klass.associate_persistent_dns?(node)
     end
 
     def self.associate_elastic_ip(node)

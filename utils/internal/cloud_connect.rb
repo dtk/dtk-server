@@ -28,12 +28,10 @@ module XYZ
     end  # => Top class
 
     class Route53 < Top
-
-      DNS_DOMAIN = "r8network.com"
-
-      def initialize()
+      def initialize(dns_domain)
+        @dns_domain = dns_domain
         dns = Fog::DNS::AWS.new(get_compute_params())
-        @r8zone = dns.zones().find { |z| z.domain.include? DNS_DOMAIN }
+        @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
       end
 
       def all_records()
@@ -81,9 +79,6 @@ module XYZ
         get(name).modify(:value => value)
       end
 
-      def get_dns(node)
-        return "#{node[:id]}.#{DNS_DOMAIN}"
-      end
     end # => Route53 class
 
     class EC2 < Top

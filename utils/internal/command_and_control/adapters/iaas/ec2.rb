@@ -34,7 +34,7 @@ module XYZ
         node.update_admin_op_status!(:running)
       end
 
-      def self.process_persistent_hostname__first_boot!(node)
+      def self.process_addresses__first_boot?(node)
         hostname_external_ref = {:iaas => :aws }
         if node.persistent_hostname?()
           begin 
@@ -48,8 +48,8 @@ module XYZ
             raise e
           end
         end
-        if node.external_dns?()
-          persistent_dns = dns().get_dns(node)
+        if dns_assignment = DNS::R8.generate_node_assignment?(node)
+          persistent_dns = dns_assignment.ret_address()
           
           # we create it on node ready since we still do not have that data
           hostname_external_ref.merge!(:persistent_dns => persistent_dns)
@@ -63,7 +63,7 @@ module XYZ
         #TODO: stub for feature_node_admin_state
       end
 
-      def self.process_persistent_hostname__terminate(node)
+      def self.process_addresses__terminate?(node)
         unless node[:hostname_external_ref].nil? 
           if node.persistent_hostname?()
             elastic_ip = node[:hostname_external_ref][:elastic_ip]
@@ -72,8 +72,8 @@ module XYZ
             Log.info "Elastic IP #{elastic_ip} has been released."
           end
           
-          if node.external_dns?()
-            success = dns().destroy(node.persistent_dns())
+          if persistent_dns = node.persistent_dns()
+            success = dns().destroy(persistent_dns)
             if success
               Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
             else
@@ -85,8 +85,11 @@ module XYZ
         end
       end
 
-      def self.associate_persistent_dns(node)
+      def self.associate_persistent_dns?(node)
         node.update_object!(:hostname_external_ref, :admin_op_status, :external_ref)
+        unless persistent_dns = node.persistent_dns()
+          return
+        end
         dns_name = node[:external_ref][:dns_name]
         # TODO: Link it to IP, need ot speak to reach to see how to get IP data
         # we add record to DNS which links node's DNS to perssistent DNS
@@ -172,10 +175,9 @@ module XYZ
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
-        if node.persistent_hostname?() || node.external_dns?()
-          #TODO: using process_persistent_hostname for both peristent hostname and external_dns; so shoudl change naem of this and related functions
-          process_persistent_hostname__first_boot!(node)
-        end
+
+        process_addresses__first_boot?(node)
+
         {:status => "succeeded",
           :node => {
             :external_ref => external_ref
@@ -190,9 +192,7 @@ module XYZ
         return true unless instance_id #return if instance does not exist
         response = conn().server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
-        if node.persistent_hostname?() || node.external_dns?()
-          process_persistent_hostname__terminate(node)
-        end
+          process_addresses__terminate?(node)
         response
       end
 
@@ -256,13 +256,12 @@ module XYZ
       Conn    = Array.new
       AwsDns = Array.new
 
-      #TODO: sharing ec2 connection with ec2 datasource
       def self.conn()
         Conn[0] ||= CloudConnect::EC2.new
       end
 
       def self.dns()
-        AwsDns[0] ||= CloudConnect::Route53.new
+        AwsDns[0] ||= CloudConnect::Route53.new(R8::Config[:r8_dns][:domain])
       end
 
     end

@@ -261,7 +261,7 @@ module XYZ
       end
 
       def self.dns()
-        AwsDns[0] ||= CloudConnect::Route53.new(R8::Config[:r8_dns][:domain])
+        AwsDns[0] ||= CloudConnect::Route53.new(::R8::Config[:dns][:r8][:domain])
       end
 
     end

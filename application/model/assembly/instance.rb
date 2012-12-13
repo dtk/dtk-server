@@ -15,6 +15,7 @@ module DTK; class  Assembly
     def get_service_add_ons()
       get_objs_helper(:service_add_ons_from_instance,:service_add_on)
     end
+
     def get_augmented_service_add_ons()
       get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
     end
@@ -287,7 +288,9 @@ module DTK; class  Assembly
     end
 
     def get_attributes_print_form_aux(filter_proc=nil)
-      assembly_attrs = Array.new #TODO: stub
+      assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
+        Attribute::Pattern::Display.new(attr,:assembly).print_form()
+      end
       component_attrs = get_augmented_nested_component_attributes(filter_proc).map do |aug_attr|
         Attribute::Pattern::Display.new(aug_attr,:component).print_form()
       end

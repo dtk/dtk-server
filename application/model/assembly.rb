@@ -6,12 +6,17 @@ module DTK
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
     ### standard get methods
-    def get_assembly_level_attributes()
+    def get_assembly_level_attributes(filter_proc=nil)
       sp_hash = {
         :cols => [:id,:display_name,:attribute_value,:data_type],
         :filter => [:eq,:component_component_id, id()]
       }
-      Model.get_objs(model_handle(:attribute),sp_hash)
+      ret = Model.get_objs(model_handle(:attribute),sp_hash)
+      if filter_proc
+        ret.select{|r| filter_proc.call(r)}
+      else
+        ret
+      end
     end
 
     ### standard get methods

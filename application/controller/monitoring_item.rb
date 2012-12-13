@@ -3,7 +3,7 @@ module XYZ
 
     # limit (hours) how long can nodes run
     UP_TIME_LIMIT = 4
-    
+
     def list_for_component_display()
       component_or_node_display()
     end

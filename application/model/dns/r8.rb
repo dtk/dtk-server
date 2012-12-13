@@ -15,7 +15,9 @@ module DTK
         #TODO: to supports this may want to put in logic that prevents assemblies with explicit names from having same name
         assembly_part = assembly_part(r8_dns_info[:assembly])
         node_part = qualified_name(r8_dns_info)
-        tenant_part = ::R8::Config[:dns][:r8][:tenant_name]
+        unless tenant_part = ::R8::Config[:dns][:r8][:tenant_name]
+          raise Error.new("Server config variable (dns.r8.tenant_name) has not been set")
+        end
         domain = ::R8::Config[:dns][:r8][:domain]
         "#{assembly_part}.#{node_part}.#{tenant_part}.#{domain}"
       end

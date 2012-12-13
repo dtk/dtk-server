@@ -429,6 +429,27 @@ module XYZ
            :cols => NodeBindingRuleset.common_columns()
          }]
 
+      virtual_column :r8_dns_info, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :component,
+           :alias => :assembly,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id =>:node__assembly_id},
+           :cols => [:id,:display_name,:group_id,:ref,:ref_num]
+         },
+         {
+           :model_name => :attribute,
+           :convert => true,
+           :alias => :attribute_r8_dns_enabled,
+           :join_type => :inner,
+           :join_cond=>{:assembly_id =>:assembly__id},
+           :filter=>[:eq,:display_name,"r8_dns_enabled"],
+           :cols => [:id,:display_name,:group_id]
+         }]
+
       virtual_column :cmps_for_clone_into_node, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

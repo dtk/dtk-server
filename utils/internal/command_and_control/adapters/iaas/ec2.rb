@@ -49,7 +49,7 @@ module XYZ
           end
         end
         if dns_assignment = DNS::R8.generate_node_assignment?(node)
-          persistent_dns = dns_assignment.ret_address()
+          persistent_dns = dns_assignment.address()
           
           # we create it on node ready since we still do not have that data
           hostname_external_ref.merge!(:persistent_dns => persistent_dns)

@@ -140,10 +140,10 @@ module XYZ
               node.update_operational_status!(:running)
               node.update_admin_op_status!(:running)
               node.associate_elastic_ip?()
-              set_result_succeeded(workitem,result,task,action)
-              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               node.associate_persistent_dns?()
+              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
+              set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
@@ -171,9 +171,10 @@ module XYZ
               node.update_operational_status!(:running)
               # assign elastic ip if present, this covers both cases when starting node or creating it
               node.associate_elastic_ip?()
+              node.associate_persistent_dns?()
               set_result_succeeded(workitem,result,task,action)
               action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              node.associate_persistent_dns?()
+
 
               reply_to_engine(workitem)
             end,

@@ -73,7 +73,7 @@ module XYZ
           end
           
           if persistent_dns = node.persistent_dns()
-            success = dns().destroy(persistent_dns)
+            success = dns().destroy_record(persistent_dns)
             if success
               Log.info "Persistent DNS has been released '#{node.persistent_dns()}', node termination continues."
             else
@@ -90,18 +90,16 @@ module XYZ
         unless persistent_dns = node.persistent_dns()
           return
         end
-        dns_name = node[:external_ref][:dns_name]
-        # TODO: Link it to IP, need ot speak to reach to see how to get IP data
+        ec2_address = node[:external_ref][:ec2_public_address]
         # we add record to DNS which links node's DNS to perssistent DNS
-
-        record = dns().get(node.persistent_dns())
+        record = dns().get_record(node.persistent_dns())
 
         if record.nil?
           # there is no record we need to create it (first boot)
-          record = dns().create(node.persistent_dns(),dns_name)
+          record = dns().create_record(node.persistent_dns(),ec2_address)
         else
           # we need to update it with new dns name
-          record = record.modify(:value => dns_name)
+          record = dns().update_record(record,ec2_address)
         end
 
         # in case there was no record created we raise error

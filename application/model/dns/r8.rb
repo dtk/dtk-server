@@ -11,7 +11,9 @@ module DTK
       end
      private
       def self.generate_dns_address(r8_dns_info)
-        assembly_part = qualified_name(r8_dns_info[:assembly])
+        #TODO: relying on the keys below being unique; more robust would be to check againts existing names
+        #TODO: to supports this may want to put in logic that prevents assemblies with explicit names from having same name
+        assembly_part = assembly_part(r8_dns_info[:assembly])
         node_part = qualified_name(r8_dns_info)
         tenant_part = ::R8::Config[:dns][:r8][:tenant_name]
         domain = ::R8::Config[:dns][:r8][:domain]
@@ -20,6 +22,18 @@ module DTK
 
       def self.qualified_name(obj)
         obj[:ref] + (obj[:ref_num] ? "-#{obj[:ref_num]}" : "") 
+      end
+
+      def self.assembly_part(assembly)
+        if has_explicit_name?(assembly)
+          assembly[:display_name]
+        else
+          qualified_name(assembly)
+        end
+      end
+      
+      def self.has_explicit_name?(assembly)
+        assembly[:ref] != assembly[:display_name]
       end
     end
   end

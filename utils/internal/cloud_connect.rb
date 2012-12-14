@@ -57,7 +57,7 @@ module XYZ
       end
 
       def destroy_record(name, type=nil)
-        record = get(name,type)
+        record = get_record(name,type)
         return (record.nil? ? false : record.destroy)
       end
 

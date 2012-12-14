@@ -11,34 +11,43 @@ module DTK; module CommandAndControlAdapter
         #attribute_names in normalized form so need to convert
         change = nil
         attribute_names.each do |normalized_attr_name|
-          if raw_info = AttributeToSetMapping[normalized_attr_name]
-            raw_name = raw_info[:raw_name]
-            raw_val = raw_state_info[raw_name]
-            if normalized_val = (raw_info[:fn] ? raw_info[:fn].call(raw_state_info,node) : raw_val) 
-              change = true
-              ret[normalized_attr_name] = normalized_val
-              node[:external_ref][raw_name] = raw_val
+          attribute_names.each do |attr_name|
+            if AttributeMapping.respond_to?(attr_name)
+              #TODO: if can legitimately have nil value then need to change logic
+              if val = AttributeMapping.send(attr_name,ret,raw_state_info,node)
+                ret[attr_name] = val
+                change = true
+              end
             end
           end
         end
-        node.update(:external_ref => node[:external_ref]) if change
+        if change
+          node.update(:external_ref => node[:external_ref])
+        end
         ret
       end
-      #TODO: if can legitimately have nil value then need to change update
-      AttributeToSetMapping = {
-        :host_addresses_ipv4 => {
-          :raw_name => :dns_name,
-          :fn => lambda{|raw,node|ret_dns_value(raw,node)} #null if no value
-        },
-        :fqdn => {
-          :raw_name => :private_dns_name,
-          :fn => lambda{|raw,node|raw[:dns_name] && raw[:private_dns_name] && {raw[:dns_name] => raw[:private_dns_name]}}
-        }
-      }
 
-      def self.ret_dns_value(raw,node)
-        address = node.persistent_dns() || node.elastic_ip() || raw[:dns_name]
-        address && [address]
+      module AttributeMapping
+        def self.host_addresses_ipv4(ret,raw_state_info,node)
+          if ec2_public_address = raw_state_info[:dns_name]
+            node[:external_ref][:ec2_public_address] = ec2_public_address
+            dns = node[:external_ref][:dns_name] = ret_dns_value(raw_state_info,node)
+            [dns]
+          end
+        end
+
+        def self.fqdn(ret,raw_state_info,node)
+          if ec2_private_address = raw_state_info[:private_dns_name]
+            if dns = ret_dns_value(raw_state_info,node)
+              node[:external_ref][:private_dns_name] = {dns => ec2_private_address}
+            end
+          end
+        end
+
+      private
+        def self.ret_dns_value(raw_state_info,node)
+          node.persistent_dns() || node.elastic_ip() || raw_state_info[:dns_name]
+        end
       end
 
       def ec2_public_address!(node)

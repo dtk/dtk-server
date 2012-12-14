@@ -117,13 +117,9 @@ module XYZ
         "#{node[:display_name]} (#{node[:id]}"
       end
 
-      Conn    = Array.new
-      AwsDns = Array.new
-
       def self.conn()
-        Conn[0] ||= CloudConnect::EC2.new
+        @conn ||= CloudConnect::EC2.new
       end
-
     end
   end
 end

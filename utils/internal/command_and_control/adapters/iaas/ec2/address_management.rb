@@ -91,6 +91,11 @@ module DTK; module CommandAndControlAdapter
           end
         end
       end
+
+      def dns()
+        @dns ||= CloudConnect::Route53.new(::R8::Config[:dns][:r8][:domain])
+      end
+
     end
   end
 end;end

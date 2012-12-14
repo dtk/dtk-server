@@ -1,7 +1,7 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module AddressManagementClassMixin
-      def self.associate_elastic_ip(node)
+      def associate_elastic_ip(node)
         unless elastic_ip = node.elastic_ip()
           Log.error("associate_elastic_ip called but there is not allocated elastic ip for node with ID '#{node[:id]}")
           return
@@ -9,7 +9,7 @@ module DTK; module CommandAndControlAdapter
         conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
       end
 
-      def self.associate_persistent_dns?(node)
+      def associate_persistent_dns?(node)
         #check if it needs a persistent dns
         unless persistent_dns = node.persistent_dns()
           return
@@ -73,7 +73,7 @@ module DTK; module CommandAndControlAdapter
         unless node[:hostname_external_ref].nil? 
           if node.persistent_hostname?()
             unless elastic_ip = node.elastic_ip()
-              Log.error("in process_addresses__terminate? call with node.persistent_hostname?, expecting an alstic ip for node with ID '#{node[:id]}")
+              Log.error("in process_addresses__terminate? call with node.persistent_hostname?, expecting an elastic ip for node with ID '#{node[:id]}")
               return
             end
             # no need for dissasociation since that will be done when instance is destroyed
@@ -88,8 +88,6 @@ module DTK; module CommandAndControlAdapter
             else
               Log.warn "System was not able to release '#{node.persistent_dns()}', for node ID '#{node[:id]}' look into this."
             end
-          else
-            Log.warn "There is error in logic, elastic_ip data not found on persistent node."
           end
         end
       end

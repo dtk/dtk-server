@@ -36,7 +36,7 @@ module DTK; module CommandAndControlAdapter
         }
       }
 
-      def ret_dns_value(raw,node)
+      def self.ret_dns_value(raw,node)
         address = node.persistent_dns() || node.elastic_ip() || raw[:dns_name]
         address && [address]
       end

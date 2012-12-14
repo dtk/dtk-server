@@ -142,7 +142,7 @@ module DTK; class Task
         attrs_to_set = attributes_to_set()
         attr_names = attrs_to_set.map{|a|a[:display_name].to_sym}
         av_pairs__node_components = get_dynamic_attributes__node_components!(attr_names)
-        rest_av_pairs = (attr_names.empty? ? {} : CommandAndControl.get_and_update_node_state!(node,attr_names))
+        rest_av_pairs = (attr_names.empty? ? {} : CommandAndControl.get_and_update_node_state!(self[:node],attr_names))
         av_pairs = av_pairs__node_components.merge(rest_av_pairs)
         return ret if av_pairs.empty?
         attrs_to_set.each do |attr|

@@ -77,11 +77,11 @@ module XYZ
      end
   end
   class ErrorNameAmbiguous <  ErrorUsage
-    def initialize(name,object_type)
-      super(msg(name,object_type))
+    def initialize(name,matching_ids,object_type)
+      super(msg(name,matching_ids,object_type))
     end
-     def msg(name,object_type)
-       "Ambiguous name (#{name}) for #{object_type}"
+     def msg(name,matching_ids,object_type)
+       "Ambiguous name (#{name}) for #{object_type} which matches ids: #{matching_ids.join(',')}"
      end
   end
   class ErrorNameDoesNotExist <  ErrorUsage

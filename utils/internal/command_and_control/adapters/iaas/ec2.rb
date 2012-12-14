@@ -3,7 +3,7 @@ module XYZ
     class Ec2 < CommandAndControlIAAS
       r8_nested_require('ec2','cloud_init')
       r8_nested_require('ec2','node_state')
-      r8_nested_require('ec2','addres_manangement')
+      r8_nested_require('ec2','address_management')
       extend NodeStateClassMixin
       extend AddressManagementClassMixin
 

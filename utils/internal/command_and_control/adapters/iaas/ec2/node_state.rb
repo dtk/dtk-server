@@ -14,7 +14,7 @@ module DTK; module CommandAndControlAdapter
           if raw_info = AttributeToSetMapping[normalized_attr_name]
             raw_name = raw_info[:raw_name]
             raw_val = raw_state_info[raw_name]
-            if normalized_val = (raw_info[:fn] ? raw_info[:fn].call(raw_state_info) : raw_val) 
+            if normalized_val = (raw_info[:fn] ? raw_info[:fn].call(raw_state_info,node) : raw_val) 
               change = true
               ret[normalized_attr_name] = normalized_val
               node[:external_ref][raw_name] = raw_val
@@ -28,13 +28,18 @@ module DTK; module CommandAndControlAdapter
       AttributeToSetMapping = {
         :host_addresses_ipv4 => {
           :raw_name => :dns_name,
-          :fn => lambda{|raw|raw[:dns_name] && [raw[:dns_name]]} #null if no value
+          :fn => lambda{|raw,node|ret_dns_value(raw,node)} #null if no value
         },
         :fqdn => {
           :raw_name => :private_dns_name,
-          :fn => lambda{|raw|raw[:dns_name] && raw[:private_dns_name] && {raw[:dns_name] => raw[:private_dns_name]}}
+          :fn => lambda{|raw,node|raw[:dns_name] && raw[:private_dns_name] && {raw[:dns_name] => raw[:private_dns_name]}}
         }
       }
+
+      def ret_dns_value(raw,node)
+        address = node.persistent_dns() || node.elastic_ip() || raw[:dns_name]
+        address && [address]
+      end
 
       def ec2_public_address!(node)
         if raw_state_info = raw_state_info!(node)

@@ -3,7 +3,7 @@ module DTK; module CommandAndControlAdapter
     module AddressManagementClassMixin
       def self.associate_elastic_ip(node)
         unless elastic_ip = node.elastic_ip()
-          Log.error("associate_elastic_ip called but theer is not allocated elastic ip for node with ID '#{node[:id]}")
+          Log.error("associate_elastic_ip called but there is not allocated elastic ip for node with ID '#{node[:id]}")
           return
         end
         conn().associate_elastic_ip(node.instance_id(),node.elastic_ip())
@@ -72,7 +72,10 @@ module DTK; module CommandAndControlAdapter
       def process_addresses__terminate?(node)
         unless node[:hostname_external_ref].nil? 
           if node.persistent_hostname?()
-            elastic_ip = node[:hostname_external_ref][:elastic_ip]
+            unless elastic_ip = node.elastic_ip()
+              Log.error("in process_addresses__terminate? call with node.persistent_hostname?, expecting an alstic ip for node with ID '#{node[:id]}")
+              return
+            end
             # no need for dissasociation since that will be done when instance is destroyed
             conn().release_elastic_ip(elastic_ip)
             Log.info "Elastic IP #{elastic_ip} has been released."

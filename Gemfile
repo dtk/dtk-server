@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
 # required to start a server
+gem 'bundler','>= 1.1.5'
 gem 'fog','1.8.0'
 gem 'ramaze','2012.04.14'
 gem 'sequel','3.25.0'

@@ -399,7 +399,7 @@ module XYZ
         if rows.size == 0
           raise ErrorNameDoesNotExist.new(name,pp_object_type())
         elsif rows.size > 1
-          raise ErrorNameAmbiguous.new(name,pp_object_type())
+          raise ErrorNameAmbiguous.new(name,rows.map{|r|r[:id]},pp_object_type())
         end
         rows.first[:id]
       end

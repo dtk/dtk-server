@@ -40,7 +40,7 @@ module XYZ
 
       Lock = Mutex.new
 
-      def get(name, type=nil)
+      def get_record(name, type=nil)
         Lock.synchronize do
           5.times do
             begin
@@ -56,8 +56,8 @@ module XYZ
         end
       end
 
-      def destroy(name, type=nil)
-        record = get(name,type)
+      def destroy_record(name, type=nil)
+        record = get_record(name,type)
         return (record.nil? ? false : record.destroy)
       end
 
@@ -66,7 +66,7 @@ module XYZ
       # value          => URL, DNS, IP, etc.. which it links to
       # type           => DNS Record type supports A, AAA, CNAME, NS, etc.
       #
-      def create(name, value, type = 'CNAME', ttl=300)
+      def create_record(name, value, type = 'CNAME', ttl=300)
         create_hash = { :type => type, :name => name, :value => value, :ttl => ttl }
         @r8zone.records.create(create_hash)
       end
@@ -74,9 +74,9 @@ module XYZ
       ##
       # New value for records to be linked to
       #
-      def modify(name, value)
+      def update_record(record, value)
         # record is changed via Fog's modify
-        get(name).modify(:value => value)
+        record.modify(:value => value)
       end
 
     end # => Route53 class

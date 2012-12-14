@@ -262,14 +262,17 @@ module XYZ
     end
 
     def instance_id()
+      update_object!(:external_ref)
       (self[:external_ref]||{})[:instance_id]
     end
 
     def persistent_dns()
+      update_object!(:hostname_external_ref)
       (self[:hostname_external_ref]||{})[:persistent_dns]
     end
 
     def elastic_ip()
+      update_object!(:hostname_external_ref)
       (self[:hostname_external_ref]||{})[:elastic_ip]
     end
     

@@ -136,14 +136,17 @@ module XYZ
             :on_msg_received => proc do |msg|
               result = {:type => :power_on_node, :task_id => task_id}
               node = task[:executable_action][:node]
-              # TODO do both statuses at once
+              # TODO should update_admin_op_status be set initially to running meaning want it to be running
               node.update_operational_status!(:running)
               node.update_admin_op_status!(:running)
+
+              #these must be called before get_and_propagate_dynamic_attributes
               node.associate_elastic_ip?()
-              set_result_succeeded(workitem,result,task,action)
-              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               node.associate_persistent_dns?()
+
+              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
+              set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 
@@ -169,12 +172,13 @@ module XYZ
               Log.info_pp [:found,msg[:senderid]]
               node = task[:executable_action][:node]
               node.update_operational_status!(:running)
-              # assign elastic ip if present, this covers both cases when starting node or creating it
+
+              #these must be called before get_and_propagate_dynamic_attributes
               node.associate_elastic_ip?()
-              set_result_succeeded(workitem,result,task,action)
-              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
               node.associate_persistent_dns?()
 
+              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+              set_result_succeeded(workitem,result,task,action)
               reply_to_engine(workitem)
             end,
             :on_timeout => proc do 

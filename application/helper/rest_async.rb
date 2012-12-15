@@ -9,8 +9,8 @@ module Ramaze::Helper
     end
    private
     def initiate_stream()
-      ok_response_proc = lambda{|data|rest_ok_response(data)} 
-      notok_response_proc = lambda{|data|rest_notok_response(data)} 
+      ok_response_proc = lambda{|data|JSON.pretty_generate(rest_ok_response(data))} 
+      notok_response_proc = lambda{|data|JSON.pretty_generate(rest_notok_response(data))} 
       deferred_body = Deferred::Body.new(ok_response_proc,notok_response_proc)
       request.env['async.callback'].call [200, {'Content-Type' => 'text/html'},deferred_body]
       deferred_body

@@ -58,6 +58,7 @@ module DTK
     def rest__get_attributes()
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
+      assembly = ret_assembly_instance_object()
       rest_ok_response assembly.get_attributes_print_form(filter)
     end
 

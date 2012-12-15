@@ -1,6 +1,7 @@
 module XYZ
   class NodeController < Controller
     helper :node_helper
+    helper :rest_async
     #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)
@@ -124,6 +125,12 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__get_op_status()
+      rest_deferred_response do |handle|
+        sleep(2)
+        handle.rest_ok_response(:op_status => "running")
+      end
+    end
 
 ##### TODO: below needs cleanup
 

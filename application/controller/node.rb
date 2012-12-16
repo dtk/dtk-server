@@ -127,7 +127,6 @@ module XYZ
 
     def rest__get_op_status()
       rest_deferred_response do |handle|
-        sleep(2)
         handle.rest_ok_response(:op_status => "running")
       end
     end
@@ -144,7 +143,6 @@ module XYZ
       node_group.add_member(node,id_handle(parent_id,:target))
       rest_ok_response
     end
-
 
 
     helper :i18n_string_mapping

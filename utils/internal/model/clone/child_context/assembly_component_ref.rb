@@ -1,6 +1,7 @@
 module DTK
   class ChildContext
     class AssemblyComponentRef < self
+      r8_nested_require('assembly_component_ref','add_on')
      private
       def initialize(clone_proc,hash)
         super

@@ -3,9 +3,15 @@ module DTK
     include ::EventMachine::Deferrable
     def self.create(async_callback,content_type,response_procs,&blk)
       deferred_body = new(response_procs)
-      async_callback.call [200, {'Content-Type' => content_type},deferred_body]
+      ::EventMachine::next_tick do #TODO: is next_tick necessary?
+        async_callback.call [200, {'Content-Type' => content_type},deferred_body]
+      end
       CreateThread.defer do
         begin
+          #TODO: to allow simpler form where blk does not have a handle parameter
+          #can case on whether this is the case and if not call 
+          # data = blk.call()
+          #deferred_body.rest_ok_response(data)
           blk.call(deferred_body)
         rescue => e
           deferred_body.rest_notok_response(e)
@@ -15,16 +21,12 @@ module DTK
     end
 
     def rest_ok_response(data)
-      ::EventMachine::next_tick do 
-        push_data(@response_procs[:ok].call(data))
-        signal_eos()
-      end
+      push_data(@response_procs[:ok].call(data))
+      signal_eos()
     end
     def rest_notok_response(data)
-      ::EventMachine::next_tick do
-        push_data(@response_procs[:notok].call(data))
-        signal_eos() 
-      end
+      push_data(@response_procs[:notok].call(data))
+      signal_eos() 
     end
 
     #needed by rack/thin
@@ -39,11 +41,15 @@ module DTK
     end
 
     def push_data(data)
-      @body_callback.call data
+      ::EventMachine::next_tick do 
+        @body_callback.call data
+      end
     end
 
     def signal_eos()
-      succeed()
+      ::EventMachine::next_tick do
+        succeed()
+      end
     end
   end
 end

@@ -40,14 +40,6 @@ module XYZ
       rest_ok_response node.info()
     end
 
-    def rest__info()
-      node,subtype = ret_node_params_object_and_subtype()
-       unless subtype == :instance
-         raise ErrorUsage::BadParamValue.new(:subtype,subtype)
-       end
-      rest_ok_response node.info()
-    end
-
     def rest__info_about()
       node,subtype = ret_node_params_object_and_subtype()
       about = ret_non_null_request_params(:about).to_sym

@@ -12,10 +12,10 @@ module DTK
         
         attr_reader :project
         def service_add_on_node_bindings()
-          @service_add_on_proc.node_bindings()
+          @service_add_on_proc && @service_add_on_proc.node_bindings()
         end
         def get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
-          @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
+          @service_add_on_proc && @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
         end
         def service_add_on_proc?()
           @service_add_on_proc
@@ -25,7 +25,7 @@ module DTK
         def initialize(target_obj,source_obj,opts={})
           super(source_obj,opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-          @service_add_on_proc = ServiceAddOnProc.new(opts[:service_add_on_info])
+          @service_add_on_proc = opts[:service_add_on_info] && ServiceAddOnProc.new(opts[:service_add_on_info])
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)

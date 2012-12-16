@@ -15,12 +15,16 @@ module DTK
     end
 
     def rest_ok_response(data)
-      push_data(@response_procs[:ok].call(data))
-      signal_eos()
+      ::EventMachine::next_tick do 
+        push_data(@response_procs[:ok].call(data))
+        signal_eos()
+      end
     end
     def rest_notok_response(data)
-      push_data(@response_procs[:notok].call(data))
-      signal_eos() 
+      ::EventMachine::next_tick do
+        push_data(@response_procs[:notok].call(data))
+        signal_eos() 
+      end
     end
 
     #needed by rack/thin

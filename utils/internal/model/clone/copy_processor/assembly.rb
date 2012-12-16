@@ -12,10 +12,10 @@ module DTK
         
         attr_reader :project
         def service_add_on_node_bindings()
-          @service_add_on_proc && @service_add_on_proc.node_bindings()
+          @service_add_on_proc ? @service_add_on_proc.node_bindings() : []
         end
         def get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
-          @service_add_on_proc && @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts)
+          @service_add_on_proc ? @service_add_on_proc.get_mapped_nodes(create_override_attrs,create_opts) : []
         end
         def service_add_on_proc?()
           @service_add_on_proc

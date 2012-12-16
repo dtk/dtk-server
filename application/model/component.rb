@@ -12,6 +12,7 @@ module XYZ
   class Component < Model
     r8_nested_require('component','template')
     r8_nested_require('component','dependency')
+    r8_nested_require('component','resource_matching')
     include TemplateMixin
     extend DependencyClassMixin
     include ComponentModelDefProcessor

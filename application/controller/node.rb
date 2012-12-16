@@ -126,8 +126,10 @@ module XYZ
     end
 
     def rest__get_op_status()
+      node = create_node_obj(:node_id)
       rest_deferred_response do |handle|
-        handle.rest_ok_response(:op_status => "running")
+        status = node.get_and_update_status!()
+        handle.rest_ok_response(:op_status => status)
       end
     end
 

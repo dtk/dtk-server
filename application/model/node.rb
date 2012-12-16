@@ -86,7 +86,6 @@ module XYZ
     def info()
       get_obj(:cols => InfoCols).hash_subset(*InfoCols)
     end
-    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref]
 
     class << self
      private
@@ -103,14 +102,12 @@ module XYZ
       end
       AssemblyNodeNameSep = '::'
     end
-
     InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
 
     def info()
       get_obj(:cols => InfoCols).hash_subset(*InfoCols)
     end
     
-
     def info_about(about,opts={})
       case about
        when :components

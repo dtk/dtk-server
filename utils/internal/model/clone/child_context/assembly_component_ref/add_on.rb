@@ -10,15 +10,12 @@ module DTK;class ChildContext
         end
 
         ndx_template_to_instance_nodes = self[:parent_rels].inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
-        input_for_cmp_match = Hash.new
         aug_cmp_refs.each do |cmp_ref|
-          node_id = ndx_template_to_instance_nodes[cmp_ref[:node_node_id]]
-          (input_for_cmp_match[node_id] ||= Array.new) << cmp_ref
+          target_node_id = ndx_template_to_instance_nodes[cmp_ref.delete(:node_node_id)]
+          cmp_ref.merge!(:target_node_id => target_node_id)
         end
-        
         #for each node that is not new, check if there is componenst already on target nodes that match/conflict
-        cmp_ref_mh = aug_cmp_refs.first.model_handle()
-        matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(cmp_ref_mh,input_for_cmp_match)
+        matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(aug_cmp_refs)
         unless conflicts.empty?
           raise ErrorUsage.new("TODO: provide conflict message")
         end

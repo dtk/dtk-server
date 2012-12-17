@@ -10,7 +10,7 @@ is_development = ARGV[0] || false
 unless is_development
   rotating_logger = Logger.new('r8server.log', 'daily')
   Ramaze::Log.loggers = [rotating_logger]
-  Ramaze::Log.level = Logger::WARN
+  Ramaze::Log.level = Logger::DEBUG
 else
   puts "**** DEVELOPMENT MODE - NO LOGS ****"
 end

@@ -1,6 +1,7 @@
 module XYZ
   class NodeController < Controller
     helper :node_helper
+    helper :rest_async
     #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)
@@ -29,14 +30,6 @@ module XYZ
     def rest__list()
       response = ret_node_subtype_class().list(model_handle())
       rest_ok_response response
-    end
-
-    def rest__info()
-      node,subtype = ret_node_params_object_and_subtype()
-       unless subtype == :instance
-         raise ErrorUsage::BadParamValue.new(:subtype,subtype)
-       end
-      rest_ok_response node.info()
     end
 
     def rest__info()
@@ -124,6 +117,13 @@ module XYZ
       rest_ok_response 
     end
 
+    def rest__get_op_status()
+      node = create_node_obj(:node_id)
+      rest_deferred_response do |handle|
+        status = node.get_and_update_status!()
+        handle.rest_ok_response(:op_status => status)
+      end
+    end
 
 ##### TODO: below needs cleanup
 
@@ -137,7 +137,6 @@ module XYZ
       node_group.add_member(node,id_handle(parent_id,:target))
       rest_ok_response
     end
-
 
 
     helper :i18n_string_mapping

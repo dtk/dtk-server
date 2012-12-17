@@ -73,7 +73,6 @@ module Ramaze::Helper
 
     def update_from_hash(id,hash,opts={})
       idh = id_handle(id,model_name,hash["display_name"])
-      hash_assigns = Aux.col_refs_to_keys(hash)
       model_class(model_name).update_from_hash_assignments(idh,Aux.col_refs_to_keys(hash),opts)
     end
 
@@ -116,8 +115,8 @@ module Ramaze::Helper
       IDHandle[:c => c, :uri => uri].get_id()
     end
 
-    #request parsing fns
-#TODO: may deprecat; befoe so would have to remove from call in some list views in display
+    # request parsing fns
+    # TODO: may deprecat; befoe so would have to remove from call in some list views in display
     def ret_where_clause(field_set=Model::FieldSet.all_real(model_name()))
       hash = ret_hash_for_where_clause()
       hash ? field_set.ret_where_clause_for_search_string(hash.reject{|k,v|k == :parent_id}) : nil
@@ -128,31 +127,31 @@ module Ramaze::Helper
     end
 
     def ret_order_by_list()
-      #TODO: handle case when this is a get
-      #TODO: filter fields to make sure real fields or treat virtual columns
+      # TODO: handle case when this is a get
+      # TODO: filter fields to make sure real fields or treat virtual columns
       saved_search = ret_saved_search_in_request()
       return nil unless (saved_search||{})["order_by"]
       saved_search["order_by"].map{|x|{:field => x["field"].to_sym, :order => x["order"]}}
     end
 
-#TODO: just for testing
-TestOveride = 100# nil
+    # TODO: just for testing
+    TestOveride = 100# nil
     LimitDefault = 20
     NumModelItemsDefault = 10000
     def ret_paging_info()
       #TODO: case on request_method_is_post?()
       #TODO: might be taht query is optimzied by not having start being 0 included
       saved_search = ret_saved_search_in_request()
-#TODO: just for testing
-if TestOveride and (saved_search||{})["start"].nil?
-  return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
-end
+      #TODO: just for testing
+      if TestOveride and (saved_search||{})["start"].nil?
+        return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
+      end
       return nil unless saved_search
       return nil unless saved_search["start"] or saved_search["limit"]
       start = (saved_search["start"]||0).to_i
       limit = (saved_search["limit"] || R8::Config[:page_limit] || LimitDefault).to_i
-#TODO: just for testing
-limit = TestOveride if TestOveride 
+      # TODO: just for testing
+      limit = TestOveride if TestOveride 
       num_model_items = (saved_search["num_model_items"] || NumModelItemsDefault)
       {:start => start, :limit => limit, :num_model_items => num_model_items}
     end
@@ -186,7 +185,6 @@ limit = TestOveride if TestOveride
     end
 
     def convert_filter_form(filter)
-      ret = nil
       if filter.kind_of?(Array) and filter.size == 3
         if filter[0].to_sym == :eq and filter[2].to_s =~ /^[0-9]+$/
           [filter[0].to_sym, filter[1].to_sym, filter[2].to_i]

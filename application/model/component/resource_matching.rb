@@ -7,24 +7,32 @@ module DTK
         matches = Matches.new
         conflicts = Array.new
         target_node_ids = node_id_cmp_ref_mapping.keys
-        ndx_component_types = Hash.new
-        node_id_cmp_ref_mapping.each_value do |cmp_refs|
-          cmp_refs.each{|cmp_ref|ndx_component_types[cmp_ref[:component_template][:component_type]] ||= true}
-        end
-
+        cmp_refs = node_id_cmp_ref_mapping.values.flatten
+        
+##group as one fn
+        cmp_types = cmp_refs.map{|cmp_ref|cmp_ref[:component_template][:component_type]}.uniq
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:attribute_values],
-          :filter => [:and,[:oneof,:node_node_id,target_node_ids],[:oneof,:component_type,ndx_component_types.keys]]
+          :filter => [:and,[:oneof,:node_node_id,target_node_ids],[:oneof,:component_type,cmp_types]]
         }
-        #just 'possible' because matching on :node_node_id nad component_types but not combiniation
         cmp_mh = cmp_ref_mh.createMH(:component)
-        possible_matches = Model.get_objs(cmp_mh,sp_hash)
-        #TODO: remove the ones taht are not matches
+        ndx_cmp_attr_info = Hash.new
+        Model.get_objs(cmp_mh,sp_hash).each do |cmp|
+          cmp_id = cmp[:id]
+          pntr = ndx_cmp_attr_info[cmp_id] ||= cmp.hash_subset(:id,:group_id,:display_name).merge(:attributes => Array.new)
+          pntr[:attributes] << cmp[:attribute]
+        end
+#end group as one fn
+        
+        #to determine if there is a match we need to first get attributes for any cmp_ref that may be involved in a match
+        #these are ones where there is atleast one matching node/component_type pair
+        pruned_cmp_refs = cmp_refs.reject do |cmp_ref|             
+          #STUB
+        end
 
         #get attribute information for relevant compoennt_refs
         #TODO: stub
-        cmp_refs = node_id_cmp_ref_mapping.values.flatten
-        cmp_template_attrs = ComponentRef.get_ndx_attribute_values(cmp_refs)
+        cmp_template_attrs = ComponentRef.get_ndx_attribute_values(pruned_cmp_refs)
 
         #this query finds the components and its attributes on the nodes 
         [matches,conflicts]

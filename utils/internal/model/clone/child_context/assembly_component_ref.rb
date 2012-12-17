@@ -1,7 +1,9 @@
 module DTK
   class ChildContext
     class AssemblyComponentRef < self
+      r8_nested_require('assembly_component_ref','add_on')
      private
+
       def initialize(clone_proc,hash)
         super
         find_component_templates_in_assembly!()
@@ -11,14 +13,21 @@ module DTK
       end
 
       def find_component_templates_in_assembly!()
-        #find the component templates that each component ref is pointing to
+        merge!(:matches => get_aug_matching_component_refs())
+      end
+
+      #gets the component templates that each component ref is pointing to
+      def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {
-          :cols => [:id,:display_name,:node_with_assembly_id,:component_template_id],
+          :cols => [:id,:display_name,:node_with_assembly_id,matching_component_refs__virtual_col()],
           :filter => [:oneof, :node_node_id, node_stub_ids]
         }
-        matches = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
-        merge!(:matches => matches)
+        Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
+      end
+
+      def matching_component_refs__virtual_col()
+        :component_template_id
       end
 
       #for processing component refs in an assembly

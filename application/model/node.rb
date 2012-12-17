@@ -65,6 +65,39 @@ module XYZ
       Model.get_obj(model_handle(:target),sp_hash)
     end
 
+    def self.get_violations(id_handles)
+      get_objs_in_set(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
+    end
+
+    def self.get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      ret = Array.new
+      return ret if node_idhs.empty?()
+      filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
+      if add_filter
+        filter = [:and,filter,add_filter]
+      end
+      sp_hash = {
+        :cols => cols||[:id,:group_id,:display_name,:required],
+        :filter => filter,
+      }
+      attr_mh = node_idhs.first.createMH(:attribute)
+      get_objs(attr_mh,sp_hash)
+    end
+
+    def get_project()
+      get_objects_col_from_sp_hash(:cols => [:project]).first
+    end
+
+    def self.get_ports(id_handles)
+      get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
+    end
+
+    def get_ports(*types)
+      port_list = self.class.get_ports([id_handle])
+      i18n = get_i18n_mappings_for_models(:component,:attribute)
+      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
+    end
+
     ######### Model apis
 
 
@@ -149,20 +182,6 @@ module XYZ
     end
     private :get_attributes_print_form_aux
 
-    def self.get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
-      ret = Array.new
-      return ret if node_idhs.empty?()
-      filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
-      if add_filter
-        filter = [:and,filter,add_filter]
-      end
-      sp_hash = {
-        :cols => cols||[:id,:group_id,:display_name,:required],
-        :filter => filter,
-      }
-      attr_mh = node_idhs.first.createMH(:attribute)
-      get_objs(attr_mh,sp_hash)
-    end
 
     def set_attributes(av_pairs)
       Attribute::Pattern::Node.set_attributes(self,av_pairs)
@@ -407,19 +426,6 @@ module XYZ
     end
     private :update_dangling_links
 
-    def get_project()
-      get_objects_col_from_sp_hash(:cols => [:project]).first
-    end
-
-    def self.get_ports(id_handles)
-      get_objs_in_set(id_handles,{:cols => [:ports]},{:keep_ref_cols => true}).map{|r|r[:port]}
-    end
-
-    def get_ports(*types)
-      port_list = self.class.get_ports([id_handle])
-      i18n = get_i18n_mappings_for_models(:component,:attribute)
-      port_list.map{|port|port.filter_and_process!(i18n,*types)}.compact
-    end
 
     def self.get_port_links(id_handles,*port_types)
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
@@ -471,10 +477,6 @@ module XYZ
         ret[attr_id] << row[:port_l4_input]
       end
       ret
-    end
-
-    def self.get_violations(id_handles)
-      get_objs_in_set(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
     end
 
     def get_ui_info(datacenter)

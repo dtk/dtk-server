@@ -2,21 +2,14 @@ module DTK
   class Clone; class CopyProcessor; class Assembly
     class ServiceAddOnProc
       def initialize(service_add_on_info)
-        if service_add_on_info
-          @service_add_on = service_add_on_info[:service_add_on]
-          @node_bindings = service_add_on_info[:service_add_on].get_service_node_bindings()
-          @base_assembly = service_add_on_info[:base_assembly]
-        else
-          @service_add_on = nil
-          @node_bindings = Array.new
-          @base_assembly = nil
-        end
+        @service_add_on = service_add_on_info[:service_add_on]
+        @node_bindings = service_add_on_info[:service_add_on].get_service_node_bindings()
+        @base_assembly = service_add_on_info[:base_assembly]
       end
       attr_reader :node_bindings
       
       def get_mapped_nodes(create_override_attrs,create_opts)
         ret = Array.new
-        return ret unless @service_add_on
         cols_needed = (create_opts[:returning_sql_cols]||[]) - create_override_attrs.keys
         unless missing = (cols_needed - [:ancestor_id]).empty?
           raise Error.new("Not implemented: get_mapped_nodes returning cols (#{missing.join(",")})")
@@ -40,7 +33,6 @@ module DTK
 
       def get_matching_ports_link_hashes_in_target(new_sub_assembly_idh)
         ret = Array.new
-        return ret unless @service_add_on
         port_links = @service_add_on.get_port_links()
         if port_links.empty?
           return ret

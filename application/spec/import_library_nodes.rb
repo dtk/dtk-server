@@ -16,7 +16,7 @@ end
 user_mh = model_handle(:user)
 super_user_obj = User.create_user_in_groups?(user_mh,username)
 
-CurrentSession.new.set_user_object(super_user_obj)
+CurrentSession.set_user_object(super_user_obj)
 all_group_obj = UserGroup.get_by_groupname(user_mh.createMH(:user_group),"all")
 container_idh = IDHandle[:c => 2, :uri => "/", :group_id => all_group_obj[:id]]
 opts = {:username => username} #TODO: do we need this

@@ -75,7 +75,9 @@ module DTK
     SpecialContext = {
         :library_to_target => {
           :target => {:node => AssemblyNode, :port_link => PortLink},
-          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
+          :node => {:component_ref => AssemblyComponentRef},
+#TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
+#          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
           :component => {:attribute => AssemblyComponentAttribute}
       },
       #TODO: remove; since using different mechanism to sabve an assembly instance in the library

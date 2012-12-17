@@ -31,7 +31,7 @@
          :alias => :component_template,
          :join_type=>:inner,
          :join_cond=>{:id=>:component_ref__component_template_id},
-         :cols=>[:id,:group_id,:display_name,:component_type]
+         :cols=>[:id,:group_id,:display_name,:component_type,:only_one_per_node]
        }]
     }
   },

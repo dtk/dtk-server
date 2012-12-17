@@ -13,18 +13,19 @@ module DTK;class ChildContext
         input_for_cmp_match = Hash.new
         aug_cmp_refs.each do |cmp_ref|
           node_id = ndx_template_to_instance_nodes[cmp_ref[:node_node_id]]
-          (input_for_cmp_match[node_id] ||= Array.new) << cmp_ref[:component_template]
+          (input_for_cmp_match[node_id] ||= Array.new) << cmp_ref
         end
         
         #for each node that is not new, check if there is componenst already on target nodes that match/conflict
-        cmp_mh = aug_cmp_refs.first[:component_template].model_handle()
-        matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(cmp_mh,input_for_cmp_match)
+        cmp_ref_mh = aug_cmp_refs.first.model_handle()
+        matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(cmp_ref_mh,input_for_cmp_match)
         unless conflicts.empty?
           raise ErrorUsage.new("TODO: provide conflict message")
         end
         #remove the matches
         unless matches.empty?
-          aug_cmp_refs.reject!{|cmp| matches.include?(cmp[:id])}
+          matching_ids = matches.ids()
+          aug_cmp_refs.reject!{|cmp| matching_ids.include?(cmp[:id])}
         end
         merge!(:matches => aug_cmp_refs)
       end

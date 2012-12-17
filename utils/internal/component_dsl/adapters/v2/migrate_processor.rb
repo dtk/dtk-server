@@ -1,4 +1,4 @@
-module DTK; class ComponentMetaFileV2
+module DTK; class ComponentDSLV2
   class MigrateProcessor
     def initialize(module_name,parent,old_version_hash)
       @module_name = module_name

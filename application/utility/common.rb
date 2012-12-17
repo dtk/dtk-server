@@ -139,9 +139,9 @@ eos
     end
     impl = impls.first
 
-    cmf = ComponentMetaFile.create_meta_file_object(impl)
+    cmf = ComponentDSL.create_meta_file_object(impl)
     new_version_integer = 2 
-    hash_content = DTK::ComponentMetaFile::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
+    hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)
     new_path = "dtk-meta.puppet.json"
     impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
@@ -178,7 +178,7 @@ eos
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash = YAML.load_file(r8meta_path)
 
-      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
+      ComponentDSL.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
       
       impl_obj.add_contained_files_and_push_to_repo()
       ret << impl_obj

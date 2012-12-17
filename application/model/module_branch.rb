@@ -145,8 +145,8 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:implementation])
-          component_meta_file.update_model()
+          component_dsl = ComponentDSL.create_meta_file_object(augmented_branch[:implementation])
+          component_dsl.update_model()
         end
 
         #update the repo
@@ -166,8 +166,8 @@ module DTK
           target_impl.modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_meta_file = ComponentMetaFile.create_meta_file_object(target_impl)
-          component_meta_file.update_model()
+          component_dsl = ComponentDSL.create_meta_file_object(target_impl)
+          component_dsl.update_model()
         end
       
         #update the repo

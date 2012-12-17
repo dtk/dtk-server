@@ -1,7 +1,7 @@
-#TODO" unfify with generate_meta and import_export/import by moving these under component_meta_file
-r8_nested_require('component_meta_file','update_model')
+#TODO" unfify with generate_meta and import_export/import by moving these under component_dsl
 module DTK
-  class ComponentMetaFile
+  class ComponentDSL
+    r8_nested_require('component_dsl','update_model')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
@@ -17,7 +17,7 @@ module DTK
       create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh)
     end
 
-    #creates a ComponentMetaFile if file_obj_hash is a r8meta file
+    #creates a ComponentDSL if file_obj_hash is a r8meta file
     def self.create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh=nil)
       filename =  file_obj_hash[:path]
       return nil unless isa_meta_filename?(filename)
@@ -106,7 +106,11 @@ module DTK
         @cached_adapter_class ||= Hash.new
         return @cached_adapter_class[version_integer] if @cached_adapter_class[version_integer]
         adapter_name = "v#{version_integer.to_s}"
-        @cached_adapter_class[version_integer] = DynamicLoader.load_and_return_adapter_class("component_meta_file",adapter_name)
+        opts = {
+          :no_cap_convert => [:adapter_type],
+          :subclass_adapter_name => true
+        }
+        @cached_adapter_class[version_integer] = DynamicLoader.load_and_return_adapter_class("ComponentDSL",adapter_name,opts)
       end
 
       def convert_to_hash(format_type,content)

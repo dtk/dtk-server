@@ -1,5 +1,5 @@
 module DTK
-  class ComponentMetaFileV1 < ComponentMetaFile
+  class ComponentDSLV1 < ComponentDSL
     def self.parse_check(input_hash)
       #TODO: stub
     end

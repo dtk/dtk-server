@@ -1,4 +1,4 @@
-module DTK; class ComponentMetaFile
+module DTK; class ComponentDSL
   module UpdateModelMixin
     def update_model(opts={})
       input_hash =
@@ -45,10 +45,10 @@ module DTK; class ComponentMetaFile
 
   module UpdateModelClassMixin
     def update_model(impl_obj,module_branch_idh,version=nil)
-      component_meta_file_obj = create_meta_file_object(impl_obj)
+      component_dsl_obj = create_meta_file_object(impl_obj)
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version
-      component_meta_file_obj.update_model(update_opts)
+      component_dsl_obj.update_model(update_opts)
     end
 
     #TODO: make private after removing all non class references to it

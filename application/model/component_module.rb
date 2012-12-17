@@ -134,8 +134,8 @@ module DTK
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
         target_impl = lib_branch.get_implementation()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(source_impl,library_idh,target_impl)
-        component_meta_file.update_model()
+        component_dsl = ComponentDSL.create_meta_file_object(source_impl,library_idh,target_impl)
+        component_dsl.update_model()
       end
     end
     private :promote_to_library__meta_changes
@@ -216,7 +216,7 @@ module DTK
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
       impl = module_branch.get_implementation()
       if diffs_summary.meta_file_changed?()
-        ComponentMetaFile.update_model(impl,module_branch.id_handle())
+        ComponentDSL.update_model(impl,module_branch.id_handle())
       end
       #TODO: assembly_template_ws_item
       promote_to_library(version)
@@ -245,19 +245,19 @@ module DTK
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
-      ComponentMetaFile.update_model(impl_obj,module_branch_idh,version) unless meta_created
+      ComponentDSL.update_model(impl_obj,module_branch_idh,version) unless meta_created
       {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :meta_created => meta_created}
     end
 
     def self.parse_to_create_meta?(module_name,config_agent_type,impl_obj)
       ret = nil
-      return nil if ComponentMetaFile.filename_if_exists?(impl_obj)
+      return nil if ComponentDSL.filename_if_exists?(impl_obj)
       
       parsing_error = nil
       render_hash = nil
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
+        meta_generator = GenerateMeta.create(ComponentDSLVersion)
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e
@@ -269,14 +269,13 @@ module DTK
       end
       if render_hash 
         content = YAML.dump(render_hash.yaml_form())
-        meta_filename = ComponentMetaFile.filename(config_agent_type)
+        meta_filename = ComponentDSL.filename(config_agent_type)
         ret = {:path => meta_filename, :content => content}
       end
       raise parsing_error if parsing_error
       ret
     end
-    ComponentMetaDSLVersion = "1.0"
-
+    ComponentDSLVersion = "1.0"
 
     def export_preprocess(branch)
       #noop

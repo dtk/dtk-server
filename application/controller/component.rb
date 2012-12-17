@@ -1,5 +1,5 @@
 module XYZ
-  class ComponentController < Controller
+  class ComponentController < AuthController
     helper :i18n_string_mapping 
 
     def delete()

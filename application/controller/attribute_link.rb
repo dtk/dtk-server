@@ -1,5 +1,5 @@
 module XYZ
-  class Attribute_linkController < Controller
+  class Attribute_linkController < AuthController
 
     #deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})

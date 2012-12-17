@@ -1,5 +1,5 @@
 module XYZ
-  class AttributeController < Controller
+  class AttributeController < AuthController
     def get_datatypes()
       datatypes = AttributeDatatype.ret_datatypes()
       {:data => datatypes}

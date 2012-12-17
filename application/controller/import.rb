@@ -2,7 +2,7 @@
 require 'fileutils'
 
 module XYZ
-  class ImportController < Controller
+  class ImportController < AuthController
 
     def index
       return {:data=>''}

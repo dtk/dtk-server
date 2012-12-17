@@ -1,5 +1,5 @@
 module XYZ
-  class Node_groupController < Controller
+  class Node_groupController < AuthController
     helper :node_group_helper
 
     def rest__create()

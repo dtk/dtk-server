@@ -1,5 +1,5 @@
 module XYZ
-  class Service_moduleController < Controller
+  class Service_moduleController < AuthController
     #TODO: for debugging; will be removed
 
     def rest__debug_get_project_trees()

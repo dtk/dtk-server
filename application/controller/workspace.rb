@@ -1,5 +1,5 @@
 module XYZ
-  class WorkspaceController < Controller
+  class WorkspaceController < AuthController
     helper :i18n_string_mapping
 
     def index()

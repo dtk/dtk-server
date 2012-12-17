@@ -10,9 +10,8 @@ module XYZ
     end
 
     def process_user_info_aux(scalar_assigns,model_or_id_handle)
-      to_add = Hash.new
       #cleanup if everything should come from model or id handle
-      user_obj = CurrentSession.new.get_user_object()
+      user_obj = CurrentSession.get_user_object()
       assigns = Hash.new
       if user_obj
         assigns.merge!(CONTEXT_ID => user_obj[:c],:owner_id => user_obj[:id])
@@ -27,7 +26,7 @@ module XYZ
             "model handle with type(#{model_or_id_handle[:model_name]})"
           end
         raise Error.new("model_or_id_handle[:group_id] not set for #{bad_item}")
-end
+      end
       assigns.merge!(:group_id => model_or_id_handle[:group_id])
       #remove if in overrides or null val
       assigns.inject({}){|h,(col,val)| (val and not scalar_assigns.has_key?(col)) ? h.merge(col => val) : h}
@@ -43,8 +42,7 @@ end
 
     def augment_for_authorization(where_clause,model_handle)
       conjoin_set = where_clause ? [where_clause] : Array.new 
-      session = CurrentSession.new
-      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : session.get_auth_filters()
+      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : CurrentSession.get_auth_filters()
       if auth_filters 
 =begin
 controller_line = caller.find{|x|x =~ /application\/controller/}
@@ -56,7 +54,7 @@ if controller_line =~ /controller\/(.+)\.rb:.+`(.+)'/
 end
 mn = model_handle[:model_name]
 unless [:task_log].include?(mn) or ["target#get_nodes_status", "task#get_logs"].include?(controller_action) #ignore list
-  username = CurrentSession.new.get_username()
+  username = CurrentSession.get_username()
   pp [:auth,username,mn,controller_action]
 end
 =end

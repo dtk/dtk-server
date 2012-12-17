@@ -1,5 +1,5 @@
 module XYZ
-  class DatacenterController < Controller
+  class DatacenterController < AuthController
     def create(name)
       c = ret_session_context_id()
       Target.create(name,c)

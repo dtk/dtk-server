@@ -1,5 +1,5 @@
 module XYZ
-  class DependencyController < Controller
+  class DependencyController < AuthController
     def rest__add_component_dependency()
       cmp_id,type,other_component_id = ret_non_null_request_params(:component_id,:type,:other_component_id)
       hash_info = {

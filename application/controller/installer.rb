@@ -1,7 +1,7 @@
 
 
 module XYZ
-  class InstallerController < Controller
+  class InstallerController < AuthController
 
     def index
     end

@@ -1,5 +1,5 @@
 module DTK
-  class AssemblyController < Controller
+  class AssemblyController < AuthController
     helper :assembly_helper
     #### create and delete actions ###
     def rest__delete()

@@ -1,5 +1,5 @@
 module XYZ
-  class NodeController < Controller
+  class NodeController < AuthController
     helper :node_helper
     helper :rest_async
     #### create and delete actions ###

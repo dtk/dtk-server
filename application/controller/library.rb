@@ -1,5 +1,5 @@
 module DTK
-  class LibraryController < Controller
+  class LibraryController < AuthController
     def rest__info_about()
       library = create_obj(:library_id)
       about = ret_non_null_request_params(:about).to_sym

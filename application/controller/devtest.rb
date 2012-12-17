@@ -1,5 +1,5 @@
 module XYZ
-  class DevtestController < Controller 
+  class DevtestController < AuthController 
     #using default layout
     layout :default
     def initialize

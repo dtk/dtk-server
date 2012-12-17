@@ -1,5 +1,5 @@
 module XYZ
-  class DataSourceController < Controller
+  class DataSourceController < AuthController
     #TBD: just test hard wired to ec2 and
     def create__ec2(*uri_array)
       c = ret_session_context_id()

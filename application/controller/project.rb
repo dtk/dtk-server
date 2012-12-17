@@ -1,5 +1,5 @@
 module XYZ
-  class ProjectController < Controller
+  class ProjectController < AuthController
     def test_group_attrs(datacenter_id=nil)
       redirect = "/xyz/project/test_group_attrs/#{(datacenter_id||"").to_s}"
       unless datacenter_id

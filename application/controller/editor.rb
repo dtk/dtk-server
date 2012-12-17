@@ -1,7 +1,7 @@
 
 
 module XYZ
-  class EditorController < Controller
+  class EditorController < AuthController
 
     def index
       return {:data=>''}

@@ -1,5 +1,5 @@
 module XYZ
-  class Port_linkController < Controller
+  class Port_linkController < AuthController
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params
       return Error.new("not implemented update of port link") if hash["id"]

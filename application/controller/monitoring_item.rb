@@ -1,5 +1,5 @@
 module XYZ
-  class Monitoring_itemController < Controller
+  class Monitoring_itemController < AuthController
 
     # limit (hours) how long can nodes run
     UP_TIME_LIMIT = 4

@@ -212,7 +212,7 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
-    def create_new_dsl_version(dsl_integer_version,config_agent_type,encoding)
+    def create_new_dsl_version(dsl_integer_version,config_agent_type,format_type)
       module_name =  self[:display_name]
       matching_branches = get_module_branches_matching_version(version)
       branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)

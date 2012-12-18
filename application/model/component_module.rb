@@ -87,6 +87,18 @@ module DTK
       self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
     end
 
+    def create_dsl_from_objects(dsl_integer_version)
+      module_name =  self[:display_name]
+      matching_branches = get_module_branches_matching_version(version)
+      branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
+      impl = branch.get_implementation()
+      dsl = ComponentDSL.create_meta_file_object(impl)
+      hash_content = ComponentDSL::migrate_processor(module_name,dsl_integer_version,dsl.input_hash).generate_new_version_hash()
+      content = JSON.pretty_generate(hash_content)
+      new_path = "dtk-meta.puppet.json"
+      impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
+    end
+
     def info_about(about)
       case about
        when :components
@@ -257,7 +269,7 @@ module DTK
       render_hash = nil
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        meta_generator = GenerateMeta.create(ComponentDSLVersion)
+        meta_generator = GenerateMeta.create(R8::Config[:dsl][:component][:version][:default])
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e
@@ -275,7 +287,6 @@ module DTK
       raise parsing_error if parsing_error
       ret
     end
-    ComponentDSLVersion = "1.0"
 
     def export_preprocess(branch)
       #noop

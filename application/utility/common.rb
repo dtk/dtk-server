@@ -139,9 +139,9 @@ eos
     end
     impl = impls.first
 
-    cmf = ComponentDSL.create_meta_file_object(impl)
+    dsl = ComponentDSL.create_meta_file_object(impl)
     new_version_integer = 2 
-    hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_version_integer,cmf.input_hash).generate_new_version_hash()
+    hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_version_integer,dsl.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)
     new_path = "dtk-meta.puppet.json"
     impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)

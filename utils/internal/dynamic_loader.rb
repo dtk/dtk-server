@@ -19,11 +19,7 @@ module DTK
    private
     Lock = Mutex.new
     def self.convert?(n,type,opts)
-      no_cap_convert = 
-        if opt = opts[:no_cap_convert]
-          opt.to_a.include?(type)
-        end
-      no_cap_convert ? n : cap_form(n)
+      (opts[:class_name]||{})[type] || cap_form(n)
     end
 
     def self.cap_form(x)

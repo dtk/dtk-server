@@ -107,10 +107,10 @@ module DTK
         return @cached_adapter_class[version_integer] if @cached_adapter_class[version_integer]
         adapter_name = "v#{version_integer.to_s}"
         opts = {
-          :no_cap_convert => [:adapter_type],
+          :class_name => {:adapter_type => "ComponentDSL"},
           :subclass_adapter_name => true
         }
-        @cached_adapter_class[version_integer] = DynamicLoader.load_and_return_adapter_class("ComponentDSL",adapter_name,opts)
+        @cached_adapter_class[version_integer] = DynamicLoader.load_and_return_adapter_class("component_dsl",adapter_name,opts)
       end
 
       def convert_to_hash(format_type,content)

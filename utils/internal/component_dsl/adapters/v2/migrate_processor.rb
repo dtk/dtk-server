@@ -1,4 +1,4 @@
-module DTK; class ComponentDSLV2
+module DTK; class ComponentDSL; class V2
   class MigrateProcessor
     def initialize(module_name,parent,old_version_hash)
       @module_name = module_name
@@ -277,4 +277,4 @@ module DTK; class ComponentDSLV2
       ret_singleton_form + ndx_ret.map{|k,v|{k => v[:els]}}
     end
   end
-end; end
+end; end; end

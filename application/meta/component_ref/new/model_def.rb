@@ -18,7 +18,20 @@
          :model_name=>:node,
          :join_type=>:inner,
          :join_cond=>{:id=>:component_ref__node_node_id},
-         :cols=>[:id,:display_name,:assembly_id]
+         :cols=>[:id,:group_id,:display_name,:assembly_id]
+       }]
+    },
+    :component_templates=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :convert => true,
+         :alias => :component_template,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component_ref__component_template_id},
+         :cols=>[:id,:group_id,:display_name,:component_type,:only_one_per_node]
        }]
     }
   },

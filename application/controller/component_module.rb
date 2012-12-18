@@ -1,5 +1,5 @@
 module XYZ
-  class Component_moduleController < Controller
+  class Component_moduleController < AuthController
     helper :module_helper
 
     #### create and delete actions ###

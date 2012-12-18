@@ -13,7 +13,7 @@ module XYZ
 
     class << self 
       def create_users_private_library?(model_handle)
-        user_obj = CurrentSession.new.get_user_object()
+        user_obj = CurrentSession.get_user_object()
         private_group_obj = user_obj.get_private_group()
         library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
         username = user_obj[:username]

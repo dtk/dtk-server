@@ -27,7 +27,7 @@ user_obj, user_group_id = add_user_in_group?(username,"user-#{username}")
 container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_obj[:id], :group_id => user_group_id]
 opts = {:username => username}
 
-XYZ::CurrentSession.new.set_user_object(user_obj)
+XYZ::CurrentSession.set_user_object(user_obj)
 XYZ::Object.import_objects_from_file(container_idh,import_file,opts)
 
 

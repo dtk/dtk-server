@@ -1,5 +1,5 @@
 module XYZ
-  class ImplementationController < Controller
+  class ImplementationController < AuthController
 #TODO: see what to keep
 ###TODO: for testing
 

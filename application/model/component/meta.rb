@@ -82,6 +82,11 @@ module XYZ
         [attributes_def.merge(
            :cols => [:id,:display_name,:hidden,:description,id(:component),:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
         )]
+        virtual_column :attribute_values, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [attributes_def.merge(
+           :cols => [:id,:group_id,:display_name,:attribute_value]
+        )]
 
         virtual_column :attributes_view_def_info, :type => :json, :hidden => true, 
         :remote_dependencies => 

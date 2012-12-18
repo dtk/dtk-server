@@ -1,7 +1,7 @@
 
 
 module XYZ
-  class AdminController < Controller
+  class AdminController < AuthController
 
     #TODO: figure out proper place/naming for function calls for db install/setup steps
     def dbrebuild

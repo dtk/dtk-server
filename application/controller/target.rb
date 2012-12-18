@@ -1,5 +1,5 @@
 module XYZ
-  class TargetController < Controller
+  class TargetController < AuthController
     def rest__create()
       display_name = ret_non_null_request_params(:target_name)
       params_hash = ret_params_hash(:description,:iaas_type,:iaas_properties)

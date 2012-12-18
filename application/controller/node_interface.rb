@@ -1,4 +1,4 @@
 module XYZ
-  class Node_interfaceController < Controller
+  class Node_interfaceController < AuthController
   end
 end

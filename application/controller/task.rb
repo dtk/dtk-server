@@ -1,5 +1,5 @@
 module XYZ
-  class TaskController < Controller
+  class TaskController < AuthController
     helper :task_helper
 
     def rest__status()

@@ -1,5 +1,5 @@
 module XYZ
-  class Search_objectController < Controller
+  class Search_objectController < AuthController
     def save(explicit_hash=nil)
       hash_assignments = explicit_hash || request.params.dup
       redirect = (not (hash_assignments.delete("redirect").to_s == "false"))

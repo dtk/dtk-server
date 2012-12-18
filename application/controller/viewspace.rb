@@ -1,5 +1,5 @@
 module XYZ
-  class ViewspaceController < Controller
+  class ViewspaceController < AuthController
 
     def update_pos(id)
 pp 'Updating items positions in viewspace:'

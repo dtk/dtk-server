@@ -57,21 +57,30 @@ module DTK
 
       model_name = Model.normalize_model(hash[:model_handle][:model_name])
       parent_model_name = Model.normalize_model(hash[:model_handle][:parent_model_name])
-#TODO: think this is wrong since calls AssemblyNode in middle of run      
-#klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || self
-      klass = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name] || ChildContext
+      klass = ret_special_child_context?(clone_proc,parent_model_name,model_name) || ChildContext
       klass.new(clone_proc,hash)
     end
 
    private
+    def self.ret_special_child_context?(clone_proc,parent_model_name,model_name)
+      if match = (SpecialContext[clone_proc.clone_direction()][parent_model_name]||{})[model_name]
+        if match.kind_of?(Proc) 
+          match.call(clone_proc)
+        else
+          match
+        end
+      end
+    end
     #index are clone_direction, parent, child
     SpecialContext = {
-      :library_to_target => {
-        :target => {:node => AssemblyNode, :port_link => PortLink},
-        :node => {:component_ref => AssemblyComponentRef},
-        :component => {:attribute => AssemblyComponentAttribute}
+        :library_to_target => {
+          :target => {:node => AssemblyNode, :port_link => PortLink},
+          :node => {:component_ref => AssemblyComponentRef},
+#TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
+#          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
+          :component => {:attribute => AssemblyComponentAttribute}
       },
-      #TODO: remove
+      #TODO: remove; since using different mechanism to sabve an assembly instance in the library
       :target_to_library => {
         #:library => {:node => AssemblyTemplateNode},
         #:node => {:component => AssemblyTemplateComponent}

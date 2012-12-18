@@ -1,5 +1,5 @@
 module XYZ
-  class File_assetController < Controller
+  class File_assetController < AuthController
     helper :i18n_string_mapping
 
     def get(id)

@@ -1,5 +1,5 @@
 module XYZ
-  class InventoryController < Controller
+  class InventoryController < AuthController
 
     def index
 #TODO: what is proper where clause to generaly get managed nodes

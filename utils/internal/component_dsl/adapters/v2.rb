@@ -1,6 +1,6 @@
 module DTK
   class ComponentDSL
-    class V2
+    class V2 < self
       r8_nested_require('v2','migrate_processor')
       def self.parse_check(input_hash)
         #TODO: stub

@@ -20,7 +20,8 @@ module DTK
     #returns array where each element with keys :path,:hash_content
     def migrate(module_name,dsl_integer_version)
       ret = Array.new
-      hash_content = self.class.migrate_processor(module_name,dsl_integer_version,input_hash).generate_new_version_hash()
+      migrate_proc = self.class.migrate_processor(module_name,dsl_integer_version,input_hash)
+      hash_content = migrate_proc.generate_new_version_hash()
       ret << {:path => foo,:hash_content => hash_content}
       ret
     end
@@ -112,12 +113,11 @@ module DTK
     def self.version()
       VersionIntegerToVersion[version_integer()]
     end
+   private
     def self.version_integer()
       to_s =~ /V([0-9]+$)/
       $1.to_i
     end
-
-   private
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["version"]||"not_specified"
       unless version_integer = VersionToVersionInteger[version]

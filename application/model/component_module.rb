@@ -212,32 +212,32 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
-    def create_new_dsl_version(dsl_integer_version,format_type)
-      unless dsl_integer_version == 2
+    def create_new_dsl_version(new_dsl_integer_version,format_type)
+      module_name =  update_object!(:display_name)[:display_name]
+      unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemeneted when target version is 2")
       end
-      previous_dsl_version = dsl_integer_version -1 
-      module_name =  self[:display_name]
+      previous_dsl_version = new_dsl_integer_version-1 
       matching_branches = get_module_branches_matching_version()
       module_branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
 
       #create in memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
-      dsl_paths_and_content = component_dsl.migrate(module_name,dsl_integer_version)
+      dsl_paths_and_content = component_dsl.migrate(module_name,new_dsl_integer_version,format_type)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
    private
-    #TODO: update so not hard-coded to use yaml
+    #TODO: update so not hard-coded to use yaml and version 1
     def self.parse_to_create_dsl?(module_name,config_agent_type,impl_obj)
       ret = nil
-      return nil if ComponentDSL.filename_if_exists?(impl_obj)
+      return ret if ComponentDSL.filename?(impl_obj)
       
       parsing_error = nil
       render_hash = nil
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        meta_generator = GenerateMeta.create(R8::Config[:dsl][:component][:version][:default])
+        meta_generator = GenerateMeta.create(ComponentDSL.default_integer_version())
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e
@@ -248,9 +248,11 @@ module DTK
         raise e
       end
       if render_hash 
-        content = Aux.serialize(render_hash.yaml_form(),:yaml)
-        meta_filename = ComponentDSL.filename(config_agent_type)
-        ret = {:path => meta_filename, :content => content}
+        #TODO: encapsulate this
+        format_type = :yaml
+        content = Aux.serialize(render_hash.yaml_form(),format_type)
+        dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)
+        ret = {:path => dsl_filename, :content => content}
       end
       raise parsing_error if parsing_error
       ret

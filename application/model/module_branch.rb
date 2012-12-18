@@ -4,6 +4,10 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def get_type()
+      update_object!(:type)[:type].to_sym
+    end
+
     def pp_version()
       update_object!(:version)
       (self[:version] == BranchNameDefaultVersion) ? nil : self[:version]
@@ -25,15 +29,20 @@ module DTK
       if args.size == 1
         args[0]
       else
-        [{:path => args[0],:hash_content => args[1],:format => args[2] || R8::Config[:dsl][:component][:encoding][:default].to_sym}]
+        [{:path => args[0],:hash_content => args[1],:format_type => args[2]||default_dsl_format_type()}]
       end
       unless files.empty?
         files.each do |file_info|
-          content = Aux.serialize(file_info[:hash_content],file_info[:format])
+          content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
           RepoManager.add_file({:path => file_info[:path]},content,self)
         end
         RepoManager.push_changes(self)
       end
+    end
+    
+    def self.default_dsl_format_type()
+      index = (get_type() == :service_module ? :service : :component)
+      R8::Config[:dsl][index][:encoding][:default].to_sym
     end
 
     def self.update_library_from_workspace?(ws_branches,opts={})
@@ -44,7 +53,7 @@ module DTK
         matching_branches = ws_branches
       else
         sample_ws_branch = ws_branches.first
-        type = sample_ws_branch.update_object!(:type)[:type].to_sym
+        type = sample_ws_branch.get_type()
         sp_hash = {
           :cols => cols_for_matching_library_branches(type),
           :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]

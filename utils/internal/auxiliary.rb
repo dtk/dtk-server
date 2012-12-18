@@ -100,14 +100,25 @@ module XYZ
         key_value.values.first
       end
 
-      def serialze(hash_content,format)
-        case format
+      def serialize(hash_content,format_type)
+        case format_type
           when :json
             JSON.pretty_generate(hash_content)
           when :yaml
             YAML.dump(hash_content)
           else
-            raise EWrror.new("Format (#{format}) is not treated")
+            raise Error.new("Format (#{format_format}) is not treated")
+        end
+      end
+
+      def convert_to_hash(content,format_type)
+        case format_type
+          when :json
+            JSON.parse(content)
+          when :yaml
+            YAML.load(content)
+          else
+            raise Error.new("Format (#{format_type}) is not treated")
         end
       end
 

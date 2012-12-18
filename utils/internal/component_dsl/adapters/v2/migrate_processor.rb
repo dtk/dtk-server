@@ -80,7 +80,7 @@ module DTK; class ComponentDSL; class V2
       ]
     }
     AttrOmit = {
-      :component => %w{display_name component_type}
+      :component => %w{display_name component_type version}
     }
 
     AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|

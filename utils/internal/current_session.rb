@@ -36,4 +36,7 @@ module DTK
       end
     end
   end
+
+  class SessionError < Error
+  end
 end

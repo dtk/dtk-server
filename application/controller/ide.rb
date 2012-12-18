@@ -1,5 +1,5 @@
 module XYZ
-  class IdeController < AuthController
+  class IdeController < Controller
 
     def index()
       projects = Project.get_all(model_handle(:project))

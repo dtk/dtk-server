@@ -97,9 +97,12 @@ module XYZ
       model,method = action[:route].split("/")
       method ||= :index
       result = nil
-      begin 
+      begin
        result = call_action(action,parent_model_name)
-       rescue Exception => e
+      rescue DTK::SessionError => e
+        # TODO: Look into the code so we can return 401 HTTP status
+        result = rest_notok_response(:message => e.message)
+      rescue Exception => e
         #TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)
           Log.error_pp([e,e.backtrace[0]])

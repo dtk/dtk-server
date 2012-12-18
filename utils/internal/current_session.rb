@@ -12,6 +12,10 @@ module DTK
         instance = Instance.new
         instance.respond_to?(name)||super
       end
+
+      def get_instance()
+        Instance.new
+      end
     end
    private
     class Instance
@@ -35,5 +39,8 @@ module DTK
         @auth_filters = array_auth_filters
       end
     end
+  end
+
+  class SessionError < Error
   end
 end

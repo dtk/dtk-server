@@ -12,10 +12,6 @@ module DTK
         instance = Instance.new
         instance.respond_to?(name)||super
       end
-
-      def get_instance()
-        Instance.new
-      end
     end
    private
     class Instance

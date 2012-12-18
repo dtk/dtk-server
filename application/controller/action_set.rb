@@ -1,6 +1,18 @@
 module XYZ
   class ActionsetController < Controller
     def process(*route)
+
+      unless route.first == "user"
+        login_first unless R8::Config[:development_test_user] #TODO unless clause for testing
+        session = CurrentSession.new
+
+        # TODO: Temp fix until we see why it does not see set_user_object method sometimes
+        if session.respond_to?(:set_user_object)
+          session.set_user_object(user_object())
+          session.set_auth_filters(:c,:group_ids)
+        end
+      end
+
       @json_response = true if ajax_request? 
 
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
@@ -143,6 +155,7 @@ module XYZ
         :engine => lambda{|action, value| value },
         :variables => variables
        )
+
       return a.call
     end
 

@@ -212,22 +212,22 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
-    def create_new_dsl_version(dsl_integer_version,config_agent_type,format_type)
+    def create_new_dsl_version(dsl_integer_version,format_type)
+      unless dsl_integer_version == 2
+        raise Error.new("component_module.create_new_dsl_version only implemeneted when target version is 2")
+      end
+      old_dsl_integer_version = 1 
       module_name =  self[:display_name]
-      matching_branches = get_module_branches_matching_version(version)
-      branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
-      impl = branch.get_implementation()
-      component_dsl = ComponentDSL.create_meta_file_object(impl)
-      dsl_files_and_paths = ComponentDSL.migrate(module_name,dsl_integer_version,encoding,component_dsl.input_hash)
-=begin      
-      hash_content = ComponentDSL::migrate_processor(module_name,dsl_integer_version,component_dsl.input_hash).generate_new_version_hash()
-      content = JSON.pretty_generate(hash_content)
-      new_path = "dtk-meta.puppet.json"
-      impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
-=end
+      matching_branches = get_module_branches_matching_version()
+      module_branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
+
+      component_dsl = ComponentDSL.create_dsl_object(module_branch,dsl_integer_version,format_type)
+      dsl_paths_and_content = component_dsl.migrate(module_name,dsl_integer_version)
+      module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
    private
+    #TODO: update so not hard-coded to use yaml
     def self.parse_to_create_dsl?(module_name,config_agent_type,impl_obj)
       ret = nil
       return nil if ComponentDSL.filename_if_exists?(impl_obj)
@@ -247,7 +247,7 @@ module DTK
         raise e
       end
       if render_hash 
-        content = YAML.dump(render_hash.yaml_form())
+        content = Aux.serialize(render_hash.yaml_form(),:yaml)
         meta_filename = ComponentDSL.filename(config_agent_type)
         ret = {:path => meta_filename, :content => content}
       end

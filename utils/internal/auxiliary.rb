@@ -100,6 +100,17 @@ module XYZ
         key_value.values.first
       end
 
+      def serialze(hash_content,format)
+        case format
+          when :json
+            JSON.pretty_generate(hash_content)
+          when :yaml
+            YAML.dump(hash_content)
+          else
+            raise EWrror.new("Format (#{format}) is not treated")
+        end
+      end
+
       def hash_from_file_with_json(file_name)
         return nil unless File.exists?(file_name)
         ret = nil

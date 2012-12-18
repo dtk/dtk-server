@@ -19,10 +19,21 @@ module DTK
       RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
     end
 
-    def serialize_and_save_to_repo(file_path,hash_content)
-      content = JSON.pretty_generate(hash_content)
-      RepoManager.add_file({:path => file_path},content,self)
-      RepoManager.push_changes(self)
+    #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
+    def serialize_and_save_to_repo(*args)
+      files = 
+      if args.size == 1
+        args[0]
+      else
+        [{:path => args[0],:hash_content => args[1],:format => args[2] || R8::Config[:dsl][:component][:encoding][:default].to_sym}]
+      end
+      unless files.empty?
+        files.each do |file_info|
+          content = Aux.serialize(file_info[:hash_content],file_info[:format])
+          RepoManager.add_file({:path => file_info[:path]},content,self)
+        end
+        RepoManager.push_changes(self)
+      end
     end
 
     def self.update_library_from_workspace?(ws_branches,opts={})

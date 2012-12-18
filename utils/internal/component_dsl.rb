@@ -16,6 +16,25 @@ module DTK
       new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
     end
 
+    #returns array where each element with keys :path,:hash_content
+    def migrate(module_name,dsl_integer_version)
+      ret = Array.new
+      hash_content = self.class.migrate_processor(module_name,dsl_integer_version,input_hash).generate_new_version_hash()
+      ret << {:path => foo,:hash_content => hash_content}
+      ret
+    end
+
+    def self.filename_if_exists?(impl_obj,dsl_integer_version=1,format_type=nil)
+      unless regexp = DSLFilenameRegexp[dsl_integer_version]
+        raise Error.new("Do not treat Component DSL version: #{dsl_integer_version.to_s}")
+      end
+      format_ext_regexp = (format_type && Regexp.new("\.(#{ExtensionToType[format_type.to_sym]}$)"))
+      depth = 1
+      RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
+        (f =~ regexp) and (format_ext_regexp.nil? or f =~ format_ext_regexp)
+      end
+    end
+
     attr_reader :input_hash
     def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
       @config_agent_type = config_agent_type
@@ -29,16 +48,6 @@ module DTK
 
     class << self
      private
-      def filename_if_exists?(impl_obj,dsl_integer_version=1,format_type=nil)
-        unless regexp = DSLFilenameRegexp[dsl_integer_version]
-          raise Error.new("Do not treat Component DSL version: #{dsl_integer_version.to_s}")
-        end
-        format_ext_regexp = (format_type && Regexp.new("\.(#{ExtensionToType[format_type.to_sym]}$)"))
-        depth = 1
-        RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
-          (f =~ regexp) and (format_ext_regexp.nil? or f =~ format_ext_regexp)
-        end
-      end
       #returns [config_agent_type,file_extension]
       def isa_dsl_filename?(filename,dsl_integer_version=1)
         filename =~ DSLFilenameRegexp[dsl_integer_version]
@@ -92,8 +101,8 @@ module DTK
       "r8meta.#{config_agent_type}.yml"
     end
 
-    def self.migrate_processor(module_name,new_version_integer,old_version_hash)
-      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(module_name,old_version_hash)
+    def self.migrate_processor(module_name,new_version_integer,input_hash)
+      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(module_name,input_hash)
     end
 
     def self.version()

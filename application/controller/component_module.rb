@@ -132,6 +132,17 @@ module XYZ
       workspace_branch_info = component_module.create_workspace_branch?(project,version)
       rest_ok_response workspace_branch_info
     end
+
+    def rest__create_new_dsl_version()
+      component_module = create_obj(:component_module_id)
+      dsl_version = ret_non_null_request_params(:dsl_version).to_i
+      format = :json
+      component_module.create_new_dsl_version(dsl_version,format_type)
+      rest_ok_response 
+    end
+
+
+
     #### end: actions to manage workspace and promote changes from workspace to library ###
 
     def rest__push_to_mirror()

@@ -5,15 +5,16 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    def self.create_dsl_object(module_branch,dsl_integer_version,format_type)
+    def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       impl = module_branch.get_implementation()
       unless dsl_filename = filename_if_exists?(impl,dsl_integer_version,format_type)
         raise Error.new("Cannot find DSL file")
       end
-      config_agent_type,file_extension = parse_meta_filename(dsl_filename)
+      parsed_name = parse_dsl_filename(dsl_filename)
+      format_type ||= parsed_name[:format_type]
       content = RepoManager.get_file_content(dsl_filename,module_branch)
       input_hash = convert_to_hash(format_type,content)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
+      new(parsed_name[:config_agent_type],impl.id_handle(),module_branch.id_handle(),input_hash)
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -48,13 +49,18 @@ module DTK
 
     class << self
      private
-      #returns [config_agent_type,file_extension]
       def isa_dsl_filename?(filename,dsl_integer_version=1)
         filename =~ DSLFilenameRegexp[dsl_integer_version]
       end
+      #returns hash with keys: :config_agent_type,:format_type
       def parse_dsl_filename(filename,dsl_integer_version=1)
         if filename =~ DSLFilenameRegexp[dsl_integer_version]
-          [$1.to_sym,$2]
+          config_agent_type = $1.to_sym
+          file_extension = $2
+          unless format_type = ExtensionToType[file_extension]
+            raise Error.new("illegal file extension #{file_extension}") unless file_extension
+          end
+          {:config_agent_type => config_agent_type,:format_type => format_type}
         else
           raise Error.new("Component filename (#{filename}) has illegal form")
         end
@@ -86,12 +92,10 @@ module DTK
     def self.create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh=nil)
       filename =  file_obj_hash[:path]
       return nil unless isa_dsl_filename?(filename)
-      config_agent_type,file_extension = parse_dsl_filename(filename)
-      format_type = ExtensionToType[file_extension]
-      raise Error.new("illegal file extension #{file_extension}") unless file_extension
+      parsed_name = parse_dsl_filename(dsl_filename)
       module_branch_idh = target_impl.get_module_branch().id_handle()
-      input_hash = convert_to_hash(format_type,content)
-      self.new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+      input_hash = convert_to_hash(parsed_name[:format_type],content)
+      self.new(arsed_name[:config_agent_type],target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
     end
 
     def self.filename(config_agent_type)

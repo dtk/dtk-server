@@ -137,11 +137,9 @@ module XYZ
       component_module = create_obj(:component_module_id)
       dsl_version = ret_non_null_request_params(:dsl_version).to_i
       format = :json
-      component_module.create_new_dsl_version(dsl_version,format_type)
+      component_module.create_new_dsl_version(dsl_version,format)
       rest_ok_response 
     end
-
-
 
     #### end: actions to manage workspace and promote changes from workspace to library ###
 

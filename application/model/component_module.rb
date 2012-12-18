@@ -216,12 +216,13 @@ module DTK
       unless dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemeneted when target version is 2")
       end
-      old_dsl_integer_version = 1 
+      previous_dsl_version = dsl_integer_version -1 
       module_name =  self[:display_name]
       matching_branches = get_module_branches_matching_version()
       module_branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
 
-      component_dsl = ComponentDSL.create_dsl_object(module_branch,dsl_integer_version,format_type)
+      #create in memory dsl object using old version
+      component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
       dsl_paths_and_content = component_dsl.migrate(module_name,dsl_integer_version)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end

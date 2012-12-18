@@ -12,30 +12,33 @@ class DeferrableBody
   end
 end
 
+Count = 20
+Frequency = 0.5
 class MyController < Ramaze::Controller
   map '/'
 
   def index
-
     body = DeferrableBody.new
-
     # Get the headers out there asap, let the client know we're alive...
     EM.next_tick do
       request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
     end
-    #emulate pieces of work being completed
-    EM.add_timer(1) do
-      body.send "first part\n"
-    end
-    EM.add_timer(5) do
-      body.send "second part\n"
-      body.succeed
-    end
-    EM.add_timer(5) do
-      body.send "second part\n"
-      body.succeed
-    end
+    repeat(body,Count)
     throw :async
+  end
+
+  def repeat(body,index)
+    #emulate pieces of work being completed
+    EM.add_timer(Frequency) do
+      body.send "part #{(Count-index).to_s}\n"
+      EM.next_tick do
+        if index == 0
+          body.succeed
+        else
+          repeat(body,index-1)
+        end
+      end
+    end   
   end
 end
 Ramaze::Log.level = Logger::WARN

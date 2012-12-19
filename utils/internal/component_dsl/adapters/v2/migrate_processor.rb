@@ -112,12 +112,12 @@ module DTK; class ComponentDSL; class V2
        :description,
        {:external_ref => {:new_key => :only_one_per_node,:custom_fn => :only_one_per_node, :skip_if_nil => true}},
        {:external_ref => {:custom_fn => :external_ref}},
-       {:basic_type => {:new_key => :type, :skip_if_nil => true}},
+       {:basic_type => {:custom_fn => :type, :new_key => :type, :skip_if_nil => true}},
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
        {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}},
        {:component_order => {:new_key => :constraints,:custom_fn => :component_order_rels}},
-       {:external_link_defs => {:custom_fn => :external_link_defs}}
+       {:external_link_defs => {:new_key => :link_defs, :custom_fn => :external_link_defs}}
       ]
     }
     AttrOmit = {
@@ -169,6 +169,11 @@ module DTK; class ComponentDSL; class V2
           ["puppet_definition"].include?(type) ? true : nil
         end
 
+        def self.type(basic_type)
+          #omit default 'service'
+          (basic_type == "service") ? nil : basic_type
+        end
+
         def self.external_ref(ext_ref_assigns)
           ret = PrettyPrintHash.new
           key = type = ext_ref_assigns["type"]
@@ -195,7 +200,7 @@ module DTK; class ComponentDSL; class V2
         def self.attributes(attrs_assigns)
           #TODO: may sort alphabetically (same for othter lists)
           attrs_assigns.inject(PrettyPrintHash.new) do |h,(attr,attr_info)|
-            h.merge(attr => Attribute.attribute(attr_info))
+            h.merge(attr => Attribute.attribute(attr,attr_info))
           end
         end
 
@@ -236,14 +241,31 @@ module DTK; class ComponentDSL; class V2
       end
       
       class Attribute < self
-        def self.attribute(attr_info)
+        def self.attribute(attr,attr_info)
           ret = PrettyPrintHash.new
-          %w{description data_type}.each{|k|ret[k] = attr_info[k] if attr_info[k]}
+          %w{description}.each{|k|ret[k] = attr_info[k] if attr_info[k]}
+          type = type(attr_info["data_type"],attr_info["semantic_type"])
+          ret["type"] = type if type
           ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
-          ret["external_ref"] =  external_ref(attr_info["external_ref"])
+          external_ref = external_ref(attr,attr_info["external_ref"])
+          ret["external_ref"] = external_ref if external_ref
           ret
         end
-        def self.external_ref(ext_ref_assigns)
+
+        def self.type(data_type,semantic_type)
+          ret = nil
+          if semantic_type
+            unless semantic_type.kind_of?(Hash) and semantic_type.size == 1 and semantic_type.keys.first == ":array"
+              Log.error("Ignoring because unexpected semantic type (#{semantic_type})")
+            else
+              ret = "array(#{semantic_type.values.first})"
+            end
+          end
+          ret ||= data_type
+          ret
+        end
+
+        def self.external_ref(attr,ext_ref_assigns)
           ret = PrettyPrintHash.new
           key = type = ext_ref_assigns["type"]
           val_attr = nil
@@ -255,17 +277,22 @@ module DTK; class ComponentDSL; class V2
           else
             raise Error.new("Do not treat external ref type: #{type}")
           end
-          ret[key] = override_val||ext_ref_assigns[val_attr]
-        
+          key_val = override_val||ext_ref_assigns[val_attr]
+          #ignore if key_val is same as attribute
+          unless key_val === attr
+            ret[key] = override_val||ext_ref_assigns[val_attr]
+          end
+
           #get any other attributes in ext_ref
           (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
-          ret
+          ret.empty? ? nil : ret
         end
       end
 
       class LinkDef < self
         def self.external_link_def(assigns)
           ret = PrettyPrintHash.new
+          ret["type"] = "external"
           ret["required"] = true if assigns["required"]
           ret["possible_links"] = assigns["possible_links"].map{|pl| possible_link(pl)}
           ret

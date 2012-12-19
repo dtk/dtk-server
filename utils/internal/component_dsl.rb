@@ -76,14 +76,11 @@ module DTK
     end
 
     def migrate_processor(module_name,new_version_integer,input_hash)
-      self.class.load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(self,module_name,input_hash)
+      self.class.load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(@config_agent_type,module_name,input_hash)
     end
 
     def self.version()
       VersionIntegerToVersion[version_integer()]
-    end
-    def version()
-      self.class.version()
     end
    private
     def self.version_integer()

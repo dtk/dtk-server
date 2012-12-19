@@ -1,15 +1,16 @@
 module DTK; class ComponentDSL; class V2
   class MigrateProcessor
-    def initialize(parent,module_name,old_version_hash)
+    def initialize(version,config_agent_type,module_name,old_version_hash)
       @module_name = module_name
       @old_version_hash = old_version_hash
-      @parent = parent
+      @version = version
+      @module_type = module_type(config_agent_type)
     end
     def generate_new_version_hash()
       ret = PrettyPrintHash.new
       ret["module_name"] = @module_name
-      ret["version"] = @parent.version()
-      ret["module_type"] = module_type(@parent.config_agent_type)
+      ret["version"] = @version
+      ret["module_type"] = @module_type
       cmps = ret["components"] = PrettyPrintHash.new
       @old_version_hash.each do |cmp_ref,cmp_info|
         cmps.merge!(strip_module_name(cmp_ref)=> migrate(:component,cmp_ref,cmp_info))

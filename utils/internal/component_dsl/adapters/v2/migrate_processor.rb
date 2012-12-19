@@ -38,7 +38,7 @@ module DTK; class ComponentDSL; class V2
         if val = assigns[proc_vars[:key]]
           ref = nil
           if proc_vars[:custom_fn]
-            val = CustomFn.send(proc_vars[:custom_fn].to_sym,val)
+            val = CustomFn.const_get(type.to_s.capitalize).send(proc_vars[:custom_fn].to_sym,val)
           elsif proc_vars[:migrate_type]
             if proc_vars[:has_ref]
               ref = val.keys.first
@@ -47,6 +47,8 @@ module DTK; class ComponentDSL; class V2
               val = migrate(proc_vars[:migrate_type],nil,val)
             end
           end
+
+          next if proc_vars[:skip_if_nil] and val.nil?
 
           new_key = proc_vars[:new_key]
           if ret[new_key].nil?
@@ -95,7 +97,7 @@ module DTK; class ComponentDSL; class V2
        if attr_proc_info.kind_of?(Hash)
          ret[:key] = attr_proc_info.keys.first.to_s
          info = attr_proc_info.values.first
-         ret.merge!(Aux::hash_subset(info,[:new_key,:type,:custom_fn,:has_ref]))
+         ret.merge!(Aux::hash_subset(info,[:new_key,:type,:custom_fn,:has_ref,:skip_if_nil]))
          ret[:new_key] ||= ret[:key]
          ret[:new_key] = ret[:new_key].to_s
         else
@@ -108,8 +110,9 @@ module DTK; class ComponentDSL; class V2
       :component =>
       [
        :description,
+       {:external_ref => {:new_key => :only_one_per_node,:custom_fn => :only_one_per_node, :skip_if_nil => true}},
        {:external_ref => {:custom_fn => :external_ref}},
-       {:basic_type => {:new_key => :type}},
+       {:basic_type => {:new_key => :type, :skip_if_nil => true}},
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
        {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}},
@@ -131,167 +134,199 @@ module DTK; class ComponentDSL; class V2
 
     ModuleComponentSeperator  = "::"
 
-    class CustomFnBase; class << self
-     def qualified_component_ref(cmp_ref)
-       cmp_ref.gsub(/__/,ModuleComponentSeperator)
-     end
-
-     def map_in_array_form(assigns,&block)
-       ret_singleton_form = Array.new
-       ndx_ret = Hash.new
-       assigns.each do |ref,info|
-         el = block.call(ref,info)
-         if el.size == 1 
-           key = el.keys.first
-           val = el.values.first
-           if ndx_ret[key]
-             if ndx_ret[key][:single_el]
-               ndx_ret[key] = {:els => [ndx_ret[key][:els],val],:single_el => false} 
-             else
-               ndx_ret[key][:els] << val
-             end
-           else
-             ndx_ret[key] = {:els => val,:single_el => true}
-           end
-         else
-           ret_singleton_form << el
-         end
-       end
-      ret_singleton_form + ndx_ret.map{|k,v|{k => v[:els]}}
-     end
-
-    end; end
-
-    class CustomFn < CustomFnBase; class << self
-      def external_ref(ext_ref_assigns)
-        ret = PrettyPrintHash.new
-        key = type = ext_ref_assigns["type"]
-        val_attr = nil
-        override_val = nil
-        case type
-        when "puppet_class"
-          val_attr = "class_name"
-        when "puppet_definition"
-          val_attr = "definition_name"
-        when "puppet_attribute"
-          val_attr = "path"
-          override_val = (ext_ref_assigns["path"] =~ /node\[[^\]]+\]\[([^\]]+)/; $1)
-        else
-          raise Error.new("Do not treat external ref type: #{type}")
-        end
-        ret[key] = override_val||ext_ref_assigns[val_attr]
-        
-        #get any other attributes in ext_ref
-        (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
-        ret
+    class CustomFn
+      def self.qualified_component_ref(cmp_ref)
+        cmp_ref.gsub(/__/,ModuleComponentSeperator)
       end
 
-      def attributes(attrs_assigns)
-        #TODO: may sort alphabetically (same for othetr lists)
-        attrs_assigns.inject(PrettyPrintHash.new) do |h,(attr,attr_info)|
-          h.merge(attr => CustomFn.attribute(attr_info))
-        end
-      end
-
-      def attribute(attr_info)
-        ret = PrettyPrintHash.new
-        %w{description data_type}.each{|k|ret[k] = attr_info[k] if attr_info[k]}
-        ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
-        ret["external_ref"] =  CustomFn.external_ref(attr_info["external_ref"])
-        ret
-      end
-      
-      def external_link_defs(external_link_defs)
-        ret = PrettyPrintHash.new
-        external_link_defs.each do |external_link_def|
-          type = external_link_def["type"]
-          if ret[type]
-            raise Error.new("Unexpected that more than one instance of link def type (#{type})")
+      def self.map_in_array_form(assigns,&block)
+        ret_singleton_form = Array.new
+        ndx_ret = Hash.new
+        assigns.each do |ref,info|
+          el = block.call(ref,info)
+          if el.size == 1 
+            key = el.keys.first
+            val = el.values.first
+            if ndx_ret[key]
+              if ndx_ret[key][:single_el]
+                ndx_ret[key] = {:els => [ndx_ret[key][:els],val],:single_el => false} 
+              else
+                ndx_ret[key][:els] << val
+              end
+            else
+              ndx_ret[key] = {:els => val,:single_el => true}
+            end
+          else
+            ret_singleton_form << el
           end
-          ret[type] = CustomFn.external_link_def(external_link_def)
         end
-        ret
+        ret_singleton_form + ndx_ret.map{|k,v|{k => v[:els]}}
       end
 
-      def external_link_def(assigns)
-        ret = PrettyPrintHash.new
-        ret["required"] = true if assigns["required"]
-        ret["possible_links"] = assigns["possible_links"].map{|pl| CustomFn.possible_link(pl)}
-        ret
-      end
-
-      def possible_link(assigns)
-        remote_cmp_ref = qualified_component_ref(assigns.keys.first)
-        info = assigns.values.first
-        unless info.keys == ["attribute_mappings"]
-          raise Error.new("TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
+      class Component < self
+        def self.only_one_per_node(ext_ref_assigns)
+          type = ext_ref_assigns["type"]
+          ["puppet_definition"].include?(type) ? true : nil
         end
-        possible_link_info = PrettyPrintHash.new
-        possible_link_info["attribute_mappings"] = info["attribute_mappings"].map{|am|CustomFn.attribute_mapping(am)}
-        {remote_cmp_ref => possible_link_info}
-      end
 
-      def attribute_mapping(assigns)
-        unless assigns.kind_of?(Hash) and assigns.size == 1
-          raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
-        end
-        {CustomFn.atriibute_mapping_attr(assigns.keys.first) => CustomFn.atriibute_mapping_attr(assigns.values.first)}
-      end
-
-      def atriibute_mapping_attr(var)
-        parts = var.split(".")
-        parts[0] = ([":remote_node",":local_node"].include?(parts[0]) ? parts[0] : qualified_component_ref(parts[0])).gsub(/^:/,"")
-        parts.join(".")
-      end
-
-      def ui(assigns)
-        CustomFn.ui__single_png(assigns)||assigns
-      end
-      def ui__single_png(assigns)
-        return unless assigns.size == 1 and assigns.keys.first == "images"
-      
-        image_assigns = assigns.values.first
-        return unless image_assigns.keys.sort == ["display","tiny","tnail"]
+        def self.external_ref(ext_ref_assigns)
+          ret = PrettyPrintHash.new
+          key = type = ext_ref_assigns["type"]
+          val_attr = nil
+          override_val = nil
+          case type
+          when "puppet_class"
+            val_attr = "class_name"
+          when "puppet_definition"
+            val_attr = "definition_name"
+          when "puppet_attribute"
+            val_attr = "path"
+            override_val = (ext_ref_assigns["path"] =~ /node\[[^\]]+\]\[([^\]]+)/; $1)
+          else
+            raise Error.new("Do not treat external ref type: #{type}")
+          end
+          ret[key] = override_val||ext_ref_assigns[val_attr]
         
-        return unless image_assigns["tiny"].empty?
-        return unless image_assigns["tnail"] == image_assigns["display"]
-        {"image_icon" => image_assigns["tnail"]}
+          #get any other attributes in ext_ref
+          (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
+          ret
+        end
+
+        def self.attributes(attrs_assigns)
+          #TODO: may sort alphabetically (same for othter lists)
+          attrs_assigns.inject(PrettyPrintHash.new) do |h,(attr,attr_info)|
+            h.merge(attr => Attribute.attribute(attr_info))
+          end
+        end
+
+        def self.external_link_defs(external_link_defs)
+          ret = PrettyPrintHash.new
+          external_link_defs.each do |external_link_def|
+            type = external_link_def["type"]
+            if ret[type]
+              raise Error.new("Unexpected that more than one instance of link def type (#{type})")
+            end
+            ret[type] = LinkDef.external_link_def(external_link_def)
+          end
+          ret
+        end
+
+        def self.ui(assigns)
+          ui__single_png(assigns)||assigns
+        end
+
+        def self.ui__single_png(assigns)
+          return unless assigns.size == 1 and assigns.keys.first == "images"
+      
+          image_assigns = assigns.values.first
+          return unless image_assigns.keys.sort == ["display","tiny","tnail"]
+          
+          return unless image_assigns["tiny"].empty?
+          return unless image_assigns["tnail"] == image_assigns["display"]
+          {"image_icon" => image_assigns["tnail"]}
+        end
+      
+        def self.dependencies(deps_assigns)
+          map_in_array_form(deps_assigns){|ref,dep_assign| Constraint.dependency(ref,dep_assign)}
+        end
+
+        def self.component_order_rels(assigns)
+          map_in_array_form(assigns){|ref,cmp_order_rel| Constraint.component_order_rel(ref,cmp_order_rel)}
+        end
       end
       
-      def dependencies(deps_assigns)
-        map_in_array_form(deps_assigns){|ref,dep_assign| CustomFn.dependency(ref,dep_assign)}
-      end
-      def dependency(ref,dep_assign)
-        ret = CustomFn.dependency__requires(ref,dep_assign)
-        unless ret
-          raise Error.new("TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
+      class Attribute < self
+        def self.attribute(attr_info)
+          ret = PrettyPrintHash.new
+          %w{description data_type}.each{|k|ret[k] = attr_info[k] if attr_info[k]}
+          ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
+          ret["external_ref"] =  external_ref(attr_info["external_ref"])
+          ret
         end
-        ret
-      end
-      def dependency__requires(ref,dep_assign)
-        return unless dep_assign["type"] == "component"
-        return unless filter = (dep_assign["search_pattern"]||{})[":filter"]
-        return unless filter[0] == ":eq" and filter[1] == ":component_type"
-        require_cmp = qualified_component_ref(filter[2])
-        {"requires_component" => require_cmp}
-      end
-
-      def component_order_rels(assigns)
-        map_in_array_form(assigns){|ref,cmp_order_rel| CustomFn.component_order_rel(ref,cmp_order_rel)}
-      end
-      def component_order_rel(ref,cmp_order_rel)
-        ret = CustomFn.component_order_rel__after(ref,cmp_order_rel)
-
-        unless ret
-          ret = "TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
+        def self.external_ref(ext_ref_assigns)
+          ret = PrettyPrintHash.new
+          key = type = ext_ref_assigns["type"]
+          val_attr = nil
+          override_val = nil
+          case type
+          when "puppet_attribute"
+            val_attr = "path"
+            override_val = (ext_ref_assigns["path"] =~ /node\[[^\]]+\]\[([^\]]+)/; $1)
+          else
+            raise Error.new("Do not treat external ref type: #{type}")
+          end
+          ret[key] = override_val||ext_ref_assigns[val_attr]
+        
+          #get any other attributes in ext_ref
+          (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
+          ret
         end
-        ret
       end
-      def component_order_rel__after(ref,cmp_order_rel)
-        return unless cmp_order_rel.keys == ["after"]
-        {"after_component" =>  qualified_component_ref(cmp_order_rel["after"])}
-      end
-    end; end
 
+      class LinkDef < self
+        def self.external_link_def(assigns)
+          ret = PrettyPrintHash.new
+          ret["required"] = true if assigns["required"]
+          ret["possible_links"] = assigns["possible_links"].map{|pl| possible_link(pl)}
+          ret
+        end
+
+        def self.possible_link(assigns)
+          remote_cmp_ref = qualified_component_ref(assigns.keys.first)
+          info = assigns.values.first
+          unless info.keys == ["attribute_mappings"]
+            raise Error.new("TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
+          end
+          possible_link_info = PrettyPrintHash.new
+          possible_link_info["attribute_mappings"] = info["attribute_mappings"].map{|am|attribute_mapping(am)}
+          {remote_cmp_ref => possible_link_info}
+        end
+
+        def self.attribute_mapping(assigns)
+          unless assigns.kind_of?(Hash) and assigns.size == 1
+            raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
+          end
+          {atriibute_mapping_attr(assigns.keys.first) => atriibute_mapping_attr(assigns.values.first)}
+        end
+
+        def self.atriibute_mapping_attr(var)
+          parts = var.split(".")
+          parts[0] = ([":remote_node",":local_node"].include?(parts[0]) ? parts[0] : qualified_component_ref(parts[0])).gsub(/^:/,"")
+          parts.join(".")
+        end
+      end
+
+      class Constraint < self
+        def self.ependency(ref,dep_assign)
+          ret = requires(ref,dep_assign)
+          unless ret
+            raise Error.new("TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
+          end
+          ret
+        end
+
+        def self.requires(ref,dep_assign)
+          return unless dep_assign["type"] == "component"
+          return unless filter = (dep_assign["search_pattern"]||{})[":filter"]
+          return unless filter[0] == ":eq" and filter[1] == ":component_type"
+          require_cmp = qualified_component_ref(filter[2])
+          {"requires_component" => require_cmp}
+        end
+
+        def self.component_order_rel(ref,cmp_order_rel)
+          ret = component_order_rel__after(ref,cmp_order_rel)
+
+          unless ret
+            ret = "TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
+          end
+          ret
+        end
+
+        def self.component_order_rel__after(ref,cmp_order_rel)
+          return unless cmp_order_rel.keys == ["after"]
+          {"after_component" =>  qualified_component_ref(cmp_order_rel["after"])}
+        end
+      end
+    end
   end
 end; end; end

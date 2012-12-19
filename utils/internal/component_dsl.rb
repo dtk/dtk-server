@@ -42,7 +42,7 @@ module DTK
     #returns array where each element with keys :path,:hash_content
     def migrate(module_name,new_dsl_integer_version,format_type)
       ret = Array.new
-      migrate_proc = self.class.migrate_processor(module_name,new_dsl_integer_version,input_hash)
+      migrate_proc = migrate_processor(module_name,new_dsl_integer_version,input_hash)
       hash_content = migrate_proc.generate_new_version_hash()
       ret << {:path => self.class.dsl_filename(@config_agent_type,format_type,new_dsl_integer_version),:hash_content => hash_content,:format_type => format_type}
       ret
@@ -64,7 +64,7 @@ module DTK
       R8::Config[:dsl][:component][:version][:default].to_i
     end
 
-    attr_reader :input_hash
+    attr_reader :input_hash,:config_agent_type
     def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
       @config_agent_type = config_agent_type
       @input_hash = version_parse_check_and_normalize(version_specific_input_hash)
@@ -75,12 +75,15 @@ module DTK
       end
     end
 
-    def self.migrate_processor(module_name,new_version_integer,input_hash)
-      load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(module_name,input_hash)
+    def migrate_processor(module_name,new_version_integer,input_hash)
+      self.class.load_and_return_version_adapter_class(new_version_integer).ret_migrate_processor(self,module_name,input_hash)
     end
 
     def self.version()
       VersionIntegerToVersion[version_integer()]
+    end
+    def version()
+      self.class.version()
     end
    private
     def self.version_integer()

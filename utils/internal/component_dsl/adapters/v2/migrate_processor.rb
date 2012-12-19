@@ -1,6 +1,6 @@
 module DTK; class ComponentDSL; class V2
   class MigrateProcessor
-    def initialize(module_name,parent,old_version_hash)
+    def initialize(parent,module_name,old_version_hash)
       @module_name = module_name
       @old_version_hash = old_version_hash
       @parent = parent
@@ -9,7 +9,7 @@ module DTK; class ComponentDSL; class V2
       ret = PrettyPrintHash.new
       ret["module_name"] = @module_name
       ret["version"] = @parent.version()
-      ret["module_type"] = "puppet_module" #TODO: hard-wired
+      ret["module_type"] = module_type(@parent.config_agent_type)
       cmps = ret["components"] = PrettyPrintHash.new
       @old_version_hash.each do |cmp_ref,cmp_info|
         cmps.merge!(strip_module_name(cmp_ref)=> migrate(:component,cmp_ref,cmp_info))
@@ -17,6 +17,14 @@ module DTK; class ComponentDSL; class V2
       ret
     end
    private
+    def module_type(config_agent_type)
+      case config_agent_type
+        when :puppet then "puppet_module"
+        when :chef then "chef_module"
+        else raise Error.new("Unexepected config_agent_type (#{config_agent_type})")
+      end
+    end
+
     def migrate(type,ref,assigns)
       unless TypesTreated.include?(type)
         raise Error.new("Migration of type (#{type}) not yet treated")

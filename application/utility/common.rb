@@ -121,6 +121,9 @@ eos
   end
 
   def migrate_metafile(module_name)
+    raise Error.new("Function has been deprecated")
+=begin
+#TODO: probably deprecate: it is also out of date so wil not work
     component_module_mh = pre_execute(:component_module)
     sp_hash = {
       :cols => [:id,:dispaly_name],
@@ -146,7 +149,9 @@ eos
     new_path = "dtk-meta.puppet.json"
     impl.add_file_and_push_to_repo(new_path,content,:is_meta_file => true)
     "#{repo[:local_dir]}/#{new_path}"
+=end
   end
+
 
   def ret_idhs(mn,hash_content,container_idh)
     (hash_content[mn]||{}).keys.map do |key|

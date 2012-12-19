@@ -8,8 +8,8 @@ module DTK
       def self.normalize(input_hash)
         input_hash
       end
-      def self.ret_migrate_processor(module_name,old_version_hash)
-        MigrateProcessor.new(module_name,self,old_version_hash)
+      def self.ret_migrate_processor(parent,module_name,old_version_hash)
+        MigrateProcessor.new(parent,module_name,old_version_hash)
       end
     end
   end

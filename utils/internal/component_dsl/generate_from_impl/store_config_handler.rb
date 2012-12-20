@@ -1,7 +1,7 @@
-module XYZ
+module DTK
   module StoreConfigHandlerMixin
     class StoreConfigHandler
-      extend CommonGenerateMetaMixin
+      extend CommonGenerateDSLMixin
       def self.set_output_attribute!(attribute_meta,exp_rsc_ps)
         klass = ret_klass(exp_rsc_ps[:name])
         klass.process_output_attr!(attribute_meta,exp_rsc_ps)

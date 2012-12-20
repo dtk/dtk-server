@@ -25,7 +25,7 @@ include XYZ::PuppetParser
 r8_parse = parse_given_filename(file)
 #pp r8_parse
 begin
-meta_generator = XYZ::GenerateMeta.create("1.0")
+meta_generator = XYZ::GenerateDSL.create()
 #TODO: should be able to figure this out "puppet" from r8_parse
 refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 #pp refinement_hash

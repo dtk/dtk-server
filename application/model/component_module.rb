@@ -229,7 +229,6 @@ module DTK
     end
 
    private
-    #TODO: update so not hard-coded to use yaml and version 1
     def self.parse_to_create_dsl?(module_name,config_agent_type,impl_obj)
       ret = nil
       return ret if ComponentDSL.filename?(impl_obj)
@@ -238,7 +237,7 @@ module DTK
       render_hash = nil
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        meta_generator = GenerateMeta.create(ComponentDSL.default_integer_version())
+        meta_generator = GenerateDSL.create()
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e

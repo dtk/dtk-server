@@ -4,6 +4,7 @@
 module DTK
   class ComponentDSL
     r8_nested_require('component_dsl','update_model')
+    r8_nested_require('component_dsl','generate_from_impl')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 

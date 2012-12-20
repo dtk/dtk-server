@@ -22,7 +22,6 @@ files =
    'create_thread', 
    'eventmachine_helper',
    'extract',
-   'generate_meta',
    'component_dsl',
    'action_results_queue',
    'simple_action_queue',

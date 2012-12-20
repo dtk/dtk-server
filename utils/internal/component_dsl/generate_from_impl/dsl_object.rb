@@ -1,5 +1,5 @@
-  #TODO: when have multiple versions may dynamically load
-  #require File.expand_path("generate_meta/versions/V1.0.rb", File.dirname(__FILE__))
+  #TODO: when have multiple integer_versions may dynamically load
+  #require File.expand_path("generate_meta/integer_versions/V1.0.rb", File.dirname(__FILE__))
 module DTK; class ComponentDSL
   class GenerateFromImpl
     module CommonMixin
@@ -12,7 +12,7 @@ module DTK; class ComponentDSL
       end
       
       def create_external_ref(name,type)
-        RenderHash.new([{"name" => name},{"type" => type}])
+        DSLObject::RenderHash.new([{"name" => name},{"type" => type}])
       end
       
       def sanitize_attribute(attr)
@@ -175,14 +175,14 @@ module DTK; class ComponentDSL
       end
       
       def klass(type)
-        mod = XYZ.const_get "V#{version.gsub(".","_")}"
+        version_class = ComponentDSL.load_and_return_version_adapter_class(integer_version())
         cap_type = type.to_s.split("_").map{|t|t.capitalize}.join("")
-        mod.const_get "#{cap_type}DSL"
+        version_class.const_get("DSLObject").const_get(cap_type)
       end
 
       #context
-      def version()
-        (@context||{})[:version]
+      def integer_version()
+        (@context||{})[:integer_version]
       end
       def module_name()
         (@context||{})[:module_name]
@@ -525,7 +525,7 @@ module DTK; class ComponentDSL
           ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
         end
       end
-    end
+
 
     #TODO: may deprecate
     #handles intermediate state where objects may be unknown and just need users input
@@ -570,7 +570,7 @@ module DTK; class ComponentDSL
         YAML::dump(yaml_form(),io)
         io << "\n"
       end
-      #since yaml generator is beiung used want to remove references so dont generate yaml with labels
+      #since yaml generator is being used want to remove references so dont generate yaml with labels
       def yaml_form(level=1)
         ret = RenderHash.new
         each do |k,v|
@@ -592,3 +592,4 @@ module DTK; class ComponentDSL
     end
   end
 end; end
+    end

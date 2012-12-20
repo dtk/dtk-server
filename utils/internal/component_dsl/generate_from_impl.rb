@@ -9,10 +9,15 @@ module DTK; class ComponentDSL
       new(integer_version)
     end
     SupportedIntegerVersions = [1,2]
+   
+    def initialize(integer_version)
+      @integer_version = integer_version
+    end
+    private :initialize
 
     def generate_refinement_hash(parse_struct,module_name,impl_idh)
       context = {
-        :version => @version,
+        :integer_version => @integer_version,
         :module_name => module_name,
         :config_agent_type => parse_struct.config_agent_type,
         :implementation_id => impl_idh.get_id()
@@ -21,7 +26,7 @@ module DTK; class ComponentDSL
     end
 
     def self.save_dsl_info(meta_info_hash,impl_mh)
-      version = meta_info_hash["version"]
+      integer_version = meta_info_hash["version"]
       config_agent_type = meta_info_hash["config_agent_type"]
       module_name = meta_info_hash["module_name"]
       components = meta_info_hash["components"]
@@ -36,8 +41,8 @@ module DTK; class ComponentDSL
       library_idh = impl_idh.createIDH(:model_name => :library,:id => impl_obj[:library_library_id])
       repo_obj = Model.get_obj(impl_idh.createMH(:repo),{:cols => [:id,:local_dir], :filter => [:eq, :id, impl_obj[:repo_id]]})
                                        
-      meta_generator = create(version)
-      object_form = meta_generator.reify(module_hash,module_name,config_agent_type)
+      dsl_generator = create(integer_version)
+      object_form = dsl_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
 
       r8meta_hash.delete("version") #TODO: currently version not handled in add_components_from_r8meta
@@ -56,16 +61,12 @@ module DTK; class ComponentDSL
     
     def reify(hash,module_name,config_agent_type)
       context = {
-        :version => @version,
+        :integer_version => @integer_version,
         #TODO: do we neeed module_name and :config_agent_type for reify?
         :module_name => module_name,
         :config_agent_type => config_agent_type
       }
       DSLObject.new(context).reify(hash)
-    end
-   private
-    def initialize(version)
-      @version = version
     end
   end
 end; end

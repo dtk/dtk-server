@@ -1,8 +1,9 @@
 #TODO: modify for that the abstract classes do what is below and the hash_render fn is what makes teh difference;
 #this is because dont want to modify interface to front end
-module XYZ
-  module V1_0
-    class ModuleMeta < ::XYZ::ModuleMeta
+module DTK; class ComponentDSL; class V1
+  Base = ComponentDSL::GenerateFromImpl::DSLObject
+  class DSLObject
+    class Module < Base::Module
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["version"] = "1.0"
@@ -13,7 +14,7 @@ module XYZ
         ret
       end
     end
-    class ComponentMeta < ::XYZ::ComponentMeta
+    class Component < Base::Component
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["display_name"] = required_value(:display_name)
@@ -67,7 +68,7 @@ module XYZ
       end
     end
 
-    class DependencyMeta < ::XYZ::DependencyMeta
+    class Dependency < Base::Dependency
       def render_hash_form(opts={})
         #TODO: stub
         ret = RenderHash.new
@@ -75,7 +76,7 @@ module XYZ
       end
     end
 
-    class LinkDefMeta < ::XYZ::LinkDefMeta
+    class LinkDef < Base::LinkDef
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["type"] = required_value(:type)
@@ -87,7 +88,7 @@ module XYZ
       end
     end
 
-    class LinkDefPossibleLinkMeta < ::XYZ::LinkDefPossibleLinkMeta
+    class LinkDefPossibleLink < Base::LinkDefPossibleLink
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["type"] = required_value(:type)
@@ -97,7 +98,7 @@ module XYZ
       end
     end
 
-    class LinkDefAttributeMappingMeta  < ::XYZ::LinkDefAttributeMappingMeta
+    class LinkDefAttributeMapping  < Base::LinkDefAttributeMapping
       def render_hash_form(opts={})
         input = self[:input]
         output = self[:output]
@@ -113,7 +114,7 @@ module XYZ
       end
     end
 
-    class AttributeMeta < ::XYZ::AttributeMeta
+    class Attribute < Base::Attribute
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret["display_name"] = required_value(:field_name)
@@ -136,4 +137,4 @@ module XYZ
       end
     end
   end
-end
+end; end; end

@@ -13,7 +13,7 @@ module XYZ
 
     class << self 
       def create_users_private_library?(model_handle)
-        user_obj = CurrentSession.get_user_object()
+        user_obj = CurrentSession.new.get_user_object()
         private_group_obj = user_obj.get_private_group()
         library_mh = model_handle.createMH(:model_name => :library, :group_id => private_group_obj[:id])
         username = user_obj[:username]
@@ -28,7 +28,7 @@ module XYZ
       end
 
       def get_users_private_library(model_handle,username=nil)
-        username ||=  CurrentSession.get_username()
+        username ||=  CurrentSession.new.get_username()
         sp_hash = {
           :cols => [:id,:display_name,:group_id],
           :filter => [:eq,:display_name,users_private_library_name(username)] 

@@ -117,7 +117,7 @@ module XYZ
         end
         new_index = max+1
         suffix = (new_index == 1 ? "" : "-#{new_index.to_s}")
-        username = CurrentSession.get_username()
+        username = CurrentSession.new.get_username()
         new_repo_username = "dtk-#{type}-#{username}#{suffix}"
       end
       [new_repo_username,new_index]

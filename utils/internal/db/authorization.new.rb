@@ -19,7 +19,7 @@ module XYZ
     def process_user_info_aux!(scalar_assigns,model_or_id_handle,columns=nil)
       to_add = Hash.new
       #cleanup if everything should come from model or id handle
-      user_obj = CurrentSession.get_user_object()
+      user_obj = CurrentSession.new.get_user_object()
       if user_obj
         update_if_needed!(to_add,columns,scalar_assigns,CONTEXT_ID,user_obj[:c])
         update_if_needed!(to_add,columns,scalar_assigns,:owner_id,user_obj[:id])
@@ -49,7 +49,7 @@ module XYZ
 
     def augment_for_authorization(where_clause,model_handle)
       conjoin_set = where_clause ? [where_clause] : Array.new 
-      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : CurrentSession.get_auth_filters()
+      auth_filters = NoAuth.include?(model_handle[:model_name]) ? nil : CurrentSession.new.get_auth_filters()
       if auth_filters 
 =begin
 create_dataset_found = caller.select{|x|x =~ /create_dataset'/}
@@ -82,7 +82,7 @@ end
 
     def process_session_auth(auth_filters)
       ret =  Array.new
-      user_obj = CurrentSession.get_user_object()
+      user_obj = CurrentSession.new.get_user_object()
       return ret unless user_obj
       auth_filters.each do |auth_filter|
         if auth = auth_context[auth_filter]

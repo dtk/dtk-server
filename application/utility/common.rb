@@ -196,7 +196,7 @@ eos
     user_obj[:username]
   end
   def pre_execute(model_name=nil)
-    CurrentSession.set_user_object(user_obj)
+    CurrentSession.new.set_user_object(user_obj)
     if model_name 
       model_name == :top ? user_mh.create_top() : user_mh.createMH(model_name)
     end

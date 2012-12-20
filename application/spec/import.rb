@@ -73,7 +73,7 @@ container_idh = XYZ::IDHandle[:c => 2, :uri => container_uri, :user_id => user_o
 opts.merge!(:username => username)
 opts.merge!(:add_implementations => {:version => Implementation[:version], :library => Library, :base_directory => BaseDir})
 
-XYZ::CurrentSession.set_user_object(user_obj)
+XYZ::CurrentSession.new.set_user_object(user_obj)
 XYZ::Object.import_objects_from_file(container_idh,import_file,opts)
 
 

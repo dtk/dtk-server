@@ -4,13 +4,10 @@ module XYZ
 
       unless route.first == "user"
         login_first unless R8::Config[:development_test_user] #TODO unless clause for testing
-        session = CurrentSession.new
 
-        # TODO: Temp fix until we see why it does not see set_user_object method sometimes
-        if session.respond_to?(:set_user_object)
-          session.set_user_object(user_object())
-          session.set_auth_filters(:c,:group_ids)
-        end
+        session = CurrentSession.new
+        session.set_user_object(user_object())
+        session.set_auth_filters(:c,:group_ids)
       end
 
       @json_response = true if ajax_request? 

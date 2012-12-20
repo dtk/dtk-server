@@ -115,7 +115,7 @@ module XYZ
     end
 
     def self.private_user_repo_name(module_name,module_specific_type)
-      username = CurrentSession.get_username()
+      username = CurrentSession.new.get_username()
       incorporate_module_type(module_specific_type,"#{username}-#{module_name}")
 
     end

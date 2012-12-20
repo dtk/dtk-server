@@ -324,7 +324,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       class Constraint < self
-        def self.ependency(ref,dep_assign)
+        def self.dependency(ref,dep_assign)
           ret = requires(ref,dep_assign)
           unless ret
             raise Error.new("TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")

@@ -25,12 +25,11 @@ module DTK
       end
       content = RepoManager.get_file_content(dsl_filename, :implementation => source_impl)
       target_impl ||= source_impl
-      create_from_file_obj_hash?(target_impl,{:path => dsl_filename},content,container_idh)
+      create_from_file_obj_hash?(target_impl,dsl_filename,content,container_idh)
     end
     #creates a ComponentDSL if file_obj_hash is a r8meta file
-    def self.create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh=nil)
-      filename =  file_obj_hash[:path]
-      return nil unless isa_dsl_filename?(filename)
+    def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,container_idh=nil)
+      return nil unless isa_dsl_filename?(dsl_filename)
       parsed_name = parse_dsl_filename(dsl_filename)
       module_branch_idh = target_impl.get_module_branch().id_handle()
       input_hash = convert_to_hash(content,parsed_name[:format_type])

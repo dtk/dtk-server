@@ -25,7 +25,7 @@ module XYZ
 
       #special processing if this the meta file
       target_impl = self[:implementation]
-      if component_dsl = ComponentDSL.create_from_file_obj_hash?(target_impl,self,content)
+      if component_dsl = ComponentDSL.create_from_file_obj_hash?(target_impl,self[:path],content)
         component_dsl.update_model()
       end
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)

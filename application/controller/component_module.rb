@@ -11,16 +11,16 @@ module XYZ
       rest_ok_response module_repo_info
     end
 
-    #TODO: rename to rest__update_repo_and_add_meta_data(), input field :scaffold_if_no_meta -> :scaffold_if_no_dsl and output field :meta_created -> :dsl_craeted
-    def rest__update_repo_and_add_meta_data()
+    #TODO: rename to rest__update_repo_and_add_dsl_data(), input field :scaffold_if_no_dsl -> :scaffold_if_no_dsl and output field :dsl_created -> :dsl_craeted
+    def rest__update_repo_and_add_dsl()
       repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
-      version,scaffold = ret_request_params(:version,:scaffold_if_no_meta)
+      version,scaffold = ret_request_params(:version,:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold}
       repo_idh = id_handle(repo_id,:repo)
       library_idh = id_handle(library_id,:library)
       project = get_default_project()
       dsl_created = ComponentModule.update_repo_and_add_dsl(repo_idh,library_idh,project,module_name,version,opts)[:dsl_created]
-      rest_ok_response :meta_created => dsl_created
+      rest_ok_response :dsl_created => dsl_created
     end
 
     def rest__update_model_from_clone()

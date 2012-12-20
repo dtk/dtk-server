@@ -165,7 +165,7 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_dsl = ComponentDSL.create_dsl_object(augmented_branch[:implementation])
+          component_dsl = ComponentDSL.create_dsl_object_from_impl(augmented_branch[:implementation])
           component_dsl.update_model()
         end
 
@@ -186,7 +186,7 @@ module DTK
           target_impl.modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_dsl = ComponentDSL.create_dsl_object(target_impl)
+          component_dsl = ComponentDSL.create_dsl_object_from_impl(target_impl)
           component_dsl.update_model()
         end
       

@@ -18,17 +18,15 @@ module DTK
       input_hash = convert_to_hash(content,format_type)
       new(parsed_name[:config_agent_type],impl.id_handle(),module_branch.id_handle(),input_hash)
     end
-
-    def self.create_dsl_object(source_impl,container_idh=nil,target_impl=nil)
-      unless meta_filename = filename?(source_impl)
-        raise Error.new("No component meta file found")
+    #TODO: should unify above and two below
+    def self.create_dsl_object_from_impl(source_impl,container_idh=nil,target_impl=nil)
+      unless dsl_filename = filename?(source_impl)
+        raise Error.new("Cannot find DSL file")
       end
-      file_obj_hash = {:path => meta_filename,:implementation => source_impl}
-      content = RepoManager.get_file_content(file_obj_hash,{:implementation => source_impl})
+      content = RepoManager.get_file_content(dsl_filename, :implementation => source_impl)
       target_impl ||= source_impl
-      create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh)
+      create_from_file_obj_hash?(target_impl,{:path => dsl_filename},content,container_idh)
     end
-
     #creates a ComponentDSL if file_obj_hash is a r8meta file
     def self.create_from_file_obj_hash?(target_impl,file_obj_hash,content,container_idh=nil)
       filename =  file_obj_hash[:path]

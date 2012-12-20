@@ -134,7 +134,7 @@ module DTK
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
         target_impl = lib_branch.get_implementation()
-        component_dsl = ComponentDSL.create_dsl_object(source_impl,library_idh,target_impl)
+        component_dsl = ComponentDSL.create_dsl_object_from_impl(source_impl,library_idh,target_impl)
         component_dsl.update_model()
       end
     end

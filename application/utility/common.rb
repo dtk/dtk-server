@@ -142,7 +142,7 @@ eos
     end
     impl = impls.first
 
-    dsl = ComponentDSL.create_meta_file_object(impl)
+    dsl = ComponentDSL.create_dsl_object(impl)
     new_version_integer = 2 
     hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_version_integer,dsl.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)

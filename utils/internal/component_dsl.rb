@@ -19,7 +19,7 @@ module DTK
       new(parsed_name[:config_agent_type],impl.id_handle(),module_branch.id_handle(),input_hash)
     end
 
-    def self.create_meta_file_object(source_impl,container_idh=nil,target_impl=nil)
+    def self.create_dsl_object(source_impl,container_idh=nil,target_impl=nil)
       unless meta_filename = filename?(source_impl)
         raise Error.new("No component meta file found")
       end

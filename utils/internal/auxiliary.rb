@@ -100,6 +100,28 @@ module XYZ
         key_value.values.first
       end
 
+      def serialize(hash_content,format_type)
+        case format_type
+          when :json
+            JSON.pretty_generate(hash_content)
+          when :yaml
+            YAML.dump(hash_content)
+          else
+            raise Error.new("Format (#{format_format}) is not treated")
+        end
+      end
+
+      def convert_to_hash(content,format_type)
+        case format_type
+          when :json
+            JSON.parse(content)
+          when :yaml
+            YAML.load(content)
+          else
+            raise Error.new("Format (#{format_type}) is not treated")
+        end
+      end
+
       def hash_from_file_with_json(file_name)
         return nil unless File.exists?(file_name)
         ret = nil

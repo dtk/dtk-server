@@ -393,9 +393,9 @@ module XYZ
       end
       ret
     end
+
     def commit(message,*array_opts)
       set_author?()
-      #TODO: see why dont need "-a" here. Also may make resilient by checking if anything to commit
       git_command.commit(cmd_opts(),'-m',message,*array_opts)
     end
 
@@ -444,8 +444,13 @@ module XYZ
         begin
           @grit_git.send(name,*args,&block)
         rescue ::Grit::Git::CommandFailed => e
-          error_msg = "Grit error: #{e.err}; exitstatus=#{e.exitstatus}; command='#{e.command}'"
-          raise Error.new(error_msg)
+          #e.err empty is being interpretad as no error
+          if e.err.nil? or e.err.empty?
+            Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
+          else
+            error_msg = "Grit error: #{e.err}; exitstatus=#{e.exitstatus}; command='#{e.command}'"
+            raise Error.new(error_msg)
+          end
          rescue => e
           raise e
         end

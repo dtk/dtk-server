@@ -75,7 +75,7 @@ module XYZ
       #this wil add any file_assets that have not been yet added (this will include the r8meta file
       impl_obj.create_file_assets_from_dir_els()
 
-      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
+      ComponentDSL.add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
 
       impl_obj.add_contained_files_and_push_to_repo()
     end

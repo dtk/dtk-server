@@ -4,6 +4,10 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def get_type()
+      update_object!(:type)[:type].to_sym
+    end
+
     def pp_version()
       update_object!(:version)
       (self[:version] == BranchNameDefaultVersion) ? nil : self[:version]
@@ -19,10 +23,26 @@ module DTK
       RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
     end
 
-    def serialize_and_save_to_repo(file_path,hash_content)
-      content = JSON.pretty_generate(hash_content)
-      RepoManager.add_file({:path => file_path},content,self)
-      RepoManager.push_changes(self)
+    #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
+    def serialize_and_save_to_repo(*args)
+      files = 
+      if args.size == 1
+        args[0]
+      else
+        [{:path => args[0],:hash_content => args[1],:format_type => args[2]||default_dsl_format_type()}]
+      end
+      unless files.empty?
+        files.each do |file_info|
+          content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
+          RepoManager.add_file({:path => file_info[:path]},content,self)
+        end
+        RepoManager.push_changes(self)
+      end
+    end
+    
+    def self.default_dsl_format_type()
+      index = (get_type() == :service_module ? :service : :component)
+      R8::Config[:dsl][index][:encoding][:default].to_sym
     end
 
     def self.update_library_from_workspace?(ws_branches,opts={})
@@ -33,7 +53,7 @@ module DTK
         matching_branches = ws_branches
       else
         sample_ws_branch = ws_branches.first
-        type = sample_ws_branch.update_object!(:type)[:type].to_sym
+        type = sample_ws_branch.get_type()
         sp_hash = {
           :cols => cols_for_matching_library_branches(type),
           :filter => [:oneof, :id, ws_branches.map{|r|r.id_handle().get_id()}]
@@ -145,8 +165,8 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_meta_file = ComponentMetaFile.create_meta_file_object(augmented_branch[:implementation])
-          component_meta_file.update_model()
+          component_dsl = ComponentDSL.create_dsl_object_from_impl(augmented_branch[:implementation])
+          component_dsl.update_model()
         end
 
         #update the repo
@@ -166,8 +186,8 @@ module DTK
           target_impl.modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_meta_file = ComponentMetaFile.create_meta_file_object(target_impl)
-          component_meta_file.update_model()
+          component_dsl = ComponentDSL.create_dsl_object_from_impl(target_impl)
+          component_dsl.update_model()
         end
       
         #update the repo

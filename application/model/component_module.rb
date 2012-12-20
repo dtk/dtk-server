@@ -45,20 +45,20 @@ module DTK
 
     #assumes library repo branch create; it updates this, creates workspace branch and then adds meta to workspace branch so it does
     #not show up in library until user promotes it.
-    #TODO: consider whether combined functionality of create_empty_repo and update_repo_and_add_meta_data shoudl just create ws branch
-    #returns  {:meta_created => meta_created}
-    def self.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version=nil,opts={})
+    #TODO: consider whether combined functionality of create_empty_repo and update_repo_and_add_dsl should just create ws branch
+    #returns has with key :dsl_created
+    def self.update_repo_and_add_dsl(repo_idh,library_idh,project,module_name,version=nil,opts={})
       repo = repo_idh.create_object()
       branch_info = {
         :workspace_branch => ModuleBranch.workspace_branch_name(project),
         :library_branch => ModuleBranch.library_branch_name(library_idh)
       }
       repo.update_for_new_repo(branch_info.values) 
-      module_and_mb_info = create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts)
+      module_and_mb_info = update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version=nil,opts)
       library_mb = module_and_mb_info[:module_branch_idh].create_object()
       module_obj = module_and_mb_info[:module_idh].create_object() 
       module_obj.create_workspace_branch?(project,version,library_idh,library_mb)
-      {:meta_created => module_and_mb_info[:meta_created]}
+      {:dsl_created => module_and_mb_info[:dsl_created]}
     end
 
     def create_new_version(new_version,existing_version=nil)
@@ -84,7 +84,7 @@ module DTK
       new_lib_branch_name = ModuleBranch.library_branch_name(library_idh,new_version)
       repo = id_handle(:model_name => :repo, :id => ws_branch[:repo_id]).create_object()
       ws_branch.add_library_branch?(new_lib_branch_name)
-      self.class.create_objects_for_library_module(repo,library_idh,module_name,new_version)
+      self.class.update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,new_version)
     end
 
     def info_about(about)
@@ -134,8 +134,8 @@ module DTK
         library_idh = id_handle().get_parent_id_handle_with_auth_info()
         source_impl = ws_branch.get_implementation()
         target_impl = lib_branch.get_implementation()
-        component_meta_file = ComponentMetaFile.create_meta_file_object(source_impl,library_idh,target_impl)
-        component_meta_file.update_model()
+        component_dsl = ComponentDSL.create_dsl_object_from_impl(source_impl,library_idh,target_impl)
+        component_dsl.update_model()
       end
     end
     private :promote_to_library__meta_changes
@@ -212,52 +212,33 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
+    def create_new_dsl_version(new_dsl_integer_version,format_type)
+      module_name =  update_object!(:display_name)[:display_name]
+      unless new_dsl_integer_version == 2
+        raise Error.new("component_module.create_new_dsl_version only implemeneted when target version is 2")
+      end
+      previous_dsl_version = new_dsl_integer_version-1 
+      matching_branches = get_module_branches_matching_version()
+      module_branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
+
+      #create in memory dsl object using old version
+      component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
+      #create from component_dsl teh new version dsl
+      dsl_paths_and_content = component_dsl.migrate(module_name,new_dsl_integer_version,format_type)
+      module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
+    end
+
    private
-    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
-      impl = module_branch.get_implementation()
-      if diffs_summary.meta_file_changed?()
-        ComponentMetaFile.update_model(impl,module_branch.id_handle())
-      end
-      #TODO: assembly_template_ws_item
-      promote_to_library(version)
-    end
-
-    def self.import_postprocess(repo,library_idh,module_name,version)
-      create_objects_for_library_module(repo,library_idh,module_name,version)[:module_branch_idh]
-    end
-    
-    #returns  {:module_branch_idh => module_branch_idh, :meta_created => meta_created}
-    def self.create_objects_for_library_module(repo,library_idh,module_name,version=nil,opts={})
-      config_agent_type = :puppet #TODO: hard wired
-      branch_name = ModuleBranch.library_branch_name(library_idh,version)
-      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
-
-      parsing_error = nil
-      meta_created = nil
-      if opts[:scaffold_if_no_meta]
-        begin
-          meta_created = parse_to_create_meta?(module_name,config_agent_type,impl_obj)
-         rescue => e
-          parsing_error = e
-        end
-      end
-      impl_obj.create_file_assets_from_dir_els()
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
-      module_branch_idh = module_and_branch_info[:module_branch_idh]
-      raise parsing_error if parsing_error
-      ComponentMetaFile.update_model(impl_obj,module_branch_idh,version) unless meta_created
-      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :meta_created => meta_created}
-    end
-
-    def self.parse_to_create_meta?(module_name,config_agent_type,impl_obj)
+    #TODO: update so not hard-coded to use yaml and version 1
+    def self.parse_to_create_dsl?(module_name,config_agent_type,impl_obj)
       ret = nil
-      return nil if ComponentMetaFile.filename_if_exists?(impl_obj)
+      return ret if ComponentDSL.filename?(impl_obj)
       
       parsing_error = nil
       render_hash = nil
       begin
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        meta_generator = GenerateMeta.create(ComponentMetaDSLVersion)
+        meta_generator = GenerateMeta.create(ComponentDSL.default_integer_version())
         refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e
@@ -268,15 +249,52 @@ module DTK
         raise e
       end
       if render_hash 
-        content = YAML.dump(render_hash.yaml_form())
-        meta_filename = ComponentMetaFile.filename(config_agent_type)
-        ret = {:path => meta_filename, :content => content}
+        #TODO: encapsulate this
+        format_type = :yaml
+        content = Aux.serialize(render_hash.yaml_form(),format_type)
+        dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)
+        ret = {:path => dsl_filename, :content => content}
       end
       raise parsing_error if parsing_error
       ret
     end
-    ComponentMetaDSLVersion = "1.0"
 
+    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
+      impl = module_branch.get_implementation()
+      if diffs_summary.meta_file_changed?()
+        ComponentDSL.update_model(impl,module_branch.id_handle())
+      end
+      #TODO: assembly_template_ws_item
+      promote_to_library(version)
+    end
+
+    def self.import_postprocess(repo,library_idh,module_name,version)
+      update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version)[:module_branch_idh]
+    end
+    
+    #returns  hash with keys :module_branch_idh,:dsl_created
+    #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
+    def self.update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version=nil,opts={})
+      config_agent_type = :puppet #TODO: hard wired
+      branch_name = ModuleBranch.library_branch_name(library_idh,version)
+      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
+
+      parsing_error = nil
+      dsl_created = nil
+      if opts[:scaffold_if_no_dsl]
+        begin
+          dsl_created = parse_to_create_dsl?(module_name,config_agent_type,impl_obj)
+         rescue => e
+          parsing_error = e
+        end
+      end
+      impl_obj.create_file_assets_from_dir_els()
+      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+      raise parsing_error if parsing_error
+      ComponentDSL.update_model(impl_obj,module_branch_idh,version) unless dsl_created
+      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :dsl_created => dsl_created}
+    end
 
     def export_preprocess(branch)
       #noop

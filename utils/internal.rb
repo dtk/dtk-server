@@ -23,7 +23,7 @@ files =
    'eventmachine_helper',
    'extract',
    'generate_meta',
-   'component_meta_file',
+   'component_dsl',
    'action_results_queue',
    'simple_action_queue',
    'async_response'

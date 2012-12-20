@@ -31,7 +31,7 @@ module XYZ
       require 'yaml'
       r8meta_hash = YAML.load_file(r8meta_path)
 
-      ComponentMetaFile.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
+      ComponentDSL.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
 
       impl_obj.add_contained_files_and_push_to_repo()
       {:content => {}}

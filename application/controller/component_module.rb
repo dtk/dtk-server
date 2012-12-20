@@ -11,15 +11,16 @@ module XYZ
       rest_ok_response module_repo_info
     end
 
+    #TODO: rename to rest__update_repo_and_add_meta_data(), input field :scaffold_if_no_meta -> :scaffold_if_no_dsl and output field :meta_created -> :dsl_craeted
     def rest__update_repo_and_add_meta_data()
       repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
       version,scaffold = ret_request_params(:version,:scaffold_if_no_meta)
-      opts = {:scaffold_if_no_meta => scaffold}
+      opts = {:scaffold_if_no_dsl => scaffold}
       repo_idh = id_handle(repo_id,:repo)
       library_idh = id_handle(library_id,:library)
       project = get_default_project()
-      meta_created = ComponentModule.update_repo_and_add_meta_data(repo_idh,library_idh,project,module_name,version,opts)[:meta_created]
-      rest_ok_response :meta_created => meta_created
+      dsl_created = ComponentModule.update_repo_and_add_dsl(repo_idh,library_idh,project,module_name,version,opts)[:dsl_created]
+      rest_ok_response :meta_created => dsl_created
     end
 
     def rest__update_model_from_clone()
@@ -132,6 +133,15 @@ module XYZ
       workspace_branch_info = component_module.create_workspace_branch?(project,version)
       rest_ok_response workspace_branch_info
     end
+
+    def rest__create_new_dsl_version()
+      component_module = create_obj(:component_module_id)
+      dsl_version = ret_non_null_request_params(:dsl_version).to_i
+      format = :json
+      component_module.create_new_dsl_version(dsl_version,format)
+      rest_ok_response 
+    end
+
     #### end: actions to manage workspace and promote changes from workspace to library ###
 
     def rest__push_to_mirror()

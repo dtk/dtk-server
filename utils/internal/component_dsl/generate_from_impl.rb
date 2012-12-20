@@ -1,9 +1,8 @@
 module DTK; class ComponentDSL
   class GenerateFromImpl
-    r8_nested_require("generate_from_impl","store_config_handler")
     r8_nested_require("generate_from_impl","dsl_object")
     def self.create(integer_version=nil)
-      integer_version ||= default_integer_version()
+      integer_version ||= ComponentDSL.default_integer_version()
       unless SupportedIntegerVersions.include?(integer_version)
         raise Error.new("Unexpected version (#{version})")
       end

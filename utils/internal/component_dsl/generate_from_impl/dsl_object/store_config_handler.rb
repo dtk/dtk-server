@@ -1,7 +1,7 @@
-module DTK
+module DTK; class ComponentDSL; class GenerateFromImpl
   module StoreConfigHandlerMixin
     class StoreConfigHandler
-      extend CommonGenerateDSLMixin
+      extend CommonMixin
       def self.set_output_attribute!(attribute_meta,exp_rsc_ps)
         klass = ret_klass(exp_rsc_ps[:name])
         klass.process_output_attr!(attribute_meta,exp_rsc_ps)
@@ -128,4 +128,4 @@ module DTK
       end
     end 
   end
-end
+end; end; end

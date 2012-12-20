@@ -10,7 +10,7 @@ module DTK
 
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       impl = module_branch.get_implementation()
-      unless dsl_filename = filename?(impl,dsl_integer_version,format_type)
+      unless dsl_filename = contains_dsl_file?(impl,dsl_integer_version,format_type)
         raise Error.new("Cannot find DSL file")
       end
       parsed_name = parse_dsl_filename(dsl_filename)
@@ -21,7 +21,7 @@ module DTK
     end
     #TODO: should unify above and two below
     def self.create_dsl_object_from_impl(source_impl,container_idh=nil,target_impl=nil)
-      unless dsl_filename = filename?(source_impl)
+      unless dsl_filename = contains_dsl_file?(source_impl)
         raise Error.new("Cannot find DSL file")
       end
       content = RepoManager.get_file_content(dsl_filename, :implementation => source_impl)
@@ -46,7 +46,7 @@ module DTK
       ret
     end
 
-    def self.filename?(impl_obj,dsl_integer_version=nil,format_type=nil)
+    def self.contains_dsl_file?(impl_obj,dsl_integer_version=nil,format_type=nil)
       dsl_integer_version ||= integer_version(dsl_integer_version)
       unless regexp = DSLFilenameRegexp[dsl_integer_version]
         raise Error.new("Do not treat Component DSL version: #{dsl_integer_version.to_s}")

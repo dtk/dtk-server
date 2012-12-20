@@ -2,6 +2,13 @@ module XYZ
   class Component_moduleController < AuthController
     helper :module_helper
 
+def rest__test_generate_dsl()
+  component_module = create_obj(:component_module_id)
+  dsl_created = component_module.test_generate_dsl()
+  STDOUT << dsl_created[:content] << "/n"
+  rest_ok_response
+end
+
     #### create and delete actions ###
     def create_empty_repo()
       module_name = ret_non_null_request_params(:component_module_name)

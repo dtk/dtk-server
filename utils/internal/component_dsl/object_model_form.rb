@@ -36,6 +36,9 @@ module DTK; class ComponentDSL
           replace(hash)
         end
       end
+      def set_if_not_nil(key,val)
+        self[key] = val unless val.nil?
+      end
     end
 
     class ParsingError < ErrorUsage

@@ -5,7 +5,7 @@ module XYZ
 def rest__test_generate_dsl()
   component_module = create_obj(:component_module_id)
   dsl_created = component_module.test_generate_dsl()
-  STDOUT << dsl_created[:content] << "/n"
+  STDOUT << dsl_created[:content] << "\n"
   rest_ok_response
 end
 

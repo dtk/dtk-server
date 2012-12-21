@@ -263,7 +263,7 @@ module DTK
       end
       if render_hash 
         #TODO: encapsulate this
-        format_type = R8::Config[:dsl][:component][:encoding][:default].to_sym
+        format_type = R8::Config[:dsl][:component][:format_type][:default].to_sym
         content = Aux.serialize(render_hash.yaml_form(),format_type)
         dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)
         ret = {:path => dsl_filename, :content => content}

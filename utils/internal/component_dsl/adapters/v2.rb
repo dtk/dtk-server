@@ -4,11 +4,12 @@ module DTK
       r8_nested_require('v2','migrate_processor')
       r8_nested_require('v2','parser')
       r8_nested_require('v2','dsl_object')
+      r8_nested_require('v2','convert_to_object_model_form')
       def self.parse_check(input_hash)
         #TODO: stub
       end
       def self.normalize(input_hash)
-        input_hash
+        ObjectModelForm.new.convert(input_hash)
       end
       def self.ret_migrate_processor(config_agent_type,module_name,old_version_hash)
         new_version = version()

@@ -238,11 +238,23 @@ module DTK; class ComponentDSL
       end
       
       class RenderHash < SimpleOrderedHash
+        def serialize(format_type=nil)
+          format_type ||= ComponentDSL.default_format_type()
+          if format_type == :yaml
+            Aux.serialize(yaml_form(),format_type)
+          else
+            Aux.serialize(self,format_type)
+          end
+        end
+
+        #TODO: deprecate
         def write_yaml(io)
           require 'yaml'
           YAML::dump(yaml_form(),io)
           io << "\n"
         end
+
+       private
         #since yaml generator is being used want to remove references so dont generate yaml with labels
         def yaml_form(level=1)
           ret = RenderHash.new

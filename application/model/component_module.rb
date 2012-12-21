@@ -252,6 +252,7 @@ module DTK
       begin
         impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
         dsl_generator = ComponentDSL::GenerateFromImpl.create()
+        #refinement_hash is neutral form but with version specfic objects fro next phase
         refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name,impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form()
        rescue ErrorUsage => e
@@ -262,9 +263,8 @@ module DTK
         raise e
       end
       if render_hash 
-        #TODO: encapsulate this
-        format_type = R8::Config[:dsl][:component][:format_type][:default].to_sym
-        content = Aux.serialize(render_hash.yaml_form(),format_type)
+        format_type = ComponentDSL.default_format_type()
+        content = render_hash.serialize(format_type)
         dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)
         ret = {:path => dsl_filename, :content => content}
       end

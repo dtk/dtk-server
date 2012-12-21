@@ -62,6 +62,10 @@ module DTK
       R8::Config[:dsl][:component][:integer_version][:default].to_i
     end
 
+    def self.default_format_type()
+      R8::Config[:dsl][:component][:format_type][:default].to_sym
+    end
+
     attr_reader :input_hash,:config_agent_type
     def initialize(config_agent_type,impl_idh,module_branch_idh,version_specific_input_hash,container_idh=nil)
       @config_agent_type = config_agent_type

@@ -31,6 +31,12 @@ module DTK; class ComponentDSL; class V1
       def basic_type?()
         value(:basic_type)
       end
+      def component_type?()
+        required_value(:component_type)
+      end
+      def only_one_per_node?()
+        value(:only_one_per_node)
+      end
     end
 
     class Dependency < Base::Dependency
@@ -80,18 +86,14 @@ module DTK; class ComponentDSL; class V1
     end
 
     class Attribute < Base::Attribute
-      def render_hash_form(opts={})
-        ret = RenderHash.new
-        ret["display_name"] = required_value(:field_name)
-        ret.set_unless_nil("description",value(:description))
-        ret["data_type"] = required_value(:type)
-        ret.set_unless_nil("value_asserted",value(:default_info))
-        ret.set_unless_nil("required",value(:required))
-        ret.set_unless_nil("dynamic",value(:dynamic))
-        ret["external_ref"] = converted_external_ref()
-        ret
-      end
      private
+      def display_name?()
+        required_value(:field_name)
+      end
+      def data_type_field()
+        "data_type"
+      end
+
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new

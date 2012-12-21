@@ -89,25 +89,20 @@ module DTK; class ComponentDSL; class V2
     end
 
     class Attribute < Base::Attribute
-      def render_hash_form(opts={})
-        ret = RenderHash.new
-        ret["display_name"] = required_value(:field_name)
-        ret.set_unless_nil("description",value(:description))
-        ret["data_type"] = required_value(:type)
-        ret.set_unless_nil("value_asserted",value(:default_info))
-        ret.set_unless_nil("required",value(:required))
-        ret.set_unless_nil("dynamic",value(:dynamic))
-        ret["external_ref"] = converted_external_ref()
-        ret
-      end
      private
+      def data_type_field()
+        "type"
+      end
+
       def converted_external_ref()
-        ext_ref = required_value(:external_ref)
         ret = RenderHash.new
-        ret["type"] = ext_ref["type"]
-        ret["path"] = "node[#{module_name}][#{ext_ref["name"]}]"
+        ext_ref = required_value(:external_ref)
+        attr_name = ext_ref["name"]
+        unless attr_name == value(:id)
+          ret[ext_ref["type"]] = attr_name
+        end
         (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
-        ret
+        ret.empty? ? nil : ret
       end
     end
   end

@@ -1,3 +1,4 @@
+#TODO: better sepearte parts that are where creating refinement has and parts for rendering in dtk  dsl vrsion specfic form
 module DTK; class ComponentDSL
   class GenerateFromImpl
     class DSLObject
@@ -117,7 +118,7 @@ module DTK; class ComponentDSL
           return if opts[:reify]
           processed_name = component_ps[:name]
           #if qualified name make sure matches module name
-          if processed_name =~ /(^.+)::(.+$)/
+         if processed_name =~ /(^.+)::(.+$)/
             prefix = $1
             unqual_name = $2
             if processed_name =~ /::.+::/
@@ -155,8 +156,8 @@ module DTK; class ComponentDSL
           ret.set_unless_nil("ui",value(:ui))
           ret.set_unless_nil("basic_type",basic_type?())
           ret.set_unless_nil("type",type?())
-          ret["component_type"] = required_value(:component_type)
-          ret.set_unless_nil("only_one_per_node",value(:only_one_per_node))
+          ret.set_unless_nil("component_type",component_type?())
+          ret.set_unless_nil("only_one_per_node",only_one_per_node?())
           ret.set_unless_nil("dependency",converted_dependencies(opts))
           ret.set_unless_nil("attribute",converted_attributes(opts))
           ret.set_unless_nil("link_defs",converted_link_defs(opts))
@@ -214,6 +215,10 @@ module DTK; class ComponentDSL
         def basic_type?()
         end
         def type?()
+        end
+        def component_type?()
+        end
+        def only_one_per_node?()
         end
 
         def converted_dependencies(opts)
@@ -323,6 +328,18 @@ module DTK; class ComponentDSL
             raise Error.new("Unexpected parse structure type (#{parse_struct.class.to_s})")
           end  
         end
+
+        def render_hash_form(opts={})
+          ret = RenderHash.new
+          ret.set_unless_nil("display_name",display_name?())
+          ret.set_unless_nil("description",value(:description))
+          ret[data_type_field()] = required_value(:type)
+          ret.set_unless_nil("value_asserted",value(:default_info))
+          ret.set_unless_nil("required",value(:required))
+          ret.set_unless_nil("dynamic",value(:dynamic))
+          ret.set_unless_nil("external_ref",converted_external_ref())
+          ret
+        end
         
         def attr_num()
           (@context||[])[:attr_num]
@@ -396,6 +413,10 @@ module DTK; class ComponentDSL
         
         def existing_hash_keys()
           ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
+        end
+
+        #render hash methods
+        def display_name?()
         end
       end
     end

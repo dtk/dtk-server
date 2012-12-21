@@ -3,6 +3,7 @@ module DTK
     class V2 < self
       r8_nested_require('v2','migrate_processor')
       r8_nested_require('v2','parser')
+      r8_nested_require('v2','dsl_object')
       def self.parse_check(input_hash)
         #TODO: stub
       end

@@ -26,6 +26,8 @@ module DTK; class ComponentDSL
     end
 
     def self.save_dsl_info(meta_info_hash,impl_mh)
+      #TODO: check
+      raise Error.new("Need to cehck if meta_info_hash['version'] is right call")
       integer_version = meta_info_hash["version"]
       config_agent_type = meta_info_hash["config_agent_type"]
       module_name = meta_info_hash["module_name"]
@@ -44,8 +46,6 @@ module DTK; class ComponentDSL
       dsl_generator = create(integer_version)
       object_form = dsl_generator.reify(module_hash,module_name,config_agent_type)
       r8meta_hash = object_form.render_hash_form()
-
-      r8meta_hash.delete("version") #TODO: currently version not handled in add_components_from_r8meta
 
       r8meta_path = "#{repo_obj[:local_dir]}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)

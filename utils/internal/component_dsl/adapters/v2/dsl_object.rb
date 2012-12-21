@@ -25,6 +25,21 @@ module DTK; class ComponentDSL; class V2
     end
 
     class Component < Base::Component
+     private
+      def converted_external_ref()
+        ext_ref = required_value(:external_ref)
+        ret = RenderHash.new
+        #ext_ref["type"] will be "puppet_class" or "puppet_definition" for pupppet config agent
+        ret[ext_ref["type"]] = ext_ref["name"]
+        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
+        ret
+      end
+
+      def type?()
+        basic_type = value(:basic_type)
+        #'service' is default
+        basic_type == "service" ? nil : basic_type
+      end
     end
 
     class Dependency < Base::Dependency

@@ -148,12 +148,13 @@ module DTK; class ComponentDSL
 
         def render_hash_form(opts={})
           ret = RenderHash.new
-          ret["display_name"] = required_value(:display_name)
-          ret.set_unless_nil("label",value(:label))
+          ret.set_unless_nil("display_name",display_name?())
+          ret.set_unless_nil("label",label?())
           ret.set_unless_nil("description",value(:description))
           ret["external_ref"] = converted_external_ref()
           ret.set_unless_nil("ui",value(:ui))
-          ret.set_unless_nil("basic_type",value(:basic_type))
+          ret.set_unless_nil("basic_type",basic_type?())
+          ret.set_unless_nil("type",type?())
           ret["component_type"] = required_value(:component_type)
           ret.set_unless_nil("only_one_per_node",value(:only_one_per_node))
           ret.set_unless_nil("dependency",converted_dependencies(opts))
@@ -206,21 +207,15 @@ module DTK; class ComponentDSL
         end
 
         #for render_hash
-        def converted_external_ref()
-          ext_ref = required_value(:external_ref)
-          ret = RenderHash.new
-          ext_ref_key = 
-            case ext_ref["type"]
-            when "puppet_class" then "class_name"
-            when "puppet_definition" then "definition_name"
-            else raise Error.new("unexpected component type (#{ext_ref["type"]})")
-            end
-          #TODO: may need to append module name
-          ret[ext_ref_key] = ext_ref["name"]
-          ret["type"] = ext_ref["type"]
-          (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
-          ret
+        def display_name?()
+        end 
+        def label?()
         end
+        def basic_type?()
+        end
+        def type?()
+        end
+
         def converted_dependencies(opts)
           nil #TODO: stub
         end

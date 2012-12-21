@@ -6,6 +6,31 @@ module DTK; class ComponentDSL; class V1
     class Module < Base::Module
     end
     class Component < Base::Component
+     private
+      def converted_external_ref()
+        ext_ref = required_value(:external_ref)
+        ret = RenderHash.new
+        ext_ref_key = 
+          case ext_ref["type"]
+          when "puppet_class" then "class_name"
+          when "puppet_definition" then "definition_name"
+          else raise Error.new("unexpected component type (#{ext_ref["type"]})")
+          end
+        #TODO: may need to append module name
+        ret[ext_ref_key] = ext_ref["name"]
+        ret["type"] = ext_ref["type"]
+        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
+        ret
+      end
+      def display_name?()
+        required_value(:display_name)
+      end 
+      def label?()
+        value(:label)
+      end
+      def basic_type?()
+        value(:basic_type)
+      end
     end
 
     class Dependency < Base::Dependency

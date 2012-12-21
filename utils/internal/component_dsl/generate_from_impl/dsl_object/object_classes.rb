@@ -15,10 +15,11 @@ module DTK; class ComponentDSL
 
         def render_hash_form(opts={})
           ret = RenderHash.new
-          version = ComponentDSL.version(integer_version())
-          ret["version"] = version if version
+          ret.set_unless_nil("module_name",module_name?())
+          ret.set_unless_nil("version",ComponentDSL.version(integer_version()))
+          ret.set_unless_nil("module_type",module_type?())
           self[:components].each_element(:skip_required_is_false => true) do |cmp|
-            hash_key = cmp.hash_key
+            hash_key = render_cmp_ref(cmp.hash_key)
             ret[hash_key] = cmp.render_hash_form(opts)
           end
           ret
@@ -95,6 +96,19 @@ module DTK; class ComponentDSL
             end
           end
         end
+
+        #for render_hash
+        def module_name?()
+          nil
+        end
+
+        def module_type?()
+          nil
+        end
+
+        def render_cmp_ref(hash_key)
+          hash_key
+        end
       end
 
       class Component < self
@@ -131,6 +145,23 @@ module DTK; class ComponentDSL
           self[:dependencies] = dependencies unless dependencies.empty?
           set_attributes(component_ps)
         end
+
+        def render_hash_form(opts={})
+          ret = RenderHash.new
+          ret["display_name"] = required_value(:display_name)
+          ret.set_unless_nil("label",value(:label))
+          ret.set_unless_nil("description",value(:description))
+          ret["external_ref"] = converted_external_ref()
+          ret.set_unless_nil("ui",value(:ui))
+          ret.set_unless_nil("basic_type",value(:basic_type))
+          ret["component_type"] = required_value(:component_type)
+          ret.set_unless_nil("only_one_per_node",value(:only_one_per_node))
+          ret.set_unless_nil("dependency",converted_dependencies(opts))
+          ret.set_unless_nil("attribute",converted_attributes(opts))
+          ret.set_unless_nil("link_defs",converted_link_defs(opts))
+          ret
+        end
+
        private
         def object_attributes()
           [:attributes,:dependencies,:link_defs]
@@ -170,6 +201,42 @@ module DTK; class ComponentDSL
             name = child[:name]
             next unless is_foreign_component_name?(name)
             ret << name unless ret.include?(name)
+          end
+          ret
+        end
+
+        #for render_hash
+        def converted_external_ref()
+          ext_ref = required_value(:external_ref)
+          ret = RenderHash.new
+          ext_ref_key = 
+            case ext_ref["type"]
+            when "puppet_class" then "class_name"
+            when "puppet_definition" then "definition_name"
+            else raise Error.new("unexpected component type (#{ext_ref["type"]})")
+            end
+          #TODO: may need to append module name
+          ret[ext_ref_key] = ext_ref["name"]
+          ret["type"] = ext_ref["type"]
+          (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
+          ret
+        end
+        def converted_dependencies(opts)
+          nil #TODO: stub
+        end
+
+        def converted_link_defs(opts)
+          return nil unless lds = self[:link_defs]
+          lds.map_element(:skip_required_is_false => true){|ld|ld.render_hash_form(opts)}
+        end
+
+        def converted_attributes(opts)
+          attrs = self[:attributes]
+          return nil if attrs.nil? or attrs.empty?
+          ret = RenderHash.new
+          attrs.each_element(:skip_required_is_false => true) do |attr|
+            hash_key = attr.hash_key
+            ret[hash_key] = attr.render_hash_form(opts)
           end
           ret
         end

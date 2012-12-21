@@ -2,59 +2,29 @@ module DTK; class ComponentDSL; class V2
   Base = ComponentDSL::GenerateFromImpl::DSLObject
   class DSLObject
     class Module < Base::Module
-    end
-    class Component < Base::Component
-      def render_hash_form(opts={})
-        ret = RenderHash.new
-        ret["display_name"] = required_value(:display_name)
-        ret.set_unless_nil("label",value(:label))
-        ret.set_unless_nil("description",value(:description))
-        ret["external_ref"] = converted_external_ref()
-        ret.set_unless_nil("ui",value(:ui))
-        ret.set_unless_nil("basic_type",value(:basic_type))
-        ret["component_type"] = required_value(:component_type)
-        ret.set_unless_nil("only_one_per_node",value(:only_one_per_node))
-        ret.set_unless_nil("dependency",converted_dependencies(opts))
-        ret.set_unless_nil("attribute",converted_attributes(opts))
-        ret.set_unless_nil("link_defs",converted_link_defs(opts))
-        ret
-      end
-
      private
-      def converted_external_ref()
-        ext_ref = required_value(:external_ref)
-        ret = RenderHash.new
-        ext_ref_key = 
-          case ext_ref["type"]
-            when "puppet_class" then "class_name"
-            when "puppet_definition" then "definition_name"
-            else raise Error.new("unexpected component type (#{ext_ref["type"]})")
-          end
-        #TODO: may need to append module name
-        ret[ext_ref_key] = ext_ref["name"]
-        ret["type"] = ext_ref["type"]
-        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
-        ret
-      end
-      def converted_dependencies(opts)
-        nil #TODO: stub
+      def module_name?()
+        module_name()
       end
 
-      def converted_link_defs(opts)
-        return nil unless lds = self[:link_defs]
-        lds.map_element(:skip_required_is_false => true){|ld|ld.render_hash_form(opts)}
-      end
-
-      def converted_attributes(opts)
-        attrs = self[:attributes]
-        return nil if attrs.nil? or attrs.empty?
-        ret = RenderHash.new
-        attrs.each_element(:skip_required_is_false => true) do |attr|
-          hash_key = attr.hash_key
-          ret[hash_key] = attr.render_hash_form(opts)
+      def module_type?()
+        config_agent_type = config_agent_type()
+        case config_agent_type
+          when :puppet then "puppet_module"
+          else Log.error("not traeted yet config_agent type (#{config_agent_type})")
         end
-        ret
       end
+
+      def render_cmp_ref(cmp_ref)
+        strip_module_name(cmp_ref)
+      end
+
+      def strip_module_name(cmp_ref)
+        cmp_ref.gsub(Regexp.new("^#{module_name()}__"),"")
+      end
+    end
+
+    class Component < Base::Component
     end
 
     class Dependency < Base::Dependency

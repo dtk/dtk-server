@@ -1,10 +1,9 @@
-#TODO" unfify with generate_meta and import_export/import by moving these under component_dsl
 #TODO: in process of converting 'meta' to 'dsl'
-
 module DTK
   class ComponentDSL
     r8_nested_require('component_dsl','update_model')
     r8_nested_require('component_dsl','generate_from_impl')
+    r8_nested_require('component_dsl','object_model_form')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
@@ -100,8 +99,8 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-#pp ret
-#raise ErrorUsage.new("Testing")
+pp ret
+raise ErrorUsage.new("Testing")
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret

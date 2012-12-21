@@ -9,8 +9,9 @@ module DTK
         #TODO: stub
       end
       def self.normalize(input_hash)
-        ObjectModelForm.new.convert(input_hash)
+        ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
       end
+
       def self.ret_migrate_processor(config_agent_type,module_name,old_version_hash)
         new_version = version()
         MigrateProcessor.new(new_version,config_agent_type,module_name,old_version_hash)

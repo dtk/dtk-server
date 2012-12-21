@@ -91,8 +91,9 @@ module DTK
       $1.to_i
     end
     def version_parse_check_and_normalize(version_specific_input_hash)
-      version = version_specific_input_hash["version"]||"not_specified"
-      unless integer_version = VersionToVersionInteger[version]
+      version = version_specific_input_hash["version"]
+      integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
+      unless integer_version
         raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
       end
       klass = self.class.load_and_return_version_adapter_class(integer_version)
@@ -111,8 +112,8 @@ module DTK
       "#{DSLFilePrefixes[integer_version(dsl_integer_version)]}.#{config_agent_type}.#{TypeToExtension[format_type]}"
     end
 
+    VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
-#      "not_specified" => 1,
       "0.9" => 2
     }
     VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|

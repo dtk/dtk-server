@@ -4,7 +4,10 @@
 # for options related to running the application locally.
 require 'rubygems'
 require 'newrelic_rpm'
+require 'newrelic-sequel'
+
 require File.expand_path('app', File.dirname(__FILE__))
+
 ::NewRelic::Agent.manual_start
 
 is_development = ARGV[0] || false

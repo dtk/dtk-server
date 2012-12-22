@@ -40,9 +40,9 @@ module DTK
       end
     end
     
-    def self.default_dsl_format_type()
+    def default_dsl_format_type()
       index = (get_type() == :service_module ? :service : :component)
-      R8::Config[:dsl][index][:encoding][:default].to_sym
+      R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
     def self.update_library_from_workspace?(ws_branches,opts={})

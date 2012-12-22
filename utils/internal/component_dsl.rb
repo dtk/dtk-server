@@ -85,10 +85,6 @@ module DTK
       VersionIntegerToVersion[integer_version]
     end
    private
-    def self.integer_version()
-      to_s =~ /V([0-9]+$)/
-      $1.to_i
-    end
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["version"]
       integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
@@ -99,10 +95,10 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-
-pp ret
-raise ErrorUsage.new("Testing")
-
+if self.class.default_integer_version() == 2
+  pp ret
+  raise ErrorUsage.new("Still being worked on")
+end
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret
@@ -151,10 +147,16 @@ raise ErrorUsage.new("Testing")
         @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("component_dsl",adapter_name,opts)
       end
      private
-      def integer_version(pos_val)
+      def integer_version(pos_val=nil)
         pos_val ? pos_val.to_i : default_integer_version()
       end
-
+=begin
+TODO: this was old version; think want to remove
+    def self.integer_version()
+      to_s =~ /V([0-9]+$)/
+      $1.to_i
+    end
+=end
       def isa_dsl_filename?(filename,dsl_integer_version=nil)
         filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
       end

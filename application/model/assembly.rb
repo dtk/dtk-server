@@ -63,6 +63,11 @@ module DTK
       assembly[:component_type] ? assembly[:component_type].gsub(/__/,"::") : assembly[:display_name]
     end
 
+    def is_stopped?
+      filtered_nodes = get_nodes(:id,:admin_op_status).select { |node| node[:admin_op_status] == 'stopped' }
+      return (filtered_nodes.size > 0)
+    end
+
     class << self
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new

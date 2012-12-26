@@ -124,6 +124,16 @@ module DTK
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__create_task()
       assembly = ret_assembly_instance_object()
+
+      if assembly.is_stopped?
+        validate_params = [
+          :action => :start, 
+          :params => {:assembly_id => assembly[:id]}, 
+          :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
+        ]
+        return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
+      end
+
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg)
       task.save!()

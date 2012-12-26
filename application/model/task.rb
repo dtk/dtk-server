@@ -303,15 +303,19 @@ module XYZ
 
     #recursively walks structure, but returns them in flat list
     def get_all_subtasks()
+      self.class.get_all_subtasks([id_handle])
+    end
+    def self.get_all_subtasks(top_id_handles)
       ret = Array.new
-      id_handles = [id_handle]
+      id_handles = top_id_handles
 
       until id_handles.empty?
+        model_handle = id_handles.first.createMH()
         sp_hash = {
           :cols => Task.common_columns(),
           :filter => [:oneof,:task_id,id_handles.map{|idh|idh.get_id}] 
         }
-        next_level_objs = Model.get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
+        next_level_objs = get_objs(model_handle,sp_hash).reject{|k,v|k == :subtasks}
         next_level_objs.each{|st|st.reify!()}
         id_handles = next_level_objs.map{|obj|obj.id_handle}
 
@@ -322,7 +326,6 @@ module XYZ
     def reify!()
       self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type],self[:executable_action],id_handle)
     end
-    protected :reify!
 
     def self.get_hierarchical_structure(top_task_idh)
       sp_hash = {

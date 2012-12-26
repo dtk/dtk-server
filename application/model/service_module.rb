@@ -32,10 +32,11 @@ module DTK
     def self.delete(idh)
       module_obj = idh.create_object().update_object!(:display_name)
       module_name =  module_obj[:display_name]
-      unless module_obj.get_associated_target_instances().empty?
-        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target")
+      assoc_assemblies = module_obj.get_associated_target_instances()
+      unless assoc_assemblies.empty?
+        assembly_names = assoc_assemblies.map{|a|a[:display_name]}
+        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target (#{assembly_names.join(',')})")
       end
-
       repos = module_obj.get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})

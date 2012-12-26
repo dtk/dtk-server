@@ -1,6 +1,27 @@
 module DTK
   class Task; module StatusMixin
     class Status
+      def self.get_active_top_level_tasks(model_handle)
+        #TODO: need protection so dont get stake tasks that never came out of executing mode
+        filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
+        Task.get_top_level_tasks(model_handle,filter)
+      end
+
+      def self.find_nodes_that_are_active(model_handle)
+        ret = Array.new
+        model_handle = model_handle.createMH(:task)
+        top_level_active = get_active_top_level_tasks(model_handle)
+        return ret if top_level_active.empty?
+        #TODO: way to make call Task.get_all_subtasks faster 
+        ndx_ret = Hash.new
+        Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
+          if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
+            ndx_ret[node[:id]] ||= node
+          end
+        end
+        ndx_ret.values
+      end
+
      private
       def self.get_status_aux(task_obj_idh,task_obj_type,filter,opts={})
         task_mh = task_obj_idh.createMH(:task)

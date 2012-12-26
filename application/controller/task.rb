@@ -3,25 +3,21 @@ module XYZ
     helper :task_helper
 
     def rest__status()
-      if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "replay"
-        return rest_ok_response(debug_mock_replay())
-      end
-      hash = request.params
-      task_id = hash["task_id"] && hash["task_id"].to_i
+      task_id,detail_level =  ret_request_params(:task_id,:detail_level)
+      detail_level =  (detail_level||:summary).to_sym
       unless task_id
         #TODO: use Task.get_top_level_most_recent_task(model_handle,filter=nil)
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end
       opts = Task::Status::Opts.new
-      if :summary == (hash["detail_level"]||:summary).to_sym
+      if detail_level == :summary
         opts[:no_components] = true
         opts[:no_attributes] = true
       end
 
       task_structure = Task.get_hierarchical_structure(id_handle(task_id))
       state_info = task_structure.status_hash_form(opts)
-      debug_mock_record(state_info) if defined? R8::EnvironmentConfig::TaskMockMode and  R8::EnvironmentConfig::TaskMockMode == "record"
       rest_ok_response state_info
     end
 

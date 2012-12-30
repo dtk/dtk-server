@@ -2,7 +2,8 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
  class Repo
     class Remote
-      def initialize(rest_base_url=default_rest_base_url())
+      def initialize(remote_repo=nil)
+        rest_base_url = rest_base_url(remote_repo)
         @client = RepoManagerClient.new(rest_base_url)
       end
 
@@ -76,6 +77,12 @@ module DTK
         client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
       end
 
+      def default_remote_repo()
+        self.class.default_remote_repo()
+      end
+      def self.default_remote_repo()
+        :r8_network #TODO: have this obtained from config file
+      end
       def self.default_namespace()
         DefaultsNamespace
       end
@@ -99,7 +106,12 @@ module DTK
         module_type.to_s.gsub(/_module$/,"")
       end
 
-      def default_rest_base_url()
+      def rest_base_url(remote_repo=nil)
+        unless remote_repo.nil? or remote_repo == default_remote_repo()
+          raise Error.new("MOD_RESTRUCT:  need to put in logic to treat non default repo_name")
+        end
+        #TODO: change config so that it has ability to have multiple repos and use form like
+        #remote = ::R8::Config[:repo][:remote][remote_repo]
         remote = ::R8::Config[:repo][:remote]
         "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end

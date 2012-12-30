@@ -265,19 +265,20 @@ module DTK
 
   module ModuleClassMixin
     #import from remote repo
-    def import(library_idh,remote_module_name,remote_namespace,version=nil)
+    def import(project,remote_repo,remote_module_name,remote_namespace,version=nil)
       module_name = remote_module_name
 
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      if module_obj = module_exists?(library_idh,module_name)
+      branch = ModuleBranch.workspace_branch_name(project)
+      if module_obj = module_exists?(project.id_handle(),module_name)
         if module_obj.get_module_branch(branch)
-          raise ErrorUsage.new("Conflicts with existing library module (#{pp_module_name(module_name,version)})")
+          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(module_name,version)})")
         end
       end
 
-      unless remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+      unless remote_module_info = Repo::Remote.new(remote_repo).get_module_info(remote_module_name,module_type(),remote_namespace)
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
       end
+#TODO: got here
       unless remote_module_info[:branches].include?(branch)
         raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not have version (#{version||"CURRENT"})")
       end
@@ -455,13 +456,16 @@ module DTK
       end.values
     end
 
-    def module_exists?(library_idh,module_name)
+    def module_exists?(project_idh,module_name)
+      unless project_idh[:model_name] == :project
+        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
+      end
       sp_hash = {
         :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
+        :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      module_branches = get_obj(library_idh.createMH(model_name()),sp_hash)
+      module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)

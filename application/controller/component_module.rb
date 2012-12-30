@@ -75,12 +75,13 @@ end
 
     #### end: list and info actions ###
     
-    #### actions to interact with remote repo ###
+    #### actions to interact with remote repos ###
     def rest__import()
-      library_idh = ret_library_idh_or_default()
+      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      project = get_default_project()
       ret_non_null_request_params(:remote_module_names).each do |name|
         remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
-        ComponentModule.import(library_idh,remote_module_name,remote_namespace,version)
+        ComponentModule.import(project,remote_repo,remote_module_name,remote_namespace,version)
       end
       rest_ok_response
     end

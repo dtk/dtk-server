@@ -78,6 +78,22 @@ module XYZ
       [repo_obj, impl_obj]
     end
 
+    def self.create_project_impl?(project_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
+      repo_obj.update_object!(:repo_name)
+      impl_ref = ref(config_agent_type,module_name,branch)
+      impl_hash = {
+        :display_name => version ? "#{module_name}(#{version})" : module_name,
+        :type => ImplementationType[config_agent_type],
+        :repo => repo_obj[:repo_name],
+        :repo_id => repo_obj[:id],
+        :project_project_id => project_idh.get_id(),
+        :version => branch
+      }
+      impl_mh = project_idh.create_childMH(:implementation)
+      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
+      impl_idh.create_object().merge(impl_hash)
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
     def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
       repo_obj.update_object!(:repo_name)
       impl_ref = ref(config_agent_type,module_name,branch)

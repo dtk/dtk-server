@@ -281,10 +281,43 @@ module DTK
       promote_to_library(version)
     end
 
-    def self.import_postprocess(repo,library_idh,module_name,version)
-      update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version)[:module_branch_idh]
+    def self.import_postprocess(repo,project_idh,module_name,version)
+      unless project_idh[:model_name] == :project
+        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
+      end
+
+      update_ws_module_objs_and_create_dsl?(repo,project_idh,module_name,version)[:module_branch_idh]
     end
     
+    #returns  hash with keys :module_branch_idh,:dsl_created
+    #dsl_created is either nil or hash keys: path, :conent
+    #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit
+    #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
+    def self.update_ws_module_objs_and_create_dsl?(repo,project_idh,module_name,version=nil,opts={})
+      config_agent_type = :puppet #TODO: hard wired
+      branch_name = ModuleBranch.project_branch_name(project_idh,version)
+      impl_obj = Implementation.create_project_impl?(project_idh,repo,module_name,config_agent_type,branch_name,version)
+
+      parsing_error = nil
+      dsl_created = nil
+      if opts[:scaffold_if_no_dsl]
+        begin
+          dsl_created = parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
+         rescue => e
+          parsing_error = e
+        end
+      end
+      impl_obj.create_file_assets_from_dir_els()
+      module_and_branch_info = create_ws_module_and_branch_obj?(project_idh,repo.id_handle(),module_name,version)
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+      raise parsing_error if parsing_error
+      #if dsl_created then dont update model (this wil eb done when users optionally edits and commits)
+      ComponentDSL.update_model(impl_obj,module_branch_idh,version) unless dsl_created
+      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :dsl_created => dsl_created}
+    end
+
+    #MOD_RESTRUCT: TODO: deprecate below for above
+
     #returns  hash with keys :module_branch_idh,:dsl_created
     #dsl_created is either nil or hash keys: path, :conent
     #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit

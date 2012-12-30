@@ -238,6 +238,20 @@ module DTK
       end.values
     end
 
+    def self.ret_ws_create_hash(parent_model_name,project_idh,repo_idh,version=nil)
+      branch =  project_branch_name(project_idh,version)
+      assigns = {
+        :display_name => branch,
+        :branch => branch,
+        :repo_id => repo_idh.get_id(),
+        :is_workspace => true,
+        :type => parent_model_name.to_s
+      }
+      assigns[:version] = version||BranchNameDefaultVersion
+      ref = branch
+      {ref => assigns}
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
     def self.ret_lib_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
       branch =  library_branch_name(library_idh,version)
       assigns = {

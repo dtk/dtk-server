@@ -299,7 +299,7 @@ module DTK
       end
 
       repo.initial_synchronize_with_remote_repo(remote_params[:repo],branch)
-      module_branch_idh = import_postprocess(repo,library_idh,local_params[:module_name],remote_params[:version])
+      module_branch_idh = import_postprocess(repo,project_idh,local_params[:module_name],remote_params[:version])
       module_branch_idh
     end
 
@@ -466,6 +466,25 @@ module DTK
       module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
+    def create_ws_module_and_branch_obj?(project_idh,repo_idh,module_name,input_version)
+      ref = module_name
+      mb_create_hash = ModuleBranch.ret_ws_create_hash(model_name,project_idh,repo_idh,input_version)
+      version = mb_create_hash.values.first[:version]
+      create_hash = {
+        model_name.to_s => {
+          ref => {
+            :display_name => module_name,
+            :module_branch => mb_create_hash
+          }
+        }
+      }
+      input_hash_content_into_model(project_idh,create_hash)
+
+      module_branch = get_project_module_branch(project_idh,module_name,version)
+      module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
+      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)
       ref = module_name
       mb_create_hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh,input_version)
@@ -484,5 +503,6 @@ module DTK
       module_idh =  library_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
+
   end
 end

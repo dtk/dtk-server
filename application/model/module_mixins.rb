@@ -265,22 +265,20 @@ module DTK
 
   module ModuleClassMixin
     #import from remote repo
-    def import(project,remote_repo,remote_module_name,remote_namespace,version=nil)
-      module_name = remote_module_name
-
+    def import(project,remote_params,local_params)
       branch = ModuleBranch.workspace_branch_name(project)
-      if module_obj = module_exists?(project.id_handle(),module_name)
+      if module_obj = module_exists?(project.id_handle(),local_params[:module_name])
         if module_obj.get_module_branch(branch)
-          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(module_name,version)})")
+          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_params[:module_name],remote_params[:version])})")
         end
       end
-
-      unless remote_module_info = Repo::Remote.new(remote_repo).get_module_info(remote_module_name,module_type(),remote_namespace)
-        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+      
+      remote_repo = Repo::Remote.new(remote_params[:repo])
+      unless remote_module_info = remote_repo.get_module_info(remote_params[:module_name],module_type(),remote_params[:namespace])
+        raise ErrorUsage.new("Remote module (#{remote_params[:namespace]}/#{remote_params[:module_name]}) does not exist")
       end
-#TODO: got here
       unless remote_module_info[:branches].include?(branch)
-        raise ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not have version (#{version||"CURRENT"})")
+        raise ErrorUsage.new("Remote module (#{remote_params[:namespace]}/#{remote_params[:module_name]}) does not have version (#{remote_params[:version]||"CURRENT"})")
       end
 
       #case on whether the module is created already
@@ -291,17 +289,17 @@ module DTK
         end
         repo = repos.first()
       else
-        #TODO: this will be done a priori (or not at all because of movingto model wheer duing create owner sets rights)
-        Repo::Remote.new.authorize_dtk_instance(remote_module_name,module_type())
+        #MOD_RESTRUCT: TODO: what entity gets authorized; also this shoudl be done a priori
+        remote_repo.authorize_dtk_instance(remote_params[:module_name],module_type())
 
         #create empty repo on local repo manager; 
         #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-        create_opts = {:remote_repo_name => remote_module_info[:git_repo_name],:remote_repo_namespace => remote_namespace,:delete_if_exists => true}
-        repo = create_empty_repo_and_local_clone(library_idh,module_name,component_type,create_opts)
+        create_opts = {:remote_repo_name => remote_module_info[:git_repo_name],:remote_repo_namespace => remote_params[:namespace],:delete_if_exists => true}
+        repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
 
-      repo.synchronize_with_remote_repo(branch)
-      module_branch_idh = import_postprocess(repo,library_idh,module_name,version)
+      repo.initial_synchronize_with_remote_repo(remote_params[:repo],branch)
+      module_branch_idh = import_postprocess(repo,library_idh,local_params[:module_name],remote_params[:version])
       module_branch_idh
     end
 
@@ -406,15 +404,15 @@ module DTK
       end
     end
 
-    def create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,opts={})
-      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
+    def create_empty_workspace_repo(project_idh,module_name,module_specific_type,opts={})
+      auth_repo_users = RepoUser.authorized_users(project_idh.createMH(:repo_user))
       repo_user_acls = auth_repo_users.map do |repo_username|
         {
           :repo_username => repo_username,
           :access_rights => "RW+"
         }
       end
-      Repo.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,opts)
+      Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 
     def get_library_module_branch(library_idh,module_name,version=nil)

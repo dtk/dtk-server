@@ -213,6 +213,7 @@ module XYZ
     end
 
     #TODO: update to use ret_merge_relationship
+    
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)
         git_command__fetch(remote_name)

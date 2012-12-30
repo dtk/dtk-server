@@ -107,6 +107,16 @@ module XYZ
 
     ###### for repo admin functions, such as creating and deleting repositories
 
+    def self.create_empty_workspace_repo(repo_obj,repo_user_acls,opts)
+      klass = load_and_return_adapter_class()
+      #create repo on repo server
+      klass.create_server_repo(repo_obj,repo_user_acls,opts) 
+      if R8::Config[:repo][:workspace][:use_local_clones]
+        klass.create_repo_clone(repo_obj,opts)
+      end
+    end
+
+    #MOD_RESTRUCT: TODO: deprecate below for above
     def self.create_repo_and_local_clone(repo_obj,repo_user_acls,opts={})
       klass = load_and_return_adapter_class()
       #create repo on repo server

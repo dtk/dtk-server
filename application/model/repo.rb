@@ -39,7 +39,6 @@ module XYZ
       RepoManager.create_empty_workspace_repo(repo_obj,repo_user_acls,opts) 
       repo_obj
     end
-    end
     #MOD_RESTRUCT: TODO: deprecate below for above
     def self.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name

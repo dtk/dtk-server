@@ -27,7 +27,7 @@
    :constraints,
    :component_relation,
    :implementation,
-   :component_module,
+   :component_module,#MOD_RESTRUCT: may remove
    :service_module
   ]
 }

@@ -32,7 +32,7 @@ module XYZ
         opts[k] ? h.merge(k => opts[k]) : h
       end
 
-      repo_mh = library_idh.createMH(:repo)
+      repo_mh = project_idh.createMH(:repo)
       repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
       repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify_model(repo_idh,repo_user_acls)

@@ -91,7 +91,7 @@ lambda__segment_components =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id,:version],:filter=>[:eq,:is_workspace,false]),
+      [lambda__segment_module_branches.call(:cols => [:id,:version],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_components.call(
         :cols => [:id,:display_name,:version],
         :filter=>[:eq,:assembly_id,nil])

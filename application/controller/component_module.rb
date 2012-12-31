@@ -49,7 +49,8 @@ end
 
     #### list and info actions ###
     def rest__list()
-      rest_ok_response ComponentModule.list(model_handle)
+      project = get_default_project()
+      rest_ok_response ComponentModule.list(model_handle, :project_idh => project.id_handle())
     end
 
     def rest__workspace_branch_info()

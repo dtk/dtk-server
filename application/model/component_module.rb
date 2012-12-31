@@ -154,7 +154,47 @@ module DTK
       get_objs_uniq(:target_instances)
     end
 
-    def self.list(mh,opts={})
+    #MOD_RESTRUCT: TODO: when dprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
+    def self.list(mh,opts)
+      if project_id = opts[:project_idh]
+        (list__library_parent(mh,opts) + list__project_parent(opts[:project_idh])).sort{|a,b|a[:display_name] <=> b[:display_name]}
+      else
+        list__library_parent(mh,opts)
+      end
+    end
+    def self.list__project_parent(project_idh)
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => [:eq, :project_project_id, project_idh.get_id()]
+      }
+      ndx_module_info = get_objs(project_idh.createMH(:component_module),sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
+
+      #get version info
+      sp_hash = {
+        :cols => [:component_id,:version],
+        :filter => [:and,[:oneof, :component_id, ndx_module_info.keys], [:neq,:is_workspace,true]]
+      }
+      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
+      #join in version info
+      branch_info.each do |br|
+        mod = ndx_module_info[br[:component_id]]
+        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
+        mdl = ndx_module_info[br[:component_id]]
+        (mdl[:version_array] ||= Array.new) <<  version
+      end
+      #put version info in prin form
+      unsorted = ndx_module_info.values.map do |mdl|
+        raw_va = mdl.delete(:version_array)
+        unless raw_va.nil? or raw_va == ["CURRENT"]
+          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
+          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        end
+        mdl.merge(:type => mdl.component_type())
+      end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
+    def self.list__library_parent(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {

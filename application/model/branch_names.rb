@@ -25,6 +25,7 @@ module DTK
       version || BranchNameDefaultVersion
     end
 
+    #MOD_RESTRUCT: TODO: this hard codes in assumption that different users have different repos
     def workspace_branch_name(project,version=nil)
       project.update_object!(:ref)
       version_prefix = ((version and version != BranchNameDefaultVersion)?  "-v#{version}" : "")

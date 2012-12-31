@@ -266,7 +266,7 @@ module DTK
   module ModuleClassMixin
     #import from remote repo
     def import(project,remote_params,local_params)
-      branch = ModuleBranch.workspace_branch_name(project)
+      branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
       if module_obj = module_exists?(project.id_handle(),local_params[:module_name])
         if module_obj.get_module_branch(branch)
           raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_params[:module_name],remote_params[:version])})")
@@ -289,7 +289,12 @@ module DTK
 
         #create empty repo on local repo manager; 
         #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-        create_opts = {:remote_repo_name => remote_module_info[:git_repo_name],:remote_repo_namespace => remote_params[:namespace],:delete_if_exists => true}
+        create_opts = {
+          :remote_repo_name => remote_module_info[:git_repo_name],
+          :remote_repo_namespace => remote_params[:namespace],
+          :create_branches => [branch],
+          :delete_if_exists => true
+        }
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
 

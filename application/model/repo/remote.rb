@@ -36,15 +36,29 @@ module DTK
         client.delete_module(params)
       end
 
-      def get_module_info(name,type,namespace=nil)
-        params = {
-          :name => name,
-          :type => type_for_remote_module(type),
-          :namespace => namespace || self.class.default_namespace()
+      def get_module_info(remote_params)
+        client_params = {
+          :name => remote_params[:module_name],
+          :type => type_for_remote_module(remote_params[:module_type]),
+          :namespace => remote_params[:module_namespace] || self.class.default_namespace()
         } 
-        response_data = client.get_module_info(params)
-        Aux.convert_keys_to_symbols(response_data)
+        response_data = client.get_module_info(client_params)
+        ret = Aux.convert_keys_to_symbols(response_data)
+        unless ret 
+          raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not exist")
+        end
+        if remote_params[:version]
+          versions = branch_names_to_versions(ret[:branches])
+          unless versions and versions.include?(remote_params[:version])
+            raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not have version (#{remote_params[:version]||"CURRENT"})")
+          end
+        end
+        ret
       end
+      def qualified_module_name(remote_params)
+        "#{remote_params[:module_namespace]}/#{remote_params[:module_name]}"
+      end
+      private :qualified_module_name
 
       def list_module_info(type=nil)
         filter = type && {:type => type_for_remote_module(type)}
@@ -66,9 +80,6 @@ module DTK
         (branches.include?(HeadBranchName) ? ["CURRENT"] : []) + branches.reject{|b|b == HeadBranchName}.sort
       end
       private :branch_names_to_versions
-      def self.version_to_branch_name(version)
-        version ? version : HeadBranchName
-      end
       HeadBranchName = "master"
 
       def authorize_dtk_instance(module_name,type)

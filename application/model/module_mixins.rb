@@ -274,12 +274,7 @@ module DTK
       end
       
       remote_repo = Repo::Remote.new(remote_params[:repo])
-      unless remote_module_info = remote_repo.get_module_info(remote_params[:module_name],module_type(),remote_params[:namespace])
-        raise ErrorUsage.new("Remote module (#{remote_params[:namespace]}/#{remote_params[:module_name]}) does not exist")
-      end
-      unless remote_module_info[:branches].include?(branch)
-        raise ErrorUsage.new("Remote module (#{remote_params[:namespace]}/#{remote_params[:module_name]}) does not have version (#{remote_params[:version]||"CURRENT"})")
-      end
+      remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
 
       #case on whether the module is created already
       if module_obj
@@ -320,7 +315,15 @@ module DTK
 
       error = nil
       begin
-        remote_module_info = Repo::Remote.new.get_module_info(remote_module_name,module_type(),remote_namespace)
+        remote_params = {
+          :module_name => remote_module_name,
+          :module_type => module_type(),
+          :module_namespace => remote_namespace
+        }
+        remote_params.merge!(:version => version) if version
+        remote_module_info = Repo::Remote.new.get_module_info(remote_params)
+       rescue  ErrorUsage => e
+        error = e
        rescue Exception 
         error = ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
       end

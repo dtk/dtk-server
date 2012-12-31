@@ -1045,17 +1045,13 @@ POSSIBLE CHANGES TO HASH
       end
       tpl.assign(:library_list,library_list)
 
-#      service_list = get_objects(:service,nil)
-#	  service_list = ServiceModule.list(model_handle(:service_module))
-
-	  service_list = ServiceModule.list(model_handle(:service_module)).map do |r|
-		{
-			:id => r[:id],
-			:name => "#{r[:display_name]}#{r[:version] && "-#{r[:version]}"}"
-		}
-	  end
-pp "}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"
-pp service_list
+      project = get_default_project()
+      service_list = ServiceModule.list(model_handle(:service_module), :project_idh => project.id_handle()).map do |r|
+        {
+          :id => r[:id],
+          :name => "#{r[:display_name]}#{r[:version] && "-#{r[:version]}"}"
+        }
+      end
 =begin
 	  service_list = Array.new
 	  service_list = [

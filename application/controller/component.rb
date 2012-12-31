@@ -76,13 +76,27 @@ pp poss_remote_cmps
         [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
 
-      #restrict results to belong to library and not nested in assembly
-      filter_conjuncts += [[:neq,:type,"composite"],[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
+      filter_conjuncts += [[:neq,:type,"composite"],[:or, [:neq,:project_project_id,nil],[:neq,:library_library_id,nil]],[:eq,:assembly_id,nil]]
+      #MOD_RESTRUCT: when deprecate component templates in library switch above with below
+      #restrict results to belong to project and not nested in assembly
+      #filter_conjuncts += [[:neq,:type,"composite"],[:neq,:project_project_id,nil],[:eq,:assembly_id,nil]]
+
+
       sp_hash = {
         :cols => cols,
         :filter => [:and] + filter_conjuncts
      }
       component_list = Model.get_objs(model_handle(:component),sp_hash).each{|r|r.materialize!(cols)}
+      #MOD_RESTRUCT: when deprecate component templates in library  remove below
+      ndx_component_list = Hash.new
+      component_list.each do |r|
+        ndx = r[:display_name]
+        if ndx_component_list[ndx].nil? or r[:library_library_id]
+          ndx_component_list[ndx] = r
+        end
+      end
+      component_list = ndx_component_list.values()
+
 
       i18n = get_i18n_mappings_for_models(model_name)
       component_list.each_with_index do |model,index|

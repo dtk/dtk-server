@@ -220,7 +220,7 @@ module XYZ
       else
         add_remote(remote_name,remote_url)
       end
-      pull_changes(remote_name)
+      pull_changes(remote_name,opts[:remote_branch])
       push_changes()
       remote_name
     end
@@ -297,9 +297,9 @@ module XYZ
       git_command__push(@branch,remote_name)
     end
 
-    def pull_changes(remote_name=nil)
+    def pull_changes(remote_name=nil,remote_branch=nil)
       checkout(@branch) do
-        git_command__pull(@branch,remote_name)
+        git_command__pull(remote_branch||@branch,remote_name)
       end
     end
 

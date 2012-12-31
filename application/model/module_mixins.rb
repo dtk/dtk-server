@@ -266,9 +266,9 @@ module DTK
   module ModuleClassMixin
     #import from remote repo
     def import(project,remote_params,local_params)
-      branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
+      local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
       if module_obj = module_exists?(project.id_handle(),local_params[:module_name])
-        if module_obj.get_module_branch(branch)
+        if module_obj.get_module_branch(local_branch)
           raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_params[:module_name],remote_params[:version])})")
         end
       end
@@ -292,13 +292,13 @@ module DTK
         create_opts = {
           :remote_repo_name => remote_module_info[:git_repo_name],
           :remote_repo_namespace => remote_params[:namespace],
-          :create_branches => [branch],
+          :create_branches => [local_branch],
           :delete_if_exists => true
         }
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
 
-      repo.initial_synchronize_with_remote_repo(remote_params[:repo],branch)
+      repo.initial_synchronize_with_remote_repo(remote_params,local_branch)
       module_branch_idh = import_postprocess(repo,project_idh,local_params[:module_name],remote_params[:version])
       module_branch_idh
     end

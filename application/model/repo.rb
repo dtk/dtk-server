@@ -85,7 +85,7 @@ module XYZ
       RepoManager.diff(ws_branch[:branch],lib_branch)
     end
     
-    def initial_synchronize_with_remote_repo(remote,branch,opts={})
+    def initial_synchronize_with_remote_repo(remote_params,branch,opts={})
       unless R8::Config[:repo][:workspace][:use_local_clones]
         raise Error.new("Not implemented yet: initial_synchronize_with_remote_repo w/o local clones")
       end
@@ -93,9 +93,11 @@ module XYZ
       unless self[:remote_repo_name]
         raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
       end
-      remote_url = Remote.new(remote).repo_url_ssh_access(self[:remote_repo_name])
-      remote_name = remote_name_for_push_pull(remote)
-      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts.merge(:initial => true))
+      remote_url = Remote.new(remote_params[:repo]).repo_url_ssh_access(self[:remote_repo_name])
+      remote_name = remote_name_for_push_pull(remote_params[:repo])
+      remote_branch = Remote.version_to_branch_name(remote_params[:version])
+      repo_opts = opts.merge(:initial => true, :remote_branch => remote_branch)
+      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,repo_opts)
     end
     #MOD_RESTRUCT: TODO: see if need below any more now that have above
     def synchronize_with_remote_repo(branch,opts={})

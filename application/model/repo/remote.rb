@@ -80,7 +80,11 @@ module DTK
         (branches.include?(HeadBranchName) ? ["CURRENT"] : []) + branches.reject{|b|b == HeadBranchName}.sort
       end
       private :branch_names_to_versions
+      def self.version_to_branch_name(version)
+        version ? version : HeadBranchName
+      end
       HeadBranchName = "master"
+      
 
       def authorize_dtk_instance(module_name,type)
         username = dtk_instance_username()

@@ -28,6 +28,6 @@
    :component_relation,
    :implementation,
    :component_module,#MOD_RESTRUCT: may remove
-   :service_module
+   :service_module #MOD_RESTRUCT: may remove
   ]
 }

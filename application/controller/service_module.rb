@@ -16,7 +16,8 @@ module XYZ
     #end: for debugging; will be removed
 
     def rest__list()
-      rest_ok_response ServiceModule.list(model_handle)
+      project = get_default_project()
+      rest_ok_response ServiceModule.list(model_handle, :project_idh => project.id_handle())
     end
 
     def rest__list_remote()
@@ -63,13 +64,9 @@ module XYZ
 
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
-      library_id = ret_request_params(:library_id) 
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
-      unless library_idh
-        raise ErrorUsage.new("No library specified and no default can be determined")
-      end
       config_agent_type =  ret_request_params(:config_agent_type)|| :puppet
-      service_module_idh = ServiceModule.create_library_module_obj(library_idh,module_name,config_agent_type)
+      project = get_default_project()
+      service_module_idh = ServiceModule.create_workspace_module_obj(project,module_name,config_agent_type)
       rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
     

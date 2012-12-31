@@ -49,8 +49,25 @@ module DTK
       {:module_name => module_name}
     end
 
-
-    def self.list(mh,opts={})
+    #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
+    def self.list(mh,opts)
+      if project_id = opts[:project_idh]
+        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
+        list__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
+      else
+        list__library_parent(mh,opts)
+      end
+    end
+    def self.list__project_parent(mh,project_idh)
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => [:eq, :project_project_id, project_idh.get_id()]
+      }
+      get_objs(mh,sp_hash)
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
+    def self.list__library_parent(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
@@ -204,13 +221,14 @@ module DTK
       Model.get_objs(model_handle(:component),sp_hash)
     end 
 
-    def self.create_library_module_obj(library_idh,module_name,config_agent_type,version=nil)
-      if module_exists?(library_idh,module_name)
+    def self.create_workspace_module_obj(project,module_name,config_agent_type,version=nil)
+      project_idh = project.id_handle()
+      if module_exists?(project_idh,module_name)
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
 
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_type(),:delete_if_exists => true)
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
+      repo = create_empty_workspace_repo(project_idh,module_name,module_type(),:delete_if_exists => true)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
     end
 

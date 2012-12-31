@@ -99,6 +99,6 @@ lambda__segment_impls =
       ]
     }
   },
-  :many_to_one=>[:library],
+  :many_to_one=>[:project,:library], #MOD_RESTRUCT: may remove library as parent
   :one_to_many=>[:module_branch]
 }

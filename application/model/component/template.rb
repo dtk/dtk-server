@@ -1,6 +1,26 @@
 module DTK; class Component
   class Template < self
-    def self.list(model_handle,opts={})
+    #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
+    def self.list(mh,opts)
+      if project_id = opts[:project_idh]
+        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
+        list__project_parent(opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
+      else
+        list__library_parent(mh,opts)
+      end
+    end
+    def self.list__project_parent(project_idh)
+      sp_hash = {
+        :cols => [:id, :type, :display_name, :description],
+        :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
+      }
+      ret = get_objs(project_idh.createMH(:component),sp_hash)
+      ret.each{|r|r[:display_name] = r.display_name_print_form()}
+      ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
+    def self.list__library_parent(model_handle,opts={})
       library_filter = (opts[:library_idh] ? [:eq, :library_library_id, opts[:library_idh].get_id()] : [:neq, :library_library_id, nil])
       sp_hash = {
         :cols => [:id, :type, :display_name, :description],

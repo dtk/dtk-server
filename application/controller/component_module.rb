@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class Component_moduleController < AuthController
     helper :module_helper
 

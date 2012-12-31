@@ -281,22 +281,19 @@ module DTK
       promote_to_library(version)
     end
 
-    def self.import_postprocess(repo,project_idh,module_name,version)
-      unless project_idh[:model_name] == :project
-        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
-      end
-
-      update_ws_module_objs_and_create_dsl?(repo,project_idh,module_name,version)[:module_branch_idh]
+    def self.import_postprocess(project,repo,module_name,version)
+      update_ws_module_objs_and_create_dsl?(project,repo,module_name,version)[:module_branch_idh]
     end
     
     #returns  hash with keys :module_branch_idh,:dsl_created
     #dsl_created is either nil or hash keys: path, :conent
     #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit
     #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
-    def self.update_ws_module_objs_and_create_dsl?(repo,project_idh,module_name,version=nil,opts={})
+    def self.update_ws_module_objs_and_create_dsl?(project,repo,module_name,version=nil,opts={})
+      project_idh = project.id_handle()
       config_agent_type = :puppet #TODO: hard wired
-      branch_name = ModuleBranch.project_branch_name(project_idh,version)
-      impl_obj = Implementation.create_project_impl?(project_idh,repo,module_name,config_agent_type,branch_name,version)
+      branch_name = ModuleBranch.workspace_branch_name(project,version)
+      impl_obj = Implementation.create_workspace_impl?(project_idh,repo,module_name,config_agent_type,branch_name,version)
 
       parsing_error = nil
       dsl_created = nil

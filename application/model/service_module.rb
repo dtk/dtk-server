@@ -216,6 +216,7 @@ module DTK
 
    private
     def self.import_postprocess(repo,library_idh,module_name,version)
+      raise Error.new("MOD_RESTRUCT: needs to be rewritten")
       module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl?

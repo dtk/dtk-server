@@ -239,7 +239,7 @@ module DTK
     end
 
     def self.ret_ws_create_hash(parent_model_name,project_idh,repo_idh,version=nil)
-      branch =  project_branch_name(project_idh,version)
+      branch =  workspace_branch_name(project_idh,version)
       assigns = {
         :display_name => branch,
         :branch => branch,

@@ -45,6 +45,7 @@ module DTK
     end
 
     def pull_from_remote(version=nil)
+      raise Error.new("MOD_RESTRUCT: needs to be rewritten") # made one change so far:  self.class.import_postprocess(project,repo,module_name,version)
       repo = get_library_repo()
       update_object!(:display_name,:library_library_id)
       module_name = self[:display_name]
@@ -64,7 +65,7 @@ module DTK
         raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(branch)
-        self.class.import_postprocess(repo,library_idh,module_name,version)
+        self.class.import_postprocess(project,repo,module_name,version)
         #update ws from library
         update_ws_branch_from_lib_branch?(version)
        when :branchpoint
@@ -299,7 +300,7 @@ module DTK
       end
 
       repo.initial_synchronize_with_remote_repo(remote_params,local_branch)
-      module_branch_idh = import_postprocess(repo,project_idh,local_params[:module_name],remote_params[:version])
+      module_branch_idh = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
       module_branch_idh
     end
 

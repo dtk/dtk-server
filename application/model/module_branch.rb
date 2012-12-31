@@ -10,7 +10,7 @@ module DTK
 
     def pp_version()
       update_object!(:version)
-      (self[:version] == BranchNameDefaultVersion) ? nil : self[:version]
+      has_default_version?() ? nil : self[:version] 
     end
 
     #this adds library branch from this, which is a workspace branch
@@ -126,10 +126,6 @@ module DTK
     end
 
     class << self
-      def version_field(version=nil)
-        version || "master"
-      end
-
       def get_augmented_workspace_branch(module_obj,version=nil,opts={})
         sp_hash = {
           :cols => cols_for_matching_library_branches(module_obj.module_type()),
@@ -245,9 +241,9 @@ module DTK
         :branch => branch,
         :repo_id => repo_idh.get_id(),
         :is_workspace => true,
-        :type => parent_model_name.to_s
+        :type => parent_model_name.to_s,
+        :version => self.class.version_field(version)
       }
-      assigns[:version] = version||BranchNameDefaultVersion
       ref = branch
       {ref => assigns}
     end
@@ -259,9 +255,9 @@ module DTK
         :branch => branch,
         :repo_id => repo_idh.get_id(),
         :is_workspace => false,
-        :type => parent_model_name.to_s
+        :type => parent_model_name.to_s,
+        :version => self.class.version_field(version)
       }
-      assigns[:version] = version||BranchNameDefaultVersion
       ref = branch
       {ref => assigns}
     end

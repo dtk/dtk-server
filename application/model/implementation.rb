@@ -93,12 +93,6 @@ module XYZ
       impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
       impl_idh.create_object().merge(impl_hash)
     end
-    class << self
-      private
-      def version_field(version)
-        version || "master"
-      end
-    end
     #MOD_RESTRUCT: TODO: deprecate below for create_workspace_impl?
     def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
       repo_obj.update_object!(:repo_name)

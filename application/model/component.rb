@@ -91,8 +91,9 @@ module XYZ
       ret
     end
 
+    #MOD_RESTRUCT: TODO: see if this is what is wanted; now returning what is used in implementaion and module branch fields
     def self.default_version()
-      branch_name_default_version()
+      version_field_default()
     end
 
     def self.component_type_from_user_friendly_name(user_friendly_name)

@@ -345,10 +345,8 @@ module DTK
     def list_remotes(model_handle)
       unsorted = Repo::Remote.new.list_module_info(module_type()).map do |r|
         el = {:display_name => r[:qualified_name],:type => component_type()} #TODO: hard coded
-        branches = r[:branches]
-        if branches and not branches == ["master"]
-          version_array =(branches.include?("master") ? ["CURRENT"] : []) + branches.reject{|b|b == "master"}.sort
-          el.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        if versions = r[:versions]
+          el.merge!(:version => versions.join(", ")) #TODO: change to ':versions' after sync with client
         end
         el
       end

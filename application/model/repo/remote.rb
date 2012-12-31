@@ -53,9 +53,23 @@ module DTK
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
           namespace = r["namespace"] && "#{r["namespace"]}/"
           qualified_name = "#{namespace}#{r["name"]}"
-          el.merge(:qualified_name => qualified_name, :branches => r["branches"])  
+          el.merge!(:qualified_name => qualified_name)
+          if versions = branch_names_to_versions(r["branches"])
+            el.merge!(:versions => versions)
+          end
+          el
         end
       end
+
+      def branch_names_to_versions(branch_names)
+        return nil unless branch_names and not branch_names == [HeadBranchName]
+        (branches.include?(HeadBranchName) ? ["CURRENT"] : []) + branches.reject{|b|b == HeadBranchName}.sort
+      end
+      private :branch_names_to_versions
+      def self.version_to_branch_name(version)
+        version ? version : HeadBranchName
+      end
+      HeadBranchName = "master"
 
       def authorize_dtk_instance(module_name,type)
         username = dtk_instance_username()

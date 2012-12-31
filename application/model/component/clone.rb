@@ -60,7 +60,7 @@ module XYZ
       #need to search project to see if has implementation that matches (same repo)
 
       update_object!(:module_branch_id,:implementation_id,:ancestor_id,:version,:component_type,:group_id) 
-      self[:version] ||= BranchNameDefaultVersion
+      self[:version] ||= self.class.version_field_default()
 
       proj_idh = proj.id_handle()
 

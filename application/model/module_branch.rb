@@ -234,15 +234,15 @@ module DTK
       end.values
     end
 
-    def self.ret_ws_create_hash(parent_model_name,project_idh,repo_idh,version=nil)
-      branch =  workspace_branch_name(project_idh,version)
+    def self.ret_workspace_create_hash(project,type,repo_idh,version=nil)
+      branch =  workspace_branch_name(project,version)
       assigns = {
         :display_name => branch,
         :branch => branch,
         :repo_id => repo_idh.get_id(),
         :is_workspace => true,
-        :type => parent_model_name.to_s,
-        :version => self.class.version_field(version)
+        :type => type,
+        :version => version_field(version)
       }
       ref = branch
       {ref => assigns}
@@ -256,7 +256,7 @@ module DTK
         :repo_id => repo_idh.get_id(),
         :is_workspace => false,
         :type => parent_model_name.to_s,
-        :version => self.class.version_field(version)
+        :version =>version_field(version)
       }
       ref = branch
       {ref => assigns}

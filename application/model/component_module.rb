@@ -290,10 +290,9 @@ module DTK
     #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit
     #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
     def self.update_ws_module_objs_and_create_dsl?(project,repo,module_name,version=nil,opts={})
-      project_idh = project.id_handle()
       config_agent_type = :puppet #TODO: hard wired
       branch_name = ModuleBranch.workspace_branch_name(project,version)
-      impl_obj = Implementation.create_workspace_impl?(project_idh,repo,module_name,config_agent_type,branch_name,version)
+      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
 
       parsing_error = nil
       dsl_created = nil
@@ -305,7 +304,7 @@ module DTK
         end
       end
       impl_obj.create_file_assets_from_dir_els()
-      module_and_branch_info = create_ws_module_and_branch_obj?(project_idh,repo.id_handle(),module_name,version)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
       #if dsl_created then dont update model (this wil eb done when users optionally edits and commits)

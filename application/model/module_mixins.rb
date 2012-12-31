@@ -422,6 +422,19 @@ module DTK
       Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 
+    def get_workspace_module_branch(project,module_name,version=nil)
+      project_idh = project.id_handle()
+      filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      branch = ModuleBranch.workspace_branch_name(project,version)
+      post_filter = proc{|mb|mb[:branch] == branch}
+      matches = get_matching_module_branches(project_idh,filter,post_filter)
+      if matches.size == 1
+        matches.first
+      elsif matches.size > 2
+        raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
+      end
+    end
+    #MOD_RESTRUCT: TODO: may deprecate below for above
     def get_library_module_branch(library_idh,module_name,version=nil)
       filter = [:and, [:eq, :display_name, module_name], [:eq, :library_library_id, library_idh.get_id()]]
       branch = ModuleBranch.library_branch_name(library_idh,version)
@@ -473,9 +486,11 @@ module DTK
       module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
-    def create_ws_module_and_branch_obj?(project_idh,repo_idh,module_name,input_version)
+    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version)
+      project_idh = project.id_handle()
       ref = module_name
-      mb_create_hash = ModuleBranch.ret_ws_create_hash(model_name,project_idh,repo_idh,input_version)
+      module_type = model_name.to_s
+      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project,module_type,repo_idh,input_version)
       version = mb_create_hash.values.first[:version]
       create_hash = {
         model_name.to_s => {
@@ -487,7 +502,7 @@ module DTK
       }
       input_hash_content_into_model(project_idh,create_hash)
 
-      module_branch = get_project_module_branch(project_idh,module_name,version)
+      module_branch = get_workspace_module_branch(project,module_name,version)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end

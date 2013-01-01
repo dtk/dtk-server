@@ -78,6 +78,21 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__delete_remote()
+      name = ret_non_null_request_params(:remote_module_name)
+      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_params = {
+        :repo => remote_repo,
+        :module_name => remote_module_name,
+        :module_namespace => remote_namespace
+      }
+      remote_params.merge!(:version => version) if version
+      project = get_default_project()
+      ServiceModule.delete_remote(project,remote_params)
+      rest_ok_response 
+    end
+
     def rest__add_user_direct_access()
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       ServiceModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)

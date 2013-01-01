@@ -119,26 +119,27 @@ module XYZ
       RepoManager.ret_remote_merge_relationship(self[:repo_name],branch,remote_name,opts)
     end
 
-    def push_to_remote(remote_repo_name,branch)
+    def push_to_remote(branch,remote_repo_name,version=nil)
       unless remote_repo_name
         raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
       end
       update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull()
-      RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name)
+      remote_name = remote_name_for_push_pull(remote_repo_name) 
+      remote_branch = Remote.version_to_branch_name(version)
+      RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name,remote_branch)
     end
 
-    def link_to_remote(remote_repo_name,branch)
+    def link_to_remote(branch,remote_repo_name)
       update_object!(:repo_name)
       remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
-      remote_name = remote_name_for_push_pull()
+      remote_name = remote_name_for_push_pull(remote_repo_name)
       RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
       remote_repo_name
     end
 
-    def unlink_remote()
+    def unlink_remote(remote_repo)
       update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull()
+      remote_name = remote_name_for_push_pull(remote_repo)
       RepoManager.unlink_remote(self[:repo_name],remote_name)
       update(:remote_repo_name => nil, :remote_repo_namespace => nil)
     end

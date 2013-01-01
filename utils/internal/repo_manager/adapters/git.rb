@@ -293,8 +293,8 @@ module XYZ
       end
     end
 
-    def push_changes(remote_name=nil)
-      git_command__push(@branch,remote_name)
+    def push_changes(remote_name=nil,remote_branch=nil)
+      git_command__push(@branch,remote_name,remote_branch)
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
@@ -507,10 +507,11 @@ module XYZ
 
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
-    def git_command__push(branch_name,remote_name=nil)
+    def git_command__push(branch_name,remote_name=nil,remote_branch=nil)
       Git_command__push_mutex.synchronize do 
         remote_name ||= default_remote_name()
-        git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{branch_name}")
+        remote_branch ||= branch_name
+        git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}")
       end
     end
 

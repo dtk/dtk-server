@@ -25,19 +25,19 @@ module DTK
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
       end
 
-      branch = ModuleBranch.workspace_branch_name(project,version)
-      unless module_branch = get_module_branch(branch)
+      local_branch = ModuleBranch.workspace_branch_name(project,version)
+      unless module_branch_obj = get_module_branch(local_branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-      export_preprocess(module_branch)
+      export_preprocess(module_branch_obj)
 
       #create module on remote repo manager
       module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type())
       remote_repo_name = module_info[:git_repo_name]
 
       #link and push to remote repo
-      repo.link_to_remote(remote_repo_name,branch)
-      repo.push_to_remote(remote_repo_name,branch)
+      repo.link_to_remote(local_branch,remote_repo_name)
+      repo.push_to_remote(local_branch,remote_repo_name)
 
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
@@ -324,40 +324,34 @@ module DTK
       end
     end
 
-    def delete_remote(library_idh,remote_namespace,remote_module_name,version=nil)
+    def delete_remote(project,remote_params)
       #TODO: put in version specific logic
-      if version
+      if remote_params[:version]
         raise Error.new("TODO: delete_remote when version given")
       end
-
+      remote_repo = Repo::Remote.new(remote_params[:repo])
       error = nil
       begin
-        remote_params = {
-          :module_name => remote_module_name,
-          :module_type => module_type(),
-          :module_namespace => remote_namespace
-        }
-        remote_params.merge!(:version => version) if version
-        remote_module_info = Repo::Remote.new.get_module_info(remote_params)
+        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
        rescue  ErrorUsage => e
         error = e
        rescue Exception 
-        error = ErrorUsage.new("Remote module (#{remote_namespace}/#{remote_module_name}) does not exist")
+        error = ErrorUsage.new("Remote module (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
       end
 
       #delete module on remote repo manager
       unless error
-        Repo::Remote.new.delete_module(remote_module_name,module_type())
+        remote_repo.delete_module(remote_params[:module_name],module_type())
       end
         
-      #if module is local; remove link to remote
-      module_name = remote_module_name
+      #unlinke local repos access to this module
+      local_module_name = remote_params[:module_name]
       sp_hash = {
         :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :display_name, module_name], [:eq, :library_library_id,library_idh.get_id()]]
+        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :library_library_id,project[:id]]]
       } 
-      if module_obj = get_obj(library_idh.createMH(model_type),sp_hash)
-        module_obj.get_repos().each{|repo|repo.unlink_remote()}
+      if module_obj = get_obj(project.model_handle(model_type),sp_hash)
+        module_obj.get_repos().each{|repo|repo.unlink_remote(remote_params[:repo])}
       end
       raise error if error
     end

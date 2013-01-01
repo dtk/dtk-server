@@ -82,9 +82,9 @@ module XYZ
         adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{branch}",opts)
       end
 
-      def push_to_remote_repo(repo_name,branch,remote_name)
+      def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
-        adapter_repo.push_changes(remote_name)
+        adapter_repo.push_changes(remote_name,remote_branch)
         repo_name
       end
 

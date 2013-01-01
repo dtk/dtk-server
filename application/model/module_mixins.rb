@@ -344,11 +344,11 @@ module DTK
         remote_repo.delete_module(remote_params[:module_name],module_type())
       end
         
-      #unlinke local repos access to this module
+      #unlink any local repos that were linked to this remote module
       local_module_name = remote_params[:module_name]
       sp_hash = {
         :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :library_library_id,project[:id]]]
+        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
       } 
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         module_obj.get_repos().each{|repo|repo.unlink_remote(remote_params[:repo])}

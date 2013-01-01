@@ -116,7 +116,9 @@ end
 
     def rest__export()
       component_module = create_obj(:component_module_id)
-      component_module.export()
+      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      project = get_default_project()
+      component_module.export(project,remote_repo)
       rest_ok_response 
     end
 

@@ -16,23 +16,23 @@ module DTK
   end
 
   module ModuleMixin
-    #export to remote
-    def export(version=nil)
+    #export to a remote repo
+    def export(project,remote_repo,version=nil)
       #TODO: put in version-specfic logic
-      repo = get_library_repo()
+      repo = get_workspace_repo()
       module_name = update_object!(:display_name)[:display_name]
       if repo[:remote_repo_name]
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
       end
 
-      branch = library_branch_name(version)
+      branch = ModuleBranch.workspace_branch_name(project,version)
       unless module_branch = get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
       export_preprocess(module_branch)
 
       #create module on remote repo manager
-      module_info = Repo::Remote.new.create_module(module_name,module_type())
+      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type())
       remote_repo_name = module_info[:git_repo_name]
 
       #link and push to remote repo
@@ -195,6 +195,17 @@ module DTK
     def get_repos()
       get_objs_uniq(:repos)
     end
+    def get_workspace_repo()
+      sp_hash = {
+        :cols => [:id,:display_name,:workspace_repo,:project_project_id]
+      }
+      row = get_obj(sp_hash)
+      #opportunistically set display name and project_project_id on module
+      self[:display_name] ||= row[:display_name]
+      self[:project_project_id] ||= row[:project_project_id]
+      row[:repo]
+    end
+    #MOD_RESTRUCT: deprecate below for above
     def get_library_repo()
       sp_hash = {
         :cols => [:id,:display_name,:library_repo,:library_library_id]

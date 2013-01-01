@@ -77,7 +77,7 @@ module DTK
 
       def branch_names_to_versions(branch_names)
         return nil unless branch_names and not branch_names == [HeadBranchName]
-        (branches.include?(HeadBranchName) ? ["CURRENT"] : []) + branches.reject{|b|b == HeadBranchName}.sort
+        (branch_names.include?(HeadBranchName) ? ["CURRENT"] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
       end
       private :branch_names_to_versions
       def self.version_to_branch_name(version)

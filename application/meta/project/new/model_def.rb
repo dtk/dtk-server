@@ -4,7 +4,7 @@
   :columns=>{
     :type => {:type=>:varchar, :size => 25}
   },                   #TODO: should :implementation,:component be here?  
-  :one_to_many=> [:task,:implementation,:component,:component_module,:service_module],
+  :one_to_many=> [:task,:implementation,:component,:node,:component_module,:service_module],
   :virtual_columns=>{
     :targets=>{
       :type=>:json,

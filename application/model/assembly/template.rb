@@ -13,7 +13,28 @@ module DTK; class Assembly
     end
 
     ### end: standard get methods
-    def self.list(assembly_mh,opts={})
+    #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
+    def self.list(mh,opts={})
+      if project_id = opts[:project_idh]
+        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
+        list__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
+      else
+        list__library_parent(mh,opts)
+      end
+    end
+    def self.list__project_parent(assembly_mh,opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
+      }
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
+      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
+      list_aux(assembly_rows,attr_rows,opts)
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
+    def self.list__library_parent(assembly_mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact

@@ -69,7 +69,8 @@ module DTK
         if subtype == :instance 
           Assembly::Instance.list(model_handle(),opts)
         else 
-          Assembly::Template.list(model_handle(),opts) 
+          project = get_default_project()
+          Assembly::Template.list(model_handle(),opts.merge(:project_idh => project.id_handle()))
         end
       rest_ok_response result 
     end

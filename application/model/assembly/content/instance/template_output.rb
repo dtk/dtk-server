@@ -2,13 +2,13 @@ module DTK
   class Assembly::Content::Instance
     class TemplateOutput < Hash
       include AssemblyImportExportCommon
-      def initialize(library_idh,service_module_branch)
+      def initialize(container_idh,service_module_branch)
         super()
-        @library_idh = library_idh
+        @container_idh = container_idh
         @service_module_branch = service_module_branch
       end
       def save_to_model()
-        Model.input_hash_content_into_model(@library_idh,self,:preserve_input_hash=>true)
+        Model.input_hash_content_into_model(@container_idh,self,:preserve_input_hash=>true)
       end
       def serialize_and_save_to_repo()
         hash_to_serialize = serialize()
@@ -18,6 +18,7 @@ module DTK
         path
       end
 
+      
       def synchronize_workspace_with_library_branch()
         lib_branch = @service_module_branch
         service_module = lib_branch.get_service_module()
@@ -81,7 +82,7 @@ module DTK
           :filter => [:oneof, :id, self[:node].values.map{|n|n[:node_binding_rs_id]}]
         }
         #TODO: may get this info in earlier phase
-        node_binding_rows = Model.get_objs(@library_idh.create_childMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+        node_binding_rows = Model.get_objs(@container_idh.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
         assembly_ref = assembly_ref()
         self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|

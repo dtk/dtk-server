@@ -1114,7 +1114,6 @@ POSSIBLE CHANGES TO HASH
 
       service = id_handle(service_id,:service_module).create_object.update_object!(:display_name,:library_library_id)
       service_module_name = service[:display_name]
-      library_idh = id_handle(service[:library_library_id],:library)
 
       #TODO remove DEMOHACK
       node_idhs = item_list.map do |item|
@@ -1122,8 +1121,8 @@ POSSIBLE CHANGES TO HASH
         model = (item["model"].nil? or item["model"].empty?) ? :node : item["model"].to_sym
         id_handle(id,model)
       end
-
-      Assembly::Template.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
+      project = get_default_project()
+      Assembly::Template.create_workspace_template(project,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
     end
   end

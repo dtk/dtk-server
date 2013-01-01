@@ -24,6 +24,21 @@ module DTK; class Assembly
       list_aux(assembly_rows,attr_rows,opts)
     end
 
+    def self.create_workspace_template(project,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
+      project_idh = project.id_handle()
+      #1) get a content object, 2) modify, and 3) persist
+      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+      #TODO: raise error to user if dangling link
+      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+
+      service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
+
+      assembly_ci = Content::Instance.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
+      assembly_ci.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
+      assembly_ci.create_assembly_template(project_idh,service_module_branch)
+    end
+    #MOD_RESTRUCT: TODO: deprecate below for above
     def self.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info,version=nil)
       #first make sure that all referenced components have updated modules in the library
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)

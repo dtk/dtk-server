@@ -45,6 +45,7 @@ module DTK
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
+    #MOD_RESTRUCT: TODO: deprecate 
     def self.update_library_from_workspace?(ws_branches,opts={})
       ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new

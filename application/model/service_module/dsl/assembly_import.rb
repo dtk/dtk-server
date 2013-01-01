@@ -166,12 +166,13 @@ module DTK; class ServiceModule
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules
         cmp_types = components_hash.map{|cmp|component_type(cmp)}
+        cmp_mh = container_idh.create_childMH(:component)
         sp_hash = {
           :cols => [:id, :display_name, :component_type, :ref, :module_name],
           :filter => [:and, [:oneof, :component_type,cmp_types],
-                      [:neq, :library_library_id,nil]] #TODO: think this should pick out specific library
+                      [:eq, cmp_mh.parent_id_field_name, container_idh.get_id()]]
         }
-        matching_cmps = Model.get_objs(container_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+        matching_cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols => true)
         #make sure a match is found for each component
         non_matches = Array.new
         augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|

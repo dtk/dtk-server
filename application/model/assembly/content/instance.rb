@@ -4,10 +4,9 @@ module DTK
     class Instance < self
       r8_nested_require('instance','template_output')
       def self.create_container_for_clone(container_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-        mn = container_idh[:model_name]
-        containter_field = "#{mn}_#{mn}_id".to_sym
+        assembly_mh = container_idh.create_childMH(:component)
         hash_values = {
-          containter_field => container_idh.get_id(),
+          assembly_mh.parent_id_field_name => container_idh.get_id(),
           :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
           :ui => icon_info,
@@ -15,7 +14,6 @@ module DTK
           :module_branch_id => service_module_branch[:id],
           :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
         }
-        assembly_mh = container_idh.create_childMH(:component)
         create(assembly_mh,hash_values)
       end
       def add_content_for_clone!(container_idh,node_idhs,port_links,augmented_branches)

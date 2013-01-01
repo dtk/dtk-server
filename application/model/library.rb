@@ -9,7 +9,16 @@ module XYZ
       }
       Model.get_obj(model_handle(:service_module),sp_hash)
     end
-    
+
+
+    def get_node_binding_rulesets(filter=nil)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name],
+      }
+      sp_hash.merge!(:filter => filter) if filter
+      Model.get_ojs(model_handle(:node_binding_ruleset),sp_hash)
+    end
+
     ### end: get methods
 
     class << self 

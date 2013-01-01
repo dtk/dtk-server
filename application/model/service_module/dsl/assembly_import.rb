@@ -107,7 +107,6 @@ module DTK; class ServiceModule
         {assembly_ref => {"port_link" => port_links}}
       end
 
-      #TODO: more efficient to resolve heer teh ids for *node_binding_rs_id
       def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
@@ -122,6 +121,18 @@ module DTK; class ServiceModule
           end
           h.merge(merge_hash)
         end
+
+        #compute nb_rs_to_id
+        nb_rs_to_id = Hash.new
+        unless node_to_nb_rs.empty?
+          name_filter = [:oneof, :display_name,node_to_nb_rs.values]
+          #TODO: hard coded that nodding in public library
+          nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
+          nb_rs_to_id = nb_rs_containter.get_node_bind_rulesets(filter).inject(Hash.new) do |h,r|
+            h.merge(r[:display_name] => r[:id])
+          end
+        end
+
         assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
           node_ref = "#{assembly_ref}--#{node_hash_ref}"
           node_output = {
@@ -130,7 +141,11 @@ module DTK; class ServiceModule
             "*assembly_id" => "/component/#{assembly_ref}" 
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
-            node_output["*node_binding_rs_id"] = "/node_binding_ruleset/#{nb_rs}"
+            if nb_rs_id = nb_rs_to_id[nb_rs]
+              node_output["node_binding_rs_id"] = nb_rs_id
+            else
+              raise ErrorUsage.new("Bad node reference #{nb_rs})")
+            end
           else
             node_output["node_binding_rs_id"] = nil
           end

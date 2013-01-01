@@ -12,11 +12,15 @@ module XYZ
 
 
     def get_node_binding_rulesets(filter=nil)
+      full_filter = [:eq,:library_library_id,id()]
+      if filter 
+        full_filter = [:and,full_filter,filter]
+      end
       sp_hash = {
-        :cols => [:id,:group_id,:display_name],
+        :cols => [:id,:group_id,:ref],
+        :filter => full_filter
       }
-      sp_hash.merge!(:filter => filter) if filter
-      Model.get_ojs(model_handle(:node_binding_ruleset),sp_hash)
+      Model.get_objs(model_handle(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
     end
 
     ### end: get methods

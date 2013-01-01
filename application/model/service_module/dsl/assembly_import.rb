@@ -125,11 +125,11 @@ module DTK; class ServiceModule
         #compute nb_rs_to_id
         nb_rs_to_id = Hash.new
         unless node_to_nb_rs.empty?
-          name_filter = [:oneof, :display_name,node_to_nb_rs.values]
+          filter = [:oneof, :ref, node_to_nb_rs.values]
           #TODO: hard coded that nodding in public library
           nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
-          nb_rs_to_id = nb_rs_containter.get_node_bind_rulesets(filter).inject(Hash.new) do |h,r|
-            h.merge(r[:display_name] => r[:id])
+          nb_rs_to_id = nb_rs_containter.get_node_binding_rulesets(filter).inject(Hash.new) do |h,r|
+            h.merge(r[:ref] => r[:id])
           end
         end
 

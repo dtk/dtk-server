@@ -226,8 +226,12 @@ module DTK
       if module_exists?(project_idh,module_name)
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
-
-      repo = create_empty_workspace_repo(project_idh,module_name,module_type(),:delete_if_exists => true)
+      ws_branch = ModuleBranch.workspace_branch_name(project,version)
+      create_opts = {
+        :create_branches => [ws_branch],
+        :delete_if_exists => true
+      }
+      repo = create_empty_workspace_repo(project_idh,module_name,module_type(),create_opts)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_and_branch_info[:module_idh]
     end

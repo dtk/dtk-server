@@ -177,6 +177,7 @@ module DTK
     end
 
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
+      raise Error.new("MOD_RESTRUCT: needs to be written")
       #TODO: because of assembly_template_ws_item doing &promote_to_library first
       promote_to_library(version)
       #TODO: assembly_template_ws_item
@@ -237,12 +238,11 @@ module DTK
     end
 
    private
-    def self.import_postprocess(repo,library_idh,module_name,version)
-      raise Error.new("MOD_RESTRUCT: needs to be rewritten")
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
+    def self.import_postprocess(project,repo,module_name,version)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl?
-      create_assemblies_from_dsl?(library_idh,module_branch,module_name)
+      create_assemblies_from_dsl?(project.id_handle(),module_branch,module_name)
       module_branch_idh
     end
 

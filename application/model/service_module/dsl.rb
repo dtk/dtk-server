@@ -25,14 +25,14 @@ module DTK
         end
       end
 
-      def create_assemblies_from_dsl?(library_idh,module_branch,module_name)
+      def create_assemblies_from_dsl?(container_idh,module_branch,module_name)
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         
-        assembly_import_helper = AssemblyImport.new(library_idh,module_name)
+        assembly_import_helper = AssemblyImport.new(container_idh,module_name)
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
@@ -48,7 +48,7 @@ module DTK
         files.select{|f| f =~ add_on_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = JSON.parse(json_content)
-          ServiceAddOn.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+          ServiceAddOn.import(container_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
         end
       end
 

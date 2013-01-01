@@ -89,7 +89,7 @@ end
           :version => version
         }
         local_params = {
-        :module_name => remote_module_name #TODO: hard coded making local module name same as remote module_name
+          :module_name => remote_module_name #TODO: hard coded making local module name same as remote module_name
         }
         ComponentModule.import(project,remote_params,local_params)
       end

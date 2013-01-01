@@ -1,5 +1,16 @@
 module XYZ
   class Project < Model
+    ### get methods
+    def get_service_module(module_name)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name],
+        :filter => [:and,[:eq,:project_project_id,id()],[:eq,:display_name,module_name]]
+      }
+      Model.get_obj(model_handle(:service_module),sp_hash)
+    end
+    
+    ### end: get methods
+
     #Model apis
     def self.create_new_project(model_handle,name,type)
       sp_hash = {

@@ -2,8 +2,8 @@ module DTK
   class ServiceAddOn
    private
     class Import 
-      def initialize(library_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
-        @library_idh = library_idh
+      def initialize(container_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
+        @container_idh = container_idh
         @module_name = module_name
         @dsl_file = dsl_file
         @hash_content = hash_content
@@ -33,7 +33,7 @@ module DTK
         end
 
         input_hash = {assembly_ref => {:service_add_on => {type => ao_input_hash}}}
-        Model.import_objects_from_hash(library_idh,"component" =>  input_hash)
+        Model.import_objects_from_hash(container_idh,"component" =>  input_hash)
       end
 
       def self.dsl_filename_path_info()
@@ -67,7 +67,7 @@ module DTK
       end
 
       DslRegExp = Regexp.new("add-ons/([^/]+)\.json$")    
-      attr_reader :library_idh, :module_name, :dsl_file, :hash_content, :ports
+      attr_reader :container_idh, :module_name, :dsl_file, :hash_content, :ports
 
       def import_port_link(port_link_info)
       end

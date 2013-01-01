@@ -26,12 +26,18 @@ module XYZ
 
     def rest__import()
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      library_id = ret_request_params(:library_id) 
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
-      unless library_idh
-        raise Error.new("No library specified and no default can be determined")
-      end
-      ServiceModule.import(library_idh,remote_module_name,remote_namespace,version)
+      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      project = get_default_project()
+      remote_params = {
+        :repo => remote_repo,
+        :namespace => remote_namespace,
+        :module_name => remote_module_name,
+        :version => version
+      }
+      local_params = {
+        :module_name => remote_module_name #TODO: hard coded making local module name same as remote module_name
+      }
+      ServiceModule.import(project,remote_params,local_params)
       rest_ok_response
     end
     

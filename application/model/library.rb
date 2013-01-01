@@ -1,6 +1,7 @@
 module XYZ
   class Library < Model
     ### get methods
+    #MOD_RESTRUCT: deprecate
     def get_service_module(module_name)
       sp_hash = {
         :cols => [:id,:group_id,:display_name],

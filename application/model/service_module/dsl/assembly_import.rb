@@ -1,20 +1,20 @@
 #converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    def initialize(library_idh,module_name)
-      @library_idh = library_idh
+    def initialize(container_idh,module_name)
+      @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
       @ndx_assembly_hashes = Hash.new #indexed by ref
       @ndx_module_branch_ids = Hash.new
       @module_name = module_name
-      @service_module = get_service_module(library_idh,module_name)
+      @service_module = get_service_module(container_idh,module_name)
     end
     def add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
       assemblies_hash.each do |ref,assem|
         @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
-        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@library_idh,ref,assem,node_bindings_hash))
+        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash))
         @ndx_assembly_hashes[ref] ||= assem
       end
     end
@@ -27,22 +27,22 @@ module DTK; class ServiceModule
         :cols => [:id],
         :filter => [:oneof,:module_branch_id, module_branch_ids()]
       }
-      existing_assembly_ids = Model.get_objs(@library_idh.createMH(:component),sp_hash).map{|r|r[:id]}
+      existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
       mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
       @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint)
 
-      Model.input_hash_content_into_model(@library_idh,@db_updates_assemblies)
+      Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
 
       #port links can only be imported in after ports created
       #add ports to assembly nodes
       db_updates_port_links = Hash.new
       @ndx_assembly_hashes.each do |ref,assembly|
-        assembly_idh = @library_idh.get_child_id_handle(:component,ref)
+        assembly_idh = @container_idh.get_child_id_handle(:component,ref)
         ports = add_ports_during_import(assembly_idh)
         db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assembly,ports))
         ports.each{|p|@ndx_ports[p[:id]] = p}
       end
-      Model.input_hash_content_into_model(@library_idh,{"component" => db_updates_port_links})
+      Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
     end
 
     def ports()
@@ -64,8 +64,8 @@ module DTK; class ServiceModule
     end
 
    private
-    def get_service_module(library_idh,module_name)
-      library_idh.create_object().get_service_module(module_name)
+    def get_service_module(container_idh,module_name)
+      container_idh.create_object().get_service_module(module_name)
     end
 
     def add_ports_during_import(assembly_idh)
@@ -108,7 +108,7 @@ module DTK; class ServiceModule
       end
 
       #TODO: more efficient to resolve heer teh ids for *node_binding_rs_id
-      def self.import_nodes(library_idh,assembly_ref,assembly_hash,node_bindings_hash)
+      def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash)
         module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
         node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
@@ -135,7 +135,7 @@ module DTK; class ServiceModule
             node_output["node_binding_rs_id"] = nil
           end
 
-          cmps_output = import_component_refs(library_idh,assembly_hash["name"],module_refs,node_hash["components"])
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],module_refs,node_hash["components"])
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -162,7 +162,7 @@ module DTK; class ServiceModule
 
 
       #TODO: more efficient to resolve here the ids for *component_template_id
-      def self.import_component_refs(library_idh,assembly_name,module_refs,components_hash)
+      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules
         cmp_types = components_hash.map{|cmp|component_type(cmp)}
@@ -171,7 +171,7 @@ module DTK; class ServiceModule
           :filter => [:and, [:oneof, :component_type,cmp_types],
                       [:neq, :library_library_id,nil]] #TODO: think this should pick out specific library
         }
-        matching_cmps = Model.get_objs(library_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+        matching_cmps = Model.get_objs(container_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
         #make sure a match is found for each component
         non_matches = Array.new
         augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|

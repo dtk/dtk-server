@@ -21,8 +21,8 @@ module DTK
 
     ###end standard get methods
 
-    def self.import(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
-      Import.new(library_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes).import()
+    def self.import(container_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+      Import.new(container_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes).import()
     end
     def self.dsl_filename_path_info()
       Import.dsl_filename_path_info()

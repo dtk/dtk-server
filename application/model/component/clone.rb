@@ -9,7 +9,7 @@ module XYZ
       unless self[:library_library_id]
         return self
       end
-      workspace_cmp = create_workspace_component_template?(node.get_project()).create_object()
+      workspace_cmp = get_workspace_component_template(node.get_project()).create_object()
       #check constraints
       unless opts[:no_constraint_checking]
         if constraints = workspace_cmp.get_constraints!(:update_object => true)
@@ -52,10 +52,7 @@ module XYZ
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
     end
 
-    #TODO: see if can align with ComponentModule.create_workspace_branch?
-    #this will be alibrary component templaet
-    def create_workspace_component_template?(proj,opts={})
-      #processing so that component's implementation and template are cloned to project
+    def get_workspace_component_template(proj,opts={})
       #self will have implementation_id set to library implementation and ancestor_id set to library template
       #need to search project to see if has implementation that matches (same repo)
 
@@ -68,7 +65,9 @@ module XYZ
       if ws_cmp_tmp_idh  = find_match_in_project(proj_idh)
         return ws_cmp_tmp_idh
       end
-
+      raise Error.new("MOD_RESTRUCT: should not reach here")
+=begin
+MOD_RESTRUCT: remove
       #create module branch for work space if needed
       library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
       workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
@@ -96,6 +95,7 @@ module XYZ
       new_ws_cmp_tmp_id = proj.clone_into(self,to_add_mb_assigns)
       
       id_handle.createIDH(:id => new_ws_cmp_tmp_id,:parent_model_name => :project)
+=end
     end
 
     def source_clone_info_opts()

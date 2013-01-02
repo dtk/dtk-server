@@ -461,7 +461,7 @@ module DTK
         r[:module_branch].merge(:module_id => r[:id],:library_id => r[:library_library_id])
       end
       if rows.empty?
-        raise ErrorUsage.new("Module (#{module_name}) does not exist")
+        raise ErrorUsage.new("Module does not exist")
       end
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
     end

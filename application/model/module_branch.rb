@@ -13,16 +13,6 @@ module DTK
       has_default_version?() ? nil : self[:version] 
     end
 
-    #this adds library branch from this, which is a workspace branch
-    def add_library_branch?(new_lib_branch_name)
-      RepoManager.add_branch_and_push_to_origin?(new_lib_branch_name,self)
-    end
-
-    #this adds ws branch from this, which is a lib branch
-    def add_workspace_branch?(new_ws_branch_name)
-      RepoManager.add_branch_and_push_to_origin?(new_ws_branch_name,self)
-    end
-
     #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
     def serialize_and_save_to_repo(*args)
       files = 
@@ -193,33 +183,6 @@ module DTK
       end
     end
   
-    def create_workspace_branch?(module_type,project)
-      module_id_col = module_id_col(module_type)
-      update_object!(module_id_col,:version,:repo_id,:type)
-
-      ref = branch = workspace_branch_name(project)
-      match_assigns = {
-        module_id_col => self[module_id_col],
-        :project_id =>  project.id_handle.get_id(),
-        :version => self[:version]
-      }
-      other_assigns = {
-        :display_name => branch,
-        :branch => branch,
-        :repo_id => self[:repo_id],
-        :is_workspace => true,
-        :type => self[:type]
-
-      }
-      branch_mh = model_handle.merge(:parent_model_name => module_type)
-      mb_idh = Model.create_from_row?(branch_mh,ref,match_assigns,other_assigns) do
-        #called only if row is created
-        new_ws_branch_name = branch
-        add_workspace_branch?(new_ws_branch_name)
-      end
-      mb_idh.create_object().merge(match_assigns).merge(other_assigns)
-    end
-
     def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
         :cols => [:id,:display_name,:component_ws_module_branches],

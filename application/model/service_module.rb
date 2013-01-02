@@ -153,29 +153,6 @@ module DTK
       end
     end
 
-    #creates workspace branch (if needed) and related objects from library one
-    def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
-      needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
-      update_object!(*needed_cols)
-      module_name = module_name()
-      library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
-
-      #get library branch if needed
-      library_mb ||= get_library_module_branch(version)
-
-      #create module branch for workspace if needed and push it to repo server
-      workspace_mb = library_mb.create_workspace_branch?(:service_module,proj)
-      
-      #get repo info
-      sp_hash = {
-        :cols => [:id, :repo_name],
-        :filter => [:eq, :id, workspace_mb[:repo_id]]
-      }
-      repo = Model.get_obj(model_handle(:repo),sp_hash)
-      module_info = {:workspace_branch => workspace_mb[:branch]}
-      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
-    end
-
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
       raise Error.new("MOD_RESTRUCT: needs to be written")
       #TODO: because of assembly_template_ws_item doing &promote_to_library first
@@ -190,12 +167,6 @@ module DTK
       self.class.create_assemblies_from_dsl?(library_idh,module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
-
-    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
-      #TODO: assembly_template_ws_item
-      # no op until address item
-    end
-    private :promote_to_library__meta_changes
 
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]

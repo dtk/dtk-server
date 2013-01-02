@@ -153,12 +153,11 @@ end
       rest_ok_response
     end
 
-    def rest__create_workspace_branch()
+
+    def rest__get_workspace_branch_info()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
-      project = get_default_project()
-      workspace_branch_info = component_module.create_workspace_branch?(project,version)
-      rest_ok_response workspace_branch_info
+      rest_ok_response component_module.get_workspace_branch_info(version)
     end
 
     def rest__create_new_dsl_version()

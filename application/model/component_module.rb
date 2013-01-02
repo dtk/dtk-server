@@ -67,7 +67,6 @@ module DTK
       module_and_mb_info = update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version=nil,opts)
       library_mb = module_and_mb_info[:module_branch_idh].create_object()
       module_obj = module_and_mb_info[:module_idh].create_object() 
-      module_obj.create_workspace_branch?(project,version,library_idh,library_mb)
       {:dsl_created => module_and_mb_info[:dsl_created]}
     end
 
@@ -228,40 +227,6 @@ module DTK
         mdl.merge(:type => mdl.component_type())
       end
       unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-
-    #creates workspace branch (if needed) and related objects from library one
-    def create_workspace_branch?(proj,version,library_idh=nil,library_mb=nil)
-      needed_cols = (library_idh.nil? ? [:library_library_id,:display_name] : [:display_name])
-      update_object!(*needed_cols)
-      module_name = self[:display_name]
-      library_idh ||= id_handle(:model_name => :library, :id => self[:library_library_id])
-
-      #get library branch if needed
-      library_mb ||= get_library_module_branch(version)
-
-      #create module branch for workspace if needed and push it to repo server
-      workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
-      
-      #create new project implementation if needed
-      #  first get library implementation
-      sp_hash = {
-        :cols => [:id,:group_id],
-        :filter => [:and, [:eq, :library_library_id, library_idh.get_id()],
-                    [:eq, :version, ModuleBranch.version_field(version)],
-                    [:eq, :module_name,module_name]]
-      }
-      library_impl = Model.get_obj(model_handle(:implementation),sp_hash)
-      new_impl_idh = library_impl.clone_into_project_if_needed(proj)
-
-      #get repo info
-      sp_hash = {
-        :cols => [:id, :repo_name],
-        :filter => [:eq, :id, workspace_mb[:repo_id]]
-      }
-      repo = Model.get_obj(model_handle(:repo),sp_hash)
-      module_info = {:workspace_branch => workspace_mb[:branch]}
-      ModuleRepoInfo.new(repo,module_name,module_info,library_idh)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type)

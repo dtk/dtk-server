@@ -1,6 +1,6 @@
 module DTK
   class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,branch_info,library_idh=nil)
+    def initialize(repo,module_name,branch_obj)
       super()
       repo.update_object!(:repo_name,:id)
       repo_name = repo[:repo_name]
@@ -8,9 +8,9 @@ module DTK
         :repo_id => repo[:id],
         :repo_name => repo_name,
         :module_name => module_name,
-        :repo_url => RepoManager.repo_url(repo_name)
-      }.merge(Aux::hash_subset(branch_info,[:workspace_branch,:library_branch]))
-      hash.merge!(:library_id => library_idh.get_id()) if library_idh
+        :repo_url => RepoManager.repo_url(repo_name),
+        :workspace_branch => branch_obj[:branch]
+      }
       replace(hash)
     end
   end
@@ -91,10 +91,19 @@ module DTK
     private :update_ws_branch_from_lib_branch?
 
     def get_workspace_branch_info(version=nil)
-      aug_branch = ModuleBranch.get_augmented_workspace_branch(self,version)
-      repo = aug_branch[:workspace_repo]
-      module_name = aug_branch[module_type()][:display_name]
-      ModuleRepoInfo.new(repo,module_name,aug_branch)
+      sp_hash = {
+        :cols => [:display_name,:workspace_info]
+      }
+      version_field = ModuleBranch.version_field(version)
+      rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
+      if rows.size == 0
+        raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
+      elsif rows.size > 1
+        raise Error.new("Unexpected that get more than 1 matching row")
+      end
+      info = rows.first
+      module_name = info[:display_name]
+      ModuleRepoInfo.new(info[:repo],module_name,info[:module_branch])
     end
 
     #type is :library or :workspace
@@ -197,7 +206,7 @@ module DTK
     end
     def get_workspace_repo()
       sp_hash = {
-        :cols => [:id,:display_name,:workspace_repo,:project_project_id]
+        :cols => [:id,:display_name,:workspace_info,:project_project_id]
       }
       row = get_obj(sp_hash)
       #opportunistically set display name and project_project_id on module
@@ -226,7 +235,19 @@ module DTK
     def module_type()
       self.class.module_type()
     end
-
+=begin
+    def get_workspace_branch(version=nil)
+      mb_mh = model_handle().create_childMH(:module_branch)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:branch],
+        :filter => [:and,[:eq,  mb_mh.parent_id_field_name(), id()],
+                    [:eq,:is_workspace,true],
+                    [:eq,:version,ModuleBranch.version_field(version)]]
+      }
+      Model.get_obj(mb_mh,sp_hash)
+    end
+=end
+    #MOD_RESTRUCT: may replace below with above
     def get_module_branch(branch)
       sp_hash = {
         :cols => [:module_branches]

@@ -118,24 +118,5 @@ module XYZ
       rest_ok_response
     end
 
-    def rest__workspace_branch_info()
-      service_module = create_obj(:service_module_id)
-      version = ret_request_params(:version)
-      workspace_branch_info = service_module.get_workspace_branch_info(version)
-      rest_ok_response workspace_branch_info
-    end
-
-    def rest__deprecate_workspace_branch_info(service_module_id)
-      #TODO: stub using library branch until put in service module workspace mechanism
-      service_module = create_object_from_id(service_module_id)
-      repo = service_module.get_library_repo()
-      service_module_name = service_module.update_object!(:display_name)[:display_name] 
-      workspace_branch_info = {
-        :branch => "master", 
-        :module_name => service_module_name,
-        :repo_url => RepoManager.repo_url(repo[:repo_name])
-      }
-      rest_ok_response workspace_branch_info
-    end
   end
 end

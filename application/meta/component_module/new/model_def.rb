@@ -55,11 +55,11 @@ lambda__segment_components =
       :hidden=>true,
       :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:id,:display_name,:branch,:version,:type,:repo_id,:is_workspace])]
     },
-    :workspace_repo=>{
+    :workspace_info=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols =>[:id,:repo_id],:filter=>[:eq,:is_workspace,true]),
+      [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
     #MOD_RESTRUCT: deprecate below for above

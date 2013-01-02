@@ -40,6 +40,7 @@ module DTK
     end
 
     def self.create_empty_repo(library_idh,project,module_name)
+      raise Error.new("MOD_RESTRUCT: needs to be rewritten") 
       if module_exists?(library_idh,module_name)
         raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
       end

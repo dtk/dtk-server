@@ -53,11 +53,10 @@ end
       rest_ok_response ComponentModule.list(model_handle, :project_idh => project.id_handle())
     end
 
-    def rest__workspace_branch_info()
+    def rest__get_workspace_branch_info()
       component_module = create_obj(:component_module_id)
       version = ret_request_params(:version)
-      workspace_branch_info = component_module.get_workspace_branch_info(version)
-      rest_ok_response workspace_branch_info
+      rest_ok_response component_module.get_workspace_branch_info(version)
     end
 
     def rest__get_all_workspace_library_diffs()
@@ -151,13 +150,6 @@ end
       existing_version = ret_request_params(:existing_version)
       component_module.create_new_version(new_version,existing_version)
       rest_ok_response
-    end
-
-
-    def rest__get_workspace_branch_info()
-      component_module = create_obj(:component_module_id)
-      version = ret_request_params(:version)
-      rest_ok_response component_module.get_workspace_branch_info(version)
     end
 
     def rest__create_new_dsl_version()

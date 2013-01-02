@@ -99,17 +99,6 @@ module DTK; class Assembly
       Model.delete_instances(node_idhs)    
     end
 
-    def self.synchronize_workspace_with_library_branch(assembly_idh)
-      module_info = assembly_idh.create_object().get_obj(:cols => [:service_module])
-      service_module = module_info[:service_module]
-      lib_branch = module_info[:module_branch]
-      version=nil #TODO: stub
-      if ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
-        repo = ws_branch[:workspace_repo]
-        repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
-      end
-    end
-
     def info_about(about)
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}

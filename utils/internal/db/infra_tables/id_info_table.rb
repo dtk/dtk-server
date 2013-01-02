@@ -283,7 +283,7 @@ module XYZ
     #TODO: refactor this, DB.parent_field, and DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
     def parent_id_field_name(parent_model_name_or_idh=nil)
       arg = parent_model_name_or_idh #shorthand
-      parent_model_name ||= self[:parent_model_name]||(arg.kind_of?(Symbol) ? arg : arg[:model_name])
+      parent_model_name ||= self[:parent_model_name]||(arg && (arg.kind_of?(Symbol) ? arg : arg[:model_name]))
       return nil unless parent_model_name
       DB.parent_field(parent_model_name,self[:model_name])
     end

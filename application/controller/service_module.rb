@@ -50,9 +50,17 @@ module XYZ
       rest_ok_response 
     end
 
-    def rest__push_to_remote()
+    #either indicates no auth or sends back info needed to push changes to remote
+    def rest__check_remote_auth()
       service_module = create_obj(:service_module_id)
-      service_module.push_to_remote()
+      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      rest_ok_response service_module.check_remote_auth(remote_repo,rsa_pub_key,Repo::Remote::Auth::RW)
+    end
+
+    def rest__push_to_remote_legacy()
+      service_module = create_obj(:service_module_id)
+      service_module.push_to_remote__deprecate()
       rest_ok_response
     end
     

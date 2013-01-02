@@ -133,6 +133,11 @@ end
       component_module.push_to_remote()
       rest_ok_response
     end
+    def rest__push_to_remote_legacy()
+      component_module = create_obj(:component_module_id)
+      component_module.push_to_remote_deprecate()
+      rest_ok_response
+    end
 
     #### end: actions to interact with remote repo ###
 

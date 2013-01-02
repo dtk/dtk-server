@@ -2,6 +2,7 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
  class Repo
     class Remote
+      r8_nested_require('remote','auth')
       def initialize(remote_repo=nil)
         rest_base_url = rest_base_url(remote_repo)
         @client = RepoManagerClient.new(rest_base_url)

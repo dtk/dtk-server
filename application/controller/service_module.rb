@@ -42,11 +42,9 @@ module XYZ
     end
     
     def rest__export()
-      service_module_id = ret_request_param_id(:service_module_id)
-      service_module = create_object_from_id(service_module_id)
-      project = get_default_project()
+      service_module = create_obj(:service_module_id)
       remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
-      service_module.export(project,remote_repo)
+      service_module.export(remote_repo)
       rest_ok_response 
     end
 

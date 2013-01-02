@@ -1,8 +1,9 @@
 module DTK
   module ModuleRemoteMixin
     #export to a remote repo
-    def export(project,remote_repo,version=nil)
+    def export(remote_repo,version=nil)
       #TODO: put in version-specfic logic
+      project = get_project()
       repo = get_workspace_repo()
       module_name = update_object!(:display_name)[:display_name]
       if repo[:remote_repo_name]

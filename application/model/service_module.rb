@@ -154,8 +154,8 @@ module DTK
     end
 
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
-      update_object!(:project_project_id,:display_name)
-      project_idh = id_handle(:model_name => :project, :id => self[:project_project_id])
+      project_idh = get_project().id_handle()
+      update_object!(:display_name)
       #TODO: for more efficiency can push in diffs_summary to below
       self.class.create_assemblies_from_dsl?(project_idh,module_branch,module_name())
     end

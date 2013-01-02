@@ -285,8 +285,6 @@ module DTK
       if diffs_summary.meta_file_changed?()
         ComponentDSL.update_model(impl,module_branch.id_handle())
       end
-      #TODO: assembly_template_ws_item
-      promote_to_library(version)
     end
 
     def self.import_postprocess(project,repo,module_name,version)

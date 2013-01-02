@@ -120,12 +120,8 @@ module DTK
       matches.first
     end
 
-    #TODO: assembly_template_ws_item
-    #TODO: right now adding to ws and promoting to library; may move to just adding to workspace
     def update_model_from_clone_changes?(diffs_summary,version=nil)
-      matching_branches = get_module_branches_matching_version(version)
-      ws_branch = find_branch(:workspace,matching_branches)
-
+      ws_branch = get_workspace_module_branch(version)
       #first update the server clone
       merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
       if merge_result == :merge_needed
@@ -235,18 +231,18 @@ module DTK
     def module_type()
       self.class.module_type()
     end
-=begin
-    def get_workspace_branch(version=nil)
+
+    def get_workspace_module_branch(version=nil)
       mb_mh = model_handle().create_childMH(:module_branch)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:branch],
-        :filter => [:and,[:eq,  mb_mh.parent_id_field_name(), id()],
+        :cols => [:id,:group_id,:display_name,:branch,:version],
+        :filter => [:and,[:eq,mb_mh.parent_id_field_name(),id()],
                     [:eq,:is_workspace,true],
                     [:eq,:version,ModuleBranch.version_field(version)]]
       }
       Model.get_obj(mb_mh,sp_hash)
     end
-=end
+
     #MOD_RESTRUCT: may replace below with above
     def get_module_branch(branch)
       sp_hash = {

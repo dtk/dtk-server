@@ -154,17 +154,10 @@ module DTK
     end
 
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
-      raise Error.new("MOD_RESTRUCT: needs to be written")
-      #TODO: because of assembly_template_ws_item doing &promote_to_library first
-      promote_to_library(version)
-      #TODO: assembly_template_ws_item
-      #Being passed workspace branch, but before address this item putting assemblies on library branch
-      module_branch = find_branch(:library,get_module_branches())
-      
-      update_object!(:library_library_id,:display_name)
-      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
+      update_object!(:project_project_id,:display_name)
+      project_idh = id_handle(:model_name => :project, :id => self[:project_project_id])
       #TODO: for more efficiency can push in diffs_summary to below
-      self.class.create_assemblies_from_dsl?(library_idh,module_branch,module_name())
+      self.class.create_assemblies_from_dsl?(project_idh,module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
 

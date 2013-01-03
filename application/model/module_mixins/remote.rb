@@ -1,13 +1,25 @@
 module DTK
   module ModuleRemoteMixin
+    #either indicates no auth or sends back info needed to push changes to remote
+    def check_remote_auth(remote_repo,rsa_pub_key,access_rights,version=nil)
+      unless branch_info = get_workspace_branch_info(version)
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
+      end
+      unless remote_repo_name = branch_info[:repo].linked_remote?(remote_repo)
+        raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
+      end
+      remote_repo = Repo::Remote.new(remote_repo)
+      remote_repo.check_remote_auth(rsa_pub_key,access_rights,version)
+    end
+
     #export to a remote repo
     def export(remote_repo,version=nil)
       #TODO: put in version-specfic logic
       project = get_project()
       repo = get_workspace_repo()
       module_name = update_object!(:display_name)[:display_name]
-      if repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module (#{repo[:remote_repo_name]})")
+      if repo.linked_remote?(remote_repo)
+        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
@@ -114,7 +126,7 @@ module DTK
         end
         repo = repos.first()
       else
-        #MOD_RESTRUCT: TODO: what entity gets authorized; also this shoudl be done a priori
+        #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
         remote_repo.authorize_dtk_instance(remote_params[:module_name],module_type())
 
         #create empty repo on local repo manager; 
@@ -133,7 +145,7 @@ module DTK
       module_branch_idh
     end
 
-        def delete_remote(project,remote_params)
+    def delete_remote(project,remote_params)
       #TODO: put in version specific logic
       if remote_params[:version]
         raise Error.new("TODO: delete_remote when version given")

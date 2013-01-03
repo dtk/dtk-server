@@ -215,7 +215,7 @@ module DTK
       module_info = get_component_modules_info(module_branch)
 
       #check that all component modules are linked to a remote component module
-      unlinked_mods = module_info.select{|r|r[:repo][:remote_repo_name].nil?}
+      unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?()}
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       end

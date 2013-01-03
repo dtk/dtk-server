@@ -21,6 +21,13 @@ module XYZ
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end
 
+    def linked_remote?(remote_repo=nil)
+      unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
+        raise Error.new("Not implemented yet for remote's other than default")
+      end
+      update_object!(:remote_repo_name)[:remote_repo_name]
+    end
+
     def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name
       #MOD_RESTRUCT: TODO: may be heere decide whether do what is doing now where each user has own repo or we share repos accross server instance

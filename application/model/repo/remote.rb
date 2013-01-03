@@ -2,6 +2,13 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
  class Repo
     class Remote
+      class ModuleRepoInfo < Hash
+        #has keys
+        #  :repo_url
+        #  :local_branch
+        #  :remote_branch
+      end
+
       r8_nested_require('remote','auth')
       def initialize(remote_repo=nil)
         rest_base_url = rest_base_url(remote_repo)
@@ -37,6 +44,8 @@ module DTK
         client.delete_module(params)
       end
 
+      def check_remote_auth(rsa_pub_key,access_rights,version)
+      end
       def get_module_info(remote_params)
         client_params = {
           :name => remote_params[:module_name],

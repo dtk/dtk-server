@@ -176,13 +176,32 @@ module DTK
         end
       elsif opts[:raise_error]
         unless response.ok?
-          raise Error.new(response.inspect)
+          raise Error.new(error_msg(response))
         end
           response.data
       else
         response.data
       end
     end
+
+    def error_msg(response)
+      if response.kind_of?(Common::Response::Error) and response["errors"] 
+        errors = response["errors"]
+        if include_error_code?(errors,"connection_refused") 
+          "Repo Manager refused the connection; it may be down"
+        else
+          "Repo Manager Connection Error: #{errors.inspect}"
+        end
+      else
+        "Repo Manager Connection Error: #{response.inspect}"
+      end
+    end
+    def include_error_code?(errors,code)
+      !!errors.find do |el|
+        el.kind_of?(Hash) and el["code"] == code
+      end
+    end
+    private :error_msg,:include_error_code?
 
     RestClientWrapper = Common::Response::RestClientWrapper
     def get_rest_request_data(route,opts={})

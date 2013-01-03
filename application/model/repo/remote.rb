@@ -4,18 +4,18 @@ module DTK
     class Remote
       class ModuleRepoInfo < Hash
         #has keys
-        #  :repo_url
+        #  :remote_repo_url
         #  :remote_repo 
         #  :remote_branch
         #  :module_name
-        def initialize(remote,module_name,remote_repo=nil,version=nil)
+        def initialize(parent,remote_params)
           super()
-          remote_repo ||= remote.default_remote_repo()
+          remote_repo = @remote_repo||parent.default_remote_repo()
           hash = {
-            :module_name => module_name,
+            :module_name => remote_params[:module_name],
             :remote_repo => remote_repo.to_s,
-            :repo_url => remote.rest_base_url(remote_repo),
-            :remote_branch => remote.version_to_branch_name(version)
+            :remote_repo_url => parent.repo_url_ssh_access(remote_params[:remote_repo_name]),
+            :remote_branch => parent.version_to_branch_name(remote_params[:version])
           }
           replace(hash)
         end
@@ -25,8 +25,8 @@ module DTK
       include AuthMixin
 
       def initialize(remote_repo=nil)
-        rest_base_url = rest_base_url(remote_repo)
-        @client = RepoManagerClient.new(rest_base_url)
+        @remote_repo = remote_repo
+        @client = RepoManagerClient.new(rest_base_url(remote_repo))
       end
 
       #create (empty) remote module

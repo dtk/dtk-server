@@ -88,6 +88,16 @@ module DTK
       return (filtered_nodes.size > 0)
     end
 
+    def are_nodes_running?
+      nodes = get_nodes(:id)
+      running_nodes = Task::Status::Assembly.get_active_nodes(model_handle())
+      
+      return false if running_nodes.empty?
+      interrsecting_nodes = (running_nodes.map(&:id) & nodes.map(&:id))
+
+      return !interrsecting_nodes.empty?
+    end
+
     class << self
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new

@@ -210,6 +210,10 @@ module DTK
         return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
       end
 
+      if assembly.are_nodes_running?
+        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
+      end
+
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg)
       task.save!()

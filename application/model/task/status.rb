@@ -49,6 +49,10 @@ module DTK
         end
       end
       class Assembly < self
+        def self.get_active_nodes(model_handle)
+          find_nodes_that_are_active(model_handle)
+        end
+
         def self.get_status(assembly_idh,opts={})
           filter = [:eq, :assembly_id, assembly_idh.get_id()]
           get_status_aux(assembly_idh,:assembly,filter,opts)

@@ -28,6 +28,12 @@ module DTK
     private :update_ws_branch_from_lib_branch?
 
     def get_workspace_branch_info(version=nil)
+      info = get_augmented_workspace_branch(version)
+      module_name = info[:display_name]
+      ModuleRepoInfo.new(info[:repo],module_name,info[:module_branch])
+    end
+
+    def get_augmented_workspace_branch(version=nil)
       sp_hash = {
         :cols => [:display_name,:workspace_info]
       }
@@ -38,9 +44,7 @@ module DTK
       elsif rows.size > 1
         raise Error.new("Unexpected that get more than 1 matching row")
       end
-      info = rows.first
-      module_name = info[:display_name]
-      ModuleRepoInfo.new(info[:repo],module_name,info[:module_branch])
+      rows.first
     end
 
     #type is :library or :workspace

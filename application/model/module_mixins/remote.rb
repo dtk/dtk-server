@@ -2,12 +2,13 @@ module DTK
   module ModuleRemoteMixin
     #either indicates no auth or sends back info needed to push changes to remote
     def check_remote_auth(remote_repo,rsa_pub_key,access_rights,version=nil)
-      unless branch_info = get_workspace_branch_info(version)
+      unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
-      unless branch_info[:repo].linked_remote?(remote_repo)
+      unless aug_branch[:repo].linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
+
       remote_repo = Repo::Remote.new(remote_repo)
       remote_params = {
         :module_name => module_name(),

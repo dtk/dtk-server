@@ -5,6 +5,17 @@ module XYZ
       [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
     end
 
+    def self.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => [:eq,:ssh_rsa_pub_key,ssh_rsa_pub_key]
+      }
+      unless ret = get_obj(mh.createMH(:repo_user),sp_hash)
+        raise ErrorUsage.new("The RSA Public key for the client machine has not been registered")
+      end
+      ret
+    end
+
     #TODO: stub that gets all repo users that are visbile; may restrict by filter on owner
     def self.authorized_users(model_handle)
       get_objs(model_handle, :cols => [:id,:username]).map{|r|r[:username]}

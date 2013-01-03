@@ -14,7 +14,7 @@ module DTK
         :module_name => module_name(),
         :module_type => module_type()
       }
-      remote_repo.check_remote_auth(remote_params,rsa_pub_key,access_rights,version)
+      remote_repo.check_remote_auth(model_handle(),remote_params,rsa_pub_key,access_rights,version)
     end
 
     #export to a remote repo

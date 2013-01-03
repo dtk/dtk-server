@@ -10,6 +10,8 @@ module DTK
       end
 
       r8_nested_require('remote','auth')
+      include AuthMixin
+
       def initialize(remote_repo=nil)
         rest_base_url = rest_base_url(remote_repo)
         @client = RepoManagerClient.new(rest_base_url)
@@ -42,16 +44,6 @@ module DTK
           :type => type_for_remote_module(type)
         }
         client.delete_module(params)
-      end
-
-      def check_remote_auth(remote_params,rsa_pub_key,access_rights,version=nil)
-        module_name = remote_params[:module_name]
-        type = type_for_remote_module(remote_params[:module_type])
-        #TODO: stub tht gives all users complete access
-        #TODO: should query first
-        authorize_end_user(module_name,type,rsa_pub_key,access_rights)
-        #TODO: stub for testing
-        get_module_info(remote_params)
       end
 
       def get_module_info(remote_params)
@@ -103,32 +95,6 @@ module DTK
       end
       HeadBranchName = "master"
       
-      def authorize_dtk_instance(module_name,type)
-        username = dtk_instance_remote_repo_username()
-        rsa_pub_key = dtk_instance_rsa_pub_key()
-        access_rights = "RW+"
-        authorize_user(username,rsa_pub_key,access_rights,module_name,type)
-      end
-
-      def authorize_end_user(module_name,type,rsa_pub_key,access_rights)
-        username = end_user_remote_repo_username()
-        authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,type)
-      end
-
-      def authorize_user(username,rsa_pub_key,access_rights,module_name,type)
-        client.create_user(username,rsa_pub_key,:update_if_exists => true)
-        grant_user_rights_params = {
-          :name => module_name,
-          :namespace => DefaultsNamespace,
-          :type => type_for_remote_module(type),
-          :username => username,
-          :access_rights => access_rights
-        }
-        client.grant_user_access_to_module(grant_user_rights_params)
-        module_name
-      end
-      private :authorize_user
-
       def repo_url_ssh_access(remote_repo_name)
         client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
       end
@@ -178,10 +144,8 @@ module DTK
       def dtk_instance_remote_repo_username()
         @dtk_instance_remote_repo_username ||= Common::Aux.dtk_instance_repo_username()
       end
-      #TODO: change; currently dtk_instance_remote_repo_username has form instance-id--instance-id; want user name to just
-      #be instance-id--username, not instance-id--instance-id--username
-      def end_user_remote_repo_username()
-        "#{dtk_instance_remote_repo_username()}--#{CurrentSession.new.get_username()}"
+      def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
+        "#{dtk_instance_remote_repo_username()}--#{RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]}"
       end
  
     end

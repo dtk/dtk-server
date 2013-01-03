@@ -5,11 +5,15 @@ module DTK
       unless branch_info = get_workspace_branch_info(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
-      unless remote_repo_name = branch_info[:repo].linked_remote?(remote_repo)
+      unless branch_info[:repo].linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
       remote_repo = Repo::Remote.new(remote_repo)
-      remote_repo.check_remote_auth(rsa_pub_key,access_rights,version)
+      remote_params = {
+        :module_name => module_name(),
+        :module_type => module_type()
+      }
+      remote_repo.check_remote_auth(remote_params,rsa_pub_key,access_rights,version)
     end
 
     #export to a remote repo

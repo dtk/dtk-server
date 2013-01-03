@@ -17,7 +17,7 @@ module DTK
 
       #create (empty) remote module
       def create_module(name,type)
-        username = dtk_instance_username()
+        username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
@@ -44,8 +44,16 @@ module DTK
         client.delete_module(params)
       end
 
-      def check_remote_auth(rsa_pub_key,access_rights,version)
+      def check_remote_auth(remote_params,rsa_pub_key,access_rights,version=nil)
+        module_name = remote_params[:module_name]
+        type = type_for_remote_module(remote_params[:module_type])
+        #TODO: stub tht gives all users complete access
+        #TODO: should query first
+        authorize_end_user(module_name,type,rsa_pub_key,access_rights)
+        #TODO: stub for testing
+        get_module_info(remote_params)
       end
+
       def get_module_info(remote_params)
         client_params = {
           :name => remote_params[:module_name],
@@ -95,11 +103,19 @@ module DTK
       end
       HeadBranchName = "master"
       
-
       def authorize_dtk_instance(module_name,type)
-        username = dtk_instance_username()
+        username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"
+        authorize_user(username,rsa_pub_key,access_rights,module_name,type)
+      end
+
+      def authorize_end_user(module_name,type,rsa_pub_key,access_rights)
+        username = end_user_remote_repo_username()
+        authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,type)
+      end
+
+      def authorize_user(username,rsa_pub_key,access_rights,module_name,type)
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
         grant_user_rights_params = {
           :name => module_name,
@@ -111,6 +127,7 @@ module DTK
         client.grant_user_access_to_module(grant_user_rights_params)
         module_name
       end
+      private :authorize_user
 
       def repo_url_ssh_access(remote_repo_name)
         client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
@@ -158,9 +175,13 @@ module DTK
       def dtk_instance_rsa_pub_key()
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
-      def dtk_instance_username()
-        @dtk_instance_username ||= Common::Aux.dtk_instance_repo_username()
+      def dtk_instance_remote_repo_username()
+        @dtk_instance_remote_repo_username ||= Common::Aux.dtk_instance_repo_username()
       end
+      def end_user_remote_repo_username()
+        "#{dtk_instance_remote_repo_username()}--#{CurrentSession.new.get_username()}"
+      end
+ 
     end
   end
 end

@@ -7,7 +7,7 @@ module DTK; class Repo
         type = type_for_remote_module(remote_params[:module_type])
         #TODO: should do aprori
         authorize_end_user(mh,module_name,type,rsa_pub_key,access_rights)
-        ModuleRepoInfo.new(module_name,remote_params[:remote_repo],version)
+        ModuleRepoInfo.new(self,module_name,remote_params[:remote_repo],version)
       end
 
       def authorize_dtk_instance(module_name,type)

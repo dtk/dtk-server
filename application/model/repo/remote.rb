@@ -8,14 +8,14 @@ module DTK
         #  :remote_repo 
         #  :remote_branch
         #  :module_name
-        def initialize(module_name,remote_repo=nil,version=nil)
+        def initialize(remote,module_name,remote_repo=nil,version=nil)
           super()
-          remote_repo ||= default_remote_repo()
+          remote_repo ||= remote.default_remote_repo()
           hash = {
             :module_name => module_name,
-            :remote_repo => remote_repo,
-            :repo_url => rest_base_url(remote_repo),
-            :remote_branch => version_to_branch_name(version)
+            :remote_repo => remote_repo.to_s,
+            :repo_url => remote.rest_base_url(remote_repo),
+            :remote_branch => remote.version_to_branch_name(version)
           }
           replace(hash)
         end
@@ -137,13 +137,6 @@ module DTK
         end
       end
 
-     private
-      attr_reader :client
-
-      def type_for_remote_module(module_type)
-        module_type.to_s.gsub(/_module$/,"")
-      end
-
       def rest_base_url(remote_repo=nil)
         unless remote_repo.nil? or remote_repo == default_remote_repo()
           raise Error.new("MOD_RESTRUCT:  need to put in logic to treat non default repo_name")
@@ -152,6 +145,13 @@ module DTK
         #remote = ::R8::Config[:repo][:remote][remote_repo]
         remote = ::R8::Config[:repo][:remote]
         "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
+      end
+
+     private
+      attr_reader :client
+
+      def type_for_remote_module(module_type)
+        module_type.to_s.gsub(/_module$/,"")
       end
 
       def dtk_instance_rsa_pub_key()

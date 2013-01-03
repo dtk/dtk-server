@@ -5,8 +5,20 @@ module DTK
       class ModuleRepoInfo < Hash
         #has keys
         #  :repo_url
-        #  :local_branch
+        #  :remote_repo 
         #  :remote_branch
+        #  :module_name
+        def initialize(module_name,remote_repo=nil,version=nil)
+          super()
+          remote_repo ||= default_remote_repo()
+          hash = {
+            :module_name => module_name,
+            :remote_repo => remote_repo,
+            :repo_url => rest_base_url(remote_repo),
+            :remote_branch => version_to_branch_name(version)
+          }
+          replace(hash)
+        end
       end
 
       r8_nested_require('remote','auth')
@@ -90,6 +102,10 @@ module DTK
         (branch_names.include?(HeadBranchName) ? ["CURRENT"] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
       end
       private :branch_names_to_versions
+
+      def version_to_branch_name(version)
+        self.class.version_to_branch_name(version)
+      end
       def self.version_to_branch_name(version)
         version ? version : HeadBranchName
       end

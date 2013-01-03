@@ -1,14 +1,13 @@
 module DTK; class Repo 
   class Remote
     module AuthMixin
+      #TODO: stub tht gives all users complete access
       def check_remote_auth(mh,remote_params,rsa_pub_key,access_rights,version=nil)
         module_name = remote_params[:module_name]
         type = type_for_remote_module(remote_params[:module_type])
-        #TODO: stub tht gives all users complete access
-        #TODO: should query first
+        #TODO: should do aprori
         authorize_end_user(mh,module_name,type,rsa_pub_key,access_rights)
-        #TODO: stub for testing
-        get_module_info(remote_params)
+        ModuleRepoInfo.new(module_name,remote_params[:remote_repo],version)
       end
 
       def authorize_dtk_instance(module_name,type)

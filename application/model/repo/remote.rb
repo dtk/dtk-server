@@ -178,6 +178,8 @@ module DTK
       def dtk_instance_remote_repo_username()
         @dtk_instance_remote_repo_username ||= Common::Aux.dtk_instance_repo_username()
       end
+      #TODO: change; currently dtk_instance_remote_repo_username has form instance-id--instance-id; want user name to just
+      #be instance-id--username, not instance-id--instance-id--username
       def end_user_remote_repo_username()
         "#{dtk_instance_remote_repo_username()}--#{CurrentSession.new.get_username()}"
       end

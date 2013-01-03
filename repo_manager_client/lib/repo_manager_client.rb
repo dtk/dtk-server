@@ -138,7 +138,21 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    def delete_user(user_id)
+    #TODO: does not work if user has access right; so shoudl fix on repo manager and allow names
+    def delete_user(user_id_or_name) 
+      #TODO: this is temporary until enale repo manager to take name or id or we cache id
+      if user_id_or_name.kind_of?(Fixnum)
+        delete_user_given_id(user_id_or_name)
+      else
+        user_info = list_users()
+        unless matching_user = user_info.find{|r|r["username"] == user_id_or_name}
+          raise ErrorUsage.new("User (#{user_id_or_name} does not exsit")
+        end
+        delete_user_given_id(matching_user["id"])
+      end
+    end
+
+    def delete_user_given_id(user_id)
       route = "/rest/system/user/delete"
       body = {:id => user_id}
       post_rest_request_data(route,body,:raise_error => true)

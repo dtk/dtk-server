@@ -77,7 +77,7 @@ end
     
     #### actions to interact with remote repos ###
     def rest__import()
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       project = get_default_project()
       ret_non_null_request_params(:remote_module_names).each do |name|
         remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
@@ -97,14 +97,15 @@ end
 
     def rest__pull_from_remote()
       component_module = create_obj(:component_module_id)
-      component_module.pull_from_remote()
+      remote_repo = ret_remote_repo()
+      component_module.pull_from_remote(remote_repo)
       rest_ok_response
     end
 
     def rest__delete_remote()
       name = ret_non_null_request_params(:remote_module_name)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
         :module_name => remote_module_name,
@@ -122,7 +123,7 @@ end
 
     def rest__export()
       component_module = create_obj(:component_module_id)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       component_module.export(remote_repo)
       rest_ok_response 
     end
@@ -131,8 +132,9 @@ end
     def rest__check_remote_auth()
       component_module = create_obj(:component_module_id)
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
-      rest_ok_response component_module.check_remote_auth(remote_repo,rsa_pub_key,Repo::Remote::AccessRights::RW)
+      access_rights = ret_access_rights()
+      remote_repo = ret_remote_repo()
+      rest_ok_response component_module.check_remote_auth(remote_repo,rsa_pub_key,access_rights)
     end
 
     def rest__push_to_remote_legacy()

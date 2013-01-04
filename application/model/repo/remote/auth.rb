@@ -49,6 +49,13 @@ module DTK; class Repo
           "RW+"
         end
       end
+      def self.convert_from_string_form(rights)
+        case rights
+          when "r" then R
+          when "rw" then RW
+          else raise ErrorUsage("Illegal access rights string '#{rights}'")
+        end  
+      end
     end
   end
 end; end

@@ -26,7 +26,7 @@ module XYZ
 
     def rest__import()
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       project = get_default_project()
       remote_params = {
         :repo => remote_repo,
@@ -43,7 +43,7 @@ module XYZ
     
     def rest__export()
       service_module = create_obj(:service_module_id)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       service_module.export(remote_repo)
       rest_ok_response 
     end
@@ -52,8 +52,9 @@ module XYZ
     def rest__check_remote_auth()
       service_module = create_obj(:service_module_id)
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
-      rest_ok_response service_module.check_remote_auth(remote_repo,rsa_pub_key,Repo::Remote::AccessRights::RW)
+      remote_repo = ret_remote_repo()
+      access_rights = ret_access_rights()
+      rest_ok_response service_module.check_remote_auth(remote_repo,rsa_pub_key,access_rights)
     end
 
     def rest__push_to_remote_legacy()
@@ -91,7 +92,7 @@ module XYZ
     def rest__delete_remote()
       name = ret_non_null_request_params(:remote_module_name)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
-      remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
+      remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
         :module_name => remote_module_name,

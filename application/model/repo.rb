@@ -3,6 +3,7 @@ module XYZ
     r8_nested_require('repo','remote')
     r8_nested_require('repo','diff')
     r8_nested_require('repo','diffs')
+    include RemoteMixin
 
     ###virtual columns
     def base_dir()
@@ -19,13 +20,6 @@ module XYZ
         :filter => [:and, [:eq,:repo_id,id()],[:eq,:repo_user_id,repo_user_idh.get_id()]]
       }
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
-    end
-
-    def linked_remote?(remote_repo=nil)
-      unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
-        raise Error.new("Not implemented yet for remote's other than default")
-      end
-      update_object!(:remote_repo_name)[:remote_repo_name]
     end
 
     def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
@@ -84,68 +78,7 @@ module XYZ
       RepoManager.diff(ws_branch[:branch],lib_branch)
     end
     
-    def initial_synchronize_with_remote_repo(remote_params,branch,opts={})
-      unless R8::Config[:repo][:workspace][:use_local_clones]
-        raise Error.new("Not implemented yet: initial_synchronize_with_remote_repo w/o local clones")
-      end
-      update_object!(:repo_name,:remote_repo_name)
-      unless self[:remote_repo_name]
-        raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
-      end
-      remote_url = Remote.new(remote_params[:repo]).repo_url_ssh_access(self[:remote_repo_name])
-      remote_name = remote_name_for_push_pull(remote_params[:repo])
-      remote_branch = Remote.version_to_branch_name(remote_params[:version])
-      repo_opts = opts.merge(:initial => true, :remote_branch => remote_branch)
-      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,repo_opts)
-    end
-    #MOD_RESTRUCT: TODO: see if need below any more now that have above
-    def synchronize_with_remote_repo(branch,opts={})
-      update_object!(:repo_name,:remote_repo_name)
-      unless self[:remote_repo_name]
-        raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
-      end
-      remote_url = Remote.new().repo_url_ssh_access(self[:remote_repo_name])
-      remote_name = remote_name_for_push_pull()
-      RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts)
-    end
-
-    def ret_remote_merge_relationship(remote_repo,local_branch,version,opts={})
-      update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull(remote_repo)
-      remote_branch = Remote.version_to_branch_name(version)
-      RepoManager.ret_remote_merge_relationship(self[:repo_name],local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
-    end
-
-    def push_to_remote(branch,remote_repo_name,version=nil)
-      unless remote_repo_name
-        raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
-      end
-      update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull()
-      remote_branch = Remote.version_to_branch_name(version)
-      RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name,remote_branch)
-    end
-
-    def link_to_remote(branch,remote_repo_name)
-      update_object!(:repo_name)
-      remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
-      remote_name = remote_name_for_push_pull()
-      RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
-      remote_repo_name
-    end
-
-    def unlink_remote(remote_repo)
-      update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull(remote_repo)
-      RepoManager.unlink_remote(self[:repo_name],remote_name)
-      update(:remote_repo_name => nil, :remote_repo_namespace => nil)
-    end
-
-   private    
-    def remote_name_for_push_pull(remote_name=nil)
-      remote_name||"remote"
-    end
-
+   private
     def self.private_user_repo_name(module_name,module_specific_type)
       username = CurrentSession.new.get_username()
       incorporate_module_type(module_specific_type,"#{username}-#{module_name}")

@@ -40,7 +40,7 @@ module DTK
         #TODO: for rebost idempotency under errors may have under this same as under :local_behind
         raise ErrorUsage.new("No changes in remote (#{remote_repo}) linked to module (#{module_name}) to pull from")
        when :local_behind
-        repo.synchronize_with_remote_repo(local_branch)
+        repo.synchronize_with_remote_repo(remote_repo,local_branch,version)
         project = get_project()
         self.class.import_postprocess(project,repo,module_name,version)
        when :branchpoint
@@ -147,7 +147,7 @@ module DTK
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
 
-      repo.initial_synchronize_with_remote_repo(remote_params,local_branch)
+      repo.synchronize_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
       module_branch_idh = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
       module_branch_idh
     end

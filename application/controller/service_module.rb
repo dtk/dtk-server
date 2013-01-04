@@ -1,5 +1,6 @@
 module XYZ
   class Service_moduleController < AuthController
+    helper :module_helper
     #TODO: for debugging; will be removed
 
     def rest__debug_get_project_trees()
@@ -51,10 +52,10 @@ module XYZ
     #either indicates no auth or sends back info needed to push changes to remote
     def rest__check_remote_auth()
       service_module = create_obj(:service_module_id)
-      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       remote_repo = ret_remote_repo()
       access_rights = ret_access_rights()
-      rest_ok_response service_module.check_remote_auth(remote_repo,rsa_pub_key,access_rights)
+      rest_ok_response service_module.check_remote_auth(action,remote_repo,rsa_pub_key,access_rights)
     end
 
     def rest__push_to_remote_legacy()

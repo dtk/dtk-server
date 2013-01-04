@@ -95,13 +95,6 @@ end
       rest_ok_response
     end
 
-    def rest__pull_from_remote()
-      component_module = create_obj(:component_module_id)
-      remote_repo = ret_remote_repo()
-      component_module.pull_from_remote(remote_repo)
-      rest_ok_response
-    end
-
     def rest__delete_remote()
       name = ret_non_null_request_params(:remote_module_name)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
@@ -131,10 +124,10 @@ end
     #either indicates no auth or sends back info needed to push changes to remote
     def rest__check_remote_auth()
       component_module = create_obj(:component_module_id)
-      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       access_rights = ret_access_rights()
       remote_repo = ret_remote_repo()
-      rest_ok_response component_module.check_remote_auth(remote_repo,rsa_pub_key,access_rights)
+      rest_ok_response component_module.check_remote_auth(action,remote_repo,rsa_pub_key,access_rights)
     end
 
     def rest__push_to_remote_legacy()

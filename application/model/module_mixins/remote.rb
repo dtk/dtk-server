@@ -1,12 +1,16 @@
 module DTK
   module ModuleRemoteMixin
     #either indicates no auth or sends back info needed to push changes to remote
-    def check_remote_auth(remote_repo,rsa_pub_key,access_rights,version=nil)
+    def check_remote_auth(action,remote_repo,rsa_pub_key,access_rights,version=nil)
       unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
       unless remote_repo_name = aug_branch[:repo].linked_remote?(remote_repo)
-        raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
+        if action == :push
+          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
+        else #action == :pull
+          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+        end
       end
 
       remote_repo = Repo::Remote.new(remote_repo)
@@ -18,7 +22,7 @@ module DTK
       remote_params.merge!(:version => version) if version
       remote_repo.check_remote_auth(model_handle(),remote_params,rsa_pub_key,access_rights)
     end
-
+    
     #export to a remote repo
     def export(remote_repo,version=nil)
       #TODO: put in version-specfic logic
@@ -46,44 +50,6 @@ module DTK
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
       remote_repo_name
-    end
-
-    def pull_from_remote(version=nil)
-      raise Error.new("MOD_RESTRUCT: needs to be rewritten") # made one change so far:  self.class.import_postprocess(project,repo,module_name,version)
-      repo = get_library_repo()
-      update_object!(:display_name,:library_library_id)
-      module_name = self[:display_name]
-      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
-
-      unless remote_repo_name = repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot pull from remote because local module (#{module_name}) is not linked to a remote module; use import.")
-      end
-      branch = library_branch_name(version)
-      unless get_module_branch(branch)
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
-      end
-      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
-      case merge_rel
-       when :equal,:local_ahead 
-        #TODO: for reboust idempotency under errors may have under this same as under :local_behind
-        raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
-       when :local_behind
-        repo.synchronize_with_remote_repo(branch)
-        self.class.import_postprocess(project,repo,module_name,version)
-        #update ws from library
-        update_ws_branch_from_lib_branch?(version)
-       when :branchpoint
-        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
-        #mean discard local changes
-        #the relevant steps for discard local changes are
-        #1 find merge base for  refs/heads/master and refs/remotes/remote/master; call it sha-mp
-        #2 execute  git reset --hard sha-mp
-        #3 execute  git push --force origin sha-mp:master
-        #4 execute code under case local_behind
-        raise ErrorUsage.new("Merge from remote repo is needed before can pull changes into module (#{module_name})")
-       else 
-        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
-      end
     end
 
     def push_to_remote__deprecate(version=nil) #MOD_RESTRUCT

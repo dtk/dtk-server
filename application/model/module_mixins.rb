@@ -66,7 +66,7 @@ module DTK
       #first update the server clone
       merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
       if merge_result == :merge_needed
-        raise Error.new("Synchronization problem exists between GUI editted file and local clone view for module (#{pp_module_name(version)})")
+        raise Error.new("Merge problem exists between multiple clients editting the module (#{pp_module_name(version)})")
       end 
 
       update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)

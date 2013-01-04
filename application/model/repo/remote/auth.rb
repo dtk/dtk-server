@@ -2,12 +2,14 @@ module DTK; class Repo
   class Remote
     module AuthMixin
       #TODO: stub tht gives all users complete access
-      def check_remote_auth(mh,remote_params,rsa_pub_key,access_rights)
+      def raise_error_if_no_access(mh,remote_params,access_rights,opts={})
         module_name = remote_params[:module_name]
         type = type_for_remote_module(remote_params[:module_type])
-        #TODO: should do aprori
-        authorize_end_user(mh,module_name,type,rsa_pub_key,access_rights)
-        ModuleRepoInfo.new(self,remote_params)
+        #TODO: should be done a prori
+        if opts[:rsa_pub_key]
+          authorize_end_user(mh,module_name,type,opts[:rsa_pub_key],access_rights)
+        end
+        true
       end
 
       def authorize_dtk_instance(module_name,type)
@@ -38,7 +40,7 @@ module DTK; class Repo
 
     end
 
-    class AccessError < UsageError
+    class AccessError < ErrorUsage
       def initialize(remote_repo,access_rights=nil)
         super(error_msg(remote_repo,access_rights))
       end

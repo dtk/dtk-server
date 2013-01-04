@@ -1,7 +1,7 @@
 module DTK
   module ModuleRemoteMixin
-    #either indicates no auth or sends back info needed to push changes to remote
-    def check_remote_auth(action,remote_repo,rsa_pub_key,access_rights,version=nil)
+    #raises an access rights usage eerror if user does not have access to the remote module
+    def get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version=nil)
       unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
@@ -13,14 +13,15 @@ module DTK
         end
       end
 
-      remote_repo = Repo::Remote.new(remote_repo)
       remote_params = {
         :module_name => module_name(),
         :module_type => module_type(),
         :remote_repo_name => remote_repo_name
       }
       remote_params.merge!(:version => version) if version
-      remote_repo.check_remote_auth(model_handle(),remote_params,rsa_pub_key,access_rights)
+      remote_repo = Repo::Remote.new(remote_repo)
+      remote_repo.raise_error_if_no_access(model_handle(),remote_params,access_rights,:rsa_pub_key => rsa_pub_key)
+      remote_repo.get_remote_module_info(remote_params)
     end
 
     #TODO: may have pull_from_remote combine this and above to validate user has access rights plus first try to pull from erver

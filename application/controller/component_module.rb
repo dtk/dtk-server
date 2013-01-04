@@ -121,13 +121,13 @@ end
       rest_ok_response 
     end
 
-    #either indicates no auth or sends back info needed to push changes to remote
-    def rest__check_remote_auth()
+    #get remote_module_info; throws an access rights usage eerror if user does not have access
+    def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       access_rights = ret_access_rights()
       remote_repo = ret_remote_repo()
-      rest_ok_response component_module.check_remote_auth(action,remote_repo,rsa_pub_key,access_rights)
+      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights)
     end
 
     def rest__push_to_remote_legacy()

@@ -24,6 +24,10 @@ module DTK
       r8_nested_require('remote','auth')
       include AuthMixin
 
+      def get_remote_module_info(remote_params)
+        ModuleRepoInfo.new(self,remote_params)
+      end
+
       def initialize(remote_repo=nil)
         @remote_repo = remote_repo
         @client = RepoManagerClient.new(rest_base_url(remote_repo))

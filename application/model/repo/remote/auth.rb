@@ -38,15 +38,34 @@ module DTK; class Repo
 
     end
 
+    class AccessError < UsageError
+      def initialize(remote_repo,access_rights=nil)
+        super(error_msg(remote_repo,access_rights))
+      end
+     private
+      def error_msg(remote_repo,access_rights=nil)
+        if access_rights
+          "#{access_rights.pp_form()} access rights denied to remote repo #{remote_repo}"
+        else
+        "Access denied to remote repo #{remote_repo}"
+        end
+      end
+    end
     class AccessRights
       class R < self
         def self.remote_repo_form()
           "R"
         end
+        def self.pp_form()
+          "Read"
+        end
       end
       class RW < self
         def self.remote_repo_form()
           "RW+"
+        end
+         def self.pp_form()
+          "Read/Write"
         end
       end
       def self.convert_from_string_form(rights)

@@ -22,6 +22,41 @@ module DTK
       remote_params.merge!(:version => version) if version
       remote_repo.check_remote_auth(model_handle(),remote_params,rsa_pub_key,access_rights)
     end
+
+    #TODO: may have pull_from_remote combine this and above to validate user has access rights plus first try to pull from erver
+    #or do this conditionally based on whether the user has a local clone created already
+    def pull_from_remote_if_fast_foward(remote_repo,version=nil)
+      unless aug_branch = get_augmented_workspace_branch(version)
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
+      end
+      unless remote_repo_name = aug_branch[:repo].linked_remote?(remote_repo)
+        raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+      end
+
+      repo = aug_branch[:repo]
+      local_branch = aug_branch[:branch]
+      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,local_branch,:fetch_if_needed => true)
+      case merge_rel
+       when :equal,:local_ahead 
+        #TODO: for reboust idempotency under errors may have under this same as under :local_behind
+        raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
+       when :local_behind
+        repo.synchronize_with_remote_repo(local_branch)
+        project = get_project()
+        self.class.import_postprocess(project,repo,module_name,version)
+       when :branchpoint
+        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
+        #mean discard local changes
+        #the relevant steps for discard local changes are
+        #1 find merge base for  refs/heads/master and refs/remotes/remote/master; call it sha-mp
+        #2 execute  git reset --hard sha-mp
+        #3 execute  git push --force origin sha-mp:master
+        #4 execute code under case local_behind
+        raise ErrorUsage.new("Merge from remote repo is needed before can pull changes into module (#{module_name})")
+       else 
+        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
+      end
+    end
     
     #export to a remote repo
     def export(remote_repo,version=nil)

@@ -60,10 +60,8 @@ module XYZ
 
     def rest__pull_from_remote()
       service_module = create_obj(:service_module_id)
-      remote_params = ret_params_hash(:remote_repo_url,:remote_repo,:remote_branch)
-pp remote_params
-raise ErrorUsage.new("got here")
-      rest_ok_response
+      remote_repo = ret_remote_repo()
+      service_module.pull_from_remote_if_fast_foward(remote_repo)
     end
 
     def rest__push_to_remote_legacy()

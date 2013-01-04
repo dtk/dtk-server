@@ -24,23 +24,21 @@ module DTK
       remote_repo.get_remote_module_info(remote_params)
     end
 
-    #TODO: may have pull_from_remote combine this and above to validate user has access rights plus first try to pull from erver
-    #or do this conditionally based on whether the user has a local clone created already
     def pull_from_remote_if_fast_foward(remote_repo,version=nil)
       unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
-      unless remote_repo_name = aug_branch[:repo].linked_remote?(remote_repo)
+      unless aug_branch[:repo].linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
 
       repo = aug_branch[:repo]
       local_branch = aug_branch[:branch]
-      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,local_branch,:fetch_if_needed => true)
+      merge_rel = repo.ret_remote_merge_relationship(remote_repo,local_branch,version,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_ahead 
-        #TODO: for reboust idempotency under errors may have under this same as under :local_behind
-        raise ErrorUsage.new("No changes in remote linked to module (#{module_name}) to pull from")
+        #TODO: for rebost idempotency under errors may have under this same as under :local_behind
+        raise ErrorUsage.new("No changes in remote (#{remote_repo}) linked to module (#{module_name}) to pull from")
        when :local_behind
         repo.synchronize_with_remote_repo(local_branch)
         project = get_project()
@@ -53,7 +51,7 @@ module DTK
         #2 execute  git reset --hard sha-mp
         #3 execute  git push --force origin sha-mp:master
         #4 execute code under case local_behind
-        raise ErrorUsage.new("Merge from remote repo is needed before can pull changes into module (#{module_name})")
+        raise ErrorUsage.new("Merge is needed; this must be done on workspace clone; issue command to clone module to workspace and then try this command again")
        else 
         raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
       end
@@ -98,7 +96,7 @@ module DTK
       unless get_module_branch(branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-      merge_rel = repo.ret_remote_merge_relationship(remote_repo_name,branch,:fetch_if_needed => true)
+      merge_rel = repo.ret_remote_merge_relationship(Repo::Remote.default_remote_repo(),branch,version,:fetch_if_needed => true)
       case merge_rel
        when :equal,:local_behind 
         raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")

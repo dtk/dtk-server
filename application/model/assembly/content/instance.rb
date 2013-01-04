@@ -83,10 +83,7 @@ module DTK
         @template_output.save_to_model()
         @template_output.serialize_and_save_to_repo()
       end
-      #MOD_RESTRUCT: TODO: deprecate below 
-      def synchronize_workspace_with_library_branch()
-        @template_output.synchronize_workspace_with_library_branch()
-      end
+
      private
       #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
       def get_component_template_mapping__project(project_idh,ws_branches)

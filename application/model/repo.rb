@@ -80,14 +80,6 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
-    def synchronize_library_with_workspace_branch(lib_branch,ws_branch)
-      RepoManager.fast_foward_merge_from_branch(ws_branch[:branch],lib_branch)
-    end
-
-    def synchronize_workspace_with_library_branch(ws_branch,lib_branch)
-      RepoManager.fast_foward_merge_from_branch(lib_branch[:branch],ws_branch)
-    end
-
     def diff_between_library_and_workspace(lib_branch,ws_branch)
       RepoManager.diff(ws_branch[:branch],lib_branch)
     end
@@ -117,13 +109,11 @@ module XYZ
       RepoManager.synchronize_with_remote_repo(self[:repo_name],branch,remote_name,remote_url,opts)
     end
 
-    def ret_remote_merge_relationship(remote_repo_name,branch,opts={})
-      unless remote_repo_name
-        raise ErrorUsage.new("Cannot determine metge relationship if remote_repo_name is null")
-      end
+    def ret_remote_merge_relationship(remote_repo,local_branch,version,opts={})
       update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull()
-      RepoManager.ret_remote_merge_relationship(self[:repo_name],branch,remote_name,opts)
+      remote_name = remote_name_for_push_pull(remote_repo)
+      remote_branch = Remote.version_to_branch_name(version)
+      RepoManager.ret_remote_merge_relationship(self[:repo_name],local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
     end
 
     def push_to_remote(branch,remote_repo_name,version=nil)
@@ -131,7 +121,7 @@ module XYZ
         raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
       end
       update_object!(:repo_name)
-      remote_name = remote_name_for_push_pull(remote_repo_name) 
+      remote_name = remote_name_for_push_pull()
       remote_branch = Remote.version_to_branch_name(version)
       RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name,remote_branch)
     end
@@ -139,7 +129,7 @@ module XYZ
     def link_to_remote(branch,remote_repo_name)
       update_object!(:repo_name)
       remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
-      remote_name = remote_name_for_push_pull(remote_repo_name)
+      remote_name = remote_name_for_push_pull()
       RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
       remote_repo_name
     end

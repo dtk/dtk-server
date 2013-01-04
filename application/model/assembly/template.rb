@@ -84,8 +84,6 @@ module DTK; class Assembly
     def self.delete(assembly_idh)
       #first delete the dsl files
       ServiceModule.delete_assembly_dsl?(assembly_idh)
-      #TODO: assembly_template_ws_item - so below synchronizes ws branch with library branch
-      synchronize_workspace_with_library_branch(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while compoennt's parents are the nodes
       #do not need to delete port links which use a cascade foreign keyy
       delete_assemblies_nodes([assembly_idh])

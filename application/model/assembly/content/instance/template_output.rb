@@ -18,19 +18,6 @@ module DTK
         path
       end
 
-      
-      def synchronize_workspace_with_library_branch()
-        lib_branch = @service_module_branch
-        service_module = lib_branch.get_service_module()
-        version=nil #TODO: stub
-        if ws_branch = ModuleBranch.get_augmented_workspace_branch(service_module,version,:no_error_if_none=>true)
-          repo = ws_branch[:workspace_repo]
-          sync_result = repo.synchronize_workspace_with_library_branch(ws_branch,lib_branch)
-          if sync_result == :merge_needed
-            raise ErrorUsage.new("synchronize_workspace_with_library_branch needs merge")
-          end
-        end
-      end
      private
       def assembly_meta_filename_path()
         ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])

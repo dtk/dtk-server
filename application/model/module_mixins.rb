@@ -28,9 +28,9 @@ module DTK
     private :update_ws_branch_from_lib_branch?
 
     def get_workspace_branch_info(version=nil)
-      info = get_augmented_workspace_branch(version)
-      module_name = info[:display_name]
-      ModuleRepoInfo.new(info[:repo],module_name,info[:module_branch])
+      aug_branch = get_augmented_workspace_branch(version)
+      module_name = aug_branch[:module_name]
+      ModuleRepoInfo.new(aug_branch[:repo],module_name,aug_branch)
     end
 
     def get_augmented_workspace_branch(version=nil)
@@ -38,13 +38,14 @@ module DTK
         :cols => [:display_name,:workspace_info]
       }
       version_field = ModuleBranch.version_field(version)
-      rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
-      if rows.size == 0
+      modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
+      if modules.size == 0
         raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
-      elsif rows.size > 1
+      elsif modules.size > 1
         raise Error.new("Unexpected that get more than 1 matching row")
       end
-      rows.first
+      module_obj = modules.first
+      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
     end
 
     #type is :library or :workspace

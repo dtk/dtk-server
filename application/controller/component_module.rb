@@ -132,7 +132,7 @@ end
       component_module = create_obj(:component_module_id)
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
       remote_repo = (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
-      rest_ok_response component_module.check_remote_auth(remote_repo,rsa_pub_key,Repo::Remote::Auth::RW)
+      rest_ok_response component_module.check_remote_auth(remote_repo,rsa_pub_key,Repo::Remote::AccessRights::RW)
     end
 
     def rest__push_to_remote_legacy()

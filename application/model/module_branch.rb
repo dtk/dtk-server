@@ -13,6 +13,11 @@ module DTK
       has_default_version?() ? nil : self[:version] 
     end
 
+    def matches_version?(version=nil)
+      update_object!(:version)
+      self[:version] == self.class.version_field(version)
+    end
+
     #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
     def serialize_and_save_to_repo(*args)
       files = 

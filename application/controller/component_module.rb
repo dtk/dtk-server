@@ -138,15 +138,9 @@ end
 
     #### end: actions to interact with remote repo ###
 
-    #### actions to manage workspace and promote changes from workspace to library ###
-    def rest__promote_to_library()
-      component_module = create_obj(:component_module_id)
-      version = ret_request_params(:version)
-      component_module.promote_to_library(version)
-      rest_ok_response
-    end
+    #### actions to manage workspace
 
-    def rest__promote_as_new_version()
+    def rest__create_new_version()
       component_module = create_obj(:component_module_id)
       new_version = ret_non_null_request_params(:new_version)
       existing_version = ret_request_params(:existing_version)

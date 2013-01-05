@@ -19,6 +19,15 @@ module DTK
 
   module ModuleMixin
     include ModuleRemoteMixin
+
+    def get_module_branches()
+      get_objs_helper(:module_branches,:module_branch)
+    end
+
+    def get_module_branches_matching_version(version=nil)
+      get_module_branches().select{|mb|mb.matches_version?(version)}
+    end
+
     def update_ws_branch_from_lib_branch?(version=nil)
       matching_branches = get_module_branches_matching_version(version)
       ws_branch_obj = find_branch(:workspace,matching_branches)
@@ -71,47 +80,6 @@ module DTK
       end 
 
       update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)
-    end
-
-    #promotes workspace changes to library
-    def promote_to_library(version=nil)
-      #TODO: unify with ModuleBranch#update_library_from_workspace_aux?(augmented_branch)
-      matching_branches = get_module_branches_matching_version(version)
-      #check that there is a workspace branch
-      unless ws_branch = find_branch(:workspace,matching_branches)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) in the workspace")
-      end
-
-      #check that there is a library branch
-      unless lib_branch =  find_branch(:library,matching_branches)
-        raise Error.new("No library version exists for module (#{pp_module_name(version)}); try using create-new-version")
-      end
-
-      unless lib_branch[:repo_id] == ws_branch[:repo_id]
-        raise Error.new("Not supporting case where promoting workspace to library branch when branches are on two different repos")
-      end
-
-      repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
-
-      diffs = repo.diff_between_library_and_workspace(lib_branch,ws_branch).ret_summary()
-      if diffs.no_diffs?()
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-      end
-      #want this here before any changes in case error in parsing meta file
-      promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
- 
-      result = repo.synchronize_library_with_workspace_branch(lib_branch,ws_branch)
-      case result
-       when :changed
-        nil #no op
-       when :no_change 
-        #TODO: with check before now in diffs this shoudl not be reached
-        raise ErrorUsage.new("For module (#{pp_module_name(version)}), workspace and library are identical")
-       when :merge_needed
-        raise ErrorUsage.new("In order to promote changes for module (#{pp_module_name(version)}), merge into workspace is needed")
-       else
-        raise Error.new("Unexpected result (#{result}) from synchronize_library_with_workspace_branch")
-      end
     end
 
     def get_repos()
@@ -198,15 +166,6 @@ module DTK
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
       module_name = self[:display_name]
       self.class.get_library_module_branch(library_idh,module_name,version)
-    end
-
-   def get_module_branches_matching_version(version=nil)
-      update_object!(:display_name,:library_library_id)
-      module_name = self[:display_name]
-      filter = [:eq, :id, self[:id]]
-      version_in_mb = ModuleBranch.version_field(version)
-      post_filter = proc{|r|r[:version] == version_in_mb}
-      self.class.get_matching_module_branches(id_handle(),filter,post_filter)
     end
 
     def library_branch_name(version=nil)
@@ -314,11 +273,11 @@ module DTK
 
     def get_matching_module_branches(mh_or_idh,filter,post_filter=nil)
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:module_branches,:library_library_id],
+        :cols => [:id,:display_name,:group_id,:module_branches],
         :filter => filter
       }
-      rows =  get_objs(mh_or_idh.create_childMH(module_type()),sp_hash).map do |r|
-        r[:module_branch].merge(:module_id => r[:id],:library_id => r[:library_library_id])
+      rows = get_objs(mh_or_idh.create_childMH(module_type()),sp_hash).map do |r|
+        r[:module_branch].merge(:module_id => r[:id])
       end
       if rows.empty?
         raise ErrorUsage.new("Module does not exist")

@@ -72,29 +72,19 @@ module DTK
     end
 
     def create_new_version(new_version,existing_version=nil)
-      update_object!(:display_name,:library_library_id)
-      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
-      module_name = self[:display_name]
-
-      matching_branches = get_module_branches_matching_version(existing_version)
-      #check that there is a workspace branch
-      unless ws_branch = find_branch(:workspace,matching_branches)
+      unless aug_ws_branch = get_augmented_workspace_branch(existing_version)
         raise ErrorUsage.new("There is no module (#{pp_module_name(existing_version)}) in the workspace")
       end
 
-      #make sure there is a not a library branch that exists already
-      if find_branch(:library,get_module_branches_matching_version(new_version))
-        if new_version == existing_version
-          raise ErrorUsage.new("Library version exists for module (#{pp_module_name(new_version)}); try using promote-to-library")
-        else
-          raise ErrorUsage.new("Library version exists for module (#{pp_module_name(new_version)})")
-        end
+      #make sure there is a not an existing branch that matches the new one
+      #TODO: may also put in check taht version number is greater
+      if get_module_branches_matching_version(new_version)
+        raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-
-      new_lib_branch_name = ModuleBranch.library_branch_name(library_idh,new_version)
-      repo = id_handle(:model_name => :repo, :id => ws_branch[:repo_id]).create_object()
-      ws_branch.add_library_branch?(new_lib_branch_name)
-      self.class.update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,new_version)
+      project = get_project()
+      aug_ws_branch.add_new_branch?(project,new_version)
+      repo = aug_ws_branch[:repo]
+      self.class.update_ws_module_objs_and_create_dsl?(project,repo,module_name(),new_version)
     end
 
     def info_about(about)
@@ -138,17 +128,6 @@ module DTK
       repo = id_handle(:model_name => :repo, :id => lib_branch[:repo_id]).create_object()
       repo.diff_between_library_and_workspace(lib_branch,ws_branch)
     end
-
-    def promote_to_library__meta_changes(diffs,ws_branch,lib_branch)
-      if diffs.meta_file_changed?()
-        library_idh = id_handle().get_parent_id_handle_with_auth_info()
-        source_impl = ws_branch.get_implementation()
-        target_impl = lib_branch.get_implementation()
-        component_dsl = ComponentDSL.create_dsl_object_from_impl(source_impl,library_idh,target_impl)
-        component_dsl.update_model()
-      end
-    end
-    private :promote_to_library__meta_changes
 
     def get_associated_target_instances()
       get_objs_uniq(:target_instances)

@@ -19,10 +19,6 @@ module DTK
       get_objs_helper(:assembly_nodes,:node,:augmented => true)
     end
 
-    def get_module_branches()
-      get_objs_helper(:module_branches,:module_branch)
-    end
-
     ### end: get methods
 
     def self.model_type()

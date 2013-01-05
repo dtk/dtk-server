@@ -100,10 +100,18 @@ module XYZ
       user_friendly_name.gsub(/::/,"__")
     end
 
-    def display_name_print_form()
-      update_object!(:component_type,:ref_num)
+    def display_name_print_form(opts={})
+      cols_to_get = [:component_type,:ref_num]
+      unless opts[:without_version] 
+        cols_to_get += [:version]
+      end
+      update_object!(*cols_to_get)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
-      self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
+      ret = self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
+      unless opts[:without_version] or self[:version].nil? or self[:version] == self.class.version_field_default()
+        ret << "(#{self[:version]})"
+      end 
+      ret 
     end
 
     ### virtual column defs

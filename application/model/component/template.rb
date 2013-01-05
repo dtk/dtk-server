@@ -12,10 +12,10 @@ module DTK; class Component
     end
     def self.list__project_parent(project_idh)
       sp_hash = {
-        :cols => [:id, :type, :display_name, :description],
+        :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
         :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
       }
-      ret = get_objs(project_idh.createMH(:component),sp_hash)
+      ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
       ret.each{|r|r[:display_name] = r.display_name_print_form()}
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end

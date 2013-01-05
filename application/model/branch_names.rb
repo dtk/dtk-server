@@ -1,4 +1,4 @@
-#TODO: this changes dpending on mapping to repos and libraries
+#TODO: this changes depending on mapping to repos and libraries
 module DTK
   VersionFieldDefault = 'master'
 

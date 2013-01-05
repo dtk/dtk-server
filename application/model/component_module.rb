@@ -142,7 +142,7 @@ module DTK
     end
     def self.list__project_parent(project_idh)
       sp_hash = {
-        :cols => [:id, :display_name,:version],
+        :cols => [:id, :display_name],
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       ndx_module_info = get_objs(project_idh.createMH(:component_module),sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
@@ -150,7 +150,7 @@ module DTK
       #get version info
       sp_hash = {
         :cols => [:component_id,:version],
-        :filter => [:and,[:oneof, :component_id, ndx_module_info.keys], [:neq,:is_workspace,true]]
+        :filter => [:and,[:oneof, :component_id, ndx_module_info.keys], [:eq,:is_workspace,true]]
       }
       branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
       #join in version info

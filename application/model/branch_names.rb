@@ -1,4 +1,4 @@
-#TODO: this changes depending on mapping to repos and libraries
+#TODO: putting version defaults in now
 module DTK
   VersionFieldDefault = 'master'
 
@@ -7,6 +7,11 @@ module DTK
       version = update_object!(:version)[:version]
       version.nil? or  (version == VersionFieldDefault)
     end
+
+    def version_display_name(display_name,version)
+      "#{display_name}(#{version})"
+    end
+
    protected
     def workspace_branch_name(project)
       self.class.workspace_branch_name(project,self[:version])

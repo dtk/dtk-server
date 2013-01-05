@@ -16,7 +16,7 @@ module XYZ
 
     def rest__list()
       project = get_default_project()
-      rest_ok_response Component::Template.list(model_handle(),:project_idh => project.id_handle())
+      rest_ok_response Component::Template.list(model_handle(),:project_idh => project.id_handle()) 
     end
 
     def get_attributes_for_attr_mappings(component_id)

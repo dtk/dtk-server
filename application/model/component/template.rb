@@ -16,7 +16,7 @@ module DTK; class Component
         :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
       }
       ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
-      ret.each{|r|r[:display_name] = r.display_name_print_form()}
+      ret.each{|r|r.convert_to_print_form!()}
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
     #MOD_RESTRUCT: TODO: deprecate below for above
@@ -27,7 +27,7 @@ module DTK; class Component
         :filter => [:and, [:eq, :type, "template"], library_filter]
       }
       ret = get_objs(model_handle.createMH(:component),sp_hash)
-      ret.each{|r|r[:display_name] = r.display_name_print_form()}
+      ret.each{|r|r.convert_to_print_form!()}
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 

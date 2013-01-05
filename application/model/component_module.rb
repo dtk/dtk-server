@@ -5,12 +5,10 @@ module DTK
     include ModuleMixin
 #TODO: for testing
     def test_generate_dsl()
-      module_name =  update_object!(:display_name)[:display_name]
-      matching_branches = get_module_branches_matching_version()
-      module_branch =  find_branch(:workspace,matching_branches) || component_module.find_branch(:library,matching_branches)
+      module_branch = get_module_branch_matching_version()
       config_agent_type = :puppet
       impl_obj = module_branch.get_implementation()
-      ComponentModule.parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
+      ComponentModule.parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
     end
 ### end: for testing
 
@@ -78,11 +76,11 @@ module DTK
 
       #make sure there is a not an existing branch that matches the new one
       #TODO: may also put in check taht version number is greater
-      if get_module_branches_matching_version(new_version)
+      if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       project = get_project()
-      aug_ws_branch.add_new_branch?(project,new_version)
+      aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]
       self.class.update_ws_module_objs_and_create_dsl?(project,repo,module_name(),new_version)
     end
@@ -111,8 +109,7 @@ module DTK
     end
 
     def workspace_library_diffs(version=nil)
-      matching_branches = get_module_branches_matching_version(version)
-      unless ws_branch = find_branch(:workspace,matching_branches)
+      unless ws_branch = get_module_branch_matching_version(version)
         return nil
       end
 
@@ -215,8 +212,7 @@ module DTK
         raise Error.new("component_module.create_new_dsl_version only implemeneted when target version is 2")
       end
       previous_dsl_version = new_dsl_integer_version-1 
-      matching_branches = get_module_branches_matching_version()
-      module_branch =  find_branch(:workspace,matching_branches) || find_branch(:library,matching_branches)
+      module_branch = get_module_branch_matching_version()
 
       #create in memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)

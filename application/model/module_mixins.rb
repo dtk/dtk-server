@@ -24,17 +24,9 @@ module DTK
       get_objs_helper(:module_branches,:module_branch)
     end
 
-    def get_module_branches_matching_version(version=nil)
-      get_module_branches().select{|mb|mb.matches_version?(version)}
+    def get_module_branch_matching_version(version=nil)
+      get_module_branches().find{|mb|mb.matches_version?(version)}
     end
-
-    def update_ws_branch_from_lib_branch?(version=nil)
-      matching_branches = get_module_branches_matching_version(version)
-      ws_branch_obj = find_branch(:workspace,matching_branches)
-      lib_branch_obj = find_branch(:library,matching_branches)
-      ModuleBranch.update_workspace_from_library?(ws_branch_obj,lib_branch_obj)
-    end
-    private :update_ws_branch_from_lib_branch?
 
     def get_workspace_branch_info(version=nil)
       aug_branch = get_augmented_workspace_branch(version)

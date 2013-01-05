@@ -4,18 +4,21 @@ module DTK; class Component
     def self.list(mh,opts)
       if project_id = opts[:project_idh]
         ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
-        list__project_parent(opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        list__project_parent(opts[:project_idh],opts).each{|r|ndx_ret[r[:display_name]] ||= r}
         ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
       else
         list__library_parent(mh,opts)
       end
     end
-    def self.list__project_parent(project_idh)
+    def self.list__project_parent(project_idh,opts={})
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
         :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
       }
       ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+      if constraint = opts[:component_version_constraints]
+        ret = ret.select{|r|constraint.meets_constraint?(r)}
+      end
       ret.each{|r|r.convert_to_print_form!()}
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end

@@ -71,9 +71,9 @@ module DTK
       {:dsl_created => module_and_mb_info[:dsl_created]}
     end
 
-    def create_new_version(new_version,existing_version=nil)
-      unless aug_ws_branch = get_augmented_workspace_branch(existing_version)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(existing_version)}) in the workspace")
+    def create_new_version(new_version)
+      unless aug_ws_branch = get_augmented_workspace_branch()
+        raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
 
       #make sure there is a not an existing branch that matches the new one

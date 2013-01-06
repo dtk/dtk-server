@@ -46,7 +46,7 @@ module DTK
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          component_template_id = ndx_component_templates[m[:component_template_id]].get_id()
+          component_template_id = ndx_component_templates[m[:component_template_id]][:id]
           #set  ndx_node_template_to_ref
           #first index is the associated node instance, second is teh component template
           pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 

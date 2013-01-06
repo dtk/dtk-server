@@ -275,6 +275,16 @@ module XYZ
            :filter => [:eq, :is_workspace, true],
            :cols => [:id,:display_name,:type,:component_id] 
          }]         
+      virtual_column :component_module_branches, :type => :json, :hidden => true, 
+      :remote_dependencies =>
+        [lambda__segment_component.call([:id,:display_name,:module_branch_id]),
+         {
+           :model_name => :module_branch,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :cols => [:id,:display_name,:type,:component_id] 
+         }]         
       virtual_column :components_and_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_attrs.call(

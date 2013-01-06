@@ -179,7 +179,9 @@ module DTK
   
     def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
-        :cols => [:id,:display_name,:component_ws_module_branches],
+    #MOD_RESTRUCT: after get rid of lib branches might use below
+#        :cols => [:id,:display_name,:component_ws_module_branches],
+        :cols => [:id,:display_name,:component_module_branches], #temp which can return lib branches
         :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
       }
       sample_node_idh = node_idhs.first()

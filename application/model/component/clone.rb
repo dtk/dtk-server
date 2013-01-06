@@ -1,15 +1,8 @@
 #TODO: determine what in this file is deprecated
-module XYZ
+module DTK
   module ComponentClone
     def clone_pre_copy_hook_into_node(node,opts={})
-      #if this is a library template find associated component workspace; create this and related ws module branch/impleemntation if they dont exists
-
-      #being pro-active in what cols may be needed
-      update_object!(:module_branch_id,:implementation_id,:ancestor_id,:version,:component_type,:library_library_id,:group_id) 
-      unless self[:library_library_id]
-        return self
-      end
-      workspace_cmp = get_workspace_component_template(node.get_project()).create_object()
+      workspace_cmp = self
       #check constraints
       unless opts[:no_constraint_checking]
         if constraints = workspace_cmp.get_constraints!(:update_object => true)
@@ -50,52 +43,6 @@ module XYZ
       add_needed_sap_attributes(component_idh)
       parent_action_id_handle = id_handle().get_top_container_id_handle(:datacenter)
       StateChange.create_pending_change_item(:new_item => component_idh, :parent => parent_action_id_handle)
-    end
-
-    def get_workspace_component_template(proj,opts={})
-      #self will have implementation_id set to library implementation and ancestor_id set to library template
-      #need to search project to see if has implementation that matches (same repo)
-
-      update_object!(:module_branch_id,:implementation_id,:ancestor_id,:version,:component_type,:group_id) 
-      self[:version] ||= self.class.version_field_default()
-
-      proj_idh = proj.id_handle()
-
-      #if match, tehn depening on opts uptade object to point to this; return teh workssapce compoennt templaet idh
-      if ws_cmp_tmp_idh  = find_match_in_project(proj_idh)
-        return ws_cmp_tmp_idh
-      end
-      raise Error.new("MOD_RESTRUCT: should not reach here")
-=begin
-MOD_RESTRUCT: remove
-      #create module branch for work space if needed
-      library_mb = id_handle(:model_name => :module_branch,:id => self[:module_branch_id]).create_object()
-      workspace_mb = library_mb.create_workspace_branch?(:component_module,proj)
-      workspace_mb_id = workspace_mb[:id]
-      version = workspace_mb[:version]
-      
-      #create new project implementation if needed
-      library_impl = id_handle(:model_name => :implementation,:id => self[:implementation_id]).create_object()
-      new_impl_id = library_impl.clone_into_project_if_needed(proj).get_id()
-
-      
-      #####=======
-      #TODO: may seperate above which may eb subsumed by ComponentModule.create_workspace_branch? and below that cpopise 'on demand'
-      # a specfic component"
-
-      #clone library component (this) to form workspace component (template)
-      to_add_mb_assigns = {
-        :implementation_id => new_impl_id, 
-        :module_branch_id => workspace_mb_id, 
-        :version => version,  #TODO: this may not be necessary
-        :ancsetor_id => self[:id],
-        :extended_base => self[:extended_base]
-      }
-
-      new_ws_cmp_tmp_id = proj.clone_into(self,to_add_mb_assigns)
-      
-      id_handle.createIDH(:id => new_ws_cmp_tmp_id,:parent_model_name => :project)
-=end
     end
 
     def source_clone_info_opts()
@@ -139,6 +86,12 @@ MOD_RESTRUCT: remove
       return nil unless sap_attr_idh
       AttributeLink.create_links_sap(basic_type_info,sap_attr_idh,sap_config_attr.id_handle(),par_attr.id_handle(),node.id_handle())
     end
+
+   protected
+    def self.compute_sap_db(sap_config_val,par_vals)
+      #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
+      par_vals.map{|par_val|sap_config_val.merge(par_val)}
+    end
    private
     #TODO: some of these are redendant of whats in sap_dependency_X like "sap__l4" and "sap__db"
     BasicTypeInfo = {
@@ -155,32 +108,33 @@ MOD_RESTRUCT: remove
         :fn => lambda{|sap_config,par|compute_sap_db(sap_config,par)}
       }
     }
-   protected
-    def self.compute_sap_db(sap_config_val,par_vals)
-      #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
-      par_vals.map{|par_val|sap_config_val.merge(par_val)}
-    end
-   private
-    def find_match_in_project(project_idh)
-      update_object!(:version,:component_type) 
+  end
+  module ComponentCloneClassMixin
+    #indexed by id of matching component
+    def find_ndx_component_templates(project_idh,component_list)
+      ret = Hash.new
+      return ret if component_list.empty?
+      ndx_cmps = Hash.new
+      ndx_versions = Hash.new
+      component_list.each do |cmp|
+        cmp.update_object!(:version,:component_type)
+        (ndx_cmps[cmp[:component_type]] ||= Hash.new)[cmp[:version]] = cmp[:id]
+        ndx_versions[cmp[:version]] ||= true
+      end
       sp_hash = {
         :filter => [:and,
                     [:eq, :project_project_id, project_idh.get_id()],
-                    [:eq, :component_type, self[:component_type]],
-                    [:eq,:version, self[:version]]
+                    [:oneof, :component_type, ndx_cmps.keys],
+                    [:oneof, :version, ndx_versions.keys]
                    ],
-        :cols => [:id,:group_id]
+        :cols => [:id,:group_id,:display_name]
       }
-      row = Model.get_objects_from_sp_hash(model_handle,sp_hash).first
-      row && row.id_handle()
-    end
-  end
-  module ComponentCloneClassMixin
-    def create_ndx_workspace_component_templates?(lib_cmps,proj,opts={})
-      #TODO: stub so can bulk this up in contrast to below which iterators instance by instance
-      lib_cmps.inject(Hash.new) do |h,lib_cmp|
-        h.merge(lib_cmp[:id] => lib_cmp.create_workspace_component_template?(proj,opts))
+      get_objs(project_idh.createMH(:component),sp_hash).each do |r|
+        if cmp_id = ndx_cmps[r[:component_type][:version]]
+          ret[cmp_id] = r
+        end
       end
+      ret
     end
   end
 end

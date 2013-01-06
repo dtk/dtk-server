@@ -37,10 +37,8 @@ module DTK
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_node_template_to_ref = Hash.new
 
-        #use workspace components, rather than lib components
-        #TODO: may instaed make this conversion when computing matches
-        lib_cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
-        ndx_workspace_templates = Component.create_ndx_workspace_component_templates?(lib_cmps,@clone_proc.project)
+        cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
+        ndx_component_templates = Component.find_ndx_component_templates(@clone_proc.project.id_handle(),cmps)
 
         mapping_rows = matches.map do |m|
           node = m[:node]
@@ -48,7 +46,7 @@ module DTK
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          component_template_id = ndx_workspace_templates[m[:component_template_id]].get_id()
+          component_template_id = ndx_component_templates[m[:component_template_id]].get_id()
           #set  ndx_node_template_to_ref
           #first index is the associated node instance, second is teh component template
           pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 

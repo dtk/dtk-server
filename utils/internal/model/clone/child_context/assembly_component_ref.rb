@@ -38,7 +38,7 @@ module DTK
         ndx_node_template_to_ref = Hash.new
 
         cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
-        ndx_component_templates = Component.find_ndx_component_templates(@clone_proc.project.id_handle(),cmps)
+        ndx_component_templates = Component.find_ndx_workspace_templates(@clone_proc.project.id_handle(),cmps)
 
         mapping_rows = matches.map do |m|
           node = m[:node]

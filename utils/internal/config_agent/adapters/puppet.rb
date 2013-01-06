@@ -69,7 +69,7 @@ module XYZ
       def component_with_deps(action,ndx_components,ndx_impl_info)
         cmp = action[:component]
         ret = component_external_ref(cmp)
-        ret.merge!("module_name" => (ndx_impl_info[cmp[:implementation_id]]||{})[:display_name])
+        ret.merge!("module_name" => (ndx_impl_info[cmp[:implementation_id]]||{})[:module_name])
         cmp_deps = action[:component_dependencies]
         return ret unless cmp_deps and not cmp_deps.empty?
         ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})

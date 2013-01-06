@@ -14,9 +14,7 @@ module XYZ
         
         #TODO: getting out implemention info not needed if put module names in component ext refs
         impl_info = get_relevant_impl_info(config_node)
-        #TODO: see if this needed stil in that we are pushing at earlier stage
-        #push implementation
-        version_context = push_implementation(impl_info)
+        version_context = get_version_context(impl_info)
 
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node,impl_info)
@@ -150,13 +148,10 @@ module XYZ
         end
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
       end
-      def self.push_implementation(impl_info)
-        #TODO: put in logic to reduce unnecesarry pushes
-        ret = Array.new
+      def self.get_version_context(impl_info)
+        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
         impl_info.each do |impl|
-          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:display_name]}
-          context = {:implementation => impl}
-          RepoManager.push_implementation(context)
+          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
         end
         ret
       end

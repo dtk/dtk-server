@@ -43,11 +43,15 @@ module DTK; class Component
         check_valid_id__project_parent(model_handle,id)
       end
     end
-    def self.name_to_id(model_handle,name)
-      begin
-        name_to_id__library_parent(model_handle,name)
-       rescue ErrorNameDoesNotExist
-        name_to_id__project_parent(model_handle,name)
+    def self.name_to_id(model_handle,name,version=nil)
+      if version
+        name_to_id__project_parent(model_handle,name,version)
+      else
+        begin
+          name_to_id__library_parent(model_handle,name)
+         rescue ErrorNameDoesNotExist
+          name_to_id__project_parent(model_handle,name)
+        end
       end
     end
     def self.check_valid_id__project_parent(model_handle,id)
@@ -58,12 +62,13 @@ module DTK; class Component
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-    def self.name_to_id__project_parent(model_handle,name)
+    def self.name_to_id__project_parent(model_handle,name,version=nil)
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
                     [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
-                    [:neq, :project_project_id, nil]]
+                    [:neq, :project_project_id, nil],
+                    [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,name,sp_hash)
     end

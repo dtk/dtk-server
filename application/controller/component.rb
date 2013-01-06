@@ -1,6 +1,6 @@
 module XYZ
   class ComponentController < AuthController
-    helper :filter_context
+    helper :filter_context_helper
     helper :i18n_string_mapping 
 
     def delete()

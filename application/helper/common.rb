@@ -237,13 +237,14 @@ module Ramaze::Helper
       create_object_from_id(ret_request_param_id(param,model_class))
     end
     #param refers to key that can have id or name value
-    def ret_request_param_id_handle(param,model_class=nil)
-      id = ret_request_param_id(param,model_class)
+    def ret_request_param_id_handle(param,model_class=nil,version=nil)
+      id = ret_request_param_id(param,model_class,version)
       model_name = (model_class && OverrideModelName[model_class]) || model_name()
       id_handle(id,model_name)
     end
     #param refers to key that can have id or name value
-    def ret_request_param_id(param,model_class=nil)
+    #if version is given then param is assumed to be a name
+    def ret_request_param_id(param,model_class=nil,version=nil)
       model_name = (model_class && OverrideModelName[model_class]) || model_name()
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
@@ -253,7 +254,11 @@ module Ramaze::Helper
         id = id_or_name.to_i
         model_class.check_valid_id(model_handle,id)
       else
-        model_class.name_to_id(model_handle,id_or_name)
+        if version
+          model_class.name_to_id(model_handle,id_or_name,version)
+        else
+          model_class.name_to_id(model_handle,id_or_name)
+        end
       end
     end
     OverrideModelName = {

@@ -9,7 +9,7 @@ module DTK
     end
 
     def version_display_name(display_name,version)
-      "#{display_name}(#{version})"
+      self.class.version_display_name(display_name,version)
     end
 
    protected
@@ -22,8 +22,13 @@ module DTK
       VersionFieldDefault
     end
 
+
     def version_field(version)
       version || VersionFieldDefault
+    end
+
+    def version_display_name(display_name,version)
+      "#{display_name}(#{version})"
     end
 
     def library_branch_name(library_idh,version=nil)

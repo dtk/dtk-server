@@ -113,19 +113,14 @@ module XYZ
       end 
       ret 
     end
-    def convert_to_print_form!(opts={})
-      cols_to_get = [:component_type,:ref_num]
-      unless opts[:without_version] 
-        cols_to_get += [:version]
-      end
-      update_object!(*cols_to_get)
+    def convert_to_print_form!()
+      update_object!(:component_type,:ref_num,:version)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
       self[:display_name] = self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
       if has_default_version?()
         self[:version] = nil
-      elsif not opts[:without_version]
-        self[:display_name] = version_display_name(self[:display_name],self[:version])
       end 
+      self
     end
 
     ### virtual column defs

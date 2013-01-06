@@ -403,7 +403,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
-           :cols => [:id,:display_name,:group_id,:description,:component_type]
+           :cols => [:id,:display_name,:group_id,:description,:component_type,:version,:ref_num]
          }]
 
       virtual_column :node_centric_components, :type => :json, :hidden => true,

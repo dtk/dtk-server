@@ -144,9 +144,8 @@ module XYZ
     def info_about(about,opts={})
       case about
        when :components
-        get_objs(:cols => [:components]).map do |r|
-          cmp = r[:component]
-          cmp.hash_subset(:id,:dsecription).merge(:display_name => cmp.display_name_print_form())
+        get_objs(:cols => [:components],:keep_ref_cols => true).map do |r|
+          r[:component].convert_to_print_form!()
         end.sort{|a,b|a[:display_name] <=> b[:display_name]}
        when :attributes
         get_attributes_print_form()

@@ -28,7 +28,7 @@ module DTK
     end
 
     def version_display_name(display_name,version)
-      "#{display_name}(#{version})"
+      version ? "#{display_name}(#{version})" : display_name
     end
 
     def library_branch_name(library_idh,version=nil)

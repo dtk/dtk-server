@@ -76,7 +76,7 @@ module DTK; class Component
                     [:neq, :project_project_id, nil],
                     [:eq, :version, version_field(version)]]
       }
-      name_to_id_helper(model_handle,name,sp_hash)
+      name_to_id_helper(model_handle,version_display_name(name,version),sp_hash)
     end
     #MOD_RESTRUCT: TODO: deprecate below for above
     def self.check_valid_id__library_parent(model_handle,id)

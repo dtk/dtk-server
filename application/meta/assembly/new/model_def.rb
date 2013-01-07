@@ -196,7 +196,7 @@ lambda__template_nodes_and_components =
            :alias => :component_template,
            :join_type => :inner,
            :join_cond=>{:id => q(:component_ref,:component_template_id)},
-           :cols => [:id,:display_name,:module_branch_id]
+           :cols => [:id,:display_name,:group_id,:component_type,:version,:module_branch_id]
          }]
     },
     :tasks=> {

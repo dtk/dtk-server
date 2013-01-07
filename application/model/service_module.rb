@@ -5,11 +5,13 @@ module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')
     r8_nested_require('service_module','dsl')
+    r8_nested_require('service_module','lock_version')
 
     extend ModuleClassMixin
     include ModuleMixin
     extend DSLClassMixin
-    
+    include LockVersionMixin
+
     ### standard get methods
     def get_assemblies()
       get_objs_helper(:assemblies,:component)
@@ -17,6 +19,15 @@ module DTK
 
     def get_augmented_assembly_nodes()
       get_objs_helper(:assembly_nodes,:node,:augmented => true)
+    end
+
+    def get_referenced_component_templates()
+      ndx_ret = Hash.new
+      get_objs(:cols => [:component_templates]).each do |r|
+        cmp_template = r[:component_template]
+        ndx_ret[cmp_template[:id]] ||= cmp_template
+      end
+      ndx_ret.values
     end
 
     ### end: get methods

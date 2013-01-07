@@ -1,8 +1,10 @@
-module XYZ
+module DTK
   class Service_moduleController < AuthController
     helper :module_helper
+    helper :component_template_helper
+    helper :version_helper
+    
     #TODO: for debugging; will be removed
-
     def rest__debug_get_project_trees()
       ServiceModule.get_project_trees(model_handle)
       rest_ok_response
@@ -13,7 +15,6 @@ module XYZ
       service_module.get_ports()
       rest_ok_response
     end
-
     #end: for debugging; will be removed
 
     def rest__list()
@@ -129,6 +130,21 @@ module XYZ
       json_diffs = ret_request_params(:json_diffs)
       diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
       service_module.update_model_from_clone_changes?(diffs_summary,version)
+      rest_ok_response
+    end
+
+    def rest__lock_component_version()
+      service_module = create_obj(:service_module_id)
+      component_template_idh = ret_component_template_idh()
+      version, level = ret_request_params(:version,:level)
+      if version
+        raise ErrorUsage.new("Either version or level must be given, not both") if level
+        raise_error_if_version_illegal_format(version)
+        service_module.lock_component_version__given_version(component_template_idh,version)
+      else
+        raise ErrorUsage.new("Either version or level must be given") unless level
+        service_module.lock_component_version__given_level(component_template_idh,level)
+      end
       rest_ok_response
     end
 

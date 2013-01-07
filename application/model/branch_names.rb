@@ -1,4 +1,4 @@
-#TODO: putting version defaults in now
+#TODO: putting version defaults in now; may move to seperate file or rename to branch_names_and_versions
 module DTK
   VersionFieldDefault = 'master'
 
@@ -21,7 +21,6 @@ module DTK
     def version_field_default()
       VersionFieldDefault
     end
-
 
     def version_field(version)
       version || VersionFieldDefault

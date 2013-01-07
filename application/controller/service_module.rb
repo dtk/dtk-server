@@ -71,11 +71,15 @@ module DTK
       rest_ok_response
     end
     
-    def rest__list_assemblies()
-      service_module_id = ret_request_param_id(:service_module_id)
-      service_module = create_object_from_id(service_module_id)
-      rest_ok_response service_module.list_assembly_templates()
+    def rest__info_about()
+      service_module = create_obj(:service_module_id)
+      about = ret_non_null_request_params(:about).to_sym
+      unless AboutEnum.include?(about)
+        raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
+      end
+      rest_ok_response service_module.info_about(about)
     end
+    AboutEnum = [:assemblies,:components]
 
     def rest__get_workspace_branch_info()
       service_module = create_obj(:service_module_id)
@@ -135,7 +139,13 @@ module DTK
 
     def rest__lock_component_version()
       service_module = create_obj(:service_module_id)
-      component_template_idh = ret_component_template_idh()
+      component_template_idh = nil
+      begin
+        component_template_idh = ret_component_template_idh(:omit_version)
+       rescue ErrorNameDoesNotExist => e
+        service_name = service_module.update_object!(:display_name)[:display_name]
+        raise e.qualify("for service with name (#{service_name})")
+      end
       version, level = ret_request_params(:version,:level)
       if version
         raise ErrorUsage.new("Either version or level must be given, not both") if level

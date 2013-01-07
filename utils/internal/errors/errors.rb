@@ -16,6 +16,7 @@ module XYZ
         {:error => {name.to_sym => {:msg => to_s}}}
       end
     end
+
   end
 
   class R8ParseError < Error
@@ -26,14 +27,18 @@ module XYZ
   end
 
   class ErrorUsage < Error
-    #TODO: make second argument be polymorphic to handle things like wrong type, wrong rane
+    #TODO: make second argument be polymorphic to handle things like wrong type, wrong name
     class BadParamValue < self
-      def initialize(param,enum_vals)
+      def initialize(param,enum_vals=nil)
         super(msg(param,enum_vals))
       end
      private
       def msg(param,enum_vals)
-        "Paramater '#{param}' has an illegal value; most be one of (#{enum_vals.join(",")})"
+        msg = "Paramater '#{param}' has an illegal value"
+        if enum_vals
+          msg << "; most be one of (#{enum_vals.join(",")})"
+        end
+        msg
       end
     end
   end
@@ -85,12 +90,23 @@ module XYZ
      end
   end
   class ErrorNameDoesNotExist <  ErrorUsage
-    def initialize(name,object_type)
-      super(msg(name,object_type))
+    def initialize(name,object_type,augment_string=nil)
+      super(msg(name,object_type,augment_string))
+      @name_param = name
+      @object_type = object_type
     end
-     def msg(name,object_type)
-       "No object of type #{object_type} with name (#{name}) exists"
-     end
+
+    def qualify(augment_string)
+      self.class.new(@name_param,@object_type,augment_string)
+    end
+
+    def msg(name,object_type,augment_string)
+      msg = "No object of type #{object_type} with name (#{name}) exists"
+      if augment_string
+        msg << " #{augment_string}"
+      end
+      msg
+    end
   end
 
   class ErrorConstraintViolations < ErrorUsage

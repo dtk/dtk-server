@@ -84,13 +84,25 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
-    def list_assembly_templates()
+    def get_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]
       }
       mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+      #TODO: should below use 'get form' instead
       Assembly::Template.list(model_handle(:component),:filter => filter)
+    end
+
+    def info_about(about)
+      case about
+        when :assemblies
+        mb_idhs = get_objs(:cols => [:module_branches]).map{|r|r[:module_branch].id_handle()}
+        filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+        Assembly::Template.list(model_handle(:component),:filter => filter)
+      else
+        raise ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
+      end
     end
 
     def self.get_project_trees(mh)
@@ -184,7 +196,7 @@ module DTK
 
     def get_associated_target_instances()
       ret = Array.new
-      assembly_templates = list_assembly_templates()
+      assembly_templates = get_assembly_templates()
       return ret if assembly_templates.empty?
       sp_hash = {
         :cols => [:id,:display_name],

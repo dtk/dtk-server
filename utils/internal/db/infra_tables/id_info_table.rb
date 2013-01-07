@@ -335,8 +335,8 @@ module XYZ
 	    String :relation_name
 	    column ID_INFO_TABLE[:id], ID_TYPES[:id]
             column ID_INFO_TABLE[:local_id], ID_TYPES[:local_id] 
-	    String :relation_type, :size => 25 
-	    String :parent_relation_type, :size => 25 
+	    String :relation_type, :size => 50 
+	    String :parent_relation_type, :size => 50 
 	    String :ref
             Integer :ref_num
 	    Boolean :is_factory, :default => false

@@ -65,6 +65,7 @@ module DTK; class Component
         [:and,
          [:eq, :id, id],
          [:eq, :type, "template"],
+         [:eq, :node_node_id, nil],
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
@@ -74,6 +75,7 @@ module DTK; class Component
         :filter => [:and,
                     [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
                     [:neq, :project_project_id, nil],
+                    [:eq, :node_node_id, nil],
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,version_display_name(name,version),sp_hash)

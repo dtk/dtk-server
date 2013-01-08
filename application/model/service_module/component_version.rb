@@ -1,7 +1,7 @@
 module DTK
   class ServiceModule
-    module LockVersionMixin
-      def lock_component_version__given_version(component_template_idh,version)
+    module ComponentVersionMixin
+      def create_component_version__given_version(component_template_idh,version)
         #check that component belongs to service module
         component_template_id = component_template_idh.get_id()
         referenced_templates =  get_referenced_component_templates() 
@@ -18,9 +18,6 @@ module DTK
 
      private
       def raise_error_if_not_legal_new_version(version,component_template,referenced_templates)
-        unless is_legal_version_format?(version)
-
-        end
         component_type = component_template[:component_type]
         existing_versions = referenced_templates.select{|r|(r[:component_type] == component_type) and r[:version]}.map{|r|r[:version]}
         unless existing_versions.empty?

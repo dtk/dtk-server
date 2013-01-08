@@ -137,11 +137,11 @@ module DTK
       rest_ok_response
     end
 
-    def rest__lock_component_version()
+    def rest__create_component_version()
       service_module = create_obj(:service_module_id)
       component_template_idh = nil
       begin
-        component_template_idh = ret_component_template_idh(:omit_version)
+        component_template_idh = ret_component_template_idh(:omit_version => true)
        rescue ErrorNameDoesNotExist => e
         service_name = service_module.update_object!(:display_name)[:display_name]
         raise e.qualify("for service with name (#{service_name})")
@@ -150,11 +150,26 @@ module DTK
       if version
         raise ErrorUsage.new("Either version or level must be given, not both") if level
         raise_error_if_version_illegal_format(version)
-        service_module.lock_component_version__given_version(component_template_idh,version)
+        service_module.create_component_version__given_version(component_template_idh,version)
       else
         raise ErrorUsage.new("Either version or level must be given") unless level
-        service_module.lock_component_version__given_level(component_template_idh,level)
+        service_module.create_component_version__given_level(component_template_idh,level)
       end
+      rest_ok_response
+    end
+
+    def rest__set_component_version()
+      service_module = create_obj(:service_module_id)
+      component_template_idh = nil
+      begin
+        component_template_idh = ret_component_template_idh()
+       rescue ErrorNameDoesNotExist => e
+        service_name = service_module.update_object!(:display_name)[:display_name]
+        raise e.qualify("for service with name (#{service_name})")
+      end
+      version = ret_non_null_request_params(:version)
+      raise_error_if_version_illegal_format(version)
+      service_module.set_component_version(component_template_idh,version)
       rest_ok_response
     end
 

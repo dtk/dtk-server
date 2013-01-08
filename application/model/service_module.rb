@@ -5,12 +5,12 @@ module DTK
   class ServiceModule < Model
     r8_nested_require('service_module','global_module_refs')
     r8_nested_require('service_module','dsl')
-    r8_nested_require('service_module','lock_version')
+    r8_nested_require('service_module','component_version')
 
     extend ModuleClassMixin
     include ModuleMixin
     extend DSLClassMixin
-    include LockVersionMixin
+    include ComponentVersionMixin
 
     ### standard get methods
     def get_assemblies()

@@ -142,8 +142,8 @@ end
 
     def rest__create_new_version()
       component_module = create_obj(:component_module_id)
-      new_version = ret_non_null_request_params(:new_version)
-      component_module.create_new_version(new_version)
+      version = ret_version()
+      component_module.create_new_version(version)
       rest_ok_response
     end
 

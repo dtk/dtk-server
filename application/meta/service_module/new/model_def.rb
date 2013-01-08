@@ -30,6 +30,27 @@ lambda__segment_impls =
     :cols=>args[:cols]
   }
 }
+assembly_nodes  = 
+  [
+   lambda__segment_module_branches.call(:cols => [:id]),
+   {
+     :model_name=>:component,
+     :alias => :assembly,
+     :convert => true,
+     :join_type=>:inner,
+     :join_cond=>{:module_branch_id =>:module_branch__id},
+     :cols=>[:id,:group_id,:display_name]
+   },
+   {
+     :model_name=>:node,
+     :convert => true,
+     :join_type=>:inner,
+         :join_cond=>{:assembly_id =>:assembly__id},
+     :cols=>[:id,:group_id,:display_name]
+   }
+  ]
+
+
 {
   :schema=>:module,
   :table=>:service,
@@ -86,26 +107,28 @@ lambda__segment_impls =
     :assembly_nodes=>{
       :type=>:json,
       :hidden=>true,
+      :remote_dependencies=>assembly_nodes
+     },
+     :component_templates=>{
+      :type=>:json,
+      :hidden=>true,
       :remote_dependencies=>
-      [
-       lambda__segment_module_branches.call(:cols => [:id]),
-       {
-         :model_name=>:component,
-         :alias => :assembly,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:module_branch_id =>:module_branch__id},
-         :cols=>[:id,:group_id,:display_name]
-       },
-       {
-         :model_name=>:node,
-         :convert => true,
-         :join_type=>:inner,
-         :join_cond=>{:assembly_id =>:assembly__id},
-         :cols=>[:id,:group_id,:display_name]
-       }
-      ]
-    }
+       assembly_nodes +
+       [{
+          :model_name => :component_ref,
+          :join_type => :inner,
+          :join_cond=>{:node_node_id => q(:node,:id)},
+          :cols => [:id,:display_name,:component_template_id]
+        },
+        {
+          :model_name => :component,
+          :convert => true,
+          :alias => :component_template,
+          :join_type => :inner,
+          :join_cond=>{:id => q(:component_ref,:component_template_id)},
+          :cols => [:id,:display_name,:group_id,:component_type,:version,:module_branch_id]
+        }]
+     }
   },
   :many_to_one=>[:project,:library], #MOD_RESTRUCT: may remove library as parent
   :one_to_many=>[:module_branch]

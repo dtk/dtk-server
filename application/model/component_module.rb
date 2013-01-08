@@ -75,10 +75,11 @@ module DTK
       end
 
       #make sure there is a not an existing branch that matches the new one
-      #TODO: may also put in check taht version number is greater
       if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
+      #TODO: may check that version number is greater than existing versions
+
       project = get_project()
       aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]

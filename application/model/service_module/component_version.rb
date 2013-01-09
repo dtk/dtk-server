@@ -8,13 +8,13 @@ module DTK
           raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{version}) defined")
         end
 
-        #TODO: right now no versuion associated with service module
+        #TODO: right now no versuion associated with service module so 'nil' argument
         service_mb = get_module_branch_matching_version(nil)
         #get the associated module_version_constraints
         vconstraints = service_mb.get_module_version_constraints()
 
         #check if set to this version already
-        if vconstraints.include_version?(cmp_module_name,version)
+        if vconstraints.include_module_version?(cmp_module_name,version)
           raise ErrorUsage.new("Service module (#{module_name()}) already has component module (#{cmp_module_name}) set to version (#{version})")
         end
 

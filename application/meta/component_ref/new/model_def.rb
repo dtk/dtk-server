@@ -2,6 +2,9 @@
   :schema=>:component,
   :table=>:ref,
   :columns=>{
+    :component_type=>{:type =>:varchar,:size=>50},
+    :version=>{:type=>:varchar,:size =>25},
+    :instance_version=>{:type=>:boolean,:default=>false}, #whether this has an insstance assigned to this instance, which oevrrides any global version setting of assembly this is in
     :component_template_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:component,

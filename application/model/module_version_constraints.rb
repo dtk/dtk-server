@@ -1,21 +1,54 @@
 module DTK
   class ModuleVersionConstraints < Model
-    def meets_constraint?(cmp_template)
-      true
+    def include_module_version?(cmp_module_name,version)
+      module_constraint(cmp_module_name).include?(version)
     end
+
+    def include_module?(cmp_module_name)
+      component_modules.has_key?(key(cmp_module_name))
+    end
+
     private
-     def constraints()
-       self[:constraints]||get_and_reify_constraints()
+     def module_constraint(cmp_module_name)
+       Constraint.reify?(component_modules[key(cmp_module_name)])
      end
-     def get_and_reify_constraints()
-       unless self[:id]
-         raise Error.new("ComponentVersionConstraints#get_constraints() shoudl not be called if this is not associated with persisted object")
+
+     def component_modules()
+       ((self[:constraints]||{})[:component_modules])||{}
+     end
+
+     def key(el)
+       el.to_sym
+     end
+
+     class Constraint
+       def self.reify?(constraint=nil)
+         if constraint.nil? then new()
+         elsif constraint.kind_of?(Constraint) then constraint
+         elsif constraint.kind_of?(string) then new(constraint)
+         else
+           raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
+         end
        end
-       reify(update_object!(:constraints))
-     end
-     def reify(constraints)
-       #TODO: stub
-       constraints
+
+       def include?(version)
+         case @type
+           when :empty
+           nil
+         when :scalar
+           @value == version
+         end
+       end
+
+      private
+       def initialize(scalar=nil)
+         @type = (scalar ? :scalar : :empty)
+         @value = scalar
+       end
+
+       def empty?()
+         @type == :empty?
+       end
      end
   end
 end

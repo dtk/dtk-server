@@ -8,6 +8,15 @@ module DTK
       update_object!(:type)[:type].to_sym
     end
 
+    def get_module_version_constraints()
+      sp_hash = {
+        :cols => [:id,:display_name,:group_id,:constraints],
+        :filter => [:eq, :branch_id,id()]
+      }
+      mh = model_handle(:module_version_constraints)
+      Model.get_obj(mh,sp_hash)||ModuleVersionConstraints.create_stub(mh)
+    end
+
     def pp_version()
       update_object!(:version)
       has_default_version?() ? nil : self[:version] 

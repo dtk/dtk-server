@@ -99,7 +99,7 @@ module DTK
     }
 
     #keys: [:name,namespace,:type,:id]
-    #contraints :id or (:name, :namespace, and :type)
+    #constraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
       body = params_hash
@@ -107,7 +107,7 @@ module DTK
     end
 
     #keys: [:name,namespace,:type,:id]
-    #contraints :id or (:name, :namespace, and :type)
+    #constraints :id or (:name, :namespace, and :type)
     def get_module_info(params_hash)
       route = "/rest/system/module/info"
       body = params_hash

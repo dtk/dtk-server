@@ -182,7 +182,7 @@ module XYZ
       def demodulize(str)
         str.gsub(/^.*::/, '')
       end
-     
+
       def without_keys(hash,array_with_keys_to_remove)
         hash.reject{|k,v| array_with_keys_to_remove.include?(k)}
       end

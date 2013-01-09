@@ -2,8 +2,14 @@ module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle and Model; make sure not expensive to laod these defs in this module
 
-    def create_object_from_id(id,model_name_x=model_name(),opts={})
-      id_handle(id,model_name_x).create_object(opts.merge(:controller_class => self.class))
+    def create_object_from_id(id,model_name_or_class=nil,opts={})
+      model_name  =
+        if model_name_or_class.nil? then model_name()
+        elsif model_name_or_class.kind_of?(Symbol) then model_name_or_class
+        else #it is a model class
+          ret_module_name_from_class(model_name_or_class)
+        end
+      id_handle(id,model_name).create_object(opts.merge(:controller_class => self.class))
     end      
 
     def user_object()
@@ -234,19 +240,18 @@ module Ramaze::Helper
     #TODO: these three methods below need some cleanup
     #param refers to key that can have id or name value
     def create_obj(param,model_class=nil)
-      create_object_from_id(ret_request_param_id(param,model_class))
+      create_object_from_id(ret_request_param_id(param,model_class),model_class)
     end
 
     #param refers to key that can have id or name value
     def ret_request_param_id_handle(param,model_class=nil,version=nil)
       id = ret_request_param_id(param,model_class,version)
-      model_name = (model_class && OverrideModelName[model_class]) || model_name()
-      id_handle(id,model_name)
+      id_handle(id,ret_module_name_from_class(model_class))
     end
     #param refers to key that can have id or name value
     #if version is given then param is assumed to be a name
     def ret_request_param_id(param,model_class=nil,version=nil)
-      model_name = (model_class && OverrideModelName[model_class]) || model_name()
+      model_name = ret_module_name_from_class(model_class)
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
 
@@ -262,6 +267,15 @@ module Ramaze::Helper
         end
       end
     end
+
+    def ret_module_name_from_class(model_class=nil)
+      if model_class
+        OverrideModelName[model_class]||Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym
+      else
+        model_name()
+      end
+    end
+    private :ret_module_name_from_class
     OverrideModelName = {
       Component::Template => :component,
       NodeBindingRuleset  => :node_binding_ruleset

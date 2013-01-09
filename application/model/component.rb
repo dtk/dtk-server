@@ -113,6 +113,11 @@ module XYZ
       end 
       ret 
     end
+
+    def self.module_name(component_type)
+      component_type.gsub(/^.+__/,'')
+    end
+
     def convert_to_print_form!()
       update_object!(:component_type,:ref_num,:version)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")

@@ -21,13 +21,21 @@ module DTK
       get_objs_helper(:assembly_nodes,:node,:augmented => true)
     end
 
-    def get_referenced_component_templates()
+    def get_referenced_component_refs()
       ndx_ret = Hash.new
-      get_objs(:cols => [:component_templates]).each do |r|
-        cmp_template = r[:component_template]
-        ndx_ret[cmp_template[:id]] ||= cmp_template
+      get_objs(:cols => [:component_refs]).each do |r|
+        cmp_ref = r[:component_ref]
+        ndx_ret[cmp_ref[:id]] ||= cmp_ref
       end
       ndx_ret.values
+    end
+
+    def get_referenced_component_modules()
+      ret = Array.new
+      cmp_refs = get_referenced_component_refs()
+      return ret if cmp_refs.empty?
+      project = get_project()
+      ComponentRef.get_referenced_component_modules(project,cmp_refs)
     end
 
     ### end: get methods

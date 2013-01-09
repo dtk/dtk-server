@@ -27,7 +27,9 @@ module DTK
           end        
         end
         #TODO: stub 
-        
+        #set in vconstraints the module have specfied value and update both model and service's global refs
+        vconstraints.set_module_version(cmp_module_name,version)
+        vconstraints.save!()
       end
 
     end

@@ -109,24 +109,17 @@ assembly_nodes  =
       :hidden=>true,
       :remote_dependencies=>assembly_nodes
      },
-     :component_templates=>{
+     :component_refs=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
        assembly_nodes +
        [{
           :model_name => :component_ref,
+          :convert => true,
           :join_type => :inner,
           :join_cond=>{:node_node_id => q(:node,:id)},
-          :cols => [:id,:display_name,:component_template_id]
-        },
-        {
-          :model_name => :component,
-          :convert => true,
-          :alias => :component_template,
-          :join_type => :inner,
-          :join_cond=>{:id => q(:component_ref,:component_template_id)},
-          :cols => [:id,:display_name,:group_id,:component_type,:version,:module_branch_id]
+          :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:component_template_id]
         }]
      }
   },

@@ -236,6 +236,7 @@ module Ramaze::Helper
     def create_obj(param,model_class=nil)
       create_object_from_id(ret_request_param_id(param,model_class))
     end
+
     #param refers to key that can have id or name value
     def ret_request_param_id_handle(param,model_class=nil,version=nil)
       id = ret_request_param_id(param,model_class,version)

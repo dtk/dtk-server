@@ -1,5 +1,5 @@
 module DTK
-  class ComponentVersionConstraints < Model
+  class ModuleVersionConstraints < Model
     def meets_constraint?(cmp_template)
       true
     end

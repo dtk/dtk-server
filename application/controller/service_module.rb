@@ -136,17 +136,11 @@ module DTK
       rest_ok_response
     end
 
-    def rest__set_component_version()
+    def rest__set_component_module_version()
       service_module = create_obj(:service_module_id)
-      component_template_idh = nil
-      begin
-        component_template_idh = ret_component_template_idh()
-       rescue ErrorNameDoesNotExist => e
-        service_name = service_module.update_object!(:display_name)[:display_name]
-        raise e.qualify("for service with name (#{service_name})")
-      end
+      component_module = create_obj(:component_module_id,ComponentModule)
       version = ret_version()
-      service_module.set_component_version(component_template_idh,version)
+      service_module.set_component_module_version(component_module,version)
       rest_ok_response
     end
 

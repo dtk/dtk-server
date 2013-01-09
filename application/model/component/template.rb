@@ -1,4 +1,3 @@
-r8_nested_require('template','version_constraints')
 module DTK; class Component
   class Template < self
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method

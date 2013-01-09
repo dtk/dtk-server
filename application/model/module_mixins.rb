@@ -130,24 +130,22 @@ module DTK
     end
 
     def module_name()
-      update_object!(:display_name)[:display_name]
+      get_field?(:display_name)
     end
 
     def pp_module_name(version=nil)
-      update_object!(:display_name)
-      self.class.pp_module_name(self[:display_name],version)
+      self.class.pp_module_name(module_name(),version)
     end
 
     def pp_module_branch_name(module_branch)
-      update_object!(:display_name)
       module_branch.update_object!(:version)
       version = (module_branch.has_default_version?() ? nil : module_branch[:version])
-      self.class.pp_module_name(self[:display_name],version)
+      self.class.pp_module_name(module_name(),version)
     end
 
    private
     def get_project()
-      update_object!(:project_project_id,:display_name) #including :display is opportunistic
+      update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
       if project_id = self[:project_project_id]
         id_handle(:model_name => :project, :id => project_id).create_object()
       end

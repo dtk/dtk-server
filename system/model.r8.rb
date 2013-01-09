@@ -461,6 +461,11 @@ module XYZ
       @id_handle[:group_id] ||= group_id()
       self
     end
+    
+    #this returns fiueld if exists, otherways gets it
+    def get_field?(field)
+      self[field]||update_object!(field)[field]
+    end
 
     def update_and_materialize_object!(*cols)
       update_object!(*cols).materialize!(cols)

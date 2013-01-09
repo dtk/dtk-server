@@ -1,7 +1,27 @@
 module DTK
   class ServiceModule
     module ComponentVersionMixin
-      def set_component_version(component_template_idh,version)
+      def set_component_module_version(component_module,version)
+        cmp_module_name = component_module.module_name()
+        #make sure that component_module has version defined
+        unless module_branch = component_module.get_module_branch_matching_version(version)
+          update_object!(:display_name)
+          raise ErrorUsage.new("Service module (Component module (#{cmp_module_name}) does not have version (#{version}) defined")
+        end
+
+        #get the associated module_version_constraints
+        
+        #check if set to this version already
+
+        #make sure that the service module references the component module
+        #quick check is looking in module_version_constraints, if no match then do more expensive
+        #get_referenced_component_modules()
+=begin
+        matching_cmp_modules = get_referenced_component_modules().select do |r|
+          r.module_name() == cmp_module_name
+        end
+
+
         component_template = component_template_idh.create_object().update_object!(:id,:group_id,:display_name,:component_type,:version)
         version_field = ModuleBranch.version_field(version)
         #check that component type is referenced by service module
@@ -17,16 +37,13 @@ module DTK
             :version_set_already
           end
         if error 
-          update_object!(:display_name)
-          template_pp_name = component_template_idh.create_object().display_name_print_form()
-          case error
-           when :not_referenced
-            raise ErrorUsage.new("Service module (#{self[:display_name]}) does not reference component template (#{template_pp_name})")
+
            when :version_set_already
             raise ErrorUsage.new("Service module (#{self[:display_name]}) already has component template (#{template_pp_name}) set to version (#{version})")
           end        
         end
         #TODO: stub 
+=end
       end
 
     end

@@ -184,7 +184,7 @@ module DTK
       project_idh = get_project().id_handle()
       update_object!(:display_name)
       #TODO: for more efficiency can push in diffs_summary to below
-      self.class.create_assemblies_from_dsl?(project_idh,module_branch,module_name())
+      self.class.update_model_from_dsl(project_idh,module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
 
@@ -232,8 +232,8 @@ module DTK
     def self.import_postprocess(project,repo,module_name,version)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl?
-      create_assemblies_from_dsl?(project.id_handle(),module_branch,module_name)
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
+      update_model_from_dsl(project.id_handle(),module_branch,module_name)
       module_branch_idh
     end
 
@@ -246,7 +246,7 @@ module DTK
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       end
-      GlobalModelRefs.serialize_and_save_to_repo(module_info,module_branch)
+      GlobalModuleRefs.serialize_and_save_to_repo(module_info,module_branch)
     end
 
     #returns [module_branch,component_modules]

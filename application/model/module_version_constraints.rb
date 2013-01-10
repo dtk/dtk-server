@@ -10,11 +10,13 @@ module DTK
 
     def set_module_version(cmp_module_name,version)
       create_component_modules_hash?()[key(cmp_module_name)] = Constraint.reify?(version)
-      #TODO: here may search through related  component instances and change version associated with them
+      #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
-    def save!(parent_idh)
-      if id()
+    def save!(parent_idh=nil)
+      parent_idh ||= @parent_idh
+
+      if id() 
         #persisted already, needs update
         update(:constraints => constraints_in_hash_form())
       else
@@ -26,6 +28,12 @@ module DTK
         }
         @id_handle = Model.create_from_row(mh,row,:convert => true)
       end
+      self
+    end
+
+    def set_and_save_constraints!(constraints_hash_form)
+      set_constraints(constraints_hash_form)
+      save!()
     end
 
     def constraints_in_hash_form()
@@ -36,6 +44,8 @@ module DTK
       self.class.hash_form(constraints)
     end
 
+    attr_accessor :parent_idh
+
     private
      def module_constraint(cmp_module_name)
        Constraint.reify?(component_modules[key(cmp_module_name)])
@@ -43,6 +53,10 @@ module DTK
 
      def component_modules()
        ((self[:constraints]||{})[:component_modules])||{}
+     end
+
+     def set_constraints(hash)
+       self[:constraints] = hash
      end
 
      def create_component_modules_hash?()

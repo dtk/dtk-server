@@ -25,7 +25,26 @@ module DTK
         end
       end
 
-      def create_assemblies_from_dsl?(container_idh,module_branch,module_name)
+      def update_model_from_dsl(container_idh,module_branch,module_name)
+        update_global_refs(module_branch)
+        update_assemblies_from_dsl(container_idh,module_branch,module_name)
+      end
+
+      def assembly_meta_directory_path(assembly_name)
+        "assemblies/#{assembly_name}"
+      end
+      def assembly_meta_filename_path(assembly_name)
+        "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
+      end
+      def assembly_dsl_filename_path_info()
+        {
+          :regexp => Regexp.new("assembly.json$"),
+          :path_depth => 3
+        }
+      end
+
+     private
+      def update_assemblies_from_dsl(container_idh,module_branch,module_name)
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
@@ -34,7 +53,7 @@ module DTK
         
         assembly_import_helper = AssemblyImport.new(container_idh,module_name)
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
-          json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
+          json_content = RepoManager.get_file_content(meta_file,module_branch)
           hash_content = JSON.parse(json_content)
           assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
             h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
@@ -52,17 +71,11 @@ module DTK
         end
       end
 
-      def assembly_meta_directory_path(assembly_name)
-        "assemblies/#{assembly_name}"
-      end
-      def assembly_meta_filename_path(assembly_name)
-        "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
-      end
-      def assembly_dsl_filename_path_info()
-        {
-          :regexp => Regexp.new("assembly.json$"),
-          :path_depth => 3
-        }
+      def update_global_refs(module_branch)
+        json_content = RepoManager.get_file_content(GlobalModuleRefs.meta_filename_path(),module_branch)
+        constraints_hash_form = JSON.parse(json_content)
+        vconstraints = module_branch.get_module_version_constraints()
+        vconstraints.set_and_save_constraints!(constraints_hash_form)
       end
     end
   end

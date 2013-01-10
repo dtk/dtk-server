@@ -1,16 +1,17 @@
 module DTK
   class ServiceModule
-    class GlobalModelRefs
+    class GlobalModuleRefs
       def self.serialize_and_save_to_repo(module_info,service_module_branch)
         path = meta_filename_path()
         service_module_branch.serialize_and_save_to_repo(meta_filename_path(),hash_content(service_module_branch))
         path
       end
-     private
+
       def self.meta_filename_path()
         "global_module_refs.json"
       end
 
+     private
       def self.hash_content(service_module_branch)
         ret = SimpleOrderedHash.new()
         vconstraints = service_module_branch.get_module_version_constraints()

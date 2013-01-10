@@ -10,12 +10,12 @@ module DTK
 
     def set_module_version(cmp_module_name,version)
       create_component_modules_hash?()[key(cmp_module_name)] = Constraint.reify?(version)
+      #TODO: here may search through related  component instances and change version associated with them
     end
 
     def save!(parent_idh)
-      #TODO: write to git repo
       if id()
-        #persisted already
+        #persisted already, needs update
         update(:constraints => constraints_in_hash_form())
       else
         mh = parent_idh.create_childMH(:module_version_constraints) 
@@ -26,6 +26,14 @@ module DTK
         }
         @id_handle = Model.create_from_row(mh,row,:convert => true)
       end
+    end
+
+    def constraints_in_hash_form()
+      ret = Hash.new
+      unless constraints = self[:constraints]
+        return ret
+      end
+      self.class.hash_form(constraints)
     end
 
     private
@@ -43,14 +51,6 @@ module DTK
 
      def key(el)
        el.to_sym
-     end
-
-     def constraints_in_hash_form()
-       ret = Hash.new
-       unless constraints = self[:constraints]
-         return ret
-       end
-       self.class.hash_form(constraints)
      end
 
      def self.hash_form(el)

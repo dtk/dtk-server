@@ -116,5 +116,5 @@ lambda__matching_library_branches =
     }
   },
   :many_to_one=>[:component_module,:service_module],
-  :one_to_many=>[:component_version_constraints]
+  :one_to_many=>[:module_version_constraints]
 }

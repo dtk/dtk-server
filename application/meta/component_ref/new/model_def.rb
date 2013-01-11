@@ -20,6 +20,7 @@
       :remote_dependencies=>
       [{
          :model_name=>:node,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:component_ref__node_node_id},
          :cols=>[:id,:group_id,:display_name,:assembly_id]

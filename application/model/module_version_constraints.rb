@@ -53,8 +53,10 @@ module DTK
     end
 
     #TODO: we may simplify relationship of compoennt ref to compoennt template tos implify and make moer efficient below
+    #augmented with :component_template key which points to associated component template or nil 
     def get_matching_component_template_ids(aug_cmp_refs)
       ret = Hash.new
+      return ret if aug_cmp_refs.empty?
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
       # 1) if has_override_version is set
       #    a) if it points to a component template, use this

@@ -12,6 +12,9 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    def self.get_augmented_component_refs(mh)
+    end
+
     ### end: standard get methods
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
     def self.list(mh,opts={})

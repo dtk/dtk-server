@@ -17,18 +17,6 @@ module DTK
       end
 
       #gets the component templates that each component ref is pointing to
-=begin
-DEPRECATE
-      def get_aug_matching_component_refs()
-        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
-        sp_hash = {
-          :cols => [:id,:display_name,:node_with_assembly_id,matching_component_refs__virtual_col()],
-          :filter => [:oneof, :node_node_id, node_stub_ids]
-        }
-        Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
-      end
-=end
-      #gets the component templates that each component ref is pointing to
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {

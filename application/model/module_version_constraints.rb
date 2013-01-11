@@ -13,6 +13,11 @@ module DTK
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
+    def self.create_and_reify?(module_branch,module_version_constraints=nil)
+      module_version_constraints ||= ModuleVersionConstraints.create_stub(module_branch.model_handle(:module_version_constraints))
+      module_version_constraints.reify!(module_branch)
+    end
+                                                                          
     def reify!(parent)
       @parent = parent
       cmp_modules = component_modules()

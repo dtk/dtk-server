@@ -14,8 +14,7 @@ module DTK
         :filter => [:eq,:branch_id,id()]
       }
       mh = model_handle(:module_version_constraints)
-      ret = Model.get_obj(mh,sp_hash)||ModuleVersionConstraints.create_stub(mh)
-      ret.reify!(self)
+      ModuleVersionConstraints.create_and_reify?(self,Model.get_obj(mh,sp_hash))
     end
 
     def pp_version()

@@ -25,6 +25,17 @@ segment_component_ref = {
   :join_cond=>{:node_node_id => :node__id},
   :cols => [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type]
 }
+lambda__segment_component_template =
+  lambda{|join_type|
+  {
+    :model_name => :component,
+    :convert => true,
+    :alias => :component_template,
+    :join_type => join_type,
+    :join_cond=>{:id => q(:component_ref,:component_template_id)},
+    :cols => [:id,:display_name,:component_type,:basic_type,:description]
+  }
+}
 lambda__segments_nodes_and_components =
   lambda{|node_cols,cmp_cols|
     [
@@ -133,21 +144,15 @@ lambda__instance_nodes_and_components =
     },
 
     :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
-    :augmented_component_ref=>{
+    :augmented_component_refs=>{
       :type => :json, 
       :hidden => true,
       :remote_dependencies =>
       [
-       lambda__segment_node.call([:id,:display_name,:os_type]),
+       lambda__segment_node.call([:id,:group_id,:display_name,:os_type]),
        segment_component_ref,
-       {
-         :model_name => :component,
-         :convert => true,
-         :alias => :nested_component,
-         :join_type => :inner,
-         :join_cond=>{:id => q(:component_ref,:component_template_id)},
-         :cols => [:id,:display_name,:component_type,:basic_type,:description]
-       }]
+       lambda__segment_component_template.call(:left_outer)
+      ]
     },
 
     #MOD_RESTRUCT: deprecate bleow for above

@@ -12,7 +12,14 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
-    def self.get_augmented_component_refs(mh)
+    def self.get_augmented_component_refs(mh,opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
+      }
+      aug_cmp_refs = get_objs(mh.createMH(:component),sp_hash)
+      version_constraints = ModuleVersionConstraints.create_and_reify!(self[:module_version_constraints])
+      raise Error.new("complete")
     end
 
     ### end: standard get methods

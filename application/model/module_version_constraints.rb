@@ -13,6 +13,17 @@ module DTK
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
+    def reify!(parent)
+      @parent = parent
+      cmp_modules = component_modules()
+      cmp_modules.each{|mod,constraint|cmp_modules[mod] = Constraint.reify?(constraint)}
+      self
+    end
+
+    def self.reify_component_modules(cmp_modules)
+      cmp_modules
+    end
+
     def save!(parent_idh=nil)
       parent_idh ||= parent_idh()
 
@@ -43,8 +54,6 @@ module DTK
       end
       self.class.hash_form(constraints)
     end
-
-    attr_accessor :parent
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 

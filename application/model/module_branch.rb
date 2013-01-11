@@ -15,8 +15,7 @@ module DTK
       }
       mh = model_handle(:module_version_constraints)
       ret = Model.get_obj(mh,sp_hash)||ModuleVersionConstraints.create_stub(mh)
-      ret.parent = self
-      ret
+      ret.reify!(self)
     end
 
     def pp_version()

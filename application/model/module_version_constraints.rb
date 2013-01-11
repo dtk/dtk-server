@@ -57,8 +57,8 @@ module DTK
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
-    def get_matching_component_template_ids(aug_cmp_refs)
-      ret = Hash.new
+    def set_matching_component_template_ids!(aug_cmp_refs)
+      ret = aug_cmp_refs
       return ret if aug_cmp_refs.empty?
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
       # 1) if has_override_version is set
@@ -95,10 +95,18 @@ module DTK
       #mappings will have for each component type that has a module_version_constraints the related component template id
       mappings = get_component_type_to_template_id_mappings?(cmp_types_to_check.keys)
 
-raise Error.new("Got here")
-      #TODO: finish
+      #set the compoennt template ids; raise error if theer i a required element that does not have a matching component template
+      cmp_types_to_check.each do |cmp_type,els|
+        els.each do |el|
+          if cmp_template_id = mappings[cmp_type]
+            el[:pntr][:component_template_id] = cmp_template_id 
+          elsif el[:required]
+            raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+          end
+        end
+      end
+      ret
     end
-
 
    private
 

@@ -4,15 +4,15 @@ module DTK; class Component
     #type_version_list is an array with each element having keys :component_type, :version_field
     def self.get_matching_type_and_version(project_idh,type_version_field_list)
       ret = Array.new
-      cmp_types = type_version_list.map{|r|r[:component_type]}.uniq
-      versions = type_version_list.map{|r|r[:version_field]}
+      cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
+      versions = type_version_field_list.map{|r|r[:version_field]}
       sp_hash = {
-        :cols => [:id,:component_template,:version],
+        :cols => [:id,:component_type,:version],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
                     [:oneof, :component_type, cmp_types]]
       }
-      get_objects(project_idh.createMH(:component),sp_hash).select do |r|
+      get_objs(project_idh.createMH(:component),sp_hash).select do |r|
         type_version_field_list.find{|tv|tv[:version_field] == r[:version] and tv[:component_type] == r[:component_type]}
       end
     end

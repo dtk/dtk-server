@@ -38,10 +38,7 @@ DEPRECATE
         aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
 
         module_constraints = @clone_proc.module_version_constraints()
-        ndx_cmp_ref_to_template_id = module_constraints.get_matching_component_template_ids(aug_cmp_refs)
-        aug_cmp_refs.map do |r|
-          r.merge!(:component_template_id => ndx_cmp_ref_to_template_id[r[:id]])
-        end
+        module_constraints.set_matching_component_template_ids!(aug_cmp_refs)
       end
 
       def matching_component_refs__virtual_col()

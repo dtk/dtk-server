@@ -197,7 +197,7 @@ raise Error.new("Got here")
       end
 
       def is_scalar?()
-          @value if @type == :scalare
+        @value if @type == :scalar
       end
       
       def to_s()

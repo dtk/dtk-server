@@ -14,7 +14,7 @@ module DTK
     end
 
     def save!(parent_idh=nil)
-      parent_idh ||= @parent_idh
+      parent_idh ||= parent_idh()
 
       if id() 
         #persisted already, needs update
@@ -44,15 +44,9 @@ module DTK
       self.class.hash_form(constraints)
     end
 
-    attr_accessor :parent_idh
+    attr_accessor :parent
 
-    #augmented with node and component template info
-
-    def get_augmented_matching_componente_refs(mh,node_stub_ids)
-
-    end
-
-    #TODO: we may simplify relationship of compoennt ref to compoennt template tos implify and make moer efficient below
+    #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
     def get_matching_component_template_ids(aug_cmp_refs)
       ret = Hash.new
@@ -89,10 +83,9 @@ module DTK
       end
       
       #Lookup up modules mapping
-      cmp_modules_to_lookup = cmp_types_to_check.keys.inject(Hash.new) do |h,cmp_type|
-        h.merge(Component.module_name(cmp_type) => true)
-      end.keys
-pp [:cmp_modules_to_lookup,cmp_modules_to_lookup]
+      #mappings will have for each component type that has a module_version_constraints the related component template id
+      mappings = get_component_type_to_template_id_mappings?(cmp_types_to_check.keys)
+
 raise Error.new("Got here")
       #TODO: finish
     end
@@ -104,6 +97,29 @@ raise Error.new("Got here")
       def mapping_required?()
         find{|r|r[:required]}
       end
+    end
+
+    def get_component_type_to_template_id_mappings?(cmp_types)
+      ret = Hash.new
+      return ret if cmp_types.empty?
+      type_version_pairs = Array.new
+      cmp_types.each do |cmp_type|
+        if version = ret_scalar_version?(cmp_type)
+          type_version_pairs << {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
+        end
+      end
+      return ret if type_version_pairs.empty?
+
+      #get matching component template ids
+      matching_templates = Component::Template.get_matching_type_and_version(project_idh,type_version_pairs)
+      matching_templates.inject(Hash.new) do |h,r|
+        h.merge(r[:component_type] => r[:id])
+      end
+    end
+
+    def ret_scalar_version?(component_type)
+      ret = component_modules[key(Component.module_name(component_type))]
+      ret && ret.is_scalar?()
     end
 
     def module_constraint(cmp_module_name)
@@ -141,6 +157,16 @@ raise Error.new("Got here")
         el
       end
     end
+
+    def parent_idh()
+      @parent.id_handle()
+    end
+    def project_idh()
+      unless project_id = @parent.get_field?(:project_project_id)
+        raise Error.new("Cannot find project from parent object")
+      end
+      @parent.model_handle(:project).createIDH(:id => project_id)
+    end
     
     class Constraint
       def self.reify?(constraint=nil)
@@ -159,6 +185,10 @@ raise Error.new("Got here")
         when :scalar
           @value == version
         end
+      end
+
+      def is_scalar?()
+          @value if @type == :scalare
       end
       
       def to_s()

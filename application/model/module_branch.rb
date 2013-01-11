@@ -15,7 +15,7 @@ module DTK
       }
       mh = model_handle(:module_version_constraints)
       ret = Model.get_obj(mh,sp_hash)||ModuleVersionConstraints.create_stub(mh)
-      ret.parent_idh = id_handle()
+      ret.parent = self
       ret
     end
 

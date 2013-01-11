@@ -66,33 +66,34 @@ module DTK
       cmp_types_to_check = Hash.new
       aug_cmp_refs.each do |r|
         if r[:has_override_version]
-          unless self[:component_template]
+          unless self[:component_template_id]
             raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")
           end
-          r[:component_template_id] = r[:component_template][:id]
         elsif r[:component_template]
           cmp_type = r[:component_template][:component_type]
           (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r}
-          #opportunistically setting component_template_id (it, however, might be overwritten)
-          r[:component_template_id] = r[:component_template][:id]
         elsif r[:component_type]
           cmp_type = r[:component_type]
           (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
         else
-          raise Error.new("component ref with id (#{r[:id]} must eitehr point to a component template or have component_type set")
+          raise Error.new("component ref with id (#{r[:id]} must either point to a component template or have component_type set")
         end
       end
 
       #shortcut if no locked versions
       if component_modules().empty?
-        if el = cmp_types_to_check.find{|r|r.mapping_required?()}
+        if el = cmp_types_to_check.values.find{|r|r.mapping_required?()}
           raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
           return aug_cmp_ref
         end
       end
       
-      #TODO: lookup up modules mapping
-      component_modules = ComponentTypeToCheck.ret_modules_to_lookup(cmp_types_to_check)
+      #Lookup up modules mapping
+      cmp_modules_to_lookup = cmp_types_to_check.keys.inject(Hash.new) do |h,cmp_type|
+        h.merge(Component.module_name(cmp_type) => true)
+      end.keys
+pp [:cmp_modules_to_lookup,cmp_modules_to_lookup]
+raise Error.new("Got here")
       #TODO: finish
     end
 
@@ -104,7 +105,6 @@ module DTK
         find{|r|r[:required]}
       end
     end
-
 
     def module_constraint(cmp_module_name)
       Constraint.reify?(component_modules[key(cmp_module_name)])

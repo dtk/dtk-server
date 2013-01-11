@@ -27,6 +27,7 @@ module DTK
     def save!(parent_idh=nil)
       parent_idh ||= parent_idh()
 
+      #update model
       if id() 
         #persisted already, needs update
         update(:constraints => constraints_in_hash_form())
@@ -39,6 +40,10 @@ module DTK
         }
         @id_handle = Model.create_from_row(mh,row,:convert => true)
       end
+
+      #update git repo
+      ServiceModule::GlobalModuleRefs.serialize_and_save_to_repo(@parent)
+
       self
     end
 

@@ -246,7 +246,6 @@ module DTK
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       end
-      GlobalModuleRefs.serialize_and_save_to_repo(module_info,module_branch)
     end
 
     #returns [module_branch,component_modules]

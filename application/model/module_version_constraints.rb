@@ -120,7 +120,7 @@ raise Error.new("Got here")
       return ret if type_version_pairs.empty?
 
       #get matching component template ids
-      matching_templates = Component::Template.get_matching_type_and_version(project_idh,type_version_pairs)
+      matching_templates = Component::Template.get_matching_type_and_version(project_idh(),type_version_pairs)
       matching_templates.inject(Hash.new) do |h,r|
         h.merge(r[:component_type] => r[:id])
       end
@@ -171,7 +171,12 @@ raise Error.new("Got here")
       @parent.id_handle()
     end
     def project_idh()
-      unless project_id = @parent.get_field?(:project_project_id)
+      return @project_idh if @project_idh
+      unless service_id = @parent.get_field?(:service_id)
+        raise Error.new("Cannot find project from parent object")
+      end
+      service_module = @parent.model_handle(:service_module).createIDH(:id => service_id).create_object()
+      unless project_id = service_module.get_field?(:project_project_id)
         raise Error.new("Cannot find project from parent object")
       end
       @parent.model_handle(:project).createIDH(:id => project_id)

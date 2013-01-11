@@ -10,8 +10,8 @@ module DTK
 
     def get_module_version_constraints()
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:constraints],
-        :filter => [:eq, :branch_id,id()]
+        :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id],
+        :filter => [:eq,:branch_id,id()]
       }
       mh = model_handle(:module_version_constraints)
       ret = Model.get_obj(mh,sp_hash)||ModuleVersionConstraints.create_stub(mh)

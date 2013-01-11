@@ -30,6 +30,7 @@ module DTK
       self.class.list_aux(assembly_rows,attr_rows).first
     end
 
+    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     def self.get_component_templates(assembly_mh,filter=nil)
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:component_templates],

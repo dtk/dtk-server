@@ -178,6 +178,7 @@ lambda__template_nodes_and_components =
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]
     },
+    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     :component_templates=> { 
       :type => :json, 
       :hidden => true,

@@ -278,7 +278,8 @@ module Ramaze::Helper
     private :ret_module_name_from_class
     OverrideModelName = {
       Component::Template => :component,
-      NodeBindingRuleset  => :node_binding_ruleset
+      Assembly::Instance => :component,
+      Assembly::Template  => :component
     }
 
 

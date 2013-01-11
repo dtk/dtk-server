@@ -46,78 +46,134 @@ module DTK
 
     attr_accessor :parent_idh
 
-    private
-     def module_constraint(cmp_module_name)
-       Constraint.reify?(component_modules[key(cmp_module_name)])
-     end
+    #augmented with node and component template info
+    #TODO: we may simplify relationship of compoennt ref to compoennt template tos implify and make moer efficient below
+    def get_aug_matching_componente_refs(mh,node_stub_ids)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:node_and_template_info],
+        :filter => [:oneof, :node_node_id, node_stub_ids]
+      }
+      aug_cmp_ref = Model.get_objs(mh.createMH(:cmp_ref),sp_hash)
+      #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
+      # 1) if has_override_version is set
+      #    a) if it points to a component template, use this
+      #    b) otherwise raise error
+      # 2) elsif element does not point to a component template need to look it up in module_version_constraints and error if it does not exist
+      # 3) else look it up and if lookup exists use this as teh value to use
+      cmp_types_to_check = Hash.new
+      aug_cmp_ref.each do |r|
+        if r[:has_override_version]
+          unless self[:component_template]
+            raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")
+          end
+          r[:component_template_id] = r[:component_template][:id]
+        elsif r[:component_template]
+          cmp_type = r[:component_template][:component_type]
+          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r}
+          #opportunistically setting component_template_id (it, however, might be overwritten)
+          r[:component_template_id] = r[:component_template][:id]
+        elsif r[:component_type]
+          cmp_type = r[:component_type]
+          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
+        else
+          raise Error.new("component ref with id (#{r[:id]} must eitehr point to a component template or have component_type set")
+        end
+      end
 
-     def component_modules()
-       ((self[:constraints]||{})[:component_modules])||{}
-     end
+      #shortcut if no locked versions
+      if component_modules().empty?
+        if el = cmp_types_to_check.find{|r|r.mapping_required?()}
+          raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+          return aug_cmp_ref
+        end
+      end
+      
+      #TODO: lookup up modules mapping
+      component_modules = ComponentTypeToCheck.ret_modules_to_lookup(cmp_types_to_check)
+      #TODO: finish
+    end
 
-     def set_constraints(hash)
-       self[:constraints] = hash
-     end
 
-     def create_component_modules_hash?()
-       (self[:constraints] ||= Hash.new)[:component_modules] ||= Hash.new
-     end
+   private
 
-     def key(el)
-       el.to_sym
-     end
+    class ComponentTypeToCheck < Array
+      def mapping_required?()
+        find{|r|r[:required]}
+      end
+    end
 
-     def self.hash_form(el)
-       if el.kind_of?(Hash)
-         el.inject(Hash.new) do |h,(k,v)|
-           if val = hash_form(v)
+
+    def module_constraint(cmp_module_name)
+      Constraint.reify?(component_modules[key(cmp_module_name)])
+    end
+    
+    def component_modules()
+      ((self[:constraints]||{})[:component_modules])||{}
+    end
+
+    def set_constraints(hash)
+      self[:constraints] = hash
+    end
+
+    def create_component_modules_hash?()
+      (self[:constraints] ||= Hash.new)[:component_modules] ||= Hash.new
+    end
+    
+    def key(el)
+      el.to_sym
+    end
+    
+    def self.hash_form(el)
+      if el.kind_of?(Hash)
+        el.inject(Hash.new) do |h,(k,v)|
+          if val = hash_form(v)
              h.merge(k => val)
-           else
-             h
-           end
-         end
-       elsif el.kind_of?(Constraint)
-         el.to_s
-       else
-         el
-       end
-     end
-
-     class Constraint
-       def self.reify?(constraint=nil)
-         if constraint.nil? then new()
-         elsif constraint.kind_of?(Constraint) then constraint
-         elsif constraint.kind_of?(String) then new(constraint)
-         else
-           raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
-         end
-       end
-
-       def include?(version)
-         case @type
-           when :empty
-           nil
-         when :scalar
-           @value == version
-         end
-       end
-
-       def to_s()
-         case @type
-          when :scalar
-           @value.to_s
-         end
-       end
-
-      private
-       def initialize(scalar=nil)
-         @type = (scalar ? :scalar : :empty)
-         @value = scalar
-       end
-
-       def empty?()
-         @type == :empty?
-       end
-     end
+          else
+            h
+          end
+        end
+      elsif el.kind_of?(Constraint)
+        el.to_s
+      else
+        el
+      end
+    end
+    
+    class Constraint
+      def self.reify?(constraint=nil)
+        if constraint.nil? then new()
+        elsif constraint.kind_of?(Constraint) then constraint
+        elsif constraint.kind_of?(String) then new(constraint)
+        else
+          raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
+        end
+      end
+      
+      def include?(version)
+        case @type
+        when :empty
+          nil
+        when :scalar
+          @value == version
+        end
+      end
+      
+      def to_s()
+        case @type
+        when :scalar
+          @value.to_s
+        end
+      end
+      
+     private
+      def initialize(scalar=nil)
+        @type = (scalar ? :scalar : :empty)
+        @value = scalar
+      end
+      
+      def empty?()
+        @type == :empty?
+      end
+    end
   end
 end

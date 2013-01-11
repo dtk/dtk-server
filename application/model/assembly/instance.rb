@@ -362,7 +362,7 @@ module DTK; class  Assembly
     def create_library_template_from_assembly(library_idh,name_info=nil)
       update_object!(:component_type,:version,:ui)
       if self[:version]
-        raise Error.new("TODO: not implemented yet AssemblyInstance#create_library_template when version no null")
+        raise Error.new("TODO: not implemented yet Assembly::Instance#create_library_template when version no null")
       end
       if name_info
         service_module_name = name_info[:service_module_name]

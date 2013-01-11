@@ -27,6 +27,7 @@ module DTK;class ChildContext
         merge!(:matches => aug_cmp_refs)
       end
 
+      #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
       def matching_component_refs__virtual_col()
         :component_templates
       end

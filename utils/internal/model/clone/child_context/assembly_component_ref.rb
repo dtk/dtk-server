@@ -26,6 +26,12 @@ module DTK
         Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
       end
 
+      def get_aug_matching_component_refs()
+        node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
+        module_constraints = @clone_proc.module_version_constraints()
+        module_constraints.get_aug_matching_component_refs(model_handle,node_stub_ids)
+      end
+
       def matching_component_refs__virtual_col()
         :component_template_id
       end

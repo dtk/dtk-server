@@ -5,6 +5,7 @@
     :component_type=>{:type =>:varchar,:size=>50},
     :version=>{:type=>:varchar,:size =>25},
     :has_override_version=>{:type=>:boolean,:default=>false}, #whether this has an insstance assigned to this instance, which oevrrides any global version setting of assembly this is in
+    #must point to :component_template_id or have :component_type and version set
     :component_template_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:component,
@@ -13,7 +14,7 @@
     }
   },
   :virtual_columns=>{
-    :node_with_assembly_id=> {
+    :node_and_template_info=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
@@ -22,8 +23,18 @@
          :join_type=>:inner,
          :join_cond=>{:id=>:component_ref__node_node_id},
          :cols=>[:id,:group_id,:display_name,:assembly_id]
+       },
+      {
+         :model_name=>:component,
+         :convert => true,
+         :alias => :component_template,
+         :join_type=>:left_outer,
+         :join_cond=>{:id=>:component_ref__component_template_id},
+         :cols=>[:id,:group_id,:display_name,:component_type,:only_one_per_node,:version,:module_branch_id]
        }]
     },
+
+    #MOD_RESTRUCT: check if still applicable
     :component_templates=> {
       :type=>:json,
       :hidden=>true,

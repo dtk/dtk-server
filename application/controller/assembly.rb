@@ -154,7 +154,7 @@ module DTK
 
     def rest__start()
       assembly = ret_assembly_instance_object()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,AssemblyInstance)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)
 
       # filters only stopped nodes for this assembly

@@ -47,13 +47,14 @@ module DTK
     attr_accessor :parent_idh
 
     #augmented with node and component template info
+
+    def get_augmented_matching_componente_refs(mh,node_stub_ids)
+
+    end
+
     #TODO: we may simplify relationship of compoennt ref to compoennt template tos implify and make moer efficient below
-    def get_aug_matching_componente_refs(mh,node_stub_ids)
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:node_and_template_info],
-        :filter => [:oneof, :node_node_id, node_stub_ids]
-      }
-      aug_cmp_ref = Model.get_objs(mh.createMH(:cmp_ref),sp_hash)
+    def get_matching_component_template_ids(aug_cmp_refs)
+      ret = Hash.new
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
       # 1) if has_override_version is set
       #    a) if it points to a component template, use this
@@ -61,7 +62,7 @@ module DTK
       # 2) elsif element does not point to a component template need to look it up in module_version_constraints and error if it does not exist
       # 3) else look it up and if lookup exists use this as teh value to use
       cmp_types_to_check = Hash.new
-      aug_cmp_ref.each do |r|
+      aug_cmp_refs.each do |r|
         if r[:has_override_version]
           unless self[:component_template]
             raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")

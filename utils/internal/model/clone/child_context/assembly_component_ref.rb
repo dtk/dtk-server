@@ -17,6 +17,8 @@ module DTK
       end
 
       #gets the component templates that each component ref is pointing to
+=begin
+DEPRECATE
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {
@@ -25,11 +27,21 @@ module DTK
         }
         Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
       end
-
+=end
+      #gets the component templates that each component ref is pointing to
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:node_and_template_info],
+          :filter => [:oneof, :node_node_id, node_stub_ids]
+        }
+        aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
+
         module_constraints = @clone_proc.module_version_constraints()
-        module_constraints.get_aug_matching_component_refs(model_handle,node_stub_ids)
+        ndx_cmp_ref_to_template_id = module_constraints.get_matching_component_template_ids(aug_cmp_refs)
+        aug_cmp_refs.map do |r|
+          r.merge!(:component_template_id => ndx_cmp_ref_to_template_id[r[:id]])
+        end
       end
 
       def matching_component_refs__virtual_col()

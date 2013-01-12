@@ -29,7 +29,7 @@ module DTK; class Assembly
           service_module_name = service_module_name(r[:component_type])
           pntr = aug_cmp_refs_ndx_by_vc[service_module_name]
           unless pntr 
-            module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id])
+            module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
               :version_constraints => ModuleVersionConstraints.create_and_reify?(module_branch,r[:module_version_constraints])
             }
@@ -64,7 +64,7 @@ module DTK; class Assembly
     def self.get(mh,opts={})
       if project_id = opts[:project_idh]
         ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
-        get__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:id]] ||= r}
+        get__project_parent(mh,opts).each{|r|ndx_ret[r[:id]] ||= r}
         ndx_ret.values
       else
         list__library_parent(mh,opts)
@@ -72,13 +72,14 @@ module DTK; class Assembly
     end
 
     def self.get__project_parent(mh,opts={})
-      ndx_ret = Hash.new
-      aug_cmp_refs = get_augmented_component_refs(mh,opts)
-      aug_cmp_refs.each do |r|
-        component_template = r[:component_template]
-        ndx_ret[component_template[:id]] ||= component_template
-      end
-      ndx_ret.values
+      sp_hash = {
+        :cols => [:id, :group_id,:display_name,:component_type],
+        :filter => [:and, [:eq, :type, "composite"], 
+                    opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
+                    opts[:filter]
+                   ].compact
+      }
+      get_objs(mh.createMH(:component),sp_hash)
     end
 
     def self.list__project_parent(assembly_mh,opts={})

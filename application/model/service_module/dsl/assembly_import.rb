@@ -199,47 +199,6 @@ module DTK; class ServiceModule
         ret
       end
 
-=begin
-DEPRECATE
-      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash)
-        #find the reference components and clone
-        #TODO: not clear we need the modules if component names are unique w/o modules
-        cmp_types = components_hash.map{|cmp|component_type(cmp)}
-        cmp_mh = container_idh.create_childMH(:component)
-        sp_hash = {
-          :cols => [:id, :display_name, :component_type, :ref, :module_name],
-          :filter => [:and, [:oneof, :component_type,cmp_types],
-                      [:eq, cmp_mh.parent_id_field_name, container_idh.get_id()]]
-        }
-        matching_cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols => true)
-        augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
-          if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
-            cmp_template_relative_uri = "/component/#{match[:ref]}" 
-            cmp_ref = {
-              "*component_template_id" => cmp_template_relative_uri,
-              "display_name" => match[:component_type]
-            }
-            attr_overrides = attribute_overrides(cmp_hash,cmp_template_relative_uri)
-            unless attr_overrides.empty?
-              cmp_ref.merge!("attribute_override" => attr_overrides)
-            end
-            h.merge(match[:component_type] => cmp_ref)
-          else 
-            non_matches << component_type(cmp_hash)
-            h
-          end
-        end
-        #error if one or more matches
-        unless non_matches.empty?
-          raise ErrorUsage.new("No component matches for (#{non_matches.join(",")}) found in assembly (#{assembly_name})")
-        end
-        augment_cmps
-      end
-      def self.component_type(cmp)
-        (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
-      end
-=end
-
       def self.attribute_overrides(cmp,cmp_template_relative_uri)
         ret = Hash.new
         return ret unless cmp.kind_of?(Hash)

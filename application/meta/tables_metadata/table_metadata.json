@@ -148,11 +148,9 @@
       "id",
       "assembly_name",
       "status",
-      "nodes",
-      "components"
+      "nodes"
     ],
     "mapping": {
-      "components": "nodes.first['components'].join(', ')",
       "nodes": "nodes.size",
       "status": "execution_status",
       "assembly_name": "display_name",
@@ -163,11 +161,9 @@
     "order": [
       "id",
       "assembly_name",
-      "nodes",
-      "components"
+      "nodes"
     ],
     "mapping": {
-      "components": "nodes.first['components'].join(', ')",
       "nodes": "nodes.size",
       "assembly_name": "display_name",
       "id": "dtk_id"

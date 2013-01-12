@@ -35,7 +35,7 @@ module DTK; class Assembly
               :version_constraints => ModuleVersionConstraints.create_and_reify?(module_branch,r[:module_version_constraints])
             }
           end
-          aug_cmp_ref = r[:component_ref].merge(:component_template => r[:component_template])
+          aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))
           (pntr[:aug_cmp_refs] ||= Array.new) << aug_cmp_ref
         end
       end
@@ -85,7 +85,7 @@ module DTK; class Assembly
     end
 
     def self.list__project_parent(assembly_mh,opts={})
-      opts = opts.merge(:cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])])
+      opts = opts.merge(:cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact)
       assembly_rows = get__project_parent(assembly_mh,opts)
       if opts[:detail_level] == "attributes"
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
@@ -208,13 +208,13 @@ module DTK; class Assembly
       case about 
        when :components
         aug_component_refs = self.class.get_augmented_component_refs(model_handle,:filter => [:eq,:id,id()])
-        pp aug_component_refs
-
-        cols = [:template_nodes_and_cmps_summary]
-        post_process = proc do |r|
-          display_name = "#{r[:node][:display_name]}/#{pp_display_name(r[:nested_component][:display_name])}"
-          r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
+        ret = aug_component_refs.map do |r|
+          cmp_template = r[:component_template]
+          display_name = "#{r[:node][:display_name]}/#{pp_display_name(cmp_template[:component_type])}"
+          version = ModuleBranch.version_from_version_field(cmp_template[:version])
+          cmp_template.hash_subset(:id).merge(:display_name => display_name, :version => version)
         end
+        return ret
        when :nodes
         cols = [:node_templates]
         post_process = proc do |r|

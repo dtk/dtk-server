@@ -26,6 +26,10 @@ module DTK
       version || VersionFieldDefault
     end
 
+    def version_from_version_field(version_field)
+      (version_field == VersionFieldDefault) ? nil : version_field
+    end
+
     def version_display_name(display_name,version)
       version ? "#{display_name}(#{version})" : display_name
     end

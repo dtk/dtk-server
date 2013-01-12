@@ -85,24 +85,70 @@ module DTK; class Assembly
     def self.list__project_parent(assembly_mh,opts={})
       #TODO: rewrite to use this when at certain detail level
       sp_hash = {
-        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
+        :cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact,
         :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
-      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
-      list_aux(assembly_rows,attr_rows,opts)
+      if opts[:detail_level] == "attributes"
+        attr_rows = get_component_attributes(assembly_mh,assembly_rows)
+        list_aux(assembly_rows,attr_rows,opts)
+      else
+        list_aux_simple(assembly_rows,opts)
+      end
     end
     #MOD_RESTRUCT: TODO: deprecate below for above
     def self.list__library_parent(assembly_mh,opts={})
       sp_hash = {
-        :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
+        :cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact,
         :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
-      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_component_attributes(assembly_mh,assembly_rows) : []
-      list_aux(assembly_rows,attr_rows,opts)
+      if opts[:detail_level] == "attributes"
+        attr_rows = get_component_attributes(assembly_mh,assembly_rows)
+        list_aux(assembly_rows,attr_rows,opts)
+      else
+        list_aux_simple(assembly_rows,opts)
+      end
+    end
+
+    def self.list_virtual_column?(detail_level=nil)
+      if detail_level.nil?
+        nil
+      elsif detail_level == "nodes"
+        :template_nodes
+      else
+        raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+      end
+    end
+
+    def self.list_aux_simple(assembly_rows,opts={})
+      ndx_ret = Hash.new
+      if opts[:detail_level] == "components"
+        raise Error.new("list assembly templates at component level not treated")
+      end
+      include_nodes = ["nodes"].include?(opts[:detail_level])
+
+      assembly_rows.each do |r|
+        #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+        #get_objs do this (using possibly option flag for subtype processing)
+        pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r),:ndx_nodes => Hash.new)
+        pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
+        next unless include_nodes
+        node_id = r[:node][:id]
+        unless node = pntr[:ndx_nodes][node_id] 
+          node = pntr[:ndx_nodes][node_id] = {
+            :node_name => r[:node][:display_name], 
+            :node_id => node_id 
+          }
+          node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
+          node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
+        end
+      end
+      unsorted = ndx_ret.values.map do |r|
+        el = r.slice(:id,:display_name,:module_branch_id)
+        include_nodes ? el.merge(:nodes => r[:ndx_nodes].values) : el
+      end
+      opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     def self.create_workspace_template(project,node_idhs,assembly_name,service_module_name,icon_info,version=nil)

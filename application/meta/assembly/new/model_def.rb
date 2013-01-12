@@ -144,6 +144,7 @@ lambda__instance_nodes_and_components =
     },
 
     :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
+    :template_nodes=>lambda__nodes.call([:id,:group_id,:display_name,:os_type,:external_ref]),
     :augmented_component_refs=>{
       :type => :json, 
       :hidden => true,

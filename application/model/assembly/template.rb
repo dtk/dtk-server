@@ -23,20 +23,33 @@ module DTK; class Assembly
       #look for version contraints which are on a per component module basis
       aug_cmp_refs_ndx_by_vc = Hash.new
       aug_cmp_refs.each do |r|
-        unless component_type = r[:component_type]||(r[:component_template]||{})[:component_type]
+        unless component_type = (r[:component_ref]||{})[:component_type]||(r[:component_template]||{})[:component_type]
           Log.error("Component ref with id #{r[:id]}) does not have a compoennt type ssociated with it")
         else
-          module_name = Component.module_name(component_type)
-          pntr = aug_cmp_refs_ndx_by_vc[module_name] ||= {:version_constraints => ModuleVersionConstraints.create_and_reify?(r[:module_version_constraints])}
+          service_module_name = service_module_name(r[:component_type])
+          pntr = aug_cmp_refs_ndx_by_vc[service_module_name]
+          unless pntr 
+            module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id])
+            pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
+              :version_constraints => ModuleVersionConstraints.create_and_reify?(module_branch,r[:module_version_constraints])
+            }
+          end
           (pntr[:aug_cmp_refs] ||= Array.new) << r
         end
       end
-      aug_cmp_refs_ndx_by_vc.values do |r|
+      aug_cmp_refs_ndx_by_vc.each_value do |r|
         r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs])
       end
       aug_cmp_refs
     end
     ### end: standard get methods
+
+    class << self
+     private
+      def service_module_name(component_type_field)
+        component_type_field.gsub(/__.+$/,'')
+      end
+    end
 
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
     def self.list(mh,opts={})
@@ -60,10 +73,10 @@ module DTK; class Assembly
 
     def self.get__project_parent(mh,opts={})
       ndx_ret = Hash.new
-      aug_cmp_refs = get_augmented_component_refs(assembly_mh,opts)
-      aug_cmp_refs.in do |r|
-        component_template = aug_cmp_refs[:component_template]
-        ndex_ret[component_template[:id]] ||= component_template
+      aug_cmp_refs = get_augmented_component_refs(mh,opts)
+      aug_cmp_refs.each do |r|
+        component_template = r[:component_template]
+        ndx_ret[component_template[:id]] ||= component_template
       end
       ndx_ret.values
     end

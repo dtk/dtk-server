@@ -49,8 +49,8 @@ module DTK
       module_name =  module_obj[:display_name]
       assoc_assemblies = module_obj.get_associated_target_instances()
       unless assoc_assemblies.empty?
-        assembly_names = assoc_assemblies.map{|a|a[:display_name]}
-        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target (#{assembly_names.join(',')})")
+        assembly_ids = assoc_assemblies.map{|a|a[:id]}
+        raise ErrorUsage.new("Cannot delete a module if one or more of its instances exist in a target (#{assembly_ids.join(',')})")
       end
       repos = module_obj.get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}

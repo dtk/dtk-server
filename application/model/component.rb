@@ -115,7 +115,7 @@ module XYZ
     end
 
     def self.module_name(component_type)
-      component_type.gsub(/^.+__/,'')
+      component_type.gsub(/__.+$/,'')
     end
 
     def convert_to_print_form!()

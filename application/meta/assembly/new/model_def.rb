@@ -33,7 +33,7 @@ lambda__segment_component_template =
     :alias => :component_template,
     :join_type => join_type,
     :join_cond=>{:id => q(:component_ref,:component_template_id)},
-    :cols => [:id,:display_name,:component_type,:basic_type,:description]
+    :cols => [:id,:display_name,:component_type,:version,:basic_type,:description]
   }
 }
 lambda__segments_nodes_and_components =

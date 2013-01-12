@@ -48,10 +48,28 @@ module DTK; class Assembly
         list__library_parent(mh,opts)
       end
     end
+    def self.get(mh,opts={})
+      if project_id = opts[:project_idh]
+        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+        get__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:id]] ||= r}
+        ndx_ret.values
+      else
+        list__library_parent(mh,opts)
+      end
+    end
+
+    def self.get__project_parent(mh,opts={})
+      ndx_ret = Hash.new
+      aug_cmp_refs = get_augmented_component_refs(assembly_mh,opts)
+      aug_cmp_refs.in do |r|
+        component_template = aug_cmp_refs[:component_template]
+        ndex_ret[component_template[:id]] ||= component_template
+      end
+      ndx_ret.values
+    end
+
     def self.list__project_parent(assembly_mh,opts={})
       #TODO: rewrite to use this when at certain detail level
-      test = get_augmented_component_refs(assembly_mh,opts)
-pp [:test,test]
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact

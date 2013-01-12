@@ -45,7 +45,7 @@ module DTK
     end
 
     def self.delete(idh)
-      module_obj = idh.create_object().update_object!(:display_name)
+      module_obj = idh.create_object().update_object!(:display_name,:project_project_id)
       module_name =  module_obj[:display_name]
       assoc_assemblies = module_obj.get_associated_target_instances()
       unless assoc_assemblies.empty?
@@ -97,9 +97,13 @@ module DTK
         :cols => [:module_branches]
       }
       mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
-      filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
-      #TODO: should below use 'get form' instead
-      Assembly::Template.list(model_handle(:component),:filter => filter)
+      opts = {
+        :filter => [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
+      }
+      if project = get_project()
+        opts.merge!(:project_idh => project.id_handle())
+      end
+      Assembly::Template.get(model_handle(:component),opts)
     end
 
     def info_about(about)

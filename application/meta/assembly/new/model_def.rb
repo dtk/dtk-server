@@ -151,11 +151,17 @@ lambda__instance_nodes_and_components =
       [
        lambda__segment_node.call([:id,:group_id,:display_name,:os_type]),
        segment_component_ref,
-       lambda__segment_component_template.call(:left_outer)
+       lambda__segment_component_template.call(:left_outer),
+       {
+         :model_name => :module_version_constraints,
+         :convert => true,
+         :join_type => :left_outer,
+         :join_cond=>{:branch_id => q(:component,:module_branch_id)},
+         :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id]
+       }
       ]
     },
-
-    #MOD_RESTRUCT: deprecate bleow for above
+    #MOD_RESTRUCT: deprecate below for above
     :template_nodes_and_cmps_summary=> {
       :type => :json, 
       :hidden => true,

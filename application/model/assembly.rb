@@ -93,7 +93,7 @@ module DTK
             node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
             node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
           end
-          cmp_hash = r[:nested_component]
+          cmp_hash = list_aux__component_template(r)
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             cmp = 
               if opts[:component_info] 
@@ -104,7 +104,7 @@ module DTK
                 cmp_type
               end
 
-            if attrs = ndx_attrs[r[:nested_component][:id]]
+            if attrs = ndx_attrs[list_aux__component_template(r)[:id]]
               processed_attrs = attrs.map do |attr|
                 proc_attr = {:attribute_name => attr[:display_name], :value => attr[:attribute_value]}
                 proc_attr[:override] = true if attr[:is_instance_value]
@@ -121,6 +121,12 @@ module DTK
         end
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
+
+      #MOD_RESTRUCT: TODO: r[:nested_component] is temp until move over to assembly virtual attributes that use :component_template rather than :nested_component
+      def list_aux__component_template(r)
+        r[:component_template]||r[:nested_component]
+      end
+      private :list_aux__component_template
 
       def internal_assembly_ref(service_module_name,assembly_name)
         "#{service_module_name}-#{assembly_name}"

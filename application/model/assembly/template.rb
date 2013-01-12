@@ -12,17 +12,32 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    #TODO: this can be expensive call; may move to factoring in :module_version_constraints relatsionship to what component_ref component_template_id is pointing to
     def self.get_augmented_component_refs(mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
       }
       aug_cmp_refs = get_objs(mh.createMH(:component),sp_hash)
-      version_constraints = ModuleVersionConstraints.create_and_reify!(self[:module_version_constraints])
-      raise Error.new("complete")
-    end
 
+      #look for version contraints which are on a per component module basis
+      aug_cmp_refs_ndx_by_vc = Hash.new
+      aug_cmp_refs.each do |r|
+        unless component_type = r[:component_type]||(r[:component_template]||{})[:component_type]
+          Log.error("Component ref with id #{r[:id]}) does not have a compoennt type ssociated with it")
+        else
+          module_name = Component.module_name(component_type)
+          pntr = aug_cmp_refs_ndx_by_vc[module_name] ||= {:version_constraints => ModuleVersionConstraints.create_and_reify?(r[:module_version_constraints])}
+          (pntr[:aug_cmp_refs] ||= Array.new) << r
+        end
+      end
+      aug_cmp_refs_ndx_by_vc.values do |r|
+        r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs])
+      end
+      aug_cmp_refs
+    end
     ### end: standard get methods
+
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
     def self.list(mh,opts={})
       if project_id = opts[:project_idh]
@@ -34,6 +49,9 @@ module DTK; class Assembly
       end
     end
     def self.list__project_parent(assembly_mh,opts={})
+      #TODO: rewrite to use this when at certain detail level
+      test = get_augmented_component_refs(assembly_mh,opts)
+pp [:test,test]
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:template_nodes_and_cmps_summary],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact

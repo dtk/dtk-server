@@ -7,7 +7,7 @@ module DTK; class Component
       cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
       versions = type_version_field_list.map{|r|r[:version_field]}
       sp_hash = {
-        :cols => [:id,:component_type,:version],
+        :cols => [:id,:group_id,:component_type,:version],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
                     [:oneof, :component_type, cmp_types]]

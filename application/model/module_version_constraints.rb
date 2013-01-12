@@ -25,10 +25,6 @@ module DTK
       self
     end
 
-    def self.reify_component_modules(cmp_modules)
-      cmp_modules
-    end
-
     def save!(parent_idh=nil)
       parent_idh ||= parent_idh()
 
@@ -67,7 +63,7 @@ module DTK
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
-    def set_matching_component_template_ids!(aug_cmp_refs)
+    def set_matching_component_template_info!(aug_cmp_refs)
       ret = aug_cmp_refs
       return ret if aug_cmp_refs.empty?
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
@@ -103,13 +99,14 @@ module DTK
       
       #Lookup up modules mapping
       #mappings will have for each component type that has a module_version_constraints the related component template id
-      mappings = get_component_type_to_template_id_mappings?(cmp_types_to_check.keys)
+      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
 
       #set the compoennt template ids; raise error if theer i a required element that does not have a matching component template
       cmp_types_to_check.each do |cmp_type,els|
         els.each do |el|
-          if cmp_template_id = mappings[cmp_type]
-            el[:pntr][:component_template_id] = cmp_template_id 
+          if cmp_template = mappings[cmp_type]
+            el[:pntr][:component_template_id] = cmp_template[:id] 
+            el[:pntr][:component_template] = cmp_template
           elsif el[:required]
             raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
           end
@@ -126,7 +123,7 @@ module DTK
       end
     end
 
-    def get_component_type_to_template_id_mappings?(cmp_types)
+    def get_component_type_to_template_mappings?(cmp_types)
       ret = Hash.new
       return ret if cmp_types.empty?
       type_version_pairs = Array.new
@@ -140,7 +137,7 @@ module DTK
       #get matching component template ids
       matching_templates = Component::Template.get_matching_type_and_version(project_idh(),type_version_pairs)
       matching_templates.inject(Hash.new) do |h,r|
-        h.merge(r[:component_type] => r[:id])
+        h.merge(r[:component_type] => r)
       end
     end
 

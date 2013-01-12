@@ -214,7 +214,7 @@ module DTK; class Assembly
           version = ModuleBranch.version_from_version_field(cmp_template[:version])
           cmp_template.hash_subset(:id).merge(:display_name => display_name, :version => version)
         end
-        return ret
+        return ret.sort(&order)
        when :nodes
         cols = [:node_templates]
         post_process = proc do |r|

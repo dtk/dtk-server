@@ -110,8 +110,14 @@ module DTK
       case about
         when :assemblies
         mb_idhs = get_objs(:cols => [:module_branches]).map{|r|r[:module_branch].id_handle()}
-        filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
-        Assembly::Template.list(model_handle(:component),:filter => filter)
+        opts = {
+          :filter => [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}],
+          :detail_level => "nodes"
+        }
+        if project = get_project()
+          opts.merge!(:project_idh => project.id_handle())
+        end
+        Assembly::Template.list(model_handle(:component),opts)
       else
         raise ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
       end

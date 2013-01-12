@@ -18,12 +18,13 @@ module DTK; class Assembly
         :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
         :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
       }
-      aug_cmp_refs = get_objs(mh.createMH(:component),sp_hash)
+      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
 
       #look for version contraints which are on a per component module basis
       aug_cmp_refs_ndx_by_vc = Hash.new
-      aug_cmp_refs.each do |r|
-        unless component_type = (r[:component_ref]||{})[:component_type]||(r[:component_template]||{})[:component_type]
+      assembly_rows.each do |r|
+        component_ref = r[:component_ref]
+        unless component_type = component_ref[:component_type]||(r[:component_template]||{})[:component_type]
           Log.error("Component ref with id #{r[:id]}) does not have a compoennt type ssociated with it")
         else
           service_module_name = service_module_name(r[:component_type])
@@ -34,13 +35,14 @@ module DTK; class Assembly
               :version_constraints => ModuleVersionConstraints.create_and_reify?(module_branch,r[:module_version_constraints])
             }
           end
-          (pntr[:aug_cmp_refs] ||= Array.new) << r
+          aug_cmp_ref = r[:component_ref].merge(:component_template => r[:component_template])
+          (pntr[:aug_cmp_refs] ||= Array.new) << aug_cmp_ref
         end
       end
       aug_cmp_refs_ndx_by_vc.each_value do |r|
         r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs])
       end
-      aug_cmp_refs
+      aug_cmp_refs_ndx_by_vc.values.map{|r|r[:aug_cmp_refs]}.flatten
     end
     ### end: standard get methods
 

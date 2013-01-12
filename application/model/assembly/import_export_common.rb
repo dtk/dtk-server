@@ -2,6 +2,7 @@ module XYZ
   module AssemblyImportExportCommon
     Seperators = {
       :module_component => "::",
+      :component_version => ":",
       :component_port => "/",
       :assembly_node => "/",
       :node_component => "/",

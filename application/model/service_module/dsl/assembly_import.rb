@@ -175,8 +175,32 @@ module DTK; class ServiceModule
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 
+      #Not looking here for dangling refs
+      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash)
+        components_hash.inject(Hash.new) do |h,cmp_hash|
+          parse = component_ref_parse(cmp_hash)
+          cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
+          if cmp_ref[:version]
+            cmp_ref[:has_override_version] = true
+          end
+          h.merge(parse[:ref] => cmp_ref)
+        end
+      end
 
-      #TODO: more efficient to resolve here the ids for *component_template_id
+      def self.component_ref_parse(cmp)
+        term = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+        if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")
+          type = $1; version = $2
+        else
+          type = term; version = nil
+        end
+        ret = {:component_type => type, :ref => term, :display_name => term}
+        ret.merge!(:version => version) if version
+        ret
+      end
+
+=begin
+DEPRECATE
       def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash)
         #find the reference components and clone
         #TODO: not clear we need the modules if component names are unique w/o modules
@@ -188,8 +212,6 @@ module DTK; class ServiceModule
                       [:eq, cmp_mh.parent_id_field_name, container_idh.get_id()]]
         }
         matching_cmps = Model.get_objs(cmp_mh,sp_hash,:keep_ref_cols => true)
-        #make sure a match is found for each component
-        non_matches = Array.new
         augment_cmps = components_hash.inject(Hash.new) do |h,cmp_hash|
           if match = matching_cmps.find{|match_cmp|match_cmp[:component_type] == component_type(cmp_hash)}
             cmp_template_relative_uri = "/component/#{match[:ref]}" 
@@ -216,6 +238,7 @@ module DTK; class ServiceModule
       def self.component_type(cmp)
         (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
       end
+=end
 
       def self.attribute_overrides(cmp,cmp_template_relative_uri)
         ret = Hash.new

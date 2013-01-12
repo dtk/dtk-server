@@ -55,7 +55,7 @@ module DTK; class Assembly
     def self.list(mh,opts={})
       if project_id = opts[:project_idh]
         ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
-        list__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        list__project_parent(mh,opts).each{|r|ndx_ret[r[:display_name]] ||= r}
         ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
       else
         list__library_parent(mh,opts)
@@ -73,7 +73,7 @@ module DTK; class Assembly
 
     def self.get__project_parent(mh,opts={})
       sp_hash = {
-        :cols => [:id, :group_id,:display_name,:component_type],
+        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type],
         :filter => [:and, [:eq, :type, "composite"], 
                     opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                     opts[:filter]
@@ -83,12 +83,8 @@ module DTK; class Assembly
     end
 
     def self.list__project_parent(assembly_mh,opts={})
-      #TODO: rewrite to use this when at certain detail level
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact,
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :project_project_id, nil], opts[:filter]].compact
-      }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
+      opts = opts.merge(:cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])])
+      assembly_rows = get__project_parent(assembly_mh,opts)
       if opts[:detail_level] == "attributes"
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
         list_aux(assembly_rows,attr_rows,opts)
@@ -115,7 +111,7 @@ module DTK; class Assembly
       if detail_level.nil?
         nil
       elsif detail_level == "nodes"
-        :template_nodes
+        :template_stub_nodes
       else
         raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
       end
@@ -209,6 +205,9 @@ module DTK; class Assembly
       ret = nil
       case about 
        when :components
+        aug_component_refs = self.class.get_augmented_component_refs(model_handle,:filter => [:eq,:id,id()])
+        pp aug_component_refs
+
         cols = [:template_nodes_and_cmps_summary]
         post_process = proc do |r|
           display_name = "#{r[:node][:display_name]}/#{pp_display_name(r[:nested_component][:display_name])}"

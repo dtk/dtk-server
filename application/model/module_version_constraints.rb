@@ -4,6 +4,60 @@ module DTK
       module_version_constraints ||= ModuleVersionConstraints.create_stub(module_branch_parent.model_handle(:module_version_constraints))
       module_version_constraints.reify!(module_branch_parent)
     end
+
+    #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
+    #augmented with :component_template key which points to associated component template or nil 
+    def set_matching_component_template_info!(aug_cmp_refs)
+      ret = aug_cmp_refs
+      return ret if aug_cmp_refs.empty?
+      #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
+      # 1) if has_override_version is set
+      #    a) if it points to a component template, use this
+      #    b) otherwise raise error
+      # 2) elsif element does not point to a component template need to look it up in module_version_constraints and error if it does not exist
+      # 3) else look it up and if lookup exists use this as teh value to use
+      cmp_types_to_check = Hash.new
+      aug_cmp_refs.each do |r|
+        if r[:has_override_version]
+          unless self[:component_template_id]
+            raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")
+          end
+        elsif r[:component_template]
+          cmp_type = r[:component_template][:component_type]
+          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r}
+        elsif r[:component_type]
+          cmp_type = r[:component_type]
+          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
+        else
+          raise Error.new("component ref with id (#{r[:id]} must either point to a component template or have component_type set")
+        end
+      end
+
+      #shortcut if no locked versions
+      if component_modules().empty?
+        if el = cmp_types_to_check.values.find{|r|r.mapping_required?()}
+          raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+          return aug_cmp_ref
+        end
+      end
+      
+      #Lookup up modules mapping
+      #mappings will have for each component type that has a module_version_constraints the related component template id
+      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
+
+      #set the compoennt template ids; raise error if theer i a required element that does not have a matching component template
+      cmp_types_to_check.each do |cmp_type,els|
+        els.each do |el|
+          if cmp_template = mappings[cmp_type]
+            el[:pntr][:component_template_id] = cmp_template[:id] 
+            el[:pntr][:component_template] = cmp_template
+          elsif el[:required]
+            raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+          end
+        end
+      end
+      ret
+    end
                                                                           
     def include_module_version?(cmp_module_name,version)
       module_constraint(cmp_module_name).include?(version)
@@ -61,60 +115,6 @@ module DTK
       self.class.hash_form(constraints)
     end
 
-    #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
-    #augmented with :component_template key which points to associated component template or nil 
-    def set_matching_component_template_info!(aug_cmp_refs)
-      ret = aug_cmp_refs
-      return ret if aug_cmp_refs.empty?
-      #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
-      # 1) if has_override_version is set
-      #    a) if it points to a component template, use this
-      #    b) otherwise raise error
-      # 2) elsif element does not point to a component template need to look it up in module_version_constraints and error if it does not exist
-      # 3) else look it up and if lookup exists use this as teh value to use
-      cmp_types_to_check = Hash.new
-      aug_cmp_refs.each do |r|
-        if r[:has_override_version]
-          unless self[:component_template_id]
-            raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")
-          end
-        elsif r[:component_template]
-          cmp_type = r[:component_template][:component_type]
-          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r}
-        elsif r[:component_type]
-          cmp_type = r[:component_type]
-          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
-        else
-          raise Error.new("component ref with id (#{r[:id]} must either point to a component template or have component_type set")
-        end
-      end
-
-      #shortcut if no locked versions
-      if component_modules().empty?
-        if el = cmp_types_to_check.values.find{|r|r.mapping_required?()}
-          raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
-          return aug_cmp_ref
-        end
-      end
-      
-      #Lookup up modules mapping
-      #mappings will have for each component type that has a module_version_constraints the related component template id
-      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
-
-      #set the compoennt template ids; raise error if theer i a required element that does not have a matching component template
-      cmp_types_to_check.each do |cmp_type,els|
-        els.each do |el|
-          if cmp_template = mappings[cmp_type]
-            el[:pntr][:component_template_id] = cmp_template[:id] 
-            el[:pntr][:component_template] = cmp_template
-          elsif el[:required]
-            raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
-          end
-        end
-      end
-      ret
-    end
-
    private
 
     class ComponentTypeToCheck < Array
@@ -128,9 +128,8 @@ module DTK
       return ret if cmp_types.empty?
       type_version_pairs = Array.new
       cmp_types.each do |cmp_type|
-        if version = ret_scalar_version?(cmp_type)
-          type_version_pairs << {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
-        end
+        version = ret_selected_version(cmp_type)
+        type_version_pairs << {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
       end
       return ret if type_version_pairs.empty?
 
@@ -141,9 +140,13 @@ module DTK
       end
     end
 
-    def ret_scalar_version?(component_type)
+    def ret_selected_version(component_type)
       ret = component_modules[key(Component.module_name(component_type))]
-      ret && ret.is_scalar?()
+      if ret.nil? then ret 
+      elsif ret.is_scalar?() then ret.is_scalar?()
+      else
+        raise Eeror.new("Not treating the version type")
+      end
     end
 
     def module_constraint(cmp_module_name)

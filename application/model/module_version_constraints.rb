@@ -13,33 +13,30 @@ module DTK
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
       # 1) if has_override_version is set
       #    a) if it points to a component template, use this
-      #    b) otherwise raise error
-      # 2) elsif element does not point to a component template need to look it up in module_version_constraints and error if it does not exist
-      # 3) else look it up and if lookup exists use this as teh value to use
+      #    b) otherwise look it up using given version
+      # 2) else look it up and if lookup exists use this as teh value to use; element marked required if it does not point to a component template
       cmp_types_to_check = Hash.new
       aug_cmp_refs.each do |r|
+        unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
+          ref =  ErrorDanglingComponentRefs.pp_component_ref(r)
+          ref = (ref ? "(#{ref})" : "")
+          raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
+        end
         if r[:has_override_version]
-          unless self[:component_template_id]
-            raise Error.new("#{pp_component_ref(r)} that has override-version flag set needs a component_template id")
+          unless r[:component_template_id]
+            unless r[:version]
+              raise Error.new("Component ref has override-version flag set, but no version")
+            end
+            (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :version => r[:version]}
           end
-        elsif r[:component_template]
-          cmp_type = r[:component_template][:component_type]
-          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r}
-        elsif r[:component_type]
-          cmp_type = r[:component_type]
-          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
         else
-          raise Error.new("#{pp_component_ref(r)} must either point to a component template or have component_type set")
+          (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r,:required => r[:component_template_id].nil?}
         end
       end
 
-      #shortcut if no locked versions
-      if component_modules().empty?
-        if el = cmp_types_to_check.values.find{|r|r.mapping_required?()}
-          raise Error.new("TOOD: this is not right can have the mapping to no version; want another shortcut")
-          raise Error.new("Mapping is required for #{pp_component_ref(el[:pntr])}, but none exists")
-          return aug_cmp_ref
-        end
+      #shortcut if no locked versions and no required elements
+      if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
+        return ret
       end
       
       #Lookup up modules mapping
@@ -47,6 +44,7 @@ module DTK
       mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
 
       #set the compoennt template ids; raise error if there is a required element that does not have a matching component template
+      error_cmp_refs = Array.new
       cmp_types_to_check.each do |cmp_type,els|
         els.each do |el|
           if cmp_template = mappings[cmp_type]
@@ -55,10 +53,11 @@ module DTK
               el[:pntr][:component_template] = cmp_template
             end
           elsif el[:required]
-            raise Error.new("Mapping is required for #{pp_component_ref(el[:pntr])}, but none exists")
+            error_cmp_refs << el[:pntr]
           end
         end
       end
+      raise ErrorMissingComponentTemplates.new(error_cmp_refs) unless error_cmp_refs.empty?
       ret
     end
                                                                           
@@ -118,18 +117,30 @@ module DTK
       self.class.hash_form(constraints)
     end
 
+    class ErrorDanglingComponentRefs < ErrorUsage
+      def initialize(cmp_refs)
+        super(err_msg(cmp_refs))
+      end
+      def self.pp_component_ref(component_ref)
+        if component_ref[:component_type]
+          Component.pp_component_type(component_ref[:component_type])
+        elsif component_ref[:id]
+          "id:#{component_ref[:id].to_s})"
+        end
+      end
+     private
+      def err_msg(cmp_refs)
+        what = (cmp_refs.size==1 ? "component ref" : "component refs")
+        refs = cmp_refs.map{|cmp_ref|self.class.pp_component_ref(cmp_ref)}.compact.join(",")
+        verb = (cmp_refs.size==1 ? "does" : "do")
+        "The referenced #{what} (#{refs}) #{verb} not exist"
+      end
+    end
+
    private
     class ComponentTypeToCheck < Array
       def mapping_required?()
         find{|r|r[:required]}
-      end
-    end
-
-    def pp_component_ref(component_ref)
-      if component_ref[:id]
-        "component ref with id (#{component_ref[:id].to_s})"
-      else
-        "component ref"
       end
     end
 

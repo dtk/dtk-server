@@ -20,9 +20,9 @@ module XYZ
         !!(defined_method?(name) || super)
       end
 
-      def get_file_content(file_obj_or_path,context)
+      def get_file_content(file_obj_or_path,context,opts={})
         file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
-        get_adapter_repo(context).get_file_content(file_obj_or_path)
+        get_adapter_repo(context).get_file_content(file_obj_or_path,opts)
       end
 
       #signature is effectively def add_file(file_obj_or_path,content,commit_msg=nil,context)

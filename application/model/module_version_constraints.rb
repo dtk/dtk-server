@@ -155,7 +155,6 @@ module DTK
       return ret if type_version_pairs.empty?
 
       #get matching component template ids
-      Log.info("TODO: need to rewrite Component::Template.get_matching_type_and_version so can also find legacy component templates on libraries")
       matching_templates = Component::Template.get_matching_type_and_version(project_idh(),type_version_pairs)
       matching_templates.inject(Hash.new) do |h,r|
         h.merge(r[:component_type] => r)

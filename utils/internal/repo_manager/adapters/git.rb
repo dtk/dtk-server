@@ -1,7 +1,8 @@
+#TODO: replace as many git cehckout calss with raw object model ops taht work in both clone and bare repos
 require 'grit'
 require 'fileutils'
 r8_nested_require('git','manage_git_server')
-module XYZ
+module DTK
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
     
@@ -94,8 +95,13 @@ module XYZ
       end
     end
 
-    def get_file_content(file_asset)
+    def get_file_content(file_asset,opts={})
       checkout(@branch) do
+        if opts[:no_error_if_not_found]
+          unless File.exists?(file_asset[:path])
+            return nil
+          end
+        end
         File.open(file_asset[:path]){|f|f.read}
       end
     end

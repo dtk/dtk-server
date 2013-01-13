@@ -1,7 +1,7 @@
 #converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    def initialize(container_idh,module_name)
+    def initialize(container_idh,module_name,module_version_constraints)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
@@ -9,12 +9,13 @@ module DTK; class ServiceModule
       @ndx_module_branch_ids = Hash.new
       @module_name = module_name
       @service_module = get_service_module(container_idh,module_name)
+      @module_version_constraints = module_version_constraints
     end
     def add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
       assemblies_hash.each do |ref,assem|
         @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
-        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash))
+        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash,@module_version_constraints))
         @ndx_assembly_hashes[ref] ||= assem
       end
     end
@@ -107,7 +108,7 @@ module DTK; class ServiceModule
         {assembly_ref => {"port_link" => port_links}}
       end
 
-      def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash)
+      def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
         module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
         node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
@@ -150,7 +151,7 @@ module DTK; class ServiceModule
             node_output["node_binding_rs_id"] = nil
           end
 
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],module_refs,node_hash["components"])
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],module_refs,node_hash["components"],version_constraints)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -175,9 +176,8 @@ module DTK; class ServiceModule
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 
-      #Not looking here for dangling refs
-      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash)
-        components_hash.inject(Hash.new) do |h,cmp_hash|
+      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash,version_constraints)
+        ret = components_hash.inject(Hash.new) do |h,cmp_hash|
           parse = component_ref_parse(cmp_hash)
           cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
           if cmp_ref[:version]
@@ -185,6 +185,10 @@ module DTK; class ServiceModule
           end
           h.merge(parse[:ref] => cmp_ref)
         end
+        #find and insert component template ids
+        #just set component_template_id
+        version_constraints.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
+        ret
       end
 
       def self.component_ref_parse(cmp)

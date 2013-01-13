@@ -26,8 +26,8 @@ module DTK
       end
 
       def update_model_from_dsl(container_idh,module_branch,module_name)
-        update_global_refs(module_branch)
-        update_assemblies_from_dsl(container_idh,module_branch,module_name)
+        module_version_constraints = update_global_refs(module_branch)
+        update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
       end
 
       def assembly_meta_directory_path(assembly_name)
@@ -44,14 +44,14 @@ module DTK
       end
 
      private
-      def update_assemblies_from_dsl(container_idh,module_branch,module_name)
+      def update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         
-        assembly_import_helper = AssemblyImport.new(container_idh,module_name)
+        assembly_import_helper = AssemblyImport.new(container_idh,module_name,module_version_constraints)
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content(meta_file,module_branch)
           hash_content = JSON.parse(json_content)
@@ -73,7 +73,7 @@ module DTK
 
       def update_global_refs(module_branch)
         json_content = RepoManager.get_file_content(GlobalModuleRefs.meta_filename_path(),module_branch)
-        constraints_hash_form = JSON.parse(json_content)
+        constraints_hash_form = Aux.convert_keys_to_symbols(JSON.parse(json_content))
         vconstraints = module_branch.get_module_version_constraints()
         vconstraints.set_and_save_constraints!(constraints_hash_form)
       end

@@ -7,7 +7,7 @@ module DTK
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
-    def set_matching_component_template_info!(aug_cmp_refs)
+    def set_matching_component_template_info!(aug_cmp_refs,opts={})
       ret = aug_cmp_refs
       return ret if aug_cmp_refs.empty?
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
@@ -20,7 +20,7 @@ module DTK
       aug_cmp_refs.each do |r|
         if r[:has_override_version]
           unless self[:component_template_id]
-            raise Error.new("Component ref with id (#{r[:id]}) that has override-version flag set needs a component_template id")
+            raise Error.new("#{pp_component_ref(r)} that has override-version flag set needs a component_template id")
           end
         elsif r[:component_template]
           cmp_type = r[:component_template][:component_type]
@@ -29,14 +29,15 @@ module DTK
           cmp_type = r[:component_type]
           (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :required => true}
         else
-          raise Error.new("component ref with id (#{r[:id]} must either point to a component template or have component_type set")
+          raise Error.new("#{pp_component_ref(r)} must either point to a component template or have component_type set")
         end
       end
 
       #shortcut if no locked versions
       if component_modules().empty?
         if el = cmp_types_to_check.values.find{|r|r.mapping_required?()}
-          raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+          raise Error.new("TOOD: this is not right can have the mapping to no version; want another shortcut")
+          raise Error.new("Mapping is required for #{pp_component_ref(el[:pntr])}, but none exists")
           return aug_cmp_ref
         end
       end
@@ -45,14 +46,16 @@ module DTK
       #mappings will have for each component type that has a module_version_constraints the related component template id
       mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
 
-      #set the compoennt template ids; raise error if theer i a required element that does not have a matching component template
+      #set the compoennt template ids; raise error if there is a required element that does not have a matching component template
       cmp_types_to_check.each do |cmp_type,els|
         els.each do |el|
           if cmp_template = mappings[cmp_type]
             el[:pntr][:component_template_id] = cmp_template[:id] 
-            el[:pntr][:component_template] = cmp_template
+            if opts[:donot_set_component_template]
+              el[:pntr][:component_template] = cmp_template
+            end
           elsif el[:required]
-            raise Error.new("Mapping is required for Component ref with id (#{el[:pntr][:id]}), but none exists")
+            raise Error.new("Mapping is required for #{pp_component_ref(el[:pntr])}, but none exists")
           end
         end
       end
@@ -116,10 +119,17 @@ module DTK
     end
 
    private
-
     class ComponentTypeToCheck < Array
       def mapping_required?()
         find{|r|r[:required]}
+      end
+    end
+
+    def pp_component_ref(component_ref)
+      if component_ref[:id]
+        "component ref with id (#{component_ref[:id].to_s})"
+      else
+        "component ref"
       end
     end
 
@@ -134,6 +144,7 @@ module DTK
       return ret if type_version_pairs.empty?
 
       #get matching component template ids
+      Log.info("TODO: need to rewrite Component::Template.get_matching_type_and_version so can also find legacy component templates on libraries")
       matching_templates = Component::Template.get_matching_type_and_version(project_idh(),type_version_pairs)
       matching_templates.inject(Hash.new) do |h,r|
         h.merge(r[:component_type] => r)

@@ -25,5 +25,5 @@
     :required=>{:type=>:boolean}, 
     :output_is_local=>{:type=>:boolean} 
   },
-  :many_to_one=>[:library, :datacenter, :component, :service_add_on]
+  :many_to_one=>[:project,:datacenter, :component, :service_add_on,:library] #MOD_RESTRUCT: remove library
 }

@@ -18,7 +18,7 @@
    :node_binding_ruleset,
    :node_group_relation,
    :attribute_link,
-   :port_link,
+   :port_link, #MOD_RESTRUCT: may remove
    :network_partition,
    :network_gateway,
    :region,

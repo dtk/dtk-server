@@ -136,6 +136,7 @@ module DTK
 
         assembly_ref = self[:ref]
         #TODO: make port_link_ref and port_refs shorter
+        #TODO: may a prori look up port ids
         port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",

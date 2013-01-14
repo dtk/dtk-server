@@ -142,7 +142,7 @@ module DTK
     def delete_tree?(type,tree_path,opts={})
       ret = nil
       checkout(@branch) do
-        ret = File.exists?("#{@path}/#{tree_path}")
+        ret = File.exists?(full_path(tree_path))
         delete_tree(type,tree_path,opts.merge(:no_checkout=>true)) if ret
       end
       ret
@@ -150,9 +150,10 @@ module DTK
     def delete_tree(type,path,opts={})
       if opts[:no_checkout]
         delete_tree__body(type,path,opts)
-      end
-      checkout(@branch) do
-        delete_tree__body(type,path,opts)
+      else
+        checkout(@branch) do
+          delete_tree__body(type,path,opts)
+        end
       end
     end
     def delete_tree__body(type,path,opts={})
@@ -474,6 +475,10 @@ module DTK
         !!(@grit_git.respond_to?(name) || super)
       end
     end
+
+    def full_path(relative_path)
+      "#{@path}/#{relative_path}"
+    end
   end
 
   class RepomanagerGitLinux < RepoManagerGit
@@ -492,11 +497,14 @@ module DTK
       #took out because could not pass in time out @grit_repo.add(file_path)
     end
     def git_command__rm(file_path)
-      git_command.rm(cmd_opts(),file_path)
-      #took out because could not pass in command opts @grit_repo.remove(file_path)
+      #git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so 
+      #need to use os comamdn to dleet file and just delete the file from the index
+      git_command.rm(cmd_opts(),"--cached",file_path)
+      FileUtils.rm_f full_path(file_path)
     end
     def git_command__rm_r(dir)
-      git_command.rm(cmd_opts(),"-r",dir)
+      git_command.rm(cmd_opts(),"-r","--cached",dir)
+      FileUtils.rm_rf full_path(dir)
     end
 
     def git_command__remote_add(remote_name,remote_url)

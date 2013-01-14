@@ -140,25 +140,34 @@ module DTK
       delete_tree(:directory,dir,opts)
     end
     def delete_tree?(type,tree_path,opts={})
-      ret = File.exists?("#{@path}/#{tree_path}")
-      delete_tree(type,tree_path,opts) if ret
+      ret = nil
+      checkout(@branch) do
+        ret = File.exists?("#{@path}/#{tree_path}")
+        delete_tree(type,tree_path,opts.merge(:no_checkout=>true)) if ret
+      end
       ret
     end
     def delete_tree(type,path,opts={})
+      if opts[:no_checkout]
+        delete_tree__body(type,path,opts)
+      end
       checkout(@branch) do
-        message = "Deleting #{path} in #{@branch}"
-        case type
-         when :file then git_command__rm(path)
-         when :directory then git_command__rm_r(path)
-         else raise Error.new("Unexpected type (#{type})")
-        end
-        commit(message)
-        if opts[:push_changes]
-          push_changes()
-        end
+        delete_tree__body(type,path,opts)
       end
     end
-
+    def delete_tree__body(type,path,opts={})
+      message = "Deleting #{path} in #{@branch}"
+      case type
+        when :file then git_command__rm(path)
+         when :directory then git_command__rm_r(path)
+         else raise Error.new("Unexpected type (#{type})")
+      end
+      commit(message)
+      if opts[:push_changes]
+        push_changes()
+      end 
+    end
+    private :delete_tree__body
 
     def update_file_content(file_asset,content)
       checkout(@branch) do

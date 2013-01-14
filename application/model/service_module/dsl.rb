@@ -9,19 +9,19 @@ module DTK
         }
         assembly_mh = assembly_idh.createMH()
         ndx_module_branches = Hash.new
-        ret = nil
         get_objs(assembly_mh,sp_hash).each do |r|
           module_branch = r[:module_branch]
           assembly_name = r[:display_name]
           assembly_dir = assembly_meta_directory_path(assembly_name)
           RepoManager.delete_directory?(assembly_dir,module_branch)
           ndx_module_branches[module_branch[:id]] ||= module_branch
+        end
+        ret = nil
+        ndx_module_branches.each_value do |module_branch|
+          RepoManager.push_changes(module_branch)
           if module_branch[:is_workspace]
             ret = module_branch.get_module_repo_info()
           end
-        end
-        ndx_module_branches.each_value do |module_branch|
-          RepoManager.push_changes(module_branch)
         end
         ret
       end

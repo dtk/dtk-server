@@ -3,26 +3,27 @@ module DTK
     r8_nested_require('dsl','assembly_import')
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_idh)
-        delete_assemblies_dsl?([assembly_idh])
-      end
-      def delete_assemblies_dsl?(assembly_idhs)
-        return if assembly_idhs.empty?
         sp_hash = {
           :cols => [:display_name, :module_branch],
-          :filter => [:oneof,:id,assembly_idhs.map{|idh|idh.get_id()}]
+          :filter => [:eq,:id,assembly_idh.get_id()]
         }
-        assembly_mh = assembly_idhs.first.createMH()
+        assembly_mh = assembly_idh.createMH()
         ndx_module_branches = Hash.new
+        ret = nil
         get_objs(assembly_mh,sp_hash).each do |r|
           module_branch = r[:module_branch]
           assembly_name = r[:display_name]
           assembly_dir = assembly_meta_directory_path(assembly_name)
           RepoManager.delete_directory?(assembly_dir,module_branch)
           ndx_module_branches[module_branch[:id]] ||= module_branch
+          if module_branch[:is_workspace]
+            ret = module_branch.get_module_repo_info()
+          end
         end
         ndx_module_branches.each_value do |module_branch|
           RepoManager.push_changes(module_branch)
         end
+        ret
       end
 
       def update_model_from_dsl(container_idh,module_branch,module_name)

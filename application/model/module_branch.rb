@@ -16,6 +16,18 @@ module DTK
       mh = model_handle(:module_version_constraints)
       ModuleVersionConstraints.create_and_reify?(self,Model.get_obj(mh,sp_hash))
     end
+    
+    def get_module_repo_info()
+      repo = get_repo(:repo_name)
+      module_name = get_module_name()
+      ModuleRepoInfo.new(repo,module_name,self)
+    end
+
+    def get_module_name()
+      row = get_obj(:cols => [:type,:parent_info])
+      type = row[:type].to_sym
+      row[type].module_name()
+    end
 
     def pp_version()
       update_object!(:version)

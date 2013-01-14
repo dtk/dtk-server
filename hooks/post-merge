@@ -17,6 +17,8 @@ commit_messages=`git log ORIG_HEAD..HEAD`
 if [[ `echo ${commit_messages} | grep "db:migrate"` ]]; then
  echo "Commit messages indicate that the db migration should be executed."
  echo "Executing..."
- #./utility/dbrebuild.rb
- #./utility/initialize
+ cd application/
+ ./utility/dbrebuild.rb
+ ./utility/initialize
+ cd ..
 fi;

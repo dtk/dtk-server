@@ -4,8 +4,7 @@ module DTK
     #### create and delete actions ###
     def rest__delete()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      Assembly.delete(id_handle(assembly_id),subtype)
-      rest_ok_response 
+      rest_ok_response Assembly.delete(id_handle(assembly_id),subtype)
     end
 
     def rest__add_component()

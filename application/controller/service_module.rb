@@ -22,20 +22,7 @@ module DTK
     end
 
     def rest__import()
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      local_module_name = ret_request_params(:local_module_name)||remote_module_name 
-      remote_repo = ret_remote_repo()
-      project = get_default_project()
-      remote_params = {
-        :repo => remote_repo,
-        :namespace => remote_namespace,
-        :module_name => remote_module_name,
-        :version => version
-      }
-      local_params = {
-        :module_name => local_module_name
-      }
-      rest_ok_response ServiceModule.import(project,remote_params,local_params)
+      rest_ok_response import_method_helper(ServiceModule)
     end
     
     def rest__export()

@@ -264,7 +264,9 @@ module DTK
     end
 
     def self.import_postprocess(project,repo,module_name,version)
-      update_ws_module_objs_and_create_dsl?(project,repo,module_name,version)[:module_branch_idh]
+      module_and_branch_info = update_ws_module_objs_and_create_dsl?(project,repo,module_name,version)
+      module_branch = module_and_branch_info[:module_branch_idh].create_object()
+      ModuleRepoInfo.new(repo,module_name,module_branch,version)
     end
     
     #returns  hash with keys :module_branch_idh,:dsl_created

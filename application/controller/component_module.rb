@@ -77,22 +77,7 @@ end
     
     #### actions to interact with remote repos ###
     def rest__import()
-      remote_repo = ret_remote_repo()
-      project = get_default_project()
-      ret_non_null_request_params(:remote_module_names).each do |name|
-        remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
-        remote_params = {
-          :repo => remote_repo,
-          :namespace => remote_namespace,
-          :module_name => remote_module_name,
-          :version => version
-        }
-        local_params = {
-          :module_name => remote_module_name #TODO: hard coded making local module name same as remote module_name
-        }
-        ComponentModule.import(project,remote_params,local_params)
-      end
-      rest_ok_response
+      rest_ok_response import_method_helper(ComponentModule)
     end
 
     def rest__delete_remote()

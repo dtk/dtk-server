@@ -1,6 +1,6 @@
 module DTK
   class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,branch_obj)
+    def initialize(repo,module_name,branch_obj,version=nil)
       super()
       repo.update_object!(:repo_name,:id)
       repo_name = repo[:repo_name]
@@ -11,6 +11,7 @@ module DTK
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch)
       }
+      hahs.merge!(:version => version) if version
       replace(hash)
     end
   end

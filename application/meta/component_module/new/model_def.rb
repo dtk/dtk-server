@@ -105,14 +105,43 @@ lambda__segment_components =
         :filter=>[:eq,:assembly_id,nil])
       ]
     },
-    :target_instances=>{
+    :assembly_templates=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
-        :cols => [:id,:display_name],
-        :alias=>:target_instance,
+        :cols => [:id,:display_name,:group_id],
+        :alias=>:component_template,
+        :filter=>[:eq,:node_node_id,nil]),
+       {
+         :model_name=>:component_ref,
+         :join_type=>:inner,
+         :join_cond=>{:component_template_id =>:component_template__id},
+         :cols=>[:id,:display_name,:group_id,:node_node_id]
+       },
+       {
+         :model_name=>:node,
+         :join_type=>:inner,
+         :join_cond=>{:id =>:component_ref__node_node_id},
+         :cols=>[:id,:display_name,:group_id,:assembly_id]
+       },
+       {
+         :model_name=>:component,
+         :alias => :assembly_template,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id =>:node__assembly_id},
+         :cols=>[:id,:display_name,:group_id,:module_branch_id]
+       }]
+    },
+    :component_instances=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id]),
+       lambda__segment_components.call(
+        :cols => [:id,:group_id,:display_name,:component_type,:version],
         :filter=>[:neq,:node_node_id,nil])
       ]
     }

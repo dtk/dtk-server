@@ -256,8 +256,23 @@ module XYZ
           item
         end
       end
+
+      #TODO: theer may be some exceptions
+      def singular?(plural)
+        if plural =~ /s$/
+          if plural =~ /ies$/
+            plural.gsub(/ies$/,'y')
+          else
+            plural.gsub(/s$/,'')
+          end
+        else
+          plural #input not plural
+        end
+      end
+
     end
   end
+
   class Debug
     class << self
       def print_and_ret(x)

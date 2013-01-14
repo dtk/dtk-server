@@ -346,11 +346,11 @@ module DTK; class Assembly
     end
 
     def display_name_print_form()
-      pp_display_name(get_field?(:display_name))
+      pp_display_name(get_field?(:component_type))
     end
    private
-    def pp_display_name(display_name)
-      display_name.gsub(Regexp.new(ModuleTemplateSep),"::")
+    def pp_display_name(component_type)
+      component_type.gsub(Regexp.new(ModuleTemplateSep),"::")
     end
     def self.pp_name_to_component_type(pp_name)
       pp_name.gsub(/::/,ModuleTemplateSep)

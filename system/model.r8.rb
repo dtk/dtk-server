@@ -20,7 +20,8 @@ module XYZ
     end
 
     #TODO: looking to use this as step to transform to simpler object model calls
-    def get_objs_helper(virtual_attr,result_col,opts={})
+    def get_objs_helper(virtual_attr,result_col=nil,opts={})
+      result_col ||= Aux.singular?(virtual_attr).to_sym
       sp_hash = {
         :cols => [virtual_attr]
       }
@@ -42,7 +43,8 @@ module XYZ
       end
     end
 
-    def get_obj_helper(virtual_attr,result_col,opts={})
+    def get_obj_helper(virtual_attr,result_col=nil,opts={})
+      result_col ||= virtual_attr
       rows = get_objs_helper(virtual_attr,result_col,opts)
       if rows.size > 1
         filter = (opts[:sql_filter] ? " {opts[:sql_filter]} " : "") 
@@ -482,6 +484,7 @@ module XYZ
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objs(model_handle(),sp_hash,opts)
     end
+
     #TODO: remove get_objects_from_sp_hash
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])

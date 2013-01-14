@@ -47,13 +47,13 @@ module DTK
       assembly_templates = module_obj.get_associated_assembly_templates()
       unless assembly_templates.empty?
         assembly_names = assembly_templates.map{|a|a.display_name_print_form()}
-        raise ErrorUsage.new("Cannot delete the component module because the assemblies (#{assembly_names.join(',')}) reference it")
+        raise ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
       end
 
       components = module_obj.get_associated_component_instances()
       unless components.empty?
-        component_names = components.map{|r|r.display_name_print_form()}
-        raise ErrorUsage.new("Cannot delete the component module because the component instances (#{component_names.join(',')}) reference it")
+        component_names = components.map{|r|r.display_name_print_form(:node_prefix=>true)}
+        raise ErrorUsage.new("Cannot delete the component module because the component instance(s) (#{component_names.join(',')}) reference it")
       end
 
       impls = module_obj.get_implementations()

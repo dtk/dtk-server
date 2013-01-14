@@ -126,6 +126,17 @@ module XYZ
          :cols => [:id,:display_name]
        }]
 
+    virtual_column :node, :type => :json, :hidden => true,
+      :remote_dependencies =>
+      [
+       {
+         :model_name => :node,
+         :convert=>true,
+         :join_type => :inner,
+         :join_cond=>{:id => :component__node_node_id},
+         :cols => [:id,:display_name, :group_id]
+       }]
+
     virtual_column :node_for_state_change_info, :type => :json, :hidden => true,
       :remote_dependencies =>
       [

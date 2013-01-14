@@ -345,6 +345,9 @@ module DTK; class Assembly
       ret
     end
 
+    def display_name_print_form()
+      pp_display_name(get_field?(:display_name))
+    end
    private
     def pp_display_name(display_name)
       display_name.gsub(Regexp.new(ModuleTemplateSep),"::")

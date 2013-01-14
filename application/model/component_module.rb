@@ -26,13 +26,12 @@ module DTK
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         assembly_template = r[:assembly_template]
-        ndx_ret[assembly_template[:id]] ||= assembly_template
+        ndx_ret[assembly_template[:id]] ||= Assembly::Template.create_as(assembly_template)
       end
-      pp ndx_ret.values
-      raise Error.new("Got here")
+      ndx_ret.values
     end
 
-    def get_associated_component_isntances()
+    def get_associated_component_instances()
       ndx_ret = Hash.new
       get_objs(:cols => [:component_instances]).each do |r|
         component = r[:component]
@@ -45,13 +44,13 @@ module DTK
       module_obj = idh.create_object().update_object!(:display_name)
       module_name =  module_obj[:display_name]
 
-      assembly_tempates = module_obj.get_associated_assembly_templates()
-      unless assembly_tempates.empty?
-        assembly_names = assembly_templates.map{|a|a.display_name_print_form(module_name)}
+      assembly_templates = module_obj.get_associated_assembly_templates()
+      unless assembly_templates.empty?
+        assembly_names = assembly_templates.map{|a|a.display_name_print_form()}
         raise ErrorUsage.new("Cannot delete the component module because the assemblies (#{assembly_names.join(',')}) reference it")
       end
 
-      components = module_obj.get_associated_component_isntances()
+      components = module_obj.get_associated_component_instances()
       unless components.empty?
         component_names = components.map{|r|r.display_name_print_form()}
         raise ErrorUsage.new("Cannot delete the component module because the component instances (#{component_names.join(',')}) reference it")

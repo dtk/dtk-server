@@ -148,8 +148,8 @@ module DTK
       end
 
       repo.synchronize_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
-      module_branch_idh = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
-      module_branch_idh
+      module_repo_info = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
+      module_repo_info
     end
 
     def delete_remote(project,remote_params)

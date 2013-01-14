@@ -16,17 +16,14 @@ module DTK
     end
     #end: for debugging; will be removed
 
-    def rest__list()
-      project = get_default_project()
-      rest_ok_response ServiceModule.list(model_handle, :project_idh => project.id_handle())
-    end
-
+    #### actions to interact with remote repos ###
     def rest__list_remote()
       rest_ok_response ServiceModule.list_remotes(model_handle)
     end
 
     def rest__import()
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       remote_repo = ret_remote_repo()
       project = get_default_project()
       remote_params = {
@@ -36,10 +33,9 @@ module DTK
         :version => version
       }
       local_params = {
-        :module_name => remote_module_name #TODO: hard coded making local module name same as remote module_name
+        :module_name => local_module_name
       }
-      ServiceModule.import(project,remote_params,local_params)
-      rest_ok_response
+      rest_ok_response ServiceModule.import(project,remote_params,local_params)
     end
     
     def rest__export()
@@ -49,6 +45,12 @@ module DTK
       rest_ok_response 
     end
 
+    def rest__push_to_remote_legacy()
+      service_module = create_obj(:service_module_id)
+      service_module.push_to_remote__deprecate()
+      rest_ok_response
+    end
+    
     #get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
@@ -64,12 +66,13 @@ module DTK
       service_module.pull_from_remote_if_fast_foward(remote_repo)
     end
 
-    def rest__push_to_remote_legacy()
-      service_module = create_obj(:service_module_id)
-      service_module.push_to_remote__deprecate()
-      rest_ok_response
+    #### end actions to interact with remote repos ###
+
+    def rest__list()
+      project = get_default_project()
+      rest_ok_response ServiceModule.list(model_handle, :project_idh => project.id_handle())
     end
-    
+
     def rest__info_about()
       service_module = create_obj(:service_module_id)
       about = ret_non_null_request_params(:about).to_sym

@@ -244,7 +244,7 @@ module DTK
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
       update_model_from_dsl(project.id_handle(),module_branch,module_name)
-      module_branch_idh
+      ModuleRepoInfo.new(repo,module_name,module_branch)
     end
 
     def export_preprocess(module_branch)

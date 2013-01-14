@@ -9,7 +9,7 @@ module DTK
         :repo_name => repo_name,
         :module_name => module_name,
         :repo_url => RepoManager.repo_url(repo_name),
-        :workspace_branch => branch_obj[:branch]
+        :workspace_branch => branch_obj.get_field?(:branch)
       }
       replace(hash)
     end

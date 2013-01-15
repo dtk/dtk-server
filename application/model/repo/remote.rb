@@ -62,21 +62,24 @@ module DTK
     end
 
     class Remote
-      class ModuleRepoInfo < Hash
+      class RemoteModuleRepoInfo < Hash
         #has keys
         #  :remote_repo_url
         #  :remote_repo 
         #  :remote_branch
         #  :module_name
-        def initialize(parent,remote_params)
+        #  :version
+        def initialize(parent,branch_obj,remote_params)
           super()
           remote_repo = @remote_repo||parent.default_remote_repo()
           hash = {
             :module_name => remote_params[:module_name],
             :remote_repo => remote_repo.to_s,
             :remote_repo_url => parent.repo_url_ssh_access(remote_params[:remote_repo_name]),
-            :remote_branch => parent.version_to_branch_name(remote_params[:version])
+            :remote_branch => parent.version_to_branch_name(remote_params[:version]),
+            :workspace_branch => branch_obj.get_field?(:branch)
           }
+          hash.merge!(:version => remote_params[:version]) if remote_params[:version]
           replace(hash)
         end
       end
@@ -84,8 +87,8 @@ module DTK
       r8_nested_require('remote','auth')
       include AuthMixin
 
-      def get_remote_module_info(remote_params)
-        ModuleRepoInfo.new(self,remote_params)
+      def get_remote_module_info(branch_obj,remote_params)
+        RemoteModuleRepoInfo.new(self,branch_obj,remote_params)
       end
 
       def initialize(remote_repo=nil)
@@ -171,7 +174,7 @@ module DTK
         self.class.version_to_branch_name(version)
       end
       def self.version_to_branch_name(version)
-        version ? version : HeadBranchName
+        version ? "v#{version}" : HeadBranchName
       end
       HeadBranchName = "master"
       

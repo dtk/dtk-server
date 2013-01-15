@@ -2,10 +2,10 @@ module DTK
   module ModuleRemoteMixin
     #raises an access rights usage eerror if user does not have access to the remote module
     def get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version=nil)
-      unless aug_branch = get_augmented_workspace_branch(version)
+      unless aug_ws_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
-      unless remote_repo_name = aug_branch[:repo].linked_remote?(remote_repo)
+      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?(remote_repo)
         if action == :push
           raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
         else #action == :pull
@@ -21,7 +21,7 @@ module DTK
       remote_params.merge!(:version => version) if version
       remote_repo = Repo::Remote.new(remote_repo)
       remote_repo.raise_error_if_no_access(model_handle(),remote_params,access_rights,:rsa_pub_key => rsa_pub_key)
-      remote_repo.get_remote_module_info(remote_params)
+      remote_repo.get_remote_module_info(aug_ws_branch,remote_params)
     end
 
     def pull_from_remote_if_fast_foward(remote_repo,version=nil)

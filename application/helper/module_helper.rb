@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module ModuleHelper
     def import_method_helper(module_class)
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       remote_repo = ret_remote_repo()
       project = get_default_project()

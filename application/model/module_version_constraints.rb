@@ -57,7 +57,7 @@ module DTK
           end
         end
       end
-      raise ErrorMissingComponentTemplates.new(error_cmp_refs) unless error_cmp_refs.empty?
+      raise ErrorDanglingComponentRefs.new(error_cmp_refs) unless error_cmp_refs.empty?
       ret
     end
                                                                           

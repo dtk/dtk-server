@@ -7,7 +7,8 @@ module Ramaze::Helper
       JSON.generate(@ctrl_results)
     end
 
-    def rest_ok_response(data={})
+    def rest_ok_response(data=nil)
+      data ||= Hash.new
       RestResponse.new(:status => :ok,:data => data)
     end
 

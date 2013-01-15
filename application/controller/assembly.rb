@@ -1,10 +1,17 @@
 module DTK
   class AssemblyController < AuthController
     helper :assembly_helper
+
     #### create and delete actions ###
     def rest__delete()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
-      rest_ok_response Assembly.delete(id_handle(assembly_id),subtype)
+      if subtype == :template
+        #returning module_repo_info so client can update this in its local module
+        rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
+      else #subtype == :instance
+        Assembly::Instance.delete(id_handle(assembly_id))
+        rest_ok_response
+      end
     end
 
     def rest__add_component()

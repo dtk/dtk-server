@@ -108,11 +108,12 @@ module DTK
 
     def info_about(about)
       case about
-        when :assemblies
+       when "assembly-templates".to_sym
         mb_idhs = get_objs(:cols => [:module_branches]).map{|r|r[:module_branch].id_handle()}
         opts = {
           :filter => [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}],
-          :detail_level => "nodes"
+          :detail_level => "nodes",
+          :no_module_prefix => true
         }
         if project = get_project()
           opts.merge!(:project_idh => project.id_handle())

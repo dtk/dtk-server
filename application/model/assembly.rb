@@ -60,8 +60,16 @@ module DTK
     def self.ret_component_type(service_module_name,assembly_name)
       "#{service_module_name}__#{assembly_name}"
     end
-    def self.pretty_print_name(assembly)
-      assembly[:component_type] ? assembly[:component_type].gsub(/__/,"::") : assembly[:display_name]
+    def self.pretty_print_name(assembly,opts={})
+      if cmp_type = assembly[:component_type] 
+        if opts[:no_module_prefix]
+          assembly[:component_type].gsub(/^.+__/,"")
+        else
+          assembly[:component_type].gsub(/__/,"::")
+        end
+      else 
+        assembly[:display_name]
+      end
     end
 
     def is_stopped?
@@ -78,10 +86,11 @@ module DTK
           end
         end
         ndx_ret = Hash.new
+        pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_rows.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
           pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
@@ -154,15 +163,6 @@ module DTK
           :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
         }
         Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
-      end
-    end
-
-    def self.delete(assembly_idh,subtype=nil)
-      subtype ||= (is_template?(assembly_idh) ? :template : :instance) 
-      if subtype == :template
-        Assembly::Template.delete(assembly_idh)
-      else
-        Assembly::Instance.delete(assembly_idh)
       end
     end
 

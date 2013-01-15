@@ -125,11 +125,11 @@ module DTK; class Assembly
         raise Error.new("list assembly templates at component level not treated")
       end
       include_nodes = ["nodes"].include?(opts[:detail_level])
-
+      pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
       assembly_rows.each do |r|
         #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
         #get_objs do this (using possibly option flag for subtype processing)
-        pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r),:ndx_nodes => Hash.new)
+        pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
         next unless include_nodes
         node_id = r[:node][:id]
@@ -183,7 +183,7 @@ module DTK; class Assembly
       assembly_ci.synchronize_workspace_with_library_branch()
     end
 
-    def self.delete(assembly_idh)
+    def self.delete_and_ret_module_repo_info(assembly_idh)
       #first delete the dsl files
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes

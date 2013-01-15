@@ -1,8 +1,8 @@
 module Ramaze::Helper
   module VersionHelper
     def ret_version()
-      version = ret_non_null_request_params(:version)
-      raise_error_if_version_illegal_format(version)
+      version = ret_request_params(:version)
+      version && raise_error_if_version_illegal_format(version)
     end
     def is_legal_version_format?(version)
       return true unless version

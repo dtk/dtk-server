@@ -18,7 +18,7 @@ end
       rest_ok_response module_repo_info
     end
 
-    #TODO: rename to rest__update_repo_and_add_dsl_data(), input field :scaffold_if_no_dsl -> :scaffold_if_no_dsl and output field :dsl_created -> :dsl_craeted
+    #TODO: rename to rest__update_repo_and_add_dsl_data(), input field :scaffold_if_no_dsl -> :scaffold_if_no_dsl and output field :dsl_created -> :dsl_created
     def rest__update_repo_and_add_dsl()
       repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
       version,scaffold = ret_request_params(:version,:scaffold_if_no_dsl)
@@ -32,7 +32,7 @@ end
 
     def rest__update_model_from_clone()
       component_module = create_obj(:component_module_id)
-      version = ret_request_params(:version)
+      version = ret_version()
       json_diffs = ret_request_params(:json_diffs)
       diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
       component_module.update_model_from_clone_changes?(diffs_summary,version)
@@ -55,7 +55,7 @@ end
 
     def rest__get_workspace_branch_info()
       component_module = create_obj(:component_module_id)
-      version = ret_request_params(:version)
+      version = ret_version()
       rest_ok_response component_module.get_workspace_branch_info(version)
     end
 
@@ -106,13 +106,14 @@ end
       rest_ok_response 
     end
 
-    #get remote_module_info; throws an access rights usage eerror if user does not have access
+    #get remote_module_info; throws an access rights usage error if user does not have access
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       access_rights = ret_access_rights()
       remote_repo = ret_remote_repo()
-      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights)
+      version = ret_version()
+      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version)
     end
 
     def rest__push_to_remote_legacy()

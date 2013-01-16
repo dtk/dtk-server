@@ -18,7 +18,7 @@ module DTK
       cmp_types_to_check = Hash.new
       aug_cmp_refs.each do |r|
         unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
-          ref =  ErrorDanglingComponentRefs.pp_component_ref(r)
+          ref =  ComponentRef.print_form(r)
           ref = (ref ? "(#{ref})" : "")
           raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
         end
@@ -57,7 +57,7 @@ module DTK
           end
         end
       end
-      raise ErrorDanglingComponentRefs.new(error_cmp_refs) unless error_cmp_refs.empty?
+      raise ErrorUsage::DanglingComponentRefs.new(error_cmp_refs) unless error_cmp_refs.empty?
       ret
     end
                                                                           
@@ -115,26 +115,6 @@ module DTK
         return ret
       end
       self.class.hash_form(constraints)
-    end
-
-    class ErrorDanglingComponentRefs < ErrorUsage
-      def initialize(cmp_refs)
-        super(err_msg(cmp_refs))
-      end
-      def self.pp_component_ref(component_ref)
-        if component_ref[:component_type]
-          Component.pp_component_type(component_ref[:component_type])
-        elsif component_ref[:id]
-          "id:#{component_ref[:id].to_s})"
-        end
-      end
-     private
-      def err_msg(cmp_refs)
-        what = (cmp_refs.size==1 ? "component ref" : "component refs")
-        refs = cmp_refs.map{|cmp_ref|self.class.pp_component_ref(cmp_ref)}.compact.join(",")
-        verb = (cmp_refs.size==1 ? "does" : "do")
-        "The referenced #{what} (#{refs}) #{verb} not exist"
-      end
     end
 
    private

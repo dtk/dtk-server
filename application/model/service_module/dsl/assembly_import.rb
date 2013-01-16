@@ -109,7 +109,6 @@ module DTK; class ServiceModule
       end
 
       def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
-        module_refs = assembly_hash["modules"]
         an_sep = Seperators[:assembly_node]
         node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
           merge_hash = Hash.new
@@ -151,7 +150,7 @@ module DTK; class ServiceModule
             node_output["node_binding_rs_id"] = nil
           end
 
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],module_refs,node_hash["components"],version_constraints)
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -176,7 +175,7 @@ module DTK; class ServiceModule
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 
-      def self.import_component_refs(container_idh,assembly_name,module_refs,components_hash,version_constraints)
+      def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)
         ret = components_hash.inject(Hash.new) do |h,cmp_hash|
           parse = component_ref_parse(cmp_hash)
           cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])

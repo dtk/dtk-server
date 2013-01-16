@@ -1,5 +1,4 @@
-#When creating these objects, an internal errro class is passed to the creation functions
-module XYZ
+module DTK
   class RestError  
     def self.create(err)
       if RestUsageError.match?(err)

@@ -42,5 +42,22 @@ module DTK
       end
     end
 
+    #each elemant of cmp_refs is a component ref or a hash with component ref fields
+    def self.ret_unique_union(cmp_refs1,cmp_refs2)
+      ndx_ret = cmp_refs1.inject(Hash.new){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
+      cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
+    end
+
+    class << self
+     private
+      def ret_unique_union__ndx(cmp_ref__obj_or_hash)
+        if cmp_ref__obj_or_hash[:component_type]
+          cmp_ref__obj_or_hash[:component_type]
+        else
+          raise Error.new("Not treated yet: ComponentRef.ret_unique_union when cmp ref (#{cmp_ref__obj_or_hash.inspect}) does not have :component_type set")
+        end
+      end
+    end
+
   end
 end

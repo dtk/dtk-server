@@ -3,6 +3,7 @@ module DTK
     class DanglingComponentRefs < self
       def initialize(cmp_refs)
         super(err_msg(cmp_refs))
+        #each element can be a component ref object or a hash
         @component_refs = cmp_refs 
       end
 
@@ -17,7 +18,7 @@ module DTK
           begin
             yield
            rescue DanglingComponentRefs => e
-            @component_refs += e.component_refs
+            @component_refs = ComponentRef.ret_unique_union(@component_refs,e.component_refs)
           end
         end
 

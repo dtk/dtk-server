@@ -13,11 +13,15 @@ module DTK; class ServiceModule
     end
     def add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
+      dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       assemblies_hash.each do |ref,assem|
-        @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
-        @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash,@module_version_constraints))
-        @ndx_assembly_hashes[ref] ||= assem
+        dangling_errors.aggregate_errors! do
+          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
+          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash,@module_version_constraints))
+          @ndx_assembly_hashes[ref] ||= assem
+        end
       end
+      dangling_errors.raise_error?()
     end
 
     def import()

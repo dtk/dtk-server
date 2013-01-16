@@ -53,15 +53,22 @@ module DTK
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         
         assembly_import_helper = AssemblyImport.new(container_idh,module_name,module_version_constraints)
+        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
-          json_content = RepoManager.get_file_content(meta_file,module_branch)
-          hash_content = JSON.parse(json_content)
-          assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
-            h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
+          dangling_errors.aggregate_errors! do
+            json_content = RepoManager.get_file_content(meta_file,module_branch)
+            hash_content = JSON.parse(json_content)
+            assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
+              h.merge(assembly_ref(module_name,assembly_info["name"]) => assembly_info)
+            end
+            node_bindings_hash = hash_content["node_bindings"]
+            assembly_import_helper.add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
           end
-          node_bindings_hash = hash_content["node_bindings"]
-          assembly_import_helper.add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
         end
+        #TODO: below should put in option to raise error and cleanup
+        #dangling_errors.raise_error_and_cleanup?(module_branch) #or pass in service module
+        dangling_errors.raise_error?()
+
         assembly_import_helper.import()
         ports = assembly_import_helper.ports()
         aug_assembly_nodes = assembly_import_helper.augmented_assembly_nodes()

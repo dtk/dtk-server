@@ -3,8 +3,32 @@ module DTK
     class DanglingComponentRefs < self
       def initialize(cmp_refs)
         super(err_msg(cmp_refs))
+        @component_refs = cmp_refs 
       end
-      private
+
+      attr_reader :component_refs
+
+      class Aggregate 
+        def initialize()
+          @component_refs = Array.new
+        end
+
+        def aggregate_errors!(&block)
+          begin
+            yield
+           rescue DanglingComponentRefs => e
+            @component_refs += e.component_refs
+          end
+        end
+
+        def raise_error?()
+          unless @component_refs.empty?()
+            raise DanglingComponentRefs.new(@component_refs)
+          end
+        end
+      end
+
+     private
       def err_msg(cmp_refs)
         what = (cmp_refs.size==1 ? "component ref" : "component refs")
         refs = cmp_refs.map{|cmp_ref|ComponentRef.print_form(cmp_ref)}.compact.join(",")

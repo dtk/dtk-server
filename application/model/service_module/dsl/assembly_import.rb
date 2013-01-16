@@ -133,29 +133,33 @@ module DTK; class ServiceModule
           end
         end
 
+        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
-          node_ref = "#{assembly_ref}--#{node_hash_ref}"
-          node_output = {
-            "display_name" => node_hash_ref, 
-            "type" => "stub",
-            "*assembly_id" => "/component/#{assembly_ref}" 
-          }
-          if nb_rs = node_to_nb_rs[node_hash_ref]
-            if nb_rs_id = nb_rs_to_id[nb_rs]
-              node_output["node_binding_rs_id"] = nb_rs_id
+          dangling_errors.aggregate_errors! do
+            node_ref = "#{assembly_ref}--#{node_hash_ref}"
+            node_output = {
+              "display_name" => node_hash_ref, 
+              "type" => "stub",
+              "*assembly_id" => "/component/#{assembly_ref}" 
+            }
+            if nb_rs = node_to_nb_rs[node_hash_ref]
+              if nb_rs_id = nb_rs_to_id[nb_rs]
+                node_output["node_binding_rs_id"] = nb_rs_id
+              else
+                #TODO: extend dangling_errors.aggregate_errors to handle this
+                raise ErrorUsage.new("Bad node reference #{nb_rs})")
+              end
             else
-              raise ErrorUsage.new("Bad node reference #{nb_rs})")
+              node_output["node_binding_rs_id"] = nil
             end
-          else
-            node_output["node_binding_rs_id"] = nil
+            cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+            unless cmps_output.empty?
+              node_output["component_ref"] = cmps_output
+            end
+            h.merge(node_ref => node_output)
           end
-
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
-          unless cmps_output.empty?
-            node_output["component_ref"] = cmps_output
-          end
-          h.merge(node_ref => node_output)
         end
+        dangling_errors.raise_error?()
       end
 
      private

@@ -1,17 +1,17 @@
 module DTK
   class ErrorUsage < Error
     class DanglingComponentRefs < self
-      def initialize(cmp_refs)
-        super(err_msg(cmp_refs))
+      def initialize(cmp_ref_info_list)
+        super(err_msg(cmp_ref_info_list))
         #each element can be a component ref object or a hash
-        @component_refs = cmp_refs 
+        @cmp_ref_info_list = cmp_ref_info_list 
       end
 
-      attr_reader :component_refs
+      attr_reader :cmp_ref_info_list
 
       class Aggregate 
         def initialize(opts={})
-          @component_refs = Array.new
+          @cmp_ref_info_list = Array.new
           @error_cleanup = opts[:error_cleanup]
         end
 
@@ -19,7 +19,7 @@ module DTK
           begin
             yield
            rescue DanglingComponentRefs => e
-            @component_refs = ComponentRef.ret_unique_union(@component_refs,e.component_refs)
+            @cmp_ref_info_list = ret_unique_union(@cmp_ref_info_list,e.cmp_ref_info_list)
            rescue Exception => e
             @error_cleanup.call() if @error_cleanup
             raise e
@@ -27,20 +27,44 @@ module DTK
         end
 
         def raise_error?()
-          unless @component_refs.empty?()
+          unless @cmp_ref_info_list.empty?()
             @error_cleanup.call() if @error_cleanup
-            raise DanglingComponentRefs.new(@component_refs)
+            raise DanglingComponentRefs.new(@cmp_ref_info_list)
           end
         end
+        
+       private
+        def ret_unique_union(cmp_refs1,cmp_refs2)
+          ndx_ret = cmp_refs1.inject(Hash.new){|h,r|h.merge(ret_unique_union__ndx(r) => r)}
+          cmp_refs2.inject(ndx_ret){|h,r|h.merge(ret_unique_union__ndx(r) => r)}.values
+        end
+        
+        def ret_unique_union__ndx(cmp_ref_info)
+          ret = cmp_ref_info[:component_type]
+          if version = cmp_ref_info[:version]
+            ret = "#{ret}(#{version})"
+          end
+          ret
+        end
+
       end
 
      private
-      def err_msg(cmp_refs)
-        what = (cmp_refs.size==1 ? "component ref" : "component refs")
-        refs = cmp_refs.map{|cmp_ref|ComponentRef.print_form(cmp_ref)}.compact.join(",")
-        verb = (cmp_refs.size==1 ? "does" : "do")
+      def err_msg(cmp_ref_info_list)
+        what = (cmp_ref_info_list.size==1 ? "component ref" : "component refs")
+        refs = cmp_ref_info_list.map{|cmp_ref_info|print_form(cmp_ref_info)}.compact.join(",")
+        verb = (cmp_ref_info_list.size==1 ? "does" : "do")
         "The referenced #{what} (#{refs}) #{verb} not exist"
       end
+
+      def print_form(cmp_ref_info)
+        ret = ComponentRef.print_form(cmp_ref_info)
+        if version = cmp_ref_info[:version]
+          ret = "#{ret}(#{version})"
+        end
+        ret
+      end
+
     end
 
     #TODO: make second argument be polymorphic to handle things like wrong type, wrong name

@@ -11,10 +11,10 @@ module DTK
       ret = aug_cmp_refs
       return ret if aug_cmp_refs.empty?
       #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
-      # 1) if has_override_version is set
+      # 1) if key 'has_override_version' is set
       #    a) if it points to a component template, use this
       #    b) otherwise look it up using given version
-      # 2) else look it up and if lookup exists use this as teh value to use; element marked required if it does not point to a component template
+      # 2) else look it up and if lookup exists use this as the value to use; element marked required if it does not point to a component template
       cmp_types_to_check = Hash.new
       aug_cmp_refs.each do |r|
         unless cmp_type = r[:component_type]||(r[:component_template]||{})[:component_type]
@@ -38,26 +38,28 @@ module DTK
       if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
         return ret
       end
-      
+
       #Lookup up modules mapping
-      #mappings will have for each component type that has a module_version_constraints the related component template id
+      #mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
+      #component_template will be null if no match is found
       mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
 
-      #set the compoennt template ids; raise error if there is a required element that does not have a matching component template
-      error_cmp_refs = Array.new
+      #set the component template ids; raise error if there is a required element that does not have a matching component template
+      reference_errors = Array.new
       cmp_types_to_check.each do |cmp_type,els|
         els.each do |el|
-          if cmp_template = mappings[cmp_type]
+          cmp_type_version_info = mappings[cmp_type]
+          if cmp_template = cmp_type_version_info[:component_template]
             el[:pntr][:component_template_id] = cmp_template[:id] 
             if opts[:donot_set_component_template]
               el[:pntr][:component_template] = cmp_template
             end
           elsif el[:required]
-            error_cmp_refs << el[:pntr]
+            reference_errors << {:component_type => cmp_type, :version => cmp_type_version_info[:version]} 
           end
         end
       end
-      raise ErrorUsage::DanglingComponentRefs.new(error_cmp_refs) unless error_cmp_refs.empty?
+      raise ErrorUsage::DanglingComponentRefs.new(reference_errors) unless reference_errors.empty?
       ret
     end
                                                                           
@@ -124,21 +126,27 @@ module DTK
       end
     end
 
+    def get_needed_component_type_version_pairs(cmp_types)
+      cmp_types.map do |cmp_type|
+        version = ret_selected_version(cmp_type)
+        {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
+      end
+    end
+
     def get_component_type_to_template_mappings?(cmp_types)
       ret = Hash.new
       return ret if cmp_types.empty?
-      type_version_pairs = Array.new
-      cmp_types.each do |cmp_type|
+      #first put in ret info about component type and version
+      ret = cmp_types.inject(Hash.new) do |h,cmp_type|
         version = ret_selected_version(cmp_type)
-        type_version_pairs << {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
+        h.merge(cmp_type => {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)})
       end
-      return ret if type_version_pairs.empty?
 
-      #get matching component template ids
-      matching_templates = Component::Template.get_matching_type_and_version(project_idh(),type_version_pairs)
-      matching_templates.inject(Hash.new) do |h,r|
-        h.merge(r[:component_type] => r)
+      #get matching component template info and insert matches into ret
+      Component::Template.get_matching_type_and_version(project_idh(),ret.values).each do |cmp_template|
+        ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
       end
+      ret
     end
 
     def ret_selected_version(component_type)

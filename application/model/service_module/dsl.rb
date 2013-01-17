@@ -26,9 +26,9 @@ module DTK
         ret
       end
 
-      def update_model_from_dsl(container_idh,module_branch,module_name)
+      def update_model_from_dsl(container_idh,service_module_idh,module_branch,module_name)
         module_version_constraints = update_global_refs(module_branch)
-        update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
+        update_assemblies_from_dsl(container_idh,service_module_idh,module_branch,module_name,module_version_constraints)
       end
 
       def assembly_meta_directory_path(assembly_name)
@@ -45,17 +45,16 @@ module DTK
       end
 
      private
-      def update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
+      def update_assemblies_from_dsl(container_idh,service_module_idh,module_branch,module_name,module_version_constraints)
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        
         assembly_import_helper = AssemblyImport.new(container_idh,module_name,module_version_constraints)
-        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{ServiceModule.delete(service_module_idh)})
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
-          dangling_errors.aggregate_errors! do
+          dangling_errors.aggregate_errors!()  do
             json_content = RepoManager.get_file_content(meta_file,module_branch)
             hash_content = JSON.parse(json_content)
             assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
@@ -65,8 +64,6 @@ module DTK
             assembly_import_helper.add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
           end
         end
-        #TODO: below should put in option to raise error and cleanup
-        #dangling_errors.raise_error_and_cleanup?(module_branch) #or pass in service module
         dangling_errors.raise_error?()
 
         assembly_import_helper.import()

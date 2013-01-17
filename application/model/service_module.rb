@@ -195,7 +195,7 @@ module DTK
       project_idh = get_project().id_handle()
       update_object!(:display_name)
       #TODO: for more efficiency can push in diffs_summary to below
-      self.class.update_model_from_dsl(project_idh,module_branch,module_name())
+      self.class.update_model_from_dsl(project_idh,id_handle(),module_branch,module_name())
     end
     private :update_model_from_clone_changes_aux?
 
@@ -244,7 +244,7 @@ module DTK
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
-      update_model_from_dsl(project.id_handle(),module_branch,module_name)
+      update_model_from_dsl(project.id_handle(),module_and_branch_info[:module_idh],module_branch,module_name)
       ModuleRepoInfo.new(repo,module_name,module_branch)
     end
 

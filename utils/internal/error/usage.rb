@@ -10,8 +10,9 @@ module DTK
       attr_reader :component_refs
 
       class Aggregate 
-        def initialize()
+        def initialize(opts={})
           @component_refs = Array.new
+          @error_cleanup = opts[:error_cleanup]
         end
 
         def aggregate_errors!(&block)
@@ -19,11 +20,15 @@ module DTK
             yield
            rescue DanglingComponentRefs => e
             @component_refs = ComponentRef.ret_unique_union(@component_refs,e.component_refs)
+           rescue Exception => e
+            @error_cleanup.call() if @error_cleanup
+            raise e
           end
         end
 
         def raise_error?()
           unless @component_refs.empty?()
+            @error_cleanup.call() if @error_cleanup
             raise DanglingComponentRefs.new(@component_refs)
           end
         end

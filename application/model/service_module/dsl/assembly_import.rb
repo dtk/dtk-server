@@ -138,7 +138,7 @@ module DTK; class ServiceModule
         end
 
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
-        assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+        ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
           dangling_errors.aggregate_errors! do
             node_ref = "#{assembly_ref}--#{node_hash_ref}"
             node_output = {
@@ -164,6 +164,7 @@ module DTK; class ServiceModule
           end
         end
         dangling_errors.raise_error?()
+        ret
       end
 
      private

@@ -79,7 +79,7 @@ module DTK
       def update_global_refs(module_branch)
         constraints_hash_form = Hash.new
         if json_content = RepoManager.get_file_content(GlobalModuleRefs.meta_filename_path(),module_branch,:no_error_if_not_found=>true)
-          constraints_hash_form = Aux.convert_keys_to_symbols(JSON.parse(json_content))
+          constraints_hash_form = JSON.parse(json_content)
         end
         vconstraints = module_branch.get_module_version_constraints()
         vconstraints.set_and_save_constraints!(constraints_hash_form)

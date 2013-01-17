@@ -44,6 +44,15 @@ module XYZ
       def convert_keys_to_symbols(hash)
         hash.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => hash[k])}
       end
+      def convert_keys_to_symbols_recursive(obj)
+        if obj.kind_of?(Hash)
+          obj.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => convert_keys_to_symbols_recursive(obj[k]))}
+        elsif obj.kind_of?(Array)
+          obj.map{|el|convert_keys_to_symbols_recursive(el)}
+        else
+          obj
+        end
+      end
 
       def ordered_hash(array_with_hashes)
         array_with_hashes.inject(ActiveSupport::OrderedHash.new) do |h,x|

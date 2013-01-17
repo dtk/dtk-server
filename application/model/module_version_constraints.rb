@@ -107,7 +107,7 @@ module DTK
     end
 
     def set_and_save_constraints!(constraints_hash_form)
-      set_constraints(constraints_hash_form)
+      reify_and_set_constraints(constraints_hash_form)
       save!()
     end
 
@@ -166,8 +166,18 @@ module DTK
       ((self[:constraints]||{})[:component_modules])||{}
     end
 
-    def set_constraints(hash)
-      self[:constraints] = hash
+    def reify_and_set_constraints(hash)
+      self[:constraints] = 
+        if hash.empty? then hash
+        elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
+          reify_component_module_contraints(hash.values.first)
+        elsif
+          raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
+        end
+    end
+
+    def reify_component_module_contraints(hash)
+      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => Constraint.reify?(hash[k]))}}
     end
 
     def create_component_modules_hash?()

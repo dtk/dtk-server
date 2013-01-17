@@ -51,10 +51,11 @@ module DTK
 
      private
       def err_msg(cmp_ref_info_list)
-        what = (cmp_ref_info_list.size==1 ? "component ref" : "component refs")
+        what = (cmp_ref_info_list.size==1 ? "component template" : "component templates")
         refs = cmp_ref_info_list.map{|cmp_ref_info|print_form(cmp_ref_info)}.compact.join(",")
-        verb = (cmp_ref_info_list.size==1 ? "does" : "do")
-        "The referenced #{what} (#{refs}) #{verb} not exist"
+        is = (cmp_ref_info_list.size==1 ? "is" : "are")
+        does = (cmp_ref_info_list.size==1 ? "does" : "do")
+        "The following #{what} (#{refs}) that #{is} referenced by assemblies in the service module #{does} not exist"
       end
 
       def print_form(cmp_ref_info)

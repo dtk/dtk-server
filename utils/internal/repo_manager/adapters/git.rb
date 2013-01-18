@@ -240,6 +240,7 @@ module DTK
         add_remote(remote_name,remote_url)
       end
       pull_changes(remote_name,remote_branch)
+      push_changes()
       remote_name
     end
 
@@ -332,8 +333,16 @@ module DTK
       git_command__push(@branch,remote_name,remote_branch)
     end
 
+=begin
+#MOD_RESTRUCT-NEW
     def pull_changes(remote_name=nil,remote_branch=nil)
       git_command__pull(@branch,remote_branch||@branch,remote_name)
+    end
+=end
+    def pull_changes(remote_name=nil,remote_branch=nil)
+      checkout(@branch) do
+        git_command__pull__checkout_form(remote_branch||@branch,remote_name)
+      end
     end
 
     def rebase_from_remote(remote_name=nil)
@@ -560,6 +569,14 @@ module DTK
       remote_name ||= default_remote_name()
       git_command.pull(cmd_opts(),remote_name,"#{remote_branch}:#{local_branch}")
     end
+    
+    #MOD_RESTRUCT-NEW deprecate below
+    def git_command__pull__checkout_form(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
+      git_command.pull(cmd_opts(),remote_name,branch_name)
+    end
+
+
 
     def git_command__rebase(branch_name,remote_name=nil)
       remote_name ||= default_remote_name()

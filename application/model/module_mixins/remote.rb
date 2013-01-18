@@ -161,7 +161,7 @@ module DTK
         create_opts = {
           :remote_repo_name => remote_module_info[:git_repo_name],
           :remote_repo_namespace => remote_params[:namespace],
-          :create_branches => [local_branch],
+          :create_branches => [local_branch], #MOD_RESTRUCT=NEW: deleet after fix
           :delete_if_exists => true
         }
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)

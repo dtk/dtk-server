@@ -234,7 +234,6 @@ module DTK
     end
 
     def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
-      add_branch?(@branch)
       if remote_exists?(remote_name)
         git_command__fetch(remote_name)
       else
@@ -334,9 +333,7 @@ module DTK
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
-      checkout(@branch) do
-        git_command__pull(remote_branch||@branch,remote_name)
-      end
+      git_command__pull(@branch,remote_branch||@branch,remote_name)
     end
 
     def rebase_from_remote(remote_name=nil)
@@ -559,9 +556,9 @@ module DTK
       rev_list.split("\n").grep(index_sha)
     end
 
-    def git_command__pull(branch_name,remote_name=nil)
+    def git_command__pull(local_branch,remote_branch,remote_name=nil)
       remote_name ||= default_remote_name()
-      git_command.pull(cmd_opts(),remote_name,branch_name)
+      git_command.pull(cmd_opts(),remote_name,"#{remote_branch}:#{local_branch}")
     end
 
     def git_command__rebase(branch_name,remote_name=nil)

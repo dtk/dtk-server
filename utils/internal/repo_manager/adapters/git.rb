@@ -17,7 +17,7 @@ module DTK
         end
       end
       local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
-      local_repo.clone_from_git_server(repo_name)
+      local_repo.clone_from_git_server(repo_name,opts)
       if create_branches = opts[:create_branches]
         (create_branches - [CreateMethodBranch]).each{|branch|local_repo.add_branch?(branch)}
       end
@@ -64,12 +64,15 @@ module DTK
       @git_url ||= self.class.repo_url()
     end
 
-    def clone_from_git_server(repo_name)
+    #MOD_RESTRUCT-NEW: may not in any case perform initial commit
+    def clone_from_git_server(repo_name,opts={})
       remote_repo = "#{repo_url()}:#{repo_name}"
       git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
-      Dir.chdir(@path) do
-        commit("initial empty commit","--allow-empty")
+      unless opts[:no_initial_commit]
+        Dir.chdir(@path) do
+          commit("initial empty commit","--allow-empty")
+        end
       end
     end
 
@@ -234,12 +237,22 @@ module DTK
     end
 
     def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
-      if remote_exists?(remote_name)
-        git_command__fetch(remote_name)
-      else
+      unless remote_exists?(remote_name)
         add_remote(remote_name,remote_url)
       end
+      #TODO: can we just fetch specfic remote branch?
+      git_command__fetch(remote_name)
+
+      #TODO: since fetch is used then see if can use a merge to do below
+      #pull changes from remote
       pull_changes(remote_name,remote_branch)
+
+      ##MOD_RESTRUCT-NEW
+      #as a side effect of the push a master branch is created with uncommited changes; TODO: figure out way to avoid this hack
+      checkout("master") do
+        commit("initial master commit","-a")
+      end
+      #push to local #TODO: prime exampe where much better iof we can just push to bare repo
       push_changes()
       remote_name
     end
@@ -333,18 +346,17 @@ module DTK
       git_command__push(@branch,remote_name,remote_branch)
     end
 
-=begin
-#MOD_RESTRUCT-NEW
     def pull_changes(remote_name=nil,remote_branch=nil)
       git_command__pull(@branch,remote_branch||@branch,remote_name)
     end
-=end
+
+=begin
     def pull_changes(remote_name=nil,remote_branch=nil)
       checkout(@branch) do
         git_command__pull__checkout_form(remote_branch||@branch,remote_name)
       end
     end
-
+=end
     def rebase_from_remote(remote_name=nil)
        checkout(@branch) do
         git_command__rebase(@branch,remote_name)
@@ -575,8 +587,6 @@ module DTK
       remote_name ||= default_remote_name()
       git_command.pull(cmd_opts(),remote_name,branch_name)
     end
-
-
 
     def git_command__rebase(branch_name,remote_name=nil)
       remote_name ||= default_remote_name()

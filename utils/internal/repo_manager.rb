@@ -71,6 +71,12 @@ module XYZ
 
     ### for dealing with actual repos
     class << self
+      def initial_sync_with_remote_repo(branch,repo_name,remote_name,remote_url,remote_branch,opts={})
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts)
+      end
+
+      #MOD_RESTRUCT: TODO: may deprecate      
       def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url,opts={})
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
         adapter_repo.synchronize_with_remote_repo(remote_name,remote_url,opts)

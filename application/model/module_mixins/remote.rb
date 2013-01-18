@@ -38,7 +38,7 @@ module DTK
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
-      repo.synchronize_with_remote_repo(remote_repo,local_branch,version)
+      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
       module_repo_info = self.class.import_postprocess(project,repo,module_name,version)
       module_repo_info
     end
@@ -166,8 +166,7 @@ module DTK
         }
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
-
-      repo.synchronize_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
+      repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
       module_repo_info = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
       module_repo_info
     end

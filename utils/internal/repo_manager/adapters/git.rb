@@ -1,4 +1,4 @@
-#TODO: replace as many git cehckout calss with raw object model ops taht work in both clone and bare repos
+#TODO: replace as many git checkout calls with eitehr qualified calss raw object model ops taht work in both clone and bare repos
 require 'grit'
 require 'fileutils'
 r8_nested_require('git','manage_git_server')
@@ -233,7 +233,18 @@ module DTK
       ret
     end
 
-    #TODO: update to use ret_merge_relationship
+    def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
+      add_branch?(@branch)
+      if remote_exists?(remote_name)
+        git_command__fetch(remote_name)
+      else
+        add_remote(remote_name,remote_url)
+      end
+      pull_changes(remote_name,remote_branch)
+      remote_name
+    end
+
+    #MOD_RESTRUCT: TODO: may deprecate
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)
         git_command__fetch(remote_name)
@@ -562,6 +573,9 @@ module DTK
       git_command.merge(cmd_opts(),branch_to_merge_from)
     end
 
+    def git_command__create_local_branch(branch_name)
+      git_command.branch(cmd_opts(),branch_name)
+    end
     def git_command__delete_local_branch(branch_name)
       git_command.branch(cmd_opts(),"-D",branch_name)
     end

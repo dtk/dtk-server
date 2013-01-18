@@ -24,6 +24,26 @@ module DTK
       remote_repo.get_remote_module_info(aug_ws_branch,remote_params)
     end
 
+    #this should be called when the module is linked, but the specfic version is not
+    def import_version(remote_repo,version)
+      module_name = module_name()
+      project = get_project()
+      aug_head_branch = get_augmented_workspace_branch(nil)
+      repo = aug_head_branch && aug_head_branch[:repo]
+      unless repo and repo.linked_remote?(remote_repo)
+        raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+      end
+      if get_augmented_workspace_branch(version)
+        raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
+      end
+
+      local_branch = ModuleBranch.workspace_branch_name(project,version)
+      repo.synchronize_with_remote_repo(repo,local_branch,version)
+      module_repo_info = self.class.import_postprocess(project,repo,module_name,version)
+      module_repo_info
+    end
+
+    #MOD_RESTRUCT: this might be deprecated
     def pull_from_remote_if_fast_foward(remote_repo,version=nil)
       unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
@@ -56,7 +76,7 @@ module DTK
         raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
       end
     end
-    
+
     #export to a remote repo
     def export(remote_repo,version=nil)
       #TODO: put in version-specfic logic

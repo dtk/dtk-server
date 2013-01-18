@@ -191,6 +191,11 @@ module DTK
       ::DTK::Repo::Diffs.new(array_diff_hashes)
     end
 
+    #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary
+    def any_diffs?(ref1,ref2)
+      not @grit_repo.diff(ref1,ref2).empty?
+    end
+
     #returns :no_change, :changed, :merge_needed
     def fast_foward_pull(remote_branch,remote_name=nil)
       remote_name ||= default_remote_name()
@@ -298,12 +303,17 @@ module DTK
       other_sha = other_grit_ref.commit.id
       local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
       
-      if other_sha == local_sha then :equal
+      if other_sha == local_sha 
+        :equal
       else
-        merge_sha = git_command__merge_base(@branch,ref)
-        if merge_sha == local_sha then :local_behind
-         elsif merge_sha == other_sha then :local_ahead
-         else :branchpoint
+        #shas can be different but  they can have same content so do a git diff
+        unless any_diffs?(local_sha,other_sha)
+          return :equal
+        end
+        #TODO: see if missing or mis-categorizing any condition below
+        if git_command__rev_list_contains?(local_sha,other_sha) then :local_ahead
+        elsif git_command__rev_list_contains?(other_sha,local_sha) then :local_behind
+        else :branchpoint
         end
       end
     end
@@ -522,11 +532,6 @@ module DTK
       git_command.fetch(cmd_opts(),"--all")
     end
 
-    def git_command__merge_base(ref1,ref2)
-      #chomp added below because raw griot command has a cr at end of line
-      git_command.merge_base(cmd_opts(),ref1,ref2).chomp
-    end
-
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
     def git_command__push(branch_name,remote_name=nil,remote_branch=nil)
@@ -535,6 +540,12 @@ module DTK
         remote_branch ||= branch_name
         git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}")
       end
+    end
+
+    def git_command__rev_list_contains?(container_sha,index_sha)
+      #chomp added below because raw grit command has a cr at end of line
+      rev_list = git_command.rev_list(cmd_opts(),container_sha)
+      rev_list.split("\n").grep(index_sha)
     end
 
     def git_command__pull(branch_name,remote_name=nil)

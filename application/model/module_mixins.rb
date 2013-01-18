@@ -35,14 +35,17 @@ module DTK
       ModuleRepoInfo.new(aug_branch[:repo],module_name,aug_branch)
     end
 
-    def get_augmented_workspace_branch(version=nil)
+    def get_augmented_workspace_branch(version=nil,opts={})
       sp_hash = {
         :cols => [:display_name,:workspace_info]
       }
       version_field = ModuleBranch.version_field(version)
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if modules.size == 0
-        raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
+        unless opts[:donot_raise_error]
+          raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
+        end
+        return nil
       elsif modules.size > 1
         raise Error.new("Unexpected that get more than 1 matching row")
       end

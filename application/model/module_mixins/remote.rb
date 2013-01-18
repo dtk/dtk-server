@@ -33,12 +33,12 @@ module DTK
       unless repo and repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
-      if get_augmented_workspace_branch(version)
+      if get_augmented_workspace_branch(version,:donot_raise_error=>true)
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
-      repo.synchronize_with_remote_repo(repo,local_branch,version)
+      repo.synchronize_with_remote_repo(remote_repo,local_branch,version)
       module_repo_info = self.class.import_postprocess(project,repo,module_name,version)
       module_repo_info
     end
@@ -82,7 +82,7 @@ module DTK
       #TODO: put in version-specfic logic
       project = get_project()
       repo = get_workspace_repo()
-      module_name = update_object!(:display_name)[:display_name]
+      module_name = module_name()
       if repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       end

@@ -37,9 +37,7 @@ module XYZ
       repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
       repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify_model(repo_idh,repo_user_acls)
-      create_opts =  opts.dup
-      create_opts[:no_initial_commit] ||= true
-      RepoManager.create_empty_workspace_repo(repo_obj,repo_user_acls,create_opts) 
+      RepoManager.create_empty_workspace_repo(repo_obj,repo_user_acls,opts) 
       repo_obj
     end
     #MOD_RESTRUCT: TODO: deprecate below for above

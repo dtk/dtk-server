@@ -235,24 +235,17 @@ module DTK
       ret
     end
 
+    #TODO: prime exampe where much better if we can just push to bare repo
     def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
       unless remote_exists?(remote_name)
         add_remote(remote_name,remote_url)
       end
-      #TODO: can we just fetch specfic remote branch?
-      #git_command__fetch(remote_name)
 
-      #TODO: since fetch is used then see if can use a merge to do below
-      #pull changes from remote
-      #git_command__create_empty_branch(@branch)
+      #create branch with history from remote and not merge
+      git_command__create_empty_branch(@branch)
       pull_changes(remote_name,remote_branch)
 
-      ##MOD_RESTRUCT-NEW
-      #as a side effect of the push a master branch is created with uncommited changes; TODO: figure out way to avoid this hack
-      checkout("master") do
-        commit("initial master commit","-a")
-      end
-      #push to local #TODO: prime exampe where much better iof we can just push to bare repo
+      #push to local 
       push_changes()
       remote_name
     end
@@ -347,16 +340,12 @@ module DTK
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
-      git_command__pull(@branch,remote_branch||@branch,remote_name)
-    end
-
-=begin
-    def pull_changes(remote_name=nil,remote_branch=nil)
-      checkout(@branch) do
-        git_command__pull__checkout_form(remote_branch||@branch,remote_name)
+      #note: even though generated git comamdn hash --git-dor set, need to chdir 
+      Dir.chdir(@path) do
+        git_command__pull(@branch,remote_branch||@branch,remote_name)
       end
     end
-=end
+
     def rebase_from_remote(remote_name=nil)
        checkout(@branch) do
         git_command__rebase(@branch,remote_name)

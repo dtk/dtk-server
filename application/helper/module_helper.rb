@@ -23,14 +23,14 @@ module Ramaze::Helper
     end
 
     def ret_remote_repo()
-      (ret_request_params(:remote_repo)||::DTK::Rep::Diffs.default_remote_repo()).to_sym
+      (ret_request_params(:remote_repo)||::DTK::Repo::Remote.default_remote_repo()).to_sym
     end
 
     def ret_access_rights()
       if rights = ret_request_params(:access_rights)
-        ::DTK::Rep::Diffs::AccessRights.convert_from_string_form(rights)
+        ::DTK::Repo::Remote::AccessRights.convert_from_string_form(rights)
       else
-        ::DTK::Rep::Diffs::AccessRights::RW
+        ::DTK::Repo::Remote::AccessRights::RW
       end
     end
 

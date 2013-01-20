@@ -119,11 +119,11 @@ module DTK
 
     def rest__update_model_from_clone()
       service_module = create_obj(:service_module_id)
+      commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_request_params(:version)
-      json_diffs = ret_request_params(:json_diffs)
-      diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
-      service_module.update_model_from_clone_changes?(diffs_summary,version)
-      rest_ok_response
+      diffs_summary = ret_diffs_summary()
+      service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
+      rest_ok_response 
     end
 
     def rest__set_component_module_version()

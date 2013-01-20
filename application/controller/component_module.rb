@@ -32,10 +32,10 @@ end
 
     def rest__update_model_from_clone()
       component_module = create_obj(:component_module_id)
+      commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
-      json_diffs = ret_request_params(:json_diffs)
-      diffs_summary = Repo::Diffs::Summary.new(json_diffs && JSON.parse(json_diffs))
-      component_module.update_model_from_clone_changes?(diffs_summary,version)
+      diffs_summary = ret_diffs_summary()
+      component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
       rest_ok_response
     end
 

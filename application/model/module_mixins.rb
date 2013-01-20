@@ -67,8 +67,11 @@ module DTK
       matches.first
     end
 
-    def update_model_from_clone_changes?(diffs_summary,version=nil)
+    def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
       ws_branch = get_workspace_module_branch(version)
+      if ws_branch.is_set_to_sha?(commit_sha)
+        return
+      end
       #first update the server clone
       merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
       if merge_result == :merge_needed
@@ -76,6 +79,7 @@ module DTK
       end 
 
       update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)
+      ws_branch.set_sha(commit_sha)
     end
 
     def get_repos()

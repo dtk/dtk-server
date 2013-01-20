@@ -29,6 +29,13 @@ module DTK
       row[type].module_name()
     end
 
+    def is_set_to_sha?(commit_sha)
+      commit_sha == get_field?(:current_sha)
+    end
+    def set_sha(commit_sha)
+      update(:current_sha => commit_sha)
+    end
+
     def pp_version()
       update_object!(:version)
       has_default_version?() ? nil : self[:version] 

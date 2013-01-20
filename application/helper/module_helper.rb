@@ -17,15 +17,20 @@ module Ramaze::Helper
       module_class.import(project,remote_params,local_params)
     end
 
+    def ret_diffs_summary()
+      json_diffs = ret_request_params(:json_diffs)
+      ::DTK::Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))
+    end
+
     def ret_remote_repo()
-      (ret_request_params(:remote_repo)||::DTK::Repo::Remote.default_remote_repo()).to_sym
+      (ret_request_params(:remote_repo)||::DTK::Rep::Diffs.default_remote_repo()).to_sym
     end
 
     def ret_access_rights()
       if rights = ret_request_params(:access_rights)
-        ::DTK::Repo::Remote::AccessRights.convert_from_string_form(rights)
+        ::DTK::Rep::Diffs::AccessRights.convert_from_string_form(rights)
       else
-        ::DTK::Repo::Remote::AccessRights::RW
+        ::DTK::Rep::Diffs::AccessRights::RW
       end
     end
 

@@ -564,9 +564,8 @@ module DTK
     end
 
     def git_command__rev_list_contains?(container_sha,index_sha)
-      #chomp added below because raw grit command has a cr at end of line
       rev_list = git_command.rev_list(cmd_opts(),container_sha)
-      rev_list.split("\n").grep(index_sha)
+      !rev_list.split("\n").grep(index_sha).empty?
     end
 
     def git_command__pull(local_branch,remote_branch,remote_name=nil)

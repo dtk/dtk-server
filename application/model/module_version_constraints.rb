@@ -89,7 +89,12 @@ module DTK
       #update model
       if id() 
         #persisted already, needs update
-        update(:constraints => constraints_in_hash_form())
+        update_row = {
+          :id => id(),
+          :constraints => constraints_in_hash_form()
+        }
+        #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified constraint hash
+        Model.update_from_rows(model_handle(),[update_row])
       else
         mh = parent_idh.create_childMH(:module_version_constraints) 
         row = {

@@ -279,7 +279,7 @@ module DTK; class  Assembly
           r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
         end
        when :nodes
-        return get_nodes(:id,:display_name,:os_type,:external_ref,:type).sort(&order)
+        return get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
        when :tasks
         cols = [:tasks]
         post_process_per_row = proc do |r|

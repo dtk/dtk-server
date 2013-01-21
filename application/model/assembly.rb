@@ -123,12 +123,13 @@ module DTK
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
             node = pntr[:ndx_nodes][node_id] = {
-              :node_name => r[:node][:display_name], 
-              :node_id => node_id, 
+              :node_name  => r[:node][:display_name], 
+              :node_id    => node_id,
               :components => Array.new
             }
-            node[:external_ref] = r[:node][:external_ref] if r[:node][:external_ref]
-            node[:os_type] = r[:node][:os_type] if r[:node][:os_type]
+            node[:admin_op_status] = r[:node][:admin_op_status] if r[:node][:admin_op_status]
+            node[:external_ref]    = r[:node][:external_ref] if r[:node][:external_ref]
+            node[:os_type]         = r[:node][:os_type] if r[:node][:os_type]
           end
           cmp_hash = list_aux__component_template(r)
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
@@ -154,7 +155,21 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
-          r.slice(:id,:display_name,:execution_status,:module_branch_id,:version,:assembly_template).merge(:nodes => r[:ndx_nodes].values)
+          op_status      = ''
+          pending_status = nil
+          stop_status    = nil
+
+          r[:ndx_nodes].each do |node|
+            if (status = node[1][:admin_op_status]).eql? "stopped"
+              stop_status = "stopped"; break
+            elsif status.eql? "pending"
+              pending_status = "pending"
+            end
+          end
+
+          op_status = stop_status||pending_status||"running"    
+
+          r.slice(:id,:display_name,:execution_status,:module_branch_id).merge(:nodes => r[:ndx_nodes].values, :op_status => op_status)
         end
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
@@ -225,7 +240,7 @@ module DTK
       end
       port_links = get_port_links()
       port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
-
+      
       {:nodes => ndx_nodes.values, :port_links => port_links}
     end
 

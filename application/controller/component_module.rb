@@ -18,15 +18,14 @@ end
       rest_ok_response module_repo_info
     end
 
-    #TODO: rename to rest__update_repo_and_add_dsl_data(), input field :scaffold_if_no_dsl -> :scaffold_if_no_dsl and output field :dsl_created -> :dsl_created
     def rest__update_repo_and_add_dsl()
-      repo_id,library_id,module_name = ret_non_null_request_params(:repo_id,:library_id,:module_name)
-      version,scaffold = ret_request_params(:version,:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold}
+      component_module = create_obj(:component_module_id)
+      repo_id = ret_non_null_request_params(:repo_id)
       repo_idh = id_handle(repo_id,:repo)
-      library_idh = id_handle(library_id,:library)
-      project = get_default_project()
-      dsl_created = ComponentModule.update_repo_and_add_dsl(repo_idh,library_idh,project,module_name,version,opts)[:dsl_created]
+      version = ret_version()
+      scaffold = ret_request_params(:scaffold_if_no_dsl)
+      opts = {:scaffold_if_no_dsl => scaffold}
+      dsl_created = ComponentModule.update_repo_and_add_dsl_data(commit_sha,repo_idh,version,opts)[:dsl_created]
       rest_ok_response :dsl_created => dsl_created
     end
 

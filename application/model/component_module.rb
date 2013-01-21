@@ -69,23 +69,6 @@ module DTK
       config_agent_type
     end
 
-    #assumes library repo branch create; it updates this, creates workspace branch and then adds meta to workspace branch so it does
-    #not show up in library until user promotes it.
-    #TODO: consider whether combined functionality of create_empty_repo and update_repo_and_add_dsl should just create ws branch
-    #returns has with key :dsl_created
-    def self.update_repo_and_add_dsl(repo_idh,library_idh,project,module_name,version=nil,opts={})
-      repo = repo_idh.create_object()
-      branch_info = {
-        :workspace_branch => ModuleBranch.workspace_branch_name(project),
-        :library_branch => ModuleBranch.library_branch_name(library_idh)
-      }
-      repo.update_for_new_repo(branch_info.values) 
-      module_and_mb_info = update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version=nil,opts)
-      library_mb = module_and_mb_info[:module_branch_idh].create_object()
-      module_obj = module_and_mb_info[:module_idh].create_object() 
-      {:dsl_created => module_and_mb_info[:dsl_created]}
-    end
-
     def create_new_version(new_version)
       unless aug_ws_branch = get_augmented_workspace_branch()
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
@@ -238,6 +221,45 @@ module DTK
       dsl_paths_and_content = component_dsl.migrate(module_name,new_dsl_integer_version,format_type)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
+    #creates workspace branch and then adds meta to it
+
+
+    def update_repo_and_add_dsl_data(commit_sha,repo_idh,version,opts={})
+      ret = {:dsl_created => nil}
+      ws_branch = get_workspace_module_branch(version)
+      unless ws_branch.is_set_to_sha?(commit_sha)
+        pull_clone_changes?(ws_branch,version)
+      end
+
+      unless opts[:scaffold_if_no_dsl]
+        return ret
+      end
+
+      parse_info = parse_impl_to_create_and_push_dsl?(commit_sha,repo_idh,version)
+      new_commit_sha = parse_info[:new_commit_sha]
+      if new_commit_sha and new_commit_sha != commit_sha
+        ws_branch.set_sha(new_commit_sha)      
+      end
+      {:dsl_created => parse_info[:dsl_created]}
+    end
+
+
+    #returns hash with keys :dsl_created :new_commit_sha
+    def parse_impl_to_create_and_push_dsl?(commit_sha,repo_idh,version)
+      config_agent_type = :puppet #TODO: Hard coded
+      new_commit_sha = commit_sha
+      module_name = module_name()
+      project = get_project()
+      branch_name = ModuleBranch.workspace_branch_name(project,version)
+      repo = repo_idh.create_object()
+      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
+
+      if dsl_created = self.class.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
+        raise Error.new("write code to add and push addition with dsl file")
+      end
+      {:dsl_created => dsl_created,:new_commit_sha => new_commit_sha}
+    end
+    private :parse_impl_to_create_and_push_dsl?
 
     #only creates dsl file(s) if one does not exist
     def self.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
@@ -283,7 +305,8 @@ module DTK
     def self.import_postprocess(project,repo,module_name,version)
       module_and_branch_info = update_ws_module_objs_and_create_dsl?(project,repo,module_name,version)
       module_branch = module_and_branch_info[:module_branch_idh].create_object()
-      ModuleRepoInfo.new(repo,module_name,module_branch,version)
+      module_idh = module_and_branch_info[:module_idh]
+      ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
     end
     
     #returns  hash with keys :module_branch_idh,:dsl_created
@@ -306,35 +329,6 @@ module DTK
       end
       impl_obj.create_file_assets_from_dir_els()
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
-      module_branch_idh = module_and_branch_info[:module_branch_idh]
-      raise parsing_error if parsing_error
-      #if dsl_created then dont update model (this wil eb done when users optionally edits and commits)
-      ComponentDSL.update_model(impl_obj,module_branch_idh,version) unless dsl_created
-      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :dsl_created => dsl_created}
-    end
-
-    #MOD_RESTRUCT: TODO: deprecate below for above
-
-    #returns  hash with keys :module_branch_idh,:dsl_created
-    #dsl_created is either nil or hash keys: path, :conent
-    #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit
-    #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
-    def self.update_lib_module_objs_and_create_dsl?(repo,library_idh,module_name,version=nil,opts={})
-      config_agent_type = :puppet #TODO: hard wired
-      branch_name = ModuleBranch.library_branch_name(library_idh,version)
-      impl_obj = Implementation.create_library_impl?(library_idh,repo,module_name,config_agent_type,branch_name,version)
-
-      parsing_error = nil
-      dsl_created = nil
-      if opts[:scaffold_if_no_dsl]
-        begin
-          dsl_created = parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-         rescue => e
-          parsing_error = e
-        end
-      end
-      impl_obj.create_file_assets_from_dir_els()
-      module_and_branch_info = create_lib_module_and_branch_obj?(library_idh,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
       #if dsl_created then dont update model (this wil eb done when users optionally edits and commits)

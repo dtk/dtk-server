@@ -1,12 +1,13 @@
 module DTK
   class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,branch_obj,version=nil)
+    def initialize(repo,module_name,module_idh,branch_obj,version=nil)
       super()
       repo.update_object!(:repo_name,:id)
       repo_name = repo[:repo_name]
       hash = {
         :repo_id => repo[:id],
         :repo_name => repo_name,
+        :module_id => module_idh.get_id(),
         :module_name => module_name,
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch)
@@ -32,7 +33,7 @@ module DTK
     def get_workspace_branch_info(version=nil)
       aug_branch = get_augmented_workspace_branch(version)
       module_name = aug_branch[:module_name]
-      ModuleRepoInfo.new(aug_branch[:repo],module_name,aug_branch)
+      ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
 
     def get_augmented_workspace_branch(version=nil,opts={})
@@ -72,14 +73,18 @@ module DTK
       if ws_branch.is_set_to_sha?(commit_sha)
         return
       end
-      #first update the server clone
-      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
-      if merge_result == :merge_needed
-        raise Error.new("Merge problem exists between multiple clients editting the module (#{pp_module_name(version)})")
-      end 
+
+      pull_clone_changes?(ws_branch,version)
 
       update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)
       ws_branch.set_sha(commit_sha)
+    end
+
+    def pull_clone_changes?(ws_branch,version=nil)
+      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
+      if merge_result == :merge_needed
+        raise Error.new("Merge problem exists between multiple clients editting the module (#{pp_module_name(version)})")
+      end
     end
 
     def get_repos()
@@ -250,7 +255,8 @@ module DTK
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       branch_obj = module_and_branch_info[:module_branch_idh].create_object()
-      module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,branch_obj,version))
+      module_idh = module_and_branch_info[:module_idh]
+      module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,module_idh,branch_obj,version))
     end
 
     #can be overwritten

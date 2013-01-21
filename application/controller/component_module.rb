@@ -10,11 +10,11 @@ def rest__test_generate_dsl()
 end
 
     #### create and delete actions ###
-    def create_empty_repo()
-      module_name = ret_non_null_request_params(:component_module_name)
-      library_idh = ret_library_idh_or_default()
+  def rest__create()
+      module_name = ret_non_null_request_params(:module_name)
+      config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      module_repo_info = ComponentModule.create_empty_repo(library_idh,project,module_name)
+      module_repo_info = ComponentModule.initialize_module(project,module_name,config_agent_type)
       rest_ok_response module_repo_info
     end
 

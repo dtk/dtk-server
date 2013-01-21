@@ -70,7 +70,7 @@ module DTK
 
     def add_workspace_branch?(project,version)
       branch_name = self.class.workspace_branch_name(project,version)
-      RepoManager.add_branch_and_push_to_origin?(branch_name,self)
+      RepoManager.add_branch_and_push?(branch_name,self)
     end
 
     #MOD_RESTRUCT: TODO: deprecate 

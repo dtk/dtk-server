@@ -21,6 +21,8 @@ server.create_repo_user_for_nodes?()
 server.create_users_private_library?() if options[:create_private]
 
 idhs = server.create_users_private_target?(nil,ec2_region)
+=begin
+#DEPREACTE
 if options[:module_names]
   library_impls = server.add_modules_from_external_repo_dir(options[:module_names])
   (idhs[:project_idhs]||[]).each do |project_idh|
@@ -28,4 +30,5 @@ if options[:module_names]
     server.add_modules_workspaces(project,library_impls)
   end
 end
+=end
 

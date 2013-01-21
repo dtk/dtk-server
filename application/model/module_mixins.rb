@@ -233,6 +233,30 @@ module DTK
       end
     end
 
+    #returns module_and_branch_info
+    def initialize_module(project,module_name,config_agent_type,version=nil)
+      project_idh = project.id_handle()
+      if module_exists?(project_idh,module_name)
+        raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
+      end
+      ws_branch = ModuleBranch.workspace_branch_name(project,version)
+      create_opts = {
+        :create_branches => [ws_branch],
+        :push_create_branches => true,
+        :donot_create_master_branch => true,
+        :delete_if_exists => true,
+      }
+      
+      repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
+      create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+    end
+
+    #can be overwritten
+    def module_specific_type(config_agent_type)
+      module_type()
+    end
+    private :module_specific_type
+
     def create_empty_workspace_repo(project_idh,module_name,module_specific_type,opts={})
       auth_repo_users = RepoUser.authorized_users(project_idh.createMH(:repo_user))
       repo_user_acls = auth_repo_users.map do |repo_username|

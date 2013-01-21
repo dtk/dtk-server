@@ -1,10 +1,8 @@
 r8_require('branch_names')
-r8_nested_require('implementation','create_workspace')
 module XYZ
   class Implementation < Model
     include BranchNamesMixin
     extend BranchNamesClassMixin
-    include ImplCreateWorkspaceMixin
 
     def modify_file_assets(diff_summary)
       paths_to_delete = diff_summary.paths_to_delete

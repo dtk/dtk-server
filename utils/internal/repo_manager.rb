@@ -3,7 +3,7 @@ module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push_to_origin?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?]
+      RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_server_ssh_rsa_fingerprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
 
       def method_missing(name,*args,&block)
@@ -119,6 +119,10 @@ module XYZ
       klass.create_server_repo(repo_obj,repo_user_acls,opts) 
       if R8::Config[:repo][:workspace][:use_local_clones]
         klass.create_repo_clone(repo_obj,opts)
+      elsif R8::Config[:repo][:workspace][:update_bare_repo]
+        raise Error.new("Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]")
+      else
+        raise Error.new("shoudl not reach heer")
       end
     end
 

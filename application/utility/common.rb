@@ -161,6 +161,9 @@ eos
   end
   private :ret_idhs
 
+=begin
+#DEPREACTE
+
   def add_modules_from_external_repo_dir(module_names)
     library_mh = pre_execute(:library)
     library_idh = Library.get_users_private_library(library_mh).id_handle()
@@ -190,6 +193,7 @@ eos
     end
     ret
   end
+=end
 
   def add_modules_workspaces(project,library_impls)
     library_impls.map{|library_impl|library_impl.clone_into_project_if_needed(project)}

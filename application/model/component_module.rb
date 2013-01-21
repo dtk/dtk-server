@@ -65,19 +65,8 @@ module DTK
       {:module_name => module_name}
     end
 
-    def self.create_empty_repo(library_idh,project,module_name)
-      raise Error.new("MOD_RESTRUCT: needs to be rewritten") 
-      if module_exists?(library_idh,module_name)
-        raise ErrorUsage.new("Conflicts with existing library module (#{module_name})")
-      end
-      module_specific_type = :puppet  #TODO: hard wired
-      branch_info = {
-        :workspace_branch => ModuleBranch.workspace_branch_name(project),
-        :library_branch => ModuleBranch.library_branch_name(library_idh)
-      }
-      create_opts = {:delete_if_exists => true, :create_branches => branch_info.values}
-      repo = create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,create_opts)
-      ModuleRepoInfo.new(repo,module_name,branch_info,library_idh)
+    def self.module_specific_type(config_agent_type)
+      config_agent_type
     end
 
     #assumes library repo branch create; it updates this, creates workspace branch and then adds meta to workspace branch so it does

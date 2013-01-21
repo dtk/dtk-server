@@ -78,9 +78,9 @@ module DTK
 
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
-      config_agent_type =  ret_request_params(:config_agent_type)|| :puppet
+      config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      service_module_idh = ServiceModule.create_workspace_module_obj(project,module_name,config_agent_type)
+      service_module_idh = ServiceModule.initialize_module(project,module_name,config_agent_type)[:module_idh]
       rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
     

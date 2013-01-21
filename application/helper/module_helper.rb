@@ -17,6 +17,10 @@ module Ramaze::Helper
       module_class.import(project,remote_params,local_params)
     end
 
+    def ret_config_agent_type()
+      ret_request_params(:config_agent_type)|| :puppet #TODO: puppet hardwired
+    end
+
     def ret_diffs_summary()
       json_diffs = ret_request_params(:json_diffs)
       ::DTK::Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))

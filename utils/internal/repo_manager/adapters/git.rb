@@ -16,14 +16,14 @@ module DTK
           raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
-      #TODO: create does not actually create the branch passed to oit
+      #create() does not actually create the branch passed to oit
       local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.create_local_repo(repo_name,opts)
-      if create_branches = opts[:create_branches]
-        if opts[:push_create_branches]
-          create_branches.each{|branch|local_repo.add_branch_and_push?(branch,:empty=>true)}
+      if create_branch = opts[:create_branche]
+        if opts[:push_created_branch]
+          local_repo.add_branch_and_push?(create_branch,:empty=>true)
         else
-          create_branches.each{|branch|local_repo.add_branch?(branch,:empty=>true)}
+          local_repo.add_branch?(create_branch,:empty=>true)
         end
       end
     end

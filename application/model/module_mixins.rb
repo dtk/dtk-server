@@ -233,7 +233,7 @@ module DTK
       end
     end
 
-    #returns module_and_branch_info
+    #returns hash with keys :module_idh :module_branch_idh
     def initialize_module(project,module_name,config_agent_type,version=nil)
       project_idh = project.id_handle()
       if module_exists?(project_idh,module_name)
@@ -241,14 +241,16 @@ module DTK
       end
       ws_branch = ModuleBranch.workspace_branch_name(project,version)
       create_opts = {
-        :create_branches => [ws_branch],
-        :push_create_branches => true,
+        :create_branch => ws_branch,
+        :push_created_branche => true,
         :donot_create_master_branch => true,
         :delete_if_exists => true,
       }
       
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
-      create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      branch_obj = module_and_branch_info[:module_branch_idh].create_object()
+      module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,branch_obj,version))
     end
 
     #can be overwritten

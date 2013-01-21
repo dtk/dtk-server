@@ -1,6 +1,5 @@
 r8_require('branch_names')
 r8_nested_require('implementation','create_workspace')
-r8_nested_require('implementation','promote_module')
 module XYZ
   class Implementation < Model
     include BranchNamesMixin

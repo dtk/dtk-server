@@ -5,7 +5,6 @@ module XYZ
     include BranchNamesMixin
     extend BranchNamesClassMixin
     include ImplCreateWorkspaceMixin
-    include ImplPromoteModuleMixin
 
     def modify_file_assets(diff_summary)
       paths_to_delete = diff_summary.paths_to_delete

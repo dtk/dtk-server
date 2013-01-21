@@ -19,7 +19,11 @@ module DTK
       local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.create_local_repo(repo_name,opts)
       if create_branches = opts[:create_branches]
-        (create_branches - [CreateMethodBranch]).each{|branch|local_repo.add_branch?(branch)}
+        if opts[:push_create_branches]
+          create_branches.each{|branch|local_repo.add_branch_and_push_to_origin?(branch,:empty=>true)}
+        else
+          create_branches.each{|branch|local_repo.add_branch?(branch,:empty=>true)}
+        end
       end
     end
     CreateMethodBranch = "master" #TODO: may make this so it could be changed
@@ -68,10 +72,8 @@ module DTK
       remote_repo = "#{repo_url()}:#{repo_name}"
       git_command__clone(remote_repo,@path)      
       @grit_repo = Grit::Repo.new(@path) 
-      unless opts[:no_initial_commit]
-        Dir.chdir(@path) do
-          commit("initial empty commit","--allow-empty")
-        end
+      unless opts[:donot_create_master_branch]
+        git_command__empty_commit()
       end
     end
 
@@ -366,22 +368,27 @@ module DTK
       end
     end
 
-    def add_branch_and_push_to_origin?(new_branch)
-      add_branch?(new_branch)
+    def add_branch_and_push_to_origin?(new_branch,opts={})
+      add_branch?(new_branch,opts)
       checkout(new_branch) do
         git_command__push(new_branch)
       end
     end
 
-    def add_branch?(new_branch)
+    def add_branch?(new_branch,opts={})
       unless get_branches().include?(new_branch)
-        add_branch(new_branch)
+        add_branch(new_branch,opts)
       end
     end
 
-    def add_branch(new_branch)
-      checkout(@branch) do
-        git_command__add_branch(new_branch)
+    def add_branch(new_branch,opts={})
+      if opts[:empty]
+        git_command__create_empty_branch(new_branch)
+        git_command__empty_commit()
+      else
+        checkout(@branch) do
+          git_command__add_branch(new_branch)
+        end
       end
     end
 
@@ -438,9 +445,14 @@ module DTK
       ret
     end
 
+    def git_command__empty_commit()
+      commit("initial empty commit","--allow-empty")
+    end
     def commit(message,*array_opts)
-      set_author?()
-      git_command.commit(cmd_opts(),'-m',message,*array_opts)
+      Dir.chdir(@path) do
+        set_author?()
+        git_command.commit(cmd_opts(),'-m',message,*array_opts)
+      end
     end
 
     def default_remote_name()

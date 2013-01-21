@@ -171,6 +171,7 @@ module DTK
 
           r.slice(:id,:display_name,:execution_status,:module_branch_id).merge(:nodes => r[:ndx_nodes].values, :op_status => op_status)
         end
+        
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
@@ -240,7 +241,7 @@ module DTK
       end
       port_links = get_port_links()
       port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
-      
+
       {:nodes => ndx_nodes.values, :port_links => port_links}
     end
 

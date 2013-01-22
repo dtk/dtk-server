@@ -65,7 +65,7 @@ module DTK
         
         if dsl_file_info = self.class.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
           dsl_created = true
-          new_commit_sha = FileAsset.add_and_push_to_repo(impl_obj,type,dsl_file_info[:path],dsl_file_info[:content])
+          new_commit_sha = impl_obj.add_file_and_push_to_repo(dsl_file_info[:path],dsl_file_info[:content])
         end
         {:dsl_created => dsl_created,:new_commit_sha => new_commit_sha}
       end

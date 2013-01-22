@@ -3,15 +3,21 @@ module XYZ
     #model apis
     def get_content()
       #if content stored in db then return that
-      return self[:content] if self[:content]
+      if cache_content?()
+        return self[:content] if self[:content]
+      end
       update_object!(:path,:implementation_info)
       content = RepoManager.get_file_content(self,{:implementation => self[:implementation]})
-      #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
+      if cache_content?()
+        #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
+      end
       content
     end
 
     def update_content(content)
-      update(:content => content)
+      if cache_content?()
+        update(:content => content)
+      end
       update_object!(:path,:implementation_info)
 
       #TODO: trap parse errors and then do consitemncy check with meta
@@ -56,7 +62,7 @@ module XYZ
         :file_name => file_name,
         :display_name => file_name,
         :path => path,
-        :content => content,
+        :content => cache_content?() ? content : nil,
         :implementation_implementation_id => impl_obj.id()
       }
     end
@@ -99,6 +105,14 @@ module XYZ
    def self.file_asset_ref(path)
      path.gsub(Regexp.new("/"),"_")
    end
+
+   def cache_content?()
+     self.class.cache_content?()
+   end
+   def self.cache_content?()
+     R8::Config[:file_asset][:cache_content]
+   end
+
  end
 end
 

@@ -11,7 +11,7 @@ module XYZ
     end
 
     def last_access_time()
-      access_time
+      self.access_time
     end
 
     def get_username()

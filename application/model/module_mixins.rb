@@ -247,7 +247,7 @@ module DTK
       ws_branch = ModuleBranch.workspace_branch_name(project,version)
       create_opts = {
         :create_branch => ws_branch,
-        :push_created_branche => true,
+        :push_created_branch => true,
         :donot_create_master_branch => true,
         :delete_if_exists => true,
       }

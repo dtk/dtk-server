@@ -54,6 +54,9 @@ assembly_nodes  =
 {
   :schema=>:module,
   :table=>:service,
+  :columns=>{
+    :ready_to_stage => {:type=>:boolean,:default=>true}, #set to false when service dsl has a parsing error
+  },
   :virtual_columns=>{
     :module_branches=>{
       :type=>:json,

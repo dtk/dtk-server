@@ -31,9 +31,11 @@ module XYZ
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end
 
+    #returns sha of remote head
     def self.add_and_push_to_repo(impl_obj,type,path,content,opts={})
       add(impl_obj,type,path,content,opts)
-      RepoManager.push_implementation(:implementation => impl_obj)
+      sha_remote_head = RepoManager.push_implementation(:implementation => impl_obj)
+      sha_remote_head
     end
     def self.add(impl_obj,type,path,content,opts={})
       hash = ret_create_hash(impl_obj,type,path,content)

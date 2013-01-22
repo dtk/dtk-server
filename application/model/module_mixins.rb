@@ -239,7 +239,7 @@ module DTK
     end
 
     #returns hash with keys :module_idh :module_branch_idh
-    def initialize_module(project,module_name,config_agent_type,version=nil)
+    def initialize_module(project,module_name,config_agent_type,version=nil,opts={})
       project_idh = project.id_handle()
       if module_exists?(project_idh,module_name)
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
@@ -249,11 +249,12 @@ module DTK
         :create_branch => ws_branch,
         :push_created_branch => true,
         :donot_create_master_branch => true,
-        :delete_if_exists => true,
+        :delete_if_exists => true
       }
       
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      create_objs_opts = Aux.hash_subset(opts,[:not_ready_to_stage])
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,create_objs_opts)
       branch_obj = module_and_branch_info[:module_branch_idh].create_object()
       module_idh = module_and_branch_info[:module_idh]
       module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,module_idh,branch_obj,version))
@@ -340,18 +341,24 @@ module DTK
       module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
-    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version)
+    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,opts={})
       project_idh = project.id_handle()
       ref = module_name
       module_type = model_name.to_s
       mb_create_hash = ModuleBranch.ret_workspace_create_hash(project,module_type,repo_idh,input_version)
       version = mb_create_hash.values.first[:version]
+
+      fields = {
+        :display_name => module_name,
+        :module_branch => mb_create_hash
+      }
+      if opts[:not_ready_to_stage]
+        fields.merge!(:ready_to_stage => false)
+      end
+
       create_hash = {
         model_name.to_s => {
-          ref => {
-            :display_name => module_name,
-            :module_branch => mb_create_hash
-          }
+          ref => fields
         }
       }
       input_hash_content_into_model(project_idh,create_hash)

@@ -568,12 +568,17 @@ module DTK
 
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
+    #returns sha of remote haed
     def git_command__push(branch_name,remote_name=nil,remote_branch=nil)
+      ret = nil
       Git_command__push_mutex.synchronize do 
         remote_name ||= default_remote_name()
         remote_branch ||= branch_name
         git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}")
+        remote_name = "#{remote_name}/#{remote_branch}"
+        ret = @grit_repo.remotes.find{|r|r.name == remote_name}.commit.id
       end
+      ret
     end
 
     def git_command__rev_list_contains?(container_sha,index_sha)

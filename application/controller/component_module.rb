@@ -14,7 +14,9 @@ end
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      module_repo_info = ComponentModule.initialize_module(project,module_name,config_agent_type)[:module_repo_info]
+      version = nil
+      opts = {:not_ready_to_stage => true} #this option is set because rest__create() is first step in having client push initial content 
+      module_repo_info = ComponentModule.initialize_module(project,module_name,config_agent_type,version,opts)[:module_repo_info]
       rest_ok_response module_repo_info
     end
 

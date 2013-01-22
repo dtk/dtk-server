@@ -49,6 +49,9 @@ lambda__segment_components =
 {
   :schema=>:module,
   :table=>:component,
+  :columns=>{
+    :ready_to_stage => {:type=>:boolean,:default=>true}, #set to false when manifest or dsl has a parsing error
+  },
   :virtual_columns=>{
     :module_branches=>{
       :type=>:json,

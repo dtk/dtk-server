@@ -19,7 +19,7 @@ module DTK
       #create() does not actually create the branch passed to oit
       local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.create_local_repo(repo_name,opts)
-      if create_branch = opts[:create_branche]
+      if create_branch = opts[:create_branch]
         if opts[:push_created_branch]
           local_repo.add_branch_and_push?(create_branch,:empty=>true)
         else

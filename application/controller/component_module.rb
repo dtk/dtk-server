@@ -20,12 +20,12 @@ end
 
     def rest__update_repo_and_add_dsl()
       component_module = create_obj(:component_module_id)
-      repo_id = ret_non_null_request_params(:repo_id)
+      repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold}
-      dsl_created = ComponentModule.update_repo_and_add_dsl_data(commit_sha,repo_idh,version,opts)[:dsl_created]
+      dsl_created = component_module.update_repo_and_add_dsl_data(commit_sha,repo_idh,version,opts)[:dsl_created]
       rest_ok_response :dsl_created => dsl_created
     end
 

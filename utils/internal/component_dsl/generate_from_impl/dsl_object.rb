@@ -254,7 +254,6 @@ module DTK; class ComponentDSL
           io << "\n"
         end
 
-       private
         #since yaml generator is being used want to remove references so dont generate yaml with labels
         def yaml_form(level=1)
           ret = RenderHash.new

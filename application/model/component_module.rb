@@ -1,16 +1,11 @@
 r8_require('module_mixins')
 module DTK
   class ComponentModule < Model
+    r8_nested_require('component_module','parse_to_create_dsl')
     extend ModuleClassMixin
     include ModuleMixin
-#TODO: for testing
-    def test_generate_dsl()
-      module_branch = get_module_branch_matching_version()
-      config_agent_type = :puppet
-      impl_obj = module_branch.get_implementation()
-      ComponentModule.parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
-    end
-### end: for testing
+    extend ParseToCreateDSLClassMixin
+    include ParseToCreateDSLMixin
 
     def self.model_type()
       :component_module
@@ -243,57 +238,6 @@ module DTK
       {:dsl_created => parse_info[:dsl_created]}
     end
 
-
-    #returns hash with keys :dsl_created :new_commit_sha
-    def parse_impl_to_create_and_push_dsl?(commit_sha,repo_idh,version)
-      config_agent_type = :puppet #TODO: Hard coded
-      new_commit_sha = commit_sha
-      module_name = module_name()
-      project = get_project()
-      branch_name = ModuleBranch.workspace_branch_name(project,version)
-      repo = repo_idh.create_object()
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
-
-      if dsl_created = self.class.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-        raise Error.new("write code to add and push addition with dsl file")
-      end
-      {:dsl_created => dsl_created,:new_commit_sha => new_commit_sha}
-    end
-    private :parse_impl_to_create_and_push_dsl?
-
-    #only creates dsl file(s) if one does not exist
-    def self.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-      unless ComponentDSL.contains_dsl_file?(impl_obj)
-        parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-      end
-    end
-
-    #returns a key with created file's :path and :content 
-    def self.parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
-      parsing_error = nil
-      render_hash = nil
-      begin
-        impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
-        dsl_generator = ComponentDSL::GenerateFromImpl.create()
-        #refinement_hash is neutral form but with version specfic objects fro next phase
-        refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name,impl_obj.id_handle())
-        render_hash = refinement_hash.render_hash_form()
-       rescue ErrorUsage => e
-        #parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
-         parsing_error = e
-      rescue => e
-        Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
-        raise e
-      end
-      if render_hash 
-        format_type = ComponentDSL.default_format_type()
-        content = render_hash.serialize(format_type)
-        dsl_filename = ComponentDSL.dsl_filename(config_agent_type,format_type)
-        ret = {:path => dsl_filename, :content => content}
-      end
-      raise parsing_error if parsing_error
-      ret
-    end
    private
     def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
       impl = module_branch.get_implementation()
@@ -310,7 +254,7 @@ module DTK
     end
     
     #returns  hash with keys :module_branch_idh,:dsl_created
-    #dsl_created is either nil or hash keys: path, :conent
+    #dsl_created is either nil or hash keys: path, :content
     #this method does not add the dsl file, but rather passes as argument enabling user to edit then commit
     #creates and updates the module informationa dn optionally creates the dsl depending on :scaffold_if_no_dsl flag in option
     def self.update_ws_module_objs_and_create_dsl?(project,repo,module_name,version=nil,opts={})
@@ -322,7 +266,8 @@ module DTK
       dsl_created = nil
       if opts[:scaffold_if_no_dsl]
         begin
-          dsl_created = parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
+          parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
+          dsl_created = true
          rescue => e
           parsing_error = e
         end
@@ -331,7 +276,7 @@ module DTK
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       raise parsing_error if parsing_error
-      #if dsl_created then dont update model (this wil eb done when users optionally edits and commits)
+      #if dsl_created then dont update model (this will be done when users optionally edits and commits)
       ComponentDSL.update_model(impl_obj,module_branch_idh,version) unless dsl_created
       {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :dsl_created => dsl_created}
     end

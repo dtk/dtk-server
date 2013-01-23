@@ -241,7 +241,7 @@ module DTK
     end
 
     #returns hash with keys :module_idh :module_branch_idh
-    def initialize_module(project,module_name,config_agent_type,version=nil,opts={})
+    def initialize_module(project,module_name,config_agent_type,version=nil)
       project_idh = project.id_handle()
       if module_exists?(project_idh,module_name)
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")

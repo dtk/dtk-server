@@ -207,13 +207,16 @@ module DTK
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
+#      impl_obj = module_branch.get_implementation()
+#      impl_obj.create_file_assets_from_dir_els()
+
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
 
+ #     update_module_objs_or_create_dsl?(module_branch,version,opts)
       project = get_project()
       repo = repo_idh.create_object()
-      update_module_info = self.class.update_module_objs_and_create_dsl?(project,repo,module_name(),version,opts)
-      {:dsl_created_info => update_module_info[:dsl_created_info]}
+      self.class.update_module_objs_and_create_dsl?(project,repo,module_name(),version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type)
@@ -232,12 +235,6 @@ module DTK
     end
 
    private
-    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version,opts={})
-      impl = module_branch.get_implementation()
-      if opts[:force_parse] or diffs_summary.meta_file_changed?()
-        ComponentDSL.update_model(impl,module_branch.id_handle())
-      end
-    end
 
     def self.import_postprocess(project,repo,module_name,version)
       module_and_branch_info = update_module_objs_and_create_dsl?(project,repo,module_name,version)
@@ -262,6 +259,27 @@ module DTK
         dsl_created_info = parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
       end
       {:module_idh => module_idh, :module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
+    end
+
+    def update_module_objs_or_create_dsl?(module_branch,version,opts={})
+      impl_obj = module_branch.get_implementation()
+      dsl_created_info = Hash.new
+      if ComponentDSL.contains_dsl_file?(impl_obj)
+        diffs_summary =  opts[:diffs_summary]
+        if opts[:force_parse] or (diffs_summary and diffs_summary.meta_file_changed?())
+          set_dsl_parsed!(false)
+          ComponentDSL.update_model(impl_obj,module_branch.id_handle(),version)
+          set_dsl_parsed!(true)
+        end
+      else
+        config_agent_type = config_agent_type_default()
+        dsl_created_info = parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
+      end
+      {:dsl_created_info => dsl_created_info}
+    end
+
+    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version,opts={})
+      update_module_objs_or_create_dsl?(module_branch,version, :diffs_summary => diffs_summary)
     end
 
     def self.config_agent_type_default()

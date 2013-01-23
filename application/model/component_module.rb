@@ -235,7 +235,7 @@ module DTK
       if new_commit_sha and new_commit_sha != commit_sha
         ws_branch.set_sha(new_commit_sha)      
       end
-      {:dsl_created => parse_info[:dsl_created]}
+      {:dsl_created => parse_info[:dsl_created], :commit_sha => new_commit_sha}
     end
 
    private

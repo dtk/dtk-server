@@ -204,18 +204,15 @@ module DTK
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
       ret = {:dsl_created_info => Hash.new}
-      module_name = module_name()
       module_branch = get_workspace_module_branch(version)
-      if module_branch.is_set_to_sha?(commit_sha)
-        #no more processing to do
-        return ret
-      end
-        
-      pull_clone_changes?(module_branch,version)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
+
+      parse_needed = !dsl_parsed?()
+      return ret unless pull_was_needed or parse_needed
 
       project = get_project()
       repo = repo_idh.create_object()
-      update_module_info = self.class.update_module_objs_and_create_dsl?(project,repo,module_name,version,opts)
+      update_module_info = self.class.update_module_objs_and_create_dsl?(project,repo,module_name(),version,opts)
       {:dsl_created_info => update_module_info[:dsl_created_info]}
     end
 
@@ -235,9 +232,9 @@ module DTK
     end
 
    private
-    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version=nil)
+    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version,opts={})
       impl = module_branch.get_implementation()
-      if diffs_summary.meta_file_changed?()
+      if opts[:force_parse] or diffs_summary.meta_file_changed?()
         ComponentDSL.update_model(impl,module_branch.id_handle())
       end
     end

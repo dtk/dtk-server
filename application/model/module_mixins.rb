@@ -70,24 +70,16 @@ module DTK
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
-      ws_branch = get_workspace_module_branch(version)
-      if ws_branch.is_set_to_sha?(commit_sha)
-        return
-      end
+      module_branch = get_workspace_module_branch(version)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
-      pull_clone_changes?(ws_branch,version)
+      parse_needed = !dsl_parsed?()
+      return unless pull_was_needed or parse_needed
 
-      update_model_from_clone__type_specific?(diffs_summary,ws_branch,version)
-      ws_branch.set_sha(commit_sha)
+      update_model_from_clone__type_specific?(diffs_summary,module_branch,version,:force_parse => parse_needed)
       set_dsl_parsed!(true)
     end
 
-    def pull_clone_changes?(ws_branch,version=nil)
-      merge_result = RepoManager.fast_foward_pull(ws_branch[:branch],ws_branch)
-      if merge_result == :merge_needed
-        raise Error.new("Merge problem exists between multiple clients editting the module (#{pp_module_name(version)})")
-      end
-    end
 
     def get_repos()
       get_objs_uniq(:repos)
@@ -160,6 +152,10 @@ module DTK
 
     def set_dsl_parsed!(boolean_val)
       update(:dsl_parsed => boolean_val)
+    end
+
+    def dsl_parsed?()
+      get_field?(:dsl_parsed)
     end
 
    private

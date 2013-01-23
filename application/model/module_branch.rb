@@ -23,10 +23,29 @@ module DTK
       ModuleRepoInfo.new(repo,module_name,self)
     end
 
-    def get_module_name()
+    def get_module()
       row = get_obj(:cols => [:type,:parent_info])
       type = row[:type].to_sym
-      row[type].module_name()
+      row[type]
+    end
+
+    def get_module_name()
+      get_module().module_name()
+    end
+
+    #returns true if actual pull was needed
+    def pull_repo_changes?(commit_sha)
+      update_object!(:branch,:current_sha)
+      if is_set_to_sha?(commit_sha)
+        nil
+      else
+        merge_result = RepoManager.fast_foward_pull(self[:branch],self)
+        if merge_result == :merge_needed
+          raise Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
+        end
+        set_sha(commit_sha)
+        true
+      end
     end
 
     def is_set_to_sha?(commit_sha)

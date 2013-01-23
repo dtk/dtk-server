@@ -253,8 +253,7 @@ module DTK
       }
       
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
-      create_objs_opts = Aux.hash_subset(opts,[:not_ready_to_stage])
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,create_objs_opts)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       branch_obj = module_and_branch_info[:module_branch_idh].create_object()
       module_idh = module_and_branch_info[:module_idh]
       module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,module_idh,branch_obj,version))
@@ -341,7 +340,7 @@ module DTK
       module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
-    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,opts={})
+    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version)
       project_idh = project.id_handle()
       ref = module_name
       module_type = model_name.to_s
@@ -352,9 +351,6 @@ module DTK
         :display_name => module_name,
         :module_branch => mb_create_hash
       }
-      if opts[:not_ready_to_stage]
-        fields.merge!(:ready_to_stage => false)
-      end
 
       create_hash = {
         model_name.to_s => {

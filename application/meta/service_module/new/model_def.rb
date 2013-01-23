@@ -55,7 +55,7 @@ assembly_nodes  =
   :schema=>:module,
   :table=>:service,
   :columns=>{
-    :ready_to_stage => {:type=>:boolean,:default=>true}, #set to false when service dsl has a parsing error
+    :dsl_parsed => {:type=>:boolean,:default=>false}, #set to true when dsl has successfully parsed
   },
   :virtual_columns=>{
     :module_branches=>{

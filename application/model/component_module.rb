@@ -256,14 +256,15 @@ module DTK
       impl_obj.create_file_assets_from_dir_els()
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-
+      module_idh = module_and_branch_info[:module_idh]
       dsl_created_info = Hash.new
       if ComponentDSL.contains_dsl_file?(impl_obj)
         ComponentDSL.update_model(impl_obj,module_branch_idh,version)
+        module_idh.create_object().update(:dsl_parsed => true)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
       end
-      {:module_idh => module_and_branch_info[:module_idh], :module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
+      {:module_idh => module_idh, :module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
     end
 
     def self.config_agent_type_default()

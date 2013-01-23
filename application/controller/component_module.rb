@@ -4,8 +4,8 @@ module DTK
 
 def rest__test_generate_dsl()
   component_module = create_obj(:component_module_id)
-  dsl_created = component_module.test_generate_dsl()
-  STDOUT << dsl_created[:content] << "\n"
+  dsl_created_info = component_module.test_generate_dsl()
+  STDOUT << dsl_created_info[:content] << "\n"
   rest_ok_response
 end
 
@@ -20,15 +20,15 @@ end
       rest_ok_response module_repo_info
     end
 
-    def rest__update_repo_and_add_dsl()
+    def rest__update_from_initial_create()
       component_module = create_obj(:component_module_id)
       repo_id,commit_sha = ret_non_null_request_params(:repo_id,:commit_sha)
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold}
-      dsl_created = component_module.update_repo_and_add_dsl_data(commit_sha,repo_idh,version,opts)[:dsl_created]
-      rest_ok_response :dsl_created => dsl_created
+      dsl_created_info = component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
+      rest_ok_response :dsl_created_info => dsl_created_info
     end
 
     def rest__update_model_from_clone()

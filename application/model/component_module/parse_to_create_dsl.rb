@@ -1,17 +1,8 @@
 module DTK
   class ComponentModule
-    module ParseToCreateDSLClassMixin
-      #only creates dsl file(s) if one does not exist
-      #returns empty hash if no dsl field created or instead hash with keys: :path and :content  
-      def parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-        ret = Hash.new
-        unless ComponentDSL.contains_dsl_file?(impl_obj)
-          ret = parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
-        end
-        ret
-      end
 
-      #returns a key with created file's :path and :content 
+    module ParseToCreateDSLClassMixin
+      #returns empty hash if no dsl field created or instead hash with keys: :path and :content  
       def parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
         parsing_error = nil
         render_hash = nil
@@ -49,26 +40,6 @@ module DTK
         self.class.parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
       end
 ### end: for testing
-
-     private
-
-    #returns hash with keys: :dsl_created, :new_commit_sha
-      def parse_impl_to_create_and_push_dsl?(commit_sha,repo_idh,version)
-        dsl_created = nil
-        config_agent_type = :puppet #TODO: Hard coded
-        new_commit_sha = commit_sha
-        module_name = module_name()
-        project = get_project()
-        branch_name = ModuleBranch.workspace_branch_name(project,version)
-        repo = repo_idh.create_object()
-        impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
-        
-        if dsl_file_info = self.class.parse_impl_to_create_dsl?(module_name,config_agent_type,impl_obj)
-          dsl_created = true
-          new_commit_sha = impl_obj.add_file_and_push_to_repo(dsl_file_info[:path],dsl_file_info[:content])
-        end
-        {:dsl_created => dsl_created,:new_commit_sha => new_commit_sha}
-      end
 
     end
   end

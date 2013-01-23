@@ -28,7 +28,7 @@ end
       scaffold = ret_request_params(:scaffold_if_no_dsl)
       opts = {:scaffold_if_no_dsl => scaffold}
       dsl_created_info = component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
-      rest_ok_response :dsl_created_info => dsl_created_info
+      rest_ok_response dsl_created_info
     end
 
     def rest__update_model_from_clone()

@@ -166,8 +166,10 @@ module DTK
         }
         repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
       end
-      repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
+      commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
       module_repo_info = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
+      branch_obj = module_repo_info[:module_branch_idh].create_object()
+      branch_obj.set_sha(commit_sha)
       module_repo_info
     end
 

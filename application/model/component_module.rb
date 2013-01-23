@@ -235,7 +235,7 @@ module DTK
     end
 
    private
-    def update_model_from_clone_changes_aux?(diffs_summary,module_branch,version=nil)
+    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version=nil)
       impl = module_branch.get_implementation()
       if diffs_summary.meta_file_changed?()
         ComponentDSL.update_model(impl,module_branch.id_handle())
@@ -260,7 +260,7 @@ module DTK
       dsl_created_info = Hash.new
       if ComponentDSL.contains_dsl_file?(impl_obj)
         ComponentDSL.update_model(impl_obj,module_branch_idh,version)
-        module_idh.create_object().update(:dsl_parsed => true)
+        module_idh.create_object().set_dsl_parsed!(true)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
       end

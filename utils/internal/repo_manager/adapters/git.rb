@@ -250,7 +250,6 @@ module DTK
 
       #push to local 
       push_changes()
-      remote_name
     end
 
     #MOD_RESTRUCT: TODO: may deprecate

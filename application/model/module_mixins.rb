@@ -9,6 +9,7 @@ module DTK
         :repo_name => repo_name,
         :module_id => module_idh.get_id(),
         :module_name => module_name,
+        :module_branch_idh => branch_obj.id_handle(),
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch)
       }
@@ -76,8 +77,9 @@ module DTK
 
       pull_clone_changes?(ws_branch,version)
 
-      update_model_from_clone_changes_aux?(diffs_summary,ws_branch,version)
+      update_model_from_clone__type_specific?(diffs_summary,ws_branch,version)
       ws_branch.set_sha(commit_sha)
+      set_dsl_parsed!(true)
     end
 
     def pull_clone_changes?(ws_branch,version=nil)
@@ -154,6 +156,10 @@ module DTK
       module_branch.update_object!(:version)
       version = (module_branch.has_default_version?() ? nil : module_branch[:version])
       self.class.pp_module_name(module_name(),version)
+    end
+
+    def set_dsl_parsed!(boolean_val)
+      update(:dsl_parsed => boolean_val)
     end
 
    private

@@ -131,6 +131,7 @@ module XYZ
           #at this point child_list will just have existing items; need to add new items
           new_child_ids = new_uris.map{|uri| IDHandle[:c => c, :uri => uri].get_id()}
           child_id_list = child_id_list + new_child_ids
+          #TODO: check if should apply recursively and if so pass this as option to delete_not_matching_children
           delete_not_matching_children(child_id_list,factory_id_info,assigns,opts) 
         end
         new_uris

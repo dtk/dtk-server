@@ -198,13 +198,18 @@ module XYZ
       @completeness_info ? @completeness_info.is_complete? : nil
     end    
 
-    def mark_as_complete(constraints={})
+    def mark_as_complete(constraints={},opts={})
       if constraints.empty?
         @completeness_info ||= HashIsComplete.new()
       else
         @completeness_info = HashIsComplete.new(constraints)
       end
+      @apply_recursively = opts[:apply_recursively]
       self
+    end
+
+    def apply_recursively?()
+      @apply_recursively
     end
 
     def set_constraints(constraints)

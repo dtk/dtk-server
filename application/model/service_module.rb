@@ -46,8 +46,11 @@ module DTK
 
     def self.delete(idh)
       module_obj = idh.create_object().update_object!(:display_name,:project_project_id)
-      module_name =  module_obj[:display_name]
-      assoc_assemblies = module_obj.get_associated_target_instances()
+      module_name =  module_obj.module_name()
+
+      assembly_templates = module_obj.get_assembly_templates()
+
+      assoc_assemblies = get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map{|a|a[:display_name]}
         raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
@@ -56,10 +59,8 @@ module DTK
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})
 
-      assemblies = idh.create_object().get_assemblies()
       #need to explicitly delete nodes since nodes' parents are not the assembly
-      Log.error("bug in Assembly::Template.delete_assemblies_nodes")
-      Assembly::Template.delete_assemblies_nodes(assemblies.map{|a|a.id_handle()})
+      Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
 
       delete_instance(idh)
       {:module_name => module_name}
@@ -213,15 +214,15 @@ module DTK
       end
     end
 
-    def get_associated_target_instances()
+    def self.get_associated_target_instances(assembly_templates)
       ret = Array.new
-      assembly_templates = get_assembly_templates()
       return ret if assembly_templates.empty?
       sp_hash = {
         :cols => [:id,:display_name],
         :filter => [:oneof, :ancestor_id, assembly_templates.map{|r|r[:id]}]
       }
-      Model.get_objs(model_handle(:component),sp_hash)
+      mh = assembly_templates.first.model_handle(:component)
+      get_objs(mh,sp_hash)
     end 
 
    private

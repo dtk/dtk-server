@@ -6,7 +6,7 @@ module DTK; class Assembly
       return ret if assembly_idhs.empty?()
       sp_hash = {
         :cols => [:id, :group_id, :display_name],
-        :filter => [:oneof, :id, assembly_idhs.map{|idh|idh.get_id()}]
+        :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)

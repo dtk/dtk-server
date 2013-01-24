@@ -78,7 +78,7 @@ module DTK
       project = get_project()
       aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]
-      self.class.update_module_objs_and_create_dsl?(project,repo,module_name(),new_version)
+      self.class.create_module_objs_and_dsl?(project,repo,module_name(),new_version)
     end
 
     def info_about(about)
@@ -207,16 +207,12 @@ module DTK
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
-#      impl_obj = module_branch.get_implementation()
-#      impl_obj.create_file_assets_from_dir_els()
-
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
 
- #     update_module_objs_or_create_dsl?(module_branch,version,opts)
       project = get_project()
       repo = repo_idh.create_object()
-      self.class.update_module_objs_and_create_dsl?(project,repo,module_name(),version,opts)
+      self.class.create_module_objs_and_dsl?(project,repo,module_name(),version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type)
@@ -237,13 +233,13 @@ module DTK
    private
 
     def self.import_postprocess(project,repo,module_name,version)
-      module_and_branch_info = update_module_objs_and_create_dsl?(project,repo,module_name,version)
+      module_and_branch_info = create_module_objs_and_dsl?(project,repo,module_name,version)
       module_branch = module_and_branch_info[:module_branch_idh].create_object()
       module_idh = module_and_branch_info[:module_idh]
       ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
     end
-    
-    def self.update_module_objs_and_create_dsl?(project,repo,module_name,version,opts={})
+
+    def self.create_module_objs_and_dsl?(project,repo,module_name,version,opts={})
       config_agent_type = config_agent_type_default()
       branch_name = ModuleBranch.workspace_branch_name(project,version)
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
@@ -251,7 +247,8 @@ module DTK
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_idh = module_and_branch_info[:module_idh]
-      dsl_created_info = Hash.new
+
+      dsl_created_info = Hash.new()
       if ComponentDSL.contains_dsl_file?(impl_obj)
         ComponentDSL.update_model(impl_obj,module_branch_idh,version)
         module_idh.create_object().set_dsl_parsed!(true)
@@ -261,12 +258,14 @@ module DTK
       {:module_idh => module_idh, :module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
     end
 
-    def update_module_objs_or_create_dsl?(module_branch,version,opts={})
+    def update_module_objs_or_create_dsl?(diffs_summary,module_branch,version)
       impl_obj = module_branch.get_implementation()
+      #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
+      impl_obj.modify_file_assets(diffs_summary)
       dsl_created_info = Hash.new
+
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        diffs_summary =  opts[:diffs_summary]
-        if opts[:force_parse] or (diffs_summary and diffs_summary.meta_file_changed?())
+        if diffs_summary.meta_file_changed?()
           set_dsl_parsed!(false)
           ComponentDSL.update_model(impl_obj,module_branch.id_handle(),version)
           set_dsl_parsed!(true)
@@ -278,8 +277,8 @@ module DTK
       {:dsl_created_info => dsl_created_info}
     end
 
-    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version,opts={})
-      update_module_objs_or_create_dsl?(module_branch,version, :diffs_summary => diffs_summary)
+    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
+      update_module_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
     def self.config_agent_type_default()

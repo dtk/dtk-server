@@ -76,7 +76,7 @@ module DTK
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
 
-      update_model_from_clone__type_specific?(diffs_summary,module_branch,version,:force_parse => parse_needed)
+      update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
       set_dsl_parsed!(true)
     end
 

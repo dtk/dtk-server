@@ -33,10 +33,12 @@ module DTK; class Repo
       end
       DiffNames = [:renamed,:added,:deleted,:modified]
       DiffTypes = DiffNames.map{|n|"files_#{n}".to_sym}
+
      private
       def path(r)
         r["path"]||r[:path]
       end
+
     end
 
     def initialize(array_diff_hashes)

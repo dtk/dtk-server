@@ -204,7 +204,7 @@ module DTK
       if assembly.is_stopped?
         validate_params = [
           :action => :start, 
-          :params => {:assembly_id => assembly[:id]}, 
+          :params => {:assembly => assembly[:id]}, 
           :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
         ]
         return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)

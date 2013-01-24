@@ -158,8 +158,9 @@ module DTK
       ret = component_modules[key(Component.module_name(component_type))]
       if ret.nil? then ret 
       elsif ret.is_scalar?() then ret.is_scalar?()
+      elsif ret.empty? then nil
       else
-        raise Eeror.new("Not treating the version type")
+        raise Error.new("Not treating the version type (#{ret.inspect})")
       end
     end
 
@@ -229,6 +230,10 @@ module DTK
         if constraint.nil? then new()
         elsif constraint.kind_of?(Constraint) then constraint
         elsif constraint.kind_of?(String) then new(constraint)
+        elsif constraint.kind_of?(Hash) and constraint.size == 1 and constraint.keys.first == "namespace"
+          #MOD_RESTRUCT: TODO: need to decide if depracting 'namespace' key
+          Log.info("Ignoring constraint of form (#{constraint.inspect})")
+          new()
         else
           raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
         end
@@ -246,6 +251,10 @@ module DTK
       def is_scalar?()
         @value if @type == :scalar
       end
+
+      def empty?()
+        @type == :empty
+      end
       
       def to_s()
         case @type
@@ -260,9 +269,6 @@ module DTK
         @value = scalar
       end
       
-      def empty?()
-        @type == :empty?
-      end
     end
   end
 end

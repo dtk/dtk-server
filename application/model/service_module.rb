@@ -58,6 +58,7 @@ module DTK
 
       assemblies = idh.create_object().get_assemblies()
       #need to explicitly delete nodes since nodes' parents are not the assembly
+      Log.error("bug in Assembly::Template.delete_assemblies_nodes")
       Assembly::Template.delete_assemblies_nodes(assemblies.map{|a|a.id_handle()})
 
       delete_instance(idh)

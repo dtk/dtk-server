@@ -34,7 +34,7 @@ module DTK; class ServiceModule
       }
       existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
       mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
-      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint)
+      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,:apply_recursively => true)
 
       Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
 

@@ -1,6 +1,25 @@
 module XYZ
   class DB
     module DataProcessingUpdate
+      class CreateStack
+        def initialize(id_info)
+          @relation_type = id_info[:relation_type]
+          @id = id_info[:id]
+          @children = Array.new
+        end
+
+        def self.create_indexed(create_stack_array)
+          #TODO: stub
+          Indexed.new()
+        end
+        attr_reader :children
+
+        class Indexed
+          def delete_not_matching_children()
+          end
+        end
+      end
+
       def update_from_select(model_handle,field_set,select_ds,opts={})
         columns = field_set.cols
         #TODO: right now need to hardwire to t1 for this to work; although alias set with this var; adding where clause puts t1 in
@@ -37,7 +56,6 @@ module XYZ
         fetch_raw_sql(sql){|row| ret << row}
         ret
       end
-
 
       def update_rows_meeting_filter(model_handle,scalar_assignments,where_clause,opts={})
         #TODO: not treating opts yet or conversion from json form
@@ -107,6 +125,11 @@ module XYZ
       def update_from_hash_from_factory_id(factory_id_info,id_handle,assigns,opts={})
         new_uris = Array.new
         delete_not_matching = (assigns.kind_of?(HashObject) and assigns.is_complete?)
+        create_stack_array = 
+          if opts[:create_stack_array] then opts[:create_stack_array]
+          elsif assigns.kind_of?(HashObject) and assigns.apply_recursively? then Array.new
+        end
+
 	c = factory_id_info[:c]
         child_id_list = Array.new
 	#each assigns key should be qualified ref wrt factory_id
@@ -116,9 +139,17 @@ module XYZ
           child_idh[:group_id] = id_handle[:group_id] if id_handle[:group_id]
 	  child_id_info = IDInfoTable.get_row_from_id_handle child_idh
           if child_id_info
-	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,opts)
+            child_opts = opts
+            if create_stack_array
+              create_stack = CreateStack.new(child_id_info)
+              create_stack_array << create_stack
+              child_opts = opts.merge(:create_stack_array => create_stack.children()) 
+            end
+	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,child_opts)
+            #TODO: may better unify with create stack
             child_id_list << child_id_info[:id] if delete_not_matching
           else
+            #TODO: no need now to maintain a create stack for new items, because creaet stack just used to delete from existing parents
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend
               factory_id_handle = id_handle.createIDH(:uri => factory_id_info[:uri], :is_factory => true) 
               create_uris = create_from_hash(factory_id_handle,{qualified_ref => child_assigns}).map{|r|r[:uri]}
@@ -132,17 +163,21 @@ module XYZ
           new_child_ids = new_uris.map{|uri| IDHandle[:c => c, :uri => uri].get_id()}
           child_id_list = child_id_list + new_child_ids
           #TODO: check if should apply recursively and if so pass this as option to delete_not_matching_children
-          delete_not_matching_children(child_id_list,factory_id_info,assigns,opts) 
+          delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts) 
         end
         new_uris
       end
 
-      def delete_not_matching_children(child_id_list,factory_id_info,assigns,opts={})
+      def delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts={})
         parent_id_handle = IDHandle[:c => factory_id_info[:c], :guid => factory_id_info[:parent_id]]
         relation_type = factory_id_info[:relation_type]
         where_clause = child_id_list.empty? ? nil : SQL.not(SQL.or(*child_id_list.map{|id|{:id=>id}}))
         where_clause = SQL.and(where_clause,assigns.constraints) unless assigns.constraints.empty?
-        delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)        
+        delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)
+        if assigns.apply_recursively?
+          indexed_create_stack = CreateStack.create_indexed(create_stack_array)
+          indexed_create_stack.delete_not_matching_children()
+        end
       end
 
       #TODO: make more efficient by allowing a multiple insert/update

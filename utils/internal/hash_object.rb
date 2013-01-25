@@ -198,6 +198,7 @@ module XYZ
       @completeness_info ? @completeness_info.is_complete? : nil
     end    
 
+    #TODO: may want to make :apply_recursively = true be the default
     def mark_as_complete(constraints={},opts={})
       if constraints.empty?
         @completeness_info ||= HashIsComplete.new()

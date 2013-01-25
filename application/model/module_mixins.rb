@@ -18,6 +18,15 @@ module DTK
     end
   end
 
+  class CloneUpdateInfo < ModuleRepoInfo
+    def initialize(module_obj,version=nil)
+      aug_branch = module_obj.get_augmented_workspace_branch(version)
+      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
+      replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
+      self[:commit_sha] = aug_branch[:current_sha]
+    end
+  end
+
   r8_nested_require('module_mixins','remote')  
 
   module ModuleMixin
@@ -35,6 +44,10 @@ module DTK
       aug_branch = get_augmented_workspace_branch(version)
       module_name = aug_branch[:module_name]
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+    end
+
+    def get_clone_update_info(version=nil)
+      CloneUpdateInfo.new(self,version)
     end
 
     def get_augmented_workspace_branch(version=nil,opts={})

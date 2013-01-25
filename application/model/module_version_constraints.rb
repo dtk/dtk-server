@@ -83,7 +83,7 @@ module DTK
       self
     end
 
-    def save!(parent_idh=nil)
+    def save!(parent_idh=nil,opts={})
       parent_idh ||= parent_idh()
 
       #update model
@@ -106,14 +106,16 @@ module DTK
       end
 
       #update git repo
-      ServiceModule::GlobalModuleRefs.serialize_and_save_to_repo(@parent)
+      unless opts[:donot_make_repo_changes]
+        ServiceModule::GlobalModuleRefs.serialize_and_save_to_repo(@parent)
+      end
 
       self
     end
 
-    def set_and_save_constraints!(constraints_hash_form)
+    def set_and_save_constraints!(constraints_hash_form,opts={})
       reify_and_set_constraints(constraints_hash_form)
-      save!()
+      save!(nil,opts)
     end
 
     def constraints_in_hash_form()

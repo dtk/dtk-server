@@ -130,8 +130,8 @@ module DTK
       service_module = create_obj(:service_module_id)
       component_module = create_obj(:component_module_id,ComponentModule)
       version = ret_version()
-      service_module.set_component_module_version(component_module,version)
-      rest_ok_response
+      clone_update_info = service_module.set_component_module_version(component_module,version)
+      rest_ok_response clone_update_info
     end
 
   end

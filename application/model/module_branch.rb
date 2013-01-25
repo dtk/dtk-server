@@ -53,6 +53,7 @@ module DTK
     end
     def set_sha(commit_sha)
       update(:current_sha => commit_sha)
+      commit_sha
     end
 
     def pp_version()
@@ -78,10 +79,16 @@ module DTK
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
           RepoManager.add_file({:path => file_info[:path]},content,self)
         end
-        RepoManager.push_changes(self)
+        push_changes_to_repo()
       end
     end
-    
+
+    def push_changes_to_repo()
+      commit_sha = RepoManager.push_changes(self)
+      set_sha(commit_sha)
+    end
+    private :push_changes_to_repo
+
     def default_dsl_format_type()
       index = (get_type() == :service_module ? :service : :component)
       R8::Config[:dsl][index][:format_type][:default].to_sym

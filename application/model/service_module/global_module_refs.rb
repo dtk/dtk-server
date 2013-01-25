@@ -15,15 +15,15 @@ module DTK
       def self.get_hash_content(service_module_branch)
         ret = SimpleOrderedHash.new()
         vconstraints = service_module_branch.get_module_version_constraints()
-        unorderd_hash = vconstraints.constraints_in_hash_form()
-        if unorderd_hash.empty?
+        unordered_hash = vconstraints.constraints_in_hash_form()
+        if unordered_hash.empty?
           return ret
         end
-        unless unorderd_hash.size == 1 and unorderd_hash.keys.first == :component_modules
-          raise Error.new("Unexpected key(s) in module_version_constraints (#{unorderd_hash.keys.join(',')})")
+        unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
+          raise Error.new("Unexpected key(s) in module_version_constraints (#{unordered_hash.keys.join(',')})")
         end
 
-        cmp_mods = unorderd_hash[:component_modules]
+        cmp_mods = unordered_hash[:component_modules]
         cmp_mod_contraints = cmp_mods.keys.to_s.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
         ret.merge(:component_modules => cmp_mod_contraints)
       end

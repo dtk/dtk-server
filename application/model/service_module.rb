@@ -196,7 +196,8 @@ module DTK
     def update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
       project_idh = get_project().id_handle()
       #TODO: for more efficiency can push in diffs_summary to below
-      self.class.update_model_from_dsl(project_idh,id_handle(),module_branch,module_name())
+      opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
+      self.class.update_model_from_dsl(project_idh,id_handle(),module_branch,module_name(),opts)
     end
     private :update_model_from_clone__type_specific?
 

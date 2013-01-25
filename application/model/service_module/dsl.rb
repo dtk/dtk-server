@@ -26,8 +26,8 @@ module DTK
         ret
       end
 
-      def update_model_from_dsl(container_idh,service_module_idh,module_branch,module_name)
-        module_version_constraints = update_global_refs(module_branch)
+      def update_model_from_dsl(container_idh,service_module_idh,module_branch,module_name,opts={})
+        module_version_constraints = update_global_refs(module_branch,opts)
         update_assemblies_from_dsl(container_idh,service_module_idh,module_branch,module_name,module_version_constraints)
       end
 
@@ -76,13 +76,13 @@ module DTK
         end
       end
 
-      def update_global_refs(module_branch)
+      def update_global_refs(module_branch,opts={})
         constraints_hash_form = Hash.new
         if json_content = RepoManager.get_file_content(GlobalModuleRefs.meta_filename_path(),module_branch,:no_error_if_not_found=>true)
           constraints_hash_form = JSON.parse(json_content)
         end
         vconstraints = module_branch.get_module_version_constraints()
-        vconstraints.set_and_save_constraints!(constraints_hash_form)
+        vconstraints.set_and_save_constraints!(constraints_hash_form,opts)
       end
     end
   end

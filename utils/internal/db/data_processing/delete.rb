@@ -35,6 +35,28 @@ module XYZ
 	ds.delete
 	nil
       end
+      #TODO: may deprecate above for below
+      #id_rels is hash having form {:parent_id => [child_ids..], ..}
+      def delete_instances_wrt_parents(parent_id_handle,parent_rel_type,child_rel_type,id_rels)
+        parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
+        parent_fk_col = self.class.parent_field(parent_rel_type,child_rel_type)
+        disjuncts_array = id_rels.map do |(parent_id,children_ids)|
+          SQL.and({parent_fk_col => parent_id},SQL.not(SQL.in(:id,children_ids)))
+        end
+
+        filter = SQL.and({CONTEXT_ID => parent_id_handle[:c]},SQL.or(*disjuncts_array))
+	ds = dataset(DB_REL_DEF[child_rel_type]).filter(filter)
+        #Debugging
+        pp "------------------------------"
+        pp [:recursive_update_hash_delete, child_rel_type]
+        pp [:id_rels,id_rels]
+        pp [:deleting, ds.select(:ref,:id).all]
+        pp "------------------------------"
+        ######
+	ds.delete
+	nil
+      end
+
     end
   end
 end

@@ -51,7 +51,7 @@ module DTK
           cmp_type_version_info = mappings[cmp_type]
           if cmp_template = cmp_type_version_info[:component_template]
             el[:pntr][:component_template_id] = cmp_template[:id] 
-            if opts[:donot_set_component_template]
+            unless opts[:donot_set_component_template]
               el[:pntr][:component_template] = cmp_template
             end
           elsif el[:required]

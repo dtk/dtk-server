@@ -194,7 +194,7 @@ module DTK
       end
     end
 
-    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
       project_idh = get_project().id_handle()
       #TODO: for more efficiency can push in diffs_summary to below
       opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
@@ -228,14 +228,23 @@ module DTK
     end 
 
    private
+=begin 
+DEPRECATE
     def self.import_postprocess(project,repo,module_name,version)
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
       module_idh = module_and_branch_info[:module_idh]
       service_module = module_and_branch_info[:module_idh].create_object()
       service_module.update_model_from_dsl(project.id_handle(),module_branch,module_name)
       ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
+    end
+=end
+    def import__dsl(commit_sha,repo,module_and_branch_info)
+      info = module_and_branch_info #for succinctness
+      module_branch_idh = info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
+      update_model_from_dsl(get_project().id_handle(),module_branch,info[:module_name])
+      module_branch.set_sha(commit_sha)
     end
 
     def export_preprocess(module_branch)

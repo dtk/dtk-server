@@ -231,12 +231,20 @@ module DTK
     end
 
    private
-
+=begin
     def self.import_postprocess(project,repo,module_name,version)
       module_and_branch_info = create_module_objs_and_dsl?(project,repo,module_name,version)
       module_branch = module_and_branch_info[:module_branch_idh].create_object()
       module_idh = module_and_branch_info[:module_idh]
       ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
+    end
+=end
+    def import__dsl(commit_sha,repo,module_and_branch_info)
+      info = module_and_branch_info #for succinctness
+      #TODO: may be able to strip out parts below
+      self.class.create_module_objs_and_dsl?(get_project(),repo,info[:module_name],info[:version])
+      module_branch = module_branch_idh.create_object()
+      module_branch.set_sha(commit_sha)
     end
 
     def self.create_module_objs_and_dsl?(project,repo,module_name,version,opts={})
@@ -277,7 +285,7 @@ module DTK
       {:dsl_created_info => dsl_created_info}
     end
 
-    def update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
       update_module_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 

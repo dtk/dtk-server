@@ -89,8 +89,7 @@ module DTK
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
 
-      update_model_from_clone__type_specific?(diffs_summary,module_branch,version)
-      set_dsl_parsed!(true)
+      update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
     end
 
 
@@ -269,9 +268,13 @@ module DTK
       
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
-      branch_obj = module_and_branch_info[:module_branch_idh].create_object()
-      module_idh = module_and_branch_info[:module_idh]
-      module_and_branch_info.merge(:module_repo_info => ModuleRepoInfo.new(repo,module_name,module_idh,branch_obj,version))
+      module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info))
+    end
+
+    def module_repo_info(repo,module_and_branch_info)
+      info = module_and_branch_info #for succinctness
+      branch_obj = info[:module_branch_idh].create_object()
+      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,info[:version])
     end
 
     #can be overwritten
@@ -376,7 +379,7 @@ module DTK
 
       module_branch = get_workspace_module_branch(project,module_name,version)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
-      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
+      {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
     #MOD_RESTRUCT: TODO: deprecate below for above
     def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)

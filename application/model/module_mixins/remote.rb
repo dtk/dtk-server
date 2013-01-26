@@ -38,13 +38,14 @@ module DTK
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
-      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-      module_repo_info = self.class.import_postprocess(project,repo,module_name,version)
+      commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+      module_repo_info = self.class.import_postprocess(project,aug_head_branch,module_name,commit_sha,version)
       module_repo_info
     end
 
-    #MOD_RESTRUCT: this might be deprecated
+    #MOD_RESTRUCT: needes to be updated
     def pull_from_remote_if_fast_foward(remote_repo,version=nil)
+      raise Error.new("MOD_RESTRUCT: Needs to be updated")
       unless aug_branch = get_augmented_workspace_branch(version)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
@@ -62,7 +63,7 @@ module DTK
        when :local_behind
         repo.synchronize_with_remote_repo(remote_repo,local_branch,version)
         project = get_project()
-        self.class.import_postprocess(project,repo,module_name,version)
+        self.class.import_postprocess(project,repo,commit_sha,module_name,version)
        when :branchpoint
         #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
         #mean discard local changes
@@ -136,9 +137,11 @@ module DTK
     #import from remote repo
     def import(project,remote_params,local_params)
       local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
-      if module_obj = module_exists?(project.id_handle(),local_params[:module_name])
+      local_module_name = local_params[:module_name]
+      version = remote_params[:version]
+      if module_obj = module_exists?(project.id_handle(),local_module_name)
         if module_obj.get_module_branch(local_branch)
-          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_params[:module_name],remote_params[:version])})")
+          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_module_name,version)})")
         end
       end
       
@@ -164,13 +167,17 @@ module DTK
           :donot_create_master_branch => true,
           :delete_if_exists => true
         }
-        repo = create_empty_workspace_repo(project.id_handle(),local_params[:module_name],component_type,create_opts)
+        repo = create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
       end
-      commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,remote_params[:version])
-      module_repo_info = import_postprocess(project,repo,local_params[:module_name],remote_params[:version])
-      branch_obj = module_repo_info[:module_branch_idh].create_object()
-      branch_obj.set_sha(commit_sha)
-      module_repo_info
+      
+      commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,version)
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+
+      module_and_branch_info[:module_idh].import__dsl(repo,module_and_branch_info)
+#      import_postprocess(project,repo,local_module_name,version)
+#      branch_obj = module_repo_info[:module_branch_idh].create_object()
+ #     branch_obj.set_sha(commit_sha)
+       module_repo_info(commit_sha,repo,module_and_branch_info)
     end
 
     def delete_remote(project,remote_params)

@@ -227,7 +227,6 @@ module DTK
       get_objs(mh,sp_hash)
     end 
 
-   private
 =begin 
 DEPRECATE
     def self.import_postprocess(project,repo,module_name,version)
@@ -246,6 +245,8 @@ DEPRECATE
       update_model_from_dsl(get_project().id_handle(),module_branch,info[:module_name])
       module_branch.set_sha(commit_sha)
     end
+
+   private
 
     def export_preprocess(module_branch)
       #get module info for every component in an assembly in the service module

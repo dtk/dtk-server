@@ -28,9 +28,6 @@ module DTK
         ret
       end
 
-    end
-
-
 #TODO: for testing
       def test_generate_dsl()
         module_branch = get_module_branch_matching_version()

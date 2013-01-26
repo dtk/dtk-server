@@ -169,15 +169,13 @@ module DTK
         }
         repo = create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
       end
-      
+
       commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,version)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-
-      module_and_branch_info[:module_idh].import__dsl(repo,module_and_branch_info)
-#      import_postprocess(project,repo,local_module_name,version)
-#      branch_obj = module_repo_info[:module_branch_idh].create_object()
- #     branch_obj.set_sha(commit_sha)
-       module_repo_info(commit_sha,repo,module_and_branch_info)
+      module_obj ||= module_and_branch_info[:module_idh].create_object()
+      
+      module_obj.import__dsl(commit_sha,repo,module_and_branch_info)
+      module_repo_info(repo,module_and_branch_info)
     end
 
     def delete_remote(project,remote_params)

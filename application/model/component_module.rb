@@ -4,7 +4,6 @@ module DTK
     r8_nested_require('component_module','parse_to_create_dsl')
     extend ModuleClassMixin
     include ModuleMixin
-    extend ParseToCreateDSLClassMixin
     include ParseToCreateDSLMixin
 
     def self.model_type()
@@ -78,7 +77,7 @@ module DTK
       project = get_project()
       aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]
-      self.class.create_module_objs_and_dsl?(project,repo,module_name(),new_version)
+      create_impl_and_model_or_dsl_objs?(project,repo,new_version)
     end
 
     def info_about(about)
@@ -212,7 +211,7 @@ module DTK
 
       project = get_project()
       repo = repo_idh.create_object()
-      self.class.create_module_objs_and_dsl?(project,repo,module_name(),version,opts)
+      create_impl_and_model_or_dsl_objs?(project,repo,version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type)
@@ -231,9 +230,25 @@ module DTK
     end
 
    private
+
+    def create_impl_and_model_objs_or_dsl?(project,repo,version,opts={})
+      config_agent_type = config_agent_type_default()
+      module_name = module_name()
+      branch_name = ModuleBranch.workspace_branch_name(project,version)
+      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
+      impl_obj.create_file_assets_from_dir_els()
+
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+      module_idh = module_and_branch_info[:module_idh]
+
+      create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,version)
+    end
+
 =begin
+DEPRECATE
     def self.import_postprocess(project,repo,module_name,version)
-      module_and_branch_info = create_module_objs_and_dsl?(project,repo,module_name,version)
+y      module_and_branch_info = create_impl_and_model_objs_or_dsl?(project,repo,module_name,version)
       module_branch = module_and_branch_info[:module_branch_idh].create_object()
       module_idh = module_and_branch_info[:module_idh]
       ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
@@ -241,32 +256,24 @@ module DTK
 =end
     def import__dsl(commit_sha,repo,module_and_branch_info)
       info = module_and_branch_info #for succinctness
-      #TODO: may be able to strip out parts below
-      self.class.create_module_objs_and_dsl?(get_project(),repo,info[:module_name],info[:version])
+      module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
+      impl_obj = module_branch.get_implementation()
+      create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,info[:version])
       module_branch.set_sha(commit_sha)
     end
 
-    def self.create_module_objs_and_dsl?(project,repo,module_name,version,opts={})
-      config_agent_type = config_agent_type_default()
-      branch_name = ModuleBranch.workspace_branch_name(project,version)
-      impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
-      impl_obj.create_file_assets_from_dir_els()
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
-      module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_idh = module_and_branch_info[:module_idh]
-
+    def create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,version)
       dsl_created_info = Hash.new()
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        ComponentDSL.update_model(impl_obj,module_branch_idh,version)
-        module_idh.create_object().set_dsl_parsed!(true)
+        ComponentDSL.update_model(self,impl_obj,module_branch_idh,version)
       elsif opts[:scaffold_if_no_dsl] 
-        dsl_created_info = parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
+        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       {:module_idh => module_idh, :module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
     end
 
-    def update_module_objs_or_create_dsl?(diffs_summary,module_branch,version)
+    def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
       impl_obj = module_branch.get_implementation()
       #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
@@ -274,19 +281,17 @@ module DTK
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
-          set_dsl_parsed!(false)
-          ComponentDSL.update_model(impl_obj,module_branch.id_handle(),version)
-          set_dsl_parsed!(true)
+          ComponentDSL.update_model(self,impl_obj,module_branch.id_handle(),version)
         end
       else
         config_agent_type = config_agent_type_default()
-        dsl_created_info = parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
+        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       {:dsl_created_info => dsl_created_info}
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
-      update_module_objs_or_create_dsl?(diffs_summary,module_branch,version)
+      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
     def self.config_agent_type_default()

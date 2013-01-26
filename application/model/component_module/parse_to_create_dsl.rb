@@ -1,16 +1,15 @@
 module DTK
   class ComponentModule
-
-    module ParseToCreateDSLClassMixin
+    module ParseToCreateDSLMixin
       #returns empty hash if no dsl field created or instead hash with keys: :path and :content  
-      def parse_impl_to_create_dsl(module_name,config_agent_type,impl_obj)
+      def parse_impl_to_create_dsl(config_agent_type,impl_obj)
         parsing_error = nil
         render_hash = nil
         begin
           impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
           dsl_generator = ComponentDSL::GenerateFromImpl.create()
           #refinement_hash is neutral form but with version specfic objects fro next phase
-          refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name,impl_obj.id_handle())
+          refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name(),impl_obj.id_handle())
           render_hash = refinement_hash.render_hash_form()
         rescue ErrorUsage => e
           #parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
@@ -31,13 +30,13 @@ module DTK
 
     end
 
-    module ParseToCreateDSLMixin
+
 #TODO: for testing
       def test_generate_dsl()
         module_branch = get_module_branch_matching_version()
         config_agent_type = :puppet
         impl_obj = module_branch.get_implementation()
-        self.class.parse_impl_to_create_dsl(module_name(),config_agent_type,impl_obj)
+        parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
 ### end: for testing
 

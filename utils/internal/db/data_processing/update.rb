@@ -2,9 +2,9 @@ module XYZ
   class DB
     module DataProcessingUpdate
       class CreateStack
-        def initialize(id_info)
-          @relation_type = id_info[:relation_type]
-          @id = id_info[:id]
+        def initialize(relation_type,id)
+          @relation_type = relation_type
+          @id = id
           @children = Array.new
         end
 
@@ -167,7 +167,7 @@ module XYZ
           if child_id_info
             child_opts = opts
             if create_stack_array
-              create_stack = CreateStack.new(child_id_info)
+              create_stack = CreateStack.new(child_id_info[:relation_type],child_id_info[:id])
               create_stack_array << create_stack
               child_opts = opts.merge(:create_stack_array => create_stack.children()) 
             end
@@ -175,11 +175,17 @@ module XYZ
             #TODO: may better unify with create stack
             child_id_list << child_id_info[:id] if delete_not_matching
           else
-            #TODO: no need now to maintain a create stack for new items, because creaet stack just used to delete from existing parents
             unless assigns.kind_of?(HashObject) and assigns.do_not_extend
               factory_id_handle = id_handle.createIDH(:uri => factory_id_info[:uri], :is_factory => true) 
-              create_uris = create_from_hash(factory_id_handle,{qualified_ref => child_assigns}).map{|r|r[:uri]}
-              new_uris = new_uris + create_uris
+              create_results = create_from_hash(factory_id_handle,{qualified_ref => child_assigns})
+
+              #TODO: no need above to pass in handle on create stack; just for things nested down the stack -> using opts[:create_stack_array] in conditional
+              if opts[:create_stack_array] 
+                create_results.each do |child_create_res|
+                  opts[:create_stack_array] << CreateStack.new(child_idh[:model_name],child_create_res[:id])
+                end
+              end
+              new_uris = new_uris + create_results.map{|r|r[:uri]}
             end
           end
 

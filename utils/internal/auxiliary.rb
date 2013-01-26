@@ -109,6 +109,14 @@ module XYZ
         key_value.values.first
       end
 
+      def json_parse(json,file_path=nil)
+        begin 
+          ::JSON.parse(json)
+        rescue ::JSON::ParserError => e
+          raise ErrorUsage::JSONParsing.new(e,file_path)
+        end
+      end
+
       def serialize(hash_content,format_type)
         case format_type
           when :json
@@ -123,7 +131,7 @@ module XYZ
       def convert_to_hash(content,format_type)
         case format_type
           when :json
-            JSON.parse(content)
+            json_parse(content)
           when :yaml
             YAML.load(content)
           else

@@ -1,5 +1,16 @@
 module DTK
   class ErrorUsage < Error
+    class JSONParsing < self
+      def initialize(base_json_error,file_path=nil)
+        super(err_msg(base_json_error,file_path))
+      end
+     private
+      def err_msg(base_json_error,file_path=nil)
+        file_ref = file_path && " in file (#{file_path})"
+        "JSON parsing error#{file_ref}: #{base_json_error}"
+      end
+    end
+
     class DanglingComponentRefs < self
       def initialize(cmp_ref_info_list)
         super(err_msg(cmp_ref_info_list))
@@ -15,11 +26,12 @@ module DTK
           @error_cleanup = opts[:error_cleanup]
         end
 
-        def aggregate_errors!(&block)
+        def aggregate_errors!(ret_when_err=nil,&block)
           begin
             yield
            rescue DanglingComponentRefs => e
             @cmp_ref_info_list = ret_unique_union(@cmp_ref_info_list,e.cmp_ref_info_list)
+            ret_when_err
            rescue Exception => e
             @error_cleanup.call() if @error_cleanup
             raise e

@@ -295,14 +295,6 @@ module XYZ
       path.size == 1 ? val[path.first] : unravelled_value(val[path.first],path[1..path.size-1])
     end
 
-    def self.json_form(x)
-      begin
-        JSON.parse(x)
-      rescue Exception
-        x
-      end
-    end
-
    public
 
     def self.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)

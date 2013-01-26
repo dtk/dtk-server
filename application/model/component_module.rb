@@ -77,7 +77,7 @@ module DTK
       project = get_project()
       aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]
-      create_impl_and_model_or_dsl_objs?(project,repo,new_version)
+      create_impl_and_model_objs_or_dsl?(project,repo,new_version)
     end
 
     def info_about(about)
@@ -211,7 +211,7 @@ module DTK
 
       project = get_project()
       repo = repo_idh.create_object()
-      create_impl_and_model_or_dsl_objs?(project,repo,version,opts)
+      create_impl_and_model_objs_or_dsl?(project,repo,version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type)
@@ -247,7 +247,7 @@ module DTK
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
       impl_obj.create_file_assets_from_dir_els()
 
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_idh = module_and_branch_info[:module_idh]
 
@@ -295,7 +295,7 @@ y      module_and_branch_info = create_impl_and_model_objs_or_dsl?(project,repo,
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
-    def self.config_agent_type_default()
+    def config_agent_type_default()
       :puppet
     end
     def export_preprocess(branch)

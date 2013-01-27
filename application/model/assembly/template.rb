@@ -39,8 +39,9 @@ module DTK; class Assembly
           (pntr[:aug_cmp_refs] ||= Array.new) << aug_cmp_ref
         end
       end
+      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
-        r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs])
+        r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs],set_matching_opts)
       end
       aug_cmp_refs_ndx_by_vc.values.map{|r|r[:aug_cmp_refs]}.flatten
     end

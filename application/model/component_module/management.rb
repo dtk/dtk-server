@@ -21,10 +21,7 @@ module DTK; class ComponentModule
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-# Transaction do
-        create_needed_objects_and_dsl?(repo,version)
-# raise Error.new("break transaction")
-# end
+      create_needed_objects_and_dsl?(repo,version)
       module_branch.set_sha(commit_sha)
     end
 
@@ -56,7 +53,12 @@ module DTK; class ComponentModule
     end
 
    private
-        def create_needed_objects_and_dsl?(repo,version,opts={})
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
+    end
+
+
+    def create_needed_objects_and_dsl?(repo,version,opts={})
       project = get_project()
       config_agent_type = config_agent_type_default()
       module_name = module_name()
@@ -85,17 +87,17 @@ module DTK; class ComponentModule
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
+Transaction do          
           ComponentDSL.update_model(self,impl_obj,module_branch.id_handle(),version)
+#TODO: put in check if teher are any assembly templates with dangling refs
+ raise Error.new("Testing: break transaction")
+end
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       {:dsl_created_info => dsl_created_info}
-    end
-
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
-      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
   end              

@@ -40,8 +40,8 @@ end
     end
 
     def rest__delete()
-      component_module_id = ret_request_param_id(:component_module_id)
-      module_info = ComponentModule.delete(id_handle(component_module_id))
+      component_module = create_obj(:component_module_id)
+      module_info = component_module.delete_object()
       rest_ok_response module_info
     end
 

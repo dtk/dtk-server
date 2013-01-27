@@ -36,31 +36,6 @@ module DTK
      ndx_ret.values
     end
 
-    def self.delete(idh)
-      module_obj = idh.create_object().update_object!(:display_name)
-      module_name =  module_obj[:display_name]
-
-      assembly_templates = module_obj.get_associated_assembly_templates()
-      unless assembly_templates.empty?
-        assembly_names = assembly_templates.map{|a|a.display_name_print_form()}
-        raise ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
-      end
-
-      components = module_obj.get_associated_component_instances()
-      unless components.empty?
-        component_names = components.map{|r|r.display_name_print_form(:node_prefix=>true)}
-        raise ErrorUsage.new("Cannot delete the component module because the component instance(s) (#{component_names.join(',')}) reference it")
-      end
-
-      impls = module_obj.get_implementations()
-      delete_instances(impls.map{|impl|impl.id_handle()})
-      repos = module_obj.get_repos()
-      repos.each{|repo|RepoManager.delete_repo(repo)}
-      delete_instances(repos.map{|repo|repo.id_handle()})
-      delete_instance(idh)
-      {:module_name => module_name}
-    end
-
     def self.module_specific_type(config_agent_type)
       config_agent_type
     end

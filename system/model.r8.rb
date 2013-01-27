@@ -363,6 +363,14 @@ module XYZ
       end
     end
 
+    def delete_instances(idh_list)
+      self.class.delete_instances(idh_list)
+    end
+
+    def delete_instance(idh)
+      self.class.delete_instance(idh)
+    end
+
     class << self
      private
       def match_found(el,el_list,cols)

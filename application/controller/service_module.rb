@@ -85,9 +85,9 @@ module DTK
     end
     
     def rest__delete()
-      service_module_id = ret_request_param_id(:service_module_id)
-      ServiceModule.delete(id_handle(service_module_id))
-      rest_ok_response
+      service_module = create_obj(:service_module_id)
+      module_info = service_module.delete_object()
+      rest_ok_response module_info
     end
 
     def rest__delete_remote()

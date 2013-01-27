@@ -45,25 +45,22 @@ module DTK
       :service_module
     end
 
-    def self.delete(idh)
-      module_obj = idh.create_object().update_object!(:display_name,:project_project_id)
-      module_name =  module_obj.module_name()
+    def delete_object()
+      assembly_templates = get_assembly_templates()
 
-      assembly_templates = module_obj.get_assembly_templates()
-
-      assoc_assemblies = get_associated_target_instances(assembly_templates)
+      assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map{|a|a[:display_name]}
         raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
       end
-      repos = module_obj.get_repos()
+      repos = get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})
 
       #need to explicitly delete nodes since nodes' parents are not the assembly
       Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
 
-      delete_instance(idh)
+      delete_instance(id_handle())
       {:module_name => module_name}
     end
 

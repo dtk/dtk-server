@@ -52,6 +52,29 @@ module DTK; class ComponentModule
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
+
+    def delete_object()
+      assembly_templates = get_associated_assembly_templates()
+      unless assembly_templates.empty?
+        assembly_names = assembly_templates.map{|a|a.display_name_print_form()}
+        raise ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
+      end
+
+      components = get_associated_component_instances()
+      unless components.empty?
+        component_names = components.map{|r|r.display_name_print_form(:node_prefix=>true)}
+        raise ErrorUsage.new("Cannot delete the component module because the component instance(s) (#{component_names.join(',')}) reference it")
+      end
+
+      impls = get_implementations()
+      delete_instances(impls.map{|impl|impl.id_handle()})
+      repos = get_repos()
+      repos.each{|repo|RepoManager.delete_repo(repo)}
+      delete_instances(repos.map{|repo|repo.id_handle()})
+      delete_instance(id_handle())
+      {:module_name => module_name()}
+    end
+
    private
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
@@ -101,7 +124,7 @@ module DTK; class ComponentModule
       Transaction do          
         ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
 #TODO: put in check heer which is positioned after changes tentaively made if there are any assembly templates with dangling refs
- raise Error.new("Testing: break transaction")
+# raise Error.new("Testing: break transaction")
       end
       set_dsl_parsed!(true)
     end

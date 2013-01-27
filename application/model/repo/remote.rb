@@ -20,7 +20,9 @@ module DTK
         remote_url = Remote.new(remote_repo).repo_url_ssh_access(self[:remote_repo_name])
         remote_name = remote_name_for_push_pull(remote_repo)
         remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.initial_sync_with_remote_repo(local_branch,self[:repo_name],remote_name,remote_url,remote_branch)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,self[:repo_name],remote_name,remote_url,remote_branch)
+        
+        commit_sha
       end
 
       #MOD_RESTRUCT: TODO: may deprecate

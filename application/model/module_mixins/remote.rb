@@ -26,6 +26,7 @@ module DTK
 
     #this should be called when the module is linked, but the specfic version is not
     def import_version(remote_repo,version)
+      raise Error.new("MOD_RESTRUCT: must be rewritten")
       module_name = module_name()
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch(nil)
@@ -134,7 +135,8 @@ module DTK
   end
 
   module ModuleRemoteClassMixin
-    #import from remote repo
+    #import from remote repo; directly in this method handles the module/branc and repo level items
+    #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
       local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
       local_module_name = local_params[:module_name]

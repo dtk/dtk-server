@@ -227,17 +227,6 @@ module DTK
       get_objs(mh,sp_hash)
     end 
 
-=begin 
-DEPRECATE
-    def self.import_postprocess(project,repo,module_name,version)
-      module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
-      module_idh = module_and_branch_info[:module_idh]
-      service_module = module_and_branch_info[:module_idh].create_object()
-      service_module.update_model_from_dsl(project.id_handle(),module_branch,module_name)
-      ModuleRepoInfo.new(repo,module_name,module_idh,module_branch,version)
-    end
-=end
     def import__dsl(commit_sha,repo,module_and_branch_info)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]

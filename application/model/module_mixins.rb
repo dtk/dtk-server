@@ -337,27 +337,6 @@ module DTK
       version ? "#{module_name} (#{version})" : module_name
     end
 
-   private
-    def get_all_repos(mh)
-      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
-        repo = r[:repo]
-        h[repo[:id]] ||= repo
-        h
-      end.values
-    end
-
-    def module_exists?(project_idh,module_name)
-      unless project_idh[:model_name] == :project
-        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
-      end
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
-                    [:eq, :display_name, module_name]]
-      }
-      module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
-    end
-
     def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version)
       project_idh = project.id_handle()
       ref = module_name
@@ -399,6 +378,27 @@ module DTK
       module_branch = get_library_module_branch(library_idh,module_name,version)
       module_idh =  library_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
+    end
+
+   private
+    def get_all_repos(mh)
+      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
+        repo = r[:repo]
+        h[repo[:id]] ||= repo
+        h
+      end.values
+    end
+
+    def module_exists?(project_idh,module_name)
+      unless project_idh[:model_name] == :project
+        raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
+      end
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
+                    [:eq, :display_name, module_name]]
+      }
+      module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
     end
 
   end

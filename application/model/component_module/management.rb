@@ -72,7 +72,7 @@ module DTK; class ComponentModule
 
       dsl_created_info = Hash.new()
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        ComponentDSL.update_model(self,impl_obj,module_branch_idh,version)
+        parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
@@ -87,17 +87,23 @@ module DTK; class ComponentModule
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
-Transaction do          
-          ComponentDSL.update_model(self,impl_obj,module_branch.id_handle(),version)
-#TODO: put in check heer which is positioned after changes tentaively made if there are any assembly templates with dangling refs
- raise Error.new("Testing: break transaction")
-end
+          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       {:dsl_created_info => dsl_created_info}
+    end
+
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
+      set_dsl_parsed!(false)
+      Transaction do          
+        ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
+#TODO: put in check heer which is positioned after changes tentaively made if there are any assembly templates with dangling refs
+ raise Error.new("Testing: break transaction")
+      end
+      set_dsl_parsed!(true)
     end
 
   end              

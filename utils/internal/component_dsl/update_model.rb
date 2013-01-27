@@ -58,13 +58,11 @@ module DTK; class ComponentDSL
   end
 
   module UpdateModelClassMixin
-    def update_model(module_obj,impl_obj,module_branch_idh,version=nil)
+    def parse_and_update_model(impl_obj,module_branch_idh,version=nil)
       component_dsl_obj = create_dsl_object_from_impl(impl_obj)
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version
-      module_obj.set_dsl_parsed!(false)
       component_dsl_obj.update_model(update_opts)
-      module_obj.set_dsl_parsed!(true)
     end
 
     def add_components_from_dsl(container_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil)

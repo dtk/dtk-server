@@ -149,7 +149,7 @@ module DTK
       
       remote_repo = Repo::Remote.new(remote_params[:repo])
       remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
-
+Transaction do
       #case on whether the module is created already
       if module_obj
         repos = module_obj.get_repos()
@@ -177,6 +177,8 @@ module DTK
       module_obj ||= module_and_branch_info[:module_idh].create_object()
       
       module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+  raise Error.new("break transaction")
+end
       module_repo_info(repo,module_and_branch_info,version)
     end
 

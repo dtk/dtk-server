@@ -5,6 +5,9 @@ module XYZ
       @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
     end
 
+    def transaction(*args,&block)
+      @db.transaction(*args,&block)
+    end
 
     def ret_array_dataset(rows)
       ds = @db.dataset()

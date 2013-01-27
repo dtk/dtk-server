@@ -289,6 +289,12 @@ module XYZ
       create_from_rows(model_handle,[row],opts).first
     end
 
+    def Transaction(*args,&block)
+      self.class.Transaction(*args,&block)
+    end
+    def self.Transaction(*args,&block)
+      @db.transaction(*args,&block)
+    end
 
     #adds or deletes children based on match_cols
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})

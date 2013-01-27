@@ -77,8 +77,8 @@ module DTK
       project = get_project()
       aug_ws_branch.add_workspace_branch?(project,new_version)
       repo = aug_ws_branch[:repo]
-      impl_obj,config_agent_type = create_impl_and_file_objs?(project,repo,version,opts)
-      create_model_objs_or_dsl?(impl_obj,config_agent_type,aug_ws_branch.id_handle(),version)
+      impl_obj,config_agent_type = create_impl_and_file_objs?(project,repo,new_version)
+      create_model_objs_or_dsl?(impl_obj,config_agent_type,aug_ws_branch.id_handle(),new_version)
     end
 
     def info_about(about)
@@ -231,12 +231,11 @@ module DTK
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
-    def import__dsl(commit_sha,repo,module_and_branch_info)
+    def import__dsl(commit_sha,repo,module_and_branch_info,version)
       info = module_and_branch_info #for succinctness
-      version = info[:version]
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-      impl_obj,config_agent_type = create_impl_and_file_objs?(project,repo,version)
+      impl_obj,config_agent_type = create_impl_and_file_objs?(get_project(),repo,version)
       create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,version)
       module_branch.set_sha(commit_sha)
     end

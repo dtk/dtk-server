@@ -176,8 +176,8 @@ module DTK
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
       module_obj ||= module_and_branch_info[:module_idh].create_object()
       
-      module_obj.import__dsl(commit_sha,repo,module_and_branch_info)
-      module_repo_info(repo,module_and_branch_info)
+      module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+      module_repo_info(repo,module_and_branch_info,version)
     end
 
     def delete_remote(project,remote_params)

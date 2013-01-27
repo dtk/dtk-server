@@ -268,13 +268,13 @@ module DTK
       
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
-      module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info))
+      module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info,version))
     end
 
-    def module_repo_info(repo,module_and_branch_info)
+    def module_repo_info(repo,module_and_branch_info,version)
       info = module_and_branch_info #for succinctness
       branch_obj = info[:module_branch_idh].create_object()
-      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,info[:version])
+      ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version)
     end
 
     #can be overwritten

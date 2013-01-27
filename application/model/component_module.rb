@@ -74,11 +74,19 @@ module DTK
       end
       #TODO: may check that version number is greater than existing versions
 
-      project = get_project()
-      aug_ws_branch.add_workspace_branch?(project,new_version)
-      repo = aug_ws_branch[:repo]
-      impl_obj,config_agent_type = create_impl_and_file_objs?(project,repo,new_version)
-      create_model_objs_or_dsl?(impl_obj,config_agent_type,aug_ws_branch.id_handle(),new_version)
+      aug_new_branch = aug_ws_branch.add_workspace_branch?(self,new_version)
+      repo = aug_new_branch[:repo]
+      impl_obj,config_agent_type = create_impl_and_file_objs?(repo,new_version)
+      create_model_objs_or_dsl?(impl_obj,config_agent_type,aug_new_branch.id_handle(),new_version)
+    end
+
+    def import__dsl(commit_sha,repo,module_and_branch_info,version)
+      info = module_and_branch_info #for succinctness
+      module_branch_idh = info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object()
+      impl_obj,config_agent_type = create_impl_and_file_objs?(repo,version)
+      create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,version)
+      module_branch.set_sha(commit_sha)
     end
 
     def info_about(about)
@@ -210,9 +218,8 @@ module DTK
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
 
-      project = get_project()
       repo = repo_idh.create_object()
-      impl_obj,config_agent_type = create_impl_and_file_objs?(project,repo,version,opts)
+      impl_obj,config_agent_type = create_impl_and_file_objs?(repo,version,opts)
       create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch.id_handle(),version)
     end
 
@@ -231,19 +238,11 @@ module DTK
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
-    def import__dsl(commit_sha,repo,module_and_branch_info,version)
-      info = module_and_branch_info #for succinctness
-      module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object()
-      impl_obj,config_agent_type = create_impl_and_file_objs?(get_project(),repo,version)
-      create_model_objs_or_dsl?(impl_obj,config_agent_type,module_branch_idh,version)
-      module_branch.set_sha(commit_sha)
-    end
-
    private
 
     #returns  [impl_obj,config_agent_type] 
-    def create_impl_and_file_objs?(project,repo,version,opts={})
+    def create_impl_and_file_objs?(repo,version,opts={})
+      project = get_project()
       config_agent_type = config_agent_type_default()
       module_name = module_name()
       branch_name = ModuleBranch.workspace_branch_name(project,version)

@@ -93,6 +93,13 @@ module DTK
     end
 
 
+    def get_project()
+      update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
+      if project_id = self[:project_project_id]
+        id_handle(:model_name => :project, :id => project_id).create_object()
+      end
+    end
+
     def get_repos()
       get_objs_uniq(:repos)
     end
@@ -171,13 +178,6 @@ module DTK
     end
 
    private
-    def get_project()
-      update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
-      if project_id = self[:project_project_id]
-        id_handle(:model_name => :project, :id => project_id).create_object()
-      end
-    end
-
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])

@@ -94,9 +94,11 @@ module DTK
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
-    def add_workspace_branch?(project,version)
-      branch_name = self.class.workspace_branch_name(project,version)
+    def add_workspace_branch?(module_obj,new_version)
+      project = module_obj.get_project()
+      branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
+      module_obj.get_augmented_workspace_branch(new_version)
     end
 
     #MOD_RESTRUCT: TODO: deprecate 

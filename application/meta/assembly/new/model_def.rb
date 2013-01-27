@@ -23,7 +23,7 @@ segment_component_ref = {
   :convert => true,
   :join_type => :inner,
   :join_cond=>{:node_node_id => :node__id},
-  :cols => [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type]
+  :cols => [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
 }
 lambda__segment_component_template =
   lambda{|join_type|

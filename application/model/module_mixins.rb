@@ -46,7 +46,7 @@ module DTK
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
 
-    def get_clone_update_info(version=nil)
+    def ret_clone_update_info(version=nil)
       CloneUpdateInfo.new(self,version)
     end
 

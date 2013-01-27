@@ -89,7 +89,7 @@ module DTK; class ComponentModule
         if diffs_summary.meta_file_changed?()
 Transaction do          
           ComponentDSL.update_model(self,impl_obj,module_branch.id_handle(),version)
-#TODO: put in check if teher are any assembly templates with dangling refs
+#TODO: put in check heer which is positioned after changes tentaively made if there are any assembly templates with dangling refs
  raise Error.new("Testing: break transaction")
 end
         end

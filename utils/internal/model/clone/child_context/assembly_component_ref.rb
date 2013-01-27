@@ -20,7 +20,7 @@ module DTK
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:component_template_id,:node_and_template_info],
+          :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:component_template_id,:node_and_template_info,:template_id_synched],
           :filter => [:oneof, :node_node_id, node_stub_ids]
         }
         aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)

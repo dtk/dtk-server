@@ -1,6 +1,6 @@
 module DTK
   class ServiceModule
-y    module ComponentVersionMixin
+    module ComponentVersionMixin
       def set_component_module_version(component_module,component_version,service_version=nil)
         cmp_module_name = component_module.module_name()
         #make sure that component_module has version defined
@@ -14,7 +14,7 @@ y    module ComponentVersionMixin
 
         #check if set to this version already; if so no-op
         if vconstraints.include_module_version?(cmp_module_name,component_version)
-          return get_clone_update_info(service_version)
+          return ret_clone_update_info(service_version)
         end
 
         #make sure that the service module references the component module
@@ -28,7 +28,7 @@ y    module ComponentVersionMixin
         #set in vconstraints the module have specfied value and update both model and service's global refs
         vconstraints.set_module_version(cmp_module_name,component_version)
         vconstraints.save!()
-        get_clone_update_info(service_version)
+        ret_clone_update_info(service_version)
       end
 
     end

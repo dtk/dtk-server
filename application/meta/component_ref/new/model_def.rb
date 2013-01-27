@@ -11,7 +11,9 @@
       :foreign_key_rel_type=>:component,
       :on_delete=>:set_null,
       :on_update=>:set_null
-    }
+    },
+    :template_id_synched=>{:type =>:boolean,:default=>false} #indicates whether :component_template_id is set and currently synced
+    #which wil allow cheaper search when tarce to and from component refs and compoennt templtaes
   },
   :virtual_columns=>{
     :node_and_template_info=>{

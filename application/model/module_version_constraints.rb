@@ -30,10 +30,13 @@ module DTK
             (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :version => r[:version]}
           end
         else
-          unless r[:template_id_synched]
+          unless r[:template_id_synched] 
             (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r,:required => r[:component_template_id].nil?}
+          else
+            raise Error.new("Unexpected that r[:component_template_id] is null for (#{r.inspect})") if r[:component_template_id].nil?
           end
         end
+        r[:template_id_synched] = true #marking each item synchronized
       end
 
       #shortcut if no locked versions and no required elements

@@ -94,11 +94,12 @@ module DTK
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
-    def add_workspace_branch?(module_obj,new_version)
-      project = module_obj.get_project()
+    #returns repo for new branch
+    def add_workspace_branch?(project,base_repo,new_version)
+      repo_new_branch = base_repo #TODO: bakes in taht difefernt versions share same repo
       branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
-      module_obj.get_augmented_workspace_branch(new_version)
+      repo_new_branch
     end
 
     #MOD_RESTRUCT: TODO: deprecate 

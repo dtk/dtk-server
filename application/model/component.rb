@@ -104,6 +104,8 @@ module XYZ
       user_friendly_name.gsub(/::/,"__")
     end
 
+    ### display name functions
+    #TODO: should collpase these into just one or two
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:ref_num]
       unless opts[:without_version] 
@@ -137,12 +139,13 @@ module XYZ
     def convert_to_print_form!()
       update_object!(:component_type,:ref_num,:version)
       component_type = pp_component_type()
-      self[:display_name] = self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
+      self[:display_name] = (self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type)
       if has_default_version?()
         self[:version] = nil
       end 
       self
     end
+    ### end: display name functions
 
     ### virtual column defs
     def name()

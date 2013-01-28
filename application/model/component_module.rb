@@ -26,15 +26,6 @@ module DTK
       end
       ndx_ret.values
     end
-    #TODO: remove below
-    def get_associated_augmented_component_refs()
-      ndx_ret = Hash.new
-      get_objs(:cols => [:assembly_templates]).each do |r|
-        component_ref = r[:component_ref]
-        ndx_ret[component_ref[:id]] ||= component_ref.merge(component_ref.hash_subset(:assembly_template,:node))
-      end
-      ndx_ret.values
-    end
 
     def get_associated_component_instances()
       ndx_ret = Hash.new

@@ -10,6 +10,7 @@ module DTK
         "JSON parsing error#{file_ref}: #{base_json_error}"
       end
     end
+
     class ReferencedComponentTemplates < self
       def initialize(aug_cmp_templates)
         super(err_msg(aug_cmp_templates))
@@ -17,8 +18,20 @@ module DTK
       end
       private
       def err_msg(aug_cmp_templates)
-        pp aug_cmp_templates
-        "TODO: write error msg for ReferencedComponentTemplates"
+        ident = "  "
+        ref_errors = ident + aug_cmp_templates.map{|cmp_tmpl|msg_per_cmp_template(cmp_tmpl)}.flatten.join("\n#{ident}")
+        size = aug_cmp_templates.size
+        what = (size==1 ? "component template" : "component templates")
+        is = (size==1 ? "is" : "are")
+        "The following #{what} would be deleted, but #{is} referenced by existing assembly templates:\n#{ref_errors}"
+      end
+      def msg_per_cmp_template(cmp_tmpl)
+        cmp_template = cmp_tmpl.display_name_print_form
+        cmp_tmpl[:component_refs].map do |aug_cmp_ref|
+          #TODO: aug_cmp_ref also has node and component ref fields that can be displayed
+          assembly_template = Assembly::Template.pretty_print_name(aug_cmp_ref[:assembly_template])
+          "Component Template (#{cmp_template}) is referenced by assembly template (#{assembly_template})"
+        end
       end
     end
 

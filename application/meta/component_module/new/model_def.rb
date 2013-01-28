@@ -136,7 +136,7 @@ lambda__segment_components =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id =>:node__assembly_id},
-         :cols=>[:id,:display_name,:group_id,:module_branch_id]
+         :cols=>[:id,:display_name,:group_id,:module_branch_id,:component_type]
        }]
     },
     :component_instances=>{

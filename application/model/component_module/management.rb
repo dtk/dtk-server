@@ -118,37 +118,36 @@ module DTK; class ComponentModule
       {:dsl_created_info => dsl_created_info}
     end
 
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
-      #TODO: change from  aug_component_refs to aug_cmp_templates, which lists component templates at top level and then assembly refs
-      #that refer to it
-      aug_component_refs = get_associated_augmented_component_refs()
       aug_component_templates = get_aug_associated_component_templates()
-pp [:aug_component_templates,aug_component_templates]
       Transaction do          
         ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
         #below is teh conservative thing to do if dont know if any deletes
         any_deletes = true
+        if opts[:no_deletes_performed]
+          any_deletes = false
+        end
         if any_deletes
-          raise_errors_if_dangling_cmp_refs(aug_component_refs)
+          raise_errors_if_dangling_cmp_refs(aug_component_templates)
         end
       end
       set_dsl_parsed!(true)
     end
 
-    def raise_errors_if_dangling_cmp_refs(aug_component_refs)
+    def raise_errors_if_dangling_cmp_refs(aug_component_templates)
       #this is called within transaction after any deletes are performed (if any)
-      return if aug_component_refs.empty?
+      return if aug_component_templates.empty?
       sp_hash = {
         :cols => [:id,:display_name,:group_id],
-        :filter => [:oneof, :id, aug_component_refs.map{|r|r[:component_template_id]}]
+        :filter => [:oneof, :id, aug_component_templates.map{|r|r[:id]}]
       }
       cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
-      dangling_cmp_refs = aug_component_refs.reject{|r|cmp_template_ids_still_present.include?(r[:component_template_id])}
-      unless dangling_cmp_refs.empty?
-        raise ErrorUsage::ReferencedComponentTemplates.new(dangling_cmp_refs)
+      referenced_cmp_templates = aug_component_templates.reject{|r|cmp_template_ids_still_present.include?(r[:id])}
+      unless referenced_cmp_templates.empty?
+        raise ErrorUsage::ReferencedComponentTemplates.new(referenced_cmp_templates)
       end
     end
       

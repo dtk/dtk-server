@@ -90,6 +90,7 @@ module DTK; class ComponentDSL
     end
 
     def db_update_form(cmps_input_hash,non_complete_cmps_input_hash,module_branch_idh)
+      #TODO: look at use of new recursive delete capability; this may be needed to handle attributes correctly
       mark_as_complete_constraint = {:module_branch_id=>module_branch_idh.get_id()} #so only delete extra components that belong to same module
       cmp_db_update_hash = cmps_input_hash.inject(DBUpdateHash.new) do |h,(ref,hash_assigns)|
         h.merge(ref => db_update_form_aux(:component,hash_assigns))

@@ -279,7 +279,8 @@ module Ramaze::Helper
     OverrideModelName = {
       Component::Template => :component,
       Assembly::Instance => :component,
-      Assembly::Template  => :component
+      Assembly::Template  => :component,
+      NodeGroup => :node
     }
 
 

@@ -138,13 +138,13 @@ module DTK; class ComponentModule
       #this is called within transaction after any deletes are performed (if any)
       return if aug_component_refs.empty?
       sp_hash = {
-        :cols => [:id,:dispaly_name,:group_id],
-        :filter => [:oneof, :id, aug_component_refs.map{|r|r[:id]}]
+        :cols => [:id,:display_name,:group_id],
+        :filter => [:oneof, :id, aug_component_refs.map{|r|r[:component_template_id]}]
       }
-      cmp_ref_ids_still_present = Model.get_objs(model_handle(:component_ref),sp_hash).map{|r|r[:id]}
-      dangling_refs = aug_component_refs.reject{|r|cmp_ref_ids_still_present.include?(r[:id])}
-      return if dangling_refs.empty?
-      pp [:raise_errors_if_dangling_cmp_refs,dangling_refs]
+      cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
+      dangling_cmp_refs = aug_component_refs.reject{|r|cmp_template_ids_still_present.include?(r[:component_template_id])}
+      return if dangling_cmp_refs.empty?
+      pp [:raise_errors_if_dangling_cmp_refs,dangling_cmp_refs]
       raise ErrorUsage.new("TODO: return a usage error that indicates all dangling refs")
     end
       

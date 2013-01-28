@@ -17,7 +17,16 @@ module DTK
       ndx_ret.values
     end
 
-    #TODO: may want to align so same keys as what is returned by Assembly::Template.get_augmented_component_refs
+    def get_aug_associated_component_templates()
+      ndx_ret = Hash.new
+      get_objs(:cols => [:assembly_templates]).each do |r|
+        component_template = r[:component_template]
+        pntr = ndx_ret[component_template[:id]] ||= component_template.merge(:component_refs => Array.new)
+        pntr[:component_refs] << r[:component_ref].merge(r.hash_subset(:id,:display_name,:node,:assembly_template))
+      end
+      ndx_ret.values
+    end
+    #TODO: remove below
     def get_associated_augmented_component_refs()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|

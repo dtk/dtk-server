@@ -121,7 +121,11 @@ module DTK; class ComponentModule
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
+      #TODO: change from  aug_component_refs to aug_cmp_templates, which lists component templates at top level and then assembly refs
+      #that refer to it
       aug_component_refs = get_associated_augmented_component_refs()
+      aug_component_templates = get_aug_associated_component_templates()
+pp [:aug_component_templates,aug_component_templates]
       Transaction do          
         ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
@@ -143,9 +147,9 @@ module DTK; class ComponentModule
       }
       cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
       dangling_cmp_refs = aug_component_refs.reject{|r|cmp_template_ids_still_present.include?(r[:component_template_id])}
-      return if dangling_cmp_refs.empty?
-      pp [:raise_errors_if_dangling_cmp_refs,dangling_cmp_refs]
-      raise ErrorUsage.new("TODO: return a usage error that indicates all dangling refs")
+      unless dangling_cmp_refs.empty?
+        raise ErrorUsage::ReferencedComponentTemplates.new(dangling_cmp_refs)
+      end
     end
       
   end              

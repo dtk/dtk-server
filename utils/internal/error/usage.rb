@@ -10,6 +10,17 @@ module DTK
         "JSON parsing error#{file_ref}: #{base_json_error}"
       end
     end
+    class ReferencedComponentTemplates < self
+      def initialize(aug_cmp_templates)
+        super(err_msg(aug_cmp_templates))
+        @aug_cmp_templates = aug_cmp_templates
+      end
+      private
+      def err_msg(aug_cmp_templates)
+        pp aug_cmp_templates
+        "TODO: write error msg for ReferencedComponentTemplates"
+      end
+    end
 
     class DanglingComponentRefs < self
       def initialize(cmp_ref_info_list)

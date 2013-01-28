@@ -114,7 +114,7 @@ lambda__segment_components =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
-        :cols => [:id,:display_name,:group_id],
+        :cols => [:id,:display_name,:group_id,:component_type,:version],
         :alias=>:component_template,
         :filter=>[:eq,:node_node_id,nil]),
        {
@@ -122,7 +122,7 @@ lambda__segment_components =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:component_template_id =>:component_template__id},
-         :cols=>[:id,:display_name,:group_id,:node_node_id]
+         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_template_id,:component_type,:version]
        },
        {
          :model_name=>:node,

@@ -283,7 +283,6 @@ module Ramaze::Helper
       NodeGroup => :node
     }
 
-
     def ret_request_params(*params)
       return nil unless request_method_is_post?()
       return request.params if params.size == 0

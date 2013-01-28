@@ -154,6 +154,8 @@ module XYZ
         content = nil #TODO to clear model cache of content
         FileAsset.ret_create_hash(self,file_type,file_path,content)
       end
+      return if file_asset_rows.empty?()
+
       #TODO: need to make create? from rows
       file_asset_mh = model_handle().create_childMH(:file_asset)
       Model.modify_children_from_rows(file_asset_mh,id_handle,file_asset_rows)

@@ -70,7 +70,7 @@ module DTK; class Assembly
         get__project_parent(mh,opts).each{|r|ndx_ret[r[:id]] ||= r}
         ndx_ret.values
       else
-        list__library_parent(mh,opts)
+        get__library_parent(mh,opts)
       end
     end
 
@@ -95,7 +95,7 @@ module DTK; class Assembly
         list_aux_simple(assembly_rows,opts)
       end
     end
-    #MOD_RESTRUCT: TODO: deprecate below for above
+    #MOD_RESTRUCT: TODO: deprecate two below for above
     def self.list__library_parent(assembly_mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact,
@@ -108,6 +108,13 @@ module DTK; class Assembly
       else
         list_aux_simple(assembly_rows,opts)
       end
+    end
+    def self.get__library_parent(mh,opts={})
+      sp_hash = {
+        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
+      }
+      get_objs(mh.createMH(:component),sp_hash)
     end
 
     def self.list_virtual_column?(detail_level=nil)

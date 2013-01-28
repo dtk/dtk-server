@@ -8,21 +8,21 @@ module DTK
     include ModuleMixin
     include ParseToCreateDSLMixin
 
-    def self.model_type()
-      :component_module
-    end
-    def self.component_type()
-      :puppet #hardwired
-    end
-    def component_type()
-      :puppet #hardwired
-    end
-
     def get_associated_assembly_templates()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         assembly_template = r[:assembly_template]
         ndx_ret[assembly_template[:id]] ||= Assembly::Template.create_as(assembly_template)
+      end
+      ndx_ret.values
+    end
+
+    #TODO: may want to align so same keys as what is returned by Assembly::Template.get_augmented_component_refs
+    def get_associated_augmented_component_refs()
+      ndx_ret = Hash.new
+      get_objs(:cols => [:assembly_templates]).each do |r|
+        component_ref = r[:component_ref]
+        ndx_ret[component_ref[:id]] ||= component_ref.merge(component_ref.hash_subset(:assembly_template,:node))
       end
       ndx_ret.values
     end
@@ -34,10 +34,6 @@ module DTK
         ndx_ret[component[:id]] ||= component
       end
      ndx_ret.values
-    end
-
-    def self.module_specific_type(config_agent_type)
-      config_agent_type
     end
 
     def info_about(about)
@@ -52,6 +48,22 @@ module DTK
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end
     end
+
+    def self.model_type()
+      :component_module
+    end
+    def self.component_type()
+      :puppet #hardwired
+    end
+    def component_type()
+      :puppet #hardwired
+    end
+
+
+    def self.module_specific_type(config_agent_type)
+      config_agent_type
+    end
+
 
     def self.get_all_workspace_library_diffs(mh)
       #TODO: not treating versions yet and removing modules wheer component not in workspace

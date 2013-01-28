@@ -80,7 +80,6 @@ module DTK; class ComponentModule
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
-
     def create_needed_objects_and_dsl?(repo,version,opts={})
       project = get_project()
       config_agent_type = config_agent_type_default()
@@ -120,14 +119,34 @@ module DTK; class ComponentModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
-      set_dsl_parsed!(false)
+      #get associated assembly templates before do any updates and use to see if any dangling references
+      #within transaction after do update
+      aug_component_refs = get_associated_augmented_component_refs()
       Transaction do          
         ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
-#TODO: put in check heer which is positioned after changes tentaively made if there are any assembly templates with dangling refs
-# raise Error.new("Testing: break transaction")
+        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
+        #below is teh conservative thing to do if dont know if any deletes
+        any_deletes = true
+        if any_deletes
+          raise_errors_if_dangling_cmp_refs(aug_component_refs)
+        end
       end
       set_dsl_parsed!(true)
     end
 
+    def raise_errors_if_dangling_cmp_refs(aug_component_refs)
+      #this is called within transaction after any deletes are performed (if any)
+      return if aug_component_refs.empty?
+      sp_hash = {
+        :cols => [:id,:dispaly_name,:group_id],
+        :filter => [:oneof, :id, aug_component_refs.map{|r|r[:id]}]
+      }
+      cmp_ref_ids_still_present = Model.get_objs(model_handle(:component_ref),sp_hash).map{|r|r[:id]}
+      dangling_refs = aug_component_refs.reject{|r|cmp_ref_ids_still_present.include?(r[:id])}
+      return if dangling_refs.empty?
+      pp [:raise_errors_if_dangling_cmp_refs,dangling_refs]
+      raise ErrorUsage.new("TODO: return a usage error that indicates all dangling refs")
+    end
+      
   end              
 end; end

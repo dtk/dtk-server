@@ -119,6 +119,7 @@ lambda__segment_components =
         :filter=>[:eq,:node_node_id,nil]),
        {
          :model_name=>:component_ref,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:component_template_id =>:component_template__id},
          :cols=>[:id,:display_name,:group_id,:node_node_id]

@@ -124,12 +124,6 @@ end
       rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version)
     end
 
-    def rest__push_to_remote_legacy()
-      component_module = create_obj(:component_module_id)
-      component_module.push_to_remote_deprecate()
-      rest_ok_response
-    end
-
     #### end: actions to interact with remote repo ###
 
     #### actions to manage workspace

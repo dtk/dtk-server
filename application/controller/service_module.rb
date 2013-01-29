@@ -32,12 +32,6 @@ module DTK
       rest_ok_response 
     end
 
-    def rest__push_to_remote_legacy()
-      service_module = create_obj(:service_module_id)
-      service_module.push_to_remote__deprecate()
-      rest_ok_response
-    end
-    
     #get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)

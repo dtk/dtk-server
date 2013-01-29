@@ -81,7 +81,7 @@ module DTK
 
     #export to a remote repo
     def export(remote_repo,version=nil)
-      #TODO: put in version-specfic logic
+      #TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()
       module_name = module_name()
@@ -106,30 +106,6 @@ module DTK
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
       remote_repo_name
-    end
-
-    def push_to_remote__deprecate(version=nil) #MOD_RESTRUCT
-      repo = get_library_repo()
-      module_name = update_object!(:display_name)[:display_name]
-      unless remote_repo_name = repo[:remote_repo_name]
-        raise ErrorUsage.new("Cannot push module (#{module_name}) to remote because it is currently not linked to a remote module")
-      end
-      branch = library_branch_name(version)
-      unless get_module_branch(branch)
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
-      end
-      merge_rel = repo.ret_remote_merge_relationship(Repo::Remote.default_remote_repo(),branch,version,:fetch_if_needed => true)
-      case merge_rel
-       when :equal,:local_behind 
-        raise ErrorUsage.new("No changes in module (#{module_name}) to push to remote")
-       when :local_ahead
-        repo.push_to_remote(remote_repo_name,branch)
-       when :branchpoint
-        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge
-        raise ErrorUsage.new("Merge from remote repo is needed before can push changes to module (#{module_name})")
-       else 
-        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
-      end
     end
 
   end

@@ -102,19 +102,6 @@ module DTK; class  Assembly
         ndx_ret.values
       end
 
-      def delete_and_destroy_its_nodes(assembly_idh)
-        #TODO: need to refine to handle case where node hosts multiple assemblies or native components; before that need to modify node isnatnce
-        #repo so can point to multiple assembly instances
-        sp_hash = {
-          :cols => [:id, :display_name,:instance_nodes_and_cmps_summary],
-          :filter => [:and, [:eq, :type, "composite"], target_filter]
-        }
-        assembly_rows = get_objs(assembly_mh,sp_hash)
-        get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-        attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
-        add_execution_status!(assembly_rows,assembly_mh)
-        list_aux(assembly_rows,attr_rows)
-      end
      private
       def add_execution_status!(assembly_rows,assembly_mh)
         sp_hash = {
@@ -170,20 +157,20 @@ module DTK; class  Assembly
       order ? ret.sort(&order) : ret
     end
 
-    def self.delete(assembly_idhs)
+    def self.delete(assembly_idhs,opts={})
       if assembly_idhs.kind_of?(Array)
         return if assembly_idhs.empty?
       else
         assembly_idhs = [assembly_idhs]
       end
       delete(get_sub_assemblies(assembly_idhs).id_handles())
-      delete_and_destroy_its_nodes(assembly_idhs)
+      delete_assembly_nodes(assembly_idhs,opts)
       delete_instances(assembly_idhs)
     end
 
     class << self
      private
-      def delete_and_destroy_its_nodes(assembly_idhs)
+      def delete_assembly_nodes(assembly_idhs,opts={})
         return if assembly_idhs.empty?
         #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
         sp_hash = {
@@ -192,7 +179,11 @@ module DTK; class  Assembly
         }
         node_mh = assembly_idhs.first.createMH(:node)
         assembly_nodes = get_objs(node_mh,sp_hash)
-        assembly_nodes.map{|r|r.destroy_and_delete()}
+        if opts[:destroy_nodes]
+          assembly_nodes.map{|r|r.destroy_and_delete()}
+        else
+          assembly_nodes.map{|r|r.delete_object()}
+        end
       end
     end
 

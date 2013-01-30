@@ -386,13 +386,14 @@ module XYZ
       row && row[:attribute]
     end
 
+    def delete_object()
+      update_dangling_links()
+      Model.delete_instance(id_handle())
+    end
     def destroy_and_delete()
       update_object!(:external_ref,:hostname_external_ref)
       suceeeded = CommandAndControl.destroy_node?(self)
-      if suceeeded
-        update_dangling_links()
-        Model.delete_instance(id_handle())
-      end
+      delete_object() if suceeeded
     end
 
     def update_dangling_links()

@@ -3,15 +3,22 @@ module DTK
     helper :assembly_helper
 
     #### create and delete actions ###
+    #TODO: rename to delete_and_destroy
     def rest__delete()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
       if subtype == :template
         #returning module_repo_info so client can update this in its local module
         rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
       else #subtype == :instance
-        Assembly::Instance.delete(id_handle(assembly_id))
+        Assembly::Instance.delete(id_handle(assembly_id),:destroy_nodes => true)
         rest_ok_response
       end
+    end
+
+    def rest__remove_from_system()
+      assembly = ret_assembly_instance_object()
+      Assembly::Instance.delete(assembly.id_handle())
+      rest_ok_response
     end
 
     def rest__add_component()

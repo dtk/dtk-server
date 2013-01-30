@@ -37,10 +37,10 @@ module DTK
     end
 
     module DSLMixin
-      def update_model_from_dsl(container_idh,module_branch,module_name,opts={})
+      def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         module_version_constraints = update_global_refs(module_branch,opts)
-        update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
+        update_assemblies_from_dsl(module_branch,module_version_constraints)
         set_dsl_parsed!(true)
       end
 
@@ -55,13 +55,15 @@ module DTK
         vconstraints.set_and_save_constraints!(constraints_hash_form,opts)
       end
 
-      def update_assemblies_from_dsl(container_idh,module_branch,module_name,module_version_constraints)
+      def update_assemblies_from_dsl(module_branch,module_version_constraints)
+        project_idh = get_project.id_handle()
+        module_name = module_name()
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        assembly_import_helper = AssemblyImport.new(container_idh,module_name,module_version_constraints)
+        assembly_import_helper = AssemblyImport.new(project_idh,module_name,module_version_constraints)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           dangling_errors.aggregate_errors!()  do
@@ -82,7 +84,7 @@ module DTK
         files.select{|f| f =~ add_on_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = Aux.json_parse(json_content,meta_file)
-          ServiceAddOn.import(container_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+          ServiceAddOn.import(project_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
         end
       end
 

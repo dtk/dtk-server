@@ -77,7 +77,14 @@ module DTK
       service_module_idh = ServiceModule.initialize_module(project,module_name,config_agent_type)[:module_idh]
       rest_ok_response(:service_module_id => service_module_idh.get_id())
     end
-    
+
+    def rest__create_new_version()
+      service_module = create_obj(:service_module_id)
+      version = ret_version()
+      service_module.create_new_version(version)
+      rest_ok_response
+    end
+
     def rest__delete()
       service_module = create_obj(:service_module_id)
       module_info = service_module.delete_object()

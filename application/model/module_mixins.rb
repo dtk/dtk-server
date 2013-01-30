@@ -82,6 +82,21 @@ module DTK
       matches.first
     end
 
+    def create_new_version(new_version)
+      unless aug_ws_branch = get_augmented_workspace_branch()
+        raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
+      end
+
+      #make sure there is a not an existing branch that matches the new one
+      if get_module_branch_matching_version(new_version)
+        raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
+      end
+      #TODO: may check that version number is greater than existing versions
+
+      repo_for_new_branch = aug_ws_branch.add_workspace_branch?(get_project(),aug_ws_branch[:repo],new_version)
+      create_new_version__type_specific(repo_for_new_branch,new_version)
+    end
+
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
@@ -94,9 +109,11 @@ module DTK
 
 
     def get_project()
+      #caching
+      return self[:project] if self[:project]
       update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
       if project_id = self[:project_project_id]
-        id_handle(:model_name => :project, :id => project_id).create_object()
+        self[:project] = id_handle(:model_name => :project, :id => project_id).create_object()
       end
     end
 

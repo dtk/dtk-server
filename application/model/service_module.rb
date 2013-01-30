@@ -191,14 +191,6 @@ module DTK
       end
     end
 
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
-      project_idh = get_project().id_handle()
-      #TODO: for more efficiency can push in diffs_summary to below
-      opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
-      update_model_from_dsl(project_idh,module_branch,module_name(),opts)
-    end
-    private :update_model_from_clone__type_specific?
-
     def self.find(mh,service_module_name,library_idh=nil)
       lib_filter = library_idh && [:and,:library_library_id,library_idh.get_id()]
       sp_hash = {
@@ -231,11 +223,23 @@ module DTK
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
-      update_model_from_dsl(get_project().id_handle(),module_branch,info[:module_name])
+      update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
     end
 
    private
+    def create_new_version__type_specific(repo_for_new_branch,new_version)
+      project = get_project()
+      repo_idh = repo_for_new_branch.id_handle()
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)
+      update_model_from_dsl(module_branch)
+    end
+
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      #TODO: for more efficiency can push in diffs_summary to below
+      opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
+      update_model_from_dsl(module_branch,opts)
+    end
 
     def export_preprocess(module_branch)
       #get module info for every component in an assembly in the service module

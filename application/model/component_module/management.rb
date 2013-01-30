@@ -1,22 +1,6 @@
 #Methods for creating, importing, importing, etc modules
 module DTK; class ComponentModule
   module ManagementMixin
-
-    def create_new_version(new_version)
-      unless aug_ws_branch = get_augmented_workspace_branch()
-        raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
-      end
-
-      #make sure there is a not an existing branch that matches the new one
-      if get_module_branch_matching_version(new_version)
-        raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
-      end
-      #TODO: may check that version number is greater than existing versions
-
-      repo_new_branch = aug_ws_branch.add_workspace_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_needed_objects_and_dsl?(repo_new_branch,new_version)
-    end
-
     def import__dsl(commit_sha,repo,module_and_branch_info,version)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
@@ -52,7 +36,6 @@ module DTK; class ComponentModule
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
 
-
     def delete_object()
       assembly_templates = get_associated_assembly_templates()
       unless assembly_templates.empty?
@@ -76,6 +59,10 @@ module DTK; class ComponentModule
     end
 
    private
+    def create_new_version__type_specific(repo_for_new_branch,new_version)
+      create_needed_objects_and_dsl?(repo_for_new_branch,new_version)
+    end
+
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end

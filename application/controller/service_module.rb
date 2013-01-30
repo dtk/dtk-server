@@ -36,15 +36,10 @@ module DTK
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
-      remote_repo = ret_remote_repo()
       access_rights = ret_access_rights()
-      rest_ok_response service_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights)
-    end
-
-    def rest__pull_from_remote()
-      service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
-      service_module.pull_from_remote_if_fast_foward(remote_repo)
+      version = ret_version()
+      rest_ok_response service_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version)
     end
 
     #### end actions to interact with remote repos ###

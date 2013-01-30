@@ -26,11 +26,10 @@ module DTK
 
     #this should be called when the module is linked, but the specfic version is not
     def import_version(remote_repo,version)
-      raise Error.new("MOD_RESTRUCT: must be rewritten")
       module_name = module_name()
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch(nil)
-      repo = aug_head_branch && aug_head_branch[:repo]
+      repo = aug_head_branch && aug_head_branch[:repo] 
       unless repo and repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
@@ -38,45 +37,11 @@ module DTK
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
       end
 
-      local_branch = ModuleBranch.workspace_branch_name(project,version)
-      commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-      module_repo_info = self.class.import_postprocess(project,aug_head_branch,module_name,commit_sha,version)
-      module_repo_info
-    end
+      repo_for_new_branch = aug_head_branch.add_workspace_branch?(project,repo,version)
 
-    #MOD_RESTRUCT: needes to be updated
-    def pull_from_remote_if_fast_foward(remote_repo,version=nil)
-      raise Error.new("MOD_RESTRUCT: Needs to be updated")
-      unless aug_branch = get_augmented_workspace_branch(version)
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
-      end
-      unless aug_branch[:repo].linked_remote?(remote_repo)
-        raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
-      end
-
-      repo = aug_branch[:repo]
-      local_branch = aug_branch[:branch]
-      merge_rel = repo.ret_remote_merge_relationship(remote_repo,local_branch,version,:fetch_if_needed => true)
-      case merge_rel
-       when :equal,:local_ahead 
-        #TODO: for rebost idempotency under errors may have under this same as under :local_behind
-        raise ErrorUsage.new("No changes in remote (#{remote_repo}) linked to module (#{module_name}) to pull from")
-       when :local_behind
-        repo.synchronize_with_remote_repo(remote_repo,local_branch,version)
-        project = get_project()
-        self.class.import_postprocess(project,repo,commit_sha,module_name,version)
-       when :branchpoint
-        #TODO: put in flag to push_to_remote that indicates that in this condition go ahead and do a merge or flag to 
-        #mean discard local changes
-        #the relevant steps for discard local changes are
-        #1 find merge base for  refs/heads/master and refs/remotes/remote/master; call it sha-mp
-        #2 execute  git reset --hard sha-mp
-        #3 execute  git push --force origin sha-mp:master
-        #4 execute code under case local_behind
-        raise ErrorUsage.new("Merge is needed; this must be done on workspace clone; issue command to clone module to workspace and then try this command again")
-       else 
-        raise Error.new("Unexpected type (#{merge_rel}) returned from ret_remote_merge_relationship")
-      end
+      local_branch_name = ModuleBranch.workspace_branch_name(project,version)
+      repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
+      create_new_version__type_specific(repo_for_new_branch,version)
     end
 
     #export to a remote repo

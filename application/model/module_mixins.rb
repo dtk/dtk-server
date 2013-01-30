@@ -231,6 +231,45 @@ module DTK
       name_to_id_default(model_handle,name)
     end
 
+    def list__project_parent(project_idh)
+      sp_hash = {
+        :cols => [:id, :display_name],
+        :filter => [:eq, :project_project_id, project_idh.get_id()]
+      }
+      mh = project_idh.createMH(model_type())
+      branch_mh = mh.create_childMH(:module_branch)
+      branch_parent_field_name =  branch_mh.parent_id_field_name()
+      ndx_module_info = get_objs(mh,sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
+
+      #get version info
+      sp_hash = {
+        :cols => [branch_parent_field_name,:version],
+        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_info.keys], [:eq,:is_workspace,true]]
+      }
+      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
+      #join in version info
+      branch_info.each do |br|
+        mod = ndx_module_info[br[branch_parent_field_name]]
+        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
+        mdl = ndx_module_info[br[branch_parent_field_name]]
+        (mdl[:version_array] ||= Array.new) <<  version
+      end
+      #put version info in prin form
+      unsorted = ndx_module_info.values.map do |mdl|
+        raw_va = mdl.delete(:version_array)
+        unless raw_va.nil? or raw_va == ["CURRENT"]
+          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
+          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        end
+        if mdl.respond_to?(:component_type)
+          mdl.merge!(:type => mdl.component_type())
+        end
+        mdl
+      end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+
+
     def add_user_direct_access(model_handle,rsa_pub_key)
       repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
       model_name = model_handle[:model_name]

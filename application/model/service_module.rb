@@ -68,20 +68,14 @@ module DTK
     def self.list(mh,opts)
       if project_id = opts[:project_idh]
         ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
-        list__project_parent(mh,opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
+        list__project_parent(opts[:project_idh]).each{|r|ndx_ret[r[:display_name]] ||= r}
         ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
       else
         list__library_parent(mh,opts)
       end
     end
-    def self.list__project_parent(mh,project_idh)
-      sp_hash = {
-        :cols => [:id, :display_name,:version],
-        :filter => [:eq, :project_project_id, project_idh.get_id()]
-      }
-      get_objs(mh,sp_hash)
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for above
+
+    #MOD_RESTRUCT: TODO: deprecate below for list__project_parent
     def self.list__library_parent(mh,opts={})
       library_idh = opts[:library_idh]
       lib_filter = (library_idh ? [:eq, :library_library_id, library_idh.get_id()] : [:neq, :library_library_id, nil])

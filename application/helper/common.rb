@@ -333,7 +333,7 @@ module Ramaze::Helper
 
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
-        error_msg = (null_params.size == 1 ? "Parameter (#{null_params.first}) is missing" : "Parameters (#{null_params.join(',')} are missing")
+        error_msg = (null_params.size == 1 ? "Rest post parameter (#{null_params.first}) is missing" : "Rest post parameters (#{null_params.join(',')} are missing")
         raise ErrorUsage.new(error_msg)
       end
     end

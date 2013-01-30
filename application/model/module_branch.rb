@@ -96,7 +96,7 @@ module DTK
 
     #returns repo for new branch
     def add_workspace_branch?(project,base_repo,new_version)
-      repo_new_branch = base_repo #TODO: bakes in that difefernt versions share same git repo
+      repo_for_new_branch = base_repo #TODO: bakes in that difefernt versions share same git repo
       branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
       repo_for_new_branch

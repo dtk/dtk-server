@@ -222,7 +222,7 @@ module DTK
       end
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in create_assemblies_dsl
+      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
       update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
     end
@@ -232,6 +232,8 @@ module DTK
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)
+      module_branch_idh = module_and_branch_info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object().merge(:repo => repo_for_new_branch) #repo added to avoid lookup in update_model_from_dsl
       update_model_from_dsl(module_branch)
     end
 

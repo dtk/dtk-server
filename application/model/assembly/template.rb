@@ -91,7 +91,7 @@ module DTK; class Assembly
       }
       ret = get_objs(mh.createMH(:component),sp_hash)
       #TODO: may instead make sure that version in assembly is set
-      ret.each{|r|r[:version] = (r[:module_branch]||{})[:version]}
+      ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
     end
 
@@ -149,7 +149,7 @@ module DTK; class Assembly
         #get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
-        pntr.merge!(:version => r[:version]) if r[:version]
+        pntr.merge!(:version => ModuleBranch.version_from_version_field(r[:version])) if r[:version]
         next unless include_nodes
         node_id = r[:node][:id]
         unless node = pntr[:ndx_nodes][node_id] 

@@ -12,7 +12,7 @@ module DTK; class ServiceModule
       @module_version_constraints = module_version_constraints
     end
     def add_assemblies(module_branch,assemblies_hash,node_bindings_hash)
-      @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
+      @ndx_module_branch_ids[module_branch[:id]] ||= true
       dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       assemblies_hash.each do |ref,assem|
         dangling_errors.aggregate_errors! do
@@ -86,7 +86,7 @@ module DTK; class ServiceModule
     module Internal
       include AssemblyImportExportCommon
       def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
-        version_field = module_branch.get_field(:version)
+        version_field = module_branch.get_field?(:version)
         assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
         {
           assembly_ref => {

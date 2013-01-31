@@ -92,6 +92,7 @@ module DTK
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
           pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
+          pntr.merge!(:version => ModuleBranch.version_from_version_field(r[:version])) if r[:version]
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
             node = pntr[:ndx_nodes][node_id] = {
@@ -139,7 +140,7 @@ module DTK
 
       def internal_assembly_ref(service_module_name,assembly_name,version_field=nil)
         simple_assembly_ref = "#{service_module_name}-#{assembly_name}"
-        internal_assembly_ref__add_version(simple_assembly_ref,version_suffix)
+        internal_assembly_ref__add_version(simple_assembly_ref,version_field)
       end
       def internal_assembly_ref__add_version(assembly_ref,version_field=nil)
         version = (version_field && ModuleBranch.version_from_version_field(version_field))

@@ -1,23 +1,22 @@
 #converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    def initialize(container_idh,module_name,module_version_constraints)
+    def initialize(container_idh,module_branch,module_name,module_version_constraints)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
       @ndx_assembly_hashes = Hash.new #indexed by ref
-      @ndx_module_branch_ids = Hash.new
+      @module_branch = module_branch
       @module_name = module_name
       @service_module = get_service_module(container_idh,module_name)
       @module_version_constraints = module_version_constraints
     end
-    def add_assemblies(module_branch,assemblies_hash,node_bindings_hash)
-      @ndx_module_branch_ids[module_branch[:id]] ||= true
+    def add_assemblies(assemblies_hash,node_bindings_hash)
       dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       assemblies_hash.each do |ref,assem|
         dangling_errors.aggregate_errors! do
-          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch,@module_name))
-          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
+          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,@module_branch,@module_name))
+          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
           @ndx_assembly_hashes[ref] ||= assem
         end
       end
@@ -25,12 +24,13 @@ module DTK; class ServiceModule
     end
 
     def import()
-      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_ids()} #so only delete extra components that belong to same module
+      module_branch_id = @module_branch[:id]
+      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module
       @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
 
       sp_hash = {
         :cols => [:id],
-        :filter => [:oneof,:module_branch_id, module_branch_ids()]
+        :filter => [:eq,:module_branch_id, module_branch_id]
       }
       existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
       mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
@@ -41,10 +41,12 @@ module DTK; class ServiceModule
       #port links can only be imported in after ports created
       #add ports to assembly nodes
       db_updates_port_links = Hash.new
+      version_field = @module_branch.get_field?(:version)
       @ndx_assembly_hashes.each do |ref,assembly|
-        assembly_idh = @container_idh.get_child_id_handle(:component,ref)
+        qualified_ref = Internal.internal_assembly_ref__add_version(ref,version_field)
+        assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
         ports = add_ports_during_import(assembly_idh)
-        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,ref,assembly,ports))
+        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,qualified_ref,assembly,ports))
         ports.each{|p|@ndx_ports[p[:id]] = p}
       end
       Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
@@ -58,10 +60,6 @@ module DTK; class ServiceModule
       @augmented_assembly_nodes ||= @service_module.get_augmented_assembly_nodes()
     end
 
-    def module_branch_ids()
-      @ndx_module_branch_ids.keys
-    end
-    
     def self.augment_with_parsed_port_names!(ports)
       ports.each do |p|
         p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
@@ -191,8 +189,11 @@ module DTK; class ServiceModule
         module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
-      def self.internal_assembly_ref__add_version(assembly_ref,version_field)
-        Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
+      class << self
+       public
+        def internal_assembly_ref__add_version(assembly_ref,version_field)
+          Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
+        end
       end
 
       def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)

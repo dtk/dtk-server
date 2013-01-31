@@ -63,7 +63,7 @@ module DTK
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        assembly_import_helper = AssemblyImport.new(project_idh,module_name,module_version_constraints)
+        assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,module_version_constraints)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           dangling_errors.aggregate_errors!()  do
@@ -73,7 +73,7 @@ module DTK
               h.merge(self.class.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
             end
             node_bindings_hash = hash_content["node_bindings"]
-            assembly_import_helper.add_assemblies(module_branch,assemblies_hash,node_bindings_hash)
+            assembly_import_helper.add_assemblies(assemblies_hash,node_bindings_hash)
           end
         end
         dangling_errors.raise_error?()

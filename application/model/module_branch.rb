@@ -94,12 +94,16 @@ module DTK
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
+    #creates if necessary a new branch from this (so new branch and this branch share history)
     #returns repo for new branch
-    def add_workspace_branch?(project,base_repo,new_version)
-      repo_for_new_branch = base_repo #TODO: bakes in that difefernt versions share same git repo
+    def create_new_branch_from_this_branch?(project,base_repo,new_version)
       branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
-      repo_for_new_branch
+      repo_for_version(base_repo,new_version)
+    end
+
+    def repo_for_version(base_repo,version)
+      base_repo #bakes in that different versions share same git repo
     end
 
     #MOD_RESTRUCT: TODO: deprecate 

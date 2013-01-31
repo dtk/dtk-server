@@ -37,11 +37,11 @@ module DTK
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
       end
 
-      repo_for_new_branch = aug_head_branch.add_workspace_branch?(project,repo,version)
-
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
-      repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
-      create_new_version__type_specific(repo_for_new_branch,version)
+      #TODO: may have commit_sha returned in this fn so client can do a reliable pull
+      commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
+      local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
+      create_new_version__type_specific(local_repo_for_imported_version,version)
       get_workspace_branch_info(version)
     end
 

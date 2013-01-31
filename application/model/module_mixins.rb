@@ -91,10 +91,10 @@ module DTK
       if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-      #TODO: may check that version number is greater than existing versions
+      #TODO: may check that version number is greater than existing versions, locally and possibly remotely
 
-      repo_for_new_branch = aug_ws_branch.add_workspace_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_new_version__type_specific(repo_for_new_branch,new_version)
+      repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
+      create_new_version__type_specific(repo_for_new_version,new_version)
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)

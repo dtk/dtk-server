@@ -93,14 +93,14 @@ lambda__instance_nodes_and_components =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:is_workspace])]
+      [lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:is_workspace])]
     },
     :service_module=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
       [
-       lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:service_id]),
+       lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:service_id]),
        {
          :model_name=>:service_module,
          :convert => true,

@@ -57,13 +57,20 @@ module DTK; class Assembly
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
     def self.list(mh,opts={})
       if project_id = opts[:project_idh]
-        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:display_name] => r)}
-        list__project_parent(mh,opts).each{|r|ndx_ret[r[:display_name]] ||= r}
+        ndx_ret = list__library_parent(mh,opts).inject(Hash.new) do |h,r|
+          ndx = version_display_name(r[:display_name],nil)
+          h.merge(ndx => r)
+        end
+        list__project_parent(mh,opts).each do |r|
+          ndx = version_display_name(r[:display_name],r[:version])
+          ndx_ret[ndx] ||= r
+        end
         ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
       else
         list__library_parent(mh,opts)
       end
     end
+
     def self.get(mh,opts={})
       if project_id = opts[:project_idh]
         ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
@@ -76,17 +83,20 @@ module DTK; class Assembly
 
     def self.get__project_parent(mh,opts={})
       sp_hash = {
-        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type],
+        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch],
         :filter => [:and, [:eq, :type, "composite"], 
                     opts[:project_idh] ? [:eq,:project_project_id,opts[:project_idh].get_id()] : [:neq, :project_project_id,nil],
                     opts[:filter]
                    ].compact
       }
-      get_objs(mh.createMH(:component),sp_hash)
+      ret = get_objs(mh.createMH(:component),sp_hash)
+      #TODO: may instead make sure that version in assembly is set
+      ret.each{|r|r[:version] = (r[:module_branch]||{})[:version]}
+      ret
     end
 
     def self.list__project_parent(assembly_mh,opts={})
-      opts = opts.merge(:cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact)
+      opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch,list_virtual_column?(opts[:detail_level])].compact)
       assembly_rows = get__project_parent(assembly_mh,opts)
       if opts[:detail_level] == "attributes"
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
@@ -139,6 +149,7 @@ module DTK; class Assembly
         #get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
+        pntr.merge!(:version => r[:version]) if r[:version]
         next unless include_nodes
         node_id = r[:node][:id]
         unless node = pntr[:ndx_nodes][node_id] 
@@ -151,7 +162,7 @@ module DTK; class Assembly
         end
       end
       unsorted = ndx_ret.values.map do |r|
-        el = r.slice(:id,:display_name,:module_branch_id)
+        el = r.slice(:id,:display_name,:module_branch_id,:version)
         include_nodes ? el.merge(:nodes => r[:ndx_nodes].values) : el
       end
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

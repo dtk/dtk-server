@@ -11,7 +11,6 @@ module DTK
     def version_display_name(display_name,version)
       self.class.version_display_name(display_name,version)
     end
-
    protected
     def workspace_branch_name(project)
       self.class.workspace_branch_name(project,self[:version])

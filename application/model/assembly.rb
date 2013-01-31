@@ -137,24 +137,17 @@ module DTK
       end
       private :list_aux__component_template
 
-      def internal_assembly_ref(service_module_name,assembly_name)
-        "#{service_module_name}-#{assembly_name}"
+      def internal_assembly_ref(service_module_name,assembly_name,version_field=nil)
+        simple_assembly_ref = "#{service_module_name}-#{assembly_name}"
+        internal_assembly_ref__add_version(simple_assembly_ref,version_suffix)
+      end
+      def internal_assembly_ref__add_version(assembly_ref,version_field=nil)
+        version = (version_field && ModuleBranch.version_from_version_field(version_field))
+        version_suffix = (version ? "--#{version}" : "")
+        "#{assembly_ref}#{version_suffix}"
       end
 
      private
-      def create_library_template_obj(library_idh,assembly_name,service_module_name,module_branch,icon_info)
-        create_row = {
-          :library_library_id => library_idh.get_id(),
-          :ref => internal_assembly_ref(service_module_name,assembly_name),
-          :display_name => assembly_name,
-          :ui => icon_info,
-          :type => "composite",
-          :module_branch_id => module_branch[:id]
-        }
-        assembly_mh = library_idh.create_childMH(:component)
-        create_from_row(assembly_mh,create_row, :convert => true)
-      end
-
       def get_default_component_attributes(assembly_mh,assembly_rows,opts={})
         #by defualt do not include derived values
         cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])

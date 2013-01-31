@@ -73,7 +73,7 @@ module DTK
               h.merge(self.class.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
             end
             node_bindings_hash = hash_content["node_bindings"]
-            assembly_import_helper.add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
+            assembly_import_helper.add_assemblies(module_branch,assemblies_hash,node_bindings_hash)
           end
         end
         dangling_errors.raise_error?()

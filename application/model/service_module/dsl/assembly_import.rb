@@ -11,13 +11,13 @@ module DTK; class ServiceModule
       @service_module = get_service_module(container_idh,module_name)
       @module_version_constraints = module_version_constraints
     end
-    def add_assemblies(module_branch_idh,assemblies_hash,node_bindings_hash)
+    def add_assemblies(module_branch,assemblies_hash,node_bindings_hash)
       @ndx_module_branch_ids[module_branch_idh.get_id()] ||= true
       dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       assemblies_hash.each do |ref,assem|
         dangling_errors.aggregate_errors! do
-          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch_idh,@module_name))
-          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,ref,assem,node_bindings_hash,@module_version_constraints))
+          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,module_branch,@module_name))
+          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
           @ndx_assembly_hashes[ref] ||= assem
         end
       end
@@ -85,13 +85,15 @@ module DTK; class ServiceModule
     #TODO: now that converted top level to a call; dont need these internal modules
     module Internal
       include AssemblyImportExportCommon
-      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch_idh,module_name)
-        assembly_ref = internal_assembly_ref(serialized_assembly_ref)
+      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
+        version_field = module_branch.get_field(:version)
+        assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
         {
           assembly_ref => {
             "display_name" => assembly_hash["name"], 
             "type" => "composite",
-            "module_branch_id" => module_branch_idh.get_id(),
+            "module_branch_id" => module_branch[:id],
+            "version" => version_field,
             "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
           }
         }
@@ -112,14 +114,14 @@ module DTK; class ServiceModule
         {assembly_ref => {"port_link" => port_links}}
       end
 
-      def self.import_nodes(container_idh,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+      def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
         an_sep = Seperators[:assembly_node]
         node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
           merge_hash = Hash.new
           if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
             serialized_assembly_ref = $1
             node = $2
-            if assembly_ref == internal_assembly_ref(serialized_assembly_ref)
+            if assembly_ref == internal_assembly_ref__without_version(serialized_assembly_ref)
               merge_hash = {node => v}
             end
           end
@@ -138,13 +140,15 @@ module DTK; class ServiceModule
         end
 
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+        version_field = module_branch.get_field?(:version)
+        assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
         ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
           dangling_errors.aggregate_errors!(h) do
-            node_ref = "#{assembly_ref}--#{node_hash_ref}"
+            node_ref = "#{assembly_ref_with_version}--#{node_hash_ref}"
             node_output = {
               "display_name" => node_hash_ref, 
               "type" => "stub",
-              "*assembly_id" => "/component/#{assembly_ref}" 
+              "*assembly_id" => "/component/#{assembly_ref_with_version}" 
             }
             if nb_rs = node_to_nb_rs[node_hash_ref]
               if nb_rs_id = nb_rs_to_id[nb_rs]
@@ -179,9 +183,16 @@ module DTK; class ServiceModule
         end
       end
 
-      def self.internal_assembly_ref(serialized_assembly_ref)
+      def self.internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
+        module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
+        Assembly.internal_assembly_ref(module_name,assembly_name,version_field)
+      end
+      def self.internal_assembly_ref__without_version(serialized_assembly_ref)
         module_name,assembly_name = parse_serialized_assembly_ref(serialized_assembly_ref)
         Assembly.internal_assembly_ref(module_name,assembly_name)
+      end
+      def self.internal_assembly_ref__add_version(assembly_ref,version_field)
+        Assembly.internal_assembly_ref__add_version(assembly_ref,version_field)
       end
 
       def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)

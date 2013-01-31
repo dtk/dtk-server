@@ -25,6 +25,14 @@ module DTK
       rest_ok_response import_method_helper(ServiceModule)
     end
     
+    #this should be called when the module is linked, but the specfic version is not
+    def rest__import_version()
+      service_module = create_obj(:service_module_id)
+      remote_repo = ret_remote_repo()
+      version = ret_version()
+      rest_ok_response service_module.import_version(remote_repo,version)
+    end
+
     def rest__export()
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()

@@ -42,6 +42,7 @@ module DTK
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
       repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
       create_new_version__type_specific(repo_for_new_branch,version)
+      get_workspace_branch_info(version)
     end
 
     #export to a remote repo

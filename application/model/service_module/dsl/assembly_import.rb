@@ -46,9 +46,10 @@ module DTK; class ServiceModule
         qualified_ref = Internal.internal_assembly_ref__add_version(ref,version_field)
         assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
         ports = add_ports_during_import(assembly_idh)
-        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,qualified_ref,assembly,ports))
+        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,qualified_ref,assembly,ports,existing_assembly_ids))
         ports.each{|p|@ndx_ports[p[:id]] = p}
       end
+      #Within Internal.import_port_links does the mark as complete for port links
       Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
     end
 
@@ -96,11 +97,11 @@ module DTK; class ServiceModule
           }
         }
       end
-      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
+      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,existing_assembly_ids)
         #augment ports with parsed display_name
         AssemblyImport.augment_with_parsed_port_names!(ports)
 
-        port_links = (assembly_hash["port_links"]||[]).inject(Hash.new) do |h,pl|
+        port_links = (assembly_hash["port_links"]||[]).inject(DBUpdateHash.new) do |h,pl|
           input = AssemblyImportPortRef.parse(pl.values.first)
           output = AssemblyImportPortRef.parse(pl.keys.first)
           input_id = input.matching_id(ports)
@@ -109,6 +110,7 @@ module DTK; class ServiceModule
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
           h.merge(pl_ref => pl_hash)
         end
+        port_links.mark_as_complete(:assembly_id=>existing_assembly_ids)
         {assembly_ref => {"port_link" => port_links}}
       end
 

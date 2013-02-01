@@ -104,7 +104,13 @@ module DTK
           #get_objs do this (using possibly option flag for subtype processing)
           pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
           pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
-          pntr.merge!(:version => ModuleBranch.version_from_version_field(r[:version])) if r[:version]
+          if version = pretty_print_version(r)
+            pntr.merge!(:version => version)
+          end
+          if template = r[:assembly_template]
+            #just triggers for assembly instances; indicates the assembly templaet that spawned it
+            pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
+          end
           node_id = r[:node][:id]
           unless node = pntr[:ndx_nodes][node_id] 
             node = pntr[:ndx_nodes][node_id] = {
@@ -139,7 +145,7 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
-          r.slice(:id,:display_name,:execution_status,:module_branch_id,:version).merge(:nodes => r[:ndx_nodes].values)
+          r.slice(:id,:display_name,:execution_status,:module_branch_id,:version,:assembly_template).merge(:nodes => r[:ndx_nodes].values)
         end
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end

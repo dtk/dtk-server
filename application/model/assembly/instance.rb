@@ -72,14 +72,18 @@ module DTK; class  Assembly
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       sp_hash = {
-        :cols => [:id, :display_name,:instance_nodes_and_cmps_summary],
+        :cols => [:id, :display_name,:component_type,:version,list_virtual_column?(opts[:detail_level])].compact,
         :filter => [:and, [:eq, :type, "composite"], target_filter]
       }
       assembly_rows = get_objs(assembly_mh,sp_hash)
-      get_attrs = (opts[:detail_level] and [opts[:detail_level]].flatten.include?("attributes")) 
-      attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
-      add_execution_status!(assembly_rows,assembly_mh)
-      list_aux(assembly_rows,attr_rows)
+      if opts[:detail_level].nil?
+        list_aux__no_details(assembly_rows)
+      else
+        get_attrs = [opts[:detail_level]].flatten.include?("attributes")
+        attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
+        add_execution_status!(assembly_rows,assembly_mh)
+        list_aux(assembly_rows,attr_rows,opts)
+      end
     end
 
     class << self
@@ -103,6 +107,29 @@ module DTK; class  Assembly
       end
 
      private
+      def list_aux__no_details(assembly_rows)
+        assembly_rows.map do |r|
+          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+          #get_objs do this (using possibly option flag for subtype processing)
+          r.id_handle.create_object().merge(:display_name => pretty_print_name(r))
+        end
+      end
+
+      def pretty_print_name(assembly,opts={})
+        assembly[:display_name]
+      end
+
+      def list_virtual_column?(detail_level=nil)
+        if detail_level.nil?
+          nil
+        elsif detail_level == "nodes"
+          #TODO: use below for component detail and introduce a more succinct one for nodes
+          :instance_nodes_and_cmps_summary
+        else
+          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        end
+      end
+
       def add_execution_status!(assembly_rows,assembly_mh)
         sp_hash = {
           :cols => [:id,:started_at,:assembly_id,:status],

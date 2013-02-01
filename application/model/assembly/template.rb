@@ -110,7 +110,7 @@ module DTK; class Assembly
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
         list_aux(assembly_rows,attr_rows,opts)
       else
-        list_aux_simple(assembly_rows,opts)
+        list_aux__simple(assembly_rows,opts)
       end
     end
     #MOD_RESTRUCT: TODO: deprecate two below for above
@@ -124,7 +124,7 @@ module DTK; class Assembly
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
         list_aux(assembly_rows,attr_rows,opts)
       else
-        list_aux_simple(assembly_rows,opts)
+        list_aux__simple(assembly_rows,opts)
       end
     end
     def self.get__library_parent(mh,opts={})
@@ -145,7 +145,7 @@ module DTK; class Assembly
       end
     end
 
-    def self.list_aux_simple(assembly_rows,opts={})
+    def self.list_aux__simple(assembly_rows,opts={})
       ndx_ret = Hash.new
       if opts[:detail_level] == "components"
         raise Error.new("list assembly templates at component level not treated")

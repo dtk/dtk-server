@@ -79,7 +79,6 @@ module DTK
       subtype = ret_assembly_subtype()
       result = 
         if subtype == :instance 
-          Log.info("TODO: put in detail level so context list is very quick")
           opts = ret_params_hash(:filter,:detail_level)
           Assembly::Instance.list(model_handle(),opts)
         else 

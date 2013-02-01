@@ -148,13 +148,15 @@
       "id",
       "assembly_name",
       "status",
-      "nodes"
+      "nodes",
+      "assembly_template"
     ],
     "mapping": {
       "nodes": "nodes.size",
       "status": "execution_status",
       "assembly_name": "display_name",
-      "id": "dtk_id"
+      "id": "dtk_id",
+      "assembly_template": "assembly_template"
     }
   },
   "assembly_template": {

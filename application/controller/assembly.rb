@@ -77,12 +77,14 @@ module DTK
 
     def rest__list()
       subtype = ret_assembly_subtype()
-      opts = {:version_suffix => true}.merge(ret_params_hash(:filter,:detail_level))
       result = 
         if subtype == :instance 
+          Log.info("TODO: put in detail level so context list is very quick")
+          opts = ret_params_hash(:filter,:detail_level)
           Assembly::Instance.list(model_handle(),opts)
         else 
           project = get_default_project()
+          opts = {:version_suffix => true}.merge(ret_params_hash(:filter,:detail_level))
           Assembly::Template.list(model_handle(),opts.merge(:project_idh => project.id_handle()))
         end
       rest_ok_response result 

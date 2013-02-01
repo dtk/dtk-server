@@ -1,3 +1,11 @@
+segment_assembly_template = {
+  :model_name=>:component,
+  :convert => true,
+  :alias => :assembly_template,
+  :join_type=>:left_outer,
+  :join_cond=>{:id => :component__ancestor_id},
+  :cols => [:id,:group_id,:display_name,:component_type,:version]
+}
 lambda__segment_module_branch =
   lambda{|module_branch_cols|
   {
@@ -71,7 +79,7 @@ lambda__instance_nodes_and_components =
   {
     :type => :json, 
     :hidden => true,
-    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols)
+    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) + [segment_assembly_template]
   }
 }
 {
@@ -140,7 +148,8 @@ lambda__instance_nodes_and_components =
         :join_type=>:inner,
         :join_cond=>{:component_component_id=>:nested_component__id},
         :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted, :is_port]
-      }]
+       }
+      ]
     },
 
     :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),

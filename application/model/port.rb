@@ -197,6 +197,8 @@ module XYZ
       end
     end
 
+    #this function adds if necsssary ports onto nodes in assembly that correspond to link_defs_info
+    #The link_defs_info is complete so any old ports not matches are removed
     def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
       ret = Array.new
       return ret if link_defs_info.empty?
@@ -210,10 +212,10 @@ module XYZ
       port_mh = assembly.id_handle.create_childMH(:port)
       ndx_existing_ports = Hash.new
       Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
-        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = r
+        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
       end 
 
-      #TODO: need to index by node because create_from_rows can only insert under one parent; if this is changed can do one insert for all
+      #Need to index by node because create_from_rows can only insert under one parent
       ndx_rows = Hash.new
       link_defs_info.each do |ld_info|
         link_def = ld_info[:link_def]
@@ -229,8 +231,9 @@ module XYZ
 
         dir = direction_from_local_remote(link_def[:local_or_remote])
         ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
-        if existing = (ndx_existing_ports[node[:id]]||{})[ref]
-          ret << existing
+        if existing_port_info = (ndx_existing_ports[node[:id]]||{})[ref]
+          existing_port_info[:matched] = true
+          ret << existing_port_info[:port]
         else
           display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
           location_asserted = ret_location_asserted(component_type,link_def[:link_type])
@@ -254,6 +257,20 @@ module XYZ
         port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
         new_rows += create_from_rows(port_mh,r[:create_rows],opts)
       end
+
+      #delete any existing ports that match what is being put in now
+      port_idhs_to_delete = Array.new
+      ndx_existing_ports.each_value do |inner_ndx_ports|
+        inner_ndx_ports.each_value do |port_info|
+          unless port_info[:matched]
+            port_idhs_to_delete << port_info[:port].id_handle()
+          end
+        end
+      end
+      unless port_idhs_to_delete.empty?()
+        delete_instances(port_idhs_to_delete)
+      end
+
       #for new rows need to splice in node info
       unless new_rows.empty?
         sp_hash = {

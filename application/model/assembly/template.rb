@@ -1,5 +1,13 @@
 module DTK; class Assembly
   class Template < self
+    def stage(target,assembly_name=nil)
+      override_attrs = Hash.new
+      override_attrs[:display_name] = assembly_name if assembly_name
+      clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
+      new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+      new_assembly_obj
+    end
+
     ### standard get methods
     def self.get_nodes(assembly_idhs)
       ret = Array.new
@@ -367,6 +375,12 @@ module DTK; class Assembly
     def display_name_print_form()
       pp_display_name(get_field?(:component_type))
     end
+
+    #TODO: probably move to Assembly
+    def model_handle(mn=nil)
+      super(mn||:component)
+    end
+
    private
     def pp_display_name(component_type)
       component_type.gsub(Regexp.new(ModuleTemplateSep),"::")
@@ -380,10 +394,6 @@ module DTK; class Assembly
 
     ModuleTemplateSep = "__"
 
-    #TODO: probably move to Assembly
-    def model_handle(mn=nil)
-      super(mn||:component)
-    end
   end
 end
 #TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get

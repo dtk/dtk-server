@@ -13,7 +13,8 @@ module Ramaze::Helper
     end
     def ret_assembly_template_object(id_param=nil)
       id_param ||= :assembly_id
-      assembly_id = ret_request_param_id(id_param,::DTK::Assembly::Template)
+      version = ret_version()
+      assembly_id = ret_request_param_id(id_param,::DTK::Assembly::Template,version)
       id_handle(assembly_id,:component).create_object(:model_name => :assembly_template)
     end
 

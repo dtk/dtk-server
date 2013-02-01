@@ -135,6 +135,18 @@ module DTK
 
     #### end: methods to modify the assembly instance
 
+    #### method(s) related to staging assembly template
+    def rest__stage()
+      target = target_idh_with_default(request.params["target_id"]).create_object()
+      assembly_template = ret_assembly_template_object()
+      #TODO: if name given and not unique either reject or generate a -n suffix
+      assembly_name = ret_request_params(:name) 
+      new_assembly_obj = assembly_template.stage(target,assembly_name)
+      rest_ok_response :assembly_id => new_assembly_obj[:id]
+    end
+
+    #### end: method(s) related to staging assembly template
+
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__create_task()
       assembly = ret_assembly_instance_object()
@@ -350,7 +362,7 @@ module DTK
 
     #TODO: unify with clone(id)
     #clone assembly from library to target
-    def rest__stage()
+    def stage()
       target_idh = target_idh_with_default(request.params["target_id"])
       assembly_id = ret_request_param_id(:assembly_id,::DTK::Assembly::Template)
       

@@ -161,13 +161,11 @@
     "order": [
       "id",
       "assembly_name",
-      "version",
       "nodes"
     ],
     "mapping": {
       "nodes": "nodes.size",
       "assembly_name": "display_name",
-      "version": "version",
       "id": "dtk_id"
     }
   },

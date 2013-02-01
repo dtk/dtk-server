@@ -77,7 +77,7 @@ module DTK
 
     def rest__list()
       subtype = ret_assembly_subtype()
-      opts = ret_params_hash(:filter,:detail_level)
+      opts = {:version_suffix => true}.merge(ret_params_hash(:filter,:detail_level))
       result = 
         if subtype == :instance 
           Assembly::Instance.list(model_handle(),opts)

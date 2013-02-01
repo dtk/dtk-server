@@ -61,15 +61,27 @@ module DTK
       "#{service_module_name}__#{assembly_name}"
     end
     def self.pretty_print_name(assembly,opts={})
-      if cmp_type = assembly[:component_type] 
-        if opts[:no_module_prefix]
-          assembly[:component_type].gsub(/^.+__/,"")
-        else
-          assembly[:component_type].gsub(/__/,"::")
-        end
-      else 
-        assembly[:display_name]
+      ret = 
+        if cmp_type = assembly[:component_type] 
+          if opts[:no_module_prefix]
+            assembly[:component_type].gsub(/^.+__/,"")
+          else
+            assembly[:component_type].gsub(/__/,"::")
+          end
+        else 
+          assembly[:display_name]
       end
+
+      if opts[:version_suffix] 
+        version = pretty_print_version(assembly)
+        version ? "#{ret}-v#{version}" : ret
+      else
+        ret
+      end
+    end
+
+    def self.pretty_print_version(assembly)
+      assembly[:version] && ModuleBranch.version_from_version_field(assembly[:version])
     end
 
     def is_stopped?

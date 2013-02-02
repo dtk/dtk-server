@@ -24,10 +24,28 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
-    def get_nodes(*alt_cols)
-      self.class.get_nodes([id_handle],*alt_cols)
+    def self.get_nodes_and_components__flat_list(assembly_mh,opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"], target_filter]
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:version,list_virtual_column?(opts[:detail_level])].compact,
+        :filter => filter
+      }
+      ret = get_objs(assembly_mh,sp_hash)
+      return ret unless opts[:detail_level]
+
+      #add in in assembly nodes without components on them
+      nodes_ids = ret.map{|r|r[:node][:id]}
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
+        :filter => filter
+      }
+      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?(r[:node][:id])}
+      ret + assembly_empty_nodes
     end
 
+    #NODES_WITH_MULT_ASSEMBLIES: does not handle this feature; may use variant of above to do this by having above take a filter option
     def self.get_nodes(assembly_idhs,*alt_cols)
       ret = Array.new
       return ret if assembly_idhs.empty?
@@ -49,10 +67,10 @@ module DTK; class  Assembly
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
     end
-
-    def get_target()
-      get_obj_helper(:target,:target)
+    def get_nodes(*alt_cols)
+      self.class.get_nodes([id_handle],*alt_cols)
     end
+
 
     def self.get_sub_assemblies(assembly_idhs)
       ret = Array.new
@@ -69,13 +87,7 @@ module DTK; class  Assembly
 
     ### end: standard get methods
     def self.list(assembly_mh,opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:version,list_virtual_column?(opts[:detail_level])].compact,
-        :filter => [:and, [:eq, :type, "composite"], target_filter]
-      }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
+      assembly_rows = get_nodes_and_components__flat_list(assembly_mh,opts)
       if opts[:detail_level].nil?
         list_aux__no_details(assembly_rows)
       else
@@ -87,6 +99,7 @@ module DTK; class  Assembly
     end
 
     class << self
+      #NODES_WITH_MULT_ASSEMBLIES: does not handle this feature
       def get_assemblies_with_nodes(mh,opts={})
         target_idh = opts[:target_idh]
         target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])

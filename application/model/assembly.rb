@@ -152,7 +152,7 @@ module DTK
 
       #MOD_RESTRUCT: TODO: r[:nested_component] is temp until move over to assembly virtual attributes that use :component_template rather than :nested_component
       def list_aux__component_template(r)
-        r[:component_template]||r[:nested_component]
+        r[:component_template]||r[:nested_component]||{}
       end
       private :list_aux__component_template
 

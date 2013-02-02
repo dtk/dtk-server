@@ -135,6 +135,14 @@ lambda__instance_nodes_and_components =
          :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
+    :instance_nodes_and_assembly_template=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=> 
+      [lambda__segment_node.call([:id,:display_name,:os_type,:external_ref]),
+       segment_assembly_template
+      ]
+    },
     :instance_nodes_and_cmps=> lambda__instance_nodes_and_components.call(Node.common_columns,Component.common_columns),
     :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:external_ref],[:id,:display_name,:component_type,:basic_type,:description]),
     :instance_nested_component_attributes=> {

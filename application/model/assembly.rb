@@ -20,15 +20,6 @@ module DTK
     end
 
     ### standard get methods
-    def info(subtype)
-      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,nested_virtual_attr]
-      }
-      assembly_rows = get_objs(sp_hash)
-      attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
-      self.class.list_aux(assembly_rows,attr_rows).first
-    end
 
     #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     def self.get_component_templates(assembly_mh,filter=nil)
@@ -47,14 +38,6 @@ module DTK
 
     def set_attributes(av_pairs)
       Attribute::Pattern::Assembly.set_attributes(self,av_pairs)
-    end
-
-    def list_smoketests()
-      sp_hash = {
-        :cols => [:instance_nodes_and_cmps_summary]
-      }
-      nodes_and_cmps = get_objs(sp_hash)
-      nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
     def self.ret_component_type(service_module_name,assembly_name)

@@ -50,25 +50,8 @@ module DTK; class  Assembly
       get_objs(node_mh,sp_hash)
     end
 
-    def self.get_nodes_and_components__flat_list(assembly_mh,opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"], target_filter]
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:version,list_virtual_column?(opts[:detail_level])].compact,
-        :filter => filter
-      }
-      ret = get_objs(assembly_mh,sp_hash)
-      return ret unless opts[:detail_level]
-
-      #add in in assembly nodes without components on them
-      nodes_ids = ret.map{|r|r[:node][:id]}
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
-        :filter => filter
-      }
-      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?(r[:node][:id])}
-      ret + assembly_empty_nodes
+    def get_target()
+      get_obj_helper(:target,:target)
     end
 
     def self.get_sub_assemblies(assembly_idhs)
@@ -84,6 +67,56 @@ module DTK; class  Assembly
       self.class.get_sub_assemblies([id_handle()])
     end
 
+    def get_nodes_and_components__flat_list(opts={})
+      filter = [:eq,:id,id()]
+      self.class.get_nodes_and_components__flat_list(model_handle(),{:filter => filter}.merge(opts))
+    end
+
+    def self.get_nodes_and_components__flat_list(assembly_mh,opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
+        :filter => filter
+      }
+      ret = get_objs(assembly_mh,sp_hash)
+      return ret unless needs_empty_nodes
+
+      #add in in assembly nodes without components on them
+      nodes_ids = ret.map{|r|r[:node][:id]}
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
+        :filter => filter
+      }
+      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?(r[:node][:id])}
+      ret + assembly_empty_nodes
+    end
+    
+    class << self
+     private
+      #returns column plus whether need to pul in empty assembly nodes (assembly nodes w/o any components)
+      def list_virtual_column?(detail_level=nil)
+        empty_assem_nodes = false
+        col = 
+        if detail_level.nil?
+          nil
+        elsif detail_level == "nodes"
+          empty_assem_nodes = true
+          #TODO: use below for component detail and introduce a more succinct one for nodes
+          :instance_nodes_and_cmps_summary
+        elsif detail_level == "components"
+          empty_assem_nodes = true
+          :instance_nodes_and_cmps_summary
+        else
+          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        end
+        [col,empty_assem_nodes]
+
+      end
+    end
+
     ### end: standard get methods
     def self.list(assembly_mh,opts={})
       assembly_rows = get_nodes_and_components__flat_list(assembly_mh,opts)
@@ -95,6 +128,12 @@ module DTK; class  Assembly
         add_execution_status!(assembly_rows,assembly_mh)
         list_aux(assembly_rows,attr_rows,opts)
       end
+    end
+
+    def list_smoketests()
+      Log.error("TODO: needs to be tested")
+      nodes_and_cmps = get_nodes_and_components__flat_list(:detail_level => "components")
+      nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
     class << self
@@ -131,17 +170,6 @@ module DTK; class  Assembly
         assembly[:display_name]
       end
 
-      def list_virtual_column?(detail_level=nil)
-        if detail_level.nil?
-          nil
-        elsif detail_level == "nodes"
-          #TODO: use below for component detail and introduce a more succinct one for nodes
-          :instance_nodes_and_cmps_summary
-        else
-          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
-        end
-      end
-
       def add_execution_status!(assembly_rows,assembly_mh)
         sp_hash = {
           :cols => [:id,:started_at,:assembly_id,:status],
@@ -163,6 +191,12 @@ module DTK; class  Assembly
         assembly_rows
       end
     end
+    def info()
+      assembly_rows = get_nodes_and_components__flat_list(:detail_level => "components")
+      attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
+      self.class.list_aux(assembly_rows,attr_rows).first
+    end
+
     def info_about(about,opts={})
       cols = post_process_per_row = order = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}

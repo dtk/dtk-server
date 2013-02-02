@@ -62,6 +62,15 @@ module DTK; class Assembly
       end
     end
 
+    def info()
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:template_nodes_and_cmps_summary]
+      }
+      assembly_rows = get_objs(sp_hash)
+      attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
+      self.class.list_aux(assembly_rows,attr_rows).first
+    end
+
     #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
     def self.list(mh,opts={})
       if project_id = opts[:project_idh]

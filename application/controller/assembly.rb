@@ -51,8 +51,8 @@ module DTK
 
     #### list and info actions ###
     def rest__info()
-      assembly,subtype = ret_assembly_params_object_and_subtype()
-      rest_ok_response assembly.info(subtype) 
+      assembly = ret_assembly_object()
+      rest_ok_response assembly.info()
     end
 
     def rest__info_about()
@@ -310,13 +310,9 @@ module DTK
 #TDODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()
-      assembly_id = ret_non_null_request_params(:assembly_id)
-      assembly = id_handle(assembly_id,:component).create_object()
-      smoketests = assembly.list_smoketests()
-      rest_ok_response smoketests
+      assembly = ret_assembly_object()
+      rest_ok_response assembly.list_smoketests()
     end
-
-
 
     def test_get_items(id)
       assembly = id_handle(id,:component).create_object()

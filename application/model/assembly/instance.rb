@@ -214,6 +214,19 @@ module DTK; class  Assembly
       end
     end
 
+    def add_node(node_template_idh,node_name)
+      node_template = node_template_idh.create_object()
+      target = get_target()
+      #TODO: see if node name used in assembly already and if so add -n suffix
+      override_attrs = {
+        :display_name => node_name,
+        :assembly_id => id(),
+      }
+      clone_opts = node_template.source_clone_info_opts()
+      new_obj = target.clone_into(node_template,override_attrs,clone_opts)
+      new_obj && new_obj.id_handle()
+    end
+
     def add_component(node_idh,component_template_idh)
       #first check that node_idh belongs to this instance
       sp_hash = {

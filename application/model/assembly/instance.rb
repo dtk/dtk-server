@@ -24,6 +24,32 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def get_nodes(*alt_cols)
+      self.class.get_nodes([id_handle],*alt_cols)
+    end
+    def self.get_nodes(assembly_idhs,*alt_cols)
+      ret = Array.new
+      return ret if assembly_idhs.empty?
+      sp_hash = {
+        :cols => [:id,:group_id,:node_node_id],
+        :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+      }
+      ndx_nodes = Hash.new
+      component_mh = assembly_idhs.first.createMH(:component) 
+      get_objs(component_mh,sp_hash).each do |cmp|
+        ndx_nodes[cmp[:node_node_id]] ||= true
+      end
+
+      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
+      sp_hash = {
+        :cols => cols,
+        :filter => [:or,[:oneof, :id, ndx_nodes.keys],
+                    [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]] #to catch nodes without any components
+      }
+      node_mh = assembly_idhs.first.createMH(:node)
+      get_objs(node_mh,sp_hash)
+    end
+
     def self.get_nodes_and_components__flat_list(assembly_mh,opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
@@ -44,33 +70,6 @@ module DTK; class  Assembly
       assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?(r[:node][:id])}
       ret + assembly_empty_nodes
     end
-
-    #NODES_WITH_MULT_ASSEMBLIES: does not handle this feature; may use variant of above to do this by having above take a filter option
-    def self.get_nodes(assembly_idhs,*alt_cols)
-      ret = Array.new
-      return ret if assembly_idhs.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:node_node_id],
-        :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
-      }
-      ndx_nodes = Hash.new
-      component_mh = assembly_idhs.first.createMH(:component) 
-      get_objs(component_mh,sp_hash).each do |cmp|
-        ndx_nodes[cmp[:node_node_id]] ||= true
-      end
-
-      cols = ([:id,:display_name,:group_id] + alt_cols).uniq
-      sp_hash = {
-        :cols => cols,
-        :filter => [:oneof, :id, ndx_nodes.keys]
-      }
-      node_mh = assembly_idhs.first.createMH(:node)
-      get_objs(node_mh,sp_hash)
-    end
-    def get_nodes(*alt_cols)
-      self.class.get_nodes([id_handle],*alt_cols)
-    end
-
 
     def self.get_sub_assemblies(assembly_idhs)
       ret = Array.new
@@ -99,8 +98,8 @@ module DTK; class  Assembly
     end
 
     class << self
-      #NODES_WITH_MULT_ASSEMBLIES: does not handle this feature
       def get_assemblies_with_nodes(mh,opts={})
+        log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
         target_idh = opts[:target_idh]
         target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
         sp_hash = {

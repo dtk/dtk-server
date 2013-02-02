@@ -21,6 +21,13 @@ module DTK
       rest_ok_response
     end
 
+    def rest__add_node()
+      assembly = ret_assembly_instance_object()
+      assembly_node_name = ret_non_null_request_params(:assembly_node_name)
+      node_template_id = ret_request_params(:node_template_id)
+      raise Error.new("Not Implemented yet")
+    end
+
     def rest__add_component()
       assembly = ret_assembly_instance_object()
       component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)

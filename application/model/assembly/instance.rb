@@ -351,15 +351,32 @@ module DTK; class  Assembly
       node.add_component(component_template_idh)
     end
 
-    def delete_component(component_idh)
-      #first check that component_idh belongs to this instance
+    def delete_component(component_idh, node_id=nil)
+
+      component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
+
+      # first check that node belongs to this assebmly
+      unless !node_id.nil? && node_id.empty?
+        sp_hash = {
+          :cols => [:id, :display_name,:group_id],
+          :filter => [:and, [:eq, :id, node_id], [:eq, :assembly_id, id()]]
+        }
+
+        unless node = Model.get_obj(model_handle(:node),sp_hash)
+          raise ErrorIdInvalid.new(node_id,:node)
+        end
+        component_filter << [:eq, :node_node_id, node_id]
+      end
+ 
+      # also check that component_idh belongs to this instance and to this node
       sp_hash = {
         :cols => [:id, :display_name],
-        :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
+        :filter => component_filter
       }
       unless Model.get_obj(model_handle(:component),sp_hash)
         raise ErrorIdInvalid.new(component_idh.get_id(),:component)
       end
+      
       Model.delete_instance(component_idh)
     end
 

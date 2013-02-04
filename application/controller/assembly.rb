@@ -22,10 +22,12 @@ module DTK
     end
 
     def rest__delete_component()
+      # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
+      node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
       #not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
-      assembly.delete_component(id_handle(component_id,:component))
+      assembly.delete_component(id_handle(component_id,:component), node_id)
       rest_ok_response
     end
 
@@ -35,6 +37,15 @@ module DTK
     def rest__info()
       assembly = ret_assembly_object()
       rest_ok_response assembly.info()
+=begin
+#MERGE-QUESTION
+      node_id = ret_non_null_request_params(:node_id)
+      assembly,subtype = ret_assembly_params_object_and_subtype()
+      nodes = assembly.info(subtype)
+      nodes[:nodes] = nodes[:nodes].select { |node| node[:node_id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
+      rest_ok_response nodes
+ Implemented part of methods for n-level context - getnetstats, info, delete-component
+=end
     end
 
     def rest__info_about()
@@ -331,9 +342,10 @@ module DTK
 
     ### mcollective actions
     def rest__initiate_get_netstats()
+      node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
       queue = ActionResultsQueue.new
-      assembly.initiate_get_netstats(queue)
+      assembly.initiate_get_netstats(queue, node_id)
       rest_ok_response :action_results_id => queue.id
     end
     

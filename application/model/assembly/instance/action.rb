@@ -2,8 +2,9 @@
 module DTK
   class Assembly::Instance
     module ActionMixin
-      def initiate_get_netstats(action_results_queue)
+      def initiate_get_netstats(action_results_queue, node_id=nil)
         nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         Action::GetNetstats.initiate(nodes,action_results_queue)
       end
 

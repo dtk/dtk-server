@@ -67,12 +67,21 @@ module DTK; class  Assembly
       self.class.get_sub_assemblies([id_handle()])
     end
 
-    def get_nodes_and_components__flat_list(opts={})
-      filter = [:eq,:id,id()]
-      self.class.get_nodes_and_components__flat_list(model_handle(),{:filter => filter}.merge(opts))
+    def get_ports()
+      assembly_nodes = get_info__flat_list(:detail_level => "nodes")
+      sp_hash = {
+        :cols => Port.common_columns(),
+        :filter => [:oneof,:node_node_id,nodes_and_cmps.map{|r|r[:node][:id]}]
+      }
+      Model.get_objs(model_handle(:port),sp_hash)
     end
 
-    def self.get_nodes_and_components__flat_list(assembly_mh,opts={})
+    def get_info__flat_list(opts={})
+      filter = [:eq,:id,id()]
+      self.class.get_info__flat_list(model_handle(),{:filter => filter}.merge(opts))
+    end
+
+    def self.get_info__flat_list(assembly_mh,opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
@@ -119,7 +128,7 @@ module DTK; class  Assembly
 
     ### end: standard get methods
     def self.list(assembly_mh,opts={})
-      assembly_rows = get_nodes_and_components__flat_list(assembly_mh,opts)
+      assembly_rows = get_info__flat_list(assembly_mh,opts)
       if opts[:detail_level].nil?
         list_aux__no_details(assembly_rows)
       else
@@ -130,9 +139,13 @@ module DTK; class  Assembly
       end
     end
 
+    def list_connections()
+      get_augmented_port_links().map{|r|r.print_form_hash()}
+    end
+
     def list_smoketests()
       Log.error("TODO: needs to be tested")
-      nodes_and_cmps = get_nodes_and_components__flat_list(:detail_level => "components")
+      nodes_and_cmps = get_info__flat_list(:detail_level => "components")
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
@@ -192,7 +205,7 @@ module DTK; class  Assembly
       end
     end
     def info()
-      assembly_rows = get_nodes_and_components__flat_list(:detail_level => "components")
+      assembly_rows = get_info__flat_list(:detail_level => "components")
       attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
       self.class.list_aux(assembly_rows,attr_rows).first
     end

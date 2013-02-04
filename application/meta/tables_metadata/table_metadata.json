@@ -171,6 +171,20 @@
       "id": "dtk_id"
     }
   },
+  "service_connection": {
+    "order": [
+      "id",
+      "type",
+      "connection",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "type": "dtk_type",
+      "connection": "connection",
+      "description": "description"
+    }
+  },
   "module_diff": {
     "order": [
       "module_name",

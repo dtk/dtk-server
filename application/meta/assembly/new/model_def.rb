@@ -16,6 +16,7 @@ lambda__segment_module_branch =
     :cols => module_branch_cols
   }
 }
+
 lambda__segment_node =
   lambda{|node_cols|
   {
@@ -115,6 +116,50 @@ lambda__instance_nodes_and_components =
          :join_type=>:inner,
          :join_cond=>{:id=>:module_branch__service_id},
          :cols=>[:id,:group_id,:display_name]
+       }]
+    },
+    :augmented_port_links=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:port_link,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:assembly_id=>:component__id},
+         :cols=>[:id,:display_name,:group_id,:input_id,:output_id]
+       },
+       {
+         :model_name=>:port,
+         :alias=>:input_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__input_id},
+         :cols => Port.common_columns()
+       },
+       {
+         :model_name=>:node,
+         :alias=>:input_node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:input_port__node_node_id},
+         :cols=>[:id,:display_name,:group_id]
+       },
+       {
+         :model_name=>:port,
+         :alias=>:output_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__output_id},
+         :cols => Port.common_columns()
+       },
+       {
+         :model_name=>:node,
+         :alias=>:output_node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:output_port__node_node_id},
+         :cols=>[:id,:display_name,:group_id]
        }]
     },
     :node_attributes=> {

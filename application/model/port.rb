@@ -59,6 +59,10 @@ module XYZ
       self[:display_name].split(RefDelim)[3].to_i
     end
 
+    def parse_external_port_display_name()
+      display_name = get_field?(:display_name)
+      self.class.parse_external_port_display_name(display_name)
+    end
     def self.parse_external_port_display_name(port_display_name)
       ret = Hash.new
       #example internal form ([output|input]___)component_external___hdp-hadoop__namenode___namenode_conn

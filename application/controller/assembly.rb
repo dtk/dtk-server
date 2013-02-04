@@ -72,6 +72,20 @@ module DTK
       :attributes => lambda{|attr|not attr[:hidden]}
     }
 
+    def rest__list_connections()
+      assembly = ret_assembly_instance_object()
+      find_missing,find_possible = ret_request_params(:find_missing,:find_possible)
+      ret =
+        if find_possible
+          assembly.list_connections__possible()
+        elsif find_missing
+          assembly.list_connections__missing()
+        else
+          assembly.list_connections()
+        end
+      rest_ok_response ret
+    end
+
     def rest__list_possible_add_ons()
       assembly = ret_assembly_instance_object()
       rest_ok_response assembly.get_service_add_ons()

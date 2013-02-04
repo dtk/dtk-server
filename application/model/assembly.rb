@@ -19,6 +19,22 @@ module DTK
       end
     end
 
+    def get_port_links()
+      sp_hash = {
+        :cols => PortLink.common_columns(),
+        :filter => [:eq,:assembly_id,:id]
+      }
+      Model.get_objs(model_handle(:port_link),:cols => PortLink.common_columns())
+    end
+    
+    #augemented with teh ports and nodes
+    def get_augmented_port_links()
+      rows = get_objs(:cols => [:augmented_port_links])
+      rows.map do |r|
+        r[:port_link].merge(r.slice(:input_port,:output_port,:input_node,:output_node))
+      end
+    end
+
     ### standard get methods
 
     #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
@@ -197,11 +213,7 @@ module DTK
         node = ndx_nodes[r[:node_node_id]]
         (node[:ports] ||= Array.new) << r.materialize!(Port.common_columns())
       end
-      sp_hash = {
-        :cols => PortLink.common_columns(),
-        :filter => [:eq, :assembly_id, id()]
-      }
-      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+      port_links = get_port_links()
       port_links.each{|pl|pl.materialize!(PortLink.common_columns())}
 
       {:nodes => ndx_nodes.values, :port_links => port_links}

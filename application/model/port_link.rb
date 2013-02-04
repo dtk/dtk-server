@@ -1,8 +1,28 @@
 module XYZ
   class PortLink < Model
     def self.common_columns()
-      [:id,:input_id,:output_id]
+      [:id,:group_id,:input_id,:output_id]
     end
+
+    #expects augmented port link with keys :input_port, :output_port, :input_node, and :output_node
+    def print_form_hash()
+      input_port,link_def_ref = print_form_hash__port(self[:input_port],self[:input_node])
+      output_port, o_link_def_ref = print_form_hash__port(self[:output_port],self[:output_node])
+      if link_def_ref != o_link_def_ref
+        Log.error("input and output link def are not equal")
+      end
+      {
+        :id => self[:id],
+        :type => link_def_ref,
+        :connection => "#{input_port} <--> #{output_port}"
+      }
+    end
+    def print_form_hash__port(port,node,opts={})
+      info = port.parse_external_port_display_name()
+      cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
+      ["#{node[:display_name]}/#{cmp_ref}",info[:link_def_ref]]
+    end
+    private :print_form_hash__port
 
     def self.create_from_links_hash(parent_idh,links_to_create)
       parent_mn =  parent_idh[:model_name]

@@ -176,7 +176,7 @@ module DTK; class  Assembly
       pp [:output_ports,output_ports]
       pp [:unc_ports,unc_ports]
       return ret if output_ports.nil? or unc_ports.nil?
-      PortLink.find_possible_connections(unc_ports,output_ports)
+      LinkDef.find_possible_connections(unc_ports,output_ports)
     end
 =begin
 [{:link_def=>

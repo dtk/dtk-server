@@ -6,6 +6,27 @@ module XYZ
     end
 
     extend LinkDefParseSerializedForm
+    #ports are augmented with link def under :link_def key
+    def self.find_possible_connections(unconnected_aug_ports,output_aug_ports)
+      ret = Array.new
+      output_aug_ports.each{|r|r.set_port_info!()}
+      unconnected_aug_ports.each do |unc_port|
+        ret += unc_port[:link_def].find_possible_connection(unc_port,output_aug_ports,:port_info_is_set=>true)
+      end
+      ret
+    end
+    
+    #unc_aug_port and output_aug_ports have keys :node
+    def find_possible_connection(unc_aug_port,output_aug_ports,opts={})
+      unless opts[:port_info_is_set]
+        output_aug_ports.each{|r|r.set_port_info!()}
+      end
+      unc_aug_port.set_port_info!()
+pp [:debug, :unc_aug_port,unc_aug_port[:port_info]]
+      pp [:debug, :out_ports,output_aug_ports.map{|r|r[:port_info]}]
+      ret = Array.new
+    end
+
     def self.create_needed_internal_links(node,component,node_link_defs_info)
       #get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
       #on either end. what is returned arelink defs annotated with their possible links

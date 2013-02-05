@@ -6,6 +6,19 @@ module XYZ
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type]
     end
 
+    #TODO: when add cardinality info, woudl check it heer
+    #assuming that augmented ports have :port_info
+    def ret_matches(in_aug_port,out_aug_ports)
+      ret = Array.new
+      cmp_type = self[:remote_component_type]
+      out_aug_ports.each do |out_port|
+        if out_port[:port_info][:component_type] == cmp_type
+          ret << {:input_port => in_aug_port,:output_port => out_port}
+        end
+      end
+      ret
+    end
+
     def self.create_from_serialized_form(link_def_idh,possible_links)
       rows = parse_possible_links(possible_links)
       link_def_id = link_def_idh.get_id()

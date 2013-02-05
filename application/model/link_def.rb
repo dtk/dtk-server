@@ -31,6 +31,7 @@ module DTK
     end
     #unc_aug_port and output_aug_ports have keys :node
     def find_possible_connection(unc_aug_port,output_aug_ports,opts={})
+      ret = Array.new
       unless opts[:port_info_is_set]
         output_aug_ports.each{|r|r.set_port_info!()}
       end
@@ -39,9 +40,12 @@ module DTK
       end
 
       unc_aug_port.set_port_info!()
-pp [:debug, :unc_aug_port,unc_aug_port]
-      pp [:debug, :out_ports,output_aug_ports]
-      ret = Array.new
+      unc_aug_port[:link_def][:link_def_links].each do |ld_link|
+        matches = ld_link.ret_matches(unc_aug_port,output_aug_ports)
+        ret += matches
+      end
+      pp ret.map{|r|{:in => r[:input_port][:port_info],:out => r[:output_port][:port_info]}}
+      ret
     end
 
     def self.set_link_def_links!(aug_ports)
@@ -57,35 +61,6 @@ pp [:debug, :unc_aug_port,unc_aug_port]
       end
       nil
     end
-=begin
-    {"local_server"=>
-      {:link_def_link=>
-        {"rsyslog__server"=>
-          {:type=>"external",
-       :content=>
-            {:attribute_mappings=>
-              [{:input=>
-                 {:component_type=>"rsyslog__client",
-              :type=>"component_attribute",
-              :attribute_name=>"server",
-                   :term_index=>"rsyslog__client.server"},
-            :output=>
-                 {:type=>"node_attribute",
-              :attribute_name=>"host_addresses_ipv4",
-              :node_name=>"remote",
-              :term_index=>"remote_node.host_addresses_ipv4.0",
-                   :path=>["0"]}}]},
-       :remote_component_type=>"rsyslog__server",
-       :display_name=>"rsyslog__server",
-            :position=>1}},
-   :description=>"Connection to rsyslog server",
-   :has_external_link=>true,
-   :required=>true,
-   :local_or_remote=>"local",
-   :display_name=>"local_server",
-        :link_type=>"server"}}
-    
-=end
 
     def self.create_needed_internal_links(node,component,node_link_defs_info)
       #get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component

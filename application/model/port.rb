@@ -59,6 +59,34 @@ module XYZ
       self[:display_name].split(RefDelim)[3].to_i
     end
 
+
+    #aug_ports are ports augmented with :nested_component
+    def self.add_link_defs!(aug_ports)
+      ret = Array.new
+      return ret if aug_ports.empty?
+      filter_array = Array.new
+      #TODO: coud do this on db server side if it had field link_def_type
+      aug_ports.each do |port|
+        link_type = port.parse_external_port_display_name()[:link_def_ref]
+        port[:link_def_type] = link_type
+        filter_array << [:and,[:eq,:component_component_id,port[:nested_component][:id]],[:eq,:link_type,link_type]]
+      end
+      sp_hash = {
+        :cols => ([:component_component_id,:link_type]+LinkDef.common_columns()).uniq,
+        :filter => [:or] + filter_array
+      }
+      link_def_mh = aug_ports.first.model_handle(:link_def)
+      link_defs = get_objs(link_def_mh,sp_hash)
+      aug_ports.each do |port|
+        cmp_id = port[:nested_component][:id]
+        unless matching_ld = link_defs.find{|ld|ld[:link_type] == port[:link_def_type] and ld[:component_component_id] == cmp_id}
+          Log.error("cannot find link def associated with port #{port.slice(:id,:display_name).inspect}")
+        end
+        port[:link_def] = matching_ld
+      end
+      aug_ports
+    end
+
     def parse_external_port_display_name()
       display_name = get_field?(:display_name)
       self.class.parse_external_port_display_name(display_name)

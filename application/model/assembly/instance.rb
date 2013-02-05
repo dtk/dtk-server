@@ -69,7 +69,10 @@ module DTK; class  Assembly
 
     #augmented with node, component and link def info
     def get_augmented_ports()
-      get_objs(:cols => [:augmented_ports])
+      ret = get_objs(:cols => [:augmented_ports]).map do |r|
+        r[:port].merge(r.slice(:node,:nested_component))
+      end
+      Port.add_link_defs!(ret)
     end
 
     def get_info__flat_list(opts={})

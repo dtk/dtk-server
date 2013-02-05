@@ -1,6 +1,10 @@
 r8_nested_require('link_def','parse_serialized_form')
 module XYZ
   class LinkDef < Model
+    def self.common_columns()
+      [:id,:group_id,:display_name,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link]
+    end
+
     extend LinkDefParseSerializedForm
     def self.create_needed_internal_links(node,component,node_link_defs_info)
       #get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component

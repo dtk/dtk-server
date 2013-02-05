@@ -13,6 +13,7 @@ module XYZ
           :link_def_link => possible_link
         }.merge(has_external_internal)
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
+        el.merge!(:description => link_def["description"]) if link_def.has_key?("description")
         h.merge(ref => el)
       end
     end

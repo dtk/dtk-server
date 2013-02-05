@@ -56,6 +56,9 @@ module XYZ
         :type => link_def_name,
         :service_ref => display_name_print_form()
       }
+      if link_def = self[:link_def] 
+        ret.merge!(link_def.hash_subset(:required,:description))
+      end
       ret
     end
 

@@ -44,7 +44,6 @@ module DTK
         matches = ld_link.ret_matches(unc_aug_port,output_aug_ports)
         ret += matches
       end
-      pp ret.map{|r|{:in => r[:input_port][:port_info],:out => r[:output_port][:port_info]}}
       ret
     end
 

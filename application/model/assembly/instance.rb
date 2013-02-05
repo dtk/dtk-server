@@ -173,42 +173,13 @@ module DTK; class  Assembly
           unc_ports << r 
         end
       end
-      pp [:output_ports,output_ports]
-      pp [:unc_ports,unc_ports]
       return ret if output_ports.nil? or unc_ports.nil?
-      LinkDef.find_possible_connections(unc_ports,output_ports)
-    end
-=begin
-[{:link_def=>
-    {:local_or_remote=>"local",
-     :dangling=>false,
-     :display_name=>"local_server",
-     :component_component_id=>2147526873,
-     :link_type=>"server",
-     :group_id=>2147483775,
-     :required=>nil,
-     :has_external_link=>true,
-     :id=>2147526883,
-     :has_internal_link=>nil},
-   :type=>"component_external",
-   :display_name=>"input___component_external___rsyslog__client___server",
-   :node_node_id=>2147526864,
-   :node=>{:display_name=>"client2", :group_id=>2147483775, :id=>2147526864},
-   :nested_component=>
-    {:node_node_id=>2147526864,
-     :display_name=>"rsyslog__client",
-     :assembly_id=>2147526805,
-     :group_id=>2147483775,
-     :component_type=>"rsyslog__client",
-     :id=>2147526873},
-   :direction=>"input",
-   :link_def_type=>"server",
-   :containing_port_id=>nil,
-   :description=>nil,
-   :location_asserted=>nil,
-   :id=>2147526885}]]
-[:debug_size, 1]
-=end
+      poss_conns = LinkDef.find_possible_connections(unc_ports,output_ports)
+      poss_conns.map do |r|
+        poss_conn = "#{r[:output_port][:id].to_s}: #{r[:output_port].print_form_hash()[:service_ref]}"
+        r[:input_port].print_form_hash().merge(:possible_connection => poss_conn)
+      end.sort{|a,b|a[:service_ref] <=> b[:service_ref]}
+   end
 
     def list_smoketests()
       Log.error("TODO: needs to be tested")

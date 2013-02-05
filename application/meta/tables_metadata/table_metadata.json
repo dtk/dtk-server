@@ -201,6 +201,20 @@
       "description": "description"
     }
   },
+  "possible_service_connection": {
+    "order": [
+      "id",
+      "type",
+      "service_ref",
+      "possible_connection"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "type": "dtk_type",
+      "service_ref": "service_ref",
+      "possible_connection": "possible_connection"
+    }
+  },
   "module_diff": {
     "order": [
       "module_name",

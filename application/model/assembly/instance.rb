@@ -68,13 +68,28 @@ module DTK; class  Assembly
     end
 
     #augmented with node, :component  and link def info
-    def get_augmented_ports()
+    def get_augmented_ports(opts={})
       ndx_ret = Hash.new
       ret = get_objs(:cols => [:augmented_ports]).map do |r|
         r[:port].merge(r.slice(:node,:nested_component))
       end
-      Port.add_link_defs_and_prune(ret)
+      ret = Port.add_link_defs_and_prune(ret)
+      if opts[:mark_unconnected]
+        get_augmented_ports__mark_unconnected!(ret,opts)
+      end
+      ret
     end
+    #TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
+    def get_augmented_ports__mark_unconnected!(aug_ports,opts={})
+      port_links = get_port_links()
+      connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+      aug_ports.each do |r|
+        if r[:direction] == "input"
+          r[:unconnected] = !connected_ports.include?(r[:id])
+        end
+      end
+    end
+    private :get_augmented_ports__mark_unconnected!
 
     def get_info__flat_list(opts={})
       filter = [:eq,:id,id()]
@@ -144,18 +159,25 @@ module DTK; class  Assembly
     end
 
     def list_connections__missing()
-      ret = Array.new
-      #TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
-      port_links = get_port_links()
-      connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
-      aug_ports_need_conns = get_augmented_ports().select do |r|
-        r[:direction] == "input" and not connected_ports.include?(r[:id])
-      end
-      aug_ports_need_conns.map do |r|
-        r.print_form_hash()
-      end
+      get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|r.print_form_hash()}
     end
 
+    def list_connections__possible()
+      ret = Array.new
+      output_ports = Array.new
+      unc_ports = Array.new
+      get_augmented_ports(:mark_unconnected=>true).each do |r|
+        if r[:direction] == "output"
+          output_ports << r 
+        elsif r[:unconnected]
+          unc_ports << r 
+        end
+      end
+      pp [:output_ports,output_ports]
+      pp [:unc_ports,unc_ports]
+      return ret if output_ports.nil? or unc_ports.nil?
+      PortLink.find_possible_connections(unc_ports,output_ports)
+    end
 =begin
 [{:link_def=>
     {:local_or_remote=>"local",
@@ -380,7 +402,9 @@ module DTK; class  Assembly
       new_sub_assembly && new_sub_assembly.id_handle()
     end
 
-    def promote_to_library(library_idh=nil)
+    #TODO: needs to be changed to use workspace branch
+    def save_as_template(template_name)
+      Raise Error.new("TODO: needs to be updated")
       #TODO: can make more efficient by increemnt update as opposed to a delete then create
       #see if corresponding template in library and deleet if so 
       if assembly_template = get_associated_template?(library_idh)

@@ -131,10 +131,11 @@ module DTK
       rest_ok_response response
     end
 
-    #### actions to promote changes from workspace to library ###
-    def rest__promote_to_library()
+    #### actions to update and create assembly templates
+    def rest__save_as_template()
       assembly = ret_assembly_instance_object()
-      assembly.promote_to_library()
+      template_name = ret_non_null_request_params(:assembly_template_name)
+      assembly.save_as_template(template_name)
       rest_ok_response
     end
 
@@ -147,7 +148,7 @@ module DTK
       assembly.create_new_template(service_module,assembly_template_name)
       rest_ok_response
     end
-    #### end: actions to promote changes from workspace to library ###
+    #### end: actions to update and create assembly templates
 
     #### methods to modify the assembly instance
     def rest__add_sub_assembly()

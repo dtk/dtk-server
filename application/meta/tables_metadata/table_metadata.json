@@ -185,6 +185,22 @@
       "description": "description"
     }
   },
+  "service_ref": {
+    "order": [
+      "id",
+      "type",
+      "service_ref",
+      "required",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "type": "dtk_type",
+      "service_ref": "service_ref",
+      "required": "required",
+      "description": "description"
+    }
+  },
   "module_diff": {
     "order": [
       "module_name",

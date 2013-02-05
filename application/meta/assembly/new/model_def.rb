@@ -118,6 +118,19 @@ lambda__instance_nodes_and_components =
          :cols=>[:id,:group_id,:display_name]
        }]
     },
+    :augmented_ports=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      lambda__segments_nodes_and_components.call([:id,:group_id,:display_name],[:id,:group_id,:display_name,:component_type]) +
+      [{
+         :model_name=>:port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:node_node_id=>:node__id},
+         :cols => Port.common_columns()
+       }]
+    },
     :augmented_port_links=> {
       :type=>:json,
       :hidden=>true,

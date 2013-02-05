@@ -11,10 +11,19 @@ module XYZ
       if link_def_ref != o_link_def_ref
         Log.error("input and output link def are not equal")
       end
+      #TODO: confiusing that input/output on port link does not reflect what is logical input/output
+      if self[:input_port][:direction] == "input"
+        left_hand_side = input_port
+        right_hand_side = output_port
+      else
+        left_hand_side = output_port
+        right_hand_side = input_port
+      end
+
       {
         :id => self[:id],
         :type => link_def_ref,
-        :connection => "#{input_port} <--> #{output_port}"
+        :connection => "#{left_hand_side} <--> #{right_hand_side}"
       }
     end
     def print_form_hash__port(port,node,opts={})

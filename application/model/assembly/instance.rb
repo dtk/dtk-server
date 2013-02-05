@@ -67,13 +67,9 @@ module DTK; class  Assembly
       self.class.get_sub_assemblies([id_handle()])
     end
 
-    def get_ports()
-      assembly_nodes = get_info__flat_list(:detail_level => "nodes")
-      sp_hash = {
-        :cols => Port.common_columns(),
-        :filter => [:oneof,:node_node_id,nodes_and_cmps.map{|r|r[:node][:id]}]
-      }
-      Model.get_objs(model_handle(:port),sp_hash)
+    #augmented with node, component and link def info
+    def get_augmented_ports()
+      get_objs(:cols => [:augmented_ports])
     end
 
     def get_info__flat_list(opts={})
@@ -141,6 +137,12 @@ module DTK; class  Assembly
 
     def list_connections()
       get_augmented_port_links().map{|r|r.print_form_hash()}
+    end
+
+    def list_connections__missing()
+      ret = Array.new
+      pp get_augmented_ports()
+      ret
     end
 
     def list_smoketests()

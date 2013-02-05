@@ -67,15 +67,13 @@ module DTK; class  Assembly
       self.class.get_sub_assemblies([id_handle()])
     end
 
-    #augmented with node, component and link def info
+    #augmented with node, :component  and link def info
     def get_augmented_ports()
       ndx_ret = Hash.new
-      get_objs(:cols => [:augmented_ports]).each do |r|
-        port = r[:port].merge(r.slice(:node))
-        pntr = ndx_ret[port[:id]] ||= r[:port].merge(:node => r[:node],:components => Array.new)
-        pntr[:components] << r[:nested_component]
+      ret = get_objs(:cols => [:augmented_ports]).map do |r|
+        r[:port].merge(r.slice(:node,:nested_component))
       end
-      Port.add_link_defs!(ndx_ret.values)
+      Port.add_link_defs_and_prune(ret)
     end
 
     def get_info__flat_list(opts={})
@@ -153,40 +151,41 @@ module DTK; class  Assembly
       aug_ports_need_conns = get_augmented_ports().select do |r|
         r[:direction] == "input" and not connected_ports.include?(r[:id])
       end
-      pp [:debug,aug_ports_need_conns]
-      pp [:debug_size,aug_ports_need_conns.size]
-
-      ret
+      aug_ports_need_conns.map do |r|
+        r.print_form_hash()
+      end
     end
+
 =begin
-    {:link_def=>
-      {:local_or_remote=>"local",
-    :display_name=>"local_server",
-    :component_component_id=>2147526873,
-    :link_type=>"server",
-    :group_id=>2147483775,
-    :required=>nil,
-    :dangling=>false,
-    :has_external_link=>true,
-    :id=>2147526883,
-        :has_internal_link=>nil},
-  :type=>"component_external",
-      :node=>{:display_name=>"client2", :group_id=>2147483775, :id=>2147526864},
-  :node_node_id=>2147526864,
-  :display_name=>"input___component_external___rsyslog__client___server",
-  :nested_component=>
-      {:node_node_id=>2147526864,
-    :display_name=>"rsyslog__client",
-    :assembly_id=>2147526805,
-    :group_id=>2147483775,
-    :component_type=>"rsyslog__client",
-        :id=>2147526873},
-  :link_def_type=>"server",
-  :direction=>"input",
-  :description=>nil,
-  :containing_port_id=>nil,
-  :id=>2147526885,
-      :location_asserted=>nil}]
+[{:link_def=>
+    {:local_or_remote=>"local",
+     :dangling=>false,
+     :display_name=>"local_server",
+     :component_component_id=>2147526873,
+     :link_type=>"server",
+     :group_id=>2147483775,
+     :required=>nil,
+     :has_external_link=>true,
+     :id=>2147526883,
+     :has_internal_link=>nil},
+   :type=>"component_external",
+   :display_name=>"input___component_external___rsyslog__client___server",
+   :node_node_id=>2147526864,
+   :node=>{:display_name=>"client2", :group_id=>2147483775, :id=>2147526864},
+   :nested_component=>
+    {:node_node_id=>2147526864,
+     :display_name=>"rsyslog__client",
+     :assembly_id=>2147526805,
+     :group_id=>2147483775,
+     :component_type=>"rsyslog__client",
+     :id=>2147526873},
+   :direction=>"input",
+   :link_def_type=>"server",
+   :containing_port_id=>nil,
+   :description=>nil,
+   :location_asserted=>nil,
+   :id=>2147526885}]]
+[:debug_size, 1]
 =end
 
     def list_smoketests()

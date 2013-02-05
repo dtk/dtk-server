@@ -41,6 +41,23 @@ module XYZ
     ###########
     RefDelim = "___"
    public
+    #this is an augmented port that has keys: node and optionally :link_def
+    def display_name_print_form()
+      info = parse_external_port_display_name()
+      cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
+      node = self[:node]
+      "#{node[:display_name]}/#{cmp_ref}"
+    end
+
+    #this is an augmented port that has keys: node and optionally :link_def
+    def print_form_hash()
+      ret = {
+        :id => self[:id],
+        :type => link_def_name,
+        :service_ref => display_name_print_form()
+      }
+      ret
+    end
 
     def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref,dir)
       "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
@@ -60,19 +77,17 @@ module XYZ
     end
 
     #TODO: this can be avoided if we put more info in the port_link
-    #aug_ports are ports augmented with :components
-    #pust link defs under component it corresponds to
-    def self.add_link_defs!(aug_ports)
+    #aug_ports are ports augmented with :nested_component
+    #removes nesetd_components not associated with teh port
+    def self.add_link_defs_and_prune(aug_ports)
       ret = Array.new
       return ret if aug_ports.empty?
-      filter_array = Array.new
       #TODO: coud do this on db server side if it had field link_def_type
-      aug_ports.each do |port|
+      filter_array = aug_ports.map do |port|
         link_type = port.parse_external_port_display_name()[:link_def_ref]
         port[:link_def_type] = link_type
-        port[:components].each do |component|
-          filter_array << [:and,[:eq,:component_component_id,component[:id]],[:eq,:link_type,link_type]]
-        end
+        component =  port[:nested_component]
+        [:and,[:eq,:component_component_id,component[:id]],[:eq,:link_type,link_type]]
       end
       sp_hash = {
         :cols => ([:component_component_id,:link_type]+LinkDef.common_columns()).uniq,
@@ -80,15 +95,15 @@ module XYZ
       }
       link_def_mh = aug_ports.first.model_handle(:link_def)
       link_defs = get_objs(link_def_mh,sp_hash)
+      
       aug_ports.each do |port|
-        port[:components].each do |component|
-          cmp_id = component[:id]
-          if matching_ld = link_defs.find{|ld|ld[:link_type] == port[:link_def_type] and ld[:component_component_id] == cmp_id}
-            component[:link_def] = matching_ld
-          end
+        component = port[:nested_component]
+        cmp_id = component[:id]
+        if matching_ld = link_defs.find{|ld|ld[:link_type] == port[:link_def_type] and ld[:component_component_id] == cmp_id}
+          ret << port.merge(:link_def => matching_ld)
         end
       end
-      aug_ports
+      ret
     end
 
     def parse_external_port_display_name()

@@ -6,10 +6,11 @@ module XYZ
 
     #expects augmented port link with keys :input_port, :output_port, :input_node, and :output_node
     def print_form_hash()
-      input_port,link_def_ref = print_form_hash__port(self[:input_port],self[:input_node])
-      output_port, o_link_def_ref = print_form_hash__port(self[:output_port],self[:output_node])
-      if link_def_ref != o_link_def_ref
-        Log.error("input and output link def are not equal")
+      input_port = print_form_hash__port(self[:input_port],self[:input_node])
+      output_port = print_form_hash__port(self[:output_port],self[:output_node])
+      link_def_name = self[:input_port].link_def_name()
+      if link_def_name != self[:output_port].link_def_name()
+        Log.error("input and output link defs are not equal")
       end
       #TODO: confiusing that input/output on port link does not reflect what is logical input/output
       if self[:input_port][:direction] == "input"
@@ -22,14 +23,12 @@ module XYZ
 
       {
         :id => self[:id],
-        :type => link_def_ref,
+        :type => link_def_name,
         :connection => "#{left_hand_side} <--> #{right_hand_side}"
       }
     end
-    def print_form_hash__port(port,node,opts={})
-      info = port.parse_external_port_display_name()
-      cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
-      ["#{node[:display_name]}/#{cmp_ref}",info[:link_def_ref]]
+    def print_form_hash__port(port,node)
+      port.merge(:node=>node).display_name_print_form()
     end
     private :print_form_hash__port
 

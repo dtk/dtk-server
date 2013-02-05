@@ -1,31 +1,91 @@
 r8_nested_require('link_def','parse_serialized_form')
-module XYZ
+module DTK
   class LinkDef < Model
+    extend LinkDefParseSerializedForm
+
     def self.common_columns()
       [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link]
     end
 
-    extend LinkDefParseSerializedForm
+    def self.get_link_def_links(link_def_idhs,opts={})
+      ret = Array.new
+      return ret if link_def_idhs.empty?
+      sp_hash = {
+        :cols => opts[:cols]||LinkDefLink.common_columns(),
+        :filter => [:oneof,:link_def_id,link_def_idhs.map{|idh|idh.get_id()}]
+      }
+      ld_link_mh = link_def_idhs.first.create_childMH(:link_def_link)
+      get_objs(ld_link_mh,sp_hash)
+    end
+
     #ports are augmented with link def under :link_def key
     def self.find_possible_connections(unconnected_aug_ports,output_aug_ports)
       ret = Array.new
       output_aug_ports.each{|r|r.set_port_info!()}
+      set_link_def_links!(unconnected_aug_ports)
+      opts = {:port_info_is_set=>true,:link_def_links_are_set=>true}
       unconnected_aug_ports.each do |unc_port|
-        ret += unc_port[:link_def].find_possible_connection(unc_port,output_aug_ports,:port_info_is_set=>true)
+        ret += unc_port[:link_def].find_possible_connection(unc_port,output_aug_ports,opts)
       end
       ret
     end
-    
     #unc_aug_port and output_aug_ports have keys :node
     def find_possible_connection(unc_aug_port,output_aug_ports,opts={})
       unless opts[:port_info_is_set]
         output_aug_ports.each{|r|r.set_port_info!()}
       end
+      unless opts[:link_def_links_are_set]
+        set_link_def_links!(unc_aug_port)
+      end
+
       unc_aug_port.set_port_info!()
-pp [:debug, :unc_aug_port,unc_aug_port[:port_info]]
-      pp [:debug, :out_ports,output_aug_ports.map{|r|r[:port_info]}]
+pp [:debug, :unc_aug_port,unc_aug_port]
+      pp [:debug, :out_ports,output_aug_ports]
       ret = Array.new
     end
+
+    def self.set_link_def_links!(aug_ports)
+      aug_ports = [aug_ports] unless aug_ports.kind_of?(Array)
+      ndx_link_defs = aug_ports.inject(Hash.new) do |h,r|
+        ld = r[:link_def]
+        h.merge(ld[:id] => ld)
+      end
+      ld_link_cols = [:id,:group_id,:display_name,:type,:position,:remote_component_type,:link_def_id] 
+      ld_links = get_link_def_links(ndx_link_defs.values.map{|r|r.id_handle()},:cols => ld_link_cols)
+      ld_links.each do |r|
+        (ndx_link_defs[r[:link_def_id]][:link_def_links] ||= Array.new) << r
+      end
+      nil
+    end
+=begin
+    {"local_server"=>
+      {:link_def_link=>
+        {"rsyslog__server"=>
+          {:type=>"external",
+       :content=>
+            {:attribute_mappings=>
+              [{:input=>
+                 {:component_type=>"rsyslog__client",
+              :type=>"component_attribute",
+              :attribute_name=>"server",
+                   :term_index=>"rsyslog__client.server"},
+            :output=>
+                 {:type=>"node_attribute",
+              :attribute_name=>"host_addresses_ipv4",
+              :node_name=>"remote",
+              :term_index=>"remote_node.host_addresses_ipv4.0",
+                   :path=>["0"]}}]},
+       :remote_component_type=>"rsyslog__server",
+       :display_name=>"rsyslog__server",
+            :position=>1}},
+   :description=>"Connection to rsyslog server",
+   :has_external_link=>true,
+   :required=>true,
+   :local_or_remote=>"local",
+   :display_name=>"local_server",
+        :link_type=>"server"}}
+    
+=end
 
     def self.create_needed_internal_links(node,component,node_link_defs_info)
       #get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component

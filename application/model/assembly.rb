@@ -22,9 +22,9 @@ module DTK
     def get_port_links()
       sp_hash = {
         :cols => PortLink.common_columns(),
-        :filter => [:eq,:assembly_id,:id]
+        :filter => [:eq,:assembly_id,id()]
       }
-      Model.get_objs(model_handle(:port_link),:cols => PortLink.common_columns())
+      Model.get_objs(model_handle(:port_link),sp_hash)
     end
     
     #augemented with teh ports and nodes

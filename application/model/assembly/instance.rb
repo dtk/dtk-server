@@ -69,10 +69,13 @@ module DTK; class  Assembly
 
     #augmented with node, component and link def info
     def get_augmented_ports()
-      ret = get_objs(:cols => [:augmented_ports]).map do |r|
-        r[:port].merge(r.slice(:node,:nested_component))
+      ndx_ret = Hash.new
+      get_objs(:cols => [:augmented_ports]).each do |r|
+        port = r[:port].merge(r.slice(:node))
+        pntr = ndx_ret[port[:id]] ||= r[:port].merge(:node => r[:node],:components => Array.new)
+        pntr[:components] << r[:nested_component]
       end
-      Port.add_link_defs!(ret)
+      Port.add_link_defs!(ndx_ret.values)
     end
 
     def get_info__flat_list(opts={})
@@ -144,9 +147,47 @@ module DTK; class  Assembly
 
     def list_connections__missing()
       ret = Array.new
-      pp get_augmented_ports()
+      #TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
+      port_links = get_port_links()
+      connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
+      aug_ports_need_conns = get_augmented_ports().select do |r|
+        r[:direction] == "input" and not connected_ports.include?(r[:id])
+      end
+      pp [:debug,aug_ports_need_conns]
+      pp [:debug_size,aug_ports_need_conns.size]
+
       ret
     end
+=begin
+    {:link_def=>
+      {:local_or_remote=>"local",
+    :display_name=>"local_server",
+    :component_component_id=>2147526873,
+    :link_type=>"server",
+    :group_id=>2147483775,
+    :required=>nil,
+    :dangling=>false,
+    :has_external_link=>true,
+    :id=>2147526883,
+        :has_internal_link=>nil},
+  :type=>"component_external",
+      :node=>{:display_name=>"client2", :group_id=>2147483775, :id=>2147526864},
+  :node_node_id=>2147526864,
+  :display_name=>"input___component_external___rsyslog__client___server",
+  :nested_component=>
+      {:node_node_id=>2147526864,
+    :display_name=>"rsyslog__client",
+    :assembly_id=>2147526805,
+    :group_id=>2147483775,
+    :component_type=>"rsyslog__client",
+        :id=>2147526873},
+  :link_def_type=>"server",
+  :direction=>"input",
+  :description=>nil,
+  :containing_port_id=>nil,
+  :id=>2147526885,
+      :location_asserted=>nil}]
+=end
 
     def list_smoketests()
       Log.error("TODO: needs to be tested")

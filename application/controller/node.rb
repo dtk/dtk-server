@@ -26,6 +26,61 @@ module XYZ
       rest_ok_response
     end
 
+    def rest__start()
+      node     = create_node_obj(:node_id)
+      nodes    = get_objects(:node, { :id => node[:id]})
+      node_idh = ret_request_param_id_handle(:node_id)
+
+      nodes, is_valid, error_msg = node_valid_for_aws?(nodes, :stopped)
+
+      unless is_valid
+        return rest_ok_response(:errors => [error_msg])
+      end
+
+      queue = SimpleActionQueue.new
+
+      CreateThread.defer do
+        # invoking command to start the nodes
+        CommandAndControl.start_instances(nodes)
+
+        task = Task.power_on_from_node(node_idh)
+        task.save!()
+
+        queue.set_result(:task_id => task.id)
+      end
+
+      rest_ok_response :action_results_id => queue.id
+    end
+
+    def rest__stop()
+      node  = create_node_obj(:node_id)
+      nodes = get_objects(:node, { :id => node[:id]})
+
+      nodes, is_valid, error_msg = node_valid_for_aws?(nodes, :running)
+
+      unless is_valid
+       return rest_ok_response(:errors => [error_msg])
+      end
+      
+      CommandAndControl.stop_instances(nodes)
+      rest_ok_response :status => :ok
+    end
+
+    def node_valid_for_aws?(nodes, status_pattern)
+      # check if staged
+      if nodes.first[:type] == "staged"
+        return nodes, false, "Node with id '#{nodes.first[:id]}' is 'staged' and as such cannot be started/stopped."
+      end
+
+      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
+      node = nodes.first[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending")
+      if node.nil?
+        return nodes, false, "There are no #{status_pattern} nodes with id '#{nodes.first[:id]}'"
+      end
+      
+      return nodes, true, nil      
+    end
+
     #### end: create and delete actions ###
 
     #### list and info actions ###

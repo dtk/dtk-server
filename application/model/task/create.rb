@@ -98,6 +98,25 @@ module XYZ
       ret
     end
 
+    def power_on_from_node(node_idh,commit_msg=nil)
+      ret = nil
+      target_idh = node_idh.get_parent_id_handle_with_auth_info()
+      task_mh = target_idh.create_childMH(:task)
+      node_mh = target_idh.create_childMH(:node)
+      node = node_idh.create_object().update_object!(:display_name)
+
+      power_on_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
+      power_on_nodes_task = create_running_node_task(task_mh,power_on_nodes_changes)
+
+      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "node_converge", :commit_message => commit_msg)
+      if power_on_nodes_task
+        ret.add_subtask(power_on_nodes_task)
+      else
+        ret = nil
+      end
+      ret
+    end
+
     #TODO: might deprecate
     def create_from_pending_changes(parent_idh,state_change_list)
       task_mh = parent_idh.create_childMH(:task)

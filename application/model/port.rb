@@ -22,7 +22,9 @@ module XYZ
           :filter => [:eq,:id,id]
         }
         rows = get_objs(model_handle,sp_hash)
-        port = rows.first
+        unless port = rows.first
+          raise ErrorIdInvalid.new(id,pp_object_type())
+        end
         unless port[:node][:assembly_id] == opts[:assembly_idh].get_id()
           Raise ErrorUsage.new("Port with id (#{id.to_s}) does not belong to assembly")
         end
@@ -188,7 +190,7 @@ module XYZ
         int_or_ext =  (int_or_ext ? [int_or_ext] : ["internal","external"])
         poss_p_names = dirs.map do |dir|
           int_or_ext.map do |ie|
-            "#{dir}#{RefDelim}component_#{int_or_ext}#{RefDelim}#{cmp_ref_internal_form}#{RefDelim}#{conn_type}"
+            "#{dir}#{RefDelim}component_#{ie}#{RefDelim}#{cmp_ref_internal_form}#{RefDelim}#{conn_type}"
           end
         end.flatten
         [node_display_name,poss_p_names]

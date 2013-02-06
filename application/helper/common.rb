@@ -239,8 +239,8 @@ module Ramaze::Helper
 
     #TODO: these three methods below need some cleanup
     #param refers to key that can have id or name value
-    def create_obj(param,model_class=nil)
-      create_object_from_id(ret_request_param_id(param,model_class),model_class)
+    def create_obj(param,model_class=nil,extra_context=nil)
+      create_object_from_id(ret_request_param_id(param,model_class,extra_context),model_class)
     end
 
     #param refers to key that can have id or name value
@@ -249,8 +249,7 @@ module Ramaze::Helper
       id_handle(id,ret_module_name_from_class(model_class))
     end
     #param refers to key that can have id or name value
-    #if version is given then param is assumed to be a name
-    def ret_request_param_id(param,model_class=nil,version=nil)
+    def ret_request_param_id(param,model_class=nil,extra_context=nil)
       model_name = ret_module_name_from_class(model_class)
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
@@ -258,13 +257,13 @@ module Ramaze::Helper
       id_or_name = ret_non_null_request_params(param)
       if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
         id = id_or_name.to_i
-        model_class.check_valid_id(model_handle,id)
+        params = [model_handle,id]
+        params << extra_context if extra_context
+        model_class.check_valid_id(*params)
       else
-        if version
-          model_class.name_to_id(model_handle,id_or_name,version)
-        else
-          model_class.name_to_id(model_handle,id_or_name)
-        end
+        params = [model_handle,id_or_name]
+        params << extra_context if extra_context
+        model_class.name_to_id(*params)
       end
     end
 

@@ -72,6 +72,16 @@ module DTK
       :attributes => lambda{|attr|not attr[:hidden]}
     }
 
+    def rest__add_connection()
+      assembly = ret_assembly_instance_object()
+      assembly_idh = assembly.id_handle()
+      conn_type = ret_non_null_request_params(:connection_type)
+      input_port = ret_port_object(:input_service_ref_id,assembly_idh,conn_type)
+      output_port = ret_port_object(:output_service_ref_id,assembly_idh,conn_type)
+      pp [:debug,assembly,input_port,output_port]
+      rest_ok_response
+    end
+
     def rest__list_connections()
       assembly = ret_assembly_instance_object()
       find_missing,find_possible = ret_request_params(:find_missing,:find_possible)

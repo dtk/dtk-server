@@ -30,5 +30,10 @@ module Ramaze::Helper
       (ret_request_params(:subtype)||:instance).to_sym
     end
 
+    def ret_port_object(param,assembly_idh,conn_type)
+      extra_context = {:assembly_idh => assembly_idh,:connection_type => conn_type}
+      create_obj(param,::DTK::Port,extra_context)
+    end
+
   end
 end

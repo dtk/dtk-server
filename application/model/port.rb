@@ -14,6 +14,43 @@ module XYZ
        :node_id
       ]
     end
+
+    def self.check_valid_id(model_handle,id,opts={}) 
+      if opts[:assembly_idh]
+        sp_hash = {
+          :cols => [:id,:node],
+          :filter => [:eq,:id,id]
+        }
+        rows = get_objs(model_handle,sp_hash)
+        port = rows.first
+        unless port[:node][:assembly_id] == opts[:assembly_idh].get_id()
+          Raise ErrorUsage.new("Port with id (#{id.to_s}) does not belong to assembly")
+        end
+        id
+      else
+        check_valid_id_default(model_handle,id)
+      end
+    end
+
+    #name should be of form <node>/<component>, like server/rsyslog::server
+    def self.name_to_id(model_handle,name,opts={})
+      unless opts[:assembly_idh] and opts[:connection_type]
+        raise Error.new("Unexpected options given in Port.name_to_id (#{opts.inspect}")
+      end
+      assembly_id = opts[:assembly_idh].get_id()
+      conn_type = opts[:connection_type]
+      node_display_name,poss_port_display_names = Port.parse_to_ret_display_name(name,conn_type,opts)
+      unless node_display_name
+        raise ErrorUsage.new("Port name (#{name}) is ill-formed")
+      end
+      augmented_sp_hash = {
+        :cols => [:id,:node],
+        :filter => [:oneof,:display_name,poss_port_display_names],
+        :post_filter => lambda{|r|r[:node][:assembly_id] == assembly_id and r[:node][:display_name] == node_display_name}
+      }
+      name_to_id_helper(model_handle,name,augmented_sp_hash)
+    end
+
     #virtual attribute defs
     def location()
       return self[:location_asserted] if self[:location_asserted]
@@ -134,6 +171,27 @@ module XYZ
         ret.merge(:module => $1,:component => $1,:link_def_ref => $2,:component_type => $1)
       else
         raise Error.new("unexpected display name (#{port_display_name})")
+      end
+    end
+    
+    #this function maps from service ref to internal display name
+    #node_display_name,poss_port_display_names
+    #input is of form form <node>/<component>, like server/rsyslog::server
+    #if error, returns nil
+    def self.parse_to_ret_display_name(service_ref_name,conn_type,opts={})
+      if service_ref_name =~ Regexp.new("(^[^/]+)/([^/]+$)")
+        node_display_name = $1
+        cmp_ref = $2
+        cmp_ref_internal_form = cmp_ref.gsub(/::/,"__")
+        dirs = (opts[:direction] ? [options[:direction]] : ["input","output"])
+        int_or_ext = opts[:internal_or_external]
+        int_or_ext =  (int_or_ext ? [int_or_ext] : ["internal","external"])
+        poss_p_names = dirs.map do |dir|
+          int_or_ext.map do |ie|
+            "#{dir}#{RefDelim}component_#{int_or_ext}#{RefDelim}#{cmp_ref_internal_form}#{RefDelim}#{conn_type}"
+          end
+        end.flatten
+        [node_display_name,poss_p_names]
       end
     end
 

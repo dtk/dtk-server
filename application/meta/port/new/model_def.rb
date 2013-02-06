@@ -60,7 +60,7 @@
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id =>:port__node_node_id},
-         :cols=>[:id,:display_name]
+         :cols=>[:id,:group_id,:display_name,:assembly_id]
        }]
     },
     :link_def_info=>{

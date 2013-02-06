@@ -78,8 +78,8 @@ module DTK
       conn_type = ret_non_null_request_params(:connection_type)
       input_port = ret_port_object(:input_service_ref_id,assembly_idh,conn_type)
       output_port = ret_port_object(:output_service_ref_id,assembly_idh,conn_type)
-      pp [:debug,assembly,input_port,output_port]
-      rest_ok_response
+      port_link_idh = assembly.add_connection(input_port,output_port)
+      rest_ok_response :connection_id => port_link_idh.get_id()
     end
 
     def rest__list_connections()

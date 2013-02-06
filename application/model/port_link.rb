@@ -4,6 +4,24 @@ module XYZ
       [:id,:group_id,:input_id,:output_id]
     end
 
+    #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
+    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
+      #get the associated link_def_link TODO: if it does not exist means constraint violation
+      link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
+      raise PortLinkError.new("Illegal link") unless link_def_link
+      if opts[:donot_create_port_link]
+        port_link = port_link_hash 
+        unless port_link_idh = opts[:port_link_idh]
+          raise Error.new("if option :donot_create_port_link give, option :port_link_idh must be set")
+        end
+      else
+        port_link = create_from_links_hash(parent_idh,[port_link_hash],opts).first
+        port_link_idh = port_link.id_handle
+      end
+      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_idh))
+      port_link
+    end
+
     #expects augmented port link with keys :input_port, :output_port, :input_node, and :output_node
     def print_form_hash()
       input_port = print_form_hash__port(self[:input_port],self[:input_node])
@@ -32,17 +50,18 @@ module XYZ
     end
     private :print_form_hash__port
 
-    def self.create_from_links_hash(parent_idh,links_to_create)
+    def self.create_from_links_hash(parent_idh,links_to_create,opts={})
       parent_mn =  parent_idh[:model_name]
       parent_id = parent_idh.get_id()
       port_link_mh = parent_idh.createMH(:model_name => :port_link,:parent_model_name => parent_mn)
       parent_col = DB.parent_field(parent_mn,:port_link)
+      override_attrs = opts[:override_attrs]||{}
       rows = links_to_create.map do |link|
         {:input_id => link[:input_id],
          :output_id => link[:output_id],
           parent_col => parent_id,
           :ref => ref_from_ids(link[:input_id],link[:output_id])
-        }
+        }.merge(override_attrs)
       end
       create_opts = {:returning_sql_cols => [:id,:input_id,:output_id]}
       #TODO: push in use of :c into create_from_rows
@@ -54,23 +73,6 @@ module XYZ
       "port_link:#{input_id}-#{output_id}"
     end
 
-    #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
-    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
-      #get the associated link_def_link TODO: if it does not exist means constraint violation
-      link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
-      raise PortLinkError.new("Illegal link") unless link_def_link
-      if opts[:donot_create_port_link]
-        port_link = port_link_hash 
-        unless port_link_idh = opts[:port_link_idh]
-          raise Error.new("if option :donot_create_port_link give, option :port_link_idh must be set")
-        end
-      else
-        port_link = create_from_links_hash(parent_idh,[port_link_hash]).first
-        port_link_idh = port_link.id_handle
-      end
-      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_idh))
-      port_link
-    end
     def create_attr_links(parent_idh,opts={})
       update_object!(:input_id,:output_id)
       augmented_opts = opts.merge(:port_link_idh => id_handle,:donot_create_port_link => true)

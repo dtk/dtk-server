@@ -361,8 +361,17 @@ module DTK; class  Assembly
       Model.delete_instance(component_idh)
     end
 
+    def add_assembly_template(assembly_template_idh)
+      assembly_template = assembly_template_idh.create_object()
+      override_attrs = {
+        :assembly_id => id()
+      }
+      target = get_target()
+      added_assembly_idh = target.clone_into(assembly_template,override_attrs)
+      id_handle()
+    end
 
-    def add_sub_assembly(add_on_name, assembly_name=nil)
+    def add_service_add_on(add_on_name, assembly_name=nil)
       update_object!(:display_name)
 
       unless aug_service_add_on = get_augmented_service_add_on(add_on_name)

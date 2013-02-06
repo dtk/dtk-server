@@ -21,24 +21,6 @@ module DTK
       rest_ok_response
     end
 
-    def rest__add_node()
-      assembly = ret_assembly_instance_object()
-      assembly_node_name = ret_non_null_request_params(:assembly_node_name)
-      node_template_id = ret_request_params(:node_template_id)
-      node_template_idh = (node_template_id ? id_handle(node_template_id,:node) : Node::Template.null_node_template(model_handle(:node)).id_handle())
-      node_instance_idh = assembly.add_node(node_template_idh,assembly_node_name)
-      rest_ok_response :node_id => node_instance_idh.get_id()
-    end
-
-    def rest__add_component()
-      assembly = ret_assembly_instance_object()
-      component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
-      #not checking here if node_id points to valid object; check is in add_component
-      node_id = ret_non_null_request_params(:node_id)
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh)
-      rest_ok_response(:component_id => new_component_idh.get_id())
-    end
-
     def rest__delete_component()
       assembly = ret_assembly_instance_object()
       #not checking here if component_id points to valid object; check is in delete_component
@@ -161,10 +143,36 @@ module DTK
     #### end: actions to update and create assembly templates
 
     #### methods to modify the assembly instance
-    def rest__add_sub_assembly()
+    def rest__add_node()
+      assembly = ret_assembly_instance_object()
+      assembly_node_name = ret_non_null_request_params(:assembly_node_name)
+      node_template_id = ret_request_params(:node_template_id)
+      node_template_idh = (node_template_id ? id_handle(node_template_id,:node) : Node::Template.null_node_template(model_handle(:node)).id_handle())
+      node_instance_idh = assembly.add_node(node_template_idh,assembly_node_name)
+      rest_ok_response :node_id => node_instance_idh.get_id()
+    end
+
+    def rest__add_component()
+      assembly = ret_assembly_instance_object()
+      component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
+      #not checking here if node_id points to valid object; check is in add_component
+      node_id = ret_non_null_request_params(:node_id)
+      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh)
+      rest_ok_response(:component_id => new_component_idh.get_id())
+    end
+
+    def rest__add_assembly_template()
+      assembly = ret_assembly_instance_object()
+      assembly_template_idh = ret_request_param_id_handle(:assembly_template_id,Assembly::Template)
+      assembly.add_assembly_template(assembly_template_idh)
+      rest_ok_response 
+    end
+
+
+    def rest__add_service_add_on()
       assembly = ret_assembly_instance_object()
       add_on_name = ret_non_null_request_params(:service_add_on_name)
-      new_sub_assembly_idh = assembly.add_sub_assembly(add_on_name)
+      new_sub_assembly_idh = assembly.service_add_on(add_on_name)
       rest_ok_response(:sub_assembly_id => new_sub_assembly_idh.get_id()) 
     end
 

@@ -49,14 +49,32 @@ module DTK
     end
 
     def rest__info_about()
+      node_id, component_id = ret_request_params(:node_id, :component_id)
       assembly,subtype = ret_assembly_params_object_and_subtype()
       about = ret_non_null_request_params(:about).to_sym
-       unless AboutEnum[subtype].include?(about)
-         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
-       end
-       
-      rest_ok_response assembly.info_about(about)
+      unless AboutEnum[subtype].include?(about)
+        raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
+      end
+      filter_proc = Proc.new do |e|
+        ret_val = nil
+        ret_val = e if check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id)
+        #ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
+      end 
+      rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
     end
+
+    # checks element trough set of fields
+    def check_element(element, fields, element_id_val)
+      return true if (element_id_val.nil? || element_id_val.empty?)
+      return false if element.nil?
+      temp_element = element.dup
+      fields.each do |field|
+        temp_element = temp_element[field]
+        return false if temp_element.nil?
+      end
+      return (temp_element == element_id_val.to_i)
+    end
+
     AboutEnum = {
       :instance => [:nodes,:components,:tasks,:attributes],
       :template => [:nodes,:components,:targets]

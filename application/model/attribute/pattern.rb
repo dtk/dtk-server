@@ -26,8 +26,11 @@ module DTK; class Attribute
 
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
-
-      filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
+      
+      filter_proc = Proc.new do |attr|
+        attr_ids.include?(attr[:attribute][:id])
+      end
+      #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,:filter_proc => filter_proc)
     end
 

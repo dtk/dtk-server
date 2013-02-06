@@ -22,7 +22,7 @@ module DTK; class  Assembly
       get_objs_helper(:aug_service_add_ons_from_instance,:service_add_on,:augmented => true)
     end
     def get_augmented_service_add_on(add_on_name)
-      filter_proc = lambda{|sao|sao[:display_name] == add_on_name}
+      filter_proc = lambda{|sao|sao[:service_add_on][:display_name] == add_on_name}
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
@@ -292,6 +292,9 @@ module DTK; class  Assembly
       end
 
       rows = get_objs(:cols => cols)
+      # If about=:component filter components by node_id, by invoking filter_proc
+      rows = rows.map { |r| opts[:filter_proc].call(r) }.compact if (opts[:filter_proc] && about == :components)
+
       ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
       order ? ret.sort(&order) : ret
     end

@@ -31,7 +31,8 @@ module XYZ
       rows = get_objs(:cols => [virtual_attr])
       if filter_proc = opts[:filter_proc]
         rows.map do |r|
-          el = r[result_col]
+          #el = r[result_col]
+          el = r
           if filter_proc.call(el)
             opts[:augmented] ? augmented_form(r,result_col) : el 
           end

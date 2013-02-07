@@ -11,20 +11,8 @@ module XYZ
       end
       ret
     end
-
-    def ret_attr_guards_and_violations(top_level_task)
-      guards = Array.new
-      #augmented_attr_list does not contain node level attributes => attr_out can be null
-      augmented_attr_list = augmented_attribute_list_from_task(top_level_task,:include_node_attributes => true)
-      dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
-        if guard = GuardedAttribute.create(attr_in,link,attr_out)
-          guards << guard
-        end
-      end
-      attr_violations = ret_required_attrs_without_values(augmented_attr_list,guards)
-      [guards,attr_violations]
-    end
    private
+    #TODO: may deprecate; have another fn that does this check for assembly insatnces
     def ret_required_attrs_without_values(augmented_attr_list,guards)
       #TODO: determine if guards test is needed in addition to required_unset_attribute?() test
       guarded_ids = nil

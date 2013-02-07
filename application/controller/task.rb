@@ -60,12 +60,7 @@ module XYZ
     def rest__execute()
       task_id =  ret_non_null_request_params(:task_id)
       task = Task.get_hierarchical_structure(id_handle(task_id))
-
-      guards,violation_errors = Attribute.ret_attr_guards_and_violations(task)
-      if violation_errors
-        raise violation_errors
-      end
-
+      guards = Attribute.ret_attribute_guards(task)
       workflow = Workflow.create(task,guards)
       workflow.defer_execution()
       rest_ok_response :task_id => task_id 

@@ -1,7 +1,9 @@
 module DTK; class  Assembly
   class Instance < self
     r8_nested_require('instance','action')
+    r8_nested_require('instance','violation')
     include ActionMixin
+    include ViolationMixin
 
     ### standard get methods
     def get_augmented_node_attributes(filter_proc=nil)

@@ -190,9 +190,14 @@ module DTK
     #### end: method(s) related to staging assembly template
 
     #### creates tasks to execute/converge assemblies and monitor status
+    def rest__find_violations()
+      assembly = ret_assembly_instance_object()
+      assembly.find_violations()
+      rest_ok_response
+    end
+
     def rest__create_task()
       assembly = ret_assembly_instance_object()
-
       if assembly.is_stopped?
         validate_params = [
           :action => :start, 

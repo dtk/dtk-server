@@ -25,14 +25,39 @@ module DTK
         :filter => [:eq,:assembly_id,id()]
       }
       Model.get_objs(model_handle(:port_link),sp_hash)
-    end
-    
-    #augemented with teh ports and nodes
+    end      
+
+    #augemented with the ports and nodes
     def get_augmented_port_links()
       rows = get_objs(:cols => [:augmented_port_links])
       rows.map do |r|
         r[:port_link].merge(r.slice(:input_port,:output_port,:input_node,:output_node))
       end
+    end
+
+    def info(subtype, node_id=nil, component_id=nil, attribute_id=nil)
+      opts = {}
+      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
+      assembly_rows = get_objs(sp_hash)
+      # filter nodes by node_id if node_id is provided in request
+      unless (node_id.nil? || node_id.empty?)
+        assembly_rows = assembly_rows.select { |node| node[:node][:id] == node_id.to_i } 
+        opts = {:component_info => true}
+      end
+      # filter nodes by component_id if component_id is provided in request
+      unless (component_id.nil? || component_id.empty?)
+        assembly_rows = assembly_rows.select { |node| node[:nested_component][:id] == component_id.to_i } 
+        opts = {:component_info => true, :attribute_info => true}
+      end
+
+      # load attributes for assembly
+      attr_rows = self.class.get_default_component_attributes(model_handle(), assembly_rows)
+
+      # filter attributes by attribute_name if attribute_name is provided in request
+      attr_rows = attr_rows.select { |attr| attr[:id] == attribute_id.to_i }  unless (attribute_id.nil? || attribute_id.empty?)
+      
+      # reconfigure response fields that will be returned to the client
+      self.class.list_aux(assembly_rows,attr_rows, opts).first      
     end
 
     ### standard get methods
@@ -101,11 +126,15 @@ module DTK
     class << self
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new
-        attr_rows.each do |attr|
-          if attr[:attribute_value]
-            (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr
+
+        if opts[:attribute_info] 
+          attr_rows.each do |attr|
+            if (attr[:attribute_value] && !attr[:attribute_value].empty?)
+              (ndx_attrs[attr[:component_component_id]] ||= Array.new) << attr
+            end
           end
         end
+
         ndx_ret = Hash.new
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_rows.each do |r|
@@ -135,7 +164,7 @@ module DTK
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             cmp = 
               if opts[:component_info] 
-                {:component_name => cmp_type,:component_id => cmp_hash[:id],:description => cmp_hash[:description]}
+                {:component_name => cmp_type,:component_id => cmp_hash[:id], :basic_type => cmp_hash[:basic_type], :description => cmp_hash[:description]}
               elsif not attr_rows.empty?
                 {:component_name => cmp_type}
               else

@@ -35,17 +35,15 @@ module DTK
 
     #### list and info actions ###
     def rest__info()
-      assembly = ret_assembly_object()
-      rest_ok_response assembly.info()
 =begin
 #MERGE-QUESTION
-      node_id = ret_non_null_request_params(:node_id)
-      assembly,subtype = ret_assembly_params_object_and_subtype()
-      nodes = assembly.info(subtype)
-      nodes[:nodes] = nodes[:nodes].select { |node| node[:node_id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-      rest_ok_response nodes
- Implemented part of methods for n-level context - getnetstats, info, delete-component
+      assembly = ret_assembly_object()
+      rest_ok_response assembly.info()
 =end
+      node_id, component_id, attribute_id = ret_request_params(:node_id, :component_id, :attribute_id)
+      assembly,subtype = ret_assembly_params_object_and_subtype()
+      nodes = assembly.info(subtype, node_id, component_id, attribute_id)
+      rest_ok_response nodes
     end
 
     def rest__info_about()

@@ -1,3 +1,4 @@
+#TODO: remove or cleanup; determine if we need to persist these
 module DTK
   class Violation < Model
     def self.find_missing_required_attributes(level,commit_task)

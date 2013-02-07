@@ -513,6 +513,29 @@ module XYZ
     end
    public
 
+    #returns hash with ndx component_id and keys :constraints, :component
+    def self.get_ndx_constraints(component_idhs)
+      ret = Hash.new
+      return ret if component_idhs.empty?
+      cmp_cols = [:id,:group_id,:only_one_per_node,:component_type,:extended_base,:implementation_id]
+      sp_hash = {
+        :cols => [:dependencies] + cmp_cols,
+        :filter => [:oneof,:id,component_idhs.map{|idh|idh.get_id()}]
+      }
+      cmp_mh = component_idhs.first.createMH()
+      get_objs(cmp_mh,sp_hash).each do |r|
+        pntr = ret[r[:id]] ||= {:constraints => Array.new, :component => r.slice(*cmp_cols)}
+        pntr[:constraints] << Constraint.create(r[:dependencies]) if r[:dependencies]
+      end
+      ret.each_value do |r|
+        cmp = r[:component]
+        r[:constraints] << Constraint::Macro.only_one_per_node(cmp[:component_type]) if cmp[:only_one_per_node]
+        r[:constraints] << Constraint::Macro.base_for_extension(cmp) if cmp[:extended_base]
+      end
+      ret
+    end
+
+    #TODO: may deprecate below or write in terms of above
     def get_constraints!(opts={})
       #TODO: may see if precalculating more is more efficient
       cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id]

@@ -362,17 +362,15 @@ module DTK; class  Assembly
     end
 
     def add_assembly_template(assembly_template)
-      ret = Array.new
+      #TODO: right now hacky way of doing this by creating assembly instance fro tempalet and then deleting
       target = get_target()
-      override_attrs = {:assembly_id => id()}
-      #TODO: more efficient to not have to loop over each object at this level
-      assembly_template.get_nodes(:cols=>[:id,:group_id]).each do |node_stub|
-        ret << target.clone_into(node_stub,override_attrs)
-      end
-      assembly_template.get_port_links(:cols=>[:id,:group_id]).each do |port_link|
-        ret << target.clone_into(port_link,override_attrs)
-      end
-      ret
+      assem_id_assign = {:assembly_id => id()}
+      #TODO: want to change node names if dups
+      override_attrs = {:node => assem_id_assign.merge(:component => assem_id_assign),:port_link => assem_id_assign}
+      clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
+      new_assembly_part_obj = target.clone_into(assembly_template,override_attrs,clone_opts)
+      self.class.delete_instance(new_assembly_part_obj.id_handle())
+      id_handle()
     end
 
     def add_service_add_on(add_on_name, assembly_name=nil)

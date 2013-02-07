@@ -362,11 +362,10 @@ module DTK; class  Assembly
     end
 
     def add_assembly_template(assembly_template)
-      #TODO: right now hacky way of doing this by creating assembly instance fro tempalet and then deleting
       target = get_target()
       assem_id_assign = {:assembly_id => id()}
       #TODO: want to change node names if dups
-      override_attrs = {:node => assem_id_assign.merge(:component => assem_id_assign),:port_link => assem_id_assign}
+      override_attrs = {:node => assem_id_assign.merge(:component_ref => assem_id_assign),:port_link => assem_id_assign}
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_part_obj = target.clone_into(assembly_template,override_attrs,clone_opts)
       self.class.delete_instance(new_assembly_part_obj.id_handle())

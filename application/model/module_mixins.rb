@@ -202,6 +202,14 @@ module DTK
       self.class.get_library_module_branch(library_idh,module_name,version)
     end
 
+   def get_module_branches_matching_version(version=nil)
+      update_object!(:display_name,:library_library_id)
+      filter = [:eq, :id, self[:id]]
+      version_in_mb = ModuleBranch.version_field(version)
+      post_filter = proc{|r|r[:version] == version_in_mb}
+      self.class.get_matching_module_branches(id_handle(),filter,post_filter)
+    end
+
     def library_branch_name(version=nil)
       library_id = update_object!(:library_library_id)[:library_library_id]
       library_idh = id_handle(:model_name => :library, :id => library_id)

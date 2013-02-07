@@ -41,6 +41,7 @@ module DTK
       end
     end
 
+    #TODO: bleow wil be deprecated
     def clone_into_library_assembly(assembly_idh,id_handles)
       opts = {:include_children => true}
       proc = Clone::CopyProcessor.create(self,assembly_idh.create_object(),opts)

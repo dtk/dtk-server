@@ -163,11 +163,10 @@ module DTK
 
     def rest__add_assembly_template()
       assembly = ret_assembly_instance_object()
-      assembly_template_idh = ret_request_param_id_handle(:assembly_template_id,Assembly::Template)
-      assembly.add_assembly_template(assembly_template_idh)
+      assembly_template = ret_assembly_template_object(:assembly_template_id)
+      assembly.add_assembly_template(assembly_template)
       rest_ok_response 
     end
-
 
     def rest__add_service_add_on()
       assembly = ret_assembly_instance_object()

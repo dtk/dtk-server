@@ -9,11 +9,14 @@ module DTK; class Assembly
     end
 
     ### standard get methods
-    def self.get_nodes(assembly_idhs)
+    def get_nodes(opts={})
+      self.class.get_nodes([id_handle()],opts)
+    end
+    def self.get_nodes(assembly_idhs,opts={})
       ret = Array.new
       return ret if assembly_idhs.empty?()
       sp_hash = {
-        :cols => [:id, :group_id, :display_name],
+        :cols => opts[:cols]||[:id, :group_id, :display_name],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       node_mh = assembly_idhs.first.createMH(:node)

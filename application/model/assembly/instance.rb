@@ -361,14 +361,18 @@ module DTK; class  Assembly
       Model.delete_instance(component_idh)
     end
 
-    def add_assembly_template(assembly_template_idh)
-      assembly_template = assembly_template_idh.create_object()
-      override_attrs = {
-        :assembly_id => id()
-      }
+    def add_assembly_template(assembly_template)
+      ret = Array.new
       target = get_target()
-      added_assembly_idh = target.clone_into(assembly_template,override_attrs)
-      id_handle()
+      override_attrs = {:assembly_id => id()}
+      #TODO: more efficient to not have to loop over each object at this level
+      assembly_template.get_nodes(:cols=>[:id,:group_id]).each do |node_stub|
+        ret << target.clone_into(node_stub,override_attrs)
+      end
+      assembly_template.get_port_links(:cols=>[:id,:group_id]).each do |port_link|
+        ret << target.clone_into(port_link,override_attrs)
+      end
+      ret
     end
 
     def add_service_add_on(add_on_name, assembly_name=nil)

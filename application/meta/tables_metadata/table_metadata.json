@@ -275,6 +275,16 @@
        "description": "description"
    }
   },
+  "violation": {
+    "order": [
+       "type",
+       "description"
+    ],
+    "mapping": {
+       "type": "dtk_type",
+       "description": "description"
+   }
+  },
   "netstat_data": {
     "order": [   
        "node_name",

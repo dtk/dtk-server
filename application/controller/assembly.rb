@@ -192,8 +192,11 @@ module DTK
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__find_violations()
       assembly = ret_assembly_instance_object()
-      assembly.find_violations()
-      rest_ok_response
+      violation_objects = assembly.find_violations()
+      violation_table = violation_objects.map do |v|
+        {:type => v.type(),:description => v.description()}
+      end.sort{|a,b|a[:type].to_s <=> b[:type].to_s}
+      rest_ok_response violation_table
     end
 
     def rest__create_task()

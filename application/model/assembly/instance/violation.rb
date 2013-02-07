@@ -20,10 +20,7 @@ module DTK
     module ViolationMixin
       def find_violations()
         unset_attr_viols = find_violations__unset_attrs()
-        unless unset_attr_viols.empty?()
-          pp unset_attr_viols.map{|v|{:type => v.type(), :description => v.description()}} 
-          raise ErrorUsage.new("unset vars")
-        end
+        unset_attr_viols
       end
      private
       def find_violations__unset_attrs()

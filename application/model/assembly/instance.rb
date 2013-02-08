@@ -453,7 +453,7 @@ module DTK; class  Assembly
       if filter
         case filter
           when :required_unset_attributes
-          get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
+          get_attributes_print_form_aux(lambda{|r|r[:attribute].required_unset_attribute?()})
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  

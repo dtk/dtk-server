@@ -13,6 +13,16 @@ module DTK
         end
       end
       class ComponentConstraint < self
+        def initialize(constraint,node)
+          @constraint = constraint
+          @node = node
+        end
+        def type()
+          :component_constraint
+        end
+        def description()
+          "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
+        end
       end
       class DanglingServiceRef < self
       end
@@ -20,7 +30,8 @@ module DTK
     module ViolationMixin
       def find_violations()
         unset_attr_viols = find_violations__unset_attrs()
-        unset_attr_viols
+        cmp_constraint_viols = find_violations__cmp_constraints()
+        unset_attr_viols + cmp_constraint_viols
       end
      private
       def find_violations__unset_attrs()
@@ -29,6 +40,24 @@ module DTK
         component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:component)}
         node_attr_viols = get_augmented_node_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:node)}
         assembly_attr_viols + component_attr_viols + node_attr_viols
+      end
+
+      def find_violations__cmp_constraints()
+        ret = Array.new
+        nodes_and_cmps = get_info__flat_list(:detail_level => "components")
+        ndx_constraints = Component.get_ndx_constraints(nodes_and_cmps.map{|r|r[:nested_component].id_handle()},:when_evaluated => :after_cmp_added)
+        #TODO: this is expensive in that it makes query for each constraint
+        nodes_and_cmps.each do |r|
+          if constraint_info = ndx_constraints[r[:nested_component][:id]]
+            constraint_scope = {"target_node_id_handle" => r[:node].id_handle()}
+            constraint_info[:constraints].each do |constraint|
+              unless constraint.evaluate_given_target(constraint_scope)
+                ret << Violation::ComponentConstraint.new(constraint,r[:node])
+              end
+            end
+          end
+        end
+        ret
       end
 
     end

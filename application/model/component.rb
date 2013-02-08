@@ -514,7 +514,8 @@ module XYZ
    public
 
     #returns hash with ndx component_id and keys :constraints, :component
-    def self.get_ndx_constraints(component_idhs)
+    #opts can have key :when_evaluated
+    def self.get_ndx_constraints(component_idhs,opts={})
       ret = Hash.new
       return ret if component_idhs.empty?
       cmp_cols = [:id,:group_id,:only_one_per_node,:component_type,:extended_base,:implementation_id]
@@ -529,8 +530,11 @@ module XYZ
       end
       ret.each_value do |r|
         cmp = r[:component]
-        r[:constraints] << Constraint::Macro.only_one_per_node(cmp[:component_type]) if cmp[:only_one_per_node]
-        r[:constraints] << Constraint::Macro.base_for_extension(cmp) if cmp[:extended_base]
+        unless opts[:when_evaluated] == :after_cmp_added
+          #these shoudl only be evaluated before component is evaluated
+          r[:constraints] << Constraint::Macro.only_one_per_node(cmp[:component_type]) if cmp[:only_one_per_node]
+          r[:constraints] << Constraint::Macro.base_for_extension(cmp) if cmp[:extended_base]
+        end
       end
       ret
     end

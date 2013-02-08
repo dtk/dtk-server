@@ -24,14 +24,24 @@ module DTK
           "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
         end
       end
-      class DanglingServiceRef < self
+      class UnconnReqServiceRef < self
+        def initialize(aug_port)
+          @augmented_port = aug_port
+        end
+        def type()
+          :unconnected_service_ref
+        end
+        def description()
+          "Service ref (#{@augmented_port.display_name_print_form()}) is not connected, but required to be"
+        end
       end
     end
     module ViolationMixin
       def find_violations()
         unset_attr_viols = find_violations__unset_attrs()
         cmp_constraint_viols = find_violations__cmp_constraints()
-        unset_attr_viols + cmp_constraint_viols
+        unconn_req_service_refs = find_violations__unconn_req_service_refs()
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs
       end
      private
       def find_violations__unset_attrs()
@@ -60,6 +70,15 @@ module DTK
         ret
       end
 
+      def find_violations__unconn_req_service_refs()
+        ret = Array.new
+        get_augmented_ports(:mark_unconnected=>true).each do |aug_port|
+          if aug_port[:unconnected] and aug_port[:link_def][:required]
+            ret << Violation::UnconnReqServiceRef.new(aug_port)
+          end
+        end
+        ret
+      end
     end
   end
 end

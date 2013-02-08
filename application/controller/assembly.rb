@@ -36,18 +36,9 @@ module DTK
     #### list and info actions ###
     def rest__info()
       assembly = ret_assembly_object()
-      rest_ok_response assembly.info()
-    end
-=begin
-#MERGE-RESOLUTION
-    TODO: need to move logic in Assembly#info to Assembly::Template#info and Assembly::Instance#info
-    def rest__info()
       node_id, component_id, attribute_id = ret_request_params(:node_id, :component_id, :attribute_id)
-      assembly,subtype = ret_assembly_params_object_and_subtype()
-      nodes = assembly.info(subtype, node_id, component_id, attribute_id)
-      rest_ok_response nodes
+      rest_ok_response assembly.info(node_id, component_id, attribute_id)
     end
-=end
 
     def rest__info_about()
       node_id, component_id = ret_request_params(:node_id, :component_id)

@@ -35,9 +35,29 @@ module DTK
       end
     end
 
-    def info(subtype, node_id=nil, component_id=nil, attribute_id=nil)
+    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
+    def self.get_component_templates(assembly_mh,filter=nil)
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:component_templates],
+        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], filter].compact
+      }
+      assembly_rows = get_objs(assembly_mh,sp_hash)
+      assembly_rows.map{|r|r[:component_template]}
+    end
+
+    #this can be overwritten
+    def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
+      Array.new
+    end
+
+    ### end: standard get methods
+
+    def info(node_id=nil, component_id=nil, attribute_id=nil)
       opts = {}
-      nested_virtual_attr = (subtype == :template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
+      nested_virtual_attr = (kind_of?(Template) ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,nested_virtual_attr]
+      }
       assembly_rows = get_objs(sp_hash)
       # filter nodes by node_id if node_id is provided in request
       unless (node_id.nil? || node_id.empty?)
@@ -60,21 +80,14 @@ module DTK
       self.class.list_aux(assembly_rows,attr_rows, opts).first      
     end
 
-    ### standard get methods
-
-    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
-    def self.get_component_templates(assembly_mh,filter=nil)
+    def self.get_default_component_attributes(assembly_mh,assembly_rows,opts={})
+      #by defualt do not include derived values
+      cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])
       sp_hash = {
-        :cols => [:id, :display_name,:component_type,:component_templates],
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], filter].compact
+        :cols => cols,
+        :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
       }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
-      assembly_rows.map{|r|r[:component_template]}
-    end
-
-    #this can be overwritten
-    def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
-      Array.new
+      Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
     end
 
     def set_attributes(av_pairs)
@@ -220,16 +233,6 @@ module DTK
         "#{assembly_ref}#{version_suffix}"
       end
 
-     private
-      def get_default_component_attributes(assembly_mh,assembly_rows,opts={})
-        #by defualt do not include derived values
-        cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])
-        sp_hash = {
-          :cols => cols,
-          :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
-        }
-        Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
-      end
     end
 
     def self.is_template?(assembly_idh)

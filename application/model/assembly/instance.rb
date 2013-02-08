@@ -257,11 +257,6 @@ module DTK; class  Assembly
         assembly_rows
       end
     end
-    def info()
-      assembly_rows = get_info__flat_list(:detail_level => "components")
-      attr_rows = self.class.get_component_attributes(model_handle(),assembly_rows)
-      self.class.list_aux(assembly_rows,attr_rows).first
-    end
 
     def info_about(about,opts={})
       cols = post_process_per_row = order = nil

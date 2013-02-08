@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+#Test Case 1: Stage existing assembly with OS ${OS} and MEMOORY_SIZE ${MEMORY_SIZE} combination and then converge it, stop the running instance (nodes) and then delete assembly
+
+require 'rubygems'
+require 'rest_client'
+require 'pp'
+require 'json'
+require 'awesome_print'
+require './test/lib/dtk_common'
+require './test/lib/shared_spec'
+
+STDOUT.sync = true
+
+ASSEMBLY_NAME = 'test_case_1_instance'
+ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+
+OS_ATTRIBUTE = 'os_identifier'
+MEMORY_SIZE_ATTRIBUTE = 'memory_size'
+OS_Memory = Struct.new(:os, :memory)
+OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("natty","m1.small"),OS_Memory.new("natty","m1.medium"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("oneiric","m1.small"),OS_Memory.new("oneiric","m1.medium"),OS_Memory.new("rh5.7-64","t1.micro"),OS_Memory.new("rh5.7-64","m1.small"),OS_Memory.new("rh5.7-64","m1.medium")]
+
+$assembly_id = 0
+dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+
+describe "Test Case 1: Stage existing assembly with OS ${OS} and MEMORY_SIZE ${MEMORY_SIZE} combination and then converge it, stop the running instance (nodes) and then delete assembly" do
+	OS_MEMORY_ARRAY.each do |x|
+		os = x["os"]
+		memory = x["memory"]
+
+		context "For #{os} and #{memory} combination, stage assembly function" do
+			include_context "Stage", dtk_common
+		end
+
+		context "For #{os} and #{memory} combination, list assemblies after stage" do
+			include_context "List assemblies after stage", dtk_common
+		end		
+
+		context "For #{os} and #{memory} combination, set OS attribute" do
+			include_context "Set attribute", dtk_common, OS_ATTRIBUTE, os
+		end
+
+		context "For #{os} and #{memory} combination, set MEMORY_SIZE attribute" do
+			include_context "Set attribute", dtk_common, MEMORY_SIZE_ATTRIBUTE, memory
+		end
+
+		context "For #{os} and #{memory} combination, converge function" do
+			include_context "Converge", dtk_common
+		end
+
+		context "For #{os} and #{memory} combination, delete and destroy assembly function" do
+			include_context "Delete assemblies", dtk_common
+		end
+	end
+end

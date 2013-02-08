@@ -45,7 +45,7 @@ module DTK
       end
      private
       def find_violations__unset_attrs()
-        filter_proc = lambda{|a|a.required_unset_attribute?()}
+        filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:assembly)}
         component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:component)}
         node_attr_viols = get_augmented_node_attributes(filter_proc).map{|a|Violation::ReqUnsetAttr.new(a,:node)}

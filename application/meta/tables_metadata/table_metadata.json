@@ -167,11 +167,9 @@
     "order": [
       "id",
       "assembly_name",
-      "nodes",
-      "components"
+      "nodes"
     ],
     "mapping": {
-      "components": "nodes.map{|r|r['components']||[]}.flatten.size",
       "nodes": "nodes.size",
       "assembly_name": "display_name",
       "id": "dtk_id"

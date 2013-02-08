@@ -71,7 +71,7 @@ module DTK
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))
 
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
-        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+        ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,aug_create_opts(create_opts))
         ret.each do |r|
           component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
           raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
@@ -79,7 +79,18 @@ module DTK
         end 
         ret
       end
-    end
+
+      def aug_create_opts(create_opts)
+        ret = create_opts
+        if ret_sql_cols = create_opts[:returning_sql_cols]
+          unless ret_sql_cols.include?(:component_type)
+            ret = ret.merge(:returning_sql_cols => ret_sql_cols + [:component_type])
+          end
+        end
+        ret
+      end
+ 
+   end
   end
 end
 

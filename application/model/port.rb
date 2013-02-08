@@ -204,8 +204,8 @@ module XYZ
         link_def_ref = parsed_port_name[:link_def_ref]
 
         node_node_id = port[:node_node_id]
-        #TODO: check display name will always be same as component_type
-        unless cmp_match = cmps.find{|cmp|cmp[:display_name] == cmp_type and cmp[:node_node_id] == node_node_id}
+        #TODO: check if need to match on version too or can only be one version type per component
+        unless cmp_match = cmps.find{|cmp|cmp[:component_type] == cmp_type and cmp[:node_node_id] == node_node_id}
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
         end
         cmp_id = cmp_match[:id]

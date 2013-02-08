@@ -20,7 +20,7 @@ module XYZ
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(Task::Action::PowerOnNode)
-          detect_when_ready = participant_executable_action(:power_on_node,task,context, :task_type => "power_on_node", :task_end => true)
+          detect_when_ready = participant_executable_action(:power_on_node,task,context, :task_type => "power_on_node", :task_end => true, :task_start => true)
           sequence([detect_when_ready])
         elsif action.kind_of?(Task::Action::CreateNode)
           main = participant_executable_action(:create_node,task,context,:task_start => true)

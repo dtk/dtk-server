@@ -198,7 +198,7 @@ module DTK
 
           op_status = stop_status||pending_status||"running"    
 
-          r.slice(:id,:display_name,:execution_status,:module_branch_id).merge(:nodes => r[:ndx_nodes].values, :op_status => op_status)
+          r.slice(:id,:display_name,:execution_status,:module_branch_id,:version,:assembly_template).merge(:nodes => r[:ndx_nodes].values, :op_status => op_status)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

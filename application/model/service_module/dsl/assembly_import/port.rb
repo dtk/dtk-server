@@ -63,37 +63,16 @@ module DTK; class ServiceModule
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
         link_defs_info.each do |ld_info|
-          next unless link_def = ld_info[:link_def]
-          cmp = ld_info[:nested_component]
-          node = ld_info[:node]
-          component_type = cmp[:component_type]
-          type = 
-            if link_def[:has_external_link]
-              link_def[:has_internal_link] ? "component_internal_external" : "component_external"
-            else #will be just ld_info[:has_internal_link]
-              "component_internal"
+          if link_def = ld_info[:link_def]
+            node = ld_info[:node]
+            port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component])
+            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+              existing_port_info[:matched] = true
+              ret << existing_port_info[:port]
+            else
+              pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+              pntr[:create_rows] << port
             end
-
-          dir = Port.direction_from_local_remote(link_def[:local_or_remote])
-          ref = Port.ref_from_component_and_link_def(type,component_type,link_def,dir)
-          if existing_port_info = (ndx_existing_ports[node[:id]]||{})[ref]
-            existing_port_info[:matched] = true
-            ret << existing_port_info[:port]
-          else
-            display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-            location_asserted = Port.ret_location_asserted(component_type,link_def[:link_type])
-            row = {
-              :ref => ref,
-              :display_name => display_name,
-              :direction => dir,
-              :link_def_id => link_def[:id],
-              :node_node_id => node[:id],
-              :type => type
-            }
-            row[:location_asserted] = location_asserted if location_asserted
-            
-            pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-            pntr[:create_rows] << row
           end
         end
 

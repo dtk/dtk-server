@@ -76,10 +76,6 @@ module XYZ
       ret
     end
 
-    def self.ref_from_component_and_link_def_ref(type,component_type,link_def_ref,dir)
-      "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
-    end
-
     #TODO: assumption that ref and display_name are the same
     def component_name()
       self.class.parse_external_port_display_name(self[:display_name])[:component_type]
@@ -244,63 +240,80 @@ module XYZ
       end
     end
 
-    #creates need component Ports and updates node_link_defs_info
+    #creates needed component Ports and updates node_link_defs_info
     def self.create_component_ports?(component_link_defs,node,component,opts={})
       ret = Array.new
-      return ret if component_link_defs.empty?
-
-      node_id = node.id()
-      port_mh = node.model_handle_with_auth_info.create_childMH(:port)
-      component_type = (component.update_object!(:component_type))[:component_type]
-      rows = component_link_defs.map do |link_def|
-        type = 
-          if link_def[:has_external_link]
-            link_def[:has_internal_link] ? "component_internal_external" : "component_external"
-          else #will be just link_def[:has_internal_link]
-            "component_internal"
-          end
-
-        dir = direction_from_local_remote(link_def[:local_or_remote])
-        ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
-        display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-        location_asserted = ret_location_asserted(component_type,link_def[:link_type])
-        row = {
-          :ref => ref,
-          :display_name => display_name,
-          :direction => dir,
-          :link_def_id => link_def[:id],
-          :node_node_id => node_id,
-          :type => type
-        }
-        row[:location_asserted] = location_asserted if location_asserted
-        row
-      end
+      rows = ret_port_create_hashes(component_link_defs,node,component,opts)
+      return ret if rows.empty?
       create_from_rows(port_mh,rows,opts)
     end
 
-    def self.direction_from_local_remote(local_or_remote)
-      #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-      case local_or_remote 
-       when "local" then "input" 
-       when "remote" then "output"
+    def self.ret_port_create_hash(component_link_def,node,component)
+      ret_port_create_hashes([component_link_def],node,component).first
+    end
+
+    class << self
+      private
+      def ret_port_create_hashes(component_link_defs,node,component)
+        ret = Array.new
+        return ret if component_link_defs.empty?
+
+        node_id = node.id()
+        port_mh = node.model_handle_with_auth_info.create_childMH(:port)
+        component_type = (component.update_object!(:component_type))[:component_type]
+        component_link_defs.map do |link_def|
+          type = 
+            if link_def[:has_external_link]
+              link_def[:has_internal_link] ? "component_internal_external" : "component_external"
+            else #will be just link_def[:has_internal_link]
+              "component_internal"
+            end
+          
+          dir = direction_from_local_remote(link_def[:local_or_remote])
+          ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
+          display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+          location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+          row = {
+            :ref => ref,
+            :display_name => display_name,
+            :direction => dir,
+            :link_def_id => link_def[:id],
+            :node_node_id => node_id,
+            :type => type
+          }
+          row[:location_asserted] = location_asserted if location_asserted
+          row
+        end
       end
-    end
 
-    #TODO: this should be in link defs
-    def self.ret_location_asserted(component_type,link_type)
-      (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]
-    end
-    LocationMapping = {
-      :mysql__master => {
-        :master_connection => "east"
-      },
-      :mysql__slave => {
-        :master_connection => "west"
+      def direction_from_local_remote(local_or_remote)
+        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+        case local_or_remote 
+          when "local" then "input" 
+          when "remote" then "output"
+        end
+      end
+
+      #TODO: this should be in link defs
+      def ret_location_asserted(component_type,link_type)
+        (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]
+      end
+      LocationMapping = {
+        :mysql__master => {
+          :master_connection => "east"
+        },
+        :mysql__slave => {
+          :master_connection => "west"
+        }
       }
-    }
+      
+      def ref_from_component_and_link_def(type,component_type,link_def,dir)
+        ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
+      end
 
-    def self.ref_from_component_and_link_def(type,component_type,link_def,dir)
-      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
+      def ref_from_component_and_link_def_ref(type,component_type,link_def_ref,dir)
+        "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
+      end
     end
 
     #virtual attribute defs

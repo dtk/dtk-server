@@ -277,7 +277,7 @@ lambda__instance_nodes_and_components =
          {
            :model_name => :link_def,
            :convert => true,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:component_component_id => q(:nested_component,:id)},
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]

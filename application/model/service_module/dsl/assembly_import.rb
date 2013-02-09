@@ -82,14 +82,15 @@ module DTK; class ServiceModule
       return ret if link_defs_info.empty?
       sp_hash = {
         :cols => [:id,:group_id,:link_def_id,:remote_component_type],
-        :filter => [:oneof, :link_def_id, link_defs_info.map{|r|r[:link_def][:id]}]
+        :filter => [:oneof, :link_def_id, link_defs_info.map{|r|(r[:link_def]||{})[:id]}.compact]
       }
       rows = Model.get_objs(assembly_idh.createMH(:link_def_link),sp_hash)
       ndx_link_def_links = rows.inject(Hash.new){|h,r|h.merge(r[:link_def_id] => r)}
       link_defs_info.each do |r|
-        link_def = r[:link_def]
-        if link = ndx_link_def_links[link_def[:id]]
-          (link_def[:link_def_links] ||= Array.new) << link
+        if link_def = r[:link_def]
+          if link = ndx_link_def_links[link_def[:id]]
+            (link_def[:link_def_links] ||= Array.new) << link
+          end
         end
       end
 

@@ -4,7 +4,10 @@ module DTK; class Assembly
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
-      new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+      new_assembly_obj = nil
+      Transaction do
+        new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+      end
       new_assembly_obj
     end
 

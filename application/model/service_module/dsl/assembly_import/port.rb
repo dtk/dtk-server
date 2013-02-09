@@ -60,10 +60,15 @@ module DTK; class ServiceModule
           (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
         end 
 
+        #create craete hashes for both local side and remore side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
+        ndx_link_def_links = Hash.new
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
+            link_def[:link_def_links].each do |link|
+              (ndx_link_def_links[link[:remote_component_type]] ||= Array.new) << link
+            end
             node = ld_info[:node]
             port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component])
             if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]

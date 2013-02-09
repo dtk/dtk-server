@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class Port < Model
     ####################
     def self.common_columns() 
@@ -243,49 +243,40 @@ module XYZ
     #creates needed component Ports and updates node_link_defs_info
     def self.create_component_ports?(component_link_defs,node,component,opts={})
       ret = Array.new
-      rows = ret_port_create_hashes(component_link_defs,node,component,opts)
+      rows = component_link_defs.map{|link_def|ret_port_create_hash(link_def,node,component,opts)}
       return ret if rows.empty?
       create_from_rows(port_mh,rows,opts)
     end
 
-    def self.ret_port_create_hash(component_link_def,node,component)
-      ret_port_create_hashes([component_link_def],node,component).first
+    def self.ret_port_create_hash(link_def,node,component)
+      node_id = node.id()
+      port_mh = node.model_handle_with_auth_info.create_childMH(:port)
+      component_type = component.get_field?(:component_type)
+      type = 
+        if link_def[:has_external_link]
+          link_def[:has_internal_link] ? "component_internal_external" : "component_external"
+        else #will be just link_def[:has_internal_link]
+          "component_internal"
+        end
+          
+      dir = direction_from_local_remote(link_def[:local_or_remote])
+      ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
+      display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+      location_asserted = ret_location_asserted(component_type,link_def[:link_type])
+      row = {
+        :ref => ref,
+        :display_name => display_name,
+        :direction => dir,
+        :link_def_id => link_def[:id],
+        :node_node_id => node_id,
+        :type => type
+      }
+      row[:location_asserted] = location_asserted if location_asserted
+      row
     end
 
     class << self
       private
-      def ret_port_create_hashes(component_link_defs,node,component)
-        ret = Array.new
-        return ret if component_link_defs.empty?
-
-        node_id = node.id()
-        port_mh = node.model_handle_with_auth_info.create_childMH(:port)
-        component_type = (component.update_object!(:component_type))[:component_type]
-        component_link_defs.map do |link_def|
-          type = 
-            if link_def[:has_external_link]
-              link_def[:has_internal_link] ? "component_internal_external" : "component_external"
-            else #will be just link_def[:has_internal_link]
-              "component_internal"
-            end
-          
-          dir = direction_from_local_remote(link_def[:local_or_remote])
-          ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
-          display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-          location_asserted = ret_location_asserted(component_type,link_def[:link_type])
-          row = {
-            :ref => ref,
-            :display_name => display_name,
-            :direction => dir,
-            :link_def_id => link_def[:id],
-            :node_node_id => node_id,
-            :type => type
-          }
-          row[:location_asserted] = location_asserted if location_asserted
-          row
-        end
-      end
-
       def direction_from_local_remote(local_or_remote)
         #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
         case local_or_remote 

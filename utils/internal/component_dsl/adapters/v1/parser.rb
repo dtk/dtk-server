@@ -24,7 +24,7 @@ module DTK; class ComponentDSL; class V1
         h.merge(cmp_ref => info)
       end
       #process the link defs for remote components
-      process_remote_link_defs!(container_idh)
+     # process_remote_link_defs!(container_idh)
     end
 
    private

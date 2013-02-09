@@ -73,10 +73,26 @@ module DTK; class ServiceModule
     end
 
     def add_ports_during_import(assembly_idh)
+      ret = Array.new
       #get the link defs/component_ports associated with components in assembly;
       #to determine if need to add internal links and for port processing
       assembly = assembly_idh.create_object()
+      #compute augmented link def info
       link_defs_info = assembly.get_objs(:cols => [:template_link_defs_info])
+      return ret if link_defs_info.empty?
+      sp_hash = {
+        :cols => [:id,:group_id,:link_def_id,:remote_component_type],
+        :filter => [:oneof, :link_def_id, link_defs_info.map{|r|r[:link_def][:id]}]
+      }
+      rows = Model.get_objs(assembly_idh.createMH(:link_def_link),sp_hash)
+      ndx_link_def_links = rows.inject(Hash.new){|h,r|h.merge(r[:link_def_id] => r)}
+      link_defs_info.each do |r|
+        link_def = r[:link_def]
+        if link = ndx_link_def_links[link_def[:id]]
+          (link_def[:link_def_links] ||= Array.new) << link
+        end
+      end
+
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
       Port.create_assembly_template_ports?(assembly,link_defs_info,create_opts)
     end

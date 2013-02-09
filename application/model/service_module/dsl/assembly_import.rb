@@ -1,6 +1,8 @@
 #converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
+    r8_nested_require('assembly_import','port')
+    include PortMixin
     def initialize(container_idh,module_branch,module_name,module_version_constraints)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
@@ -32,29 +34,13 @@ module DTK; class ServiceModule
         :cols => [:id],
         :filter => [:eq,:module_branch_id, module_branch_id]
       }
-      existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
-      mark_as_complete_node_constraint = {:assembly_id=>existing_assembly_ids}
+      @existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
+      mark_as_complete_node_constraint = {:assembly_id=>@existing_assembly_ids}
       @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,:apply_recursively => true)
 
       Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
 
-      #port links can only be imported in after ports created
-      #add ports to assembly nodes
-      db_updates_port_links = Hash.new
-      version_field = @module_branch.get_field?(:version)
-      @ndx_assembly_hashes.each do |ref,assembly|
-        qualified_ref = Internal.internal_assembly_ref__add_version(ref,version_field)
-        assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
-        ports = add_ports_during_import(assembly_idh)
-        db_updates_port_links.merge!(Internal.import_port_links(assembly_idh,qualified_ref,assembly,ports,existing_assembly_ids))
-        ports.each{|p|@ndx_ports[p[:id]] = p}
-      end
-      #Within Internal.import_port_links does the mark as complete for port links
-      Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
-    end
-
-    def ports()
-      @ndx_ports.values()
+      add_port_and_port_links()
     end
 
     def augmented_assembly_nodes()
@@ -72,32 +58,6 @@ module DTK; class ServiceModule
       container_idh.create_object().get_service_module(module_name)
     end
 
-    def add_ports_during_import(assembly_idh)
-      ret = Array.new
-      #get the link defs/component_ports associated with components in assembly;
-      #to determine if need to add internal links and for port processing
-      assembly = assembly_idh.create_object()
-      #compute augmented link def info
-      link_defs_info = assembly.get_objs(:cols => [:template_link_defs_info])
-      return ret if link_defs_info.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:link_def_id,:remote_component_type],
-        :filter => [:oneof, :link_def_id, link_defs_info.map{|r|(r[:link_def]||{})[:id]}.compact]
-      }
-      rows = Model.get_objs(assembly_idh.createMH(:link_def_link),sp_hash)
-      ndx_link_def_links = rows.inject(Hash.new){|h,r|h.merge(r[:link_def_id] => r)}
-      link_defs_info.each do |r|
-        if link_def = r[:link_def]
-          if link = ndx_link_def_links[link_def[:id]]
-            (link_def[:link_def_links] ||= Array.new) << link
-          end
-        end
-      end
-
-      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      Port.create_assembly_template_ports?(assembly,link_defs_info,create_opts)
-    end
-
     #TODO: now that converted top level to a call; dont need these internal modules
     module Internal
       include AssemblyImportExportCommon
@@ -113,22 +73,6 @@ module DTK; class ServiceModule
             "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
           }
         }
-      end
-      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,existing_assembly_ids)
-        #augment ports with parsed display_name
-        AssemblyImport.augment_with_parsed_port_names!(ports)
-
-        port_links = (assembly_hash["port_links"]||[]).inject(DBUpdateHash.new) do |h,pl|
-          input = AssemblyImportPortRef.parse(pl.values.first)
-          output = AssemblyImportPortRef.parse(pl.keys.first)
-          input_id = input.matching_id(ports)
-          output_id = output.matching_id(ports)
-          pl_ref = PortLink.ref_from_ids(input_id,output_id)
-          pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
-          h.merge(pl_ref => pl_hash)
-        end
-        port_links.mark_as_complete(:assembly_id=>existing_assembly_ids)
-        {assembly_ref => {"port_link" => port_links}}
       end
 
       def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)

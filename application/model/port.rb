@@ -2,17 +2,7 @@ module XYZ
   class Port < Model
     ####################
     def self.common_columns() 
-      [
-       :id,
-       :display_name,
-       :name,
-       :description,
-       :direction,
-       :type,
-       :location,
-       :containing_port_id,
-       :node_id
-      ]
+      [:id,:group_id,:display_name,:name,:description,:direction,:type,:location,:containing_port_id,:node_id]
     end
 
     def self.check_valid_id(model_handle,id,opts={}) 
@@ -53,22 +43,7 @@ module XYZ
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 
-    #virtual attribute defs
-    def location()
-      return self[:location_asserted] if self[:location_asserted]
-      #TODO: stub
-      return "east" if self[:display_name] =~ /nagios__server/
-      return "east" if self[:display_name] =~ /mysql__master/
-      return "west" if self[:display_name] =~ /nagios__client/
-      return "east" if self[:display_name] =~ /ganglia server/
-      return "west" if self[:display_name] =~ /ganglia monitor/
-
-      case self[:direction]
-        when "output" then "north"
-        when "input" then "south"
-      end
-    end
-    
+    #virtual attribute defs    
     def name()
       self[:display_name]
     end
@@ -79,7 +54,7 @@ module XYZ
     
     ###########
     RefDelim = "___"
-   public
+
     #this is an augmented port that has keys: node and optionally :link_def
     def display_name_print_form()
       info = parse_external_port_display_name()
@@ -303,108 +278,12 @@ module XYZ
       create_from_rows(port_mh,rows,opts)
     end
 
-    class << self
-     private
-      def direction_from_local_remote(local_or_remote)
-        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        case local_or_remote 
-          when "local" then "input" 
-          when "remote" then "output"
-        end
+    def self.direction_from_local_remote(local_or_remote)
+      #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
+      case local_or_remote 
+       when "local" then "input" 
+       when "remote" then "output"
       end
-    end
-
-    #this function adds if necsssary ports onto nodes in assembly that correspond to link_defs_info
-    #The link_defs_info is complete so any old ports not matches are removed
-    def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
-      ret = Array.new
-      return ret if link_defs_info.empty?
-
-      #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking fro existing ports
-      sp_hash = {
-        :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
-        :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
-      }
-
-      port_mh = assembly.id_handle.create_childMH(:port)
-      ndx_existing_ports = Hash.new
-      Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
-        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
-      end 
-
-      #Need to index by node because create_from_rows can only insert under one parent
-      ndx_rows = Hash.new
-      link_defs_info.each do |ld_info|
-        link_def = ld_info[:link_def]
-        cmp = ld_info[:nested_component]
-        node = ld_info[:node]
-        component_type = cmp[:component_type]
-        type = 
-          if link_def[:has_external_link]
-            link_def[:has_internal_link] ? "component_internal_external" : "component_external"
-          else #will be just ld_info[:has_internal_link]
-            "component_internal"
-          end
-
-        dir = direction_from_local_remote(link_def[:local_or_remote])
-        ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
-        if existing_port_info = (ndx_existing_ports[node[:id]]||{})[ref]
-          existing_port_info[:matched] = true
-          ret << existing_port_info[:port]
-        else
-          display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
-          location_asserted = ret_location_asserted(component_type,link_def[:link_type])
-          row = {
-            :ref => ref,
-            :display_name => display_name,
-            :direction => dir,
-            :link_def_id => link_def[:id],
-            :node_node_id => node[:id],
-            :type => type
-          }
-          row[:location_asserted] = location_asserted if location_asserted
-
-          pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-          pntr[:create_rows] << row
-        end
-      end
-
-      new_rows = Array.new
-      ndx_rows.values.each do |r|
-        port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
-        new_rows += create_from_rows(port_mh,r[:create_rows],opts)
-      end
-
-      #delete any existing ports that match what is being put in now
-      port_idhs_to_delete = Array.new
-      ndx_existing_ports.each_value do |inner_ndx_ports|
-        inner_ndx_ports.each_value do |port_info|
-          unless port_info[:matched]
-            port_idhs_to_delete << port_info[:port].id_handle()
-          end
-        end
-      end
-      unless port_idhs_to_delete.empty?()
-        delete_instances(port_idhs_to_delete)
-      end
-
-      #for new rows need to splice in node info
-      unless new_rows.empty?
-        sp_hash = {
-          :cols => [:id,:node],
-          :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:parent_id]}]
-        }
-        ndx_port_node = get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
-          h.merge(r[:id] => r[:node])
-        end
-        new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
-      end
-      ret + new_rows
-    end
-
-   private
-    def self.ref_from_component_and_link_def(type,component_type,link_def,dir)
-      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
     end
 
     #TODO: this should be in link defs
@@ -419,5 +298,27 @@ module XYZ
         :master_connection => "west"
       }
     }
+
+    def self.ref_from_component_and_link_def(type,component_type,link_def,dir)
+      ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
+    end
+
+    #virtual attribute defs
+    #related to UX direction
+    def location()
+      return self[:location_asserted] if self[:location_asserted]
+      #TODO: stub
+      return "east" if self[:display_name] =~ /nagios__server/
+      return "east" if self[:display_name] =~ /mysql__master/
+      return "west" if self[:display_name] =~ /nagios__client/
+      return "east" if self[:display_name] =~ /ganglia server/
+      return "west" if self[:display_name] =~ /ganglia monitor/
+
+      case self[:direction]
+        when "output" then "north"
+        when "input" then "south"
+      end
+    end
+
   end
 end

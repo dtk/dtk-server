@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module AssemblyImportExportCommon
     Seperators = {
       :module_component => "::",

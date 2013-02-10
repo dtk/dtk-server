@@ -1,7 +1,11 @@
 module DTK; class ServiceModule
   class AssemblyImport
     module PortMixin
+      def ports()
+        @ndx_ports.values()
+      end
      private
+      include AssemblyImportExportCommon
       def add_port_and_port_links()
         #port links can only be imported in after ports created
         #add ports to assembly nodes
@@ -63,11 +67,11 @@ module DTK; class ServiceModule
         #create craete hashes for both local side and remore side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
-        ndx_link_def_links = Hash.new
+        ld_links_info = Array.new
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
             link_def[:link_def_links].each do |link|
-              (ndx_link_def_links[link[:remote_component_type]] ||= Array.new) << link
+              ld_links_info << {:link => link, :link_def => link_def}
             end
             node = ld_info[:node]
             port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component])
@@ -78,6 +82,18 @@ module DTK; class ServiceModule
               pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
               pntr[:create_rows] << port
             end
+          end
+        end
+
+        #add the remote ports
+        ld_links_info.each do |ld_link_info|
+          remote_component_type = ld_link_info[:link][:remote_component_type]
+          if matching_node_cmp = link_defs_info.find{|r|r[:nested_component][:component_type] == remote_component_type}
+            node = matching_node_cmp[:node]
+            component = matching_node_cmp[:nested_component]
+            port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
+            pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+            pntr[:create_rows] << port
           end
         end
 

@@ -248,7 +248,7 @@ module DTK
       create_from_rows(port_mh,rows,opts)
     end
 
-    def self.ret_port_create_hash(link_def,node,component)
+    def self.ret_port_create_hash(link_def,node,component,opts={})
       node_id = node.id()
       port_mh = node.model_handle_with_auth_info.create_childMH(:port)
       component_type = component.get_field?(:component_type)
@@ -259,7 +259,7 @@ module DTK
           "component_internal"
         end
           
-      dir = direction_from_local_remote(link_def[:local_or_remote])
+      dir = direction_from_local_remote(link_def[:local_or_remote],opts)
       ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
       display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
       location_asserted = ret_location_asserted(component_type,link_def[:link_type])
@@ -277,11 +277,18 @@ module DTK
 
     class << self
       private
-      def direction_from_local_remote(local_or_remote)
-        #TODO: just hueristc for computing dir; also need to upport "<>" (bidirectional)
-        case local_or_remote 
-          when "local" then "input" 
-          when "remote" then "output"
+      def direction_from_local_remote(local_or_remote,opts={})
+        #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
+        if opts[:remote_side]
+          case local_or_remote 
+            when "local" then "output" 
+            when "remote" then "input"
+          end
+        else
+          case local_or_remote 
+            when "local" then "input" 
+            when "remote" then "output"
+          end
         end
       end
 

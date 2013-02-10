@@ -17,6 +17,14 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
+    :link_type=>{
+      :type=>:varchar,
+      :size =>50
+    },
+    :component_type=>{
+      :type=>:varchar,
+      :size =>50
+    },
     :link_def_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:link_def,
@@ -70,14 +78,14 @@
       [{
          :model_name=>:link_def,
          :convert => true,
-         :join_type=>:inner,
+         :join_type=>:left_outer,
          :join_cond=>{:id =>:port__link_def_id},
          :cols=>[:id,:display_name,:component_component_id,:link_type,:has_external_link,:has_internal_link,:local_or_remote]
        },
        {
          :model_name=>:component,
          :convert => true,
-         :join_type=>:inner,
+         :join_type=>:left_outer,
          :join_cond=>{:id => :link_def__component_component_id},
          :cols=>[:id,:display_name,:component_type,:node_node_id,:implementation_id,:extended_base]
        },

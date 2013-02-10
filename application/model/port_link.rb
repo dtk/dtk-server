@@ -80,30 +80,46 @@ module XYZ
     end
    private
     def self.get_link_def_and_components(parent_idh,port_link_hash)
-      Log.error("TODO: see if can rewrite so dont need link def on remote side: instead put added fields in port such as link_type and way to get component in one query")
-
       #returns [link_def_link,relevant_components]
       ret = [nil,nil]
       sp_hash = {
-        :cols => [:link_def_info],
+        :cols => [:id,:group_id,:display_name,:component_type,:direction,:link_type,:link_def_info,:node_node_id],
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
       link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
-pp link_def_info
-      #local_cmp_info wil haev a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
-      local_cmp_info_and_links = link_def_info.select{|r|r[:link_def][:local_or_remote] == "local"}
+      #local_cmp_info wil have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
+      local_cmp_info_and_links = link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == "local"}
       return ret if local_cmp_info_and_links.empty?
       local_cmp_info = local_cmp_info_and_links.first #all elements wil agree on the parts aside from link_def_link
 
-      remote_cmp_info = link_def_info.find{|r|r[:link_def][:local_or_remote] == "remote"}
-      return ret unless remote_cmp_info
-      return ret unless local_cmp_info[:link_def][:link_type] == remote_cmp_info[:link_def][:link_type]
+      remote_cmp_info = link_def_info.select{|r|r[:id] != local_cmp_info[:id]}
+      unless remote_cmp_info.size == 1
+        raise Error.new("Unexpected result that a unique remote port is not found")
+      else
+        remote_cmp_info = remote_cmp_info.first
+      end
+
+      return ret unless local_cmp_info[:link_type] == remote_cmp_info[:link_type]
       #find the matching link_def_link
-      remote_cmp_type = remote_cmp_info[:component][:component_type]
+      remote_cmp_type = remote_cmp_info[:component_type]
       match = local_cmp_info_and_links.find{|r|(r[:link_def_link]||{})[:remote_component_type] == remote_cmp_type} 
       return ret unless match
+
+      #get remote component
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:node_node_id,:component_type,:implementation_id,:extended_base],
+        :filter => [:and,[:eq,:component_type,remote_cmp_type],[:eq,:node_node_id,remote_cmp_info[:node_node_id]]]
+      }
+      cmp_mh = local_cmp_info[:component].model_handle()
+      rows = Model.get_objs(cmp_mh,sp_hash)
+      unless rows.size == 1
+      #TODO: refine if multiple of same component types
+        raise Error.new("Unexpected that getting remote port link component does not return unique element")
+      else
+        remote_cmp = rows.first
+      end
       link_def_link = match[:link_def_link].merge!(:local_component_type => local_cmp_info[:component][:component_type])
-      relevant_components = [local_cmp_info[:component], remote_cmp_info[:component]]
+      relevant_components = [local_cmp_info[:component], remote_cmp]
       [link_def_link,relevant_components]
     end
   end

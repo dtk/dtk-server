@@ -180,10 +180,7 @@ module DTK
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
         end
         cmp_id = cmp_match[:id]
-        unless link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
-          Log.error("TODO: see if find to remove err: annot find matching link def for component with id (#{cmp_id})")
-          nil
-        else
+        if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           {:id => port[:id], :link_def_id => link_def_match[:id]}
         end
       end.compact
@@ -269,11 +266,13 @@ module DTK
         :ref => ref,
         :display_name => display_name,
         :direction => dir,
-        :link_def_id => link_def[:id],
         :node_node_id => node_id,
+        :component_type => component_type,
+        :link_type => link_def[:link_type],
         :type => type
       }
-      row[:location_asserted] = location_asserted if location_asserted
+      row.merge!(:location_asserted => location_asserted) if location_asserted
+      row.merge!(:link_def_id => link_def[:id]) unless opts[:remote_side]
       row
     end
 

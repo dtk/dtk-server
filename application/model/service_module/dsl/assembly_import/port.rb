@@ -70,7 +70,7 @@ module DTK; class ServiceModule
         ld_links_info = Array.new
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
-            link_def[:link_def_links].each do |link|
+            (link_def[:link_def_links]||{}).each do |link|
               ld_links_info << {:link => link, :link_def => link_def}
             end
             node = ld_info[:node]

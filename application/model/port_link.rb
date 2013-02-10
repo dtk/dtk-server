@@ -80,6 +80,8 @@ module XYZ
     end
    private
     def self.get_link_def_and_components(parent_idh,port_link_hash)
+      Log.error("TODO: see if can rewrite so dont need link def on remote side: instead put added fields in port such as link_type and way to get component in one query")
+
       #returns [link_def_link,relevant_components]
       ret = [nil,nil]
       sp_hash = {
@@ -87,6 +89,7 @@ module XYZ
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
       link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
+pp link_def_info
       #local_cmp_info wil haev a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
       local_cmp_info_and_links = link_def_info.select{|r|r[:link_def][:local_or_remote] == "local"}
       return ret if local_cmp_info_and_links.empty?

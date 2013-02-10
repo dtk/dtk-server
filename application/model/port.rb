@@ -181,9 +181,11 @@ module DTK
         end
         cmp_id = cmp_match[:id]
         unless link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
-          raise Error.new("Cannot find matching link def for component with id (#{cmp_id})")
+          Log.error("TODO: see if find to remove err: annot find matching link def for component with id (#{cmp_id})")
+          nil
+        else
+          {:id => port[:id], :link_def_id => link_def_match[:id]}
         end
-        {:id => port[:id], :link_def_id => link_def_match[:id]}
       end.compact
       update_from_rows(port_mh,update_rows)
     end

@@ -80,48 +80,48 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
-#Transaction do
-      local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
-      local_module_name = local_params[:module_name]
-      version = remote_params[:version]
-      if module_obj = module_exists?(project.id_handle(),local_module_name)
-        if module_obj.get_module_branch(local_branch)
-          raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_module_name,version)})")
+      Transaction do
+        local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
+        local_module_name = local_params[:module_name]
+        version = remote_params[:version]
+        if module_obj = module_exists?(project.id_handle(),local_module_name)
+          if module_obj.get_module_branch(local_branch)
+            raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_module_name,version)})")
+          end
         end
-      end
       
-      remote_repo = Repo::Remote.new(remote_params[:repo])
-      remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
+        remote_repo = Repo::Remote.new(remote_params[:repo])
+        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
 
-      #case on whether the module is created already
-      if module_obj
-        repos = module_obj.get_repos()
-        unless repos.size == 1
-          raise Error.new("unexpected that number of matching repos is not equal to 1")
+        #case on whether the module is created already
+        if module_obj
+          repos = module_obj.get_repos()
+          unless repos.size == 1
+            raise Error.new("unexpected that number of matching repos is not equal to 1")
+          end
+          repo = repos.first()
+        else
+          #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
+          remote_repo.authorize_dtk_instance(remote_params[:module_name],module_type())
+          
+          #create empty repo on local repo manager; 
+          #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+          create_opts = {
+            :remote_repo_name => remote_module_info[:git_repo_name],
+            :remote_repo_namespace => remote_params[:namespace],
+            :donot_create_master_branch => true,
+            :delete_if_exists => true
+          }
+          repo = create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
         end
-        repo = repos.first()
-      else
-        #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-        remote_repo.authorize_dtk_instance(remote_params[:module_name],module_type())
-
-        #create empty repo on local repo manager; 
-        #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-        create_opts = {
-          :remote_repo_name => remote_module_info[:git_repo_name],
-          :remote_repo_namespace => remote_params[:namespace],
-          :donot_create_master_branch => true,
-          :delete_if_exists => true
-        }
-        repo = create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
+        
+        commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,version)
+        module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+        module_obj ||= module_and_branch_info[:module_idh].create_object()
+        
+        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+        module_repo_info(repo,module_and_branch_info,version)
       end
-
-      commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,version)
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj ||= module_and_branch_info[:module_idh].create_object()
-      
-      module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
-      module_repo_info(repo,module_and_branch_info,version)
- #   end
     end
 
     def delete_remote(project,remote_params)

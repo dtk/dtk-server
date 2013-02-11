@@ -92,8 +92,13 @@ module DTK; class ServiceModule
             node = matching_node_cmp[:node]
             component = matching_node_cmp[:nested_component]
             port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
-            pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-            pntr[:create_rows] << port
+            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+              existing_port_info[:matched] = true
+              ret << existing_port_info[:port]
+            else
+              pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+              pntr[:create_rows] << port
+            end
           end
         end
 

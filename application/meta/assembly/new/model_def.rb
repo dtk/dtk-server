@@ -127,9 +127,16 @@ lambda__instance_nodes_and_components =
          :model_name=>:port,
          :convert => true,
          :join_type=>:inner,
-         :join_cond=>{:node_node_id=>:node__id},
+         :join_cond=>{:node_node_id=>:node__id,:component_type=>:nested_component__component_type},
          :cols => Port.common_columns()
-       }]
+       },
+       {
+         :model_name=>:link_def,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:component_component_id => :nested_component__id},
+         :cols => ([:component_component_id]+LinkDef.common_columns()).uniq
+       }]         
     },
     :augmented_port_links=> {
       :type=>:json,

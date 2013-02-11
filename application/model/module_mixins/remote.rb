@@ -80,7 +80,7 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
-Transaction do
+#Transaction do
       local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
       local_module_name = local_params[:module_name]
       version = remote_params[:version]
@@ -121,7 +121,7 @@ Transaction do
       
       module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
       module_repo_info(repo,module_and_branch_info,version)
-    end
+ #   end
     end
 
     def delete_remote(project,remote_params)

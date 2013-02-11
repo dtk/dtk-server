@@ -89,36 +89,6 @@ module DTK
       self[:display_name].split(RefDelim)[3].to_i
     end
 
-    #TODO: this can be avoided if we put more info in the port_link
-    #aug_ports are ports augmented with :nested_component
-    #removes nesetd_components not associated with teh port
-    def self.add_link_defs_and_prune(aug_ports)
-      ret = Array.new
-      return ret if aug_ports.empty?
-      #TODO: coud do this on db server side if it had field link_def_type
-      filter_array = aug_ports.map do |port|
-        link_type = port.parse_external_port_display_name()[:link_def_ref]
-        port[:link_def_type] = link_type
-        component =  port[:nested_component]
-        [:and,[:eq,:component_component_id,component[:id]],[:eq,:link_type,link_type]]
-      end
-      sp_hash = {
-        :cols => ([:component_component_id,:link_type]+LinkDef.common_columns()).uniq,
-        :filter => [:or] + filter_array
-      }
-      link_def_mh = aug_ports.first.model_handle(:link_def)
-      link_defs = get_objs(link_def_mh,sp_hash)
-      
-      aug_ports.each do |port|
-        component = port[:nested_component]
-        cmp_id = component[:id]
-        if matching_ld = link_defs.find{|ld|ld[:link_type] == port[:link_def_type] and ld[:component_component_id] == cmp_id}
-          ret << port.merge(:link_def => matching_ld)
-        end
-      end
-      ret
-    end
-
     def parse_external_port_display_name()
       display_name = get_field?(:display_name)
       self.class.parse_external_port_display_name(display_name)

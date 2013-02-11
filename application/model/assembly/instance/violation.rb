@@ -1,41 +1,5 @@
 module DTK
   class Assembly::Instance
-    class Violation 
-      class ReqUnsetAttr < self
-        def initialize(attr,type)
-          @attr_display_name = Attribute::Pattern::Display.new(attr,type).print_form()[:display_name]
-        end
-        def type()
-          :required_unset_attribute
-        end
-        def description()
-          "Attribute (#{@attr_display_name}) is required, but unset"
-        end
-      end
-      class ComponentConstraint < self
-        def initialize(constraint,node)
-          @constraint = constraint
-          @node = node
-        end
-        def type()
-          :component_constraint
-        end
-        def description()
-          "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
-        end
-      end
-      class UnconnReqServiceRef < self
-        def initialize(aug_port)
-          @augmented_port = aug_port
-        end
-        def type()
-          :unconnected_service_ref
-        end
-        def description()
-          "Service ref (#{@augmented_port.display_name_print_form()}) is not connected, but required to be"
-        end
-      end
-    end
     module ViolationMixin
       def find_violations()
         unset_attr_viols = find_violations__unset_attrs()
@@ -78,6 +42,44 @@ module DTK
           end
         end
         ret
+      end
+
+    end
+
+    class Violation 
+      class ReqUnsetAttr < self
+        def initialize(attr,type)
+          @attr_display_name = Attribute::Pattern::Display.new(attr,type).print_form()[:display_name]
+        end
+        def type()
+          :required_unset_attribute
+        end
+        def description()
+          "Attribute (#{@attr_display_name}) is required, but unset"
+        end
+      end
+      class ComponentConstraint < self
+        def initialize(constraint,node)
+          @constraint = constraint
+          @node = node
+        end
+        def type()
+          :component_constraint
+        end
+        def description()
+          "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
+        end
+      end
+      class UnconnReqServiceRef < self
+        def initialize(aug_port)
+          @augmented_port = aug_port
+        end
+        def type()
+          :unconnected_service_ref
+        end
+        def description()
+          "Service ref (#{@augmented_port.display_name_print_form()}) is not connected, but required to be"
+        end
       end
     end
   end

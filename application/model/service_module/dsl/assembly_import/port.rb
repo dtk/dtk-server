@@ -113,7 +113,7 @@ module DTK; class ServiceModule
           end
         end
         unless port_idhs_to_delete.empty?()
-          delete_instances(port_idhs_to_delete)
+          Model.delete_instances(port_idhs_to_delete)
         end
 
         #for new rows need to splice in node info

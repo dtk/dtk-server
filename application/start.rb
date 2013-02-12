@@ -8,6 +8,7 @@ require File.expand_path('app', File.dirname(__FILE__))
 is_development = ARGV[0] || false
 server_port    = ARGV[1] || R8::Config[:server_port]
 
+
 unless is_development
   rotating_logger = Logger.new('r8server.log', 'daily')
   Ramaze::Log.loggers = [rotating_logger]

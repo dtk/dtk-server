@@ -48,7 +48,7 @@ module XYZ
         raise ErrorUsage.new("Cannot find default target")
       end
       ref = display_name.downcase.gsub(/ /,"-")
-      row = default.merge(:ref => ref, :display_name => display_name, :description => nil).merge(params_hash)
+      row = default.merge(:ref => ref, :display_name => display_name).merge(params_hash)
       create_from_row(target_mh,row,:convert => true)
     end
    

@@ -23,8 +23,8 @@ module DTK
 
     def rest__list_assemblies()
       service_module_id = ret_request_param_id(:service_module_id)
-      service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.get_assembly_templates()
+      service_module = create_object_from_id(service_module_id)
+      rest_ok_response service_module.list_assembly_templates()
     end
 
     def rest__import()

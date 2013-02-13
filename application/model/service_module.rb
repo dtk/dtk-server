@@ -75,15 +75,6 @@ module DTK
       end
     end
 
-    def list_assembly_templates()
-      sp_hash = {
-        :cols => [:module_branches]
-      }
-      mb_idhs = get_objs(sp_hash).map{|r|r[:module_branch].id_handle()}
-      filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
-      Assembly::Template.list(model_handle(:component),:filter => filter)
-    end
-
     #MOD_RESTRUCT: TODO: deprecate below for list__project_parent
     def self.list__library_parent(mh,opts={})
       library_idh = opts[:library_idh]

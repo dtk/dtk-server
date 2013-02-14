@@ -11,23 +11,7 @@ class DtkCommon
 	$success == true
 	$log = '/var/log/thin.log'
 
-	attr_reader:assembly_name
-	attr_reader:assembly_template
-	attr_reader:SERVER
-	attr_reader:PORT
-	attr_reader:ENDPOINT
-	attr_reader:USERNAME
-	attr_reader:PASSWORD
-	attr_reader:success
-
-	attr_writer:assembly_name
-	attr_writer:assembly_template
-	attr_writer:SERVER
-	attr_writer:PORT
-	attr_writer:ENDPOINT
-	attr_writer:USERNAME
-	attr_writer:PASSWORD
-	attr_writer:success
+	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success
 
 	$opts = {
 				 :timeout => 100,
@@ -40,13 +24,10 @@ class DtkCommon
 		#Initialize variables
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
-		@SERVER = 'ec2-184-72-164-154.compute-1.amazonaws.com'
-		#@SERVER = 'dev9.r8network.com'
+		@SERVER = 'dev10.r8network.com'
 		@PORT = 7000
-		@ENDPOINT = "http://ec2-184-72-164-154.compute-1.amazonaws.com:7000"
-		#@ENDPOINT = "http://dev9.r8network.com:7000"
-		@USERNAME = 'dtk'
-		#USERNAME = 'dtk9'
+		@ENDPOINT = "http://dev10.r8network.com:7000"
+		@USERNAME = 'dtk10'
 		@PASSWORD = 'r8server'
 
 		#Login to dtk application
@@ -79,7 +60,6 @@ class DtkCommon
 
 			log_print()
 		end
-
 		return request_response_JSON
 	end
 
@@ -89,24 +69,30 @@ class DtkCommon
 
 	def stage_assembly()
 		#Get list of assembly templates and extract selected template and its assembly id
+		assembly_id = 0
 		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
 		test_template = assembly_template_list['data'].select { |x| x['display_name'] == @assembly_template }
-		template_assembly_id = test_template.first['id']
 
+		template_assembly_id = test_template.first['id']
 		puts "Assembly Template id: #{template_assembly_id}"
 
 		#Stage assembly and return assembly id
-		stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})
-		assembly_id = stage_assembly_response['data']['assembly_id']
+		stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})		
 
-		puts "Assembly id: #{assembly_id}"
+		if (stage_assembly_response['data']['assembly_id'])
+			assembly_id = stage_assembly_response['data']['assembly_id']
+			puts "Assembly id: #{assembly_id}"
+		else
+			puts "Stage assembly didnt pass"
+		end
+
 		return assembly_id
 	end
 
 	def check_if_assembly_exists(assembly_id)
 		#Get list of assemblies and check if staged assembly exists
 		assembly_exists = false
-		assembly_list = send_request('/rest/assembly/list', {:subtype=>'instance'})
+		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
 		test_assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }
 
 		puts "Assembly with id #{assembly_id}: "
@@ -120,7 +106,6 @@ class DtkCommon
 				assembly_exists = true
 			end
 		end
-
 		return assembly_exists
 	end
 
@@ -141,7 +126,7 @@ class DtkCommon
 			"Assembly info:"
 			puts send_request('/rest/assembly/info', {:assembly_id=>assembly_id,:subtype=>:instance})
 
-			if (!test_assembly.nil?)
+			if (test_assembly.any?)
 				extract_assembly_id = test_assembly.first['id']
 				op_status = test_assembly.first['op_status']
 				puts "Assembly found: #{extract_assembly_id} with op status #{op_status}"
@@ -170,7 +155,8 @@ class DtkCommon
 		is_attributes_set = false
 
 		#Get attribute id for which value will be set
-		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+		pretty_print_JSON(assembly_attributes)
 		attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
 
 		#Set attribute value for given attribute id
@@ -312,6 +298,20 @@ class DtkCommon
 		return delete_assembly_response['status']
 	end
 
+	def delete_assembly_template(assembly_template_name)
+		#Cleanup step - Delete assembly template
+		assembly_template_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
+		assembly_template_id = assembly_template_list['data'].select { |x| x['display_name'] == assembly_template_name }.first['id']
+		delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_id, :subtype=>:template})
+		return delete_assembly_template_response['status']
+	end
+
+	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
+		template_created = false
+		#To Do! Add implementation here!
+		return template_created
+	end
+
 	def netstats_check(assembly_id)
 		response = send_request('/rest/assembly/initiate_get_netstats', {:assembly_id=>assembly_id})
 		action_results_id = response['data']['action_results_id']
@@ -346,7 +346,7 @@ class DtkCommon
 		lines = File.readlines($log).map(&:chomp)
 
 		#"cut" the deck, as with playing cards, so start_line is first in the array
-		lines = lines.slice!(start_line..lines.length) + line
+		lines = lines.slice!(start_line..lines.length) + lines
 
 		#searching backwards can just be searching a reversed array forwards
 		lines.reverse!
@@ -409,6 +409,43 @@ class DtkCommon
 		return module_imported
 	end
 
+	def get_module_components_list(module_name, filter_version)
+		component_ids_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			pretty_print_JSON(module_components_list)
+
+			module_components_list['data'].each do |x|
+				if (filter_version != "")
+					component_ids_list << x['id'] if x['version'] == filter_version
+				else
+					component_ids_list << x['id']
+				end
+			end
+		end
+		return component_ids_list
+	end
+
+	def add_component_to_assembly_node(assembly_id, node_name, component_id)
+		component_added = false
+		assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+		if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
+			puts "Node #{node_name} exists in assembly. Get node id..."
+			node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
+			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_id, :assembly_id=>assembly_id})
+
+			if (component_add_response['status'] == 'ok')
+				puts "Component added to assembly"
+				component_added = true
+			end
+		end
+		return component_added
+	end
+
 	def delete_module(module_to_delete)
 		module_deleted = false
 		modules_list = send_request('/rest/component_module/list', {})
@@ -418,7 +455,7 @@ class DtkCommon
 			delete_response = send_request('/rest/component_module/delete', {:component_module_id=>module_to_delete})
 			pretty_print_JSON(delete_response)
 
-			if (delete_response['status'] == 'ok' && !modules_list['data'].select { |x| x['display_name'] == module_to_delete }.first)
+			if (delete_response['status'] == 'ok' && modules_list['data'].select { |x| x['module_name'] == nil })
 				puts "Module deleted successfully"
 				module_deleted = true
 			else
@@ -461,7 +498,7 @@ class DtkCommon
 	end
 
 	def create_new_service(service_name)
-		service_module = nil
+		service_created = false
 		service_list = send_request('/rest/service_module/list', {})
 
 		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
@@ -479,12 +516,12 @@ class DtkCommon
 
 			if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
 				puts "New service #{service_name} added successfully."
-				return service_module
+				service_created = true
 			else
 				puts "New service #{service_name} was not added successfully."
 			end
 		end
-		return service_module
+		return service_created
 	end
 
 	def delete_service(service_name)
@@ -513,5 +550,28 @@ class DtkCommon
 			service_deleted = false
 		end
 		return service_deleted
+	end
+
+	def check_if_service_contains_assembly_template(service_name, assembly_template_name)
+		service_contains_template = false
+		service_list = send_request('/rest/service_module/list', {})
+
+		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
+			puts "Service exists in service list. Try to find if #{assembly_template_name} belongs to #{service_name} service..."
+			service_id = service_list['data'].select { |x| x['display_name'] == service_name }.first['id']
+			service_templates_list = send_request('/rest/service_module/list_assemblies', {:service_module_id=>service_id})
+
+			if (service_templates_list['data'].select { |x| x['display_name'] == assembly_template_name }.first)
+				puts "Assembly template #{assembly_template_name} belongs to #{service_name} service."
+				service_contains_template = true
+			else
+				puts "Assembly template #{assembly_template_name} does not belong to #{service_name} service."
+				service_contains_template = false
+			end
+		else
+			puts "Service does not exist in service list."
+			service_contains_template = false
+		end
+		return service_contains_template
 	end
 end

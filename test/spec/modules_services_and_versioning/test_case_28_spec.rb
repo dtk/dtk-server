@@ -34,6 +34,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 	context "Module existence on local filesystem check" do
 		it "verifies module exists" do
 			list_response = system("ls #{module_filesystem_location}/#{module_name}")
+			puts list_response
 			list_response.should eq(true)
 		end
 	end
@@ -68,10 +69,12 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Delete module", dtk_common, module_name
 	end
 
+=begin
 	context "Delete module from local filesystem" do
 		it "deletes module" do
 			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}")
 			delete_response.should eq(true)
 		end
 	end
+=end
 end

@@ -12,7 +12,7 @@ require './test/lib/shared_spec'
 STDOUT.sync = true
 
 ASSEMBLY_NAME = 'test_case_8_instance'
-ASSEMBLY_TEMPLATE = 'test::redhat_bigtop_namenode'
+ASSEMBLY_TEMPLATE = 'bakir_test::redhat_bigtop_namenode'
 namenode_port = 8020
 namenode_web_port = 50070
 

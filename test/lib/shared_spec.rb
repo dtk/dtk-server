@@ -137,6 +137,13 @@ shared_context "Import remote module" do |dtk_common, module_name|
 	end
 end
 
+shared_context "Import versioned module from remote" do |dtk_common, module_name, version|
+	it "checks existance of module and imports versioned module from remote repo" do
+		module_imported = dtk_common.import_versioned_module_from_remote(module_name, version)
+		module_imported.should eq(true)
+	end
+end
+
 shared_context "Get module components list" do |dtk_common, module_name|
 	it "gets list of all components modules" do
 		$module_components_list = dtk_common.get_module_components_list(module_name, "")

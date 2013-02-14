@@ -12,7 +12,7 @@ require './test/lib/shared_spec'
 assembly_name = 'test_case_32_instance'
 assembly_template = 'bootstrap::test1'
 new_assembly_template = 'test_case_32_instance_assembly_template'
-service_name = "new_service"
+service_name = 'new_service'
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

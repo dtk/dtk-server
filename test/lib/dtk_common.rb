@@ -497,6 +497,34 @@ class DtkCommon
 		return module_versioned
 	end
 
+	def import_versioned_module_from_remote(module_name, version)
+		module_imported = false
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name }.first)
+			puts "Module exists in module list. Try to import versioned module..."
+			module_id = modules_list['data'].select { |x| x['display_name'] == module_name }.first['id']
+			import_response = send_request('/rest/component_module/import_version', {:version=>version, :component_module_id=>module_id})
+			puts "Import versioned module response:"
+			pretty_print_JSON(import_response)
+			puts "Module list response:"
+			modules_list = send_request('/rest/component_module/list', {})
+			pretty_print_JSON(modules_list)
+
+			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['version'].include? version) }.first)
+				puts "Versioned module imported successfully."
+				module_imported = true
+			else
+				puts "Versioned module was not imported successfully."
+				module_imported = false
+			end
+		else
+			puts "Module does not exist in module list and therefore versioned module cannot be imported."
+			module_imported = false
+		end
+		return module_imported
+	end
+
 	def create_new_service(service_name)
 		service_created = false
 		service_list = send_request('/rest/service_module/list', {})

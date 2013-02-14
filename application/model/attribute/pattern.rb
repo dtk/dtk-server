@@ -189,6 +189,7 @@ module DTK; class Attribute
       end
 
       def ret_filter(fragment,type)
+pp [:fragment,fragment]
         if fragment =~ /[a-z]\[([^\]]+)\]/
           filter = $1
           if type == :component
@@ -208,7 +209,7 @@ module DTK; class Attribute
               raise ErrorNotImplementedYet.new("Component filter of type (#{type})")
             end
           else
-            raise ErrorNotImplementedYet.new("Parsing of component fileter (#{filter})")
+            raise ErrorNotImplementedYet.new("Parsing of component filter (#{filter})")
           end
         else
           nil #without qualification means all (no filter)

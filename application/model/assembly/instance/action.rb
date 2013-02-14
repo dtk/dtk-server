@@ -72,7 +72,7 @@ module DTK
           def self.process_data_for_ipv4(raw_data)
             ndx_ret = Hash.new
             raw_data.each do |r|
-              next unless r[:state] == "LISTEN"
+              next unless r[:state] == "LISTEN" || r[:protocol] == "udp"
               if r[:local] =~ /(^.+):([0-9]+$)/
                 address = $1
                 address = "0.0.0.0" if address == "::"

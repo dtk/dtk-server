@@ -80,10 +80,12 @@ describe "Test Case 29: Import component module from remote, version it and use 
 		include_context "Delete module", dtk_common, module_name
 	end
 
+=begin
 	context "Delete module from local filesystem" do
 		it "deletes module" do
 			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}")
 			delete_response.should eq(true)
 		end
 	end
+=end
 end

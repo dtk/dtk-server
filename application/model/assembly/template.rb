@@ -271,13 +271,13 @@ module DTK; class Assembly
       order ? ret.sort(&order) : ret
     end
 
-    def self.exists?(library_idh,service_module_name,template_name)
+    def self.exists?(project_idh,service_module_name,template_name)
       component_type = component_type(service_module_name,template_name)
       sp_hash = {
         :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :component_type, component_type], [:eq, :library_library_id, library_idh.get_id()]]
+        :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
       }
-      get_obj(library_idh.createMH(:component),sp_hash)
+      get_obj(project_idh.createMH(:component),sp_hash)
     end
     #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
         def self.check_valid_id(model_handle,id)

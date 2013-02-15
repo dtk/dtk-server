@@ -26,7 +26,17 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
 	context "Import module #{module_name} function" do
-		include_context "Import remote module", dtk_common, module_name
+		#include_context "Import remote module", dtk_common, module_name
+		it "test" do
+			value = ap `dtk module import #{module_name}`
+		
+			if value.include? "module_directory:"
+				pass == "TRUE"
+			else
+				pass =="FALSE"
+			end
+			pass.should eq("TRUE")
+		end
 	end
 
 	context "Get module components list" do

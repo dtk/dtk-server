@@ -387,15 +387,14 @@ class DtkCommon
 
 			if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_import}.first)
 				puts "Module specified found in list of remote modules. Try to import module..."
-				exec('dtk module import #{module_to_import}')
-				# send_request('/rest/component_module/import', {:remote_module_name=>module_to_import, :local_module_name=>module_to_import})
+				import_response = send_request('/rest/component_module/import', {:remote_module_name=>module_to_import, :local_module_name=>module_to_import})
 				puts "Module import response:"
-				#pretty_print_JSON(import_response)
+				pretty_print_JSON(import_response)
 				modules_list = send_request('/rest/component_module/list', {})
 				puts "Module list response:"
 				pretty_print_JSON(modules_list)
-				#import_response['status'] == 'ok' && 
-				if (modules_list['data'].select { |x| x['display_name'] == module_to_import }.first)
+
+				if (import_response['status'] == 'ok' && modules_list['data'].select { |x| x['display_name'] == module_to_import }.first)
 					puts "Module imported successfully from remote repo."
 					module_imported = true
 				else

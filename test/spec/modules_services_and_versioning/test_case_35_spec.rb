@@ -4,7 +4,7 @@
 require 'rubygems'
 require 'rest_client'
 require 'pp'
-require 'json'
+#require 'json'
 require 'awesome_print'
 require './test/lib/dtk_common'
 require './test/lib/shared_spec'
@@ -28,7 +28,7 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 	context "Import module #{module_name} function" do
 		#include_context "Import remote module", dtk_common, module_name
 		it "test" do
-			value = ap `dtk module import #{module_name}`
+			value = `dtk module import #{module_name}`
 		
 			if value.include? "module_directory:"
 				pass == "TRUE"

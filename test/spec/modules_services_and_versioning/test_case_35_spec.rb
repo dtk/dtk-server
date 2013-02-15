@@ -33,13 +33,6 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		include_context "Get module components list", dtk_common, module_name
 	end
 
-	context "Module existence on local filesystem check" do
-		it "verifies module exists" do
-			list_response = system("ls #{module_filesystem_location}/#{module_name}")
-			list_response.should eq(true)
-		end
-	end
-
 	context "Import versioned module from remote function" do
 		include_context "Import versioned module from remote", dtk_common, module_name, module_version
 	end
@@ -48,17 +41,12 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		include_context "Get versioned module components list", dtk_common, module_name, module_version
 	end
 
-	context "Versioned module existence on local filesystem check" do
-		it "verifies versioned module exists" do
-			list_response = system("ls #{module_filesystem_location}/#{module_name}-#{module_version}")
-			list_response.should eq(true)
-		end
-	end
-
 	context "Delete module" do
 		include_context "Delete module", dtk_common, module_name
 	end
 
+=begin 
+	#Not used now in the script
 	context "Delete module from local filesystem" do
 		it "deletes module" do
 			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}")
@@ -72,4 +60,5 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 			delete_response.should eq(true)
 		end
 	end
+=end
 end

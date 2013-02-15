@@ -35,13 +35,6 @@ describe "Test Case 29: Import component module from remote, version it and use 
 		include_context "Get module components list", dtk_common, module_name
 	end
 
-	context "Module existence on local filesystem check" do
-		it "verifies module exists" do
-			list_response = system("ls #{module_filesystem_location}/#{module_name}")
-			list_response.should eq(true)
-		end
-	end
-
 	context "Create new version of module #{module_name}" do
 		include_context "Create new module version", dtk_common, module_name, module_version
 	end
@@ -79,13 +72,4 @@ describe "Test Case 29: Import component module from remote, version it and use 
 	context "Delete module" do
 		include_context "Delete module", dtk_common, module_name
 	end
-
-=begin
-	context "Delete module from local filesystem" do
-		it "deletes module" do
-			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}")
-			delete_response.should eq(true)
-		end
-	end
-=end
 end

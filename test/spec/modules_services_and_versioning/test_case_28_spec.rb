@@ -24,7 +24,12 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 describe "Test Case 28: Import component module from remote and use this component in assembly" do
 
 	context "Import module #{module_name} function" do
-		include_context "Import remote module", dtk_common, module_name
+		#include_context "Import remote module", dtk_common, module_name
+		it "Imports module" do
+			value = ap `dtk module import #{module_name}`
+			puts value
+			value.should_not eq(nil)
+		end
 	end
 
 	context "Get module components list" do

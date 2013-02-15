@@ -26,7 +26,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 	context "Import module #{module_name} function" do
 		#include_context "Import remote module", dtk_common, module_name
 		it "Imports module" do
-			value = ap `dtk module import #{module_name}`
+			value = `dtk module import #{module_name}`
 			puts value
 			value.should_not eq(nil)
 		end

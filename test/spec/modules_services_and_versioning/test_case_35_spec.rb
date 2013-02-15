@@ -11,7 +11,7 @@ require './test/lib/shared_spec'
 
 assembly_name = 'test_case_35_instance'
 assembly_template = 'bootstrap::test1'
-module_name = 'apache'
+module_name = 'test'
 module_version = '0.0.1'
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
@@ -29,7 +29,7 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		#include_context "Import remote module", dtk_common, module_name
 		it "test" do
 			pass = false
-			value = `./ruby dtk module import #{module_name}`	
+			value = `dtk module import #{module_name}`	
 			pass = value.include? "module_directory:"
 			pass.should eq(true)
 		end

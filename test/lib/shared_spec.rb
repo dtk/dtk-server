@@ -176,20 +176,47 @@ shared_context "Delete module" do |dtk_common, module_name|
 	end
 end
 
-#always pass, unix function
 shared_context "Delete module from local filesystem" do |module_filesystem_location, module_name|
 	it "deletes module from local filesystem" do
-		pass = true
+		pass = false
 		value = `rm -rf #{module_filesystem_location}/#{module_name}`
+		pass = !value.include?("cannot remove")
 		pass.should eq(true)
 	end
 end
 
-#always pass, unix function
 shared_context "Delete versioned module from local filesystem" do |module_filesystem_location, module_name, module_version|
 	it "deletes versioned module from local filesystem" do
-		pass = true
+		pass = false
 		value = `rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}`
+		pass = !value.include?("cannot remove")
+		pass.should eq(true)
+	end
+end
+
+shared_context "Check module imported on local filesystem" do |module_filesystem_location, module_name|
+	it "checks if module imported on local filesystem" do
+		pass = false
+		value = `ls #{module_filesystem_location}/#{module_name}`
+		pass = !value.include?("No such file or directory")
+		pass.should eq(true)
+	end
+end
+
+shared_context "Clone versioned module" do |dtk_common, module_name, module_version|
+	it "clones versioned module from server to local filesystem" do
+		pass = false
+		value = `dtk module #{module_name} clone -v #{module_version} -n`
+		pass = value.include?("module_directory:")
+		pass.should eq(true)
+	end
+end
+
+shared_context "Check versioned module imported on local filesystem" do |module_filesystem_location, module_name, module_version|
+	it "checks if versioned module imported on local filesystem" do
+		pass = false
+		value = `ls #{module_filesystem_location}/#{module_name}-#{module_version}`
+		pass = !value.include?("No such file or directory")
 		pass.should eq(true)
 	end
 end

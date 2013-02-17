@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 35: Import new module from remote repo and then import same version-ed module from remote
+#Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server
 
 require 'rubygems'
 require 'rest_client'
@@ -9,11 +9,12 @@ require 'awesome_print'
 require './test/lib/dtk_common'
 require './test/lib/shared_spec'
 
-assembly_name = 'test_case_35_instance'
+assembly_name = 'test_case_33_instance'
 assembly_template = 'bootstrap::test1'
-module_name = 'test'
+module_name = 'mysql'
 module_version = '0.0.1'
 module_filesystem_location = "~/component_modules"
+file_for_change = "README.md"
 $assembly_id = 0
 
 #Initial empty module components list, will be populated after "Get module components list" context call
@@ -23,7 +24,7 @@ $versioned_module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
+describe "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do
 
 	context "Import module #{module_name} function" do
 		include_context "Import remote module", module_name
@@ -37,14 +38,40 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
 	end	
 
-	context "Import versioned module from remote function" do
-		include_context "Import versioned module from remote", dtk_common, module_name, module_version
+	context "Create new version of module #{module_name}" do
+		include_context "Create new module version", dtk_common, module_name, module_version
 	end
 
 	context "Get versioned module components list" do
 		include_context "Get versioned module components list", dtk_common, module_name, module_version
 	end
 
+	context "Clone versioned module" do
+		include_context "Clone versioned module", dtk_common, module_name, module_version
+	end	
+
+	context "Check if versioned module cloned on local filesystem" do
+		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name
+	end
+
+	context "Append comment to the readme module file to see effect of push-clone-change" do
+		it "appends comment to readme file" do
+			pass = true
+			`echo "# Mysql module for Puppet" >> #{module_filesystem_location}/#{module_name}-#{module_version}/#{file_for_change}`
+			pass.should eq(true)
+		end
+	end
+
+	context "Push clone changes of module from local copy to server" do
+		it "push clone changes of module" do
+			pass = false
+			value = `dtk module #{module_name} push-clone-changes -v #{module_version}`
+			file_modified_value = /json_diffs: (.*)/.match(value)
+			pass = file_modified_value[1].include?("#{file_for_change}")
+			pass.should eq(true)
+		end
+	end
+ 
 	context "Delete module" do
 		include_context "Delete module", dtk_common, module_name
 	end

@@ -31,6 +31,10 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Get module components list", dtk_common, module_name
 	end
 
+	context "Check if module imported on local filesystem" do
+		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
+	end
+
 	context "Stage assembly function" do
 		include_context "Stage", dtk_common
 	end

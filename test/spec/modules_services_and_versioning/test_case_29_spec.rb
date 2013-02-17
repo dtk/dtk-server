@@ -35,6 +35,10 @@ describe "Test Case 29: Import component module from remote, version it and use 
 		include_context "Get module components list", dtk_common, module_name
 	end
 
+	context "Check if module imported on local filesystem" do
+		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
+	end	
+
 	context "Create new version of module #{module_name}" do
 		include_context "Create new module version", dtk_common, module_name, module_version
 	end

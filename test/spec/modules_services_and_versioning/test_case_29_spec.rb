@@ -28,7 +28,7 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 describe "Test Case 29: Import component module from remote, version it and use this version-ed component in assembly" do
 
 	context "Import module #{module_name} function" do
-		include_context "Import remote module", dtk_common, module_name
+		include_context "Import remote module", module_name
 	end
 
 	context "Get module components list" do
@@ -71,5 +71,9 @@ describe "Test Case 29: Import component module from remote, version it and use 
 
 	context "Delete module" do
 		include_context "Delete module", dtk_common, module_name
+	end
+
+	context "Delete module from local filesystem" do
+		include_context "Delete module", module_filesystem_location, module_name
 	end
 end

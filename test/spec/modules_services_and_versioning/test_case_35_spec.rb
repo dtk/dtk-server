@@ -26,13 +26,7 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
 	context "Import module #{module_name} function" do
-		#include_context "Import remote module", dtk_common, module_name
-		it "test" do
-			pass = false
-			value = `dtk module import #{module_name}`	
-			pass = value.include? "module_directory:"
-			pass.should eq(true)
-		end
+		include_context "Import remote module", module_name
 	end
 
 	context "Get module components list" do
@@ -51,20 +45,11 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		include_context "Delete module", dtk_common, module_name
 	end
 
-=begin 
-	#Not used now in the script
 	context "Delete module from local filesystem" do
-		it "deletes module" do
-			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}")
-			delete_response.should eq(true)
-		end
+		include_context "Delete module", module_filesystem_location, module_name
 	end
 
 	context "Delete versioned module from local filesystem" do
-		it "deletes versioned module" do
-			delete_response = system("rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}")
-			delete_response.should eq(true)
-		end
+		include_context "Delete versioned module", module_filesystem_location, module_name, module_version
 	end
-=end
 end

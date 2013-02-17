@@ -130,10 +130,12 @@ shared_context "Check if port avaliable" do |dtk_common, port|
 	end
 end
 
-shared_context "Import remote module" do |dtk_common, module_name|
-	it "checks existance of module and imports module from remote repo" do
-		module_imported = dtk_common.import_remote_module(module_name)
-		module_imported.should eq(true)
+shared_context "Import remote module" do |module_name|
+	it "imports module from remote repo" do
+		pass = false
+		value = `dtk module import #{module_name}`	
+		pass = value.include? "module_directory:"
+		pass.should eq(true)
 	end
 end
 
@@ -171,6 +173,24 @@ shared_context "Delete module" do |dtk_common, module_name|
 	it "deletes module from server" do
 		module_deleted = dtk_common.delete_module(module_name)
 		module_deleted.should eq(true)
+	end
+end
+
+#always pass, unix function
+shared_context "Delete module from local filesystem" do |module_filesystem_location, module_name|
+	it "deletes module from local filesystem" do
+		pass = true
+		value = `rm -rf #{module_filesystem_location}/#{module_name}`
+		pass.should eq(true)
+	end
+end
+
+#always pass, unix function
+shared_context "Delete versioned module from local filesystem" do |module_filesystem_location, module_name, module_version|
+	it "deletes versioned module from local filesystem" do
+		pass = true
+		value = `rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}`
+		pass.should eq(true)
 	end
 end
 

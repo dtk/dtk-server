@@ -62,6 +62,6 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	end
 
 	context "Delete versioned module from local filesystem" do
-		include_context "Delete versioned module", module_filesystem_location, module_name, module_version
+		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
 end

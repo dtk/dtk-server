@@ -54,6 +54,6 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 	end
 
 	context "Delete versioned module from local filesystem" do
-		include_context "Delete versioned module", module_filesystem_location, module_name, module_version
+		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
 end

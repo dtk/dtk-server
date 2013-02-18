@@ -66,6 +66,6 @@ describe "Test Case 28: Import component module from remote and use this compone
 	end
 
 	context "Delete module from local filesystem" do
-		include_context "Delete module", module_filesystem_location, module_name
+		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 end

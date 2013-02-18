@@ -77,7 +77,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 	end
 
 	context "Delete module from local filesystem" do
-		include_context "Delete module", module_filesystem_location, module_name
+		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 
 	context "Delete versioned module from local filesystem" do

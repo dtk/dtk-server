@@ -23,6 +23,8 @@ $versioned_module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 35: Import new module from remote repo and then import same version-ed module from remote"
+
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
 	context "Import module #{module_name} function" do

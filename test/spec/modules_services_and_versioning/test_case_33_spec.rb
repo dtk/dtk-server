@@ -51,7 +51,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 	end	
 
 	context "Check if versioned module cloned on local filesystem" do
-		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name
+		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version
 	end
 
 	context "Append comment to the readme module file to see effect of push-clone-change" do

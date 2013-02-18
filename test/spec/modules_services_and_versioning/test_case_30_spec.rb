@@ -50,7 +50,7 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	end	
 
 	context "Check if versioned module cloned on local filesystem" do
-		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name
+		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version
 	end
 
 	context "Delete module" do

@@ -23,6 +23,8 @@ $versioned_module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 35: Import new module from remote repo and then import same version-ed module from remote"
+
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
 	context "Import module #{module_name} function" do
@@ -50,7 +52,7 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 	end
 
 	context "Delete module from local filesystem" do
-		include_context "Delete module", module_filesystem_location, module_name
+		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 
 	context "Delete versioned module from local filesystem" do

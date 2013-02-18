@@ -23,6 +23,8 @@ $versioned_module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
+
 describe "Test Case 30: Import component module from remote, version it and clone it to local filesystem" do
 
 	context "Import module #{module_name} function" do
@@ -50,7 +52,7 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	end	
 
 	context "Check if versioned module cloned on local filesystem" do
-		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name
+		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version
 	end
 
 	context "Delete module" do
@@ -58,7 +60,7 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	end
 
 	context "Delete module from local filesystem" do
-		include_context "Delete module", module_filesystem_location, module_name
+		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 
 	context "Delete versioned module from local filesystem" do

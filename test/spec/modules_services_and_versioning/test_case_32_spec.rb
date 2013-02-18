@@ -17,6 +17,8 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 32: Get list of all assembly templates for particular service"
+
 describe "Test Case 32: Get list of all assembly templates for particular service" do
 
 	context "Create new service function" do

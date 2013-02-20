@@ -69,7 +69,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 			pass = false
 			value = `dtk module #{module_name} push-clone-changes -v #{module_version}`
 			file_modified_value = /json_diffs: (.*)/.match(value)
-			pass = file_modified_value[1].include?("#{file_for_change}")
+			pass = file_modified_value.include?("#{file_for_change}")
 			pass.should eq(true)
 		end
 	end

@@ -125,7 +125,7 @@ module DTK
       end
 
       def msg(version_value)
-        "Version has an illegal value '#{version_value}', format needed: '#.#.#'"
+        "Version has an illegal value '#{version_value}', format needed: '##.##.##'"
       end
     end
   end

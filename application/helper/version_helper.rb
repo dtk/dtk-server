@@ -6,7 +6,7 @@ module Ramaze::Helper
     end
     def is_legal_version_format?(version)
       return true unless version
-      !!(version =~ /\A[0-9]+\.[0-9]+\.[0-9]+\Z/)
+      !!(version =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
     end
 
     def raise_error_if_version_illegal_format(version)

@@ -4,6 +4,28 @@ module XYZ
     helper :rest_async
     helper :component_template_helper
 
+    ### mcollective actions
+    def rest__initiate_get_netstats()
+      node = create_node_obj(:node_id)
+      queue = ActionResultsQueue.new
+      # TODO: Move GetNetstas MColl action class to shared location between assembly and node controllers
+      Assembly::Instance::Action::GetNetstats.initiate([node], queue) 
+      rest_ok_response (:action_results_id => queue.id)
+    end
+    
+    def rest__get_action_results()
+      #TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
+      action_results_id = ret_non_null_request_params(:action_results_id)
+      ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
+      disable_post_processing = ret_request_param_boolean(:disable_post_processing)
+
+      if ret_request_param_boolean(:using_simple_queue)
+        rest_ok_response SimpleActionQueue.get_results(action_results_id)
+      else
+        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+      end
+    end
+
     #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)

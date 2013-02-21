@@ -315,7 +315,6 @@ class DtkCommon
 	def netstats_check(assembly_id)
 		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
 		action_results_id = response['data']['action_results_id']
-		puts action_results_id
 
 		netstat_response = 'no_response'
 		end_loop = false

@@ -92,6 +92,20 @@ module XYZ
       nodes.inject({}){|h,n|h.merge(n.id => ndx_changes[n.id]||StateChange.node_config_change__no_changes())}
     end
 
+    def get_iaas_type()
+      update_object!(:iaas_type)[:iaas_type]
+    end
+
+    # returns aws params if pressent in iaas properties
+    def get_aws_compute_params()
+      iaas_props = update_object!(:iaas_properties)[:iaas_properties]
+      if iaas_props && (aws_key = iaas_props[:key]) && (aws_secret = iaas_props[:secret])
+        return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+      end
+
+      return nil
+    end
+
     def get_and_update_nodes_status()
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       nodes.inject({}){|h,n|h.merge(n.id => n.get_and_update_status!())}

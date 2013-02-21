@@ -71,7 +71,7 @@ module DTK; module CommandAndControlAdapter
      private
       def raw_state_info!(node)
         if instance_id = get_instance_id_from_object(node)
-          node[:raw_ec2_state_info] ||= conn().server_get(instance_id)
+          node[:raw_ec2_state_info] ||= conn(node.get_target_iaas_credentials()).server_get(instance_id)
         end
       end
 

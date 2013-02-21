@@ -1,5 +1,6 @@
 module XYZ
   class TargetController < AuthController
+
     def rest__create()
       display_name = ret_non_null_request_params(:target_name)
       params_hash = ret_params_hash(:description,:iaas_type,:iaas_properties)
@@ -7,6 +8,7 @@ module XYZ
       target_idh = Target.create_from_default(project_idh,display_name,params_hash)
       rest_ok_response(:target_id => target_idh.get_id())
     end
+
 
     def rest__create_assembly_template()
       #TODO: this may be just used for testing

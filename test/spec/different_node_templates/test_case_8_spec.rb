@@ -13,6 +13,7 @@ STDOUT.sync = true
 
 assembly_name = 'test_case_8_instance'
 assembly_template = 'bakir_test::redhat_bigtop_namenode'
+memory = 'm1.small'
 namenode_port = 8020
 namenode_web_port = 50070
 $assembly_id = 0
@@ -29,6 +30,10 @@ describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add O
 
 	context "List assemblies after stage" do		
 		include_context "List assemblies after stage", dtk_common
+	end
+
+	context "Set memory size attribute to #{memory_size}" do
+		include_context "Set attribute", dtk_common, 'memory_size', memory
 	end
 
 	context "Converge function" do

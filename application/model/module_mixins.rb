@@ -98,13 +98,14 @@ module DTK
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
-      module_branch = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
-      parse_needed = !dsl_parsed?()
-      return unless pull_was_needed or parse_needed
-
-      update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      Transaction do 
+        module_branch = get_workspace_module_branch(version)
+        pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
+        
+        parse_needed = !dsl_parsed?()
+        return unless pull_was_needed or parse_needed
+        update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      end
     end
 
 

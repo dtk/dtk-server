@@ -92,8 +92,13 @@ module DTK; class ServiceModule
             node = matching_node_cmp[:node]
             component = matching_node_cmp[:nested_component]
             port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
-            pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-            pntr[:create_rows] << port
+            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+              existing_port_info[:matched] = true
+              ret << existing_port_info[:port]
+            else
+              pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+              pntr[:create_rows] << port
+            end
           end
         end
 
@@ -113,7 +118,7 @@ module DTK; class ServiceModule
           end
         end
         unless port_idhs_to_delete.empty?()
-          delete_instances(port_idhs_to_delete)
+          Model.delete_instances(port_idhs_to_delete)
         end
 
         #for new rows need to splice in node info

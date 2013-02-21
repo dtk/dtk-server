@@ -35,8 +35,8 @@ end
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
       diffs_summary = ret_diffs_summary()
-      component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
-      rest_ok_response
+      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
+      rest_ok_response dsl_created_info
     end
 
     def rest__delete()

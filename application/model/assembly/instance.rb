@@ -73,9 +73,8 @@ module DTK; class  Assembly
     def get_augmented_ports(opts={})
       ndx_ret = Hash.new
       ret = get_objs(:cols => [:augmented_ports]).map do |r|
-        r[:port].merge(r.slice(:node,:nested_component))
+        r[:port].merge(r.slice(:node,:nested_component,:link_def))
       end
-      ret = Port.add_link_defs_and_prune(ret)
       if opts[:mark_unconnected]
         get_augmented_ports__mark_unconnected!(ret,opts)
       end
@@ -425,15 +424,13 @@ module DTK; class  Assembly
       #if no library_idh is given and no matching template, use teh public library
       library_idh ||= Library.get_public_library(model_handle.createMH(:library)).id_handle()
 
-      create_library_template_from_assembly(library_idh)
+      create_assembly_template_from_instance(library_idh)
     end
 
     def create_new_template(service_module,new_template_name)
-      service_module.update_object!(:display_name,:library_library_id)
-      library_idh = id_handle(:model_name => :library, :id => service_module[:library_library_id])
-      service_module_name = service_module[:display_name]
-
-      if Assembly::Template.exists?(library_idh,service_module_name,new_template_name)
+      service_module_name = service_module.get_field?(:display_name)
+      project_idh = service_module.get_project().id_handle()
+      if Assembly::Template.exists?(project_idh,service_module_name,new_template_name)
         raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
       end
 
@@ -441,7 +438,7 @@ module DTK; class  Assembly
         :service_module_name => service_module_name,
         :assembly_template_name => new_template_name
       }
-      create_library_template_from_assembly(library_idh,name_info)
+      create_assembly_template_from_instance(project_idh,name_info)
     end      
 
     def get_attributes_print_form(filter=nil)
@@ -529,7 +526,8 @@ module DTK; class  Assembly
       end
     end
 
-    def create_library_template_from_assembly(library_idh,name_info=nil)
+    def create_assembly_template_from_instance(project_idh,name_info=nil)
+      raise Error.new("TODO: not implemented yet: reate_assembly_template_from_instance not converted yet to 'workspace form'")
       update_object!(:component_type,:version,:ui)
       if self[:version]
         raise Error.new("TODO: not implemented yet Assembly::Instance#create_library_template when version no null")
@@ -545,7 +543,7 @@ module DTK; class  Assembly
       if node_idhs.empty?
         raise Error.new("Cannot find any nodes associated with assembly (#{self[:display_name]})")
       end
-      Assembly::Template.create_library_template(library_idh,node_idhs,template_name,service_module_name,ui)
+      Assembly::Template.create_library_template(project_idh,node_idhs,template_name,service_module_name,ui)
     end
   end
 end 

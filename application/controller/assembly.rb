@@ -154,10 +154,8 @@ module DTK
 
     def rest__create_new_template()
       assembly = ret_assembly_instance_object()
-      service_module_name,assembly_template_name = ret_non_null_request_params(:service_module_name,:assembly_template_name)
-      unless service_module = ServiceModule.find(model_handle(:service_module),service_module_name)
-        raise ErrorUsage.new("Cannot find service nodule (#{service_module_name})")
-      end
+      service_module = create_obj(:service_module_name,ServiceModule)
+      assembly_template_name = ret_non_null_request_params(:assembly_template_name)
       assembly.create_new_template(service_module,assembly_template_name)
       rest_ok_response
     end

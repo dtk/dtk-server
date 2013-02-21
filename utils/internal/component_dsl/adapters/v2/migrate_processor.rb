@@ -71,7 +71,7 @@ module DTK; class ComponentDSL; class V2
 
       rest_attrs = (assigns.keys - (AttrOmit[type]||[])) - AttrProcessed[type]
       unless rest_attrs.empty?
-        raise Error.new("TODO: not yet implemented component keys (#{rest_attrs.join(",")})")
+        raise Error.new("feature_component_dsl_v2: TODO: not yet implemented component keys (#{rest_attrs.join(",")})")
       end
 #      rest_attrs.each{|k|ret[k] = assigns[k] if assigns[k]}
       ret
@@ -302,7 +302,7 @@ module DTK; class ComponentDSL; class V2
           remote_cmp_ref = qualified_component_ref(assigns.keys.first)
           info = assigns.values.first
           unless info.keys == ["attribute_mappings"]
-            raise Error.new("TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
+            raise Error.new("feature_component_dsl_v2: TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
           end
           possible_link_info = PrettyPrintHash.new
           possible_link_info["attribute_mappings"] = info["attribute_mappings"].map{|am|attribute_mapping(am)}
@@ -327,7 +327,7 @@ module DTK; class ComponentDSL; class V2
         def self.dependency(ref,dep_assign)
           ret = requires(ref,dep_assign)
           unless ret
-            raise Error.new("TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
+            raise Error.new("feature_component_dsl_v2: TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
           end
           ret
         end
@@ -344,7 +344,7 @@ module DTK; class ComponentDSL; class V2
           ret = component_order_rel__after(ref,cmp_order_rel)
 
           unless ret
-            ret = "TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
+            ret = "feature_component_dsl_v2: TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
           end
           ret
         end

@@ -19,8 +19,9 @@ module DTK
     
     def get_module_repo_info()
       repo = get_repo(:repo_name)
-      module_name = get_module_name()
-      ModuleRepoInfo.new(repo,module_name,self)
+      module_obj = get_module()
+      version = get_field?(:version)
+      ModuleRepoInfo.new(repo,module_obj.module_name(),module_obj.id_handle(),self,version)
     end
 
     def get_module()

@@ -32,7 +32,7 @@ describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add O
 		include_context "List assemblies after stage", dtk_common
 	end
 
-	context "Set memory size attribute to #{memory_size}" do
+	context "Set memory size attribute to #{memory}" do
 		include_context "Set attribute", dtk_common, 'memory_size', memory
 	end
 

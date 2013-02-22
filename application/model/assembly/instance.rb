@@ -259,7 +259,8 @@ module DTK; class  Assembly
 
     def info_about(about,opts={})
       cols = post_process_per_row = order = nil
-      order = proc{|a,b|a[:display_name] <=> b[:display_name]}
+      order = proc { |a,b| a[:display_name] <=> b[:display_name] }
+      
       case about 
        when :attributes
         ret = get_attributes_print_form_aux(opts[:filter_proc]).map do |a|
@@ -270,7 +271,11 @@ module DTK; class  Assembly
         cols = [:instance_nodes_and_cmps_summary]
         post_process_per_row = proc do |r|
           display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
-          r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
+          version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
+          # Remove version from display name
+          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+          columns_filtered = r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
+          return columns_filtered
         end
        when :nodes
         return get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)

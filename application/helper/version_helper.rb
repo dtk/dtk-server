@@ -6,12 +6,12 @@ module Ramaze::Helper
     end
     def is_legal_version_format?(version)
       return true unless version
-      !!(version =~ /^[0-9]+\.[0-9]+\.[0-9]+$/)
+      !!(version =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
     end
 
     def raise_error_if_version_illegal_format(version)
       unless is_legal_version_format?(version)
-        raise ::DTK::ErrorUsage::BadParamValue.new(:version)
+        raise ::DTK::ErrorUsage::BadVersionValue.new(version)
       end
       version
     end

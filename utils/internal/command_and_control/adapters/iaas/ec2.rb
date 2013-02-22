@@ -20,7 +20,7 @@ module XYZ
 
       def self.start_instances(nodes)
         nodes.each do |node|
-          conn().server_start(node.instance_id())
+          conn(node.get_target_iaas_credentials()).server_start(node.instance_id())
           node.update_admin_op_status!(:pending)
           Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
@@ -28,7 +28,7 @@ module XYZ
 
       def self.stop_instances(nodes)
         nodes.each do |node|
-          conn().server_stop(node.instance_id())
+          conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
@@ -66,8 +66,13 @@ module XYZ
             create_options[:user_data] = user_data if user_data
           end
           response = nil
+
+          # we check if assigned target has aws credentials assigned to it, if so we will use those
+          # credentials to create nodes
+          target_aws_creds = node.get_target_iaas_credentials()
+
           begin
-            response = conn().server_create(create_options)
+            response = conn(target_aws_creds).server_create(create_options)
           rescue => e
             return {:status => "failed", :error_object => e}
           end
@@ -107,7 +112,10 @@ module XYZ
       def self.destroy_node?(node)
         instance_id = (node[:external_ref]||{})[:instance_id]
         return true unless instance_id #return if instance does not exist
-        response = conn().server_destroy(instance_id)
+
+        target_aws_creds = node.get_target_iaas_credentials()
+
+        response = conn(target_aws_creds).server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
         process_addresses__terminate?(node)
         response
@@ -117,7 +125,13 @@ module XYZ
         "#{node[:display_name]} (#{node[:id]}"
       end
 
-      def self.conn()
+      # we can provide this methods set of aws_creds that will be used. We will not use this
+      # EC2 client as member, since this is only for this specific deployment
+      def self.conn(target_aws_creds=nil)
+        if target_aws_creds
+          return CloudConnect::EC2.new(target_aws_creds)
+        end
+
         @conn ||= CloudConnect::EC2.new
       end
     end

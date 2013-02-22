@@ -118,6 +118,16 @@ module DTK
         msg
       end
     end
+
+    class BadVersionValue < self
+      def initialize(version_value)
+        super(msg(version_value))
+      end
+
+      def msg(version_value)
+        "Version has an illegal value '#{version_value}', format needed: '##.##.##'"
+      end
+    end
   end
 
   #TODO: nest these also under ErrorUsage

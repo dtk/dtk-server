@@ -55,7 +55,8 @@ module XYZ
     end
 
     def self.get_and_update_node_state!(node,attribute_names)
-      adapter_name = R8::Config[:command_and_control][:iaas][:type]
+      # TODO: Haris - Test more this change
+      adapter_name = node.get_target_iaas_type() || R8::Config[:command_and_control][:iaas][:type]
       klass = load_for_aux(:iaas,adapter_name)      
       klass.get_and_update_node_state!(node,attribute_names)
     end

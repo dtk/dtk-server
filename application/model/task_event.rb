@@ -6,7 +6,7 @@ module XYZ
       if action.kind_of?(Task::Action::PowerOnNode)
         # TODO: Look into this see if neccessery
         Log.warn ">>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
-      elsif action.kind_of?(Task::Action::CreateNode) 
+      elsif action.kind_of?(Task::Action::CreateNode)
         case event_type
          when :start 
           StartCreateNode.create_start?(action)

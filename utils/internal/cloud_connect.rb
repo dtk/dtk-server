@@ -85,8 +85,8 @@ module XYZ
 
       WAIT_FOR_NODE = 10 # seconds
 
-      def initialize()             
-        @conn = Fog::Compute::AWS.new(get_compute_params())
+      def initialize(override_of_aws_params = nil)             
+        @conn = Fog::Compute::AWS.new(override_of_aws_params||get_compute_params())
       end
 
 

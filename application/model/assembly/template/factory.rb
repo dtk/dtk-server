@@ -77,7 +77,7 @@ module DTK
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        @template_output = Output.new(container_idh,service_module_branch)
+        @template_output = Output.create(container_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in container and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])

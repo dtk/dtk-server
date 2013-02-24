@@ -134,7 +134,7 @@ module XYZ
       virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
-         lambda__segment_port.call(ContentObject::CommonCols+[:type,:link_def_id,:direction],{:filter => [:eq,:type,"component_external"]}),
+         lambda__segment_port.call(ContentObject::CommonCols+[:type,:link_def_id,:direction,:component_type,:link_type],{:filter => [:eq,:type,"component_external"]}),
          {
           :model_name => :link_def,
            :convert => true,

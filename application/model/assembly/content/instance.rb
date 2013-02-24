@@ -161,7 +161,7 @@ module DTK
 
       def create_port_content(port)
         port_ref = qualified_ref(port)
-        port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction])
+        port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction,:link_type,:component_type])
         port_hash.merge!(:link_def_id => port[:link_def][:ancestor_id])
         {port_ref => port_hash}
       end

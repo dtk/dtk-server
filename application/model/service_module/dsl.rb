@@ -32,8 +32,6 @@ module DTK
       def assembly_meta_filename_path(assembly_name)
         "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
       end
-     private
-
     end
 
     module DSLMixin
@@ -69,11 +67,7 @@ module DTK
           dangling_errors.aggregate_errors!()  do
             json_content = RepoManager.get_file_content(meta_file,module_branch)
             hash_content = Aux.json_parse(json_content,meta_file)
-            assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
-              h.merge(self.class.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
-            end
-            node_bindings_hash = hash_content["node_bindings"]
-            assembly_import_helper.add_assemblies(assemblies_hash,node_bindings_hash)
+            assembly_import_helper.process(module_name,hash_content)
           end
         end
         dangling_errors.raise_error?()

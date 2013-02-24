@@ -13,16 +13,13 @@ module DTK; class ServiceModule
       @service_module = get_service_module(container_idh,module_name)
       @module_version_constraints = module_version_constraints
     end
-    def add_assemblies(assemblies_hash,node_bindings_hash)
-      dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
-      assemblies_hash.each do |ref,assem|
-        dangling_errors.aggregate_errors! do
-          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,@module_branch,@module_name))
-          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
-          @ndx_assembly_hashes[ref] ||= assem
-        end
+
+    def process(module_name,hash_content)
+      assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
+        h.merge(ServiceModule.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
       end
-      dangling_errors.raise_error?()
+      node_bindings_hash = hash_content["node_bindings"]
+      add_assemblies(assemblies_hash,node_bindings_hash)
     end
 
     def import()
@@ -54,6 +51,18 @@ module DTK; class ServiceModule
     end
 
    private
+    def add_assemblies(assemblies_hash,node_bindings_hash)
+      dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+      assemblies_hash.each do |ref,assem|
+        dangling_errors.aggregate_errors! do
+          @db_updates_assemblies["component"].merge!(Internal.import_assembly_top(ref,assem,@module_branch,@module_name))
+          @db_updates_assemblies["node"].merge!(Internal.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
+          @ndx_assembly_hashes[ref] ||= assem
+        end
+      end
+      dangling_errors.raise_error?()
+    end
+
     def get_service_module(container_idh,module_name)
       container_idh.create_object().get_service_module(module_name)
     end

@@ -138,7 +138,7 @@ module XYZ
          {
           :model_name => :link_def,
            :convert => true,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:id => q(:port,:link_def_id)},
            :cols => [:id,:ancestor_id]
          }]

@@ -1,9 +1,9 @@
-r8_require('../../content_object_type')
+r8_require('../../factory_object_type')
 module DTK
   class Assembly; class Template
     class Factory < self
-      extend ContentObjectClassMixin
-      include ContentObjectMixin
+      extend FactoryObjectClassMixin
+      include FactoryObjectMixin
       r8_nested_require('factory','output')
       def self.create_container_for_clone(container_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         assembly_mh = container_idh.create_childMH(:component)
@@ -20,7 +20,7 @@ module DTK
       end
 
       def add_content_for_clone!(container_idh,node_idhs,port_links,augmented_branches)
-        node_scalar_cols = ContentObject::CommonCols + [:node_binding_rs_id]
+        node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}

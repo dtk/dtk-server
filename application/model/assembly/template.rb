@@ -1,5 +1,7 @@
 module DTK; class Assembly
   class Template < self
+    r8_nested_require('template','factory')
+
     def stage(target,assembly_name=nil)
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name
@@ -193,10 +195,10 @@ module DTK; class Assembly
 
       service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
 
-      assembly_ci = Content::Instance.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_factory = Factory.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
-      assembly_ci.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
-      assembly_ci.create_assembly_template(project_idh,service_module_branch)
+      assembly_factory.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
+      assembly_factory.create_assembly_template(project_idh,service_module_branch)
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)

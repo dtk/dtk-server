@@ -1,8 +1,10 @@
-#TODO: 'Instance' is a confusing name for this class
+r8_require('../../content_object_type')
 module DTK
-  class Assembly; class Content
-    class Instance < self
-      r8_nested_require('instance','template_output')
+  class Assembly; class Template
+    class Factory < self
+      extend ContentObjectClassMixin
+      include ContentObjectMixin
+      r8_nested_require('factory','output')
       def self.create_container_for_clone(container_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         assembly_mh = container_idh.create_childMH(:component)
         hash_values = {
@@ -16,6 +18,7 @@ module DTK
         }
         create(assembly_mh,hash_values)
       end
+
       def add_content_for_clone!(container_idh,node_idhs,port_links,augmented_branches)
         node_scalar_cols = ContentObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
@@ -74,7 +77,7 @@ module DTK
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        @template_output = TemplateOutput.new(container_idh,service_module_branch)
+        @template_output = Output.new(container_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in container and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])

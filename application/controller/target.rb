@@ -9,31 +9,7 @@ module XYZ
     end
 
     def rest__create_assembly_template()
-      #TODO: this may be just used for testing
-      assembly_name,service_module_name = ret_non_null_request_params(:assembly_name,:service_module_name)
-      target_id,node_ids,library_id = ret_request_params(:target_id,:node_ids,:library_id)
-      unless target_id or node_ids
-        #only need target_id if node_ids not specified
-        targets = Model.get_objs(model_handle,:cols => [:id,:dispaly_name])
-        unless targets.size == 1
-          raise Error.new("Cannot find unique target")
-        end
-        target_id = targets.first[:id]
-      end
-      unless node_ids
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:eq,:datacenter_datacenter_id,target_id]
-        }
-        node_ids = Model.get_objs(model_handle(:node),sp_hash).map{|r|r[:id]}
-      end
-      node_idhs = node_ids.map{|id|id_handle(id,:node)}
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
-
-      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
-
-      Assembly::Template.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
-      rest_ok_response 
+      raise Error.new("target/create_assembly_template not implemented yet")
     end
 
     def rest__info_about()

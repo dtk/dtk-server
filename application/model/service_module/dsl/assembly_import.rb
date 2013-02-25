@@ -60,6 +60,28 @@ module DTK; class ServiceModule
     end
 
    private
+    def determine_integer_version(hash_content)
+      if hash_content["assemblies"]
+        1
+      elsif hash_content["assembly"]
+        2
+      else
+        raise Error.new("Cannot determine assembly dsl version")
+      end
+    end
+
+    def load_and_return_version_adapter_class(integer_version)
+      return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
+      adapter_name = "v#{integer_version.to_s}"
+      opts = {
+        :class_name => {:adapter_type => "AssemblyImport"},
+        :subclass_adapter_name => true,
+        :base_class => ServiceModule
+      }
+      CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_import",adapter_name,opts)
+    end
+    CachedAdapterClasses = Hash.new
+      
     def get_service_module(container_idh,module_name)
       container_idh.create_object().get_service_module(module_name)
     end

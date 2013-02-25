@@ -1,26 +1,20 @@
 module DTK
   class ServiceModule; class AssemblyExport
-    class V1 < self
+    class V2 < self
      private
-      def ordered_hash_keys()
-        [:node_bindings,:assemblies]
-      end
-
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
-        ref = assembly_hash.delete(:ref)
-        {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
+        SimpleOrderedHash.new(
+         [{
+           :name => assembly_hash()[:display_name],
+           :node_bindings => node_bindings_hash, 
+           :assembly => assembly_hash
+          }])
       end
 
       def assembly_output_hash()
         ret = SimpleOrderedHash.new()
-        ret[:name] = assembly_hash()[:display_name]
-        ret[:ref] = assembly_ref()
-        #TODO: may put in version info
-        #  "#{impl[:module_name]}-#{version}"
-        #end
-
         #add assembly level attributes
         #TODO: stub
       
@@ -40,10 +34,6 @@ module DTK
         ret
       end
 
-      def assembly_ref()
-        self[:component].keys.first
-      end
-
       def node_bindings_output_hash()
         sp_hash = {
           :cols => [:id,:ref],
@@ -52,9 +42,8 @@ module DTK
         #TODO: may get this info in earlier phase
         node_binding_rows = Model.get_objs(@container_idh.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
-        assembly_ref = assembly_ref()
         self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|
-          h.merge("#{assembly_ref}#{Seperators[:assembly_node]}#{node_hash[:display_name]}" => node_binding_id_to_ref[node_hash[:node_binding_rs_id]])
+          h.merge("#{node_hash[:display_name]}" => node_binding_id_to_ref[node_hash[:node_binding_rs_id]])
         end
       end
 

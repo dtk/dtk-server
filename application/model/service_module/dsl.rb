@@ -1,6 +1,7 @@
 module DTK
   class ServiceModule
     r8_nested_require('dsl','assembly_import')
+    r8_nested_require('dsl','assembly_export')
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_idh)
         sp_hash = {

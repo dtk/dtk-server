@@ -1,10 +1,11 @@
 module DTK
-  class Assembly::Template; class Output
+  class ServiceModule; class AssemblyExport
     class V1 < self
      private
-      def assembly_meta_filename_path()
-        ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])
+      def ret_ordered_hash_content(hash_to_serialize)
+        SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
       end
+
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()

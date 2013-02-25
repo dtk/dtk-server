@@ -1,6 +1,6 @@
 module DTK
-  class Assembly::Template
-    class Output < Hash
+  class ServiceModule
+    class AssemblyExport < Hash
       def self.create(container_idh,service_module_branch,integer_version=nil)
         klass = load_and_return_version_adapter_class(integer_version)
         klass.new(container_idh,service_module_branch)
@@ -12,7 +12,7 @@ module DTK
 
       def serialize_and_save_to_repo()
         hash_to_serialize = serialize()
-        ordered_hash_content = SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
+        ordered_hash_content = ret_ordered_hash_content(hash_to_serialize)
         path = assembly_meta_filename_path()
         @service_module_branch.serialize_and_save_to_repo(path,ordered_hash_content)
         path
@@ -26,11 +26,11 @@ module DTK
         return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
         adapter_name = "v#{integer_version.to_s}"
         opts = {
-          :class_name => {:adapter_type => "Output"},
+          :class_name => {:adapter_type => "AssemblyExport"},
           :subclass_adapter_name => true,
-          :base_class => Assembly::Template
+          :base_class => ServiceModule
         }
-        CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("output",adapter_name,opts)
+        CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_export",adapter_name,opts)
       end
       CachedAdapterClasses = Hash.new
       
@@ -38,6 +38,10 @@ module DTK
         super()
         @container_idh = container_idh
         @service_module_branch = service_module_branch
+      end
+
+      def assembly_meta_filename_path()
+        ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])
       end
 
     end

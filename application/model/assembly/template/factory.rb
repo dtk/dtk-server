@@ -96,7 +96,10 @@ module DTK
         branch_ids = ws_branches.map{|b|b[:id]}
         sp_hash = {
           :cols => [:id, :display_name,:module_branch_id,:component_type,:project_project_id],
-          :filter => [:and,[:oneof, :component_type,cmp_types],[:oneof, :module_branch_id, branch_ids]]
+          :filter => [:and,
+                      [:oneof, :component_type, cmp_types],
+                      [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                      [:oneof, :module_branch_id, branch_ids]]
         }
         cmp_tmpls = Model.get_objs(project_idh.create_childMH(:component),sp_hash)
         cmp_tmpls.each do |cmp|

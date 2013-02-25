@@ -4,10 +4,10 @@ module DTK
     class Factory < self
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
-      def self.create_container_for_clone(container_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-        assembly_mh = container_idh.create_childMH(:component)
+      def self.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+        assembly_mh = project_idh.create_childMH(:component)
         hash_values = {
-          assembly_mh.parent_id_field_name => container_idh.get_id(),
+          :project_project_id => project_idh.get_id(),
           :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
           :ui => icon_info,
@@ -18,7 +18,7 @@ module DTK
         create(assembly_mh,hash_values)
       end
 
-      def add_content_for_clone!(container_idh,node_idhs,port_links,augmented_branches)
+      def add_content_for_clone!(project_idh,node_idhs,port_links,augmented_branches)
         node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
@@ -64,19 +64,14 @@ module DTK
         end
         self[:nodes] = @ndx_nodes.values
         self[:port_links] = port_links
-        @component_template_mapping = 
-          if container_idh[:model_name] == :project
-            get_component_template_mapping__project(container_idh,augmented_branches)
-          else
-            get_component_template_mapping(container_idh,augmented_branches)
-          end
+        @component_template_mapping = get_component_template_mapping(project_idh,augmented_branches)
         self
       end
-      def create_assembly_template(container_idh,service_module_branch)
+      def create_assembly_template(project_idh,service_module_branch)
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        @template_output = ServiceModule::AssemblyExport.create(container_idh,service_module_branch)
+        @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in container and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
@@ -88,7 +83,7 @@ module DTK
 
      private
       #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
-      def get_component_template_mapping__project(project_idh,ws_branches)
+      def get_component_template_mapping(project_idh,ws_branches)
         ret = Hash.new
         cmp_types = self[:nodes].map do |node|
           node[:components].map{|cmp|cmp[:component_type]}
@@ -105,28 +100,6 @@ module DTK
         cmp_tmpls.each do |cmp|
           ws_branch_id = cmp[:module_branch_id]
           (ret[cmp[:component_type]] ||= Hash.new).merge!(ws_branch_id => cmp[:id])
-        end
-        ret
-      end
-      #MOD_RESTRUCT: TODO: deprecate below for above
-      #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
-      def get_component_template_mapping(library_idh,augmented_lib_branches)
-        ret = Hash.new
-        cmp_types = self[:nodes].map do |node|
-          node[:components].map{|cmp|cmp[:component_type]}
-        end.flatten
-        branch_ids = augmented_lib_branches.map{|b|b[:id]}
-        sp_hash = {
-          :cols => [:id, :display_name,:module_branch_id,:component_type,:library_library_id],
-          :filter => [:and,[:oneof, :component_type,cmp_types],[:oneof, :module_branch_id, branch_ids]]
-        }
-        lib_to_ws_branches = augmented_lib_branches.inject(Hash.new) do |h,r|
-          h.merge(r[:id] => r[:workspace_module_branch][:id])
-        end
-        cmp_tmpls = Model.get_objs(library_idh.create_childMH(:component),sp_hash)
-        cmp_tmpls.each do |cmp|
-          lib_branch_id = cmp[:module_branch_id]
-          (ret[cmp[:component_type]] ||= Hash.new).merge!(lib_to_ws_branches[lib_branch_id] => cmp[:id])
         end
         ret
       end

@@ -31,6 +31,65 @@ module DTK; class ServiceModule
       end
     end
 
+    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
+      version_field = module_branch.get_field?(:version)
+      assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
+      {
+        assembly_ref => {
+          "display_name" => assembly_hash["name"], 
+          "type" => "composite",
+          "module_branch_id" => module_branch[:id],
+          "version" => version_field,
+          "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
+        }
+      }
+    end
+
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+      #compute node_to_nb_rs and nb_rs_to_id
+      node_to_nb_rs = ret_node_to_node_binding_rs(node_bindings_hash)
+      nb_rs_to_id = Hash.new
+      unless node_to_nb_rs.empty?
+        filter = [:oneof, :ref, node_to_nb_rs.values]
+        #TODO: hard coded that nodding in public library
+        nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
+        nb_rs_to_id = nb_rs_containter.get_node_binding_rulesets(filter).inject(Hash.new) do |h,r|
+          h.merge(r[:ref] => r[:id])
+        end
+      end
+raise Error.new("Got here")
+      dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+      version_field = module_branch.get_field?(:version)
+      assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
+      ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+        dangling_errors.aggregate_errors!(h) do
+          node_ref = "#{assembly_ref_with_version}--#{node_hash_ref}"
+          node_output = {
+            "display_name" => node_hash_ref, 
+            "type" => "stub",
+            "*assembly_id" => "/component/#{assembly_ref_with_version}" 
+          }
+          if nb_rs = node_to_nb_rs[node_hash_ref]
+            if nb_rs_id = nb_rs_to_id[nb_rs]
+              node_output["node_binding_rs_id"] = nb_rs_id
+            else
+              #TODO: extend dangling_errors.aggregate_errors to handle this
+              raise ErrorUsage.new("Bad node reference #{nb_rs})")
+            end
+          else
+            node_output["node_binding_rs_id"] = nil
+          end
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+          unless cmps_output.empty?
+            node_output["component_ref"] = cmps_output
+          end
+          h.merge(node_ref => node_output)
+        end
+      end
+      dangling_errors.raise_error?()
+      ret
+    end
+
     def import()
       module_branch_id = @module_branch[:id]
       mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module

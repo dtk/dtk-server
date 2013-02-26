@@ -2,7 +2,6 @@
 r8_nested_require('assembly','import_export_common')
 module DTK
   class Assembly < Component
-    r8_nested_require('assembly','content')
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
     ### standard get methods

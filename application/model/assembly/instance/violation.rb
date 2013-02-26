@@ -18,8 +18,9 @@ module DTK
 
       def find_violations__cmp_constraints()
         ret = Array.new
-        nodes_and_cmps = get_info__flat_list(:detail_level => "components")
-        ndx_constraints = Component.get_ndx_constraints(nodes_and_cmps.map{|r|r[:nested_component].id_handle()},:when_evaluated => :after_cmp_added)
+        nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
+        cmp_idhs = nodes_and_cmps.map{|r|r[:nested_component].id_handle()}
+        ndx_constraints = Component.get_ndx_constraints(cmp_idhs,:when_evaluated => :after_cmp_added)
         #TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
           if constraint_info = ndx_constraints[r[:nested_component][:id]]

@@ -11,18 +11,20 @@ require './test/lib/shared_spec'
 
 STDOUT.sync = true
 
-ASSEMBLY_NAME = 'test_case_1_instance'
-ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+assembly_name = 'test_case_1_instance'
+assembly_template = 'bootstrap::node_with_params'
 
 OS_ATTRIBUTE = 'os_identifier'
 MEMORY_SIZE_ATTRIBUTE = 'memory_size'
 OS_Memory = Struct.new(:os, :memory)
-OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("natty","m1.small"),OS_Memory.new("natty","m1.medium"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("oneiric","m1.small"),OS_Memory.new("oneiric","m1.medium"),OS_Memory.new("rh5.7-64","t1.micro"),OS_Memory.new("rh5.7-64","m1.small"),OS_Memory.new("rh5.7-64","m1.medium")]
+OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("rh5.7-64","t1.micro")]
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-describe "Test Case 1: Stage existing assembly with OS ${OS} and MEMORY_SIZE ${MEMORY_SIZE} combination and then converge it, stop the running instance (nodes) and then delete assembly" do
+puts "Test Case 1: Stage existing assembly with OS ${OS} and MEMORY_SIZE ${MEMORY_SIZE} combination and then converge it"
+
+describe "Test Case 1: Stage existing assembly with OS ${OS} and MEMORY_SIZE ${MEMORY_SIZE} combination and then converge it" do
 	OS_MEMORY_ARRAY.each do |x|
 		os = x["os"]
 		memory = x["memory"]

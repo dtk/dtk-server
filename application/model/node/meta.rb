@@ -134,11 +134,11 @@ module XYZ
       virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
-         lambda__segment_port.call(ContentObject::CommonCols+[:type,:link_def_id,:direction],{:filter => [:eq,:type,"component_external"]}),
+         lambda__segment_port.call(FactoryObject::CommonCols+[:type,:link_def_id,:direction,:component_type,:link_type],{:filter => [:eq,:type,"component_external"]}),
          {
           :model_name => :link_def,
            :convert => true,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:id => q(:port,:link_def_id)},
            :cols => [:id,:ancestor_id]
          }]
@@ -288,13 +288,13 @@ module XYZ
       virtual_column :components_and_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_attrs.call(
-          :cmp_cols=>ContentObject::CommonCols+[:component_type],
-          :attr_cols=>ContentObject::CommonCols+[:attribute_value,:required])
+          :cmp_cols=>FactoryObject::CommonCols+[:component_type],
+          :attr_cols=>FactoryObject::CommonCols+[:attribute_value,:required])
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(
-          :cmp_cols=>ContentObject::CommonCols+[:module_branch_id,:component_type],
-          :attr_cols=>ContentObject::CommonCols+[:attribute_value])
+          :cmp_cols=>FactoryObject::CommonCols+[:module_branch_id,:component_type],
+          :attr_cols=>FactoryObject::CommonCols+[:attribute_value])
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 
       :remote_dependencies => 

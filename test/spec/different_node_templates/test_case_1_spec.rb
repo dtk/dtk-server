@@ -17,7 +17,7 @@ assembly_template = 'bootstrap::node_with_params'
 OS_ATTRIBUTE = 'os_identifier'
 MEMORY_SIZE_ATTRIBUTE = 'memory_size'
 OS_Memory = Struct.new(:os, :memory)
-OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("rh5.7-64","t1.micro")]
+OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1.small"),OS_Memory.new("rh5.7-64","t1.micro")]
 
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

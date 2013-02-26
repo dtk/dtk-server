@@ -10,7 +10,7 @@ module DTK; class ServiceModule
       end
 
       def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
-        node_to_nb_rs = ret_node_to_node_binding_rs(node_bindings_hash)
+        node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
         #compute nb_rs_to_id
         nb_rs_to_id = Hash.new
         unless node_to_nb_rs.empty?
@@ -58,7 +58,7 @@ module DTK; class ServiceModule
       include AssemblyImportExportCommon
 
       #TODO: deprecate import_nodes to use parent's version which calls functions below
-      def self.ret_node_to_node_binding_rs(node_bindings_hash)
+      def self.ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
         an_sep = Seperators[:assembly_node]
         (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
           merge_hash = Hash.new

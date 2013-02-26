@@ -2,15 +2,15 @@ module DTK
   class ServiceModule; class AssemblyExport
     class V1 < self
      private
-      def ordered_hash_keys()
-        [:node_bindings,:assemblies]
-      end
-
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
         ref = assembly_hash.delete(:ref)
-        {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
+        SimpleOrderedHash.new(
+         [
+          {:node_bindings => node_bindings_hash},
+          {:assemblies => {ref => assembly_hash}}
+         ])
       end
 
       def assembly_output_hash()

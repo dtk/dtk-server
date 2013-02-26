@@ -12,13 +12,13 @@ module DTK; class ServiceModule
         db_updates_port_links = Hash.new
         version_field = @module_branch.get_field?(:version)
         @ndx_assembly_hashes.each do |ref,assembly|
-          qualified_ref = Internal.internal_assembly_ref__add_version(ref,version_field)
+          qualified_ref = self.class.internal_assembly_ref__add_version(ref,version_field)
           assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
           ports = add_ports_during_import(assembly_idh)
           db_updates_port_links.merge!(import_port_links(assembly_idh,qualified_ref,assembly,ports))
           ports.each{|p|@ndx_ports[p[:id]] = p}
         end
-        #Within Internal.import_port_links does the mark as complete for port links
+        #Within import_port_links does the mark as complete for port links
         Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
       end
 

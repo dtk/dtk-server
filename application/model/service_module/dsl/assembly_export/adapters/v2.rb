@@ -18,6 +18,7 @@ module DTK
         #add assembly level attributes
         #TODO: stub
       
+        #TODO: need to add in component overide values
         #add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
@@ -40,7 +41,7 @@ module DTK
           i = 0; found = false
           while i < cmps.size and !found
             if match_component?(cmps[i],in_parsed_port[:component_name])
-              cmps[i] = add_service_to_cmp(cmps[i],out_parsed_port)
+              cmps[i] = add_service_link_to_cmp(cmps[i],out_parsed_port)
               found = true
             end
             i = i+1
@@ -48,8 +49,8 @@ module DTK
           unless found
             raise Error.new("Cannot find matching component for input port")
           end
-          raise Error.new("got here")
         end
+        ret
       end
 
       def parse_port_ref(qualified_port_ref,node_ref_to_name)
@@ -70,16 +71,19 @@ module DTK
         match_term == component_name
       end
 
-      def add_service_to_cmp(component_in_ret,out_parsed_port)
+      def add_service_link_to_cmp(component_in_ret,out_parsed_port)
         ret = Hash.new
         if component_in_ret.kind_of?(Hash)
           ret = component_in_ret
-          ret[:service_links] ||= Hash.new
+          service_links = ret[:service_links] ||= Hash.new
         else # it will be a string
-          ret = {component_in_ret => {:service_links => Hash.new}}
+          service_links = Hash.new  
+          ret = {component_in_ret => {:service_links => service_links}}
         end
+        output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
+        service_link = {out_parsed_port[:link_def_ref] => output_target}
         #TODO: this assumes that no component can have two port links with same link def ref
-        ret[:service_links].merge!(service_link_output_form(out_parsed_port))
+        service_links.merge!(service_link)
         ret 
       end
 

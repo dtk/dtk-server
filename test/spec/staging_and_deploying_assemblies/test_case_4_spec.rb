@@ -11,15 +11,15 @@ require './test/lib/shared_spec'
 
 STDOUT.sync = true
 
-ASSEMBLY_NAME = 'test_case_4_instance'
-ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+assembly_name = 'test_case_4_instance'
+assembly_template = 'bootstrap::node_with_params'
 OS = 'natty'
 OS_ATTRIBUTE = 'os_identifier'
 MEMORY_SIZE = 't1.micro'
 MEMORY_SIZE_ATTRIBUTE = 'memory_size'
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly" do
 

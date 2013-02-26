@@ -45,7 +45,7 @@ end
 shared_context "Create assembly template from assembly" do |dtk_common, service_name, assembly_template_name|
 	it "creates assembly template in given service from existing assembly" do
 		assembly_template_created = dtk_common.create_assembly_template_from_assembly($assembly_id, service_name, assembly_template_name)
-		assembly_template_creted.should eq(true)
+		assembly_template_created.should eq(true)
 	end
 end
 

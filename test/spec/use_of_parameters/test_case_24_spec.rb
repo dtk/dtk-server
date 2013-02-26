@@ -9,14 +9,14 @@ require 'awesome_print'
 require './test/lib/dtk_common'
 require './test/lib/shared_spec'
 
-ASSEMBLY_NAME = 'test_case_24_instance'
-ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+assembly_name = 'test_case_24_instance'
+assembly_template = 'bootstrap::node_with_params'
 OS = 'natty'
 MEMORY_SIZE = 't1.micro'
 NODE_NAME = 'node1'
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)" do
 

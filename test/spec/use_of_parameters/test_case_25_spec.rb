@@ -9,8 +9,8 @@ require 'awesome_print'
 require './test/lib/dtk_common'
 require './test/lib/shared_spec'
 
-ASSEMBLY_NAME = 'test_case_25_instance'
-ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+$assembly_name = 'test_case_25_instance'
+$assembly_template = 'bootstrap::node_with_params'
 OS = 'natty'
 MEMORY_SIZE = 't1.micro'
 NODE_NAME = 'node1'
@@ -26,10 +26,10 @@ attr_param_list << 'host_addresses_ipv4'
 attr_param_list << 'node_components'
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 
 def check_param_existance_on_node(assembly_id, node_name, param_name_list)
-	dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 	param_check = true
 	assembly_nodes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
 
@@ -56,7 +56,7 @@ def check_param_existance_on_node(assembly_id, node_name, param_name_list)
 end
 
 def check_param_existance_on_attribute(assembly_id, node_name, param_name_list)
-	dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 	param_check = true
 	assembly_attributes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 

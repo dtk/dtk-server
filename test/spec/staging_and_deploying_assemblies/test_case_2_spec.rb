@@ -11,11 +11,11 @@ require './test/lib/shared_spec'
 
 STDOUT.sync = true
 
-ASSEMBLY_NAME = 'test_case_2_instance'
-ASSEMBLY_TEMPLATE = 'bootstrap::node_with_params'
+assembly_name = 'test_case_2_instance'
+assembly_template = 'bootstrap::node_with_params'
 
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 2: Stage existing assembly and then delete assembly" do
 

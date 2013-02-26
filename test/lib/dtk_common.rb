@@ -69,7 +69,7 @@ class DtkCommon
 
 	def stage_assembly()
 		#Get list of assembly templates and extract selected template and its assembly id
-		assembly_id = 0
+		assembly_id = nil
 		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
 		test_template = assembly_template_list['data'].select { |x| x['display_name'] == @assembly_template }
 
@@ -307,8 +307,15 @@ class DtkCommon
 	end
 
 	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
-		template_created = false
-		#To Do! Add implementation here!
+		template_created = false	
+		create_assembly_template_response = send_request('/rest/assembly/create_new_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
+		if (create_assembly_template_response['status'] == 'ok')
+			puts "Assembly template #{assembly_template_name} created in service #{service_name}"
+			template_created = true
+		else
+			puts "Assembly template #{assembly_template_name} was not created in service #{service_name}" 
+			template_created = true
+		end
 		return template_created
 	end
 

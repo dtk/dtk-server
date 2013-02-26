@@ -2,10 +2,8 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
       def self.assembly_iterate(module_name,hash_content,&block)
-        assemblies_hash = hash_content["assembly"].values.inject(Hash.new) do |h,assembly_info|
-          name = hash_content["name"]
-          h.merge(ServiceModule.assembly_ref(module_name,name) => assembly_info.merge("name" => name))
-        end
+        name = hash_content["name"]
+        assemblies_hash = {ServiceModule.assembly_ref(module_name,name) => hash_content["assembly"].merge("name" => name)}
         node_bindings_hash = hash_content["node_bindings"]
         block.call(assemblies_hash,node_bindings_hash)
       end
@@ -13,7 +11,7 @@ module DTK; class ServiceModule
      private
       include AssemblyImportExportCommon
 
-      def self.ret_node_to_node_binding_rs(node_bindings_hash)
+      def self.ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
         (node_bindings_hash||{}).inject(Hash.new) do |h,(node,v)|
           merge_hash = 
             if v.kind_of?(String) then {node => v}

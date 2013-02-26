@@ -47,7 +47,7 @@ module DTK; class ServiceModule
 
     def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
       #compute node_to_nb_rs and nb_rs_to_id
-      node_to_nb_rs = ret_node_to_node_binding_rs(node_bindings_hash)
+      node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
       unless node_to_nb_rs.empty?
         filter = [:oneof, :ref, node_to_nb_rs.values]
@@ -57,7 +57,7 @@ module DTK; class ServiceModule
           h.merge(r[:ref] => r[:id])
         end
       end
-raise Error.new("Got here")
+
       dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       version_field = module_branch.get_field?(:version)
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)

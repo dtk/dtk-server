@@ -9,34 +9,8 @@ module DTK; class ServiceModule
         block.call(assemblies_hash,node_bindings_hash)
       end
 
-      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
-        version_field = module_branch.get_field?(:version)
-        assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
-        {
-          assembly_ref => {
-            "display_name" => assembly_hash["name"], 
-            "type" => "composite",
-            "module_branch_id" => module_branch[:id],
-            "version" => version_field,
-            "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
-          }
-        }
-      end
-
       def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
-        an_sep = Seperators[:assembly_node]
-        node_to_nb_rs = (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
-          merge_hash = Hash.new
-          if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
-            serialized_assembly_ref = $1
-            node = $2
-            if assembly_ref == internal_assembly_ref__without_version(serialized_assembly_ref)
-              merge_hash = {node => v}
-            end
-          end
-          h.merge(merge_hash)
-        end
-
+        node_to_nb_rs = ret_node_to_node_binding_rs(node_bindings_hash)
         #compute nb_rs_to_id
         nb_rs_to_id = Hash.new
         unless node_to_nb_rs.empty?
@@ -82,6 +56,22 @@ module DTK; class ServiceModule
 
      private
       include AssemblyImportExportCommon
+
+      #TODO: deprecate import_nodes to use parent's version which calls functions below
+      def self.ret_node_to_node_binding_rs(node_bindings_hash)
+        an_sep = Seperators[:assembly_node]
+        (node_bindings_hash||{}).inject(Hash.new) do |h,(ser_assem_node,v)|
+          merge_hash = Hash.new
+          if ser_assem_node =~ Regexp.new("(^[^#{an_sep}]+)#{an_sep}(.+$)")
+            serialized_assembly_ref = $1
+            node = $2
+            if assembly_ref == internal_assembly_ref__without_version(serialized_assembly_ref)
+              merge_hash = {node => v}
+            end
+          end
+          h.merge(merge_hash)
+        end
+      end
       
       #return [module_name,assembly_name]
       def self.parse_serialized_assembly_ref(ref)

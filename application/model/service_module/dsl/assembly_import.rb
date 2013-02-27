@@ -17,18 +17,36 @@ module DTK; class ServiceModule
     def process(module_name,hash_content)
       #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
       integer_version = determine_integer_version(hash_content)
-      version_proc_class = load_and_return_version_adapter_class(integer_version)
-      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      @version_proc_class = load_and_return_version_adapter_class(integer_version)
+      @version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           dangling_errors.aggregate_errors! do
-            @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
+            @db_updates_assemblies["component"].merge!(@version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
+            @db_updates_assemblies["node"].merge!(@version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
             @ndx_assembly_hashes[ref] ||= assem
           end
         end
         dangling_errors.raise_error?()
       end
+    end
+
+    def import()
+      module_branch_id = @module_branch[:id]
+      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module
+      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
+
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:eq,:module_branch_id, module_branch_id]
+      }
+      @existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
+      mark_as_complete_node_constraint = {:assembly_id=>@existing_assembly_ids}
+      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,:apply_recursively => true)
+
+      Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
+
+      add_port_and_port_links()
     end
 
     def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
@@ -89,25 +107,6 @@ module DTK; class ServiceModule
       dangling_errors.raise_error?()
       ret
     end
-
-    def import()
-      module_branch_id = @module_branch[:id]
-      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module
-      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
-
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:eq,:module_branch_id, module_branch_id]
-      }
-      @existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
-      mark_as_complete_node_constraint = {:assembly_id=>@existing_assembly_ids}
-      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,:apply_recursively => true)
-
-      Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
-
-      add_port_and_port_links()
-    end
-
 
     def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
       version_field = module_branch.get_field?(:version)

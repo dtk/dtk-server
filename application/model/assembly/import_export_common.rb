@@ -12,10 +12,8 @@ module DTK
     class AssemblyImportPortRef < SimpleHashObject
       def self.parse(port_ref,assembly_id=nil)
         if port_ref =~ PortRefRegex
-          node = $1; cmp_type_x = $2; link_def_ref = $3
-          #TODO: global for "__"
-          cmp_type = cmp_type_x.gsub(ModCompRegex,"__")
-          hash = {:node => node,:component_type => cmp_type, :link_def_ref => link_def_ref}
+          node = $1; cmp_name = $2; link_def_ref = $3
+          hash = {:node => node,:component_type => component_type(cmp_name),:link_def_ref => link_def_ref}
           if assembly_id
             hash.merge!(:assembly_id => assembly_id)
           end
@@ -24,9 +22,30 @@ module DTK
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     
       end
+      def self.parse_service_link(input_node,input_cmp_name,service_link_hash)
+        unless service_link_hash.size == 1
+          raise Error.new("ill-formed service link (#{service_link_hash.inject})")
+        end
+        link_def_ref = service_link_hash.keys.first
+        if service_link_hash.values.first =~ ServiceLinkTarget
+          output_node = $1; output_cmp_name = $2
+          input = {:node => input_node,:component_type => component_type(input_cmp_name), :link_def_ref => link_def_ref}
+          output = {:node => output_node,:component_type => component_type(output_cmp_name), :link_def_ref => link_def_ref}
+          {:input => new(input), :output => new(output)}
+        else
+          raise Error.new("ill-formed service link (#{service_link_hash.inject}")
+        end     
+      end
+      class << self
+        def component_type(cmp_name)
+          #TODO: global for "__"
+          cmp_type = cmp_name.gsub(ModCompRegex,"__")
+        end
+      end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
       ModCompRegex = Regexp.new(Seperators[:module_component])
-      
+      ServiceLinkTarget= Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
+
       #ports are augmented with field :parsed_port_name
       def matching_id(aug_ports)
         match = aug_ports.find do |port|

@@ -2,15 +2,15 @@ module DTK
   class ServiceModule; class AssemblyExport
     class V1 < self
      private
-      def ret_ordered_hash_content(hash_to_serialize)
-        SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
-      end
-
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
         ref = assembly_hash.delete(:ref)
-        {:node_bindings => node_bindings_hash, :assemblies => {ref => assembly_hash}}
+        SimpleOrderedHash.new(
+         [
+          {:node_bindings => node_bindings_hash},
+          {:assemblies => {ref => assembly_hash}}
+         ])
       end
 
       def assembly_output_hash()
@@ -43,9 +43,6 @@ module DTK
       def assembly_ref()
         self[:component].keys.first
       end
-      def assembly_hash()
-        self[:component].values.first
-      end
 
       def node_bindings_output_hash()
         sp_hash = {
@@ -59,18 +56,6 @@ module DTK
         self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|
           h.merge("#{assembly_ref}#{Seperators[:assembly_node]}#{node_hash[:display_name]}" => node_binding_id_to_ref[node_hash[:node_binding_rs_id]])
         end
-      end
-
-      def component_output_form(component_hash)
-        name = component_name_output_form(component_hash[:component_type])
-        if attr_overrides = component_hash[:attribute_override]
-          {name => attr_overrides.values.inject(Hash.new){|h,a|h.merge(a[:display_name] => a[:attribute_value])}}
-        else
-          name 
-        end
-      end
-      def component_name_output_form(internal_format)
-        internal_format.gsub(/__/,Seperators[:module_component])
       end
 
       def port_output_form(qualified_port_ref,dir)

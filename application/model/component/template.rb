@@ -10,6 +10,7 @@ module DTK; class Component
         :cols => [:id,:group_id,:component_type,:version],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
+                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
                     [:oneof, :component_type, cmp_types]]
       }
       get_objs(project_idh.createMH(:component),sp_hash).select do |r|

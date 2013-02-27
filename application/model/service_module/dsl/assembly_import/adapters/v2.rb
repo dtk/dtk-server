@@ -11,10 +11,9 @@ module DTK; class ServiceModule
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        
-        port_links = ret_service_links(assembly_hash).inject(DBUpdateHash.new) do |h,pl|
-          input = AssemblyImportPortRef.parse(pl.values.first)
-          output = AssemblyImportPortRef.parse(pl.keys.first)
+        port_links = parse_service_links(assembly_hash).inject(DBUpdateHash.new) do |h,parsed_service_link|
+          input = parsed_service_link[:input]
+          output = parsed_service_link[:output]
           input_id = input.matching_id(ports)
           output_id = output.matching_id(ports)
           pl_ref = PortLink.ref_from_ids(input_id,output_id)
@@ -28,14 +27,18 @@ module DTK; class ServiceModule
      private
       include AssemblyImportExportCommon
 
-      def self.ret_service_links(assembly_hash)
+      def self.parse_service_links(assembly_hash)
         ret = Array.new
-        assembly_hash["nodes"].each_pair do |node_ref,node_hash|
-          (node_hash["components"]||[]).each do |cmp_hash|
-            pp cmp_hash
+        assembly_hash["nodes"].each_pair do |input_node_name,node_hash|
+          (node_hash["components"]||[]).each do |input_cmp|
+            if input_cmp.kind_of?(Hash) 
+              input_cmp_name = input_cmp.keys.first
+              (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,target|
+                ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,link_def_type => target)
+              end
+            end
           end
         end
-        raise Error.new("Got here")
         ret
       end
 

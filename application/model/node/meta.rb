@@ -293,7 +293,7 @@ module XYZ
       virtual_column :cmps_and_non_default_attrs, :type => :json, :hidden => true, 
       :remote_dependencies =>
         lambda__components_and_non_default_attrs.call(
-          :cmp_cols=>FactoryObject::CommonCols+[:module_branch_id,:component_type],
+          :cmp_cols=>FactoryObject::CommonCols+[:ancestor_id,:component_type],
           :attr_cols=>FactoryObject::CommonCols+[:attribute_value])
         
       virtual_column :input_attribute_links_cmp, :type => :json, :hidden => true, 

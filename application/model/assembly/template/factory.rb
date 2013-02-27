@@ -64,7 +64,6 @@ module DTK
         end
         self[:nodes] = @ndx_nodes.values
         self[:port_links] = port_links
-        @component_template_mapping = get_component_template_mapping(project_idh,augmented_branches)
         self
       end
       def create_assembly_template(project_idh,service_module_branch)
@@ -82,28 +81,6 @@ module DTK
       end
 
      private
-      #returns two key hash [cmp_type][ws_branch_id] -> cmp_template_id
-      def get_component_template_mapping(project_idh,ws_branches)
-        ret = Hash.new
-        cmp_types = self[:nodes].map do |node|
-          node[:components].map{|cmp|cmp[:component_type]}
-        end.flatten
-        branch_ids = ws_branches.map{|b|b[:id]}
-        sp_hash = {
-          :cols => [:id, :display_name,:module_branch_id,:component_type,:project_project_id],
-          :filter => [:and,
-                      [:oneof, :component_type, cmp_types],
-                      [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
-                      [:oneof, :module_branch_id, branch_ids]]
-        }
-        cmp_tmpls = Model.get_objs(project_idh.create_childMH(:component),sp_hash)
-        cmp_tmpls.each do |cmp|
-          ws_branch_id = cmp[:module_branch_id]
-          (ret[cmp[:component_type]] ||= Hash.new).merge!(ws_branch_id => cmp[:id])
-        end
-        ret
-      end
-
       def create_port_link_content(port_link)
         in_port = @ndx_ports[port_link[:input_id]]
         in_node_ref = node_ref(@ndx_nodes[in_port[:node_node_id]])
@@ -147,10 +124,7 @@ module DTK
       def create_component_ref_content(cmp)
         cmp_ref_ref = qualified_ref(cmp)
         cmp_ref_hash = Aux::hash_subset(cmp,[:display_name,:description,:component_type])
-        unless @component_template_mapping[cmp[:component_type]]
-          raise Error.new("Cannot find component #{cmp[:component_type]} in @component_template_mapping")
-        end
-        cmp_template_id = @component_template_mapping[cmp[:component_type]][cmp[:module_branch_id]]
+        cmp_template_id = cmp[:ancestor_id]
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
         add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}

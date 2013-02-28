@@ -73,6 +73,11 @@ module DTK
         "#{node_name}#{sep[:node_component]}#{cmp_name}#{sep[:component_port]}#{p[:link_def_ref]}"
       end
 
+      def attr_overrides_output_form(attr_overrides)
+        av_list = attr_overrides.values.map{|attr|{attr[:display_name] => attr[:attribute_value]}}.sort{|a,b|a.keys.first <=> b.keys.first}
+        SimpleOrderedHash.new(av_list)
+      end
+
     end
   end; end
 end

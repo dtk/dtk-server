@@ -128,6 +128,20 @@ module XYZ
         end
       end
 
+      def create_key_pair(name)
+        unless key_pair = @conn.key_pairs.get(name)
+          key_pair = @conn.key_pairs.create(:name => name)
+        end
+        return key_pair
+      end
+
+      def create_security_group(name, description = nil)
+        unless sc = @conn.security_groups.get(name)
+          sc = @conn.security_groups.create(:name => name, :description => description)
+        end
+        return sc
+      end
+
       def server_create(options)
         hash_form(@conn.servers.create(options))
       end

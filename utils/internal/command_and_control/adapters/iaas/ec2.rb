@@ -1,6 +1,9 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
+
+      R8_KEY_PAIR = 'admin'
+
       r8_nested_require('ec2','cloud_init')
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
@@ -31,6 +34,20 @@ module XYZ
           conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
+        end
+      end
+
+      def self.add_security_group_and_key_pair(iaas_credentials)
+        begin
+          ec2_creds = get_ec2_credentials(iaas_credentials)
+          connection = conn(ec2_creds)
+          connection.create_key_pair(R8_KEY_PAIR)
+          Log.debug "Created needed R8 key pair (admin) for newly created target-template"
+          connection.create_security_group(R8::Config[:ec2][:security_group], 'DTK security group')
+          Log.debug "Created needed security group (#{R8::Config[:ec2][:security_group]})  for newly created target-template"
+        rescue Fog::Compute::AWS::Error => e
+          # probabably this will handle credentials failure
+          raise ErrorUsage.new(e.message)
         end
       end
 
@@ -134,6 +151,16 @@ module XYZ
 
         @conn ||= CloudConnect::EC2.new
       end
+
+      private
+
+      def self.get_ec2_credentials(iaas_credentials)
+        if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
+          return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+        end
+        return nil
+      end
+
     end
   end
 end

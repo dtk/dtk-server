@@ -145,13 +145,6 @@ module DTK
     end
 
     #### actions to update and create assembly templates
-    def rest__save_as_template()
-      assembly = ret_assembly_instance_object()
-      template_name = ret_non_null_request_params(:assembly_template_name)
-      assembly.save_as_template(template_name)
-      rest_ok_response
-    end
-
     def rest__create_new_template()
       assembly = ret_assembly_instance_object()
       service_module = create_obj(:service_module_name,ServiceModule)

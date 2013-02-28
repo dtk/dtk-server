@@ -1122,7 +1122,7 @@ POSSIBLE CHANGES TO HASH
         id_handle(id,model)
       end
       project = get_default_project()
-      Assembly::Template.create_workspace_template(project,node_idhs,assembly_name,service_module_name,icon_info) 
+      Assembly::Template.create_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
     end
   end

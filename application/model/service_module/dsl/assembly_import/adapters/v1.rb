@@ -1,94 +1,14 @@
-#converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    r8_nested_require('assembly_import','port')
-    include PortMixin
-    def initialize(container_idh,module_branch,module_name,module_version_constraints)
-      @container_idh = container_idh
-      @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
-      @ndx_ports = Hash.new
-      @ndx_assembly_hashes = Hash.new #indexed by ref
-      @module_branch = module_branch
-      @module_name = module_name
-      @service_module = get_service_module(container_idh,module_name)
-      @module_version_constraints = module_version_constraints
-    end
-
-    def process(module_name,hash_content)
-      #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
-      integer_version = determine_integer_version(hash_content)
-      version_proc = load_and_return_version_adapter_class(integer_version)
-      version_proc.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
-        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
-        assemblies_hash.each do |ref,assem|
-          dangling_errors.aggregate_errors! do
-            @db_updates_assemblies["component"].merge!(version_proc.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(version_proc.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
-            @ndx_assembly_hashes[ref] ||= assem
-          end
+    class V1 < self
+      def self.assembly_iterate(module_name,hash_content,&block)
+        assemblies_hash = hash_content["assemblies"].values.inject(Hash.new) do |h,assembly_info|
+          h.merge(ServiceModule.assembly_ref(module_name,assembly_info["name"]) => assembly_info)
         end
-        dangling_errors.raise_error?()
+        node_bindings_hash = hash_content["node_bindings"]
+        block.call(assemblies_hash,node_bindings_hash)
       end
-    end
 
-    def import()
-      module_branch_id = @module_branch[:id]
-      mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module
-      @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
-
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:eq,:module_branch_id, module_branch_id]
-      }
-      @existing_assembly_ids = Model.get_objs(@container_idh.createMH(:component),sp_hash).map{|r|r[:id]}
-      mark_as_complete_node_constraint = {:assembly_id=>@existing_assembly_ids}
-      @db_updates_assemblies["node"].mark_as_complete(mark_as_complete_node_constraint,:apply_recursively => true)
-
-      Model.input_hash_content_into_model(@container_idh,@db_updates_assemblies)
-
-      add_port_and_port_links()
-    end
-
-    def augmented_assembly_nodes()
-      @augmented_assembly_nodes ||= @service_module.get_augmented_assembly_nodes()
-    end
-
-    def self.augment_with_parsed_port_names!(ports)
-      ports.each do |p|
-        p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
-      end
-    end
-
-   private
-    def determine_integer_version(hash_content)
-      if hash_content["assemblies"]
-        1
-      elsif hash_content["assembly"]
-        2
-      else
-        raise Error.new("Cannot determine assembly dsl version")
-      end
-    end
-
-    def load_and_return_version_adapter_class(integer_version)
-      return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
-      adapter_name = "v#{integer_version.to_s}"
-      opts = {
-        :class_name => {:adapter_type => "AssemblyImport"},
-        :subclass_adapter_name => true,
-        :base_class => ServiceModule
-      }
-      CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class("assembly_import",adapter_name,opts)
-    end
-    CachedAdapterClasses = Hash.new
-      
-    def get_service_module(container_idh,module_name)
-      container_idh.create_object().get_service_module(module_name)
-    end
-
-    #TODO: now that converted top level to a call; dont need these internal modules
-    module Internal
-      include AssemblyImportExportCommon
       def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
         version_field = module_branch.get_field?(:version)
         assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
@@ -161,6 +81,8 @@ module DTK; class ServiceModule
       end
 
      private
+      include AssemblyImportExportCommon
+      
       #return [module_name,assembly_name]
       def self.parse_serialized_assembly_ref(ref)
         if ref =~ /(^.+)::(.+$)/
@@ -222,7 +144,7 @@ module DTK; class ServiceModule
           h.merge(name => {"display_name" => name, "attribute_value" => value, "*attribute_template_id" => attr_template_id}) 
         end       
       end
+
     end
-    
   end
 end; end

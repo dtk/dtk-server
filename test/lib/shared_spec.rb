@@ -133,7 +133,7 @@ end
 shared_context "Import remote module" do |module_name|
 	it "imports module from remote repo" do
 		pass = false
-		value = `dtk module import #{module_name}`	
+		value = `dtk module import #{module_name}`
 		pass = value.include? "module_directory:"
 		pass.should eq(true)
 	end

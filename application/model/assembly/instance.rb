@@ -259,7 +259,8 @@ module DTK; class  Assembly
 
     def info_about(about,opts={})
       cols = post_process_per_row = order = nil
-      order = proc{|a,b|a[:display_name] <=> b[:display_name]}
+      order = proc { |a,b| a[:display_name] <=> b[:display_name] }
+      
       case about 
        when :attributes
         ret = get_attributes_print_form_aux(opts[:filter_proc]).map do |a|
@@ -270,7 +271,11 @@ module DTK; class  Assembly
         cols = [:instance_nodes_and_cmps_summary]
         post_process_per_row = proc do |r|
           display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
-          r[:nested_component].hash_subset(:id).merge(:display_name => display_name)
+          version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
+          # Remove version from display name
+          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+          columns_filtered = r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
+          return columns_filtered
         end
        when :nodes
         return get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
@@ -412,25 +417,10 @@ module DTK; class  Assembly
       new_sub_assembly && new_sub_assembly.id_handle()
     end
 
-    #TODO: needs to be changed to use workspace branch
-    def save_as_template(template_name)
-      Raise Error.new("TODO: needs to be updated")
-      #TODO: can make more efficient by increemnt update as opposed to a delete then create
-      #see if corresponding template in library and deleet if so 
-      if assembly_template = get_associated_template?(library_idh)
-        Assembly::Template.delete(assembly_template.id_handle())
-      end
-      library_idh ||= assembly_template && id_handle(:model_name => :library,:id => assembly_template[:library_library_id])
-      #if no library_idh is given and no matching template, use teh public library
-      library_idh ||= Library.get_public_library(model_handle.createMH(:library)).id_handle()
-
-      create_assembly_template_from_instance(library_idh)
-    end
-
     def create_new_template(service_module,new_template_name)
       service_module_name = service_module.get_field?(:display_name)
-      project_idh = service_module.get_project().id_handle()
-      if Assembly::Template.exists?(project_idh,service_module_name,new_template_name)
+      project = service_module.get_project()
+      if Assembly::Template.exists?(project.id_handle(),service_module_name,new_template_name)
         raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
       end
 
@@ -438,7 +428,7 @@ module DTK; class  Assembly
         :service_module_name => service_module_name,
         :assembly_template_name => new_template_name
       }
-      create_assembly_template_from_instance(project_idh,name_info)
+      create_assembly_template_from_instance(project,name_info)
     end      
 
     def get_attributes_print_form(filter=nil)
@@ -526,24 +516,19 @@ module DTK; class  Assembly
       end
     end
 
-    def create_assembly_template_from_instance(project_idh,name_info=nil)
-      raise Error.new("TODO: not implemented yet: reate_assembly_template_from_instance not converted yet to 'workspace form'")
-      update_object!(:component_type,:version,:ui)
-      if self[:version]
-        raise Error.new("TODO: not implemented yet Assembly::Instance#create_library_template when version no null")
-      end
+    def create_assembly_template_from_instance(project,name_info=nil)
       if name_info
         service_module_name = name_info[:service_module_name]
         template_name = name_info[:assembly_template_name]
       else
-      service_module_name,template_name = Assembly::Template.parse_component_type(self[:component_type])
+        component_type = get_field?(:component_type)
+        service_module_name,template_name = Assembly::Template.parse_component_type(component_type)
       end
-      ui = self[:ui]
       node_idhs = get_nodes().map{|r|r.id_handle()}
       if node_idhs.empty?
-        raise Error.new("Cannot find any nodes associated with assembly (#{self[:display_name]})")
+        raise Error.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
       end
-      Assembly::Template.create_library_template(project_idh,node_idhs,template_name,service_module_name,ui)
+      Assembly::Template.create_from_instance(project,node_idhs,template_name,service_module_name)
     end
   end
 end 

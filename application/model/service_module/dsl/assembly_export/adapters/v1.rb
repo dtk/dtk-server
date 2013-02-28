@@ -1,27 +1,11 @@
 module DTK
-  class Assembly::Content::Instance
-    class TemplateOutput < Hash
-      include AssemblyImportExportCommon
-      def initialize(container_idh,service_module_branch)
-        super()
-        @container_idh = container_idh
-        @service_module_branch = service_module_branch
-      end
-      def save_to_model()
-        Model.input_hash_content_into_model(@container_idh,self,:preserve_input_hash=>true)
-      end
-      def serialize_and_save_to_repo()
-        hash_to_serialize = serialize()
-        ordered_hash_content = SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
-        path = assembly_meta_filename_path()
-        @service_module_branch.serialize_and_save_to_repo(path,ordered_hash_content)
-        path
+  class ServiceModule; class AssemblyExport
+    class V1 < self
+     private
+      def ret_ordered_hash_content(hash_to_serialize)
+        SimpleOrderedHash.new([:node_bindings,:assemblies].map{|k|{k => hash_to_serialize[k]}})
       end
 
-     private
-      def assembly_meta_filename_path()
-        ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])
-      end
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
@@ -103,6 +87,7 @@ module DTK
         sep = Seperators #just for succinctness
         "#{node_name}#{sep[:node_component]}#{cmp_name}#{sep[:component_port]}#{p[:link_def_ref]}"
       end
+
     end
-  end
+  end; end
 end

@@ -11,13 +11,16 @@ require './test/lib/shared_spec'
 
 STDOUT.sync = true
 
-ASSEMBLY_NAME = 'test_case_8_instance'
-ASSEMBLY_TEMPLATE = 'bakir_test::redhat_bigtop_namenode'
+assembly_name = 'test_case_8_instance'
+assembly_template = 'bakir_test::redhat_bigtop_namenode'
+memory = 'm1.small'
 namenode_port = 8020
 namenode_web_port = 50070
-
 $assembly_id = 0
-dtk_common = DtkCommon.new(ASSEMBLY_NAME, ASSEMBLY_TEMPLATE)
+
+dtk_common = DtkCommon.new(assembly_name, assembly_template)
+
+puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
 
 describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 

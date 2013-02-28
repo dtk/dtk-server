@@ -1,8 +1,9 @@
-#TODO: 'Instance' is a confusing name for this class
+r8_require('../../factory_object_type')
 module DTK
-  class Assembly; class Content
-    class Instance < self
-      r8_nested_require('instance','template_output')
+  class Assembly; class Template
+    class Factory < self
+      extend FactoryObjectClassMixin
+      include FactoryObjectMixin
       def self.create_container_for_clone(container_idh,assembly_name,service_module_name,service_module_branch,icon_info)
         assembly_mh = container_idh.create_childMH(:component)
         hash_values = {
@@ -16,8 +17,9 @@ module DTK
         }
         create(assembly_mh,hash_values)
       end
+
       def add_content_for_clone!(container_idh,node_idhs,port_links,augmented_branches)
-        node_scalar_cols = ContentObject::CommonCols + [:node_binding_rs_id]
+        node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
@@ -74,7 +76,7 @@ module DTK
         nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
 
-        @template_output = TemplateOutput.new(container_idh,service_module_branch)
+        @template_output = ServiceModule::AssemblyExport.create(container_idh,service_module_branch)
         assembly_ref = self[:ref]
         #TODO: consider moving port link so it is conatined under assembly rather than being contained in container and points to assembly
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
@@ -94,7 +96,10 @@ module DTK
         branch_ids = ws_branches.map{|b|b[:id]}
         sp_hash = {
           :cols => [:id, :display_name,:module_branch_id,:component_type,:project_project_id],
-          :filter => [:and,[:oneof, :component_type,cmp_types],[:oneof, :module_branch_id, branch_ids]]
+          :filter => [:and,
+                      [:oneof, :component_type, cmp_types],
+                      [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                      [:oneof, :module_branch_id, branch_ids]]
         }
         cmp_tmpls = Model.get_objs(project_idh.create_childMH(:component),sp_hash)
         cmp_tmpls.each do |cmp|
@@ -161,8 +166,8 @@ module DTK
 
       def create_port_content(port)
         port_ref = qualified_ref(port)
-        port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction])
-        port_hash.merge!(:link_def_id => port[:link_def][:ancestor_id])
+        port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction,:link_type,:component_type])
+        port_hash.merge!(:link_def_id => port[:link_def][:ancestor_id]) if port[:link_def]
         {port_ref => port_hash}
       end
 

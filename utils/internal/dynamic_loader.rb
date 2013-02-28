@@ -7,10 +7,11 @@ module DTK
         Lock.synchronize{r8_nested_require_with_caller_dir(caller_dir,"#{adapter_type}/adapters",adapter_name)}
         type_part = convert?(adapter_type,:adapter_type,opts)
         name_part = convert?(adapter_name,:adapter_name,opts)
+        base_class = opts[:base_class]||DTK
         if opts[:subclass_adapter_name]
-          DTK.const_get(type_part).const_get name_part
+          base_class.const_get(type_part).const_get name_part
         else
-          DTK.const_get "#{type_part}#{name_part}"
+          base_class.const_get "#{type_part}#{name_part}"
         end
        rescue LoadError
         raise Error.new("cannot find #{adapter_type} adapter (#{adapter_name})")

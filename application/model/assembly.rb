@@ -2,7 +2,6 @@
 r8_nested_require('assembly','import_export_common')
 module DTK
   class Assembly < Component
-    r8_nested_require('assembly','content')
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
     ### standard get methods
@@ -173,11 +172,13 @@ module DTK
             node[:external_ref]    = r[:node][:external_ref] if r[:node][:external_ref]
             node[:os_type]         = r[:node][:os_type] if r[:node][:os_type]
           end
+
           cmp_hash = list_aux__component_template(r)
           if cmp_type =  cmp_hash[:component_type] && cmp_hash[:component_type].gsub(/__/,"::")
             cmp = 
-              if opts[:component_info] 
-                {:component_name => cmp_type,:component_id => cmp_hash[:id], :basic_type => cmp_hash[:basic_type], :description => cmp_hash[:description]}
+              if opts[:component_info]
+                version = ModuleBranch.version_from_version_field(cmp_hash[:version])
+                {:component_name => cmp_type,:component_id => cmp_hash[:id], :basic_type => cmp_hash[:basic_type], :description => cmp_hash[:description], :version => version}
               elsif not attr_rows.empty?
                 {:component_name => cmp_type}
               else

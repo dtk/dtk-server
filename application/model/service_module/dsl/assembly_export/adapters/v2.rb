@@ -75,7 +75,7 @@ module DTK
         ret = Hash.new
         if component_in_ret.kind_of?(Hash)
           ret = component_in_ret
-          service_links = ret[:service_links] ||= Hash.new
+          service_links = ret.values.first[:service_links] ||= Hash.new
         else # it will be a string
           service_links = Hash.new  
           ret = {component_in_ret => {:service_links => service_links}}

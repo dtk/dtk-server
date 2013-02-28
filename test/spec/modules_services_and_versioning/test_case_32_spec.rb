@@ -11,7 +11,7 @@ require './test/lib/shared_spec'
 
 assembly_name = 'test_case_32_instance'
 assembly_template = 'bootstrap::test1'
-new_assembly_template = 'test_case_32_instance_assembly_template'
+new_assembly_template = 'test_case_32_temp'
 service_name = 'new_service'
 $assembly_id = 0
 
@@ -34,7 +34,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 	end
 
 	context "Create assembly template in #{service_name} service from existing assembly" do
-		it "missing test step implementation"
+		include_context "Create assembly template from assembly", dtk_common, service_name, new_assembly_template
 	end
 
 	context "Check if #{new_assembly_template} assembly_template belongs to #{service_name} service" do
@@ -42,7 +42,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 	end
 
 	context "Delete assembly template" do
-		include_context "Delete assembly template", dtk_common, new_assembly_template
+		include_context "Delete assembly template", dtk_common, "#{service_name}::#{new_assembly_template}"
 	end
 
 	context "Delete and destroy assemblies" do

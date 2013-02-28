@@ -58,7 +58,7 @@ module DTK
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if modules.size == 0
         unless opts[:donot_raise_error]
-          raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
+          raise ErrorUsage.new("Service/Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
       elsif modules.size > 1

@@ -8,6 +8,12 @@
       :on_delete=>:set_null,
       :on_update=>:set_null
     },
+    :parent_id=> {
+      :type=>:bigint,
+      :foreign_key_rel_type=>:datacenter,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    },
     :ui=> {
       :type=>:json
     },

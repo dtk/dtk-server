@@ -218,7 +218,7 @@ module DTK; class Assembly
       Model.delete_instances(node_idhs)    
     end
 
-    def info_about(about)
+    def info_about(about, opts={})
       cols = post_process = nil
       order = proc{|a,b|a[:display_name] <=> b[:display_name]}
       ret = nil

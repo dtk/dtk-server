@@ -245,6 +245,6 @@ end
 shared_context "Check if assembly template belongs to the service" do |dtk_common, service_name, assembly_template_name|
 	it "verifes that assembly template is part of the service" do
 		template_exists_in_service = dtk_common.check_if_service_contains_assembly_template(service_name, assembly_template_name)
-		template_exists_in_service eq(true)
+		template_exists_in_service.should eq(true)
 	end
 end

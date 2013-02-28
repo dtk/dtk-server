@@ -85,8 +85,8 @@ module XYZ
 
       WAIT_FOR_NODE = 10 # seconds
 
-      def initialize()             
-        @conn = Fog::Compute::AWS.new(get_compute_params())
+      def initialize(override_of_aws_params = nil)             
+        @conn = Fog::Compute::AWS.new(override_of_aws_params||get_compute_params())
       end
 
 
@@ -126,6 +126,20 @@ module XYZ
         else
           :server_does_not_exist
         end
+      end
+
+      def create_key_pair(name)
+        unless key_pair = @conn.key_pairs.get(name)
+          key_pair = @conn.key_pairs.create(:name => name)
+        end
+        return key_pair
+      end
+
+      def create_security_group(name, description = nil)
+        unless sc = @conn.security_groups.get(name)
+          sc = @conn.security_groups.create(:name => name, :description => description)
+        end
+        return sc
       end
 
       def server_create(options)

@@ -6,6 +6,8 @@
 require File.expand_path('app', File.dirname(__FILE__))
 
 is_development = ARGV[0] || false
+server_port    = ARGV[1] || R8::Config[:server_port]
+
 
 unless is_development
   rotating_logger = Logger.new('r8server.log', 'daily')
@@ -15,4 +17,4 @@ else
   puts "**** DEVELOPMENT MODE - NO LOGS ****"
 end
 
-Ramaze.start(:adapter => :thin, :port => R8::Config[:server_port], :file => __FILE__)
+Ramaze.start(:adapter => :thin, :port => server_port, :file => __FILE__)

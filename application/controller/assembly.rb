@@ -193,7 +193,7 @@ module DTK
     def rest__stage()
       target = target_idh_with_default(request.params["target_id"]).create_object()
       assembly_template = ret_assembly_template_object()
-      #TODO: if name given and not unique either reject or generate a -n suffix
+      # TODO: if name given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 
       new_assembly_obj = assembly_template.stage(target,assembly_name)
       rest_ok_response :assembly_id => new_assembly_obj[:id]
@@ -229,8 +229,8 @@ module DTK
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg)
       task.save!()
-#TODO: this was call from gui commit window
-#pp Attribute.augmented_attribute_list_from_task(task)
+      # TODO: this was call from gui commit window
+      # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
 

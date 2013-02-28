@@ -23,9 +23,15 @@ module XYZ
       klass = load_iaas_for(:node => nodes.first)
       klass.start_instances(nodes)
     end
+
     def self.stop_instances(nodes)
       klass = load_iaas_for(:node => nodes.first)
       klass.stop_instances(nodes)
+    end
+
+    def self.prepare_account_for_target(iaas_adapter_name, iaas_credentials)
+      klass = load_for_aux(:iaas, iaas_adapter_name)
+      klass.add_security_group_and_key_pair(iaas_credentials)
     end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)
@@ -55,7 +61,8 @@ module XYZ
     end
 
     def self.get_and_update_node_state!(node,attribute_names)
-      adapter_name = R8::Config[:command_and_control][:iaas][:type]
+      # TODO: Haris - Test more this change
+      adapter_name = node.get_target_iaas_type() || R8::Config[:command_and_control][:iaas][:type]
       klass = load_for_aux(:iaas,adapter_name)      
       klass.get_and_update_node_state!(node,attribute_names)
     end

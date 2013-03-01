@@ -279,8 +279,9 @@ module DTK; class ServiceModule
         unless bad_attrs.empty?
           #TODO: extend dangling_errors.aggregate_errors to handle this
           bad_attrs_list = bad_attrs.keys.join(",")
+          attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")
           cmp_ref_name = cmp_ref_info[:component_type].gsub(/__/,"::")
-          raise ErrorUsage.new("Bad attribute(s) (#{bad_attrs_list}) on component ref (#{cmp_ref_name})")
+          raise ErrorUsage.new("Bad #{attribute} (#{bad_attrs_list}) on component ref (#{cmp_ref_name})")
         end
       end
       cmp_ref

@@ -55,6 +55,10 @@ module DTK; class ServiceModule
           h.merge(merge_hash)
         end
       end
+
+      def self.ret_attribute_overrides(cmp_input)
+        (cmp_input.kind_of?(Hash) && cmp_input.values.first["attributes"])||{}
+      end
       
     end
   end

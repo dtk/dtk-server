@@ -1,31 +1,5 @@
 module DTK; class ComponentDSL; class V1
   class Parser < ::DTK::ComponentDSL::Parser
-    def parse_components!(config_agent_type,dsl_hash)
-      impl_id = impl_idh.get_id()
-      module_branch_id = module_branch_idh.get_id()
-
-      @components_hash = dsl_hash.inject({}) do |h, (r8_hash_cmp_ref,cmp_info)|
-        cmp_ref = component_ref(config_agent_type,r8_hash_cmp_ref)
-        info = Hash.new
-        cmp_info.each do |k,v|
-          case k
-          when "external_link_defs"
-            v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
-            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
-          when "link_defs" 
-            parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
-            (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
-          else
-            info[k] = v
-          end
-        end
-        info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
-        h.merge(cmp_ref => info)
-      end
-      #process the link defs for remote components
-     # process_remote_link_defs!(container_idh)
-    end
 
    private
     def component_ref_from_cmp_type(config_agent_type,component_type)

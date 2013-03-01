@@ -12,7 +12,7 @@ module DTK
       unless dsl_filename = contains_dsl_file?(impl,dsl_integer_version,format_type)
         raise Error.new("Cannot find DSL file")
       end
-      parsed_name = parse_dsl_filename(dsl_filename)
+      parsed_name = parse_dsl_filename(dsl_filename,dsl_integer_version)
       format_type ||= parsed_name[:format_type]
       content = RepoManager.get_file_content(dsl_filename,module_branch)
       input_hash = convert_to_hash(content,format_type)

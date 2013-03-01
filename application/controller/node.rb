@@ -10,7 +10,7 @@ module XYZ
       queue = ActionResultsQueue.new
       # TODO: Move GetNetstas MColl action class to shared location between assembly and node controllers
       Assembly::Instance::Action::GetNetstats.initiate([node], queue) 
-      rest_ok_response (:action_results_id => queue.id)
+      rest_ok_response :action_results_id => queue.id
     end
     
     def rest__get_action_results()

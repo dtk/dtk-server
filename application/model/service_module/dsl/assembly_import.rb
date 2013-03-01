@@ -225,17 +225,22 @@ module DTK; class ServiceModule
     end
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)
-      ret = components_hash.inject(Hash.new) do |h,cmp_hash|
-        parse = component_ref_parse(cmp_hash)
+      ret = components_hash.inject(Hash.new) do |h,cmp_input|
+        parse = component_ref_parse(cmp_input)
         cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
         if cmp_ref[:version]
           cmp_ref[:has_override_version] = true
         end
+        ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
+          pntr = cmp_ref[:attribute_override] ||= Hash.new
+          pntr.merge!(import_attribute_overrides(attr_name,attr_val))
+        end
         h.merge(parse[:ref] => cmp_ref)
       end
-      #find and insert component template ids
+      #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
       version_constraints.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
+      set_attribute_template_ids!(container_idh,ret)
       ret
     end
 
@@ -251,17 +256,36 @@ module DTK; class ServiceModule
       ret
     end
 
-=begin
-TODO: see if need this
-      def self.attribute_overrides(cmp,cmp_template_relative_uri)
-        ret = Hash.new
-        return ret unless cmp.kind_of?(Hash)
-        cmp.values.first.inject(Hash.new) do |h,(name,value)|
-          attr_template_id = "#{cmp_template_relative_uri}/attribute/#{name}"
-          h.merge(name => {"display_name" => name, "attribute_value" => value, "*attribute_template_id" => attr_template_id}) 
-        end       
+    def self.import_attribute_overrides(attr_name,attr_val)
+      {attr_name => {:display_name => attr_name, :attribute_value => attr_val}}
+    end
+
+    def self.set_attribute_template_ids!(container_idh,cmp_ref)
+
+      cmp_ref_info = cmp_ref.values.first
+      if attrs = cmp_ref_info[:attribute_override]
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:and,[:component_component_id,cmp_ref_info[:component_template_id]],
+                      [:oneof, :display_name,attrs.keys]]
+        }
+        attr_mh = container_idh.createMH(:attribute)
+        Model.get_objs(attr_mh,sp_hash).each do |r|
+          #relies on cmp_ref_info[:attribute_override] keys matching display_name
+          attrs[r[:display_name]].merge!(:attribute_template_id => r[:id])
+        end
+
+        bad_attrs = attrs.reject{|ref,info|info[:attribute_template_id]}
+        unless bad_attrs.empty?
+          #TODO: extend dangling_errors.aggregate_errors to handle this
+          bad_attrs_list = bad_attrs.keys.join(",")
+          cmp_ref_name = cmp_ref_info[:component_type].gsub(/__/,"::")
+          raise ErrorUsage.new("Bad attribute(s) (#{bad_attrs_list}) on component ref (#{cmp_ref_name})")
+        end
       end
-=end
-    
+      cmp_ref
+    end
+
   end
 end; end
+

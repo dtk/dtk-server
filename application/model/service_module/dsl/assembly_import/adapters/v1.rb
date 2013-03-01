@@ -49,6 +49,10 @@ module DTK; class ServiceModule
         Assembly.internal_assembly_ref(module_name,assembly_name)
       end
 
+      def self.ret_attribute_overrides(cmp_input)
+        (cmp_input.kind_of?(Hash) && cmp_input.values.first)||{}
+      end
+
     end
   end
 end; end

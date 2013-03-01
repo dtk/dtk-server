@@ -84,6 +84,7 @@ module DTK
       integer_version ||= integer_version()
       VersionIntegerToVersion[integer_version]
     end
+
    private
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["version"]
@@ -142,19 +143,14 @@ module DTK
         }
         @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("component_dsl",adapter_name,opts)
       end
+
+      def isa_dsl_filename?(filename,dsl_integer_version=nil)
+        filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
+      end
+
      private
       def integer_version(pos_val=nil)
         pos_val ? pos_val.to_i : default_integer_version()
-      end
-=begin
-TODO: this was old version; think want to remove
-    def self.integer_version()
-      to_s =~ /V([0-9]+$)/
-      $1.to_i
-    end
-=end
-      def isa_dsl_filename?(filename,dsl_integer_version=nil)
-        filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
       end
 
       #returns hash with keys: :config_agent_type,:format_type

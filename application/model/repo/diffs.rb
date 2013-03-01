@@ -20,8 +20,8 @@ module DTK; class Repo
       end
 
       def meta_file_changed?()
-        (self[:files_modified] and !!self[:files_modified].find{|r|path(r) =~ /^r8meta/}) or
-        (self[:files_added] and !!self[:files_added].find{|r|path(r) =~ /^r8meta/}) 
+        (self[:files_modified] and !!self[:files_modified].find{|r|ComponentDSL.isa_dsl_filename?(path(r))}) or
+        (self[:files_added] and !!self[:files_added].find{|r|ComponentDSL.isa_dsl_filename?(path(r))})
       end
 
       #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 

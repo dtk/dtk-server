@@ -24,9 +24,11 @@ module DTK; class ComponentDSL; class V2
       def body(input_hash,cmp)
         ret = OutputHash.new
         ret["display_name"] = ret["component_type"] = qualified_component(cmp)
+        ret.set_if_not_nil("description",input_hash["description"])
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
+        add_attributes!(ret,input_hash)
         ret
       end
 
@@ -48,27 +50,19 @@ module DTK; class ComponentDSL; class V2
       def only_one_per_node(external_ref)
         external_ref["type"] == "puppet_definition" ? true : nil
       end
+
+      def add_attributes!(ret,input_hash)
+        if input_hash["attributes"]
+          pp input_hash["attributes"]
+
+raise Error.new("Got here")
+        end
+        ret
+      end
     end
+
   end
 end; end; end
 =begin
-{"components"=>
-  {"sink"=>
-    {"attributes"=>
-      {"members"=>
-        {"type"=>"array(string)",
-         "description"=>"Members gotten from connected sources"}},
-     "external_ref"=>{"puppet_class"=>"v2::sink"}},
-   "source"=>
-    {"link_defs"=>
-      {"member"=>
-        {"possible_links"=>
-          [{"v2::sink"=>
-             {"attribute_mappings"=>
-               [{"local_node.host_addresses_ipv4.0"=>"v2::sink.members"}]}}],
-         "type"=>"external"}},
-     "external_ref"=>{"puppet_class"=>"v2::source"}}},
- "module_type"=>"puppet_module",
- "version"=>"0.9",
- "module_name"=>"v2"}
+example
 =end

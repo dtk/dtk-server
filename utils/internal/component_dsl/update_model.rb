@@ -33,6 +33,7 @@ module DTK; class ComponentDSL
           info = Hash.new
           cmp_info.each do |k,v|
             case k
+            #TODO: deprecate this case when remove v1  
             when "external_link_defs"
               v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
@@ -47,12 +48,22 @@ module DTK; class ComponentDSL
           info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
           h.merge(cmp_ref => info)
         end
+        #TODO: think this is no longer needed
         #process the link defs for remote components
         # process_remote_link_defs!(container_idh)
       end
 
      private
       attr_reader :impl_idh, :module_branch_idh,:container_idh
+
+      def component_ref_from_cmp_type(config_agent_type,component_type)
+        "#{config_agent_type}-#{component_type}"
+      end
+      def component_ref(config_agent_type,r8_hash_cmp_ref)
+        #TODO: may be better to have these prefixes already in r8 dsl file
+        "#{config_agent_type}-#{r8_hash_cmp_ref}"
+      end
+
     end
 
    private

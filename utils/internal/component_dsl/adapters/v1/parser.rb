@@ -2,14 +2,6 @@ module DTK; class ComponentDSL; class V1
   class Parser < ::DTK::ComponentDSL::Parser
 
    private
-    def component_ref_from_cmp_type(config_agent_type,component_type)
-      "#{config_agent_type}-#{component_type}"
-    end
-    def component_ref(config_agent_type,r8_hash_cmp_ref)
-      #TODO: may be better to have these prefixes already in r8 dsl file
-      "#{config_agent_type}-#{r8_hash_cmp_ref}"
-    end
-
     #updates both @components_hash and @remote_link_defs
     def process_remote_link_defs!(library_idh)
       return if @remote_link_defs.empty?

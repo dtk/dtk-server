@@ -23,12 +23,12 @@ module DTK; class ComponentDSL; class V2
       
       def body(input_hash,cmp)
         ret = OutputHash.new
-        ret["display_name"] = ret["component_type"] = qualified_component(cmp)
+        cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
         ret.set_if_not_nil("description",input_hash["description"])
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
-        add_attributes!(ret,input_hash)
+        add_attributes!(ret,cmp_type,input_hash)
         ret
       end
 
@@ -50,19 +50,29 @@ module DTK; class ComponentDSL; class V2
       def only_one_per_node(external_ref)
         external_ref["type"] == "puppet_definition" ? true : nil
       end
-
-      def add_attributes!(ret,input_hash)
-        if input_hash["attributes"]
-          pp input_hash["attributes"]
-
-raise Error.new("Got here")
+      
+      def add_attributes!(ret,cmp_type,input_hash)
+        if in_attrs = input_hash["attributes"]
+          attrs = OutputHash.new
+          in_attrs.each_pair do |name,info|
+            attr_props = OutputHash.new(
+              "name" => name,
+              "data_type" => info.req(:type),
+              "external_ref" => {
+                 "type" => "puppet_attribute", #TODO: hard-wired
+                 "path" => "node[#{cmp_type}][#{name}]"
+              }
+            )
+            attr_props.set_if_not_nil("description",info["description"])
+            attr_props.set_if_not_nil("required",info["required"])
+            attrs.merge!(name => attr_props)
+          end
+          ret.merge!("attribute" => attrs)
         end
         ret
       end
-    end
 
+    end
   end
 end; end; end
-=begin
-example
-=end
+

@@ -7,6 +7,7 @@ module DTK
         #TODO: stub
       end
       def self.normalize(input_hash)
+pp input_hash
         input_hash
       end
     end

@@ -110,18 +110,17 @@ module DTK; class ComponentDSL; class V2
       :component =>
       [
        :description,
-       {:external_ref => {:new_key => :only_one_per_node,:custom_fn => :only_one_per_node, :skip_if_nil => true}},
        {:external_ref => {:custom_fn => :external_ref}},
        {:basic_type => {:custom_fn => :type, :new_key => :type, :skip_if_nil => true}},
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
-       {:dependency => {:new_key => :constraints,:custom_fn => :dependencies}},
-       {:component_order => {:new_key => :constraints,:custom_fn => :component_order_rels}},
+       {:dependency => {:new_key => :requires,:custom_fn => :requires_components}},
+       {:component_order => {:new_key => :after,:custom_fn => :after_components}},
        {:external_link_defs => {:new_key => :link_defs, :custom_fn => :external_link_defs}}
       ]
     }
     AttrOmit = {
-      :component => %w{display_name component_type version}
+      :component => %w{display_name component_type version only_one_per_node}
     }
 
     AttrProcessed = AttrOrdered.inject(Hash.new) do |h,(type,attrs_info)|
@@ -231,12 +230,12 @@ module DTK; class ComponentDSL; class V2
           {"image_icon" => image_assigns["tnail"]}
         end
       
-        def self.dependencies(deps_assigns)
-          map_in_array_form(deps_assigns){|ref,dep_assign| Constraint.dependency(ref,dep_assign)}
+        def self.requires_components(deps_assigns)
+          map_in_array_form(deps_assigns){|ref,dep_assign| Constraint.requires_component(ref,dep_assign)}
         end
 
-        def self.component_order_rels(assigns)
-          map_in_array_form(assigns){|ref,cmp_order_rel| Constraint.component_order_rel(ref,cmp_order_rel)}
+        def self.after_components(assigns)
+          map_in_array_form(assigns){|ref,cmp_order_rel| Constraint.after_component(ref,cmp_order_rel)}
         end
       end
       
@@ -324,35 +323,21 @@ module DTK; class ComponentDSL; class V2
       end
 
       class Constraint < self
-        def self.dependency(ref,dep_assign)
-          ret = requires(ref,dep_assign)
-          unless ret
-            raise Error.new("feature_component_dsl_v2: TODO: not implemented yet treating dependency (#{{ref => dep_assign}.inspect})")
-          end
-          ret
-        end
-
-        def self.requires(ref,dep_assign)
+        def self.requires_component(ref,dep_assign)
           return unless dep_assign["type"] == "component"
           return unless filter = (dep_assign["search_pattern"]||{})[":filter"]
           return unless filter[0] == ":eq" and filter[1] == ":component_type"
-          require_cmp = qualified_component_ref(filter[2])
-          {"requires_component" => require_cmp}
+          qualified_component_ref(filter[2])
         end
 
-        def self.component_order_rel(ref,cmp_order_rel)
-          ret = component_order_rel__after(ref,cmp_order_rel)
-
-          unless ret
-            ret = "feature_component_dsl_v2: TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
+        def self.after_component(ref,cmp_order_rel)
+          if cmp_order_rel.keys == ["after"]
+            qualified_component_ref(cmp_order_rel["after"])
+          else
+            "feature_component_dsl_v2: TODO: not implemented yet treating component_order relation (#{{ref => cmp_order_rel}.inspect})"
           end
-          ret
         end
 
-        def self.component_order_rel__after(ref,cmp_order_rel)
-          return unless cmp_order_rel.keys == ["after"]
-          {"after_component" =>  qualified_component_ref(cmp_order_rel["after"])}
-        end
       end
     end
   end

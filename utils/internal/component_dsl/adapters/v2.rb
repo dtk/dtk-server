@@ -23,7 +23,96 @@ ret
   end
 end
 =begin
-example tarnslation 
+
+example translations 
+
+normalized form
+{"dtk_server__base"=>{"display_name"=>"dtk_server__base",
+  "description"=>"DTK Server",
+  "external_ref"=>{"class_name"=>"dtk_server::base", "type"=>"puppet_class"},
+  "basic_type"=>"service",
+  "component_type"=>"dtk_server__base",
+  "dependency"=>{"gitolite"=>
+    {"type"=>"component",
+     "search_pattern"=>{":filter"=>[":eq", ":component_type", "gitolite"]},
+     "description"=>"gitolite is required for dtk_server__base",
+     "display_name"=>"gitolite",
+     "severity"=>"warning"},
+   "dtk"=>
+    {"type"=>"component",
+     "search_pattern"=>{":filter"=>[":eq", ":component_type", "dtk"]},
+     "description"=>"dtk is required for dtk_server__base",
+     "display_name"=>"dtk",
+     "severity"=>"warning"}}},
+ "dtk_server__tenant"=>{"display_name"=>"dtk_server__tenant",
+  "description"=>"DTK Server",
+  "external_ref"=>{"definition_name"=>"dtk_server::tenant",
+   "type"=>"puppet_definition"},
+  "basic_type"=>"service",
+  "component_type"=>"dtk_server__tenant",
+  "only_one_per_node"=>false,
+  "attribute"=>{"server_git_branch"=>{"display_name"=>"server_git_branch",
+    "description"=>"Branch in server git repo to use",
+    "data_type"=>"string",
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][server_git_branch]"}},
+   "name"=>{"display_name"=>"name",
+    "description"=>"User name",
+    "data_type"=>"string",
+    "required"=>true,
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][name]"}},
+   "stomp_server_host"=>{"display_name"=>"stomp_server_host",
+    "description"=>"Stomp server host",
+    "data_type"=>"string",
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][stomp_server_host]"}},
+   "server_public_dns"=>{"display_name"=>"server_public_dns",
+    "description"=>"Server public dns",
+    "data_type"=>"string",
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][server_public_dns]"}},
+   "db_host"=>{"display_name"=>"db_host",
+    "description"=>"Database server host",
+    "data_type"=>"string",
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][db_host]"}},
+   "port"=>{"display_name"=>"port",
+    "description"=>"port that server runs on",
+    "data_type"=>"integer",
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][port]"}},
+   "gitolite_user"=>{"display_name"=>"gitolite_user",
+    "description"=>"User name for gitolite server",
+    "data_type"=>"string",
+    "required"=>true,
+    "external_ref"=>{"type"=>"puppet_attribute",
+     "path"=>"node[dtk_server__tenant][gitolite_user]"}}},
+  "dependency"=>{"dtk_server__base"=>
+    {"type"=>"component",
+     "search_pattern"=>
+      {":filter"=>[":eq", ":component_type", "dtk_server__base"]},
+     "description"=>"dtk_server__base is required for dtk_server__tenant",
+     "display_name"=>"dtk_server__base",
+     "severity"=>"warning"}},
+  "component_order"=>{"dtk_postgresql__db"=>{"after"=>"dtk_postgresql__db"}},
+  "external_link_defs"=>[{"required"=>false,
+    "possible_links"=>
+     [{"dtk_activemq"=>
+        {"attribute_mappings"=>
+          [{":remote_node.host_addresses_ipv4.0"=>
+             ":dtk_server__tenant.stomp_server_host"}]}}],
+    "type"=>"stomp-server"},
+   {"required"=>false,
+    "possible_links"=>
+     [{"dtk_postgresql__server"=>
+        {"attribute_mappings"=>
+          [{":remote_node.host_addresses_ipv4.0"=>
+             ":dtk_server__tenant.db_host"}]}}],
+    "type"=>"db"}]}}
+
+----
+
 From
 [:input_hash,
  {"components"=>

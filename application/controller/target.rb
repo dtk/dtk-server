@@ -40,6 +40,9 @@ module XYZ
       rest_ok_response(:target_id => target_idh.get_id())
     end
 
+    def rest__delete()
+    end
+
 
     def rest__create_assembly_template()
       raise Error.new("target/create_assembly_template not implemented yet")

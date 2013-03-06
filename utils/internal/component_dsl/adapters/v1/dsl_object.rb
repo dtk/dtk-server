@@ -4,6 +4,11 @@ module DTK; class ComponentDSL; class V1
   Base = ComponentDSL::GenerateFromImpl::DSLObject
   class DSLObject
     class Module < Base::Module
+     private
+      def add_component!(ret,hash_key,content)
+        ret[hash_key] = content
+        ret
+      end
     end
     class Component < Base::Component
      private

@@ -15,6 +15,11 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
+      def add_component!(ret,hash_key,content)
+        (ret["components"] ||= Hash.new)[hash_key] = content
+        ret
+      end
+
       def render_cmp_ref(cmp_ref)
         strip_module_name(cmp_ref)
       end

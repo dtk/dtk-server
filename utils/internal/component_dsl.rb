@@ -96,8 +96,8 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-pp ret
-raise Error.new("got here")
+pp [:input_hash,version_specific_input_hash]
+pp [:normalize,ret]
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret

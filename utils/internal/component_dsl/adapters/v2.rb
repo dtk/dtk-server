@@ -9,10 +9,7 @@ module DTK
         #TODO: stub
       end
       def self.normalize(input_hash)
-pp [:input_hash,input_hash]
-        ret = ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
-pp [:normalize,ret]
-ret
+        ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
       end
 
       def self.ret_migrate_processor(config_agent_type,module_name,old_version_hash)

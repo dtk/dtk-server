@@ -118,12 +118,9 @@ module DTK; class ComponentDSL
           return if opts[:reify]
           processed_name = component_ps[:name]
           #if qualified name make sure matches module name
-         if processed_name =~ /(^.+)::(.+$)/
+         if processed_name =~ /(^[^:]+)::(.+$)/
             prefix = $1
             unqual_name = $2
-            if processed_name =~ /::.+::/
-              raise Error.new("unexpected class or definition name #{processed_name})")
-            end
             unless prefix == module_name
               raise Error.new("prefix (#{prefix}) not equal to module name (#{module_name})")
             end 
@@ -335,7 +332,7 @@ module DTK; class ComponentDSL
           ret.set_unless_nil("description",value(:description))
           ret[data_type_field()] = required_value(:type)
           ret.set_unless_nil("value_asserted",value(:default_info))
-          ret.set_unless_nil("required",value(:required))
+          ret["required"] = true if value(:required)
           ret.set_unless_nil("dynamic",value(:dynamic))
           ret.set_unless_nil("external_ref",converted_external_ref())
           ret

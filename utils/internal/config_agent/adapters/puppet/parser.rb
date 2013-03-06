@@ -266,9 +266,11 @@ module XYZ
         super
       end
      private
-      #ignore components that have more than one qualification; tehy are mostly sub classes/defs
       def self.ignore?(ast_obj,opts={})
-        ast_obj.name =~ /::.+::/
+        #TODO: make this configurable 
+        #ignore components that have more than one qualification; tehy are mostly sub classes/defs
+        #ast_obj.name =~ /::.+::/
+        nil
       end
 
       def parse_children(ast_item,opts)

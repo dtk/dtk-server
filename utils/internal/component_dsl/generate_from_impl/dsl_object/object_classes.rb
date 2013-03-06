@@ -21,7 +21,7 @@ module DTK; class ComponentDSL
           ret.set_unless_nil("module_type",module_type?())
           self[:components].each_element(:skip_required_is_false => true) do |cmp|
             hash_key = render_cmp_ref(cmp.hash_key)
-            ret[hash_key] = cmp.render_hash_form(opts)
+            add_component!(ret,hash_key,cmp.render_hash_form(opts))
           end
           ret
         end

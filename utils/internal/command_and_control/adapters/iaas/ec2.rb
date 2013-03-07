@@ -41,8 +41,8 @@ module XYZ
         begin
           ec2_creds = get_ec2_credentials(iaas_credentials)
           connection = conn(ec2_creds)
-          connection.create_key_pair(R8_KEY_PAIR)
-          Log.debug "Created needed R8 key pair (admin) for newly created target-template"
+          connection.create_key_pair(R8::Config[:ec2][:keypair])
+          Log.debug "Created needed R8 key pair (#{R8::Config[:ec2][:keypair]}) for newly created target-template"
           connection.create_security_group(R8::Config[:ec2][:security_group], 'DTK security group')
           Log.debug "Created needed security group (#{R8::Config[:ec2][:security_group]})  for newly created target-template"
         rescue Fog::Compute::AWS::Error => e

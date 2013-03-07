@@ -18,8 +18,10 @@ module DTK; class ComponentDSL; class V2
          qualified_component(input_key)
       end
       def qualified_component(cmp)
-        "#{@module_name}__#{cmp}"
+        "#{@module_name}#{ModCmpDelim#{cmp}"
       end
+
+      ModCmpDelim = "__"
       
       def body(input_hash,cmp)
         ret = OutputHash.new
@@ -29,6 +31,7 @@ module DTK; class ComponentDSL; class V2
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
         add_attributes!(ret,cmp_type,input_hash)
+        add_link_defs!(ret,input_hash)
         ret
       end
 
@@ -70,6 +73,39 @@ module DTK; class ComponentDSL; class V2
           ret.merge!("attribute" => attrs)
         end
         ret
+      end
+
+      def add_link_defs!(ret,input_hash)
+        if input_hash["links"]
+          lds = ret["external_link_defs"] = Array.new
+          input_hash["links"].each_pair do |ld_ref,in_link_def|
+            ld = OutputHash.new("type" => convert_cmp_form(ld_ref))
+            ld["required"] = true if in_link_def["required"]
+            possible_links = ld["possible_links"] = Array.new
+            in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
+              ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
+              possible_link = OutputHash.new(pl_cmp => {"attribute_mappings" => ams})
+              possible_links << possible_link
+            end
+            lds << ld
+          end
+        end
+        ret
+      end
+
+      def convert_attribute_mapping(input_am)
+        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
+          output = convert_cmp_form($1)
+          input = convert_cmp_form($2)
+          output.gsub!(/host_address$/,"host_addresses_ipv4.0")
+          {output => input}
+        else
+          raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
+        end
+      end
+
+      def convert_cmp_form(in_cmp)
+        in_cmp.gsub(/::/,ModCmpDelim)
       end
 
     end

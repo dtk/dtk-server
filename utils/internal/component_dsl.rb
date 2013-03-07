@@ -16,7 +16,8 @@ module DTK
       format_type ||= parsed_name[:format_type]
       content = RepoManager.get_file_content(dsl_filename,module_branch)
       input_hash = convert_to_hash(content,format_type)
-      new(parsed_name[:config_agent_type],impl.id_handle(),module_branch.id_handle(),input_hash)
+      config_agent_type = ret_config_agent_type(input_hash)
+      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash)
     end
     #TODO: should unify above and two below
     def self.create_dsl_object_from_impl(source_impl,container_idh=nil,target_impl=nil)
@@ -33,7 +34,8 @@ module DTK
       parsed_name = parse_dsl_filename(dsl_filename)
       module_branch_idh = target_impl.get_module_branch().id_handle()
       input_hash = convert_to_hash(content,parsed_name[:format_type])
-      new(parsed_name[:config_agent_type],target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+      config_agent_type = ret_config_agent_type(input_hash)
+      new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -107,7 +109,16 @@ pp [:normalize,ret]
       unless [:puppet,:chef].include?(config_agent_type.to_sym)
         raise Error.new("Illegal config agent type (#{config_agent_type})")
       end
-      "#{DSLFilePrefixes[integer_version(dsl_integer_version)]}.#{config_agent_type}.#{TypeToExtension[format_type]}"
+      first_part =
+        case integer_version(dsl_integer_version)
+         when 1
+          "r8meta.#{config_agent_type}"
+         when 2
+          "dtk.model"
+        else
+          raise Error.new("DSL type not treated")
+        end
+      "#{first_part}.#{TypeToExtension[format_type]}"
     end
 
     VersionIntegerWhenVersionMissing = 1
@@ -119,12 +130,8 @@ pp [:normalize,ret]
     end
 
     DSLFilenameRegexp = {
-      1 => /^r8meta\.([a-z]+)\.([a-z]+$)/,
-      2 => /^r8component\.([a-z]+)\.([a-z]+$)/
-    }
-    DSLFilePrefixes = {
-      1 => "r8meta",
-      2 => "r8component"
+      1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
+      2 => /^dtk\.model\.([a-z]+$)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys
@@ -155,17 +162,27 @@ pp [:normalize,ret]
         pos_val ? pos_val.to_i : default_integer_version()
       end
 
-      #returns hash with keys: :config_agent_type,:format_type
+      #returns hash with keys: :format_type
       def parse_dsl_filename(filename,dsl_integer_version=nil)
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
-          config_agent_type = $1.to_sym
-          file_extension = $2
+          file_extension = $1
           unless format_type = ExtensionToType[file_extension]
             raise Error.new("illegal file extension #{file_extension}") unless file_extension
           end
-          {:config_agent_type => config_agent_type,:format_type => format_type}
+          {:format_type => format_type}
         else
           raise Error.new("Component filename (#{filename}) has illegal form")
+        end
+      end
+
+      def ret_config_agent_type(input_hash)
+        if type = input_hash["module_type"]
+          case type
+           when "puppet_module" then :puppet
+           else raise ErrorUsage.new("Unexpected module_type (#{type})")
+          end
+        else
+          :puppet #this will just be version 1
         end
       end
 

@@ -8,8 +8,8 @@ module DTK; class ComponentDSL; class V2
     end
     def generate_new_version_hash()
       ret = PrettyPrintHash.new
-      ret["module_name"] = @module_name
-      ret["version"] = @version
+      ret["module"] = @module_name
+      ret["dsl_version"] = @version
       ret["module_type"] = @module_type
       cmps = ret["components"] = PrettyPrintHash.new
       @old_version_hash.each do |cmp_ref,cmp_info|
@@ -116,7 +116,7 @@ module DTK; class ComponentDSL; class V2
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
        {:dependency => {:new_key => :requires,:custom_fn => :requires_components}},
        {:component_order => {:new_key => :after,:custom_fn => :after_components}},
-       {:external_link_defs => {:new_key => :link_defs, :custom_fn => :external_link_defs}}
+       {:external_link_defs => {:new_key => :links, :custom_fn => :external_link_defs}}
       ]
     }
     AttrOmit = {
@@ -292,34 +292,36 @@ module DTK; class ComponentDSL; class V2
       class LinkDef < self
         def self.external_link_def(assigns)
           ret = PrettyPrintHash.new
-          ret["type"] = "external"
+          #ret["type"] = "external"
           ret["required"] = true if assigns["required"]
-          ret["possible_links"] = assigns["possible_links"].map{|pl| possible_link(pl)}
+          ret["endpoints"] = assigns["possible_links"].inject(PrettyPrintHash.new) do |h,pl| 
+            h.merge(endpoints(pl))
+          end
           ret
         end
 
-        def self.possible_link(assigns)
+        def self.endpoints(assigns)
           remote_cmp_ref = qualified_component_ref(assigns.keys.first)
           info = assigns.values.first
           unless info.keys == ["attribute_mappings"]
             raise Error.new("feature_component_dsl_v2: TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
           end
-          possible_link_info = PrettyPrintHash.new
-          possible_link_info["attribute_mappings"] = info["attribute_mappings"].map{|am|attribute_mapping(am)}
-          {remote_cmp_ref => possible_link_info}
+          endpoints_info = PrettyPrintHash.new
+          endpoints_info["attribute_mappings"] = info["attribute_mappings"].map{|am|attribute_mapping(am)}
+          {remote_cmp_ref => endpoints_info}
         end
 
         def self.attribute_mapping(assigns)
           unless assigns.kind_of?(Hash) and assigns.size == 1
             raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
           end
-          {atriibute_mapping_attr(assigns.keys.first) => atriibute_mapping_attr(assigns.values.first)}
+          "#{atriibute_mapping_attr(assigns.keys.first)} -> #{atriibute_mapping_attr(assigns.values.first)}"
         end
 
         def self.atriibute_mapping_attr(var)
           parts = var.split(".")
           parts[0] = ([":remote_node",":local_node"].include?(parts[0]) ? parts[0] : qualified_component_ref(parts[0])).gsub(/^:/,"")
-          parts.join(".")
+          parts.join(".").gsub(/host_addresses_ipv4\.0/,"host_address")
         end
       end
 

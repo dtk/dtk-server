@@ -4,7 +4,7 @@ module DTK; class ComponentDSL; class V2
       new.convert(input_hash)
     end
     def convert(input_hash)
-      Component.new(input_hash.req(:module_name)).convert(input_hash.req(:components))
+      Component.new(input_hash.req(:module)).convert(input_hash.req(:components))
     end
     class Component < self
       def initialize(module_name)

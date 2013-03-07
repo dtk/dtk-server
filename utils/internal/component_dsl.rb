@@ -89,7 +89,7 @@ module DTK
 
    private
     def version_parse_check_and_normalize(version_specific_input_hash)
-      version = version_specific_input_hash["version"]
+      version = version_specific_input_hash["dsl_version"]
       integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
       unless integer_version
         raise ErrorUsage.new("Illegal version (#{version}) found in meta file")

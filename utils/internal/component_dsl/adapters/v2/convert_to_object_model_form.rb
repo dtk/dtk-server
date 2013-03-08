@@ -68,6 +68,7 @@ module DTK; class ComponentDSL; class V2
               }
             )
             add_attr_data_type_attrs!(attr_props,info)
+            attr_props.set_if_not_nil("value_asserted",info["default"])
             attr_props.set_if_not_nil("description",info["description"])
             attr_props.set_if_not_nil("required",info["required"])
             attrs.merge!(name => attr_props)

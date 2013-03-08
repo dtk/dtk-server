@@ -144,23 +144,6 @@ module DTK; class ComponentDSL
           set_attributes(component_ps)
         end
 
-        def render_hash_form(opts={})
-          ret = RenderHash.new
-          ret.set_unless_nil("display_name",display_name?())
-          ret.set_unless_nil("label",label?())
-          ret.set_unless_nil("description",value(:description))
-          ret["external_ref"] = converted_external_ref()
-          ret.set_unless_nil("ui",value(:ui))
-          ret.set_unless_nil("basic_type",basic_type?())
-          ret.set_unless_nil("type",type?())
-          ret.set_unless_nil("component_type",component_type?())
-          ret.set_unless_nil("only_one_per_node",only_one_per_node?())
-          ret.set_unless_nil("dependency",converted_dependencies(opts))
-          ret.set_unless_nil("attribute",converted_attributes(opts))
-          ret.set_unless_nil("link_defs",converted_link_defs(opts))
-          ret
-        end
-
        private
         def object_attributes()
           [:attributes,:dependencies,:link_defs]
@@ -326,18 +309,6 @@ module DTK; class ComponentDSL
           end  
         end
 
-        def render_hash_form(opts={})
-          ret = RenderHash.new
-          ret.set_unless_nil("display_name",display_name?())
-          ret.set_unless_nil("description",value(:description))
-          ret[data_type_field()] = required_value(:type)
-          ret.set_unless_nil("value_asserted",value(:default_info))
-          ret["required"] = true if value(:required)
-          ret.set_unless_nil("dynamic",value(:dynamic))
-          ret.set_unless_nil("external_ref",converted_external_ref())
-          ret
-        end
-        
         def attr_num()
           (@context||[])[:attr_num]
         end

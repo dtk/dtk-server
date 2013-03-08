@@ -214,6 +214,7 @@ module DTK
       ret = Array.new
       rows = component_link_defs.map{|link_def|ret_port_create_hash(link_def,node,component,opts)}
       return ret if rows.empty?
+      port_mh = node.model_handle(:port)
       create_from_rows(port_mh,rows,opts)
     end
 

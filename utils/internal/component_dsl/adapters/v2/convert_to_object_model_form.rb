@@ -59,7 +59,7 @@ module DTK; class ComponentDSL; class V2
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
             attr_props = OutputHash.new(
-              "name" => name,
+              "display_name" => name,
               "data_type" => info.req(:type),
               "external_ref" => {
                  "type" => "puppet_attribute", #TODO: hard-wired

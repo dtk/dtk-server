@@ -98,13 +98,13 @@ module DTK; class ComponentDSL; class V2
       def add_link_defs!(ret,input_hash)
         if input_hash["links"]
           lds = ret["external_link_defs"] = Array.new
-          input_hash["links"].each_pair do |ld_ref,in_link_def|
-            ld = OutputHash.new("type" => convert_cmp_form(ld_ref))
+          input_hash["links"].each_pair do |ld_type,in_link_def|
+            ld = OutputHash.new("type" => ld_type)
             ld["required"] = true if in_link_def["required"]
             possible_links = ld["possible_links"] = Array.new
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
               ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
-              possible_link = OutputHash.new(pl_cmp => {"attribute_mappings" => ams})
+              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"attribute_mappings" => ams})
               possible_links << possible_link
             end
             lds << ld

@@ -266,8 +266,8 @@ module DTK; class ServiceModule
       if attrs = cmp_ref_info[:attribute_override]
         sp_hash = {
           :cols => [:id,:display_name],
-          :filter => [:and,[:component_component_id,cmp_ref_info[:component_template_id]],
-                      [:oneof, :display_name,attrs.keys]]
+          :filter => [:and, [:eq, :component_component_id, cmp_ref_info[:component_template_id]],
+                      [:oneof, :display_name, attrs.keys]]
         }
         attr_mh = container_idh.createMH(:attribute)
         Model.get_objs(attr_mh,sp_hash).each do |r|

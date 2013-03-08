@@ -48,9 +48,10 @@ module DTK
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
       end
       filter_proc = Proc.new do |e|
-        ret_val = nil
-        ret_val = e if check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id)
+        ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
         #ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
+        ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
+        ret_val
       end 
       rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
     end
@@ -191,9 +192,11 @@ module DTK
 
     #### method(s) related to staging assembly template
     def rest__stage()
-      target = target_idh_with_default(request.params["target_id"]).create_object()
+      target_id = ret_request_param_id_optional(:target_id, ::DTK::Target)
+
+      target = target_idh_with_default(target_id).create_object()
       assembly_template = ret_assembly_template_object()
-      #TODO: if name given and not unique either reject or generate a -n suffix
+      # TODO: if name given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 
       new_assembly_obj = assembly_template.stage(target,assembly_name)
       rest_ok_response :assembly_id => new_assembly_obj[:id]
@@ -229,8 +232,8 @@ module DTK
       commit_msg = ret_request_params(:commit_msg)
       task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg)
       task.save!()
-#TODO: this was call from gui commit window
-#pp Attribute.augmented_attribute_list_from_task(task)
+      # TODO: this was call from gui commit window
+      # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
 

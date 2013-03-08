@@ -57,12 +57,21 @@ module XYZ
     #######################
     # standard get methods
 
-    def get_target()
+    def get_target(additional_columns = [])
       sp_hash = {
-        :cols => [:id,:group_id,:display_name],
+        :cols => [:id,:group_id,:display_name] + additional_columns,
         :filter => [:eq,:id,target_id()]
       }
       Model.get_obj(model_handle(:target),sp_hash)
+    end
+
+    def get_target_iaas_type()
+      get_target().get_iaas_type()
+    end
+
+    def get_target_iaas_credentials()
+      # TODO: Haris - When we support multiple IAAS we will need to modify logic here
+      get_target().get_aws_compute_params()
     end
 
     def self.get_violations(id_handles)

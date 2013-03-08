@@ -39,7 +39,7 @@ module Ramaze::Helper
       if target_id = ret_request_params(target_id_field)
         id_handle(target_id,:target)
       else
-        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id])
+        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id], :filter => [:eq, :is_default_target,'t'])
         raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
         targets.first
       end
@@ -50,7 +50,7 @@ module Ramaze::Helper
       if target_id
         id_handle(target_id,:target)
       else
-        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id])
+        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id],:filter => [:eq, :is_default_target,'t'])
         raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
         targets.first.id_handle()
       end
@@ -265,6 +265,15 @@ module Ramaze::Helper
         params << extra_context if extra_context
         model_class.name_to_id(*params)
       end
+    end
+
+    # resolve name/id but in this case given request param is not required
+    def ret_request_param_id_optional(param,model_class=nil,extra_context=nil)
+      if ret_request_params(param)
+        return ret_request_param_id(param, model_class, extra_context)
+      end
+
+      return nil
     end
 
     def ret_module_name_from_class(model_class=nil)

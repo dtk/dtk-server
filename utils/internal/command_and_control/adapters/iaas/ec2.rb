@@ -1,6 +1,9 @@
 module XYZ
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
+
+      R8_KEY_PAIR = 'admin'
+
       r8_nested_require('ec2','cloud_init')
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
@@ -20,7 +23,7 @@ module XYZ
 
       def self.start_instances(nodes)
         nodes.each do |node|
-          conn().server_start(node.instance_id())
+          conn(node.get_target_iaas_credentials()).server_start(node.instance_id())
           node.update_admin_op_status!(:pending)
           Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
@@ -28,9 +31,23 @@ module XYZ
 
       def self.stop_instances(nodes)
         nodes.each do |node|
-          conn().server_stop(node.instance_id())
+          conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
+        end
+      end
+
+      def self.add_security_group_and_key_pair(iaas_credentials)
+        begin
+          ec2_creds = get_ec2_credentials(iaas_credentials)
+          connection = conn(ec2_creds)
+          connection.create_key_pair(R8::Config[:ec2][:keypair])
+          Log.debug "Created needed R8 key pair (#{R8::Config[:ec2][:keypair]}) for newly created target-template"
+          connection.create_security_group(R8::Config[:ec2][:security_group], 'DTK security group')
+          Log.debug "Created needed security group (#{R8::Config[:ec2][:security_group]})  for newly created target-template"
+        rescue Fog::Compute::AWS::Error => e
+          # probabably this will handle credentials failure
+          raise ErrorUsage.new(e.message)
         end
       end
 
@@ -66,8 +83,13 @@ module XYZ
             create_options[:user_data] = user_data if user_data
           end
           response = nil
+
+          # we check if assigned target has aws credentials assigned to it, if so we will use those
+          # credentials to create nodes
+          target_aws_creds = node.get_target_iaas_credentials()
+
           begin
-            response = conn().server_create(create_options)
+            response = conn(target_aws_creds).server_create(create_options)
           rescue => e
             return {:status => "failed", :error_object => e}
           end
@@ -107,7 +129,10 @@ module XYZ
       def self.destroy_node?(node)
         instance_id = (node[:external_ref]||{})[:instance_id]
         return true unless instance_id #return if instance does not exist
-        response = conn().server_destroy(instance_id)
+
+        target_aws_creds = node.get_target_iaas_credentials()
+
+        response = conn(target_aws_creds).server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
         process_addresses__terminate?(node)
         response
@@ -117,9 +142,25 @@ module XYZ
         "#{node[:display_name]} (#{node[:id]}"
       end
 
-      def self.conn()
+      # we can provide this methods set of aws_creds that will be used. We will not use this
+      # EC2 client as member, since this is only for this specific deployment
+      def self.conn(target_aws_creds=nil)
+        if target_aws_creds
+          return CloudConnect::EC2.new(target_aws_creds)
+        end
+
         @conn ||= CloudConnect::EC2.new
       end
+
+      private
+
+      def self.get_ec2_credentials(iaas_credentials)
+        if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
+          return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+        end
+        return nil
+      end
+
     end
   end
 end

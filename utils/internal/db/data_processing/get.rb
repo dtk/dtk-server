@@ -59,7 +59,7 @@ module XYZ
       end
 
       def get_parent_object(id_handle,opts={})
-	parent_id_handle = id_handle.get_parent_id_handle()
+	      parent_id_handle = id_handle.get_parent_id_handle()
         get_object_scalar_columns(parent_id_handle,opts)
       end
 

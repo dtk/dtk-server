@@ -1,7 +1,11 @@
 r8_nested_require('target','clone')
+
 module XYZ
   class Target < Model
     include TargetCloneMixin
+    r8_nested_require('target','instance')
+    r8_nested_require('target','template')
+
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
     end
@@ -25,6 +29,18 @@ module XYZ
       self[:display_name]
     end
 
+    def type()
+      self[:type]
+    end
+
+    def is_template?()
+      (self[:type] == 'template')
+    end
+
+    def is_default?()
+      self[:is_default_target]
+    end
+
     ######### Model apis
     def info_about(about)
       case about
@@ -41,6 +57,18 @@ module XYZ
       check_valid_id_helper(model_handle,id,[:eq, :id, id])
     end
 
+    def self.get(target_mh, id)
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => [:eq, :id, id]
+      }
+      return get_objs(target_mh, sp_hash).first
+    end
+
+    def self.delete(id_handle, opts = {})
+      delete_instance(id_handle,opts) if exists? id_handle
+    end
+
     #takes values from default aside from ones specfically given in argument
     def self.create_from_default(project_idh,display_name,params_hash)
       target_mh = project_idh.createMH(:target) 
@@ -48,7 +76,7 @@ module XYZ
         raise ErrorUsage.new("Cannot find default target")
       end
       ref = display_name.downcase.gsub(/ /,"-")
-      row = default.merge(:ref => ref, :display_name => display_name, :description => nil).merge(params_hash)
+      row = default.merge(:ref => ref, :display_name => display_name).merge(params_hash)
       create_from_row(target_mh,row,:convert => true)
     end
    
@@ -90,6 +118,20 @@ module XYZ
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       ndx_changes = StateChange.get_ndx_node_config_changes(id_handle)
       nodes.inject({}){|h,n|h.merge(n.id => ndx_changes[n.id]||StateChange.node_config_change__no_changes())}
+    end
+
+    def get_iaas_type()
+      update_object!(:iaas_type)[:iaas_type]
+    end
+
+    # returns aws params if pressent in iaas properties
+    def get_aws_compute_params()
+      iaas_props = update_object!(:iaas_properties)[:iaas_properties]
+      if iaas_props && (aws_key = iaas_props[:key]) && (aws_secret = iaas_props[:secret])
+        return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+      end
+
+      return nil
     end
 
     def get_and_update_nodes_status()

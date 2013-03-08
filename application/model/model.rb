@@ -27,7 +27,7 @@ module XYZ
       #### Actions
       #idempotent
       def delete(id_handle,opts={})
-        delete_instance(id_handle,opts)if exists? id_handle
+        delete_instance(id_handle,opts) if exists? id_handle
       end
       #idempotent
       def create_simple(new_uri,c,opts={})

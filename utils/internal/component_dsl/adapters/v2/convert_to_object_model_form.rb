@@ -1,3 +1,4 @@
+#TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent phase
 module DTK; class ComponentDSL; class V2
   class ObjectModelForm < ComponentDSL::ObjectModelForm
     def self.convert(input_hash)
@@ -60,12 +61,12 @@ module DTK; class ComponentDSL; class V2
           in_attrs.each_pair do |name,info|
             attr_props = OutputHash.new(
               "display_name" => name,
-              "data_type" => info.req(:type),
               "external_ref" => {
                  "type" => "puppet_attribute", #TODO: hard-wired
                  "path" => "node[#{cmp_type}][#{name}]"
               }
             )
+            add_attr_data_type_attrs!(attr_props,info)
             attr_props.set_if_not_nil("description",info["description"])
             attr_props.set_if_not_nil("required",info["required"])
             attrs.merge!(name => attr_props)
@@ -74,6 +75,25 @@ module DTK; class ComponentDSL; class V2
         end
         ret
       end
+
+      def add_attr_data_type_attrs!(attr_props,info)
+        type = info.req(:type)
+        if AutomicTypes.include?(type)
+          attr_props.merge!("data_type" => type)
+        elsif type =~ /^array\((.+)\)$/
+          scalar_type = $1
+          if ScalarTypes.include?(scalar_type)
+            semantic_type = {":array" => scalar_type} 
+            attr_props.merge!("data_type" => "json","semantic_type_summary" => type,"semantic_type" => semantic_type)
+          end
+        end
+        unless attr_props["data_type"]
+          raise ParsingError.new("Ill-formed attribute data type (?1)",type)
+        end
+        attr_props
+      end
+      ScalarTypes = %w{integer string boolean}
+      AutomicTypes = ScalarTypes + %w{json}
 
       def add_link_defs!(ret,input_hash)
         if input_hash["links"]

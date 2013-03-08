@@ -27,6 +27,7 @@ module DTK; class ComponentDSL; class V2
       def body(input_hash,cmp)
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
+        ret["basic_type"] = "service"
         ret.set_if_not_nil("description",input_hash["description"])
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref
@@ -97,14 +98,14 @@ module DTK; class ComponentDSL; class V2
 
       def add_link_defs!(ret,input_hash)
         if input_hash["links"]
-          lds = ret["external_link_defs"] = Array.new
+          lds = ret["link_defs"] = Array.new
           input_hash["links"].each_pair do |ld_type,in_link_def|
             ld = OutputHash.new("type" => ld_type)
             ld["required"] = true if in_link_def["required"]
             possible_links = ld["possible_links"] = Array.new
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
               ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
-              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"attribute_mappings" => ams})
+              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"type" => "external","attribute_mappings" => ams})
               possible_links << possible_link
             end
             lds << ld

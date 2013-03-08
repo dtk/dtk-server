@@ -16,8 +16,8 @@ module DTK; class ComponentDSL
 
         def render_hash_form(opts={})
           ret = RenderHash.new
-          ret.set_unless_nil("module_name",module_name?())
-          ret.set_unless_nil("version",ComponentDSL.version(integer_version()))
+          ret.set_unless_nil("module",module_name?())
+          ret.set_unless_nil("dsl_version",ComponentDSL.version(integer_version()))
           ret.set_unless_nil("module_type",module_type?())
           self[:components].each_element(:skip_required_is_false => true) do |cmp|
             hash_key = render_cmp_ref(cmp.hash_key)

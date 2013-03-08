@@ -1,0 +1,3 @@
+--require rspec2db
+--format Rspec2db
+--options .\config\rspec2db.yml

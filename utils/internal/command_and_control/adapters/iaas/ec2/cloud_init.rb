@@ -72,7 +72,8 @@ cat << EOF > /etc/mcollective/facts.yaml
 git-server: "<%=git_server_url %>"
 EOF
 
-ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
+mkdir /root/.ssh
+touch /root/.ssh/known_hosts
 cat << EOF >>/root/.ssh/known_hosts
 <%=fingerprint %>
 EOF

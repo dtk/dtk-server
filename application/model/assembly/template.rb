@@ -254,6 +254,15 @@ module DTK; class Assembly
       order ? ret.sort(&order) : ret
     end
 
+    def self.list_modules(assembly_templates)
+      components = []
+      assembly_templates.each do |assembly|
+        components << assembly.info_about(:components)
+      end
+
+      return components.flatten
+    end
+
     def self.exists?(project_idh,service_module_name,template_name)
       component_type = component_type(service_module_name,template_name)
       sp_hash = {

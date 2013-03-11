@@ -33,6 +33,10 @@ module XYZ
         nodes.each do |node|
           conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
+          # we remove dns if it is not persistent dns
+          unless node.persistent_hostname?
+            node.strip_dns_info!()
+          end
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end

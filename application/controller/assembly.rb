@@ -56,6 +56,14 @@ module DTK
       rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
     end
 
+    def rest__list_modules()
+      ids = ret_request_params(:assemblies)
+      assembly_templates = get_assemblies_from_ids(ids)
+      components = Assembly::Template.list_modules(assembly_templates)
+      
+      rest_ok_response components
+    end
+
     # checks element trough set of fields
     def check_element(element, fields, element_id_val)
       return true if (element_id_val.nil? || element_id_val.empty?)
@@ -422,6 +430,16 @@ module DTK
 
     def get_tree(id)
       return {:data=>'some tree data goes here'}
+    end
+
+    def get_assemblies_from_ids(ids)
+      assemblies = []
+      ids.each do |id|
+        assembly = id_handle(id.to_i,:component).create_object(:model_name => :assembly_template)
+        assemblies << assembly
+      end
+
+      return assemblies
     end
 
     #TODO: unify with clone(id)

@@ -132,12 +132,14 @@
   "target": {
     "order": [
       "id",
+      "name",
       "target_type",
       "iaas",
       "description"
     ],
     "mapping": {
       "iaas": "iaas_type",
+      "name": "display_name",
       "id": "dtk_id",
       "description": "description",
       "target_type": "dtk_type"

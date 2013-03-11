@@ -267,6 +267,15 @@ module Ramaze::Helper
       end
     end
 
+    # resolve name/id but in this case given request param is not required
+    def ret_request_param_id_optional(param,model_class=nil,extra_context=nil)
+      if ret_request_params(param)
+        return ret_request_param_id(param, model_class, extra_context)
+      end
+
+      return nil
+    end
+
     def ret_module_name_from_class(model_class=nil)
       if model_class
         OverrideModelName[model_class]||Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym

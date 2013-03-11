@@ -85,6 +85,10 @@ module XYZ
       normalize_model(mn1) == normalize_model(mn2)
     end
 
+    def self.name_to_id(model_handle,name)
+      name_to_id_default(model_handle,name)
+    end
+
     def hash_subset(*cols)
       Aux::hash_subset(self,cols)
     end

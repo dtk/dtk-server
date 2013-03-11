@@ -40,6 +40,17 @@ module XYZ
       rest_ok_response(:target_id => target_idh.get_id())
     end
 
+    def rest__delete()
+      target_id  = ret_request_param_id_optional(:target_id, ::DTK::Target)
+
+      if Target.get(model_handle(),target_id).is_default?
+        raise ErrorUsage, "You cannot delete default target with ID '#{target_id}'"
+      else
+        Target.delete(id_handle(target_id))
+      end
+
+      rest_ok_response
+    end
 
     def rest__create_assembly_template()
       raise Error.new("target/create_assembly_template not implemented yet")

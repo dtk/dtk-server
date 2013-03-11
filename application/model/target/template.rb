@@ -11,12 +11,8 @@ module DTK
       end
 
       def self.get(target_mh, id)
-        sp_hash = {
-          :cols => common_columns(),
-          :filter => [:eq, :id, id]
-        }
-        target = get_objs(target_mh, sp_hash).first
-        raise ErrorUsage.new("Target with ID '#{id}' is not a template") unless target.is_template()
+        target = super(target_mh, id)
+        raise ErrorUsage.new("Target with ID '#{id}' is not a template") unless target.is_template?
         return target
       end
 

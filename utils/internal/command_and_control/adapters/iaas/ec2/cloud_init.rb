@@ -58,6 +58,28 @@ cat << EOF >>/root/.ssh/known_hosts
 EOF
 
 eos
+
+UserDataTemplates[:debian] = Erubis::Eruby.new <<eos
+#!/bin/sh 
+
+cat << EOF >> /etc/mcollective/server.cfg
+---
+plugin.stomp.host = <%=node_config_server_host %>
+EOF
+
+cat << EOF > /etc/mcollective/facts.yaml
+---
+git-server: "<%=git_server_url %>"
+EOF
+
+mkdir /root/.ssh
+touch /root/.ssh/known_hosts
+cat << EOF >>/root/.ssh/known_hosts
+<%=fingerprint %>
+EOF
+
+eos
+
     end
   end
 end; end

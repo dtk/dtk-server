@@ -33,8 +33,12 @@ module XYZ
       self[:type]
     end
 
-    def is_template()
+    def is_template?()
       (self[:type] == 'template')
+    end
+
+    def is_default?()
+      self[:is_default_target]
     end
 
     ######### Model apis
@@ -51,6 +55,18 @@ module XYZ
 
     def self.check_valid_id(model_handle,id)
       check_valid_id_helper(model_handle,id,[:eq, :id, id])
+    end
+
+    def self.get(target_mh, id)
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => [:eq, :id, id]
+      }
+      return get_objs(target_mh, sp_hash).first
+    end
+
+    def self.delete(id_handle, opts = {})
+      delete_instance(id_handle,opts) if exists? id_handle
     end
 
     #takes values from default aside from ones specfically given in argument

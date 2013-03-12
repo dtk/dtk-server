@@ -1,7 +1,7 @@
 options:
   suite: "full regression" #this can be used in a setup where multiple projects share the same test results database 
   build: "12345" #
-  backtrace: false #set backtrace to true for more details and metadata
+  backtrace: true #set backtrace to true for more details and metadata
 dbconnection:
   adapter: postgresql
   database:  rspec_test_report

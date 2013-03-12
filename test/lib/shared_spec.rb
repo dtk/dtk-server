@@ -9,7 +9,7 @@ STDOUT.sync = true
 shared_context "Stage" do |dtk_common|
 	it "stages assembly from assembly template" do
 		$assembly_id = dtk_common.stage_assembly()
-		$assembly_id.should_not eq(nil)
+		$assembly_id.should eq(nil)
 		puts "Stage completed successfully!"
 	end
 end

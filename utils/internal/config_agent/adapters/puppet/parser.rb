@@ -1,4 +1,6 @@
 #TODO: think better to move assumptions about ast form into the initialization functions to capture their assumptions
+module Puppet
+end
 require 'puppet/parser'
 
 module XYZ

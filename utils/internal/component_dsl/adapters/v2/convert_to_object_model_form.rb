@@ -19,7 +19,11 @@ module DTK; class ComponentDSL; class V2
          qualified_component(input_key)
       end
       def qualified_component(cmp)
-        "#{@module_name}#{ModCmpDelim}#{cmp}"
+        if @module_name == cmp
+          cmp
+        else
+          "#{@module_name}#{ModCmpDelim}#{cmp}"
+        end
       end
 
       ModCmpDelim = "__"

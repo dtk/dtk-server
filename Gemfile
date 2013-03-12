@@ -21,7 +21,8 @@ gem 'awesome_print','1.1.0'
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
 gem 'chef','10.16.2'
-gem 'puppet','2.7.6'
+#gem 'puppet','2.7.6'
+gem 'puppet','3.1.0'
 gem 'stomp','1.1.9'
 gem 'grit','2.5.0'
 gem 'innate','2012.03' #version compatible with ramaze','2012.04.14

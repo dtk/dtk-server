@@ -1,4 +1,4 @@
-#TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent phase
+#TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent parser phase
 module DTK; class ComponentDSL; class V2
   class ObjectModelForm < ComponentDSL::ObjectModelForm
     def self.convert(input_hash)
@@ -36,6 +36,8 @@ module DTK; class ComponentDSL; class V2
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
+        ret.set_if_not_nil("dependency",dependency(input_hash,cmp))
+        ret.set_if_not_nil("component_order",component_order(input_hash))
         add_attributes!(ret,cmp_type,input_hash)
         add_link_defs!(ret,input_hash)
         ret
@@ -60,6 +62,34 @@ module DTK; class ComponentDSL; class V2
         external_ref["type"] == "puppet_definition" ? true : nil
       end
       
+      def dependency(input_hash,cmp)
+        if req_cmps = input_hash["requires"]
+          req_cmps.inject(OutputHash.new) do |h,dep_cmp|
+            cmp_internal_form = convert_cmp_form(cmp)
+            dep_cmp_internal_form = convert_cmp_form(dep_cmp)
+            el = {dep_cmp_internal_form =>
+              {"type"=>"component",
+                "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp_internal_form]},
+                "description"=>
+                "#{dep_cmp} is required for #{cmp}",
+                "display_name"=>dep_cmp_internal_form,
+                "severity"=>"warning"}}
+            h.merge(el)
+          end
+        end
+      end
+
+      def component_order(input_hash)
+        if after_cmps = input_hash["after"]
+          after_cmps.inject(OutputHash.new) do |h,after_cmp|
+            after_cmp_internal_form = convert_cmp_form(after_cmp)
+            el={after_cmp_internal_form =>
+              {"after"=>after_cmp_internal_form}}
+            h.merge(el)
+          end
+        end
+      end
+
       def add_attributes!(ret,cmp_type,input_hash)
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new

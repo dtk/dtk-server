@@ -6,6 +6,6 @@ dbconnection:
   adapter: postgresql
   database:  rspec_test_report
   username: postgres
-  password: pass
-  host: ec2-54-246-3-66.eu-west-1.compute.amazonaws.com
+  password: password
+  host: localhost
   port: 5432

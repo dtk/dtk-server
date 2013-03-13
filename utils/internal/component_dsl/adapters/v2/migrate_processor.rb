@@ -247,6 +247,7 @@ module DTK; class ComponentDSL; class V2
           ret["type"] = type if type
           ret["default"] = attr_info["value_asserted"] if attr_info["value_asserted"]
           ret["required"] = true if attr_info["required"]
+          ret["dynamic"] = true if attr_info["dynamic"]
           external_ref = external_ref(attr,attr_info["external_ref"])
           ret["external_ref"] = external_ref if external_ref
           ret

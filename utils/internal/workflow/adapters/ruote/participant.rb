@@ -146,7 +146,7 @@ module XYZ
                 node.update_operational_status!(:running)
                 node.update_admin_op_status!(:running)
 
-                #these must be called before get_and_propagate_dynamic_attributes
+                # these must be called before get_and_propagate_dynamic_attributes
                 node.associate_elastic_ip?()
                 node.associate_persistent_dns?()
 

@@ -1,11 +1,11 @@
 options:
   suite: "full regression" #this can be used in a setup where multiple projects share the same test results database 
-  build: "12345" #
+  build: "32345678" #
   backtrace: true #set backtrace to true for more details and metadata
 dbconnection:
   adapter: postgresql
   database:  rspec_test_report
   username: postgres
-  password: password
-  host: ec2-54-246-3-66.eu-west-1.compute.amazonaws.com
+  password: bj3011sa$
+  host: localhost
   port: 5432

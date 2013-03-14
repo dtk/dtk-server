@@ -2,15 +2,15 @@ module DTK
   class Component_moduleController < AuthController
     helper :module_helper
 
-def rest__test_generate_dsl()
-  component_module = create_obj(:component_module_id)
-  dsl_created_info = component_module.test_generate_dsl()
-  STDOUT << dsl_created_info[:content] << "\n"
-  rest_ok_response
-end
+    def rest__test_generate_dsl()
+      component_module = create_obj(:component_module_id)
+      dsl_created_info = component_module.test_generate_dsl()
+      STDOUT << dsl_created_info[:content] << "\n"
+      rest_ok_response
+    end
 
-    #### create and delete actions ###
-  def rest__create()
+      #### create and delete actions ###
+    def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
@@ -61,6 +61,11 @@ end
 
     def rest__get_all_workspace_library_diffs()
       rest_ok_response ComponentModule.get_all_workspace_library_diffs(model_handle)
+    end
+
+    def rest__info()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+      rest_ok_response ComponentModule.info(model_handle(), module_id)
     end
 
     def rest__info_about()

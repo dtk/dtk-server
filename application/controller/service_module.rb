@@ -63,6 +63,11 @@ module DTK
       rest_ok_response ServiceModule.list(model_handle, :project_idh => project.id_handle())
     end
 
+    def rest__info()
+      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+      rest_ok_response ServiceModule.info(model_handle(), module_id)
+    end
+
     def rest__info_about()
       service_module = create_obj(:service_module_id)
       about = ret_non_null_request_params(:about).to_sym

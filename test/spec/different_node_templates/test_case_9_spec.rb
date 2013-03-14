@@ -6,8 +6,8 @@ require 'rest_client'
 require 'pp'
 require 'json'
 require 'awesome_print'
-require './test/lib/dtk_common'
-require './test/lib/shared_spec'
+require './lib/dtk_common'
+require './lib/shared_spec'
 
 STDOUT.sync = true
 

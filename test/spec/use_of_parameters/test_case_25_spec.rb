@@ -141,7 +141,7 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 		include_context "Check attribute", dtk_common, NODE_NAME, 'memory_size', MEMORY_SIZE
 	end
 
-	#context "Delete and destroy assemblies" do
-#		include_context "Delete assemblies", dtk_common
-#	end
+	context "Delete and destroy assemblies" do
+		include_context "Delete assemblies", dtk_common
+	end
 end

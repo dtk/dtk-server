@@ -21,9 +21,8 @@ node_param_list << 'ec2_public_address'
 node_param_list << 'private_dns_name'
 
 attr_param_list = Array.new
-attr_param_list << 'fqdn'
-attr_param_list << 'host_addresses_ipv4'
-attr_param_list << 'node_components'
+attr_param_list << 'memory_size'
+attr_param_list << 'os_identifier'
 
 $assembly_id = 0
 dtk_common = DtkCommon.new($assembly_name, $assembly_template)
@@ -142,7 +141,7 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 		include_context "Check attribute", dtk_common, NODE_NAME, 'memory_size', MEMORY_SIZE
 	end
 
-	context "Delete and destroy assemblies" do
-		include_context "Delete assemblies", dtk_common
-	end
+	#context "Delete and destroy assemblies" do
+#		include_context "Delete assemblies", dtk_common
+#	end
 end

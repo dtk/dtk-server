@@ -59,6 +59,14 @@ module DTK
       :puppet #hardwired
     end
 
+    def self.info(target_mh, id, opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => [:eq,:id,id]
+      }
+      get_objs(target_mh, sp_hash.merge(opts)).first
+    end
+
 
     def self.module_specific_type(config_agent_type)
       config_agent_type

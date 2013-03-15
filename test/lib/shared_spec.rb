@@ -207,7 +207,7 @@ shared_context "Clone versioned module" do |dtk_common, module_name, module_vers
 	it "clones versioned module from server to local filesystem" do
 		pass = false
 		value = `dtk module #{module_name} clone -v #{module_version} -n`
-		pass = value.include?("Module #{module_name} has been successfully cloned!")
+		pass = value.include?("module_directory:")
 		pass.should eq(true)
 	end
 end

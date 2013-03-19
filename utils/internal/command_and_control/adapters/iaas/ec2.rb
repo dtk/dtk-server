@@ -76,6 +76,7 @@ module XYZ
           rescue => e
             return {:status => "failed", :error_object => e}
           end
+
           instance_id = response[:id]
           state = response[:state]
           external_ref = external_ref.merge({

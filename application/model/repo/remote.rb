@@ -110,30 +110,37 @@ module DTK
 
       def initialize(remote_repo=nil)
         @remote_repo = remote_repo
-        @client = RepoManagerClient.new(rest_base_url(remote_repo))
+        @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo))
+        Log.debug "Using repo manager: '#{repo_url}'"
       end
 
-      #create (empty) remote module
-      def create_module(name,type)
+      # TODO: [Haris] Refactor later so that params order makes more sense
+      # request_params: hash map containing remote_component_name, remote_component_namespace
+      def create_module(name, type, request_params = {})
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
-        namespace = self.class.default_namespace()
+        #namespace = self.class.default_namespace()
+        namespace = request_params[:remote_component_namespace] || CurrentSession.new.get_user_object().get_namespace()
         params = {
           :username => username,
-          :name => name,
+          :name => request_params[:remote_component_name] || name,
           :access_rights => "RW+", 
           :type => type_for_remote_module(type),
           :namespace => namespace,
           :noop_if_exists => true
         } 
         response_data = client.create_module(params)
+
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
-      def delete_module(name,type)
-        namespace = self.class.default_namespace()
+      # TODO: [Haris] We should refactor this so that arguments are passed in more logical
+      # order, (name, namespace, type) for now we can live with it
+      def delete_module(name,type, namespace=nil)
+        # if namespace omitted we will use default one
+        namespace ||= self.class.default_namespace()
         params = {
           :name => name,
           :namespace => namespace,

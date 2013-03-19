@@ -7,29 +7,30 @@ module DTK; class Repo
         type = type_for_remote_module(remote_params[:module_type])
         #TODO: should be done a prori
         if opts[:rsa_pub_key]
-          authorize_end_user(mh,module_name,type,opts[:rsa_pub_key],access_rights)
+          # TODO: [Haris] Check namespace here 
+          authorize_end_user(mh,module_name,DefaultsNamespace,type,opts[:rsa_pub_key],access_rights)
         end
         true
       end
 
-      def authorize_dtk_instance(module_name,type)
+      def authorize_dtk_instance(module_name, module_namespace, type)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "RW+"
-        authorize_user(username,rsa_pub_key,access_rights,module_name,type)
+        authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type)
       end
 
-      def authorize_end_user(mh,module_name,type,rsa_pub_key,access_rights)
+      def authorize_end_user(mh,module_name,module_namespace,type,rsa_pub_key,access_rights)
         username = get_end_user_remote_repo_username(mh,rsa_pub_key)
-        authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,type)
+        authorize_user(username,rsa_pub_key,access_rights.remote_repo_form(),module_name,module_namespace,type)
       end
 
      private 
-      def authorize_user(username,rsa_pub_key,access_rights,module_name,type)
+      def authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type)
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
         grant_user_rights_params = {
           :name => module_name,
-          :namespace => DefaultsNamespace,
+          :namespace => module_namespace || DefaultsNamespace,
           :type => type_for_remote_module(type),
           :username => username,
           :access_rights => access_rights

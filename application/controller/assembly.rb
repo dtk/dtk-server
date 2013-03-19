@@ -265,6 +265,7 @@ module DTK
       nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
 
       unless is_valid
+        Log.info(error_msg)
         return rest_ok_response(:errors => [error_msg])
       end
 
@@ -292,6 +293,7 @@ module DTK
       nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :running)
 
       unless is_valid
+        Log.info(error_msg)
         return rest_ok_response(:errors => [error_msg])
       end
       

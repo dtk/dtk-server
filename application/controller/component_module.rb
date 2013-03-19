@@ -94,8 +94,10 @@ module DTK
     end
 
     def rest__delete_remote()
-      name = ret_non_null_request_params(:remote_module_name)
+      name      = ret_non_null_request_params(:remote_module_name)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+      # use default one, if there is namaspace provided in request
+      remote_namespace = ret_request_params(:remote_module_namespace) || remote_namespace
       remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
@@ -114,8 +116,9 @@ module DTK
 
     def rest__export()
       component_module = create_obj(:component_module_id)
+      name_and_ns_params = ret_params_hash(:remote_component_name, :remote_component_namespace)
       remote_repo = ret_remote_repo()
-      component_module.export(remote_repo)
+      component_module.export(remote_repo, nil, name_and_ns_params)
       rest_ok_response 
     end
 

@@ -30,6 +30,11 @@ module XYZ
       klass.stop_instances(nodes)
     end
 
+    def self.prepare_account_for_target(iaas_adapter_name, iaas_credentials)
+      klass = load_for_aux(:iaas, iaas_adapter_name)
+      klass.add_security_group_and_key_pair(iaas_credentials)
+    end
+
     def self.find_matching_node_binding_rule(node_binding_rules,target)
       target.update_object!(:iaas_type,:iaas_properties)
       klass = load_iaas_for(:target => target)

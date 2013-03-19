@@ -42,7 +42,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 	end
 
 	context "Delete assembly template" do
-		it "missing test step implementation"
+		include_context "Delete assembly template", dtk_common, new_assembly_template
 	end
 
 	context "Delete and destroy assemblies" do

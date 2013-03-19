@@ -19,6 +19,8 @@ namenode_web_port = 50070
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 9: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly"
+
 describe "Test Case 9: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly" do
 
 	context "Stage assembly function" do

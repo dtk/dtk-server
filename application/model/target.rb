@@ -1,7 +1,11 @@
 r8_nested_require('target','clone')
+
 module XYZ
   class Target < Model
     include TargetCloneMixin
+    r8_nested_require('target','instance')
+    r8_nested_require('target','template')
+
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
     end
@@ -23,6 +27,14 @@ module XYZ
     ### virtual column defs
     def name()
       self[:display_name]
+    end
+
+    def type()
+      self[:type]
+    end
+
+    def is_template()
+      (self[:type] == 'template')
     end
 
     ######### Model apis

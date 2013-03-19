@@ -88,7 +88,7 @@ module DTK; class ServiceModule
         #add the remote ports
         ld_links_info.each do |ld_link_info|
           remote_component_type = ld_link_info[:link][:remote_component_type]
-          if matching_node_cmp = link_defs_info.find{|r|r[:nested_component][:component_type] == remote_component_type}
+          link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
             node = matching_node_cmp[:node]
             component = matching_node_cmp[:nested_component]
             port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)

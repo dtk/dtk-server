@@ -1,41 +1,48 @@
 module XYZ
   class TargetController < AuthController
+    helper :target_helper
+
+    def rest__list()
+
+      subtype = ret_target_subtype()
+
+      if subtype.eql? :instance
+        response = Target::Instance.list(model_handle())
+      else
+        response = Target::Template.list(model_handle())
+      end
+
+      rest_ok_response response
+    end
 
     def rest__create()
       display_name = ret_non_null_request_params(:target_name)
-      params_hash = ret_params_hash(:description,:iaas_type,:iaas_properties)
-      project_idh = get_default_project().id_handle()
-      target_idh = Target.create_from_default(project_idh,display_name,params_hash)
+      template_id  = ret_request_params(:target_template_id)
+      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties)
+      project_idh  = get_default_project().id_handle()
+
+      unless template_id
+        # we first check if we are ok with aws credentials
+        CommandAndControl.prepare_account_for_target(params_hash[:iaas_type],params_hash[:iaas_properties])
+        # create target template
+        target_idh = Target::Template.create_from_user_input(project_idh, display_name, params_hash, true)
+        # get object since we will need iaas data to copy
+        target_template =  Model.get_objs(target_idh, { :cols => [:id, :description, :iaas_type, :iaas_properties]}).first
+        template_id = target_template[:id]
+      else
+        target_template = Target::Template.get(model_handle(),template_id)
+         # we extract needed values
+        params_hash = extract_hash(target_template,:description,:iaas_type,:iaas_properties)
+      end
+
+      # create target instance
+      target_idh = Target.create_from_default(project_idh,display_name, params_hash.merge(:parent_id => template_id.to_i))
       rest_ok_response(:target_id => target_idh.get_id())
     end
 
 
     def rest__create_assembly_template()
-      #TODO: this may be just used for testing
-      assembly_name,service_module_name = ret_non_null_request_params(:assembly_name,:service_module_name)
-      target_id,node_ids,library_id = ret_request_params(:target_id,:node_ids,:library_id)
-      unless target_id or node_ids
-        #only need target_id if node_ids not specified
-        targets = Model.get_objs(model_handle,:cols => [:id,:dispaly_name])
-        unless targets.size == 1
-          raise Error.new("Cannot find unique target")
-        end
-        target_id = targets.first[:id]
-      end
-      unless node_ids
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:eq,:datacenter_datacenter_id,target_id]
-        }
-        node_ids = Model.get_objs(model_handle(:node),sp_hash).map{|r|r[:id]}
-      end
-      node_idhs = node_ids.map{|id|id_handle(id,:node)}
-      library_idh = (library_id && id_handle(library_id,:library)) || Library.get_public_library(model_handle(:library)).id_handle()
-
-      icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
-
-      Assembly::Template.create_library_template(library_idh,node_idhs,assembly_name,service_module_name,icon_info) 
-      rest_ok_response 
+      raise Error.new("target/create_assembly_template not implemented yet")
     end
 
     def rest__info_about()
@@ -197,9 +204,7 @@ module XYZ
     end
 
     def create()
-pp '++++++++++++++++++++++++++++++++++++++'
-pp request.params
-
+      # TODO: Should we remove this method?
       return {}
     end
 

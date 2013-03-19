@@ -21,9 +21,8 @@ node_param_list << 'ec2_public_address'
 node_param_list << 'private_dns_name'
 
 attr_param_list = Array.new
-attr_param_list << 'fqdn'
-attr_param_list << 'host_addresses_ipv4'
-attr_param_list << 'node_components'
+attr_param_list << 'memory_size'
+attr_param_list << 'os_identifier'
 
 $assembly_id = 0
 dtk_common = DtkCommon.new($assembly_name, $assembly_template)

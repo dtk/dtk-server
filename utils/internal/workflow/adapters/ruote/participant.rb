@@ -83,7 +83,7 @@ module XYZ
   
           begin
             yield
-           rescue Exception => e
+          rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
             if event and errors
               Log.info_pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}]
@@ -114,16 +114,15 @@ module XYZ
           begin
             # Killing task to prevent upstream subtasks' execution
             Workflow.kill(get_top_task_id(workitem))            
-          rescue Exception => e            
+          rescue Exception => e    
           end
         end
-      end
-      def cancel_upstream_subtasks(workitem)
+        def cancel_upstream_subtasks(workitem)
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
           begin
             # Killing task to prevent upstream subtasks' execution
             Workflow.cancel(get_top_task_id(workitem))            
-          rescue Exception => e            
+          rescue Exception => e   
           end
         end
       end

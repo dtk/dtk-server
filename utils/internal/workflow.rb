@@ -31,8 +31,16 @@ module XYZ
 
     def self.cancel(task_id)
       @@Lock.synchronize do 
-        raise ErrorUsage.new("There are no tasks running with TASK_ID: #{task_id}") unless @@active_workflows[task_id]
+        raise Error.new("There are no tasks running with TASK_ID: #{task_id}") unless @@active_workflows[task_id]
         @@active_workflows[task_id].cancel()
+        @@active_workflows.delete(task_id)
+      end
+    end
+
+    def self.kill(task_id)
+      @@Lock.synchronize do 
+        raise Error.new("There are no tasks running with TASK_ID: #{task_id}") unless @@active_workflows[task_id]
+        @@active_workflows[task_id].kill()
         @@active_workflows.delete(task_id)
       end
     end

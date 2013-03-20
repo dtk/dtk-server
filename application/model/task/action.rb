@@ -33,6 +33,11 @@ module DTK; class Task
           self[:error] =  error.to_hash
         end
       end
+      class Cancelled < self
+        def initialize(hash={})
+          super(hash)
+        end
+      end
     end
   end
 end; end

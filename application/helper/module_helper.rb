@@ -7,7 +7,7 @@ module Ramaze::Helper
       project = get_default_project()
       remote_params = {
         :repo => remote_repo,
-        :namespace => remote_namespace,
+        :module_namespace => remote_namespace,
         :module_name => remote_module_name,
         :version => version
       }

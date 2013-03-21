@@ -19,12 +19,30 @@ module XYZ
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node,impl_info)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
-
+        
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
+      end
+
+      #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
+      def self.initiate_cancelation(task_idh,top_task_idh,config_node,opts)
+
+        #TODO: getting out implemention info not needed if put module names in component ext refs
+        impl_info = get_relevant_impl_info(config_node)
+        version_context = get_version_context(impl_info)
+
+        config_agent = ConfigAgent.load(config_node[:config_agent_type])
+        msg_content =  config_agent.ret_msg_content(config_node,impl_info)
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
+        
+        pbuilderid = Node.pbuilderid(config_node[:node])
+        filter = filter_single_fact("pbuilderid",pbuilderid)
+        context = opts[:receiver_context]
+        callbacks = context[:callbacks]
+        async_agent_call("puppet_cancel","run",msg_content,filter,callbacks,context)
       end
 
       def self.authorize_node(node,callbacks,context_x={})
@@ -56,14 +74,15 @@ module XYZ
         rc = opts[:receiver_context]
         callbacks = {
           :on_msg_received => proc do |msg|
-            rc[:callbacks][:on_msg_received].call(msg)
+            # is_task_canceled is set from participant cancel method
+            rc[:callbacks][:on_msg_received].call(msg) unless node[:is_task_canceled]
           end,
           :on_timeout => proc do 
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
               new_opts = opts.merge(:count => count-1)
-              poll_to_detect_node_ready(node,new_opts)
+              poll_to_detect_node_ready(node,new_opts) unless node[:is_task_canceled]
             end
           end
         }

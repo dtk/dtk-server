@@ -54,12 +54,19 @@ module DTK
 
       module_name = module_name()
 
+      # if user did not specify remote values we set default / current ones
+      request_params[:remote_component_name]      ||= module_name
+      request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
+
       if repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       end
 
       if module_name != request_params[:remote_component_name]
-        #raise ErrorUsage.new("Remote repo name ('#{request_params[:remote_component_name]}') is not valid, name must correspond to local module name ('#{module_name}')")
+        # TODO: [Haris] Check with Rich, since if we use diffrent name we have a problem with unlinking, it is hard to unlink
+        # since modules are checked with new name, and modules exist only by they original name. Can be fixed, just to see if it is
+        # necessery
+        raise ErrorUsage.new("Remote repo name ('#{request_params[:remote_component_name]}') is not valid, name must correspond to local module name ('#{module_name}')")
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
@@ -159,6 +166,7 @@ module DTK
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
       } 
+
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         module_obj.get_repos().each{|repo|repo.unlink_remote(remote_params[:repo])}
       end

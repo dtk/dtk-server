@@ -2,7 +2,7 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
   class Repo
     module RemoteMixin
-      def linked_remote?(remote_repo=nil)
+      def linked_remote?(remote_repo=nil) 
         unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
           raise Error.new("Not implemented yet for remote's other than default")
         end
@@ -212,6 +212,11 @@ module DTK
       def self.default_remote_repo()
         :r8_network #TODO: have this obtained from config file
       end
+
+      def self.default_user_namespace()
+        CurrentSession.new.get_user_object().get_namespace()
+      end
+
       def self.default_namespace()
         DefaultsNamespace
       end

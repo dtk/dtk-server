@@ -116,7 +116,7 @@ module DTK
 
     def rest__export()
       component_module = create_obj(:component_module_id)
-      name_and_ns_params = ret_params_hash(:remote_component_name, :remote_component_namespace)
+      name_and_ns_params = ret_params_hash_with_nil(:remote_component_name, :remote_component_namespace)
       remote_repo = ret_remote_repo()
       component_module.export(remote_repo, nil, name_and_ns_params)
       rest_ok_response 

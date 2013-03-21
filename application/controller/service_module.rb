@@ -42,7 +42,9 @@ module DTK
     def rest__export()
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
-      service_module.export(remote_repo)
+      name_and_ns_params = ret_params_hash_with_nil(:remote_component_name, :remote_component_namespace)
+      
+      service_module.export(remote_repo, nil, name_and_ns_params)
       rest_ok_response 
     end
 

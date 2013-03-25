@@ -23,6 +23,10 @@ module XYZ
         Engine.cancel_process(@wfid)
       end
 
+      def kill()
+        Engine.kill_process(@wfid)
+      end
+
       def execute(top_task_id) 
         TaskInfo.initialize_task_info()
         begin
@@ -134,18 +138,27 @@ module XYZ
           #TODO: this needs to clean all keys associated with the task; some handle must be passed in
           #TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
         end
+
+        def self.get_top_task_id(task_id)
+          top_key = task_key(task_id)
+          return top_key.split('-')[0] 
+        end
        
        private
        # Amar: altered key format to enable top task cleanup by adding top_task_id on front
-        def self.task_key(task_id,task_type,top_task_id=nil)
+        def self.task_key(task_id,task_type=nil,top_task_id=nil)
           ret_key = task_id.to_s
           ret_key = "#{top_task_id.to_s}-#{ret_key}" if top_task_id
           ret_key = "#{ret_key}-#{task_type}" if task_type
           return ret_key if top_task_id
 
           Store.keys.each do |key|
-            return key if key.match(/.*#{ret_key}/)
+            if key.match(/.*#{ret_key}/)
+              ret_key = key 
+              break
+            end
           end
+          return ret_key
         end
       end
 =begin

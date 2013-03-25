@@ -83,7 +83,7 @@ module XYZ
   
           begin
             yield
-           rescue Exception => e
+          rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
             if event and errors
               Log.info_pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}]
@@ -104,6 +104,26 @@ module XYZ
         def delete_task_info(workitem)
           params = workitem.params
           Ruote::TaskInfo.delete(params["task_id"],params["task_type"])
+        end
+        def get_top_task_id(workitem)
+          params = workitem.params
+          Ruote::TaskInfo.get_top_task_id(params["task_id"])
+        end
+        def kill_upstream_subtasks(workitem)
+          # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the killing
+          begin
+            # Killing task to prevent upstream subtasks' execution
+            Workflow.kill(get_top_task_id(workitem))            
+          rescue Exception => e    
+          end
+        end
+        def cancel_upstream_subtasks(workitem)
+          # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
+          begin
+            # Killing task to prevent upstream subtasks' execution
+            Workflow.cancel(get_top_task_id(workitem))            
+          rescue Exception => e   
+          end
         end
       end
 
@@ -130,6 +150,11 @@ module XYZ
         end
 
         def cancel(fei, flavour)
+          
+          # Don't execute cancel if ruote process is killed
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
           wi = workitem
           params = get_params(wi) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -179,6 +204,7 @@ module XYZ
                 Log.error("Timeout detecting node is ready to be powered on!")
                 result = {:type => :timeout_create_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
+                kill_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end
@@ -188,14 +214,18 @@ module XYZ
         end
 
         def cancel(fei, flavour)
-            wi = workitem
-            params = get_params(wi) 
-            task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-            task.add_internal_guards!(workflow.guards[:internal])
-            pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-            set_result_canceled(wi, task)
-            delete_task_info(wi)
-            reply_to_engine(wi)
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
         end
       end
 
@@ -225,6 +255,7 @@ module XYZ
                 Log.error("Timeout detecting if node is ready")
                 result = {:type => :timeout_create_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
+                kill_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end
@@ -234,20 +265,24 @@ module XYZ
         end
 
         def cancel(fei, flavour)
-            wi = workitem
-            params = get_params(wi) 
-            task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
 
-            # Amar: (TODO: Find better solution)
-            # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
-            # Due to asyc calls, it was the only way I could figure out how to stop node detection task
-            task[:executable_action][:node][:is_task_canceled] = true
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
 
-            task.add_internal_guards!(workflow.guards[:internal])
-            pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-            set_result_canceled(wi, task)
-            delete_task_info(wi)
-            reply_to_engine(wi)
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_canceled] = true
+
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
         end
       end
 
@@ -293,10 +328,12 @@ module XYZ
               :on_timeout => proc do 
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
+                cancel_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
               :on_error => proc do |error_obj|
+                cancel_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
               end 
@@ -307,6 +344,10 @@ module XYZ
         end
 
         def cancel(fei, flavour)
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
             wi = workitem
             params = get_params(wi) 
             task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -363,6 +404,7 @@ module XYZ
                   event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
+                  cancel_upstream_subtasks(workitem)
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
                 end,
@@ -383,6 +425,10 @@ module XYZ
 
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(fei, flavour)
+
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
           begin
             wi = workitem
             params = get_params(wi) 

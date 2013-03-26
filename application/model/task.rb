@@ -136,6 +136,7 @@ module XYZ
       parent_status = 
         if subtask_status_array.include?("failed") then "failed"
         elsif subtask_status_array.include?("executing") then "executing"
+        elsif subtask_status_array.include?("cancelled") then "cancelled"
         elsif not subtask_status_array.find{|s|s != "succeeded"} then "succeeded" #all succeeded
         else "executing" #if reach here must be some created and some finished
        end

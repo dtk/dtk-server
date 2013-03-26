@@ -19,15 +19,24 @@ module XYZ
         Engine.register_participant participant, m
       end
 
-      def execute()
+      def cancel()
+        Engine.cancel_process(@wfid)
+      end
+
+      def kill()
+        Engine.kill_process(@wfid)
+      end
+
+      def execute(top_task_id) 
         TaskInfo.initialize_task_info()
         begin
-          wfid = Engine.launch(process_def())
+          @wfid = Engine.launch(process_def())
+
           #TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
-          Engine.wait_for(wfid, :timeout => TopTaskDefualtTimeOut)
+          Engine.wait_for(@wfid, :timeout => TopTaskDefualtTimeOut)
           
           #detect if wait for finished due to normal execution or errors 
-          errors = Engine.errors(wfid)
+          errors = Engine.errors(@wfid)
           if errors.nil? or errors.empty?
             pp :normal_completion
           else
@@ -44,17 +53,16 @@ module XYZ
             end
 
             #different ways to continue
-            # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(wfid)
-
+            # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)
             #this cancels everything
-            Engine.cancel_process(wfid)
+            #Engine.cancel_process(@wfid)
           end
          rescue Exception => e
           pp "error trap in ruote#execute"
           pp [e,e.backtrace[0..10]]
-          #TODO: if do following Engine.cancel_process(wfid), need to update task; somhow need to detrmine what task triggered this
+          #TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
-          TaskInfo.clean
+          TaskInfo.clean(top_task_id)
         end
         nil
       end
@@ -64,6 +72,14 @@ module XYZ
       def initiate_executable_action(task,receiver_context)
         opts = {
           :initiate_only => true,
+          :receiver_context => receiver_context
+        }
+        CommandAndControl.execute_task_action(task,top_task_idh,opts)
+      end
+
+      def initiate_cancel_action(task,receiver_context)
+        opts = {
+          :cancel_task => true,
           :receiver_context => receiver_context
         }
         CommandAndControl.execute_task_action(task,top_task_idh,opts)
@@ -91,32 +107,58 @@ module XYZ
 
       #This works under the assumption that task_ids are never reused
       class TaskInfo 
+        
         Store = Hash.new
         Lock = Mutex.new
+        
         def self.initialize_task_info()
           #deprecate
         end
-        def self.set(task_id,task_info,task_type=nil)
-          key = task_key(task_id,task_type)
+        
+        def self.set(top_task_id, task_id,task_info,task_type=nil)
+          key = task_key(task_id,task_type, top_task_id)
           Lock.synchronize{Store[key] = task_info}
         end
-        def self.get_and_delete(task_id,task_type=nil)
-          key = task_key(task_id,task_type)
-          if (not key =~ /post/) and Store.keys.find{|x| x =~ /post/} and (not Store.keys.find{|x| x =~ Regexp.new("#{key}-post")})
-raise "TODO: workflow bug"
-end
+        
+        def self.get(task_id,task_type=nil,top_task_id=nil)
+          key = task_key(task_id,task_type, top_task_id)
           ret = nil
-          Lock.synchronize{ret = Store.delete(key)}
-          ret 
+          Lock.synchronize{ret = Store[key]}
+          return ret
         end
-        def self.clean()
+        
+        def self.delete(task_id,task_type=nil,top_task_id=nil)
+          key = task_key(task_id,task_type)
+          Lock.synchronize{Store.delete(key)}
+        end
+
+        def self.clean(top_task_id)
+          Lock.synchronize{ Store.delete_if { |key, value| key.match(/#{top_task_id}.*/) } }
           pp [:write_cleanup,Store.keys]
           #TODO: this needs to clean all keys associated with the task; some handle must be passed in
           #TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
         end
+
+        def self.get_top_task_id(task_id)
+          top_key = task_key(task_id)
+          return top_key.split('-')[0] 
+        end
+       
        private
-        def self.task_key(task_id,task_type)
-          task_type ? "#{task_id.to_s}-#{task_type}" : task_id.to_s
+       # Amar: altered key format to enable top task cleanup by adding top_task_id on front
+        def self.task_key(task_id,task_type=nil,top_task_id=nil)
+          ret_key = task_id.to_s
+          ret_key = "#{top_task_id.to_s}-#{ret_key}" if top_task_id
+          ret_key = "#{ret_key}-#{task_type}" if task_type
+          return ret_key if top_task_id
+
+          Store.keys.each do |key|
+            if key.match(/.*#{ret_key}/)
+              ret_key = key 
+              break
+            end
+          end
+          return ret_key
         end
       end
 =begin
@@ -154,8 +196,10 @@ end
 
 #TODO: see if stil needed
 ###Monkey patches
+# Amar: Additional monkey patching to support instant cancel of concurrent running subtasks on cancel task request
 module Ruote
   class DispatchPool
+
     def do_threaded_dispatch(participant, msg)
 
       msg = Rufus::Json.dup(msg)
@@ -170,7 +214,6 @@ module Ruote
 
       Thread.new do
         begin
-
           do_dispatch(participant, msg)
 
         rescue => exception
@@ -184,7 +227,6 @@ require 'ruote/worker'
 module Ruote
   class Worker
     def run_in_thread
-
       Thread.abort_on_exception = true
         # TODO : remove me at some point
 

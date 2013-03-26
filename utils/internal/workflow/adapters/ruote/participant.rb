@@ -8,7 +8,7 @@ module XYZ
         end
 
         def get_params(workitem)
-          task_info = get_and_delete_task_info(workitem)
+          task_info = get_task_info(workitem)
           params = {"task_id" => workitem.params["task_id"]}
           workflow = task_info["workflow"]
           params.merge!("workflow" => workflow)
@@ -35,6 +35,10 @@ module XYZ
           task.update_at_task_completion("succeeded",Task::Action::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
           set_result_succeeded__stack(workitem,new_result,task,action)
+        end
+
+        def set_result_canceled(workitem, task)
+          task.update_at_task_completion("cancelled",Task::Action::Result::Cancelled.new())
         end
 
         def set_result_failed(workitem,new_result,task)
@@ -79,7 +83,7 @@ module XYZ
   
           begin
             yield
-           rescue Exception => e
+          rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
             if event and errors
               Log.info_pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}]
@@ -93,9 +97,33 @@ module XYZ
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
         end
-        def get_and_delete_task_info(workitem)
+        def get_task_info(workitem)
           params = workitem.params
-          Ruote::TaskInfo.get_and_delete(params["task_id"],params["task_type"])
+          Ruote::TaskInfo.get(params["task_id"],params["task_type"])
+        end
+        def delete_task_info(workitem)
+          params = workitem.params
+          Ruote::TaskInfo.delete(params["task_id"],params["task_type"])
+        end
+        def get_top_task_id(workitem)
+          params = workitem.params
+          Ruote::TaskInfo.get_top_task_id(params["task_id"])
+        end
+        def kill_upstream_subtasks(workitem)
+          # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the killing
+          begin
+            # Killing task to prevent upstream subtasks' execution
+            Workflow.kill(get_top_task_id(workitem))            
+          rescue Exception => e    
+          end
+        end
+        def cancel_upstream_subtasks(workitem)
+          # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
+          begin
+            # Killing task to prevent upstream subtasks' execution
+            Workflow.cancel(get_top_task_id(workitem))            
+          rescue Exception => e   
+          end
         end
       end
 
@@ -121,6 +149,22 @@ module XYZ
           end
         end
 
+        def cancel(fei, flavour)
+          
+          # Don't execute cancel if ruote process is killed
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
+        end
+
        private
         def errors_in_result?(result)
           if result[:status] == "failed"
@@ -136,7 +180,6 @@ module XYZ
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
-          
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
@@ -153,50 +196,93 @@ module XYZ
                 action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
                 Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
                 set_result_succeeded(workitem,result,task,action)
+
+                delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
               :on_timeout => proc do 
                 Log.error("Timeout detecting node is ready to be powered on!")
                 result = {:type => :timeout_create_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
+                kill_upstream_subtasks(workitem)
+                delete_task_info(workitem)
                 reply_to_engine(workitem)
               end
             }
-
             poll_to_detect_node_ready(workflow, action[:node], callbacks)
           end
+        end
+
+        def cancel(fei, flavour)
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
         end
       end
 
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
           params = get_params(workitem) 
-          task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
-          callbacks = {
-            :on_msg_received => proc do |msg|
-              result = {:type => :completed_create_node, :task_id => task_id} 
- 
-              Log.info_pp [:found,msg[:senderid]]
-              node = task[:executable_action][:node]
-              node.update_operational_status!(:running)
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          execution_context(task,workitem,task_start) do
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                result = {:type => :completed_create_node, :task_id => task_id} 
+   
+                Log.info_pp [:found,msg[:senderid]]
+                node = task[:executable_action][:node]
+                node.update_operational_status!(:running)
 
-              #these must be called before get_and_propagate_dynamic_attributes
-              node.associate_elastic_ip?()
-              node.associate_persistent_dns?()
+                #these must be called before get_and_propagate_dynamic_attributes
+                node.associate_elastic_ip?()
+                node.associate_persistent_dns?()
 
-              action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-              set_result_succeeded(workitem,result,task,action)
-              reply_to_engine(workitem)
-            end,
-            :on_timeout => proc do 
-              Log.error("Timeout detecting if node is ready")
-              result = {:type => :timeout_create_node, :task_id => task_id}
-              set_result_failed(workitem,result,task)
-              reply_to_engine(workitem)
-            end
-          }
+                action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+                set_result_succeeded(workitem,result,task,action)
+                delete_task_info(workitem)
+                reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                Log.error("Timeout detecting if node is ready")
+                result = {:type => :timeout_create_node, :task_id => task_id}
+                set_result_failed(workitem,result,task)
+                kill_upstream_subtasks(workitem)
+                delete_task_info(workitem)
+                reply_to_engine(workitem)
+              end
+            }
+            poll_to_detect_node_ready(workflow, action[:node], callbacks)
+          end
+        end
 
-          poll_to_detect_node_ready(workflow, action[:node], callbacks)
+        def cancel(fei, flavour)
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_canceled] = true
+
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
         end
       end
 
@@ -217,6 +303,7 @@ module XYZ
 
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
+          sleep(10) 
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -235,20 +322,40 @@ module XYZ
                   #task[:executable_action][:node].set_authorized()
                   set_result_succeeded(workitem,result,task,action) if task_end 
                 end
+                delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
               :on_timeout => proc do 
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
+                cancel_upstream_subtasks(workitem)
+                delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
               :on_error => proc do |error_obj|
+                cancel_upstream_subtasks(workitem)
+                delete_task_info(workitem)
                 pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
               end 
             }
             context = {:expected_count => 1}
             workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
           end
+        end
+
+        def cancel(fei, flavour)
+          
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+            wi = workitem
+            params = get_params(wi) 
+            task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+            task.add_internal_guards!(workflow.guards[:internal])
+            pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+            set_result_canceled(wi, task)
+            delete_task_info(wi)
+            reply_to_engine(wi)
         end
       end
 
@@ -267,6 +374,7 @@ module XYZ
             set_task_to_failed_preconditions(task,failed_tasks)
             #TODO: stub until
             pp ["precondition_failure", task_id] #TODO: stub
+            delete_task_info(workitem)
             return reply_to_engine(workitem)
           end
 
@@ -286,6 +394,7 @@ module XYZ
                     set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
                   end
+                  delete_task_info(workitem)
                   reply_to_engine(workitem)
                 end,
                 :on_timeout => proc do 
@@ -295,6 +404,14 @@ module XYZ
                   event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_timeout(workitem,result,task)
+                  cancel_upstream_subtasks(workitem)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end,
+                :on_cancel => proc do 
+                  pp ["task_complete_canceled #{action.class.to_s}", task_id]
+                  set_result_canceled(workitem, task)
+                  delete_task_info(workitem)
                   reply_to_engine(workitem)
                 end
               }
@@ -305,6 +422,33 @@ module XYZ
             end
           end
         end
+
+        # Ruote dispatch call to this method in case of user's cancel task request
+        def cancel(fei, flavour)
+
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+
+          begin
+            wi = workitem
+            params = get_params(wi) 
+            task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+            task.add_internal_guards!(workflow.guards[:internal])
+            pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+            callbacks = {
+                :on_msg_received => proc do |msg|
+                  #set_result_canceled(wi, task)
+                  #delete_task_info(wi)
+                  #reply_to_engine(wi)
+                end
+            }
+            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            workflow.initiate_cancel_action(task,receiver_context)
+          rescue Exception => e
+            pp "Error in cancel ExecuteOnNode #{e}"
+          end
+        end
+
        private
         def add_start_task_event?(task)
           task.add_event(:start)

@@ -126,7 +126,8 @@ module DTK
         params = {
           :username => username,
           :name => request_params[:remote_component_name] || name,
-          :access_rights => "RW+", 
+          :access_rights => "RW+",
+          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type),
           :namespace => namespace,
           :noop_if_exists => true

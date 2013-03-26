@@ -176,7 +176,8 @@ module DTK
         end
       elsif opts[:raise_error]
         unless response.ok?
-          if error_msg = response.error_message()
+          error_msg = response.error_message()
+          if error_msg && !error_msg.empty?
             raise ErrorUsage.new(error_msg)
           else
             # TODO: [Haris] Possibly 'dead' code check this later

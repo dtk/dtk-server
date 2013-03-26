@@ -145,6 +145,7 @@ module DTK
         params = {
           :name => name,
           :namespace => namespace,
+          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type)
         }
         client.delete_module(params)

@@ -7,7 +7,8 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/shared_spec'
+require './lib/assembly_operations_spec'
+require './lib/parameters_setting_spec.rb'
 
 STDOUT.sync = true
 

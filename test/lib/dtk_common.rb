@@ -10,7 +10,7 @@ class DtkCommon
 
 	$success == true
 	$log = '/var/log/thin.log'
-
+	$local_vars_array = Array.new()
 	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success
 
 	$opts = {
@@ -85,7 +85,6 @@ class DtkCommon
 		else
 			puts "Stage assembly didnt pass"
 		end
-
 		return assembly_id
 	end
 
@@ -187,10 +186,41 @@ class DtkCommon
 			if ((attribute_name.include? attribute_name_to_check) && (attribute_value == attribute_value_to_check))
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists" 
 				attribute_check = true
+			elsif ((attribute_name.include? attribute_name_to_check) && (attribute_value_to_check == ''))
+				puts "Attribute #{attribute_name_to_check} exists" 
+				attribute_check = true
+			else
+				puts "Node with name #{node_name} does not exist!"
+				attribute_check = false
+			end
+		end
+
+		return attribute_check
+	end
+
+	def check_attribute_presence_in_components(assembly_id, node_name, component_name, attribute_name_to_check, attribute_value_to_check)
+		attribute_check = false
+
+		#Get attribute and check if attribute name and attribute value exists
+		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(assembly_attributes)
+
+		#Check if node exists
+		if (assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/cmp[#{component_name}]/#{attribute_name_to_check}" }.first)		
+			attribute_name = assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/cmp[#{component_name}]/#{attribute_name_to_check}" }.first['display_name']
+			
+			if ((attribute_name.include? attribute_name_to_check) && (attribute_value_to_check == ''))
+				puts "Attribute #{attribute_name_to_check} exists" 
+				attribute_check = true
+			elsif ((attribute_name.include? attribute_name_to_check) && (attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first['value']))
+				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists" 
+				attribute_check = true
+			else
+				puts "Attribute #{attribute_name_to_check} does not exist"
+				attribute_check = false
 			end
 		else
-			attribute_check = false
-			puts "Node with name #{node_name} does not exist!"
+			puts "Attribute #{attribute_name_to_check} does not exist in component #{component_name}"
 		end
 
 		return attribute_check
@@ -420,9 +450,12 @@ class DtkCommon
 		component_ids_list = Array.new()
 		modules_list = send_request('/rest/component_module/list', {})
 
+		puts modules_list
+
 		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
 			puts "Module #{module_name} exists in the list. Get component module id..."
 			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			puts component_module_id
 			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
 			pretty_print_JSON(module_components_list)
 
@@ -435,6 +468,30 @@ class DtkCommon
 			end
 		end
 		return component_ids_list
+	end
+
+	def check_if_component_exists_in_module(module_name, filter_version, component_name)
+		component_exists_in_module = false
+		component_names_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			pretty_print_JSON(module_components_list)
+
+			module_components_list['data'].each do |x|
+				if (filter_version != "")
+					component_names_list << x['display_name'] if x['version'] == filter_version
+				else
+					component_names_list << x['display_name']
+				end
+			end
+		end
+
+		component_exists_in_module = true if component_names_list.include? component_name
+		return component_exists_in_module
 	end
 
 	def add_component_to_assembly_node(assembly_id, node_name, component_id)

@@ -7,7 +7,7 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/shared_spec'
+require './lib/modules_spec'
 
 assembly_name = 'test_case_35_instance'
 assembly_template = 'bootstrap::test1'

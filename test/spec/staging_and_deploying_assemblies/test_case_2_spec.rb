@@ -7,12 +7,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/shared_spec'
+require './lib/assembly_operations_spec'
 
 STDOUT.sync = true
 
 assembly_name = 'test_case_2_instance'
 assembly_template = 'bootstrap::node_with_params'
+$local_vars = Array.new()
 
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

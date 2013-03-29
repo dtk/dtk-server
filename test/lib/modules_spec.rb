@@ -15,6 +15,21 @@ shared_context "Import remote module" do |module_name|
   end
 end
 
+shared_context "Create module" do |module_name|
+  it "creates module from content on local machine" do
+    pass = false
+    value = `dtk module create #{module_name}`
+    pass = value.include? "module_created: #{module_name}"
+    pass.should eq(true)
+  end
+end
+
+shared_context "Export module" do |module_name, namespace|
+  it "exports module to defined namespace" do
+    module_exported = export_module_to_remote(module_name, namespace)
+    module_exported.should eq(true)
+end
+
 shared_context "Import versioned module from remote" do |dtk_common, module_name, version|
   it "checks existance of module and imports versioned module from remote repo" do
     module_imported = dtk_common.import_versioned_module_from_remote(module_name, version)

@@ -228,11 +228,8 @@ class DtkCommon
 
 	def check_components_presence_in_nodes(assembly_id, node_name, component_name_to_check)
 		component_check = false
-
 		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
-
 		pretty_print_JSON(assembly_components)
-
 		component_name = assembly_components['data'].select { |x| x['display_name'] }.first['display_name']
 
 		#Check if node exists
@@ -444,6 +441,41 @@ class DtkCommon
 			end
 		end
 		return module_imported
+	end
+
+	def export_module_to_remote(module_to_export, namespace)
+		module_exported = false
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_to_export }.first)
+			puts "Module #{module_to_export} exists in module list. Check if module exists on remote repo already..."
+			remote_modules_list = send_request('/rest/component_module/list_remote', {})
+
+			if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_export}.first)
+   			puts "Module #{module_to_export} was found in list of remote modules."
+   			module_exported = false
+			else
+				puts "Module #{module_to_export} was not found in list of remote modules. Proceed with export of module..."
+				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']				
+				export_response = send_request('/rest/component_module/export', {:remote_component_name=>module_to_export, :component_module_id=>component_module_id, :remote_component_namespace=>namespace})
+
+				puts "Module export response:"
+				pretty_print_JSON(export_response)
+
+				remote_modules_list = send_request('/rest/component_module/list_remote', {})
+				if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_export}.first)
+					puts "Module #{module_to_export} exported successfully in namespace #{namespace}"
+					module_exported = true
+				else
+					puts "Module #{module_to_export} was not exported successfully in namespace #{namespace}"
+					module_exported = false
+				end			
+			end
+		else
+			puts "Module #{module_to_export} not found in module list and therefore cannot be exported"
+			module_exported = false
+		end
+		return module_exported
 	end
 
 	def get_module_components_list(module_name, filter_version)

@@ -12,9 +12,9 @@ require './lib/parameters_setting_spec.rb'
 
 $assembly_name = 'test_case_25_instance'
 $assembly_template = 'bootstrap::node_with_params'
-OS = 'natty'
-MEMORY_SIZE = 't1.micro'
-NODE_NAME = 'node1'
+os = 'natty'
+memory_size = 't1.micro'
+node_name = 'node1'
 
 node_param_list = Array.new
 node_param_list << 'dns_name'
@@ -27,6 +27,8 @@ attr_param_list << 'os_identifier'
 
 $assembly_id = 0
 dtk_common = DtkCommon.new($assembly_name, $assembly_template)
+
+puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
 
 def check_param_existance_on_node(assembly_id, node_name, param_name_list)
 	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
@@ -78,7 +80,7 @@ end
 
 describe "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly" do
 
-	context "Stage assembly function" do
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -86,12 +88,12 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 		include_context "List assemblies after stage", dtk_common
 	end
 
-	context "Set OS attribute function" do
-		include_context "Set attribute", dtk_common, 'os_identifier', OS
+	context "Set os attribute function" do
+		include_context "Set attribute", dtk_common, 'os_identifier', os
 	end
 
-	context "Set MEMORY_SIZE attribute function" do
-		include_context "Set attribute", dtk_common, 'memory_size', MEMORY_SIZE
+	context "Set memory_size attribute function" do
+		include_context "Set attribute", dtk_common, 'memory_size', memory_size
 	end
 
 	context "Converge function" do
@@ -99,50 +101,44 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 	end
 
 	context "Node params check function" do
-		unless $assembly_id.nil?
-			it "checks if node parameters exist on particular node" do
-				param_existance = check_param_existance_on_node($assembly_id, NODE_NAME, node_param_list)
-				param_existance.should eq(true)
-				puts "All params checked on node."
-			end
+		it "checks if all node parameters (dns_name, ec2_public_address, private_dns_name) exist on node #{node_name}" do
+			param_existance = check_param_existance_on_node($assembly_id, node_name, node_param_list)
+			param_existance.should eq(true)
 		end
 	end
 
-	context "Check type param after converge function" do
-		include_context "Check param", dtk_common, NODE_NAME, 'type', 'instance'
+	context "Check type param after converge" do
+		include_context "Check param", dtk_common, node_name, 'type', 'instance'
 	end
 
-	context "Check os_type param after converge function" do
-		include_context "Check param", dtk_common, NODE_NAME, 'os_type', 'ubuntu'
+	context "Check os_type param after converge" do
+		include_context "Check param", dtk_common, node_name, 'os_type', 'ubuntu'
 	end
 
-	context "Check memory size param after converge function" do
-		include_context "Check param", dtk_common, NODE_NAME, 'external_ref', MEMORY_SIZE
+	context "Check memory size param after converge" do
+		include_context "Check param", dtk_common, node_name, 'external_ref', memory_size
 	end
 
-	context "Check component on node function" do
-		include_context "Check component", dtk_common, NODE_NAME, 'stdlib'
+	context "Check component on node" do
+		include_context "Check component", dtk_common, node_name, 'stdlib'
 	end
 
 	context "Attribute params check function" do
-		unless $assembly_id.nil?
-			it "checks if attrubute parameters exist" do
-				param_existance = check_param_existance_on_attribute($assembly_id, NODE_NAME, attr_param_list)
-				param_existance.should eq(true)
-				puts "All attribute params checked."
-			end
+		it "checks if all attribute parameters (memory_size, os_identifier) exist on node #{node_name}" do
+			param_existance = check_param_existance_on_attribute($assembly_id, node_name, attr_param_list)
+			param_existance.should eq(true)
 		end
 	end
 
-	context "Check OS attribute after converge function" do
-		include_context "Check attribute", dtk_common, NODE_NAME, 'os_identifier', OS
+	context "Check os attribute after converge" do
+		include_context "Check attribute", dtk_common, node_name, 'os_identifier', os
 	end
 
-	context "Check MEMORY_SIZE attribute after converge function" do
-		include_context "Check attribute", dtk_common, NODE_NAME, 'memory_size', MEMORY_SIZE
+	context "Check memory_size attribute after converge" do
+		include_context "Check attribute", dtk_common, node_name, 'memory_size', memory_size
 	end
 
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
 end

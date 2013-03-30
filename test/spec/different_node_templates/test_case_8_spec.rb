@@ -24,7 +24,7 @@ puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS an
 
 describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 
-	context "Stage assembly function" do
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -44,7 +44,7 @@ describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add O
 		include_context "Check if port avaliable", dtk_common, namenode_web_port
 	end
 
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
 end

@@ -8,17 +8,17 @@ require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_operations_spec'
-require './lib/parameters_setting_spec.rb'
+require './lib/parameters_setting_spec'
 
 STDOUT.sync = true
 
 assembly_name = 'test_case_1_instance'
 assembly_template = 'bootstrap::node_with_params'
 
-OS_ATTRIBUTE = 'os_identifier'
-MEMORY_SIZE_ATTRIBUTE = 'memory_size'
+os_attribute = 'os_identifier'
+memory_size_attribute = 'memory_size'
 OS_Memory = Struct.new(:os, :memory)
-OS_MEMORY_ARRAY = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("rh5.7-64","t1.micro")]
+os_memory_array = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1.micro"),OS_Memory.new("rh5.7-64","t1.micro")]
 
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
@@ -26,11 +26,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
 
 describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it" do
-	OS_MEMORY_ARRAY.each do |x|
+	os_memory_array.each do |x|
 		os = x["os"]
 		memory = x["memory"]
 
-		context "For #{os} and #{memory} combination, stage assembly function" do
+		context "For #{os} and #{memory} combination, stage assembly function on #{assembly_template} assembly template" do
 			include_context "Stage", dtk_common
 		end
 
@@ -39,11 +39,11 @@ describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combinati
 		end		
 
 		context "For #{os} and #{memory} combination, set OS attribute" do
-			include_context "Set attribute", dtk_common, OS_ATTRIBUTE, os
+			include_context "Set attribute", dtk_common, os_attribute, os
 		end
 
 		context "For #{os} and #{memory} combination, set MEMORY_SIZE attribute" do
-			include_context "Set attribute", dtk_common, MEMORY_SIZE_ATTRIBUTE, memory
+			include_context "Set attribute", dtk_common, memory_size_attribute, memory
 		end
 
 		context "For #{os} and #{memory} combination, converge function" do

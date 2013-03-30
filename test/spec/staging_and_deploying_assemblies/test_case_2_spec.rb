@@ -13,14 +13,14 @@ STDOUT.sync = true
 
 assembly_name = 'test_case_2_instance'
 assembly_template = 'bootstrap::node_with_params'
-$local_vars = Array.new()
-
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "Test Case 2: Stage existing assembly and then delete assembly"
+
 describe "Test Case 2: Stage existing assembly and then delete assembly" do
 
-	context "Stage assembly function" do
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 

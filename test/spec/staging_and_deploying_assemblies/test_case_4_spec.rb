@@ -24,9 +24,12 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly" do
 
-	puts "***************************************************************************************************************************"
-	puts "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly"
-	puts "***************************************************************************************************************************"
+	before(:all) do
+		puts "***************************************************************************************************************************"
+		puts "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly"
+		puts "***************************************************************************************************************************"
+		puts ""
+	end
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -56,5 +59,7 @@ describe "Test Case 4: Deploy from assembly template (stage and converge), stop 
 		include_context "Delete assemblies", dtk_common
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

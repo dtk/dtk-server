@@ -27,7 +27,7 @@ puts "Test Case 35: Import new module from remote repo and then import same vers
 
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
-	context "Import module #{module_name} function" do
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 

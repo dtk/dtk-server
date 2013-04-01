@@ -25,7 +25,7 @@ puts "Test Case 64: Create module in new namespace #{namespace} and try to impor
 
 describe "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}" do
 
-  context "Import module #{existing_module_name} function" do
+  context "Import module function" do
     include_context "Import remote module", existing_module_name
   end
 
@@ -33,7 +33,7 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
     include_context "Get module components list", dtk_common, existing_module_name
   end
 
-  context "Check if module #{existing_module_name} imported on local filesystem" do
+  context "Check if module imported on local filesystem" do
     include_context "Check module imported on local filesystem", module_filesystem_location, existing_module_name
   end
 
@@ -48,43 +48,43 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
     end
   end
 
-  context "Create new module #{module_name}" do
+  context "Create new module function" do
     include_context "Create module", module_name
   end
 
-  context "Export module #{module_name} to new namespace #{namespace}" do
+  context "Export module to new namespace" do
     include_context "Export module", module_name, namespace
   end
 
-  context "Delete module #{module_name}" do
+  context "Delete module" do
     include_context "Delete module", dtk_common, module_name
   end
 
-  context "Delete module #{module_name} from local filesystem" do
+  context "Delete module from local filesystem" do
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
 
-  context "Delete old module #{existing_module_name}" do
+  context "Delete old module" do
     include_context "Delete module", dtk_common, existing_module_name
   end
 
-  context "Delete old module #{existing_module_name} from local filesystem" do
+  context "Delete old module from local filesystem" do
     include_context "Delete module from local filesystem", module_filesystem_location, existing_module_name
   end
 
-  context "Import module #{module_name} function" do
+  context "Import module function" do
     include_context "Import remote module", "#{namespace}/#{module_name}"
   end
 
-  context "Check if module #{module_name} imported on local filesystem" do
+  context "Check if module imported on local filesystem" do
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Delete module #{module_name}" do
+  context "Delete module" do
     include_context "Delete module", dtk_common, module_name
   end
 
-  context "Delete module #{module_name} from local filesystem" do
+  context "Delete module from local filesystem" do
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
 end

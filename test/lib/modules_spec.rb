@@ -7,7 +7,7 @@ require 'awesome_print'
 STDOUT.sync = true
 
 shared_context "Import remote module" do |module_name|
-  it "imports module from remote repo" do
+  it "imports #{module_name} module from remote repo" do
     pass = false
     value = `dtk module import #{module_name}`
     pass = value.include? "module_directory:"
@@ -16,7 +16,7 @@ shared_context "Import remote module" do |module_name|
 end
 
 shared_context "Create module" do |module_name|
-  it "creates module from content on local machine" do
+  it "creates #{module_name} module from content on local machine" do
     pass = false
     value = `dtk module create #{module_name}`
     pass = value.include? "module_created: #{module_name}"
@@ -25,20 +25,21 @@ shared_context "Create module" do |module_name|
 end
 
 shared_context "Export module" do |module_name, namespace|
-  it "exports module to defined namespace" do
+  it "exports #{module_name} module to #{namespace} namespace" do
     module_exported = export_module_to_remote(module_name, namespace)
     module_exported.should eq(true)
+  end
 end
 
 shared_context "Import versioned module from remote" do |dtk_common, module_name, version|
-  it "checks existance of module and imports versioned module from remote repo" do
+  it "checks existance of #{module_name} module and imports module with version #{version} from remote repo" do
     module_imported = dtk_common.import_versioned_module_from_remote(module_name, version)
     module_imported.should eq(true)
   end
 end
 
 shared_context "Get module components list" do |dtk_common, module_name|
-  it "gets list of all components modules" do
+  it "gets list of all components in #{module_name} module" do
     $module_components_list = dtk_common.get_module_components_list(module_name, "")
     empty_list = $module_components_list.empty?
     empty_list.should eq(false)
@@ -46,7 +47,7 @@ shared_context "Get module components list" do |dtk_common, module_name|
 end
 
 shared_context "Get versioned module components list" do |dtk_common, module_name, version|
-  it "gets list of components modules from version #{version}" do
+  it "gets list of all components for version #{version} of #{module_name} module" do
     $versioned_module_components_list = dtk_common.get_module_components_list(module_name, version)
     empty_list = $versioned_module_components_list.empty?
     empty_list.should eq(false)
@@ -54,7 +55,7 @@ shared_context "Get versioned module components list" do |dtk_common, module_nam
 end
 
 shared_context "Check module imported on local filesystem" do |module_filesystem_location, module_name|
-  it "checks if module imported on local filesystem" do
+  it "checks that #{module_name} module is imported on local filesystem on location #{module_filesystem_location}" do
     pass = false
     value = `ls #{module_filesystem_location}/#{module_name}`
     pass = !value.include?("No such file or directory")
@@ -63,7 +64,7 @@ shared_context "Check module imported on local filesystem" do |module_filesystem
 end
 
 shared_context "Check versioned module imported on local filesystem" do |module_filesystem_location, module_name, module_version|
-  it "checks if versioned module imported on local filesystem" do
+  it "checks that #{module_name} module with version #{module_version} is imported on local filesystem on location #{module_filesystem_location}" do
     pass = false
     value = `ls #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("No such file or directory")
@@ -72,28 +73,28 @@ shared_context "Check versioned module imported on local filesystem" do |module_
 end
 
 shared_context "Check if component exists in module" do |dtk_common, module_name, component_name|
-  it "check that module contains component" do
+  it "check that #{module_name} module contains #{component_name} component" do
     component_exists = dtk_common.check_if_component_exists_in_module(module_name, "", component_name)
     component_exists.should eq(true)
   end
 end
 
 shared_context "NEG - Check if component exists in module" do |dtk_common, module_name, component_name|
-  it "check that module does not contain component anymore" do
+  it "check that #{module_name} module does not contain #{component_name} component anymore" do
     component_exists = dtk_common.check_if_component_exists_in_module(module_name, "", component_name)
     component_exists.should eq(false)
   end
 end
 
 shared_context "Delete module" do |dtk_common, module_name|
-  it "deletes module from server" do
+  it "deletes #{module_name} module from server" do
     module_deleted = dtk_common.delete_module(module_name)
     module_deleted.should eq(true)
   end
 end
 
 shared_context "Delete module from local filesystem" do |module_filesystem_location, module_name|
-  it "deletes module from local filesystem" do
+  it "deletes #{module_name} module from local filesystem" do
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}`
     pass = !value.include?("cannot remove")
@@ -102,7 +103,7 @@ shared_context "Delete module from local filesystem" do |module_filesystem_locat
 end
 
 shared_context "Delete versioned module from local filesystem" do |module_filesystem_location, module_name, module_version|
-  it "deletes versioned module from local filesystem" do
+  it "deletes #{module_name} module with version #{module_version} from local filesystem" do
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("cannot remove")
@@ -111,14 +112,14 @@ shared_context "Delete versioned module from local filesystem" do |module_filesy
 end
 
 shared_context "Create new module version" do |dtk_common, module_name, version|
-  it "creates new module version on server" do
+  it "creates new version #{version} for #{module_name} module on server" do
     module_versioned = dtk_common.create_new_module_version(module_name, version)
     module_versioned.should eq(true)
   end
 end
 
 shared_context "Clone versioned module" do |dtk_common, module_name, module_version|
-  it "clones versioned module from server to local filesystem" do
+  it "clones #{module_name} module with version #{module_version} from server to local filesystem" do
     pass = false
     value = `dtk module #{module_name} clone -v #{module_version} -n`
     pass = value.include?("module_directory:")
@@ -127,7 +128,7 @@ shared_context "Clone versioned module" do |dtk_common, module_name, module_vers
 end
 
 shared_context "Push clone changes to server" do |module_name, file_for_change|
-  it "pushes module changes from local filesystem to server" do
+  it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     pass = false
     value = `dtk module #{module_name} push-clone-changes`
     pass = value.include?("#{file_for_change}")

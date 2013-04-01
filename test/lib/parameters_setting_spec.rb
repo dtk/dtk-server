@@ -14,14 +14,14 @@ shared_context "Check attribute" do |dtk_common, node_name, name, value|
 end
 
 shared_context "Check attribute present in component" do |dtk_common, node_name, component_name, name, value|
-  it "checks value #{value} for attribute #{name} is present" do
+  it "checks value #{value} for attribute #{name} is present in #{component_name} component" do
     attribute_value_checked = dtk_common.check_attribute_presence_in_components($assembly_id, node_name, component_name, name, value)
     attribute_value_checked.should eq(true)
   end
 end
 
 shared_context "Check attribute not present in component" do |dtk_common, node_name, component_name, name, value|
-  it "checks value #{value} for attribute #{name} is not present" do
+  it "checks value #{value} for attribute #{name} is not present in #{component_name} component" do
     attribute_value_checked = dtk_common.check_attribute_presence_in_components($assembly_id, node_name, component_name, name, value)
     attribute_value_checked.should eq(false)
   end
@@ -42,7 +42,7 @@ shared_context "Check component" do |dtk_common, node_name, name|
 end
 
 shared_context "Add component to assembly node" do |dtk_common, node_name, component_id|
-  it "adds a component to assembly node" do
+  it "adds a component with #{component_id} id to #{node_name} node" do
     component_added = dtk_common.add_component_to_assembly_node($assembly_id, node_name, component_id)
     component_added.should eq(true)
   end

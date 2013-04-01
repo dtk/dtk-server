@@ -21,7 +21,9 @@ $module_components_list = Array.new()
 
 dtk_common = DtkCommon.new('', '')
 
+puts "**************************************************************************************************************************"
 puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
+puts "**************************************************************************************************************************"
 
 describe "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}" do
 
@@ -88,3 +90,5 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
 end
+
+puts "", ""

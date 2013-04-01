@@ -20,7 +20,9 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "*******************************************************************************************************************"
 puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
+puts "*******************************************************************************************************************"
 
 describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 
@@ -48,3 +50,5 @@ describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add O
 		include_context "Delete assemblies", dtk_common
 	end
 end
+
+puts "", ""

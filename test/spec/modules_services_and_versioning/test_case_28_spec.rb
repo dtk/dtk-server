@@ -24,7 +24,9 @@ $module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "************************************************************************************"
 puts "Test Case 28: Import component module from remote and use this component in assembly"
+puts "************************************************************************************"
 
 describe "Test Case 28: Import component module from remote and use this component in assembly" do
 
@@ -74,3 +76,5 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 end
+
+puts "", ""

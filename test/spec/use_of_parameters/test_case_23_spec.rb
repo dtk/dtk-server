@@ -19,7 +19,9 @@ node_name = 'node1'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "****************************************************************************************************"
 puts "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)"
+puts "****************************************************************************************************"
 
 describe "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)" do
 
@@ -55,3 +57,5 @@ describe "Test Case 23: Add optional params on existing attributes in assembly n
 		include_context "Delete assemblies", dtk_common
 	end
 end
+
+puts "", ""

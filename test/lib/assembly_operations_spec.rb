@@ -23,29 +23,28 @@ end
 shared_context "Converge" do |dtk_common|
   it "converges #{dtk_common.assembly_name} assembly" do
     converge = dtk_common.converge_assembly($assembly_id)
-    converge.should eq("succeeded")
+    converge.should eq(true)
   end
 end
 
 shared_context "Check if port avaliable" do |dtk_common, port|
   it "is avaliable" do
-    netstat_response = dtk_common.netstats_check($assembly_id)
-    namenode_port = netstat_response['data']['results'].select { |x| x['port'] == port}.first['port']
-    namenode_port.should eq(port)
+    netstat_response = dtk_common.netstats_check($assembly_id, port)
+    netstat_response.should eq(true)
   end
 end
 
 shared_context "Stop assembly" do |dtk_common|
   it "stops #{dtk_common.assembly_name} assembly" do
     stop_status = dtk_common.stop_running_assembly($assembly_id)
-    stop_status.should eq("ok")
+    stop_status.should eq(true)
   end
 end
 
 shared_context "Delete assemblies" do |dtk_common|
   it "deletes #{dtk_common.assembly_name} assembly" do
     assembly_deleted = dtk_common.delete_and_destroy_assembly($assembly_id)
-    assembly_deleted.should eq("ok")
+    assembly_deleted.should eq(true)
   end
 end
 
@@ -59,7 +58,7 @@ end
 shared_context "Delete assembly template" do |dtk_common, assembly_template_name|
   it "deletes #{assembly_template_name} assembly template" do
     assembly_template_deleted = dtk_common.delete_assembly_template(assembly_template_name)
-    assembly_template_deleted.should eq("ok")
+    assembly_template_deleted.should eq(true)
   end
 end
 

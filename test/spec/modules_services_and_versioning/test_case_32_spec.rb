@@ -18,7 +18,9 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "***********************************************************************"
 puts "Test Case 32: Get list of all assembly templates for particular service"
+puts "***********************************************************************"
 
 describe "Test Case 32: Get list of all assembly templates for particular service" do
 
@@ -58,3 +60,5 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		include_context "Delete service", dtk_common, service_name
 	end
 end
+
+puts "", ""

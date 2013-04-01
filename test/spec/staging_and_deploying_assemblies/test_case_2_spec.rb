@@ -16,7 +16,9 @@ assembly_template = 'bootstrap::node_with_params'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "*************************************************************"
 puts "Test Case 2: Stage existing assembly and then delete assembly"
+puts "*************************************************************"
 
 describe "Test Case 2: Stage existing assembly and then delete assembly" do
 
@@ -36,3 +38,5 @@ describe "Test Case 2: Stage existing assembly and then delete assembly" do
 		include_context "List assemblies after delete", dtk_common
 	end
 end
+
+puts "", ""

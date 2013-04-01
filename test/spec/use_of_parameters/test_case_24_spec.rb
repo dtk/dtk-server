@@ -21,7 +21,9 @@ rhel_memory_size = 'm1.small'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
+puts "**************************************************************************************************************"
 puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
+puts "**************************************************************************************************************"
 
 describe "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)" do
 
@@ -77,3 +79,5 @@ describe "Test Case 24: Change optional params on existing attributes in assembl
 		include_context "Delete assemblies", dtk_common
 	end
 end
+
+puts "", ""

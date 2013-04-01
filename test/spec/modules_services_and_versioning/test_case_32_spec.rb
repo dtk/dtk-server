@@ -26,7 +26,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		include_context "Create service", dtk_common, service_name
 	end
 
-	context "Stage assembly function" do
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -34,7 +34,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		include_context "List assemblies after stage", dtk_common
 	end
 
-	context "Create assembly template in #{service_name} service from existing assembly" do
+	context "Create assembly template from existing assembly" do
 		include_context "Create assembly template from assembly", dtk_common, service_name, new_assembly_template
 	end
 
@@ -46,7 +46,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		include_context "Delete assembly template", dtk_common, "#{service_name}::#{new_assembly_template}"
 	end
 
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
 

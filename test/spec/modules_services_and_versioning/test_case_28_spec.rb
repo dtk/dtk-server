@@ -14,6 +14,7 @@ require './lib/modules_spec'
 assembly_name = 'test_case_28_instance'
 assembly_template = 'bootstrap::node_with_params'
 os = 'natty'
+os_attribute = 'os_identifier'
 node_name = 'node1'
 module_name = "mysql"
 module_filesystem_location = "~/component_modules"
@@ -27,7 +28,7 @@ puts "Test Case 28: Import component module from remote and use this component i
 
 describe "Test Case 28: Import component module from remote and use this component in assembly" do
 
-	context "Import module #{module_name} function" do
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 
@@ -39,7 +40,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Check module imported on local filesystem", module_filesystem_location, module_name
 	end
 
-	context "Stage assembly function" do
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -47,8 +48,8 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "List assemblies after stage", dtk_common
 	end
 
-	context "Set OS attribute function" do
-		include_context "Set attribute", dtk_common, 'os_identifier', os
+	context "Set os attribute function" do
+		include_context "Set attribute", dtk_common, os_attribute, os
 	end
 
 	context "Add components to assembly node" do
@@ -61,7 +62,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Converge", dtk_common
 	end
 
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
 

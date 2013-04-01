@@ -27,7 +27,7 @@ puts "Test Case 30: Import component module from remote, version it and clone it
 
 describe "Test Case 30: Import component module from remote, version it and clone it to local filesystem" do
 
-	context "Import module #{module_name} function" do
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 

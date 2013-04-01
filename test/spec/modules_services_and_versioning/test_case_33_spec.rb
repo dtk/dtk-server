@@ -30,7 +30,7 @@ puts "Test Case 33: Clone existing module to local filesystem, do some change on
 
 describe "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do
 
-	context "Import module #{module_name} function" do
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 
@@ -58,7 +58,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version
 	end
 
-	context "Append comment to the readme module file to see effect of push-clone-change" do
+	context "Append comment to the readme file in module contents to see effect of push-clone-change" do
 		it "appends comment to readme file" do
 			pass = true
 			`echo "# Mysql module for Puppet" >> #{module_filesystem_location}/#{module_name}-#{module_version}/#{file_for_change}`
@@ -66,8 +66,8 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 		end
 	end
 
-	context "Push clone changes of module from local copy to server" do
-		it "push clone changes of module" do
+	context "Push clone changes of versioned module from local copy to server" do
+		it "pushes clone changes of #{module_name} module for version #{module_version}" do
 			pass = false
 			value = `dtk module #{module_name} push-clone-changes -v #{module_version}`
 			pass = value.include?("#{file_for_change}")

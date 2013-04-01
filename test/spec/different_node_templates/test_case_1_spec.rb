@@ -25,9 +25,12 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it" do
 
-	puts "*********************************************************************************************"
-	puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
-	puts "*********************************************************************************************"
+	before(:all) do
+		puts "*********************************************************************************************"
+		puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
+		puts "*********************************************************************************************"
+		puts ""
+  end
 
 	os_memory_array.each do |x|
 		os = x["os"]
@@ -57,5 +60,7 @@ describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combinati
 		end
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

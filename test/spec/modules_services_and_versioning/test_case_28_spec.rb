@@ -24,11 +24,11 @@ $module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "************************************************************************************"
-puts "Test Case 28: Import component module from remote and use this component in assembly"
-puts "************************************************************************************"
-
 describe "Test Case 28: Import component module from remote and use this component in assembly" do
+
+	puts "************************************************************************************"
+	puts "Test Case 28: Import component module from remote and use this component in assembly"
+	puts "************************************************************************************"
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -75,6 +75,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 	context "Delete module from local filesystem" do
 		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
+
+	puts "", ""
 end
 
-puts "", ""

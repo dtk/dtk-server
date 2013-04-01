@@ -28,10 +28,6 @@ attr_param_list << 'os_identifier'
 $assembly_id = 0
 dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 
-puts "***************************************************************************************************"
-puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
-puts "***************************************************************************************************"
-
 def check_param_existance_on_node(assembly_id, node_name, param_name_list)
 	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 	param_check = true
@@ -82,7 +78,11 @@ end
 
 describe "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly" do
 
-	context "Stage assembly function on #{assembly_template} assembly template" do
+	puts "***************************************************************************************************"
+	puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
+	puts "***************************************************************************************************"
+
+	context "Stage assembly function on #{$assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -143,6 +143,6 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
-end
 
-puts "", ""
+	puts "", ""
+end

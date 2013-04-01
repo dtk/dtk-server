@@ -21,11 +21,11 @@ $module_components_list = Array.new()
 
 dtk_common = DtkCommon.new('', '')
 
-puts "**************************************************************************************************************************"
-puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
-puts "**************************************************************************************************************************"
-
 describe "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}" do
+
+  puts "**************************************************************************************************************************"
+  puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
+  puts "**************************************************************************************************************************"
 
   context "Import module function" do
     include_context "Import remote module", existing_module_name
@@ -89,6 +89,6 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
   context "Delete module from local filesystem" do
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
-end
 
-puts "", ""
+  puts "", ""
+end

@@ -22,11 +22,11 @@ memory_size_attribute = 'memory_size'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "***************************************************************************************************************************"
-puts "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly"
-puts "***************************************************************************************************************************"
-
 describe "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly" do
+
+	puts "***************************************************************************************************************************"
+	puts "Test Case 4: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly"
+	puts "***************************************************************************************************************************"
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -55,6 +55,6 @@ describe "Test Case 4: Deploy from assembly template (stage and converge), stop 
 	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
-end
 
-puts "", ""
+	puts "", ""
+end

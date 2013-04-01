@@ -21,11 +21,11 @@ rhel_memory_size = 'm1.small'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "**************************************************************************************************************"
-puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
-puts "**************************************************************************************************************"
-
 describe "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)" do
+
+	puts "**************************************************************************************************************"
+	puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
+	puts "**************************************************************************************************************"
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -78,6 +78,6 @@ describe "Test Case 24: Change optional params on existing attributes in assembl
 	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
+	
+	puts "", ""
 end
-
-puts "", ""

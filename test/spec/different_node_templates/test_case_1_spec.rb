@@ -23,11 +23,12 @@ os_memory_array = [OS_Memory.new("natty","t1.micro"),OS_Memory.new("oneiric","t1
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "*********************************************************************************************"
-puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
-puts "*********************************************************************************************"
-
 describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it" do
+
+	puts "*********************************************************************************************"
+	puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
+	puts "*********************************************************************************************"
+
 	os_memory_array.each do |x|
 		os = x["os"]
 		memory = x["memory"]
@@ -55,6 +56,6 @@ describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combinati
 			include_context "Delete assemblies", dtk_common
 		end
 	end
-end
 
-puts "", ""
+	puts "", ""
+end

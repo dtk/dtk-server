@@ -23,11 +23,11 @@ $versioned_module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "**********************************************************************************************"
-puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
-puts "**********************************************************************************************"
-
 describe "Test Case 30: Import component module from remote, version it and clone it to local filesystem" do
+
+	puts "**********************************************************************************************"
+	puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
+	puts "**********************************************************************************************"
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -68,6 +68,7 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	context "Delete versioned module from local filesystem" do
 		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
+
+	puts "", ""
 end
 
-puts "", ""

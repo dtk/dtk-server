@@ -19,11 +19,11 @@ node_name = 'node1'
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "****************************************************************************************************"
-puts "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)"
-puts "****************************************************************************************************"
-
 describe "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)" do
+
+	puts "****************************************************************************************************"
+	puts "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)"
+	puts "****************************************************************************************************"
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -56,6 +56,6 @@ describe "Test Case 23: Add optional params on existing attributes in assembly n
 	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
 	end
-end
 
-puts "", ""
+	puts "", ""
+end

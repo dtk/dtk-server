@@ -1,4 +1,4 @@
-#Common class used for login on dtk application and methods for stage, converge and destroy assemblies
+#Common class with methods used for interaction with dtk server
 
 require 'rubygems'
 require 'rest_client'
@@ -11,7 +11,6 @@ STDOUT.sync = true
 class DtkCommon
 
 	$success == true
-	$log = '/var/log/thin.log'
 	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success
 
 	$opts = {

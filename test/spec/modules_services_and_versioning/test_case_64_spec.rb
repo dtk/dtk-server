@@ -57,7 +57,7 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
   end
 
   context "Export module to new namespace" do
-    include_context "Export module", module_name, namespace
+    include_context "Export module", dtk_common, module_name, namespace
   end
 
   context "Delete module" do

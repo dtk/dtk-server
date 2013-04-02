@@ -12,6 +12,7 @@ class DtkCommon
 
 	$success == true
 	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success
+	attr_accessor :component_module_id_list
 
 	$opts = {
 		:timeout => 100,
@@ -27,6 +28,9 @@ class DtkCommon
 		@ENDPOINT = "http://dev10.r8network.com:7000"
 		@USERNAME = 'dtk10'
 		@PASSWORD = 'r8server'
+
+		#user as placeholder for component ids for specific module that are accumulated
+		@component_module_id_list = Array.new()
 
 		#Login to dtk application
 		response_login = RestClient.post(@ENDPOINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
@@ -546,17 +550,19 @@ class DtkCommon
 
 			module_components_list['data'].each do |x|
 				if (filter_version != "")
-					component_ids_list << x['id'] if x['version'] == filter_version
+					@component_module_id_list << x['id'] if x['version'] == filter_version
 					puts "module component: #{x['display_name']}"
 				else
-					component_ids_list << x['id']
+					@component_module_id_list << x['id']
 					puts "module component: #{x['display_name']}"
 				end
 			end
 		end
 		puts ""
-		return component_ids_list
 	end
+
+	dtk_common = DtkCommon.new('', '')
+	dtk_common.get_module_components_list("mysql","")
 
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
@@ -603,7 +609,7 @@ class DtkCommon
 			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_id, :assembly_id=>assembly_id})
 
 			if (component_add_response['status'] == 'ok')
-				puts "Component added to assembly"
+				puts "Component with id #{component_id} added to assembly!"
 				component_added = true
 			end
 		end

@@ -41,10 +41,15 @@ shared_context "Check component" do |dtk_common, node_name, name|
   end
 end
 
-shared_context "Add component to assembly node" do |dtk_common, node_name, component_id|
-  it "adds a component with #{component_id} id to #{node_name} node" do
-    component_added = dtk_common.add_component_to_assembly_node($assembly_id, node_name, component_id)
-    component_added.should eq(true)
+shared_context "Add component to assembly node" do |dtk_common, node_name|
+  it "adds a component/s to #{node_name} node" do
+    component_added_array = Array.new()
+    pass = false
+    dtk_common.component_module_id_list.each do |component_id|
+      component_added_array << dtk_common.add_component_to_assembly_node($assembly_id, node_name, component_id)
+    end
+    pass = true if !component_added_array.include? false
+    pass.should eq(true)
   end
 end
 

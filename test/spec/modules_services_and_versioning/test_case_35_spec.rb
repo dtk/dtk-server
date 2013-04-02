@@ -16,11 +16,6 @@ module_version = '0.0.1'
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
 
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
-#Initial empty versioned module component list, will be populated after "Get versioned module components list" context call
-$versioned_module_components_list = Array.new()
-
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do

@@ -19,11 +19,6 @@ module_filesystem_location = "~/component_modules"
 file_for_change = "README.md"
 $assembly_id = 0
 
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
-#Initial empty versioned module component list, will be populated after "Get versioned module components list" context call
-$versioned_module_components_list = Array.new()
-
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do

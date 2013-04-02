@@ -48,16 +48,17 @@ end
 
 shared_context "Get module components list" do |dtk_common, module_name|
   it "gets list of all components in #{module_name} module" do
-    $module_components_list = dtk_common.get_module_components_list(module_name, "")
-    empty_list = $module_components_list.empty?
+    dtk_common.get_module_components_list(module_name, "")
+    puts "Component list: ", dtk_common.component_module_id_list
+    empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(false)
   end
 end
 
 shared_context "Get versioned module components list" do |dtk_common, module_name, version|
   it "gets list of all components for version #{version} of #{module_name} module" do
-    $versioned_module_components_list = dtk_common.get_module_components_list(module_name, version)
-    empty_list = $versioned_module_components_list.empty?
+    dtk_common.get_module_components_list(module_name, version)
+    empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(false)
   end
 end

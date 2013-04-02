@@ -16,8 +16,6 @@ existing_module_name = "bakir_test"
 module_name = "bakir_test1"
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
 
 dtk_common = DtkCommon.new('', '')
 

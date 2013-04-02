@@ -8,18 +8,22 @@ STDOUT.sync = true
 
 shared_context "Import remote module" do |module_name|
   it "imports #{module_name} module from remote repo" do
+    puts "Import remote module:", "---------------------"
     pass = false
     value = `dtk module import #{module_name}`
-    pass = value.include? "module_directory:"
+    pass = true if !value.include? "[ERROR]" || !value.include? "exists on client"
+    puts ""
     pass.should eq(true)
   end
 end
 
 shared_context "Create module" do |module_name|
   it "creates #{module_name} module from content on local machine" do
+    puts "Create module:", "--------------"
     pass = false
     value = `dtk module create #{module_name}`
     pass = value.include? "module_created: #{module_name}"
+    puts ""
     pass.should eq(true)
   end
 end
@@ -56,18 +60,22 @@ end
 
 shared_context "Check module imported on local filesystem" do |module_filesystem_location, module_name|
   it "checks that #{module_name} module is imported on local filesystem on location #{module_filesystem_location}" do
+    puts "Check module imported on local filesystem:", "------------------------------------------"
     pass = false
     value = `ls #{module_filesystem_location}/#{module_name}`
     pass = !value.include?("No such file or directory")
+    puts ""
     pass.should eq(true)
   end
 end
 
 shared_context "Check versioned module imported on local filesystem" do |module_filesystem_location, module_name, module_version|
   it "checks that #{module_name} module with version #{module_version} is imported on local filesystem on location #{module_filesystem_location}" do
+    puts "Check versioned module imported on local filesystem:", "----------------------------------------------------"
     pass = false
     value = `ls #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("No such file or directory")
+    puts ""
     pass.should eq(true)
   end
 end
@@ -95,18 +103,22 @@ end
 
 shared_context "Delete module from local filesystem" do |module_filesystem_location, module_name|
   it "deletes #{module_name} module from local filesystem" do
+    puts "Delete module from local filesystem:", "------------------------------------"
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}`
     pass = !value.include?("cannot remove")
+    puts ""
     pass.should eq(true)
   end
 end
 
 shared_context "Delete versioned module from local filesystem" do |module_filesystem_location, module_name, module_version|
   it "deletes #{module_name} module with version #{module_version} from local filesystem" do
+    puts "Delete versioned module from local filesystem:", "----------------------------------------------"
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("cannot remove")
+    puts ""
     pass.should eq(true)
   end
 end
@@ -120,28 +132,34 @@ end
 
 shared_context "Clone versioned module" do |dtk_common, module_name, module_version|
   it "clones #{module_name} module with version #{module_version} from server to local filesystem" do
+    puts "Clone versioned module:", "-----------------------"
     pass = false
     value = `dtk module #{module_name} clone -v #{module_version} -n`
     pass = value.include?("module_directory:")
+    puts ""
     pass.should eq(true)
   end
 end
 
 shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
+    puts "Push clone changes to server:", "-----------------------------"
     pass = false
     value = `dtk module #{module_name} push-clone-changes`
     pass = value.include?("#{file_for_change}")
+    puts ""
     pass.should eq(true)  
   end
 end
 
 shared_context "Replace dtk.model.json file with new one" do |module_name, file_for_change_location, file_for_change, module_filesystem_location, it_message|
   it "#{it_message}" do
+    puts "Replace dtk.model.json file with new one", "----------------------------------------"
     pass = false
       `mv #{file_for_change_location} #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     value = `ls #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     pass = !value.include?("No such file or directory")
+    puts ""
     pass.should eq(true)
   end
 end

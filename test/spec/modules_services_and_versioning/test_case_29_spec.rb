@@ -72,6 +72,13 @@ describe "Test Case 29: Import component module from remote, version it and use 
 		$versioned_module_components_list.each do |component_id|
 			include_context "Add component to assembly node", dtk_common, node_name, component_id
 		end
+
+		if ($versioned_module_components_list.empty?)
+			it "adds a component <empty> to #{node_name} node" do
+				fail = true
+				fail.should eq(false)
+			end
+		end
 	end
 
 	context "Converge function" do

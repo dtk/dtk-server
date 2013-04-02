@@ -26,9 +26,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 28: Import component module from remote and use this component in assembly" do
 
-	puts "************************************************************************************"
-	puts "Test Case 28: Import component module from remote and use this component in assembly"
-	puts "************************************************************************************"
+	before(:all) do
+		puts "************************************************************************************"
+		puts "Test Case 28: Import component module from remote and use this component in assembly"
+		puts "************************************************************************************"
+	end
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -76,6 +78,8 @@ describe "Test Case 28: Import component module from remote and use this compone
 		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end
 

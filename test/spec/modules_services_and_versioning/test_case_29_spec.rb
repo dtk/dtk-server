@@ -30,9 +30,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 29: Import component module from remote, version it and use this version-ed component in assembly" do
 
-	puts "***********************************************************************************************************"
-	puts "Test Case 29: Import component module from remote, version it and use this version-ed component in assembly"
-	puts "***********************************************************************************************************"
+	before(:all) do
+		puts "***********************************************************************************************************"
+		puts "Test Case 29: Import component module from remote, version it and use this version-ed component in assembly"
+		puts "***********************************************************************************************************"
+	end
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -88,6 +90,8 @@ describe "Test Case 29: Import component module from remote, version it and use 
 		include_context "Delete module from local filesystem", module_filesystem_location, module_name
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end
 

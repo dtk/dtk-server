@@ -25,9 +25,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 35: Import new module from remote repo and then import same version-ed module from remote" do
 
-	puts "***************************************************************************************************"
-	puts "Test Case 35: Import new module from remote repo and then import same version-ed module from remote"
-	puts "***************************************************************************************************"
+	before(:all) do
+		puts "***************************************************************************************************"
+		puts "Test Case 35: Import new module from remote repo and then import same version-ed module from remote"
+		puts "***************************************************************************************************"
+	end
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -61,6 +63,8 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end
 

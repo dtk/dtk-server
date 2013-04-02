@@ -12,8 +12,9 @@ shared_context "Import remote module" do |module_name|
     pass = false
     value = `dtk module import #{module_name}`
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
-    puts "Import of remote module #{module_name} completed successfully!" if pass = true
-    puts "Import of remote module #{module_name} did not complete successfully!" if pass = false
+    puts "Pass:", pass
+    puts "Import of remote module #{module_name} completed successfully!" if pass == true
+    puts "Import of remote module #{module_name} did not complete successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -25,8 +26,8 @@ shared_context "Create module" do |module_name|
     pass = false
     value = `dtk module create #{module_name}`
     pass = value.include? "module_created: #{module_name}"
-    puts "Module #{module_name} created successfully!" if pass = true
-    puts "Module #{module_name} was not created successfully!" if pass = false
+    puts "Module #{module_name} created successfully!" if pass == true
+    puts "Module #{module_name} was not created successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -67,10 +68,13 @@ shared_context "Check module imported on local filesystem" do |module_filesystem
   it "checks that #{module_name} module is imported on local filesystem on location #{module_filesystem_location}" do
     puts "Check module imported on local filesystem:", "------------------------------------------"
     pass = false
-    value = `ls #{module_filesystem_location}/#{module_name}`
-    pass = !value.include?("No such file or directory")
-    puts "Module #{module_name} imported on local filesystem successfully!" if pass = true
-    puts "Module #{module_name} was not imported on local filesystem successfully!" if pass = false
+    `ls #{module_filesystem_location}/#{module_name}`
+    pass = true if $?.exitstatus == 0
+    if (pass == true)
+      puts "Module #{module_name} imported on local filesystem successfully!" 
+    else
+      puts "Module #{module_name} was not imported on local filesystem successfully!"
+    end
     puts ""
     pass.should eq(true)
   end
@@ -82,8 +86,8 @@ shared_context "Check versioned module imported on local filesystem" do |module_
     pass = false
     value = `ls #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("No such file or directory")
-    puts "Versioned module #{module_name} imported on local filesystem successfully!" if pass = true
-    puts "Versioned module #{module_name} was not imported on local filesystem successfully!" if pass = false
+    puts "Versioned module #{module_name} imported on local filesystem successfully!" if pass == true
+    puts "Versioned module #{module_name} was not imported on local filesystem successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -116,8 +120,8 @@ shared_context "Delete module from local filesystem" do |module_filesystem_locat
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}`
     pass = !value.include?("cannot remove")
-    puts "Module #{module_name} deleted from local filesystem successfully!" if pass = true
-    puts "Module #{module_name} was not deleted from local filesystem successfully!" if pass = false
+    puts "Module #{module_name} deleted from local filesystem successfully!" if pass == true
+    puts "Module #{module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -129,8 +133,8 @@ shared_context "Delete versioned module from local filesystem" do |module_filesy
     pass = false
     value = `rm -rf #{module_filesystem_location}/#{module_name}-#{module_version}`
     pass = !value.include?("cannot remove")
-    puts "Versioned module #{module_name} deleted from local filesystem successfully!" if pass = true
-    puts "Versioned module #{module_name} was not deleted from local filesystem successfully!" if pass = false
+    puts "Versioned module #{module_name} deleted from local filesystem successfully!" if pass == true
+    puts "Versioned module #{module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -149,8 +153,8 @@ shared_context "Clone versioned module" do |dtk_common, module_name, module_vers
     pass = false
     value = `dtk module #{module_name} clone -v #{module_version} -n`
     pass = value.include?("module_directory:")
-    puts "Versioned module #{module_name} cloned successfully!" if pass = true
-    puts "Versioned module #{module_name} was not cloned successfully!" if pass = false
+    puts "Versioned module #{module_name} cloned successfully!" if pass == true
+    puts "Versioned module #{module_name} was not cloned successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -162,8 +166,8 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
     pass = false
     value = `dtk module #{module_name} push-clone-changes`
     pass = value.include?("#{file_for_change}")
-    puts "Clone changes pushed to server successfully!" if pass = true
-    puts "Clone changes were not pushed to server successfully!" if pass = false
+    puts "Clone changes pushed to server successfully!" if pass == true
+    puts "Clone changes were not pushed to server successfully!" if pass == false
     puts ""
     pass.should eq(true)  
   end
@@ -176,8 +180,8 @@ shared_context "Replace dtk.model.json file with new one" do |module_name, file_
       `mv #{file_for_change_location} #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     value = `ls #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     pass = !value.include?("No such file or directory")
-    puts "Old dtk.model.json replaced with new one!" if pass = true
-    puts "Old dtk.model.json was not replaced with new one!" if pass = false
+    puts "Old dtk.model.json replaced with new one!" if pass == true
+    puts "Old dtk.model.json was not replaced with new one!" if pass == false
     puts ""
     pass.should eq(true)
   end

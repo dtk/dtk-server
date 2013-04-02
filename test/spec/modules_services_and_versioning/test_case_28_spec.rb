@@ -64,6 +64,9 @@ describe "Test Case 28: Import component module from remote and use this compone
 		if ($module_components_list.empty?)
 			it "adds a component <empty> to #{node_name} node" do
 				fail = true
+				puts "Add component to assembly node:", "-------------------------------"
+				puts "Module components list is empty which means there is no component in #{module_name} module found!"
+				puts ""
 				fail.should eq(false)
 			end
 		end

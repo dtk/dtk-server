@@ -60,6 +60,13 @@ describe "Test Case 28: Import component module from remote and use this compone
 		$module_components_list.each do |component_id|
 			include_context "Add component to assembly node", dtk_common, node_name, component_id
 		end
+
+		if ($module_components_list.empty?)
+			it "adds a component <empty> to #{node_name} node" do
+				fail = true
+				fail.should eq(false)
+			end
+		end
 	end
 
 	context "Converge function" do

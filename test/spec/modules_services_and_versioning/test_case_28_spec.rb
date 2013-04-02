@@ -19,8 +19,6 @@ node_name = 'node1'
 module_name = "mysql"
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
@@ -57,19 +55,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 	end
 
 	context "Add components to assembly node" do
-		$module_components_list.each do |component_id|
-			include_context "Add component to assembly node", dtk_common, node_name, component_id
-		end
-
-		if ($module_components_list.empty?)
-			it "adds a component <empty> to #{node_name} node" do
-				fail = true
-				puts "Add component to assembly node:", "-------------------------------"
-				puts "Module components list is empty which means there is no component in #{module_name} module found!"
-				puts ""
-				fail.should eq(false)
-			end
-		end
+    include_context "Add component to assembly node", dtk_common, node_name
 	end
 
 	context "Converge function" do
@@ -92,4 +78,3 @@ describe "Test Case 28: Import component module from remote and use this compone
 		puts "", ""
 	end
 end
-

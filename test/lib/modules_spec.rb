@@ -24,7 +24,7 @@ shared_context "Create module" do |module_name|
   end
 end
 
-shared_context "Export module" do |module_name, namespace|
+shared_context "Export module" do |dtk_common, module_name, namespace|
   it "exports #{module_name} module to #{namespace} namespace" do
     module_exported = dtk_common.export_module_to_remote(module_name, namespace)
     module_exported.should eq(true)

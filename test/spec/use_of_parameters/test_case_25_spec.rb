@@ -78,9 +78,11 @@ end
 
 describe "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly" do
 
-	puts "***************************************************************************************************"
-	puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
-	puts "***************************************************************************************************"
+	before(:all) do
+		puts "***************************************************************************************************"
+		puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
+		puts "***************************************************************************************************"
+	end
 
 	context "Stage assembly function on #{$assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -144,5 +146,7 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 		include_context "Delete assemblies", dtk_common
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

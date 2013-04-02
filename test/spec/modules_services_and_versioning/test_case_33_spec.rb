@@ -28,9 +28,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do
 
-	puts "**************************************************************************************************************************************************"
-	puts "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server"
-	puts "**************************************************************************************************************************************************"
+	before(:all) do
+		puts "**************************************************************************************************************************************************"
+		puts "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server"
+		puts "**************************************************************************************************************************************************"
+	end
 
 	context "Import module function" do
 		include_context "Import remote module", module_name
@@ -89,5 +91,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

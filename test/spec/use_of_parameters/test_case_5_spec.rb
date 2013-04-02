@@ -22,9 +22,11 @@ dtk_common2 = DtkCommon.new(new_assembly_name, "#{service_name}::#{new_assembly_
 
 describe "Test Case 5: Check possibility to create assembly template from existing assembly and then to converge new assembly template" do
 
-  puts "****************************************************************************************************************************"
-  puts "Test Case 5: Check possibility to create assembly template from existing assembly and then to converge new assembly template"
-  puts "****************************************************************************************************************************"
+  before(:all) do
+    puts "****************************************************************************************************************************"
+    puts "Test Case 5: Check possibility to create assembly template from existing assembly and then to converge new assembly template"
+    puts "****************************************************************************************************************************"
+  end
 
   context "Stage assembly function on #{assembly_template} assembly template" do
     include_context "Stage", dtk_common
@@ -62,5 +64,7 @@ describe "Test Case 5: Check possibility to create assembly template from existi
     include_context "Delete assembly template", dtk_common2, "#{service_name}::#{new_assembly_template}"
   end
 
-  puts "", ""
+  after(:all) do
+    puts "", ""
+  end
 end

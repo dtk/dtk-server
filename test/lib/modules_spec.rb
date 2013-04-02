@@ -26,7 +26,7 @@ end
 
 shared_context "Export module" do |module_name, namespace|
   it "exports #{module_name} module to #{namespace} namespace" do
-    module_exported = export_module_to_remote(module_name, namespace)
+    module_exported = dtk_common.export_module_to_remote(module_name, namespace)
     module_exported.should eq(true)
   end
 end

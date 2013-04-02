@@ -20,9 +20,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 32: Get list of all assembly templates for particular service" do
 
-	puts "***********************************************************************"
-	puts "Test Case 32: Get list of all assembly templates for particular service"
-	puts "***********************************************************************"
+	before(:all) do
+		puts "***********************************************************************"
+		puts "Test Case 32: Get list of all assembly templates for particular service"
+		puts "***********************************************************************"
+	end
 
 	context "Create new service function" do
 		include_context "Create service", dtk_common, service_name
@@ -60,5 +62,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		include_context "Delete service", dtk_common, service_name
 	end
 
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

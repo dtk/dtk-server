@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "test"
+namespace = "bakir"
 existing_module_name = "bakir_test"
 module_name = "bakir_test1"
 module_filesystem_location = "~/component_modules"
@@ -23,9 +23,11 @@ dtk_common = DtkCommon.new('', '')
 
 describe "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}" do
 
-  puts "**************************************************************************************************************************"
-  puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
-  puts "**************************************************************************************************************************"
+  before(:all) do
+    puts "**************************************************************************************************************************"
+    puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
+    puts "**************************************************************************************************************************"
+  end
 
   context "Import module function" do
     include_context "Import remote module", existing_module_name
@@ -90,5 +92,7 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
 
-  puts "", ""
+  after(:all) do
+    puts "", ""
+  end
 end

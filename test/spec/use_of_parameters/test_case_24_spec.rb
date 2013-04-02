@@ -23,9 +23,11 @@ dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)" do
 
-	puts "**************************************************************************************************************"
-	puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
-	puts "**************************************************************************************************************"
+	before(:all) do
+		puts "**************************************************************************************************************"
+		puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
+		puts "**************************************************************************************************************"
+	end
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
@@ -79,5 +81,7 @@ describe "Test Case 24: Change optional params on existing attributes in assembl
 		include_context "Delete assemblies", dtk_common
 	end
 	
-	puts "", ""
+	after(:all) do
+		puts "", ""
+	end
 end

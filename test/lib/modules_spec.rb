@@ -144,9 +144,9 @@ shared_context "Delete versioned module from local filesystem" do |module_filesy
   end
 end
 
-shared_context "Delete module from remote repo" do |module_name, namespace|
+shared_context "Delete module from remote repo" do |dtk_common, module_name, namespace|
   it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
-    module_deleted = delete_module_from_remote(module_name, namespace)
+    module_deleted = dtk_common.delete_module_from_remote(module_name, namespace)
     module_deleted.should eq(true)
   end
 end

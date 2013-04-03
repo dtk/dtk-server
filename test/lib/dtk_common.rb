@@ -562,9 +562,6 @@ class DtkCommon
 		return module_deleted
 	end
 
-	dtk_common = DtkCommon.new('', '')
-	dtk_common.delete_module_from_remote('bakir_test4','bakir')
-
 	def get_module_components_list(module_name, filter_version)
 		puts "Get module components list:", "---------------------------"
 		component_ids_list = Array.new()

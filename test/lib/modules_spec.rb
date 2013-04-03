@@ -25,6 +25,7 @@ shared_context "Create module" do |module_name|
     pass = false
     value = `dtk module create #{module_name}`
     pass = value.include? "module_created: #{module_name}"
+
     puts "Module #{module_name} created successfully!" if pass == true
     puts "Module #{module_name} was not created successfully!" if pass == false
     puts ""
@@ -140,6 +141,13 @@ shared_context "Delete versioned module from local filesystem" do |module_filesy
     puts "Versioned module #{module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ""
     pass.should eq(true)
+  end
+end
+
+shared_context "Delete module from remote repo" do |dtk_common, module_name, namespace|
+  it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
+    module_deleted = dtk_common.delete_module_from_remote(module_name, namespace)
+    module_deleted.should eq(true)
   end
 end
 

@@ -17,6 +17,10 @@ module XYZ
       node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
+
+      #staged_config_nodes_changes = generate_stages(config_nodes_changes)
+
+
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly.id_handle())
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
@@ -27,6 +31,29 @@ module XYZ
         ret.add_subtask(create_nodes_task||config_nodes_task) 
       end
       ret
+    end
+
+    def generate_stages(state_change_list)
+
+      nodes = Array.new
+
+      state_change_list.each do |node_change_list|
+        node_id = node_change_list.first[:node][:id]
+        cmp_ids = Array.new
+        node_change_list.each do |component|
+          cmp_ids << component[:component][:id]
+        end
+        cmp_deps = Component.get_component_type_and_dependencies(cmp_ids)
+        nodes << { :node_id => node_id, :component_dependency => cmp_deps }
+      end
+
+      # DEBUG SNIPPET
+      require 'rubygems'
+      require 'ap'
+      ap "nodes"
+      ap nodes
+
+
     end
 
     def task_when_nodes_ready_from_assembly(assembly, component_type)
@@ -203,7 +230,6 @@ module XYZ
     #so node is not repeated for each element corresponding to same node
     def config_nodes_task(task_mh,state_change_list,assembly_idh=nil)
       return nil unless state_change_list and not state_change_list.empty?
-      #generate_stages(state_change_list)
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
@@ -228,14 +254,6 @@ module XYZ
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
       ret
-    end
-
-    def generate_stages(state_change_list)
-      # DEBUG SNIPPET
-      require 'rubygems'
-      require 'ap'
-      ap "state_change_list"
-      ap state_change_list
     end
 
     # Amar

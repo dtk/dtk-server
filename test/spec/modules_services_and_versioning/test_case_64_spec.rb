@@ -90,6 +90,10 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
     include_context "Delete module from local filesystem", module_filesystem_location, module_name
   end
 
+  context "Delete module from remote" do
+    include_context "Delete module from remote repo", module_name, namespace
+  end
+
   after(:all) do
     puts "", ""
   end

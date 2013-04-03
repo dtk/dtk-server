@@ -536,6 +536,35 @@ class DtkCommon
 		return module_exported
 	end
 
+	def delete_module_from_remote(module_name, namespace)
+		puts "Delete module from remote:", "--------------------------"
+		module_deleted = false
+
+		remote_modules_list = send_request('/rest/component_module/list_remote', {})
+		puts "List of remote modules:"
+		pretty_print_JSON(remote_modules_list)
+
+		if (remote_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{module_name}" }.first)
+			puts "Module #{module_name} in #{namespace} namespace exists. Proceed with deleting this module..."
+			delete_remote_module = send_request('/rest/component_module/delete_remote', {:remote_module_name=>module_name, :remote_module_namespace=>namespace})
+			if (delete_remote_module['status'] == 'ok')
+				puts "Module #{module_name} in #{namespace} deleted from remote!"
+				module_deleted = true
+			else
+				puts "Module #{module_name} in #{namespace} was not deleted from remote!"
+				module_deleted = false				
+			end
+		else
+			puts "Module #{module_name} in #{namespace} namespace does not exist!"
+			module_deleted = false
+		end
+		puts ""
+		return module_deleted
+	end
+
+	dtk_common = DtkCommon.new('', '')
+	dtk_common.delete_module_from_remote('bakir_test4','bakir')
+
 	def get_module_components_list(module_name, filter_version)
 		puts "Get module components list:", "---------------------------"
 		component_ids_list = Array.new()
@@ -560,9 +589,6 @@ class DtkCommon
 		end
 		puts ""
 	end
-
-	dtk_common = DtkCommon.new('', '')
-	dtk_common.get_module_components_list("mysql","")
 
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"

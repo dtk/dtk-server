@@ -341,22 +341,39 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
-    def add_component(node_idh,component_template_idh)
+    def add_component(node_idh,component_template_idh,order_index=nil)
       #first check that node_idh belongs to this instance
       sp_hash = {
-        :cols => [:id, :display_name,:group_id],
+        :cols => [:id, :display_name,:group_id, :ordered_component_ids],
         :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
       }
       unless node = Model.get_obj(model_handle(:node),sp_hash)
         raise ErrorIdInvalid.new(node_idh.get_id(),:node)
       end
-      node.add_component(component_template_idh)
+
+      # Checking if 'order_index' is valid (number and correct value)
+      order = node.get_ordered_component_ids()
+      raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
+
+      component = node.add_component(component_template_idh)
+
+      # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array
+      if order_index.nil?
+        order.push(component[:guid])
+      else
+        order.insert(order_index.to_i, component[:guid])
+      end
+      node.update_ordered_component_ids(order)
+      return component
     end
 
+    def is_order_index_valid(order_index, order)
+      return ((order_index && order_index.to_i.to_s == order_index && order_index.to_i <= order.size && order_index.to_i > -1) || order_index.nil?)
+    end
+    
     def delete_component(component_idh, node_id=nil)
-
       component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
-
+      node = nil
       # first check that node belongs to this assebmly
       unless !node_id.nil? && node_id.empty?
         sp_hash = {
@@ -372,14 +389,25 @@ module DTK; class  Assembly
  
       # also check that component_idh belongs to this instance and to this node
       sp_hash = {
-        :cols => [:id, :display_name],
+        :cols => [:id, :display_name, :node_node_id],
         :filter => component_filter
       }
-      unless Model.get_obj(model_handle(:component),sp_hash)
+      component = Model.get_obj(model_handle(:component),sp_hash)
+      unless component
         raise ErrorIdInvalid.new(component_idh.get_id(),:component)
       end
       
       Model.delete_instance(component_idh)
+      
+      # Amar: Retrieving node object to update components order
+      sp_hash = {
+        :cols => [:id, :ordered_component_ids],
+        :filter => [:and, [:eq, :id, component[:node_node_id]], [:eq, :assembly_id, id()]]
+      }
+      node = Model.get_obj(model_handle(:node),sp_hash)
+      order = node.get_ordered_component_ids()
+      order.delete(component_idh.get_id())
+      node.update_ordered_component_ids(order)
     end
 
     def add_assembly_template(assembly_template)

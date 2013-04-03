@@ -9,6 +9,7 @@ module XYZ
         context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
+
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
         ["define", {"name" => name}, [tasks]]

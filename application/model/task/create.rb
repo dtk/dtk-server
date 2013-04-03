@@ -13,7 +13,7 @@ module XYZ
       end
 
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-      nodes = assembly_config_changes.flatten(1).map{|r|r[:node]}
+      nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
       node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
@@ -253,6 +253,22 @@ module XYZ
       end
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
+
+      #FOR_AMAR
+      #rich: here is dump of internode dependencies; this is caleld after tsort (intranode) processing (which is within get_executable_action_from_state_change
+      #so  shoudl restructure so this is called before intra_node processing
+=begin
+      inter_node_deps = Array.new
+      component_actions = all_actions.map{|a|a[:component_actions]}.flatten(1) 
+      augmented_attr_list = Attribute.aug_attr_list_from_component_actions(component_actions)
+       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
+        if guard = GuardedAttribute.create(attr_in,link,attr_out)
+         inter_node_deps << guard
+        end
+      end
+      pp inter_node_deps
+      raise "got here"
+=end
       ret
     end
 

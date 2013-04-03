@@ -73,6 +73,17 @@ module XYZ
       has_req_fields ? false : true
     end
 
+    #FOR_AMAR
+    def self.aug_attr_list_from_component_actions(component_actions)
+      ret = Array.new
+      component_actions.each do |action|
+        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
+          ret << attr.merge(:component => action[:component], :node => action[:node])
+        end
+      end
+      ret
+    end
+
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
       ret = Array.new 

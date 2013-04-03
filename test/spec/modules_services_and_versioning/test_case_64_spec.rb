@@ -91,7 +91,7 @@ describe "Test Case 64: Create module in new namespace #{namespace} and try to i
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote repo", module_name, namespace
+    include_context "Delete module from remote repo", dtk_common, module_name, namespace
   end
 
   after(:all) do

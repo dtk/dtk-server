@@ -285,6 +285,7 @@ module XYZ
 
     def get_ordered_component_ids()
       ordered_component_ids = self[:ordered_component_ids]
+      return nil unless ordered_component_ids
       eval(ordered_component_ids)[:order]
     end
 

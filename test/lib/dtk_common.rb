@@ -553,7 +553,7 @@ class DtkCommon
 					@component_module_id_list << x['id'] if x['version'] == filter_version
 					puts "module component: #{x['display_name']}"
 				else
-					@component_module_id_list << x['id']
+					@component_module_id_list << x['id'] if x['version'] == nil
 					puts "module component: #{x['display_name']}"
 				end
 			end

@@ -53,6 +53,9 @@
         :type=>'related',
         :omit => ['all']
     },
+    :ordered_component_ids=>{
+        :type=>'text'
+    },
   },
   :relationships =>{
 

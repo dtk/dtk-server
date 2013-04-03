@@ -23,6 +23,7 @@ module XYZ
       column :operational_status, :varchar, :size => 20
 
       column :hostname_external_ref, :json
+      column :ordered_component_ids, :text
 
       virtual_column :status, :type => :varchar, :local_dependencies => [:is_deployed,:operational_status]
       column :ui, :json

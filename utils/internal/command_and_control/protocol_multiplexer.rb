@@ -81,6 +81,7 @@ module XYZ
               count = @count_info[request_id] -= 1
             else
               Log.error("@count_info[request_id] is null")
+              return nil
             end
           end
           if count == 0

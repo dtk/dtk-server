@@ -7,7 +7,7 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/shared_spec'
+require './lib/assembly_operations_spec'
 
 STDOUT.sync = true
 
@@ -20,11 +20,16 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
-
 describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 
-	context "Stage assembly function" do
+	before(:all) do
+		puts "*******************************************************************************************************************"
+		puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
+		puts "*******************************************************************************************************************"
+		puts ""
+  end
+
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -44,7 +49,11 @@ describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add O
 		include_context "Check if port avaliable", dtk_common, namenode_web_port
 	end
 
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
+	end
+
+	after(:all) do
+		puts "", ""
 	end
 end

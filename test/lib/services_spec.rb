@@ -22,8 +22,8 @@ end
 
 shared_context "Export service" do |dtk_common, service_name, namespace|
   it "exports #{service_name} service to #{namespace} namespace on remote repo" do
-    service_exists = dtk_common.export_service_to_remote(service_name, namespace)
-    service_exists.should eq(true)
+    service_exported = dtk_common.export_service_to_remote(service_name, namespace)
+    service_exported.should eq(true)
   end
 end
 

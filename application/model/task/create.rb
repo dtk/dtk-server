@@ -35,23 +35,23 @@ module XYZ
 
     def generate_stages(state_change_list)
 
+      # TODO FOR_RICH try to implement inter_node_deps = get_inter_node_dependencies(state_change_list)
+
+
       nodes = Array.new
-
+      tmp_inter_cmps = Hash.new
       state_change_list.each do |node_change_list|
+        ndx_cmp_idhs = Hash.new
         node_id = node_change_list.first[:node][:id]
-        cmp_ids = Array.new
-        node_change_list.each do |component|
-          cmp_ids << component[:component][:id]
+        node_change_list.each do |sc|
+          cmp = sc[:component]
+          ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
         end
-        cmp_deps = Component.get_component_type_and_dependencies(cmp_ids)
-        nodes << { :node_id => node_id, :component_dependency => cmp_deps }
+        cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
+        cmp_ids_with_deps = Task::Action::OnComponent.get_cmp_ids_with_deps(cmp_deps)
+        
+        nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
       end
-
-      # DEBUG SNIPPET
-      require 'rubygems'
-      require 'ap'
-      ap "nodes"
-      ap nodes
 
 
     end

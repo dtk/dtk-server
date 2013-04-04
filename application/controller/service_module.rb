@@ -108,12 +108,12 @@ module DTK
     end
 
     def rest__delete_remote()
-      name = ret_non_null_request_params(:remote_module_name)
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+      name = ret_non_null_request_params(:remote_service_name)
+      remote_namespace,remote_service_name,version = Repo::Remote::split_qualified_name(name)
       remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
-        :module_name => remote_module_name,
+        :module_name => remote_service_name,
         :module_namespace => remote_namespace
       }
       remote_params.merge!(:version => version) if version

@@ -18,6 +18,7 @@ module XYZ
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
 
+generate_stages(config_nodes_changes)
       #staged_config_nodes_changes = generate_stages(config_nodes_changes)
 
 
@@ -34,9 +35,12 @@ module XYZ
     end
 
     def generate_stages(state_change_list)
-
-      # TODO FOR_RICH try to implement inter_node_deps = get_inter_node_dependencies(state_change_list)
-
+      #FOR_AMAR
+      #get_internode_dependencies will do things that are redundant with what is below, but shoudl eb acceptable for now
+      #rich: left it in same form as last iteration flight list in terms of component guards, you can change
+      #Component.get_internode_dependencies(state_change_list) to reformat inside that
+      inter_node_deps = Component.get_internode_dependencies(state_change_list)
+      pp inter_node_deps
 
       nodes = Array.new
       tmp_inter_cmps = Hash.new
@@ -52,7 +56,8 @@ module XYZ
         
         nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
       end
-
+pp nodes
+raise "got here"
 
     end
 

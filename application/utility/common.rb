@@ -88,8 +88,8 @@ class R8Server
   },
   "datacenter": {
     "<%= target_ref %>": {
-      "display_name": "Staging East1",
-      "description": "Staging East1",
+      "display_name": "DTK Test Target",
+      "description": "Free R8Network testing target for getting started with the dtk-shell client, nodes will be up for 2 hours.",
       "iaas_type" : "ec2",
       "is_default_target": true,
       "iaas_properties" : {

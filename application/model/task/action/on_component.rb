@@ -55,18 +55,25 @@ module DTK; class Task
         # Get order from DB
         cmp_order = node.get_ordered_component_ids()
         # return if consistent
+        # DEBUG SNIPPET
+        require 'rubygems'
+        require 'ap'
+        ap "s_order_consistent?(cmp_ids_with_deps, cmp_order)"
+        ap is_order_consistent?(cmp_ids_with_deps, cmp_order)
         return cmp_order if is_order_consistent?(cmp_ids_with_deps, cmp_order)
 
         # generate order via TSort
         cmp_order = generate_component_order(cmp_ids_with_deps)
         # update order in node table
         node.update_ordered_component_ids(cmp_order)
+        ap "cmp_order"
+        ap cmp_order
         return cmp_order
       end
 
       # Amar: Checking if existing order in node table is consistent
       def self.is_order_consistent?(cmp_ids_with_deps, order)
-        return false unless order
+        return false if order.empty?
         begin
           cmp_ids_with_deps.map do |parent, children|  
             unless children.empty?

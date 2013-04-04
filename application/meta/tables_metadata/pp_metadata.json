@@ -27,8 +27,7 @@
          "external_ref_def":[
             "image_id",
             "size",
-            "dns_name",
-            "private_dns_name"
+            "dns_name"
          ],
          "assembly_def":[
             "display_name",
@@ -59,6 +58,7 @@
             "node_name",
             "node_id",
             "os_type",
+            "admin_op_status",
             {
                "external_ref":{
                   "type":"external_ref",
@@ -80,8 +80,7 @@
          "external_ref_def":[
             "image_id",
             "size",
-            "dns_name",
-            "private_dns_name"
+            "dns_name"
          ],
          "assembly_def":[
             "display_name",

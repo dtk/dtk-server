@@ -87,7 +87,7 @@ module DTK
     end
 
     ## systsem access
-    #required keys: [:username,:repo,:type]
+    #required keys: [:username,:tenant_name,:repo,:type]
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
@@ -176,7 +176,13 @@ module DTK
         end
       elsif opts[:raise_error]
         unless response.ok?
-          raise Error.new(error_msg(response))
+          error_msg = response.error_message()
+          if error_msg && !error_msg.empty?
+            raise ErrorUsage.new(error_msg)
+          else
+            # TODO: [Haris] Possibly 'dead' code check this later
+            raise Error.new(error_msg(response))
+          end
         end
           response.data
       else

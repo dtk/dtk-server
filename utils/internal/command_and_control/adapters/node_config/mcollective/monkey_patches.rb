@@ -44,7 +44,6 @@ module MCollective
       target = make_target(agent, :request, collective)
       req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)
       topic = make_target(agent, :reply, collective)
-
       Log.debug("Sending request #{reqid} to #{target}")
       @connection.subscribe_and_send(topic,target,req)
       reqid

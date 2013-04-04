@@ -48,12 +48,21 @@ module DTK
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
       end
       filter_proc = Proc.new do |e|
-        ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
-        #ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
-        ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
-        ret_val
+        ret_val = nil
+        # TODO: [Amar] Check commented solution
+        #ret_val = e if check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id)
+        #return ret_val
+        ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
       end 
       rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
+    end
+
+    def rest__list_modules()
+      ids = ret_request_params(:assemblies)
+      assembly_templates = get_assemblies_from_ids(ids)
+      components = Assembly::Template.list_modules(assembly_templates)
+      
+      rest_ok_response components
     end
 
     # checks element trough set of fields
@@ -170,7 +179,8 @@ module DTK
       component_template_idh = ret_request_param_id_handle(:component_template_id,Component::Template)
       #not checking here if node_id points to valid object; check is in add_component
       node_id = ret_non_null_request_params(:node_id)
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh)
+      order_index = ret_request_params(:order_index) 
+      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh,order_index)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 
@@ -257,6 +267,7 @@ module DTK
       nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
 
       unless is_valid
+        Log.info(error_msg)
         return rest_ok_response(:errors => [error_msg])
       end
 
@@ -284,6 +295,7 @@ module DTK
       nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :running)
 
       unless is_valid
+        Log.info(error_msg)
         return rest_ok_response(:errors => [error_msg])
       end
       
@@ -424,6 +436,16 @@ module DTK
 
     def get_tree(id)
       return {:data=>'some tree data goes here'}
+    end
+
+    def get_assemblies_from_ids(ids)
+      assemblies = []
+      ids.each do |id|
+        assembly = id_handle(id.to_i,:component).create_object(:model_name => :assembly_template)
+        assemblies << assembly
+      end
+
+      return assemblies
     end
 
     #TODO: unify with clone(id)

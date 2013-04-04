@@ -9,6 +9,7 @@ module XYZ
         context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
+
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
         ["define", {"name" => name}, [tasks]]
@@ -76,7 +77,7 @@ module XYZ
           "top_task_idh" => context.top_task_idh
         }
         task_id = task.id()
-        Ruote::TaskInfo.set(task_id,task_info,args[:task_type])
+        Ruote::TaskInfo.set(context.top_task_idh.get_id(), task_id,task_info,args[:task_type])
         participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(args))
       end
 

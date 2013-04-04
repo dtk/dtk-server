@@ -17,8 +17,11 @@ module XYZ
       node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly.id_handle())
 
+      #staged_config_nodes_changes = generate_stages(config_nodes_changes)
+
+
+      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly.id_handle())
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
       if create_nodes_task and config_nodes_task
         ret.add_subtask(create_nodes_task)
@@ -28,6 +31,29 @@ module XYZ
         ret.add_subtask(create_nodes_task||config_nodes_task) 
       end
       ret
+    end
+
+    def generate_stages(state_change_list)
+
+      nodes = Array.new
+
+      state_change_list.each do |node_change_list|
+        node_id = node_change_list.first[:node][:id]
+        cmp_ids = Array.new
+        node_change_list.each do |component|
+          cmp_ids << component[:component][:id]
+        end
+        cmp_deps = Component.get_component_type_and_dependencies(cmp_ids)
+        nodes << { :node_id => node_id, :component_dependency => cmp_deps }
+      end
+
+      # DEBUG SNIPPET
+      require 'rubygems'
+      require 'ap'
+      ap "nodes"
+      ap nodes
+
+
     end
 
     def task_when_nodes_ready_from_assembly(assembly, component_type)
@@ -207,20 +233,49 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action = Task::Action::ConfigNode.create_from_state_change(state_change_list.first,assembly_idh)
+        executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh)
+        raise ErrorUsage.new(error_msg) unless executable_action
         all_actions << executable_action
         ret = create_new_task(task_mh,:executable_action => executable_action) 
       else
         ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
+        all_errors = Array.new
         state_change_list.each do |sc|
-          executable_action = Task::Action::ConfigNode.create_from_state_change(sc,assembly_idh)
+          executable_action, error_msg = get_executable_action_from_state_change(sc,assembly_idh)
+          unless executable_action
+            all_errors << error_msg
+            next
+          end
           all_actions << executable_action
           ret.add_subtask_from_hash(:executable_action => executable_action)
-          end
+        end
+        raise ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
       end
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
       ret
+    end
+
+    # Amar
+    # moved call to ConfigNode.create_from_state_change into this method for error handling with clear message to user
+    # if TSort throws TSort::Cyclic error, it means intra-node cycle case
+    def get_executable_action_from_state_change(state_change, assembly_idh)
+      executable_action = nil
+      error_msg = nil
+      begin 
+        executable_action = Task::Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
+      rescue TSort::Cyclic => e
+        node = state_change.first[:node]
+        display_name = node[:display_name]
+        id = node[:id]
+        cycle_comp_ids = e.message.match(/.*\[(.+)\]/)[1]
+        component_names = Array.new
+        state_change.each do |cmp|
+          component_names << "#{cmp[:component][:display_name]} (ID: #{cmp[:component][:id].to_s})" if cycle_comp_ids.include?(cmp[:component][:id].to_s)
+        end
+        error_msg = "Intra-node components cycle detected on node '#{display_name}' (ID: #{id}) for components: #{component_names.join(', ')}"
+      end
+      return executable_action, error_msg
     end
 
     def group_by_node_and_type(state_change_list)

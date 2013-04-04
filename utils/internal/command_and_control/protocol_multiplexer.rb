@@ -32,7 +32,9 @@ module XYZ
         callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
-          if callbacks
+          if (is_cancel_response(msg)) # Amar: added in case of user's cancel request
+            callbacks.process_cancel()
+          elsif callbacks
             callbacks.process_msg(msg,request_id)
           else
             Log.error "max count or timeout reached: dropping msg"
@@ -44,6 +46,11 @@ module XYZ
       end
 
      private
+
+      def is_cancel_response(msg)
+        return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
+      end
+
       def process_request_timeout(request_id)
         callbacks = get_and_remove_reqid_callbacks(request_id)
         if callbacks
@@ -74,6 +81,7 @@ module XYZ
               count = @count_info[request_id] -= 1
             else
               Log.error("@count_info[request_id] is null")
+              return nil
             end
           end
           if count == 0
@@ -110,6 +118,11 @@ module XYZ
 
         def process_timeout(request_id)
           callback = self[:on_timeout]
+          callback.call() if callback
+        end
+
+        def process_cancel()
+          callback = self[:on_cancel]
           callback.call() if callback
         end
 

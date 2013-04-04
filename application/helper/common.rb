@@ -326,6 +326,18 @@ module Ramaze::Helper
       end
     end
 
+    # method will use nil where param empty
+    def ret_params_hash_with_nil(*params)
+      ret = Hash.new
+      return ret unless request_method_is_post?()
+      return ret if params.size == 0
+      params.inject(Hash.new) do |h,p|
+        val = request.params[p.to_s]
+        val = nil if val.empty?
+        (val ? h.merge(p.to_sym => val) : h)
+      end
+    end
+
     def ret_params_av_pairs()
       pattern,value,av_pairs_hash = ret_request_params(:pattern,:value,:av_pairs_hash)
       ret = Array.new

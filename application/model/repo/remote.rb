@@ -2,7 +2,7 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
   class Repo
     module RemoteMixin
-      def linked_remote?(remote_repo=nil)
+      def linked_remote?(remote_repo=nil) 
         unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
           raise Error.new("Not implemented yet for remote's other than default")
         end
@@ -110,33 +110,42 @@ module DTK
 
       def initialize(remote_repo=nil)
         @remote_repo = remote_repo
-        @client = RepoManagerClient.new(rest_base_url(remote_repo))
+        @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo))
+        Log.debug "Using repo manager: '#{repo_url}'"
       end
 
-      #create (empty) remote module
-      def create_module(name,type)
+      # TODO: [Haris] Refactor later so that params order makes more sense
+      # request_params: hash map containing remote_component_name, remote_component_namespace
+      def create_module(name, type, request_params = {})
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
-        namespace = self.class.default_namespace()
+        #namespace = self.class.default_namespace()
+        namespace = request_params[:remote_component_namespace] || CurrentSession.new.get_user_object().get_namespace()
         params = {
           :username => username,
-          :name => name,
-          :access_rights => "RW+", 
+          :name => request_params[:remote_component_name] || name,
+          :access_rights => "RW+",
+          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type),
           :namespace => namespace,
           :noop_if_exists => true
         } 
         response_data = client.create_module(params)
+
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
-      def delete_module(name,type)
-        namespace = self.class.default_namespace()
+      # TODO: [Haris] We should refactor this so that arguments are passed in more logical
+      # order, (name, namespace, type) for now we can live with it
+      def delete_module(name,type, namespace=nil)
+        # if namespace omitted we will use default one
+        namespace ||= self.class.default_namespace()
         params = {
           :name => name,
           :namespace => namespace,
+          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type)
         }
         client.delete_module(params)
@@ -205,6 +214,11 @@ module DTK
       def self.default_remote_repo()
         :r8_network #TODO: have this obtained from config file
       end
+
+      def self.default_user_namespace()
+        CurrentSession.new.get_user_object().get_namespace()
+      end
+
       def self.default_namespace()
         DefaultsNamespace
       end

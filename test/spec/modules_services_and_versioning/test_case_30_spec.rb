@@ -6,8 +6,8 @@ require 'rest_client'
 require 'pp'
 require 'json'
 require 'awesome_print'
-require './test/lib/dtk_common'
-require './test/lib/shared_spec'
+require './lib/dtk_common'
+require './lib/modules_spec'
 
 assembly_name = 'test_case_30_instance'
 assembly_template = 'bootstrap::test1'
@@ -16,18 +16,17 @@ module_version = '0.0.1'
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
 
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
-#Initial empty versioned module component list, will be populated after "Get versioned module components list" context call
-$versioned_module_components_list = Array.new()
-
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
-
-puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
 
 describe "Test Case 30: Import component module from remote, version it and clone it to local filesystem" do
 
-	context "Import module #{module_name} function" do
+	before(:all) do
+		puts "**********************************************************************************************"
+		puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
+		puts "**********************************************************************************************"
+	end
+
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 
@@ -66,4 +65,9 @@ describe "Test Case 30: Import component module from remote, version it and clon
 	context "Delete versioned module from local filesystem" do
 		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
 	end
+
+	after(:all) do
+		puts "", ""
+	end
 end
+

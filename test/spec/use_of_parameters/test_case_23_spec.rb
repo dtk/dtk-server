@@ -6,22 +6,28 @@ require 'rest_client'
 require 'pp'
 require 'json'
 require 'awesome_print'
-require './test/lib/dtk_common'
-require './test/lib/shared_spec'
+require './lib/dtk_common'
+require './lib/assembly_operations_spec'
+require './lib/parameters_setting_spec.rb'
 
 assembly_name = 'test_case_23_instance'
 assembly_template = 'bootstrap::node_with_params'
-OS = 'natty'
-MEMORY_SIZE = 't1.micro'
-HOST_ADDRESSES_IPV4 = '127.0.0.1'
-NODE_NAME = 'node1'
+os = 'natty'
+memory_size = 't1.micro'
+node_name = 'node1'
 
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)" do
 
-	context "Stage assembly function" do
+	before(:all) do
+		puts "****************************************************************************************************"
+		puts "Test Case 23: Add optional params on existing attributes in assembly nodes (values were not defined)"
+		puts "****************************************************************************************************"
+	end
+
+	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common
 	end
 
@@ -29,35 +35,31 @@ describe "Test Case 23: Add optional params on existing attributes in assembly n
 		include_context "List assemblies after stage", dtk_common
 	end
 
-	context "Set OS attribute function" do
-		include_context "Set attribute", dtk_common, 'os_identifier', OS
+	context "Set os attribute function" do
+		include_context "Set attribute", dtk_common, 'os_identifier', os
 	end
 
-	context "Set MEMORY_SIZE attribute function" do
-		include_context "Set attribute", dtk_common, 'memory_size', MEMORY_SIZE
-	end
-
-	context "Set HOST_ADDRESSES_IPV4 attribute function" do
-		include_context "Set attribute", dtk_common, 'host_addresses_ipv4', HOST_ADDRESSES_IPV4
+	context "Set memory_size attribute function" do
+		include_context "Set attribute", dtk_common, 'memory_size', memory_size
 	end
 
 	context "Converge function" do
 		include_context "Converge", dtk_common
 	end
 
-	context "Check OS attribute function after converge" do
-		include_context "Check attribute", dtk_common, NODE_NAME, 'os_identifier', OS
+	context "Check os attribute after converge" do
+		include_context "Check attribute", dtk_common, node_name, 'os_identifier', os
 	end
 
-	context "Check MEMORY_SIZE attribute function after converge" do
-		include_context "Check attribute", dtk_common, NODE_NAME, 'memory_size', MEMORY_SIZE
+	context "Check memory_size attribute after converge" do
+		include_context "Check attribute", dtk_common, node_name, 'memory_size', memory_size
 	end
 
-	context "Check HOST_ADDRESSES_IPV4 attribute function" do
-		include_context "Check attribute", dtk_common, NODE_NAME, 'host_addresses_ipv4', HOST_ADDRESSES_IPV4
-	end
-
-	context "Delete and destroy assemblies" do
+	context "Delete and destroy assembly function" do
 		include_context "Delete assemblies", dtk_common
+	end
+
+	after(:all) do
+		puts "", ""
 	end
 end

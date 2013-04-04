@@ -2,15 +2,15 @@ module DTK
   class Component_moduleController < AuthController
     helper :module_helper
 
-def rest__test_generate_dsl()
-  component_module = create_obj(:component_module_id)
-  dsl_created_info = component_module.test_generate_dsl()
-  STDOUT << dsl_created_info[:content] << "\n"
-  rest_ok_response
-end
+    def rest__test_generate_dsl()
+      component_module = create_obj(:component_module_id)
+      dsl_created_info = component_module.test_generate_dsl()
+      STDOUT << dsl_created_info[:content] << "\n"
+      rest_ok_response
+    end
 
-    #### create and delete actions ###
-  def rest__create()
+      #### create and delete actions ###
+    def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
@@ -63,6 +63,11 @@ end
       rest_ok_response ComponentModule.get_all_workspace_library_diffs(model_handle)
     end
 
+    def rest__info()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+      rest_ok_response ComponentModule.info(model_handle(), module_id)
+    end
+
     def rest__info_about()
       component_module = create_obj(:component_module_id)
       about = ret_non_null_request_params(:about).to_sym
@@ -89,8 +94,10 @@ end
     end
 
     def rest__delete_remote()
-      name = ret_non_null_request_params(:remote_module_name)
+      name      = ret_non_null_request_params(:remote_module_name)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
+      # use default one, if there is namaspace provided in request
+      remote_namespace = ret_request_params(:remote_module_namespace) || remote_namespace
       remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
@@ -109,8 +116,9 @@ end
 
     def rest__export()
       component_module = create_obj(:component_module_id)
+      name_and_ns_params = ret_params_hash_with_nil(:remote_component_name, :remote_component_namespace)
       remote_repo = ret_remote_repo()
-      component_module.export(remote_repo)
+      component_module.export(remote_repo, nil, name_and_ns_params)
       rest_ok_response 
     end
 

@@ -113,9 +113,21 @@ module DTK
           opts.merge!(:project_idh => project.id_handle())
         end
         Assembly::Template.list(model_handle(:component),opts)
+      when :components
+        require 'ap'
+        assembly_templates = get_assembly_templates
+
       else
         raise ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+    end
+
+    def self.info(target_mh, id, opts={})
+      sp_hash = {
+        :cols => [:id, :display_name,:version],
+        :filter => [:eq,:id,id]
+      }
+      get_objs(target_mh, sp_hash.merge(opts)).first
     end
 
     def self.get_project_trees(mh)

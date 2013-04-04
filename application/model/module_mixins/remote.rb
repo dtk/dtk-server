@@ -45,14 +45,28 @@ module DTK
       get_workspace_branch_info(version)
     end
 
-    #export to a remote repo
-    def export(remote_repo,version=nil)
-      #TODO: put in version-specfic logic or only deal with versions using push-to-remote
+    # export to a remote repo
+    # request_params: hash map containing remote_component_name, remote_component_namespace
+    def export(remote_repo,version=nil,request_params={})
+      # TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()
+
       module_name = module_name()
+
+      # if user did not specify remote values we set default / current ones
+      request_params[:remote_component_name]      ||= module_name
+      request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
+
       if repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
+      end
+
+      if module_name != request_params[:remote_component_name]
+        # TODO: [Haris] Check with Rich, since if we use diffrent name we have a problem with unlinking, it is hard to unlink
+        # since modules are checked with new name, and modules exist only by they original name. Can be fixed, just to see if it is
+        # necessery
+        raise ErrorUsage.new("Remote repo name ('#{request_params[:remote_component_name]}') is not valid, name must correspond to local module name ('#{module_name}')")
       end
 
       local_branch = ModuleBranch.workspace_branch_name(project,version)
@@ -62,7 +76,8 @@ module DTK
       export_preprocess(module_branch_obj)
 
       #create module on remote repo manager
-      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type())
+      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type(),request_params)
+
       remote_repo_name = module_info[:git_repo_name]
 
       #link and push to remote repo
@@ -80,13 +95,14 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
+
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
         local_module_name = local_params[:module_name]
         version = remote_params[:version]
         if module_obj = module_exists?(project.id_handle(),local_module_name)
           if module_obj.get_module_branch(local_branch)
-            raise ErrorUsage.new("Conflicts with existing local module (#{pp_module_name(local_module_name,version)})")
+            raise ErrorUsage.new("Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})")
           end
         end
       
@@ -102,7 +118,7 @@ module DTK
           repo = repos.first()
         else
           #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-          remote_repo.authorize_dtk_instance(remote_params[:module_name],module_type())
+          remote_repo.authorize_dtk_instance(remote_params[:module_name],remote_params[:module_namespace],module_type())
           
           #create empty repo on local repo manager; 
           #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -141,7 +157,7 @@ module DTK
 
       #delete module on remote repo manager
       unless error
-        remote_repo.delete_module(remote_params[:module_name],module_type())
+        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace])
       end
         
       #unlink any local repos that were linked to this remote module
@@ -150,6 +166,7 @@ module DTK
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
       } 
+
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         module_obj.get_repos().each{|repo|repo.unlink_remote(remote_params[:repo])}
       end

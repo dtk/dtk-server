@@ -97,30 +97,6 @@ module XYZ
       ret
     end
 
-    def self.aug_attr_list_from_component_actions(component_actions)
-      ret = Array.new
-      node_ids = Hash.new
-      component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          cmp = action[:component]
-          node_ids[cmp[:node_node_id]] ||= true
-          ret << attr.merge(:component => action[:component])
-        end
-      end
-      return ret if ret.empty?
-      #get node info
-      node_mh = component_actions.first[:component].model_handle(:node)
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id],
-        :filter => [:oneof,:id,node_ids.keys]
-      }
-      ndx_nodes = get_objs(node_mh,sp_hash).inject(Hash.new){|h,n|h.merge(n[:id]=>n)}
-      ret.each do |r|
-        r.merge!(:node => ndx_nodes[r[:component][:node_node_id]])
-      end
-      ret
-    end
-
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
       ret = Array.new 

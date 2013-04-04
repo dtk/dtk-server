@@ -56,9 +56,6 @@ generate_stages(config_nodes_changes)
         
         nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
       end
-pp nodes
-raise "got here"
-
     end
 
     def task_when_nodes_ready_from_assembly(assembly, component_type)
@@ -258,30 +255,6 @@ raise "got here"
       end
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
-
-      #FOR_AMAR
-      #rich: here is dump of internode dependencies; this is caleld after tsort (intranode) processing (which is within get_executable_action_from_state_change
-      #so  shoudl restructure so this is called before intra_node processing
-
-      inter_node_deps = Array.new
-      component_actions = all_actions.map{|a|a[:component_actions]}.flatten(1) 
-      augmented_attr_list = Attribute.aug_attr_list_from_component_actions(component_actions)
-       Attribute.dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
-        if attr_guard = GuardedAttribute.create(attr_in,link,attr_out)
-          guard = attr_guard[:guard]
-          guarded = attr_guard[:guarded]
-          cmp_dep = {
-            :guard => {:component => guard[:component], :node => guard[:node]},
-            :guarded => {:component => guarded[:component], :node => guarded[:node]}
-          }
-          #guarded has to go after guard
-          #flat list of dependencies as oppossed to collecting all deps for one component
-          #attr_guard has relationship between attributes; stripping out attr info; consequently same compoennt relationship can be in more than once
-         inter_node_deps << cmp_dep
-        end
-      end
-      pp inter_node_deps
-
       ret
     end
 

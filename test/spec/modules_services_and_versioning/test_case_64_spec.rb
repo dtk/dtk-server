@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}
+#Test Case 64: Export module using full name #{module_name} to users default namespace and then delete it
 
 require 'rubygems'
 require 'rest_client'
@@ -19,12 +19,12 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
 
-describe "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}" do
+describe "Test Case 64: Export module using full name #{module_name} to users default namespace and then delete it" do
 
   before(:all) do
-    puts "**************************************************************************************************************************"
-    puts "Test Case 64: Create module in new namespace #{namespace} and try to import it using full name #{namespace}/#{module_name}"
-    puts "**************************************************************************************************************************"
+    puts "********************************************************************************************************"
+    puts "Test Case 64: Export module using full name #{module_name} to users default namespace and then delete it"
+    puts "********************************************************************************************************"
   end
 
   context "Import module function" do

@@ -441,6 +441,11 @@ module XYZ
       new_subtask
     end
 
+    def add_subtasks(new_subtasks)
+      new_subtasks.each { |new_subtask| (self[:subtasks] ||= Array.new) << new_subtask }
+      new_subtasks
+    end
+
     def set_positions!()
       self[:position] ||= 1
       return nil if subtasks.empty?

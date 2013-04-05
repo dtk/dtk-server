@@ -95,6 +95,10 @@ module XYZ
         CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
       end
 
+      def get_top_task
+        return @top_task
+      end
+
      private 
       def initialize(top_task,guards)
         super(top_task,guards)

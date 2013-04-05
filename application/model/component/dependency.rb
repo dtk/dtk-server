@@ -25,7 +25,6 @@ module DTK
         end
       end
 
-      #FOR_AMAR
       def get_internode_dependencies(state_change_list)
         ret = Array.new
         aug_attr_list = Attribute.aug_attr_list_from_state_change_list(state_change_list)
@@ -43,7 +42,16 @@ module DTK
             ret << cmp_dep
           end
         end
-        ret
+
+        # Amar: changing format for algorithm
+        internode_dependencies = Array.new
+        ret.each do |dep|
+          internode_dependencies << {
+            :node_dependency => { dep[:guarded][:node][:id] => dep[:guard][:node][:id] },
+            :component_dependency => { dep[:guarded][:component][:id] => [dep[:guard][:component][:id]] }
+          }
+        end
+        return internode_dependencies
       end
 
      private

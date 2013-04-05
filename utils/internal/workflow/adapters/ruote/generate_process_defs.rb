@@ -9,7 +9,6 @@ module XYZ
         context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
-
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
         ["define", {"name" => name}, [tasks]]
@@ -30,7 +29,7 @@ module XYZ
         elsif action.kind_of?(Task::Action::ConfigNode)
           guards = nil
           if guard_tasks = context.get_guard_tasks(action)
-            guards = ret_guards(guard_tasks)
+            #guards = ret_guards(guard_tasks)
           end
           authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
           main = participant_executable_action(:execute_on_node,task,context,:task_end => true)

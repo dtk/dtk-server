@@ -17,33 +17,28 @@ module XYZ
       node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-
-generate_stages(config_nodes_changes)
-      #staged_config_nodes_changes = generate_stages(config_nodes_changes)
-
-
-      config_nodes_task = config_nodes_task(task_mh,config_nodes_changes,assembly.id_handle())
-      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
-      if create_nodes_task and config_nodes_task
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-      else
-        # only one will be non null
-        ret.add_subtask(create_nodes_task||config_nodes_task) 
+      # Amar: Generating Stages for inter node dependencies
+      staged_config_nodes_changes = generate_stages(config_nodes_changes)
+      stages_config_nodes_task = Array.new
+      staged_config_nodes_changes.each do |cnc| 
+        config_nodes_task = config_nodes_task(task_mh,cnc,assembly.id_handle())
+        stages_config_nodes_task << config_nodes_task if config_nodes_task
       end
-      ret
+      ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
+      ret.add_subtask(create_nodes_task) if create_nodes_task
+      ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
+      return ret
     end
 
+    # Generating stages in case of inter node component dependencies 
     def generate_stages(state_change_list)
-      #FOR_AMAR
-      #get_internode_dependencies will do things that are redundant with what is below, but shoudl eb acceptable for now
-      #rich: left it in same form as last iteration flight list in terms of component guards, you can change
-      #Component.get_internode_dependencies(state_change_list) to reformat inside that
-      inter_node_deps = Component.get_internode_dependencies(state_change_list)
-      pp inter_node_deps
-
+      stages = Array.new
       nodes = Array.new
-      tmp_inter_cmps = Hash.new
+
+      # Rich: get_internode_dependencies will do things that are redundant with what is below, but shoudl eb acceptable for now
+      internode_dependencies = Component.get_internode_dependencies(state_change_list)
+      return [state_change_list] if internode_dependencies.empty?
+
       state_change_list.each do |node_change_list|
         ndx_cmp_idhs = Hash.new
         node_id = node_change_list.first[:node][:id]
@@ -56,6 +51,89 @@ generate_stages(config_nodes_changes)
         
         nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
       end
+
+
+      stages << clean_dependencies_that_are_internode(internode_dependencies, nodes)
+      # everything in each stage can be executed concurrently, only each stage must go sequentially
+      while stage = generate_stage(internode_dependencies)
+        stages << stage 
+      end
+
+      # DEBUG SNIPPET
+      require 'rubygems'
+      require 'ap'
+      ap "stages"
+      ap stages
+
+      return populate_stages_data(stages, state_change_list)
+    end
+
+    # Populating stages from original data 'state_change_list'
+    def populate_stages_data(stages, state_change_list)
+      stages_state_change_list = Array.new
+      stages.each do |stage|
+        stage_scl = Array.new
+        stage.each do |cmp|
+          node_id = cmp[:node_id]
+          in_node_scl = state_change_list.select { |n| n.first[:node][:id] == node_id }.first
+          cmp_ids = cmp[:component_dependency].keys
+          out_node_scl = Array.new
+          cmp_ids.each do |cmp_id|
+            in_node_scl.each do |in_node_cmp|
+              if in_node_cmp[:component][:id] == cmp_id
+                out_node_scl << in_node_cmp
+              end
+            end
+          end
+          stage_scl << out_node_scl
+        end
+        stages_state_change_list << stage_scl
+      end
+      return stages_state_change_list
+    end
+
+    # This method removes intranode dependency components from nodes and returns stage_1 actions
+    def clean_dependencies_that_are_internode(internode_dependencies, nodes)
+      nodes.each do |node|
+        internode_dependencies.each do |internode_dependency|
+          parent = internode_dependency[:component_dependency].keys.first
+          if node[:component_dependency].keys.include?(parent)
+            node[:component_dependency].delete(parent) 
+          end
+        end
+      end
+      return nodes
+    end
+
+    # This method will remove and return stage elements from current 'internode_dependencies'
+    # that are not depended on any component in current 'internode_dependencies'
+    def generate_stage(internode_dependencies)
+      # Return nil if all stages are generated
+      return nil if internode_dependencies.empty?
+
+      stage = Array.new
+      internode_dependencies_to_rm = Array.new
+      internode_dependencies.each do |internode_dependency|
+        children = internode_dependency[:component_dependency].values.first
+        if is_stage(internode_dependencies, children)
+          internode_dependencies_to_rm << internode_dependency
+          stage_element = {
+            :component_dependency => internode_dependency[:component_dependency],
+            :node_id => internode_dependency[:node_dependency].keys.first
+          }
+          stage << stage_element unless stage.include?(stage_element)
+        end
+      end
+      internode_dependencies_to_rm.each { |rm| internode_dependencies.delete(rm) }
+
+      return stage
+    end
+
+    def is_stage(internode_dependencies, children)
+      internode_dependencies.each do |internode_dependency|
+        return false if children.include?(internode_dependency[:component_dependency].keys.first)
+      end
+      return true
     end
 
     def task_when_nodes_ready_from_assembly(assembly, component_type)

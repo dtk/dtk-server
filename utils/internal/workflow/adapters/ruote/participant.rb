@@ -365,8 +365,17 @@ module XYZ
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          
+          # DEBUG SNIPPET - Amar: This is temporary printout for showcase
+          require 'rubygems'
+          require 'ap'
+          ap "Temp print: ConfingNode subtask action: "
+          ap "NODE: #{task[:executable_action][:node][:display_name]}(#{task[:executable_action][:node][:id]})"
+          tmp_out = Array.new
+          task[:executable_action][:component_actions].each{ |cmp| tmp_out << "#{cmp[:component][:display_name]}(#{cmp[:component][:id]})"}
+          ap "COMPONENTS: #{tmp_out.join(', ')}"
+          
           task.update_input_attributes!() if task_start
-
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])

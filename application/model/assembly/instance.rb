@@ -368,7 +368,7 @@ module DTK; class  Assembly
     end
 
     def is_order_index_valid(order_index, order)
-      return ((order_index && order_index.to_i.to_s == order_index && order_index.to_i <= order.size && order_index.to_i > -1) || order_index.nil?)
+      return ((order_index && order_index.to_i.to_s == order_index && order_index.to_i <= order.size && order_index.to_i > -1) || order_index.nil? || order_index.empty?)
     end
     
     def delete_component(component_idh, node_id=nil)

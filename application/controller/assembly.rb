@@ -48,11 +48,10 @@ module DTK
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
       end
       filter_proc = Proc.new do |e|
-        ret_val = nil
-        # TODO: [Amar] Check commented solution
-        #ret_val = e if check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id)
-        #return ret_val
-        ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
+        ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
+        #ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
+        ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
+        ret_val
       end 
       rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
     end

@@ -4,7 +4,7 @@
   :columns=>{
     :type=>{
       :type=>:varchar,
-      :size =>25
+      :size =>50
     },
     :direction=>{
       :type=>:varchar,

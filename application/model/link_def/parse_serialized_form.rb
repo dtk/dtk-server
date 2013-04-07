@@ -4,7 +4,10 @@ module XYZ
       link_defs.inject({}) do |h,link_def|
         link_def_type = link_def["type"]
         ref = "local_#{link_def_type}"
-        has_external_internal = Hash.new
+        has_external_internal = { #defaults that can be overritten
+          :has_internal_link=>false,
+          :has_external_link=>false
+        }
         possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,config_agent_type,remote_link_defs,has_external_internal,local_cmp_ref)
         el = {
           :display_name => ref,

@@ -43,7 +43,7 @@ module DTK; class StateChange
           component_list.each do |change|
             sorted_component_list[ordered_component_ids.index(change[:component][:id])] = change
           end
-          sorted_ndx_ret << sorted_component_list
+          sorted_ndx_ret << sorted_component_list.compact
         end
       rescue Exception => e
         #pp "Sorting components failed. Returning random component order"

@@ -755,6 +755,60 @@ class DtkCommon
 		return service_created
 	end
 
+	def check_if_service_exists_on_remote(service_name, namespace)
+		puts "Check if service exists on remote:", "----------------------------------"
+		service_exists = false
+		service_remote_list = send_request('/rest/service_module/list_remote', {})
+		puts "Service list on remote:"
+		pretty_print_JSON(service_remote_list)
+
+		if (service_remote_list['data'].select { |x| x['display_name'] == "#{namespace}/#{service_name}" }.first)
+			puts "Service #{service_name} with namespace #{namespace} exists on remote repo!"
+			service_exists = true
+		else
+			puts "Service #{service_name} with namespace #{namespace} does not exist on remote repo!"
+		end
+		puts ""
+		return service_exists
+	end
+
+	def export_service_to_remote(service_name, namespace)
+		puts "Export service to remote:", "-------------------------"
+		service_exported = false
+		service_list = send_request('/rest/service_module/list', {})
+
+		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
+			puts "Service #{service_name} exists in service list. Check if service exists on remote repo already..."
+			service_remote_list = send_request('/rest/service_module/list_remote', {})
+
+			if (service_remote_list['data'].select { |x| x['display_name'].include? service_name}.first)
+   			puts "Service #{service_name} was found in list of remote services."
+   			service_exported = false
+			else
+				puts "Service #{service_name} was not found in list of remote services. Proceed with export of service..."
+				service_module_id = service_list['data'].select { |x| x['display_name'] == service_name}.first['id']				
+				export_response = send_request('/rest/service_module/export', {:remote_component_name=>service_name, :service_module_id=>service_module_id, :remote_component_namespace=>namespace})
+
+				puts "Service export response:"
+				pretty_print_JSON(export_response)
+				service_remote_list = send_request('/rest/service_module/list_remote', {})
+
+				if (service_remote_list['data'].select { |x| x['display_name'].include? service_name}.first)
+					puts "Service #{service_name} exported successfully in namespace #{namespace}"
+					service_exported = true
+				else
+					puts "Service #{service_name} was not exported successfully in namespace #{namespace}"
+					service_exported = false
+				end			
+			end
+		else
+			puts "Service #{service_name} not found in service list and therefore cannot be exported"
+			service_exported = false
+		end
+		puts ""
+		return service_exported
+	end
+
 	def delete_service(service_name)
 		puts "Delete service:", "---------------"
 		service_deleted = false
@@ -779,6 +833,32 @@ class DtkCommon
 			end			
 		else
 			puts "Service #{service_name} does not exist in service list and therefore cannot be deleted."
+			service_deleted = false
+		end
+		puts ""
+		return service_deleted
+	end
+
+	def delete_service_from_remote(service_name, namespace)
+		puts "Delete service from remote:", "---------------------------"
+		service_deleted = false
+
+		service_remote_list = send_request('/rest/service_module/list_remote', {})
+		puts "List of remote services:"
+		pretty_print_JSON(service_remote_list)
+
+		if (service_remote_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{service_name}" }.first)
+			puts "Service #{service_name} in #{namespace} namespace exists. Proceed with deleting this service..."
+			delete_remote_service = send_request('/rest/service_module/delete_remote', {:remote_service_name=>"#{namespace}/#{service_name}"})
+			if (delete_remote_service['status'] == 'ok')
+				puts "Service #{service_name} in #{namespace} deleted from remote!"
+				service_deleted = true
+			else
+				puts "Service #{service_name} in #{namespace} was not deleted from remote!"
+				service_deleted = false				
+			end
+		else
+			puts "Service #{service_name} in #{namespace} namespace does not exist on remote!"
 			service_deleted = false
 		end
 		puts ""

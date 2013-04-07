@@ -62,7 +62,7 @@ module DTK
         #TODO: does this need fixing up in case a component can appear multiple times
         #TODO: assumption that port_ref == display_name
         port_ref = qualified_port_ref.split("/").last
-        p = Port.parse_external_port_display_name(port_ref)
+        p = Port.parse_port_display_name(port_ref)
         node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)
         unless matching_node = self[:node].find{|ref,hash|ref == node_ref}
           raise Error.new("Cannot find matching node for node ref #{node_ref})")

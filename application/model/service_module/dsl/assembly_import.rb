@@ -173,7 +173,7 @@ module DTK; class ServiceModule
 
     def self.augment_with_parsed_port_names!(ports)
       ports.each do |p|
-        p[:parsed_port_name] ||= Port.parse_external_port_display_name(p[:display_name])
+        p[:parsed_port_name] ||= Port.parse_port_display_name(p[:display_name])
       end
     end
 

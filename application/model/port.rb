@@ -57,7 +57,7 @@ module DTK
 
     #this is an augmented port that has keys: node and optionally :link_def
     def display_name_print_form()
-      info = parse_external_port_display_name()
+      info = parse_port_display_name()
       cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
       node = self[:node]
       "#{node[:display_name]}/#{cmp_ref}"
@@ -78,10 +78,10 @@ module DTK
 
     #TODO: assumption that ref and display_name are the same
     def component_name()
-      self.class.parse_external_port_display_name(self[:display_name])[:component_type]
+      self.class.parse_port_display_name(self[:display_name])[:component_type]
     end
     def link_def_name()
-      self.class.parse_external_port_display_name(self[:display_name])[:link_def_ref]
+      self.class.parse_port_display_name(self[:display_name])[:link_def_ref]
     end
 
     #TODO: is this still used and right?
@@ -89,17 +89,17 @@ module DTK
       self[:display_name].split(RefDelim)[3].to_i
     end
 
-    def parse_external_port_display_name()
+    def parse_port_display_name()
       display_name = get_field?(:display_name)
-      self.class.parse_external_port_display_name(display_name)
+      self.class.parse_port_display_name(display_name)
     end
     def set_port_info!()
-      self[:port_info] ||= parse_external_port_display_name()
+      self[:port_info] ||= parse_port_display_name()
     end
-    def self.parse_external_port_display_name(port_display_name)
+    def self.parse_port_display_name(port_display_name)
       ret = Hash.new
-      #example internal form ([output|input]___)component_external___hdp-hadoop__namenode___namenode_conn
-      #TODO: deprecate fotms with out input or output
+      #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn
+      #TODO: deprecate forms with out input or output
       if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
         port_display_name = $1
         ret.merge!(:direction => :input)
@@ -108,10 +108,10 @@ module DTK
         ret.merge!(:direction => :output)
       end
 
-      if port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
-        ret.merge(:module => $1,:component => $2,:link_def_ref => $3,:component_type => "#{$1}__#{$2}")
-      elsif  port_display_name =~ Regexp.new("component_external#{RefDelim}(.+)#{RefDelim}(.+$)")
-        ret.merge(:module => $1,:component => $1,:link_def_ref => $2,:component_type => $1)
+      if port_display_name =~ Regexp.new("component_(internal|external)#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
+        ret.merge(:port_type => $1,:module => $2,:component => $3,:link_def_ref => $4,:component_type => "#{$2}__#{$3}")
+      elsif  port_display_name =~ Regexp.new("component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+$)")
+        ret.merge(:port_type => $1,:module => $2,:component => $2,:link_def_ref => $3,:component_type => $2)
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
@@ -140,7 +140,7 @@ module DTK
 
     def self.set_ports_link_def_ids(port_mh,ports,cmps,link_defs)
       update_rows = ports.map do |port|
-        parsed_port_name = parse_external_port_display_name(port[:display_name])
+        parsed_port_name = parse_port_display_name(port[:display_name])
         cmp_type =  parsed_port_name[:component_type]
         link_def_ref = parsed_port_name[:link_def_ref]
 

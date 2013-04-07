@@ -140,13 +140,26 @@ module DTK; class ComponentDSL; class V2
             possible_links = ld["possible_links"] = Array.new
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
               ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
-              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"type" => "external","attribute_mappings" => ams})
+              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"type" => link_type(in_pl_info),"attribute_mappings" => ams})
               possible_links << possible_link
             end
             lds << ld
           end
         end
         ret
+      end
+
+      def link_type(link_info)
+        ret = 
+          if loc = link_info["location"]
+            case loc
+              when "local" then "internal"
+              when "remote" then "external"
+            else 
+              raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+            end
+          end
+        ret||"external"
       end
 
       def convert_attribute_mapping(input_am)

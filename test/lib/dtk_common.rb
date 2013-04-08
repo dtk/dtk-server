@@ -426,7 +426,8 @@ class DtkCommon
 
 	def netstats_check(assembly_id, port)
 		puts "Netstats check:", "---------------"
-		netstats_check = false
+		sleep 20 #Before initiating netstats check, wait for services to be up
+ 		netstats_check = false
 		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
 		action_results_id = response['data']['action_results_id']
 

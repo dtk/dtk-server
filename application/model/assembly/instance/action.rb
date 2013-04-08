@@ -14,6 +14,12 @@ module DTK
         Action::GetLog.initiate(nodes,action_results_queue,params)
       end
 
+      def initiate_get_ps(action_results_queue, node_id=nil)
+        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
+        Action::GetPs.initiate(nodes,action_results_queue)
+      end
+
       module Action
         class GetLog < ActionResultsQueue::Result
           def self.initiate(nodes, action_results_queue, params)
@@ -86,6 +92,29 @@ module DTK
               end
             end
             ndx_ret.values
+          end
+        end
+        class GetPs < ActionResultsQueue::Result
+          def self.initiate(nodes,action_results_queue)
+            indexes = nodes.map{|r|r[:id]}
+            action_results_queue.set_indexes!(indexes)
+            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+            end
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                response = CommandAndControl.parse_response__execute_action(nodes,msg)
+                #TODO: now ignoring bad results because have time out mechanism; might put errors in queue to terminate earlier
+                if response and response[:pbuilderid] and response[:status] == :ok
+                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+                  raw_data = response[:data].map{|r|node_info.merge(r)}
+                  data = process_data_for_ipv4(raw_data)
+                  action_results_queue.push(node_info[:id],new(node_info[:display_name],data))
+
+                end
+              end
+            }
+            CommandAndControl.request__execute_action(:ps,:get_ps,nodes,callbacks)
           end
         end
       end

@@ -32,6 +32,8 @@ module DTK; class ServiceModule
       
       def self.component_ref_parse(cmp)
         term = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+        ref = term
+        display_name = term
         if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")
           type = $1; version = $2
         else
@@ -42,9 +44,11 @@ module DTK; class ServiceModule
         if type =~ ComponentTitleRegex
           type = $1
           component_title = $2
+          ref = "#{type}--#{component_title}"
+          display_name = "#{type}[#{component_title}]"
         end
 
-        ret = {:component_type => type, :ref => term, :display_name => term}
+        ret = {:component_type => type, :ref => ref, :display_name => display_name}
         ret.merge!(:version => version) if version
         ret.merge!(:component_title => component_title) if component_title
         ret

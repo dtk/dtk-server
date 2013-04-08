@@ -21,7 +21,7 @@ module XYZ
       staged_config_nodes_changes = generate_stages(config_nodes_changes)
       stages_config_nodes_task = Array.new
       staged_config_nodes_changes.each_index do |i| 
-        config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i}")
+        config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i+1}")
         stages_config_nodes_task << config_nodes_task if config_nodes_task
       end
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
@@ -62,7 +62,7 @@ module XYZ
       while stage = generate_stage(internode_dependencies)
         stages << stage 
       end
-      
+
       return populate_stages_data(stages, state_change_list)
     end
 

@@ -107,16 +107,25 @@ module XYZ
     ### display name functions
     #TODO: should collpase these into just one or two
     def display_name_print_form(opts={})
-      cols_to_get = [:component_type,:ref_num]
+      cols_to_get = [:component_type,:display_name,:ref_name]
       unless opts[:without_version] 
         cols_to_get += [:version]
       end
       update_object!(*cols_to_get)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
-      ret = self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type
+
+      #handle version
+      ret = component_type
       unless opts[:without_version] or has_default_version?()
         ret << "(#{self[:version]})"
       end 
+
+      #handle component title
+      #NOTE: ref_num is for dsl versions before v2
+      if title = ComponentTitle.title?(self)||self[:ref_num]
+        ret = ComponentTitle.print_form_with_title(ret,title)
+      end
+
       if opts[:node_prefix]
         if node = get_node()
           ret = "#{node[:display_name]}/#{ret}"
@@ -145,6 +154,7 @@ module XYZ
       end 
       self
     end
+
     ### end: display name functions
 
     ### virtual column defs

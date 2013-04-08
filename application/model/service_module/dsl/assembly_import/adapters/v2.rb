@@ -27,7 +27,7 @@ module DTK; class ServiceModule
      private
       include AssemblyImportExportCommon
 
-
+      #pattern that appears in dsl that designates a component title
       ComponentTitleRegex = /(^.+)\[(.+)\]/
       
       def self.component_ref_parse(cmp)
@@ -44,8 +44,8 @@ module DTK; class ServiceModule
         if type =~ ComponentTitleRegex
           type = $1
           component_title = $2
-          ref = "#{type}--#{component_title}"
-          display_name = "#{type}[#{component_title}]"
+          ref = ComponentTitle.ref_with_title(type,component_title)
+          display_name = ComponentTitle.display_name_with_title(type,component_title)
         end
 
         ret = {:component_type => type, :ref => ref, :display_name => display_name}

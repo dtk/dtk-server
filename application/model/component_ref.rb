@@ -1,5 +1,18 @@
 module DTK 
   class ComponentRef < Model
+    def display_name_print_form(opts={})
+      cols_to_get = [:component_type,:display_name,:ref_name]
+      update_object!(*cols_to_get)
+      component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
+      ret = component_type
+      #handle component title
+      #NOTE: ref_num is for dsl versions before v2
+      if title = ComponentTitle.title?(self)||self[:ref_num]
+        ret = ComponentTitle.print_form_with_title(ret,title)
+      end
+      ret 
+    end
+
     def self.get_referenced_component_modules(project,component_refs)
       template_ids_to_get = Array.new
       component_types = Array.new

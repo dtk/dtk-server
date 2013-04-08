@@ -227,7 +227,7 @@ module DTK; class Assembly
         aug_component_refs = self.class.get_augmented_component_refs(model_handle,:filter => [:eq,:id,id()])
         ret = aug_component_refs.map do |r|
           cmp_template = r[:component_template]
-          display_name = "#{r[:node][:display_name]}/#{pp_display_name(r[:display_name])}"
+          display_name = "#{r[:node][:display_name]}/#{r.display_name_print_form()}"
           version = ModuleBranch.version_from_version_field(cmp_template[:version])
           cmp_template.hash_subset(:id).merge(:display_name => display_name, :version => version)
         end

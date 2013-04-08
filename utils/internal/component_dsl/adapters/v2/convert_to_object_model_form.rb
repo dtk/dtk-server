@@ -59,7 +59,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       def only_one_per_node(external_ref)
-        external_ref["type"] == "puppet_definition" ? true : nil
+        external_ref["type"] != "puppet_definition"
       end
       
       def dependency(input_hash,cmp)

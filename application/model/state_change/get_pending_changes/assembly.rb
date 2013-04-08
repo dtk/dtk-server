@@ -23,11 +23,6 @@ module DTK; class StateChange
         create_stub(state_change_mh,hash)
       end
       ##group by node id
-
-      changes.each do |change|
-        change[:component][:id]
-      end
-
       ndx_ret = Hash.new
       changes.each do |sc|
         node_id = sc[:node][:id]

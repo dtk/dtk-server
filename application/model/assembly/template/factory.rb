@@ -26,7 +26,7 @@ module DTK
 
         #get contained ports
         sp_hash = {
-          :cols => [:id,:display_name,:external_ports_for_clone],
+          :cols => [:id,:display_name,:ports_for_clone],
           :filter => [:oneof,:id,node_ids]
         }
         @ndx_ports = Hash.new

@@ -132,10 +132,10 @@ module XYZ
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns
-      virtual_column :external_ports_for_clone, :type => :json, :hidden => true, 
+      virtual_column :ports_for_clone, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
-         lambda__segment_port.call(FactoryObject::CommonCols+[:type,:link_def_id,:direction,:component_type,:link_type],{:filter => [:eq,:type,"component_external"]}),
+         lambda__segment_port.call(FactoryObject::CommonCols+[:type,:link_def_id,:direction,:component_type,:link_type],{}),
          {
           :model_name => :link_def,
            :convert => true,

@@ -277,6 +277,18 @@ module XYZ
       self[:admin_op_status] = op_status.to_s
     end
 
+    def update_ordered_component_ids(order)
+      ordered_component_ids = "{ :order => [#{order.join(',')}] }"
+      update(:ordered_component_ids => ordered_component_ids)
+      self[:ordered_component_ids] = ordered_component_ids      
+    end
+
+    def get_ordered_component_ids()
+      ordered_component_ids = self[:ordered_component_ids]
+      return Array.new unless ordered_component_ids
+      eval(ordered_component_ids)[:order]
+    end
+
     def self.pbuilderid(node)
       node.update_object!(:external_ref)
       (node[:external_ref]||{})[:instance_id]

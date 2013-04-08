@@ -7,7 +7,9 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/shared_spec'
+require './lib/assembly_operations_spec'
+require './lib/parameters_setting_spec'
+require './lib/modules_spec'
 
 assembly_name = 'test_case_33_instance'
 assembly_template = 'bootstrap::test1'
@@ -17,18 +19,17 @@ module_filesystem_location = "~/component_modules"
 file_for_change = "README.md"
 $assembly_id = 0
 
-#Initial empty module components list, will be populated after "Get module components list" context call
-$module_components_list = Array.new()
-#Initial empty versioned module component list, will be populated after "Get versioned module components list" context call
-$versioned_module_components_list = Array.new()
-
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
-
-puts "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server"
 
 describe "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server" do
 
-	context "Import module #{module_name} function" do
+	before(:all) do
+		puts "**************************************************************************************************************************************************"
+		puts "Test Case 33: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server"
+		puts "**************************************************************************************************************************************************"
+	end
+
+	context "Import module function" do
 		include_context "Import remote module", module_name
 	end
 
@@ -56,7 +57,7 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 		include_context "Check versioned module imported on local filesystem", module_filesystem_location, module_name, module_version
 	end
 
-	context "Append comment to the readme module file to see effect of push-clone-change" do
+	context "Append comment to the readme file in module contents to see effect of push-clone-change" do
 		it "appends comment to readme file" do
 			pass = true
 			`echo "# Mysql module for Puppet" >> #{module_filesystem_location}/#{module_name}-#{module_version}/#{file_for_change}`
@@ -64,8 +65,8 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 		end
 	end
 
-	context "Push clone changes of module from local copy to server" do
-		it "push clone changes of module" do
+	context "Push clone changes of versioned module from local copy to server" do
+		it "pushes clone changes of #{module_name} module for version #{module_version}" do
 			pass = false
 			value = `dtk module #{module_name} push-clone-changes -v #{module_version}`
 			pass = value.include?("#{file_for_change}")
@@ -83,5 +84,9 @@ describe "Test Case 33: Clone existing module to local filesystem, do some chang
 
 	context "Delete versioned module from local filesystem" do
 		include_context "Delete versioned module from local filesystem", module_filesystem_location, module_name, module_version
+	end
+
+	after(:all) do
+		puts "", ""
 	end
 end

@@ -12,6 +12,7 @@ module DTK; class StateChange
         :filter => filter
       }
       state_change_mh = assembly.model_handle(:state_change)
+
       changes = get_objs(assembly.model_handle(:component),sp_hash).map do |cmp|
         node = cmp.delete(:node)
         hash = {
@@ -22,12 +23,34 @@ module DTK; class StateChange
         create_stub(state_change_mh,hash)
       end
       ##group by node id
+
+      changes.each do |change|
+        change[:component][:id]
+      end
+
       ndx_ret = Hash.new
       changes.each do |sc|
         node_id = sc[:node][:id]
         (ndx_ret[node_id] ||= Array.new) << sc
       end
-      ndx_ret.values
+
+      # Sorting components on each node by 'ordered_component_ids' field
+      sorted_ndx_ret = Array.new
+      begin
+        ndx_ret.values.each do |component_list|
+          ordered_component_ids = component_list.first[:node].get_ordered_component_ids()
+          sorted_component_list = Array.new
+          component_list.each do |change|
+            sorted_component_list[ordered_component_ids.index(change[:component][:id])] = change
+          end
+          sorted_ndx_ret << sorted_component_list.compact
+        end
+      rescue Exception => e
+        #pp "Sorting components failed. Returning random component order"
+        return ndx_ret.values
+      end
+      
+      return sorted_ndx_ret
     end
 
     #no generate option needed for node state changes

@@ -27,6 +27,29 @@ module DTK; class ServiceModule
      private
       include AssemblyImportExportCommon
 
+
+      ComponentTitleRegex = /(^.+)\[(.+)\]/
+      
+      def self.component_ref_parse(cmp)
+        term = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+        if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")
+          type = $1; version = $2
+        else
+          type = term; version = nil
+        end
+
+        component_title = nil
+        if type =~ ComponentTitleRegex
+          type = $1
+          component_title = $2
+        end
+
+        ret = {:component_type => type, :ref => term, :display_name => term}
+        ret.merge!(:version => version) if version
+        ret.merge!(:component_title => component_title) if component_title
+        ret
+      end
+
       def self.parse_service_links(assembly_hash)
         ret = Array.new
         assembly_hash["nodes"].each_pair do |input_node_name,node_hash|

@@ -231,6 +231,12 @@ module DTK; class ServiceModule
         if cmp_ref[:version]
           cmp_ref[:has_override_version] = true
         end
+        #if there is a component title then put it under attribute 'name'
+        #TODO: see if have any case where component title differs from 'name'
+        if cmp_title = parse[:component_title] 
+          cmp_ref[:attribute_override] = import_attribute_overrides("name",cmp_title)
+        end
+
         ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
           pntr = cmp_ref[:attribute_override] ||= Hash.new
           pntr.merge!(import_attribute_overrides(attr_name,attr_val))

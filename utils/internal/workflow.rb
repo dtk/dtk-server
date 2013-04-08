@@ -1,6 +1,15 @@
 module XYZ
   class Workflow
 
+    # Configuration for 'temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'
+    @@temporal_coordination_mode = "STAGES"
+    def self.guards_mode?
+      @@temporal_coordination_mode == "GUARDS"
+    end
+    def self.stages_mode?
+      @@temporal_coordination_mode == "STAGES"
+    end
+
     # Variables to enable cancelation of tasks. 
     # 'active_workflows' holds current active tasks executing on Ruote engine
     # Lock is needed in case of concurrent execution

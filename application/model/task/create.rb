@@ -20,8 +20,8 @@ module XYZ
       # Amar: Generating Stages for inter node dependencies
       staged_config_nodes_changes = generate_stages(config_nodes_changes)
       stages_config_nodes_task = Array.new
-      staged_config_nodes_changes.each do |cnc| 
-        config_nodes_task = config_nodes_task(task_mh,cnc,assembly.id_handle())
+      staged_config_nodes_changes.each_index do |i| 
+        config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i}")
         stages_config_nodes_task << config_nodes_task if config_nodes_task
       end
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
@@ -32,6 +32,10 @@ module XYZ
 
     # Generating stages in case of inter node component dependencies 
     def generate_stages(state_change_list)
+
+      # If 'GUARDS' temporal mode set, don't generate stages workflow
+      return [state_change_list] unless XYZ::Workflow.stages_mode?
+
       stages = Array.new
       nodes = Array.new
 
@@ -58,13 +62,7 @@ module XYZ
       while stage = generate_stage(internode_dependencies)
         stages << stage 
       end
-
-      # DEBUG SNIPPET
-      require 'rubygems'
-      require 'ap'
-      ap "stages"
-      ap stages
-
+      
       return populate_stages_data(stages, state_change_list)
     end
 
@@ -308,7 +306,7 @@ module XYZ
 
     #TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure 
     #so node is not repeated for each element corresponding to same node
-    def config_nodes_task(task_mh,state_change_list,assembly_idh=nil)
+    def config_nodes_task(task_mh,state_change_list,assembly_idh=nil, stage_index=nil)
       return nil unless state_change_list and not state_change_list.empty?
       ret = nil
       all_actions = Array.new
@@ -316,9 +314,10 @@ module XYZ
         executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh)
         raise ErrorUsage.new(error_msg) unless executable_action
         all_actions << executable_action
-        ret = create_new_task(task_mh,:executable_action => executable_action) 
+        ret = create_new_task(task_mh,:display_name => "config_node_stage#{stage_index}", :temporal_order => "concurrent")
+        ret.add_subtask_from_hash(:executable_action => executable_action)
       else
-        ret = create_new_task(task_mh,:display_name => "config_node_stage", :temporal_order => "concurrent")
+        ret = create_new_task(task_mh,:display_name => "config_node_stage#{stage_index}", :temporal_order => "concurrent")
         all_errors = Array.new
         state_change_list.each do |sc|
           executable_action, error_msg = get_executable_action_from_state_change(sc,assembly_idh)

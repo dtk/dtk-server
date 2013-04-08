@@ -29,7 +29,7 @@ module XYZ
         elsif action.kind_of?(Task::Action::ConfigNode)
           guards = nil
           if guard_tasks = context.get_guard_tasks(action)
-            #guards = ret_guards(guard_tasks)
+            guards = ret_guards(guard_tasks)
           end
           authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
           main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
@@ -133,6 +133,10 @@ module XYZ
         end
 
         def get_guard_tasks(action)
+
+          # If 'STAGES' temporal mode set, don't generate workflow with guards
+          return nil unless XYZ::Workflow.guards_mode?
+
           ret = nil
           #short cuircuit; must be multiple peers in order there to be guard tasks
           return ret if peer_tasks.size < 2

@@ -396,7 +396,6 @@ module XYZ
         row
       end
       new_idhs = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
-      #set ids
       unrolled_tasks.each_with_index{|task,i|task.set_id_handle(new_idhs[i])}
 
       #set parent relationship and use to set task_id (subtask parent) and children_status

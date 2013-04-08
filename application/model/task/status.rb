@@ -110,7 +110,6 @@ module DTK
         end
       end
       ret << el
-
       num_subtasks = subtasks.size
       #ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
@@ -186,7 +185,8 @@ module DTK
           if sample_st = subtasks.first
             if sample_st[:executable_action_type]
               sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
-              type = (sample_type && "#{sample_type}s") #make plural
+              suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
+              type = (sample_type && "#{sample_type}s#{suffix}") #make plural
             end
           end 
         end

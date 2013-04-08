@@ -397,6 +397,7 @@ module XYZ
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task)
+                    cancel_upstream_subtasks(workitem)
                   else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event

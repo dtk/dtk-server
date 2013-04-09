@@ -103,15 +103,16 @@ module DTK
             end
             callbacks = {
               :on_msg_received => proc do |msg|
+                require 'ap'
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
-                #TODO: now ignoring bad results because have time out mechanism; might put errors in queue to terminate earlier
-                if response and response[:pbuilderid] and response[:status] == :ok
-                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                  raw_data = response[:data].map{|r|node_info.merge(r)}
-                  data = process_data_for_ipv4(raw_data)
-                  action_results_queue.push(node_info[:id],new(node_info[:display_name],data))
-
-                end
+                ap "response"
+                ap response
+                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+                raw_data = response[:data].map{|r|node_info.merge(r)}
+                #ap "node_info"
+                #ap node_info
+                #ap msg
+                action_results_queue.push(node_info[:id],new(node_info[:display_name],raw_data))
               end
             }
             CommandAndControl.request__execute_action(:ps,:get_ps,nodes,callbacks)

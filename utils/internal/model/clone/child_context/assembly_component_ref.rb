@@ -38,7 +38,7 @@ module DTK
         #mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
-        ndx_node_template_to_ref = Hash.new
+        ndx_to_find_cmp_ref_id = Hash.new
 
         cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
         ndx_component_templates = Component.find_ndx_workspace_templates(@clone_proc.project.id_handle(),cmps)
@@ -50,10 +50,13 @@ module DTK
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
           component_template_id = ndx_component_templates[m[:component_template_id]][:id]
-          #set  ndx_node_template_to_ref
+          #set  ndx_to_find_cmp_ref_id
           #first index is the associated node instance, second is teh component template
-          pntr = ndx_node_template_to_ref[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
-          pntr[component_template_id] = m[:id]
+          pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
+          if pntr[m[:display_name]]
+            Log.error("unexpected that multiple matches when creating ndx_to_find_cmp_ref_id")
+          end
+          pntr[m[:display_name]] = m[:id]
 
           {:ancestor_id => component_template_id,
             :component_template_id =>  component_template_id,
@@ -75,7 +78,7 @@ module DTK
         select_ds = cmp_template_ds.join_table(:inner,mapping_ds,[:component_template_id])
         ret = Model.create_from_select(component_mh,field_set_to_copy,select_ds,create_override_attrs,aug_create_opts(create_opts))
         ret.each do |r|
-          component_ref_id = ndx_node_template_to_ref[r[:node_node_id]][r[:ancestor_id]]
+          component_ref_id = ndx_to_find_cmp_ref_id[r[:node_node_id]][r[:display_name]]
           raise Error.new("Variable component_ref_id should not be null") if component_ref_id.nil?
           r.merge!(:component_ref_id => component_ref_id, :component_template_id => r[:ancestor_id])
         end 

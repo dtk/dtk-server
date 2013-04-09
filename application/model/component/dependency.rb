@@ -48,7 +48,9 @@ module DTK
         ret.each do |dep|
           internode_dependencies << {
             :node_dependency => { dep[:guarded][:node][:id] => dep[:guard][:node][:id] },
-            :component_dependency => { dep[:guarded][:component][:id] => [dep[:guard][:component][:id]] }
+            :node_dependency_names => { dep[:guarded][:node][:display_name] => dep[:guard][:node][:display_name] },
+            :component_dependency => { dep[:guarded][:component][:id] => [dep[:guard][:component][:id]] },
+            :component_dependency_names => { dep[:guarded][:component][:display_name] => [dep[:guard][:component][:display_name]] }
           }
         end
         return internode_dependencies

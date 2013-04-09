@@ -43,6 +43,10 @@ module XYZ
       internode_dependencies = Component.get_internode_dependencies(state_change_list)
       return [state_change_list] if internode_dependencies.empty?
 
+      # Raise error if inter node dependency cycle detected
+      error_msg_for_internode_cycle = detect_internode_cycle(internode_dependencies)
+      raise ErrorUsage.new(error_msg_for_internode_cycle) if error_msg_for_internode_cycle
+
       state_change_list.each do |node_change_list|
         ndx_cmp_idhs = Hash.new
         node_id = node_change_list.first[:node][:id]
@@ -64,6 +68,30 @@ module XYZ
       end
 
       return populate_stages_data(stages, state_change_list)
+    end
+
+    def detect_internode_cycle(internode_dependencies)
+      error_msg = nil
+      tsort_input_deps = Hash.new
+      internode_dependencies.each { |cmp_dep| tsort_input_deps.merge!(cmp_dep[:component_dependency])}
+      begin
+        TSortHash.new(tsort_input_deps).tsort
+      rescue TSort::Cyclic => e
+        cycle_comp_ids = e.message.match(/.*\[(.+)\]/)[1]
+        cmp_dep_str = Array.new
+        nds_dep_str = Array.new
+        internode_dependencies.each do |dep|
+          if cycle_comp_ids.include?(dep[:component_dependency].keys.first.to_s)
+            cmp_dep_str << "#{format_hash(dep[:component_dependency_names])} (#{format_hash(dep[:component_dependency])})"
+            nds_dep_str << "#{format_hash(dep[:node_dependency_names])} (#{format_hash(dep[:node_dependency])})"
+          end
+        end
+        error_msg = "Inter-node components cycle detected.\nNodes cycle:\n#{nds_dep_str.join("\n")}\nComponents cycle:\n#{cmp_dep_str.join("\n")}"
+      end
+      return error_msg
+    end
+    def format_hash(h)
+      h.map{|k,v| "#{k} => #{v}"}.join(',')
     end
 
     # Populating stages from original data 'state_change_list'

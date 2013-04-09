@@ -55,15 +55,18 @@ module DTK
     ###########
     RefDelim = "___"
 
-    #this is an augmented port that has keys: node and optionally :link_def
+    #this is an augmented port that has keys: node and optionally :link_def and nested_component
     def display_name_print_form()
       info = parse_port_display_name()
       cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
+      if title = self[:nested_component] && ComponentTitle.title?(self[:nested_component])
+        cmp_ref = ComponentTitle.display_name_with_title(cmp_ref,title)
+      end
       node = self[:node]
       "#{node[:display_name]}/#{cmp_ref}"
     end
 
-    #this is an augmented port that has keys: node and optionally :link_def
+    #this is an augmented port that has keys: node and optionally :link_def and nested_component
     def print_form_hash()
       ret = {
         :id => self[:id],

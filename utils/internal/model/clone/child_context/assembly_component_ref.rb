@@ -20,10 +20,10 @@ module DTK
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type,:version,:has_override_version,:component_template_id,:node_and_template_info,:template_id_synched],
+          :cols => [:id,:group_id,:display_name,:ref,:component_type,:version,:has_override_version,:component_template_id,:node_and_template_info,:template_id_synched],
           :filter => [:oneof, :node_node_id, node_stub_ids]
         }
-        aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash)
+        aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash,:keep_ref_cols => true)
 
         module_constraints = @clone_proc.module_version_constraints()
         module_constraints.set_matching_component_template_info!(aug_cmp_refs)
@@ -58,14 +58,16 @@ module DTK
           {:ancestor_id => component_template_id,
             :component_template_id =>  component_template_id,
             :node_node_id =>  node_node_id,
-            :assembly_id => node[:assembly_id]
+            :assembly_id => node[:assembly_id],
+            :display_name => m[:display_name],
+            :ref => m[:ref]
           }
         end
 
         mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
       
         #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:assembly_id] + parent_rels.first.keys
+        remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
         cmp_template_wc = nil
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))

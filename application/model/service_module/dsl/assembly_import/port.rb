@@ -67,11 +67,13 @@ module DTK; class ServiceModule
         #create craete hashes for both local side and remore side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
-        ld_links_info = Array.new
+        ndx_ld_links_info = Hash.new
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
+            ndx = link_def[:id]
+            next if ndx_ld_links_info[ndx] #removing duplicate link defs
             (link_def[:link_def_links]||{}).each do |link|
-              ld_links_info << {:link => link, :link_def => link_def}
+              ndx_ld_links_info[ndx] = {:link => link, :link_def => link_def}
             end
             node = ld_info[:node]
             port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component])
@@ -86,7 +88,7 @@ module DTK; class ServiceModule
         end
 
         #add the remote ports
-        ld_links_info.each do |ld_link_info|
+        ndx_ld_links_info.each_value do |ld_link_info|
           remote_component_type = ld_link_info[:link][:remote_component_type]
           link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
             node = matching_node_cmp[:node]

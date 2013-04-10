@@ -43,9 +43,10 @@ module XYZ
       internode_dependencies = Component.get_internode_dependencies(state_change_list)
       return [state_change_list] if internode_dependencies.empty?
 
+      # Amar: TODO Remove this if new impl works
       # Raise error if inter node dependency cycle detected
-      error_msg_for_internode_cycle = detect_internode_cycle(internode_dependencies)
-      raise ErrorUsage.new(error_msg_for_internode_cycle) if error_msg_for_internode_cycle
+      #error_msg_for_internode_cycle = detect_internode_cycle(internode_dependencies)
+      #raise ErrorUsage.new(error_msg_for_internode_cycle) if error_msg_for_internode_cycle
 
       state_change_list.each do |node_change_list|
         ndx_cmp_idhs = Hash.new
@@ -63,14 +64,36 @@ module XYZ
 
       stages << clean_dependencies_that_are_internode(internode_dependencies, nodes)
       # everything in each stage can be executed concurrently, only each stage must go sequentially
+      prev_deps_count = internode_dependencies.size
       while stage = generate_stage(internode_dependencies)
+        # Checks for inter node dependency cycle and throws error if cycle present
+        prev_deps_count = detect_internode_cycle(internode_dependencies, prev_deps_count)
         stages << stage 
       end
-
       return populate_stages_data(stages, state_change_list)
     end
 
-    def detect_internode_cycle(internode_dependencies)
+    def detect_internode_cycle(internode_dependencies, prev_deps_count)
+      cur_deps_count = internode_dependencies.size
+      if prev_deps_count == cur_deps_count
+        # Gathering data for error's pretty print on CLI side
+        cmp_dep_str = Array.new
+        nds_dep_str = Array.new
+        internode_dependencies.each do |dep|
+          cmp_dep_str << "#{format_hash(dep[:component_dependency_names])} (#{format_hash(dep[:component_dependency])})"
+          nds_dep_str << "#{format_hash(dep[:node_dependency_names])} (#{format_hash(dep[:node_dependency])})"
+        end
+        error_msg = "Inter-node components cycle detected.\nNodes cycle:\n#{nds_dep_str.join("\n")}\nComponents cycle:\n#{cmp_dep_str.join("\n")}"
+        raise ErrorUsage.new(error_msg)
+      end
+      return cur_deps_count
+    end
+    def format_hash(h)
+      h.map{|k,v| "#{k} => #{v}"}.join(',')
+    end
+
+    # Amar: TODO remove this if new impl works in more cases
+    def detect_internode_cycle_old(internode_dependencies)
       error_msg = nil
       tsort_input_deps = Hash.new
       internode_dependencies.each { |cmp_dep| tsort_input_deps.merge!(cmp_dep[:component_dependency])}
@@ -94,9 +117,6 @@ module XYZ
         # TSort is not expected to complete ordering as internode_dependencies is not full graph representation 
       end
       return error_msg
-    end
-    def format_hash(h)
-      h.map{|k,v| "#{k} => #{v}"}.join(',')
     end
 
     # Populating stages from original data 'state_change_list'

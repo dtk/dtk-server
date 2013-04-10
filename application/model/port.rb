@@ -100,13 +100,22 @@ module DTK
       self[:port_info] ||= parse_port_display_name()
     end
 
-
+    #methods related to internal form of display_name/ref
+    #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn[___title]
+    class << self
+     private
+      def ret_encoded_port_name(type,component_type,link_def,dir,title=nil)
+        link_def_ref = link_def[:link_type]
+        ret = "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
+        title ? "#{ret}#{RefDelim}#{title}" : ret
+      end
+    end
     ParseRegex = {
       :with_title    => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+)#{RefDelim}(.+$)"),
       :without_title => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+$)")
     }
     def self.parse_port_display_name(port_display_name)
-      #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn[___title]
+
       ret = Hash.new
       #TODO: deprecate forms without input or output
       if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
@@ -134,6 +143,7 @@ module DTK
 
       ret
     end
+    #end: methods related to internal form of display_name/ref
     
     #this function maps from service ref to internal display name
     #node_display_name,poss_port_display_names
@@ -248,8 +258,9 @@ module DTK
         end
           
       dir = direction_from_local_remote(link_def[:local_or_remote],opts)
-      ref = ref_from_component_and_link_def(type,component_type,link_def,dir)
-      display_name = ref #TODO: rather than encoded name to component i18n name, make add a structured column likne name_context
+      cmp_ref = opts[:component_ref]
+      title = cmp_ref && ComponentTitle.title?(cmp_ref)
+      display_name = ref = ret_encoded_port_name(type,component_type,link_def,dir,title)
       location_asserted = ret_location_asserted(component_type,link_def[:link_type])
       row = {
         :ref => ref,
@@ -295,13 +306,6 @@ module DTK
         }
       }
       
-      def ref_from_component_and_link_def(type,component_type,link_def,dir)
-        ref_from_component_and_link_def_ref(type,component_type,link_def[:link_type],dir)
-      end
-
-      def ref_from_component_and_link_def_ref(type,component_type,link_def_ref,dir)
-        "#{dir}#{RefDelim}#{type}#{RefDelim}#{component_type}#{RefDelim}#{link_def_ref}"
-      end
     end
 
     #virtual attribute defs

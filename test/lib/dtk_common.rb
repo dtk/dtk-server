@@ -426,7 +426,8 @@ class DtkCommon
 
 	def netstats_check(assembly_id, port)
 		puts "Netstats check:", "---------------"
-		netstats_check = false
+		sleep 20 #Before initiating netstats check, wait for services to be up
+ 		netstats_check = false
 		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
 		action_results_id = response['data']['action_results_id']
 
@@ -849,7 +850,7 @@ class DtkCommon
 
 		if (service_remote_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{service_name}" }.first)
 			puts "Service #{service_name} in #{namespace} namespace exists. Proceed with deleting this service..."
-			delete_remote_service = send_request('/rest/service_module/delete_remote', {:remote_module_name=>"#{namespace}/#{service_name}"})
+			delete_remote_service = send_request('/rest/service_module/delete_remote', {:remote_service_name=>"#{namespace}/#{service_name}"})
 			if (delete_remote_service['status'] == 'ok')
 				puts "Service #{service_name} in #{namespace} deleted from remote!"
 				service_deleted = true

@@ -73,13 +73,26 @@ module DTK; class  Assembly
     def get_augmented_ports(opts={})
       ndx_ret = Hash.new
       ret = get_objs(:cols => [:augmented_ports]).map do |r|
-        r[:port].merge(r.slice(:node,:nested_component,:link_def))
-      end
+        if get_augmented_ports__matches_on_title?(r[:nested_component],r[:port])
+          r[:port].merge(r.slice(:node,:nested_component,:link_def))
+        end
+      end.compact
       if opts[:mark_unconnected]
         get_augmented_ports__mark_unconnected!(ret,opts)
       end
       ret
     end
+
+    #TODO: more efficient if can do the 'title' match on sql side
+    def get_augmented_ports__matches_on_title?(component,port)
+      ret = true
+      if cmp_title = ComponentTitle.title?(component)
+        ret = (cmp_title == port.title?())
+      end
+      ret
+    end
+    private :get_augmented_ports__matches_on_title?
+
     #TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
     def get_augmented_ports__mark_unconnected!(aug_ports,opts={})
       port_links = get_port_links()

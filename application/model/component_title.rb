@@ -14,6 +14,7 @@ module DTK
     end
 
     def self.title?(component)
+      return nil unless component #convience so dont have to check argument being passed is nil
       display_name = component.get_field?(:display_name)
       if display_name =~ /^.+\[(.+)\]$/
         $1

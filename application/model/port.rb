@@ -81,15 +81,19 @@ module DTK
 
     #TODO: assumption that ref and display_name are the same
     def component_name()
-      self.class.parse_port_display_name(self[:display_name])[:component_type]
+      parse_port_display_name()[:component_type]
     end
     def link_def_name()
-      self.class.parse_port_display_name(self[:display_name])[:link_def_ref]
+      parse_port_display_name()[:link_def_ref]
     end
+    def title?()
+      parse_port_display_name()[:title]
+    end 
 
-    #TODO: is this still used and right?
+    #TODO: this should be deprecated; 
     def ref_num()
-      self[:display_name].split(RefDelim)[3].to_i
+#      self[:display_name].split(RefDelim)[3].to_i
+      raise Error.new("using deprecated method port#ref_num")
     end
 
     def parse_port_display_name()

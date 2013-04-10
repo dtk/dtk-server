@@ -75,8 +75,10 @@ module XYZ
       tsort_input_deps = Hash.new
       internode_dependencies.each { |cmp_dep| tsort_input_deps.merge!(cmp_dep[:component_dependency])}
       begin
+        # TSort is only used for cycle detection in this case. If exception is thrown, cycle exists
         TSortHash.new(tsort_input_deps).tsort
       rescue TSort::Cyclic => e
+        # Gathering data for error's pretty print on CLI side
         cycle_comp_ids = e.message.match(/.*\[(.+)\]/)[1]
         cmp_dep_str = Array.new
         nds_dep_str = Array.new
@@ -87,6 +89,9 @@ module XYZ
           end
         end
         error_msg = "Inter-node components cycle detected.\nNodes cycle:\n#{nds_dep_str.join("\n")}\nComponents cycle:\n#{cmp_dep_str.join("\n")}"
+      rescue Exception => e
+        # TSort is expected to fail
+        # TSort is not expected to complete ordering as internode_dependencies is not full graph representation 
       end
       return error_msg
     end

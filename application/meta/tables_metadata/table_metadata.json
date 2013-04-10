@@ -308,17 +308,19 @@
    }
   },
   "ps_data": {
-    "order": [   
+    "order": [  
+       "node_id",
        "uid",
        "pid",
        "start_time",
        "command"
     ],
     "mapping": {
+       "node_id": "node_id",
        "uid": "uid",
        "pid": "pid",
        "start_time": "start_time",
-       "command": "command"
+       "command": "command.strip"
    }
   }
 }

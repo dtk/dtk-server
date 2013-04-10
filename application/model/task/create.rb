@@ -51,16 +51,23 @@ module XYZ
       state_change_list.each do |node_change_list|
         ndx_cmp_idhs = Hash.new
         node_id = node_change_list.first[:node][:id]
+        
+        # Gathering all impl ids to get loaded in first config node stage
+        impl_ids_list = Array.new
+        node_change_list.each { |sc| impl_ids_list << sc[:component][:implementation_id] }
+        
         node_change_list.each do |sc|
           cmp = sc[:component]
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
+
+          # Adding impl_ids_list to each node
+          sc[:node][:implementation_ids_list] = impl_ids_list
         end
         cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
         cmp_ids_with_deps = Task::Action::OnComponent.get_cmp_ids_with_deps(cmp_deps)
-        
+
         nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
       end
-
 
       stages << clean_dependencies_that_are_internode(internode_dependencies, nodes)
       # everything in each stage can be executed concurrently, only each stage must go sequentially
@@ -122,6 +129,7 @@ module XYZ
     # Populating stages from original data 'state_change_list'
     def populate_stages_data(stages, state_change_list)
       stages_state_change_list = Array.new
+      first_stage = true
       stages.each do |stage|
         stage_scl = Array.new
         stage.each do |cmp|
@@ -132,12 +140,15 @@ module XYZ
           cmp_ids.each do |cmp_id|
             in_node_scl.each do |in_node_cmp|
               if in_node_cmp[:component][:id] == cmp_id
+                # removing impl_ids_list from stages except from first stage. Component modules must be loaded only for first stage
+                in_node_cmp[:node][:implementation_ids_list] = Array.new unless first_stage
                 out_node_scl << in_node_cmp
               end
             end
           end
           stage_scl << out_node_scl
         end
+        first_stage = false if first_stage
         stages_state_change_list << stage_scl
       end
       return stages_state_change_list

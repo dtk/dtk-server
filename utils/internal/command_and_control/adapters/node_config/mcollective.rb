@@ -162,10 +162,23 @@ module XYZ
         ret = Array.new
         return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
-        impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
-          sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
-        end
+        impl_idhs = get_impl_idhs(config_node, sample_idh)
+        return ret unless impl_idhs
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
+      end
+      def self.get_impl_idhs(config_node, sample_idh)
+        # if [:node][:implementation_ids_list] empty, or populated use it for getting impl_idhs, 
+        # else if nil use gathering from [:component][:implementation_id]
+        if impl_ids = config_node[:node][:implementation_ids_list]
+          impl_idhs = impl_ids.uniq.map do |impl_id|
+            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
+          end
+        else
+          impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
+            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
+          end
+        end
+        return impl_idhs
       end
       def self.get_version_context(impl_info)
         ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array

@@ -99,10 +99,16 @@ module DTK
     def set_port_info!()
       self[:port_info] ||= parse_port_display_name()
     end
+
+
+    ParseRegex = {
+      :with_title    => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+)#{RefDelim}(.+$)"),
+      :without_title => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+$)")
+    }
     def self.parse_port_display_name(port_display_name)
+      #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn[___title]
       ret = Hash.new
-      #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn
-      #TODO: deprecate forms with out input or output
+      #TODO: deprecate forms without input or output
       if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
         port_display_name = $1
         ret.merge!(:direction => :input)
@@ -111,13 +117,22 @@ module DTK
         ret.merge!(:direction => :output)
       end
 
-      if port_display_name =~ Regexp.new("component_(internal|external)#{RefDelim}(.+)__(.+)#{RefDelim}(.+$)")
-        ret.merge(:port_type => $1,:module => $2,:component => $3,:link_def_ref => $4,:component_type => "#{$2}__#{$3}")
-      elsif  port_display_name =~ Regexp.new("component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+$)")
-        ret.merge(:port_type => $1,:module => $2,:component => $2,:link_def_ref => $3,:component_type => $2)
+      if port_display_name =~ ParseRegex[:with_title]
+        ret.merge!(:port_type => $1,:component_type => $2,:link_def_ref => $3, :title => $4)
+      elsif port_display_name =~ ParseRegex[:without_title]
+        ret.merge!(:port_type => $1,:component_type => $2,:link_def_ref => $3)
       else
         raise Error.new("unexpected display name (#{port_display_name})")
       end
+      
+      component_type = ret[:component_type]
+      if component_type =~ Regexp.new("(^.+)__(.+$)")
+        ret.merge!(:module => $1,:component => $2)
+      else
+        ret.merge!(:module => component_type,:component => component_type)
+      end
+
+      ret
     end
     
     #this function maps from service ref to internal display name

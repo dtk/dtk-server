@@ -33,9 +33,10 @@ module DTK
             end
 
             indexes = nodes.map{|r|r[:id]}
+            ap "testtesttest"
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+              h.merge(n.pbuilderid => {:id => "test", :display_name => n[:display_name]}) 
             end
 
             callbacks = {
@@ -99,14 +100,15 @@ module DTK
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+              h.merge(n.pbuilderid => {:node_id => n[:id].to_s, :display_name => n[:display_name]}) 
             end
             callbacks = {
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                  action_results_queue.push(node_info[:id], response[:data])
+                  raw_data = response[:data].map{|r|node_info.merge(r)}
+                  action_results_queue.push(node_info[:id], raw_data)
                 end
               end
             }

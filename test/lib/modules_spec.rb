@@ -19,13 +19,64 @@ shared_context "Import remote module" do |module_name|
   end
 end
 
+shared_context "Import module from puppet forge" do |puppet_forge_module_name|
+  it "imports #{puppet_forge_module_name} module from puppet forge" do
+    puts "Import module from puppet forge:", "---------------------"
+    pass = false
+    value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
+    pass = true if ((!value.include? "[ERROR]") || (!value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
+    puts "Import of puppet forge module #{module_name} completed successfully!" if pass == true
+    puts "Import of puppet forge module #{module_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "NEG - Import module from puppet forge" do |puppet_forge_module_name|
+  it "does not import #{puppet_forge_module_name} module from puppet forge" do
+    puts "NEG - Import module from puppet forge:", "---------------------"
+    pass = false
+    value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
+    pass = true if ((value.include? "[ERROR]") || (value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
+    puts "Import of incorrect puppet forge module #{module_name} was not completed successfully!" if pass == true
+    puts "Import of incorrect puppet forge module #{module_name} was completed successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Create module from provided git repo" do |module_name, git_ssh_repo_url|
+  it "creates #{module_name} module from #{git_ssh_repo_url} repo" do
+    puts "Create module from git repo:", "---------------------"
+    pass = false
+    value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
+    pass = true if ((!value.include? "[ERROR]") || (!value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    puts "Module #{module_name} created successfully from provided git repo!" if pass == true
+    puts "Module #{module_name} was not created successfully from provided git repo!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "NEG - Create module from provided git repo" do |module_name, git_ssh_repo_url|
+  it "does not create #{module_name} module from #{git_ssh_repo_url} repo" do
+    puts "NEG - Create module from git repo:", "---------------------"
+    pass = false
+    value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
+    pass = true if ((value.include? "[ERROR]") || (value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == true
+    puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Create module" do |module_name|
   it "creates #{module_name} module from content on local machine" do
     puts "Create module:", "--------------"
     pass = false
     value = `dtk module import #{module_name}`
     pass = value.include? "module_created: #{module_name}"
-
     puts "Module #{module_name} created successfully!" if pass == true
     puts "Module #{module_name} was not created successfully!" if pass == false
     puts ""
@@ -54,6 +105,16 @@ shared_context "Get module components list" do |dtk_common, module_name|
     dtk_common.get_module_components_list(module_name, "")
     empty_list = dtk_common.component_module_id_list.empty?
     empty_list.should eq(false)
+  end
+end
+
+shared_context "NEG - Get module components list" do |dtk_common, module_name|
+  it "gets empty list of all components since #{module_name} module does not exist" do
+    #delete previous elements in array
+    dtk_common.component_module_id_list.delete_if { |x| x != nil }
+    dtk_common.get_module_components_list(module_name, "")
+    empty_list = dtk_common.component_module_id_list.empty?
+    empty_list.should eq(true)
   end
 end
 

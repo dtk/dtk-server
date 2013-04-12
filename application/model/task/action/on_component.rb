@@ -42,20 +42,43 @@ module DTK; class Task
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
         end
         cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
-        cmp_order = get_component_order(cmp_deps, node)
+        cmp_order = get_intra_node_stages(cmp_deps, state_change_list, node) if XYZ::Workflow.intra_node_stages?
+        cmp_order = get_total_component_order(cmp_deps, node) if XYZ::Workflow.intra_node_total_order?
         cmp_order.map do |(component_id,deps)|
           create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end
       end
 
+      def self.get_intra_node_stages(cmp_deps, state_change_list, node)
+        cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
+        # DEBUG SNIPPET
+        require 'rubygems'
+        require 'ap'
+        ap "COMPONENTS_WITH_DEPENDENCIES"
+        ap cmp_ids_with_deps
+        intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps.dup, state_change_list)
+
+        intranode_stages = Array.new
+        intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
+        ap "INTRA_NODE_STAGES"
+        ap intranode_stages
+        node[:intra_node_stages] = intranode_stages
+        return cmp_ids_with_deps
+      end
+
       # Amar
       # Return order from node table if order is consistent, otherwise generate order through TSort and update order in table
-      def self.get_component_order(cmp_deps, node)
+      def self.get_total_component_order(cmp_deps, node)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps)
         # Get order from DB
         cmp_order = node.get_ordered_component_ids()
+        # DEBUG SNIPPET
+        require 'rubygems'
+        require 'ap'
+        ap "TOTAL_COMPONENT_ORDERING"
+        ap cmp_order
         # return if consistent
-        return cmp_order if is_order_consistent?(cmp_ids_with_deps, cmp_order)
+        return cmp_order if is_total_order_consistent?(cmp_ids_with_deps, cmp_order)
 
         # generate order via TSort
         cmp_order = generate_component_order(cmp_ids_with_deps)
@@ -65,7 +88,7 @@ module DTK; class Task
       end
 
       # Amar: Checking if existing order in node table is consistent
-      def self.is_order_consistent?(cmp_ids_with_deps, order)
+      def self.is_total_order_consistent?(cmp_ids_with_deps, order)
         return false if order.empty?
         return false unless cmp_ids_with_deps.keys.sort == order.sort
         begin
@@ -100,7 +123,7 @@ module DTK; class Task
           non_null_deps = info[:component_dependencies].map{|ct|cmp_type_to_id[ct]}.compact
           h.merge(id => non_null_deps)
         end
-        return cmp_ids_with_deps
+        return cmp_ids_with_deps.nil? ? {} : cmp_ids_with_deps
       end
 
       #returns array of form [component_id,deps]

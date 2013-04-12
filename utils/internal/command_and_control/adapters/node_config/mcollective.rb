@@ -11,11 +11,9 @@ module XYZ
       end
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
-        
         #TODO: getting out implemention info not needed if put module names in component ext refs
         impl_info = get_relevant_impl_info(config_node)
         version_context = get_version_context(impl_info)
-
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node,impl_info)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
@@ -163,7 +161,7 @@ module XYZ
         return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = get_impl_idhs(config_node, sample_idh)
-        return ret unless impl_idhs
+        return ret unless impl_idhs.empty?
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
       end
       def self.get_impl_idhs(config_node, sample_idh)

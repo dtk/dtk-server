@@ -427,7 +427,6 @@ module XYZ
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}
               workflow.initiate_executable_action(task,receiver_context)
-              end
             else
               raise Error.new("TODO: if reach need to implement config node that is not long running")
             end

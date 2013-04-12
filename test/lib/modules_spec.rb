@@ -10,7 +10,7 @@ shared_context "Import remote module" do |module_name|
   it "imports #{module_name} module from remote repo" do
     puts "Import remote module:", "---------------------"
     pass = false
-    value = `dtk module import #{module_name}`
+    value = `dtk module import-r8n #{module_name}`
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
     puts "Import of remote module #{module_name} completed successfully!" if pass == true
     puts "Import of remote module #{module_name} did not complete successfully!" if pass == false
@@ -23,7 +23,7 @@ shared_context "Create module" do |module_name|
   it "creates #{module_name} module from content on local machine" do
     puts "Create module:", "--------------"
     pass = false
-    value = `dtk module create #{module_name}`
+    value = `dtk module import #{module_name}`
     pass = value.include? "module_created: #{module_name}"
 
     puts "Module #{module_name} created successfully!" if pass == true

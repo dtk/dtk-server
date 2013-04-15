@@ -25,8 +25,8 @@ shared_context "Import module from puppet forge" do |puppet_forge_module_name|
     pass = false
     value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
-    puts "Import of puppet forge module #{module_name} completed successfully!" if pass == true
-    puts "Import of puppet forge module #{module_name} did not complete successfully!" if pass == false
+    puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
+    puts "Import of puppet forge module #{puppet_forge_module_name} did not complete successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end

@@ -100,7 +100,7 @@ module DTK
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-              h.merge(n.pbuilderid => {:node_id => n[:id].to_s, :display_name => n[:display_name]}) 
+              h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]}) 
             end
             callbacks = {
               :on_msg_received => proc do |msg|

@@ -3,7 +3,27 @@ module XYZ
     def process(*route)
 
       unless route.first == "user"
-        login_first unless R8::Config[:development_test_user] #TODO unless clause for testing
+
+        unless logged_in?
+          # using cookie to take session information
+          # composed data is consistent form user_id, expire timestamp, and tenant id
+          composed_data = ::AESCrypt.decrypt(request.cookies["dtk-user-info"], ENCRYPTION_SALT, ENCRYPTION_SALT)
+          user_id, time_integer, c = composed_data.split('_')
+
+          # make sure that cookie has not expired
+          if (time_integer.to_i >= Time.now.to_i)
+            # due to tight coupling between model_handle and user_object we will set
+            # model handle manually 
+            ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
+            # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
+            # this is easiest way to do it. But does feel dirty.
+            user_login(ramaze_user.merge(:access_time => Time.now))
+            # we set :last_ts as access time for later check
+            session.store(:last_ts, Time.now.to_i)
+          end
+        end
+
+        login_first unless R8::Config[:development_test_user]
 
         session = CurrentSession.new
         session.set_user_object(user_object())
@@ -103,14 +123,15 @@ module XYZ
     end
 
     def run_rest_action(action,parent_model_name=nil)
-      model,method = action[:route].split("/")
+      model, method = action[:route].split("/")
       method ||= :index
       result = nil
       begin
        result = call_action(action,parent_model_name)
       rescue DTK::SessionError => e
+        auth_unauthorized_response(e.message)
         # TODO: Look into the code so we can return 401 HTTP status
-        result = rest_notok_response(:message => e.message)
+        #result = rest_notok_response(:message => e.message)
       rescue Exception => e
         #TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)

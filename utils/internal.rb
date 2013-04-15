@@ -4,6 +4,7 @@ files =
    'error', 
    'auxiliary', 
    'sql', 
+   'aes', 
    'dataset_from_search_pattern', 
    'hash_object', 
    'array_object', 

@@ -30,10 +30,6 @@ describe "Test Case 69: Import module from git repo url" do
     include_context "Create module from provided git repo", module_name, git_ssh_repo_url
   end
 
-  context "Get module components list" do
-    include_context "Get module components list", dtk_common, module_name
-  end
-
   context "Check if module imported on local filesystem" do
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end

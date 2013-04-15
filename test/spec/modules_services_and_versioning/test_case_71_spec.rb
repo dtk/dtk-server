@@ -30,10 +30,6 @@ describe "Test Case 71: Import module from puppet forge" do
     include_context "Import module from puppet forge", puppet_forge_module_name
   end
 
-  context "Get module components list" do
-    include_context "Get module components list", dtk_common, module_name
-  end
-
   context "Check if module imported on local filesystem" do
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end

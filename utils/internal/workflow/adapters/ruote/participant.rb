@@ -38,10 +38,20 @@ module XYZ
         end
 
         def set_result_canceled(workitem, task)
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_canceled] = true
+
           task.update_at_task_completion("cancelled",Task::Action::Result::Cancelled.new())
         end
 
         def set_result_failed(workitem,new_result,task)
+
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_failed] = true
           error = 
             if not new_result[:statuscode] == 0
               CommandAndControl::Error::Communication.new
@@ -273,10 +283,6 @@ module XYZ
           params = get_params(wi) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
 
-          # Amar: (TODO: Find better solution)
-          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
-          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
-          task[:executable_action][:node][:is_task_canceled] = true
 
           task.add_internal_guards!(workflow.guards[:internal])
           pp ["Canceling task #{action.class.to_s}: #{task_id}"]

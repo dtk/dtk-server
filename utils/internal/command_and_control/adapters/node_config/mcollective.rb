@@ -17,7 +17,6 @@ module XYZ
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node,impl_info)
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
-        
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
@@ -73,14 +72,14 @@ module XYZ
         callbacks = {
           :on_msg_received => proc do |msg|
             # is_task_canceled is set from participant cancel method
-            rc[:callbacks][:on_msg_received].call(msg) unless node[:is_task_canceled]
+            rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
           end,
           :on_timeout => proc do 
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
               new_opts = opts.merge(:count => count-1)
-              poll_to_detect_node_ready(node,new_opts) unless node[:is_task_canceled]
+              poll_to_detect_node_ready(node,new_opts) unless (node[:is_task_canceled] || node[:is_task_failed])
             end
           end
         }
@@ -161,7 +160,7 @@ module XYZ
         return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
         impl_idhs = get_impl_idhs(config_node, sample_idh)
-        return ret unless impl_idhs.empty?
+        return ret if impl_idhs.empty?
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
       end
       def self.get_impl_idhs(config_node, sample_idh)

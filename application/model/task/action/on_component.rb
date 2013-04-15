@@ -51,17 +51,9 @@ module DTK; class Task
 
       def self.get_intra_node_stages(cmp_deps, state_change_list, node)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
-        # DEBUG SNIPPET
-        require 'rubygems'
-        require 'ap'
-        ap "COMPONENTS_WITH_DEPENDENCIES"
-        ap cmp_ids_with_deps
         intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps.dup, state_change_list)
-
         intranode_stages = Array.new
         intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
-        ap "INTRA_NODE_STAGES"
-        ap intranode_stages
         node[:intra_node_stages] = intranode_stages
         return cmp_ids_with_deps
       end
@@ -72,11 +64,6 @@ module DTK; class Task
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps)
         # Get order from DB
         cmp_order = node.get_ordered_component_ids()
-        # DEBUG SNIPPET
-        require 'rubygems'
-        require 'ap'
-        ap "TOTAL_COMPONENT_ORDERING"
-        ap cmp_order
         # return if consistent
         return cmp_order if is_total_order_consistent?(cmp_ids_with_deps, cmp_order)
 

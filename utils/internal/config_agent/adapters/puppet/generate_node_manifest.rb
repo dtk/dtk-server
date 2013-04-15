@@ -39,12 +39,7 @@ module XYZ
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
           ret += attr_val_stmts
         end
-        # DEBUG SNIPPET
-        require 'rubygems'
-        require 'ap'
-        ap "PUPPET_MANIFEST_WITH_STAGES"
-        ap ret
-        ret
+        return ret
       end      
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
@@ -65,12 +60,7 @@ module XYZ
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
           ret += attr_val_stmts
         end
-        # DEBUG SNIPPET
-        require 'rubygems'
-        require 'ap'
-        ap "PUPPET_MANIFEST_WITH_TOTAL_ORDERING"
-        ap ret
-        ret
+        return ret
       end
 
       def generate_middle_manifest(cmp_with_attrs, stage, ret)

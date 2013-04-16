@@ -33,7 +33,6 @@ module DTK
             end
 
             indexes = nodes.map{|r|r[:id]}
-            ap "testtesttest"
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
               h.merge(n.pbuilderid => {:id => "test", :display_name => n[:display_name]}) 

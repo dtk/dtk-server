@@ -175,10 +175,20 @@ module DTK
         parsed_port_name = parse_port_display_name(port[:display_name])
         cmp_type =  parsed_port_name[:component_type]
         link_def_ref = parsed_port_name[:link_def_ref]
-
         node_node_id = port[:node_node_id]
+        port_title = parsed_port_name[:title]
         #TODO: check if need to match on version too or can only be one version type per component
-        unless cmp_match = cmps.find{|cmp|cmp[:component_type] == cmp_type and cmp[:node_node_id] == node_node_id}
+        cmp_match = cmps.find do |cmp|
+          if cmp[:component_type] == cmp_type and cmp[:node_node_id] == node_node_id
+            if port_title
+              cmp_title = ComponentTitle.title?(cmp)
+              cmp_title == port_title
+            else
+              true
+            end
+          end
+        end
+        unless cmp_match
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
         end
         cmp_id = cmp_match[:id]

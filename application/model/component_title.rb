@@ -13,9 +13,13 @@ module DTK
       "#{component_type}--#{title}"
     end
 
+    #component can be a hash or object
     def self.title?(component)
       return nil unless component #convience so dont have to check argument being passed is nil
-      display_name = component.get_field?(:display_name)
+      display_name = component[:display_name] || (component.kind_of?(Component) && component.get_field?(:display_name))
+      unless display_name
+        raise Error.new("Parameter (component) should have :display_name field")
+      end
       if display_name =~ /^.+\[(.+)\]$/
         $1
       end

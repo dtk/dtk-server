@@ -11,7 +11,11 @@ module Ramaze::Helper
     end
 
     def auth_violation_response()
-      rest_request? ? respond('Not Authorized',403) : redirect(R8::Config[:login][:path])
+      rest_request? ? respond('Forbidden',403) : redirect(R8::Config[:login][:path])
+    end
+
+    def auth_unauthorized_response(message)
+      rest_request? ? respond(message,401) : redirect(R8::Config[:login][:path])
     end
 
     def get_user()

@@ -283,12 +283,14 @@ module DTK; class  Assembly
        when :components
         cols = [:instance_nodes_and_cmps_summary]
         post_process_per_row = proc do |r|
-          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
-          version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
-          # Remove version from display name
-          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
-          columns_filtered = r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
-          return columns_filtered
+          if r
+            display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
+            version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
+            # Remove version from display name
+            display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+            columns_filtered = r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
+            return columns_filtered
+          end
         end
        when :nodes
         return get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
@@ -308,6 +310,8 @@ module DTK; class  Assembly
       rows = rows.map { |r| opts[:filter_proc].call(r) }.compact if (opts[:filter_proc] && about == :components)
 
       ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
+      #remove nil values from array ret
+      ret.reject!{|r| r.nil?}
       order ? ret.sort(&order) : ret
     end
 

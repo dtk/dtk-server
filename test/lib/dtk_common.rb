@@ -426,7 +426,8 @@ class DtkCommon
 
 	def netstats_check(assembly_id, port)
 		puts "Netstats check:", "---------------"
-		netstats_check = false
+		sleep 20 #Before initiating netstats check, wait for services to be up
+ 		netstats_check = false
 		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
 		action_results_id = response['data']['action_results_id']
 
@@ -507,8 +508,9 @@ class DtkCommon
 		if (modules_list['data'].select { |x| x['display_name'] == module_to_export }.first)
 			puts "Module #{module_to_export} exists in module list. Check if module exists on remote repo already..."
 			remote_modules_list = send_request('/rest/component_module/list_remote', {})
+			pretty_print_JSON(remote_modules_list)
 
-			if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_export}.first)
+			if (remote_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{module_to_export}"}.first)
    			puts "Module #{module_to_export} was found in list of remote modules."
    			module_exported = false
 			else
@@ -535,6 +537,9 @@ class DtkCommon
 		puts ""
 		return module_exported
 	end
+
+	dtk_common = DtkCommon.new('', '')
+	dtk_common.export_module_to_remote('apache','dtk10')
 
 	def delete_module_from_remote(module_name, namespace)
 		puts "Delete module from remote:", "--------------------------"

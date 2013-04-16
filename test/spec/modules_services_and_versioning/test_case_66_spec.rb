@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/services_spec'
 
-namespace = "bakir"
+namespace = "dtk10"
 service_name = "bakir_test1"
 $assembly_id = 0
 
@@ -29,7 +29,7 @@ describe "Test Case 66: Export service using full name #{service_name} to users 
     include_context "Create service", dtk_common, service_name
   end
 
-  context "Export service to new namespace" do
+  context "Export service to default namespace" do
     include_context "Export service", dtk_common, service_name, namespace
   end
 

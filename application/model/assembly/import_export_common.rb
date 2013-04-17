@@ -11,9 +11,10 @@ module DTK
 
     class AssemblyImportPortRef < SimpleHashObject
       def self.parse(port_ref,assembly_id=nil)
+        #TODO: may need to update this to handle port refs with titles
         if port_ref =~ PortRefRegex
           node = $1; cmp_name = $2; link_def_ref = $3
-          hash = {:node => node,:component_type => component_type(cmp_name),:link_def_ref => link_def_ref}
+          hash = {:node => node,:component_type => component_type_internal_form(cmp_name),:link_def_ref => link_def_ref}
           if assembly_id
             hash.merge!(:assembly_id => assembly_id)
           end
@@ -29,9 +30,9 @@ module DTK
         link_def_ref = service_link_hash.keys.first
         if service_link_hash.values.first =~ ServiceLinkTarget
           output_node = $1; output_cmp_name = $2
-          input = {:node => input_node,:component_type => component_type(input_cmp_name), :link_def_ref => link_def_ref}
-          output = {:node => output_node,:component_type => component_type(output_cmp_name), :link_def_ref => link_def_ref}
-          {:input => new(input), :output => new(output)}
+          input = parsed_endpoint(input_node,input_cmp_name,link_def_ref)
+          output = parsed_endpoint(output_node,output_cmp_name,link_def_ref)
+          {:input => input, :output => output}
         else
           raise Error.new("ill-formed service link (#{service_link_hash.inject}")
         end     
@@ -40,14 +41,14 @@ module DTK
        private
         def parsed_endpoint(node,cmp_name,link_def_ref)
           component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
-          ret_hash = {:node => node,:component_type => component_type, :link_def_ref => link_def_ref}
+          ret_hash = {:node => node,:component_type => component_type_internal_form(component_type), :link_def_ref => link_def_ref}
           ret_hash.merge!(:title => title) if title
           new(ret_hash)
         end
 
-        def component_type(cmp_name)
+        def component_type_internal_form(cmp_type)
           #TODO: global for "__"
-          cmp_type = cmp_name.gsub(ModCompRegex,"__")
+          cmp_type = cmp_type.gsub(ModCompRegex,"__")
         end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
@@ -55,17 +56,19 @@ module DTK
       ServiceLinkTarget= Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
 
       #ports are augmented with field :parsed_port_name
-      def matching_id(aug_ports)
+      def matching_id(aug_ports,opts={})
         match = aug_ports.find do |port|
           p = port[:parsed_port_name]
           node = port[:node][:display_name]
           if self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
-            self[:assembly_id].nil? or (self[:assembly_id] == port[:assembly_id])
+            if self[:assembly_id].nil? or (self[:assembly_id] == port[:assembly_id])
+              self[:title] == p[:title] #they both can be nil -> want a match
+            end
           end
         end
         if match
           match[:id]
-        else
+        elsif not opts[:do_not_throw_error]
           raise Error.new("Cannot find match to (#{self.inspect})")
         end
       end

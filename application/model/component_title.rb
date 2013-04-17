@@ -13,6 +13,16 @@ module DTK
       "#{component_type}--#{title}"
     end
 
+    ComponentTitleRegex = /(^.+)\[(.+)\]$/
+    #returns [component_type,title]
+    def self.parse_component_display_name(cmp_display_name)
+      if cmp_display_name =~ ComponentTitleRegex
+        [$1,$2]
+      else
+        [cmp_display_name,nil]
+      end
+    end
+
     #component can be a hash or object
     def self.title?(component)
       return nil unless component #convience so dont have to check argument being passed is nil
@@ -20,18 +30,8 @@ module DTK
       unless display_name
         raise Error.new("Parameter (component) should have :display_name field")
       end
-      if display_name =~ /^.+\[(.+)\]$/
-        $1
-      end
-    end
-
-    #returns [component_type,title]
-    def self.parse_display_name(cmp_display_name)
-      if cmp_display_name =~ /(^.+)\[(.+)\]$/
-        [$1,$2]
-      else
-        [cmp_display_name,nil]
-      end
+      component_type,title = parse_component_display_name(display_name)
+      title
     end
 
   end

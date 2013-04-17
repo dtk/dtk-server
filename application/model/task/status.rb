@@ -30,7 +30,6 @@ module DTK
           task_obj = task_obj_idh.create_object().update_object!(:display_name)
           raise ErrorUsage.new("No tasks found for #{task_obj_type} (#{task_obj[:display_name]})")
         end
-
         task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
         
         status_opts = Opts.new
@@ -44,6 +43,8 @@ module DTK
         end
         if opts[:format] == :table
           task_structure.status_table_form(status_opts)
+        elsif opts[:format] == :list
+          task_structure.status_list()
         else
           task_structure.status(status_opts)
         end
@@ -79,6 +80,43 @@ module DTK
           replace(hash_opts) unless hash_opts.empty?
         end
       end
+    end
+
+    def status_list()
+      ret = Hash.new
+
+      ret[:task_id] = self[:id]
+      ret[:task_name] = self[:display_name]
+      ret[:temporal_order] = self[:temporal_order]
+      ret[:actions] = Array.new
+
+      level_1 = self[:subtasks]
+      level_1.each do |l1|
+        level_1_ret = Hash.new
+        level_1_ret[:temporal_order] = l1[:temporal_order]
+        level_1_ret[:task_name] = l1[:display_name]
+        level_2 = l1[:subtasks]
+        level_1_ret[:nodes] = Array.new
+        level_2.each do |l2|
+          level_2_ret = Hash.new
+          level_2_ret[:node_name] = l2[:executable_action][:node][:display_name]
+          if l2[:executable_action_type] == "CreateNode"
+            level_2_ret[:task_name] = "create_node"
+            level_2_ret[:node_id] = l2[:executable_action][:node][:id]
+          elsif l2[:executable_action_type] == "ConfigNode"
+            level_2_ret[:task_name] = "config_node"
+            level_2_ret[:components] = Array.new
+            level_3 = l2[:executable_action][:component_actions]            
+            level_3.each do |l3|
+              level_2_ret[:components] << { :component_name => l3[:component][:display_name] }
+            end
+          end
+          level_1_ret[:nodes] << level_2_ret
+        end
+        ret[:actions] << level_1_ret
+      end
+
+      return ret
     end
 
     def status_table_form(opts,level=1,ndx_errors=nil)

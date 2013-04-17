@@ -24,5 +24,15 @@ module DTK
         $1
       end
     end
+
+    #returns [component_type,title]
+    def self.parse_display_name(cmp_display_name)
+      if cmp_display_name =~ /(^.+)\[(.+)\]$/
+        [$1,$2]
+      else
+        [cmp_display_name,nil]
+      end
+    end
+
   end
 end

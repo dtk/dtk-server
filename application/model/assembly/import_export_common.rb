@@ -37,6 +37,14 @@ module DTK
         end     
       end
       class << self
+       private
+        def parsed_endpoint(node,cmp_name,link_def_ref)
+          component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
+          ret_hash = {:node => node,:component_type => component_type, :link_def_ref => link_def_ref}
+          ret_hash.merge!(:title => title) if title
+          new(ret_hash)
+        end
+
         def component_type(cmp_name)
           #TODO: global for "__"
           cmp_type = cmp_name.gsub(ModCompRegex,"__")

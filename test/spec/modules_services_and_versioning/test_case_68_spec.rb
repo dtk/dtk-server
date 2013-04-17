@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "bakir"
+namespace = "dtk10"
 module_name = "apache"
 module_filesystem_location = "~/component_modules"
 $assembly_id = 0
@@ -38,7 +38,7 @@ describe "Test Case 68: Import module from r8 repo and export to default tenant 
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Export module to new namespace" do
+  context "Export module to default namespace" do
     include_context "Export module", dtk_common, module_name, namespace
   end
 

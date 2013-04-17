@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "bakir"
+namespace = "dtk10"
 existing_module_name = "bakir_test"
 module_name = "bakir_test1"
 module_filesystem_location = "~/component_modules"
@@ -54,7 +54,7 @@ describe "Test Case 64: Export module using full name #{module_name} to users de
     include_context "Create module", module_name
   end
 
-  context "Export module to new namespace" do
+  context "Export module to default namespace" do
     include_context "Export module", dtk_common, module_name, namespace
   end
 

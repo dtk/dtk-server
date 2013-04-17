@@ -23,7 +23,7 @@ os = 'rh5.7-64'
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
-node_name = "node1"
+node_name = 'node1'
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

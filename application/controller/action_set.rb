@@ -4,7 +4,8 @@ module XYZ
 
       unless route.first == "user"
 
-        unless logged_in?
+        #unless logged_in?
+        if false
           # using cookie to take session information
           # composed data is consistent form user_id, expire timestamp, and tenant id
           composed_data = ::AESCrypt.decrypt(request.cookies["dtk-user-info"], ENCRYPTION_SALT, ENCRYPTION_SALT)

@@ -64,15 +64,16 @@ module DTK; class ServiceModule
           (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
         end 
 
-        #create craete hashes for both local side and remore side ports
+        #create create-hashes for both local side and remore side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
-        ld_links_info = Array.new
+        ndx_ld_links_info = Hash.new
         link_defs_info.each do |ld_info|
-          if link_def = ld_info[:link_def]
-            (link_def[:link_def_links]||{}).each do |link|
-              ld_links_info << {:link => link, :link_def => link_def}
-            end
+          link_def = ld_info[:link_def]
+          if link_def 
+            ndx = link_def[:id]
+            ndx_ld_links_info[ndx] ||= (link_def[:link_def_links]||{}).map{|link|{:link => link, :link_def => link_def}}
+
             node = ld_info[:node]
             cmp_ref = ld_info[:component_ref]
             port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component],:component_ref => cmp_ref)
@@ -87,18 +88,21 @@ module DTK; class ServiceModule
         end
 
         #add the remote ports
-        ld_links_info.each do |ld_link_info|
-          remote_component_type = ld_link_info[:link][:remote_component_type]
-          link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
-            node = matching_node_cmp[:node]
-            component = matching_node_cmp[:nested_component]
-            port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
-            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
-              existing_port_info[:matched] = true
-              ret << existing_port_info[:port]
-            else
-              pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-              pntr[:create_rows] << port
+        ndx_ld_links_info.each_value do |ld_links_info|
+          ld_links_info.each do |ld_link_info|
+            remote_component_type = ld_link_info[:link][:remote_component_type]
+            #TODO: to handle remotes that have a title may need to update matching used below
+            link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
+              node = matching_node_cmp[:node]
+              component = matching_node_cmp[:nested_component]
+              port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
+              if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+                existing_port_info[:matched] = true
+                ret << existing_port_info[:port]
+              else
+                pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
+                pntr[:create_rows] << port
+              end
             end
           end
         end

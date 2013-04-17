@@ -53,6 +53,13 @@ shared_context "Add component to assembly node" do |dtk_common, node_name|
   end
 end
 
+shared_context "Add specific component to assembly node" do |dtk_common, node_name, component_name|
+  it "adds #{component_name} component to #{node_name} node" do
+    component_added = dtk_common.add_component_by_name_to_assembly_node($assembly_id, node_name, component_name)
+    component_added.should eq(true)
+  end
+end
+
 shared_context "Set attribute" do |dtk_common, name, value|
   it "sets value #{value} for attribute #{name}" do
     attribute_value_set = dtk_common.set_attribute($assembly_id, name, value)

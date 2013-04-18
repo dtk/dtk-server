@@ -9,10 +9,12 @@ module XYZ
       unless route.first == "user"
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
-            Log.debug "Session cookie has been used to revive user session"
+            Log.debug "Session cookie has been used to temporary revive user session"
+
             # using cookie to take session information
             # composed data is consistent form user_id, expire timestamp, and tenant id
-            cookie_data = Base64.decode64(request.cookies["dtk-user-info"])
+            # URL encoding is transfering + sign to ' ', so we correct that via gsub
+            cookie_data = Base64.decode64(request.cookies["dtk-user-info"].gsub(' ','+'))
             composed_data = ::AESCrypt.decrypt(cookie_data, ENCRYPTION_SALT, ENCRYPTION_SALT)
 
             user_id, time_integer, c = composed_data.split('_')
@@ -22,6 +24,7 @@ module XYZ
               # due to tight coupling between model_handle and user_object we will set
               # model handle manually 
               ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
+   
               # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
               # this is easiest way to do it. But does feel dirty.
               # TODO: [Haris] This does not work since user is not persisted, look into this after cookie bug is resolved

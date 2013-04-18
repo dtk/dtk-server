@@ -538,9 +538,6 @@ class DtkCommon
 		return module_exported
 	end
 
-	dtk_common = DtkCommon.new('', '')
-	dtk_common.export_module_to_remote('apache','dtk10')
-
 	def delete_module_from_remote(module_name, namespace)
 		puts "Delete module from remote:", "--------------------------"
 		module_deleted = false

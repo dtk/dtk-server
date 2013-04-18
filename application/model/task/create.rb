@@ -210,7 +210,7 @@ module XYZ
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
-        executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh)
+        executable_action, error_msg = get_executable_action_from_state_change(state_change_list.first, assembly_idh, stage_index)
         raise ErrorUsage.new(error_msg) unless executable_action
         all_actions << executable_action
         ret = create_new_task(task_mh,:display_name => "config_node_stage#{stage_index}", :temporal_order => "concurrent")
@@ -219,7 +219,7 @@ module XYZ
         ret = create_new_task(task_mh,:display_name => "config_node_stage#{stage_index}", :temporal_order => "concurrent")
         all_errors = Array.new
         state_change_list.each do |sc|
-          executable_action, error_msg = get_executable_action_from_state_change(sc,assembly_idh)
+          executable_action, error_msg = get_executable_action_from_state_change(sc, assembly_idh, stage_index)
           unless executable_action
             all_errors << error_msg
             next
@@ -237,11 +237,12 @@ module XYZ
     # Amar
     # moved call to ConfigNode.create_from_state_change into this method for error handling with clear message to user
     # if TSort throws TSort::Cyclic error, it means intra-node cycle case
-    def get_executable_action_from_state_change(state_change, assembly_idh)
+    def get_executable_action_from_state_change(state_change, assembly_idh, stage_index)
       executable_action = nil
       error_msg = nil
       begin 
         executable_action = Task::Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
+        executable_action[:node][:inter_node_stage] = stage_index
       rescue TSort::Cyclic => e
         node = state_change.first[:node]
         display_name = node[:display_name]

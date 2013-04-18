@@ -11,7 +11,12 @@ module XYZ
         cmps_with_attrs = components_with_attributes(config_node,impl_info)
         assembly_attrs = assembly_attributes(config_node)
         manifest = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node[:node][:intra_node_stages])
-        {:components_with_attributes => cmps_with_attrs, :node_manifest => manifest}
+        msg_content = {
+          :components_with_attributes => cmps_with_attrs, 
+          :node_manifest => manifest, 
+          :inter_node_stage => config_node[:node][:inter_node_stage]
+        }
+        return msg_content
       end
       def type()
         :puppet

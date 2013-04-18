@@ -1,14 +1,18 @@
+require 'base64'
+
 module XYZ
   class ActionsetController < Controller
     def process(*route)
 
-      unless route.first == "user"
+      ramaze_user = user_object()
 
-        #unless logged_in?
-        if false
+      unless route.first == "user"
+        unless logged_in?
           # using cookie to take session information
           # composed data is consistent form user_id, expire timestamp, and tenant id
-          composed_data = ::AESCrypt.decrypt(request.cookies["dtk-user-info"], ENCRYPTION_SALT, ENCRYPTION_SALT)
+          cookie_data = Base64.decode64(request.cookies["dtk-user-info"])
+          composed_data = ::AESCrypt.decrypt(cookie_data, ENCRYPTION_SALT, ENCRYPTION_SALT)
+
           user_id, time_integer, c = composed_data.split('_')
 
           # make sure that cookie has not expired
@@ -18,17 +22,19 @@ module XYZ
             ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
             # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
             # this is easiest way to do it. But does feel dirty.
+            # TODO: [Haris] This does not work since user is not persisted, look into this after cookie bug is resolved
             user_login(ramaze_user.merge(:access_time => Time.now))
+
             # we set :last_ts as access time for later check
             session.store(:last_ts, Time.now.to_i)
           end
         end
 
-        login_first unless R8::Config[:development_test_user]
-
         session = CurrentSession.new
-        session.set_user_object(user_object())
+        session.set_user_object(ramaze_user)
         session.set_auth_filters(:c,:group_ids)
+
+        login_first unless R8::Config[:development_test_user]
       end
 
       @json_response = true if ajax_request? 

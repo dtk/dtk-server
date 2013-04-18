@@ -82,6 +82,8 @@ module DTK
       end
     end
 
+    # Amar
+    # This method will return task details in form of list. It is used when CLI list-task-info is invoked
     def status_list()
       ret = Hash.new
 
@@ -95,7 +97,8 @@ module DTK
         level_1_ret = Hash.new
         level_1_ret[:temporal_order] = l1[:temporal_order]
         level_1_ret[:task_name] = l1[:display_name]
-        level_2 = l1[:subtasks]
+        level_2 = [l1]
+        level_2 = l1[:subtasks] if l1[:subtasks]
         level_1_ret[:nodes] = Array.new
         level_2.each do |l2|
           level_2_ret = Hash.new
@@ -103,6 +106,8 @@ module DTK
           if l2[:executable_action_type] == "CreateNode"
             level_2_ret[:task_name] = "create_node"
             level_2_ret[:node_id] = l2[:executable_action][:node][:id]
+            # Amar: Special case when 1 node present, to skip printing 'task1' on CLI for create_node_stage
+            level_1_ret[:task_name] = "create_node_stage" if l1[:subtasks].nil? && l1[:display_name].include?("task")
           elsif l2[:executable_action_type] == "ConfigNode"
             level_2_ret[:task_name] = "config_node"
             level_2_ret[:components] = Array.new

@@ -9,6 +9,7 @@ module XYZ
       unless route.first == "user"
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
+            Log.debug "Session cookie has been used to revive user session"
             # using cookie to take session information
             # composed data is consistent form user_id, expire timestamp, and tenant id
             cookie_data = Base64.decode64(request.cookies["dtk-user-info"])

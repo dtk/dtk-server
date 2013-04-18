@@ -216,7 +216,7 @@ module DTK; class  Assembly
 
     class << self
       def get_assemblies_with_nodes(mh,opts={})
-        log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
+        Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
         target_idh = opts[:target_idh]
         target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
         sp_hash = {

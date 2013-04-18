@@ -2,7 +2,7 @@ module XYZ
   class Monitoring_itemController < AuthController
 
     # limit (hours) how long can nodes run
-    UP_TIME_LIMIT = 4
+    UP_TIME_LIMIT = R8::Config[:idle][:up_time_hours]
 
     def list_for_component_display()
       component_or_node_display()
@@ -39,7 +39,7 @@ module XYZ
           response = aws_connection.get_instance_status(node.instance_id())
 
           if response[:status].eql? :running
-            if (response[:up_time_hours] >= UP_TIME_LIMIT)
+            if (response[:up_time_hours] >= UP_TIME_LIMIT.to_i)
               stop_this_assembly = true
               break
             end

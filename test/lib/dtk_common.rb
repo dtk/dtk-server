@@ -538,9 +538,6 @@ class DtkCommon
 		return module_exported
 	end
 
-	dtk_common = DtkCommon.new('', '')
-	dtk_common.export_module_to_remote('apache','dtk10')
-
 	def delete_module_from_remote(module_name, namespace)
 		puts "Delete module from remote:", "--------------------------"
 		module_deleted = false
@@ -638,6 +635,25 @@ class DtkCommon
 
 			if (component_add_response['status'] == 'ok')
 				puts "Component with id #{component_id} added to assembly!"
+				component_added = true
+			end
+		end
+		puts ""
+		return component_added
+	end
+
+	def add_component_by_name_to_assembly_node(assembly_id, node_name, component_name)
+		puts "Add component to assembly node:", "-------------------------------"
+		component_added = false
+		assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+
+		if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
+			puts "Node #{node_name} exists in assembly. Get node id..."
+			node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
+			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>assembly_id})
+
+			if (component_add_response['status'] == 'ok')
+				puts "Component #{component_name} added to assembly!"
 				component_added = true
 			end
 		end

@@ -102,40 +102,40 @@ module DTK; class ComponentDSL; class V2
       AutomicTypes = ScalarTypes + %w{json}
 
       #partitions into link_defs, "dependency", and "component_order"
-      def add_dependent_components!(ret,input_hash,base_cmp_type)
-        dep_config = get_dependent_config(input_hash,base_cmp_type)
-        ret.set_if_not_nil("dependency",dep_config[:dependency])
-        #TODO: put back in if needed ret.set_if_not_nil("component_order",dep_config[:component_order])
+      def add_dependent_components!(ret,input_hash,base_cmp)
+        dep_config = get_dependent_config(input_hash,base_cmp)
+        ret.set_if_not_nil("dependency",dep_config[:dependencies])
+        #TODO: put back in if needed ret.set_if_not_nil("component_order",dep_config[:component_orders])
         ret.set_if_not_nil("link_defs",dep_config[:link_defs])
       end
 
-      def get_dependent_config(input_hash,base_cmp_type)
+      def get_dependent_config(input_hash,base_cmp)
         ret = Hash.new
         if links = input_hash["depends_on"]
           lds = ret[:link_defs] = Array.new
           links.each_pair do |ld_ref,in_link_def|
-            cmp_type = ld_ref
-            ld_type = in_link_def.req("relation_type")
+            dep_cmp = convert_to_internal_cmp_form(ld_ref)
+            ld_type = in_link_def["relation_type"]||component_part(dep_cmp)
             ld = OutputHash.new("type" => ld_type)
             link_type = link_type(in_link_def)
             if in_link_def["required"]
               ld["required"] = true 
               if link_type == "internal"
-                pntr = ret[:dependency] ||= OutputHash.new
-                add_dependency!(pntr,cmp_type,base_cmp_type)
+                pntr = ret[:dependencies] ||= OutputHash.new
+                add_dependency!(pntr,dep_cmp,base_cmp)
               end
             end
             possible_links = ld["possible_links"] = Array.new
             if in_attr_mappings = in_link_def["attribute_mappings"]
-              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp_type,cmp_type)}
-              possible_link = OutputHash.new(convert_cmp_form(cmp_type) => {"type" => link_type,"attribute_mappings" => ams})
+              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp)}
+              possible_link = OutputHash.new(convert_to_internal_cmp_form(dep_cmp) => {"type" => link_type,"attribute_mappings" => ams})
               possible_links << possible_link
             end
 =begin
  put back in when processing choices            
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
               ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
-              possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"type" => link_type(in_pl_info),"attribute_mappings" => ams})
+              possible_link = OutputHash.new(convert_to_internal_cmp_form(pl_cmp) => {"type" => link_type(in_pl_info),"attribute_mappings" => ams})
               possible_links << possible_link
             end
 =end
@@ -145,16 +145,15 @@ module DTK; class ComponentDSL; class V2
         ret
       end
 
-      def add_dependency!(ret,dep_cmp,base_cmp_type)
-        dep_cmp_internal_form = convert_cmp_form(dep_cmp)
-        cmp_internal_form = convert_cmp_form(base_cmp_type) #TODO: may be convreted already; so this would eb no-op
-        ret[dep_cmp_internal_form] ||= {dep_cmp_internal_form =>
-            {"type"=>"component",
-              "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp_internal_form]},
-              "description"=>
-              "#{dep_cmp} is required for #{cmp}",
-              "display_name"=>dep_cmp_internal_form,
-             "severity"=>"warning"}}
+      def add_dependency!(ret,dep_cmp,base_cmp)
+        ret[dep_cmp] ||= { 
+          "type"=>"component",
+          "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
+          "description"=>
+          "#{convert_to_pp_cmp_form(dep_cmp)} is required for #{convert_to_pp_cmp_form(base_cmp)}",
+          "display_name"=>dep_cmp,
+          "severity"=>"warning"
+        }
       end
 
 =begin
@@ -162,7 +161,7 @@ module DTK; class ComponentDSL; class V2
       def component_order(input_hash)
         if after_cmps = input_hash["after"]
           after_cmps.inject(OutputHash.new) do |h,after_cmp|
-            after_cmp_internal_form = convert_cmp_form(after_cmp)
+            after_cmp_internal_form = convert_to_internal_cmp_form(after_cmp)
             el={after_cmp_internal_form =>
               {"after"=>after_cmp_internal_form}}
             h.merge(el)
@@ -171,6 +170,13 @@ module DTK; class ComponentDSL; class V2
       end
 =end
 
+      def component_part(cmp)
+        if cmp =~ Regexp.new("^.+#{ModCmpDelim}(.+$)")
+          $1
+        else
+          cmp
+        end
+      end
 
       def link_type(link_info)
         ret = 
@@ -202,8 +208,8 @@ module DTK; class ComponentDSL; class V2
             cmp_or_node_ref = $1
             attr = $2
             case cmp_or_node_ref
-              when "base" then convert_cmp_form(base_cmp)
-              when "this" then convert_cmp_form(this_cmp)
+              when "base" then convert_to_internal_cmp_form(base_cmp)
+              when "this" then convert_to_internal_cmp_form(this_cmp)
               when "this_node" then "remote_node"
               when "base_node" then "local_node"
             end + ".#{attr}"
@@ -214,10 +220,13 @@ module DTK; class ComponentDSL; class V2
         ret
       end
 
-      def convert_cmp_form(in_cmp)
-        in_cmp.gsub(/::/,ModCmpDelim)
+      CmpPPDelim = '::'
+      def convert_to_internal_cmp_form(cmp)
+        cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
       end
-
+      def convert_to_pp_cmp_form(cmp)
+        cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
+      end
     end
   end
 end; end; end

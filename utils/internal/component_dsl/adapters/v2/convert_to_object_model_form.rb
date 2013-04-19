@@ -36,10 +36,8 @@ module DTK; class ComponentDSL; class V2
         external_ref = external_ref(input_hash.req(:external_ref),cmp)
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
-        ret.set_if_not_nil("dependency",dependency(input_hash,cmp))
-        ret.set_if_not_nil("component_order",component_order(input_hash))
         add_attributes!(ret,cmp_type,input_hash)
-        add_link_defs!(ret,input_hash,cmp_type)
+        add_dependent_components!(ret,input_hash,cmp_type)
         ret
       end
 
@@ -62,34 +60,6 @@ module DTK; class ComponentDSL; class V2
         external_ref["type"] != "puppet_definition"
       end
       
-      def dependency(input_hash,cmp)
-        if req_cmps = input_hash["requires"]
-          req_cmps.inject(OutputHash.new) do |h,dep_cmp|
-            cmp_internal_form = convert_cmp_form(cmp)
-            dep_cmp_internal_form = convert_cmp_form(dep_cmp)
-            el = {dep_cmp_internal_form =>
-              {"type"=>"component",
-                "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp_internal_form]},
-                "description"=>
-                "#{dep_cmp} is required for #{cmp}",
-                "display_name"=>dep_cmp_internal_form,
-                "severity"=>"warning"}}
-            h.merge(el)
-          end
-        end
-      end
-
-      def component_order(input_hash)
-        if after_cmps = input_hash["after"]
-          after_cmps.inject(OutputHash.new) do |h,after_cmp|
-            after_cmp_internal_form = convert_cmp_form(after_cmp)
-            el={after_cmp_internal_form =>
-              {"after"=>after_cmp_internal_form}}
-            h.merge(el)
-          end
-        end
-      end
-
       def add_attributes!(ret,cmp_type,input_hash)
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new
@@ -131,18 +101,36 @@ module DTK; class ComponentDSL; class V2
       ScalarTypes = %w{integer string boolean}
       AutomicTypes = ScalarTypes + %w{json}
 
-      def add_link_defs!(ret,input_hash,base_cmp_type)
+      #partitions into link_defs, "dependency", and "component_order"
+      def add_dependent_components!(ret,input_hash,base_cmp_type)
+        dep_config = get_dependent_config(input_hash,base_cmp_type)
+        ret.set_if_not_nil("dependency",dep_config[:dependency])
+        #TODO: put back in if needed ret.set_if_not_nil("component_order",dep_config[:component_order])
+        ret.set_if_not_nil("link_defs",dep_config[:link_defs])
+      end
+
+      def get_dependent_config(input_hash,base_cmp_type)
+        ret = Hash.new
         if links = input_hash["depends_on"]
-          lds = ret["link_defs"] = Array.new
+          lds = ret[:link_defs] = Array.new
           links.each_pair do |ld_ref,in_link_def|
             cmp_type = ld_ref
             ld_type = in_link_def.req("relation_type")
             ld = OutputHash.new("type" => ld_type)
-            ld["required"] = true if in_link_def["required"]
+            link_type = link_type(in_link_def)
+            if in_link_def["required"]
+              ld["required"] = true 
+              if link_type == "internal"
+                pntr = ret[:dependency] ||= OutputHash.new
+                add_dependency!(pntr,cmp_type,base_cmp_type)
+              end
+            end
             possible_links = ld["possible_links"] = Array.new
-            ams = in_link_def.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am,base_cmp_type,cmp_type)}
-            possible_link = OutputHash.new(convert_cmp_form(cmp_type) => {"type" => link_type(in_link_def),"attribute_mappings" => ams})
-            possible_links << possible_link
+            if in_attr_mappings = in_link_def["attribute_mappings"]
+              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp_type,cmp_type)}
+              possible_link = OutputHash.new(convert_cmp_form(cmp_type) => {"type" => link_type,"attribute_mappings" => ams})
+              possible_links << possible_link
+            end
 =begin
  put back in when processing choices            
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
@@ -156,6 +144,33 @@ module DTK; class ComponentDSL; class V2
         end
         ret
       end
+
+      def add_dependency!(ret,dep_cmp,base_cmp_type)
+        dep_cmp_internal_form = convert_cmp_form(dep_cmp)
+        cmp_internal_form = convert_cmp_form(base_cmp_type) #TODO: may be convreted already; so this would eb no-op
+        ret[dep_cmp_internal_form] ||= {dep_cmp_internal_form =>
+            {"type"=>"component",
+              "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp_internal_form]},
+              "description"=>
+              "#{dep_cmp} is required for #{cmp}",
+              "display_name"=>dep_cmp_internal_form,
+             "severity"=>"warning"}}
+      end
+
+=begin
+#TODO: moidfy and put in if needed
+      def component_order(input_hash)
+        if after_cmps = input_hash["after"]
+          after_cmps.inject(OutputHash.new) do |h,after_cmp|
+            after_cmp_internal_form = convert_cmp_form(after_cmp)
+            el={after_cmp_internal_form =>
+              {"after"=>after_cmp_internal_form}}
+            h.merge(el)
+          end
+        end
+      end
+=end
+
 
       def link_type(link_info)
         ret = 

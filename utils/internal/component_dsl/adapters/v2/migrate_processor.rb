@@ -116,7 +116,7 @@ module DTK; class ComponentDSL; class V2
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
        {:dependency => {:new_key => :requires,:custom_fn => :requires_components}},
        {:component_order => {:new_key => :after,:custom_fn => :after_components}},
-       {:external_link_defs => {:new_key => :links, :custom_fn => :external_link_defs}}
+       {:external_link_defs => {:new_key => :depends_on, :custom_fn => :external_link_defs}}
       ]
     }
     AttrOmit = {
@@ -136,6 +136,14 @@ module DTK; class ComponentDSL; class V2
     class CustomFn
       def self.qualified_component_ref(cmp_ref)
         cmp_ref.gsub(/__/,ModuleComponentSeperator)
+      end
+
+      def self.component_part(qual_cmp_ref)
+        if qual_cmp_ref =~ Regexp.new("#{ModuleComponentSeperator}(.+$)")
+          $1
+        else
+          qual_cmp_ref
+        end
       end
 
       def self.map_in_array_form(assigns,&block)
@@ -206,11 +214,7 @@ module DTK; class ComponentDSL; class V2
         def self.external_link_defs(external_link_defs)
           ret = PrettyPrintHash.new
           external_link_defs.each do |external_link_def|
-            type = external_link_def["type"]
-            if ret[type]
-              raise Error.new("Unexpected that more than one instance of link def type (#{type})")
-            end
-            ret[type] = LinkDef.external_link_def(external_link_def)
+            ret.merge!(LinkDef.external_link_def(external_link_def))
           end
           ret
         end
@@ -292,37 +296,55 @@ module DTK; class ComponentDSL; class V2
 
       class LinkDef < self
         def self.external_link_def(assigns)
-          ret = PrettyPrintHash.new
-          #ret["type"] = "external"
-          ret["required"] = true if assigns["required"]
-          ret["endpoints"] = assigns["possible_links"].inject(PrettyPrintHash.new) do |h,pl| 
-            h.merge(endpoints(pl))
+          content = PrettyPrintHash.new
+          pls = assigns["possible_links"]
+          unless pls.size == 1
+            raise Error.new("feature_component_dsl_v2: TODO: not implemented yet when multiple possible links")
           end
-          ret
+
+          choice_info = choice_info(pls.first)
+          ref = choice_info[:remote_cmp_ref]
+          unless component_part(ref) == assigns["type"]
+            content["relation_type"] = assigns["type"]
+          end
+          content["location"] = "remote"
+          content["required"] = true if assigns["required"]
+          content["attribute_mapping"] = choice_info[:attribute_mapping]
+          {ref => content}
         end
 
-        def self.endpoints(assigns)
+        def self.choice_info(assigns)
           remote_cmp_ref = qualified_component_ref(assigns.keys.first)
           info = assigns.values.first
           unless info.keys == ["attribute_mappings"]
             raise Error.new("feature_component_dsl_v2: TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
           end
-          endpoints_info = PrettyPrintHash.new
-          endpoints_info["attribute_mappings"] = info["attribute_mappings"].map{|am|attribute_mapping(am)}
-          {remote_cmp_ref => endpoints_info}
+          attribute_mappings = info["attribute_mappings"].map{|am|attribute_mapping(am,remote_cmp_ref)}
+          {:remote_cmp_ref => remote_cmp_ref,:attribute_mapping => attribute_mappings}
         end
 
-        def self.attribute_mapping(assigns)
+        def self.attribute_mapping(assigns,remote_cmp_ref)
           unless assigns.kind_of?(Hash) and assigns.size == 1
             raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
           end
-          "#{atriibute_mapping_attr(assigns.keys.first)} -> #{atriibute_mapping_attr(assigns.values.first)}"
+          "#{atriibute_mapping_attr(assigns.keys.first,remote_cmp_ref)} -> #{atriibute_mapping_attr(assigns.values.first,remote_cmp_ref)}"
         end
 
-        def self.atriibute_mapping_attr(var)
+        def self.atriibute_mapping_attr(var,remote_cmp_ref)
           parts = var.split(".")
-          parts[0] = ([":remote_node",":local_node"].include?(parts[0]) ? parts[0] : qualified_component_ref(parts[0])).gsub(/^:/,"")
-          parts.join(".").gsub(/host_addresses_ipv4\.0/,"host_address")
+          case parts[0]
+           when "remote_node" 
+            parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]
+           when ":local_node"
+            parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]
+           else
+            if remote_cmp_ref == qualified_component_ref(parts[0]).gsub(/^:/,"")
+              parts = [parts[1]]
+            else
+              parts[0] = "base"
+            end
+          end
+          parts.join(".")
         end
       end
 

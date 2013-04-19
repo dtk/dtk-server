@@ -39,7 +39,7 @@ module DTK; class ComponentDSL; class V2
         ret.set_if_not_nil("dependency",dependency(input_hash,cmp))
         ret.set_if_not_nil("component_order",component_order(input_hash))
         add_attributes!(ret,cmp_type,input_hash)
-        add_link_defs!(ret,input_hash)
+        add_link_defs!(ret,input_hash,cmp_type)
         ret
       end
 
@@ -131,18 +131,26 @@ module DTK; class ComponentDSL; class V2
       ScalarTypes = %w{integer string boolean}
       AutomicTypes = ScalarTypes + %w{json}
 
-      def add_link_defs!(ret,input_hash)
-        if input_hash["links"]
+      def add_link_defs!(ret,input_hash,base_cmp_type)
+        if links = input_hash["depends_on"]
           lds = ret["link_defs"] = Array.new
-          input_hash["links"].each_pair do |ld_type,in_link_def|
+          links.each_pair do |ld_ref,in_link_def|
+            cmp_type = ld_ref
+            ld_type = in_link_def.req("relation_type")
             ld = OutputHash.new("type" => ld_type)
             ld["required"] = true if in_link_def["required"]
             possible_links = ld["possible_links"] = Array.new
+            ams = in_link_def.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am,base_cmp_type,cmp_type)}
+            possible_link = OutputHash.new(convert_cmp_form(cmp_type) => {"type" => link_type(in_link_def),"attribute_mappings" => ams})
+            possible_links << possible_link
+=begin
+ put back in when processing choices            
             in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
               ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
               possible_link = OutputHash.new(convert_cmp_form(pl_cmp) => {"type" => link_type(in_pl_info),"attribute_mappings" => ams})
               possible_links << possible_link
             end
+=end
             lds << ld
           end
         end
@@ -162,15 +170,33 @@ module DTK; class ComponentDSL; class V2
         ret||"external"
       end
 
-      def convert_attribute_mapping(input_am)
+      def convert_attribute_mapping(input_am,base_cmp,this_cmp)
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
-          output = convert_cmp_form($1)
-          input = convert_cmp_form($2)
+          output = convert_attr_ref($1,base_cmp,this_cmp)
+          input = convert_attr_ref($2,base_cmp,this_cmp)
           output.gsub!(/host_address$/,"host_addresses_ipv4.0")
           {output => input}
         else
           raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
         end
+      end
+
+      def convert_attr_ref(attr_ref,base_cmp,this_cmp)
+        ret = 
+          if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+            cmp_or_node_ref = $1
+            attr = $2
+            case cmp_or_node_ref
+              when "base" then convert_cmp_form(base_cmp)
+              when "this" then convert_cmp_form(this_cmp)
+              when "this_node" then "remote_node"
+              when "base_node" then "local_node"
+            end + ".#{attr}"
+          end 
+        unless ret
+          raise ParsingError.new("Attribute refernce (?1) is ill-formed",attr_ref)
+        end
+        ret
       end
 
       def convert_cmp_form(in_cmp)

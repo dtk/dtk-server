@@ -309,7 +309,7 @@ module DTK; class ComponentDSL; class V2
           end
           content["location"] = "remote"
           content["required"] = false if (!assigns["required"].nil?) and not assigns["required"]
-          content["attribute_mapping"] = choice_info[:attribute_mapping]
+          content["attribute_mappings"] = choice_info[:attribute_mappings]
           {ref => content}
         end
 
@@ -320,7 +320,7 @@ module DTK; class ComponentDSL; class V2
             raise Error.new("feature_component_dsl_v2: TODO: not implemented yet when possibles links has keys (#{info.keys.join(",")})")
           end
           attribute_mappings = info["attribute_mappings"].map{|am|attribute_mapping(am,remote_cmp_ref)}
-          {:remote_cmp_ref => remote_cmp_ref,:attribute_mapping => attribute_mappings}
+          {:remote_cmp_ref => remote_cmp_ref,:attribute_mappings => attribute_mappings}
         end
 
         def self.attribute_mapping(assigns,remote_cmp_ref)

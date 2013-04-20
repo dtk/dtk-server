@@ -105,7 +105,7 @@ module DTK; class ComponentDSL; class V2
       def add_dependent_components!(ret,input_hash,base_cmp)
         dep_config = get_dependent_config(input_hash,base_cmp)
         ret.set_if_not_nil("dependency",dep_config[:dependencies])
-        #TODO: put back in if needed ret.set_if_not_nil("component_order",dep_config[:component_orders])
+        ret.set_if_not_nil("component_order",dep_config[:component_order])
         ret.set_if_not_nil("link_defs",dep_config[:link_defs])
       end
 
@@ -118,8 +118,9 @@ module DTK; class ComponentDSL; class V2
             ld_type = in_link_def["relation_type"]||component_part(dep_cmp)
             ld = OutputHash.new("type" => ld_type)
             link_type = link_type(in_link_def)
-            if in_link_def["required"]
-              ld["required"] = true 
+
+            is_required = ld["required"] = is_required?(in_link_def)
+            if is_required
               if link_type == "internal"
                 pntr = ret[:dependencies] ||= OutputHash.new
                 add_dependency!(pntr,dep_cmp,base_cmp)
@@ -142,6 +143,7 @@ module DTK; class ComponentDSL; class V2
             lds << ld
           end
         end
+        ret[:component_order] = component_order(input_hash)
         ret
       end
 
@@ -156,8 +158,6 @@ module DTK; class ComponentDSL; class V2
         }
       end
 
-=begin
-#TODO: moidfy and put in if needed
       def component_order(input_hash)
         if after_cmps = input_hash["after"]
           after_cmps.inject(OutputHash.new) do |h,after_cmp|
@@ -168,7 +168,6 @@ module DTK; class ComponentDSL; class V2
           end
         end
       end
-=end
 
       def component_part(cmp)
         if cmp =~ Regexp.new("^.+#{ModCmpDelim}(.+$)")
@@ -178,9 +177,10 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
+      DefaultLinkType = "local"
       def link_type(link_info)
         ret = 
-          if loc = link_info["location"]
+          if loc = link_info["location"]||DefaultLinkType
             case loc
               when "local" then "internal"
               when "remote" then "external"
@@ -189,6 +189,11 @@ module DTK; class ComponentDSL; class V2
             end
           end
         ret||"external"
+      end
+
+      DefaultIsRequired = true
+      def is_required?(link_info)
+        link_info["required"]||DefaultIsRequired
       end
 
       def convert_attribute_mapping(input_am,base_cmp,this_cmp)
@@ -202,20 +207,21 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
-      def convert_attr_ref(attr_ref,base_cmp,this_cmp)
+      def convert_attr_ref(attr_ref,base_cmp,dep_cmp)
         ret = 
           if attr_ref =~ /(^[^.]+)\.([^.]+$)/
             cmp_or_node_ref = $1
             attr = $2
             case cmp_or_node_ref
               when "base" then convert_to_internal_cmp_form(base_cmp)
-              when "this" then convert_to_internal_cmp_form(this_cmp)
-              when "this_node" then "remote_node"
+              when "node" then "remote_node"
               when "base_node" then "local_node"
             end + ".#{attr}"
-          end 
+          else
+            "#{convert_to_internal_cmp_form(dep_cmp)}.#{attr_ref}"
+          end
         unless ret
-          raise ParsingError.new("Attribute refernce (?1) is ill-formed",attr_ref)
+          raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
         ret
       end

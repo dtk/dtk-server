@@ -212,11 +212,7 @@ module DTK; class ComponentDSL; class V2
         end
 
         def self.external_link_defs(external_link_defs)
-          ret = PrettyPrintHash.new
-          external_link_defs.each do |external_link_def|
-            ret.merge!(LinkDef.external_link_def(external_link_def))
-          end
-          ret
+          external_link_defs.map{|external_link_def|LinkDef.external_link_def(external_link_def)}
         end
 
         def self.ui(assigns)
@@ -235,9 +231,7 @@ module DTK; class ComponentDSL; class V2
         end
       
         def self.requires_components(deps_assigns)
-          deps_assigns.inject(Hash.new) do |h,(ref,dep_assign)|
-            h.merge(Constraint.requires_component(ref,dep_assign) => Hash.new)
-          end
+          map_in_array_form(deps_assigns){|ref,dep_assign|Constraint.requires_component(ref,dep_assign)}
         end
 
         def self.after_components(assigns)

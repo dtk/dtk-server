@@ -7,6 +7,21 @@ module DTK; class ComponentDSL; class V2
     def convert(input_hash)
       Component.new(input_hash.req(:module)).convert(input_hash.req(:components))
     end
+
+    def convert_to_hash_form(hash_or_array,&block)
+      if hash_or_array.kind_of?(Hash)
+        hash_or_array.each_pair{|k,v|block.call(k,v)}
+      else #hash_or_array.kind_of?(Array)
+        hash_or_array.each do |el|
+          if el.kind_of?(Hash)
+            block.call(el.keys.first,el.values.first)
+          else #el.kind_of?(String)
+            block.call(el,Hash.new)
+          end
+        end
+      end
+    end
+
     class Component < self
       def initialize(module_name)
         @module_name = module_name
@@ -113,7 +128,7 @@ module DTK; class ComponentDSL; class V2
         ret = Hash.new
         link_defs  = Array.new
         if dep_cmps = input_hash["depends_on"]
-          dep_cmps.each_pair do |in_dep_cmp_ref,in_dep_cmp|
+          convert_to_hash_form(dep_cmps) do |in_dep_cmp_ref,in_dep_cmp|
             dep_cmp = convert_to_internal_cmp_form(in_dep_cmp_ref)
             ld_type = in_dep_cmp["relation_type"]||component_part(dep_cmp)
             ld = OutputHash.new("type" => ld_type)

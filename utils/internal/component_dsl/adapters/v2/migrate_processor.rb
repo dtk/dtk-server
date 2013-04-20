@@ -114,7 +114,7 @@ module DTK; class ComponentDSL; class V2
        {:basic_type => {:custom_fn => :type, :new_key => :type, :skip_if_nil => true}},
        {:ui => {:custom_fn => :ui}},
        {:attribute => {:new_key => :attributes,:custom_fn => :attributes}},
-       {:dependency => {:new_key => :requires,:custom_fn => :requires_components}},
+       {:dependency => {:new_key => :depends_on,:custom_fn => :requires_components}},
        {:component_order => {:new_key => :after,:custom_fn => :after_components}},
        {:external_link_defs => {:new_key => :depends_on, :custom_fn => :external_link_defs}}
       ]
@@ -235,7 +235,9 @@ module DTK; class ComponentDSL; class V2
         end
       
         def self.requires_components(deps_assigns)
-          map_in_array_form(deps_assigns){|ref,dep_assign| Constraint.requires_component(ref,dep_assign)}
+          deps_assigns.inject(Hash.new) do |h,(ref,dep_assign)|
+            h.merge(Constraint.requires_component(ref,dep_assign) => Hash.new)
+          end
         end
 
         def self.after_components(assigns)
@@ -350,9 +352,10 @@ module DTK; class ComponentDSL; class V2
 
       class Constraint < self
         def self.requires_component(ref,dep_assign)
-          return unless dep_assign["type"] == "component"
-          return unless filter = (dep_assign["search_pattern"]||{})[":filter"]
-          return unless filter[0] == ":eq" and filter[1] == ":component_type"
+          ret = nil
+          return ret unless dep_assign["type"] == "component"
+          return ret unless filter = (dep_assign["search_pattern"]||{})[":filter"]
+          return ret unless filter[0] == ":eq" and filter[1] == ":component_type"
           qualified_component_ref(filter[2])
         end
 

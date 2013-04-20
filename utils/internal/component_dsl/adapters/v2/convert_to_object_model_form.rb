@@ -111,15 +111,15 @@ module DTK; class ComponentDSL; class V2
 
       def get_dependent_config(input_hash,base_cmp)
         ret = Hash.new
-        if links = input_hash["depends_on"]
-          lds = ret[:link_defs] = Array.new
-          links.each_pair do |ld_ref,in_link_def|
-            dep_cmp = convert_to_internal_cmp_form(ld_ref)
-            ld_type = in_link_def["relation_type"]||component_part(dep_cmp)
+        link_defs  = Array.new
+        if dep_cmps = input_hash["depends_on"]
+          dep_cmps.each_pair do |in_dep_cmp_ref,in_dep_cmp|
+            dep_cmp = convert_to_internal_cmp_form(in_dep_cmp_ref)
+            ld_type = in_dep_cmp["relation_type"]||component_part(dep_cmp)
             ld = OutputHash.new("type" => ld_type)
-            link_type = link_type(in_link_def)
+            link_type = link_type(in_dep_cmp)
 
-            is_required = ld["required"] = is_required?(in_link_def)
+            is_required = ld["required"] = is_required?(in_dep_cmp)
             if is_required
               if link_type == "internal"
                 pntr = ret[:dependencies] ||= OutputHash.new
@@ -127,22 +127,15 @@ module DTK; class ComponentDSL; class V2
               end
             end
             possible_links = ld["possible_links"] = Array.new
-            if in_attr_mappings = in_link_def["attribute_mappings"]
+            if in_attr_mappings = in_dep_cmp["attribute_mappings"]
               ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp)}
               possible_link = OutputHash.new(convert_to_internal_cmp_form(dep_cmp) => {"type" => link_type,"attribute_mappings" => ams})
               possible_links << possible_link
+              link_defs << ld
             end
-=begin
- put back in when processing choices            
-            in_link_def.req(:endpoints).each_pair do |pl_cmp,in_pl_info|
-              ams = in_pl_info.req(:attribute_mappings).map{|in_am|convert_attribute_mapping(in_am)}
-              possible_link = OutputHash.new(convert_to_internal_cmp_form(pl_cmp) => {"type" => link_type(in_pl_info),"attribute_mappings" => ams})
-              possible_links << possible_link
-            end
-=end
-            lds << ld
           end
         end
+        ret[:link_defs] = link_defs unless link_defs.empty?
         ret[:component_order] = component_order(input_hash)
         ret
       end

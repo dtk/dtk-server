@@ -17,14 +17,18 @@ module DTK
           return ret_clone_update_info(service_version)
         end
 
+=begin
+TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
         #make sure that the service module references the component module
         unless vconstraints.include_module?(cmp_module_name)
+
           #quick check is looking in module_version_constraints, if no match then do more expensive
           #get_referenced_component_modules()
           unless get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
             raise ErrorUsage.new("Service module (#{module_name()}) does not reference component module (#{cmp_module_name})")
           end        
         end
+=end
 
         #set in vconstraints the module have specfied value and update both model and service's global refs
         vconstraints.set_module_version(cmp_module_name,component_version)

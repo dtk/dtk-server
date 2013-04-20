@@ -308,7 +308,7 @@ module DTK; class ComponentDSL; class V2
             content["relation_type"] = assigns["type"]
           end
           content["location"] = "remote"
-          content["required"] = true if assigns["required"]
+          content["required"] = false if (!assigns["required"].nil?) and not assigns["required"]
           content["attribute_mapping"] = choice_info[:attribute_mapping]
           {ref => content}
         end

@@ -329,7 +329,7 @@ module DTK; class ComponentDSL; class V2
         def self.atriibute_mapping_attr(var,remote_cmp_ref)
           parts = var.split(".")
           case parts[0]
-           when "remote_node" 
+           when ":remote_node" 
             parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]
            when ":local_node"
             parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]

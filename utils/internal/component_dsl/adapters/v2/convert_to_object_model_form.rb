@@ -201,7 +201,7 @@ module DTK; class ComponentDSL; class V2
 
       DefaultIsRequired = true
       def is_required?(link_info)
-        link_info["required"]||DefaultIsRequired
+        link_info["required"].nil? ? DefaultIsRequired : link_info["required"]
       end
 
       def convert_attribute_mapping(input_am,base_cmp,this_cmp)

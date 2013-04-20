@@ -146,8 +146,9 @@ module DTK
     def rest__create_new_dsl_version()
       component_module = create_obj(:component_module_id)
       dsl_version = ret_non_null_request_params(:dsl_version).to_i
+      module_version = ret_version() 
       format = :json
-      component_module.create_new_dsl_version(dsl_version,format)
+      component_module.create_new_dsl_version(dsl_version,format,module_version)
       rest_ok_response 
     end
 

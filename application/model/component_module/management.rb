@@ -21,12 +21,12 @@ module DTK; class ComponentModule
       create_needed_objects_and_dsl?(repo,version,opts)
     end
 
-    def create_new_dsl_version(new_dsl_integer_version,format_type)
+    def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
       end
       previous_dsl_version = new_dsl_integer_version-1 
-      module_branch = get_module_branch_matching_version()
+      module_branch = get_module_branch_matching_version(module_version)
 
       #create in memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)

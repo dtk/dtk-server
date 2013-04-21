@@ -216,22 +216,18 @@ module DTK; class ComponentDSL; class V2
       end
 
       def convert_attr_ref(attr_ref,base_cmp,dep_cmp)
-        ret = 
-          if attr_ref =~ /(^[^.]+)\.([^.]+$)/
-            cmp_or_node_ref = $1
-            attr = $2
-            case cmp_or_node_ref
-              when "base" then convert_to_internal_cmp_form(base_cmp)
-              when "node" then "remote_node"
-              when "base_node" then "local_node"
-            end + ".#{attr}"
+        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+          cmp_or_node_ref = $1
+          attr = $2
+          case cmp_or_node_ref
+            when "base" then convert_to_internal_cmp_form(base_cmp)
+            when "node" then "remote_node"
+            when "base_node" then "local_node"
+            else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
+          end + ".#{attr}"
           else
             "#{convert_to_internal_cmp_form(dep_cmp)}.#{attr_ref}"
           end
-        unless ret
-          raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
-        end
-        ret
       end
 
       CmpPPDelim = '::'

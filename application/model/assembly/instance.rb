@@ -73,8 +73,11 @@ module DTK; class  Assembly
     def get_augmented_ports(opts={})
       ndx_ret = Hash.new
       ret = get_objs(:cols => [:augmented_ports]).map do |r|
-        if get_augmented_ports__matches_on_title?(r[:nested_component],r[:port])
-          r[:port].merge(r.slice(:node,:nested_component,:link_def))
+        link_def = r[:link_def]
+        if link_def.nil? or (link_def[:link_type] == r[:port].link_def_name())
+          if get_augmented_ports__matches_on_title?(r[:nested_component],r[:port])
+            r[:port].merge(r.slice(:node,:nested_component,:link_def))
+          end
         end
       end.compact
       if opts[:mark_unconnected]

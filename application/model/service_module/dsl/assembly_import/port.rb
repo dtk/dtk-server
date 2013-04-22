@@ -81,8 +81,8 @@ module DTK; class ServiceModule
               existing_port_info[:matched] = true
               ret << existing_port_info[:port]
             else
-              pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-              pntr[:create_rows] << port
+              pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
+              pntr[:ndx_create_rows][port[:ref]] ||= port
             end
           end
         end
@@ -101,8 +101,7 @@ module DTK; class ServiceModule
                 ret << existing_port_info[:port]
               else
                 pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
-                ndx = port[:ref]
-                pntr[:ndx_create_rows][ndx] ||= port
+                pntr[:ndx_create_rows][port[:ref]] ||= port
               end
             end
           end

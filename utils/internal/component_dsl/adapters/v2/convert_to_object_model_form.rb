@@ -204,30 +204,30 @@ module DTK; class ComponentDSL; class V2
         link_info["required"].nil? ? DefaultIsRequired : link_info["required"]
       end
 
-      def convert_attribute_mapping(input_am,base_cmp,this_cmp)
+      def convert_attribute_mapping(input_am,base_cmp,dep_cmp)
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
-          output = convert_attr_ref($1,base_cmp,this_cmp)
-          input = convert_attr_ref($2,base_cmp,this_cmp)
-          output.gsub!(/host_address$/,"host_addresses_ipv4.0")
-          {output => input}
+          left = convert_attr_ref($1,:dep,dep_cmp)
+          right = convert_attr_ref($2,:base,base_cmp)
+        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
+          left = convert_attr_ref($2,:base,base_cmp)
+          right = convert_attr_ref($1,:dep,dep_cmp)
         else
           raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
         end
+        {left => right}
       end
 
-      def convert_attr_ref(attr_ref,base_cmp,dep_cmp)
+      def convert_attr_ref(attr_ref,dep_or_base,cmp)
         if attr_ref =~ /(^[^.]+)\.([^.]+$)/
-          cmp_or_node_ref = $1
+          prefix = $1
           attr = $2
-          case cmp_or_node_ref
-            when "base" then convert_to_internal_cmp_form(base_cmp)
-            when "node" then "remote_node"
-            when "base_node" then "local_node"
+          case prefix
+            when "node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
             else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
-          end + ".#{attr}"
-          else
-            "#{convert_to_internal_cmp_form(dep_cmp)}.#{attr_ref}"
-          end
+          end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
+        else
+          "#{convert_to_internal_cmp_form(cmp)}.#{attr_ref}"
+        end
       end
 
       CmpPPDelim = '::'

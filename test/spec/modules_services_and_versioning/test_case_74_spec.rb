@@ -15,7 +15,7 @@ assembly_template2 = 'redhat_hdp_namenode'
 service_name = 'bakir_test_service'
 $assembly_id = 0
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new('', '')
 
 describe "Test Case 74: Import service from remote repo and check its corresponding assembly templates" do
 

@@ -418,7 +418,6 @@ class DtkCommon
 			template_created = true
 		else
 			puts "Assembly template #{assembly_template_name} was not created in service #{service_name}" 
-			template_created = true
 		end
 		puts ""
 		return template_created

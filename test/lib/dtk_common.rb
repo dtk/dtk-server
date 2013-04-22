@@ -317,7 +317,7 @@ class DtkCommon
 				puts "Converge process finished successfully!"
 			elsif (status.include? 'failed')
 				task_status = status
-				puts "Converge process was not finished successfully!"
+				puts "Converge process was not finished successfully! Some tasks failed!"
 			end
 			puts "Task execution status: #{task_status}"
 
@@ -418,7 +418,6 @@ class DtkCommon
 			template_created = true
 		else
 			puts "Assembly template #{assembly_template_name} was not created in service #{service_name}" 
-			template_created = true
 		end
 		puts ""
 		return template_created
@@ -774,6 +773,20 @@ class DtkCommon
 		end
 		puts ""
 		return service_created
+	end
+
+	def check_if_service_exists(service_name)
+		puts "Check if service exists:", "------------------------"
+		service_exists = false
+		service_list = send_request('/rest/service_module/list', {})
+
+		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
+			puts "Service #{service_name} exists."
+			service_exists = true
+		else
+			puts "Service #{service_name} does not exist!"
+		end
+		return service_exists
 	end
 
 	def check_if_service_exists_on_remote(service_name, namespace)

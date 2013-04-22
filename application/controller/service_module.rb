@@ -90,8 +90,8 @@ module DTK
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      service_module_idh = ServiceModule.initialize_module(project,module_name,config_agent_type)[:module_idh]
-      rest_ok_response(:service_module_id => service_module_idh.get_id())
+      init_hash_response = ServiceModule.initialize_module(project,module_name,config_agent_type)
+      rest_ok_response(:service_module_id => init_hash_response[:module_branch_idh].get_id(), :repo_info => init_hash_response[:module_repo_info])
     end
 
     def rest__create_new_version()

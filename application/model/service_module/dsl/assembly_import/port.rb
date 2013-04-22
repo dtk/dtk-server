@@ -64,7 +64,7 @@ module DTK; class ServiceModule
           (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
         end 
 
-        #create create-hashes for both local side and remore side ports
+        #create create-hashes for both local side and remote side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
         ndx_ld_links_info = Hash.new
@@ -100,8 +100,9 @@ module DTK; class ServiceModule
                 existing_port_info[:matched] = true
                 ret << existing_port_info[:port]
               else
-                pntr = ndx_rows[node[:id]] ||= {:node => node, :create_rows => Array.new}
-                pntr[:create_rows] << port
+                pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
+                ndx = port[:ref]
+                pntr[:ndx_create_rows][ndx] ||= port
               end
             end
           end
@@ -110,7 +111,7 @@ module DTK; class ServiceModule
         new_rows = Array.new
         ndx_rows.values.each do |r|
           port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
-          new_rows += Model.create_from_rows(port_mh,r[:create_rows],opts)
+          new_rows += Model.create_from_rows(port_mh,r[:ndx_create_rows].values,opts)
         end
 
         #delete any existing ports that match what is being put in now

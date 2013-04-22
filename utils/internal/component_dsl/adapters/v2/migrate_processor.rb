@@ -323,24 +323,33 @@ module DTK; class ComponentDSL; class V2
           unless assigns.kind_of?(Hash) and assigns.size == 1
             raise Error.new("Unexpected form for attribute mapping (#{assigns.inspect})")
           end
-          "#{atriibute_mapping_attr(assigns.keys.first,remote_cmp_ref)} -> #{atriibute_mapping_attr(assigns.values.first,remote_cmp_ref)}"
+          left_attr, dir = attribute_mapping_attr_info(assigns.keys.first,remote_cmp_ref)
+          right_attr = attribute_mapping_attr_info(assigns.values.first)
+          dir_str = 
+            case dir 
+             when :output_to_input then "->"
+             else # :input_to_output
+              "<-"
+            end
+          "#{left_attr} #{dir_str} #{right_attr}"
         end
 
-        def self.atriibute_mapping_attr(var,remote_cmp_ref)
-          parts = var.split(".")
+        #if remote_cmp_ref non-null returns [attr_ref,dir], otherwise just returns attr_ref
+        def self.attribute_mapping_attr_info(var,remote_cmp_ref=nil)
+          dir = nil
+          attr_ref = nil
+          parts = (var =~ /(^[^.]+)\.(.+$)/; [$1,$2])
           case parts[0]
-           when ":remote_node" 
-            parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]
-           when ":local_node"
-            parts = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")]
+           when ":remote_node",":local_node" 
+            attr_ref = ["node",parts[1].gsub(/host_addresses_ipv4\.0/,"host_address")].join('.')
+            dir = (remote_cmp_ref && (parts[0] == ":remote_node" ? :output_to_input : :input_to_output))
            else
-            if remote_cmp_ref == qualified_component_ref(parts[0]).gsub(/^:/,"")
-              parts = [parts[1]]
-            else
-              parts[0] = "base"
+            attr_ref = parts[1]
+            if remote_cmp_ref
+              dir = (remote_cmp_ref == qualified_component_ref(parts[0]).gsub(/^:/,"") ? :output_to_input : :input_to_output) 
             end
           end
-          parts.join(".")
+          dir ? [attr_ref,dir] : attr_ref
         end
       end
 

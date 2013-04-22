@@ -338,7 +338,7 @@ module DTK; class ComponentDSL
           set_label(name)
           self[:label] = t(name) 
           self[:description] = unknown
-          self[:type] = t("string") #default taht can be overriten
+          self[:type] = t("string") #default that can be overriten
           var_default = nil
           if default = attr_ps[:default]
             if default.set_default_value?()

@@ -301,7 +301,7 @@ module DTK; class ComponentDSL; class V2
           choice_info = choice_info(pls.first)
           ref = choice_info[:remote_cmp_ref]
           unless component_part(ref) == assigns["type"]
-            content["relation_type"] = assigns["type"]
+            content["relation_name"] = assigns["type"]
           end
           content["location"] = "remote"
           content["required"] = false if (!assigns["required"].nil?) and not assigns["required"]

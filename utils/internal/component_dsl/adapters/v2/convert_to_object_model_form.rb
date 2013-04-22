@@ -130,7 +130,7 @@ module DTK; class ComponentDSL; class V2
         if dep_cmps = input_hash["depends_on"]
           convert_to_hash_form(dep_cmps) do |in_dep_cmp_ref,in_dep_cmp|
             dep_cmp = convert_to_internal_cmp_form(in_dep_cmp_ref)
-            ld_type = in_dep_cmp["relation_type"]||component_part(dep_cmp)
+            ld_type = in_dep_cmp["relation_name"]||component_part(dep_cmp)
             ld = OutputHash.new("type" => ld_type)
             link_type = link_type(in_dep_cmp)
 

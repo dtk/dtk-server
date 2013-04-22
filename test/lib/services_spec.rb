@@ -13,6 +13,26 @@ shared_context "Create service" do |dtk_common, service_name|
   end
 end
 
+shared_context "Import remote service" do |dtk_common, service_name|
+  it "imports #{service_name} service from remote repo" do
+    puts "Import remote service:", "---------------------"
+    pass = false
+    value = `dtk service import-r8n #{service_name}`
+    pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
+    puts "Import of remote service #{service_name} completed successfully!" if pass == true
+    puts "Import of remote service #{service_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "List all services" do |dtk_common, service_name|
+  it "verifies that #{service_name} service exists on server" do
+    service_exists = dtk_common.check_if_service_exists(service_name)
+    service_exists.should eq(true)
+  end
+end
+
 shared_context "List all services on remote" do |dtk_common, service_name, namespace|
   it "verifies that #{service_name} service exists on remote" do
     service_exists = dtk_common.check_if_service_exists_on_remote(service_name, namespace)

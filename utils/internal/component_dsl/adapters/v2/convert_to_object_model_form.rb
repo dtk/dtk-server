@@ -54,7 +54,22 @@ module DTK; class ComponentDSL; class V2
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
+        if opts[:constants]
+          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]))
+        end
         ret
+      end
+
+      def ret_input_hash_with_constants(constant_assigns)
+        attrs_hash = constant_assigns.inject(InputHash.new) do |h,ca|
+          el = {ca.attribute_name() => {
+              "type"=>ca.datatype()||"string",
+              "default" => ca.attribute_value(),
+              #"hidden" => true
+            }}
+          h.merge(el)
+        end
+        InputHash.new("attributes" => attrs_hash)
       end
 
       def external_ref(input_hash,cmp)
@@ -93,7 +108,11 @@ module DTK; class ComponentDSL; class V2
             attr_props.set_if_not_nil("required",info["required"])
             attrs.merge!(name => attr_props)
           end
-          ret.merge!("attribute" => attrs)
+          if ret["attribute"]
+            ret["attribute"].merge!(attrs)
+          else
+            ret["attribute"] = attrs
+          end
         end
         ret
       end
@@ -249,14 +268,18 @@ module DTK; class ComponentDSL; class V2
       end
 
       class ConstantAssignment 
+        attr_reader :datatype
+
         def initialize(constant,dep_attr_ref,dep_cmp)
           @dependent_attribute = dep_attr_ref
           @dependent_component = dep_cmp
           @constant = constant
+          @datatype = nil #TODO: stub for when constants have data types
         end
+
         def self.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts={})
           ret = attr_ref
-          if attr_ref = /^constant\:(.+$)/
+          if attr_ref =~ /^constant\:(.+$)/
             stripped_attr_ref = $1
             constant_assign = new(stripped_attr_ref,dep_attr_ref,dep_cmp)
             (opts[:constants] ||= Array.new) << constant_assign

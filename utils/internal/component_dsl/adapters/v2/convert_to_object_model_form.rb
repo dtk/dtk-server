@@ -52,7 +52,8 @@ module DTK; class ComponentDSL; class V2
         ret["external_ref"] = external_ref
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
         add_attributes!(ret,cmp_type,input_hash)
-        add_dependent_components!(ret,input_hash,cmp_type)
+        opts = Hash.new
+        add_dependent_components!(ret,input_hash,cmp_type,opts)
         ret
       end
 
@@ -117,14 +118,14 @@ module DTK; class ComponentDSL; class V2
       AutomicTypes = ScalarTypes + %w{json}
 
       #partitions into link_defs, "dependency", and "component_order"
-      def add_dependent_components!(ret,input_hash,base_cmp)
-        dep_config = get_dependent_config(input_hash,base_cmp)
+      def add_dependent_components!(ret,input_hash,base_cmp,opts={})
+        dep_config = get_dependent_config(input_hash,base_cmp,opts)
         ret.set_if_not_nil("dependency",dep_config[:dependencies])
         ret.set_if_not_nil("component_order",dep_config[:component_order])
         ret.set_if_not_nil("link_defs",dep_config[:link_defs])
       end
 
-      def get_dependent_config(input_hash,base_cmp)
+      def get_dependent_config(input_hash,base_cmp,opts={})
         ret = Hash.new
         link_defs  = Array.new
         if dep_cmps = input_hash["depends_on"]
@@ -143,7 +144,7 @@ module DTK; class ComponentDSL; class V2
             end
             possible_links = ld["possible_links"] = Array.new
             if in_attr_mappings = in_dep_cmp["attribute_mappings"]
-              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp)}
+              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
               possible_link = OutputHash.new(convert_to_internal_cmp_form(dep_cmp) => {"type" => link_type,"attribute_mappings" => ams})
               possible_links << possible_link
               link_defs << ld
@@ -204,20 +205,23 @@ module DTK; class ComponentDSL; class V2
         link_info["required"].nil? ? DefaultIsRequired : link_info["required"]
       end
 
-      def convert_attribute_mapping(input_am,base_cmp,dep_cmp)
+      def convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+        #TODO: right now only treating constant on right hand side meaning only for <- case
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
-          left = convert_attr_ref($1,:dep,dep_cmp)
-          right = convert_attr_ref($2,:base,base_cmp)
+          dep_attr,base_attr = [$1,$2]
+          left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp)
+          right = convert_attr_ref_simple(base_attr,:base,base_cmp)
         elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
-          left = convert_attr_ref($2,:base,base_cmp)
-          right = convert_attr_ref($1,:dep,dep_cmp)
+          dep_attr,base_attr = [$1,$2]
+          left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,opts)
+          right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp)
         else
           raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
         end
         {left => right}
       end
 
-      def convert_attr_ref(attr_ref,dep_or_base,cmp)
+      def convert_attr_ref_simple(attr_ref,dep_or_base,cmp)
         if attr_ref =~ /(^[^.]+)\.([^.]+$)/
           prefix = $1
           attr = $2
@@ -227,6 +231,46 @@ module DTK; class ComponentDSL; class V2
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
           "#{convert_to_internal_cmp_form(cmp)}.#{attr_ref}"
+        end
+      end
+
+      def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
+        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+          prefix = $1
+          attr = $2
+          case prefix
+            when "node" then "local_node"
+            else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
+          end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
+        else
+          stripped_attr_ref = ConstantAssignment.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts)
+          "#{convert_to_internal_cmp_form(base_cmp)}.#{stripped_attr_ref}"
+        end
+      end
+
+      class ConstantAssignment 
+        def initialize(constant,dep_attr_ref,dep_cmp)
+          @dependent_attribute = dep_attr_ref
+          @dependent_component = dep_cmp
+          @constant = constant
+        end
+        def self.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts={})
+          ret = attr_ref
+          if attr_ref = /^constant\:(.+$)/
+            stripped_attr_ref = $1
+            constant_assign = new(stripped_attr_ref,dep_attr_ref,dep_cmp)
+            (opts[:constants] ||= Array.new) << constant_assign
+            ret = constant_assign.attribute_name()
+          end
+          ret
+        end
+
+        ConstantDelim = "___"
+        def attribute_name()
+          "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}"
+        end
+        def attribute_value()
+          @constant
         end
       end
 

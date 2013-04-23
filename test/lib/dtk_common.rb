@@ -11,7 +11,7 @@ STDOUT.sync = true
 class DtkCommon
 
 	$success == true
-	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success
+	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success, :error_message
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -45,19 +45,20 @@ class DtkCommon
 
 		#If response contains errors, accumulate all errors to error_message
 		unless response_JSON["errors"].nil? 
-			error_message = ""
-			response_JSON["errors"].each { |e| error_message += "#{e['code']}: #{e['message']} "}
+			@error_message = ""
+			response_JSON["errors"].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
 		end
 
-		#If response status notok, success = false, show error_message
+		#If response status notok, show error_message
 		if (response_JSON["status"] == "notok")
-			$success = false
 			puts "", "Request failed!"
-			puts error_message
+			puts @error_message
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"
 				pretty_print_JSON(response_JSON["errors"].first["backtrace"])
 			end
+		else
+			@error_message = ""
 		end
 		return response_JSON
 	end
@@ -298,35 +299,41 @@ class DtkCommon
 		assembly_converged = false
 		puts "Converge process for assembly with id #{assembly_id} started!"
 		create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => assembly_id})
-		task_id = create_task_response['data']['task_id']
-		task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
 
-		end_loop = false
-		count = 0
-		max_num_of_retries = 10
+		if (@error_message == "")
+			task_id = create_task_response['data']['task_id']
+			puts task_id
+			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+			end_loop = false
+			count = 0
+			max_num_of_retries = 10
 
-		task_status = 'executing'
-		while task_status.include? 'executing' || end_loop == false
-			sleep 20
-			count += 1
-			response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
-			status = response_task_status['data']['status']
-			if (status.include? 'succeeded')
-				task_status = status
-				assembly_converged = true
-				puts "Converge process finished successfully!"
-			elsif (status.include? 'failed')
-				task_status = status
-				puts "Converge process was not finished successfully! Some tasks failed!"
+			task_status = 'executing'
+			while task_status.include? 'executing' || end_loop == false
+				sleep 20
+				count += 1
+				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
+				status = response_task_status['data']['status']
+				if (status.include? 'succeeded')
+					task_status = status
+					assembly_converged = true
+					puts "Converge process finished successfully!"
+				elsif (status.include? 'failed')
+					task_status = status
+					puts "Converge process was not finished successfully! Some tasks failed!"
+				end
+				puts "Task execution status: #{task_status}"
+
+				if (count > max_num_of_retries)
+					puts "Max number of retries reached..."
+					puts "Converge process was not finished successfully!"
+					end_loop = true 
+				end
 			end
-			puts "Task execution status: #{task_status}"
-
-			if (count > max_num_of_retries)
-				puts "Max number of retries reached..."
-				puts "Converge process was not finished successfully!"
-				end_loop = true 
-			end
+		else
+			puts "Assembly was not converged successfully!"
 		end
+
 		puts ""
 		return assembly_converged
 	end
@@ -396,14 +403,18 @@ class DtkCommon
 		puts "Delete assembly template:", "-------------------------"
 		assembly_templated_deleted = false
 		assembly_template_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
-		assembly_template_id = assembly_template_list['data'].select { |x| x['display_name'] == assembly_template_name }.first['id']
-		delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_id, :subtype=>:template})
+		if (assembly_template_list['data'].select { |x| x['display_name'] == assembly_template_name }.first)
+			puts "Assembly template exists in assembly template list. Proceed with deleting assembly template..."
+			delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_id, :subtype=>:template})
 
-		if (delete_assembly_template_response['status'] == "ok")
-			puts "Assembly template #{assembly_template_name} deleted successfully!"
-			assembly_templated_deleted = true
+			if (delete_assembly_template_response['status'] == "ok")
+				puts "Assembly template #{assembly_template_name} deleted successfully!"
+				assembly_templated_deleted = true
+			else
+				puts "Assembly template #{assembly_template_name} was not deleted successfully!"
+			end
 		else
-			puts "Assembly template #{assembly_template_name} was not deleted successfully!"
+			puts "Assembly template does not exist in assembly template list."
 		end
 		puts ""
 		return assembly_templated_deleted

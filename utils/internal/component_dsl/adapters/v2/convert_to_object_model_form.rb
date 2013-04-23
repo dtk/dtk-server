@@ -55,7 +55,7 @@ module DTK; class ComponentDSL; class V2
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
         if opts[:constants]
-          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]))
+          add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
         ret
       end
@@ -91,17 +91,19 @@ module DTK; class ComponentDSL; class V2
         external_ref["type"] != "puppet_definition"
       end
       
-      def add_attributes!(ret,cmp_type,input_hash)
+      def add_attributes!(ret,cmp_type,input_hash,opts={})
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
-            attr_props = OutputHash.new(
-              "display_name" => name,
-              "external_ref" => {
-                 "type" => "puppet_attribute", #TODO: hard-wired
+            external_ref = 
+              if opts[:constant_attribute]
+                Attribute::Constant.ret_external_ref()
+              else
+                {"type" => "puppet_attribute", #TODO: hard-wired
                  "path" => "node[#{cmp_type}][#{name}]"
               }
-            )
+              end
+            attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
             attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
             attr_props.set_if_not_nil("description",info["description"])
@@ -262,38 +264,8 @@ module DTK; class ComponentDSL; class V2
             else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
-          stripped_attr_ref = ConstantAssignment.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts)
+          stripped_attr_ref = Attribute::Constant.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts)
           "#{convert_to_internal_cmp_form(base_cmp)}.#{stripped_attr_ref}"
-        end
-      end
-
-      class ConstantAssignment 
-        attr_reader :datatype
-
-        def initialize(constant,dep_attr_ref,dep_cmp)
-          @dependent_attribute = dep_attr_ref
-          @dependent_component = dep_cmp
-          @constant = constant
-          @datatype = nil #TODO: stub for when constants have data types
-        end
-
-        def self.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts={})
-          ret = attr_ref
-          if attr_ref =~ /^constant\:(.+$)/
-            stripped_attr_ref = $1
-            constant_assign = new(stripped_attr_ref,dep_attr_ref,dep_cmp)
-            (opts[:constants] ||= Array.new) << constant_assign
-            ret = constant_assign.attribute_name()
-          end
-          ret
-        end
-
-        ConstantDelim = "___"
-        def attribute_name()
-          "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}"
-        end
-        def attribute_value()
-          @constant
         end
       end
 

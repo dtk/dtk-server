@@ -289,8 +289,10 @@ module DTK; class Task
         attrs = Model.get_objs(attr_mh,sp_hash)
 
         attrs.each do |attr|
-          actions = ndx_actions[attr[parent_field_name]]
-          actions.each{|action|action.add_attribute!(attr)}
+          unless attr.is_constant?()
+            actions = ndx_actions[attr[parent_field_name]]
+            actions.each{|action|action.add_attribute!(attr)}
+          end
         end
       end
 

@@ -15,12 +15,14 @@ module XYZ
     r8_nested_require('attribute','pattern')
     r8_nested_require('attribute','legal_value')
     r8_nested_require('attribute','special_processing')
+    r8_nested_require('attribute','constant')
     include AttributeGroupInstanceMixin
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
     extend AttributeGuardClassMixin
     extend  AttrPropagateChangesClassMixin
+    include ConstantMixin
 
     set_relation_name(:attribute,:attribute)
     extend AttributeMetaClassMixin

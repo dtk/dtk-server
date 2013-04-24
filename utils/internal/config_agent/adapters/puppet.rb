@@ -10,8 +10,13 @@ module XYZ
       def ret_msg_content(config_node,impl_info)
         cmps_with_attrs = components_with_attributes(config_node,impl_info)
         assembly_attrs = assembly_attributes(config_node)
-        manifest = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs)
-        {:components_with_attributes => cmps_with_attrs, :node_manifest => manifest}
+        manifest = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node[:node][:intra_node_stages])
+        msg_content = {
+          :components_with_attributes => cmps_with_attrs, 
+          :node_manifest => manifest, 
+          :inter_node_stage => config_node[:node][:inter_node_stage]
+        }
+        return msg_content
       end
       def type()
         :puppet
@@ -79,9 +84,9 @@ module XYZ
         ext_ref = component[:external_ref]
         case ext_ref[:type]
          when "puppet_class"
-          {"component_type" => "class", "name" => ext_ref[:class_name]}
+          {"component_type" => "class", "name" => ext_ref[:class_name], "id" => component[:id]}
          when "puppet_definition"
-          {"component_type" => "definition", "name" => ext_ref[:definition_name]}
+          {"component_type" => "definition", "name" => ext_ref[:definition_name], "id" => component[:id]}
           else
           Log.error("unexepected external type #{ext_ref[:type]}")
           nil

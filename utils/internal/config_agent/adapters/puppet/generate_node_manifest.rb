@@ -5,14 +5,66 @@ module XYZ
         @import_statement_modules = Array.new
       end
 
-      def generate(cmps_with_attrs,assembly_attrs=nil)
+      def generate(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
+        # Amar:
+        # if intra node stages configured 'stages_ids' will not be nil, 
+        # if stages_ids is nil use generation with total ordering (old implementation)
+        if stages_ids
+          generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
+        else
+          generate_with_total_ordering(cmps_with_attrs,assembly_attrs)
+        end
+      end
+
+     private
+
+      def generate_with_stages(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
+        ret = Array.new
+        add_default_extlookup_config!(ret)
+        add_assembly_attributes!(ret,assembly_attrs||[])
+        stages_ids.each_with_index do |stage_ids, i|
+          stage = i+1
+          ret << "stage{#{quote_form(stage)} :}"
+          stage_ids.each do |cmp_id| 
+            cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
+            ret = generate_middle_manifest(cmp_with_attrs, stage, ret)
+          end
+        end
+        size = stages_ids.size
+        if size > 1
+          ordering_statement = (1..stages_ids.size).map{|s|"Stage[#{s.to_s}]"}.join(" -> ")
+          ret << ordering_statement
+        end
+
+        if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
+          ret += attr_val_stmts
+        end
+        return ret
+      end      
+
+      def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
         ret = Array.new
         add_default_extlookup_config!(ret)
         add_assembly_attributes!(ret,assembly_attrs||[])
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
-          module_name = cmp_with_attrs["module_name"]
           ret << "stage{#{quote_form(stage)} :}"
+          ret = generate_middle_manifest(cmp_with_attrs, stage, ret)
+        end
+        size = cmps_with_attrs.size
+        if size > 1
+          ordering_statement = (1..cmps_with_attrs.size).map{|s|"Stage[#{s.to_s}]"}.join(" -> ")
+          ret << ordering_statement
+        end
+
+        if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
+          ret += attr_val_stmts
+        end
+        return ret
+      end
+
+      def generate_middle_manifest(cmp_with_attrs, stage, ret)
+        module_name = cmp_with_attrs["module_name"]
           attrs = process_and_return_attr_name_val_pairs(cmp_with_attrs)
           stage_assign = "stage => #{quote_form(stage)}"
           case cmp_with_attrs["component_type"]
@@ -51,19 +103,8 @@ module XYZ
             ret << "}"
             ret << "class {\"#{class_wrapper}\": #{stage_assign}}"
           end
-        end
-        size = cmps_with_attrs.size
-        if size > 1
-          ordering_statement = (1..cmps_with_attrs.size).map{|s|"Stage[#{s.to_s}]"}.join(" -> ")
-          ret << ordering_statement
-        end
-
-        if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
-          ret += attr_val_stmts
-        end
-        ret
       end
-     private
+
       def add_default_extlookup_config!(ret)
         ret << "$extlookup_datadir = #{DefaultExtlookupDatadir}"
         ret << "$extlookup_precedence = #{DefaultExtlookupPrecedence}"

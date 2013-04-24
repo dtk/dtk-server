@@ -9,7 +9,6 @@ module XYZ
         context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
-
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
         ["define", {"name" => name}, [tasks]]
@@ -33,7 +32,10 @@ module XYZ
             guards = ret_guards(guard_tasks)
           end
           authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
-          main = participant_executable_action(:execute_on_node,task,context,:task_end => true)
+          main = participant_executable_action(:execute_on_node,task,context,:task_type => "config_node",:task_end => true)
+          # Amar: sync agent code subtask will be generated only in first inter node stage
+          #sync_agent_code = participant_executable_action(:sync_agent_code,task,context,:task_type => "sync_agent_code",:task_end => true) if task[:executable_action][:node][:inter_node_stage] == "_1"
+          #sequence_tasks = [guards,authorize_action,main,sync_agent_code].compact
           sequence_tasks = [guards,authorize_action,main].compact
           sequence(*sequence_tasks)
         end
@@ -134,6 +136,10 @@ module XYZ
         end
 
         def get_guard_tasks(action)
+
+          # If 'STAGES' temporal mode set, don't generate workflow with guards
+          return nil unless XYZ::Workflow.guards_mode?
+
           ret = nil
           #short cuircuit; must be multiple peers in order there to be guard tasks
           return ret if peer_tasks.size < 2

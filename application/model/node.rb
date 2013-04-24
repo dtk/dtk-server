@@ -277,6 +277,11 @@ module XYZ
       self[:admin_op_status] = op_status.to_s
     end
 
+    def update_agent_git_commit_id(agent_git_commit_id)
+      update(:agent_git_commit_id => agent_git_commit_id)
+      self[:agent_git_commit_id] = agent_git_commit_id      
+    end
+
     def update_ordered_component_ids(order)
       ordered_component_ids = "{ :order => [#{order.join(',')}] }"
       update(:ordered_component_ids => ordered_component_ids)

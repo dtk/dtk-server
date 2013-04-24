@@ -73,6 +73,30 @@ module XYZ
       has_req_fields ? false : true
     end
 
+    #FOR_AMAR
+    def self.aug_attr_list_from_state_change_list(state_change_list)
+      ret = Array.new
+      #get all relevant attributes by first finding component ids
+      ndx_scs = Hash.new
+      state_change_list.each do |node_change_list|
+        node_change_list.each do |sc|
+          ndx_scs[sc[:component][:id]] ||= sc
+        end
+      end
+      return ret if ndx_scs.empty?
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_component_id,:attribute_value,:required,:dynamic],
+        :filter => [:oneof,:component_component_id, ndx_scs.keys]
+      }
+      attr_mh = state_change_list.first.first[:component].model_handle(:attribute)
+      ret = get_objs(attr_mh,sp_hash)
+      ret.each do |attr|
+        sc = ndx_scs[attr[:component_component_id]]
+        attr.merge!(:component => sc[:component], :node => sc[:node])
+      end
+      ret
+    end
+
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
       ret = Array.new 

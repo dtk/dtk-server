@@ -85,6 +85,14 @@ module XYZ
         CommandAndControl.execute_task_action(task,top_task_idh,opts)
       end
 
+      def initiate_sync_agent_action(task,receiver_context)
+        opts = {
+          :sync_agent_task => true,
+          :receiver_context => receiver_context
+        }
+        CommandAndControl.execute_task_action(task,top_task_idh,opts)
+      end
+
       def initiate_node_action(method,node,callbacks,context)
         CommandAndControl.initiate_node_action(method,node,callbacks,context)
       end

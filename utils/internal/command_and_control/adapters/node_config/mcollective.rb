@@ -11,15 +11,13 @@ module XYZ
       end
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
-        
         #TODO: getting out implemention info not needed if put module names in component ext refs
         impl_info = get_relevant_impl_info(config_node)
         version_context = get_version_context(impl_info)
-
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node,impl_info)
-        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
-        
+        agent_git_details = { :repo => "dtk-node-agent", :branch => "" }
+        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context, :agent_git_details => agent_git_details)
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
@@ -29,20 +27,23 @@ module XYZ
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_cancelation(task_idh,top_task_idh,config_node,opts)
-
-        #TODO: getting out implemention info not needed if put module names in component ext refs
-        impl_info = get_relevant_impl_info(config_node)
-        version_context = get_version_context(impl_info)
-
-        config_agent = ConfigAgent.load(config_node[:config_agent_type])
-        msg_content =  config_agent.ret_msg_content(config_node,impl_info)
-        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context)
-        
+        msg_content = { :task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id() }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call("puppet_cancel","run",msg_content,filter,callbacks,context)
+      end
+
+      #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
+      def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
+        # TODO Move agent's GIT URL to configuration
+        msg_content = { :git_server_url => "git@github.com:rich-reactor8/dtk-node-agent.git" }
+        pbuilderid = Node.pbuilderid(config_node[:node])
+        filter = filter_single_fact("pbuilderid",pbuilderid)
+        context = opts[:receiver_context]
+        callbacks = context[:callbacks]
+        async_agent_call("sync_agent_code","run",msg_content,filter,callbacks,context)
       end
 
       def self.authorize_node(node,callbacks,context_x={})
@@ -75,14 +76,14 @@ module XYZ
         callbacks = {
           :on_msg_received => proc do |msg|
             # is_task_canceled is set from participant cancel method
-            rc[:callbacks][:on_msg_received].call(msg) unless node[:is_task_canceled]
+            rc[:callbacks][:on_msg_received].call(msg) unless (node[:is_task_canceled] || node[:is_task_failed])
           end,
           :on_timeout => proc do 
             if count < 1
               rc[:callbacks][:on_timeout].call
             else
               new_opts = opts.merge(:count => count-1)
-              poll_to_detect_node_ready(node,new_opts) unless node[:is_task_canceled]
+              poll_to_detect_node_ready(node,new_opts) unless (node[:is_task_canceled] || node[:is_task_failed])
             end
           end
         }
@@ -162,10 +163,23 @@ module XYZ
         ret = Array.new
         return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
         sample_idh = config_node[:component_actions].first[:component].id_handle
-        impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
-          sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
-        end
+        impl_idhs = get_impl_idhs(config_node, sample_idh)
+        return ret if impl_idhs.empty?
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
+      end
+      def self.get_impl_idhs(config_node, sample_idh)
+        # if [:node][:implementation_ids_list] empty, or populated use it for getting impl_idhs, 
+        # else if nil use gathering from [:component][:implementation_id]
+        if impl_ids = config_node[:node][:implementation_ids_list]
+          impl_idhs = impl_ids.uniq.map do |impl_id|
+            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
+          end
+        else
+          impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
+            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
+          end
+        end
+        return impl_idhs
       end
       def self.get_version_context(impl_info)
         ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array

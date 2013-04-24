@@ -1,12 +1,29 @@
 module XYZ
   class Workflow
 
+    # Configuration for 'inter_node_temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'
+    @@inter_node_temporal_coordination_mode = "STAGES"
+    # Configuration for 'intra_node_temporal_coordination_mode'; Values: 'STAGES' 'TOTAL_ORDER'
+    @@intra_node_temporal_coordination_mode = "STAGES"
+    def self.guards_mode?
+      @@inter_node_temporal_coordination_mode == "GUARDS"
+    end
+    def self.stages_mode?
+      @@inter_node_temporal_coordination_mode == "STAGES"
+    end
+    def self.intra_node_total_order?
+      @@intra_node_temporal_coordination_mode == "TOTAL_ORDER"
+    end
+    def self.intra_node_stages?
+      @@intra_node_temporal_coordination_mode == "STAGES"
+    end
+
     # Variables to enable cancelation of tasks. 
     # 'active_workflows' holds current active tasks executing on Ruote engine
     # Lock is needed in case of concurrent execution
     @@active_workflows = Hash.new
     @@Lock = Mutex.new
-
+ 
     def defer_execution()
       CreateThread.defer do
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]

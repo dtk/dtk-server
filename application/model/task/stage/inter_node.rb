@@ -1,0 +1,180 @@
+
+# TODO AMAR: Following case is possibly a bug: n1=[c1[c2],c3[c1]] n2=[c2]. c3 should be moved into stage2 along with c1.
+# CHECK ALGORITHM OF THIS CASE
+module XYZ
+	module Stage
+		class InterNode
+
+		    # Generating stages in case of inter node component dependencies 
+		    def self.generate_stages(state_change_list)
+
+		      # If 'GUARDS' temporal mode set, don't generate stages workflow
+		      return [state_change_list] unless XYZ::Workflow.stages_mode?
+
+		      stages = Array.new
+		      nodes = Array.new
+
+		      # Rich: get_internode_dependencies will do things that are redundant with what is below, but shoudl eb acceptable for now
+		      internode_dependencies = Component.get_internode_dependencies(state_change_list)
+		      return [state_change_list] if internode_dependencies.empty?
+
+		      # Amar: TODO Remove this if new impl works
+		      # Raise error if inter node dependency cycle detected
+		      #error_msg_for_internode_cycle = detect_internode_cycle(internode_dependencies)
+		      #raise ErrorUsage.new(error_msg_for_internode_cycle) if error_msg_for_internode_cycle
+
+		      state_change_list.each do |node_change_list|
+		        ndx_cmp_idhs = Hash.new
+		        node_id = node_change_list.first[:node][:id]
+		        
+		        # Gathering all impl ids to get loaded in first config node stage
+		        impl_ids_list = Array.new
+		        node_change_list.each { |sc| impl_ids_list << sc[:component][:implementation_id] }
+		        
+		        node_change_list.each do |sc|
+		          cmp = sc[:component]
+		          ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
+
+		          # Adding impl_ids_list to each node
+		          sc[:node][:implementation_ids_list] = impl_ids_list
+		        end
+		        cmp_deps = Component.get_component_type_and_dependencies(ndx_cmp_idhs.values)
+		        cmp_ids_with_deps = Task::Action::OnComponent.get_cmp_ids_with_deps(cmp_deps)
+
+		        nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }
+		      end
+
+		      stages << clean_dependencies_that_are_internode(internode_dependencies, nodes)
+		      # everything in each stage can be executed concurrently, but each stage must go sequentially
+		      prev_deps_count = internode_dependencies.size
+		      while stage = generate_stage(internode_dependencies)
+		        # Checks for inter node dependency cycle and throws error if cycle present
+		        prev_deps_count = detect_internode_cycle(internode_dependencies, prev_deps_count)
+		        stages << stage 
+		      end
+		      return populate_stages_data(stages, state_change_list)
+		    end
+
+		    private
+		    def self.detect_internode_cycle(internode_dependencies, prev_deps_count)
+		      cur_deps_count = internode_dependencies.size
+		      if prev_deps_count == cur_deps_count
+		        # Gathering data for error's pretty print on CLI side
+		        cmp_dep_str = Array.new
+		        nds_dep_str = Array.new
+		        internode_dependencies.each do |dep|
+		          cmp_dep_str << "#{format_hash(dep[:component_dependency_names])} (#{format_hash(dep[:component_dependency])})"
+		          nds_dep_str << "#{format_hash(dep[:node_dependency_names])} (#{format_hash(dep[:node_dependency])})"
+		        end
+		        error_msg = "Inter-node components cycle detected.\nNodes cycle:\n#{nds_dep_str.join("\n")}\nComponents cycle:\n#{cmp_dep_str.join("\n")}"
+		        raise ErrorUsage.new(error_msg)
+		      end
+		      return cur_deps_count
+		    end
+		    def self.format_hash(h)
+		      h.map{|k,v| "#{k} => #{v}"}.join(',')
+		    end
+
+		    # Amar: TODO remove this method if new impl works in more cases
+		    def self.detect_internode_cycle_old(internode_dependencies)
+		      error_msg = nil
+		      tsort_input_deps = Hash.new
+		      internode_dependencies.each { |cmp_dep| tsort_input_deps.merge!(cmp_dep[:component_dependency])}
+		      begin
+		        # TSort is only used for cycle detection in this case. If exception is thrown, cycle exists
+		        TSortHash.new(tsort_input_deps).tsort
+		      rescue TSort::Cyclic => e
+		        # Gathering data for error's pretty print on CLI side
+		        cycle_comp_ids = e.message.match(/.*\[(.+)\]/)[1]
+		        cmp_dep_str = Array.new
+		        nds_dep_str = Array.new
+		        internode_dependencies.each do |dep|
+		          if cycle_comp_ids.include?(dep[:component_dependency].keys.first.to_s)
+		            cmp_dep_str << "#{format_hash(dep[:component_dependency_names])} (#{format_hash(dep[:component_dependency])})"
+		            nds_dep_str << "#{format_hash(dep[:node_dependency_names])} (#{format_hash(dep[:node_dependency])})"
+		          end
+		        end
+		        error_msg = "Inter-node components cycle detected.\nNodes cycle:\n#{nds_dep_str.join("\n")}\nComponents cycle:\n#{cmp_dep_str.join("\n")}"
+		      rescue Exception => e
+		        # TSort is expected to fail
+		        # TSort is not expected to complete ordering as internode_dependencies is not full graph representation 
+		      end
+		      return error_msg
+		    end
+
+		    # Populating stages from original data 'state_change_list'
+		    def self.populate_stages_data(stages, state_change_list)
+		      stages_state_change_list = Array.new
+		      first_stage = true
+		      stages.each do |stage|
+		        stage_scl = Array.new
+		        stage.each do |cmp|
+		          node_id = cmp[:node_id]
+		          in_node_scl = state_change_list.select { |n| n.first[:node][:id] == node_id }.first
+		          cmp_ids = cmp[:component_dependency].keys
+		          out_node_scl = Array.new
+		          cmp_ids.each do |cmp_id|
+		            in_node_scl.each do |in_node_cmp|
+		              if in_node_cmp[:component][:id] == cmp_id
+		                # removing impl_ids_list from stages except from first stage. Component modules must be loaded only for first stage
+		                in_node_cmp[:node][:implementation_ids_list] = Array.new unless first_stage
+		                out_node_scl << in_node_cmp
+		              end
+		            end
+		          end
+		          stage_scl << out_node_scl
+		        end
+		        first_stage = false if first_stage
+		        stages_state_change_list << stage_scl
+		      end
+		      return stages_state_change_list
+		    end
+
+		    # This method removes intranode dependency components from nodes and returns stage_1 actions
+		    def self.clean_dependencies_that_are_internode(internode_dependencies, nodes)
+		      nodes.each do |node|
+		        internode_dependencies.each do |internode_dependency|
+		          parent = internode_dependency[:component_dependency].keys.first
+		          if node[:component_dependency].keys.include?(parent)
+		            node[:component_dependency].delete(parent) 
+		          end
+		        end
+		      end
+		      return nodes
+		    end
+
+		    # This method will remove and return stage elements from current 'internode_dependencies'
+		    # that are not depended on any component in current 'internode_dependencies'
+		    def self.generate_stage(internode_dependencies)
+		      # Return nil if all stages are generated
+		      return nil if internode_dependencies.empty?
+
+		      stage = Array.new
+		      internode_dependencies_to_rm = Array.new
+		      internode_dependencies.each do |internode_dependency|
+		        children = internode_dependency[:component_dependency].values.first
+		        if is_stage(internode_dependencies, children)
+		          internode_dependencies_to_rm << internode_dependency
+		          stage_element = {
+		            :component_dependency => internode_dependency[:component_dependency],
+		            :node_id => internode_dependency[:node_dependency].keys.first
+		          }
+		          stage << stage_element unless stage.include?(stage_element)
+		        end
+		      end
+		      internode_dependencies_to_rm.each { |rm| internode_dependencies.delete(rm) }
+
+		      return stage
+		    end
+
+		    def self.is_stage(internode_dependencies, children)
+		      internode_dependencies.each do |internode_dependency|
+		        return false if children.include?(internode_dependency[:component_dependency].keys.first)
+		      end
+		      return true
+		    end
+
+
+		end
+	end
+end

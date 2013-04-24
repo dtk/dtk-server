@@ -352,7 +352,8 @@ module DTK
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       format = (ret_request_params(:format)||:hash).to_sym
-      rest_ok_response Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
+      response = Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
+      rest_ok_response response
     end
 
     ### mcollective actions

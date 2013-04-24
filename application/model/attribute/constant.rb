@@ -19,22 +19,11 @@ module DTK
         external_ref[:type] == ExternalRefType
       end
 
-      def initialize(constant,dep_attr_ref,dep_cmp)
+      def initialize(constant,dep_attr_ref,dep_cmp,datatype)
         @dependent_attribute = dep_attr_ref
         @dependent_component = dep_cmp
         @constant = constant
-        @datatype = nil #TODO: stub for when constants have data types
-      end
-
-      def self.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts={})
-        ret = attr_ref
-        if attr_ref =~ /^constant\:(.+$)/
-          stripped_attr_ref = $1
-          constant_assign = new(stripped_attr_ref,dep_attr_ref,dep_cmp)
-          (opts[:constants] ||= Array.new) << constant_assign
-          ret = constant_assign.attribute_name()
-        end
-        ret
+        @datatype = datatype.to_s
       end
 
       ConstantDelim = "___"

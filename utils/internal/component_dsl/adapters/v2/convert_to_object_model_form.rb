@@ -230,43 +230,62 @@ module DTK; class ComponentDSL; class V2
         #TODO: right now only treating constant on right hand side meaning only for <- case
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
           dep_attr,base_attr = [$1,$2]
-          left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp)
-          right = convert_attr_ref_simple(base_attr,:base,base_cmp)
+          left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:output)
+          right = convert_attr_ref_simple(base_attr,:base,base_cmp,:input)
         elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
           dep_attr,base_attr = [$1,$2]
-          left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,opts)
-          right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp)
+          left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,:output,opts)
+          right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:input)
         else
           raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
         end
         {left => right}
       end
 
-      def convert_attr_ref_simple(attr_ref,dep_or_base,cmp)
+      def convert_attr_ref_simple(attr_ref,dep_or_base,cmp,input_or_output)
         if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+          if input_or_output == :input
+            raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+          end
           prefix = $1
           attr = $2
           case prefix
-            when "node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
+            when "$node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
             else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
           end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
         else
-          "#{convert_to_internal_cmp_form(cmp)}.#{attr_ref}"
+          dollar_sign,var_name = (attr_ref =~ /(^\$*)(.+$)/; [$1,$2])
+          has_dollar_sign = !dollar_sign.empty?
+          if (input_or_output == :input and has_dollar_sign) or
+              (input_or_output == :output and !has_dollar_sign)
+            raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+          end
+          "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
         end
       end
 
-      def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
-        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
-          prefix = $1
-          attr = $2
-          case prefix
-            when "node" then "local_node"
-            else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
-          end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
+      def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,input_or_output,opts={})
+        is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts) || convert_attr_ref_simple(attr_ref,:base,base_cmp,input_or_output)
+      end
+
+      def is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
+        return nil if attr_ref =~ /^\$/
+
+        datatype = :string
+        const = attr_ref
+        if attr_ref =~ /^'(.+)'$/
+          const = $1
+        elsif ['true','false'].include?(attr_ref)
+          datatype = :boolean
+        elsif attr_ref =~ /^[0-9]+$/
+          datatype = :integer
         else
-          stripped_attr_ref = Attribute::Constant.strip_constant?(attr_ref,dep_attr_ref,dep_cmp,opts)
-          "#{convert_to_internal_cmp_form(base_cmp)}.#{stripped_attr_ref}"
+          ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
+
+        constant_assign = Attribute::Constant.new(const,dep_attr_ref,dep_cmp,datatype)
+        (opts[:constants] ||= Array.new) << constant_assign
+        "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
       end
 
       CmpPPDelim = '::'

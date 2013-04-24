@@ -38,12 +38,19 @@ module XYZ
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
         # TODO Move agent's GIT URL to configuration
-        msg_content = { :git_server_url => "git@github.com:rich-reactor8/dtk-node-agent.git" }
+        agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
+        agent_paths = Dir.glob("#{agent_repo_dir}/mcollective_additions/plugins/v2.2/agent/*")
+        agents = Hash.new
+        name_regex = /\/agent\/(.+)/
+        agent_paths.each do |agent_path|
+          File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+        end
+        msg_content = { :agent_files => agents }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        async_agent_call("sync_agent_code","run",msg_content,filter,callbacks,context)
+        async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
       end
 
       def self.authorize_node(node,callbacks,context_x={})

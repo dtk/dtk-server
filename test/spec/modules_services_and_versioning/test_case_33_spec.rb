@@ -15,7 +15,7 @@ assembly_name = 'test_case_33_instance'
 assembly_template = 'bootstrap::test1'
 module_name = 'mysql'
 module_version = '0.0.1'
-module_filesystem_location = "~/.dtk/component_modules"
+module_filesystem_location = "~/component_modules"
 file_for_change = "README.md"
 $assembly_id = 0
 

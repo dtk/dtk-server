@@ -14,7 +14,7 @@ require './lib/modules_spec'
 namespace = "dtk10"
 existing_module_name = "bakir_test"
 module_name = "bakir_test1"
-module_filesystem_location = "~/.dtk/component_modules"
+module_filesystem_location = "~/component_modules"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')

@@ -325,13 +325,12 @@ module DTK; class ComponentDSL; class V2
           end
           left_attr, dir = attribute_mapping_attr_info(assigns.keys.first,remote_cmp_ref)
           right_attr = attribute_mapping_attr_info(assigns.values.first)
-          dir_str = 
-            case dir 
-             when :output_to_input then "->"
-             else # :input_to_output
-              "<-"
-            end
-          "#{left_attr} #{dir_str} #{right_attr}"
+
+          if dir == :output_to_input
+            "$#{left_attr} -> #{right_attr}"
+          else
+            "#{left_attr} <- $#{right_attr}"
+          end
         end
 
         #if remote_cmp_ref non-null returns [attr_ref,dir], otherwise just returns attr_ref

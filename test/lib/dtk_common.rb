@@ -405,7 +405,7 @@ class DtkCommon
 		assembly_template_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
 		if (assembly_template_list['data'].select { |x| x['display_name'] == assembly_template_name }.first)
 			puts "Assembly template exists in assembly template list. Proceed with deleting assembly template..."
-			delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_id, :subtype=>:template})
+			delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_name, :subtype=>:template})
 
 			if (delete_assembly_template_response['status'] == "ok")
 				puts "Assembly template #{assembly_template_name} deleted successfully!"
@@ -419,6 +419,8 @@ class DtkCommon
 		puts ""
 		return assembly_templated_deleted
 	end
+
+
 
 	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
 		puts "Create assembly template from assembly:", "---------------------------------------"

@@ -272,8 +272,13 @@ module DTK
 
 
     def add_user_direct_access(model_handle,rsa_pub_key)
-      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
-      model_name = model_handle[:model_name]
+      repo_user            = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
+      model_name           = model_handle[:model_name]
+      existing_rsa_pub_key = RepoUser.get_existing_repo_users(model_handle.createMH(:repo_user),filter_keys={:ssh_rsa_pub_key => rsa_pub_key},cols=[:ssh_rsa_pub_key])
+      
+      # Do not allow two users with same rsa pub key (e.g server and client installed on same machine)
+      raise ErrorUsage.new("Provided rsa public key exists already") unless existing_rsa_pub_key.empty?
+      
       return if repo_user.has_direct_access?(model_name,:donot_update => true)
       repo_user.update_direct_access(model_name,true)
       repos = get_all_repos(model_handle)

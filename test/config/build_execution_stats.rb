@@ -22,7 +22,7 @@ report << "------------------------------\n"
 @test_runs.each do |test_run|
   @success_rate = ((test_run.example_count.to_i - test_run.failure_count.to_i).to_f/test_run.example_count.to_f)*100
   @test_steps_count = test_run.example_count
-  @test_steps_pass_count = test_run.example_count - test_run.failure_count
+  @test_steps_pass_count = (test_run.example_count.to_i - test_run.failure_count.to_i)
   @test_steps_failed_count = test_run.failure_count
   @formatted_rate = sprintf("%.2f", @success_rate)
   @formatted_duration = sprintf("%.2f", test_run.duration.to_f)

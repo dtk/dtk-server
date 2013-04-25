@@ -19,6 +19,22 @@ module XYZ
           params
         end
 
+        def get_head_git_commit_id()
+          # TODO Amar put this into configuration if needed
+          agent_repo_dir = "#{DTK::RepoManager::Config[:bare_repo_dir]}/dtk-node-agent"
+          agent_repo_url = "git@github.com:rich-reactor8/dtk-node-agent.git"
+          # Clone will be invoked only when DTK Server is started for the first time
+          unless File.directory?(agent_repo_dir)
+            clone_args = [agent_repo_url, agent_repo_dir]
+            cmd_opts = {:raise => true, :timeout => 60}
+            ::Grit::Git.new("").clone(cmd_opts, *clone_args)
+          else
+            repo = ::Grit::Git.new(agent_repo_dir)
+          end
+          head_commit_id = ::Grit::Repo.new(agent_repo_dir).commits.first.id
+          return head_commit_id
+        end
+
         def set_task_to_executing(task)
           task.update_at_task_start()
         end
@@ -38,10 +54,20 @@ module XYZ
         end
 
         def set_result_canceled(workitem, task)
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_canceled] = true
+
           task.update_at_task_completion("cancelled",Task::Action::Result::Cancelled.new())
         end
 
         def set_result_failed(workitem,new_result,task)
+
+          # Amar: (TODO: Find better solution)
+          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
+          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
+          task[:executable_action][:node][:is_task_failed] = true
           error = 
             if not new_result[:statuscode] == 0
               CommandAndControl::Error::Communication.new
@@ -137,8 +163,8 @@ module XYZ
             result = workflow.process_executable_action(task)
             if errors_in_result = errors_in_result?(result)
               event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
-             pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-             set_result_failed(workitem,result,task)
+              pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+              set_result_failed(workitem,result,task)
             else
               node = task[:executable_action][:node]
               node.update_operational_status!(:running)
@@ -273,10 +299,6 @@ module XYZ
           params = get_params(wi) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
 
-          # Amar: (TODO: Find better solution)
-          # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
-          # Due to asyc calls, it was the only way I could figure out how to stop node detection task
-          task[:executable_action][:node][:is_task_canceled] = true
 
           task.add_internal_guards!(workflow.guards[:internal])
           pp ["Canceling task #{action.class.to_s}: #{task_id}"]
@@ -359,14 +381,94 @@ module XYZ
         end
       end
 
+      class SyncAgentCode < NodeParticipants
+
+        def consume(workitem)
+          params = get_params(workitem) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          
+          node = task[:executable_action][:node]
+          installed_agent_git_commit_id = node[:agent_git_commit_id]
+          head_git_commit_id = get_head_git_commit_id()
+          if head_git_commit_id == installed_agent_git_commit_id
+            set_result_succeeded(workitem,nil,task,action)
+            delete_task_info(workitem)
+            return reply_to_engine(workitem)
+          end
+
+          # TODO Amar: test to remove dyn attrs and errors_in_result part
+          execution_context(task,workitem,task_start) do
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                result = msg[:body].merge("task_id" => task_id)
+                if errors_in_result = errors_in_result?(result)
+                  event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
+                  pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                  set_result_failed(workitem,result,task)
+                  cancel_upstream_subtasks(workitem)
+                else
+                  node.update_agent_git_commit_id(head_git_commit)
+                  event = task.add_event(:complete_succeeded,result)
+                  pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
+                  set_result_succeeded(workitem,result,task,action) if task_end 
+                  action.get_and_propagate_dynamic_attributes(result)
+                end
+                delete_task_info(workitem)
+                reply_to_engine(workitem)
+              end,
+              :on_timeout => proc do 
+                result = {
+                  :status => "timeout" 
+                }
+                event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                set_result_timeout(workitem,result,task)
+                cancel_upstream_subtasks(workitem)
+                delete_task_info(workitem)
+                reply_to_engine(workitem)
+              end,
+              :on_cancel => proc do 
+                pp ["task_complete_canceled #{action.class.to_s}", task_id]
+                set_result_canceled(workitem, task)
+                delete_task_info(workitem)
+                reply_to_engine(workitem)
+              end
+            }
+            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            begin
+              workflow.initiate_sync_agent_action(task,receiver_context)
+            rescue Exception => e
+              e.backtrace
+            end
+          end
+        end
+
+        # Ruote dispatch call to this method in case of user's cancel task request
+        def cancel(fei, flavour)
+
+          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
+          return if flavour
+          
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
+        end
+
+      end
+
       class ExecuteOnNode < NodeParticipants
         #LockforDebug = Mutex.new
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          
           task.update_input_attributes!() if task_start
-
           workitem.fields["guard_id"] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
@@ -388,6 +490,7 @@ module XYZ
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                     set_result_failed(workitem,result,task)
+                    cancel_upstream_subtasks(workitem)
                   else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event

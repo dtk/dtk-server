@@ -9,7 +9,9 @@ module XYZ
       if opts[:initiate_only]
         klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       elsif opts[:cancel_task]
-        klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)        
+        klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)   
+      elsif opts[:sync_agent_task]
+        klass.initiate_sync_agent_code(task_idh,top_task_idh,task_action,opts)         
       else
         result = klass.execute(task_idh,top_task_idh,task_action)
         result.merge(:task_id => task.id())

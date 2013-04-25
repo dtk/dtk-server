@@ -145,7 +145,7 @@ module XYZ
          :convert=>true,
          :join_type => :inner,
          :join_cond=>{:id => :component__node_node_id},
-         :cols => [:id,:display_name, :external_ref, :ordered_component_ids]
+         :cols => [:id,:display_name, :external_ref, :ordered_component_ids, :agent_git_commit_id]
        }]
 
       virtual_column :implementation_file_paths, :type => :json, :hidden => true,

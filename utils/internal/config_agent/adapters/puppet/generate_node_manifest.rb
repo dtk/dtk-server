@@ -1,8 +1,8 @@
 module XYZ
   module PuppetGenerateNodeManifest
     class NodeManifest
-      def initialize()
-        @import_statement_modules = Array.new
+      def initialize(import_statement_modules=nil)
+        @import_statement_modules = import_statement_modules||Array.new
       end
 
       def generate(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
@@ -22,18 +22,16 @@ module XYZ
         ret = Array.new
         add_default_extlookup_config!(ret)
         add_assembly_attributes!(ret,assembly_attrs||[])
+        ret << generate_stage_statements(stages_ids.size)
         stages_ids.each_with_index do |stage_ids, i|
           stage = i+1
-          ret << "stage{#{quote_form(stage)} :}"
+          ret << " " #space between stages
+          puppet_stage = PuppetStage.new(stage,@import_statement_modules)
           stage_ids.each do |cmp_id| 
             cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
-            ret = generate_middle_manifest(cmp_with_attrs, stage, ret)
+            puppet_stage.generate_manifest!(cmp_with_attrs)
           end
-        end
-        size = stages_ids.size
-        if size > 1
-          ordering_statement = (1..stages_ids.size).map{|s|"Stage[#{s.to_s}]"}.join(" -> ")
-          ret << ordering_statement
+          puppet_stage.add_lines_for_stage!(ret)
         end
 
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
@@ -46,15 +44,11 @@ module XYZ
         ret = Array.new
         add_default_extlookup_config!(ret)
         add_assembly_attributes!(ret,assembly_attrs||[])
+        ret << generate_stage_statements(cmps_with_attrs.size)
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
-          ret << "stage{#{quote_form(stage)} :}"
-          ret = generate_middle_manifest(cmp_with_attrs, stage, ret)
-        end
-        size = cmps_with_attrs.size
-        if size > 1
-          ordering_statement = (1..cmps_with_attrs.size).map{|s|"Stage[#{s.to_s}]"}.join(" -> ")
-          ret << ordering_statement
+          ret << " " #space between stages
+          PuppetStage.new(stage,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(ret)
         end
 
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
@@ -63,25 +57,40 @@ module XYZ
         return ret
       end
 
-      def generate_middle_manifest(cmp_with_attrs, stage, ret)
-        module_name = cmp_with_attrs["module_name"]
+      def generate_stage_statements(size)
+        (1..size).map{|s|"stage{#{s.to_s}:}"}.join(" -> ")
+      end
+
+      class PuppetStage < self
+        def initialize(stage,import_statement_modules)
+          super(import_statement_modules)
+          @stage = stage
+          @class_lines = Array.new
+          @def_lines = Array.new
+        end
+
+        def add_lines_for_stage!(ret)
+          @class_lines.each{|line|ret << line}
+          add_definition_lines!(ret)
+        end
+
+        def generate_manifest!(cmp_with_attrs)
+          module_name = cmp_with_attrs["module_name"]
           attrs = process_and_return_attr_name_val_pairs(cmp_with_attrs)
-          stage_assign = "stage => #{quote_form(stage)}"
           case cmp_with_attrs["component_type"]
            when "class"
             cmp = cmp_with_attrs["name"]
-            raise "No component name" unless cmp
+            raise Error.new("No component name") unless cmp
             if imp_stmt = needs_import_statement?(cmp,module_name)
-              ret << imp_stmt 
+              @class_lines << imp_stmt 
             end
-
             #TODO: see if need \" and quote form
-            attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign]
+            attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign()]
             attr_str = attr_str_array.join(", ")
-            ret << "class {\"#{cmp}\": #{attr_str}}"
+            @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when "definition"
             defn = cmp_with_attrs["name"]
-            raise "No definition name" unless defn
+            raise Error.new("No definition name") unless defn
             name_attr = nil
             attr_str_array = attrs.map do |k,v|
               if k == "name"
@@ -91,18 +100,75 @@ module XYZ
                 "#{k} => #{process_val(v)}"
               end
             end.compact
+            attr_str_array << "require => #{anchor_ref(:begin)}"
+            attr_str_array << "before => #{anchor_ref(:end)}"
             attr_str = attr_str_array.join(", ")
-            raise "No name attribute for definition" unless name_attr
+            raise Error.new("No name attribute for definition") unless name_attr
             if imp_stmt = needs_import_statement?(defn,module_name)
-              ret << imp_stmt
+              @def_lines << imp_stmt
             end
+            @def_lines << "#{defn} {#{name_attr}: #{attr_str}}"
+          end
+          self
+        end
+
+       private
+        def add_definition_lines!(ret)
+          unless @def_lines.empty?()
             #putting def in class because defs cannot go in stages
-            class_wrapper = "stage#{stage.to_s}"
             ret << "class #{class_wrapper} {"
-            ret << "#{defn} {#{name_attr}: #{attr_str}}"
+            ret << "  #{anchor(:begin)}"
+            @def_lines.each{|line|ret << "  #{line}"}
+            ret << "  #{anchor(:end)}"
             ret << "}"
             ret << "class {\"#{class_wrapper}\": #{stage_assign}}"
           end
+        end
+
+        def class_wrapper()
+          "dtk_stage#{@stage.to_s}"
+        end
+
+        def stage_assign()
+          "stage => #{quote_form(@stage)}"
+        end
+
+        def anchor(type)
+          "anchor{#{class_wrapper}::#{type}: }"
+        end
+        def anchor_ref(type)
+          "Anchor[#{class_wrapper}::#{type}]"
+        end
+
+        #removes imported collections and puts them on global array
+        def process_and_return_attr_name_val_pairs(cmp_with_attrs)
+          ret = Hash.new
+          return ret unless attrs = cmp_with_attrs["attributes"]
+          cmp_name = cmp_with_attrs["name"]
+          attrs.each do |attr_info|
+            attr_name = attr_info["name"]
+            val = attr_info["value"]
+            case attr_info["type"] 
+             when "attribute"
+              ret[attr_name] = val
+            else raise Error.new("unexpected attribute type (#{attr_info["type"]})")
+            end
+          end
+          ret
+        end
+
+        def needs_import_statement?(cmp_or_def,module_name)
+          #TODO: keeping in, in case we decide to do check for import; use of imports are now considered violating Puppet best practices
+          #if wanted to actual check would need to know what manifest files are present
+          return nil #TODO: would put conditional in if doing checks
+          ret_import_statement(module_name)
+        end
+
+        def ret_import_statement(module_name)
+          @import_statement_modules << module_name
+          "import '#{module_name}'"
+        end
+
       end
 
       def add_default_extlookup_config!(ret)
@@ -116,34 +182,6 @@ module XYZ
         assembly_attrs.each do |attr|
           ret << "$#{attr['name']} = #{process_val(attr['value'])}"
         end
-      end
-
-      def needs_import_statement?(cmp_or_def,module_name)
-        #TODO: this needs to be refined
-        return nil if cmp_or_def =~ /::/
-        return nil if @import_statement_modules.include?(module_name)
-        @import_statement_modules << module_name
-        "import '#{module_name}'"
-      end
-
-      #removes imported collections and puts them on global array
-      def process_and_return_attr_name_val_pairs(cmp_with_attrs)
-        ret = Hash.new
-        return ret unless attrs = cmp_with_attrs["attributes"]
-        cmp_name = cmp_with_attrs["name"]
-        attrs.each do |attr_info|
-          attr_name = attr_info["name"]
-          val = attr_info["value"]
-          case attr_info["type"] 
-           when "attribute"
-            ret[attr_name] = val
-           #TODO  imported_collection not currently treated on server
- #         when "imported_collection"
-#            add_imported_collection(cmp_name,attr_name,val,{"resource_type" => attr_info["resource_type"], "import_coll_query" =>  attr_info["import_coll_query"]})
-          else raise "unexpected attribute type (#{attr_info["type"]})"
-          end
-        end
-        ret
       end
 
       def get_attr_val_statements(cmps_with_attrs)
@@ -182,6 +220,7 @@ module XYZ
           obj.to_s
         end
       end
+
     end
   end
 end

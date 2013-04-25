@@ -21,5 +21,5 @@ build_id = ARGV[0]
   @formatted_rate = sprintf("%.2f", @success_rate)
   @formatted_duration = sprintf("%.2f", test_run.duration.to_f)
 
-  File.open(ARGV[1], 'w') {|f| f.write("Build: #{test_run.build}\nDuration: #{@formatted_duration}s\nSuccess rate: #{@formatted_rate}%") }
+  File.open(ARGV[1], 'w') {|f| f.write("Build: #{test_run.build}\nDuration: #{@formatted_duration}s\nSuccess rate: #{@formatted_rate}%\n") }
 end

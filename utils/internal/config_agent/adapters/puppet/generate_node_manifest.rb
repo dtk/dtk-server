@@ -17,6 +17,13 @@ module XYZ
       end
 
      private
+      #this configuration switch is whether anchors are used in generating teh 'class wrapper' for putting definitions in stages
+      UseAnchorsForClassWrapper = false
+      #TODO: best practice would be to use anchors so internal resources dont 'fall out', but to use this requires that stdlib is always include
+      # so turning off now
+      def use_anchors_for_class_wrappers?()
+        UseAnchorsForClassWrapper
+      end
 
       def generate_with_stages(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
         ret = Array.new
@@ -100,8 +107,10 @@ module XYZ
                 "#{k} => #{process_val(v)}"
               end
             end.compact
-            attr_str_array << "require => #{anchor_ref(:begin)}"
-            attr_str_array << "before => #{anchor_ref(:end)}"
+            if use_anchors_for_class_wrappers?()
+              attr_str_array << "require => #{anchor_ref(:begin)}"
+              attr_str_array << "before => #{anchor_ref(:end)}"
+            end
             attr_str = attr_str_array.join(", ")
             raise Error.new("No name attribute for definition") unless name_attr
             if imp_stmt = needs_import_statement?(defn,module_name)
@@ -117,9 +126,13 @@ module XYZ
           unless @def_lines.empty?()
             #putting def in class because defs cannot go in stages
             ret << "class #{class_wrapper} {"
-            ret << "  #{anchor(:begin)}"
+            if use_anchors_for_class_wrappers?()
+              ret << "  #{anchor(:begin)}"
+            end
             @def_lines.each{|line|ret << "  #{line}"}
-            ret << "  #{anchor(:end)}"
+            if use_anchors_for_class_wrappers?()
+              ret << "  #{anchor(:end)}"
+            end
             ret << "}"
             ret << "class {\"#{class_wrapper}\": #{stage_assign}}"
           end

@@ -13,7 +13,7 @@ require './lib/modules_spec'
 
 namespace = "dtk10"
 module_name = "apache"
-module_filesystem_location = "~/component_modules"
+module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')

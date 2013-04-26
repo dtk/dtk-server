@@ -799,6 +799,7 @@ class DtkCommon
 		else
 			puts "Service #{service_name} does not exist!"
 		end
+		puts ""
 		return service_exists
 	end
 

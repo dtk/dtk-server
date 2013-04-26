@@ -55,9 +55,22 @@ shared_context "Check if assembly template belongs to the service" do |dtk_commo
 end
 
 shared_context "Delete service" do |dtk_common, service_name|
-  it "deletes #{service_name}  service module" do
+  it "deletes #{service_name} service module" do
     service_deleted = dtk_common.delete_service(service_name)
     service_deleted.should eq(true)
+  end
+end
+
+shared_context "Delete service from local filesystem" do |service_filesystem_location, service_name|
+  it "deletes #{service_name} service module from local filesystem" do
+    puts "Delete service from local filesystem:", "-------------------------------------"
+    pass = false
+    value = `rm -rf #{service_filesystem_location}/#{service_name}`
+    pass = !value.include?("cannot remove")
+    puts "Service #{service_name} deleted from local filesystem successfully!" if pass == true
+    puts "Service #{service_name} was not deleted from local filesystem successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
   end
 end
 

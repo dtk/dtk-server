@@ -13,7 +13,7 @@ assembly_name = 'test_case_30_instance'
 assembly_template = 'bootstrap::test1'
 module_name = 'mysql'
 module_version = '0.0.1'
-module_filesystem_location = "~/component_modules"
+module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

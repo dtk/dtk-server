@@ -47,7 +47,7 @@ describe "Test Case 66: Export service using full name #{service_name} to users 
   end
 
   context "Delete service from local filesystem" do
-    include_context "Delete service from local filesystem", service_name, service_filesystem_location
+    include_context "Delete service from local filesystem", service_filesystem_location, service_name
   end
 
   after(:all) do

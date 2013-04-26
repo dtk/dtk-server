@@ -47,7 +47,7 @@ describe "Test Case 74: Import service from remote repo and check its correspond
   end
 
   context "Delete service from local filesystem" do
-    include_context "Delete service from local filesystem", service_name, service_filesystem_location
+    include_context "Delete service from local filesystem", service_filesystem_location, service_name
   end
 
   after(:all) do

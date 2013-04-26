@@ -274,7 +274,7 @@ module DTK
       repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
       model_name = model_handle[:model_name]
       
-      return if repo_user.has_direct_access?(model_name,:donot_update => true)
+      raise ErrorUsage.new("Provided rsa public key exists already") if repo_user.has_direct_access?(model_name,:donot_update => true)
       repo_user.update_direct_access(model_name,true)
       repos = get_all_repos(model_handle)
       unless repos.empty?

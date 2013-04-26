@@ -29,8 +29,7 @@ module XYZ
       existing_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
-        # return match if match
-        raise ErrorUsage.new("Provided rsa public key exists already") if match
+        return match if match
       else
         case existing_users.size
          when 0

@@ -21,17 +21,20 @@ module XYZ
 
         def get_head_git_commit_id()
           # TODO Amar put this into configuration if needed
-          agent_repo_dir = "#{DTK::RepoManager::Config[:bare_repo_dir]}/dtk-node-agent"
+          agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
           agent_repo_url = "git@github.com:rich-reactor8/dtk-node-agent.git"
           # Clone will be invoked only when DTK Server is started for the first time
+          cmd_opts = {:raise => true, :timeout => 60}
           unless File.directory?(agent_repo_dir)
             clone_args = [agent_repo_url, agent_repo_dir]
-            cmd_opts = {:raise => true, :timeout => 60}
             ::Grit::Git.new("").clone(cmd_opts, *clone_args)
-          else
-            repo = ::Grit::Git.new(agent_repo_dir)
           end
-          head_commit_id = ::Grit::Repo.new(agent_repo_dir).commits.first.id
+
+          # git pull will be invoked each time, 
+          # but this operation is very fast (few ms of roundtrip) when no changes present 
+          repo = ::Grit::Repo.new(agent_repo_dir)
+          repo.git.send(:pull, cmd_opts)
+          head_commit_id = repo.commits.first.id
           return head_commit_id
         end
 
@@ -401,13 +404,13 @@ module XYZ
             callbacks = {
               :on_msg_received => proc do |msg|
                 result = msg[:body].merge("task_id" => task_id)
-                if errors_in_result = errors_in_result?(result)
+                if result[:statuscode] != 0
                   event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                   pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   set_result_failed(workitem,result,task)
                   cancel_upstream_subtasks(workitem)
                 else
-                  node.update_agent_git_commit_id(head_git_commit)
+                  node.update_agent_git_commit_id(head_git_commit_id)
                   event = task.add_event(:complete_succeeded,result)
                   pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
                   set_result_succeeded(workitem,result,task,action) if task_end 

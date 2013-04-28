@@ -13,6 +13,7 @@ require './lib/services_spec'
 assembly_name = 'test_case_32_instance'
 assembly_template = 'bootstrap::test1'
 new_assembly_template = 'test_case_32_temp'
+service_filesystem_location = '~/dtk/service_modules'
 service_name = 'new_service'
 $assembly_id = 0
 
@@ -61,6 +62,10 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 	context "Delete service function" do
 		include_context "Delete service", dtk_common, service_name
 	end
+
+	context "Delete service from local filesystem" do
+    include_context "Delete service from local filesystem", service_filesystem_location, service_name
+  end
 
 	after(:all) do
 		puts "", ""

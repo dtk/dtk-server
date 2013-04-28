@@ -13,6 +13,7 @@ require './lib/services_spec'
 assembly_template1 = 'redhat_bigtop_namenode'
 assembly_template2 = 'redhat_hdp_namenode'
 service_name = 'bakir_test_service'
+service_filesystem_location = '~/dtk/service_modules'
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
@@ -43,6 +44,10 @@ describe "Test Case 74: Import service from remote repo and check its correspond
 
   context "Delete service function" do
     include_context "Delete service", dtk_common, service_name
+  end
+
+  context "Delete service from local filesystem" do
+    include_context "Delete service from local filesystem", service_filesystem_location, service_name
   end
 
   after(:all) do

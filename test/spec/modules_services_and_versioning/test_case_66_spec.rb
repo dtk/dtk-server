@@ -13,6 +13,7 @@ require './lib/services_spec'
 
 namespace = "dtk10"
 service_name = "bakir_test1"
+service_filesystem_location = '~/dtk/service_modules'
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
@@ -43,6 +44,10 @@ describe "Test Case 66: Export service using full name #{service_name} to users 
 
   context "Delete service from remote" do
     include_context "Delete service from remote repo", dtk_common, service_name, namespace
+  end
+
+  context "Delete service from local filesystem" do
+    include_context "Delete service from local filesystem", service_filesystem_location, service_name
   end
 
   after(:all) do

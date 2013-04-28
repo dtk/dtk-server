@@ -13,7 +13,7 @@ require './lib/modules_spec'
 
 module_name = "ruby"
 git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-ruby.git-incorrect"
-module_filesystem_location = "~/component_modules"
+module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')

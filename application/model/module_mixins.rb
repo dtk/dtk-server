@@ -58,7 +58,7 @@ module DTK
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if modules.size == 0
         unless opts[:donot_raise_error]
-          raise ErrorUsage.new("Service/Module (#{pp_module_name(version)}) does not exist")
+          raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
       elsif modules.size > 1
@@ -98,14 +98,13 @@ module DTK
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
-      Transaction do 
-        module_branch = get_workspace_module_branch(version)
-        pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-        
-        parse_needed = !dsl_parsed?()
-        return unless pull_was_needed or parse_needed
-        update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
-      end
+      module_branch = get_workspace_module_branch(version)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
+
+      parse_needed = !dsl_parsed?()
+      return unless pull_was_needed or parse_needed
+
+      update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
     end
 
 
@@ -272,14 +271,10 @@ module DTK
 
 
     def add_user_direct_access(model_handle,rsa_pub_key)
-      repo_user            = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
-      model_name           = model_handle[:model_name]
-      existing_rsa_pub_key = RepoUser.get_existing_repo_users(model_handle.createMH(:repo_user),filter_keys={:ssh_rsa_pub_key => rsa_pub_key},cols=[:ssh_rsa_pub_key])
+      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
+      model_name = model_handle[:model_name]
       
-      # Do not allow two users with same rsa pub key (e.g server and client installed on same machine)
-      raise ErrorUsage.new("Provided rsa public key exists already") unless existing_rsa_pub_key.empty?
-      
-      return if repo_user.has_direct_access?(model_name,:donot_update => true)
+      raise ErrorUsage.new("Provided rsa public key exists already") if repo_user.has_direct_access?(model_name,:donot_update => true)
       repo_user.update_direct_access(model_name,true)
       repos = get_all_repos(model_handle)
       unless repos.empty?

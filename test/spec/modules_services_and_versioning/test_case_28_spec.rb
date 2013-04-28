@@ -17,7 +17,7 @@ os = 'natty'
 os_attribute = 'os_identifier'
 node_name = 'node1'
 module_name = "mysql"
-module_filesystem_location = "~/component_modules"
+module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

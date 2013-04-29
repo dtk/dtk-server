@@ -22,6 +22,24 @@ module DTK; class ComponentDSL; class V2
       end
     end
 
+   private
+
+    ModCmpDelim = "__"
+    CmpPPDelim = '::'
+    def convert_to_internal_cmp_form(cmp)
+      cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
+    end
+    def convert_to_pp_cmp_form(cmp)
+      cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
+    end
+    def component_part(cmp_external_form)
+      if cmp_external_form =~ Regexp.new("^.+#{CmpPPDelim}(.+$)")
+        $1
+      else
+        cmp_external_form
+      end
+    end
+
     class Component < self
       def initialize(module_name)
         @module_name = module_name
@@ -41,8 +59,6 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
-      ModCmpDelim = "__"
-      
       def body(input_hash,cmp)
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
@@ -151,7 +167,7 @@ module DTK; class ComponentDSL; class V2
         link_defs  = Array.new
         if in_dep_cmps = input_hash["depends_on"]
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
-            choices = Choice.get_choices(conn_ref,conn_info,base_cmp,opts)
+            choices = Choice.convert_choices(conn_ref,conn_info,base_cmp,opts)
 
             #determine if create a link def and/or a dependency
             #creaet a dependency if just single choice and base adn depnedncy on same node
@@ -169,7 +185,7 @@ module DTK; class ComponentDSL; class V2
               link_def = OutputHash.new(
                 "type" => get_connection_label(conn_ref,conn_info),
                 "required" =>  true, #will be putting optional elements under a key that is peer to 'depends_on'
-                "possible_links" => choices
+                "possible_links" => choices.map{|choice|choice.possible_link()}
               )
               link_def.set_if_not_nil("description",conn_info["description"])
               link_defs << link_def
@@ -179,125 +195,6 @@ module DTK; class ComponentDSL; class V2
         ret[:link_defs] = link_defs unless link_defs.empty?
         ret[:component_order] = component_order(input_hash)
         ret
-      end
-
-      class Choice < OutputHash
-        def self.get_choices(conn_ref,conn_info,base_cmp,opts={})
-          if possible_conn = conn_info["choices"]
-            choices.map{|possible_conn|new(possible_conn,base_cmp,conn_info,opts)}
-          else
-            dep_cmp_external_form = conn_info["component"]||conn_ref
-            parent_info=Hash.new
-            [new({dep_cmp_external_form => conn_info},base_cmp,parent_info,opts)]
-          end
-        end
-
-        def initialize(possible_conn,base_cmp,parent_info={},opts={})
-          unless possible_conn.kind_of?(Hash) and possible_conn.size == 1
-            raise ParsingError.new("Ill-formed choice statement in dependency (?1)",possible_conn)
-          end
-          dep_cmp = Component.convert_to_internal_cmp_form(possible_conn.keys.first)
-          dep_cmp_info = possible_conn.values.first
-          ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
-          in_attr_mappings = (dep_cmp_info["attribute_mappings"]||[]) + (parent_info["attribute_mappings"]||[])
-          unless in_attr_mappings.empty?
-            ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
-          end
-          super(convert_to_internal_cmp_form(dep_cmp) => ret_info)
-        end
-
-        def has_attribute_mappings?()
-          ams = dep_component_info()["attribute_mappings"]
-          not (ams.nil? or ams.empty?)
-        end
-
-        def is_internal?()
-          dep_component_info()["type"] == "internal"
-        end
-        def dependent_component()
-          keys.first
-        end
-
-       private
-        def dep_component_info()
-          values.first
-        end
-
-        DefaultLinkType = "local"
-        def link_type(link_info,parent_link_info={})
-          case (link_info["location"]||parent_link_info["location"]||DefaultLinkType)
-           when "local" then "internal"
-           when "remote" then "external"
-           else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
-          end
-        end
-
-        def convert_to_internal_cmp_form(cmp)
-          Component.convert_to_internal_cmp_form(cmp)
-        end
-
-        def convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
-          #TODO: right now only treating constant on right hand side meaning only for <- case
-          if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
-            dep_attr,base_attr = [$1,$2]
-            left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:output)
-            right = convert_attr_ref_simple(base_attr,:base,base_cmp,:input)
-          elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
-            dep_attr,base_attr = [$1,$2]
-            left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,:output,opts)
-            right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:input)
-          else
-            raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
-          end
-          {left => right}
-        end
-
-        def convert_attr_ref_simple(attr_ref,dep_or_base,cmp,input_or_output)
-          if attr_ref =~ /(^[^.]+)\.([^.]+$)/
-            if input_or_output == :input
-              raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
-            end
-            prefix = $1
-            attr = $2
-            case prefix
-            when "$node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
-            else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
-            end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
-          else
-            dollar_sign,var_name = (attr_ref =~ /(^\$*)(.+$)/; [$1,$2])
-            has_dollar_sign = !dollar_sign.empty?
-            if (input_or_output == :input and has_dollar_sign) or
-                (input_or_output == :output and !has_dollar_sign)
-              raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
-            end
-            "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
-          end
-        end
-
-        def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,input_or_output,opts={})
-          is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts) || convert_attr_ref_simple(attr_ref,:base,base_cmp,input_or_output)
-        end
-
-        def is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
-          return nil if attr_ref =~ /^\$/
-          
-          datatype = :string
-          const = attr_ref
-          if attr_ref =~ /^'(.+)'$/
-            const = $1
-          elsif ['true','false'].include?(attr_ref)
-            datatype = :boolean
-          elsif attr_ref =~ /^[0-9]+$/
-            datatype = :integer
-          else
-            ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
-          end
-
-          constant_assign = Attribute::Constant.new(const,dep_attr_ref,dep_cmp,datatype)
-          (opts[:constants] ||= Array.new) << constant_assign
-          "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
-        end
-
       end
 
       def get_connection_label(conn_ref,conn_info)
@@ -334,24 +231,129 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
-      CmpPPDelim = '::'
-      def self.convert_to_internal_cmp_form(cmp)
-        cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
-      end
-      def convert_to_internal_cmp_form(cmp)
-        self.class.convert_to_internal_cmp_form(cmp)
-      end
-      def convert_to_pp_cmp_form(cmp)
-        cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
-      end
-      def component_part(cmp_external_form)
-        if cmp_external_form =~ Regexp.new("^.+#{CmpPPDelim}(.+$)")
-          $1
+    end
+
+    class Choice < self
+      def self.convert_choices(conn_ref,conn_info,base_cmp,opts={})
+        if choices = conn_info["choices"]
+          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts)}
         else
-          cmp_external_form
+          dep_cmp_external_form = conn_info["component"]||conn_ref
+          parent_info = Hash.new
+          [convert_choice(conn_info.merge("component" => dep_cmp_external_form),base_cmp,parent_info,opts)]
         end
       end
 
+      attr_reader :possible_link
+
+      def has_attribute_mappings?()
+        ams = dep_component_info()["attribute_mappings"]
+        not (ams.nil? or ams.empty?)
+      end
+
+      def is_internal?()
+        dep_component_info()["type"] == "internal"
+      end
+      def dependent_component()
+        @possible_link.keys.first
+      end
+
+      def convert(dep_cmp_info,base_cmp,parent_info={},opts={})
+        unless dep_cmp_info["component"]
+          raise ParsingError.new("Dependency possible connection (?1) is missing component key",dep_cmp_info)
+        end
+        dep_cmp = convert_to_internal_cmp_form(dep_cmp_info["component"])
+        ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
+        in_attr_mappings = (dep_cmp_info["attribute_mappings"]||[]) + (parent_info["attribute_mappings"]||[])
+        unless in_attr_mappings.empty?
+          ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
+        end
+        @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+        self
+      end
+
+     private
+      def initialize()
+        @possible_link = OutputHash.new()
+      end
+      def self.convert_choice(dep_cmp_info,base_cmp,parent_info={},opts={})
+        new().convert(dep_cmp_info,base_cmp,parent_info,opts)
+      end
+
+      def dep_component_info()
+        @possible_link.values.first
+      end
+
+      DefaultLinkType = "local"
+      def link_type(link_info,parent_link_info={})
+        case (link_info["location"]||parent_link_info["location"]||DefaultLinkType)
+         when "local" then "internal"
+         when "remote" then "external"
+         else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+        end
+      end
+
+      def convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+        #TODO: right now only treating constant on right hand side meaning only for <- case
+        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
+          dep_attr,base_attr = [$1,$2]
+          left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:output)
+          right = convert_attr_ref_simple(base_attr,:base,base_cmp,:input)
+        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
+          dep_attr,base_attr = [$1,$2]
+          left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,:output,opts)
+          right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:input)
+        else
+          raise ParsingError.new("Attribute mapping (?1) is ill-formed",input_am)
+        end
+        {left => right}
+      end
+
+      def convert_attr_ref_simple(attr_ref,dep_or_base,cmp,input_or_output)
+        if attr_ref =~ /(^[^.]+)\.([^.]+$)/
+          if input_or_output == :input
+            raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+          end
+          prefix = $1
+          attr = $2
+          case prefix
+          when "$node" then (dep_or_base == :dep) ? "remote_node" : "local_node"
+          else raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)  
+          end + ".#{attr.gsub(/host_address$/,"host_addresses_ipv4.0")}"
+        else
+          dollar_sign,var_name = (attr_ref =~ /(^\$*)(.+$)/; [$1,$2])
+          has_dollar_sign = !dollar_sign.empty?
+          if (input_or_output == :input and has_dollar_sign) or
+              (input_or_output == :output and !has_dollar_sign)
+            raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+          end
+          "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
+        end
+      end
+      
+      def convert_attr_ref_base(attr_ref,base_cmp,dep_attr_ref,dep_cmp,input_or_output,opts={})
+        is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts) || convert_attr_ref_simple(attr_ref,:base,base_cmp,input_or_output)
+      end
+
+      def is_constant?(attr_ref,base_cmp,dep_attr_ref,dep_cmp,opts={})
+        return nil if attr_ref =~ /^\$/
+          
+        datatype = :string
+        const = attr_ref
+        if attr_ref =~ /^'(.+)'$/
+          const = $1
+        elsif ['true','false'].include?(attr_ref)
+          datatype = :boolean
+        elsif attr_ref =~ /^[0-9]+$/
+          datatype = :integer
+        else
+          ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+        end
+        
+        constant_assign = Attribute::Constant.new(const,dep_attr_ref,dep_cmp,datatype)
+        (opts[:constants] ||= Array.new) << constant_assign
+        "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
+      end
     end
   end
 end; end; end

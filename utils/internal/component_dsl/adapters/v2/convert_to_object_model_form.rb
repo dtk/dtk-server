@@ -150,23 +150,30 @@ module DTK; class ComponentDSL; class V2
         ret = Hash.new
         link_defs  = Array.new
         if in_dep_cmps = input_hash["depends_on"]
-          convert_to_hash_form(in_dep_cmps) do |in_connection,in_conn_info|
-            link_def = OutputHash.new("type" => get_connection_label(in_connection,in_conn_info))
-            link_def.set_if_not_nil("description",in_conn_info["description"])
-            is_required = link_def["required"] = true #will be putting optional elements under a key that is peer to 'depends_on'
-            choices = Choice.get_choices(base_cmp,in_connection,in_conn_info)
-            link_def["possible_links"] = choices
-                              
+          convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
+            choices = Choice.get_choices(conn_ref,conn_info,base_cmp,opts)
+
+            #determine if create a link def and/or a dependency
+            #creaet a dependency if just single choice and base adn depnedncy on same node
             #TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
             if choices.size == 1 
               choice = choices.first
-              if choice.is_internal?() and is_required
+              if choice.is_internal?()
                 pntr = ret[:dependencies] ||= OutputHash.new
                 add_dependency!(pntr,choice.dependent_component(),base_cmp)
               end
             end
 
-            link_def
+            #create link defs if there are multiple choices or theer are attribute mappings
+            if choices.size > 1 or (choices.size == 1 and choices.first.has_attribute_mappings?())
+              link_def = OutputHash.new(
+                "type" => get_connection_label(conn_ref,conn_info),
+                "required" =>  true, #will be putting optional elements under a key that is peer to 'depends_on'
+                "possible_links" => choices
+              )
+              link_def.set_if_not_nil("description",conn_info["description"])
+              link_defs << link_def
+            end
           end
         end
         ret[:link_defs] = link_defs unless link_defs.empty?
@@ -175,22 +182,30 @@ module DTK; class ComponentDSL; class V2
       end
 
       class Choice < OutputHash
-        def self.get_choices(base_cmp,in_connection,in_conn_info)
-          if choices = in_connection["choices"]
-            choices.map{|choice|new(choice,base_cmp,in_connection)}
+        def self.get_choices(conn_ref,conn_info,base_cmp,opts={})
+          if possible_conn = conn_info["choices"]
+            choices.map{|possible_conn|new(possible_conn,base_cmp,conn_info,opts)}
           else
-            [new(in_connection,base_cmp)]
+            dep_cmp_external_form = conn_ref||conn_info["component"]
+            parent_info=nil
+            [new({dep_cmp_external_form => conn_info},base_cmp,parent_info,opts)]
           end
         end
 
-        def initialize(choice_info,base_cmp,parent_info)
-          ret_info = {"type" => link_type(choice_info,parent_info)}
-          in_attr_mappings = (choice_info["attribute_mappings"]|[]) + parent_info["attribute_mappings"]|[]
+        def initialize(possible_conn,base_cmp,parent_info=nil,opts={})
+          unless possible_conn.kind_of?(Hash) and possible_conn.size == 1
+            raise ParsingError.new("Ill-formed choice statement in dependency (?1)",possible_conn)
+          end
+          dep_cmp = ObjectModelForm.convert_to_internal_cmp_form(possible_conn.keys.first)
+          dep_cmp_info = possible_conn.values.first
+          ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
+          in_attr_mappings = (possible_conn["attribute_mappings"]|[]) + parent_info["attribute_mappings"]|[]
           unless in_attr_mappings.empty?
             ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
           end
           super(convert_to_internal_cmp_form(dep_cmp) => ret_info)
         end
+
         def is_internal?()
           self["type"] == "internal"
         end
@@ -210,14 +225,14 @@ module DTK; class ComponentDSL; class V2
 
       end
 
-      def get_connection_label(in_connection,in_conn_info)
-        #if component given then in_connection will be connection label
-        #if there are choices then in_connection will be connection label
-        #otehrwise in_connection will be component ref and we use the component part for the conenction label
-        if in_conn_info["component"] or in_conn_info["choices"]
-          in_connection
+      def get_connection_label(conn_ref,conn_info)
+        #if component key given then conn_ref will be connection label
+        #if there are choices then conn_ref will be connection label
+        #otehrwise conn_ref will be component ref and we use the component part for the conenction label
+        if conn_info["component"] or conn_info["choices"]
+          conn_ref
         else
-          cmp_external_form = in_connection
+          cmp_external_form = conn_ref
           component_part(cmp_external_form)
         end
       end
@@ -312,8 +327,11 @@ module DTK; class ComponentDSL; class V2
       end
 
       CmpPPDelim = '::'
-      def convert_to_internal_cmp_form(cmp)
+      def self.convert_to_internal_cmp_form(cmp)
         cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
+      end
+      def convert_to_internal_cmp_form(cmp)
+        self.class.convert_to_internal_cmp_form(cmp)
       end
       def convert_to_pp_cmp_form(cmp)
         cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)

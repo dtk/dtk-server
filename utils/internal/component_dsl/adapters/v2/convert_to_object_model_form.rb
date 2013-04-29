@@ -149,32 +149,76 @@ module DTK; class ComponentDSL; class V2
       def get_dependent_config(input_hash,base_cmp,opts={})
         ret = Hash.new
         link_defs  = Array.new
-        if dep_cmps = input_hash["depends_on"]
-          convert_to_hash_form(dep_cmps) do |in_dep_cmp_ref,in_dep_cmp|
-            dep_cmp = convert_to_internal_cmp_form(in_dep_cmp_ref)
-            ld_type = in_dep_cmp["relation_name"]||component_part(dep_cmp)
-            ld = OutputHash.new("type" => ld_type)
-            link_type = link_type(in_dep_cmp)
-
-            is_required = ld["required"] = is_required?(in_dep_cmp)
-            if is_required
-              if link_type == "internal"
+        if in_dep_cmps = input_hash["depends_on"]
+          convert_to_hash_form(in_dep_cmps) do |in_connection,in_conn_info|
+            link_def = OutputHash.new("type" => get_connection_label(in_connection,in_conn_info))
+            link_def.set_if_not_nil("description",in_conn_info["description"])
+            is_required = link_def["required"] = true #will be putting optional elements under a key that is peer to 'depends_on'
+            choices = Choice.get_choices(base_cmp,in_connection,in_conn_info)
+            link_def["possible_links"] = choices
+                              
+            #TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
+            if choices.size == 1 
+              choice = choices.first
+              if choice.is_internal?() and is_required
                 pntr = ret[:dependencies] ||= OutputHash.new
-                add_dependency!(pntr,dep_cmp,base_cmp)
+                add_dependency!(pntr,choice.dependent_component(),base_cmp)
               end
             end
-            possible_links = ld["possible_links"] = Array.new
-            if in_attr_mappings = in_dep_cmp["attribute_mappings"]
-              ams = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
-              possible_link = OutputHash.new(convert_to_internal_cmp_form(dep_cmp) => {"type" => link_type,"attribute_mappings" => ams})
-              possible_links << possible_link
-              link_defs << ld
-            end
+
+            link_def
           end
         end
         ret[:link_defs] = link_defs unless link_defs.empty?
         ret[:component_order] = component_order(input_hash)
         ret
+      end
+
+      class Choice < OutputHash
+        def self.get_choices(base_cmp,in_connection,in_conn_info)
+          if choices = in_connection["choices"]
+            choices.map{|choice|new(choice,base_cmp,in_connection)}
+          else
+            [new(in_connection,base_cmp)]
+          end
+        end
+
+        def initialize(choice_info,base_cmp,parent_info)
+          ret_info = {"type" => link_type(choice_info,parent_info)}
+          if in_attr_mappings = choice_info["attribute_mappings"]
+            ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
+          end
+          super(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+        end
+        def is_internal?()
+          self["type"] == "internal"
+        end
+        def dependent_component()
+          keys.first
+        end
+
+       private
+        DefaultLinkType = "local"
+        def link_type(link_info,parent_link_info=nil)
+          case (link_info["location"]||(parent_link_info||{})["location"]||DefaultLinkType)
+           when "local" then "internal"
+           when "remote" then "external"
+           else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+          end
+        end
+
+      end
+
+      def get_connection_label(in_connection,in_conn_info)
+        #if component given then in_connection will be connection label
+        #if there are choices then in_connection will be connection label
+        #otehrwise in_connection will be component ref and we use the component part for the conenction label
+        if in_conn_info["component"] or in_conn_info["choices"]
+          in_connection
+        else
+          cmp_external_form = in_connection
+          component_part(cmp_external_form)
+        end
       end
 
       def add_dependency!(ret,dep_cmp,base_cmp)
@@ -197,28 +241,6 @@ module DTK; class ComponentDSL; class V2
             h.merge(el)
           end
         end
-      end
-
-      def component_part(cmp)
-        if cmp =~ Regexp.new("^.+#{ModCmpDelim}(.+$)")
-          $1
-        else
-          cmp
-        end
-      end
-
-      DefaultLinkType = "local"
-      def link_type(link_info)
-        ret = 
-          if loc = link_info["location"]||DefaultLinkType
-            case loc
-              when "local" then "internal"
-              when "remote" then "external"
-            else 
-              raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
-            end
-          end
-        ret||"external"
       end
 
       DefaultIsRequired = true
@@ -295,6 +317,14 @@ module DTK; class ComponentDSL; class V2
       def convert_to_pp_cmp_form(cmp)
         cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
       end
+      def component_part(cmp_external_form)
+        if cmp_external_form =~ Regexp.new("^.+#{CmpPPDelim}(.+$)")
+          $1
+        else
+          cmp_external_form
+        end
+      end
+
     end
   end
 end; end; end

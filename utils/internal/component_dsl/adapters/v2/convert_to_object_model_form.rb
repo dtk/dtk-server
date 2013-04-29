@@ -185,7 +185,8 @@ module DTK; class ComponentDSL; class V2
 
         def initialize(choice_info,base_cmp,parent_info)
           ret_info = {"type" => link_type(choice_info,parent_info)}
-          if in_attr_mappings = choice_info["attribute_mappings"]
+          in_attr_mappings = (choice_info["attribute_mappings"]|[]) + parent_info["attribute_mappings"]|[]
+          unless in_attr_mappings.empty?
             ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
           end
           super(convert_to_internal_cmp_form(dep_cmp) => ret_info)

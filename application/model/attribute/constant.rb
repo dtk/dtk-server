@@ -28,7 +28,7 @@ module DTK
 
       ConstantDelim = "___"
       def attribute_name()
-        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}"
+        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{@constant}"
       end
       def attribute_value()
         @constant

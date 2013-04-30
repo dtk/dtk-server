@@ -114,9 +114,10 @@ module DTK
         title ? "#{ret}#{RefDelim}#{title}" : ret
       end
     end
+
     ParseRegex = {
-      :with_title    => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+)#{RefDelim}(.+$)"),
-      :without_title => Regexp.new("^component_(internal|external)#{RefDelim}(.+)#{RefDelim}(.+$)")
+      :with_title    => Regexp.new("^component_(internal|external|internal_external)#{RefDelim}(.+)#{RefDelim}(.+)#{RefDelim}(.+$)"),
+      :without_title => Regexp.new("^component_(internal|external|internal_external)#{RefDelim}(.+)#{RefDelim}(.+$)")
     }
     def self.parse_port_display_name(port_display_name)
 

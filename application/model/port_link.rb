@@ -102,7 +102,19 @@ module XYZ
       return ret unless local_cmp_info[:link_type] == remote_cmp_info[:link_type]
       #find the matching link_def_link
       remote_cmp_type = remote_cmp_info[:component_type]
-      match = local_cmp_info_and_links.find{|r|(r[:link_def_link]||{})[:remote_component_type] == remote_cmp_type} 
+
+      #look for matching link
+      components_coreside = (local_cmp_info[:node_node_id] == remote_cmp_info[:node_node_id])
+      match = local_cmp_info_and_links.find do |r|
+        possible_link = r[:link_def_link]||{}
+        if possible_link[:remote_component_type] == remote_cmp_type 
+          if components_coreside
+            possible_link[:type] == "internal"
+          else
+            possible_link[:type] == "external"
+          end
+        end
+      end
       return ret unless match
 
       #get remote component

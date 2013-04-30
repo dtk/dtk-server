@@ -1,7 +1,7 @@
-r8_nested_require('link_def','parse_serialized_form')
 module DTK
   class LinkDef < Model
-    extend LinkDefParseSerializedForm
+    r8_nested_require('link_def','parse_serialized_form')
+    extend ParseSerializedFormClassMixin
 
     def self.common_columns()
       [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link]

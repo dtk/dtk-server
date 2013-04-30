@@ -1,6 +1,19 @@
-module XYZ
-  module LinkDefParseSerializedForm
+module DTK; class LinkDef
+  module ParseSerializedFormClassMixin
     def parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs,local_cmp_ref=nil)
+      ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse(link_defs)
+    end
+  end
+
+  class ParseSerializedForm
+    attr_reader :config_agent_type,:remote_link_defs,:local_cmp_ref
+    def initialize(config_agent_type,remote_link_defs,local_cmp_ref)
+      @config_agent_type = config_agent_type
+      @remote_link_defs = remote_link_defs
+      @local_cmp_ref = local_cmp_ref
+    end
+
+    def parse(link_defs)
       link_defs.inject({}) do |h,link_def|
         link_def_type = link_def["type"]
         ref = "local_#{link_def_type}"
@@ -8,7 +21,7 @@ module XYZ
           :has_internal_link=>false,
           :has_external_link=>false
         }
-        possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,config_agent_type,remote_link_defs,has_external_internal,local_cmp_ref)
+        possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,has_external_internal)
         el = {
           :display_name => ref,
           :local_or_remote => "local",
@@ -20,8 +33,34 @@ module XYZ
         h.merge(ref => el)
       end
     end
+
    private
-    def add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type,local_cmp_ref=nil)
+    def parse_possible_links_local(possible_links,link_def_type,has_external_internal)
+      position = 0
+      possible_links.inject({}) do |h,possible_link|
+        remote_component_type = possible_link.keys.first
+        possible_link_info = possible_link.values.first
+        possible_link_type = possible_link_info["type"]
+        
+        add_remote_link_def?(remote_link_defs,remote_component_type,link_def_type,possible_link_type)
+        
+        has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
+        has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
+        
+        position += 1
+        ref = "#{remote_component_type}___#{position.to_s}" #to make sure unqiue for case when same remote type
+        el = {
+          :display_name => remote_component_type,
+          :remote_component_type => remote_component_type,
+          :position => position,
+          :content => parse_possible_link_content(possible_link_info),
+          :type => possible_link_type
+        }
+        h.merge(ref => el)
+      end
+    end
+
+    def add_remote_link_def?(remote_link_defs,remote_component_type,link_def_type,possible_link_type)
       pointer = remote_link_defs[remote_component_type] ||= Hash.new
       ref = "remote_#{link_def_type}"
       pointer[ref] ||= {
@@ -34,31 +73,6 @@ module XYZ
       pointer[ref][:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
       if local_cmp_ref and pointer[ref][:has_external_link]
         pointer[ref].merge!(:local_cmp_ref => local_cmp_ref)
-      end
-    end
-
-    def parse_possible_links_local(possible_links,link_def_type,config_agent_type,remote_link_defs,has_external_internal,local_cmp_ref=nil)
-      position = 0
-      possible_links.inject({}) do |h,possible_link|
-        remote_component_type = possible_link.keys.first
-        possible_link_info = possible_link.values.first
-        possible_link_type = possible_link_info["type"]
-
-        add_remote_link_def?(remote_link_defs,config_agent_type,remote_component_type,link_def_type,possible_link_type,local_cmp_ref)
-
-        has_external_internal[:has_internal_link] = true if %w{internal internal_external}.include?(possible_link_type)
-        has_external_internal[:has_external_link] = true if %w{external internal_external}.include?(possible_link_type)
-
-        position += 1
-        ref = remote_component_type
-        el = {
-          :display_name => ref,
-          :remote_component_type => remote_component_type,
-          :position => position,
-          :content => parse_possible_link_content(possible_link_info),
-          :type => possible_link_type
-        }
-        h.merge(ref => el)
       end
     end
 
@@ -85,9 +99,9 @@ module XYZ
     def parse_possible_link_on_create_events(events)
       trigger = events.first
       case trigger
-       when "on_create_link"
+      when "on_create_link"
         {:on_create => parse_events(events[1])}
-       else
+      else
         Log.error("unexpected event trigger: #{trigger}")
         nil
       end
@@ -119,14 +133,14 @@ module XYZ
       ret.merge!(:alias => ev_content["alias"]) if ev_content.has_key?("alias")
       ret
     end
-
+      
     #returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute
     def parse_attribute_term(term_x)
       ret = Hash.new
       term = term_x.to_s.gsub(/^:/,"")
       ret[:term_index] = term
       split = term.split(SplitPat)
-
+      
       if split[0] =~ NodeTermRE
         ret[:type] = "node_attribute"
         ret[:node_name] = $1
@@ -136,7 +150,7 @@ module XYZ
       else
         raise Error.new("unexpected form")
       end
-
+      
       unless split.size > 1
         raise Error.new("unexpected form")
       end
@@ -153,11 +167,11 @@ module XYZ
     end      
 
     SimpleTokenPat = 'a-zA-Z0-9_-'
-    AnyTokenPat = SimpleTokenPat + '_\[\]:'
     SplitPat = '.'
-
+      
     NodeTermRE = Regexp.new("^(local|remote)_node$") 
     ComponentTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
     AttributeTermRE = Regexp.new("^([#{SimpleTokenPat}]+$)") 
+
   end
-end
+end; end

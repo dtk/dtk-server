@@ -3,7 +3,7 @@ module Puppet
 end
 require 'puppet/parser'
 
-module XYZ
+module DTK
   module PuppetParser
     def parse_given_module_directory(impl_obj)
       #TODO: only handling parsing of .pp now
@@ -15,7 +15,7 @@ module XYZ
         Log.info("calling puppet and r8 processor on file #{filename}")
         begin
           krt_code = parse_given_file_path__manifest(filename,impl_obj,opts)
-          ret.add_children(krt_code) unless all_errors #short-circuiot once first error found
+          ret.add_children(krt_code) unless all_errors #short-circuit once first error found
         rescue ConfigAgent::ParseErrors => errors
           all_errors = (all_errors ? all_errors.add(errors) : errors)
         end
@@ -204,6 +204,11 @@ module XYZ
         :ast_array => ::Puppet::Parser::AST::ASTArray,
       }
       AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array]
+
+      def parse_just_signatures?()
+        @parse_just_signatures ||= R8::Config[:puppet][:parser][:parse_just_signatures] 
+      end
+
     end
 
     #can be module or file
@@ -262,10 +267,18 @@ module XYZ
         attributes << AttributePS.create_name_attribute() if puppet_type?(ast_item,:definition)
         (ast_item.context[:arguments]||[]).each{|arg|attributes << AttributePS.create(arg,opts)}
         self[:attributes] = attributes
-
+begin
         children = parse_children(ast_item,opts)
         self[:children] = children if children and not children.empty?
+rescue => e
+
+pp [:error_child,ast_item.inspect]
+parse_children(ast_item,opts)
+  raise e
+end
+
         super
+
       end
      private
       def self.ignore?(ast_obj,opts={})
@@ -295,11 +308,9 @@ module XYZ
       end
 
       def process_fn(ast_item,opts) 
-        #TODO: make what is ignored and treated fn of opts
-        types_to_ignore = [:var_def,:hostclass]
-        types_to_process = [:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
-        return nil if puppet_type?(ast_item,types_to_ignore)
-        if type = puppet_type?(ast_item,types_to_process)
+
+        return nil if puppet_type?(ast_item,types_to_ignore())
+        if type = puppet_type?(ast_item,types_to_process())
           "parse__#{type}".to_sym
         elsif puppet_type?(ast_item,:definition)
           Log.error("need to implement nested class definitions")
@@ -309,6 +320,21 @@ module XYZ
           nil
         else
           raise R8ParseError.new("unexpected ast type (#{ast_item.class.to_s})",self)
+        end
+      end
+
+      def types_to_ignore()
+        if parse_just_signatures?()
+          [:var_def,:hostclass,:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
+        else
+          [:var_def,:hostclass]
+        end
+      end
+      def types_to_process()
+        if parse_just_signatures?()
+          []
+        else
+          [:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
         end
       end
 

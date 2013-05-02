@@ -24,7 +24,7 @@ module DTK
         end
 
         cmp_mods = unordered_hash[:component_modules]
-        cmp_mod_contraints = cmp_mods.keys.to_s.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
+        cmp_mod_contraints = cmp_mods.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
         ret.merge(:component_modules => cmp_mod_contraints)
       end
 

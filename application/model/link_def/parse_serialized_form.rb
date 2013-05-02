@@ -148,16 +148,16 @@ module DTK; class LinkDef
         ret[:type] = "component_attribute"
         ret[:component_type] = $1
       else
-        raise Error.new("unexpected form")
+        raise Error.new("unexpected form (#{term_x.inspect})")
       end
       
       unless split.size > 1
-        raise Error.new("unexpected form")
+        raise Error.new("unexpected form (#{term_x.inspect})")
       end
       if split[1] =~ AttributeTermRE
         ret[:attribute_name] = $1
       else
-        raise Error.new("unexpected form")
+        raise Error.new("unexpected form (#{term_x.inspect})")
       end
       
       if split.size > 2

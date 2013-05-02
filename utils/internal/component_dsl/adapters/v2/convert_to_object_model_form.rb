@@ -295,11 +295,11 @@ module DTK; class ComponentDSL; class V2
 
       def convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
         #TODO: right now only treating constant on right hand side meaning only for <- case
-        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ]+$)/
+        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ].*$)/
           dep_attr,base_attr = [$1,$2]
           left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:output)
           right = convert_attr_ref_simple(base_attr,:base,base_cmp,:input)
-        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ]+$)/
+        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ].*$)/
           dep_attr,base_attr = [$1,$2]
           left = convert_attr_ref_base(base_attr,base_cmp,dep_attr,dep_cmp,:output,opts)
           right = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:input)
@@ -346,6 +346,8 @@ module DTK; class ComponentDSL; class V2
           datatype = :boolean
         elsif attr_ref =~ /^[0-9]+$/
           datatype = :integer
+        elsif is_json_constant?(attr_ref)
+          datatype = :json
         else
           ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
@@ -353,6 +355,11 @@ module DTK; class ComponentDSL; class V2
         constant_assign = Attribute::Constant.new(const,dep_attr_ref,dep_cmp,datatype)
         (opts[:constants] ||= Array.new) << constant_assign
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
+      end
+
+      def is_json_constant?(attr_ref)
+        #TODO: this is just temp hack
+        !!(attr_ref =~ /[{]/)
       end
     end
   end

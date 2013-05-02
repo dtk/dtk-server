@@ -28,10 +28,14 @@ module DTK
 
       ConstantDelim = "___"
       def attribute_name()
-        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{@constant}"
+        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{constant_val_for_attr_name()}"
       end
       def attribute_value()
         @constant
+      end
+
+      def constant_val_for_attr_name()
+        @constant.gsub(/[ {}\[\]:*']/,"X") #TODO: this is just heuristic; possible naem clash but very unlikely
       end
       
     end

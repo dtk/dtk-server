@@ -346,7 +346,8 @@ module DTK; class ComponentDSL; class V2
           datatype = :boolean
         elsif attr_ref =~ /^[0-9]+$/
           datatype = :integer
-        elsif is_json_constant?(attr_ref)
+        elsif sanitized_attr_ref = is_json_constant?(attr_ref)
+          const = sanitized_attr_ref
           datatype = :json
         else
           ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
@@ -357,9 +358,12 @@ module DTK; class ComponentDSL; class V2
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
       end
 
+      #returns sanitized_attr_ref
       def is_json_constant?(attr_ref)
-        #TODO: this is just temp hack
-        !!(attr_ref =~ /[{]/)
+        #TODO: this is just temp hack in how whether it is detected; providing fro using ' rather than " in constant
+        if attr_ref =~ /[{]/
+          attr_ref.gsub(/'/,"\"")
+        end
       end
     end
   end

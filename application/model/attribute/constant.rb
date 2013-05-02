@@ -35,7 +35,7 @@ module DTK
       end
 
       def constant_val_for_attr_name()
-        @constant.gsub(/[ {}\[\]:*']/,"X") #TODO: this is just heuristic; possible naem clash but very unlikely
+        @constant.gsub(/[ {}\[\]:*'"]/,"X") #TODO: this is just heuristic; possible naem clash but very unlikely
       end
       
     end

@@ -1,4 +1,5 @@
 #TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent parser phase
+#TODO: doe snot check for extra attributes
 module DTK; class ComponentDSL; class V2
   class ObjectModelForm < ComponentDSL::ObjectModelForm
     def self.convert(input_hash)
@@ -39,6 +40,18 @@ module DTK; class ComponentDSL; class V2
         cmp_external_form
       end
     end
+    #returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
+    # '*' means required
+    #e.g., keys ["*module","version"]
+    def hash_contains?(hash,keys)
+      ndx_keys = keys.inject(Hash.new){|h,r|h.merge(r.gsub(/^*/,"") => (r =~ /^*/) ? 1 : 0)}
+      ret = Hash.new
+      hash.each do |k,v|
+       unless info = ndx_keys[k]
+         return nil
+       end
+        #TODO: got here; flip 1 to 0 so can check al manditory included
+    end
 
     class Component < self
       def initialize(module_name)
@@ -70,6 +83,7 @@ module DTK; class ComponentDSL; class V2
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
+        ret.set_if_not_nil("include_modules",include_modules?(input_hash["include_modules"]))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
@@ -106,7 +120,26 @@ module DTK; class ComponentDSL; class V2
       def only_one_per_node(external_ref)
         external_ref["type"] != "puppet_definition"
       end
-      
+
+      def include_modules?(incl_module_array)
+        return nil if incl_module_array.nil?
+        unless incl_module_array.kind_of?(Array)
+          raise ParsingError.new("The content in the 'include_modules' key (?1) is ill-formed",incl_module_array)
+        end
+        incl_module_array.map do |incl_module|
+          el = 
+            if incl_module.kind_of?(String)
+              {"module" => incl_module}
+            elsif incl_module.kind_of?(Hash)
+              hash_contains?(incl_module,["*module","version"])
+            end
+          unless el
+            raise ParsingError.new("The include_module element (?1) is ill-formed",incl_module)
+          end
+          el
+        end
+      end
+
       def add_attributes!(ret,cmp_type,input_hash,opts={})
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new

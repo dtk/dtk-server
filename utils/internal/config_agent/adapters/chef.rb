@@ -6,7 +6,7 @@
 module XYZ
   module ConfigAgentAdapter
     class Chef < ConfigAgent
-      def ret_msg_content(config_node,impl_info)
+      def ret_msg_content(config_node)
         recipes_and_attrs = Processor.new(config_node)
         {:attributes => recipes_and_attrs.attributes, :run_list => recipes_and_attrs.run_list}
       end

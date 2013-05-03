@@ -1,6 +1,6 @@
 require 'mcollective'
 r8_nested_require('mcollective','monkey_patches')
-module XYZ
+module DTK
   module CommandAndControlAdapter
     class Mcollective < CommandAndControlNodeConfig
       r8_nested_require('mcollective','assembly_action')
@@ -11,11 +11,9 @@ module XYZ
       end
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
-        #TODO: getting out implemention info not needed if put module names in component ext refs
-        impl_info = get_relevant_impl_info(config_node)
-        version_context = get_version_context(impl_info)
+        version_context = get_version_context(config_node)
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
-        msg_content =  config_agent.ret_msg_content(config_node,impl_info)
+        msg_content =  config_agent.ret_msg_content(config_node)
         agent_git_details = { :repo => "dtk-node-agent", :branch => "" }
         msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context, :agent_git_details => agent_git_details)
         pbuilderid = Node.pbuilderid(config_node[:node])
@@ -188,7 +186,8 @@ module XYZ
         end
         return impl_idhs
       end
-      def self.get_version_context(impl_info)
+      def self.get_version_context(config_node)
+        impl_info = get_relevant_impl_info(config_node)
         ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
         impl_info.each do |impl|
           ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}

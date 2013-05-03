@@ -7,8 +7,8 @@ module XYZ
       include PuppetParser
       include PuppetErrorProcessing
       include PuppetGenerateNodeManifest
-      def ret_msg_content(config_node,impl_info)
-        cmps_with_attrs = components_with_attributes(config_node,impl_info)
+      def ret_msg_content(config_node)
+        cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)
         manifest = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node[:node][:intra_node_stages])
         msg_content = {
@@ -52,9 +52,8 @@ module XYZ
         end
       end
 
-      def components_with_attributes(config_node,impl_info)
+      def components_with_attributes(config_node)
         cmp_actions = config_node[:component_actions]
-        ndx_impl_info = impl_info.inject({}){|h,impl|h.merge(impl[:id] => impl)}
         node_components = cmp_actions.map{|ca|(component_external_ref(ca[:component])||{})["name"]}.compact
         ndx_cmps = cmp_actions.inject({}) do |h,cmp_action|
           cmp = cmp_action[:component]
@@ -67,14 +66,15 @@ module XYZ
           attrs_for_guards = cmp_actions.map{|cmp_action| cmp_action[:attributes]}.flatten(1)
         end
         cmp_actions.map do |cmp_action|
-          component_with_deps(cmp_action,ndx_cmps,ndx_impl_info).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards,node_components))
+          component_with_deps(cmp_action,ndx_cmps).merge(ret_attributes(cmp_action,internal_guards,attrs_for_guards,node_components))
         end
       end
 
-      def component_with_deps(action,ndx_components,ndx_impl_info)
+      def component_with_deps(action,ndx_components)
         cmp = action[:component]
         ret = component_external_ref(cmp)
-        ret.merge!("module_name" => (ndx_impl_info[cmp[:implementation_id]]||{})[:module_name])
+        module_name = ret["name"].gsub(/::.+$/,"")
+        ret.merge!("module_name" => module_name)
         cmp_deps = action[:component_dependencies]
         return ret unless cmp_deps and not cmp_deps.empty?
         ret.merge("component_dependencies" => cmp_deps.map{|cmp_id|component_external_ref(ndx_components[cmp_id])})

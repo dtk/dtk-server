@@ -1,14 +1,13 @@
 {
   :schema=>:component,
-  :table=>:module_import,
+  :table=>:include_module,
   :columns=>{
     :module_name=>{
       :type=>:varchar,
       :size =>50
     },
-    :version=>{
-      :type=>:varchar,
-      :size =>25
+    :version_constraint=>{
+      :type=>:json
     }
   },
   :many_to_one=>[:component]

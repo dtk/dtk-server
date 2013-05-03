@@ -1,4 +1,4 @@
 module DTK; class Component
-  class ModuleImport < Model
+  class IncludeModule < Model
   end
 end; end

@@ -44,13 +44,17 @@ module DTK; class ComponentDSL; class V2
     # '*' means required
     #e.g., keys ["*module","version"]
     def hash_contains?(hash,keys)
-      ndx_keys = keys.inject(Hash.new){|h,r|h.merge(r.gsub(/^*/,"") => (r =~ /^*/) ? 1 : 0)}
+      req_keys = keys.inject(Hash.new){|h,r|h.merge(r.gsub(/^\*/,"") => (r =~ /^\*/) ? 1 : 0)}
       ret = Hash.new
       hash.each do |k,v|
-       unless info = ndx_keys[k]
-         return nil
-       end
-        #TODO: got here; flip 1 to 0 so can check al manditory included
+        return nil unless req_keys[k]
+        req_keys[k] = 0
+        ret.merge!(k => v)
+      end
+      #return nil if there is a required key not found
+      unless req_keys.values.find{|x|x == 1} 
+        ret
+      end
     end
 
     class Component < self
@@ -83,7 +87,7 @@ module DTK; class ComponentDSL; class V2
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
-        ret.set_if_not_nil("include_modules",include_modules?(input_hash["include_modules"]))
+        ret.set_if_not_nil("include_module",include_modules?(input_hash["include_modules"]))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
@@ -126,7 +130,8 @@ module DTK; class ComponentDSL; class V2
         unless incl_module_array.kind_of?(Array)
           raise ParsingError.new("The content in the 'include_modules' key (?1) is ill-formed",incl_module_array)
         end
-        incl_module_array.map do |incl_module|
+        ret = OutputHash.new
+        incl_module_array.each do |incl_module|
           el = 
             if incl_module.kind_of?(String)
               {"module" => incl_module}
@@ -136,8 +141,32 @@ module DTK; class ComponentDSL; class V2
           unless el
             raise ParsingError.new("The include_module element (?1) is ill-formed",incl_module)
           end
-          el
+          if version = el.delete("version")
+            el["version_constraint"] = include_module_version_constraint(version)
+          end
+          ref = el["display_name"] = el["module"]
+          ret[ref] = el
         end
+        ret
+      end
+
+      IncludeModVersionOps = [">="]
+      IncludeModVersionNumRegexp = /^[0-9]+\.[0-9]+\.[0-9]+/
+      def include_module_version_constraint(version)
+        no_error = 
+          if version.kind_of?(String)
+            if version =~ IncludeModVersionNumRegexp
+              true
+            end
+          elsif version.kind_of?(Array) 
+            if version.size == 2 and IncludeModVersionOps.include?(version[0]) and version[1] =~ IncludeModVersionNumRegexp
+              true
+            end
+          end
+        unless no_error
+          raise ParsingError.new("The include_modules version key (?1)  is ill-formed",version)
+        end
+        version
       end
 
       def add_attributes!(ret,cmp_type,input_hash,opts={})

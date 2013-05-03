@@ -13,7 +13,7 @@ module XYZ
     r8_nested_require('component','template')
     r8_nested_require('component','dependency')
     r8_nested_require('component','resource_matching')
-    r8_nested_require('component','module_import')
+    r8_nested_require('component','include_module')
     include TemplateMixin
     extend DependencyClassMixin
     include ComponentModelDefProcessor

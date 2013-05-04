@@ -8,28 +8,28 @@ module DTK; class Component
       find_and_check_modele_versions(include_modules,impls)
     end
 
-   private
-    def self.get_from_component_idhs(component_idhs)
+    def self.get_and_set_with_impls_if_can(component_idhs,impls,opts={})
       ret = Array.new()
       return ret if component_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:module,:version_constraint],
+        :cols => [:id,:group_id,:display_name,:module,:version_constraint,:implementation],
         :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
       }
       incl_mod_idh = component_idhs.first.createMH(:include_module)
-      get_objs(incl_mod_idh,sp_hash)
-    end
+      ret = get_objs(incl_mod_idh,sp_hash)
+      incl_rows_to_update = Array.new
+      ret.each do |incl_mod|
+        if update_row = incl_mod.set_matching_implementation?(impls,opts)
+          incl_rows_to_update << incl_rows_to_update
+        end
+      end
+      unless incl_rows_to_update.empty?
+        pp [:debug,:incl_rows_to_update,incl_rows_to_update]
+      end
 
-    def self.get_implementations(impl_idhs)
-      ret = Array.new
-      return ret if impl_idhs.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
-        :filter => [:oneof,:id,impl_idhs.map{|idh|idh.get_id()}]
-      }
-      impl_mh = impl_idhs.first.createMH()
-      get_objs(impl_mh,sp_hash)
+      ret
     end
+   private
 
     def self.find_and_check_modele_versions(include_modules,impls)
       #index by module_name to make sure no conflicts
@@ -65,24 +65,6 @@ module DTK; class Component
       ndx_modules.values.map{|r|version_context_form(r,ndx_impls)}
     end
 
-    def self.raise_error_if_conflict(existing_module,module_name,version)
-      unless version == existing_module[:version]
-        #TODO: want this to be raised before task executed rather than error in task
-        existing_version = existing_module[:version]
-        raise ErrorUsage.new("Inconsistent versions for module (#{module_name}): #{version_print_form(version)}, #{version_print_form(existing_version)}")
-      end
-    end
-
-    def self.version_print_form(version)
-      version||'CURRENT'
-    end
-
-    def self.lookup_and_ndx_impls(info_to_lookup)
-      ret = Hash.new()
-      Log.error("TODO: write this routine")
-      ret
-    end
-
     def self.version_context_form(mod_info,ndx_impls)
       if impl = mod_info[:implementation]
         version_context_form_impl(impl)
@@ -99,6 +81,42 @@ module DTK; class Component
     def scalar_version?()
       vc = self[:version_constraint]
       vc if vc.nil? or vc.kind_of?(String)
+    end
+
+    #returns id, implementation_id pair if matches and needs to be set
+    def set_matching_implementation?(impls,opts={})
+      ret = nil
+      return ret if self[:implementation]
+
+      impls.each do |impl|
+        if match_implementation?(impl)
+          self[:implementation_id] = impl[:id]
+          self[:implementation] = impl
+          return {:id => self[:id], :implementation_id => impl[:id]}
+        end 
+      end
+      if opts[:raise_error_on_no_match]
+        raise ErrorUsage.new("There is no component template matching include_module (#{inspect()})")
+      end
+      ret
+    end
+
+    def match_implementation?(impl)
+      return nil if impl[:module_name] == self[:module]
+
+      module_name = impl[:module_name]
+      if version = scalar_version?()
+        impl_version = ((!impl.has_default_version?()) && impl[:version])
+        if version == impl_version
+          true
+        else
+          incl_mod_print_form = (version ? "#{module_name}:#{version}" : module_name)
+          impl_print_form = (impl_version ? "#{module_name}:#{impl_version}" : module_name)
+          raise ErrorUsage.new("Include module (#{incl_mod_print_form} conflicts with (#{impl_print_form})")
+        end
+      else
+        raise Error.new("Not implemented yet treatment of include module with constraint (#{incl_mod[:version_constraint]})")
+      end
     end
 
   end

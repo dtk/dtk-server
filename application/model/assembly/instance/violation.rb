@@ -2,10 +2,14 @@ module DTK
   class Assembly::Instance
     module ViolationMixin
       def find_violations()
+        nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
+        cmps = nodes_and_cmps.map{|r|r[:nested_component]}
+        
         unset_attr_viols = find_violations__unset_attrs()
-        cmp_constraint_viols = find_violations__cmp_constraints()
+        cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs
+        mod_incl_viols = find_violations__module_includes(cmps)
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols
       end
      private
       def find_violations__unset_attrs()
@@ -16,10 +20,9 @@ module DTK
         assembly_attr_viols + component_attr_viols + node_attr_viols
       end
 
-      def find_violations__cmp_constraints()
+      def find_violations__cmp_constraints(nodes_and_cmps,cmp_idhs)
         ret = Array.new
-        nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
-        cmp_idhs = nodes_and_cmps.map{|r|r[:nested_component].id_handle()}
+        return ret if cmp_idhs.empty?
         ndx_constraints = Component.get_ndx_constraints(cmp_idhs,:when_evaluated => :after_cmp_added)
         #TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
@@ -43,6 +46,28 @@ module DTK
           end
         end
         ret
+      end
+
+      #thjis also serves to set implementation_id on module includes that are not set already
+      def find_violations__module_includes(cmps)
+        ret = Array.new
+        return ret if cmps.empty?
+        impls = get_implementations(cmps)
+        cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
+        incl_mods = Component::IncludeModule.get_and_set_with_impls_if_can(cmp_idhs,impls,:raise_error_on_no_match=>true)
+        pp incl_mods
+        ret
+      end
+
+      def get_implementations(cmps)
+        ret = Array.new
+        return ret if cmps.empty?
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
+          :filter => [:oneof,:id,cmps.map{|cmp|cmp[:implementation_id]}]
+        }
+        impl_mh = cmps.first.model_handle(:implementation)
+        get_objs(impl_mh,sp_hash)
       end
 
     end

@@ -4,7 +4,7 @@ segment_assembly_template = {
   :alias => :assembly_template,
   :join_type=>:left_outer,
   :join_cond=>{:id => :component__ancestor_id},
-  :cols => [:id,:group_id,:display_name,:component_type,:version]
+  :cols => [:id,:group_id,:display_name,:component_type,:version,:implementation_id]
 }
 lambda__segment_module_branch =
   lambda{|module_branch_cols|

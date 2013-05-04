@@ -29,6 +29,25 @@ module DTK; class Component
 
       ret
     end
+
+    #returns id, implementation_id pair if matches and needs to be set
+    def set_matching_implementation?(impls,opts={})
+      ret = nil
+      return ret if self[:implementation]
+
+      impls.each do |impl|
+        if match_implementation?(impl)
+          self[:implementation_id] = impl[:id]
+          self[:implementation] = impl
+          return {:id => self[:id], :implementation_id => impl[:id]}
+        end 
+      end
+      if opts[:raise_error_on_no_match]
+        raise ErrorUsage.new("There is no component template matching include_module (#{inspect()})")
+      end
+      ret
+    end
+
    private
 
     def self.find_and_check_modele_versions(include_modules,impls)
@@ -81,24 +100,6 @@ module DTK; class Component
     def scalar_version?()
       vc = self[:version_constraint]
       vc if vc.nil? or vc.kind_of?(String)
-    end
-
-    #returns id, implementation_id pair if matches and needs to be set
-    def set_matching_implementation?(impls,opts={})
-      ret = nil
-      return ret if self[:implementation]
-
-      impls.each do |impl|
-        if match_implementation?(impl)
-          self[:implementation_id] = impl[:id]
-          self[:implementation] = impl
-          return {:id => self[:id], :implementation_id => impl[:id]}
-        end 
-      end
-      if opts[:raise_error_on_no_match]
-        raise ErrorUsage.new("There is no component template matching include_module (#{inspect()})")
-      end
-      ret
     end
 
     def match_implementation?(impl)

@@ -12,7 +12,7 @@
     #gets set when resolved this to particular version
     :implementation_id=>{
       :type=>:bigint,
-      :foreign_key_rel_type=>:implemtation,
+      :foreign_key_rel_type=>:implementation,
       :on_delete=>:set_null,
       :on_update=>:set_null
     }

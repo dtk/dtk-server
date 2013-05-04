@@ -134,18 +134,17 @@ module DTK; class ComponentDSL; class V2
         incl_module_array.each do |incl_module|
           el = 
             if incl_module.kind_of?(String)
-              {"module" => incl_module}
+              {"display_name" => incl_module}
             elsif incl_module.kind_of?(Hash)
-              hash_contains?(incl_module,["*module","version"])
+              hash = hash_contains?(incl_module,["*module","version"])
+              version_constraint = include_module_version_constraint(hash["version"])
+              {"display_name" => hash["module"],"version_constraint" => version_constraint}
             end
           unless el
             raise ParsingError.new("The include_module element (?1) is ill-formed",incl_module)
           end
-          if version = el.delete("version")
-            el["version_constraint"] = include_module_version_constraint(version)
-          end
-          ref = el["display_name"] = el["module"]
-          ret[ref] = el
+          ref = el["display_name"]
+          ret.merge!(ref => el)
         end
         ret
       end

@@ -17,35 +17,41 @@ module DTK; class Component
       }
       incl_mod_idh = component_idhs.first.createMH(:include_module)
       ret = get_objs(incl_mod_idh,sp_hash)
-      incl_rows_to_update = Array.new
-      ret.each do |incl_mod|
-        if update_row = incl_mod.set_matching_implementation?(impls,opts)
-          incl_rows_to_update << incl_rows_to_update
-        end
+      impls_to_set = Array.new
+      impls_to_find = Array.new
+      ret.each{|incl_mod|incl_mod.find_matching_implementation!(impls_to_set,impls_to_find,impls)}
+
+      unless impls_to_set.empty? 
+        pp [:debug,:impls_to_set,impls_to_set]
       end
-      unless incl_rows_to_update.empty?
-        pp [:debug,:incl_rows_to_update,incl_rows_to_update]
+      unless impls_to_find.empty? 
+        pp [:debug,:impls_to_find,impls_to_find]
       end
 
       ret
     end
 
-    #returns id, implementation_id pair if matches and needs to be set
-    def set_matching_implementation?(impls,opts={})
-      ret = nil
-      return ret if self[:implementation]
-
+    #three posibilities
+    # has :implementation set already -> no op
+    # finds a match in impls -> adds to impls_to_set and upadtes self
+    # finds no match -> add row to impls_to_find
+    def find_matching_implementation!(impls_to_set,impls_to_find,impls)
+      return if self[:implementation]
       impls.each do |impl|
         if match_implementation?(impl)
           self[:implementation_id] = impl[:id]
           self[:implementation] = impl
-          return {:id => self[:id], :implementation_id => impl[:id]}
+          impls_to_set<< {:id => self[:id], :implementation_id => impl[:id]}
+          return
         end 
       end
-      if opts[:raise_error_on_no_match]
-        raise ErrorUsage.new("There is no component template matching include_module (#{inspect()})")
-      end
-      ret
+      module_name, version = ret_module_name_and_version()
+      impls_to_find << {:module_include_id => self[:id],:module_name => module_name, :version => version}
+      nil
+    end
+
+    def module_name()
+      get_field?(:display_name)
     end
 
    private
@@ -65,8 +71,9 @@ module DTK; class Component
 
       info_to_lookup = Array.new
       include_modules.each do |incl_mod|
-        module_name = incl_mod[:module]
-        if version = incl_mod.scalar_version?()
+        module_name = incl_mod.module_name()
+        is_scalar,version = incl_mod.scalar_version?()
+        if is_scalar
           if existing_module = ndx_modules[module_name]
             raise_error_if_conflict(existing_module,module_name,version)
           else
@@ -97,26 +104,33 @@ module DTK; class Component
       {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
     end
 
+    #returns [is_scalar,version]
     def scalar_version?()
       vc = self[:version_constraint]
-      vc if vc.nil? or vc.kind_of?(String)
+      is_scalar = (vc.nil? or vc.kind_of?(String))
+      [is_scalar,is_scalar && vc]
+    end
+
+    #returns [module_name,version]
+    def ret_module_name_and_version()
+      is_scalar,version = scalar_version?()
+      unless is_scalar
+        raise Error.new("Not implemented yet treatment of include module with constraint (#{self[:version_constraint]})")
+      end
+      [module_name(),version]
     end
 
     def match_implementation?(impl)
-      return nil if impl[:module_name] == self[:module]
+      module_name, version = ret_module_name_and_version()
+      return nil unless impl[:module_name] == module_name
 
-      module_name = impl[:module_name]
-      if version = scalar_version?()
-        impl_version = ((!impl.has_default_version?()) && impl[:version])
-        if version == impl_version
-          true
-        else
-          incl_mod_print_form = (version ? "#{module_name}:#{version}" : module_name)
-          impl_print_form = (impl_version ? "#{module_name}:#{impl_version}" : module_name)
-          raise ErrorUsage.new("Include module (#{incl_mod_print_form} conflicts with (#{impl_print_form})")
-        end
+      impl_version = ((!impl.has_default_version?()) && impl[:version])
+      if version == impl_version
+        true
       else
-        raise Error.new("Not implemented yet treatment of include module with constraint (#{incl_mod[:version_constraint]})")
+        incl_mod_print_form = (version ? "#{module_name}:#{version}" : module_name)
+        impl_print_form = (impl_version ? "#{module_name}:#{impl_version}" : module_name)
+        raise ErrorUsage.new("Include module (#{incl_mod_print_form} conflicts with (#{impl_print_form})")
       end
     end
 

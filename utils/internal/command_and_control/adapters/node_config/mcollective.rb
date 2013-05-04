@@ -165,46 +165,27 @@ module DTK
       Lock = Mutex.new
 
       def self.get_version_context(config_node)
-        include_modules = get_include_modules(config_node)
-        impl_info = get_relevant_impl_info(config_node)
-        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
-        impl_info.each do |impl|
-          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
-        end
-        ret
-      end
-
-      def self.get_include_modules(config_node)
+        ret =  Array.new
+        return ret if config_node[:component_actions].empty?()
+        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
+        
         component_idhs = config_node[:component_actions].inject(Hash.new) do |h,r|
           cmp = r[:component]
           h.merge(cmp[:id] => cmp.id_handle())
         end.values
-        Component::IncludeModule.get_from_component_idhs(component_idhs)
+
+        impl_idhs = get_impl_idhs(config_node)
+
+        Component::IncludeModule.get_version_context(component_idhs,impl_idhs)
       end
 
-      #returns version context, (repo branch pairs)
-      def self.get_relevant_impl_info(config_node)
+      def self.get_impl_idhs(config_node)
         ret = Array.new
-        return ret unless (config_node[:state_change_types] & ["install_component","update_implementation","converge_component","setting"]).size > 0
+        impl_ids = (config_node[:node][:implementation_ids_list] || config_node[:component_actions].map{|x|x[:component][:implementation_id]}).uniq
+        
+        return ret if impl_ids.empty?
         sample_idh = config_node[:component_actions].first[:component].id_handle
-        impl_idhs = get_impl_idhs(config_node, sample_idh)
-        return ret if impl_idhs.empty?
-        Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
-      end
-
-      def self.get_impl_idhs(config_node, sample_idh)
-        # if [:node][:implementation_ids_list] empty, or populated use it for getting impl_idhs, 
-        # else if nil use gathering from [:component][:implementation_id]
-        if impl_ids = config_node[:node][:implementation_ids_list]
-          impl_idhs = impl_ids.uniq.map do |impl_id|
-            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
-          end
-        else
-          impl_idhs = config_node[:component_actions].map{|x|x[:component][:implementation_id]}.uniq.map do |impl_id|
-            sample_idh.createIDH(:model_name => :implementation, :id => impl_id)
-          end
-        end
-        return impl_idhs
+        impl_ids.map{|id|sample_idh.createIDH(:model_name => :implementation, :id => id)}
       end
 
       class Config

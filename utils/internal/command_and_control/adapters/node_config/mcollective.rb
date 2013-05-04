@@ -176,7 +176,13 @@ module DTK
 
         impl_idhs = get_impl_idhs(config_node)
 
-        Component::IncludeModule.get_version_context(component_idhs,impl_idhs)
+        impls = Component::IncludeModule.get_impls_for_version_context(component_idhs,impl_idhs)
+
+        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
+        impls.each do |impl|
+          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
+        end
+        ret
       end
 
       def self.get_impl_idhs(config_node)

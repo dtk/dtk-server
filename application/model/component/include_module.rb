@@ -1,11 +1,17 @@
 module DTK; class Component
   class IncludeModule < Model
     #a version context element is hash with keys: :repo,:branch,:implementation
-    def self.get_version_context(component_idhs,impl_idhs)
-      include_modules = get_from_component_idhs(component_idhs)
-      impls = get_implementations(impl_idhs)
-      #find all the needed modules and look for conflictes
-      find_and_check_modele_versions(include_modules,impls)
+    def self.get_impls_for_version_context(component_idhs,impl_idhs)
+      ret = get_implementations(impl_idhs)
+      include_modules = get_include_mods_with_impls(component_idhs)
+      include_modules.each do |incl_mod|
+        unless impl = incl_mod[:implementation]
+          incl_mod.delete(:implementation) #for cosmetics when prinint in error
+          raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
+          ret << impl
+        end
+      end
+      ret
     end
 
     #this method looks for include_mosules on a component in component_idhs and sees if it s matches
@@ -14,12 +20,7 @@ module DTK; class Component
     def self.find_violations_and_set_impl(component_idhs,impls)
       ret = Array.new()
       return ret if component_idhs.empty?
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:module,:version_constraint,:implementation],
-        :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
-      }
-      incl_mod_mh = component_idhs.first.createMH(:include_module)
-      incl_mods = get_objs(incl_mod_mh,sp_hash)
+      incl_mods = get_include_mods_with_impls(component_idhs)
       return ret if incl_mods.empty?
 
       impls_to_set_on_incl_mods = Array.new
@@ -27,7 +28,7 @@ module DTK; class Component
       incl_mods.each{|incl_mod|incl_mod.find_matching_implementation!(ret,impls_to_set_on_incl_mods,incl_mods_to_match,impls)}
 
       unless incl_mods_to_match.empty? 
-        impl_mh = incl_mod_mh.createMH(:implementation)
+        impl_mh = component_idhs.first.createMH(:implementation)
         find_matching_impls!(ret,impls_to_set_on_incl_mods,impl_mh,incl_mods_to_match)
       end
 
@@ -96,53 +97,24 @@ module DTK; class Component
     end
 
    private
-
-    def self.find_and_check_modele_versions(include_modules,impls)
-      #index by module_name to make sure no conflicts
-      ndx_modules = Hash.new()
-      impls.each do |impl|
-        module_name = impl[:module_name]
-        version = ((!impl.has_default_version?()) && impl[:version])
-        if existing_module = ndx_modules[module_name]
-          raise_error_if_conflict(existing_module,module_name,version)
-        else
-          ndx_modules[module_name] = {:version => version, :implementation => impl}
-        end
-      end
-
-      info_to_lookup = Array.new
-      include_modules.each do |incl_mod|
-        module_name = incl_mod.module_name()
-        is_scalar,version = incl_mod.scalar_version?()
-        if is_scalar
-          if existing_module = ndx_modules[module_name]
-            raise_error_if_conflict(existing_module,module_name,version)
-          else
-            info_to_lookup << {:version => mod_info[:version],:module_name => module_name,:include_module_id => incl_mod[:id]} 
-            ndx_modules[module_name] = {:version => version, :include_module => incl_mod}
-          end
-        else
-          raise Error.new("Not implemented yet treatment of include module with constraint (#{incl_mod[:version_constraint]})")
-        end
-      end
-
-      #need to look up implementation that corresponds to each included module
-      ndx_impls = lookup_and_ndx_impls(info_to_lookup)
-
-      ndx_modules.values.map{|r|version_context_form(r,ndx_impls)}
+     def self.get_implementations(impl_idhs)
+      ret = Array.new
+      return ret if impl_idhs.empty?
+       sp_hash = {
+        :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
+         :filter => [:oneof,:id,impl_idhs.map{|idh|idh.get_id()}]
+       }
+      impl_mh = impl_idhs.first.createMH()
+      get_objs(impl_mh,sp_hash)
     end
 
-    def self.version_context_form(mod_info,ndx_impls)
-      if impl = mod_info[:implementation]
-        version_context_form_impl(impl)
-      else
-        ndx = mod_info[:include_module][:id]
-        version_context_form_impl(ndx_impls[ndx])
-      end
-    end
-    
-    def self.version_context_form_impl(impl)
-      {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
+    def self.get_include_mods_with_impls(component_idhs)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:module,:version_constraint,:implementation],
+        :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
+      }
+      incl_mod_mh = component_idhs.first.createMH(:include_module)
+      get_objs(incl_mod_mh,sp_hash)
     end
 
     #returns [is_scalar,version]

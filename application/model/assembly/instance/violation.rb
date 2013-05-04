@@ -9,6 +9,9 @@ module DTK
         cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_incl_viols = find_violations__module_includes(cmps)
+unless mod_incl_viols.empty?
+  raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
+end
         unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols
       end
      private
@@ -54,9 +57,7 @@ module DTK
         return ret if cmps.empty?
         impls = get_implementations(cmps)
         cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
-        incl_mods = Component::IncludeModule.get_and_set_with_impls_if_can(cmp_idhs,impls,:raise_error_on_no_match=>true)
-        pp incl_mods
-        ret
+        Component::IncludeModule.find_violations_and_set_impl(cmp_idhs,impls)
       end
 
       def get_implementations(cmps)

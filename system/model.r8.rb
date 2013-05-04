@@ -75,7 +75,17 @@ module XYZ
     end
 
     def self.model_class(model_name)
-      XYZ.const_get Aux.camelize model_name
+      model_class_nested(model_name) || DTK.const_get(Aux.camelize(model_name))
+    end
+    #TODO: make the exception list be deduced from declarations in actual class
+    NestedModuleClasses = {
+      :include_module => :component
+    }
+    def self.model_class_nested(model_name)
+      if parent_model_name = NestedModuleClasses[model_name]
+        nested = DTK.const_get(Aux.camelize(parent_model_name))
+        nested.const_get(Aux.camelize(model_name))
+      end
     end
 
     def self.normalize_model(model_name)

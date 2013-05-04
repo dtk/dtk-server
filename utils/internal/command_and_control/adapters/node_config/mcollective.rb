@@ -163,6 +163,25 @@ module DTK
       end
 
       Lock = Mutex.new
+
+      def self.get_version_context(config_node)
+        include_modules = get_include_modules(config_node)
+        impl_info = get_relevant_impl_info(config_node)
+        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
+        impl_info.each do |impl|
+          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
+        end
+        ret
+      end
+
+      def self.get_include_modules(config_node)
+        component_idhs = config_node[:component_actions].inject(Hash.new) do |h,r|
+          cmp = r[:component]
+          h.merge(cmp[:id] => cmp.id_handle())
+        end.values
+        Component::IncludeModule.get_from_component_idhs(component_idhs)
+      end
+
       #returns version context, (repo branch pairs)
       def self.get_relevant_impl_info(config_node)
         ret = Array.new
@@ -172,6 +191,7 @@ module DTK
         return ret if impl_idhs.empty?
         Model.get_objs_in_set(impl_idhs,{:col => [:id, :repo, :branch]})
       end
+
       def self.get_impl_idhs(config_node, sample_idh)
         # if [:node][:implementation_ids_list] empty, or populated use it for getting impl_idhs, 
         # else if nil use gathering from [:component][:implementation_id]
@@ -185,14 +205,6 @@ module DTK
           end
         end
         return impl_idhs
-      end
-      def self.get_version_context(config_node)
-        impl_info = get_relevant_impl_info(config_node)
-        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
-        impl_info.each do |impl|
-          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
-        end
-        ret
       end
 
       class Config

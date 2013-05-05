@@ -299,10 +299,13 @@ module DTK; class ComponentDSL; class V2
           end
 
           choice_info = choice_info(pls.first)
-          ref = choice_info[:remote_cmp_ref]
-          unless component_part(ref) == assigns["type"]
-            content["relation_name"] = assigns["type"]
+          unless ref = assigns["type"]
+            raise Error.new("Expected type to be set in (#{assigns.inspect})")
           end
+          unless component = choice_info[:remote_cmp_ref]
+            raise Error.new("Expected choice_info[:remote_cmp_ref] is set in (#{assigns.inspect})")
+          end
+          content["component"] = component
           content["location"] = "remote"
           content["required"] = false if (!assigns["required"].nil?) and not assigns["required"]
           content["attribute_mappings"] = choice_info[:attribute_mappings]

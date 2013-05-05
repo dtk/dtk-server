@@ -5,10 +5,11 @@ module DTK; class Component
       ret = get_implementations(impl_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)
       include_modules.each do |incl_mod|
-        unless impl = incl_mod[:implementation]
+        if impl = incl_mod[:implementation]
+          ret << impl
+        else
           incl_mod.delete(:implementation) #for cosmetics when prinint in error
           raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
-          ret << impl
         end
       end
       ret

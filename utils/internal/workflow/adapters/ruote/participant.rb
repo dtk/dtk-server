@@ -138,19 +138,11 @@ module XYZ
           params = workitem.params
           Ruote::TaskInfo.get_top_task_id(params["task_id"])
         end
-        def kill_upstream_subtasks(workitem)
-          # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the killing
-          begin
-            # Killing task to prevent upstream subtasks' execution
-            Workflow.kill(get_top_task_id(workitem))            
-          rescue Exception => e    
-          end
-        end
         def cancel_upstream_subtasks(workitem)
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling
           begin
             # Killing task to prevent upstream subtasks' execution
-            Workflow.cancel(get_top_task_id(workitem))            
+            Workflow.kill(get_top_task_id(workitem))            
           rescue Exception => e   
           end
         end
@@ -167,6 +159,7 @@ module XYZ
             if errors_in_result = errors_in_result?(result)
               event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
               pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+              cancel_upstream_subtasks(workitem)
               set_result_failed(workitem,result,task)
             else
               node = task[:executable_action][:node]
@@ -233,7 +226,7 @@ module XYZ
                 Log.error("Timeout detecting node is ready to be powered on!")
                 result = {:type => :timeout_create_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
-                kill_upstream_subtasks(workitem)
+                cancel_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end
@@ -284,7 +277,7 @@ module XYZ
                 Log.error("Timeout detecting if node is ready")
                 result = {:type => :timeout_create_node, :task_id => task_id}
                 set_result_failed(workitem,result,task)
-                kill_upstream_subtasks(workitem)
+                cancel_upstream_subtasks(workitem)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end
@@ -301,8 +294,6 @@ module XYZ
           wi = workitem
           params = get_params(wi) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-
-
           task.add_internal_guards!(workflow.guards[:internal])
           pp ["Canceling task #{action.class.to_s}: #{task_id}"]
           set_result_canceled(wi, task)
@@ -352,8 +343,8 @@ module XYZ
               end,
               :on_timeout => proc do 
                 result = {:type => :timeout_authorize_node, :task_id => task_id}
-                set_result_failed(workitem,result,task)
                 cancel_upstream_subtasks(workitem)
+                set_result_failed(workitem,result,task)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
@@ -373,14 +364,14 @@ module XYZ
           # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
           return if flavour
 
-            wi = workitem
-            params = get_params(wi) 
-            task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-            task.add_internal_guards!(workflow.guards[:internal])
-            pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-            set_result_canceled(wi, task)
-            delete_task_info(wi)
-            reply_to_engine(wi)
+          wi = workitem
+          params = get_params(wi) 
+          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+          task.add_internal_guards!(workflow.guards[:internal])
+          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          set_result_canceled(wi, task)
+          delete_task_info(wi)
+          reply_to_engine(wi)
         end
       end
 
@@ -407,8 +398,8 @@ module XYZ
                 if result[:statuscode] != 0
                   event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                   pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  set_result_failed(workitem,result,task)
                   cancel_upstream_subtasks(workitem)
+                  set_result_failed(workitem,result,task)
                 else
                   node.update_agent_git_commit_id(head_git_commit_id)
                   event = task.add_event(:complete_succeeded,result)
@@ -425,8 +416,8 @@ module XYZ
                 }
                 event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                 pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                set_result_timeout(workitem,result,task)
                 cancel_upstream_subtasks(workitem)
+                set_result_timeout(workitem,result,task)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
@@ -492,10 +483,8 @@ module XYZ
                   if errors_in_result = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                     pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    cancel_upstream_subtasks(workitem)
                     set_result_failed(workitem,result,task)
-#TODO: Rich: CancelLogic
-#see DTK-751
-#                    cancel_upstream_subtasks(workitem)
                   else
                     event = task.add_event(:complete_succeeded,result)
                     pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
@@ -511,8 +500,8 @@ module XYZ
                   }
                   event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                   pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  set_result_timeout(workitem,result,task)
                   cancel_upstream_subtasks(workitem)
+                  set_result_timeout(workitem,result,task)
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
                 end,

@@ -53,7 +53,7 @@ module DTK
       repo = get_workspace_repo()
 
       module_name = module_name()
-
+      # test
       # if user did not specify remote values we set default / current ones
       request_params[:remote_component_name]      ||= module_name
       request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()

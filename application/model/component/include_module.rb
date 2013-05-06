@@ -36,6 +36,7 @@ module DTK; class Component
       unless impls_to_set_on_incl_mods.empty? 
         #not doing updates if any errors
         if ret.empty?
+          incl_mod_mh = component_idhs.first.createMH(:include_module)
           update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
         end
       end

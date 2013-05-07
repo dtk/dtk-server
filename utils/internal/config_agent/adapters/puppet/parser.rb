@@ -563,7 +563,7 @@ end
       end
      private
       def default_value(default_ast_obj)
-        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:undef])
+        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:ast_array,:undef])
           TermPS.create(default_ast_obj)
         else
           Log.error("not treating type (#{default_ast_obj.class.to_s}) for an attribute default")
@@ -764,6 +764,9 @@ end
       def template?()
         nil
       end
+      def default_value(opts={})
+        to_s(opts)
+      end
     end
 
     class VariablePS < TermPS
@@ -863,6 +866,15 @@ end
           t.kind_of?(TermPS) ? t.to_s(opts.merge(:in_string => true)) : t.to_s
         end
         "[#{elements.join(",")}]"
+      end
+      def default_value(opts={})
+        self[:terms].map do |t|
+          #TODO: should :in_string be set to true
+          t.kind_of?(TermPS) ? t.default_value(opts.merge(:in_string => true)) : t.default_value()
+        end
+      end
+      def data_type()
+        "json" 
       end
       def can_match?(ast_term)
         if ast_term.kind_of?(VariablePS) 

@@ -344,7 +344,7 @@ module DTK; class ComponentDSL
             if default.set_default_value?()
               self[:type] = t(default.data_type)
               var_default = default.contains_variable?()
-              self[:default_info] = var_default ? unknown : t(default.to_s) 
+              self[:default_info] = var_default ? unknown : t(default.default_value()) 
             end
           end
           if var_default

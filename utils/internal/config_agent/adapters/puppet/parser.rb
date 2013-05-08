@@ -202,8 +202,9 @@ module DTK
         :var_def => ::Puppet::Parser::AST::VarDef,
         :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
         :ast_array => ::Puppet::Parser::AST::ASTArray,
+        :ast_hash => ::Puppet::Parser::AST::ASTHash,
       }
-      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array]
+      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array,:ast_hash]
 
       def parse_just_signatures?()
         @parse_just_signatures ||= R8::Config[:puppet][:parser][:parse_just_signatures] 
@@ -563,7 +564,7 @@ end
       end
      private
       def default_value(default_ast_obj)
-        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:ast_array,:undef])
+        if puppet_type?(default_ast_obj,[:string,:name,:variable,:boolean,:ast_array,:ast_hash,:undef])
           TermPS.create(default_ast_obj)
         else
           Log.error("not treating type (#{default_ast_obj.class.to_s}) for an attribute default")
@@ -743,6 +744,7 @@ end
          when :undef then UndefPS.new(ast_term,opts)
          when :function then FunctionPS.new(ast_term,opts)
          when :ast_array then ArrayPS.new(ast_term,opts)
+         when :ast_hash then HashPS.new(ast_term,opts)
          else raise R8ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
@@ -869,8 +871,7 @@ end
       end
       def default_value(opts={})
         self[:terms].map do |t|
-          #TODO: should :in_string be set to true
-          t.kind_of?(TermPS) ? t.default_value(opts.merge(:in_string => true)) : t.default_value()
+          t.kind_of?(TermPS) ? t.default_value(opts) : t.default_value()
         end
       end
       def data_type()
@@ -884,6 +885,43 @@ end
           ret = nil
           self[:terms].each_with_index do |t,i|
             return nil unless match = t.can_match?(ast_term[:terms][i])
+            ret = (ret ? ret + match : match)
+          end
+          ret
+        end
+      end
+    end
+
+    class HashPS < TermPS
+      def initialize(hash_ast,opts={})
+        self[:key_values] = hash_ast.value.inject(Hash.new) do |h,(k,term_ast)|
+          h.merge(k.value => TermPS.create(term_ast,opts))
+        end
+        super
+      end
+      def to_s(opts={})
+        hash =  self[:key_values].inject(Hash.new) do |h,(k,t)|
+          h.merge(k => t.kind_of?(TermPS) ? t.to_s(opts) : t.to_s())
+        end
+        hash.inspect()
+      end
+      def default_value(opts={})
+        self[:key_values].inject(Hash.new) do |h,(k,t)|
+          h.merge(k => t.kind_of?(TermPS) ? t.default_value(opts) : t.default_value())
+        end
+      end
+      def data_type()
+        "json" 
+      end
+      def can_match?(ast_term)
+        if ast_term.kind_of?(VariablePS) 
+          VarMatches.new.add(self,ast_term)
+        elsif ast_term.kind_of?(HashPS)
+          return nil unless self[:key_values].keys == ast_term[:key_values].keys
+          ret = nil
+          self[:key_values].each do |k,v|
+            rturn nil unless matching_val = ast_term[:key_values][k]
+            return nil unless match = v.can_match?(matching_val)
             ret = (ret ? ret + match : match)
           end
           ret

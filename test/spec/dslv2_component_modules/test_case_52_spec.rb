@@ -17,7 +17,7 @@ node_name = 'test1'
 component_name = 'temp::source'
 module_name = 'temp'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./lib/spec/dslv2_component_modules/resources/test_case_52_dtk.model.json"
+file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_52_dtk.model.json"
 file_for_change = "dtk.model.json"
 $assembly_id = 0
 
@@ -39,7 +39,7 @@ describe "Test Case 52: Rename existing component attribute in dtk.model.json fi
     it "upgrades #{module_name} module to DSLv2" do
       puts "DSLv2 upgrade:", "---------------------"
       pass = false
-      value = `dtk module dsl-upgrade #{module_name}`
+      value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")
       puts "DSLv2 upgrade of module #{module_name} completed successfully!" if pass == true
       puts "DSLv2 upgrade of module #{module_name} did not complete successfully!" if pass == false

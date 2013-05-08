@@ -1,0 +1,18 @@
+{
+  "module": "temp",
+  "dsl_version": "0.9",
+  "module_type": "puppet_module",
+  "components": {
+    "source": {
+      "external_ref": {
+        "puppet_class": "temp::source"
+      },
+      "attributes": {
+        "param2": {
+          "description": "Param2",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

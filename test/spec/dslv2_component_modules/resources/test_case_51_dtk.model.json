@@ -1,0 +1,39 @@
+{
+  "module": "temp",
+  "dsl_version": "0.9",
+  "module_type": "puppet_module",
+  "components": {
+    "source": {
+      "external_ref": {
+        "puppet_class": "temp::source"
+      },
+      "depends_on": [
+        {
+          "member": {
+            "component": "temp::sink",
+            "location": "remote",
+            "attribute_mappings": [
+              "host_address <- $members"
+            ]
+          }
+        }
+      ]
+    },
+    "sink": {
+      "external_ref": {
+        "puppet_class": "temp::sink"
+      },
+      "attributes": {
+        "members": {
+          "description": "Members gotten from connected sources",
+          "type": "array(string)",
+          "required": true
+        },
+        "param1": {
+          "description": "Param1",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

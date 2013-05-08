@@ -1,21 +1,32 @@
-module XYZ
+module DTK
   class Workflow
 
+    #Rich: moved thess to be in config file so each developer can test different configs
     # Configuration for 'inter_node_temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'
-    @@inter_node_temporal_coordination_mode = "STAGES"
+    # @@inter_node_temporal_coordination_mode = "STAGES"
     # Configuration for 'intra_node_temporal_coordination_mode'; Values: 'STAGES' 'TOTAL_ORDER'
-    @@intra_node_temporal_coordination_mode = "STAGES"
-    def self.guards_mode?
-      @@inter_node_temporal_coordination_mode == "GUARDS"
-    end
-    def self.stages_mode?
-      @@inter_node_temporal_coordination_mode == "STAGES"
-    end
-    def self.intra_node_total_order?
-      @@intra_node_temporal_coordination_mode == "TOTAL_ORDER"
-    end
-    def self.intra_node_stages?
-      @@intra_node_temporal_coordination_mode == "STAGES"
+    # @@intra_node_temporal_coordination_mode = "STAGES"
+    class << self
+      def guards_mode?
+        inter_node_temporal_coordination_mode() == "GUARDS"
+      end
+      def stages_mode?
+        inter_node_temporal_coordination_mode() == "STAGES"
+      end
+      def intra_node_total_order?
+        intra_node_temporal_coordination_mode() == "TOTAL_ORDER"
+      end
+      def intra_node_stages?
+        intra_node_temporal_coordination_mode() == "STAGES"
+      end
+
+     private
+      def inter_node_temporal_coordination_mode()
+        @inter_node_temporal_coordination_mode ||= R8::Config[:workflow][:temporal_coordination][:inter_node]
+      end
+      def intra_node_temporal_coordination_mode()
+        @intra_node_temporal_coordination_mode ||= R8::Config[:workflow][:temporal_coordination][:intra_node]
+      end
     end
 
     # Variables to enable cancelation of tasks. 

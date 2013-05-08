@@ -309,7 +309,6 @@ module XYZ
     def self.get_all_subtasks(top_id_handles)
       ret = Array.new
       id_handles = top_id_handles
-
       until id_handles.empty?
         model_handle = id_handles.first.createMH()
         sp_hash = {

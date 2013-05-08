@@ -248,9 +248,9 @@ shared_context "Replace dtk.model.json file with new one" do |module_name, file_
   it "#{it_message}" do
     puts "Replace dtk.model.json file with new one", "----------------------------------------"
     pass = false
-      `mv #{file_for_change_location} #{module_filesystem_location}/#{module_name}/#{file_for_change}`
+      `cp #{file_for_change_location} #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     value = `ls #{module_filesystem_location}/#{module_name}/#{file_for_change}`
-    pass = !value.include?("No such file or directory")
+    pass = value.include?("No such file or directory")
     puts "Old dtk.model.json replaced with new one!" if pass == true
     puts "Old dtk.model.json was not replaced with new one!" if pass == false
     puts ""

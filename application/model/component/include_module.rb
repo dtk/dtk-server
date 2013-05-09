@@ -2,8 +2,20 @@ module DTK; class Component
   class IncludeModule < Model
     #a version context element is hash with keys: :repo,:branch,:implementation
     def self.get_impls_for_version_context(component_idhs,impl_idhs)
-      ret = get_implementations(impl_idhs)
+      ret = impls = get_implementations(impl_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)
+      return ret if include_modules.empty?()
+
+      #if any include_module is not linked to a implementation then find implementations for include_modules
+      if include_modules.find{|incl_mod|incl_mod[:implementation].nil?}
+        mod_incl_viols = find_violations_and_set_impl(component_idhs,impls,include_modules)
+        unless mod_incl_viols.empty?
+          raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
+        end
+        #TODO: there is more efficient way of doing this than calling get_include_mods_with_impls again
+        include_modules = get_include_mods_with_impls(component_idhs)
+      end
+
       include_modules.each do |incl_mod|
         if impl = incl_mod[:implementation]
           ret << impl
@@ -12,16 +24,19 @@ module DTK; class Component
           raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
         end
       end
+
       ret
     end
 
-    #this method looks for include_mosules on a component in component_idhs and sees if it s matches
-    #if an include module is not set to an implementetaion it does so
-    #it returns a hash that has key :error_code and then params related to error key
-    def self.find_violations_and_set_impl(component_idhs,impls)
+    #TODO: below is done as first part of converge and above is done as part of procssing converge node tasks; tehy have related
+    #logic; may want to consolidate so only done in one place
+    #this method looks for include_modules on a component in component_idhs
+    #for each include_module it finds it looks to find a matching implementation if one does not exist
+    #it returns an array of hashes that has an error code and params related to error key
+    def self.find_violations_and_set_impl(component_idhs,impls,incl_mods=nil)
       ret = Array.new()
       return ret if component_idhs.empty?
-      incl_mods = get_include_mods_with_impls(component_idhs)
+      incl_mods ||= get_include_mods_with_impls(component_idhs)
       return ret if incl_mods.empty?
 
       impls_to_set_on_incl_mods = Array.new
@@ -69,7 +84,7 @@ module DTK; class Component
         [:and, [:eq,:module_name,incl_mod_info[:module_name]],
          [:eq,:version,Implementation.version_field(incl_mod_info[:version])]]
       end
-      filter = ((disjuncts.size == 1) ? disjuncts : ([:or] + disjuncts))
+      filter = ((disjuncts.size == 1) ? disjuncts.first : ([:or] + disjuncts))
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:repo,:branch,:module_name,:version],
         :filter => filter

@@ -109,7 +109,7 @@ module DTK; class ComponentModule
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
       aug_component_templates = get_aug_associated_component_templates()
-      Transaction do          
+      Transaction do
         ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
         #below is teh conservative thing to do if dont know if any deletes

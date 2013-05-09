@@ -58,9 +58,9 @@ module DTK
       request_params[:remote_component_name]      ||= module_name
       request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
 
-      if repo.linked_remote?(remote_repo)
-        raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
-      end
+      # if repo.linked_remote?(remote_repo)
+      #   raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
+      # end
 
       if module_name != request_params[:remote_component_name]
         # TODO: [Haris] Check with Rich, since if we use diffrent name we have a problem with unlinking, it is hard to unlink

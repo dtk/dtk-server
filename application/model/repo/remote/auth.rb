@@ -1,14 +1,14 @@
 module DTK; class Repo 
   class Remote
     module AuthMixin
-      #TODO: stub tht gives all users complete access
+      # TODO: stub tht gives all users complete access
       def raise_error_if_no_access(mh,remote_params,access_rights,opts={})
         module_name = remote_params[:module_name]
         type = type_for_remote_module(remote_params[:module_type])
-        #TODO: should be done a prori
+        
         if opts[:rsa_pub_key]
-          # TODO: [Haris] Check namespace here 
-          authorize_end_user(mh,module_name,DefaultsNamespace,type,opts[:rsa_pub_key],access_rights)
+          namespace = extract_namespace(remote_params[:remote_repo_name])
+          authorize_end_user(mh, module_name, namespace, type, opts[:rsa_pub_key], access_rights)
         end
         true
       end
@@ -37,6 +37,11 @@ module DTK; class Repo
         }
         client.grant_user_access_to_module(grant_user_rights_params)
         module_name
+      end
+
+      # matches namespace from the name remote_repo e.g. "dtk"
+      def extract_namespace(remote_repo_name)
+        remote_repo_name.nil? ? nil : remote_repo_name.scan(/\A.*?(?=--)/).first
       end
 
     end

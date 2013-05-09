@@ -29,7 +29,7 @@ describe "Test Case 56: Add new attribute mapping in depends_on section in dtk.m
 
   context "Upgrade module to DSLv2" do
     it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "---------------------"
+      puts "DSLv2 upgrade:", "--------------"
       pass = false
       value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")

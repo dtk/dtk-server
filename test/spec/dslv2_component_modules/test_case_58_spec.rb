@@ -29,7 +29,7 @@ describe "Test Case 58: NEG - Ill-formed json content (component instead of comp
 
   context "Upgrade module to DSLv2" do
     it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "---------------------"
+      puts "DSLv2 upgrade:", "--------------"
       pass = false
       value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")

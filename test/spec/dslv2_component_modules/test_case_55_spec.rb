@@ -29,7 +29,7 @@ describe "Test Case 55: Rename existing attribute mapping in depends_on section 
 
   context "Upgrade module to DSLv2" do
     it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "---------------------"
+      puts "DSLv2 upgrade:", "--------------"
       pass = false
       value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")

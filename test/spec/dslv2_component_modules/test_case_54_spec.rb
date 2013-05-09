@@ -41,7 +41,7 @@ describe "Test Case 54: Converge assembly with modified module (added new compon
 
   context "Upgrade module to DSLv2" do
     it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "---------------------"
+      puts "DSLv2 upgrade:", "--------------"
       pass = false
       value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")

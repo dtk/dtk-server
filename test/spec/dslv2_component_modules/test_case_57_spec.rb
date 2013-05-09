@@ -29,7 +29,7 @@ describe "Test Case 57: NEG - Have attribute with required field set to - falsee
 
   context "Upgrade module to DSLv2" do
     it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "---------------------"
+      puts "DSLv2 upgrade:", "--------------"
       pass = false
       value = `dtk module #{module_name} dsl-upgrade`
       pass = true if (value.include? "Status: OK")

@@ -33,8 +33,8 @@ describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combinati
   end
 
 	os_memory_array.each do |x|
-		os = x["os"]
-		memory = x["memory"]
+		os = x[:os]
+		memory = x[:memory]
 
 		context "For #{os} and #{memory} combination, stage assembly function on #{assembly_template} assembly template" do
 			include_context "Stage", dtk_common

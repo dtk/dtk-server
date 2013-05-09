@@ -44,7 +44,6 @@ module DTK; class StateChange
         #pp "Sorting components failed. Returning random component order"
         return ndx_ret.values
       end
-      
       return sorted_ndx_ret
     end
 

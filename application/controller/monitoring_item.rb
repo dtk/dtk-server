@@ -20,7 +20,7 @@ module XYZ
       prefix_log = "[CRON JOB]"
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
-      #find running assemblies
+      # find running assemblies
       assemblies = Assembly::Instance.get_assemblies_with_nodes(model_handle()).reject{|a|a[:is_staged]} 
 
       str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')

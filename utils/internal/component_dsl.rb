@@ -100,6 +100,13 @@ module DTK
       ret = klass.normalize(version_specific_input_hash)
 pp [:input_hash,version_specific_input_hash]
 pp [:normalize,ret]
+=begin
+      if self.class.default_integer_version() == 2
+        pp ret       
+        raise ErrorUsage.new("Still being worked on")
+        return {}
+      end
+=end
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret

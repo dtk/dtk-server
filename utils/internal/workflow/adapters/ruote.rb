@@ -2,14 +2,23 @@ require 'ruote'
 r8_nested_require('ruote','participant')
 r8_nested_require('ruote','generate_process_defs')
 
-module XYZ 
+module DTK 
   module WorkflowAdapter
-    class Ruote < XYZ::Workflow
+    class Ruote < DTK::Workflow
+
+      class Worker < ::Ruote::Worker
+        def run_in_thread
+          Thread.abort_on_exception = true
+          @running = true
+          @run_thread = CreateThread.defer{ run }
+        end
+      end
+
       #TODO: stubbed storage engine using hash store; look at alternatives like redis and
       #running with remote worker
       include RuoteParticipant
       include RuoteGenerateProcessDefs
-      Engine = ::Ruote::Engine.new(::Ruote::Worker.new(::Ruote::HashStorage.new))
+      Engine = ::Ruote::Engine.new(Worker.new(::Ruote::HashStorage.new))
       #register all the classes
       ParticipantList = Array.new
       ObjectSpace.each_object(Module) do |m|
@@ -206,7 +215,7 @@ module XYZ
   end
 end
 
-#TODO: see if stil needed
+#TODO: see if can do this by subclassing DispatchPool rather than monkey patch
 ###Monkey patches
 # Amar: Additional monkey patching to support instant cancel of concurrent running subtasks on cancel task request
 module Ruote
@@ -224,7 +233,7 @@ module Ruote
       # would be OK.
       # Or maybe it's the job of an extension / subclass
 
-      Thread.new do
+      DTK::CreateThread.defer do
         begin
           do_dispatch(participant, msg)
 
@@ -235,17 +244,3 @@ module Ruote
     end
   end
 end
-require 'ruote/worker'
-module Ruote
-  class Worker
-    def run_in_thread
-      Thread.abort_on_exception = true
-        # TODO : remove me at some point
-
-      @running = true
-
-      @run_thread = Thread.new { run }
-    end
-  end
-end
-

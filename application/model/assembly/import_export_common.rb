@@ -1,13 +1,24 @@
 module DTK
   module AssemblyImportExportCommon
     Seperators = {
-      :module_component => "::",
+      :module_component => "::", #TODO: if this changes need to change ModCompGsub
       :component_version => ":",
       :component_port => "/",
       :assembly_node => "/",
       :node_component => "/",
       :component_link_def_ref => "/"
     }
+    ModCompInternalSep = "__" #TODO: if this changes need to chage ModCompGsub[:sub]
+    ModCompGsub = {
+      :pattern => /(^[^:]+)::/, 
+      :sub => '\1__'
+    }
+
+    module InternalForm
+      def self.component_type(cmp_type_ext_form)
+        cmp_type_ext_form.gsub(ModCompGsub[:pattern],ModCompGsub[:sub])
+      end
+    end
 
     class AssemblyImportPortRef < SimpleHashObject
       def self.parse(port_ref,assembly_id=nil)
@@ -46,13 +57,11 @@ module DTK
           new(ret_hash)
         end
 
-        def component_type_internal_form(cmp_type)
-          #TODO: global for "__"
-          cmp_type = cmp_type.gsub(ModCompRegex,"__")
+        def component_type_internal_form(cmp_type_ext_form)
+          InternalForm.component_type(cmp_type_ext_form)
         end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
-      ModCompRegex = Regexp.new(Seperators[:module_component])
       ServiceLinkTarget= Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
 
       #ports are augmented with field :parsed_port_name

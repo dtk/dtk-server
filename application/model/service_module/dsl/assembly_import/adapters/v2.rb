@@ -42,7 +42,7 @@ module DTK; class ServiceModule
       DSLComponentTitleRegex = /(^.+)\[(.+)\]/
       
       def self.component_ref_parse(cmp)
-        term = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+        term = InternalForm.component_type(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
         ref = term
         display_name = term
         if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")

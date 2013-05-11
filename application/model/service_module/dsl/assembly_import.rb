@@ -251,7 +251,7 @@ module DTK; class ServiceModule
     end
 
     def self.component_ref_parse(cmp)
-      term = (cmp.kind_of?(Hash) ?  cmp.keys.first : cmp).gsub(Regexp.new(Seperators[:module_component]),"__")
+      term = InternalForm.component_type(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
       if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")
         type = $1; version = $2
       else
@@ -267,7 +267,6 @@ module DTK; class ServiceModule
     end
 
     def self.set_attribute_template_ids!(container_idh,cmp_ref)
-
       cmp_ref_info = cmp_ref.values.first
       if attrs = cmp_ref_info[:attribute_override]
         sp_hash = {

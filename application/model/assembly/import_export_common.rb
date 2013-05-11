@@ -13,10 +13,22 @@ module DTK
       :pattern => /(^[^:]+)::/, 
       :sub => '\1__'
     }
+    CmpVersionRegexp = Regexp.new("(^.+)#{Seperators[:component_version]}([0-9]+.+$)")
 
     module InternalForm
-      def self.component_type(cmp_type_ext_form)
+      def self.component_ref(cmp_type_ext_form)
         cmp_type_ext_form.gsub(ModCompGsub[:pattern],ModCompGsub[:sub])
+      end
+
+      #returns [ref,component_type,version] where version can be nil
+      def self.component_ref_type_and_version(cmp_type_ext_form)
+        ref = component_ref(cmp_type_ext_form)
+        if ref =~ CmpVersionRegexp
+          type = $1; version = $2
+        else
+          type = ref; version = nil
+        end
+        [ref,type,version]
       end
     end
 
@@ -58,7 +70,8 @@ module DTK
         end
 
         def component_type_internal_form(cmp_type_ext_form)
-          InternalForm.component_type(cmp_type_ext_form)
+          #TODO: this does not take into account that there could be a version on cmp_type_ext_form
+          InternalForm.component_ref(cmp_type_ext_form)
         end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")

@@ -251,13 +251,8 @@ module DTK; class ServiceModule
     end
 
     def self.component_ref_parse(cmp)
-      term = InternalForm.component_type(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
-      if term =~ Regexp.new("(^.+)#{Seperators[:component_version]}(.+$)")
-        type = $1; version = $2
-      else
-        type = term; version = nil
-      end
-      ret = {:component_type => type, :ref => term, :display_name => term}
+      ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
+      ret = {:component_type => type, :ref => ref, :display_name => ref}
       ret.merge!(:version => version) if version
       ret
     end

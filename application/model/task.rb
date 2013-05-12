@@ -123,11 +123,7 @@ module XYZ
     def update_parents(child_hash)
       parent = id_handle.createIDH(:id => child_hash[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)
       key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
-      if parent[:children_status].nil?
-        Log.error("TODO: Fix bug that parent[:children_status] is nil")
-        return
-      end
-      children_status = parent[:children_status].merge!(key => child_hash[:status])
+      children_status = (parent[:children_status]||{}).merge!(key => child_hash[:status])
 
       parent_updates = {:children_status => children_status}
       #compute parent start time
@@ -356,6 +352,7 @@ module XYZ
       [
        :id,
        :display_name,
+       :group_id,
        :status,
        :result,
        :updated_at,

@@ -19,25 +19,6 @@ module XYZ
           params
         end
 
-        def get_head_git_commit_id()
-          # TODO Amar put this into configuration if needed
-          agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
-          agent_repo_url = "git@github.com:rich-reactor8/dtk-node-agent.git"
-          # Clone will be invoked only when DTK Server is started for the first time
-          cmd_opts = {:raise => true, :timeout => 60}
-          unless File.directory?(agent_repo_dir)
-            clone_args = [agent_repo_url, agent_repo_dir]
-            ::Grit::Git.new("").clone(cmd_opts, *clone_args)
-          end
-
-          # git pull will be invoked each time, 
-          # but this operation is very fast (few ms of roundtrip) when no changes present 
-          repo = ::Grit::Repo.new(agent_repo_dir)
-          repo.git.send(:pull, cmd_opts)
-          head_commit_id = repo.commits.first.id
-          return head_commit_id
-        end
-
         def set_task_to_executing(task)
           task.update_at_task_start()
         end
@@ -319,7 +300,6 @@ module XYZ
 
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
-          sleep(10) 
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -381,17 +361,19 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           
-          node = task[:executable_action][:node]
-          installed_agent_git_commit_id = node[:agent_git_commit_id]
-          head_git_commit_id = get_head_git_commit_id()
-          if head_git_commit_id == installed_agent_git_commit_id
-            set_result_succeeded(workitem,nil,task,action)
-            delete_task_info(workitem)
-            return reply_to_engine(workitem)
-          end
 
           # TODO Amar: test to remove dyn attrs and errors_in_result part
           execution_context(task,workitem,task_start) do
+
+            node = task[:executable_action][:node]
+            installed_agent_git_commit_id = node[:agent_git_commit_id]
+            head_git_commit_id = ::DTK::WorkflowAdapter::AgentGritAdapter.get_head_git_commit_id()
+            if head_git_commit_id == installed_agent_git_commit_id
+              set_result_succeeded(workitem,nil,task,action)
+              delete_task_info(workitem)
+              return reply_to_engine(workitem)
+            end
+
             callbacks = {
               :on_msg_received => proc do |msg|
                 result = msg[:body].merge("task_id" => task_id)
@@ -407,6 +389,8 @@ module XYZ
                   set_result_succeeded(workitem,result,task,action) if task_end 
                   action.get_and_propagate_dynamic_attributes(result)
                 end
+                # If there was a change on agents, wait for node's mcollective process to restart
+                sleep(5)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,

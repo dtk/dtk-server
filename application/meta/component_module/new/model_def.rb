@@ -50,7 +50,7 @@ lambda__segment_components =
   :schema=>:module,
   :table=>:component,
   :columns=>{
-    :dsl_parsed => {:type=>:boolean,:default=>false}, #set to true if dsl has successfully parsed
+    :dsl_parsed => {:type=>:boolean,:default=>false} # set to true if dsl has successfully parsed
   },
   :virtual_columns=>{
     :module_branches=>{

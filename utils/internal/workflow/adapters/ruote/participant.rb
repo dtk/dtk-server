@@ -367,7 +367,6 @@ module XYZ
 
             node = task[:executable_action][:node]
             installed_agent_git_commit_id = node[:agent_git_commit_id]
-            r8_require('agent_grit_adapter')
             head_git_commit_id = ::DTK::WorkflowAdapter::AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
               set_result_succeeded(workitem,nil,task,action)

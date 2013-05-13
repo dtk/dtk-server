@@ -30,6 +30,8 @@ files =
   ]
 r8_nested_require('internal',files)
 
+r8_nested_require('internal/workflow/adapters', 'agent_grit_adapter')
+
 #just load base classes; specific models dynamically loaded on need basis
 r8_nested_require('internal','data_sources') 
 

@@ -51,10 +51,19 @@ module DTK; class Task
 
       def self.get_intra_node_stages(cmp_deps, state_change_list, node)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
-        intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps.dup, state_change_list)
-        intranode_stages = Array.new
-        intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
-        node[:intra_node_stages] = intranode_stages
+        cd_ppt_stgs, scl_ppt_stgs = Stage::PuppetStageGenerator.generate_stages(cmp_ids_with_deps.dup, state_change_list.dup)
+        puppet_with_intranode_stages = Array.new
+        cd_ppt_stgs.each_with_index do |cd, i|
+          cmp_ids_with_deps_ps = cd_ppt_stgs[i].dup
+          state_change_list_ps = scl_ppt_stgs[i]
+          intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
+          intranode_stages = Array.new
+          intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
+          puppet_with_intranode_stages << intranode_stages
+        end
+        # Amar: to enable multiple puppet calls inside one puppet_apply agent call, 
+        # puppet_stages are added to intra node stages. Check PuppetStageGenerator class docs for more details
+        node[:intra_node_stages] = puppet_with_intranode_stages
         return cmp_ids_with_deps
       end
 

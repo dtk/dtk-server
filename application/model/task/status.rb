@@ -44,7 +44,7 @@ module DTK
         if opts[:format] == :table
           task_structure.status_table_form(status_opts)
         elsif opts[:format] == :list
-          task_structure.status_list()
+          task_structure.status_list(task_obj_idh.createMH(:node))
         else
           task_structure.status(status_opts)
         end
@@ -84,7 +84,7 @@ module DTK
 
     # Amar
     # This method will return task details in form of list. It is used when CLI list-task-info is invoked
-    def status_list()
+    def status_list(model_handle)
       ret = Hash.new
 
       ret[:task_id] = self[:id]
@@ -113,7 +113,23 @@ module DTK
             level_2_ret[:components] = Array.new
             level_3 = l2[:executable_action][:component_actions]            
             level_3.each do |l3|
-              level_2_ret[:components] << { :component_name => l3[:component][:display_name] }
+              # Amar: Following condition block checks if 'node_node_id' from component is identical to node's 'id' 
+              #       If two values are different, it means component came from node_group, and not from assembly instance
+              #       Result is printing component source
+              #       Check DTK-738 ticket for more details
+              source = "assembly_instance"
+              unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
+                node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
+                source = "node_group"
+              end
+              level_2_ret[:components] << 
+              { :component => 
+                {
+                  :component_name => l3[:component][:display_name], 
+                  :source => source, 
+                  :node_group => node_group 
+                } 
+              }
             end
           end
           level_1_ret[:nodes] << level_2_ret

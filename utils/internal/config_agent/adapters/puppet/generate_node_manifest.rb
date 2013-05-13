@@ -26,23 +26,28 @@ module XYZ
       end
 
       def generate_with_stages(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
+        # Amar: 'ret' variable will contain list of puppet manifests, each will be one puppet call inside puppet_apply agent
         ret = Array.new
-        add_default_extlookup_config!(ret)
-        add_assembly_attributes!(ret,assembly_attrs||[])
-        ret << generate_stage_statements(stages_ids.size)
-        stages_ids.each_with_index do |stage_ids, i|
-          stage = i+1
-          ret << " " #space between stages
-          puppet_stage = PuppetStage.new(stage,@import_statement_modules)
-          stage_ids.each do |cmp_id| 
-            cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
-            puppet_stage.generate_manifest!(cmp_with_attrs)
+        stages_ids.each do |stage_ids_ps|
+          ret_ps = Array.new
+          add_default_extlookup_config!(ret_ps)
+          add_assembly_attributes!(ret_ps,assembly_attrs||[])
+          ret_ps << generate_stage_statements(stage_ids_ps.size)
+          stage_ids_ps.each_with_index do |stage_ids, i|
+            stage = i+1
+            ret_ps << " " #space between stages
+            puppet_stage = PuppetStage.new(stage,@import_statement_modules)
+            stage_ids.each do |cmp_id| 
+              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
+              puppet_stage.generate_manifest!(cmp_with_attrs)
+            end
+            puppet_stage.add_lines_for_stage!(ret_ps)
           end
-          puppet_stage.add_lines_for_stage!(ret)
-        end
 
-        if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
-          ret += attr_val_stmts
+          if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
+            ret_ps += attr_val_stmts
+          end
+          ret << ret_ps
         end
         return ret
       end      

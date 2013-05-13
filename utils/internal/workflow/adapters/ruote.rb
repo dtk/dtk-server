@@ -1,6 +1,7 @@
 require 'ruote'
 r8_nested_require('ruote','participant')
 r8_nested_require('ruote','generate_process_defs')
+r8_nested_require('agent_grit_adapter')
 
 module XYZ 
   module WorkflowAdapter

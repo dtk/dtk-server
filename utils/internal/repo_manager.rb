@@ -94,6 +94,10 @@ module XYZ
         repo_name
       end
 
+      def repo_exists?(repo_name,branch)
+        adapter_repo = get_adapter_repo(context(repo_name,branch))
+      end
+
       def link_to_remote_repo(repo_name,branch,remote_name,remote_url)
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
         adapter_repo.add_or_update_remote(remote_name,remote_url)

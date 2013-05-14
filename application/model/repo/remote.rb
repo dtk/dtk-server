@@ -57,6 +57,12 @@ module DTK
         RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name,remote_branch)
       end
 
+      def remote_exists?(branch,remote_repo_name)
+        update_object!(:repo_name)
+        remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
+        RepoManagerGit.git_remote_exists?(remote_url)
+      end
+
       def link_to_remote(branch,remote_repo_name)
         update_object!(:repo_name)
         remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)

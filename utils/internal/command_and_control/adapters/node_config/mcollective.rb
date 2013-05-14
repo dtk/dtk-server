@@ -37,23 +37,30 @@ module XYZ
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
-        
+
         agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
-
-        repo = ::Grit::Repo.new(agent_repo_dir)
-        head = repo.commits().first
         node_commit_id = config_node[:node][:agent_git_commit_id]
-        diffs = repo.diff(node_commit_id, head.id, "mcollective_additions/plugins/v2.2/agent")
-
         agents = Hash.new
         name_regex = /\/agent\/(.+)/
-        diffs.each do |diff|
-          agent_name = name_regex.match(diff.b_path)[1]
-          if diff.deleted_file
-            agents[agent_name] = :deleted
-          else
-            File.open("#{agent_repo_dir}/#{diff.b_path}") { |file| agents[agent_name] = Base64.encode64(file.read) }
-          end          
+
+        if node_commit_id
+          repo = ::Grit::Repo.new(agent_repo_dir)
+          head = repo.commits().first
+          diffs = repo.diff(node_commit_id, head.id, "mcollective_additions/plugins/v2.2/agent")
+
+          diffs.each do |diff|
+            agent_name = name_regex.match(diff.b_path)[1]
+            if diff.deleted_file
+              agents[agent_name] = :deleted
+            else
+              File.open("#{agent_repo_dir}/#{diff.b_path}") { |file| agents[agent_name] = Base64.encode64(file.read) }
+            end          
+          end
+        else
+          agent_paths = Dir.glob("#{agent_repo_dir}/mcollective_additions/plugins/v2.2/agent/*")
+          agent_paths.each do |agent_path|
+            File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+          end
         end
 
         msg_content = { :agent_files => agents }

@@ -80,6 +80,11 @@ module DTK
 
       remote_repo_name = module_info[:git_repo_name]
 
+      # check if remote exists
+      if repo.remote_exists?(local_branch, remote_repo_name)
+        raise ErrorUsage.new("Remote repo already exists with given name and namespace")
+      end
+
       #link and push to remote repo
       repo.link_to_remote(local_branch,remote_repo_name)
       repo.push_to_remote(local_branch,remote_repo_name)

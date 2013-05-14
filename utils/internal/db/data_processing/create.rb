@@ -26,17 +26,19 @@ module XYZ
 
       #TODO: this can be optimzed and simplified
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
-#TODO: temp for debugging; theer are top leevl objects that can mistakenly trigger this
-unless model_handle[:parent_model_name]
-  unless [:repo,:datacenter,:library,:task].include?(model_handle[:model_name])
-    Log.error("missing :parent_model_name in (#{[model_handle,caller[0..5]].inspect}) in create_from_select")
-  end
-end
+
+        #TODO: temp for debugging; theer are top leevl objects that can mistakenly trigger this
+        unless model_handle[:parent_model_name]
+          unless [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl].include?(model_handle[:model_name])
+            Log.error("missing :parent_model_name in (#{[model_handle,caller[0..5]].inspect}) in create_from_select")
+          end
+        end
+
         duplicate_refs = opts[:duplicate_refs] || :allow #other alternatives: #:no_check | :error_on_duplicate | :prune_duplicates
         overrides = override_attrs.dup #because can remove elements
         set_updated_at!(overrides)
         set_created_at!(overrides)
-#TODO: benchmark point pp [:create_from_select,duplicate_refs]
+        #TODO: benchmark point pp [:create_from_select,duplicate_refs]
         user_info_assigns = DB.user_info_for_create_seleect(overrides,model_handle)
         
         #modify ds and its columns in concert

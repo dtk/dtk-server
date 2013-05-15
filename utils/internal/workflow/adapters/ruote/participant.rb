@@ -369,7 +369,7 @@ module XYZ
             installed_agent_git_commit_id = node[:agent_git_commit_id]
             head_git_commit_id = ::DTK::WorkflowAdapter::AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
-              set_result_succeeded(workitem,nil,task,action)
+              set_result_succeeded(workitem,nil,task,action) if task_end
               delete_task_info(workitem)
               return reply_to_engine(workitem)
             end

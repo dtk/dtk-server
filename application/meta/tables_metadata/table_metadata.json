@@ -50,7 +50,7 @@
       "template_type": "dtk_type",
       "image_id": "image_id",
       "size": "size",
-      "region" : "region"
+      "region": "region"
     }
   },
   "component": {
@@ -230,99 +230,105 @@
     "mapping": {
       "module_name": "name",
       "module_id": "dtk_id",
-      "has_diff" : "has_diff ? 'TRUE' : ''"
-    } 
+      "has_diff": "has_diff ? 'TRUE' : ''"
+    }
   },
   "task_status": {
-    "order": [   
-       "task_type",
-       "status",
-       "node",
-       "started_at",
-       "ended_at",
-       "errors"
+    "order": [
+      "task_type",
+      "status",
+      "node",
+      "started_at",
+      "ended_at",
+      "errors"
     ],
     "mapping": {
-       "task_type": "dtk_type",
-       "status": "status",
-       "node": "node.name",
-       "started_at": "started_at.get_date",
-       "ended_at": "ended_at.get_date",
-       "errors": "errors.message"
-   }
+      "task_type": "dtk_type",
+      "status": "status",
+      "node": "node.name",
+      "started_at": "started_at.get_date",
+      "ended_at": "ended_at.get_date",
+      "errors": "errors.message"
+    }
   },
   "assembly_task_status": {
     "order": [
-       "task_id",
-       "task_type",
-       "status",
-       "subtasks",
-       "started_at",
-       "ended_at"
+      "task_id",
+      "task_type",
+      "status",
+      "subtasks",
+      "started_at",
+      "ended_at"
     ],
     "mapping": {
-       "task_id": "dtk_id",
-       "task_type": "dtk_type",
-       "status": "status",
-       "subtasks": "subtasks.size",
-       "started_at": "started_at.get_date",
-       "ended_at": "ended_at.get_date"
-   }
+      "task_id": "dtk_id",
+      "task_type": "dtk_type",
+      "status": "status",
+      "subtasks": "subtasks.size",
+      "started_at": "started_at.get_date",
+      "ended_at": "ended_at.get_date"
+    }
   },
   "service_add_on": {
     "order": [
-       "id",
-       "name",
-       "description"
+      "id",
+      "name",
+      "description"
     ],
     "mapping": {
-       "id": "dtk_id",
-       "name": "display_name",
-       "description": "description"
-   }
+      "id": "dtk_id",
+      "name": "display_name",
+      "description": "description"
+    }
   },
   "violation": {
     "order": [
-       "type",
-       "description"
+      "type",
+      "description"
     ],
     "mapping": {
-       "type": "dtk_type",
-       "description": "description"
-   }
+      "type": "dtk_type",
+      "description": "description"
+    }
   },
   "netstat_data": {
-    "order": [   
-       "node_name",
-       "node_id",
-       "local_address",
-       "port",
-       "protocol"
+    "order": [
+      "node_name",
+      "node_id",
+      "local_address",
+      "port",
+      "protocol"
     ],
     "mapping": {
-       "node_name": "node_name",
-       "node_id": "node_id",
-       "local_address": "local_address",
-       "port": "port",
-       "protocol" : "protocol"
-   }
+      "node_name": "node_name",
+      "node_id": "node_id",
+      "local_address": "local_address",
+      "port": "port",
+      "protocol": "protocol"
+    }
   },
   "ps_data": {
-    "order": [  
-       "id",
-       "uid",
-       "pid",
-       "start_time",
-       "command"
+    "order": [
+      "id",
+      "uid",
+      "pid",
+      "start_time",
+      "command"
     ],
     "mapping": {
-       "id": "dtk_id",
-       "uid": "uid",
-       "pid": "pid",
-       "start_time": "start_time",
-       "command": "command.strip"
-   }
+      "id": "dtk_id",
+      "uid": "uid",
+      "pid": "pid",
+      "start_time": "start_time",
+      "command": "command.strip"
+    }
+  },
+  "module_version": {
+    "order": [
+      "version"
+    ],
+    "mapping": {
+      "version": "version"
+    }
   }
 }
-
-

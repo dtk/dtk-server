@@ -68,6 +68,11 @@ module DTK
       rest_ok_response ComponentModule.info(model_handle(), module_id)
     end
 
+    def rest__versions()
+      component_module = create_obj(:component_module_id)
+      rest_ok_response component_module.versions()
+    end
+
     def rest__info_about()
       component_module = create_obj(:component_module_id)
       about = ret_non_null_request_params(:about).to_sym

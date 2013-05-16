@@ -76,7 +76,8 @@ module DTK
       end
       rest_ok_response component_module.info_about(about)
     end
-    AboutEnum = [:components]
+
+    AboutEnum = [:components, :attributes]
 
     #### end: list and info actions ###
     

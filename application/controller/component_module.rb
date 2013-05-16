@@ -76,7 +76,8 @@ module DTK
       end
       rest_ok_response component_module.info_about(about)
     end
-    AboutEnum = [:components]
+
+    AboutEnum = [:components, :attributes]
 
     #### end: list and info actions ###
     
@@ -122,7 +123,7 @@ module DTK
       rest_ok_response 
     end
 
-    #get remote_module_info; throws an access rights usage error if user does not have access
+    # get remote_module_info; throws an access rights usage error if user does not have access
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)

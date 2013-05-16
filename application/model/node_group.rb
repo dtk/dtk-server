@@ -89,6 +89,18 @@ module XYZ
       name_to_id_helper(model_handle,name,sp_hash)
     end
 
+    def self.id_to_name(model_handle, id)
+      sp_hash =  {
+        :cols => [:display_name],
+           :filter => [:and,
+                       [:eq, :id, id],
+                       [:eq, :type, "node_group_instance"],
+                       [:neq, :datacenter_datacenter_id, nil]]
+      }
+      rows_raw = get_objs(model_handle,sp_hash)
+      return rows_raw.first[:display_name]
+    end
+
     def get_canonical_template_node()
       get_objs(:cols => [:canonical_template_node]).map{|r|r[:template_node]}.first
     end

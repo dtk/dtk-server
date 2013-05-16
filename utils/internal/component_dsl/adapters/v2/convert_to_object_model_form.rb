@@ -99,7 +99,7 @@ module DTK; class ComponentDSL; class V2
           el = {ca.attribute_name() => {
               "type"=>ca.datatype()||"string",
               "default" => ca.attribute_value(),
-              #"hidden" => true
+              "hidden" => true
             }}
           h.merge(el)
         end
@@ -185,6 +185,7 @@ module DTK; class ComponentDSL; class V2
             attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
             attr_props.set_if_not_nil("description",info["description"])
             attr_props.set_if_not_nil("required",info["required"])
+            attr_props.set_if_not_nil("hidden",info["hidden"])
             attrs.merge!(name => attr_props)
           end
           if ret["attribute"]

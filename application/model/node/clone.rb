@@ -24,7 +24,7 @@ module XYZ
     end
 
     def clone_post_copy_hook__component(component,opts={})
-      #if node is in assembly put component in teh assembly
+      #if node is in assembly put component in the assembly
       if assembly_id = update_object!(:assembly_id)[:assembly_id]
         component.update(:assembly_id => assembly_id)
       end

@@ -65,6 +65,11 @@ lambda__segment_components =
       [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
+    :version_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:version])]
+    },
     #MOD_RESTRUCT: deprecate below for above
     :library_repo=>{
       :type=>:json,

@@ -123,6 +123,11 @@ module XYZ
         updated_repos
       end
 
+      # get gitolite_admin keydir location
+      def get_keydir()
+        return "#{admin_directory()}keydir"
+      end
+
      private
       def admin_directory()
         @admin_directory ||= R8::Config[:repo][:git][:gitolite][:admin_directory] 

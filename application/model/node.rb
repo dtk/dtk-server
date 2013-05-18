@@ -1,12 +1,13 @@
-r8_nested_require('node','clone')
 r8_nested_require('node','meta')
 module XYZ
   class Node < Model
+    set_relation_name(:node,:node)
+
     r8_nested_require('node','template')
     r8_nested_require('node','filter')
-    include NodeClone
-    
-    set_relation_name(:node,:node)
+    r8_nested_require('node','clone')
+
+    include CloneMixin
     extend NodeMetaClassMixin 
 
     def self.common_columns()

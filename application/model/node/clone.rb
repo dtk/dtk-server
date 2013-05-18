@@ -29,15 +29,22 @@ module DTK; class Node
         @node = node
       end
       def process_component(component,opts={})
+        relevant_nodes = [@node] 
         #if node is in assembly put component in the assembly
         if assembly_id = @node.get_field?(:assembly_id)
           component.update(:assembly_id => assembly_id)
+          assembly_idh = @node.id_handle(:model_name => :assembly,:id => assembly_id)
+          relevant_nodes = Assembly::Instance.get_nodes([assembly_idh])
         end
 
-        #get the link defs/component_ports associated with components on the node; this is used
+        #get the link defs/component_ports associated with components on the node or for assembly nodes on assembly; this is used
         #to determine if need to add internal links and for port processing
-        node_link_defs_info = @node.get_objs(:cols => [:node_link_defs_info])
-
+        sp_hash = {
+          :cols => [:node_link_defs_info],
+          :filter => [:oneof, :id, relevant_nodes.map{|n|n.id()}]
+        }
+        node_link_defs_info = Model.get_objs(@node.model_handle(),sp_hash)
+        
         new_ports = create_new_ports(component,node_link_defs_info,opts)
 
         #update node_link_defs_info with new ports
@@ -51,7 +58,11 @@ module DTK; class Node
         end
 
         unless opts[:donot_create_internal_links]
-          LinkDef.create_needed_internal_links(@node,component,node_link_defs_info)
+          node_id = @node.id()
+          internal_node_link_defs_info = node_link_defs_info.select{|r|r[:id] == node_id}
+          unless internal_node_link_defs_info.empty?
+            LinkDef.create_needed_internal_links(@node,component,internal_node_link_defs_info)
+          end
         end
 
         unless opts[:donot_create_pending_changes]
@@ -62,6 +73,7 @@ module DTK; class Node
 
      private
       def create_new_ports(component,node_link_defs_info,opts={})
+        #TODO: needs to be modified to partition into input and output ports
         ret = Array.new
         component_id = component.id()
         component_link_defs = node_link_defs_info.map  do |r|

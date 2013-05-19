@@ -49,8 +49,10 @@ module DTK; class Node
 
         #update node_link_defs_info with new ports
         unless new_ports.empty?()
-          ndx_for_port_update = node_link_defs_info.inject(Hash.new){|h,r|h.merge(link_def[:id] => r)}
-          new_ports.each{|port| ndx_for_port_update[port[:link_def_id]].merge!(:port => port)}
+#TODO:
+Log.error("working on splicing in port ref to link def")
+#          ndx_for_port_update = node_link_defs_info.inject(Hash.new){|h,ld|h.merge(ld[:id] => ld)}
+ #         new_ports.each{|port| ndx_for_port_update[port[:link_def_id]].merge!(:port => port)}
         end
 
         if opts[:outermost_ports] 
@@ -61,7 +63,8 @@ module DTK; class Node
           node_id = @node.id()
           internal_node_link_defs_info = node_link_defs_info.select{|r|r[:id] == node_id}
           unless internal_node_link_defs_info.empty?
-            LinkDef.create_needed_internal_links(@node,component,internal_node_link_defs_info)
+            #TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
+            LinkDef::AutoComplete.create_internal_links(@node,component,internal_node_link_defs_info)
           end
         end
 
@@ -74,6 +77,9 @@ module DTK; class Node
      private
       def create_new_ports(component,node_link_defs_info,opts={})
         #TODO: needs to be modified to partition into input and output ports
+        #and also make sure that heer or in create_component_ports, only ports associated with component component are
+        #created; that is ones that are part of link def or ones that are on remote side of link def on extesting compoonent
+        #on node or assembly
         ret = Array.new
         component_id = component.id()
         component_link_defs = node_link_defs_info.map  do |r|

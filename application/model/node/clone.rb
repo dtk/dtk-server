@@ -60,10 +60,8 @@ module DTK; class Node
 
         #update node_link_defs_info with new ports
         unless new_ports.empty?()
-#TODO:
-Log.error("working on splicing in port ref to link def")
-#          ndx_for_port_update = node_link_defs_info.inject(Hash.new){|h,ld|h.merge(ld[:id] => ld)}
- #         new_ports.each{|port| ndx_for_port_update[port[:link_def_id]].merge!(:port => port)}
+          ndx_for_port_update = node_link_defs_info.inject(Hash.new){|h,ld|h.merge(ld[:id] => ld)}
+          new_ports.each{|port| ndx_for_port_update[port[:link_def_id]].merge!(:port => port)}
         end
 
         if opts[:outermost_ports] 
@@ -81,7 +79,6 @@ Log.error("working on splicing in port ref to link def")
       end
 
       def get_relevant_link_def_info(relevant_nodes)
-        #TODO: creating rendundant info; probably just need to return the node info plus link def
         ret = Array.new
         sp_hash = {
           :cols => [:node_link_defs_info],
@@ -92,26 +89,30 @@ Log.error("working on splicing in port ref to link def")
           
         component_type = @component.get_field?(:component_type)
         component_id = @component.id()
+        ndx_ret = Hash.new
         link_def_info_to_prune.each do |r|
           link_def = r[:link_def]
-          if link_def[:component_component_id] == component_id
-            ret << r.merge(:direction => :input)
-          elsif r[:link_def_link] and (r[:link_def_link][:remote_component_type] == component_type)
-            ret << r.merge(:direction => :output)
+          ndx = link_def[:id]
+          unless ndx_ret[ndx]
+            if link_def[:component_component_id] == component_id
+              ndx_ret[ndx] = r.merge(:direction => "input")
+            elsif (r[:link_def_link]||{})[:remote_component_type] == component_type
+              ndx_ret[ndx] = r.merge(:direction => "output")
+            end
           end
         end
-        ret
+        ndx_ret.values()
       end
 
       def create_new_ports(node_link_defs_info,opts={})
         ret = Array.new
-        rows = node_link_defs.map do |r|
+        rows = node_link_defs_info.map do |r|
           link_def = r[:link_def]
-          ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+          Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
         end
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
         port_mh = @node.model_handle(:port)
-        create_from_rows(port_mh,rows,opts)
+        Model.create_from_rows(port_mh,rows,opts)
       end
 
       #TODO: may deprecate; used just for GUI

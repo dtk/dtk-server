@@ -58,23 +58,24 @@ module DTK; class Node
 
         new_ports = create_new_ports(node_link_defs_info,opts)
 
-        #update node_link_defs_info with new ports
-        unless new_ports.empty?()
-          ndx_for_port_update = node_link_defs_info.inject(Hash.new){|h,ld|h.merge(ld[:id] => ld)}
-          new_ports.each{|port| ndx_for_port_update[port[:link_def_id]].merge!(:port => port)}
-        end
-
-        if opts[:outermost_ports] 
-          opts[:outermost_ports] += materialize_ports!(new_ports)
-        end
-
         unless opts[:donot_create_internal_links]
+          #set internal_node_link_defs_info and add any with new ports
+          internal_node_link_defs_info = Array.new
           node_id = @node.id()
-          internal_node_link_defs_info = node_link_defs_info.select{|r|r[:id] == node_id}
+          node_link_defs_info.each do |r|
+            if r[:id] == node_id
+              link_def_id = r[:link_def_id]
+              r[:port] ||= new_ports.find{|port|port[:link_def_id] = link_def_id}
+            end
+          end
           unless internal_node_link_defs_info.empty?
             #TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
             LinkDef::AutoComplete.create_internal_links(@node,@component,internal_node_link_defs_info)
           end
+        end
+
+        if opts[:outermost_ports] 
+          opts[:outermost_ports] += materialize_ports!(new_ports)
         end
       end
 

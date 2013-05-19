@@ -87,17 +87,17 @@ module XYZ
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
       link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
-      #local_cmp_info wil have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
+      #local_cmp_info will have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
       local_cmp_info_and_links = link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == "local"}
       return ret if local_cmp_info_and_links.empty?
       local_cmp_info = local_cmp_info_and_links.first #all elements wil agree on the parts aside from link_def_link
 
       remote_cmp_info = link_def_info.select{|r|r[:id] != local_cmp_info[:id]}
-      unless remote_cmp_info.size == 1
-        raise Error.new("Unexpected result that a unique remote port is not found")
-      else
-        remote_cmp_info = remote_cmp_info.first
+      if remote_cmp_info.empty?
+        raise Error.new("Unexpected result that a remote port cannot be not found")
       end
+      #local_cmp_info will have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
+      remote_cmp_info = remote_cmp_info.first
 
       return ret unless local_cmp_info[:link_type] == remote_cmp_info[:link_type]
       #find the matching link_def_link

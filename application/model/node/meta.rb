@@ -115,6 +115,13 @@ module XYZ
            :join_type => :left_outer,
            :join_cond=>{:link_def_id => q(:link_def,:id)},
            :cols => [:id,:display_name,:type,:connected]
+         },
+         {
+           :model_name=>:link_def_link,
+           :convert => true,
+           :join_type=>:left_outer,
+           :join_cond=>{:link_def_id=>:link_def__id},
+           :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type]
          }]
 
       lambda__segment_port =

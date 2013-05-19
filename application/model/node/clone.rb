@@ -20,32 +20,43 @@ module DTK; class Node
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       component = clone_copy_output.objects.first
-      ClonePostCopyHook.new(self).process_component(component,opts)
+      ClonePostCopyHookComponent.new(self,component).process(opts)
     end
 
    private
-    class ClonePostCopyHook
-      def initialize(node)
+    class ClonePostCopyHookComponent
+      def initialize(node,component)
         @node = node
+        @component = component
       end
-      def process_component(component,opts={})
+
+      def process(opts={})
         relevant_nodes = [@node] 
         #if node is in assembly put component in the assembly
         if assembly_id = @node.get_field?(:assembly_id)
-          component.update(:assembly_id => assembly_id)
+          @component.update(:assembly_id => assembly_id)
           assembly_idh = @node.id_handle(:model_name => :assembly,:id => assembly_id)
           relevant_nodes = Assembly::Instance.get_nodes([assembly_idh])
         end
 
+        create_new_ports_and_links(relevant_nodes,opts)
+
+        unless opts[:donot_create_pending_changes]
+          parent_action_id_handle = @node.get_parent_id_handle()
+          StateChange.create_pending_change_item(:new_item => @component.id_handle(), :parent => parent_action_id_handle)
+        end
+      end
+
+     private
+      def create_new_ports_and_links(relevant_nodes,opts={})
+      
         #get the link defs/component_ports associated with components on the node or for assembly nodes on assembly; this is used
         #to determine if need to add internal links and for port processing
-        sp_hash = {
-          :cols => [:node_link_defs_info],
-          :filter => [:oneof, :id, relevant_nodes.map{|n|n.id()}]
-        }
-        node_link_defs_info = Model.get_objs(@node.model_handle(),sp_hash)
-        
-        new_ports = create_new_ports(component,node_link_defs_info,opts)
+        node_link_defs_info = get_relevant_link_def_info(relevant_nodes)
+
+        return if node_link_defs_info.empty?()
+
+        new_ports = create_new_ports(node_link_defs_info,opts)
 
         #update node_link_defs_info with new ports
         unless new_ports.empty?()
@@ -64,33 +75,43 @@ Log.error("working on splicing in port ref to link def")
           internal_node_link_defs_info = node_link_defs_info.select{|r|r[:id] == node_id}
           unless internal_node_link_defs_info.empty?
             #TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
-            LinkDef::AutoComplete.create_internal_links(@node,component,internal_node_link_defs_info)
+            LinkDef::AutoComplete.create_internal_links(@node,@component,internal_node_link_defs_info)
           end
-        end
-
-        unless opts[:donot_create_pending_changes]
-          parent_action_id_handle = @node.get_parent_id_handle()
-          StateChange.create_pending_change_item(:new_item => component.id_handle(), :parent => parent_action_id_handle)
         end
       end
 
-     private
-      def create_new_ports(component,node_link_defs_info,opts={})
-        #TODO: needs to be modified to partition into input and output ports
-        #and also make sure that heer or in create_component_ports, only ports associated with component component are
-        #created; that is ones that are part of link def or ones that are on remote side of link def on extesting compoonent
-        #on node or assembly
+      def get_relevant_link_def_info(relevant_nodes)
+        #TODO: creating rendundant info; probably just need to return the node info plus link def
         ret = Array.new
-        component_id = component.id()
-        component_link_defs = node_link_defs_info.map  do |r|
+        sp_hash = {
+          :cols => [:node_link_defs_info],
+          :filter => [:oneof, :id, relevant_nodes.map{|n|n.id()}]
+        }
+        link_def_info_to_prune = Model.get_objs(@node.model_handle(),sp_hash)
+        return ret if link_def_info_to_prune.empty?
+          
+        component_type = @component.get_field?(:component_type)
+        component_id = @component.id()
+        link_def_info_to_prune.each do |r|
           link_def = r[:link_def]
           if link_def[:component_component_id] == component_id
-            link_def 
+            ret << r.merge(:direction => :input)
+          elsif r[:link_def_link] and (r[:link_def_link][:remote_component_type] == component_type)
+            ret << r.merge(:direction => :output)
           end
-        end.compact
+        end
+        ret
+      end
 
+      def create_new_ports(node_link_defs_info,opts={})
+        ret = Array.new
+        rows = node_link_defs.map do |r|
+          link_def = r[:link_def]
+          ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+        end
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-        Port.create_component_ports?(component_link_defs,@node,component,create_opts)
+        port_mh = @node.model_handle(:port)
+        create_from_rows(port_mh,rows,opts)
       end
 
       #TODO: may deprecate; used just for GUI

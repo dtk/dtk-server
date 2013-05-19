@@ -252,15 +252,6 @@ module DTK
       end
     end
 
-    #creates needed component Ports and updates node_link_defs_info
-    def self.create_component_ports?(component_link_defs,node,component,opts={})
-      ret = Array.new
-      rows = component_link_defs.map{|link_def|ret_port_create_hash(link_def,node,component,opts)}
-      return ret if rows.empty?
-      port_mh = node.model_handle(:port)
-      create_from_rows(port_mh,rows,opts)
-    end
-
     def self.ret_port_create_hash(link_def,node,component,opts={})
       node_id = node.id()
       port_mh = node.model_handle_with_auth_info.create_childMH(:port)
@@ -272,7 +263,7 @@ module DTK
           "component_internal"
         end
           
-      dir = direction_from_local_remote(link_def[:local_or_remote],opts)
+      dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
       cmp_ref = opts[:component_ref]
       title = cmp_ref && ComponentTitle.title?(cmp_ref)
       display_name = ref = ret_encoded_port_name(type,component_type,link_def,dir,title)

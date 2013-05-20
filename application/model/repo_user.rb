@@ -38,7 +38,7 @@ module XYZ
         
         pub_keys.each do |key|
           key_content = File.read("#{gitolite_admin_keydir}/#{key}")
-          raise ErrorUsage.new("Provided rsa public key already exists in gitolite_admin keydir") if (key_content == ssh_rsa_pub_key)
+          raise ErrorUsage.new("Provided rsa public key already exists in gitolite_admin keydir (#{key.to_s})") if (key_content == ssh_rsa_pub_key)
         end
       else
         case existing_users.size

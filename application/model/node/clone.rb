@@ -135,7 +135,7 @@ module DTK; class Node
           end
         end
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-        port_mh = @node.model_handle(:port)
+        port_mh = @node.child_model_handle(:port)
         Model.create_from_rows(port_mh,create_rows,opts)
       end
 
@@ -155,7 +155,7 @@ module DTK; class Node
           :filter => [:and, [:oneof, :node_node_id, @relevant_node_ids],
                       [:oneof,:component_type,ndx_remote_cmp_types.keys()]]
         }
-        cmp_mh = @node.model_handle(:component)
+        cmp_mh = @node.child_model_handle(:component)
         Model.get_objs(cmp_mh,sp_hash)
       end
       
@@ -165,7 +165,7 @@ module DTK; class Node
           :cols => [:id,:group_id,:display_name,:node_node_id],
           :filter => [:oneof, :node_node_id, @relevant_node_ids]
         }
-        port_mh = @node.model_handle(:port)
+        port_mh = @node.child_model_handle(:port)
         ports = Model.get_objs(port_mh,sp_hash)
         return ret if ports.empty?
         ports.each{|port|port.set_port_info!()}
@@ -178,7 +178,7 @@ module DTK; class Node
         ret = Array.new
         return ret if ports.empty?
         #TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
-        port_mh = @node.model_handle(:port)
+        port_mh = @node.child_model_handle(:port)
         external_port_idhs = ports.map do |port_hash|
           port_mh.createIDH(:id => port_hash[:id]) if ["component_internal_external","component_external"].include?(port_hash[:type])
         end.compact

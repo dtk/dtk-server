@@ -263,6 +263,7 @@ module DTK
           "component_internal"
         end
           
+      #TODO: clean up direction to make it cleaner how you set it
       dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
       cmp_ref = opts[:component_ref]
       title = cmp_ref && ComponentTitle.title?(cmp_ref)
@@ -274,6 +275,7 @@ module DTK
         :direction => dir,
         :node_node_id => node_id,
         :component_type => component_type,
+        :component_id => component.id(),
         :link_type => link_def[:link_type],
         :type => type
       }

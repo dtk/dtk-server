@@ -25,6 +25,12 @@
       :type=>:varchar,
       :size =>50
     },
+    :component_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
     :link_def_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:link_def,

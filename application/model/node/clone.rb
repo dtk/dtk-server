@@ -30,6 +30,7 @@ module DTK; class Node
         @component = component
         @relevant_nodes = get_relevant_nodes(node,component)
         @relevant_node_ids = @relevant_nodes.map{|n|n.id()}
+        @existing_ports = ExistingPorts.new() # for caching ports that exist already or ones that 
       end
 
       def process(opts={})
@@ -113,24 +114,26 @@ module DTK; class Node
 
         #find info about any component/ports belonging to a relevant node of that is connected by link def to @component
         ndx_cmps = get_relevant_components(node_link_defs_info).inject(Hash.new){|h,cmp|h.merge(cmp[:component_type] => cmp)}
-        ndx_ports = Hash.new #index ports by display_name and node ids 
-        get_relevant_ports(ndx_cmps.values).each do |port|
-          pntr = ndx_ports[port[:node_node_id]] ||= Hash.new
-          pntr[port[:display_name]] ||= port
-        end
+        get_relevant_ports(ndx_cmps.values).each{|port|@existing_ports.add_port(port)}
         ndx_nodes = @relevant_nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
 
         create_rows = Array.new
         node_link_defs_info.each do |r|
           link_def = r[:link_def]
-          create_rows << Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+          possible_port = Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+          #returns true if new port taht is added
+          if @existing_ports.add_if_does_not_exists?(possible_port)
+            create_rows << possible_port
+          end
+          
           if r[:direction] == "input"
             remote_cmp_type = r[:link_def_link][:remote_component_type]
             #TODO: need to see if this needs enhancement to treat components that take titles
             remote_cmp = ndx_cmps[remote_cmp_type]
             remote_node = ndx_nodes[remote_cmp[:node_node_id]]
+            #returns true if new port taht is added
             possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
-            unless (ndx_ports[remote_node[:id]]||{})[possible_port[:display_name]]
+            if @existing_ports.add_if_does_not_exists?(possible_port)
               create_rows << possible_port
             end
           end
@@ -169,6 +172,27 @@ module DTK; class Node
         }
         port_mh = @node.child_model_handle(:port)
         Model.get_objs(port_mh,sp_hash)
+      end
+
+      class ExistingPorts
+        def initialize()
+          @ndx_ports = Hash.new() #indexed by [node_id][display_name]
+        end
+        
+        def add_port(port)
+          pntr = @ndx_ports[port[:node_node_id]] ||= Hash.new
+          pntr[port[:display_name]] ||= port
+        end
+
+        def add_if_does_not_exists?(port)
+          unless port_exists?(port)
+            add_port(port)
+          end
+        end
+       private
+        def port_exists?(port)
+          !!(@ndx_ports[port[:node_node_id]]||{})[port[:display_name]]
+        end
       end
 
       #TODO: may deprecate; used just for GUI

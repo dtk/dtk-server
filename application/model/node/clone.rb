@@ -28,7 +28,8 @@ module DTK; class Node
       def initialize(node,component)
         @node = node
         @component = component
-        @relevant_node_ids = get_relevant_node_ids(node,component)
+        @relevant_nodes = get_relevant_nodes(node,component)
+        @relevant_node_ids = @relevant_nodes.map{|n|n.id()}
       end
 
       def process(opts={})
@@ -41,13 +42,13 @@ module DTK; class Node
       end
 
      private
-      def get_relevant_node_ids(node,component)
+      def get_relevant_nodes(node,component)
         if assembly_id = node.get_field?(:assembly_id)
           component.update(:assembly_id => assembly_id)
           assembly_idh = @node.id_handle(:model_name => :assembly,:id => assembly_id)
-          Assembly::Instance.get_nodes([assembly_idh]).map{|n|n.id}
+          Assembly::Instance.get_nodes([assembly_idh])
         else
-          [node.id()]
+          [node]
         end
       end
 
@@ -109,17 +110,33 @@ module DTK; class Node
       #This creates either ports on @component or ports connected by link def to @component
       def create_new_ports(node_link_defs_info,opts={})
         ret = Array.new
-        #find info about any component/ports belonging to a relevant node of that is connected by link def to @component
-        cmps = get_relevant_components(node_link_defs_info)
-        ports = get_relevant_ports(cmps)
 
-        rows = node_link_defs_info.map do |r|
+        #find info about any component/ports belonging to a relevant node of that is connected by link def to @component
+        ndx_cmps = get_relevant_components(node_link_defs_info).inject(Hash.new){|h,cmp|h.merge(cmp[:component_type] => cmp)}
+        ndx_ports = Hash.new #index ports by display_name and node ids 
+        get_relevant_ports(ndx_cmps.values).each do |port|
+          pntr = ndx_ports[port[:node_node_id]] ||= Hash.new
+          pntr[port[:display_name]] ||= port
+        end
+        ndx_nodes = @relevant_nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
+
+        create_rows = Array.new
+        node_link_defs_info.each do |r|
           link_def = r[:link_def]
-          Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+          create_rows << Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
+          if r[:direction] == "input"
+            remote_cmp_type = r[:link_def_link][:remote_component_type]
+            remote_cmp = ndx_cmps[remote_cmp_type]
+            remote_node = ndx_nodes[remote_cmp[:node_node_id]]
+            possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
+            unless (ndx_ports[remote_node[:id]]||{})[possible_port[:display_name]]
+              create_rows << possible_port
+            end
+          end
         end
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
         port_mh = @node.model_handle(:port)
-        Model.create_from_rows(port_mh,rows,opts)
+        Model.create_from_rows(port_mh,create_rows,opts)
       end
 
       def get_relevant_components(node_link_defs_info)
@@ -134,7 +151,7 @@ module DTK; class Node
         return ret if ndx_remote_cmp_types.empty?()
         
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type],
+          :cols => [:id,:group_id,:display_name,:node_node_id,:component_type],
           :filter => [:and, [:oneof, :node_node_id, @relevant_node_ids],
                       [:oneof,:component_type,ndx_remote_cmp_types.keys()]]
         }
@@ -145,7 +162,7 @@ module DTK; class Node
       def get_relevant_ports(cmps)
         ret = Array.new
         sp_hash = {
-          :cols => [:id,:group_id,:display_name],
+          :cols => [:id,:group_id,:display_name,:node_node_id],
           :filter => [:oneof, :node_node_id, @relevant_node_ids]
         }
         port_mh = @node.model_handle(:port)

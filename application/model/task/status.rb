@@ -190,6 +190,7 @@ module DTK
         error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
         error_msg << (error[:message]||"error")
         ret[:message] << error_msg
+        ret[:type] = error[:type]
       end
       ret
     end

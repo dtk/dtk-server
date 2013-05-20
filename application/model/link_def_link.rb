@@ -12,7 +12,18 @@ module DTK
       cmp_type = self[:remote_component_type]
       out_aug_ports.each do |out_port|
         if out_port[:port_info][:component_type] == cmp_type
-          ret << {:input_port => in_aug_port,:output_port => out_port}
+          match =  
+            case self[:type]
+             when "external"
+              in_aug_port[:node_node_id] != out_port[:node_node_id]
+             when "internal"
+              in_aug_port[:node_node_id] == out_port[:node_node_id]
+             else
+              raise Error.new("unexpected type for LinkDefLink object")
+            end
+          if match
+            ret << {:input_port => in_aug_port,:output_port => out_port}
+          end
         end
       end
       ret

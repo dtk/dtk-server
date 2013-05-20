@@ -30,6 +30,16 @@ module XYZ
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
         return match if match
+
+        # get all public key files from gitolite_admin keydir
+        # and raise exception if file with provided rsa_public_key exists already
+        gitolite_admin_keydir = RepoManager.get_keydir()
+        pub_keys = Dir.entries(gitolite_admin_keydir).select{|key| key.to_s.include?(".pub")}
+        
+        pub_keys.each do |key|
+          key_content = File.read("#{gitolite_admin_keydir}/#{key}")
+          raise ErrorUsage.new("Provided rsa public key already exists in gitolite_admin keydir (#{key.to_s})") if (key_content == ssh_rsa_pub_key)
+        end
       else
         case existing_users.size
          when 0

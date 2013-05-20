@@ -55,11 +55,9 @@ module XYZ
         node_group = r.hash_subset(:id,:group_id,:display_name)
         if target_idh = r[:node_group_relation].spans_target?
           target_id = target_idh.get_id()
-          unless target_nodes[target_id] 
-            target_nodes[target_id] = node_filter.filter(target_idh.create_object().get_node_members()).map{|n|n[:id]}
-            target_nodes[target_id].each do |n_id|
-              (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
-            end
+          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_members()).map{|n|n[:id]} 
+          target_nodes[target_id].each do |n_id|
+            (node_to_ng[n_id] ||= Hash.new)[node_group[:id]] ||= node_group
           end
         elsif node_filter.include?(r[:node_member])
           (node_to_ng[r[:node_member][:id]] ||= Hash.new)[node_group[:id]] ||= node_group

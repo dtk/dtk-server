@@ -98,5 +98,8 @@
       "started_at",
       "ended_at",
       "errors"
-   ]       
+   ],
+   "module_version":[
+      "version"
+   ]
 }

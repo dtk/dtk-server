@@ -33,7 +33,7 @@ class DtkCommon
 		@component_module_id_list = Array.new()
 
 		#Login to dtk application
-		response_login = RestClient.post(@ENDPOINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
+		response_login = RestClient.post(@ENDPINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
 		$cookies = response_login.cookies
 		$opts[:cookies] = response_login.cookies
 	end

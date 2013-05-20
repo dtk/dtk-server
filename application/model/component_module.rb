@@ -36,7 +36,15 @@ module DTK
      ndx_ret.values
     end
 
+    ##
+    # Returnes versions for specified module
+    #
+    def versions()
+      get_objs(:cols => [:version_info]).collect { |v_info| { :version => v_info[:module_branch][:version] } }
+    end
+
     def info_about(about)
+      pp get_associated_component_instances()
       case about
        when :components
         get_objs(:cols => [:components]).map do |r|

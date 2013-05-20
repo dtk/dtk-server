@@ -28,18 +28,11 @@ module DTK; class Node
       def initialize(node,component)
         @node = node
         @component = component
+        @relevant_node_ids = get_relevant_node_ids(node,component)
       end
 
       def process(opts={})
-        relevant_nodes = [@node] 
-        #if node is in assembly put component in the assembly
-        if assembly_id = @node.get_field?(:assembly_id)
-          @component.update(:assembly_id => assembly_id)
-          assembly_idh = @node.id_handle(:model_name => :assembly,:id => assembly_id)
-          relevant_nodes = Assembly::Instance.get_nodes([assembly_idh])
-        end
-
-        create_new_ports_and_links(relevant_nodes,opts)
+        create_new_ports_and_links(opts)
 
         unless opts[:donot_create_pending_changes]
           parent_action_id_handle = @node.get_parent_id_handle()
@@ -48,11 +41,19 @@ module DTK; class Node
       end
 
      private
-      def create_new_ports_and_links(relevant_nodes,opts={})
-      
-        #get the link defs/component_ports associated with components on the node or for assembly nodes on assembly; this is used
-        #to determine if need to add internal links and for port processing
-        node_link_defs_info = get_relevant_link_def_info(relevant_nodes)
+      def get_relevant_node_ids(node,component)
+        if assembly_id = node.get_field?(:assembly_id)
+          component.update(:assembly_id => assembly_id)
+          assembly_idh = @node.id_handle(:model_name => :assembly,:id => assembly_id)
+          Assembly::Instance.get_nodes([assembly_idh]).map{|n|n.id}
+        else
+          [node.id()]
+        end
+      end
+
+      def create_new_ports_and_links(opts={})
+        #get the link defs/component_ports associated with components on the node or for assembly, associated with an assembly node
+        node_link_defs_info = get_relevant_link_def_info()
 
         return if node_link_defs_info.empty?()
 
@@ -79,11 +80,11 @@ module DTK; class Node
         end
       end
 
-      def get_relevant_link_def_info(relevant_nodes)
+      def get_relevant_link_def_info()
         ret = Array.new
         sp_hash = {
           :cols => [:node_link_defs_info],
-          :filter => [:oneof, :id, relevant_nodes.map{|n|n.id()}]
+          :filter => [:oneof, :id, @relevant_node_ids]
         }
         link_def_info_to_prune = Model.get_objs(@node.model_handle(),sp_hash)
         return ret if link_def_info_to_prune.empty?
@@ -105,8 +106,13 @@ module DTK; class Node
         ndx_ret.values()
       end
 
+      #This creates either ports on @component or ports connected by link def to @component
       def create_new_ports(node_link_defs_info,opts={})
         ret = Array.new
+        #find info about any component/ports belonging to a relevant node of that is connected by link def to @component
+        cmps = get_relevant_components(node_link_defs_info)
+        ports = get_relevant_ports(cmps)
+
         rows = node_link_defs_info.map do |r|
           link_def = r[:link_def]
           Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
@@ -114,6 +120,40 @@ module DTK; class Node
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
         port_mh = @node.model_handle(:port)
         Model.create_from_rows(port_mh,rows,opts)
+      end
+
+      def get_relevant_components(node_link_defs_info)
+        ret = Array.new
+        ndx_remote_cmp_types = Hash.new
+        node_link_defs_info.each do |r|
+          if r[:direction] == "input"
+            cmp_type = r[:link_def_link][:remote_component_type]
+            ndx_remote_cmp_types[cmp_type] ||= true
+          end
+        end
+        return ret if ndx_remote_cmp_types.empty?()
+        
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:component_type],
+          :filter => [:and, [:oneof, :node_node_id, @relevant_node_ids],
+                      [:oneof,:component_type,ndx_remote_cmp_types.keys()]]
+        }
+        cmp_mh = @node.model_handle(:component)
+        Model.get_objs(cmp_mh,sp_hash)
+      end
+      
+      def get_relevant_ports(cmps)
+        ret = Array.new
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:oneof, :node_node_id, @relevant_node_ids]
+        }
+        port_mh = @node.model_handle(:port)
+        ports = Model.get_objs(port_mh,sp_hash)
+        return ret if ports.empty?
+        ports.each{|port|port.set_port_info!()}
+        cmp_types = cmps.map{|cmp|cmp[:component_type]}
+        ports.select{|port|cmp_types.include?(port[:port_info][:component_type])}
       end
 
       #TODO: may deprecate; used just for GUI

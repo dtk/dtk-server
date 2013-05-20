@@ -91,7 +91,7 @@ module XYZ
            :cols=>[:id,:display_name,:type]
        }]
 
-      ##### for connection to ports and port links
+      ##### for connection to ports and port link
       virtual_column :node_link_defs_info, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -121,7 +121,7 @@ module XYZ
            :convert => true,
            :join_type=>:left_outer,
            :join_cond=>{:link_def_id=>:link_def__id},
-           :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type]
+           :cols=>[:id,:display_name,:remote_component_type,:position,:type]
          }]
 
       lambda__segment_port =

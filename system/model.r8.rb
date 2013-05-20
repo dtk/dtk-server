@@ -458,6 +458,11 @@ module XYZ
 
     def self.get_objects_from_search_object(search_object,opts={})
       dataset = search_object.create_dataset()
+      # Amar: for debugging purpses uncomment following 4 lines to get SQL queries
+      #require 'rubygems'
+      #require 'ap'
+      #ap "dataset"
+      #ap dataset.sequel_ds.sql.gsub('"','')
       dataset ? dataset.all(opts) : nil
     end
 

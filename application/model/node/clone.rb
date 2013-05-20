@@ -126,6 +126,7 @@ module DTK; class Node
           create_rows << Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
           if r[:direction] == "input"
             remote_cmp_type = r[:link_def_link][:remote_component_type]
+            #TODO: need to see if this needs enhancement to treat components that take titles
             remote_cmp = ndx_cmps[remote_cmp_type]
             remote_node = ndx_nodes[remote_cmp[:node_node_id]]
             possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
@@ -162,15 +163,12 @@ module DTK; class Node
       def get_relevant_ports(cmps)
         ret = Array.new
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:node_node_id],
-          :filter => [:oneof, :node_node_id, @relevant_node_ids]
+          :cols => [:id,:group_id,:display_name,:node_node_id,:component_id],
+          :filter => [:and,[:oneof, :node_node_id, @relevant_node_ids],
+                      [:oneof,:component_id,cmps.map{|cmp|cmp.id()}]]
         }
         port_mh = @node.child_model_handle(:port)
-        ports = Model.get_objs(port_mh,sp_hash)
-        return ret if ports.empty?
-        ports.each{|port|port.set_port_info!()}
-        cmp_types = cmps.map{|cmp|cmp[:component_type]}
-        ports.select{|port|cmp_types.include?(port[:port_info][:component_type])}
+        Model.get_objs(port_mh,sp_hash)
       end
 
       #TODO: may deprecate; used just for GUI

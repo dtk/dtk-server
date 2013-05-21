@@ -126,6 +126,20 @@ module XYZ
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+    def self.list_wo_assembly_nodes(model_handle)
+      filter = [:and, [:oneof, :type, ["instance","staged"]], [:eq, :assembly_id, nil]]
+      sp_hash = {
+        :cols => common_columns() + [:assemblies],
+        :filter => filter
+      }
+      cols_except_name = common_columns() - [:display_name]
+      get_objs(model_handle,sp_hash).map do |n|
+        el = n.hash_subset(*cols_except_name)
+        assembly_name = (n[:assembly]||{})[:display_name]
+        el.merge(:display_name => user_friendly_name(n[:display_name],assembly_name))
+      end.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+
     def info()
       get_obj(:cols => InfoCols).hash_subset(*InfoCols)
     end

@@ -9,6 +9,15 @@ module Ramaze::Helper
       end
     end
 
+    def ret_nodes_by_subtype_class(model_handle)
+      subtype = ret_node_params_subtype()
+      if subtype == :template
+        ::DTK::Node::Template.list(model_handle)
+      else
+        ::DTK::Node.list_wo_assembly_nodes(model_handle)
+      end
+    end
+
     def ret_node_params_subtype()
       (ret_request_params(:subtype)||:instance).to_sym
     end

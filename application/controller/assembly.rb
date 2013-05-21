@@ -378,11 +378,17 @@ module DTK
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
+      sort_key = ret_request_params(:sort_key)
 
       if ret_request_param_boolean(:using_simple_queue)
         rest_ok_response SimpleActionQueue.get_results(action_results_id)
       else
-        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        if sort_key
+          sort_key = sort_key.to_sym
+          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing, sort_key) 
+        else
+          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        end
       end
     end
     ### end: mcollective actions

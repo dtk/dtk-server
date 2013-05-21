@@ -35,8 +35,8 @@
   },
   "node_template": {
     "order": [
-      "name",
       "id",
+      "name",
       "os",
       "template_type",
       "image_id",

@@ -97,6 +97,11 @@ module XYZ
       ret
     end
 
+    def set_attribute_value(attribute_value)
+      update(:value_asserted => attribute_value)
+      self[:value_asserted] = attribute_value
+    end
+
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
       ret = Array.new 

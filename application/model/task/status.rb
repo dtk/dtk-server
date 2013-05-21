@@ -117,7 +117,7 @@ module DTK
               #       If two values are different, it means component came from node_group, and not from assembly instance
               #       Result is printing component source
               #       Check DTK-738 ticket for more details
-              source = "assembly_instance"
+              source = "instance"
               unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
                 node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
                 source = "node_group"
@@ -190,6 +190,7 @@ module DTK
         error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
         error_msg << (error[:message]||"error")
         ret[:message] << error_msg
+        ret[:type] = error[:type]
       end
       ret
     end

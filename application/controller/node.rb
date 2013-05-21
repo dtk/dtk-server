@@ -115,7 +115,7 @@ module XYZ
 
     #### list and info actions ###
     def rest__list()
-      response = ret_node_subtype_class().list(model_handle())
+      response = ret_nodes_by_subtype_class(model_handle())
       rest_ok_response response
     end
 

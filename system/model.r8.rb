@@ -448,7 +448,7 @@ module XYZ
 
     def self.get_objects_from_search_object(search_object,opts={})
       dataset = search_object.create_dataset()
-      # DEBUG SQL HERE
+      # [Haris] DEBUG SQL HERE
       #require 'ap'
       #ap "SQL OUTPUT: #{self}"
       #ap dataset.sequel_ds.sql.gsub('"','') if dataset

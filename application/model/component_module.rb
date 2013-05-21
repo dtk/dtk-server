@@ -44,15 +44,31 @@ module DTK
     end
 
     def info_about(about)
-      pp get_associated_component_instances()
-      case about
-       when :components
+      case about.to_sym
+      when :components
         get_objs(:cols => [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
           {:id => cmp[:id], :display_name => cmp[:display_name].gsub(/__/,"::"),:version => branch.pp_version }
         end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
-       else
+      when :attributes
+        results = get_objs(:cols => [:attributes])
+        ret = results.inject([]) do |transformed, element|
+          attribute = element[:attribute]
+          transformed << { :id => attribute[:id], :display_name => attribute[:external_ref][:path], :value => attribute[:value_asserted] }
+        end
+        return ret
+      when :instances
+        results = get_objs(:cols => [:component_node_instances])
+        unique_ids, ret = [], []
+         results.each do |el|
+          unless unique_ids.include?(el[:node][:id])
+            unique_ids << el[:node][:id]
+            ret << el[:node]
+          end
+        end
+        return ret
+      else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end
     end

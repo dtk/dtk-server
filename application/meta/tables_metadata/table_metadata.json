@@ -309,14 +309,16 @@
   },
   "ps_data": {
     "order": [
-      "id",
+      "node_name",
+      "node_id",
       "uid",
       "pid",
       "start_time",
       "command"
     ],
     "mapping": {
-      "id": "dtk_id",
+      "node_name": "node_name",
+      "node_id": "node_id",
       "uid": "uid",
       "pid": "pid",
       "start_time": "start_time",

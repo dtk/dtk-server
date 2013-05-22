@@ -40,7 +40,7 @@ module DTK
     # Returnes versions for specified module
     #
     def versions()
-      get_objs(:cols => [:version_info]).collect { |v_info| { :version => v_info[:module_branch][:version] } }
+      get_objs(:cols => [:version_info]).collect { |v_info| { :version => ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) } }
     end
 
     def info_about(about)
@@ -92,10 +92,16 @@ module DTK
 
     def self.info(target_mh, id, opts={})
       sp_hash = {
-        :cols => [:id, :display_name,:version],
+        :cols => [:id, :display_name,:version,:repos],
         :filter => [:eq,:id,id]
       }
-      get_objs(target_mh, sp_hash.merge(opts)).first
+
+      response = get_obj(target_mh, sp_hash.merge(opts))
+
+      # TODO: When DTK-800 is resolved fix this part
+      namespaces = response[:repo][:remote_repo_namespace]
+      response.delete_if { |k,v| [:repo,:module_branch].include?(k) }
+      response.merge(:remote_namespace => namespaces)
     end
 
 

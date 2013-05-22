@@ -51,6 +51,40 @@ module XYZ
       ]
     end
 
+    def self.check_valid_id(model_handle,id,context={})
+      filter = [:eq, :id, id]
+      unless context.empty?
+        if assembly_id = context[:assembly_id]
+          filter = [:and,filter,[:eq,:assembly_id,assembly_id]]
+        else
+          raise Error.new("Unexepected context (#{context.inspect})")
+        end
+      end
+      check_valid_id_helper(model_handle,filter)
+    end
+
+    def self.name_to_id(model_handle,name,context={})
+      if context.empty?
+        return name_to_id_default(model_handle,name)
+      end
+      if assembly_id = context[:assembly_id]
+        #name should be of form node/component
+        #TODO: handling component names with titles
+        unless name =~ /(^[^\/]+)\/([^\/]+$)/
+          raise ErrorUsage.new("Ill-formed name for component (#{name})")
+        end
+        node_name = $1
+        cmp_name = $2
+        sp_hash = {
+          :cols => [:id,:node],
+          :filter => [:and,[:eq, :display_name, name], [:eq,:assembly_id,cmp_name]]
+        }
+        name_to_id_helper(model_handle,name,sp_hash.merge(:post_filter => lambda{|r|r[:node][:display_name] == node_name}
+      else
+        raise Error.new("Unexepected context (#{contenxt.inspect})")
+      end
+    end
+
     def get_node()
       get_obj_helper(:node)
     end

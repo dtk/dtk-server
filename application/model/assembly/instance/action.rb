@@ -107,7 +107,7 @@ module DTK
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   raw_data = response[:data].map{|r|node_info.merge(r)}
-                  action_results_queue.push(node_info[:id], raw_data)
+                  action_results_queue.push(node_info[:id], new(node_info[:display_name],raw_data))
                 end
               end
             }

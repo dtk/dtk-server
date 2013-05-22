@@ -25,7 +25,7 @@ module DTK
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
       node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
-      #not checking here if component_id points to valid object; check is in delete_component
+
       component_id = ret_non_null_request_params(:component_id)
       assembly.delete_component(id_handle(component_id,:component), node_id)
       rest_ok_response
@@ -83,6 +83,16 @@ module DTK
     FilterProc = {
       :attributes => lambda{|attr|not attr[:hidden]}
     }
+
+    def rest__add_ad_hoc_service_link()
+      assembly = ret_assembly_instance_object()
+      assembly_id = assembly.id()
+      service_type = ret_non_null_request_params(:service_type)
+      input_cmp_idh = ret_component_id_handle(:input_component_id,:assembly_id => assembly_id)
+      output_cmp_idh = ret_component_id_handle(:output_component_id,:assembly_id => assembly_id)
+      service_link_idh = assembly.add_ad_hoc_service_link(service_type,input_cmp_idh,service_link_idh)
+      rest_ok_response :service_link => service_link_idh.get_id()
+    end
 
     def rest__add_connection()
       assembly = ret_assembly_instance_object()
@@ -378,11 +388,17 @@ module DTK
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
+      sort_key = ret_request_params(:sort_key)
 
       if ret_request_param_boolean(:using_simple_queue)
         rest_ok_response SimpleActionQueue.get_results(action_results_id)
       else
-        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        if sort_key
+          sort_key = sort_key.to_sym
+          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing, sort_key) 
+        else
+          rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        end
       end
     end
     ### end: mcollective actions

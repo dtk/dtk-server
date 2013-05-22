@@ -59,14 +59,21 @@ module DTK
         end
         return ret
       when :instances
-        results = get_objs(:cols => [:component_node_instances])
-        unique_ids, ret = [], []
-         results.each do |el|
-          unless unique_ids.include?(el[:node][:id])
-            unique_ids << el[:node][:id]
-            ret << el[:node]
-          end
+        results = get_objs(:cols => [:component_module_instances_assemblies])
+        # another query to get component instances that do not have assembly
+        results += get_objs(:cols => [:component_module_instances_node])
+
+        ret = []
+        results.each do |el|
+          title_elements = [el[:node][:display_name],el[:component_instance][:display_name]]
+          title_elements.unshift(el[:assembly][:display_name]) if el[:assembly]
+          ret << { 
+            :id => el[:component_instance][:id], 
+            :display_name => title_elements.join('/'), 
+            :version => ModuleBranch.version_from_version_field(el[:component_instance][:version])
+          }
         end
+
         return ret
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        

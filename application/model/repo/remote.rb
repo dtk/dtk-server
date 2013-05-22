@@ -1,4 +1,5 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
+r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class Repo
     module RemoteMixin
@@ -60,7 +61,7 @@ module DTK
       def remote_exists?(branch,remote_repo_name)
         update_object!(:repo_name)
         remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
-        RepoManagerGit.git_remote_exists?(remote_url)
+        RepoManager.git_remote_exists?(remote_url)
       end
 
       def link_to_remote(branch,remote_repo_name)

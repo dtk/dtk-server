@@ -45,15 +45,6 @@ module DTK
       end
     end
 
-    #
-    # Returns boolean indicating if remote git url exists
-    #
-    def self.git_remote_exists?(remote_url)
-      git_object = Grit::Git.new('')
-
-      !git_object.native('ls-remote',{},remote_url).empty?
-    end
-
     def self.repo_server_dns()
       @git_dns ||= R8::Config[:repo][:git][:dns]
     end

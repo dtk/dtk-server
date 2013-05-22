@@ -86,10 +86,11 @@ module DTK
 
     def rest__add_ad_hoc_service_link()
       assembly = ret_assembly_instance_object()
+      assembly_id = assembly.id()
       service_type = ret_non_null_request_params(:service_type)
-      input_cmp_idh = ret_request_param_id_handle(:input_component_id,Component)
-      output_cmp_idh = ret_request_param_id_handle(:output_component_id,Component)
-      service_link_idh = assembly.add_ad_hoc_service_link(server_type,input_cmp_idh,service_link_idh)
+      input_cmp_idh = ret_component_id_handle(:input_component_id,:assembly_id => assembly_id)
+      output_cmp_idh = ret_component_id_handle(:output_component_id,:assembly_id => assembly_id)
+      service_link_idh = assembly.add_ad_hoc_service_link(service_type,input_cmp_idh,service_link_idh)
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 

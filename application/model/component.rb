@@ -52,7 +52,8 @@ module XYZ
     end
 
     def self.check_valid_id(model_handle,id,context={})
-      filter = [:eq, :id, id]
+      #TODO: put in check to make sure component instance and not a compoennt template
+      filter = [:eq,:id,id]
       unless context.empty?
         if assembly_id = context[:assembly_id]
           filter = [:and,filter,[:eq,:assembly_id,assembly_id]]
@@ -64,6 +65,7 @@ module XYZ
     end
 
     def self.name_to_id(model_handle,name,context={})
+      #TODO: put in check to make sure component instance and not a compoennt template
       if context.empty?
         return name_to_id_default(model_handle,name)
       end
@@ -75,11 +77,12 @@ module XYZ
         end
         node_name = $1
         cmp_name = $2
+        cmp_type = Component.component_type_from_user_friendly_name(cmp_name)
         sp_hash = {
           :cols => [:id,:node],
-          :filter => [:and,[:eq, :display_name, name], [:eq,:assembly_id,cmp_name]]
+          :filter => [:and,[:eq,:component_type,cmp_type], [:eq,:assembly_id,assembly_id]]
         }
-        name_to_id_helper(model_handle,name,sp_hash.merge(:post_filter => lambda{|r|r[:node][:display_name] == node_name}
+        name_to_id_helper(model_handle,name,sp_hash.merge(:post_filter => lambda{|r|r[:node][:display_name] == node_name}))
       else
         raise Error.new("Unexepected context (#{contenxt.inspect})")
       end

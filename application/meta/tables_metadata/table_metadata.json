@@ -94,6 +94,20 @@
       "value": "value"
     }
   },
+  "attribute_w_version": {
+    "order": [
+      "id",
+      "path",
+      "value",
+      "version"
+    ],
+    "mapping": {
+      "path": "display_name",
+      "id": "dtk_id",
+      "value": "value",
+      "version": "version"
+    }
+  },
   "module": {
     "order": [
       "id",

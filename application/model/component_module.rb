@@ -55,7 +55,8 @@ module DTK
         results = get_objs(:cols => [:attributes])
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
-          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted] }
+          branch = element[:module_branch]
+          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.pp_version}
         end
         return ret
       when :instances

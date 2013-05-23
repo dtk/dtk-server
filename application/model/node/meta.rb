@@ -137,6 +137,23 @@ module XYZ
         segment
       }
 
+      lambda__segment_node_binding =
+        lambda{|nb_cols,opts|
+        segment = {
+          :model_name => :node_binding_ruleset,
+          :convert => true,
+          :join_type => :inner,
+          :join_cond=>{:id => q(:node,:node_binding_rs_id)},
+          :cols => nb_cols
+        }
+        segment.merge!(opts) if (opts and not opts.empty?)
+        segment
+      }
+
+      virtual_column :node_bindings, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+         [ lambda__segment_node_binding.call(NodeBindingRuleset.common_columns(),{}) ]
+
       virtual_column :ports, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [lambda__segment_port.call([:id,:type,id(:node),:containing_port_id,:external_attribute_id,:direction,:location,:ref,:display_name,:name,:description],{})] #TODO: should we unify with Port.common_columns

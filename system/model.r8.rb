@@ -96,6 +96,7 @@ module XYZ
     end
 
     def self.name_to_id(model_handle,name)
+      return name.to_i if name.match(/^[0-9]+$/)
       name_to_id_default(model_handle,name)
     end
 

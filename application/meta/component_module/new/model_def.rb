@@ -178,8 +178,8 @@ lambda__segment_impls =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id],:filter=>[:eq,:is_workspace,true]),
-       lambda__segment_components.call(:cols => [:id],:filter=>[:eq,:assembly_id,nil]),
+      [lambda__segment_module_branches.call(:cols => [:id, :version],:filter=>[:eq,:is_workspace,true]),
+       lambda__segment_components.call(:cols => [:id, :display_name],:filter=>[:eq,:assembly_id,nil]),
        lambda__segment_attributes.call(:cols => [:id,:display_name,:value_asserted,:external_ref])
      ]
     },

@@ -2,17 +2,34 @@ module DTK
   class Node
     class Template < self
       def self.list(model_handle,opts={})
-        ret = Array.new
-        sp_hash = {
-          :cols => [:id,:ref,:display_name,:rules,:os_type]
-        }
-        sp_hash.merge!(:filter => opts[:filter]) if opts[:filter]
 
-        node_bindings = get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+        ret = Array.new
+        node_bindings = nil
+       
+        if opts[:target_id]
+          sp_hash = { :cols => [:node_bindings], :filter => [:eq, :datacenter_datacenter_id, opts[:target_id].to_i]}
+          node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
+          unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}            
+          node_bindings = unq_bindings.values
+        elsif opts[:is_list_all] == "true"
+          sp_hash = { :cols => [:node_bindings], :filter => [:neq, :datacenter_datacenter_id, nil]}
+          node_bindings = get_objs(model_handle.createMH(:node), sp_hash)
+          unq_bindings = node_bindings.inject({}) { |tmp,nb| tmp.merge(nb[:node_binding_rs_id] => nb[:node_binding_ruleset])}            
+          node_bindings = unq_bindings.values
+        else
+          sp_hash = {
+            :cols => [:id,:ref,:display_name,:rules,:os_type]
+          }
+          sp_hash.merge!(:filter => opts[:filter]) if opts[:filter]
+          node_bindings = get_objs(model_handle.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
+        end
+
         node_bindings.each do |nb|
           #TODO: fix so taht have a unique id for each
           unique_id = ((nb[:rules].size == 1) && nb[:id])
           nb[:rules].each do |r|
+            # Amar & Haris: Skipping node template in case when target name filter is sent in method request from CLI
+            next if (opts[:target_id] && r[:datacenter_datacenter_id] == opts[:target_id].to_i)
             el = {
               :display_name => nb[:display_name]||nb[:ref], #TODO: may just use display_name after fill in this column
               :os_type => nb[:os_type],

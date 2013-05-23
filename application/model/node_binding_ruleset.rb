@@ -1,11 +1,20 @@
 module XYZ
   class NodeBindingRuleset < Model
     def self.common_columns()
-      [:id,:display_name,:type,:os_type,:rules]
+      [:id,:display_name,:type,:os_type,:rules, :ref]
     end
 
     def self.check_valid_id(model_handle,id)
       check_valid_id_default(model_handle,id)
+    end
+    
+    def self.name_to_id(model_handle, name)
+      return name.to_i if name.match(/^[0-9]+$/)
+      sp_hash =  {
+        :cols => [:id],
+        :filter => [:eq, :ref, name]
+      }
+      name_to_id_helper(model_handle,name,sp_hash)
     end
 
     def find_matching_node_template(target)

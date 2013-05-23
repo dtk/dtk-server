@@ -187,6 +187,10 @@ module XYZ
       
       ret
     end
+
+    def print_path(component)
+      return "cmp[#{component[:display_name].gsub('__','::')}]/#{self[:display_name]}"
+    end
     
     #============= 
     def self.update_port_info(attr_mh,attr_link_rows_created)

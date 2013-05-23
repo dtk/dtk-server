@@ -42,7 +42,7 @@ module XYZ
       {
         :id => self[:id],
         :type => link_def_name,
-        :connection => "#{left_hand_side} <--> #{right_hand_side}"
+        :connection => "#{left_hand_side} --> #{right_hand_side}"
       }
     end
     def print_form_hash__port(port,node)

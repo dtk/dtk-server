@@ -50,10 +50,10 @@ module XYZ
     end
     private :print_form_hash__port
 
-    def self.create_link(parent_idh,hash)
+    def self.create_from_hash(parent_idh,hash)
       link_to_create = Hash.new
       override_attrs = Hash.new
-      hash.each_par do |k,v|
+      hash.each do |k,v|
         if [:input_id,:output_id].include?(k)
           link_to_create[k] = v
         else
@@ -64,7 +64,7 @@ module XYZ
     end
 
     def self.create_from_links_hash(parent_idh,links_to_create,opts={})
-      parent_mn =  parent_idh[:model_name]
+      parent_mn = parent_idh[:model_name]
       parent_id = parent_idh.get_id()
       port_link_mh = parent_idh.createMH(:model_name => :port_link,:parent_model_name => parent_mn)
       parent_col = DB.parent_field(parent_mn,:port_link)
@@ -80,6 +80,7 @@ module XYZ
       #TODO: push in use of :c into create_from_rows
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
+
 
     #TODO: think need to change to use locgical rdns instaed of ids to support a more efficient service/pull_from_remote so can determine diffs
     def self.ref_from_ids(input_id,output_id)

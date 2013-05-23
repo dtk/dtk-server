@@ -77,14 +77,12 @@ module DTK
 
      def create_new_port_link(input_port,output_port)
        target_idh = @assembly_instance.id_handle().get_parent_id_handle_with_auth_info()
-       link_to_create = {
+       hash_to_create = {
          :assembly_id => @assembly_instance.id(),
          :input_id => input_port.id(),
          :output_id => output_port.id()
        } 
-
-       create_opts = {:override_attrs => {:assembly_id => @assembly_instance.id()}
-       PortLink.create_from_links_hash(target_idh,[link_to_create],create_opts).first
+       PortLink.create_from_hash(target_idh,hash_to_create)
      end
 
    end

@@ -60,7 +60,7 @@ module XYZ
           override_attrs[k] = v
         end
       end
-      create_from_links_hash(parent_idh,[link_to_create],:override_attrs => :override_attrs).first
+      create_from_links_hash(parent_idh,[link_to_create],:override_attrs => override_attrs).first
     end
 
     def self.create_from_links_hash(parent_idh,links_to_create,opts={})

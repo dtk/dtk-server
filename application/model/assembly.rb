@@ -19,9 +19,13 @@ module DTK
     end
 
     def get_port_links(opts={})
+      filter = [:eq,:assembly_id,id()]
+      if opts[:filter]
+        filter = [:and,filter,opts[:filter]]
+      end
       sp_hash = {
         :cols => opts[:cols]||PortLink.common_columns(),
-        :filter => [:eq,:assembly_id,id()]
+        :filter => filter
       }
       Model.get_objs(model_handle(:port_link),sp_hash)
     end      

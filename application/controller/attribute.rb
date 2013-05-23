@@ -10,6 +10,15 @@ module XYZ
       {:data => attr_def}
     end
 
+    # Haris & Amar: Sets attribute value by attribute ID - Currently used for setting module component attribute default value
+    def rest__set()
+      attribute_id, attribute_value = ret_non_null_request_params(:attribute_id, :attribute_value)
+      attribute_instance = id_handle(attribute_id,:attribute).create_object(:model_name => :attribute)
+      attribute_instance.set_attribute_value(attribute_value)
+      
+      rest_ok_response( :attribute_id => attribute_id )
+    end
+
     #TODO: cleanup so dont have as much duplication with what is on init; wrote here becse not all cols for attribute save/update are actual columns
     #update or create depending on whether id is in post content
     def save(explicit_hash=nil,opts={})

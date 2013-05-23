@@ -5,7 +5,7 @@ module DTK
     #returns :is_complete => is_complete, :results => results
     # since action result queue post processing is specific to netstats results, 
     # you can disable mentioned post processing via flag :disable_post_processing
-    def self.get_results(queue_id,ret_only_if_complete,disable_post_processing)
+    def self.get_results(queue_id,ret_only_if_complete,disable_post_processing, sort_key = :port)
       is_complete = results = nil
       unless ret_only_if_complete
         results = self[queue_id].ret_whatever_is_complete
@@ -20,7 +20,8 @@ module DTK
           is_complete = false
         end
       end
-      {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results))}
+      ret = {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results, sort_key))}
+      return ret
     end
 
     Lock = Mutex.new
@@ -71,7 +72,7 @@ module DTK
         @node_name = node_name
       end
       attr_reader :data, :node_name
-      def self.post_process(results)
+      def self.post_process(results, sort_key = :port)
         unless results.kind_of?(Hash) #and results.values.first.kind_of?(self)
           return results
         end
@@ -82,7 +83,7 @@ module DTK
           result = results[node_id]
           node_name = result.node_name
           first = true
-          result.data.sort{|a,b|a[:port] <=> b[:port]}.each do |r|
+          result.data.sort{|a,b|a[sort_key] <=> b[sort_key]}.each do |r|
             if first
               ret << r.merge(:node_id => node_id,:node_name => node_name)
               first = false

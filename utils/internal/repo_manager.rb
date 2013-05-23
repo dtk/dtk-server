@@ -1,10 +1,21 @@
 require 'fileutils'
+require 'grit'
 module XYZ
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
       RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?]
-      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_server_ssh_rsa_fingerprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user]
+      AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_server_ssh_rsa_fingerprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user,:get_keydir]
+
+
+      #
+      # Returns boolean indicating if remote git url exists
+      #
+      def git_remote_exists?(remote_url)
+        git_object = Grit::Git.new('')
+
+        !git_object.native('ls-remote',{},remote_url).empty?
+      end
 
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)

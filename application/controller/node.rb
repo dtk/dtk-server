@@ -115,7 +115,8 @@ module XYZ
 
     #### list and info actions ###
     def rest__list()
-      response = ret_node_subtype_class().list(model_handle())
+      target_identifier = ret_request_params(:target_identifier)
+      response = ret_nodes_by_subtype_class(model_handle())
       rest_ok_response response
     end
 

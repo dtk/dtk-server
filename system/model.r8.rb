@@ -448,6 +448,12 @@ module XYZ
 
     def self.get_objects_from_search_object(search_object,opts={})
       dataset = search_object.create_dataset()
+      # [Haris] DEBUG SQL HERE
+      #require 'ap'
+      #ap "SQL OUTPUT: #{self}"
+      #ap dataset.sequel_ds.sql.gsub('"','') if dataset
+      #ap "OUTPUT:"
+      #ap dataset.all(opts) if dataset
       dataset ? dataset.all(opts) : nil
     end
 
@@ -499,6 +505,7 @@ module XYZ
       end
       rows.first
     end
+    
     def get_objs(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       Model.get_objs(model_handle(),sp_hash,opts)

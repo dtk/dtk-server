@@ -36,15 +36,46 @@ module DTK
      ndx_ret.values
     end
 
+    ##
+    # Returnes versions for specified module
+    #
+    def versions()
+      get_objs(:cols => [:version_info]).collect { |v_info| { :version => ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) } }
+    end
+
     def info_about(about)
-      case about
-       when :components
+      case about.to_sym
+      when :components
         get_objs(:cols => [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
           {:id => cmp[:id], :display_name => cmp[:display_name].gsub(/__/,"::"),:version => branch.pp_version }
         end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
-       else
+      when :attributes
+        results = get_objs(:cols => [:attributes])
+        ret = results.inject([]) do |transformed, element|
+          attribute = element[:attribute]
+          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted] }
+        end
+        return ret
+      when :instances
+        results = get_objs(:cols => [:component_module_instances_assemblies])
+        # another query to get component instances that do not have assembly
+        results += get_objs(:cols => [:component_module_instances_node])
+
+        ret = []
+        results.each do |el|
+          title_elements = [el[:node][:display_name],el[:component_instance][:display_name]]
+          title_elements.unshift(el[:assembly][:display_name]) if el[:assembly]
+          ret << { 
+            :id => el[:component_instance][:id], 
+            :display_name => title_elements.join('/'), 
+            :version => ModuleBranch.version_from_version_field(el[:component_instance][:version])
+          }
+        end
+
+        return ret
+      else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end
     end
@@ -61,10 +92,16 @@ module DTK
 
     def self.info(target_mh, id, opts={})
       sp_hash = {
-        :cols => [:id, :display_name,:version],
+        :cols => [:id, :display_name,:version,:repos],
         :filter => [:eq,:id,id]
       }
-      get_objs(target_mh, sp_hash.merge(opts)).first
+
+      response = get_obj(target_mh, sp_hash.merge(opts))
+
+      # TODO: When DTK-800 is resolved fix this part
+      namespaces = response[:repo][:remote_repo_namespace]
+      response.delete_if { |k,v| [:repo,:module_branch].include?(k) }
+      response.merge(:remote_namespace => namespaces)
     end
 
 

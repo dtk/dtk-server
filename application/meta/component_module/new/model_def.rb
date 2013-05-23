@@ -10,6 +10,80 @@ lambda__segment_module_branches =
   ret[:filter] = args[:filter] if args[:filter]
   ret
 }
+lambda__segment_components =
+  lambda{|args|
+  ret = {
+    :model_name=>:component,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:module_branch_id =>:module_branch__id},
+    :cols=>args[:cols]
+  }
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+}
+lambda__segment_instances =
+  lambda{|args|
+  ret = {
+    :model_name=>:component,
+    :convert => true,
+    :join_type=>:inner,
+    :alias => :component_instance,
+    :join_cond=>{:ancestor_id =>:component__id},
+    :cols=>args[:cols]
+  }
+
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+}
+
+lambda__segment_assembly =
+  lambda{|args|
+  ret = {
+    :model_name=>:component,
+    :convert => true,
+    :join_type=>:inner,
+    :alias => :assembly,
+    :join_cond=>{:id =>:component_instance__assembly_id},
+    :cols=>args[:cols]
+  }
+
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+}
+
+lambda__segment_node =
+  lambda{|args|
+  ret = {
+    :model_name=>:node,
+    :convert => true,
+    :join_type=>:inner,
+    :alias => :node,
+    :join_cond=>{:id =>:component_instance__node_node_id},
+    :cols=>args[:cols]
+  }
+
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+}
+
+lambda__segment_attributes =
+  lambda{|args|
+  ret = {
+    :model_name=>:attribute,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:component_component_id => :component__id},
+    :cols=>args[:cols]
+  }
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+}
 lambda__segment_repos =
   lambda{|args|
   {
@@ -27,19 +101,6 @@ lambda__segment_impls =
     :convert => true,
     :join_type=>:inner,
     :join_cond=>{:repo_id =>:module_branch__repo_id},
-    :cols=>args[:cols]
-  }
-  ret[:filter] = args[:filter] if args[:filter]
-  ret[:alias] = args[:alias] if args[:alias]
-  ret
-}
-lambda__segment_components =
-  lambda{|args|
-  ret = {
-    :model_name=>:component,
-    :convert => true,
-    :join_type=>:inner,
-    :join_cond=>{:module_branch_id =>:module_branch__id},
     :cols=>args[:cols]
   }
   ret[:filter] = args[:filter] if args[:filter]
@@ -65,6 +126,11 @@ lambda__segment_components =
       [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
+    :version_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:version])]
+    },
     #MOD_RESTRUCT: deprecate below for above
     :library_repo=>{
       :type=>:json,
@@ -78,7 +144,7 @@ lambda__segment_components =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_repos.call(:cols => [:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
+       lambda__segment_repos.call(:cols => [:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name,:remote_repo_namespace])]
     },
     :implementations=>{
       :type=>:json,
@@ -107,6 +173,15 @@ lambda__segment_components =
         :cols => [:id,:display_name,:version],
         :filter=>[:eq,:assembly_id,nil])
       ]
+    },
+    :attributes=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id],:filter=>[:eq,:is_workspace,true]),
+       lambda__segment_components.call(:cols => [:id, :display_name],:filter=>[:eq,:assembly_id,nil]),
+       lambda__segment_attributes.call(:cols => [:id,:display_name,:value_asserted,:external_ref])
+     ]
     },
     :assembly_templates=>{
       :type=>:json,
@@ -145,8 +220,42 @@ lambda__segment_components =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
-        :cols => [:id,:group_id,:display_name,:component_type,:version],
+        :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id],
         :filter=>[:neq,:node_node_id,nil])
+      ]
+    },
+    :component_module_instances_node=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+        lambda__segment_module_branches.call(:cols => [:id]),
+        lambda__segment_components.call(
+          :cols => [:id],
+          :filter=>[:eq,:type,'template']),
+        lambda__segment_instances.call(
+          :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id,:ancestor_id,:node_node_id],
+          :filter=>[:eq,:assembly_id,nil]),
+        lambda__segment_node.call(
+          :cols => [:id,:display_name])
+      ]
+    },
+    :component_module_instances_assemblies=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [
+        lambda__segment_module_branches.call(:cols => [:id]),
+        lambda__segment_components.call(
+          :cols => [:id],
+          :filter=>[:eq,:type,'template']),
+        lambda__segment_instances.call(
+          :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id,:ancestor_id,:node_node_id],
+          :filter=>[:neq,:node_node_id,nil]),
+        lambda__segment_assembly.call(
+          :cols => [:id,:display_name]),
+        lambda__segment_node.call(
+          :cols => [:id,:display_name])
       ]
     }
   },

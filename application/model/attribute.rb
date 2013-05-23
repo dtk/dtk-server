@@ -97,6 +97,11 @@ module XYZ
       ret
     end
 
+    def set_attribute_value(attribute_value)
+      update(:value_asserted => attribute_value)
+      self[:value_asserted] = attribute_value
+    end
+
     def self.augmented_attribute_list_from_task(task,opts={})
       component_actions = task.component_actions
       ret = Array.new 
@@ -139,9 +144,7 @@ module XYZ
       qualified_attribute_id_aux()
     end
     def qualified_attribute_name()
-      node_or_group_name =
-        if self.has_key?(:node) then self[:node][:display_name]
-      end
+      node_or_group_name = self.has_key?(:node) ? self[:node][:display_name] : nil
       qualified_attribute_name_aux(node_or_group_name)
     end
 
@@ -183,6 +186,10 @@ module XYZ
       ret[:default_info] = default_info if default_info
       
       ret
+    end
+
+    def print_path(component)
+      return "cmp[#{component[:display_name].gsub('__','::')}]/#{self[:display_name]}"
     end
     
     #============= 
@@ -269,10 +276,10 @@ module XYZ
 
     def self.attr_def_to_internal_form(hash)
       ret = Hash.new
-      [:required,:id].each{|k|ret[k] = hash[k] if hash.has_key?(k)}
+      [:required,:id].each{ |k| ret[k] = hash[k] if hash.has_key?(k) }
       ret[:display_name] = hash[:field_name] if hash.has_key?(:field_name)
       type_info = AttributeDatatype.attr_def_to_internal_form(hash)
-      type_info.each{|k,v|ret[k] = v}
+      type_info.each{ |k,v| ret[k] = v }
       ret[:external_ref] = attr_def_to_internal_form__external_ref(hash)
       ret[:value_asserted] = hash[:default_info] if hash.has_key?(:default_info)
       ret

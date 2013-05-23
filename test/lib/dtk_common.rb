@@ -29,11 +29,12 @@ class DtkCommon
 		@USERNAME = 'dtk10'
 		@PASSWORD = 'r8server'
 
-		#user as placeholder for component ids for specific module that are accumulated
+		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
 
 		#Login to dtk application
-		response_login = RestClient.post(@ENDPINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
+		response_login = RestClient.post(@ENDPOINT + '/rest/user/process_login', 'username' => @USERNAME, 'password' => @PASSWORD, 'server_host' => @SERVER, 'server_port' => @PORT)
+
 		$cookies = response_login.cookies
 		$opts[:cookies] = response_login.cookies
 	end
@@ -938,5 +939,227 @@ class DtkCommon
 		end
 		puts ""
 		return service_contains_template
+	end
+
+	def stage_node_template(staged_node_name, node_name)
+		#Get list of node templates, extract selected template, stage node template and return its node id
+		puts "Stage node:", "-----------"
+		node_id = nil
+		node_template_list = send_request('/rest/node/list', {:subtype=>'template'})
+
+		puts "List of avaliable node templates: "
+		pretty_print_JSON(node_template_list)
+
+		test_template = node_template_list['data'].select { |x| x['display_name'] == node_name }.first
+
+		if (!test_template.nil?)
+			puts "Node template #{node_name} found!"
+			template_node_id = test_template['id']
+			puts "Node template id: #{template_node_id}"
+
+			stage_node_response = send_request('/rest/node/stage', {:node_template_id=>template_node_id, :name=>staged_node_name})		
+
+			if (stage_node_response['data']['node_id'])
+				puts "Stage of #{node_name} node template completed successfully!"
+				node_id = stage_node_response['data']['node_id']
+				puts "Node id for a staged node template: #{node_id}"
+			else
+				puts "Stage node didnt pass!"
+			end
+		else
+			puts "Node template #{node_name} not found!"
+		end
+		puts ""
+		return node_id
+	end
+
+	def check_if_node_exists(node_id)
+		#Get list of existing nodes and check if staged node exists
+		puts "Check if node exists:", "---------------------"
+		node_exists = false
+		node_list = send_request('/rest/node/list', nil)
+		test_node = node_list['data'].select { |x| x['id'] == node_id }
+
+		puts "Node with id #{node_id}: "
+		pretty_print_JSON(test_node)
+
+		if (test_node.any?)	
+			extract_node_id = test_node.first['id']
+			execution_status = test_node.first['type']
+
+			if ((extract_node_id == node_id) && (execution_status == 'staged'))
+				puts "Node with id #{node_id} exists!"
+				node_exists = true
+			end
+		else
+			puts "Node with id #{node_id} does not exist!"
+		end
+		puts ""
+		return node_exists
+	end
+
+	def converge_node(node_id)
+		puts "Converge node:", "--------------"
+		node_converged = false
+		puts "Converge process for node with id #{node_id} started!"
+		create_task_response = send_request('/rest/node/create_task', {'node_id' => node_id})
+
+		if (@error_message == "")
+			task_id = create_task_response['data']['task_id']
+			puts task_id
+			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+			end_loop = false
+			count = 0
+			max_num_of_retries = 10
+
+			task_status = 'executing'
+			while task_status.include? 'executing' || end_loop == false
+				sleep 20
+				count += 1
+				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
+				status = response_task_status['data']['status']
+				if (status.include? 'succeeded')
+					task_status = status
+					node_converged = true
+					puts "Converge process finished successfully!"
+				elsif (status.include? 'failed')
+					task_status = status
+					puts "Converge process was not finished successfully! Some tasks failed!"
+				end
+				puts "Task execution status: #{task_status}"
+
+				if (count > max_num_of_retries)
+					puts "Max number of retries reached..."
+					puts "Converge process was not finished successfully!"
+					end_loop = true 
+				end
+			end
+		else
+			puts "Node was not converged successfully!"
+		end
+		puts ""
+		return node_converged
+	end
+
+	def destroy_node(node_id)
+		#Cleanup step - Destroy node
+		puts "Destroy node:", "-------------"
+		node_deleted = false
+		delete_node_response = send_request('/rest/node/destroy_and_delete', {:node_id=>node_id})
+
+		if (delete_node_response['status'] == "ok")
+			puts "Node deleted successfully!"
+			node_deleted = true
+		else
+			puts "Node was not deleted successfully!"
+		end
+		puts ""
+		return node_deleted
+	end
+
+	def add_component_to_assembly_node(node_id, component_name)
+		puts "Add component to assembly node:", "-------------------------------"
+		component_added = false
+		component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component_name})
+
+		if (component_add_response['status'] == 'ok')
+			puts "Component #{component_name} added to node!"
+			component_added = true
+		end
+		puts ""
+		return component_added
+	end
+
+	def set_attribute_on_node(node_id, attribute_name, attribute_value)
+		#Set attribute on particular node
+		puts "Set attribute on node:", "----------------------"
+		is_attribute_set = false
+
+		#Get attribute id for which value will be set
+		puts "List of node attributes:"
+		node_attributes = send_request('/rest/node/info_about', {:about=>'attributes', :subtype=>'instance', :node_id=>node_id})
+		pretty_print_JSON(node_attributes)
+
+		if (node_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first)
+			attribute_id = node_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+			#Set attribute value for given attribute id
+			select_attribute_value_response = send_request('/rest/node/set_attributes', {:node_id=>node_id, :value=>attribute_value, :pattern=>attribute_id})
+			extract_attribute_value = select_attribute_value_response['data'].first['value']
+
+			if (extract_attribute_value == attribute_value)
+				puts "Setting of #{attribute_name} attribute completed successfully!"
+				is_attribute_set = true
+			end
+		else
+			puts "Attribute #{attribute_name} does not exist on node!"
+		end
+		puts ""
+		return is_attribute_set
+	end
+
+	def check_get_netstats(node_id, port)
+		puts "Netstats check:", "---------------"
+		sleep 10 #Before initiating netstats check, wait for services to be up
+ 		netstats_check = false
+		response = send_request('/rest/node/initiate_get_netstats', {:node_id=>node_id})
+		action_results_id = response['data']['action_results_id']
+
+		end_loop = false
+		count = 0
+		max_num_of_retries = 50
+
+		while (end_loop == false)
+			sleep 20
+			count += 1
+			response = send_request('/rest/node/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+			puts "Netstats check:"
+			pretty_print_JSON(response)
+
+			if (count > max_num_of_retries)
+				puts "Max number of retries for getting netstats reached..."
+				end_loop = true
+			elsif (response['data']['is_complete'])
+				port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+
+				if (!port_to_check.nil?)
+					puts "Netstats check completed! Port #{port} avaiable!"
+					netstats_check = true
+					end_loop = true
+				else					
+					puts "Netstats check completed! Port #{port} is not avaiable!"
+					netstats_check = false
+					end_loop = true
+				end
+			end	
+		end
+		puts ""
+		return netstats_check
+	end
+
+	def check_list_task_info_status(node_id, component_name)
+		puts "List task info check:", "---------------------"
+		list_task_info_check = false
+
+		response = send_request('/rest/node/task_status', {:node_id=>node_id, :format=>:list})
+		puts "List task info check:"
+		pretty_print_JSON(response)
+		config_node_content = response['data']['actions'].last
+		component_content = config_node_content['nodes'].first
+
+		if (component_content['components'].select { |x| x['component']['component_name'].include? component_name}.first)
+			component = component_content['components'].select { |x| x['component']['component_name'] == component_name && x['component']['source'] == 'instance' && x['component']['node_group'].nil?}.first
+			pretty_print_JSON(component)
+
+			if (!component.nil?)
+				puts "List task info contains component #{component_name} from source=instance and node_group=nil"
+				list_task_info_check = true
+			else
+				puts "List task info does not contain component #{component_name} from source=instance and node_group=nil"
+			end
+		else
+			puts "List task info does not contain component #{component_name}"
+		end
+		puts ""
+		return list_task_info_check
 	end
 end

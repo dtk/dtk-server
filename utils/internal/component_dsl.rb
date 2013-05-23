@@ -87,6 +87,13 @@ module DTK
       VersionIntegerToVersion[integer_version]
     end
 
+    #TODO: this might move to a more common area
+    def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+      integer_version = VersionIntegerWhenVersionMissing
+      klass = self.class.load_and_return_version_adapter_class(integer_version)
+      klass.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+    end
+
    private
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["dsl_version"]

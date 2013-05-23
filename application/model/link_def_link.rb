@@ -1,6 +1,8 @@
 require  File.expand_path('link_def/context', File.dirname(__FILE__))
 module DTK
   class LinkDefLink < Model
+    r8_nested_require('link_def_link','stub')
+
     def self.common_columns()
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type]
     end

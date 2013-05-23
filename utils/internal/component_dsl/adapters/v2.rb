@@ -12,6 +12,10 @@ module DTK
         ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
       end
 
+      def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+        ObjectModelForm.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+      end
+
       def self.ret_migrate_processor(config_agent_type,module_name,old_version_hash)
         new_version = version(2)
         MigrateProcessor.new(new_version,config_agent_type,module_name,old_version_hash)

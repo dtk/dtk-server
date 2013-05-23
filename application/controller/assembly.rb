@@ -94,6 +94,16 @@ module DTK
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
+    def rest__add_ad_hoc_attribute_mapping()
+      #TODO: stub
+      assembly = ret_assembly_instance_object()
+      service_link_id = ret_non_null_request_params(:service_link_id)
+      port_link_idh = id_handle(service_link_id,:port_link) #TODO: stub; should make call tomake sure that it is an existing port link
+      attribute_mapping = ret_non_null_request_params(:attribute_mapping)
+      assembly.add_ad_hoc_attribute_mapping(port_link_idh,attribute_mapping)
+      rest_ok_response 
+    end
+
     def rest__add_connection()
       assembly = ret_assembly_instance_object()
       assembly_idh = assembly.id_handle()

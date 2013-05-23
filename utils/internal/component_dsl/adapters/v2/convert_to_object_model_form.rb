@@ -9,6 +9,10 @@ module DTK; class ComponentDSL; class V2
       Component.new(input_hash.req(:module)).convert(input_hash.req(:components))
     end
 
+    def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+      Choice.new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+    end
+
     def convert_to_hash_form(hash_or_array,&block)
       if hash_or_array.kind_of?(Hash)
         hash_or_array.each_pair{|k,v|block.call(k,v)}
@@ -296,6 +300,10 @@ module DTK; class ComponentDSL; class V2
     end
 
     class Choice < self
+      def initialize()
+        @possible_link = OutputHash.new()
+      end
+
       def self.convert_choices(conn_ref,conn_info,base_cmp,opts={})
         if choices = conn_info["choices"]
           choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts)}
@@ -335,9 +343,6 @@ module DTK; class ComponentDSL; class V2
       end
 
      private
-      def initialize()
-        @possible_link = OutputHash.new()
-      end
       def self.convert_choice(dep_cmp_info,base_cmp,parent_info={},opts={})
         new().convert(dep_cmp_info,base_cmp,parent_info,opts)
       end
@@ -370,6 +375,7 @@ module DTK; class ComponentDSL; class V2
         end
         {left => right}
       end
+      public :convert_attribute_mapping
 
       def convert_attr_ref_simple(attr_ref,dep_or_base,cmp,input_or_output)
         if attr_ref =~ /(^[^.]+)\.([^.]+$)/

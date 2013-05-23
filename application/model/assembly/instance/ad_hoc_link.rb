@@ -20,7 +20,7 @@ module DTK
        input_port,output_port,new_port_created = add_or_ret_ports?()
        unless new_port_created
          #see if there is an existing port link
-         #TODO: shoudl also add filter on service_type
+         #TODO: may also add filter on service_type
          filter = [:and,[:eq,:input_id,input_port.id()],[:eq,:output_id,output_port.id()]]
          pl_matches = @assembly_instance.get_port_links(:filter => filter)
          if pl_matches.size == 1
@@ -37,7 +37,7 @@ module DTK
      #returns input_port,output_port,new_port_created (boolean)
      def add_or_ret_ports?()
        new_port_created = false
-       ndx_matching_ports = find_matching_ports?([@input_cmp_idh,@output_cmp_idh]).inject(Hash.new){|h,p|h.merge(p[:id] => p)} 
+       ndx_matching_ports = find_matching_ports?([@input_cmp_idh,@output_cmp_idh]).inject(Hash.new){|h,p|h.merge(p[:component_id] => p)} 
        unless input_port = ndx_matching_ports[@input_cmp_idh.get_id()] 
          input_port = create_port(:input)
          new_port_created = true
@@ -51,37 +51,40 @@ module DTK
 
      def find_matching_ports?(cmp_idhs)
        sp_hash = {
-         :cols => Port.common_columns(),
+         :cols => [:id,:group_id,:display_name,:component_id],
          :filter => [:oneof,:component_id,cmp_idhs.map{|idh|idh.get_id()}]
        }
-       cmp_mh = cmp_idhs.first.createMH()
-       Model.get_objs(cmp_mh,sp_hash).select{|p|p.link_def_name() == @service_type}
+       port_mh = cmp_idhs.first.createMH(:port)
+       Model.get_objs(port_mh,sp_hash).select{|p|p.link_def_name() == @service_type}
      end
 
-     def create_port(dir)
-       @input_cmp.update_object!(:node_node_id)
-       @output_cmp.update_object!(:node_node_id)
+     def create_port(direction)
+       @input_cmp.update_object!(:node_node_id,:component_type)
+       @output_cmp.update_object!(:node_node_id,:component_type)
        link_def_stub = {:link_type => @service_type}
        if @input_cmp[:node_node_id] == @output_cmp[:node_node_id]
          link_def_stub[:has_internal_link] = true
        else
          link_def_stub[:has_external_link] = true
        end
-       component = (dir == :input ? @input_cmp : @output_cmp)
+       component = (direction == :input ? @input_cmp : @output_cmp)
        node = @assembly_instance.id_handle(:model_name => :node,:id => component[:node_node_id]).create_object()
-       create_hash = Port.ret_port_create_hash(link_def_stub,node,component)
-       create_opts = {:returning_sql_cols => [:id,:display_name,:group_id]}
+       create_hash = Port.ret_port_create_hash(link_def_stub,node,component,:direction => direction.to_s)
        port_mh = node.child_model_handle(:port)
-       Model.create_from_rows(port_mh,[create_hash],create_opts)
+       new_port_idh = Model.create_from_rows(port_mh,[create_hash]).first
+       new_port_idh.create_object()
      end
 
      def create_new_port_link(input_port,output_port)
        target_idh = @assembly_instance.id_handle().get_parent_id_handle_with_auth_info()
        link_to_create = {
+         :assembly_id => @assembly_instance.id(),
          :input_id => input_port.id(),
          :output_id => output_port.id()
        } 
-       PortLink.create_from_links_hash(target_idh,[link_to_create]).first
+
+       create_opts = {:override_attrs => {:assembly_id => @assembly_instance.id()}
+       PortLink.create_from_links_hash(target_idh,[link_to_create],create_opts).first
      end
 
    end

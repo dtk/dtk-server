@@ -50,6 +50,19 @@ module XYZ
     end
     private :print_form_hash__port
 
+    def self.create_link(parent_idh,hash)
+      link_to_create = Hash.new
+      override_attrs = Hash.new
+      hash.each_par do |k,v|
+        if [:input_id,:output_id].include?(k)
+          link_to_create[k] = v
+        else
+          override_attrs[k] = v
+        end
+      end
+      create_from_links_hash(parent_idh,[link_to_create],:override_attrs => :override_attrs).first
+    end
+
     def self.create_from_links_hash(parent_idh,links_to_create,opts={})
       parent_mn =  parent_idh[:model_name]
       parent_id = parent_idh.get_id()

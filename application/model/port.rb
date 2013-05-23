@@ -2,7 +2,7 @@ module DTK
   class Port < Model
     ####################
     def self.common_columns() 
-      [:id,:group_id,:display_name,:name,:description,:direction,:type,:location,:containing_port_id,:node_id]
+      [:id,:group_id,:display_name,:name,:description,:direction,:type,:location,:containing_port_id,:node_id,:component_id]
     end
 
     def self.check_valid_id(model_handle,id,opts={}) 
@@ -280,7 +280,7 @@ module DTK
         :type => type
       }
       row.merge!(:location_asserted => location_asserted) if location_asserted
-      row.merge!(:link_def_id => link_def[:id]) unless opts[:remote_side]
+      row.merge!(:link_def_id => link_def[:id]) unless (opts[:remote_side] or link_def[:id].nil?)
       row
     end
 

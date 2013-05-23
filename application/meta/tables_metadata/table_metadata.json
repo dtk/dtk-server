@@ -53,6 +53,20 @@
       "region": "region"
     }
   },
+  "node_template_all": {
+    "order": [
+      "id",
+      "name",
+      "os",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "os": "os_type",
+      "description": "description"
+    }
+  },
   "component": {
     "order": [
       "id",

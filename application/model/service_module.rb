@@ -114,9 +114,7 @@ module DTK
         end
         Assembly::Template.list(model_handle(:component),opts)
       when :components
-        require 'ap'
         assembly_templates = get_assembly_templates
-
       else
         raise ErrorUsage.new("TODO: not implemented yet: processing of info_about(#{about})")
       end

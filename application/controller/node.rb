@@ -115,8 +115,9 @@ module XYZ
 
     #### list and info actions ###
     def rest__list()
-      target_identifier = ret_request_params(:target_identifier)
-      response = ret_nodes_by_subtype_class(model_handle())
+      target_name, is_list_all = ret_request_params(:target_indentifier, :is_list_all)
+      target_id = DTK::Datacenter.name_to_id(model_handle(:datacenter), target_name) unless target_name.empty?
+      response = ret_nodes_by_subtype_class(model_handle(), { :target_id => target_id, :is_list_all => is_list_all })
       rest_ok_response response
     end
 
@@ -171,7 +172,8 @@ module XYZ
     def rest__stage()
       target = create_target_obj_with_default(:target_id)
       #TODO: would like to use form, but need to fix these fns up to do so: node_binding_rs =  create_obj(:node_template_id,NodeBindingRuleset)
-      node_binding_rs_id = ret_request_param_id(:node_template_id,NodeBindingRuleset)
+      node_binding_identifier = ret_request_params(:node_template_identifier)
+      node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset),node_binding_identifier)
       node_binding_rs = create_object_from_id(node_binding_rs_id,:node_binding_ruleset)
 
       opts = Hash.new

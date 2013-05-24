@@ -270,7 +270,18 @@ module DTK; class  Assembly
             ndx_task_rows[assembly_id] = task.slice(:status,:started_at)
           end
         end
-        assembly_rows.each{|r|r[:execution_status] = (ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status])||"staged"} 
+        #TODO: make sure this is right
+        assembly_rows.each do |r|
+          unless execution_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
+            execution_status =
+              case r[:node][:admin_op_status]
+                when "stopped" then "stopped"
+                when "running" then "running"
+                when "pending" then "staged"
+              end
+          end
+          r[:execution_status] = execution_status
+        end
         assembly_rows
       end
     end

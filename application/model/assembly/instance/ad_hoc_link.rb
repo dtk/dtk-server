@@ -5,8 +5,8 @@ module DTK
         AdHocLink::ServiceLink.new(self,service_type,input_cmp_idh,output_cmp_idh).add?()
       end
 
-      def add_ad_hoc_attribute_mapping(port_link_idh,attribute_mapping)
-        AdHocLink::AttributeMapping.add(self,port_link_idh,attribute_mapping)
+      def add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
+        AdHocLink::AttributeMapping.add(self,port_link,attribute_mapping)
       end
     end
     

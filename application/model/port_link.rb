@@ -1,8 +1,28 @@
 module XYZ
   class PortLink < Model
     def self.common_columns()
-      [:id,:group_id,:input_id,:output_id]
+      [:id,:group_id,:input_id,:output_id,:assembly_id]
     end
+
+    def self.check_valid_id(model_handle,id,opts={}) 
+      if opts[:assembly_idh]
+        sp_hash = {
+          :cols => [:id,:group_id,:assembly_id],
+          :filter => [:eq,:id,id]
+        }
+        rows = get_objs(model_handle,sp_hash)
+        unless port_link = rows.first
+          raise ErrorIdInvalid.new(id,pp_object_type())
+        end
+        unless port_link[:assembly_id] == opts[:assembly_idh].get_id()
+          raise ErrorUsage.new("Port with id (#{id.to_s}) does not belong to assembly")
+        end
+        id
+      else
+        check_valid_id_default(model_handle,id)
+      end
+    end
+    
 
     #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})

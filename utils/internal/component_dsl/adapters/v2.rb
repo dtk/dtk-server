@@ -12,7 +12,7 @@ module DTK
         ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
       end
 
-      def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
+      def self.convert_attribute_mapping_helper(input_am,base_cmp,dep_cmp,opts={})
         ObjectModelForm.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
       end
 

@@ -89,9 +89,9 @@ module DTK
 
     #TODO: this might move to a more common area
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
-      integer_version = VersionIntegerWhenVersionMissing
-      klass = self.class.load_and_return_version_adapter_class(integer_version)
-      klass.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+      integer_version = 2 #TODO: fix this being hard coded
+      klass = load_and_return_version_adapter_class(integer_version)
+      klass.convert_attribute_mapping_helper(input_am,base_cmp,dep_cmp,opts)
     end
 
    private

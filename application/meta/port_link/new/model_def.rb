@@ -25,5 +25,43 @@
     :required=>{:type=>:boolean}, 
     :output_is_local=>{:type=>:boolean} 
   },
+  :virtual_columns=>{
+    :augmented_ports=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{:model_name=>:port,
+         :alias=>:input_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__input_id},
+         :cols => Port.common_columns()
+       },
+       {
+         :model_name=>:component,
+         :alias=>:input_component,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:id=>:input_port__component_id},
+         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type]
+       },
+       {
+         :model_name=>:port,
+         :alias=>:output_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__output_id},
+         :cols => Port.common_columns()
+       },
+       {
+         :model_name=>:component,
+         :alias=>:output_component,
+         :convert => true,
+         :join_type=>:left_outer,
+         :join_cond=>{:id=>:output_port__component_id},
+         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type]
+       }]
+    }
+  },
   :many_to_one=>[:project,:datacenter, :component, :service_add_on,:library] #MOD_RESTRUCT: remove library
 }

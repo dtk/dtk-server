@@ -129,12 +129,13 @@ module DTK; class Node
           if r[:direction] == "input"
             remote_cmp_type = r[:link_def_link][:remote_component_type]
             #TODO: need to see if this needs enhancement to treat components that take titles
-            remote_cmp = ndx_cmps[remote_cmp_type]
-            remote_node = ndx_nodes[remote_cmp[:node_node_id]]
-            #returns true if new port taht is added
-            possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
-            if @existing_ports.add_if_does_not_exists?(possible_port)
-              create_rows << possible_port
+            if remote_cmp = ndx_cmps[remote_cmp_type]
+              remote_node = ndx_nodes[remote_cmp[:node_node_id]]
+              #returns true if new port taht is added
+              possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
+              if @existing_ports.add_if_does_not_exists?(possible_port)
+                create_rows << possible_port
+              end
             end
           end
         end

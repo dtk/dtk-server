@@ -94,13 +94,15 @@ module DTK; class Node
         component_type = @component.get_field?(:component_type)
         component_id = @component.id()
         ndx_ret = Hash.new
+        #prune if duplicate from perspective of link_def_id and remote_component_type
         link_def_info_to_prune.each do |r|
           link_def = r[:link_def]
-          ndx = link_def[:id]
+          remote_component_type =  (r[:link_def_link]||{})[:remote_component_type] #could be nil
+          ndx = "#{link_def[:id].to_s}--#{remote_component_type}"
           unless ndx_ret[ndx]
             if link_def[:component_component_id] == component_id
               ndx_ret[ndx] = r.merge(:direction => "input")
-            elsif (r[:link_def_link]||{})[:remote_component_type] == component_type
+            elsif remote_component_type == component_type
               ndx_ret[ndx] = r.merge(:direction => "output")
             end
           end

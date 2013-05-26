@@ -3,6 +3,14 @@ module DTK; class LinkDef
     def parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs,local_cmp_ref=nil)
       ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse(link_defs)
     end
+
+    #TODO: this is here so that can put attribute mappings from add hoc link commands in proper form
+    def parse_serialized_form_attribute_mapping(mapping)
+      #TODO: none of these used in attribute mapping parsing
+      config_agent_type = remote_link_defs = local_cmp_ref = nil
+      ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse_possible_link_attribute_mapping(mapping)
+    end
+
   end
 
   class ParseSerializedForm
@@ -96,6 +104,8 @@ module DTK; class LinkDef
         :input => parse_attribute_term(mapping.values.first)
       }
     end
+    public :parse_possible_link_attribute_mapping
+
     def parse_possible_link_on_create_events(events)
       trigger = events.first
       case trigger

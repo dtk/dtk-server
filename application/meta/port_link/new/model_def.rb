@@ -43,7 +43,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:id=>:input_port__component_id},
-         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type]
+         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type,:extended_base,:implementation_id]
        },
        {
          :model_name=>:port,
@@ -59,7 +59,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:id=>:output_port__component_id},
-         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type]
+         :cols=>[:id,:display_name,:group_id,:node_node_id,:component_type,:extended_base,:implementation_id]
        }]
     }
   },

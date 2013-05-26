@@ -57,6 +57,10 @@ module DTK; class  Assembly
     def get_target()
       get_obj_helper(:target,:target)
     end
+    
+    def get_target_idh()
+      id_handle().get_parent_id_handle_with_auth_info()
+    end
 
     def self.get_sub_assemblies(assembly_idhs)
       ret = Array.new

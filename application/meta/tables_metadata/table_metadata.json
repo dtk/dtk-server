@@ -53,6 +53,20 @@
       "region": "region"
     }
   },
+  "node_template_all": {
+    "order": [
+      "id",
+      "name",
+      "os",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "os": "os_type",
+      "description": "description"
+    }
+  },
   "component": {
     "order": [
       "id",
@@ -78,6 +92,20 @@
       "path": "display_name",
       "id": "dtk_id",
       "value": "value"
+    }
+  },
+  "attribute_w_version": {
+    "order": [
+      "id",
+      "path",
+      "value",
+      "version"
+    ],
+    "mapping": {
+      "path": "display_name",
+      "id": "dtk_id",
+      "value": "value",
+      "version": "version"
     }
   },
   "module": {

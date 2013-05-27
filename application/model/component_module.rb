@@ -55,9 +55,10 @@ module DTK
         results = get_objs(:cols => [:attributes])
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
-          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted] }
+          branch = element[:module_branch]
+          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.pp_version}            
         end
-        return ret
+        return ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       when :instances
         results = get_objs(:cols => [:component_module_instances_assemblies])
         # another query to get component instances that do not have assembly

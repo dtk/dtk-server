@@ -13,8 +13,8 @@ STDOUT.sync = true
 
 node_name = 'precise-micro'
 staged_node_name = 'test_case_83_instance'
-sudo_autoupgrade_attribute = 'true'
-component_name = 'sudo'
+attribute_value = 'true'
+component_name = 'jmeter'
 
 dtk_common = DtkCommon.new('', '')
 $node_id = 0
@@ -40,9 +40,9 @@ describe "Test Case 83: Stage node template, add apache component, set attribute
     include_context "Add component to node", dtk_common, staged_node_name, component_name
   end
 
-  context "Set sudo/autoupgrade attribute function" do
-    include_context "Set node attribute", dtk_common, staged_node_name, 'sudo/autoupgrade', sudo_autoupgrade_attribute
-  end
+  #context "Set sudo/autoupgrade attribute value" do
+  #  include_context "Set node attribute", dtk_common, staged_node_name, '2147586639', attribute_value
+  #end
 
   context "Converge node function" do
     include_context "Converge node", dtk_common, staged_node_name
@@ -56,9 +56,9 @@ describe "Test Case 83: Stage node template, add apache component, set attribute
     include_context "list-task-info function on node", dtk_common, staged_node_name, component_name
   end
   
-  #context "Delete and destroy node function" do
-  #  include_context "Destroy node", dtk_common, staged_node_name
-  #end
+  context "Delete and destroy node function" do
+    include_context "Destroy node", dtk_common, staged_node_name
+  end
 
   after(:all) do
     puts "", ""

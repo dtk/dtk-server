@@ -35,14 +35,16 @@ module Ramaze::Helper
       create_obj(param,::DTK::Port,extra_context)
     end
 
+    def ret_component_id(param,context={})
+      ret_request_param_id(param,::DTK::Component,context)
+    end
     def ret_component_id?(param,context={})
       if ret_request_params(param)
-        ret_request_param_id(param,::DTK::Component,context)
+        ret_component_id(param,context)
       end
     end
-
     def ret_component_id_handle(param,context={})
-      id = ret_request_param_id(param,::DTK::Component,context)
+      id = ret_component_id(param,context)
       id_handle(id,:component)
     end
 

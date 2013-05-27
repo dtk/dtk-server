@@ -84,6 +84,22 @@ module DTK
       :attributes => lambda{|attr|not attr[:hidden]}
     }
 
+    def rest__delete_service_link()
+      assembly = ret_assembly_instance_object()
+      filter = 
+        if ret_request_params(:service_link_id)
+          service_link_id = ret_request_param_id(:service_link_id,PortLink)
+          {:service_link_id => service_link_id}
+        else
+          service_type = ret_non_null_request_params(:service_type)
+          input_component_id = ret_component_id(:input_component_id, :assembly_id => assembly.id())
+          {:service_type => service_type, :input_component_id => input_component_id}
+        end
+      pp filter
+      #assembly.delete_service_link(:filter => filter)
+      rest_ok_response
+    end
+
     def rest__add_ad_hoc_service_link()
       assembly = ret_assembly_instance_object()
       assembly_id = assembly.id()

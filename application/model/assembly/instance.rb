@@ -190,8 +190,8 @@ module DTK; class  Assembly
       end
     end
 
-    def list_connections()
-      get_augmented_port_links().map{|r|r.print_form_hash()}
+    def list_connections(opts={})
+      get_augmented_port_links(opts).map{|r|r.print_form_hash()}
     end
 
     def list_connections__missing()

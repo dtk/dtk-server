@@ -62,7 +62,7 @@ module XYZ
           raise Error.new("Unexepected context (#{context.inspect})")
         end
       end
-      check_valid_id_helper(model_handle,filter)
+      check_valid_id_helper(model_handle,id,filter)
     end
 
     def self.name_to_id(model_handle,name,context={})

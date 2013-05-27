@@ -31,8 +31,16 @@ module DTK
     end      
 
     #augemented with the ports and nodes
-    def get_augmented_port_links()
+    def get_augmented_port_links(opts={})
       rows = get_objs(:cols => [:augmented_port_links])
+      if filter = opts[:filter]
+        unless filter.size == 1 and filter[:input_component_id]
+          raise Error.new("Unexepected filter (#{filter.inspect})")
+        end
+        input_component_id = filter[:input_component_id]
+        post_filer = lambda{|r|r[:input_port][:component_id] == input_component_id}
+        rows.reject!{|r|!post_filer.call(r)}
+      end
       rows.map do |r|
         r[:port_link].merge(r.slice(:input_port,:output_port,:input_node,:output_node))
       end

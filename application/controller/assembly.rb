@@ -113,6 +113,14 @@ module DTK
       rest_ok_response :connection_id => port_link_idh.get_id()
     end
 
+    def rest__list_service_links()
+      assembly = ret_assembly_instance_object()
+      component_id = ret_component_id?(:component_id,:assembly_id => assembly.id())
+      filter = (component_id && {:input_component_id => component_id})
+      ret = assembly.list_connections(filter ? {:filter => filter} : {})
+      rest_ok_response ret
+    end
+    #TODO: deprecate below for above
     def rest__list_connections()
       assembly = ret_assembly_instance_object()
       find_missing,find_possible = ret_request_params(:find_missing,:find_possible)

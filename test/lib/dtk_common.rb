@@ -602,6 +602,9 @@ class DtkCommon
 		puts ""
 	end
 
+	dtk = DtkCommon.new('','')
+	dtk.get_module_components_list('stdlib', '0.0.1')
+
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
 		component_exists_in_module = false

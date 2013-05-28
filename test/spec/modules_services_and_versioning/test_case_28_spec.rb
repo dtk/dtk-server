@@ -28,6 +28,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 		puts "************************************************************************************"
 		puts "Test Case 28: Import component module from remote and use this component in assembly"
 		puts "************************************************************************************"
+		puts ""
 	end
 
 	context "Import module function" do

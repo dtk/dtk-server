@@ -121,6 +121,16 @@ module DTK
       end.compact.sort{|a,b|a[:name] <=> b[:name]}
     end
 
+    def module_branches()
+      self.update_object!(:module_branches)
+      self[:module_branch]
+    end
+
+    def get_repos()
+      self.update_object!(:repos)
+      self[:repo]
+    end
+
     def workspace_library_diffs(version=nil)
       unless ws_branch = get_module_branch_matching_version(version)
         return nil

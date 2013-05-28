@@ -29,7 +29,7 @@ end
 
 shared_context "Add component to node" do |dtk_common, staged_node_name, component_name|
   it "adds a #{component_name} component to #{staged_node_name} node" do
-    component_added = dtk_common.add_component_to_assembly_node($node_id, component_name)
+    component_added = dtk_common.add_component_to_node($node_id, component_name)
     component_added.should eq(true)
   end
 end

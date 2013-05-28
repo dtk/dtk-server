@@ -956,8 +956,7 @@ class DtkCommon
 			puts "Node template #{node_name} found!"
 			template_node_id = test_template['id']
 			puts "Node template id: #{template_node_id}"
-
-			stage_node_response = send_request('/rest/node/stage', {:node_template_id=>template_node_id, :name=>staged_node_name})		
+			stage_node_response = send_request('/rest/node/stage', {:node_template_identifier=>template_node_id, :name=>staged_node_name})		
 
 			if (stage_node_response['data']['node_id'])
 				puts "Stage of #{node_name} node template completed successfully!"
@@ -1057,8 +1056,8 @@ class DtkCommon
 		return node_deleted
 	end
 
-	def add_component_to_assembly_node(node_id, component_name)
-		puts "Add component to assembly node:", "-------------------------------"
+	def add_component_to_node(node_id, component_name)
+		puts "Add component to node:", "----------------------"
 		component_added = false
 		component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component_name})
 

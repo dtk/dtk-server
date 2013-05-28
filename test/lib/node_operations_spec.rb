@@ -8,7 +8,7 @@ STDOUT.sync = true
 
 shared_context "Stage node template" do |dtk_common, node_name, staged_node_name|
   it "stages #{node_name} node template to #{staged_node_name} node" do
-    $node_id = dtk_common.stage_node_template(staged_node_name, node_name)    
+    $node_id = dtk_common.stage_node_template(node_name, staged_node_name)    
     $node_id.should_not eq(nil)
   end
 end

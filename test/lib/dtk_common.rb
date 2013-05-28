@@ -602,9 +602,6 @@ class DtkCommon
 		puts ""
 	end
 
-	dtk = DtkCommon.new('','')
-	dtk.get_module_components_list('stdlib', '0.0.1')
-
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
 		component_exists_in_module = false
@@ -944,7 +941,7 @@ class DtkCommon
 		return service_contains_template
 	end
 
-	def stage_node_template(staged_node_name, node_name)
+	def stage_node_template(node_name, staged_node_name)
 		#Get list of node templates, extract selected template, stage node template and return its node id
 		puts "Stage node:", "-----------"
 		node_id = nil

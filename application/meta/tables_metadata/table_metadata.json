@@ -211,6 +211,7 @@
       "type",
       "base_component",
       "dependent_component",
+      "required",
       "description"
     ],
     "mapping": {
@@ -218,6 +219,7 @@
       "type": "dtk_type",
       "base_component": "base_component",
       "dependent_component": "dependent_component",
+      "required": "required",
       "description": "description"
     }
   },
@@ -226,12 +228,14 @@
       "id",
       "type",
       "dependent_component",
+      "required",
       "description"
     ],
     "mapping": {
       "id": "dtk_id",
       "type": "dtk_type",
       "dependent_component": "dependent_component",
+      "required": "required",
       "description": "description"
     }
   },
@@ -269,13 +273,13 @@
     "order": [
       "id",
       "type",
-      "service_ref",
+      "base_component",
       "possible_connection"
     ],
     "mapping": {
       "id": "dtk_id",
       "type": "dtk_type",
-      "service_ref": "service_ref",
+      "base_component": "base_component",
       "possible_connection": "possible_connection"
     }
   },

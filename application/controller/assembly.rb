@@ -147,7 +147,7 @@ module DTK
         if find_possible
           assembly.list_connections__possible()
         elsif find_missing
-          assembly.list_connections__missing()
+          raise Error.new("Deprecated")
         else
           raise Error.new("Deprecated")
         end

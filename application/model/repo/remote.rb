@@ -227,9 +227,13 @@ module DTK
       end
 
       def self.default_namespace()
-        DefaultsNamespace
+        self.default_user_namespace()
       end
       DefaultsNamespace = "r8" #TODO: have this obtained from config file
+
+      # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default
+      # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
+
 
       #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)

@@ -205,6 +205,36 @@
       "id": "dtk_id"
     }
   },
+  "service_link": {
+    "order": [
+      "id",
+      "type",
+      "base_component",
+      "dependent_component",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "type": "dtk_type",
+      "base_component": "base_component",
+      "dependent_component": "dependent_component",
+      "description": "description"
+    }
+  },
+  "service_link_from_component": {
+    "order": [
+      "id",
+      "type",
+      "dependent_component",
+      "description"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "type": "dtk_type",
+      "dependent_component": "dependent_component",
+      "description": "description"
+    }
+  },
   "service_connection": {
     "order": [
       "id",

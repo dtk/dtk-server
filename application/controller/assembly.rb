@@ -131,8 +131,12 @@ module DTK
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()
       component_id = ret_component_id?(:component_id,:assembly_id => assembly.id())
-      filter = (component_id && {:input_component_id => component_id})
-      ret = assembly.list_connections(filter ? {:filter => filter} : {})
+      context = (ret_request_params(:context)||:assembly).to_sym
+      opts = {:context => context}
+      if component_id
+        opts.merge!(:filter => {:input_component_id => component_id})
+      end
+      ret = assembly.list_service_links(opts)
       rest_ok_response ret
     end
     #TODO: deprecate below for above

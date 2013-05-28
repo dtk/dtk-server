@@ -14,6 +14,13 @@ module DTK
         Model.delete_instance(port_link.id_handle())
       end
 
+      def list_service_links(opts={})
+        filter_opts = Aux.hash_subset(opts,[:filter])
+        context_opts = Aux.hash_subset(opts,[:context])
+        get_augmented_port_links(filter_opts).map{|r|r.print_form_hash(context_opts)}
+      end
+
+      #TODO: deprecating below for above
       def list_connections(opts={})
         get_augmented_port_links(opts).map{|r|r.print_form_hash()}
       end

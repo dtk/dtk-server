@@ -43,7 +43,7 @@ module XYZ
     end
 
     #expects augmented port link with keys :input_port, :output_port, :input_node, and :output_node
-    def print_form_hash()
+    def print_form_hash(opts={})
       input_port = print_form_hash__port(self[:input_port],self[:input_node])
       output_port = print_form_hash__port(self[:output_port],self[:output_node])
       link_def_name = self[:input_port].link_def_name()
@@ -62,7 +62,9 @@ module XYZ
       {
         :id => self[:id],
         :type => link_def_name,
-        :connection => "#{left_hand_side} --> #{right_hand_side}"
+        :base_component => left_hand_side,
+        :dependent_component => right_hand_side,
+        :connection => "#{left_hand_side} --> #{right_hand_side}" #TODO: deprecate when remove list_connections
       }
     end
     def print_form_hash__port(port,node)

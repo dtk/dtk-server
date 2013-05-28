@@ -37,6 +37,9 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
+    :cardinality=>{
+      :type=>:json
+    },
     :location_asserted=>{
       :type=>:varchar,
       :size =>10

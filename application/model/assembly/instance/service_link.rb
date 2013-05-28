@@ -15,20 +15,13 @@ module DTK
       end
 
       def list_service_links(opts={})
-        filter_opts = Aux.hash_subset(opts,[:filter])
-        context_opts = Aux.hash_subset(opts,[:context])
-        get_augmented_port_links(filter_opts).map{|r|r.print_form_hash(context_opts)}
+        get_opts = Aux.hash_subset(opts,[:filter])
+        pp_opts = Aux.hash_subset(opts,[:context])
+        get_augmented_port_links(get_opts).map{|r|ServiceLink.print_form_hash(r,pp_opts)} +
+          get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|ServiceLink.print_form_hash(r,pp_opts)}
       end
 
-      #TODO: deprecating below for above
-      def list_connections(opts={})
-        get_augmented_port_links(opts).map{|r|r.print_form_hash()}
-      end
-      
-      def list_connections__missing()
-        get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|r.print_form_hash()}
-      end
-
+      #deprecating below for above
       def list_connections__possible()
         ret = Array.new
         output_ports = Array.new
@@ -57,6 +50,55 @@ module DTK
       def initialize(assembly_instance)
         @assembly_instance = assembly_instance
       end
+
+      def self.print_form_hash(object,opts={})
+        #set the following (some can have nil as legal value)
+        service_type = base_ref = required = description = nil
+        id = object[:id]
+        if object.kind_of?(PortLink)
+          port_link = object
+          input_port = print_form_hash__port(port_link[:input_port],port_link[:input_node])
+          output_port = print_form_hash__port(port_link[:output_port],port_link[:output_node])
+          service_type = port_link[:input_port].link_def_name()
+          if service_type != port_link[:output_port].link_def_name()
+            Log.error("input and output link defs are not equal")
+          end
+          #TODO: confusing that input/output on port link does not reflect what is logical input/output
+          if port_link[:input_port][:direction] == "input"
+            base_ref = input_port
+            dep_ref = output_port
+          else
+            base_ref = output_port
+            dep_ref = input_port
+          end
+        elsif object.kind_of?(Port)
+          port = object
+          base_ref = port.display_name_print_form()
+          service_type = port.link_def_name()
+          if link_def = port[:link_def] 
+            required = port[:required]
+            description = port[:description]
+          end
+        else
+          raise Error.new("Unexpected object type (#{object.class.to_s})")
+        end
+        
+        ret = {
+          :id => id,
+          :type => service_type,
+          :base_component => base_ref
+        }
+        ret.merge!(:dependent_component => dep_ref) if dep_ref
+        ret.merge!(:required => required) if required
+        ret.merge!(:description => description) if description
+        ret
+      end
+
+     private
+      def self.print_form_hash__port(port,node)
+        port.merge(:node=>node).display_name_print_form()
+      end
+
     end
   end
 end

@@ -149,7 +149,7 @@ module DTK
         elsif find_missing
           assembly.list_connections__missing()
         else
-          assembly.list_connections()
+          raise Error.new("Deprecated")
         end
       rest_ok_response ret
     end

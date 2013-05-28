@@ -42,36 +42,6 @@ module XYZ
       port_link
     end
 
-    #expects augmented port link with keys :input_port, :output_port, :input_node, and :output_node
-    def print_form_hash(opts={})
-      input_port = print_form_hash__port(self[:input_port],self[:input_node])
-      output_port = print_form_hash__port(self[:output_port],self[:output_node])
-      link_def_name = self[:input_port].link_def_name()
-      if link_def_name != self[:output_port].link_def_name()
-        Log.error("input and output link defs are not equal")
-      end
-      #TODO: confiusing that input/output on port link does not reflect what is logical input/output
-      if self[:input_port][:direction] == "input"
-        left_hand_side = input_port
-        right_hand_side = output_port
-      else
-        left_hand_side = output_port
-        right_hand_side = input_port
-      end
-
-      {
-        :id => self[:id],
-        :type => link_def_name,
-        :base_component => left_hand_side,
-        :dependent_component => right_hand_side,
-        :connection => "#{left_hand_side} --> #{right_hand_side}" #TODO: deprecate when remove list_connections
-      }
-    end
-    def print_form_hash__port(port,node)
-      port.merge(:node=>node).display_name_print_form()
-    end
-    private :print_form_hash__port
-
     def self.create_from_hash(parent_idh,hash)
       link_to_create = Hash.new
       override_attrs = Hash.new

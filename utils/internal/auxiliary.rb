@@ -1,4 +1,4 @@
-
+require 'set'
 module XYZ
   class Aux
     class Cache < Hash
@@ -52,6 +52,10 @@ module XYZ
         else
           obj
         end
+      end
+
+      def has_just_these_keys?(hash,keys)
+        Set.new(hash.keys) == Set.new(keys)
       end
 
       def ordered_hash(array_with_hashes)

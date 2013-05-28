@@ -1,6 +1,6 @@
 module DTK
   class Assembly::Instance
-    class AdHocLink
+    class ServiceLink
       class AttributeMapping
         def self.add(assembly,port_link,am_input_form)
           port_link_info = port_link.get_obj(:cols => [:augmented_ports])

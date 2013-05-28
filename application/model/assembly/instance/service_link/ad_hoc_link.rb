@@ -1,7 +1,7 @@
 module DTK
   class Assembly::Instance
-    class AdHocLink
-      class ServiceLink < self
+    class ServiceLink
+      class AdHocLink < self
         def initialize(assembly_instance,service_type,input_cmp_idh,output_cmp_idh)
           super(assembly_instance)
           @service_type = service_type

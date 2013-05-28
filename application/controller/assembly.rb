@@ -88,15 +88,14 @@ module DTK
       assembly = ret_assembly_instance_object()
       filter = 
         if ret_request_params(:service_link_id)
-          service_link_id = ret_request_param_id(:service_link_id,PortLink)
-          {:service_link_id => service_link_id}
+          port_link_id = ret_request_param_id(:service_link_id,PortLink)
+          {:port_link_id => port_link_id}
         else
           service_type = ret_non_null_request_params(:service_type)
           input_component_id = ret_component_id(:input_component_id, :assembly_id => assembly.id())
           {:service_type => service_type, :input_component_id => input_component_id}
         end
-      pp filter
-      #assembly.delete_service_link(:filter => filter)
+      assembly.delete_service_link(filter)
       rest_ok_response
     end
 

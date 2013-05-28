@@ -30,16 +30,47 @@ module DTK
       Model.get_objs(model_handle(:port_link),sp_hash)
     end      
 
-    #augemented with the ports and nodes
+    def get_matching_port_link(filter)
+      opts = {:filter => filter, :ret_match_info => Hash.new}
+      matches = get_augmented_port_links(opts)
+      case matches.size
+        when 1
+          matches.first
+        when 0
+          raise ErrorUsage.new("Cannot find service link with condition (#{opts[:ret_match_info][:clause]})")
+        else
+          raise ErrorUsage.new("Multiple matching service links with condition (#{opts[:ret_match_info][:clause]})")
+      end
+    end
+    #augmented with the ports and nodes; component_id is on ports
     def get_augmented_port_links(opts={})
       rows = get_objs(:cols => [:augmented_port_links])
+      #TODO: remove when have all create port link calls set port_link display name to service type
+      rows.each{|r|r[:port_link][:display_name] ||= r[:input_port].link_def_name()}  
       if filter = opts[:filter]
-        unless filter.size == 1 and filter[:input_component_id]
-          raise Error.new("Unexepected filter (#{filter.inspect})")
-        end
-        input_component_id = filter[:input_component_id]
-        post_filer = lambda{|r|r[:input_port][:component_id] == input_component_id}
-        rows.reject!{|r|!post_filer.call(r)}
+        post_filter = 
+          if Aux.has_just_these_keys?(filter,[:port_link_id])
+            port_link_id = filter[:port_link_id]
+            if opts[:ret_match_info]
+              opts[:ret_match_info][:clause] = "port_link_id = #{port_link_id.to_s}"
+            end
+            lambda{|r|r[:port_link][:id] == port_link_id}
+          elsif Aux.has_just_these_keys?(filter,[:input_component_id])
+            input_component_id = filter[:input_component_id]
+            #not setting opts[:ret_match_info][:clause] because :input_component_id internally generated
+            lambda{|r|r[:input_port][:component_id] == input_component_id}
+          elsif Aux.has_just_these_keys?(filter,[:service_type,:input_component_id])
+            input_component_id = filter[:input_component_id]
+            service_type = filter[:service_type]
+            #not including conjunct with :input_component_id because internally generated
+            if opts[:ret_match_info]
+              opts[:ret_match_info][:clause] = "service_type = '#{service_type}'"
+            end
+            lambda{|r|(r[:input_port][:component_id] == input_component_id) and (r[:port_link][:display_name] == service_type)}
+          else
+            raise Error.new("Unexpected filter (#{filter.inspect})")
+          end
+        rows.reject!{|r|!post_filter.call(r)}
       end
       rows.map do |r|
         r[:port_link].merge(r.slice(:input_port,:output_port,:input_node,:output_node))

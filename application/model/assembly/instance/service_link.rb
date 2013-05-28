@@ -9,11 +9,6 @@ module DTK
         ServiceLink::AttributeMapping.add(self,port_link,attribute_mapping)
       end
 
-      def delete_service_link(filter)
-        port_link = get_matching_port_link(filter)
-        Model.delete_instance(port_link.id_handle())
-      end
-
       def list_service_links(opts={})
         get_opts = Aux.hash_subset(opts,[:filter])
         pp_opts = Aux.hash_subset(opts,[:context])

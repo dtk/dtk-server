@@ -86,16 +86,8 @@ module DTK
 
     def rest__delete_service_link()
       assembly = ret_assembly_instance_object()
-      filter = 
-        if ret_request_params(:service_link_id)
-          port_link_id = ret_request_param_id(:service_link_id,PortLink)
-          {:port_link_id => port_link_id}
-        else
-          service_type = ret_non_null_request_params(:service_type)
-          input_component_id = ret_component_id(:input_component_id, :assembly_id => assembly.id())
-          {:service_type => service_type, :input_component_id => input_component_id}
-        end
-      assembly.delete_service_link(filter)
+      port_link = ret_port_link(assembly)
+      Model.delete_instance(port_link.id_handle())
       rest_ok_response
     end
 
@@ -110,9 +102,8 @@ module DTK
     end
 
     def rest__add_ad_hoc_attribute_mapping()
-      #TODO: stub
       assembly = ret_assembly_instance_object()
-      port_link =  create_obj(:service_link_id,PortLink,:assembly_idh => assembly.id_handle())
+      port_link = ret_port_link(assembly)
       attribute_mapping = ret_non_null_request_params(:attribute_mapping)
       assembly.add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
       rest_ok_response 

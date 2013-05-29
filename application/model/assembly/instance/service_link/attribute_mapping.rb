@@ -19,7 +19,7 @@ module DTK
             }
           }
           link_def_link_stub = LinkDefLink.create_stub(assembly.model_handle(:link_def_link),link_def_link_hash)
-          link_def_link_stub.process(assembly.get_target_idh(),[base_cmp,dep_cmp])
+          link_def_link_stub.process(assembly.get_target_idh(),[base_cmp,dep_cmp],:port_link_idh => port_link.id_handle())
         end
       end
     end

@@ -48,7 +48,7 @@ module XYZ
       result_col ||= virtual_attr
       rows = get_objs_helper(virtual_attr,result_col,opts)
       if rows.size > 1
-        filter = (opts[:sql_filter] ? " {opts[:sql_filter]} " : "") 
+        filter = (opts[:sql_filter] ? " #{opts[:sql_filter]} " : "") 
         Log.error("call to get_obj for #{model_handle[:model_name]} (virtual_attr=#{virtual_attr}#{filter}) returned more than one row")
       end
       rows.first

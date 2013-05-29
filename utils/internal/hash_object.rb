@@ -1,12 +1,21 @@
-#TODO: change HashObject so taht it does not have extra overhead of checking if frozen and then introduce variant that deals with frozen for config vars
-module XYZ
+#TODO: change HashObject so that it does not have extra overhead of checking if frozen and then introduce variant that deals with frozen for config vars
+module DTK
+  class Opts < Hash
+    def initialize(initial_val=nil)
+      super()
+      replace(initial_val) if initial_val
+    end
+
+    def slice(*keys)
+      Aux::hash_subset(self,keys)
+    end
+  end
+
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places
   class SimpleHashObject < Hash
     def initialize(initial_val=nil,&block)
       block ? super(&block) : super()
-      if initial_val
-        replace(initial_val)
-      end
+      replace(initial_val) if initial_val
     end
   end
 

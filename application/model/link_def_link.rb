@@ -40,7 +40,7 @@ module DTK
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,opts={})
+    def process(parent_idh,components,opts=Opts.new)
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = LinkDefContext.create(self,link_defs_info)
 
@@ -48,7 +48,7 @@ module DTK
 
       #TODO: not bulking up procssing multiple node group members because dont yet handle case when
       #theer are multiple members taht are output that feed into a node attribute
-      links_array = AttributeMapping.ret_links_array(attribute_mappings,context)
+      links_array = AttributeMapping.ret_links_array(attribute_mappings,context,opts.slice(:raise_error))
       links_array.each do |links|
         #ret_links returns nil only if error such as not being able to find input_id or output_id
         next if links.empty?
@@ -70,26 +70,48 @@ module DTK
     end
 
     class AttributeMapping < HashObject
-      def self.ret_links_array(attribute_mappings,context)
+      def self.ret_links_array(attribute_mappings,context,opts=Opts.new)
         contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
-        contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context)}.compact}
+        contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
       end
 
-      def ret_link(context)
+      def ret_link(context,opts=Opts.new)
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
+        
+        err_msgs = Array.new
         unless input_attr
-          Log.error("cannot find input_id for #{(self[:input]||Hash.new)[:term_index]||''}")
-          return nil
+          err_msgs << "attribute (#{pp_form(:input)}) does not exist"
         end
         unless output_attr
-          Log.error("cannot find output_id for #{(self[:output]||Hash.new)[:term_index]||''}")
-          return nil
+          err_msgs << "attribute (#{pp_form(:output)}) does not exist"
         end
+        unless err_msgs.empty?
+          err_msg = err_msgs.join(" and ").capitalize
+          if opts[:raise_error]
+            raise ErrorUsage.new(err_msg)
+          else
+            Log.error(err_msg)
+            return nil
+          end
+        end
+
         ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
         ret.merge!(:input_path => input_path) if input_path
         ret.merge!(:output_path => output_path) if output_path
         ret
+      end
+
+      def pp_form(direction)
+        ret = 
+          if attr = self[direction]
+            cmp_type = attr[:component_type]
+            attr_name = attr[:attribute_name]
+            if cmp_type and attr_name
+              "#{Component.pp_component_type(cmp_type)}.#{attr_name}"
+            end
+          end
+        ret||""
       end
 
      private

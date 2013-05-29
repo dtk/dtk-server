@@ -85,8 +85,7 @@ module DTK
     }
 
     def rest__delete_service_link()
-      assembly = ret_assembly_instance_object()
-      port_link = ret_port_link(assembly)
+      port_link = ret_port_link()
       Model.delete_instance(port_link.id_handle())
       rest_ok_response
     end
@@ -109,7 +108,7 @@ module DTK
       rest_ok_response 
     end
 
-    def rest__add_connection()
+    def rest__add_connection() #TODO: deprecate
       assembly = ret_assembly_instance_object()
       assembly_idh = assembly.id_handle()
       conn_type = ret_non_null_request_params(:connection_type)
@@ -118,6 +117,13 @@ module DTK
       port_link_idh = assembly.add_connection(input_port,output_port)
       rest_ok_response :connection_id => port_link_idh.get_id()
     end
+
+    def rest__list_attribute_mappings()
+      port_link = ret_port_link()
+      ##port_link.list_attribute_mappings()
+      pp port_link
+      rest_ok_response
+    end 
 
     def rest__list_service_links()
       assembly = ret_assembly_instance_object()

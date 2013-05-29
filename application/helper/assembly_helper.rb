@@ -51,7 +51,8 @@ module Ramaze::Helper
     #assuming that service link is identified by either
     #:service_link_id, or
     #:service_type and :input_component_id
-    def ret_port_link(assembly)
+    def ret_port_link(assembly=nil)
+      assembly ||= ret_assembly_instance_object()
       if ret_request_params(:service_link_id)
         create_obj(:service_link_id,::DTK::PortLink,:assembly_idh => assembly.id_handle())
       else

@@ -16,7 +16,7 @@ module XYZ
       filter = [:oneof,:id,attr_ids]
       ndx_attrs = Attribute.get_augmented(model_handle.createMH(:attribute),filter).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
       
-      attr_links.map|al|al.merge(:input => ndx_attrs[al[:input_id]], :output => ndx_attrs[al[:output_id]])
+      attr_links.map{|al|al.merge(:input => ndx_attrs[al[:input_id]], :output => ndx_attrs[al[:output_id]])}
     end
     ########################## end: get links ##################
 

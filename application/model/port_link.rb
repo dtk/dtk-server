@@ -26,7 +26,8 @@ module DTK
     end
 
     def list_attribute_mappings()
-
+      filter = [:eq,:port_link_id,id()]
+      AttributeLink.get_augmented(model_handle(:attribute_link),filter)
     end
 
     #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created

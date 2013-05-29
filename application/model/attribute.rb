@@ -37,7 +37,7 @@ module XYZ
         :cols => common_columns + [:node_component_info],
         :filter => filter
       }
-      attrs = get_objects(model_handle,sp_hash)
+      attrs = get_objs(model_handle,sp_hash)
       return ret if attrs.empty?
       attrs.each do |r|
         r.delete(:compoennt) if r[:component].nil? #get rio of nil :component cols

@@ -127,8 +127,7 @@ module DTK
     end
 
     def get_repos()
-      self.update_object!(:repos)
-      self[:repo]
+      get_objs_helper(:repos,:repo)
     end
 
     def workspace_library_diffs(version=nil)

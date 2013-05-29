@@ -2,6 +2,23 @@ require  File.expand_path('attribute_link/propagate_changes', File.dirname(__FIL
 module XYZ
   class AttributeLink < Model
     extend AttrLinkPropagateChangesClassMixin
+    ##########################  get links ##################
+    def self.get_augmented(model_handle,filter)
+      ret = Array.new
+      sp_hash = {
+        :cols => [:id,:group_id,:input_id,:output_id],
+        :filter => filter 
+      }
+      attr_links = get_objs(model_handle,sp_hash)
+      return ret if attr_links.empty?
+      
+      attr_ids = attr_links.inject(Array.new){|array,al|array + [al[:input_id],al[:output_id]]}
+      filter = [:oneof,:id,attr_ids]
+      ndx_attrs = Attribute.get_augmented(model_handle.createMH(:attribute),filter).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      
+      attr_links.map|al|al.merge(:input => ndx_attrs[al[:input_id]], :output => ndx_attrs[al[:output_id]])
+    end
+    ########################## end: get links ##################
 
     ##########################  add new links ##################
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})

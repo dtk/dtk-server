@@ -220,7 +220,7 @@ lambda__instance_nodes_and_components =
         :convert => true,
         :join_type=>:inner,
         :join_cond=>{:component_component_id=>:nested_component__id},
-        :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted, :is_port]
+        :cols => Attribute.common_columns()
        }
       ]
     },

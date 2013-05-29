@@ -27,6 +27,28 @@ module XYZ
     set_relation_name(:attribute,:attribute)
     extend AttributeMetaClassMixin
 
+    def self.common_columns()
+      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port]
+    end
+
+    def self.get_augmented(model_handle,filter)
+      ret = Array.new
+      sp_hash = {
+        :cols => common_columns + [:node_component_info],
+        :filter => filter
+      }
+      attrs = get_objects(model_handle,sp_hash)
+      return ret if attrs.empty?
+      attrs.each do |r|
+        r.delete(:compoennt) if r[:component].nil? #get rio of nil :component cols
+
+        if node = r.delete(:direct_node)||r.delete(:component_node)
+          r.merge!(:node => node)
+        end
+      end
+      attrs
+    end
+
     ### virtual column defs
     def config_agent_type()
       external_ref_type = (self[:external_ref]||{})[:type]

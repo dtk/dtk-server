@@ -120,9 +120,9 @@ module DTK
 
     def rest__list_attribute_mappings()
       port_link = ret_port_link()
-      ##port_link.list_attribute_mappings()
-      pp port_link
-      rest_ok_response
+      #TODO: stub
+      pp port_link.list_attribute_mappings()
+      rest_ok_response 
     end 
 
     def rest__list_service_links()

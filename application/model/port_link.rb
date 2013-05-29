@@ -25,6 +25,10 @@ module DTK
       end
     end
 
+    def list_attribute_mappings()
+
+    end
+
     #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means constraint violation
@@ -80,9 +84,9 @@ module DTK
       "port_link:#{input_id}-#{output_id}"
     end
 
-    def create_attr_links(parent_idh,opts={})
+    def create_attr_links(parent_idh)
       update_object!(:input_id,:output_id)
-      augmented_opts = opts.merge(:port_link_idh => id_handle,:donot_create_port_link => true)
+      augmented_opts = Opts.new(:port_link_idh => id_handle,:donot_create_port_link => true)
       PortLink.create_port_and_attr_links(parent_idh,self,augmented_opts)
     end
    private

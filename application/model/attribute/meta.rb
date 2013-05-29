@@ -69,6 +69,33 @@ module XYZ
            :cols => [:id,:display_name,:component_type,:most_specific_type,:connectivity_profile_external,:ancestor_id,:node_node_id,:extended_base_id]
          }]
 
+      #finds both component parents with node and dircet node parent
+      virtual_column :node_component_info, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [{
+           :model_name => :node,
+           :convert => true,
+           :alias => :direct_node,
+           :join_type => :left_outer,
+           :join_cond=>{:id => p(:attribute,:node)},
+           :cols => [:id,:display_name,:group_id]
+         },
+         {
+           :model_name => :component,
+           :convert => true,
+           :join_type => :left_outer,
+           :join_cond=>{:id => p(:attribute,:component)},
+           :cols => [:id,:display_name,:group_id,:component_type,:node_node_id]
+         },
+         {
+           :model_name => :node,
+           :convert => true,
+           :alias => :component_node,
+           :join_type => :inner,
+           :join_cond=>{:id => p(:component,:node)},
+           :cols => [:id,:display_name,:group_id]
+         }]
+         
       virtual_column :port_info, :type => :boolean, :hidden => true,
       :remote_dependencies => 
         [

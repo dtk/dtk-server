@@ -128,6 +128,10 @@ module DTK
       self[:module_branch]
     end
 
+    def get_repos()
+      get_objs_helper(:repos,:repo)
+    end
+
     def workspace_library_diffs(version=nil)
       unless ws_branch = get_module_branch_matching_version(version)
         return nil

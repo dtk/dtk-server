@@ -24,6 +24,7 @@ describe "Test Case 66: Export service using full name #{service_name} to users 
     puts "**********************************************************************************************************"
     puts "Test Case 66: Export service using full name #{service_name} to users default namespace and then delete it"
     puts "**********************************************************************************************************"
+    puts ""
   end
 
   context "Create new service function" do

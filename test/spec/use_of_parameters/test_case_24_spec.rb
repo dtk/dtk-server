@@ -27,6 +27,7 @@ describe "Test Case 24: Change optional params on existing attributes in assembl
 		puts "**************************************************************************************************************"
 		puts "Test Case 24: Change optional params on existing attributes in assembly nodes (values were previously defined)"
 		puts "**************************************************************************************************************"
+    puts ""
 	end
 
 	context "Stage assembly function on #{assembly_template} assembly template" do

@@ -55,7 +55,7 @@ module XYZ
       add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users)
     end
 
-    #ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db 
+    # ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db 
     def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[])
       repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users)
       if ssh_rsa_keys[:public]

@@ -10,6 +10,7 @@ require './lib/dtk_common'
 require './lib/modules_spec'
 
 module_name = 'temp'
+module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_55_dtk.model.json"
 file_for_change = "dtk.model.json"
@@ -21,10 +22,11 @@ describe "Test Case 55: Rename existing attribute mapping in depends_on section 
     puts "*****************************************************************************************************************************"
     puts "Test Case 55: Rename existing attribute mapping in depends_on section in dtk.model.json file and push-clone-changes to server"
     puts "*****************************************************************************************************************************"
+    puts ""
   end
 
   context "Import module function" do
-    include_context "Import remote module", module_name
+    include_context "Import remote module", module_namespace + "/" + module_name
   end
 
   context "Upgrade module to DSLv2" do

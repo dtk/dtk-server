@@ -13,6 +13,7 @@ require './lib/modules_spec'
 
 namespace = "dtk10"
 existing_module_name = "bakir_test"
+module_namespace = "r8"
 module_name = "bakir_test1"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
@@ -25,10 +26,11 @@ describe "Test Case 64: Export module using full name #{module_name} to users de
     puts "********************************************************************************************************"
     puts "Test Case 64: Export module using full name #{module_name} to users default namespace and then delete it"
     puts "********************************************************************************************************"
+    puts ""
   end
 
   context "Import module function" do
-    include_context "Import remote module", existing_module_name
+    include_context "Import remote module", module_namespace + "/" + existing_module_name
   end
 
   context "Get module components list" do

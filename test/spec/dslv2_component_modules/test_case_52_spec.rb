@@ -16,6 +16,7 @@ assembly_template = 'bootstrap::test1'
 node_name = 'test1'
 component_name = 'temp::source'
 module_name = 'temp'
+module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_52_dtk.model.json"
 file_for_change = "dtk.model.json"
@@ -29,10 +30,11 @@ describe "Test Case 52: Rename existing component attribute in dtk.model.json fi
     puts "***********************************************************************************************************************************************"
     puts "Test Case 52: Rename existing component attribute in dtk.model.json file, push-clone-changes to server and check if component attribute present"
     puts "***********************************************************************************************************************************************"
+    puts ""
   end
 
   context "Import module function" do
-    include_context "Import remote module", module_name
+    include_context "Import remote module", module_namespace + "/" + module_name
   end
 
   context "Upgrade module to DSLv2" do

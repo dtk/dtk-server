@@ -93,16 +93,18 @@ module DTK
 
     def self.info(target_mh, id, opts={})
       sp_hash = {
-        :cols => [:id, :display_name,:version,:repos],
+        :cols => [:id, :display_name,:version,:remote_repos],
         :filter => [:eq,:id,id]
       }
 
-      response = get_obj(target_mh, sp_hash.merge(opts))
+      response = get_objs(target_mh, sp_hash.merge(opts))
 
-      # TODO: When DTK-800 is resolved fix this part
-      namespaces = response[:repo][:remote_repo_namespace]
-      response.delete_if { |k,v| [:repo,:module_branch].include?(k) }
-      response.merge(:remote_namespace => namespaces)
+      namespaces = response.collect { |e| { :repo_name => e[:repo_remote][:display_name] } }
+      ret = response.first || {}
+      ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
+      # [Haris] Due to join condition with module.branch we can have situations where we have many versions 
+      # of module with same remote branch, with 'uniq' we iron that out
+      ret.merge(:remote_repos => namespaces.uniq )
     end
 
 

@@ -24,6 +24,7 @@ describe "Test Case 70: NEG - Import module from incorrect git repo url" do
     puts "*************************************************************"
     puts "Test Case 70: NEG - Import module from incorrect git repo url"
     puts "*************************************************************"
+    puts ""
   end
 
   context "Create module from incorrect git repo" do

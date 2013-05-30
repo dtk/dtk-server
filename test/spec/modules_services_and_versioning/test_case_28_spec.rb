@@ -17,6 +17,7 @@ os = 'natty'
 os_attribute = 'os_identifier'
 node_name = 'node1'
 module_name = "mysql"
+module_namespace = "r8"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -32,7 +33,7 @@ describe "Test Case 28: Import component module from remote and use this compone
 	end
 
 	context "Import module function" do
-		include_context "Import remote module", module_name
+		include_context "Import remote module", module_namespace + "/" + module_name
 	end
 
 	context "Get module components list" do

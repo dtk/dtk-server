@@ -25,6 +25,7 @@ describe "Test Case 32: Get list of all assembly templates for particular servic
 		puts "***********************************************************************"
 		puts "Test Case 32: Get list of all assembly templates for particular service"
 		puts "***********************************************************************"
+    puts ""
 	end
 
 	context "Create new service function" do

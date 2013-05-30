@@ -26,6 +26,7 @@ describe "Test Case 5: Check possibility to create assembly template from existi
     puts "****************************************************************************************************************************"
     puts "Test Case 5: Check possibility to create assembly template from existing assembly and then to converge new assembly template"
     puts "****************************************************************************************************************************"
+    puts ""
   end
 
   context "Stage assembly function on #{assembly_template} assembly template" do

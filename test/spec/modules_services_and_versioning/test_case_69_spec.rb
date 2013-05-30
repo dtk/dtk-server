@@ -24,6 +24,7 @@ describe "Test Case 69: Import module from git repo url" do
     puts "*********************************************"
     puts "Test Case 69: Import module from git repo url"
     puts "*********************************************"
+    puts ""
   end
 
   context "Create module from git repo" do

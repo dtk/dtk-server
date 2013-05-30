@@ -55,8 +55,13 @@ module DTK
 
       # we now support remote module name to be specified by client
       module_name = request_params[:remote_component_name] || module_name()
-      request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
+      remote_ns = request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
 
+
+      # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
+      if module_name() != request_params[:remote_component_name]
+        raise ErrorUsage.new("We do not support custom module names (via export) at this time.")
+      end
       # if repo.linked_remote?(remote_repo)
       #   raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       # end
@@ -81,6 +86,9 @@ module DTK
       #link and push to remote repo
       repo.link_to_remote(local_branch,remote_repo_name)
       repo.push_to_remote(local_branch,remote_repo_name)
+
+      # we create remote repo for given namespace
+      RepoRemote.create_repo_remote(model_handle(:repo_remote), module_name, remote_repo_name, remote_ns, repo.id)
 
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
@@ -153,12 +161,12 @@ module DTK
         error = ErrorUsage.new("Remote module (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
       end
 
-      #delete module on remote repo manager
+      # delete module on remote repo manager
       unless error
         remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace])
       end
         
-      #unlink any local repos that were linked to this remote module
+      # unlink any local repos that were linked to this remote module
       local_module_name = remote_params[:module_name]
       sp_hash = {
         :cols => [:id,:display_name],
@@ -166,8 +174,18 @@ module DTK
       } 
 
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
-        module_obj.get_repos().each{|repo|repo.unlink_remote(remote_params[:repo])}
+        module_obj.get_repos().each do |repo|
+          # we remove remote repos
+          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
+            raise ErrorUsage.new("R8 remote repo record '#{remote_params[:module_namespace]}/#{remote_params[:module_name]}' does not exist") 
+          end
+
+          repo.unlink_remote(remote_params[:repo])
+
+          ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
+        end
       end
+     
       raise error if error
     end
 

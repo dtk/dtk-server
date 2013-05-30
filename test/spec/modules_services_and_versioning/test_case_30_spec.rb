@@ -13,6 +13,7 @@ assembly_name = 'test_case_30_instance'
 assembly_template = 'bootstrap::test1'
 module_name = 'mysql'
 module_version = '0.0.1'
+module_namespace = "r8"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -24,10 +25,11 @@ describe "Test Case 30: Import component module from remote, version it and clon
 		puts "**********************************************************************************************"
 		puts "Test Case 30: Import component module from remote, version it and clone it to local filesystem"
 		puts "**********************************************************************************************"
+    puts ""
 	end
 
 	context "Import module function" do
-		include_context "Import remote module", module_name
+		include_context "Import remote module", module_namespace + "/" + module_name
 	end
 
 	context "Get module components list" do

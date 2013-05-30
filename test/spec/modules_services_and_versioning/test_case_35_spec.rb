@@ -13,6 +13,7 @@ assembly_name = 'test_case_35_instance'
 assembly_template = 'bootstrap::test1'
 module_name = 'test'
 module_version = '0.0.1'
+module_namespace = "r8"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -24,10 +25,11 @@ describe "Test Case 35: Import new module from remote repo and then import same 
 		puts "***************************************************************************************************"
 		puts "Test Case 35: Import new module from remote repo and then import same version-ed module from remote"
 		puts "***************************************************************************************************"
+    puts ""
 	end
 
 	context "Import module function" do
-		include_context "Import remote module", module_name
+		include_context "Import remote module", module_namespace + "/" + module_name
 	end
 
 	context "Get module components list" do

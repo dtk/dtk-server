@@ -10,6 +10,7 @@ require './lib/dtk_common'
 require './lib/modules_spec'
 
 module_name = 'temp'
+module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_50_dtk.model.json"
 file_for_change = "dtk.model.json"
@@ -22,10 +23,11 @@ describe "Test Case 50: Add new component from dtk.model.json file, push-clone-c
     puts "***********************************************************************************************************************************"
     puts "Test Case 50: Add new component from dtk.model.json file, push-clone-changes to server and list components to see the effect of add"
     puts "***********************************************************************************************************************************"
+    puts ""
   end
 
   context "Import module function" do
-    include_context "Import remote module", module_name
+    include_context "Import remote module", module_namespace + "/" + module_name
   end
 
   context "Upgrade module to DSLv2" do

@@ -13,6 +13,7 @@ require './lib/modules_spec'
 
 namespace = "dtk10"
 module_name = "apache"
+module_namespace = "r8"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -24,10 +25,11 @@ describe "Test Case 68: Import module from r8 repo and export to default tenant 
     puts "*******************************************************************************"
     puts "Test Case 68: Import module from r8 repo and export to default tenant namespace"
     puts "*******************************************************************************"
+    puts ""
   end
 
   context "Import module function" do
-    include_context "Import remote module", module_name
+    include_context "Import remote module", module_namespace + "/" + module_name
   end
 
   context "Get module components list" do

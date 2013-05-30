@@ -82,6 +82,7 @@ describe "Test Case 25: Check possibility to query list of nodes/components/attr
 		puts "***************************************************************************************************"
 		puts "Test Case 25: Check possibility to query list of nodes/components/attributes of particular assembly"
 		puts "***************************************************************************************************"
+    puts ""
 	end
 
 	context "Stage assembly function on #{$assembly_template} assembly template" do

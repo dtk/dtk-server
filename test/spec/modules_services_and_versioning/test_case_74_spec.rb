@@ -13,6 +13,7 @@ require './lib/services_spec'
 assembly_template1 = 'redhat_bigtop_namenode'
 assembly_template2 = 'redhat_hdp_namenode'
 service_name = 'bakir_test_service'
+service_namespace = 'r8'
 service_filesystem_location = '~/dtk/service_modules'
 $assembly_id = 0
 
@@ -24,10 +25,11 @@ describe "Test Case 74: Import service from remote repo and check its correspond
     puts "********************************************************************************************"
     puts "Test Case 74: Import service from remote repo and check its corresponding assembly templates"
     puts "********************************************************************************************"
+    puts ""
   end
 
   context "Import service function" do
-    include_context "Import remote service", dtk_common, service_name
+    include_context "Import remote service", dtk_common, service_namespace + "/" + service_name
   end
 
   context "List all services" do

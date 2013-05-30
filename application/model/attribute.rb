@@ -253,25 +253,7 @@ module XYZ
       not get_obj(model_handle(:attribute_link),sp_hash).empty?
     end
 
-    def info_about_attr_value(value)
-      #TODO: handle complex attributes better 
-      if value
-        if value.kind_of?(Array)
-          #value.map{|el|info_about_attr_value(el)}
-          value.inspect
-        elsif value.kind_of?(Hash)
-          ret = Hash.new
-          value.each do |k,v|
-            ret[k] = info_about_attr_value(v)
-          end
-          ret
-        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
-          value
-        else
-          value.inspect
-        end
-      end
-    end
+
 
     def ret_implementation_attribute_name_and_type()
       config_agent = ConfigAgent.load(self[:config_agent_type])

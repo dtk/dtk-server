@@ -29,8 +29,8 @@ module DTK
       filter = [:eq,:port_link_id,id()]
       AttributeLink.get_augmented(model_handle(:attribute_link),filter).map do |al|
         {
-          :input_attribute => Attribute::Pattern::Display.new(al[:input]).print_form(),
-          :output_attribute => Attribute::Pattern::Display.new(al[:output]).print_form()
+          :input_attribute => al[:input].print_form(),
+          :output_attribute => al[:output].print_form()
         }
       end
     end

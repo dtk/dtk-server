@@ -76,7 +76,7 @@ end
     class Violation 
       class ReqUnsetAttr < self
         def initialize(attr,type)
-          @attr_display_name = Attribute::Pattern::Display.new(attr,type).print_form()[:display_name]
+          @attr_display_name = attr.print_form(Opts.new(:level=>type))[:display_name]
         end
         def type()
           :required_unset_attribute

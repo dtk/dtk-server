@@ -198,7 +198,7 @@ module XYZ
         #TODO: more efficient to have sql query do filtering
         if filter_proc.nil? or filter_proc.call(attr)
           display_name_prefix = "#{r[:component].display_name_print_form()}/"
-          attr.print_form(display_name_prefix)
+          attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
         end
       end.compact
       (component_attrs + node_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

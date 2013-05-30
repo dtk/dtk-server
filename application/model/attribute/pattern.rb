@@ -34,38 +34,6 @@ module DTK; class Attribute
       base_object.info_about(:attributes,:filter_proc => filter_proc)
     end
 
-    class Display
-      def initialize(aug_attr,level=nil)
-        @aug_attr = aug_attr #needs to be done first
-        @level = level||find_level()
-      end
-      def print_form()
-        display_name_prefix = 
-          case @level
-           when :assembly
-            ""
-           when :node
-            "node[#{node[:display_name]}]/"
-           when :component
-            "node[#{node[:display_name]}]/cmp[#{component.display_name_print_form()}]/"
-          end
-        @aug_attr.print_form(display_name_prefix)
-      end
-     private
-      def node()
-        @aug_attr[:node]
-      end
-      def component()
-        @aug_attr[:component]||@aug_attr[:nested_component]
-      end
-      def find_level()
-        if node()
-          component() ? :component : :node
-        else
-          :assembly
-        end
-      end
-    end
   
     class Assembly < self
       def self.create(pattern)

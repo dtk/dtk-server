@@ -484,13 +484,13 @@ module DTK; class  Assembly
 
     def get_attributes_print_form_aux(filter_proc=nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
-        Attribute::Pattern::Display.new(attr,:assembly).print_form()
+        attr.print_form(Opts.new(:level => :assembly))
       end
       component_attrs = get_augmented_nested_component_attributes(filter_proc).map do |aug_attr|
-        Attribute::Pattern::Display.new(aug_attr,:component).print_form()
+        aug_attr.print_form(Opts.new(:level => :component))
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        Attribute::Pattern::Display.new(aug_attr,:node).print_form()
+        aug_attrprint_form(Opts.new(:level => :node))
       end
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

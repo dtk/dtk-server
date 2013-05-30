@@ -145,7 +145,7 @@ module DTK
       end
      private
       def error_msg(aug_attr)
-        "The attribute (#{Attribute::Pattern::Display.new(aug_attr).print_form()[:display_name]}) is required, but missing"
+        "The attribute (#{aug_attr.print_form()[:display_name]}) is required, but missing"
       end
     end
 

@@ -16,6 +16,7 @@ module XYZ
     r8_nested_require('attribute','legal_value')
     r8_nested_require('attribute','special_processing')
     r8_nested_require('attribute','constant')
+    r8_nested_require('attribute','print_form')
     include AttributeGroupInstanceMixin
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
@@ -23,6 +24,7 @@ module XYZ
     extend AttributeGuardClassMixin
     extend  AttrPropagateChangesClassMixin
     include ConstantMixin
+    include PrintFormMixin
 
     set_relation_name(:attribute,:attribute)
     extend AttributeMetaClassMixin
@@ -229,28 +231,6 @@ module XYZ
       end
       update_from_rows(attr_mh,attr_port_info) unless attr_port_info.empty?
     end
-
-    def print_form(display_name_prefix=nil)
-      update_object!(*UpdateCols)
-      #TODO: handle complex attributes better and omit derived attributes; may also indicate whether there is an override
-      display_name = "#{display_name_prefix}#{self[:display_name]}"
-      datatype =
-        case self[:data_type]
-         when "integer" then "integer"
-         when "boolean" then "boolean"
-         else "string"
-        end
-      value = info_about_attr_value(self[:attribute_value])
-      attr_info = {
-        :display_name => display_name, 
-        :datatype => datatype,
-        :description => self[:description]||self[:display_name]
-      }
-      attr_info.merge!(:value => value) if value
-      hash_subset(*UnchangedDisplayCols).merge(attr_info)
-    end
-    UnchangedDisplayCols = [:id,:required]
-    UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
 
     def required_unset_attribute?()
       #port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic

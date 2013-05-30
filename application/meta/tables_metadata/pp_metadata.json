@@ -232,5 +232,23 @@
             "component_name"
          ]
       }
+   },
+   "module":{
+      "top_type":"module",
+      "defs":{
+         "module_def":[
+            "id",  
+            "display_name",
+            {
+               "remote_repos":{
+                  "type":"remote_repo",
+                  "is_array":true
+               }
+            }
+         ],
+         "remote_repo_def":[
+            "repo_name"
+         ]
+      }
    }
 }

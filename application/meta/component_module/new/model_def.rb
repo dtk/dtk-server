@@ -94,6 +94,16 @@ lambda__segment_repos =
     :cols=>args[:cols]
   }
 }
+lambda__segment_remote_repos =
+  lambda{|args|
+  {
+    :model_name=>:repo_remote,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:repo_id =>:repo__id},
+    :cols=>args[:cols]
+  }
+}
 lambda__segment_impls =
   lambda{|args|
   ret={
@@ -145,6 +155,15 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_repos.call(:cols => [:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name,:remote_repo_namespace])]
+    },
+    :remote_repos=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:repo_id])
+     ]
     },
     :implementations=>{
       :type=>:json,

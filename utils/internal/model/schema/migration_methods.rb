@@ -3,6 +3,7 @@ module XYZ
   module MigrationMethods #methods that can be called within a migration
 
     def db_rebuild(db)
+
       #associate database handle DBInstance with all models
       set_db_for_all_models(db)
 
@@ -18,6 +19,32 @@ module XYZ
 
     end
 
+    def migrate_data(db)
+      puts "Migrating data ... "
+
+      c = 2
+
+      columns = [ :id, :display_name, :repos ]
+
+      modules  = Model.get_objs(ModelHandle.new(c, :component_module), { :cols => columns})
+      services = Model.get_objs(ModelHandle.new(c, :service_module), { :cols => columns})
+      components = modules + services
+
+      raise "No data to migrate, exiting ..." if components.empty?
+
+      repo_remote_mh = components.first[:repo].model_handle(:repo_remote)
+
+      components.each do |e|
+
+        repo_data = RepoRemote.get_remote_repo(repo_remote_mh, e[:repo][:id], e[:display_name],e[:repo][:remote_repo_namespace])
+
+        if repo_data.nil?
+          data = RepoRemote.create_repo_remote(repo_remote_mh, e[:display_name], e[:repo][:remote_repo_name], e[:repo][:remote_repo_namespace], e[:repo][:id])
+          puts "Remote Repo migrated for => '#{data[:display_name]}'"
+        end
+      end
+
+    end
+
   end
 end
-

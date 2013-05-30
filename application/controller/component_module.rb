@@ -104,6 +104,7 @@ module DTK
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
       # use default one, if there is namaspace provided in request
       remote_namespace = ret_request_params(:remote_module_namespace) || remote_namespace
+      
       remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
@@ -112,7 +113,9 @@ module DTK
       }
       remote_params.merge!(:version => version) if version
       project = get_default_project()
+
       ComponentModule.delete_remote(project,remote_params)
+
       rest_ok_response 
     end
 

@@ -76,6 +76,7 @@ module DTK
         update_object!(:repo_name)
         remote_name = remote_name_for_push_pull(remote_repo)
         RepoManager.unlink_remote(self[:repo_name],remote_name)
+        
         update(:remote_repo_name => nil, :remote_repo_namespace => nil)
       end
       
@@ -185,6 +186,7 @@ module DTK
       def list_module_info(type=nil)
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter)
+
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
           namespace = r["namespace"] && "#{r["namespace"]}/"

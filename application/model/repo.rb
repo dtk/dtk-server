@@ -5,6 +5,10 @@ module XYZ
     r8_nested_require('repo','diffs')
     include RemoteMixin
 
+    def self.common_columns()
+      [:id,:display_name,:repo_name,:local_dir]
+    end
+
     ###virtual columns
     def base_dir()
       self[:local_dir].gsub(/\/[^\/]+$/,"")
@@ -21,6 +25,7 @@ module XYZ
       }
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end
+
 
     def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name
@@ -108,8 +113,5 @@ module XYZ
       repo_idh.create_object().merge(repo_hash)
     end
 
-    def self.common_columns()
-      [:id,:display_name,:repo_name,:local_dir]
-    end
   end
 end

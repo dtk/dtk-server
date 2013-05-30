@@ -29,7 +29,7 @@ module XYZ
 
         #TODO: temp for debugging; theer are top leevl objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
-          unless [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl].include?(model_handle[:model_name])
+          unless [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
             Log.error("missing :parent_model_name in (#{[model_handle,caller[0..5]].inspect}) in create_from_select")
           end
         end
@@ -101,7 +101,8 @@ module XYZ
           end
 
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
-#TODO: benchmark point pp [:create_from_select,sql]
+          
+          #TODO: benchmark point pp [:create_from_select,sql]
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
           ret = opts[:returning_sql_cols] ? 

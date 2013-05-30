@@ -36,11 +36,19 @@ module XYZ
 
       components.each do |e|
 
-        repo_data = RepoRemote.get_remote_repo(repo_remote_mh, e[:repo][:id], e[:display_name],e[:repo][:remote_repo_namespace])
+        # if remote records exists
+        if e[:repo][:remote_repo_name]
 
-        if repo_data.nil?
-          data = RepoRemote.create_repo_remote(repo_remote_mh, e[:display_name], e[:repo][:remote_repo_name], e[:repo][:remote_repo_namespace], e[:repo][:id])
-          puts "Remote Repo migrated for => '#{data[:display_name]}'"
+          # there seems to be a bug with old data that does not have remote namespace entered in that case
+          # we extract it from remote_repo_name
+          remote_namespace = e[:repo][:remote_repo_namespace] || e[:repo][:remote_repo_name].match(/^(.*?)\-\-/)[1]
+
+          repo_data = RepoRemote.get_remote_repo(repo_remote_mh, e[:repo][:id], e[:display_name],remote_namespace)
+
+          if repo_data.nil?
+            data = RepoRemote.create_repo_remote(repo_remote_mh, e[:display_name], e[:repo][:remote_repo_name], remote_namespace, e[:repo][:id])
+            puts "Remote Repo migrated for => '#{data[:display_name]}'"
+          end
         end
       end
 

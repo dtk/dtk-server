@@ -91,7 +91,7 @@ module XYZ
            :model_name => :node,
            :convert => true,
            :alias => :component_node,
-           :join_type => :inner,
+           :join_type => :left_outer,
            :join_cond=>{:id => p(:component,:node)},
            :cols => [:id,:display_name,:group_id]
          }]

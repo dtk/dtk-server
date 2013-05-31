@@ -165,18 +165,6 @@ module DTK; class  Assembly
     end
 
     ### end: standard get methods
-    def add_connection(input_port,output_port)
-      port_link_hash = {
-        :input_id => input_port.id(),
-        :output_id  => output_port.id(),
-      }
-      override_attrs = {
-        :assembly_id => id()
-      }
-      target = get_target()
-      port_link = PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,Opts.new(:override_attrs => override_attrs))
-      port_link.id_handle()
-    end
     
     def self.list(assembly_mh,opts={})
       assembly_rows = get_info__flat_list(assembly_mh,opts)

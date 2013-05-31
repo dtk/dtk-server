@@ -16,7 +16,21 @@ module DTK
           get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|ServiceLink.print_form_hash(r,pp_opts)}
       end
 
-      #deprecating below for above
+      #TODO: need to hamrmonize the add/list conenctions which were written from perspective of theer is link defs defined
+      #add the add service commands
+      def add_connection(input_port,output_port)
+        port_link_hash = {
+          :input_id => input_port.id(),
+          :output_id  => output_port.id(),
+        }
+        override_attrs = {
+          :assembly_id => id()
+        }
+        target = get_target()
+        port_link = PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,Opts.new(:override_attrs => override_attrs))
+        port_link.id_handle()
+      end
+
       def list_connections__possible()
         ret = Array.new
         output_ports = Array.new

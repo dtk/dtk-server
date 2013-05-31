@@ -16,6 +16,18 @@ module DTK; class  Assembly
       get_objs_helper(:instance_nested_component_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
     end
 
+    def get_augmented_attribute_mappings()
+      #TODO: once always populate field assembly_id on attribute.link, can do simpler query
+      ret = Array.new
+      sp_hash = {
+        :cols => [:id,:group_id],
+        :filter => [:eq,:assembly_id,id()]
+      }
+      port_links = Model.get_objs(model_handle(:port_link),sp_hash)
+      return ret if port_links.empty?
+      AttributeLink.get_augmented(model_handle(:attribute_link),[:oneof,:port_link_id,port_links.map{|r|r.id()}])
+    end
+
     def get_service_add_ons()
       get_objs_helper(:service_add_ons_from_instance,:service_add_on)
     end
@@ -257,6 +269,8 @@ module DTK; class  Assembly
       
       case about 
        when :attributes
+#TODO: for testing
+opts = opts.merge!(:detail_level => [:attribute_links])
         ret = get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value])
         end.sort(&order)
@@ -476,11 +490,12 @@ module DTK; class  Assembly
       assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
         attr.print_form(opts.merge(:level => :assembly))
       end
-      component_attrs = get_augmented_nested_component_attributes(filter_proc).map do |aug_attr|
-        aug_attr.print_form(opts.merge(:level => :component))
-      end
+
+      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc)
+      component_attrs = Attribute.print_form(raw_cmp_attrs,opts.merge(:level => :component,:assembly => self))
+
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        aug_attrprint_form(opts.merge(:level => :node))
+        aug_attr.print_form(opts.merge(:level => :node))
       end
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

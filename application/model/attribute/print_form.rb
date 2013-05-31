@@ -7,6 +7,20 @@ module DTK
       end
     end
 
+    module PrintFormClassMixin
+      def print_form(raw_attrs,opts=Opts.new)
+        ret = raw_attrs.map{|a|a.print_form(opts)}
+        if (opts[:detail_level]||[]).include?(:attribute_links)
+          unless assembly = opts[:assembly]
+            raise Error.new("Unexpected to have opts[:assembly] nil")
+          end
+          PrintForm.augment_with_attribute_links!(ret,assembly)
+        end
+        ret
+      end
+
+    end
+
     class PrintForm
       def self.print_form(aug_attr,opts=Opts.new)
         new(aug_attr,opts).print_form()
@@ -25,6 +39,26 @@ module DTK
       end
       UnchangedDisplayCols = [:id,:required]
       UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
+
+      def self.augment_with_attribute_links!(ret,assembly)
+        ndx_attr_mappings = Hash.new
+        assembly.get_augmented_attribute_mappings().each do |r|
+          ndx = r[:input_id]
+          pntr = ndx_attr_mappings[ndx] ||= Array.new
+          output_id = r[:output_id]
+          unless pntr.find{|m|m[:id] == output_id}
+            ndx_attr_mappings[ndx] << r[:output].print_form()
+          end
+        end
+        ret.each do |r|
+          ndx = r[:id]
+          if linked_to = ndx_attr_mappings[ndx]
+            r[:linked_to] = linked_to
+          end
+        end
+pp ret
+        ret
+      end
 
      private
       #TODO: put in as option format style

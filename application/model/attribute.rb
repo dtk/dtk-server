@@ -25,6 +25,7 @@ module XYZ
     extend  AttrPropagateChangesClassMixin
     include ConstantMixin
     include PrintFormMixin
+    extend PrintFormClassMixin
 
     set_relation_name(:attribute,:attribute)
     extend AttributeMetaClassMixin

@@ -36,7 +36,7 @@ module DTK
     end
 
     #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
-    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
+    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts=Opts.new)
       #get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link

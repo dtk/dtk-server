@@ -37,11 +37,11 @@ module DTK
         output_aug_ports.each{|r|r.set_port_info!()}
       end
       unless opts[:link_def_links_are_set]
-        set_link_def_links!(unc_aug_port)
+        LinkDef.set_link_def_links!(unc_aug_port)
       end
 
       unc_aug_port.set_port_info!()
-      unc_aug_port[:link_def][:link_def_links].each do |ld_link|
+      (unc_aug_port[:link_def][:link_def_links]||[]).each do |ld_link|
         matches = ld_link.ret_matches(unc_aug_port,output_aug_ports)
         ret += matches
       end

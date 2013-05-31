@@ -174,7 +174,7 @@ module DTK; class  Assembly
         :assembly_id => id()
       }
       target = get_target()
-      port_link = PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,:override_attrs => override_attrs)
+      port_link = PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,Opts.new(:override_attrs => override_attrs))
       port_link.id_handle()
     end
     

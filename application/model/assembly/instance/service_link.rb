@@ -31,7 +31,7 @@ module DTK
         return ret if output_ports.nil? or unc_ports.nil?
         poss_conns = LinkDef.find_possible_connections(unc_ports,output_ports)
         poss_conns.map do |r|
-          poss_conn = r[:output_port].display_name_print_form()
+          poss_conn = "#{r[:output_port][:id].to_s}:#{r[:output_port].display_name_print_form()}"
           ServiceLink.print_form_hash(r[:input_port]).merge(:possible_connection => poss_conn)
         end.sort{|a,b|a[:service_ref] <=> b[:service_ref]}
       end

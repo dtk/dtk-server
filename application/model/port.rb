@@ -280,7 +280,10 @@ module DTK
         :type => type
       }
       row.merge!(:location_asserted => location_asserted) if location_asserted
-      row.merge!(:link_def_id => link_def[:id]) unless (opts[:remote_side] or link_def[:id].nil?)
+      #TODO: not sure if we need opts[:remote_side]
+      unless dir == "output" or opts[:remote_side] or link_def[:id].nil? 
+        row.merge!(:link_def_id => link_def[:id])
+      end
       row
     end
 

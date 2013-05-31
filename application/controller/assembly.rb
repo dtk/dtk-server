@@ -161,7 +161,7 @@ module DTK
       filter = ret_request_params(:filter)
       filter = filter && filter.to_sym
       assembly = ret_assembly_instance_object()
-      rest_ok_response assembly.get_attributes_print_form(filter)
+      rest_ok_response assembly.get_attributes_print_form(Opts.new(:filter => filter))
     end
 
     def rest__list()

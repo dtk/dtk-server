@@ -257,7 +257,7 @@ module DTK; class  Assembly
       
       case about 
        when :attributes
-        ret = get_attributes_print_form_aux(opts[:filter_proc]).map do |a|
+        ret = get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value])
         end.sort(&order)
         return ret
@@ -457,28 +457,30 @@ module DTK; class  Assembly
       create_assembly_template_from_instance(project,name_info)
     end      
 
-    def get_attributes_print_form(filter=nil)
-      if filter
+    def get_attributes_print_form(opts=Opts.new)
+      opts_for_aux = opts.slice(:filter_proc,:detail_level)
+      if filter = opts[:filter]
         case filter
           when :required_unset_attributes
-          get_attributes_print_form_aux(lambda{|r|r[:attribute].required_unset_attribute?()})
+            filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
+            opts_for_aux.merge!(:filter_proc => filter_proc)
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
-      else
-        get_attributes_print_form_aux()
       end
+      get_attributes_print_form_aux(opts_for_aux)
     end
 
-    def get_attributes_print_form_aux(filter_proc=nil)
+    def get_attributes_print_form_aux(opts=Opts.new)
+      filter_proc = opts[:filter_proc]
       assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
-        attr.print_form(Opts.new(:level => :assembly))
+        attr.print_form(opts.merge(:level => :assembly))
       end
       component_attrs = get_augmented_nested_component_attributes(filter_proc).map do |aug_attr|
-        aug_attr.print_form(Opts.new(:level => :component))
+        aug_attr.print_form(opts.merge(:level => :component))
       end
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|
-        aug_attrprint_form(Opts.new(:level => :node))
+        aug_attrprint_form(opts.merge(:level => :node))
       end
 
       (assembly_attrs + node_attrs + component_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}

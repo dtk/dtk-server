@@ -100,18 +100,16 @@ module DTK
     end
 
     def rest__delete_remote()
-      name      = ret_non_null_request_params(:remote_module_name)
-      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(name)
-      # use default one, if there is namaspace provided in request
-      remote_namespace = ret_request_params(:remote_module_namespace) || remote_namespace
-      
+      module_name      = ret_non_null_request_params(:remote_module_name)
+      remote_namespace = (ret_request_params(:remote_module_namespace).empty? ? default_namespace() : ret_request_params(:remote_module_namespace))
+
       remote_repo = ret_remote_repo()
       remote_params = {
         :repo => remote_repo,
-        :module_name => remote_module_name,
+        :module_name => module_name,
         :module_namespace => remote_namespace
       }
-      remote_params.merge!(:version => version) if version
+      #remote_params.merge!(:version => version) if version
       project = get_default_project()
 
       ComponentModule.delete_remote(project,remote_params)

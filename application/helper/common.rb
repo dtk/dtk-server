@@ -22,6 +22,11 @@ module Ramaze::Helper
       end
       ret
     end
+
+    def default_namespace()
+      CurrentSession.new().get_user_object().get_namespace()
+    end
+
     def model_handle(model_name_x=model_name())
       user_obj = user_object()
       ModelHandle.create_from_user(user_obj,model_name_x)

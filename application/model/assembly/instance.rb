@@ -251,7 +251,7 @@ module DTK; class  Assembly
       end
     end
 
-    def info_about(about,opts={})
+    def info_about(about,opts=Opts.new)
       cols = post_process_per_row = order = nil
       order = proc { |a,b| a[:display_name] <=> b[:display_name] }
       

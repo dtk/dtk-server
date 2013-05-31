@@ -3,12 +3,18 @@ module DTK
   class Opts < Hash
     def initialize(initial_val=nil)
       super()
-      replace(initial_val) if initial_val
+      if initial_val
+        #add if non null
+        initial_val.each_pair do |k,v|
+          merge!(k => v) unless v.nil?
+        end
+      end
     end
 
     def slice(*keys)
       Aux::hash_subset(self,keys)
     end
+
   end
 
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places

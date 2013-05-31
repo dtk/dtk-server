@@ -41,7 +41,7 @@ module DTK
     end
 
     def rest__info_about()
-      node_id, component_id = ret_request_params(:node_id, :component_id)
+      node_id, component_id, detail_level = ret_request_params(:node_id, :component_id, :detail_level)
       assembly,subtype = ret_assembly_params_object_and_subtype()
       about = ret_non_null_request_params(:about).to_sym
       unless AboutEnum[subtype].include?(about)
@@ -53,7 +53,7 @@ module DTK
         ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
         ret_val
       end 
-      rest_ok_response assembly.info_about(about, { :filter_proc => filter_proc})
+      rest_ok_response assembly.info_about(about, Opts.new(:filter_proc => filter_proc, :detail_level => detail_level))
     end
 
     def rest__list_modules()

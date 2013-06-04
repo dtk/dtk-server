@@ -211,7 +211,7 @@ module DTK
       # we sort descending by created date
       modules.sort { |a,b| a[:repo_remote][:created_at] <=>  b[:repo_remote][:created_at] }
       # default module is the one which is the oldest
-      default_module = modules.last
+      default_module = modules.first
       default_module[:repo].consume_remote_repo!(default_module[:repo_remote])
       default_module.delete(:repo_remote)
 

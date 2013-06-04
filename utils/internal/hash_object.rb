@@ -12,9 +12,11 @@ module DTK
     end
 
     def slice(*keys)
-      Aux::hash_subset(self,keys)
+      keys.inject(self.class.new) do |h,k|
+        v = self[k]
+        (v.nil? ? h : h.merge(k => v))
+      end
     end
-
   end
 
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places

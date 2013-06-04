@@ -61,24 +61,19 @@ pp ret
       end
 
      private
-      #TODO: put in as option format style
       def initialize(aug_attr,opts=Opts.new)
         @aug_attr = aug_attr #needs to be done first
-        level = opts[:level]||find_level()
-        @display_name_prefix = opts[:display_name_prefix]||display_name_prefix(level)
+        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
       end
-      def self.display_name_prefix(aug_attr,opts=Opts.new)
-        new(aug_attr,opts[:level]).display_name_prefix()
-      end
-
-      def display_name_prefix(level)
-        case level
+      
+      def display_name_prefix(opts=Opts.new)
+        case opts[:level]
          when :assembly
            ""
          when :node
-           "node[#{node[:display_name]}]/"
+           "node[#{node()[:display_name]}]/"
          when :component
-          "node[#{node[:display_name]}]/cmp[#{component.display_name_print_form()}]/"
+          "node[#{node()[:display_name]}]/cmp[#{component().display_name_print_form()}]/"
         end
       end
 

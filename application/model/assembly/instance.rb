@@ -17,7 +17,7 @@ module DTK; class  Assembly
     end
 
     def get_augmented_attribute_mappings()
-      #TODO: once always populate field assembly_id on attribute.link, can do simpler query
+      #TODO: once field assembly_id is always populated on attribute.link, can do simpler query
       ret = Array.new
       sp_hash = {
         :cols => [:id,:group_id],

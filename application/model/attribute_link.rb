@@ -6,7 +6,7 @@ module XYZ
     def self.get_augmented(model_handle,filter)
       ret = Array.new
       sp_hash = {
-        :cols => [:id,:group_id,:input_id,:output_id],
+        :cols => [:id,:group_id,:input_id,:output_id,:function,:index_map],
         :filter => filter 
       }
       attr_links = get_objs(model_handle,sp_hash)

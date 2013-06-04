@@ -133,10 +133,12 @@ module DTK
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
+      remote_namespace = ret_request_params(:remote_namespace)
+
       access_rights = ret_access_rights()
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version)
+      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
     end
 
     #### end: actions to interact with remote repo ###

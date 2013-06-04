@@ -120,14 +120,6 @@ module DTK
       end
     end
 
-    def self.info(target_mh, id, opts={})
-      sp_hash = {
-        :cols => [:id, :display_name,:version],
-        :filter => [:eq,:id,id]
-      }
-      get_objs(target_mh, sp_hash.merge(opts)).first
-    end
-
     def self.get_project_trees(mh)
       sp_hash = {
         :cols => [:id,:display_name,:module_branches]

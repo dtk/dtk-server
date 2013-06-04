@@ -50,10 +50,12 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
-    def get_augmented_workspace_branch(version=nil,opts={})
+    def get_augmented_workspace_branch(version=nil,opts={},remote_namespace=nil)
       sp_hash = {
-        :cols => [:display_name,:workspace_info]
+        :cols => [:display_name,:workspace_info_full]
       }
+
+
       version_field = ModuleBranch.version_field(version)
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if modules.size == 0
@@ -61,11 +63,12 @@ module DTK
           raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
-      elsif modules.size > 1
-        raise Error.new("Unexpected that get more than 1 matching row")
       end
-      module_obj = modules.first
-      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+
+      # based on provided namespace we will filter remote_repos
+      module_obj = filter_repos_by_namespace(modules, remote_namespace)
+      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+      ret
     end
 
     #type is :library or :workspace
@@ -195,6 +198,26 @@ module DTK
     end
 
    private
+
+    def filter_repos_by_namespace(modules, namespace)
+      modules.each do |e|
+        if (e[:repo_remote][:repo_namespace].eql?(namespace))
+          e[:repo].consume_remote_repo!(e[:repo_remote])
+          e.delete(:repo_remote)
+          return e
+        end
+      end
+
+      # we sort descending by created date
+      modules.sort { |a,b| a[:repo_remote][:created_at] <=>  b[:repo_remote][:created_at] }
+      # default module is the one which is the oldest
+      default_module = modules.first
+      default_module[:repo].consume_remote_repo!(default_module[:repo_remote])
+      default_module.delete(:repo_remote)
+
+      return default_module
+    end
+
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
@@ -230,6 +253,44 @@ module DTK
     def name_to_id(model_handle,name)
       name_to_id_default(model_handle,name)
     end
+
+    def info(target_mh, id, opts={})
+      remote_repo_cols = [:id, :display_name, :version, :remote_repos]
+      components_cols = [:id, :display_name, :version]
+      namespaces = []
+
+      sp_hash = {
+        :cols => remote_repo_cols,
+        :filter => [:eq,:id,id]
+      }
+
+      response = get_objs(target_mh, sp_hash.merge(opts))
+
+      # if there are no remotes just get component info
+      if response.empty?
+        sp_hash[:cols] = components_cols
+        response = get_objs(target_mh, sp_hash.merge(opts))
+      else
+        # we sort in ascending order, last remote is default one
+        response.sort { |a,b| b[:repo_remote][:created_at] <=> a[:repo_remote][:created_at]}
+
+        # we switch to ascending order
+        response.each_with_index do |e,i|
+          display_name = (e[:repo_remote]||{})[:display_name]
+          prefix = ( i == 0 ? "*" : " ")
+          namespaces << { :repo_name => "#{prefix} #{display_name}" }
+        end
+      end
+      
+      ret = response.first || {}
+      ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
+      # [Haris] Due to join condition with module.branch we can have situations where we have many versions 
+      # of module with same remote branch, with 'uniq' we iron that out
+
+      ret.merge!(:remote_repos => namespaces.uniq ) if namespaces
+      ret
+    end
+
 
     def list__project_parent(project_idh)
       sp_hash = {

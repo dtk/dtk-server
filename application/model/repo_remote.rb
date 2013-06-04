@@ -30,6 +30,16 @@ module DTK
       get_obj(repo_remote_mh, sp_hash)
     end
 
+    def self.extract_module_name(repo_name)
+      repo_name.split(/\-\-.{2}\-\-/).last
+    end
 
+    def self.create_repo_remote?(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
+      repo_remote = get_remote_repo(repo_remote_mh, repo_id, module_name, repo_namespace)
+      unless repo_remote
+        repo_remote = create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
+      end
+      repo_remote
+    end
   end
 end

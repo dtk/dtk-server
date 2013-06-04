@@ -221,6 +221,10 @@ module XYZ
       id_handle ? id_handle.get_id() : nil
     end
 
+    def display_name()
+      self[:display_name]
+    end
+
     def set_id_handle(hash_or_idh)
       @id_handle = (hash_or_idh.kind_of?(IDHandle) ? hash_or_idh : IDHandle[hash_or_idh])
     end

@@ -67,15 +67,30 @@ pp ret
       end
       
       def display_name_prefix(opts=Opts.new)
-        case opts[:level]
+        level = opts.required(:level)
+        format = DisplayNamePrefixFormats[opts[:format]||:default][level]
+        case level
          when :assembly
-           ""
+          format
          when :node
-           "node[#{node()[:display_name]}]/"
+          format.gsub(/\$node/,node()[:display_name])
          when :component
-          "node[#{node()[:display_name]}]/cmp[#{component().display_name_print_form()}]/"
+          format.gsub(/\$node/,node()[:display_name]).gsub(/\$component/,component().display_name_print_form())
         end
       end
+
+      DisplayNamePrefixFormats = {
+        :default => {
+          :assembly => "a:",
+          :node => "n:$node/",
+          :component => "$node/$component/"
+        },
+        :bracket_form => {
+          :assembly => "",
+          :node => "node[$node]/",
+          :component => "node[$node]/cmp[$component]/"
+        }
+      }
 
       def value_print_form()
         #TODO: handle complex attributes better 

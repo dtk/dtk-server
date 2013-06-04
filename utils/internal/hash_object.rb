@@ -17,6 +17,15 @@ module DTK
         (v.nil? ? h : h.merge(k => v))
       end
     end
+
+    def required(key)
+      val  = self[key]
+      if val.nil?
+        raise Error.new("Key (#{key}) is required as an option")
+      end
+      val
+    end
+
   end
 
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places

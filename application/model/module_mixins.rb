@@ -254,6 +254,44 @@ module DTK
       name_to_id_default(model_handle,name)
     end
 
+    def info(target_mh, id, opts={})
+      remote_repo_cols = [:id, :display_name, :version, :remote_repos]
+      components_cols = [:id, :display_name, :version]
+      namespaces = []
+
+      sp_hash = {
+        :cols => remote_repo_cols,
+        :filter => [:eq,:id,id]
+      }
+
+      response = get_objs(target_mh, sp_hash.merge(opts))
+
+      # if there are no remotes just get component info
+      if response.empty?
+        sp_hash[:cols] = components_cols
+        response = get_objs(target_mh, sp_hash.merge(opts))
+      else
+        # we sort in ascending order, last remote is default one
+        response.sort { |a,b| b[:repo_remote][:created_at] <=> a[:repo_remote][:created_at]}
+
+        # we switch to ascending order
+        response.each_with_index do |e,i|
+          display_name = (e[:repo_remote]||{})[:display_name]
+          prefix = ( i == 0 ? "*" : " ")
+          namespaces << { :repo_name => "#{prefix} #{display_name}" }
+        end
+      end
+      
+      ret = response.first || {}
+      ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
+      # [Haris] Due to join condition with module.branch we can have situations where we have many versions 
+      # of module with same remote branch, with 'uniq' we iron that out
+
+      ret.merge!(:remote_repos => namespaces.uniq ) if namespaces
+      ret
+    end
+
+
     def list__project_parent(project_idh)
       sp_hash = {
         :cols => [:id, :display_name],

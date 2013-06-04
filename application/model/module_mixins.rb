@@ -54,6 +54,8 @@ module DTK
       sp_hash = {
         :cols => [:display_name,:workspace_info_full]
       }
+
+
       version_field = ModuleBranch.version_field(version)
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if modules.size == 0

@@ -20,6 +20,16 @@ lambda__segment_repos =
     :cols=>args[:cols]
   }
 }
+lambda__segment_remote_repos =
+  lambda{|args|
+  {
+    :model_name=>:repo_remote,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:repo_id =>:repo__id},
+    :cols=>args[:cols]
+  }
+}
 lambda__segment_impls =
   lambda{|args|
   {
@@ -70,6 +80,15 @@ assembly_nodes  =
       [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
+    :workspace_info_full=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
+       lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name]),
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id])
+     ]
+    },    
     #MOD_RESTRUCT: deprecate below for above
     :library_repo=>{
       :type=>:json,

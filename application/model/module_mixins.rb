@@ -50,9 +50,9 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
-    def get_augmented_workspace_branch(version=nil,opts={})
+    def get_augmented_workspace_branch(version=nil,opts={},remote_namespace=nil)
       sp_hash = {
-        :cols => [:display_name,:workspace_info]
+        :cols => [:display_name,:workspace_info_full]
       }
       version_field = ModuleBranch.version_field(version)
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
@@ -61,11 +61,12 @@ module DTK
           raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
-      elsif modules.size > 1
-        raise Error.new("Unexpected that get more than 1 matching row")
       end
-      module_obj = modules.first
-      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+
+      # based on provided namespace we will filter remote_repos
+      module_obj = filter_repos_by_namespace(modules, remote_namespace)
+      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+      ret
     end
 
     #type is :library or :workspace
@@ -195,6 +196,26 @@ module DTK
     end
 
    private
+
+    def filter_repos_by_namespace(modules, namespace)
+      modules.each do |e|
+        if (e[:repo_remote][:repo_namespace].eql?(namespace))
+          e[:repo].consume_remote_repo!(e[:repo_remote])
+          e.delete(:repo_remote)
+          return e
+        end
+      end
+
+      # we sort descending by created date
+      modules.sort { |a,b| a[:repo_remote][:created_at] <=>  b[:repo_remote][:created_at] }
+      # default module is the one which is the oldest
+      default_module = modules.last
+      default_module[:repo].consume_remote_repo!(default_module[:repo_remote])
+      default_module.delete(:repo_remote)
+
+      return default_module
+    end
+
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])

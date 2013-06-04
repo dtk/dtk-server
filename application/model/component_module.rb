@@ -94,7 +94,7 @@ module DTK
     def self.info(target_mh, id, opts={})
       remote_repo_cols = [:id, :display_name, :version, :remote_repos]
       components_cols = [:id, :display_name, :version]
-      namespaces = nil
+      namespaces = []
 
       sp_hash = {
         :cols => remote_repo_cols,
@@ -108,7 +108,15 @@ module DTK
         sp_hash[:cols] = components_cols
         response = get_objs(target_mh, sp_hash.merge(opts))
       else
-        namespaces = response.collect { |e| { :repo_name => (e[:repo_remote]||{})[:display_name] }}
+        # we sort in ascending order, last remote is default one
+        response.sort { |a,b| b[:repo_remote][:created_at] <=> a[:repo_remote][:created_at]}
+
+        # we switch to ascending order
+        response.each_with_index do |e,i|
+          display_name = (e[:repo_remote]||{})[:display_name]
+          prefix = ( i == 0 ? "*" : " ")
+          namespaces << { :repo_name => "#{prefix} #{display_name}" }
+        end
       end
       
       ret = response.first || {}

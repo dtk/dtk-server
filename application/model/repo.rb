@@ -26,6 +26,18 @@ module XYZ
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end
 
+    # Method will set self attributes
+    # 
+    # :remote_repo_name, :remote_repo_namespace
+    #
+    # From remote repo, this is to minimize changes to existing code base, this should change as we go on forward
+    #
+    def consume_remote_repo!(remote_repo)
+      self[:remote_repo_name] = remote_repo[:repo_name]
+      self[:remote_repo_namespace] = remote_repo[:repo_namespace]
+      self
+    end
+
 
     def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name

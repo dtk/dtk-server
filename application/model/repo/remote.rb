@@ -174,7 +174,7 @@ module DTK
           # Amar: To handle DTK-819: Returning friendly error message to CLI below if 'ret' is nil
         end
         unless ret 
-          raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not exist")
+          raise ErrorUsage.new("Remote component/service (#{qualified_module_name(remote_params)}) does not exist")
         end
         if remote_params[:version]
           versions = branch_names_to_versions(ret[:branches])

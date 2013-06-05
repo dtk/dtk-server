@@ -65,8 +65,16 @@ module DTK
         return nil
       end
 
-      # based on provided namespace we will filter remote_repos
-      module_obj = filter_repos_by_namespace(modules, remote_namespace)
+      module_obj = nil
+      if remote_namespace
+        # based on provided namespace we will filter remote_repos
+        module_obj = filter_repos_by_namespace(modules, remote_namespace)
+      else
+        unless modules.size == 1
+          raise Error.new("Unexepected that have multiple modules when no remote_repos")  
+        end
+        module_obj = modules.first
+      end
       ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
       ret
     end

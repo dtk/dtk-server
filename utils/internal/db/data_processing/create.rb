@@ -181,11 +181,11 @@ module XYZ
       def create_from_hash_with_factory(factory_idh,hash,opts={})
         ret = Array.new
         hash.each do |ref,assignments| 
-	  new_item = create_instance(factory_idh,ref,assignments,opts)
-	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
-	  ret << new_item
-        end
-	ret
+      	  new_item = create_instance(factory_idh,ref,assignments,opts)
+      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
+      	  ret << new_item
+              end
+      	 ret
       end
 
       def create_instance(factory_idh,ref,assignments,opts={})

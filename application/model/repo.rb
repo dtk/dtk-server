@@ -127,10 +127,13 @@ module XYZ
         ret = repo_idh.create_object().merge(repo_hash)
       end
 
-      # we extract module name
-      module_name = RepoRemote.extract_module_name(extra_attrs[:remote_repo_name])
-      # we create repo remote
-      RepoRemote.create_repo_remote(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], ret.id())
+      # this is only in cases when we import from r8_network 
+      if extra_attrs[:remote_repo_name]
+        # we extract module name
+        module_name = RepoRemote.extract_module_name(extra_attrs[:remote_repo_name])
+        # we create repo remote
+        RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], ret.id())
+      end
 
       return ret
     end

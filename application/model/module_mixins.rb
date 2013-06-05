@@ -409,9 +409,7 @@ module DTK
           :access_rights => "RW+"
         }
       end
-      # REMOVE THIS >>>> DEBUG <<<<
-      require 'ruby-debug';Debugger.start
-      debugger
+
       Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 

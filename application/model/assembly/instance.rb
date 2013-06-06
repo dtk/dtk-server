@@ -292,7 +292,8 @@ module DTK; class  Assembly
         post_process_per_row = proc do |r|
           r[:task]
         end
-        order = proc{|a,b|b[:started_at] <=> a[:started_at]}
+        #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
+        order = proc{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])}
       end
       unless cols
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")

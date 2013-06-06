@@ -158,7 +158,7 @@ module DTK
        rescue  ErrorUsage => e
         error = e
        rescue Exception 
-        error = ErrorUsage.new("Remote module (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
+        error = ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
       end
 
       # delete module on remote repo manager

@@ -145,40 +145,41 @@ module XYZ
       def create_from_hash_with_factory(factory_idh,hash,opts={})
         ret = Array.new
         hash.each do |ref,assignments| 
-	  new_item = create_instance(factory_idh,ref,assignments,opts)
-	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
-	  ret << new_item
+      	  new_item = create_instance(factory_idh,ref,assignments,opts)
+      	  Log.info("created new object: uri=#{new_item[:uri]}; id=#{new_item[:id]}")		   
+      	  ret << new_item
         end
-	ret
+
+	      ret
       end
 
       def create_instance(factory_idh,ref,assignments,opts={})
         relation_type,parent_uri = RestURI.parse_factory_uri(factory_idh[:uri])
         db_rel = DB_REL_DEF[relation_type]
 
-	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
-	obj_assignments = ret_object_assignments(assignments,db_rel)
+      	scalar_assignments = ret_settable_scalar_assignments(assignments,db_rel)
+      	obj_assignments = ret_object_assignments(assignments,db_rel)
 
-	#adding assignments that can be computed at this point indep. of case on parent_uri
-	scalar_assignments.merge!({:ref => ref.to_s})
-	old_id = scalar_assignments[:id]
-	modify_to_reflect_special_processing!(scalar_assignments,db_rel,:insert,opts)
+      	#adding assignments that can be computed at this point indep. of case on parent_uri
+      	scalar_assignments.merge!({:ref => ref.to_s})
+      	old_id = scalar_assignments[:id]
+      	modify_to_reflect_special_processing!(scalar_assignments,db_rel,:insert,opts)
 
-	############# processing scalar columns by inserting a row in db_rel
-	new_id = nil
-	parent_id = nil
-	parent_relation_type = nil
+      	############# processing scalar columns by inserting a row in db_rel
+      	new_id = nil
+      	parent_id = nil
+      	parent_relation_type = nil
         c = factory_idh[:c]
-       	if parent_uri == "/" ## if top level object
+        if parent_uri == "/" ## if top level object
           ref_num = compute_ref_num(db_rel,ref,c)          	  
-	  #TBD check that the assignments are legal, or trap
-	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
+      	  #TBD check that the assignments are legal, or trap
+      	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge({:ref_num => ref_num}))
         else
-	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true 
-	  parent_id = parent_id_info[:id]
-	  parent_relation_type = parent_id_info[:relation_type]
+      	  parent_id_info = IDInfoTable.get_row_from_uri parent_uri,c,:raise_error => true 
+      	  parent_id = parent_id_info[:id]
+      	  parent_relation_type = parent_id_info[:relation_type]
 
-	  parent_id_field = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
+      	  parent_id_field = ret_parent_id_field_name(parent_id_info[:db_rel],db_rel)
           ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
 
           merge_attrs = {:ref_num => ref_num,parent_id_field => parent_id_info[:id]}
@@ -186,9 +187,8 @@ module XYZ
           if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
             merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
           end
-	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
-
-	end              
+      	  new_id = insert_into_db(factory_idh,db_rel,scalar_assignments.merge(merge_attrs))
+        end              
 
 	raise Error.new("error while inserting element") if new_id.nil?
 

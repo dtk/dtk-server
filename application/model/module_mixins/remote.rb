@@ -101,12 +101,11 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
-
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
         local_module_name = local_params[:module_name]
-
         version = remote_params[:version]
+
         if module_obj = module_exists?(project.id_handle(),local_module_name)
           if module_obj.get_module_branch(local_branch)
             raise ErrorUsage.new("Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})")
@@ -159,7 +158,7 @@ module DTK
        rescue  ErrorUsage => e
         error = e
        rescue Exception 
-        error = ErrorUsage.new("Remote module (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
+        error = ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
       end
 
       # delete module on remote repo manager

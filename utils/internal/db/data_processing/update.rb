@@ -96,24 +96,24 @@ module XYZ
       #TODO Enable short circuit that conditionally avoids IDInfoTable
       #returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
-	return update_from_hash_from_factory_id(id_info,id_handle,hash_assigns,opts) if id_info[:is_factory]
+	      id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
+	      return update_from_hash_from_factory_id(id_info,id_handle,hash_assigns,opts) if id_info[:is_factory]
         update_from_hash_from_instance_id(id_info,id_handle,hash_assigns,opts)
       end
 
       #TODO Enable short circuit that conditionally avoids IDInfoTable
       #TDOD may remove below two public methods and subsume by above
       def update_instance(id_handle,scalar_assigns,opts={}) 
-	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true
-	update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
+        id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true
+        update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
       end
     
       def update(relation_type,c,scalar_assigns,where_clause={})
-	db_rel = DB_REL_DEF[relation_type]
-	ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
-	#TODO: check that valid assigns
-	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update)
-	ds.update(scalar_assigns)
+        db_rel = DB_REL_DEF[relation_type]
+        ds = dataset(db_rel).where(SQL.and(where_clause,{CONTEXT_ID => c}))
+        #TODO: check that valid assigns
+        modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update)
+        ds.update(scalar_assigns)
       end
 
      private
@@ -131,19 +131,19 @@ module XYZ
         ret = Array.new
         fetch_raw_sql(sql){|row| ret << row}
         db_rel = DB_REL_DEF[id_info[:relation_type]]
-	modify_to_reflect_special_processing!(ret,db_rel,:update)
+        modify_to_reflect_special_processing!(ret,db_rel,:update)
         ret
       end
 
       def update_instance_from_id_info(id_handle_x,id_info,scalar_assigns,opts={})
-	return nil if scalar_assigns.empty?
-	db_rel = DB_REL_DEF[id_info[:relation_type]]
-	ds = dataset(db_rel).where(:id => id_info[:id])
-	#TODO: check that valid assigns
+        return nil if scalar_assigns.empty?
+        db_rel = DB_REL_DEF[id_info[:relation_type]]
+        ds = dataset(db_rel).where(:id => id_info[:id])
+        #TODO: check that valid assigns
         id_handle = IDHandle[:id_info => id_info]
         id_handle[:group_id] ||= id_handle_x[:group_id] if id_handle_x[:group_id]
-	modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts.merge({:id_handle => id_handle}))
-	ds.update(scalar_assigns)
+        modify_to_reflect_special_processing!(scalar_assigns,db_rel,:update,opts.merge({:id_handle => id_handle}))
+        ds.update(scalar_assigns)
       end
 
       #id_handle used to pass context such as user_id and group_id
@@ -219,17 +219,17 @@ module XYZ
       #id_handle used to pass context such as user_id and group_id
       #TODO: may collapse id_info and id_handle
       def update_from_hash_from_instance_id(id_info,id_handle,assigns,opts={})
-	new_uris = Array.new
+        new_uris = Array.new
         db_rel = DB_REL_DEF[id_info[:relation_type]]
-	scalar_assigns = ret_settable_scalar_assignments(assigns,db_rel)
-	update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
+        scalar_assigns = ret_settable_scalar_assignments(assigns,db_rel)
+        update_instance_from_id_info(id_handle,id_info,scalar_assigns,opts)
 
-	obj_assigns = ret_object_assignments(assigns,db_rel)
-	obj_assigns.each_pair do |relation_type,child_assigns|
-	  factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
-#          factory_idh = IDHandle[:c => c, :uri => factory_uri, :is_factory => true]
+        obj_assigns = ret_object_assignments(assigns,db_rel)
+        obj_assigns.each_pair do |relation_type,child_assigns|
+          factory_uri = RestURI.ret_factory_uri(id_info[:uri],relation_type)
+#         factory_idh = IDHandle[:c => c, :uri => factory_uri, :is_factory => true]
           factory_idh = id_handle.createIDH(:uri => factory_uri, :is_factory => true)
-	  factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, :create_factory_if_needed => true	 
+          factory_id_info = IDInfoTable.get_row_from_id_handle factory_idh, :create_factory_if_needed => true	 
           new_uris = new_uris + update_from_hash_from_factory_id(factory_id_info,factory_idh,child_assigns,opts)
         end
         new_uris

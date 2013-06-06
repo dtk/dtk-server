@@ -165,10 +165,16 @@ module DTK
           :type => type_for_remote_module(remote_params[:module_type]),
           :namespace => remote_params[:module_namespace] || self.class.default_namespace()
         } 
-        response_data = client.get_module_info(client_params)
-        ret = Aux.convert_keys_to_symbols(response_data)
+
+        ret = nil
+        begin
+          response_data = client.get_module_info(client_params)
+          ret = Aux.convert_keys_to_symbols(response_data)
+        rescue ErrorUsage => e
+          # Amar: To handle DTK-819: Returning friendly error message to CLI below if 'ret' is nil
+        end
         unless ret 
-          raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not exist")
+          raise ErrorUsage.new("Remote component/service (#{qualified_module_name(remote_params)}) does not exist")
         end
         if remote_params[:version]
           versions = branch_names_to_versions(ret[:branches])

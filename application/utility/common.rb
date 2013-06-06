@@ -36,6 +36,11 @@ class R8Server
         :public => new_key.ssh_public_key,
         :private => new_key.private_key
       }
+      # dtk-node-dtkX should be in group 'all'
+      user_mh = model_handle(:user)
+      user_group_mh = user_mh.createMH(:user_group)
+      group_obj = UserGroup.get_all_group(user_group_mh)
+      repo_user_mh[:group_id] = group_obj[:id]
       RepoUser.add_repo_user(:node,repo_user_mh,ssh_rsa_keys)
     end
   end

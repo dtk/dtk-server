@@ -64,7 +64,7 @@ shared_context "NEG - Create module from provided git repo" do |module_name, git
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
     pass = true if ((value.include? "[ERROR]") || (value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
-    puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == true
+    puts "Module #{module_name} was not created successfully from provided incorrect git repo!" if pass == true
     puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == false
     puts ""
     pass.should eq(true)

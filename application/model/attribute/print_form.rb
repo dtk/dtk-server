@@ -27,8 +27,9 @@ module DTK
       end
 
       def print_form()
+        attr_name = attr_name_special_processing() || attr_name_default()
         attr_info = {
-          :display_name => "#{@display_name_prefix}#{@aug_attr[:display_name]}",
+          :display_name => "#{@display_name_prefix}#{attr_name}",
           :datatype => datatype_print_form(),
           :description => @aug_attr[:description]||@aug_attr[:display_name]
         }
@@ -47,7 +48,11 @@ module DTK
           pntr = ndx_attr_mappings[ndx] ||= Array.new
           output_id = r[:output_id]
           unless pntr.find{|m|m[:id] == output_id}
-            ndx_attr_mappings[ndx] << r[:output].print_form()
+            opts = Opts.new
+            if output_index_map = r[:output_index_map]
+              opts.merge!(:index_map => output_index_map)
+            end
+            ndx_attr_mappings[ndx] << r[:output].print_form(opts)
           end
         end
         ret.each do |r|
@@ -64,8 +69,19 @@ pp ret
       def initialize(aug_attr,opts=Opts.new)
         @aug_attr = aug_attr #needs to be done first
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
+        @index_map = opts[:index_map]
       end
-      
+
+      def attr_name_default()
+        index_map_string = (@index_map ? @index_map.inspect() : "")
+        "#{@aug_attr[:display_name]}#{index_map_string}"
+      end
+      def attr_name_special_processing()
+        if @aug_attr[:semantic_type_summary] == "host_address_ipv4" and @index_map == [0]
+          "host_address"
+        end
+      end
+
       def display_name_prefix(opts=Opts.new)
         level = opts.required(:level)
         format = DisplayNamePrefixFormats[opts[:format]||:default][level]

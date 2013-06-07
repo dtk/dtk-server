@@ -32,5 +32,18 @@
       :on_update=>:cascade
     }
   },
+  :virtual_columns=>{
+    :output_index_map=>{
+      :type=>:json,
+      :hidden=>true,
+      :local_dependencies => [:index_map]
+    },
+    :input_index_map=>{
+      :type=>:json,
+      :hidden=>true,
+      :local_dependencies => [:index_map]
+    }
+  },
+
   :many_to_one=>[:library, :datacenter, :component, :node]
 }

@@ -2,6 +2,26 @@ require  File.expand_path('attribute_link/propagate_changes', File.dirname(__FIL
 module XYZ
   class AttributeLink < Model
     extend AttrLinkPropagateChangesClassMixin
+
+    #virtual attribute defs    
+    def output_index_map()
+      index_map_aux(:output)
+    end
+    def input_index_map()
+      index_map_aux(:input)
+    end
+    def index_map_aux(input_or_output)
+      if index_map = get_field?(:index_map)
+        unless index_map.size == 1
+          Log.error("Not treating item map with size greater than 1")
+          return nil
+        end
+        ret = index_map.first[input_or_output]
+        (!ret.empty?) && ret
+      end
+    end
+    private :index_map_aux
+
     ##########################  get links ##################
     def self.get_augmented(model_handle,filter)
       ret = Array.new
@@ -60,6 +80,7 @@ module XYZ
     def self.attribute_info_cols()
       [:id,:attribute_value,:semantic_type_object,:component_parent]
     end
+
    private
     def  self.propagate_from_create(attr_mh,attr_info,attr_links,change_parent_idh)
       attrs_links_to_update = attr_links.map do |attr_link|

@@ -370,6 +370,7 @@ module XYZ
             head_git_commit_id = ::DTK::WorkflowAdapter::AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
               set_result_succeeded(workitem,nil,task,action) if task_end
+              pp ["task_complete_skipped_already_synced #{self.class.to_s}",task[:id]]
               delete_task_info(workitem)
               return reply_to_engine(workitem)
             end
@@ -380,7 +381,9 @@ module XYZ
                 if result[:statuscode] != 0
                   event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
                   pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  cancel_upstream_subtasks(workitem)
+                  # Amar: SyncAgentCode will be skipped 99% of times, 
+                  #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
+                  #cancel_upstream_subtasks(workitem)
                   set_result_failed(workitem,result,task)
                 else
                   node.update_agent_git_commit_id(head_git_commit_id)
@@ -400,7 +403,7 @@ module XYZ
                 }
                 event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
                 pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                cancel_upstream_subtasks(workitem)
+                #cancel_upstream_subtasks(workitem)
                 set_result_timeout(workitem,result,task)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)

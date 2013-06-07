@@ -13,7 +13,7 @@ module XYZ
             agent_repo_url = "https://github.com/rich-reactor8/dtk-node-agent.git"
             # Clone will be invoked only when DTK Server is started for the first time
             unless File.directory?("#{agent_repo_dir}")
-              cmd_opts = {:raise => true, :timeout => 60}
+              cmd_opts = { :raise => true, :timeout => 10 }
               clone_args = [agent_repo_url, agent_repo_dir]
               ::Grit::Git.new("").clone(cmd_opts, *clone_args)
             end

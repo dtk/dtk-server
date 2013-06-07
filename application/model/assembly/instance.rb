@@ -272,7 +272,7 @@ module DTK; class  Assembly
 #TODO: for testing
 opts = opts.merge!(:detail_level => [:attribute_links])
         ret = get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
-          Aux::hash_subset(a,[:id,:display_name,:value])
+          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to])
         end.sort(&order)
         return ret
        when :components

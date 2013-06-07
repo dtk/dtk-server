@@ -86,12 +86,14 @@
     "order": [
       "id",
       "path",
-      "value"
+      "value",
+      "linked_to"
     ],
     "mapping": {
       "path": "display_name",
       "id": "dtk_id",
-      "value": "value"
+      "value": "value",
+      "linked_to": "linked_to.map{|r|r['display_name']}.join(', ')"
     }
   },
   "attribute_w_version": {

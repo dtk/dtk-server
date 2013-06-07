@@ -55,13 +55,7 @@ module DTK
             ndx_attr_mappings[ndx] << r[:output].print_form(opts)
           end
         end
-        ret.each do |r|
-          ndx = r[:id]
-          if linked_to = ndx_attr_mappings[ndx]
-            r[:linked_to] = linked_to
-          end
-        end
-pp ret
+        ret.each{|r|r.merge!(:linked_to => ndx_attr_mappings[r[:id]]||[])}
         ret
       end
 
@@ -98,7 +92,7 @@ pp ret
       DisplayNamePrefixFormats = {
         :default => {
           :assembly => "a:",
-          :node => "n:$node/",
+          :node => "$node/",
           :component => "$node/$component/"
         },
         :bracket_form => {

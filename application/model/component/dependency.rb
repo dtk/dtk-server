@@ -1,5 +1,12 @@
 module DTK
   class Component
+    class DependentOn #This represents both internode and intranode dependencies; anything that shows up in the depends_on section of the dsl
+      def self.get_from_instances(cmp_instance_idhs)
+        Component.get_component_type_and_dependencies(cmp_instance_idhs)
+      end
+    end
+
+    #TODO: clean up use of this mixin and integrate with Component::DependentOn
     module DependencyClassMixin
 
       #this provides for each component, what other components it depends on

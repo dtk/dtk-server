@@ -66,6 +66,24 @@ module DTK; class  Assembly
       get_objs(node_mh,sp_hash)
     end
 
+    def get_augmented_components(opts=Opts.new)
+      ret = get_objs(:cols => [:instance_nodes_and_cmps_summary])
+      if opts[:filter_proc]
+        #TODO: should this be a select instead
+        ret = ret.map{|r| opts[:filter_proc].call(r)}.compact 
+      end
+      ret
+    end
+
+    def get_tasks(opts=Opts.new)
+      ret = get_objs(:cols => [:tasks])
+      if opts[:filter_proc]
+        #TODO: should this be a select instead
+        ret = ret.map{|r| opts[:filter_proc].call(r)}.compact
+      end
+      ret
+    end
+
     def get_target()
       get_obj_helper(:target,:target)
     end
@@ -264,51 +282,37 @@ module DTK; class  Assembly
     end
 
     def info_about(about,opts=Opts.new)
-      cols = post_process_per_row = order = nil
       order = proc { |a,b| a[:display_name] <=> b[:display_name] }
       
       case about 
        when :attributes
 #TODO: for testing
 opts = opts.merge!(:detail_level => [:attribute_links])
-        ret = get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
+        get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value,:linked_to])
         end.sort(&order)
-        return ret
+
        when :components
-        cols = [:instance_nodes_and_cmps_summary]
-        post_process_per_row = proc do |r|
-          if r
-            display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
-            version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
-            # Remove version from display name
-            display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
-            columns_filtered = r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
-            return columns_filtered
-          end
-        end
+        get_augmented_components(opts.slice(:filter_proc)).map do |r|
+          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
+          version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
+          # Remove version from display name
+          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+          r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
+        end.sort(&order)
+
        when :nodes
-        return get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
+        get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
+
        when :tasks
-        cols = [:tasks]
-        post_process_per_row = proc do |r|
+        order = proc{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
+        get_tasks(opts.slice(:filter_proc)).map do |r|
           r[:task]
-        end
-        #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
-        order = proc{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])}
-      end
-      unless cols
+        end.compact.sort(&order)
+
+       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
-
-      rows = get_objs(:cols => cols)
-      # If about=:component filter components by node_id, by invoking filter_proc
-      rows = rows.map { |r| opts[:filter_proc].call(r) }.compact if (opts[:filter_proc] && about == :components)
-
-      ret = post_process_per_row ? rows.map{|r|post_process_per_row.call(r)} : rows
-      #remove nil values from array ret
-      ret.reject!{|r| r.nil?}
-      order ? ret.sort(&order) : ret
     end
 
     def self.delete(assembly_idhs,opts={})

@@ -1,15 +1,11 @@
 module DTK
   class Component
-    class DependentOn #This represents both internode and intranode dependencies; anything that shows up in the depends_on section of the dsl
-      def self.get_from_instances(cmp_instance_idhs)
-        Component.get_component_type_and_dependencies(cmp_instance_idhs)
-      end
-    end
 
-    #TODO: clean up use of this mixin and integrate with Component::DependentOn
+    #TODO: clean up use of this mixin and integrate with Component::Instance::Dependency
     module DependencyClassMixin
 
       #this provides for each component, what other components it depends on
+      #id_handles are component isntance id_handles
       def get_component_type_and_dependencies(id_handles)
         sample_idh = id_handles.first
         #TODO: switched to use inherited dependencies; later will allow dependencies directly on component instances and have

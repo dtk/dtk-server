@@ -67,10 +67,21 @@ module DTK; class  Assembly
     end
 
     def get_augmented_components(opts=Opts.new)
-      ret = get_objs(:cols => [:instance_nodes_and_cmps_summary])
+      rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
       if opts[:filter_proc]
         #TODO: should this be a select instead
-        ret = ret.map{|r| opts[:filter_proc].call(r)}.compact 
+        rows = rows.map{|r| opts[:filter_proc].call(r)}.compact 
+      end
+      ret = rows.map do |r|
+        r[:nested_component].merge(r.hash_subset(:node))
+      end
+
+      if (opts[:detail_level]||[]).include?(:component_dependencies)
+        cmp_instance_idhs = ret.map{|r|r.id_handle()}
+        ndx_cmp_deps = Component::Instance::Dependency.get_indexed(cmp_instance_idhs)
+pp ret
+        ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
+        pp ret
       end
       ret
     end
@@ -286,19 +297,19 @@ module DTK; class  Assembly
       
       case about 
        when :attributes
-#TODO: for testing
-opts = opts.merge!(:detail_level => [:attribute_links])
+opts = opts.merge!(:detail_level => [:attribute_links]) #TODO: for testing
         get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value,:linked_to])
         end.sort(&order)
 
        when :components
-        get_augmented_components(opts.slice(:filter_proc)).map do |r|
-          display_name = "#{r[:node][:display_name]}/#{r[:nested_component][:display_name].gsub(/__/,"::")}"
-          version = ModuleBranch.version_from_version_field(r[:nested_component][:version])
+opts = opts.merge!(:detail_level => [:component_dependencies]) #TODO: for testing
+        get_augmented_components(opts.slice(:filter_proc,:detail_level)).map do |r|
+          display_name = "#{r[:node][:display_name]}/#{r[:display_name].gsub(/__/,"::")}"
+          version = ModuleBranch.version_from_version_field(r[:version])
           # Remove version from display name
           display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
-          r[:nested_component].hash_subset(:id).merge({:display_name => display_name, :version => version})
+          r.hash_subset(:id).merge({:display_name => display_name, :version => version})
         end.sort(&order)
 
        when :nodes

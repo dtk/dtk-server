@@ -79,9 +79,7 @@ module DTK; class  Assembly
       if (opts[:detail_level]||[]).include?(:component_dependencies)
         cmp_instance_idhs = ret.map{|r|r.id_handle()}
         ndx_cmp_deps = Component::Instance::Dependency.get_indexed(cmp_instance_idhs)
-pp ret
         ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
-        pp ret
       end
       ret
     end
@@ -305,10 +303,11 @@ opts = opts.merge!(:detail_level => [:attribute_links]) #TODO: for testing
        when :components
 opts = opts.merge!(:detail_level => [:component_dependencies]) #TODO: for testing
         get_augmented_components(opts.slice(:filter_proc,:detail_level)).map do |r|
-          display_name = "#{r[:node][:display_name]}/#{r[:display_name].gsub(/__/,"::")}"
-          version = ModuleBranch.version_from_version_field(r[:version])
-          # Remove version from display name
-          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+          display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
+          version = Component::Instance.version_print_form(r)
+#TODO: dont think this is needed anymore
+# Remove version from display name
+#          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
           r.hash_subset(:id).merge({:display_name => display_name, :version => version})
         end.sort(&order)
 

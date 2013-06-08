@@ -315,6 +315,7 @@ module DTK; class  Assembly
 
     def list_components(opts=Opts.new)
       add_depends_on = (opts[:detail_to_include]||[]).include?(:component_dependencies)
+      opts.set_return_value!(:datatype, add_depends_on ? :component_with_dependencies : :component)
       ret = Array.new
       get_augmented_components(opts).each do |r|
         display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"

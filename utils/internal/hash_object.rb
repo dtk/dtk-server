@@ -26,6 +26,31 @@ module DTK
       val
     end
 
+    def add_value_to_return!(key)
+      (self[:return_values] ||= ReturnValue.new).add_value_to_return!(key)
+    end
+
+    def return_value(key)
+      if rvs = self[:return_values]
+        rvs[key]
+      end
+    end
+
+    def set_return_value!(key,val)
+      if rvs = self[:return_values]
+        if rvs.has_key?(key)
+          rvs[key] = val
+        end
+      end
+      self
+    end
+
+   private
+    class ReturnValue < Hash
+      def add_value_to_return!(key)
+        self[key] ||= nil
+      end
+    end
   end
 
   #NOTE: either extend or put in another object that handles virtual attributes but not autovivication to be used in most places

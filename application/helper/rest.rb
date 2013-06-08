@@ -7,9 +7,13 @@ module Ramaze::Helper
       JSON.generate(@ctrl_results)
     end
 
-    def rest_ok_response(data=nil)
+    def rest_ok_response(data=nil,opts=::DTK::Opts.new)
       data ||= Hash.new
-      RestResponse.new(:status => :ok,:data => data)
+      payload = {:status => :ok,:data => data}
+      if opts[:datatype]
+        payload.merge!(:datatype => opts[:datatype])
+      end
+      RestResponse.new(payload)
     end
 
     # 

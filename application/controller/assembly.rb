@@ -55,8 +55,11 @@ module DTK
       opts = Opts.new(:filter_proc => filter_proc, :detail_level => detail_level)
       if detail_to_include
         opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
+        opts.add_value_to_return!(:datatype)
       end
-      rest_ok_response assembly.info_about(about, opts)
+      data = assembly.info_about(about, opts)
+      datatype = opts.return_value(:datatype)
+      rest_ok_response data, :datatype => datatype
     end
 
     def rest__list_modules()

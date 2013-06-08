@@ -26,7 +26,8 @@ files =
    'component_dsl',
    'action_results_queue',
    'simple_action_queue',
-   'async_response'
+   'async_response',
+   'output_table'
   ]
 r8_nested_require('internal',files)
 

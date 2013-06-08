@@ -76,10 +76,23 @@
     "mapping": {
       "name": "display_name",
       "version": "version",
-      "library": "library.display_name",
       "id": "dtk_id",
-      "library_id": "library_library_id",
       "component_type": "dtk_type"
+    }
+  },
+  "component_with_dependencies": {
+    "order": [
+      "id",
+      "name",
+      "version",
+      "depends_on"
+    ],
+    "mapping": {
+      "name": "display_name",
+      "version": "version",
+      "id": "dtk_id",
+      "component_type": "dtk_type",
+      "depends_on":  "depends_on"
     }
   },
   "attribute": {

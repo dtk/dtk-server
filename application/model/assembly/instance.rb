@@ -314,37 +314,40 @@ module DTK; class  Assembly
     end
 
     def list_components(opts=Opts.new)
-      add_depends_on = (opts[:detail_to_include]||[]).include?(:component_dependencies)
-      opts.set_return_value!(:datatype, add_depends_on ? :component_with_dependencies : :component)
-      ret = Array.new
-      get_augmented_components(opts).each do |r|
+      raw_rows = get_augmented_components(opts)
+      ret = raw_rows.map do |r|
         display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
         version = Component::Instance.version_print_form(r)
         #TODO: dont think this is needed anymore
         # Remove version from display name
         #          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
-        el = r.hash_subset(:id).merge({:display_name => display_name, :version => version})
-        if add_depends_on
-          list_components__add_depends_on!(ret,el,r[:component_dependencies]||{})
-        else
-          ret << el
-        end
+        r.hash_subset(:id).merge({:display_name => display_name, :version => version})
       end
- test =     ret.sort{ |a,b| "#{a[:display_name]}---#{a[:depends_on]}" <=> "#{b[:display_name]}---#{b[:depends_on]}"}
-pp test
-test
+      
+      main_table_sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
+      if (opts[:detail_to_include]||[]).include?(:component_dependencies)
+        opts.set_return_value!(:datatype,:component_with_dependencies)
+        join_columns = OutputTable::JoinColumns.new(raw_rows) do |r|
+          list_components__depends_on_cols(r)
+        end
+        OutputTable.join(ret,join_columns,&main_table_sort)
+      else
+        opts.set_return_value!(:datatype,:component)
+        ret.sort(&main_table_sort)
+      end
     end
 
-    def list_components__add_depends_on!(ret,el,component_deps)
-      if (component_deps[:link_def]||[]).empty? and (component_deps[:simple]||[]).empty?
-        ret << el
-        return
-      end
-      (component_deps[:simple]||[]).each do |dep_display_name|
-        ret << el.merge(:depends_on => Component::Template.display_name_print_form(dep_display_name))
-      end
-      (component_deps[:link_def]||[]).each do |ld|
-        ret << el.merge(:depends_on => ld[:link_type])
+    def list_components__depends_on_cols(raw_row)
+      if component_deps = raw_row[:component_dependencies]
+        depends_on_values_simple = (component_deps[:simple]||[]).map do |dep_display_name|
+          Component::Template.display_name_print_form(dep_display_name)
+        end
+
+        depends_on_values_ld = (component_deps[:link_def]||[]).map do |ld|
+          ld[:link_type]
+        end
+
+        (depends_on_values_simple + depends_on_values_ld).sort().map{|r|{:depends_on => r}}
       end
     end
 

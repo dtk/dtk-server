@@ -1,7 +1,5 @@
 module DTK; class Component
   class Instance < self
-    r8_nested_require('instance','dependency')
-    
     def self.print_form(component)
       component.get_field?(:display_name).gsub(/__/,"::")
     end

@@ -8,6 +8,14 @@ module DTK
       [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link]
     end
 
+    def self.get_with_link_def_links(model_handle,filter)
+      sp_hash = {
+        :cols => common_columns(),
+        :filter => filter
+      }
+      get_objs(model_handle,sp_hash)
+    end
+
     def self.get_link_def_links(link_def_idhs,opts={})
       ret = Array.new
       return ret if link_def_idhs.empty?

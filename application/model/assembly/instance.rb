@@ -78,8 +78,9 @@ module DTK; class  Assembly
 
       if (opts[:detail_level]||[]).include?(:component_dependencies)
         cmp_instance_idhs = ret.map{|r|r.id_handle()}
-        ndx_cmp_deps = Component::Instance::Dependency.get_indexed(cmp_instance_idhs)
+        ndx_cmp_deps = Component::Dependency::Instance.get_indexed(cmp_instance_idhs)
         ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
+pp ret
       end
       ret
     end

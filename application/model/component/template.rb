@@ -1,5 +1,9 @@
 module DTK; class Component
   class Template < self
+
+    def self.display_name_print_form(display_name)
+      display_name.gsub(/__/,"::")
+    end
     
     #type_version_list is an array with each element having keys :component_type, :version_field
     def self.get_matching_type_and_version(project_idh,type_version_field_list)

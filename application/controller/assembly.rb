@@ -49,11 +49,20 @@ module DTK
       end
       filter_proc = Proc.new do |e|
         ret_val = check_element(e,[:node,:id],node_id) && check_element(e,[:attribute,:component_component_id],component_id) && e
-        #ret_val = e if ((node_id.nil? || node_id.empty? || e[:node][:id] == node_id.to_i) && (component_id.nil? || e[:attribute].nil? || e[:attribute][:component_component_id].nil? || component_id.empty? || e[:attribute][:component_component_id] == component_id.to_i))
         ret_val = nil if (e[:attribute] and e[:attribute][:hidden])
         ret_val
       end 
-      rest_ok_response assembly.info_about(about, Opts.new(:filter_proc => filter_proc, :detail_level => detail_level))
+
+      opts = Opts.new(:filter_proc => filter_proc, :detail_level => detail_level)
+
+#TODO: for testing
+      if about == :attributes
+        opts.merge!(:detail_to_include => [:attribute_links])
+      elsif about == :components
+        detail_level = opts.merge!(:detail_to_include => [:component_dependencies])
+      end
+
+      rest_ok_response assembly.info_about(about, opts)
     end
 
     def rest__list_modules()

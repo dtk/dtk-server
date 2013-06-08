@@ -23,7 +23,7 @@ module DTK; class Component
         simple_deps.inject(Hash.new) do |h,(cmp_id,v)|
           simple_deps = v[:component_dependencies]||[]
           link_def_deps = link_defs.select{|ld|ld[:component_component_id] == ndx_cmp_to_template[cmp_id]}
-          h.merge(cmp_id => {:simple => simple_deps,:link_defs => link_def_deps})
+          h.merge(cmp_id => {:simple => simple_deps,:link_def => link_def_deps})
         end
       end
 

@@ -76,11 +76,10 @@ module DTK; class  Assembly
         r[:nested_component].merge(r.hash_subset(:node))
       end
 
-      if (opts[:detail_level]||[]).include?(:component_dependencies)
+      if (opts[:detail_to_include]||[]).include?(:component_dependencies)
         cmp_instance_idhs = ret.map{|r|r.id_handle()}
         ndx_cmp_deps = Component::Dependency::Instance.get_indexed(cmp_instance_idhs)
         ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
-pp ret
       end
       ret
     end
@@ -292,37 +291,59 @@ pp ret
     end
 
     def info_about(about,opts=Opts.new)
-      order = proc { |a,b| a[:display_name] <=> b[:display_name] }
-      
       case about 
        when :attributes
-opts = opts.merge!(:detail_level => [:attribute_links]) #TODO: for testing
-        get_attributes_print_form_aux(opts.slice(:filter_proc,:detail_level)).map do |a|
+        get_attributes_print_form_aux(opts).map do |a|
           Aux::hash_subset(a,[:id,:display_name,:value,:linked_to])
-        end.sort(&order)
+        end.sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :components
-opts = opts.merge!(:detail_level => [:component_dependencies]) #TODO: for testing
-        get_augmented_components(opts.slice(:filter_proc,:detail_level)).map do |r|
-          display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
-          version = Component::Instance.version_print_form(r)
-#TODO: dont think this is needed anymore
-# Remove version from display name
-#          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
-          r.hash_subset(:id).merge({:display_name => display_name, :version => version})
-        end.sort(&order)
+        list_components(opts)
 
        when :nodes
-        get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort(&order)
+        get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :tasks
-        order = proc{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
-        get_tasks(opts.slice(:filter_proc)).map do |r|
+        get_tasks(opts).map do |r|
           r[:task]
-        end.compact.sort(&order)
+        end.compact.sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+      end
+    end
+
+    def list_components(opts=Opts.new)
+      add_depends_on = (opts[:detail_to_include]||[]).include?(:component_dependencies)
+      ret = Array.new
+      get_augmented_components(opts).each do |r|
+        display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
+        version = Component::Instance.version_print_form(r)
+        #TODO: dont think this is needed anymore
+        # Remove version from display name
+        #          display_name.sub!(/\((\d{1,2}).(\d{1,2}).(\d{1,2})\)/, '')
+        el = r.hash_subset(:id).merge({:display_name => display_name, :version => version})
+        if add_depends_on
+          list_components__add_depends_on!(ret,el,r[:component_dependencies]||{})
+        else
+          ret << el
+        end
+      end
+ test =     ret.sort{ |a,b| "#{a[:display_name]}---#{a[:depends_on]}" <=> "#{b[:display_name]}---#{b[:depends_on]}"}
+pp test
+test
+    end
+
+    def list_components__add_depends_on!(ret,el,component_deps)
+      if (component_deps[:link_def]||[]).empty? and (component_deps[:simple]||[]).empty?
+        ret << el
+        return
+      end
+      (component_deps[:simple]||[]).each do |dep_display_name|
+        ret << el.merge(:depends_on => Component::Template.display_name_print_form(dep_display_name))
+      end
+      (component_deps[:link_def]||[]).each do |ld|
+        ret << el.merge(:depends_on => ld[:link_type])
       end
     end
 
@@ -488,7 +509,6 @@ opts = opts.merge!(:detail_level => [:component_dependencies]) #TODO: for testin
     end      
 
     def get_attributes_print_form(opts=Opts.new)
-      opts_for_aux = opts.slice(:filter_proc,:detail_level)
       if filter = opts[:filter]
         case filter
           when :required_unset_attributes
@@ -498,7 +518,7 @@ opts = opts.merge!(:detail_level => [:component_dependencies]) #TODO: for testin
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
       end
-      get_attributes_print_form_aux(opts_for_aux)
+      get_attributes_print_form_aux(opts)
     end
 
     def get_attributes_print_form_aux(opts=Opts.new)

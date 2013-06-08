@@ -144,7 +144,7 @@ module DTK
     end
 
     ### display name functions
-    #TODO: should collpase these into just one or two
+    #TODO: should collpase these into just one or two and might seperate into component templaet and component insatnce
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       unless opts[:without_version] 

@@ -5,15 +5,18 @@ module DTK
     extend ParseSerializedFormClassMixin
 
     def self.common_columns()
-      [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link]
+      [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link,:component_component_id]
     end
 
-    def self.get_with_link_def_links(model_handle,filter)
+    def self.get(component_template_idhs)
+      ret = Array.new
+      return ret if component_template_idhs.empty?()
       sp_hash = {
         :cols => common_columns(),
-        :filter => filter
+        :filter => [:oneof,:component_component_id,component_template_idhs.map{|idh|idh.get_id()}]
       }
-      get_objs(model_handle,sp_hash)
+      link_def_mh = component_template_idhs.first.createMH(:link_def)
+      get_objs(link_def_mh,sp_hash)
     end
 
     def self.get_link_def_links(link_def_idhs,opts={})

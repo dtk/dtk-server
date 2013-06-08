@@ -2,6 +2,35 @@ module DTK
   class Component
     class Dependency #This represents both internode and intranode dependencies; anything that shows up in the depends_on section of the dsl
       r8_nested_require('dependency','instance')
+
+     private
+      #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+      #this can be either component template or ciomponent isnatnce with :dependencies joined in from associated template
+      def self.find_component_simple_dependencies(components)
+        ret = Hash.new
+        cmp_idhs = Array.new
+        components.each do |cmp|
+          unless pntr = ret[cmp[:id]]
+            pntr = ret[cmp[:id]] = {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+            cmp_idhs << cmp.id_handle()
+          end
+          if cmp[:extended_base]
+            pntr[:component_dependencies] << cmp[:extended_base]
+          elsif deps = cmp[:dependencies]
+            #process dependencies
+            #TODO: hack until we have macros which will stamp the dependency to make this easier to detect
+            #looking for signature where dependency has
+            #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
+            filter = (deps[:search_pattern]||{})[":filter".to_sym]
+            if filter and deps[:type] == "component"
+              if filter[0] == ":eq" and filter[1] == ":component_type"
+                pntr[:component_dependencies] << filter[2]
+              end
+            end
+          end
+        end
+        ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
+      end
     end
 
     #TODO: clean up use of this mixin and integrate with Component::Dependency

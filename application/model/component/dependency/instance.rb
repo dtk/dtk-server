@@ -16,36 +16,15 @@ module DTK; class Component
           return simple_deps
         end
 
-        #TODO: also include link defs ones
-        simple_deps.inject(Hash.new){|h,(k,v)|h.merge(k => v[:component_dependencies]||[])}
-      end
-     private
-
-      #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
-      def self.find_component_simple_dependencies(components)
-        ret = Hash.new
-        cmp_idhs = Array.new
-        components.each do |cmp|
-          unless pntr = ret[cmp[:id]]
-            pntr = ret[cmp[:id]] = {:component_type => cmp[:component_type], :component_dependencies => Array.new}
-            cmp_idhs << cmp.id_handle()
-          end
-          if cmp[:extended_base]
-            pntr[:component_dependencies] << cmp[:extended_base]
-          elsif deps = cmp[:dependencies]
-            #process dependencies
-            #TODO: hack until we have macros which will stamp the dependency to make this easier to detect
-            #looking for signature where dependency has
-            #:search_pattern=>{:filter=>[:and, [:eq, :component_type, <component_type>]
-            filter = (deps[:search_pattern]||{})[":filter".to_sym]
-            if filter and deps[:type] == "component"
-              if filter[0] == ":eq" and filter[1] == ":component_type"
-                pntr[:component_dependencies] << filter[2]
-              end
-            end
-          end
+        component_template_idhs = components.map{|r|r.id_handle(:id => r[:parent_component][:id])}.uniq
+        link_defs = LinkDef.get(component_template_idhs)
+        ndx_cmp_to_template = components.inject(Hash.new){|h,r|h.merge(r[:id] => r[:parent_component][:id])}
+        #simple_deps will have all components 
+        simple_deps.inject(Hash.new) do |h,(cmp_id,v)|
+          simple_deps = v[:component_dependencies]||[]
+          link_def_deps = link_defs.select{|ld|ld[:component_component_id] == ndx_cmp_to_template[cmp_id]}
+          h.merge(cmp_id => {:simple => simple_deps,:link_defs => link_def_deps})
         end
-        ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
       end
 
     end

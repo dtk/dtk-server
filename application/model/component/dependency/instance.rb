@@ -1,17 +1,15 @@
 module DTK; class Component
   class Dependency
     class Instance < self 
-      def self.get_indexed(cmp_instance_idhs)
+      def self.get_indexed(components)
         ret = Array.new
-        return ret if cmp_instance_idhs.empty?
-        components = Component::Instance.get_components_with_dependency_info(cmp_instance_idhs)
-        simple_deps = ::DTK::Dependency.find_ndx_derived_order(components)
-        component_template_idhs = components.map{|r|r.id_handle(:id => r[:parent_component][:id])}.uniq
-        link_defs = LinkDef.get(component_template_idhs)
-        ndx_cmp_to_template = components.inject(Hash.new){|h,r|h.merge(r[:id] => r[:parent_component][:id])}
+        return ret if components.empty?
+        Instance.augment_with_dependency_info!(components)
+        simple_deps = ::DTK::Dependency.find_in_depends_on_form(components)
+        link_defs = LinkDef.get(components.map{|cmp|cmp.id_handle()})
         #simple_deps will have all components 
         simple_deps.inject(Hash.new) do |h,(cmp_id,simple)|
-          link_def_deps = link_defs.select{|ld|ld[:component_component_id] == ndx_cmp_to_template[cmp_id]}
+          link_def_deps = link_defs.select{|ld|ld[:component_component_id] == cmp_id}
           h.merge(cmp_id => {:simple => simple,:link_def => link_def_deps})
         end
       end

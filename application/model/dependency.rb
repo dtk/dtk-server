@@ -24,8 +24,8 @@ module DTK
 
     #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type
     #this can be either component template or component instance with :dependencies joined in from associated template
-    def self.find_ndx_derived_order(components)
-      find_ndx_cmp_type_and_derived_order(components).inject(Hash.new){|h,(cmp_id,v)|h.merge(cmp_id => v[:component_dependencies])}
+    def self.find_in_depends_on_form(components)
+      raise Error.new("write this in terms of def Dependency#depends_on_form")
     end
     def self.find_ndx_cmp_type_and_derived_order(components)
       ret = Hash.new

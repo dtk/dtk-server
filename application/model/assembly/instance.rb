@@ -67,28 +67,28 @@ module DTK; class  Assembly
     end
 
     def get_augmented_components(opts=Opts.new)
+      ret = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
       if opts[:filter_proc]
-        #TODO: should this be a select instead
-        rows = rows.map{|r| opts[:filter_proc].call(r)}.compact 
+        rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-      ret = rows.map do |r|
+      return ret if rows.empty?
+
+      components = rows.map do |r|
         r[:nested_component].merge(r.hash_subset(:node))
       end
 
       if (opts[:detail_to_include]||[]).include?(:component_dependencies)
-        cmp_instance_idhs = ret.map{|r|r.id_handle()}
-        ndx_cmp_deps = Component::Dependency::Instance.get_indexed(cmp_instance_idhs)
-        ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
+        ndx_cmp_deps = Component::Dependency::Instance.get_indexed(components)
+        components.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
       end
-      ret
+      components
     end
 
     def get_tasks(opts=Opts.new)
       ret = get_objs(:cols => [:tasks])
       if opts[:filter_proc]
-        #TODO: should this be a select instead
-        ret = ret.map{|r| opts[:filter_proc].call(r)}.compact
+        ret.reject!{|r|!opts[:filter_proc].call(r)}
       end
       ret
     end

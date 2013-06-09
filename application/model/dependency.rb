@@ -29,12 +29,10 @@ module DTK
     end
     def self.find_ndx_cmp_type_and_derived_order(components)
       ret = Hash.new
-      cmp_idhs = Array.new
       components.each do |cmp|
         unless pntr = ret[cmp[:id]]
           pntr = ret[cmp[:id]] = {:component_type => cmp[:component_type], :component_dependencies => Array.new}
-          cmp_idhs << cmp.id_handle()
-          end
+        end
         if cmp[:extended_base]
           pntr[:component_dependencies] << cmp[:extended_base]
         elsif deps = cmp[:dependencies]

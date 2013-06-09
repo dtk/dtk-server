@@ -22,7 +22,7 @@ module DTK
       ret = Hash.new
       return ret if components.empty?
       ret = Dependency::find_ndx_cmp_type_and_derived_order(components)
-      ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
+      ComponentOrder.update_with_applicable_dependencies!(ret,components.map{|cmp|cmp.id_handle()}.uniq)
     end
 
    #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 

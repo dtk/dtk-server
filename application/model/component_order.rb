@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class ComponentOrder < Model
     def self.update_with_applicable_dependencies!(component_deps,component_idhs)
       sample_idh = component_idhs.first
@@ -15,6 +15,26 @@ module XYZ
       #cmps_with_order_info can have a component appear multiple fo each order relation
       update_with_order_info!(component_deps,cmps_with_order_info)
     end
+
+    #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+    #this can be either component template or component instance with :dependencies joined in from associated template
+    def self.get_ndx_cmp_type_and_derived_order(components)
+      ret = Hash.new
+      return ret if components.empty?
+      ret = Dependency::find_ndx_cmp_type_and_derived_order(components)
+      ComponentOrder.update_with_applicable_dependencies!(ret,cmp_idhs)
+    end
+
+   #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
+    #this can be either component template or component instance with :dependencies joined in from associated template
+    def self.derived_order(components,&block)
+      ndx_cmps = components.inject({}){|h,cmp|h.merge(cmp[:id] => cmp)}
+      cmp_deps = get_ndx_cmp_type_and_derived_order(components)
+      Task::Action::OnComponent.generate_component_order(cmp_deps).each do |(component_id,deps)|
+        block.call(ndx_cmps[component_id])
+      end
+    end
+
    private
     def self.prune_if_not_applicable(cmps_with_order_info)
       ret = Array.new

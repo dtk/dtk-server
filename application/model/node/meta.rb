@@ -495,7 +495,7 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:node_node_id =>:node__id},
            :filter => [:eq, :from_on_create_event, false],
-           :cols => [:id,:display_name,:dependencies, :extended_base, :component_type] #columns needed by Component.find_component_simple_dependencies
+           :cols => [:id,:display_name,:dependencies, :extended_base, :component_type] #columns needed by finding dependencies
          }]
 
         virtual_column :has_pending_change, :type => :boolean, :hidden => true,
@@ -503,7 +503,7 @@ module XYZ
          [
           {
             :model_name => :action,
-            #TODO: avoidng use of :node__node
+            #TODO: avoiding use of :node__node
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:component__component,{:id => :component_id}).group_and_count(:component__node_node_id)},
             :join_type => :left_outer,
             :join_cond=>{:node_node_id =>:node__id}

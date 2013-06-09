@@ -33,7 +33,8 @@ module XYZ
 		          # Adding impl_ids_list to each node
 		          sc[:node][:implementation_ids_list] = impl_ids_list
 		        end
-		        cmp_deps = Component.get_component_type_and_simple_dependencies(ndx_cmp_idhs.values)
+                        components = Component::Instance.get_components_with_dependency_info(ndx_cmp_idhs.values)
+		        cmp_deps = ComponentOrder.get_ndx_cmp_type_and_derived_order(components)
 		        cmp_ids_with_deps = Task::Action::OnComponent.get_cmp_ids_with_deps(cmp_deps)
 
 		        nodes << { :node_id => node_id, :component_dependency => cmp_ids_with_deps }

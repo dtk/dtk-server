@@ -27,7 +27,7 @@ module DTK; class NodeGroup
     def clone_components(node_group_cmps,node)
       external_ports = Array.new
       #order components to respect dependencies
-      Component.ordered_components(node_group_cmps) do |ng_cmp| 
+      ComponentOrder.derived_order(node_group_cmps) do |ng_cmp| 
         clone_opts = {
           :ret_new_obj_with_cols => [:id,:display_name],
           :outermost_ports => Array.new,

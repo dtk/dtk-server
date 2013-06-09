@@ -41,9 +41,16 @@ module DTK; class Task
           cmp = sc[:component]
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
         end
-        cmp_deps = Component.get_component_type_and_simple_dependencies(ndx_cmp_idhs.values)
-        cmp_order = get_intra_node_stages(cmp_deps, state_change_list, node) if XYZ::Workflow.intra_node_stages?
-        cmp_order = get_total_component_order(cmp_deps, node) if XYZ::Workflow.intra_node_total_order?
+        components = Component::Instance.get_components_with_dependency_info(ndx_cmp_idhs.values)
+        cmp_deps = ComponentOrder.get_ndx_cmp_type_and_derived_order(components)
+        cmp_order = 
+          if Workflow.intra_node_stages?
+            get_intra_node_stages(cmp_deps, state_change_list, node) 
+          elsif Workflow.intra_node_total_order?
+            get_total_component_order(cmp_deps, node) 
+          else
+            raise Error.new("No intra node ordering strategy found")
+          end
         cmp_order.map do |(component_id,deps)|
           create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end

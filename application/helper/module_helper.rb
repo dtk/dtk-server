@@ -14,7 +14,9 @@ module Ramaze::Helper
       local_params = {
         :module_name => local_module_name
       }
-      module_class.import(project,remote_params,local_params)
+
+      response = module_class.import(project,remote_params,local_params)
+      response.merge( { :namespace => remote_namespace} )
     end
 
     def ret_config_agent_type()

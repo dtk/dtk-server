@@ -151,7 +151,7 @@ module DTK
         cols_to_get += [:version]
       end
       update_object!(*cols_to_get)
-      component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
+      component_type = component_type_print_form()
 
       #handle version
       ret = component_type
@@ -177,16 +177,16 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
-    def self.pp_component_type(component_type)
+    def self.component_type_print_form(component_type)
       component_type.gsub(/__/,"::")
     end
-    def pp_component_type()
-      self[:component_type] && self.class.pp_component_type(self[:component_type])
+    def component_type_print_form()
+      self[:component_type] && self.class.component_type_print_form(self[:component_type])
     end
 
     def convert_to_print_form!()
       update_object!(:component_type,:ref_num,:version)
-      component_type = pp_component_type()
+      component_type = component_type_print_form()
       self[:display_name] = (self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type)
       if has_default_version?()
         self[:version] = nil

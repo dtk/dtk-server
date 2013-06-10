@@ -79,9 +79,9 @@ module DTK; class  Assembly
       end
 
       if (opts[:detail_to_include]||[]).include?(:component_dependencies)
-        ndx_cmp_deps = Component::Dependency::Instance.get_indexed(components)
-        components.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
+        Dependency::All.augment_component_instances!(components)
       end
+pp  components
       components
     end
 

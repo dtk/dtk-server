@@ -1,7 +1,26 @@
 module DTK
   class Dependency < Model
+    #because initially Dependency only refered to simple dependencies; introduced Simple and Links and their parent All
+    #TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
+    class All < Hash
+      def initialize(initial_val={})
+        super()
+        unless initial_val.empty?
+          replace(initial_val)
+        end
+      end
+
+      def self.augment_component_instances!(components)
+        return components if components.empty?
+        Dependency::Simple.augment_component_instances!(components)
+        Dependency::Link.augment_component_instances!(components)
+        components
+
+      end
+    end
+
     r8_nested_require('dependency','simple')
-    r8_nested_require('dependency','derived')
+    r8_nested_require('dependency','link')
 
     #if its simple component type match returns component type
     def is_simple_component_type_match?()
@@ -15,9 +34,6 @@ module DTK
       end
     end
 
-    def self.find_in_depends_on_form(components)
-      raise Error.new("write this in terms of def Dependency#depends_on_form")
-    end
   end
 end
 

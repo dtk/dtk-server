@@ -71,7 +71,7 @@ module DTK
         elsif task && task.is_status?("executing")
           task.update_task_subtask_status("cancelled",Task::Action::Result::Cancelled.new())
         else
-          raise ErrorUsage.new("No task running with TASK_ID: #{task_id}")
+          raise ErrorUsage, "No task running with TASK_ID: #{task_id}"
         end
       end
     end

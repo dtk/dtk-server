@@ -347,6 +347,7 @@ module XYZ
         :filter => [:eq,:id,top_task_idh.get_id()]
       }
       top_task = get_objs(top_task_idh.createMH(),sp_hash).first
+      return nil unless top_task
       flat_subtask_list = top_task.get_all_subtasks()
       ndx_task_list = {top_task.id => top_task}
       subtask_count = Hash.new 

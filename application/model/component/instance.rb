@@ -3,10 +3,10 @@ module DTK; class Component
     def self.augment_with_dependency_info!(cmps)
       return cmps if cmps.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity]
+        :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
         :filter => [:oneof,:component_component_id,cmps.map{|cmp|cmp.id()}]
       }
-      dep_mh = cmps.model_handle(:dependency)
+      dep_mh = cmps.first.model_handle(:dependency)
 
       deps = get_objs(dep_mh,sp_hash)
       return cmps if deps.empty?

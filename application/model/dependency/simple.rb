@@ -1,5 +1,15 @@
 module DTK; class Dependency
   class Simple < All
+    def initialize(dependency_obj)
+      @dependency_obj = dependency_obj
+    end
+
+    def scalar_print_form?()
+      if cmp_type = @dependency_obj.is_simple_component_type_match?()
+        Component.component_type_print_form(cmp_type)
+      end
+    end
+
     def self.augment_component_instances!(cmp_instances)
       return cmp_instances if cmp_instances.empty?
       sp_hash = {

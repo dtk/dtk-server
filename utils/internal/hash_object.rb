@@ -18,6 +18,10 @@ module DTK
       end
     end
 
+    def array(key)
+      self[key]||[]
+    end
+
     def required(key)
       val  = self[key]
       if val.nil?

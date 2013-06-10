@@ -1,5 +1,15 @@
 module DTK; class Dependency
   class Link < All
+    def initialize(link_def)
+      @link_def = link_def
+    end
+
+    def scalar_print_form?()
+      #link_type may be label or component_type
+      #TODO: assumption that its safe to process label through component_type_print_form
+      Component.component_type_print_form(@link_def[:link_type])
+    end
+
     def self.augment_component_instances!(components)
       return components if components.empty?
       link_defs = LinkDef.get(components.map{|cmp|cmp.id_handle()})

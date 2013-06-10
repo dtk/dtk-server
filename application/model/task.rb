@@ -76,6 +76,10 @@ module XYZ
       [event,errors]
     end
 
+    def is_status?(status)
+      return self[:status] == status || self[:subtasks].find{ |subtask| subtask[:status] == status }
+    end
+
     def add_errors(normalized_errors)
       ret = nil
       return ret unless normalized_errors and not normalized_errors.empty?
@@ -88,6 +92,16 @@ module XYZ
       end
       Model.create_from_rows(child_model_handle(:task_error),rows,{:convert => true})
       normalized_errors 
+    end
+
+    def update_task_subtask_status(status,result)
+      self[:subtasks].each do |subtask|
+        subtask[:subtasks].each do |child_subtask|
+          child_subtask.update_at_task_completion(status, result)
+        end
+        subtask.update_at_task_completion(status, result)
+      end
+      self.update_at_task_completion(status, result)
     end
 
     def update_at_task_completion(status,result)

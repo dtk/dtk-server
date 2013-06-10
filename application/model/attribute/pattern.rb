@@ -31,7 +31,7 @@ module DTK; class Attribute
         attr_ids.include?(attr[:attribute][:id])
       end
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
-      base_object.info_about(:attributes,:filter_proc => filter_proc)
+      base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
     end
 
   

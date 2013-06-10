@@ -58,7 +58,6 @@ module XYZ
     end
 
     def rest__execute()
-      # Amar: through this method ruote is getting data to process
       task_id =  ret_non_null_request_params(:task_id)
       task = Task.get_hierarchical_structure(id_handle(task_id))
       guards = Attribute.ret_attribute_guards(task)
@@ -68,9 +67,10 @@ module XYZ
     end
 
     def rest__cancel_task()
-      task_id =  ret_non_null_request_params(:task_id)
-      Workflow.cancel(task_id)
-      rest_ok_response :task_id => task_id
+      top_task_id =  ret_non_null_request_params(:task_id)
+      task = Task.get_hierarchical_structure(id_handle(top_task_id))
+      Workflow.cancel(top_task_id, task)
+      rest_ok_response :task_id => top_task_id
     end
 
     def rest__create_converge_state_changes()

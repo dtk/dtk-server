@@ -42,6 +42,18 @@ module DTK
         @cmp_ref_info_list = cmp_ref_info_list 
       end
 
+      #
+      # Returns list of missing modules with version
+      #
+      def missing_module_list()
+        module_hash = @cmp_ref_info_list.inject(Hash.new) do |h,r|
+          module_name = r[:component_type].split('__').first
+          h.merge!( "#{module_name}#{r[:version]}" => { :name => module_name, :version => r[:version]})
+        end
+
+        module_hash.values
+      end
+
       attr_reader :cmp_ref_info_list
 
       class Aggregate 

@@ -141,8 +141,39 @@ module DTK
         module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
-        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
-        module_repo_info(repo,module_and_branch_info,version)
+        begin
+          module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+        rescue ErrorUsage::DanglingComponentRefs => e
+          # we rescue missing dependencies error here
+          if (self == DTK::ServiceModule)
+            missing_component_module_list = e.missing_module_list()
+            # TODO: [Haris] Add logic for detecting namespace after we support it
+            missing_component_module_list.each do |missing_module|
+              import_remote_params = {
+                :repo => remote_params[:repo],
+                :module_namespace => remote_params[:module_namespace],
+                :module_name => missing_module[:name],
+                :version => missing_module[:version]
+              }
+              begin
+                ComponentModule.import(project, import_remote_params, {:module_name => missing_module[:name]})
+              rescue ErrorUsage => e1
+                # we join error messages to properly represent series of events
+                raise ErrorUsage.new("#{e.message}, auto-import of component module failed: #{e1.message}")
+              end
+              Log.info "Successfully imported component module dependency '#{remote_params[:module_namespace]}/#{missing_module[:name]}' for service '#{remote_params[:module_name]}' "
+            end
+
+            # After we finish importing all module components we repeat the call
+            module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+          else
+            # [Haris] Contact me if this error occurs
+            Log.error "Unexpected error, missing component refs for component module! Contact Haris."
+            raise e
+          end
+        end
+        response = module_repo_info(repo,module_and_branch_info,version)
+        response
       end
     end
 

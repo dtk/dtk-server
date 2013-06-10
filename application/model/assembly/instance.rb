@@ -517,7 +517,7 @@ module DTK; class  Assembly
         case filter
           when :required_unset_attributes
             filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
-            opts_for_aux.merge!(:filter_proc => filter_proc)
+            opts.merge!(:filter_proc => filter_proc)
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  

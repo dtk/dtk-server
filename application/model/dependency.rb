@@ -7,10 +7,10 @@ module DTK
         @satisfied_by_component_id = nil
       end
 
-      def self.augment_component_instances!(components,opts=Opts.new)
+      def self.augment_component_instances!(assembly,components,opts=Opts.new)
         return components if components.empty?
         Dependency::Simple.augment_component_instances!(components,opts)
-        Dependency::Link.augment_component_instances!(components,opts)
+        Dependency::Link.augment_component_instances!(assembly,components,opts)
         components
       end
     end

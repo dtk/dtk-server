@@ -11,21 +11,21 @@ module DTK; class Dependency
       end
     end
 
-    def self.augment_component_instances!(cmp_instances,opts=Opts.new)
-      return cmp_instances if cmp_instances.empty?
+    def self.augment_component_instances!(components,opts=Opts.new)
+      return components if components.empty?
       sp_hash = {
         :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
-        :filter => [:oneof,:component_component_id,cmp_instances.map{|cmp|cmp.id()}]
+        :filter => [:oneof,:component_component_id,components.map{|cmp|cmp.id()}]
       }
-      dep_mh = cmp_instances.first.model_handle(:dependency)
+      dep_mh = components.first.model_handle(:dependency)
 
       dep_objs = Model.get_objs(dep_mh,sp_hash)
-      return cmp_instances if dep_objs.empty?
+      return components if dep_objs.empty?
 
       simple_deps = Array.new
-      ndx_cmp_instances = cmp_instances.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp)}
+      ndx_components = components.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp)}
       dep_objs.each do |dep_obj|
-        cmp = ndx_cmp_instances[dep_obj[:component_component_id]]
+        cmp = ndx_components[dep_obj[:component_component_id]]
         dep = new(dep_obj,cmp[:node])
         simple_deps << dep
         (cmp[:dependencies] ||= Array.new) << dep
@@ -38,8 +38,8 @@ module DTK; class Dependency
           simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
         end
       end
-      pp [:debug_test,cmp_instances.map{|r|r[:dependencies]}.compact]
-      cmp_instances
+      pp [:debug_test,components.map{|r|r[:dependencies]}.compact]
+      components
     end
 
     def self.add_component_dependency(component_idh, type, hash_info)

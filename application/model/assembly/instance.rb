@@ -349,12 +349,13 @@ module DTK; class  Assembly
       #has lookup taht includes each satisfied_by_component
       ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
 
+      #see if theer is any components that are nreferenced but not in ret
       needed_cmp_ids = Array.new
       aug_cmps.each do |aug_cmp|
         if deps = aug_cmp[:dependencies]
           needed_cmp_ids += deps.map do |dep|
             if cmp_id = dep.satisfied_by_component_id
-              ret[cmp_id].nil? && cmp_id
+              cmp_id if ret[cmp_id].nil? 
             end
           end.compact
         end

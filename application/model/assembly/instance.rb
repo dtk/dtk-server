@@ -326,16 +326,14 @@ module DTK; class  Assembly
       main_table_sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
       if opts.array(:detail_to_include).include?(:component_dependencies)
         opts.set_return_value!(:datatype,:component_with_dependencies)
-        context_for_print_form = {
-          :assembly => self, 
-          :ndx_component_print_form => ret.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])} 
-        }
-        join_columns = OutputTable::JoinColumns.new(aug_cmps) do |raw_row|
-          if deps = raw_row[:dependencies]
+        ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,ret)
+        join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
+          if deps = aug_cmp[:dependencies]
             deps.map do |dep|
+              satisfied_by = (dep.satisfied_by_component_id && ndx_component_print_form[dep.satisfied_by_component_id])
               {
-                :depends_on => dep.depends_on_print_form?(), 
-                :satisfied_by => dep.satisfied_by_print_form(context_for_print_form)
+                :depends_on => dep.depends_on_print_form?(),
+                :satisfied_by => satisfied_by 
               }
             end.compact
           end
@@ -346,6 +344,29 @@ module DTK; class  Assembly
         ret.sort(&main_table_sort)
       end
     end
+
+    def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
+      #has lookup taht includes each satisfied_by_component
+      ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
+
+      needed_cmp_ids = Array.new
+      aug_cmps.each do |aug_cmp|
+        if deps = aug_cmp[:dependencies]
+          needed_cmp_ids += deps.map do |dep|
+            if cmp_id = dep.satisfied_by_component_id
+              ret[cmp_id].nil? && cmp_id
+            end
+          end.compact
+        end
+      end
+      return ret if needed_cmp_ids.empty?
+
+      filter_array = needed_cmp_ids.map{|cmp_id|[:eq,:id,cmp_id]}
+      filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
+      additional_cmps = list_components(Opts.new(:filter => filter))
+      additional_cmps.inject(ret){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
+    end
+    private :ret_ndx_component_print_form
 
     def self.delete(assembly_idhs,opts={})
       if assembly_idhs.kind_of?(Array)

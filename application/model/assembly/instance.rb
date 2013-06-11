@@ -313,8 +313,8 @@ module DTK; class  Assembly
     end
 
     def list_components(opts=Opts.new)
-      raw_rows = get_augmented_components(opts)
-      ret = raw_rows.map do |r|
+      aug_cmps = get_augmented_components(opts)
+      ret = aug_cmps.map do |r|
         display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
         version = Component::Instance.version_print_form(r)
         #TODO: dont think this is needed anymore
@@ -326,9 +326,18 @@ module DTK; class  Assembly
       main_table_sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
       if opts.array(:detail_to_include).include?(:component_dependencies)
         opts.set_return_value!(:datatype,:component_with_dependencies)
-        join_columns = OutputTable::JoinColumns.new(raw_rows) do |raw_row|
-          if component_deps = raw_row[:dependencies]
-            component_deps.map{|dep|{:depends_on => dep.scalar_print_form?()}}.compact
+        context_for_print_form = {
+          :assembly => self, 
+          :ndx_component_print_form => ret.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])} 
+        }
+        join_columns = OutputTable::JoinColumns.new(aug_cmps) do |raw_row|
+          if deps = raw_row[:dependencies]
+            deps.map do |dep|
+              {
+                :depends_on => dep.depends_on_print_form?(), 
+                :satisfied_by => dep.satisfied_by_print_form(context_for_print_form)
+              }
+            end.compact
           end
         end
         OutputTable.join(ret,join_columns,&main_table_sort)

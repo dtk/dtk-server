@@ -7,6 +7,17 @@ module DTK
         @satisfied_by_component_id = nil
       end
 
+      def satisfied_by_print_form(context)
+        if @satisfied_by_component_id
+         if ret = context[:ndx_component_print_form][@satisfied_by_component_id]
+           return ret
+         end
+          #TODO: this wil get reached if do list components in a nested context and @satisfied_by_component_id
+          #is not on teh node setting the context
+          raise Error.new("Need to write routine that uses context[:assembly] to get the component print forms")
+        end
+      end
+
       def self.augment_component_instances!(assembly,components,opts=Opts.new)
         return components if components.empty?
         Dependency::Simple.augment_component_instances!(components,opts)

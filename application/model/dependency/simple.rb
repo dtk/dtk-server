@@ -5,7 +5,7 @@ module DTK; class Dependency
       @node = node
      end
 
-    def scalar_print_form?()
+    def depends_on_print_form?()
       if cmp_type = @dependency_obj.is_simple_filter_component_type?()
         Component.component_type_print_form(cmp_type)
       end
@@ -37,7 +37,6 @@ module DTK; class Dependency
           simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
         end
       end
-      pp [:debug_simple_deps,components.map{|r|r[:dependencies]}.compact]
       components
     end
 

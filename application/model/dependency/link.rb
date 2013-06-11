@@ -4,7 +4,7 @@ module DTK; class Dependency
       @link_def = link_def
     end
 
-    def scalar_print_form?()
+    def depends_on_print_form?()
       #link_type may be label or component_type
       #TODO: assumption that its safe to process label through component_type_print_form
       Component.component_type_print_form(@link_def[:link_type])
@@ -29,7 +29,6 @@ module DTK; class Dependency
           link_deps.each{|link_dep|link_dep.set_satisfied_by_component_id?(aug_port_links)}
         end
       end
-      pp [:debug_link_deps,components.map{|r|r[:dependencies]}.compact]
       components
     end
 

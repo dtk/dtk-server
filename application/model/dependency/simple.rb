@@ -3,7 +3,7 @@ module DTK; class Dependency
     def initialize(dependency_obj,node)
       @dependency_obj = dependency_obj
       @node = node
-    end
+     end
 
     def scalar_print_form?()
       if cmp_type = @dependency_obj.is_simple_component_type_match?()
@@ -31,9 +31,14 @@ module DTK; class Dependency
         (cmp[:dependencies] ||= Array.new) << dep
       end
       if opts[:ret_statisfied_by] and not simple_deps.empty?()
-        pp [:debug, simple_deps]
-        pp [:satisified_by,get_satisified_by(simple_deps)]
+        satisify_cmps = get_components_that_satisify_deps(simple_deps)
+        
+        unless satisify_cmps.empty?
+          pp [satisify_cmps,satisify_cmps]
+          simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id(satisify_cmps)}
+        end
       end
+      pp [:test,cmp_instances.map{|r|r[:dependencies]}]
       cmp_instances
     end
 
@@ -59,9 +64,13 @@ module DTK; class Dependency
       Model.create_from_row(dep_mh,create_row)
     end
 
+    def set_satisfied_by_component_id(satisify_cmps)
+      @satisfied_by_component_id = 0 #TODO: stub
+    end
+
     attr_reader :dependency_obj, :node
-   private
-    def self.get_satisified_by(dep_list)
+    private
+    def self.get_components_that_satisify_deps(dep_list)
       ret = Array.new
       query_disjuncts = dep_list.map do |simple_dep|
         dep_obj = simple_dep.dependency_obj

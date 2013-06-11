@@ -3,6 +3,10 @@ module DTK
     #because initially Dependency only refered to simple dependencies; introduced Simple and Links and their parent All
     #TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
     class All 
+      def initialize()
+        @satisfied_by_component_id = nil
+      end
+
       def self.augment_component_instances!(components,opts=Opts.new)
         return components if components.empty?
         Dependency::Simple.augment_component_instances!(components,opts)

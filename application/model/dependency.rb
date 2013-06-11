@@ -30,9 +30,9 @@ module DTK
         end
       end
     end
+
     SimpleFilterRelations = [:eq]
     SimpleFilterRelationsToS = SimpleFilterRelations.map{|r|":#{r.to_s}"}
-
     #if its simple component type match returns component type
     def is_simple_component_type_match?()
       #TODO: hack until we have macros which will stamp the dependency to make this easier to detect
@@ -41,6 +41,29 @@ module DTK
       if simple_filter = simple_filter?()
         if simple_filter[1] == :component_type
           simple_filter[2]
+        end
+      end
+    end
+
+    def component_satisfies_dependency?(cmp)
+      if simple_filter = simple_filter?()
+        SimpleFilter.create(simple_filter).match?(cmp)
+      end
+    end
+
+    class SimpleFilter
+      def self.create(triplet)
+        const_get(triplet[0].to_s.capitalize()).new(triplet)
+      end
+     private
+      def initialize(triplet)
+        @field = triplet[1]
+        @value = triplet[2]
+      end
+
+      class Eq < self
+        def match?(component)
+          component.has_key?(@field) and @value == component[@field]
         end
       end
     end

@@ -35,7 +35,7 @@ module DTK; class Dependency
         
         unless satisify_cmps.empty?
           pp [satisify_cmps,satisify_cmps]
-          simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id(satisify_cmps)}
+          simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
         end
       end
       pp [:test,cmp_instances.map{|r|r[:dependencies]}]
@@ -64,8 +64,10 @@ module DTK; class Dependency
       Model.create_from_row(dep_mh,create_row)
     end
 
-    def set_satisfied_by_component_id(satisify_cmps)
-      @satisfied_by_component_id = 0 #TODO: stub
+    def set_satisfied_by_component_id?(satisify_cmps)
+      if match_cmp = satisify_cmps.find{|cmp|@dependency_obj.component_satisfies_dependency?(cmp)}
+        @satisfied_by_component_id = match_cmp.id()
+      end 
     end
 
     attr_reader :dependency_obj, :node

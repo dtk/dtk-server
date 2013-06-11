@@ -171,7 +171,7 @@ module DTK
       end
     end
 
-    def self.set_ports_link_def_ids(port_mh,ports,cmps,link_defs)
+    def self.set_ports_link_def_and_cmp_ids(port_mh,ports,cmps,link_defs)
       update_rows = ports.map do |port|
         parsed_port_name = parse_port_display_name(port[:display_name])
         cmp_type =  parsed_port_name[:component_type]
@@ -193,10 +193,13 @@ module DTK
           raise Error.new("Cannot find matching component for cloned port with id (#{port[:id].to_s})")
         end
         cmp_id = cmp_match[:id]
+        el = {:id => port[:id],:component_id => cmp_id}
         if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
-          {:id => port[:id], :link_def_id => link_def_match[:id]}
+          el.merge(:link_def_id => link_def_match[:id])
+        else
+          el
         end
-      end.compact
+      end
       update_from_rows(port_mh,update_rows)
     end
 

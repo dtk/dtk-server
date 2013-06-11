@@ -101,6 +101,9 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
+      auto_load_sucess = false
+      repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
+
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
         local_module_name = local_params[:module_name]
@@ -164,17 +167,23 @@ module DTK
               Log.info "Successfully imported component module dependency '#{remote_params[:module_namespace]}/#{missing_module[:name]}' for service '#{remote_params[:module_name]}' "
             end
 
-            # After we finish importing all module components we repeat the call
-            module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+            auto_load_sucess = true
           else
             # [Haris] Contact me if this error occurs
             Log.error "Unexpected error, missing component refs for component module! Contact Haris."
             raise e
           end
         end
-        response = module_repo_info(repo,module_and_branch_info,version)
-        response
       end
+
+      # since we need changes to be commited and our DB does not support nested commits
+      # we are forced to do this, after transaction is done we repeat module_obj import_dsl
+      if auto_load_sucess
+        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+      end
+
+      response = module_repo_info(repo,module_and_branch_info,version)
+      response
     end
 
     def delete_remote(project,remote_params)

@@ -28,8 +28,8 @@ module DTK
         end
         if cmp[:extended_base]
           pntr[:component_dependencies] << cmp[:extended_base]
-        elsif deps_obj = cmp[:dependencies]
-          if dep_cmp_type = deps_obj.is_simple_component_type_match?()
+        elsif dep_obj = cmp[:dependencies]
+          if dep_cmp_type = dep_obj.is_simple_filter_component_type?()
             pntr[:component_dependencies] << dep_cmp_type
           end
         end

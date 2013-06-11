@@ -6,7 +6,7 @@ module DTK; class Dependency
      end
 
     def scalar_print_form?()
-      if cmp_type = @dependency_obj.is_simple_component_type_match?()
+      if cmp_type = @dependency_obj.is_simple_filter_component_type?()
         Component.component_type_print_form(cmp_type)
       end
     end
@@ -34,11 +34,11 @@ module DTK; class Dependency
         satisify_cmps = get_components_that_satisify_deps(simple_deps)
         
         unless satisify_cmps.empty?
-          pp [satisify_cmps,satisify_cmps]
+          pp [:debug_satisify_cmps,satisify_cmps]
           simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
         end
       end
-      pp [:test,cmp_instances.map{|r|r[:dependencies]}]
+      pp [:debug_test,cmp_instances.map{|r|r[:dependencies]}.compact]
       cmp_instances
     end
 
@@ -76,8 +76,8 @@ module DTK; class Dependency
       ret = Array.new
       query_disjuncts = dep_list.map do |simple_dep|
         dep_obj = simple_dep.dependency_obj
-        if simple_filter = dep_obj.simple_filter?()
-          [:and,[:eq,:node_node_id,simple_dep.node.id()],simple_filter]
+        if filter = dep_obj.simple_filter_triplet?()
+          [:and,[:eq,:node_node_id,simple_dep.node.id()],filter]
         else
           Log.error("Ignoring a simple dependency that is not a simple filter (#{simple_dep.dependency_obj})") 
           nil

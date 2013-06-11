@@ -19,7 +19,7 @@ module DTK
     r8_nested_require('dependency','link')
 
     #if this has simple filter, meaning test on same node as dependency then return it, normalizing to convert strings into symbols
-    def simple_filter?()
+    def simple_filter_triplet?()
       if filter = (self[:search_pattern]||{})[":filter".to_sym]
         if self[:type] == "component" and filter.size == 3 
           logical_rel_string = filter[0]
@@ -33,21 +33,17 @@ module DTK
 
     SimpleFilterRelations = [:eq]
     SimpleFilterRelationsToS = SimpleFilterRelations.map{|r|":#{r.to_s}"}
+
     #if its simple component type match returns component type
-    def is_simple_component_type_match?()
-      #TODO: hack until we have macros which will stamp the dependency to make this easier to detect
-      #looking for signature where dependency has
-      #:search_pattern=>[:eq, :component_type, <component_type>]
-      if simple_filter = simple_filter?()
-        if simple_filter[1] == :component_type
-          simple_filter[2]
-        end
+    def is_simple_filter_component_type?()
+      if filter_triplet = simple_filter_triplet?()
+        SimpleFilter.create(filter_triplet).component_type?()
       end
     end
 
     def component_satisfies_dependency?(cmp)
-      if simple_filter = simple_filter?()
-        SimpleFilter.create(simple_filter).match?(cmp)
+      if filter_triplet = simple_filter_triplet?()
+        SimpleFilter.create(filter_triplet).match?(cmp)
       end
     end
 
@@ -55,6 +51,10 @@ module DTK
       def self.create(triplet)
         const_get(triplet[0].to_s.capitalize()).new(triplet)
       end
+
+      def component_type?()
+      end
+
      private
       def initialize(triplet)
         @field = triplet[1]
@@ -64,6 +64,10 @@ module DTK
       class Eq < self
         def match?(component)
           component.has_key?(@field) and @value == component[@field]
+        end
+        
+        def component_type?()
+          @value if @field == :component_type
         end
       end
     end

@@ -79,7 +79,7 @@ module DTK; class  Assembly
       end
 
       if opts.array(:detail_to_include).include?(:component_dependencies)
-        Dependency::All.augment_component_instances!(components)
+        Dependency::All.augment_component_instances!(components, Opts.new(:ret_statisfied_by => true))
       end
       components
     end

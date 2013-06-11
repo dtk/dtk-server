@@ -1,7 +1,8 @@
 module DTK; class Dependency
   class Simple < All
-    def initialize(dependency_obj)
+    def initialize(dependency_obj,node)
       @dependency_obj = dependency_obj
+      @node = node
     end
 
     def scalar_print_form?()
@@ -10,7 +11,7 @@ module DTK; class Dependency
       end
     end
 
-    def self.augment_component_instances!(cmp_instances)
+    def self.augment_component_instances!(cmp_instances,opts=Opts.new)
       return cmp_instances if cmp_instances.empty?
       sp_hash = {
         :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
@@ -18,12 +19,20 @@ module DTK; class Dependency
       }
       dep_mh = cmp_instances.first.model_handle(:dependency)
 
-      deps = Model.get_objs(dep_mh,sp_hash)
-      return cmp_instances if deps.empty?
+      dep_objs = Model.get_objs(dep_mh,sp_hash)
+      return cmp_instances if dep_objs.empty?
+
+      simple_deps = Array.new
       ndx_cmp_instances = cmp_instances.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp)}
-      deps.each do |dep|
-        cmp = ndx_cmp_instances[dep[:component_component_id]]
-        (cmp[:dependencies] ||= Array.new) << new(dep)
+      dep_objs.each do |dep_obj|
+        cmp = ndx_cmp_instances[dep_obj[:component_component_id]]
+        dep = new(dep_obj,cmp[:node])
+        simple_deps << dep
+        (cmp[:dependencies] ||= Array.new) << dep
+      end
+      if opts[:ret_statisfied_by] and not simple_deps.empty?()
+        pp [:debug, simple_deps]
+        pp [:satisified_by,get_satisified_by(simple_deps)]
       end
       cmp_instances
     end
@@ -49,5 +58,31 @@ module DTK; class Dependency
       dep_mh = component_idh.createMH(:dependency)
       Model.create_from_row(dep_mh,create_row)
     end
+
+    attr_reader :dependency_obj, :node
+   private
+    def self.get_satisified_by(dep_list)
+      ret = Array.new
+      query_disjuncts = dep_list.map do |simple_dep|
+        dep_obj = simple_dep.dependency_obj
+        if simple_filter = dep_obj.simple_filter?()
+          [:and,[:eq,:node_node_id,simple_dep.node.id()],simple_filter]
+        else
+          Log.error("Ignoring a simple dependency that is not a simple filter (#{simple_dep.dependency_obj})") 
+          nil
+        end
+      end.compact
+      if query_disjuncts.empty?
+        return ret
+      end
+      cmp_mh = dep_list.first.node.model_handle(:component)
+      filter = (query_disjuncts.size == 1 ? query_disjuncts.first : [:or] + query_disjuncts)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_type,:node_node_id],
+        :filter => filter
+      }
+      Model.get_objs(cmp_mh,sp_hash)
+    end
+
   end
 end; end

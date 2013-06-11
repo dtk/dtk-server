@@ -10,7 +10,7 @@ module DTK; class Dependency
       Component.component_type_print_form(@link_def[:link_type])
     end
 
-    def self.augment_component_instances!(components)
+    def self.augment_component_instances!(components,opts=Opts.new)
       return components if components.empty?
       link_defs = LinkDef.get(components.map{|cmp|cmp.id_handle()})
       unless link_defs.empty?

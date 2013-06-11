@@ -25,13 +25,21 @@ module DTK; class Dependency
           end
         end
         if opts[:ret_statisfied_by] and not link_deps.empty?
-          pp [:debug_link_deps,link_deps]
           aug_port_links = assembly.get_augmented_port_links()
-          pp [:get_augmented_port_links,aug_port_links]
+          link_deps.each{|link_dep|link_dep.set_satisfied_by_component_id?(aug_port_links)}
         end
       end
+      pp [:debug_link_deps,components.map{|r|r[:dependencies]}.compact]
       components
     end
+
+    def set_satisfied_by_component_id?(aug_port_links)
+      link_def_id = @link_def[:id]
+      if match = aug_port_links.find{|aug_port|aug_port[:input_port][:link_def_id] == link_def_id}
+        @satisfied_by_component_id = match[:output_port][:component_id]
+      end 
+    end
+
   end
 end; end
 

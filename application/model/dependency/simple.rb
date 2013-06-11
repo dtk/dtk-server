@@ -34,11 +34,10 @@ module DTK; class Dependency
         satisify_cmps = get_components_that_satisify_deps(simple_deps)
         
         unless satisify_cmps.empty?
-          pp [:debug_satisify_cmps,satisify_cmps]
           simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
         end
       end
-      pp [:debug_test,components.map{|r|r[:dependencies]}.compact]
+      pp [:debug_simple_deps,components.map{|r|r[:dependencies]}.compact]
       components
     end
 

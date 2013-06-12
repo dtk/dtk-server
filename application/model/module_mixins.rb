@@ -220,22 +220,13 @@ module DTK
       end
 
       ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
-      set_default_remote_namespace!(ret)
+      repo = ret[:repo]
+      if default = RepoRemote.ret_default_remote_namespace(repo,ret[:repo_remotes])
+        repo.consume_remote_repo!(default)
+      end
+      ret
     end
     
-    def set_default_remote_namespace!(augmented_module_branch)
-      #TODO: stub until get more sophistiacted strategy for setting the default namespace
-      repo_remotes = augmented_module_branch[:repo_remotes]
-      unless repo_remotes.empty?
-        #set on augmented_module_branch[:repo] fields associated with the default namespace
-        # we sort descending by created date
-        # defaultis the one which is the oldest
-        default = repo_remotes.sort {|a,b| a[:created_at] <=>  b[:created_at]}.first
-        augmented_module_branch[:repo].consume_remote_repo!(default)
-      end
-      augmented_module_branch
-    end
-
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])

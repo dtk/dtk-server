@@ -20,7 +20,7 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(Opts.new(version ? {:filter => {:version => version}} : {}))
+      aug_branch = module_obj.get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
       super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
       replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
       self[:commit_sha] = aug_branch[:current_sha]
@@ -41,7 +41,7 @@ module DTK
     end
 
     def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(Opts.new(version ? {:filter => {:version => version}} : {}))
+      aug_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
       module_name = aug_branch[:module_name]
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
@@ -51,35 +51,25 @@ module DTK
     end
 
     def get_augmented_workspace_branch(opts=Opts.new)
-      filter = opts[:filter]||{}
-      version = filter[:version]
-      remote_namespace = filter[:remote_namespace]
+      version = (opts[:filter]||{})[:version]
+      version_field = ModuleBranch.version_field(version) #version can be nil
 
       sp_hash = {
         :cols => [:display_name,:workspace_info_full]
       }
-
-      version_field = ModuleBranch.version_field(version)
-      modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
-      if modules.size == 0
+      module_rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
+      if module_rows.size == 0
         unless opts[:donot_raise_error]
           raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
       end
 
-      module_obj = nil
-      if remote_namespace
-        # based on provided namespace we will filter remote_repos
-        module_obj = filter_repos_by_namespace(modules, remote_namespace)
-      else
-        unless modules.size == 1
-          raise Error.new("Unexepected that have multiple modules when no remote_repos")  
-        end
-        module_obj = modules.first
+      #aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
+      unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
+        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) taht meets filter conditions")
       end
-      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
-      ret
+      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
     end
 
     #type is :library or :workspace
@@ -210,23 +200,40 @@ module DTK
 
    private
 
-    def filter_repos_by_namespace(modules, namespace)
-      modules.each do |e|
-        if (e[:repo_remote][:repo_namespace].eql?(namespace))
-          e[:repo].consume_remote_repo!(e[:repo_remote])
-          e.delete(:repo_remote)
-          return e
+    def aggregate_by_remote_namespace(raw_module_rows,opts=Opts.new)
+      ret = nil
+      #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
+      if raw_module_rows.empty?()
+        raise Error.new("Unexepected that raw_module_rows is empty")
+      end
+      namespace = (opts[:filter]||{})[:remote_namespace]
+
+      repo_remotes = raw_module_rows.map do |e|
+        repo_remote = e.delete(:repo_remote)
+        if namespace.nil? or namespace == repo_remote[:repo_namespace]
+          repo_remote
         end
+      end.compact
+      #if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
+      if namespace and repo_remotes.empty?
+        return ret
       end
 
-      # we sort descending by created date
-      modules.sort { |a,b| a[:repo_remote][:created_at] <=>  b[:repo_remote][:created_at] }
-      # default module is the one which is the oldest
-      default_module = modules.first
-      default_module[:repo].consume_remote_repo!(default_module[:repo_remote])
-      default_module.delete(:repo_remote)
-
-      return default_module
+      ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
+      set_default_remote_namespace!(ret)
+    end
+    
+    def set_default_remote_namespace!(augmented_module_branch)
+      #TODO: stub until get more sophistiacted strategy for setting the default namespace
+      repo_remotes = augmented_module_branch[:repo_remotes]
+      unless repo_remotes.empty?
+        #set on augmented_module_branch[:repo] fields associated with the default namespace
+        # we sort descending by created date
+        # defaultis the one which is the oldest
+        default = repo_remotes.sort {|a,b| a[:created_at] <=>  b[:created_at]}.first
+        augmented_module_branch[:repo].consume_remote_repo!(default)
+      end
+      augmented_module_branch
     end
 
     def get_library_module_branch(version=nil)

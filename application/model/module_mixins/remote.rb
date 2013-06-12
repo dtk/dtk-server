@@ -2,14 +2,14 @@ module DTK
   module ModuleRemoteMixin
     #raises an access rights usage eerror if user does not have access to the remote module
     def get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
-      unless aug_ws_branch = get_augmented_workspace_branch(version, {}, remote_namespace)
+      unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
       unless remote_repo_name = aug_ws_branch[:repo].linked_remote?(remote_repo)
         if action == :push
-          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
+          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to a remote module")
         else #action == :pull
-          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to a remote module")
         end
       end
 
@@ -28,12 +28,12 @@ module DTK
     def import_version(remote_repo,version)
       module_name = module_name()
       project = get_project()
-      aug_head_branch = get_augmented_workspace_branch(nil)
+      aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
       unless repo and repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
-      if get_augmented_workspace_branch(version,:donot_raise_error=>true)
+      if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
       end
 

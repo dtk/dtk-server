@@ -20,7 +20,7 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(version)
+      aug_branch = module_obj.get_augmented_workspace_branch(Opts.new(version ? {:filter => {:version => version}} : {}))
       super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
       replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
       self[:commit_sha] = aug_branch[:current_sha]
@@ -41,7 +41,7 @@ module DTK
     end
 
     def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(version)
+      aug_branch = get_augmented_workspace_branch(Opts.new(version ? {:filter => {:version => version}} : {}))
       module_name = aug_branch[:module_name]
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
@@ -50,11 +50,14 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
-    def get_augmented_workspace_branch(version=nil,opts={},remote_namespace=nil)
+    def get_augmented_workspace_branch(opts=Opts.new)
+      filter = opts[:filter]||{}
+      version = filter[:version]
+      remote_namespace = filter[:remote_namespace]
+
       sp_hash = {
         :cols => [:display_name,:workspace_info_full]
       }
-
 
       version_field = ModuleBranch.version_field(version)
       modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}

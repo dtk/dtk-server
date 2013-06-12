@@ -109,11 +109,19 @@ assembly_nodes  =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:repo_id,:created_at])
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
      ]
     },
-    :remote_repos_simple=>{
+    :list_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name], :join_type => :left_outer)
+     ]
+    },
+    :list_info_with_remotes=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>

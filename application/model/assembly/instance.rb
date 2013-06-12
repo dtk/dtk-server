@@ -67,28 +67,27 @@ module DTK; class  Assembly
     end
 
     def get_augmented_components(opts=Opts.new)
+      ret = Array.new
       rows = get_objs(:cols => [:instance_nodes_and_cmps_summary])
       if opts[:filter_proc]
-        #TODO: should this be a select instead
-        rows = rows.map{|r| opts[:filter_proc].call(r)}.compact 
+        rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-      ret = rows.map do |r|
+      return ret if rows.empty?
+
+      components = rows.map do |r|
         r[:nested_component].merge(r.hash_subset(:node))
       end
 
-      if (opts[:detail_to_include]||[]).include?(:component_dependencies)
-        cmp_instance_idhs = ret.map{|r|r.id_handle()}
-        ndx_cmp_deps = Component::Dependency::Instance.get_indexed(cmp_instance_idhs)
-        ret.each{|r|r.merge!(:component_dependencies => ndx_cmp_deps[r[:id]]||[])}
+      if opts.array(:detail_to_include).include?(:component_dependencies)
+        Dependency::All.augment_component_instances!(self,components, Opts.new(:ret_statisfied_by => true))
       end
-      ret
+      components
     end
 
     def get_tasks(opts=Opts.new)
       ret = get_objs(:cols => [:tasks])
       if opts[:filter_proc]
-        #TODO: should this be a select instead
-        ret = ret.map{|r| opts[:filter_proc].call(r)}.compact
+        ret.reject!{|r|!opts[:filter_proc].call(r)}
       end
       ret
     end
@@ -314,8 +313,8 @@ module DTK; class  Assembly
     end
 
     def list_components(opts=Opts.new)
-      raw_rows = get_augmented_components(opts)
-      ret = raw_rows.map do |r|
+      aug_cmps = get_augmented_components(opts)
+      ret = aug_cmps.map do |r|
         display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
         version = Component::Instance.version_print_form(r)
         #TODO: dont think this is needed anymore
@@ -325,10 +324,19 @@ module DTK; class  Assembly
       end
       
       main_table_sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
-      if (opts[:detail_to_include]||[]).include?(:component_dependencies)
+      if opts.array(:detail_to_include).include?(:component_dependencies)
         opts.set_return_value!(:datatype,:component_with_dependencies)
-        join_columns = OutputTable::JoinColumns.new(raw_rows) do |r|
-          list_components__depends_on_cols(r)
+        ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,ret)
+        join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
+          if deps = aug_cmp[:dependencies]
+            deps.map do |dep|
+              satisfied_by = (dep.satisfied_by_component_id && ndx_component_print_form[dep.satisfied_by_component_id])
+              {
+                :depends_on => dep.depends_on_print_form?(),
+                :satisfied_by => satisfied_by 
+              }
+            end.compact
+          end
         end
         OutputTable.join(ret,join_columns,&main_table_sort)
       else
@@ -337,19 +345,29 @@ module DTK; class  Assembly
       end
     end
 
-    def list_components__depends_on_cols(raw_row)
-      if component_deps = raw_row[:component_dependencies]
-        depends_on_values_simple = (component_deps[:simple]||[]).map do |dep_display_name|
-          Component::Template.display_name_print_form(dep_display_name)
-        end
+    def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
+      #has lookup taht includes each satisfied_by_component
+      ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
 
-        depends_on_values_ld = (component_deps[:link_def]||[]).map do |ld|
-          ld[:link_type]
+      #see if theer is any components that are nreferenced but not in ret
+      needed_cmp_ids = Array.new
+      aug_cmps.each do |aug_cmp|
+        if deps = aug_cmp[:dependencies]
+          needed_cmp_ids += deps.map do |dep|
+            if cmp_id = dep.satisfied_by_component_id
+              cmp_id if ret[cmp_id].nil? 
+            end
+          end.compact
         end
-
-        (depends_on_values_simple + depends_on_values_ld).sort().map{|r|{:depends_on => r}}
       end
+      return ret if needed_cmp_ids.empty?
+
+      filter_array = needed_cmp_ids.map{|cmp_id|[:eq,:id,cmp_id]}
+      filter = (filter_array.size == 1 ? filter_array.first : [:or] + filter_array)
+      additional_cmps = list_components(Opts.new(:filter => filter))
+      additional_cmps.inject(ret){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
     end
+    private :ret_ndx_component_print_form
 
     def self.delete(assembly_idhs,opts={})
       if assembly_idhs.kind_of?(Array)
@@ -517,7 +535,7 @@ module DTK; class  Assembly
         case filter
           when :required_unset_attributes
             filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
-            opts_for_aux.merge!(:filter_proc => filter_proc)
+            opts.merge!(:filter_proc => filter_proc)
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  

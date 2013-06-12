@@ -98,14 +98,16 @@
       "id",
       "name",
       "version",
-      "depends_on"
+      "depends_on",
+      "satisfied_by"	
     ],
     "mapping": {
       "name": "display_name",
       "version": "version",
       "id": "dtk_id",
       "component_type": "dtk_type",
-      "depends_on":  "depends_on"
+      "depends_on":  "depends_on",
+      "satisfied_by": "satisfied_by"	
     }
   },
   "attribute": {

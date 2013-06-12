@@ -108,7 +108,7 @@ module DTK
             cmp_type = attr[:component_type]
             attr_name = attr[:attribute_name]
             if cmp_type and attr_name
-              "#{Component.pp_component_type(cmp_type)}.#{attr_name}"
+              "#{Component.component_type_print_form(cmp_type)}.#{attr_name}"
             end
           end
         ret||""

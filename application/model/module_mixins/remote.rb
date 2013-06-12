@@ -101,6 +101,9 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
+      auto_load_sucess = false
+      repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
+
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
         local_module_name = local_params[:module_name]
@@ -141,9 +144,46 @@ module DTK
         module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
-        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
-        module_repo_info(repo,module_and_branch_info,version)
+        begin
+          module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+        rescue ErrorUsage::DanglingComponentRefs => e
+          # we rescue missing dependencies error here
+          if (self == DTK::ServiceModule)
+            missing_component_module_list = e.missing_module_list()
+            # TODO: [Haris] Add logic for detecting namespace after we support it
+            missing_component_module_list.each do |missing_module|
+              import_remote_params = {
+                :repo => remote_params[:repo],
+                :module_namespace => missing_module[:remote_namespace] || remote_params[:module_namespace],
+                :module_name => missing_module[:name],
+                :version => missing_module[:version]
+              }
+              begin
+                ComponentModule.import(project, import_remote_params, {:module_name => missing_module[:name]})
+              rescue ErrorUsage => e1
+                # we join error messages to properly represent series of events
+                raise ErrorUsage.new("#{e.message}, auto-import of component module failed: #{e1.message}")
+              end
+              Log.info "Successfully imported component module dependency '#{remote_params[:module_namespace]}/#{missing_module[:name]}' for service '#{remote_params[:module_name]}' "
+            end
+
+            auto_load_sucess = true
+          else
+            # [Haris] Contact me if this error occurs
+            Log.error "Unexpected error, missing component refs for component module! Contact Haris."
+            raise e
+          end
+        end
       end
+
+      # since we need changes to be commited and our DB does not support nested commits
+      # we are forced to do this, after transaction is done we repeat module_obj import_dsl
+      if auto_load_sucess
+        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+      end
+
+      response = module_repo_info(repo,module_and_branch_info,version)
+      response
     end
 
     def delete_remote(project,remote_params)

@@ -119,7 +119,7 @@ assembly_nodes  =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name])
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name], :join_type => :left_outer)
      ]
     },
     #TODO: not sure if we haev implementations on service modules

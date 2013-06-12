@@ -71,12 +71,25 @@
     "order": [
       "id",
       "name",
-      "version"
+      "version",
+      "linked_remote(s)"
     ],
     "mapping": {
       "name": "display_name",
       "version": "version",
       "id": "dtk_id",
+      "component_type": "dtk_type",
+      "linked_remote(s)": "linked_remotes"
+    }
+  },
+  "component_remote": {
+    "order": [
+      "name",
+      "version"
+    ],
+    "mapping": {
+      "name": "display_name",
+      "version": "version",
       "component_type": "dtk_type"
     }
   },
@@ -129,11 +142,23 @@
     "order": [
       "id",
       "name",
-      "version"
+      "version",
+      "linked_remote(s)"
     ],
     "mapping": {
       "name": "display_name",
       "id": "dtk_id",
+      "version": "version",
+      "linked_remote(s)": "linked_remotes"
+    }
+  },
+  "module_remote": {
+    "order": [
+      "name",
+      "version"
+    ],
+    "mapping": {
+      "name": "display_name",
       "version": "version"
     }
   },

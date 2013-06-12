@@ -302,7 +302,7 @@ module DTK
 
     def list__project_parent(project_idh)
       sp_hash = {
-        :cols => [:id, :display_name],
+        :cols => [:id, :display_name, :remote_repos_simple],
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
@@ -321,10 +321,13 @@ module DTK
         mod = ndx_module_info[br[branch_parent_field_name]]
         version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
         mdl = ndx_module_info[br[branch_parent_field_name]]
-        (mdl[:version_array] ||= Array.new) <<  version
+        (mdl[:version_array]  ||= Array.new) <<  version
       end
       #put version info in prin form
       unsorted = ndx_module_info.values.map do |mdl|
+        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
+        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
+
         raw_va = mdl.delete(:version_array)
         unless raw_va.nil? or raw_va == ["CURRENT"]
           version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort

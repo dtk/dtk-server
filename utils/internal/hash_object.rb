@@ -53,7 +53,7 @@ module DTK
    private
 
     def remove_nested_nil(val)
-      unless val.kind_of?(Hash)
+      unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes 
         val
       else
         val.inject(Hash.new) do |h,(k,child_v)|

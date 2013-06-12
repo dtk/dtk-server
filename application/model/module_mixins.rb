@@ -310,7 +310,8 @@ module DTK
     end
 
 
-    def list__project_parent(project_idh)
+    def list(opts=opts.new)
+      project_idh = opts.required(:project_idh)
       sp_hash = {
         :cols => [:id, :display_name, :remote_repos_simple],
         :filter => [:eq, :project_project_id, project_idh.get_id()]
@@ -333,7 +334,7 @@ module DTK
         mdl = ndx_module_info[br[branch_parent_field_name]]
         (mdl[:version_array]  ||= Array.new) <<  version
       end
-      #put version info in prin form
+      #put version info in print form
       unsorted = ndx_module_info.values.map do |mdl|
         repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
         (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace

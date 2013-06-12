@@ -18,23 +18,10 @@ module DTK; class Component
       end
     end
       
-    #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
-    def self.list(mh,opts)
-      if project_id = opts[:project_idh]
-        ndx_ret = list__library_parent(mh,opts).inject(Hash.new) do |h,r|
-          ndx = version_display_name(r[:display_name],nil)
-          h.merge(ndx => r)
-        end
-        list__project_parent(opts[:project_idh],opts).each do |r|
-          ndx = version_display_name(r[:display_name],r[:version])
-          ndx_ret[ndx] ||= r
-        end
-        ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
-      else
-        list__library_parent(mh,opts)
+    def self.list(mh,opts=Opts.new)
+      unless project_idh = opts[:project_idh]
+        raise Error.new("Requires opts[:project_idh]")
       end
-    end
-    def self.list__project_parent(project_idh,opts={})
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
         :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
@@ -43,17 +30,6 @@ module DTK; class Component
       if constraint = opts[:component_version_constraints]
         ret = ret.select{|r|constraint.meets_constraint?(r)}
       end
-      ret.each{|r|r.convert_to_print_form!()}
-      ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for above
-    def self.list__library_parent(model_handle,opts={})
-      library_filter = (opts[:library_idh] ? [:eq, :library_library_id, opts[:library_idh].get_id()] : [:neq, :library_library_id, nil])
-      sp_hash = {
-        :cols => [:id, :type, :display_name, :description],
-        :filter => [:and, [:eq, :type, "template"], library_filter]
-      }
-      ret = get_objs(model_handle.createMH(:component),sp_hash)
       ret.each{|r|r.convert_to_print_form!()}
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end

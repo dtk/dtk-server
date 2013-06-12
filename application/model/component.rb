@@ -144,7 +144,7 @@ module DTK
     end
 
     ### display name functions
-    #TODO: should collpase these into just one or two and might seperate into component templaet and component insatnce
+    #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       unless opts[:without_version] 
@@ -177,9 +177,14 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
-    def self.component_type_print_form(component_type)
-      component_type.gsub(/__/,"::")
+    def self.component_type_print_form(component_type,opts=Opts.new)
+      if opts[:no_module_name]
+        component_type.gsub(/^.+__/,"")
+      else
+        component_type.gsub(/__/,"::")
+      end
     end
+
     def component_type_print_form()
       self[:component_type] && self.class.component_type_print_form(self[:component_type])
     end

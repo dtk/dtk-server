@@ -49,7 +49,8 @@ module DTK
         get_objs(:cols => [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
-          {:id => cmp[:id], :display_name => cmp[:display_name].gsub(/__/,"::"),:version => branch.pp_version }
+          display_name = Component::Template.component_type_print_form(cmp[:component_type],Opts.new(:no_module_name => true))
+          {:id => cmp[:id], :display_name => display_name,:version => branch.pp_version }
         end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
       when :attributes
         results = get_objs(:cols => [:attributes])

@@ -198,7 +198,7 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:version],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_components.call(
-        :cols => [:id,:display_name,:version],
+        :cols => [:id,:display_name,:group_id,:version,:component_type],
         :filter=>[:eq,:assembly_id,nil])
       ]
     },

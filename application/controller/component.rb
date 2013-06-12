@@ -18,7 +18,7 @@ module XYZ
     def rest__list()
       project = get_default_project()
       cmp_version_constraints = get_component_filter_constraints?()
-      opts = {:project_idh => project.id_handle()}
+      opts = Opts.new(:project_idh => project.id_handle())
       opts.merge!(:component_version_constraints => cmp_version_constraints) if cmp_version_constraints
       rest_ok_response Component::Template.list(model_handle(),opts)
     end

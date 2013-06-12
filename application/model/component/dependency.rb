@@ -1,10 +1,6 @@
 module DTK
   class Component
-    class Dependency #This represents both internode and intranode dependencies; anything that shows up in the depends_on section of the dsl
-      r8_nested_require('dependency','instance')
-    end
-
-    #TODO: move
+    #TODO: move to be related to component order
     module DependencyClassMixin
       def get_internode_dependencies(state_change_list)
         ret = Array.new

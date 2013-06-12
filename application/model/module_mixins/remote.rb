@@ -154,7 +154,7 @@ module DTK
             missing_component_module_list.each do |missing_module|
               import_remote_params = {
                 :repo => remote_params[:repo],
-                :module_namespace => remote_params[:module_namespace],
+                :module_namespace => missing_module[:remote_namespace] || remote_params[:module_namespace],
                 :module_name => missing_module[:name],
                 :version => missing_module[:version]
               }

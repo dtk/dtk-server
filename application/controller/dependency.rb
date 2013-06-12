@@ -5,7 +5,7 @@ module XYZ
       hash_info = {
         :other_component_id => other_component_id,
       }
-      rest_ok_response Dependency.add_component_dependency(id_handle(cmp_id,:component),type,hash_info)
+      rest_ok_response Dependency::Simple.add_component_dependency(id_handle(cmp_id,:component),type,hash_info)
     end
   end
 end

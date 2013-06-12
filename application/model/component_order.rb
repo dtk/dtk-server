@@ -18,10 +18,22 @@ module DTK
 
     #assumption that this is called with components having keys :id,:dependencies, :extended_base, :component_type 
     #this can be either component template or component instance with :dependencies joined in from associated template
+    #TODO: change :component_dependencies to :derived_order -> must chaneg all upstream uses of this return rest too
     def self.get_ndx_cmp_type_and_derived_order(components)
       ret = Hash.new
       return ret if components.empty?
-      ret = Dependency::find_ndx_cmp_type_and_derived_order(components)
+      components.each do |cmp|
+        unless pntr = ret[cmp[:id]]
+          pntr = ret[cmp[:id]] = {:component_type => cmp[:component_type], :component_dependencies => Array.new}
+        end
+        if cmp[:extended_base]
+          pntr[:component_dependencies] << cmp[:extended_base]
+        elsif dep_obj = cmp[:dependencies]
+          if dep_cmp_type = dep_obj.is_simple_filter_component_type?()
+            pntr[:component_dependencies] << dep_cmp_type
+          end
+        end
+      end
       ComponentOrder.update_with_applicable_dependencies!(ret,components.map{|cmp|cmp.id_handle()}.uniq)
     end
 

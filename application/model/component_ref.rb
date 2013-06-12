@@ -62,7 +62,7 @@ module DTK
 
     def self.print_form(cmp_ref__obj_or_hash)
       if cmp_ref__obj_or_hash[:component_type]
-        Component.pp_component_type(cmp_ref__obj_or_hash[:component_type])
+        Component.component_type_print_form(cmp_ref__obj_or_hash[:component_type])
       elsif cmp_ref__obj_or_hash[:id]
         "id:#{cmp_ref__obj_or_hash[:id].to_s})"
       end

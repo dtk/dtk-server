@@ -198,6 +198,7 @@ module DTK
       get_field?(:dsl_parsed)
     end
 
+    #assumed that all raw_module_rows agree on all except repo_remote
     def aggregate_by_remote_namespace(raw_module_rows,opts=Opts.new)
       ret = nil
       #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
@@ -313,7 +314,7 @@ module DTK
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
 
       if include_remotes 
-        unsorted_ret = aggregate_by_remote_namespace(unsorted_ret)
+        unsorted_ret = aggregate_and_add_remotes_info(unsorted_ret)
       end
       if opts.array(:detail_to_include).include?(:versions)
         get_and_join_in_version_info!(unsorted_ret,mh)
@@ -321,31 +322,58 @@ module DTK
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def get_and_join_in_version_info!(module_info,mh)
-      ndx_module_info = module_info.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
+    def aggregate_and_add_remotes_info(module_rows)
+      ndx_module_rows = Hash.new
+      module_rows.each do |r|
+        if repo_remote = r.delete(:repo_remote)
+          ndx = r[:id]
+          pntr = ndx_module_rows[ndx] ||= r.merge!(:repo_remotes => Array.new)
+          pntr[:repo_remotes] << repo_remote
+        end
+      end
+
+      ndx_module_rows.each do |ndx,module_row|
+        repo_remotes = module_row.delete(:repo_remotes)
+        linked_remotes =
+          if repo_remotes.size == 1
+            repo_remotes.first.print_form()
+          else
+            default = RepoRemote.ret_default_remote_repo(module_row[:repo],repo_remotes)
+            repo_remotes.reject!{|r|r[:id] == default[:id]}
+            sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
+            sorted_array.join(", ")
+          end
+        module_row.merge!(:linked_remotes => linked_remotes)
+      end
+      module_rows
+    end
+    private :aggregate_and_add_remotes_info
+
+    def get_and_join_in_version_info!(module_rows,mh)
+      ndx_module_rows = module_rows.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
       branch_mh = mh.create_childMH(:module_branch)
       branch_parent_field_name =  branch_mh.parent_id_field_name()
       sp_hash = {
         :cols => [branch_parent_field_name,:version],
-        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_info.keys], [:eq,:is_workspace,true]]
+        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_rows.keys], [:eq,:is_workspace,true]]
       }
       branch_info = get_objs(branch_mh,sp_hash)
       #join in version info
       branch_info.each do |br|
-        mod = ndx_module_info[br[branch_parent_field_name]]
+        mod = ndx_module_rows[br[branch_parent_field_name]]
         version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_info[br[branch_parent_field_name]]
+        mdl = ndx_module_rows[br[branch_parent_field_name]]
         (mdl[:version_array]  ||= Array.new) <<  version
       end
       #put version info in print form
-      module_info.each do |r|
+      module_rows.each do |r|
         raw_va = r.delete(:version_array)
         unless raw_va.nil? or raw_va == ["CURRENT"]
           version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
           r.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
         end
       end
-      module_info
+      module_rows
     end
     private :get_and_join_in_version_info!
 =begin

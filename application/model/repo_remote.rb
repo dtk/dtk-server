@@ -1,5 +1,10 @@
 module DTK
   class RepoRemote < Model
+    def print_form(opts=Opts.new)
+      ret = self[:display_name]
+      ret = "*#{ret}" if opts[:is_default_namespace]
+      ret
+    end
 
     def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id)
       remote_repo_create_hash = { 
@@ -49,6 +54,7 @@ module DTK
         #set on augmented_module_branch[:repo] fields associated with the default namespace
         # we sort descending by created date
         # default is the one which is the oldest
+        repo_remotes.each{|r|r.update_object!(:created_at)}
         repo_remotes.sort {|a,b| a[:created_at] <=>  b[:created_at]}.first
       end
     end

@@ -198,8 +198,6 @@ module DTK
       get_field?(:dsl_parsed)
     end
 
-   private
-
     def aggregate_by_remote_namespace(raw_module_rows,opts=Opts.new)
       ret = nil
       #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
@@ -221,12 +219,14 @@ module DTK
 
       ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
       repo = ret[:repo]
-      if default = RepoRemote.ret_default_remote_namespace(repo,ret[:repo_remotes])
+      if default = RepoRemote.ret_default_remote_repo(repo,ret[:repo_remotes])
         repo.consume_remote_repo!(default)
       end
       ret
     end
-    
+
+   private
+
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
       library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
@@ -313,20 +313,13 @@ module DTK
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
 
       if include_remotes 
-        unsorted_ret = ret_aggregate_remotes_info(unsorted_ret)
+        unsorted_ret = aggregate_by_remote_namespace(unsorted_ret)
       end
       if opts.array(:detail_to_include).include?(:versions)
         get_and_join_in_version_info!(unsorted_ret,mh)
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
-
-    def ret_aggregate_remotes_info(module_info)
-      pp module_info  
-      module_info
-    end
-    private :ret_aggregate_remotes_info
-
 
     def get_and_join_in_version_info!(module_info,mh)
       ndx_module_info = module_info.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}

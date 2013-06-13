@@ -322,16 +322,19 @@ module DTK
 
     module ListMethodHelper
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
-
-        if opts[:include_remotes]
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:created_at,:is_default],
-            :filter => [:oneof, :repo_id,branch_module_rows.map{|r|r[:repo][:id]}] 
-          }
-          remotes_info = Model.get_objs(module_mh.createMH(:repo_remote),sp_hash)
-          pp [:remotes_info,remotes_info]
-        end
+        #indexed by repo_id
+        ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
+        remotes_info = (opts[:include_remotes] ? get_remotes_info(module_mh,ndx_branch_module_rows.keys) : [])
+        pp remotes_info
         branch_module_rows
+      end
+     private 
+      def self.get_remotes_info(module_mh,repo_ids)
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:created_at,:is_default],
+          :filter => [:oneof, :repo_id, repo_ids]
+        }
+        Model.get_objs(module_mh.createMH(:repo_remote),sp_hash)
       end
     end
 =begin        

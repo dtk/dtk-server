@@ -11,7 +11,7 @@ module DTK
         if opts[:set_as_default]
           true
         elsif opts[:set_as_default_if_first]
-          get_remote_repo(repo_remote_mh,repo_id, module_name).size == 0
+          get_matching_remote_repos(repo_remote_mh,repo_id, module_name).size == 0
         else
           false
         end
@@ -30,7 +30,15 @@ module DTK
       delete_instances(idh_list)
     end
 
-    def self.get_remote_repo(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
+    def self.get_remote_repo(repo_remote_mh,repo_id, module_name, repo_namespace)
+      matches = get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace)
+      if matches.size > 0
+        raise Error.new("Unexpected to have multiple matches in get_remote_repo (#{matches.map{|r|r[:display_name]}.join(',')})")
+      else
+        matches.first
+      end
+    end
+    def self.get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace=nil)
       sp_hash = {
         :cols   => [:id], 
         :filter =>  
@@ -40,7 +48,7 @@ module DTK
            [:eq, :ref, module_name]
           ].compact
       }
-      get_obj(repo_remote_mh, sp_hash)
+      get_objs(repo_remote_mh, sp_hash)
     end
 
     def self.extract_module_name(repo_name)

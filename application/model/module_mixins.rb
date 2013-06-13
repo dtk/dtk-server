@@ -305,23 +305,69 @@ module DTK
     def list(opts=opts.new)
       project_idh = opts.required(:project_idh)
       include_remotes = opts.array(:detail_to_include).include?(:remotes)
+      include_versions = opts.array(:detail_to_include).include?(:versions)
+      include_any_detail = ((include_remotes or include_versions) ? true : nil)
       sp_hash = {
-        :cols => [:id, :display_name, include_remotes ? :list_info_with_remotes : :list_info],
+        :cols => [:id, :display_name, include_any_detail && :module_branches_with_repos].compact,
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
       unsorted_ret = get_objs(mh,sp_hash)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
-
-      if include_remotes 
-        unsorted_ret = aggregate_and_add_remotes_info(unsorted_ret)
-      end
-      if opts.array(:detail_to_include).include?(:versions)
-        get_and_join_in_version_info!(unsorted_ret,mh)
+      if include_any_detail
+        unsorted_ret = ListMethodHelper.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions))
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+    module ListMethodHelper
+      def self.aggregate_detail(branch_module_rows,module_mh,opts)
+
+        if opts[:include_remotes]
+          sp_hash = {
+            :cols => [:id,:group_id,:display_name,:created_at,:is_default],
+            :filter => [:oneof, :repo_id,branch_module_rows.map{|r|r[:repo][:id]}] 
+          }
+          remotes_info = Model.get_objs(module_mh.createMH(:repo_remote),sp_hash)
+          pp [:remotes_info,remotes_info]
+        end
+        branch_module_rows
+      end
+    end
+=begin        
+        ndx_branch_module_rows = branch_module_rows.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
+
+        if opts[:include_versions]
+          branch_mh = module_mh.create_childMH(:module_branch)
+          branch_parent_field_name =  branch_mh.parent_id_field_name()
+          sp_hash = {
+            :cols => [branch_parent_field_name,:version],
+            :filter => [:and,[:oneof, branch_parent_field_name, ndx_branch_module_rows.keys], [:eq,:is_workspace,true]]
+          }
+          branch_info = Model.get_objs(branch_mh,sp_hash)
+          pp branch_module_rows.map{|r|r[:module_branch]}
+          pp [branch_info]
+          #join in version info
+          branch_info.each do |br|
+            mod = ndx_branch_module_rows[br[branch_parent_field_name]]
+          version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
+            mdl = ndx_branch_module_rows[br[branch_parent_field_name]]
+            (mdl[:version_array]  ||= Array.new) <<  version
+          end
+        end
+
+        #put version info in print form
+        branch_module_rows.each do |r|
+          raw_va = r.delete(:version_array)
+          unless raw_va.nil? or raw_va == ["CURRENT"]
+            version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
+            r.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        end
+        end
+        branch_module_rows
+      end
+    end
+=end
     def aggregate_and_add_remotes_info(module_rows)
       no_remote_proc = true
       ndx_module_rows = Hash.new

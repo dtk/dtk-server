@@ -220,7 +220,7 @@ module DTK
 
       ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
       repo = ret[:repo]
-      if default = RepoRemote.ret_default_remote_repo(repo,ret[:repo_remotes])
+      if default = RepoRemote.ret_default_remote_repo(ret[:repo_remotes])
         repo.consume_remote_repo!(default)
       end
       ret
@@ -345,7 +345,7 @@ module DTK
             if repo_remotes.size == 1
               repo_remotes.first.print_form()
             else
-              default = RepoRemote.ret_default_remote_repo(module_row[:repo],repo_remotes)
+              default = RepoRemote.ret_default_remote_repo(repo_remotes)
               repo_remotes.reject!{|r|r[:id] == default[:id]}
               sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
               sorted_array.join(", ")

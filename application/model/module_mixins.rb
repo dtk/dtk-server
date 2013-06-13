@@ -323,29 +323,37 @@ module DTK
     end
 
     def aggregate_and_add_remotes_info(module_rows)
+      no_remote_proc = true
       ndx_module_rows = Hash.new
       module_rows.each do |r|
+        ndx = r[:id]
         if repo_remote = r.delete(:repo_remote)
-          ndx = r[:id]
+          no_remote_proc = false
           pntr = ndx_module_rows[ndx] ||= r.merge!(:repo_remotes => Array.new)
           pntr[:repo_remotes] << repo_remote
+        else
+          ndx_module_rows[ndx] = r
         end
       end
 
+      #short-cut
+      return module_rows if no_remote_proc
+
       ndx_module_rows.each do |ndx,module_row|
-        repo_remotes = module_row.delete(:repo_remotes)
-        linked_remotes =
-          if repo_remotes.size == 1
-            repo_remotes.first.print_form()
-          else
-            default = RepoRemote.ret_default_remote_repo(module_row[:repo],repo_remotes)
-            repo_remotes.reject!{|r|r[:id] == default[:id]}
-            sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
-            sorted_array.join(", ")
-          end
-        module_row.merge!(:linked_remotes => linked_remotes)
+        if repo_remotes = module_row.delete(:repo_remotes)
+          linked_remotes =
+            if repo_remotes.size == 1
+              repo_remotes.first.print_form()
+            else
+              default = RepoRemote.ret_default_remote_repo(module_row[:repo],repo_remotes)
+              repo_remotes.reject!{|r|r[:id] == default[:id]}
+              sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
+              sorted_array.join(", ")
+            end
+          module_row.merge!(:linked_remotes => linked_remotes)
+        end
       end
-      module_rows
+      ndx_module_rows.values
     end
     private :aggregate_and_add_remotes_info
 

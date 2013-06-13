@@ -322,21 +322,102 @@ module DTK
 
     module ListMethodHelper
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
-        #indexed by repo_id
+        if opts[:include_remotes]
+          augment_with_remotes_info!(branch_module_rows,module_mh)
+        end
+
+        #there can be dupliactes for a module when multiple repos; in which case will agree on all fields
+        #except :repo, :module_branch, and :repo_remotes
+        #index by module
+        ndx_ret = Hash.new
+        #aggregate
+        branch_module_rows.each do |r|
+          module_branch = r[:module_branch]
+          ndx_repo_remotes = r[:ndx_repo_remotes]
+          ndx = r[:id]
+          repo_remotes_added = false
+          unless mdl = ndx_ret[ndx]
+            r.delete(:repo)
+            r.delete(:module_branch)
+            mdl = ndx_ret[ndx] = r
+          end
+          (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
+          if ndx_repo_remotes and not repo_remotes_added
+            ndx_repo_remotes.each do |remote_repo_id,remote_repo|
+              (mdl[:ndx_repo_remotes] ||= Hash.new)[remote_repo_id] ||= remote_repo
+            end
+          end
+        end
+pp ndx_ret.values
+        #put in display name form
+        ndx_ret.values
+      end
+      DefaultVersionString = "CURRENT"
+
+     private 
+      def self.augment_with_remotes_info!(branch_module_rows,module_mh)
+        #index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
-        remotes_info = (opts[:include_remotes] ? get_remotes_info(module_mh,ndx_branch_module_rows.keys) : [])
-        pp remotes_info
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:repo_id,:created_at,:is_default],
+          :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
+        }
+        Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
+          ndx = r[:repo_id]
+          (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)
+        end
         branch_module_rows
       end
-     private 
-      def self.get_remotes_info(module_mh,repo_ids)
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:created_at,:is_default],
-          :filter => [:oneof, :repo_id, repo_ids]
-        }
-        Model.get_objs(module_mh.createMH(:repo_remote),sp_hash)
-      end
     end
+=begin
+      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
+      #join in version info
+      branch_info.each do |br|
+        mod = ndx_module_info[br[branch_parent_field_name]]
+        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
+        mdl = ndx_module_info[br[branch_parent_field_name]]
+        (mdl[:version_array]  ||= Array.new) <<  version
+      end
+      #put version info in print form
+      unsorted = ndx_module_info.values.map do |mdl|
+        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
+        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
+
+        raw_va = mdl.delete(:version_array)
+        unless raw_va.nil? or raw_va == ["CURRENT"]
+          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
+          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+        end
+        if mdl.respond_to?(:component_type)
+          mdl.merge!(:type => mdl.component_type())
+        end
+        mdl
+      end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+ {:repo_remotes=>
+   [{:group_id=>2147562164,
+     :repo_id=>2147579421,
+     :display_name=>"dtk/bootstrap",
+     :created_at=>Thu Jun 06 23:54:28 +0000 2013,
+     :id=>2147579422,
+     :is_default=>false}],
+  :repo=>
+   {:repo_name=>"sm-rich-bootstrap",
+    :local_dir=>"/home/dtk/r8server-repo/sm-rich-bootstrap",
+    :id=>2147579421},
+  :display_name=>"bootstrap",
+  :module_branch=>
+   {:version=>"master",
+    :service_id=>2147579427,
+    :repo_id=>2147579421,
+    :id=>2147579428},
+  :id=>2147579427}]
+
+=end
+
+     
+
 =begin        
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
 

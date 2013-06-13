@@ -69,7 +69,11 @@ module DTK
 
     def rest__list()
       project = get_default_project()
-      rest_ok_response ServiceModule.list(model_handle, :project_idh => project.id_handle())
+      opts = Opts.new(:project_idh => project.id_handle())
+      if detail = ret_request_params(:detail_to_include)
+        opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
+      end
+      rest_ok_response ServiceModule.list(opts)
     end
 
     def rest__info()

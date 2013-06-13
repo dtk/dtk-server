@@ -10,7 +10,7 @@ module DTK
     module PrintFormClassMixin
       def print_form(raw_attrs,opts=Opts.new)
         ret = raw_attrs.map{|a|a.print_form(opts)}
-        if (opts[:detail_to_include]||[]).include?(:attribute_links)
+        if opts.array(:detail_to_include).include?(:attribute_links)
           unless assembly = opts[:assembly]
             raise Error.new("Unexpected to have opts[:assembly] nil")
           end

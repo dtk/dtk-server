@@ -60,7 +60,13 @@ module DTK
               el[:pntr][:component_template] = cmp_template
             end
           elsif el[:required]
-            reference_errors << {:component_type => cmp_type, :version => cmp_type_version_info[:version]} 
+            cmp_ref = {
+              :component_type => cmp_type, 
+              :version => cmp_type_version_info[:version]
+            }
+            remote_namespace = nil #TODO: stub to find remote namespace associated with module
+            cmp_ref.merge!(:remote_namespace => remote_namespace) if remote_namespace
+            reference_errors << cmp_ref
           end
         end
       end

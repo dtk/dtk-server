@@ -4,9 +4,10 @@ module DTK
     def initialize(initial_val=nil)
       super()
       if initial_val
-        #add if non null
+        #add if non null; doing 'deep check for nil'
         initial_val.each_pair do |k,v|
-          merge!(k => v) unless v.nil?
+          processed_v = remove_nested_nil(v) 
+          merge!(k => processed_v) unless processed_v.nil?
         end
       end
     end
@@ -16,6 +17,10 @@ module DTK
         v = self[k]
         (v.nil? ? h : h.merge(k => v))
       end
+    end
+
+    def array(key)
+      self[key]||[]
     end
 
     def required(key)
@@ -46,6 +51,21 @@ module DTK
     end
 
    private
+
+    def remove_nested_nil(val)
+      unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes 
+        val
+      else
+        val.inject(Hash.new) do |h,(k,child_v)|
+          if processed_val = remove_nested_nil(child_v)
+            h.merge(k => processed_val)
+          else
+            h
+          end
+        end
+      end
+    end
+
     class ReturnValue < Hash
       def add_value_to_return!(key)
         self[key] ||= nil

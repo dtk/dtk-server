@@ -46,9 +46,17 @@ module DTK
       # Returns list of missing modules with version
       #
       def missing_module_list()
+        #forming hash and then getting its vals to remove dups in same <module,version,namepsace>
         module_hash = @cmp_ref_info_list.inject(Hash.new) do |h,r|
           module_name = r[:component_type].split('__').first
-          h.merge!( "#{module_name}#{r[:version]}" => { :name => module_name, :version => r[:version]})
+          remote_namespace = r[:remote_namespace]
+          ndx = "#{module_name}---#{r[:version]}---#{remote_namespace}"
+          info = {
+            :name => module_name, 
+            :version => r[:version]
+          }
+          info.merge!(:remote_namespace => remote_namespace) if remote_namespace
+          h.merge!(ndx => info)
         end
 
         module_hash.values

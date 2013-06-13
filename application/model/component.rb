@@ -144,14 +144,14 @@ module DTK
     end
 
     ### display name functions
-    #TODO: should collpase these into just one or two and might seperate into component templaet and component insatnce
+    #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       unless opts[:without_version] 
         cols_to_get += [:version]
       end
       update_object!(*cols_to_get)
-      component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
+      component_type = component_type_print_form()
 
       #handle version
       ret = component_type
@@ -177,16 +177,21 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
-    def self.pp_component_type(component_type)
-      component_type.gsub(/__/,"::")
+    def self.component_type_print_form(component_type,opts=Opts.new)
+      if opts[:no_module_name]
+        component_type.gsub(/^.+__/,"")
+      else
+        component_type.gsub(/__/,"::")
+      end
     end
-    def pp_component_type()
-      self[:component_type] && self.class.pp_component_type(self[:component_type])
+
+    def component_type_print_form()
+      self[:component_type] && self.class.component_type_print_form(self[:component_type])
     end
 
     def convert_to_print_form!()
       update_object!(:component_type,:ref_num,:version)
-      component_type = pp_component_type()
+      component_type = component_type_print_form()
       self[:display_name] = (self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type)
       if has_default_version?()
         self[:version] = nil

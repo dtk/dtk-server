@@ -2,14 +2,14 @@ module DTK
   module ModuleRemoteMixin
     #raises an access rights usage eerror if user does not have access to the remote module
     def get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
-      unless aug_ws_branch = get_augmented_workspace_branch(version, {}, remote_namespace)
+      unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
       unless remote_repo_name = aug_ws_branch[:repo].linked_remote?(remote_repo)
         if action == :push
-          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to the remote module")
+          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to a remote module")
         else #action == :pull
-          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to a remote module")
         end
       end
 
@@ -28,12 +28,12 @@ module DTK
     def import_version(remote_repo,version)
       module_name = module_name()
       project = get_project()
-      aug_head_branch = get_augmented_workspace_branch(nil)
+      aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
       unless repo and repo.linked_remote?(remote_repo)
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
-      if get_augmented_workspace_branch(version,:donot_raise_error=>true)
+      if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
       end
 
@@ -101,6 +101,9 @@ module DTK
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def import(project,remote_params,local_params)
+      auto_load_sucess = false
+      repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
+
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
         local_module_name = local_params[:module_name]
@@ -151,7 +154,7 @@ module DTK
             missing_component_module_list.each do |missing_module|
               import_remote_params = {
                 :repo => remote_params[:repo],
-                :module_namespace => remote_params[:module_namespace],
+                :module_namespace => missing_module[:remote_namespace] || remote_params[:module_namespace],
                 :module_name => missing_module[:name],
                 :version => missing_module[:version]
               }
@@ -164,17 +167,23 @@ module DTK
               Log.info "Successfully imported component module dependency '#{remote_params[:module_namespace]}/#{missing_module[:name]}' for service '#{remote_params[:module_name]}' "
             end
 
-            # After we finish importing all module components we repeat the call
-            module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+            auto_load_sucess = true
           else
             # [Haris] Contact me if this error occurs
             Log.error "Unexpected error, missing component refs for component module! Contact Haris."
             raise e
           end
         end
-        response = module_repo_info(repo,module_and_branch_info,version)
-        response
       end
+
+      # since we need changes to be commited and our DB does not support nested commits
+      # we are forced to do this, after transaction is done we repeat module_obj import_dsl
+      if auto_load_sucess
+        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+      end
+
+      response = module_repo_info(repo,module_and_branch_info,version)
+      response
     end
 
     def delete_remote(project,remote_params)

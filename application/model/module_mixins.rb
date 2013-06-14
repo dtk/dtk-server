@@ -315,12 +315,12 @@ module DTK
       unsorted_ret = get_objs(mh,sp_hash)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
-        unsorted_ret = ListMethodHelper.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions))
+        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions))
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    module ListMethodHelper
+    module ListMethodHelpers
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
         if opts[:include_remotes]
           augment_with_remotes_info!(branch_module_rows,module_mh)
@@ -357,7 +357,7 @@ module DTK
           if raw_va = mdl.delete(:version_array)
             unless raw_va.size == 1 and raw_va.first == DefaultVersionString
               version_array = (raw_va.include?(DefaultVersionString) ? [DefaultVersionString] : []) + raw_va.reject{|v|v == DefaultVersionString}.sort
-              mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+              mdl.merge!(:versions => version_array.join(", ")) 
             end
           end
 

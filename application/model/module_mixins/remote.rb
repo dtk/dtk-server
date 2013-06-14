@@ -233,7 +233,7 @@ module DTK
       unsorted = Repo::Remote.new.list_module_info(module_type()).map do |r|
         el = {:display_name => r[:qualified_name],:type => component_type()} #TODO: hard coded
         if versions = r[:versions]
-          el.merge!(:version => versions.join(", ")) #TODO: change to ':versions' after sync with client
+          el.merge!(:versions => versions.join(", ")) 
         end
         el
       end

@@ -1,4 +1,4 @@
-r8_require('branch_names')
+r8_require('../branch_names')
 module DTK
   class ModuleBranch < Model
     include BranchNamesMixin

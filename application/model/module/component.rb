@@ -1,8 +1,7 @@
-r8_require('module_mixins')
 module DTK
   class ComponentModule < Model
-    r8_nested_require('component_module','management')
-    r8_nested_require('component_module','parse_to_create_dsl')
+    r8_nested_require('component','management')
+    r8_nested_require('component','parse_to_create_dsl')
     include ManagementMixin
     extend ModuleClassMixin
     include ModuleMixin

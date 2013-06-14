@@ -142,7 +142,7 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id],:join_type=>:left_outer)
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id,:is_default],:join_type=>:left_outer)
      ]
     },
     :version_info=>{
@@ -171,7 +171,15 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:repo_id,:created_at])
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:repo_id,:created_at,:is_default])
+     ]
+    },
+    :module_branches_with_repos=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version]),
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
      ]
     },
     :implementations=>{

@@ -1046,7 +1046,8 @@ POSSIBLE CHANGES TO HASH
       tpl.assign(:library_list,library_list)
 
       project = get_default_project()
-      service_list = ServiceModule.list(model_handle(:service_module), :project_idh => project.id_handle()).map do |r|
+      opts = Opts.new(:project_idh => project.id_handle())
+      service_list = ServiceModule.list(opts).map do |r|
         {
           :id => r[:id],
           :name => "#{r[:display_name]}#{r[:version] && "-#{r[:version]}"}"

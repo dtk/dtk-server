@@ -9,7 +9,8 @@
       :on_update=>:cascade
     },
     :repo_name => {:type=>:varchar, :size => 100},
-    :repo_namespace => {:type=>:varchar, :size => 30}
+    :repo_namespace => {:type=>:varchar, :size => 30},
+    :is_default => {:type=>:boolean, :default=>false}
   },
   :many_to_one=> [:repo]
 }

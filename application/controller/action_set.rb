@@ -1,4 +1,5 @@
 require 'base64'
+r8_require('../../utils/performance_service')
 
 module XYZ
   class ActionsetController < Controller
@@ -84,11 +85,16 @@ module XYZ
 
     #parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
     def run_action_set(action_set,parent_model_name=nil)
+      # Amar: PERFORMANCE
+      PerformanceService.log("OPERATION=#{action_set.first[:route]}")
+      PerformanceService.log("REQUEST_PARAMS=#{request.params.to_json}")
       if rest_request?
         unless (action_set||[]).size == 1
           raise Error.new("If rest response action set must just have one element")
         end
+        PerformanceService.start("PERF_OPERATION_DUR")
         run_rest_action(action_set.first,parent_model_name)
+        PerformanceService.end("PERF_OPERATION_DUR")
         return
       end
 

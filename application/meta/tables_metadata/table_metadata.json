@@ -74,10 +74,19 @@
       "version"
     ],
     "mapping": {
-      "name": "display_name",
-      "version": "version",
       "id": "dtk_id",
-      "component_type": "dtk_type"
+      "name": "display_name",
+      "version": "version"
+    }
+  },
+  "component_remote": {
+    "order": [
+      "name",
+      "version"
+    ],
+    "mapping": {
+      "name": "display_name",
+      "version": "version"
     }
   },
   "component_with_dependencies": {
@@ -89,10 +98,9 @@
       "satisfied_by"	
     ],
     "mapping": {
+      "id": "dtk_id",
       "name": "display_name",
       "version": "version",
-      "id": "dtk_id",
-      "component_type": "dtk_type",
       "depends_on":  "depends_on",
       "satisfied_by": "satisfied_by"	
     }
@@ -129,12 +137,24 @@
     "order": [
       "id",
       "name",
-      "version"
+      "version(s)",
+      "linked_remote(s)"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "version(s)": "versions",
+      "linked_remote(s)": "linked_remotes"
+    }
+  },
+  "module_remote": {
+    "order": [
+      "name",
+      "version(s)"
     ],
     "mapping": {
       "name": "display_name",
-      "id": "dtk_id",
-      "version": "version"
+      "version(s)": "versions"
     }
   },
   "library": {

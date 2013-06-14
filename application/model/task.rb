@@ -96,8 +96,10 @@ module XYZ
 
     def update_task_subtask_status(status,result)
       self[:subtasks].each do |subtask|
-        subtask[:subtasks].each do |child_subtask|
-          child_subtask.update_at_task_completion(status, result)
+        if subtask[:subtasks]
+          subtask[:subtasks].each do |child_subtask|
+            child_subtask.update_at_task_completion(status, result)
+          end
         end
         subtask.update_at_task_completion(status, result)
       end

@@ -14,13 +14,13 @@ module DTK
      private
       def self.get_hash_content(service_module_branch)
         ret = SimpleOrderedHash.new()
-        vconstraints = service_module_branch.get_module_version_constraints()
+        vconstraints = service_module_branch.get_module_global_refs()
         unordered_hash = vconstraints.constraints_in_hash_form()
         if unordered_hash.empty?
           return ret
         end
         unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
-          raise Error.new("Unexpected key(s) in module_version_constraints (#{unordered_hash.keys.join(',')})")
+          raise Error.new("Unexpected key(s) in module_global_refs (#{unordered_hash.keys.join(',')})")
         end
 
         cmp_mods = unordered_hash[:component_modules]

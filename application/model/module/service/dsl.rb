@@ -38,8 +38,8 @@ module DTK
     module DSLMixin
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
-        module_version_constraints = update_global_refs(module_branch,opts)
-        update_assemblies_from_dsl(module_branch,module_version_constraints)
+        module_global_refs = update_global_refs(module_branch,opts)
+        update_assemblies_from_dsl(module_branch,module_global_refs)
         set_dsl_parsed!(true)
       end
 
@@ -50,11 +50,11 @@ module DTK
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
           constraints_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end
-        vconstraints = module_branch.get_module_version_constraints()
+        vconstraints = module_branch.get_module_global_refs()
         vconstraints.set_and_save_constraints!(constraints_hash_form,opts)
       end
 
-      def update_assemblies_from_dsl(module_branch,module_version_constraints)
+      def update_assemblies_from_dsl(module_branch,module_global_refs)
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
@@ -62,7 +62,7 @@ module DTK
         add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
         depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,module_version_constraints)
+        assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,module_global_refs)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           dangling_errors.aggregate_errors!()  do

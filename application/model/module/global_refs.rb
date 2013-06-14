@@ -1,8 +1,8 @@
 module DTK
-  class ModuleVersionConstraints < Model
-    def self.create_and_reify?(module_branch_parent,module_version_constraints=nil)
-      module_version_constraints ||= ModuleVersionConstraints.create_stub(module_branch_parent.model_handle(:module_version_constraints))
-      module_version_constraints.reify!(module_branch_parent)
+  class ModuleGlobalRefs < Model
+    def self.create_and_reify?(module_branch_parent,module_global_refs=nil)
+      module_global_refs ||= create_stub(module_branch_parent.model_handle(:module_global_refs))
+      module_global_refs.reify!(module_branch_parent)
     end
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
@@ -107,7 +107,7 @@ module DTK
         #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified constraint hash
         Model.update_from_rows(model_handle(),[update_row])
       else
-        mh = parent_idh.create_childMH(:module_version_constraints) 
+        mh = parent_idh.create_childMH(:module_global_refs) 
         row = {
           mh.parent_id_field_name() => parent_idh.get_id(),
           :ref => "constraint", #max one per parent so this can be constant

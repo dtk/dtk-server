@@ -28,7 +28,7 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
-    #TODO: this can be expensive call; may move to factoring in :module_version_constraints relatsionship to what component_ref component_template_id is pointing to
+    #TODO: this can be expensive call; may move to factoring in :module_global_refs relatsionship to what component_ref component_template_id is pointing to
     def self.get_augmented_component_refs(mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
@@ -48,7 +48,7 @@ module DTK; class Assembly
           unless pntr 
             module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
-              :version_constraints => ModuleVersionConstraints.create_and_reify?(module_branch,r[:module_version_constraints])
+              :version_constraints => ModuleGlobalRefs.create_and_reify?(module_branch,r[:module_global_refs])
             }
           end
           aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))

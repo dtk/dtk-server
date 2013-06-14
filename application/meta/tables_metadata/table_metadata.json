@@ -71,15 +71,12 @@
     "order": [
       "id",
       "name",
-      "version",
-      "linked_remote(s)"
+      "version"
     ],
     "mapping": {
-      "name": "display_name",
-      "version": "version",
       "id": "dtk_id",
-      "component_type": "dtk_type",
-      "linked_remote(s)": "linked_remotes"
+      "name": "display_name",
+      "version": "version"
     }
   },
   "component_remote": {
@@ -89,8 +86,7 @@
     ],
     "mapping": {
       "name": "display_name",
-      "version": "version",
-      "component_type": "dtk_type"
+      "version": "version"
     }
   },
   "component_with_dependencies": {
@@ -102,10 +98,9 @@
       "satisfied_by"	
     ],
     "mapping": {
+      "id": "dtk_id",
       "name": "display_name",
       "version": "version",
-      "id": "dtk_id",
-      "component_type": "dtk_type",
       "depends_on":  "depends_on",
       "satisfied_by": "satisfied_by"	
     }
@@ -142,24 +137,24 @@
     "order": [
       "id",
       "name",
-      "version",
+      "version(s)",
       "linked_remote(s)"
     ],
     "mapping": {
-      "name": "display_name",
       "id": "dtk_id",
-      "version": "version",
+      "name": "display_name",
+      "version(s)": "versions",
       "linked_remote(s)": "linked_remotes"
     }
   },
   "module_remote": {
     "order": [
       "name",
-      "version"
+      "version(s)"
     ],
     "mapping": {
       "name": "display_name",
-      "version": "version"
+      "version(s)": "versions"
     }
   },
   "library": {

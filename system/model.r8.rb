@@ -462,6 +462,8 @@ module XYZ
 
 
     def self.get_objects_from_search_object(search_object,opts={})
+      
+      PerformanceService.start("PERF_SQL", search_object.object_id)
       dataset = search_object.create_dataset()
       # [Haris] DEBUG SQL DEBUG HERE
       # require 'ap'
@@ -470,7 +472,13 @@ module XYZ
       # ap "OUTPUT:"
       # ap dataset.all(opts) if dataset
       
-      dataset ? dataset.all(opts) : nil
+      ret_val = dataset ? dataset.all(opts) : nil
+
+      PerformanceService.end("PERF_SQL", search_object.object_id)
+      PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
+      PerformanceService.log("SQL=#{dataset.sequel_ds.sql.gsub('"','')}")
+
+      return ret_val
     end
 
     def self.get_objects_from_join_array(model_handle,base_sp_hash,join_array,opts={})

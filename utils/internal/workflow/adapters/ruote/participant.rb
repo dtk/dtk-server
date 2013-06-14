@@ -180,12 +180,16 @@ module XYZ
 
         def consume(workitem)
           params = get_params(workitem) 
+          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+                # Amar: PERFORMANCE
+                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+
                 result = {:type => :power_on_node, :task_id => task_id}
                 node = task[:executable_action][:node]
                 # TODO should update_admin_op_status be set initially to running meaning want it to be running
@@ -235,10 +239,14 @@ module XYZ
       class DetectCreatedNodeIsReady < Top
         def consume(workitem)
           params = get_params(workitem) 
+          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+                # Amar: PERFORMANCE
+                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                
                 result = {:type => :completed_create_node, :task_id => task_id} 
    
                 Log.info_pp [:found,msg[:senderid]]
@@ -302,12 +310,16 @@ module XYZ
         def consume(workitem)
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
+          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
 
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+                # Amar: PERFORMANCE
+                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                
                 result = msg[:body].merge("task_id" => task_id)
                 if errors = errors_in_result?(result)
                   event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
@@ -361,6 +373,7 @@ module XYZ
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           
+          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
 
           # TODO Amar: test to remove dyn attrs and errors_in_result part
           execution_context(task,workitem,task_start) do
@@ -372,11 +385,16 @@ module XYZ
               set_result_succeeded(workitem,nil,task,action) if task_end
               pp ["task_complete_skipped_already_synced #{self.class.to_s}",task[:id]]
               delete_task_info(workitem)
+              # Amar: PERFORMANCE
+              PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
               return reply_to_engine(workitem)
             end
 
             callbacks = {
               :on_msg_received => proc do |msg|
+                # Amar: PERFORMANCE
+                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                
                 result = msg[:body].merge("task_id" => task_id)
                 if result[:statuscode] != 0
                   event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
@@ -447,6 +465,7 @@ module XYZ
         def consume(workitem)
           #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
+          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           
           task.update_input_attributes!() if task_start
@@ -466,6 +485,9 @@ module XYZ
             if action.long_running?
               callbacks = {
                 :on_msg_received => proc do |msg|
+                  # Amar: PERFORMANCE
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  
                   result = msg[:body].merge("task_id" => task_id)
                   if errors_in_result = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)

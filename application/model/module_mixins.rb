@@ -20,7 +20,7 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(version)
+      aug_branch = module_obj.get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
       super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
       replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
       self[:commit_sha] = aug_branch[:current_sha]
@@ -41,7 +41,7 @@ module DTK
     end
 
     def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(version)
+      aug_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
       module_name = aug_branch[:module_name]
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
@@ -50,33 +50,26 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
-    def get_augmented_workspace_branch(version=nil,opts={},remote_namespace=nil)
+    def get_augmented_workspace_branch(opts=Opts.new)
+      version = (opts[:filter]||{})[:version]
+      version_field = ModuleBranch.version_field(version) #version can be nil
+
       sp_hash = {
         :cols => [:display_name,:workspace_info_full]
       }
-
-
-      version_field = ModuleBranch.version_field(version)
-      modules = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
-      if modules.size == 0
+      module_rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
+      if module_rows.size == 0
         unless opts[:donot_raise_error]
           raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
         end
         return nil
       end
 
-      module_obj = nil
-      if remote_namespace
-        # based on provided namespace we will filter remote_repos
-        module_obj = filter_repos_by_namespace(modules, remote_namespace)
-      else
-        unless modules.size == 1
-          raise Error.new("Unexepected that have multiple modules when no remote_repos")  
-        end
-        module_obj = modules.first
+      #aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
+      unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
+        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) taht meets filter conditions")
       end
-      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
-      ret
+      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
     end
 
     #type is :library or :workspace
@@ -205,26 +198,35 @@ module DTK
       get_field?(:dsl_parsed)
     end
 
-   private
+    #assumed that all raw_module_rows agree on all except repo_remote
+    def aggregate_by_remote_namespace(raw_module_rows,opts=Opts.new)
+      ret = nil
+      #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
+      if raw_module_rows.empty?()
+        raise Error.new("Unexepected that raw_module_rows is empty")
+      end
+      namespace = (opts[:filter]||{})[:remote_namespace]
 
-    def filter_repos_by_namespace(modules, namespace)
-      modules.each do |e|
-        if (e[:repo_remote][:repo_namespace].eql?(namespace))
-          e[:repo].consume_remote_repo!(e[:repo_remote])
-          e.delete(:repo_remote)
-          return e
+      repo_remotes = raw_module_rows.map do |e|
+        repo_remote = e.delete(:repo_remote)
+        if namespace.nil? or namespace == repo_remote[:repo_namespace]
+          repo_remote
         end
+      end.compact
+      #if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
+      if namespace and repo_remotes.empty?
+        return ret
       end
 
-      # we sort descending by created date
-      modules.sort { |a,b| a[:repo_remote][:created_at] <=>  b[:repo_remote][:created_at] }
-      # default module is the one which is the oldest
-      default_module = modules.first
-      default_module[:repo].consume_remote_repo!(default_module[:repo_remote])
-      default_module.delete(:repo_remote)
-
-      return default_module
+      ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
+      repo = ret[:repo]
+      if default = RepoRemote.ret_default_remote_repo(ret[:repo_remotes])
+        repo.consume_remote_repo!(default)
+      end
+      ret
     end
+
+   private
 
     def get_library_module_branch(version=nil)
       update_object!(:display_name,:library_library_id)
@@ -300,47 +302,99 @@ module DTK
     end
 
 
-    def list__project_parent(project_idh)
+    def list(opts=opts.new)
+      project_idh = opts.required(:project_idh)
+      include_remotes = opts.array(:detail_to_include).include?(:remotes)
+      include_versions = opts.array(:detail_to_include).include?(:versions)
+      include_any_detail = ((include_remotes or include_versions) ? true : nil)
       sp_hash = {
-        :cols => [:id, :display_name, :remote_repos_simple],
+        :cols => [:id, :display_name, include_any_detail && :module_branches_with_repos].compact,
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
-      branch_mh = mh.create_childMH(:module_branch)
-      branch_parent_field_name =  branch_mh.parent_id_field_name()
-      ndx_module_info = get_objs(mh,sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
-
-      #get version info
-      sp_hash = {
-        :cols => [branch_parent_field_name,:version],
-        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_info.keys], [:eq,:is_workspace,true]]
-      }
-      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
-      #join in version info
-      branch_info.each do |br|
-        mod = ndx_module_info[br[branch_parent_field_name]]
-        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_info[br[branch_parent_field_name]]
-        (mdl[:version_array]  ||= Array.new) <<  version
+      unsorted_ret = get_objs(mh,sp_hash)
+      unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
+      if include_any_detail
+        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions))
       end
-      #put version info in prin form
-      unsorted = ndx_module_info.values.map do |mdl|
-        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
-        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
-
-        raw_va = mdl.delete(:version_array)
-        unless raw_va.nil? or raw_va == ["CURRENT"]
-          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-        if mdl.respond_to?(:component_type)
-          mdl.merge!(:type => mdl.component_type())
-        end
-        mdl
-      end
-      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+      unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+    module ListMethodHelpers
+      def self.aggregate_detail(branch_module_rows,module_mh,opts)
+        if opts[:include_remotes]
+          augment_with_remotes_info!(branch_module_rows,module_mh)
+        end
+
+        #there can be dupliactes for a module when multiple repos; in which case will agree on all fields
+        #except :repo, :module_branch, and :repo_remotes
+        #index by module
+        ndx_ret = Hash.new
+        #aggregate
+        branch_module_rows.each do |r|
+          module_branch = r[:module_branch]
+          ndx_repo_remotes = r[:ndx_repo_remotes]
+          ndx = r[:id]
+          repo_remotes_added = false
+          unless mdl = ndx_ret[ndx]
+            r.delete(:repo)
+            r.delete(:module_branch)
+            mdl = ndx_ret[ndx] = r
+          end
+
+          if opts[:include_versions]
+            (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
+          end
+
+          if ndx_repo_remotes and not repo_remotes_added
+            ndx_repo_remotes.each do |remote_repo_id,remote_repo|
+              (mdl[:ndx_repo_remotes] ||= Hash.new)[remote_repo_id] ||= remote_repo
+            end
+          end
+        end
+        #put in display name form
+        ndx_ret.each_value do |mdl|
+          if raw_va = mdl.delete(:version_array)
+            unless raw_va.size == 1 and raw_va.first == DefaultVersionString
+              version_array = (raw_va.include?(DefaultVersionString) ? [DefaultVersionString] : []) + raw_va.reject{|v|v == DefaultVersionString}.sort
+              mdl.merge!(:versions => version_array.join(", ")) 
+            end
+          end
+
+          if ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
+            mdl.merge!(:linked_remotes => ret_linked_remotes_print_form(ndx_repo_remotes.values))
+          end
+        end
+        ndx_ret.values
+      end
+      DefaultVersionString = "CURRENT"
+
+     private 
+      def self.augment_with_remotes_info!(branch_module_rows,module_mh)
+        #index by repo_id
+        ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:repo_id,:created_at,:is_default],
+          :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
+        }
+        Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|
+          ndx = r[:repo_id]
+          (ndx_branch_module_rows[ndx][:ndx_repo_remotes] ||= Hash.new).merge!(r[:id] => r)
+        end
+        branch_module_rows
+      end
+
+      def self.ret_linked_remotes_print_form(repo_remotes)
+        if repo_remotes.size == 1
+          repo_remotes.first.print_form()
+        else
+          default = RepoRemote.ret_default_remote_repo(repo_remotes)
+          repo_remotes.reject!{|r|r[:id] == default[:id]}
+          sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
+          sorted_array.join(", ")
+        end
+      end
+    end
 
     def add_user_direct_access(model_handle,rsa_pub_key)
       repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})

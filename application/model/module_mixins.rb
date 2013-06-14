@@ -341,15 +341,30 @@ module DTK
             r.delete(:module_branch)
             mdl = ndx_ret[ndx] = r
           end
-          (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
+
+          if opts[:include_versions]
+            (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
+          end
+
           if ndx_repo_remotes and not repo_remotes_added
             ndx_repo_remotes.each do |remote_repo_id,remote_repo|
               (mdl[:ndx_repo_remotes] ||= Hash.new)[remote_repo_id] ||= remote_repo
             end
           end
         end
-pp ndx_ret.values
         #put in display name form
+        ndx_ret.each_value do |mdl|
+          if raw_va = mdl.delete(:version_array)
+            unless raw_va.size == 1 and raw_va.first == DefaultVersionString
+              version_array = (raw_va.include?(DefaultVersionString) ? [DefaultVersionString] : []) + raw_va.reject{|v|v == DefaultVersionString}.sort
+              mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
+            end
+          end
+
+          if ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
+            mdl.merge!(:linked_remotes => ret_linked_remotes_print_form(ndx_repo_remotes.values))
+          end
+        end
         ndx_ret.values
       end
       DefaultVersionString = "CURRENT"
@@ -368,230 +383,18 @@ pp ndx_ret.values
         end
         branch_module_rows
       end
-    end
-=begin
-      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
-      #join in version info
-      branch_info.each do |br|
-        mod = ndx_module_info[br[branch_parent_field_name]]
-        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_info[br[branch_parent_field_name]]
-        (mdl[:version_array]  ||= Array.new) <<  version
-      end
-      #put version info in print form
-      unsorted = ndx_module_info.values.map do |mdl|
-        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
-        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
 
-        raw_va = mdl.delete(:version_array)
-        unless raw_va.nil? or raw_va == ["CURRENT"]
-          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-        if mdl.respond_to?(:component_type)
-          mdl.merge!(:type => mdl.component_type())
-        end
-        mdl
-      end
-      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
- {:repo_remotes=>
-   [{:group_id=>2147562164,
-     :repo_id=>2147579421,
-     :display_name=>"dtk/bootstrap",
-     :created_at=>Thu Jun 06 23:54:28 +0000 2013,
-     :id=>2147579422,
-     :is_default=>false}],
-  :repo=>
-   {:repo_name=>"sm-rich-bootstrap",
-    :local_dir=>"/home/dtk/r8server-repo/sm-rich-bootstrap",
-    :id=>2147579421},
-  :display_name=>"bootstrap",
-  :module_branch=>
-   {:version=>"master",
-    :service_id=>2147579427,
-    :repo_id=>2147579421,
-    :id=>2147579428},
-  :id=>2147579427}]
-
-=end
-
-     
-
-=begin        
-        ndx_branch_module_rows = branch_module_rows.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
-
-        if opts[:include_versions]
-          branch_mh = module_mh.create_childMH(:module_branch)
-          branch_parent_field_name =  branch_mh.parent_id_field_name()
-          sp_hash = {
-            :cols => [branch_parent_field_name,:version],
-            :filter => [:and,[:oneof, branch_parent_field_name, ndx_branch_module_rows.keys], [:eq,:is_workspace,true]]
-          }
-          branch_info = Model.get_objs(branch_mh,sp_hash)
-          pp branch_module_rows.map{|r|r[:module_branch]}
-          pp [branch_info]
-          #join in version info
-          branch_info.each do |br|
-            mod = ndx_branch_module_rows[br[branch_parent_field_name]]
-          version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-            mdl = ndx_branch_module_rows[br[branch_parent_field_name]]
-            (mdl[:version_array]  ||= Array.new) <<  version
-          end
-        end
-
-        #put version info in print form
-        branch_module_rows.each do |r|
-          raw_va = r.delete(:version_array)
-          unless raw_va.nil? or raw_va == ["CURRENT"]
-            version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-            r.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-        end
-        branch_module_rows
-      end
-    end
-=end
-    def aggregate_and_add_remotes_info(module_rows)
-      no_remote_proc = true
-      ndx_module_rows = Hash.new
-      module_rows.each do |r|
-        ndx = r[:id]
-        if repo_remote = r.delete(:repo_remote)
-          no_remote_proc = false
-          pntr = ndx_module_rows[ndx] ||= r.merge!(:repo_remotes => Array.new)
-          pntr[:repo_remotes] << repo_remote
+      def self.ret_linked_remotes_print_form(repo_remotes)
+        if repo_remotes.size == 1
+          repo_remotes.first.print_form()
         else
-          ndx_module_rows[ndx] = r
+          default = RepoRemote.ret_default_remote_repo(repo_remotes)
+          repo_remotes.reject!{|r|r[:id] == default[:id]}
+          sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
+          sorted_array.join(", ")
         end
       end
-
-      #short-cut
-      return module_rows if no_remote_proc
-
-      ndx_module_rows.each do |ndx,module_row|
-        if repo_remotes = module_row.delete(:repo_remotes)
-          linked_remotes =
-            if repo_remotes.size == 1
-              repo_remotes.first.print_form()
-            else
-              default = RepoRemote.ret_default_remote_repo(repo_remotes)
-              repo_remotes.reject!{|r|r[:id] == default[:id]}
-              sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
-              sorted_array.join(", ")
-            end
-          module_row.merge!(:linked_remotes => linked_remotes)
-        end
-      end
-      ndx_module_rows.values
     end
-    private :aggregate_and_add_remotes_info
-
-    def get_and_join_in_version_info!(module_rows,mh)
-      ndx_module_rows = module_rows.inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
-      branch_mh = mh.create_childMH(:module_branch)
-      branch_parent_field_name =  branch_mh.parent_id_field_name()
-      sp_hash = {
-        :cols => [branch_parent_field_name,:version],
-        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_rows.keys], [:eq,:is_workspace,true]]
-      }
-      branch_info = get_objs(branch_mh,sp_hash)
-      #join in version info
-      branch_info.each do |br|
-        mod = ndx_module_rows[br[branch_parent_field_name]]
-        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_rows[br[branch_parent_field_name]]
-        (mdl[:version_array]  ||= Array.new) <<  version
-      end
-      #put version info in print form
-      module_rows.each do |r|
-        raw_va = r.delete(:version_array)
-        unless raw_va.nil? or raw_va == ["CURRENT"]
-          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-          r.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-      end
-      module_rows
-    end
-    private :get_and_join_in_version_info!
-=begin
-    def modify_to_include_version_info!(ret)
-      ndx_module_info = get_objs(mh,sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
-      branch_mh = mh.create_childMH(:module_branch)
-      branch_parent_field_name =  branch_mh.parent_id_field_name()
-      #get version info
-      sp_hash = {
-        :cols => [branch_parent_field_name,:version],
-        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_info.keys], [:eq,:is_workspace,true]]
-      }
-      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
-      #join in version info
-      branch_info.each do |br|
-        mod = ndx_module_info[br[branch_parent_field_name]]
-        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_info[br[branch_parent_field_name]]
-        (mdl[:version_array]  ||= Array.new) <<  version
-      end
-      #put version info in print form
-      unsorted = ndx_module_info.values.map do |mdl|
-        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
-        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
-
-        raw_va = mdl.delete(:version_array)
-        unless raw_va.nil? or raw_va == ["CURRENT"]
-          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-        if mdl.respond_to?(:component_type)
-          mdl.merge!(:type => mdl.component_type())
-        end
-        mdl
-      end
-      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-=end
-    def list_old(opts=opts.new)
-      project_idh = opts.required(:project_idh)
-      sp_hash = {
-        :cols => [:id, :display_name, :remote_repos_simple],
-        :filter => [:eq, :project_project_id, project_idh.get_id()]
-      }
-      mh = project_idh.createMH(model_type())
-      branch_mh = mh.create_childMH(:module_branch)
-      branch_parent_field_name =  branch_mh.parent_id_field_name()
-      ndx_module_info = get_objs(mh,sp_hash).inject(Hash.new()){|h,r|h.merge(r[:id] => r)}
-
-      #get version info
-      sp_hash = {
-        :cols => [branch_parent_field_name,:version],
-        :filter => [:and,[:oneof, branch_parent_field_name, ndx_module_info.keys], [:eq,:is_workspace,true]]
-      }
-      branch_info = get_objs(project_idh.createMH(:module_branch),sp_hash)
-      #join in version info
-      branch_info.each do |br|
-        mod = ndx_module_info[br[branch_parent_field_name]]
-        version = ((br[:version].nil? or br[:version] == "master") ? "CURRENT" : br[:version])
-        mdl = ndx_module_info[br[branch_parent_field_name]]
-        (mdl[:version_array]  ||= Array.new) <<  version
-      end
-      #put version info in print form
-      unsorted = ndx_module_info.values.map do |mdl|
-        repo_namespace = mdl[:repo_remote][:display_name] if mdl[:repo_remote]
-        (mdl[:linked_remotes] ||= Array.new) <<  repo_namespace
-
-        raw_va = mdl.delete(:version_array)
-        unless raw_va.nil? or raw_va == ["CURRENT"]
-          version_array = (raw_va.include?("CURRENT") ? ["CURRENT"] : []) + raw_va.reject{|v|v == "CURRENT"}.sort
-          mdl.merge!(:version => version_array.join(", ")) #TODO: change to ':versions' after sync with client
-        end
-        if mdl.respond_to?(:component_type)
-          mdl.merge!(:type => mdl.component_type())
-        end
-        mdl
-      end
-      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-
 
     def add_user_direct_access(model_handle,rsa_pub_key)
       repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})

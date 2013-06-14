@@ -86,7 +86,7 @@ assembly_nodes  =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id],:join_type=>:left_outer)
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id,:is_default],:join_type=>:left_outer)
      ]
     },    
     #MOD_RESTRUCT: deprecate below for above
@@ -109,25 +109,16 @@ assembly_nodes  =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
+       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:repo_id,:created_at,:is_default])
+     ]
+    },
+    :module_branches_with_repos=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version]),
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
-     ]
-    },
-    :list_info=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name], :join_type => :left_outer)
-     ]
-    },
-    :list_info_with_remotes=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols => [:id,:repo_id]),
-       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir]),
-       lambda__segment_remote_repos.call(:cols => [:id,:display_name,:created_at], :join_type => :left_outer)
      ]
     },
     #TODO: not sure if we haev implementations on service modules

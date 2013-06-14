@@ -57,9 +57,10 @@ module DTK
       commit_sha
     end
 
-    def pp_version()
+    def version_print_form(opts=Opts.new)
+      default_version_string = opts[:default_version_string] # can be null
       update_object!(:version)
-      has_default_version?() ? nil : self[:version] 
+      has_default_version?() ? default_version_string : self[:version] 
     end
 
     def matches_version?(version=nil)

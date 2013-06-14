@@ -15,7 +15,18 @@ module Ramaze::Helper
         :module_name => local_module_name
       }
 
-      response = module_class.import(project,remote_params,local_params)
+      begin
+        response = module_class.import(project,remote_params,local_params)
+      rescue ::DTK::ErrorUsage::DanglingComponentRefs => e
+        if (module_class == ::DTK::ServiceModule && missing_modules = e.missing_module_list())
+          # TODO: [Haris] temp solution until Rich agument namespaces to DSL
+          return { :missing_module_components => missing_modules.collect { |v| v.merge(:namespace => remote_namespace) } }
+        else
+          # [Haris] Contact me if this error occurs
+          Log.error "Unexpected error, missing component refs for component module! Contact Haris."
+          raise e
+        end
+      end
       response.merge( { :namespace => remote_namespace} )
     end
 

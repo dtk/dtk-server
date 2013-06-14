@@ -50,14 +50,14 @@ module DTK
           cmp = r[:component]
           branch = r[:module_branch]
           display_name = Component::Template.component_type_print_form(cmp[:component_type],Opts.new(:no_module_name => true))
-          {:id => cmp[:id], :display_name => display_name,:version => branch.pp_version }
+          {:id => cmp[:id], :display_name => display_name,:version => branch.version_print_form() }
         end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
       when :attributes
         results = get_objs(:cols => [:attributes])
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
           branch = element[:module_branch]
-          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.pp_version}            
+          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.version_print_form()}            
         end
         return ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       when :instances

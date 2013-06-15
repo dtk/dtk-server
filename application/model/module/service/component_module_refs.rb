@@ -1,44 +1,5 @@
 module DTK
   class ComponentModuleRefs < Model 
-    def self.set_component_module_version(service_module,component_module,component_version,service_version=nil)
-      cmp_module_name = component_module.module_name()
-      #make sure that component_module has version defined
-      unless component_mb = component_module.get_module_branch_matching_version(component_version)
-        raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined")
-      end
-
-      service_mb = service_module.get_module_branch_matching_version(service_version)
-      #get the associated component_module_refs
-      vconstraints = service_mb.get_component_module_refs()
-
-      #check if set to this version already; if so no-op
-      if vconstraints.include_module_version?(cmp_module_name,component_version)
-        return service_module.ret_clone_update_info(service_version)
-      end
-
-=begin
-TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
-        #make sure that the service module references the component module
-        unless vconstraints.include_module?(cmp_module_name)
-
-          #quick check is looking in component_module_refs, if no match then do more expensive
-          #get_referenced_component_modules()
-          unless service_module.get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
-            raise ErrorUsage.new("Service module (#{service_module.module_name()}) does not reference component module (#{cmp_module_name})")
-          end        
-        end
-=end
-
-      #set in vconstraints the module have specfied value and update both model and service's global refs
-      vconstraints.set_module_version(cmp_module_name,component_version)
-      vconstraints.save!()
-      
-      #update the component refs with the new component_template_ids
-      service_module.update_component_template_ids(component_module)
-      
-      service_module.ret_clone_update_info(service_version)
-    end
-
     def self.meta_filename_path()
       "global_module_refs.json"
     end
@@ -127,6 +88,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def set_module_version(cmp_module_name,version)
       create_component_modules_hash?()[key(cmp_module_name)] = Constraint.reify?(version)
+      save!()
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 

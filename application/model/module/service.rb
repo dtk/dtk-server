@@ -1,8 +1,8 @@
 #TODO: until move import_export_common under service module
 r8_nested_require('../assembly','import_export_common')
 module DTK
+  r8_nested_require('service','module_global_refs')
   class ServiceModule < Model
-    r8_nested_require('service','global_module_refs')
     r8_nested_require('service','dsl')
     r8_nested_require('service','component_version')
 

@@ -46,7 +46,7 @@ module DTK
      private
       def update_global_refs(module_branch,opts={})
         constraints_hash_form = Hash.new
-        meta_filename_path = GlobalModuleRefs.meta_filename_path()
+        meta_filename_path = ModuleGlobalRefs.meta_filename_path()
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
           constraints_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end

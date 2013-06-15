@@ -1,5 +1,10 @@
 module DTK
-  class ModuleGlobalRefs < Model
+  class ModuleGlobalRefs < Model 
+
+    def self.meta_filename_path()
+      "global_module_refs.json"
+    end
+
     def self.create_and_reify?(module_branch_parent,module_global_refs=nil)
       module_global_refs ||= create_stub(module_branch_parent.model_handle(:module_global_refs))
       module_global_refs.reify!(module_branch_parent)
@@ -118,7 +123,8 @@ module DTK
 
       #update git repo
       unless opts[:donot_make_repo_changes]
-        ServiceModule::GlobalModuleRefs.serialize_and_save_to_repo(@parent)
+        meta_filename_path = self.class.meta_filename_path()
+        @parent.serialize_and_save_to_repo(meta_filename_path,get_hash_content(@parent))
       end
 
       self
@@ -138,6 +144,22 @@ module DTK
     end
 
    private
+    def get_hash_content(service_module_branch)
+      ret = SimpleOrderedHash.new()
+      module_global_refs = service_module_branch.get_module_global_refs()
+      unordered_hash = module_global_refs.constraints_in_hash_form()
+      if unordered_hash.empty?
+        return ret
+      end
+      unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
+        raise Error.new("Unexpected key(s) in module_global_refs (#{unordered_hash.keys.join(',')})")
+      end
+      
+      cmp_mods = unordered_hash[:component_modules]
+        cmp_mod_contraints = cmp_mods.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
+      ret.merge(:component_modules => cmp_mod_contraints)
+    end
+
     class ComponentTypeToCheck < Array
       def mapping_required?()
         find{|r|r[:required]}

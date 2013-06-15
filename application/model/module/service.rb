@@ -1,16 +1,14 @@
 #TODO: until move import_export_common under service module
 r8_nested_require('../assembly','import_export_common')
 module DTK
-  r8_nested_require('service','component_module_refs')
+  r8_nested_require('service','component_module_refs') 
   class ServiceModule < Model
     r8_nested_require('service','dsl')
-    r8_nested_require('service','component_version')
 
     extend ModuleClassMixin
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
-    include ComponentVersionMixin
 
     ### standard get methods
     def get_assemblies()
@@ -39,6 +37,10 @@ module DTK
     end
 
     ### end: get methods
+
+    def set_component_module_version(component_module,component_version,service_version=nil)
+      ComponentModuleRefs.set_component_module_version(self,component_module,component_version,service_version)
+    end
 
     def self.model_type()
       :service_module
@@ -198,6 +200,18 @@ module DTK
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
       update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
+    end
+
+    def update_component_template_ids(component_module)
+      #first get filter so can call get_augmented_component_refs
+      assembly_templates = component_module.get_associated_assembly_templates()
+      return if assembly_templates.empty?
+      filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
+      opts = {:filter => filter,:force_compute_template_id => true}
+      aug_cmp_refs = Assembly::Template.get_augmented_component_refs(model_handle(:component),opts)
+      return if aug_cmp_refs.empty?
+      cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
+      Model.update_from_rows(model_handle(:component_ref),cmp_ref_update_rows)
     end
 
    private

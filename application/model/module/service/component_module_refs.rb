@@ -5,13 +5,20 @@ module DTK
         cmp_module_name = component_module.module_name()
         #make sure that component_module has version defined
         unless component_mb = component_module.get_module_branch_matching_version(component_version)
-          raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined")
+          defined_versions = component_module.get_module_branches().map{|r|r.version_print_form()}.compact
+          version_info = 
+            if defined_versions.empty?
+              "there are no versions loaded"
+            else
+              "available versions: #{defined_versions.join(', ')}"
+            end
+          raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined; #{version_info}")
         end
         
         cmp_module_refs = get_component_module_refs(service_version)
         
         #check if set to this version already; if so no-op
-        if cmp_module_refs.include_module_version?(cmp_module_name,component_version)
+        if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
           return ret_clone_update_info(service_version)
         end
         
@@ -126,8 +133,8 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       ret
     end
                                                                           
-    def include_module_version?(cmp_module_name,version)
-      module_constraint(cmp_module_name).include?(version)
+    def has_module_version?(cmp_module_name,version)
+      module_version(cmp_module_name).version == version
     end
 
     def include_module?(cmp_module_name)
@@ -135,6 +142,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def set_module_version(cmp_module_name,version)
+      #TODO: update to do merge when self has more than version info
       create_component_modules_hash?()[key(cmp_module_name)] = VersionInfo::Assignment.new(version)
       save!()
       #TODO: here may search through 'linked' component instances and change version associated with them
@@ -142,8 +150,12 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def reify!(parent)
       @parent = parent
-      cmp_modules = component_modules()
-      cmp_modules.each{|mod,constraint|cmp_modules[mod] = VersionInfo::Constraint.reify?(constraint)}
+      cmp_module_objs = component_modules()
+      cmp_module_objs.each do |mod,mod_ref|
+        if version_assignment_obj = VersionInfo::Assignment.reify?(mod_ref)
+          cmp_module_objs[mod] = version_assignment_obj
+        end
+      end
       self
     end
 
@@ -239,12 +251,12 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def ret_selected_version(component_type)
       if version_info = component_modules[key(Component.module_name(component_type))]
-        version_info.ret_version()
+        version_info.version()
       end
     end
 
-    def module_constraint(cmp_module_name)
-      VersionInfo::Constraint.reify?(component_modules[key(cmp_module_name)])
+    def module_version(cmp_module_name)
+      VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
     end
     
     def component_modules()

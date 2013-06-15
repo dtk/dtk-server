@@ -50,8 +50,8 @@ module DTK
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
           constraints_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end
-        vconstraints = module_branch.get_component_module_refs()
-        vconstraints.set_and_save_constraints!(constraints_hash_form,opts)
+        cmp_module_refs = module_branch.get_component_module_refs()
+        cmp_module_refs.set_and_save_constraints!(constraints_hash_form,opts)
       end
 
       def update_assemblies_from_dsl(module_branch,component_module_refs)

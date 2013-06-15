@@ -1,16 +1,20 @@
 module DTK; class ComponentModuleRefs
   class VersionInfo
-    def initialize(value)
-      @value = value
-    end
-      
-    def to_s()
-      @value.to_s()
-    end
-
     class Assignment < self
-      def ret_version()
-        @value
+      def initialize(string_or_obj)
+        @version = string_or_obj.to_s
+      end
+
+      attr_reader :version      
+
+      def self.reify?(string_or_obj)
+        if string_or_obj.kind_of?(String) and ModuleCommon.string_has_version_format?(string_or_obj)
+          new(string_or_obj)
+        end
+      end
+
+      def to_s()
+        @version.to_s()
       end
     end
 
@@ -62,8 +66,8 @@ module DTK; class ComponentModuleRefs
       
      private
       def initialize(scalar=nil)
-        super(scalar)
         @type = (scalar ? :scalar : :empty)
+        @value = scalar
       end
       
     end

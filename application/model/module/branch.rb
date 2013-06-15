@@ -10,7 +10,7 @@ module DTK
 
     def get_component_module_refs()
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id],
+        :cols => [:id,:display_name,:group_id,:constraints],
         :filter => [:eq,:branch_id,id()]
       }
       mh = model_handle(:component_module_refs)

@@ -9,8 +9,8 @@ module DTK
         end
 
         service_mb = get_module_branch_matching_version(service_version)
-        #get the associated module_global_refs
-        vconstraints = service_mb.get_module_global_refs()
+        #get the associated component_module_refs
+        vconstraints = service_mb.get_component_module_refs()
 
         #check if set to this version already; if so no-op
         if vconstraints.include_module_version?(cmp_module_name,component_version)
@@ -22,7 +22,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
         #make sure that the service module references the component module
         unless vconstraints.include_module?(cmp_module_name)
 
-          #quick check is looking in module_global_refs, if no match then do more expensive
+          #quick check is looking in component_module_refs, if no match then do more expensive
           #get_referenced_component_modules()
           unless get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
             raise ErrorUsage.new("Service module (#{module_name()}) does not reference component module (#{cmp_module_name})")

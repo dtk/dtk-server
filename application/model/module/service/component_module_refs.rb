@@ -1,13 +1,13 @@
 module DTK
-  class ModuleGlobalRefs < Model 
+  class ComponentModuleRefs < Model 
 
     def self.meta_filename_path()
       "global_module_refs.json"
     end
 
-    def self.create_and_reify?(module_branch_parent,module_global_refs=nil)
-      module_global_refs ||= create_stub(module_branch_parent.model_handle(:module_global_refs))
-      module_global_refs.reify!(module_branch_parent)
+    def self.create_and_reify?(module_branch_parent,component_module_refs=nil)
+      component_module_refs ||= create_stub(module_branch_parent.model_handle(:component_module_refs))
+      component_module_refs.reify!(module_branch_parent)
     end
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
@@ -112,7 +112,7 @@ module DTK
         #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified constraint hash
         Model.update_from_rows(model_handle(),[update_row])
       else
-        mh = parent_idh.create_childMH(:module_global_refs) 
+        mh = parent_idh.create_childMH(:component_module_refs) 
         row = {
           mh.parent_id_field_name() => parent_idh.get_id(),
           :ref => "constraint", #max one per parent so this can be constant
@@ -146,13 +146,13 @@ module DTK
    private
     def get_hash_content(service_module_branch)
       ret = SimpleOrderedHash.new()
-      module_global_refs = service_module_branch.get_module_global_refs()
-      unordered_hash = module_global_refs.constraints_in_hash_form()
+      component_module_refs = service_module_branch.get_component_module_refs()
+      unordered_hash = component_module_refs.constraints_in_hash_form()
       if unordered_hash.empty?
         return ret
       end
       unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
-        raise Error.new("Unexpected key(s) in module_global_refs (#{unordered_hash.keys.join(',')})")
+        raise Error.new("Unexpected key(s) in component_module_refs (#{unordered_hash.keys.join(',')})")
       end
       
       cmp_mods = unordered_hash[:component_modules]

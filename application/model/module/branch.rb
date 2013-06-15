@@ -8,13 +8,13 @@ module DTK
       update_object!(:type)[:type].to_sym
     end
 
-    def get_module_global_refs()
+    def get_component_module_refs()
       sp_hash = {
         :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id],
         :filter => [:eq,:branch_id,id()]
       }
-      mh = model_handle(:module_global_refs)
-      ModuleGlobalRefs.create_and_reify?(self,Model.get_obj(mh,sp_hash))
+      mh = model_handle(:component_module_refs)
+      ComponentModuleRefs.create_and_reify?(self,Model.get_obj(mh,sp_hash))
     end
     
     def get_module_repo_info()

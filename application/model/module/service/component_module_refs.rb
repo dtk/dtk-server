@@ -1,5 +1,53 @@
 module DTK
+  class ServiceModule
+    module ComponentModuleRefsMixin
+      def set_component_module_version(component_module,component_version,service_version=nil)
+        cmp_module_name = component_module.module_name()
+        #make sure that component_module has version defined
+        unless component_mb = component_module.get_module_branch_matching_version(component_version)
+          raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined")
+        end
+        
+        cmp_module_refs = get_component_module_refs(service_version)
+        
+        #check if set to this version already; if so no-op
+        if cmp_module_refs.include_module_version?(cmp_module_name,component_version)
+          return ret_clone_update_info(service_version)
+        end
+        
+=begin
+TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
+        #make sure that the service module references the component module
+        unless cmp_module_refs.include_module?(cmp_module_name)
+
+          #quick check is looking in component_module_refs, if no match then do more expensive
+          #get_referenced_component_modules()
+          unless service_module.get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
+            raise ErrorUsage.new("Service module (#{module_name()}) does not reference component module (#{cmp_module_name})")
+          end        
+        end
+=end
+
+        #set in cmp_module_refs the module have specfied value and update both model and service's global refs
+        cmp_module_refs.set_module_version(cmp_module_name,component_version)
+        
+        #update the component refs with the new component_template_ids
+        update_component_template_ids(component_module)
+        
+        ret_clone_update_info(service_version)
+      end
+
+     private
+      def get_component_module_refs(service_version=nil)
+        get_module_branch_matching_version(service_version).get_component_module_refs()
+      end
+
+    end
+  end
+
   class ComponentModuleRefs < Model 
+    r8_nested_require('component_module_refs','version_info')
+
     def self.meta_filename_path()
       "global_module_refs.json"
     end
@@ -87,7 +135,7 @@ module DTK
     end
 
     def set_module_version(cmp_module_name,version)
-      create_component_modules_hash?()[key(cmp_module_name)] = Constraint.reify?(version)
+      create_component_modules_hash?()[key(cmp_module_name)] = VersionInfo::Assignment.new(version)
       save!()
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
@@ -95,7 +143,7 @@ module DTK
     def reify!(parent)
       @parent = parent
       cmp_modules = component_modules()
-      cmp_modules.each{|mod,constraint|cmp_modules[mod] = Constraint.reify?(constraint)}
+      cmp_modules.each{|mod,constraint|cmp_modules[mod] = VersionInfo::Constraint.reify?(constraint)}
       self
     end
 
@@ -190,17 +238,13 @@ module DTK
     end
 
     def ret_selected_version(component_type)
-      ret = component_modules[key(Component.module_name(component_type))]
-      if ret.nil? then ret 
-      elsif ret.is_scalar?() then ret.is_scalar?()
-      elsif ret.empty? then nil
-      else
-        raise Error.new("Not treating the version type (#{ret.inspect})")
+      if version_info = component_modules[key(Component.module_name(component_type))]
+        version_info.ret_version()
       end
     end
 
     def module_constraint(cmp_module_name)
-      Constraint.reify?(component_modules[key(cmp_module_name)])
+      VersionInfo::Constraint.reify?(component_modules[key(cmp_module_name)])
     end
     
     def component_modules()
@@ -218,7 +262,7 @@ module DTK
     end
 
     def reify_component_module_contraints(hash)
-      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => Constraint.reify?(hash[k]))}}
+      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Constraint.reify?(hash[k]))}}
     end
 
     def create_component_modules_hash?()
@@ -238,7 +282,7 @@ module DTK
             h
           end
         end
-      elsif el.kind_of?(Constraint)
+      elsif el.kind_of?(VersionInfo)
         el.to_s
       else
         el
@@ -260,50 +304,5 @@ module DTK
       @parent.model_handle(:project).createIDH(:id => project_id)
     end
     
-    class Constraint
-      def self.reify?(constraint=nil)
-        if constraint.nil? then new()
-        elsif constraint.kind_of?(Constraint) then constraint
-        elsif constraint.kind_of?(String) then new(constraint)
-        elsif constraint.kind_of?(Hash) and constraint.size == 1 and constraint.keys.first == "namespace"
-          #MOD_RESTRUCT: TODO: need to decide if depracting 'namespace' key
-          Log.info("Ignoring constraint of form (#{constraint.inspect})")
-          new()
-        else
-          raise Error.new("Constraint of form (#{constraint.inspect}) not treated")
-        end
-      end
-      
-      def include?(version)
-        case @type
-        when :empty
-          nil
-        when :scalar
-          @value == version
-        end
-      end
-
-      def is_scalar?()
-        @value if @type == :scalar
-      end
-
-      def empty?()
-        @type == :empty
-      end
-      
-      def to_s()
-        case @type
-        when :scalar
-          @value.to_s
-        end
-      end
-      
-     private
-      def initialize(scalar=nil)
-        @type = (scalar ? :scalar : :empty)
-        @value = scalar
-      end
-      
-    end
   end
 end

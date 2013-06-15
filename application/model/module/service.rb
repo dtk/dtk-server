@@ -1,14 +1,15 @@
 #TODO: until move import_export_common under service module
 r8_nested_require('../assembly','import_export_common')
 module DTK
-  r8_nested_require('service','component_module_refs') 
   class ServiceModule < Model
+    r8_nested_require('service','component_module_refs') 
     r8_nested_require('service','dsl')
 
     extend ModuleClassMixin
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
+    include ComponentModuleRefsMixin
 
     ### standard get methods
     def get_assemblies()
@@ -28,12 +29,16 @@ module DTK
       ndx_ret.values
     end
 
-    def get_referenced_component_modules()
+    def get_referenced_component_modules(opts=Opts.new)
       ret = Array.new
       cmp_refs = get_referenced_component_refs()
       return ret if cmp_refs.empty?
       project = get_project()
-      ComponentRef.get_referenced_component_modules(project,cmp_refs)
+      ret = ComponentRef.get_referenced_component_modules(project,cmp_refs)
+      if opts.array(:detail_to_include).include?(:versions)
+        pp get_component_module_refs()
+      end
+      ret
     end
 
     ### end: get methods
@@ -197,45 +202,6 @@ module DTK
       update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
     end
-
-    def set_component_module_version(component_module,component_version,service_version=nil)
-      cmp_module_name = component_module.module_name()
-      #make sure that component_module has version defined
-      unless component_mb = component_module.get_module_branch_matching_version(component_version)
-        raise ErrorUsage.new("Component module (#{cmp_module_name}) does not have version (#{component_version}) defined")
-      end
-
-      service_mb = get_module_branch_matching_version(service_version)
-      #get the associated component_module_refs
-      vconstraints = service_mb.get_component_module_refs()
-
-      #check if set to this version already; if so no-op
-      if vconstraints.include_module_version?(cmp_module_name,component_version)
-        return ret_clone_update_info(service_version)
-      end
-
-=begin
-TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
-        #make sure that the service module references the component module
-        unless vconstraints.include_module?(cmp_module_name)
-
-          #quick check is looking in component_module_refs, if no match then do more expensive
-          #get_referenced_component_modules()
-          unless service_module.get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
-            raise ErrorUsage.new("Service module (#{service_module.module_name()}) does not reference component module (#{cmp_module_name})")
-          end        
-        end
-=end
-
-      #set in vconstraints the module have specfied value and update both model and service's global refs
-      vconstraints.set_module_version(cmp_module_name,component_version)
-      
-      #update the component refs with the new component_template_ids
-      update_component_template_ids(component_module)
-      
-      ret_clone_update_info(service_version)
-    end
-
 
     def update_component_template_ids(component_module)
       #first get filter so can call get_augmented_component_refs

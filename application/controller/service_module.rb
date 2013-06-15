@@ -30,7 +30,7 @@ module DTK
     def rest__list_component_modules()
       service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)
-      rest_ok_response service_module.get_referenced_component_modules()
+      rest_ok_response service_module.get_referenced_component_modules(Opts.new(:detail_to_include=>[:versions]))
     end
 
     def rest__import()

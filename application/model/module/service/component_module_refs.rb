@@ -55,7 +55,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
   class ComponentModuleRefs < Model 
     r8_nested_require('component_module_refs','version_info')
 
-    def ret_version_indexed_by_modules()
+    def ret_versions_indexed_by_modules()
       component_modules.inject(Hash.new) do |h,(mod,mod_info)|
         h.merge(mod.to_s => mod_info.version())
       end

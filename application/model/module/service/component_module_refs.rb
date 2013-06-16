@@ -173,16 +173,16 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
         #persisted already, needs update
         update_row = {
           :id => id(),
-          :constraints => constraints_in_hash_form()
+          :content => content_in_hash_form()
         }
-        #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified constraint hash
+        #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified content hash
         Model.update_from_rows(model_handle(),[update_row])
       else
         mh = parent_idh.create_childMH(:component_module_refs) 
         row = {
           mh.parent_id_field_name() => parent_idh.get_id(),
-          :ref => "constraint", #max one per parent so this can be constant
-          :constraints => constraints_in_hash_form(),
+          :ref => "content", #max one per parent so this can be constant
+          :content => content_in_hash_form(),
         }
         @id_handle = Model.create_from_row(mh,row,:convert => true)
       end
@@ -196,24 +196,24 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       self
     end
 
-    def set_and_save_constraints!(constraints_hash_form,opts={})
-      reify_and_set_constraints(constraints_hash_form)
+    def set_and_save_content!(content_hash_form,opts={})
+      reify_and_set_content(content_hash_form)
       save!(nil,opts)
     end
 
-    def constraints_in_hash_form()
+    def content_in_hash_form()
       ret = Hash.new
-      unless constraints = self[:constraints]
+      unless content = self[:content]
         return ret
       end
-      self.class.hash_form(constraints)
+      self.class.hash_form(content)
     end
 
    private
     def get_hash_content(service_module_branch)
       ret = SimpleOrderedHash.new()
       component_module_refs = service_module_branch.get_component_module_refs()
-      unordered_hash = component_module_refs.constraints_in_hash_form()
+      unordered_hash = component_module_refs.content_in_hash_form()
       if unordered_hash.empty?
         return ret
       end
@@ -266,11 +266,11 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
     
     def component_modules()
-      ((self[:constraints]||{})[:component_modules])||{}
+      ((self[:content]||{})[:component_modules])||{}
     end
 
-    def reify_and_set_constraints(hash)
-      self[:constraints] = 
+    def reify_and_set_content(hash)
+      self[:content] = 
         if hash.empty? then hash
         elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
           reify_component_module_contraints(hash.values.first)
@@ -284,7 +284,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def create_component_modules_hash?()
-      (self[:constraints] ||= Hash.new)[:component_modules] ||= Hash.new
+      (self[:content] ||= Hash.new)[:component_modules] ||= Hash.new
     end
     
     def key(el)

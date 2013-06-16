@@ -45,13 +45,13 @@ module DTK
 
      private
       def update_global_refs(module_branch,opts={})
-        constraints_hash_form = Hash.new
+        content_hash_form = Hash.new
         meta_filename_path = ComponentModuleRefs.meta_filename_path()
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
-          constraints_hash_form = Aux.json_parse(json_content,meta_filename_path)
+          content_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end
         cmp_module_refs = module_branch.get_component_module_refs()
-        cmp_module_refs.set_and_save_constraints!(constraints_hash_form,opts)
+        cmp_module_refs.set_and_save_content!(content_hash_form,opts)
       end
 
       def update_assemblies_from_dsl(module_branch,component_module_refs)

@@ -129,10 +129,19 @@ module XYZ
         true
       end
 
-      def set_db_for_all_models(db)
+      def set_db_for_specfic_models(db,model_names)
+        set_db_for_all_models(db,model_names)
+      end
+
+      def set_db_for_all_models(db,filter=nil)
         Model.set_db(db)
-        #TODO: see if we can remove needing to link all children of Model
-        models.each{|model| model.set_db(db)}
+        models = 
+          if filter
+            filter.map{|model_name|Model.model_class(model_name)}
+          else         
+            models()
+          end
+        models.each{|model| model.set_db(db)} #TODO: see if we can remove needing to link all children of Model
         #infra tables
         ContextTable.set_db(db)
         IDInfoTable.set_db(db)
@@ -147,14 +156,18 @@ module XYZ
         db.setup_infrastructure_extras()
       end
 
-      def migrate_all_models(direction)
+      def migrate_specfic_models(direction,model_names)
+        migrate_all_models(direction,model_names)
+      end
+
+      def migrate_all_models(direction,filter=nil)
         # order is important
         user_models = ret_user_models()
         user_models.each do |model|
           model.create_column_defs_common_fields?(direction,:user_model=>true)
         end
 
-        concrete_models = ret_concrete_models()
+        concrete_models = ret_concrete_models(filter)
         (concrete_models-user_models).each do |model| 
           model.create_column_defs_common_fields?(direction) 
         end
@@ -180,8 +193,13 @@ module XYZ
       end
      #######
      protected
-      def ret_concrete_models()
-        models.reject {|m|m.top? or not m.superclass == Model}
+      def ret_concrete_models(filter=nil)
+        ret = models.reject {|m|m.top? or not m.superclass == Model}
+        if filter
+          model_classes = filter.map{|model_name|Model.model_class(model_name)}
+          ret.reject!{|m|!model_classes.include?(m)}
+        end
+        ret
       end
 
       def ret_user_models()

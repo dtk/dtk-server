@@ -2,6 +2,7 @@
 root = File.expand_path('../', File.dirname(__FILE__))
 
 require root + '/app'
-XYZ::Model.db_rebuild(DBinstance)
+model_names = ARGV[0] && ARGV[0].split(",").map{|m|m.to_sym}
+XYZ::Model.db_rebuild(DBinstance,model_names)
 
 

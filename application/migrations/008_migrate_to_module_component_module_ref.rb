@@ -1,3 +1,4 @@
+require  require File.expand_path("common", File.dirname(__FILE__))
 require 'pp'
 Sequel.migration do
   up do 

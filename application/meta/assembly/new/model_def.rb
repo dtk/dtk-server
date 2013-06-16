@@ -240,7 +240,7 @@ lambda__instance_nodes_and_components =
          :convert => true,
          :join_type => :left_outer,
          :join_cond=>{:branch_id => q(:component,:module_branch_id)},
-         :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id]
+         :cols => [:id,:display_name,:group_id,:content]
        }
       ]
     },

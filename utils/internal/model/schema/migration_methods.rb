@@ -3,15 +3,20 @@ module XYZ
   module MigrationMethods #methods that can be called within a migration
 
     #if model_names given then just (re)building these tables
-    def db_rebuild(db,model_names=nil)
+    def db_rebuild(db,model_names=nil,opts=Opts.new)
       #if model_naems check all are defined
       if model_names
         model_names.each do |model_name|
           begin 
             Model.model_class(model_name)
           rescue
-            puts "Model (#{model_name}) is not defined\n"
-            exit(1)
+            error_msg = "Model (#{model_name}) is not defined\n"
+            if opts[:raise_error]
+              raise Error.new(error_msg)
+            else
+              puts error_msg
+              exit(1)
+            end
           end
         end
       end

@@ -80,10 +80,11 @@ module DTK
     def rest__info_about()
       component_module = create_obj(:component_module_id)
       about = ret_non_null_request_params(:about).to_sym
+      component_template_id = ret_request_params(:component_template_id)
       unless AboutEnum.include?(about)
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum)
       end
-      rest_ok_response component_module.info_about(about)
+      rest_ok_response component_module.info_about(about, component_template_id)
     end
 
     AboutEnum = [:components, :attributes, :instances]

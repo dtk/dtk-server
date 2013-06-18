@@ -43,7 +43,7 @@ module DTK
       get_objs(:cols => [:version_info]).collect { |v_info| { :version => ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) } }
     end
 
-    def info_about(about)
+    def info_about(about, cmp_id=nil)
       case about.to_sym
       when :components
         get_objs(:cols => [:components]).map do |r|
@@ -54,6 +54,7 @@ module DTK
         end.sort{|a,b|"#{a[:version]}-#{a[:display_name]}" <=>"#{b[:version]}-#{b[:display_name]}"}
       when :attributes
         results = get_objs(:cols => [:attributes])
+        results.delete_if { |e| !(e[:component][:id] == cmp_id.to_i) } if cmp_id && !cmp_id.empty?
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
           branch = element[:module_branch]

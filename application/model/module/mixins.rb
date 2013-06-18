@@ -27,7 +27,7 @@ module DTK
     end
   end
 
-  r8_nested_require('module_mixins','remote')  
+  r8_nested_require('mixins','remote')  
 
   module ModuleMixin
     include ModuleRemoteMixin

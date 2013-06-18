@@ -236,7 +236,7 @@ lambda__instance_nodes_and_components =
        segment_component_ref,
        lambda__segment_component_template.call(:left_outer),
        {
-         :model_name => :module_version_constraints,
+         :model_name => :component_module_refs,
          :convert => true,
          :join_type => :left_outer,
          :join_cond=>{:branch_id => q(:component,:module_branch_id)},

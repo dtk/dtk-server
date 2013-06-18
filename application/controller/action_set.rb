@@ -4,6 +4,16 @@ r8_require('../../utils/performance_service')
 module XYZ
   class ActionsetController < Controller
     def process(*route)
+      route_key = route[0..1].join("/")
+      action_set_params = route[2..route.size-1]||[]
+      model_name = route[0].to_sym
+
+      route = R8::ReactorRoute.validate_route(request.request_method, route_key)
+      raise Error.new("Path '#{route_key}' not found!") unless route
+      # we set new model
+      model_name = route.first.to_sym
+      # we rewrite route key to new mapped one
+      route_key = route.join('/')
 
       ramaze_user = user_object()
 
@@ -48,9 +58,7 @@ module XYZ
 
       #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       #first two (or single items make up route_key; the rest are params
-      route_key = route[0..1].join("/")
-      action_set_params = route[2..route.size-1]||[]
-      model_name = route[0].to_sym 
+
 
       action_set_def = R8::Routes[route_key] || Hash.new
       @action_set_param_map = ret_action_set_param_map(action_set_def,action_set_params)

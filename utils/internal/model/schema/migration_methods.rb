@@ -42,7 +42,7 @@ module XYZ
       IDInfoTable.add_top_factories?() 
     end
 
-    #TODO: thios is specfic migration; will have this subsumed and removed
+    #TODO: this is specific migration; will have this subsumed and removed
     def migrate_data(db)
       puts "Migrating data ... "
 

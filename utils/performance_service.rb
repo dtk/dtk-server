@@ -6,7 +6,7 @@ module DTK
 	class PerformanceService
 
 		# Configuration
-		@@file_path = "/tmp/perf.out"
+		@@file_path = "/tmp/perf_#{Common::Aux.running_process_user()}.out"
 		@@perf_enabled = true
 
 

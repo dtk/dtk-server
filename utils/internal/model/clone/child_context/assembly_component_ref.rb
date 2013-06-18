@@ -25,8 +25,8 @@ module DTK
         }
         aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref),sp_hash,:keep_ref_cols => true)
 
-        module_constraints = @clone_proc.module_version_constraints()
-        module_constraints.set_matching_component_template_info!(aug_cmp_refs)
+        component_module_refs = @clone_proc.component_module_refs()
+        component_module_refs.set_matching_component_template_info!(aug_cmp_refs)
       end
 
       def matching_component_refs__virtual_col()

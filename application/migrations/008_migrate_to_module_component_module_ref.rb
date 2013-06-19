@@ -2,6 +2,14 @@ require File.expand_path("common", File.dirname(__FILE__))
 require 'pp'
 Sequel.migration do
   up do 
+
+     create_table(:test_transaction) do
+      column :id, "bigint", :null=>false
+      primary_key [:id]
+    end
+    pp DB[:test_transaction].all
+pp DB
+#raise "forced error"
    #TODO: this is just testing a number of things now
     DTKMigration.dtk_model_context do
       dtk_db_rebuild(:component_module_ref,:module_branch)
@@ -35,7 +43,7 @@ pp      dtk_get_objs(:component_module_ref,:cols => [:id,:ref,:component_module,
    # cmp_module_refs = DB[:module__component_module_refs].select(:id,:content,:branch_id).all()
    # info_table = DB[:top__id_info].filter(:relation_id=>cmp_module_refs.map{|r|r[:id]}).all()
 #pp info_table
-      raise "forced error"
+      raise #"forced error"
     end
   end
 end

@@ -3,7 +3,8 @@ module XYZ
   module MigrationMethods #methods that can be called within a migration
 
     #if model_names given then just (re)building these tables
-    def db_rebuild(db,model_names=nil,opts=Opts.new)
+    def db_rebuild(model_names=nil,opts=Opts.new)
+      db = opts[:db]||DB.create(R8::Config[:database])
       #if model_naems check all are defined
       if model_names
         model_names.each do |model_name|
@@ -44,6 +45,7 @@ module XYZ
 
     #TODO: this is specific migration; will have this subsumed and removed
     def migrate_data(db)
+      db = opts[:db]||DB.create(R8::Config[:database])
       puts "Migrating data ... "
 
       c = 2

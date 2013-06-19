@@ -3,14 +3,14 @@ require 'singleton'
 require 'pp'
 class DTKMigration
   def self.dtk_model_context(&block)
-    DTKModel.instance.instance_eval &block
+    DTKModelHelper.instance.instance_eval &block
   end
 
-  class DTKModel
+  class DTKModelHelper
     include Singleton
 
     def dtk_db_rebuild(*model_names)
-      Model.db_rebuild(DBinstance,model_names,Opts.new(:raise_error => true))
+      Model.db_rebuild(model_names,Opts.new(:raise_error => true, :db => dtk_db()))
     end
   
     def dtk_get_objs(model_name,sp_hash)
@@ -35,6 +35,11 @@ class DTKMigration
     end
     
    private
+    def dtk_db()
+      #TODO: this gets set now in ../app_migratin; can clean this up
+      DBinstance
+    end
+
     def initialize()
       require File.expand_path('../app_migration', File.dirname(__FILE__))
       self.class.class_eval{include DTK}

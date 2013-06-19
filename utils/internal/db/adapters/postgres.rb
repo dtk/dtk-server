@@ -1,8 +1,8 @@
 module XYZ
   class Postgres < DB
-    def initialize(db_params)
+    def initialize(db_params,opts=Opts.new)
       super()
-      @db = Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
+      @db = opts[:sequel_db]||Sequel.postgres(db_params[:name], :user => db_params[:user],  :host => db_params[:hostname], :password => db_params[:pass])
     end
 
     def transaction(*args,&block)

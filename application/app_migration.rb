@@ -37,7 +37,8 @@ r8_require("#{UTILS_DIR}/internal/log.rb")
 
 # Here goes your database connection and options:
 r8_require("#{SYSTEM_DIR}/db")
-DBinstance = XYZ::DB.create(R8::Config[:database])
+DBinstance = XYZ::DB.create_for_migrate()
+#DBinstance = XYZ::DB.create(::DB.uri)
 
 #removing memory caching for now, doesnt seem like it should be included here
 #require SYSTEM_DIR + '/cache'

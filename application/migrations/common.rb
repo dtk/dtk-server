@@ -18,7 +18,12 @@ class DTKMigration
     end
     
     def dtk_create_objs(model_name,parent_model_name,rows,old_model_name=nil)
-      ndx_user_date_ref_info = (old_model_name ? get_ndx_user_date_ref_info(old_model_name,rows.map{|r|r[:old_id]}.compact) : {})
+      ndx_user_date_ref_info = Hash.new 
+      if old_model_name 
+        ids = rows.map{|r|r[:old_id]}.compact
+        ndx_user_date_ref_info = UserDateRefCols.get(self,old_model_name,ids).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      end
+
       create_columns = rows.first.keys - [:old_id] #taking first row because they all have same columns
       create_rows = rows.map do |r|
         el = nil
@@ -53,16 +58,28 @@ class DTKMigration
       @user_mh.createMH(model_name)
     end
     
-    def get_ndx_user_date_ref_info(model_name,ids)
-      ret = Hash.new
-      return ret if ids.empty?
-      sp_hash = {
-        :cols => [:id]+UserDateRefCols,
-        :filter => [:oneof,:id,ids]
-      }
-      dtk_get_objs(model_name,sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => Aux.hash_subset(r,UserDateRefCols))}
+    module UserDateRefCols
+      def self.get(parent,model_name,ids)
+        ret = Hash.new
+        return ret if ids.empty?
+        sp_hash = {
+          :cols => [:id]+Cols,
+          :filter => [:oneof,:id,ids]
+        }
+        parent.dtk_get_objs(model_name,sp_hash).map do |raw_row|
+          raw_row.inject(Hash.new){|h,(col,val)|h.merge(col => val|| null_val(col))}
+        end
+      end
+
+      def self.null_val(col)
+        case col
+          when :ref_num then ::DTK::SQL::ColRef.cast(nil,:integer)
+        end
+      end
+
+      # Cols = [:ref,:ref_num,:owner_id,:group_id,:created_at,:updated_at]
+      Cols = [:ref,:ref_num,:owner_id,:group_id]
     end
-    #  UserDateRefCols = [:ref,:ref_num,:owner_id,:group_id,:created_at,:updated_at]
-    UserDateRefCols = [:ref,:owner_id,:group_id]
+      
   end
 end

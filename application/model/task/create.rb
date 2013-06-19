@@ -3,7 +3,7 @@ r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
 module XYZ
   module TaskCreateClassMixin
-    def create_from_assembly_instance(assembly,component_type,commit_msg=nil)
+    def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 
@@ -20,6 +20,9 @@ module XYZ
       node_mh = assembly.model_handle(:node)
       node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
       config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
+
+      # Amar: Adding puppet version on node hash so it can be sent in mcollective request on node side
+      config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
 
       # Amar: Generating Stages for inter node dependencies
       staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes)

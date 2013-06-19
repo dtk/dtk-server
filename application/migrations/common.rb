@@ -23,7 +23,6 @@ class DTKMigration
         ids = rows.map{|r|r[:old_id]}.compact
         ndx_user_date_ref_info = UserDateRefCols.get(self,old_model_name,ids).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
       end
-
       create_columns = rows.first.keys - [:old_id] #taking first row because they all have same columns
       create_rows = rows.map do |r|
         el = nil
@@ -67,18 +66,20 @@ class DTKMigration
           :filter => [:oneof,:id,ids]
         }
         parent.dtk_get_objs(model_name,sp_hash).map do |raw_row|
-          raw_row.inject(Hash.new){|h,(col,val)|h.merge(col => val|| null_val(col))}
+          raw_row.inject(Hash.new){|h,(col,val)|h.merge(col => process_val(col,val))}
         end
       end
 
-      def self.null_val(col)
-        case col
-          when :ref_num then ::DTK::SQL::ColRef.cast(nil,:integer)
-        end
+      def self.process_val(col,val)
+        type = 
+          case col
+           when :ref_num then :integer
+           when :created_at,:updated_at then :timestamp
+          end
+        (type ? ::DTK::SQL::ColRef.cast(val,type) : val)
       end
 
-      # Cols = [:ref,:ref_num,:owner_id,:group_id,:created_at,:updated_at]
-      Cols = [:ref,:ref_num,:owner_id,:group_id]
+      Cols = [:ref,:ref_num,:owner_id,:group_id,:created_at,:updated_at]
     end
       
   end

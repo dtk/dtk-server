@@ -116,6 +116,39 @@ module XYZ
         ret
       end
 
+      def create_from_select_for_migrate(model_handle,field_set,select_ds)
+        user_info_assigns = DB.user_info_for_create_seleect({},model_handle)
+        
+        #modify ds and its columns in concert
+        select_info = {:cols =>  field_set.cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
+        #processing to take into account c
+        add_cols_to_select!(select_info,{:c => user_info_assigns[:c]},{:from_self => [:end]})
+        
+        db_rel = DB_REL_DEF[model_handle[:model_name]]
+        ds = dataset(db_rel)
+        #process overrides
+        #TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
+        add_cols_to_select!(select_info,user_info_assigns,{:from_self => [:beg]})
+
+        # final ones to select and add  
+        sequel_select_with_cols = select_info[:ds]
+        columns = select_info[:cols]
+        
+        #fn tries to return ids depending on whether db adater supports returning_id
+        ret = nil
+        unless ds.respond_to?(:insert_returning_sql)
+          raise Error.new("Not supported")
+        end
+        returning_ids = Array.new
+        
+        returning_sql_cols = [:id,:display_name]
+        
+        sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
+        fetch_raw_sql(sql){|row| returning_ids << row}
+        IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
+        process_json_fields_in_returning_ids!(returning_ids,db_rel) 
+      end
+
       private
       def add_cols_to_select!(select_info,default_assigns,opts={})
         cols = select_info[:cols]

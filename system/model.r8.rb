@@ -16,7 +16,7 @@ module XYZ
     extend ExportObject
     class << self
       attr_reader :db
-      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
+      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
     end
 
     #TODO: looking to use this as step to transform to simpler object model calls
@@ -303,6 +303,12 @@ module XYZ
       create_opts = Aux::hash_subset(opts,[:returning_sql_cols,:duplicate_refs])
       field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
+    end
+
+    def self.create_from_rows_for_migrate(model_handle,rows)
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,:convert_for_create => true)
+      field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
+      create_from_select_for_migrate(model_handle,field_set,select_ds)
     end
 
     def self.create_from_row(model_handle,row,opts={})

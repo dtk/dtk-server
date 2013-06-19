@@ -15,7 +15,12 @@ module DTK
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
         msg_content =  config_agent.ret_msg_content(config_node)
         agent_git_details = { :repo => "dtk-node-agent", :branch => "" }
-        msg_content.merge!(:task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id(), :version_context => version_context, :agent_git_details => agent_git_details)
+        msg_content.merge!( :task_id => task_idh.get_id(),
+                            :top_task_id => top_task_idh.get_id(), 
+                            :version_context => version_context, 
+                            :agent_git_details => agent_git_details,
+                            :puppet_version => config_node[:node][:puppet_version]
+                          )
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
         context = opts[:receiver_context]

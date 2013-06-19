@@ -289,7 +289,8 @@ module DTK
       end
 
       commit_msg = ret_request_params(:commit_msg)
-      task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg)
+      puppet_version = ret_request_params(:puppet_version)
+      task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg, puppet_version)
       task.save!()
       # TODO: this was call from gui commit window
       # pp Attribute.augmented_attribute_list_from_task(task)

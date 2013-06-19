@@ -20,9 +20,18 @@ class DTKMigration
   end
   
   def create_objs(model_name,rows,old_model_name=nil)
-    
-    ndx_user_date_info = (old_model_name ? get_ndx_user_date_info(old_model_name,rows.map{|r|r[:old_id]}) : {})
-    pp ndx_user_date_info
+    ndx_user_date_info = (old_model_name ? get_ndx_user_date_info(old_model_name,rows.map{|r|r[:old_id]}.compact) : {})
+    create_columns = rows.first.keys - [:old_id] #taking first row because they all have same columns
+    create_rows = rows.map do |r|
+      el = nil
+      if ndx = r[:old_id]
+        if user_date_info = ndx_user_date_info[ndx]
+          el = Aux.hash_subset(r,create_columns).merge(user_date_info)
+        end
+      end
+      el || r
+    end
+    Model.create_from_rows(mh(model_name),create_rows)
   end
 
   private
@@ -31,6 +40,8 @@ class DTKMigration
   end
 
   def get_ndx_user_date_info(model_name,ids)
+    ret = Hash.new
+    return ret if ids.empty?
     sp_hash = {
       :cols => [:id]+UserAndDateCols,
       :filter => [:oneof,:id,ids]

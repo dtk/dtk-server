@@ -1,3 +1,4 @@
+raise "put the DTKMigration operations under a transaction"
 require 'sequel'
 require 'singleton'
 require 'pp'
@@ -16,7 +17,7 @@ class DTKMigration
   end
   
   def get_objs(model_name,sp_hash)
-    Model.get_objs(mh(model_name),sp_hash, :convert => true)
+    Model.get_objs(mh(model_name),sp_hash,:keep_ref_cols => true)
   end
   
   def create_objs(model_name,parent_model_name,rows,old_model_name=nil)
@@ -26,7 +27,8 @@ class DTKMigration
       el = nil
       if ndx = r[:old_id]
         if user_date_ref_info = ndx_user_date_ref_info[ndx]
-          el = Aux.hash_subset(r,create_columns).merge(user_date_ref_info)
+          #info in create_columns can over write info in user_date_ref_info
+          el = user_date_ref_info.merge(Aux.hash_subset(r,create_columns))
         end
       end
       el || r
@@ -49,5 +51,6 @@ class DTKMigration
     }
     get_objs(model_name,sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => Aux.hash_subset(r,UserDateRefCols))}
   end
-  UserDateRefCols = [:ref,:owner_id,:group_id,:created_at,:updated_at]
+#  UserDateRefCols = [:ref,:ref_num,:owner_id,:group_id,:created_at,:updated_at]
+  UserDateRefCols = [:ref,:owner_id,:group_id]
 end

@@ -117,6 +117,13 @@ module XYZ
       end
 
       def create_from_select_for_migrate(model_handle,field_set,select_ds)
+        unless model_handle[:parent_model_name]
+          unless [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
+            raise Error.new("missing :parent_model_name in model_handle (#{model_handle.inspect})")
+          end
+        end
+        parent_id_col = model_handle.parent_id_field_name()
+
         cols = field_set.cols
         select_info = {:cols =>  cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
         add_cols_to_select!(select_info,{:c => model_handle[:c]},{:from_self => [:end]})
@@ -136,7 +143,7 @@ module XYZ
           raise Error.new("Not supported")
         end
         
-        returning_sql_cols = [:id,:display_name]
+        returning_sql_cols = [:id,:display_name,parent_id_col.as(:parent_id)]
         sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
         returning_ids = Array.new
         fetch_raw_sql(sql){|row| returning_ids << row}

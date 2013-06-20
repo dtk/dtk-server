@@ -3,21 +3,30 @@ require 'singleton'
 require 'pp'
 class DTKMigration
   def self.dtk_model_context(&block)
-    DTKModelHelper.instance.instance_eval &block
+    DTKModelHelper.instance.evaluate &block
   end
 
   class DTKModelHelper
     include Singleton
 
+    #from http://www.dan-manges.com/blog/ruby-dsls-instance-eval-with-delegation
+    def evaluate(&block)
+      @self_before_instance_eval = eval "self", block.binding
+      instance_eval &block
+    end
+    def method_missing(method, *args, &block)
+      @self_before_instance_eval.send method, *args, &block
+    end
+
     def dtk_db_rebuild(*model_names)
       Model.db_rebuild(model_names,Opts.new(:raise_error => true, :db => dtk_db()))
     end
   
-    def dtk_get_objs(model_name,sp_hash)
+    def dtk_select(model_name,sp_hash)
       Model.get_objs(mh(model_name),sp_hash,:keep_ref_cols => true)
     end
     
-    def dtk_create_objs(model_name,parent_model_name,rows,old_model_name=nil)
+    def dtk_create(model_name,parent_model_name,rows,old_model_name=nil)
       ndx_user_date_ref_info = Hash.new 
       if old_model_name 
         ids = rows.map{|r|r[:old_id]}.compact
@@ -65,7 +74,7 @@ class DTKMigration
           :cols => [:id]+Cols,
           :filter => [:oneof,:id,ids]
         }
-        parent.dtk_get_objs(model_name,sp_hash).map do |raw_row|
+        parent.dtk_select(model_name,sp_hash).map do |raw_row|
           raw_row.inject(Hash.new){|h,(col,val)|h.merge(col => process_val(col,val))}
         end
       end

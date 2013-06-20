@@ -5,8 +5,9 @@ Sequel.migration do
    #TODO: this is just testing a number of things now
     DTKMigration.dtk_model_context do
       dtk_db_rebuild(:component_module_ref,:module_branch)
-      cmp_mod_refs = dtk_get_objs(:component_module_refs,:cols => [:id,:ref,:content,:branch_id])
-#      pp cmp_mod_refs
+
+      #use :component_module_refs to build :component_module_ref
+      cmp_mod_refs = dtk_select(:component_module_refs,:cols => [:id,:ref,:content,:branch_id])
       new_rows = Array.new
       cmp_mod_refs.each do |r|
         content = r[:content]
@@ -28,26 +29,17 @@ Sequel.migration do
           end
         end
       end
-      dtk_create_objs(:component_module_ref,:module_branch,new_rows,:component_module_refs)
-      cmr = dtk_get_objs(:component_module_ref,:cols => [:id,:owner_id,:group_id,:ref,:ref_num,:created_at,:component_module,:version_info,:branch_id])
+      dtk_create(:component_module_ref,:module_branch,new_rows,:component_module_refs)
 
+      #will have to clean this up later
+      rename_table :module__component_module_refs,"module__old---component_module_refs".to_sym
+      cmr = dtk_select(:component_module_ref,:cols => [:id,:owner_id,:group_id,:ref,:ref_num,:created_at,:component_module,:version_info,:branch_id])
       pp cmr
       pp  DB[:top__id_info].filter(:relation_id => cmr.map{|r|r[:id]}).all()
-      raise "still need to have top.id_info get parent info"
-=begin
-Example of id.info_top table w/o parent info
-{:ref=>"thin",
-  :relation_type=>"component_module_ref",
-  :relation_local_id=>98632,
-  :ref_num=>nil,
-  :parent_id=>0,
-  :uri=>"/component_module_ref/thin",
-  :is_factory=>false,
-  :relation_name=>"module.component_module_ref",
-  :c=>2,
-  :parent_relation_type=>nil,
-  :relation_id=>2147582280}
-=end
-    end
+      pp DB["module__old---component_module_refs".to_sym].all
+      pp DB[:module__component_module_refs].all #this wil trigger an errror so dont get to forced error
+     end
+     raise "forced error"
+ 
   end
 end

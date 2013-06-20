@@ -14,7 +14,7 @@ gem 'rspec','2.11.0'
 gem 'sshkey','1.3.1'
 gem 'ruby-debug','0.10.4'
 gem 'awesome_print','1.1.0'
-
+gem 'dtk-common', '0.1.9'
 # required to successfully run it
 
 # Version That will work, bumped it so we could 

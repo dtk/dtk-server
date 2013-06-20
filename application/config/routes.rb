@@ -6,6 +6,7 @@ R8::ReactorRoute.draw do
 
   # USER
   post 'user/process_login'    => "user#process_login"
+  get 'user/process_logout'   => "user#process_logout"
 
    # ASSEMBLY
   post  'assembly/create_new_template' => 'assembly#create_new_template'

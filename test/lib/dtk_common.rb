@@ -659,10 +659,6 @@ class DtkCommon
 		return attribute_list
 	end
 
-	dtk_common = DtkCommon.new('','')
-	list = dtk_common.get_module_attributes_list_by_component('apache','')
-	puts list.inspect
-
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
 		component_exists_in_module = false

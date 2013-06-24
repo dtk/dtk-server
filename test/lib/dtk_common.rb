@@ -602,6 +602,67 @@ class DtkCommon
 		puts ""
 	end
 
+	def get_module_attributes_list(module_name, filter_component)
+		#Filter component used on client side after retrieving all attributes from all components
+		puts "Get module attributes list:", "---------------------------"
+		attribute_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			puts "List of module attributes:"
+			pretty_print_JSON(module_attributes_list)
+
+			module_attributes_list['data'].each do |x|
+				if (filter_component != "")
+					attribute_list << x['display_name'] if x['display_name'].include? filter_component
+					puts "module attribute: #{x['display_name']}"
+				else
+					attribute_list << x['display_name']
+					puts "module attribute: #{x['display_name']}"
+				end
+			end
+		end
+		puts ""
+		return attribute_list
+	end
+
+	def get_module_attributes_list_by_component(module_name, component_name)
+		#Filter by component name used on server side to retrieve only attributes for specific component in module
+		puts "Get module attributes list by component:", "----------------------------------------"
+		attribute_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			puts "List of module components:"
+			pretty_print_JSON(module_components_list)
+
+			if (module_components_list['data'].select { |x| x['display_name'] == component_name}.first)
+				puts "Component #{component_name} exists in the list. Get component id..."
+				component_id = module_components_list['data'].select { |x| x['display_name'] == component_name}.first['id']
+				component_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id, :component_template_id=>component_id})
+				puts "List of component attributes:"
+				pretty_print_JSON(component_attributes_list)
+
+				component_attributes_list['data'].each do |x|
+					attribute_list << x['display_name']
+					puts "component attribute: #{x['display_name']}"
+				end
+			end
+		end
+		puts ""
+		return attribute_list
+	end
+
+	dtk_common = DtkCommon.new('','')
+	list = dtk_common.get_module_attributes_list_by_component('apache','')
+	puts list.inspect
+
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
 		component_exists_in_module = false

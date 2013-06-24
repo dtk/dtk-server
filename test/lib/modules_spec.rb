@@ -128,6 +128,22 @@ shared_context "Get versioned module components list" do |dtk_common, module_nam
   end
 end
 
+shared_context "Get module attributes list" do |dtk_common, module_name, filter_component|
+  it "gets list of all attributes in #{module_name} module" do
+    attributes_list = dtk_common.get_module_attributes_list(module_name, filter_component)
+    empty_list = attributes_list.empty? 
+    empty_list.should eq(false)
+  end
+end
+
+shared_context "Get module attributes list by component" do |dtk_common, module_name, component_name|
+  it "gets list of all attributes in #{module_name} module that belong to #{component_name} component" do
+    attributes_list = dtk_common.get_module_attributes_list_by_component(module_name, component_name)
+    empty_list = attributes_list.empty? 
+    empty_list.should eq(false)
+  end
+end
+
 shared_context "Check module imported on local filesystem" do |module_filesystem_location, module_name|
   it "checks that #{module_name} module is imported on local filesystem on location #{module_filesystem_location}" do
     puts "Check module imported on local filesystem:", "------------------------------------------"

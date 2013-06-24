@@ -3,7 +3,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     r8_nested_require('assembly_import','port')
     include PortMixin
-    def initialize(container_idh,module_branch,module_name,module_version_constraints)
+    def initialize(container_idh,module_branch,module_name,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
       @ndx_ports = Hash.new
@@ -11,7 +11,7 @@ module DTK; class ServiceModule
       @module_branch = module_branch
       @module_name = module_name
       @service_module = get_service_module(container_idh,module_name)
-      @module_version_constraints = module_version_constraints
+      @component_module_refs = component_module_refs
     end
 
     def process(module_name,hash_content)
@@ -23,7 +23,7 @@ module DTK; class ServiceModule
         assemblies_hash.each do |ref,assem|
           dangling_errors.aggregate_errors! do
             @db_updates_assemblies["component"].merge!(@version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(@version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@module_version_constraints))
+            @db_updates_assemblies["node"].merge!(@version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
             @ndx_assembly_hashes[ref] ||= assem
           end
         end

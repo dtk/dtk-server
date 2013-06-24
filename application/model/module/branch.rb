@@ -1,4 +1,4 @@
-r8_require('branch_names')
+r8_require('../branch_names')
 module DTK
   class ModuleBranch < Model
     include BranchNamesMixin
@@ -8,13 +8,13 @@ module DTK
       update_object!(:type)[:type].to_sym
     end
 
-    def get_module_version_constraints()
+    def get_component_module_refs()
       sp_hash = {
-        :cols => [:id,:display_name,:group_id,:constraints,:service_id,:component_id],
+        :cols => [:id,:display_name,:group_id,:constraints],
         :filter => [:eq,:branch_id,id()]
       }
-      mh = model_handle(:module_version_constraints)
-      ModuleVersionConstraints.create_and_reify?(self,Model.get_obj(mh,sp_hash))
+      mh = model_handle(:component_module_refs)
+      ComponentModuleRefs.create_and_reify?(self,Model.get_obj(mh,sp_hash))
     end
     
     def get_module_repo_info()

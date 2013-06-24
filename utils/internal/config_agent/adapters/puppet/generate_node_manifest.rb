@@ -27,7 +27,7 @@ module XYZ
 
       def generate_with_stages(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
         # Amar: 'ret' variable will contain list of puppet manifests, each will be one puppet call inside puppet_apply agent
-        ret = Array.new
+        ret = Array.new  
         stages_ids.each do |stage_ids_ps|
           ret_ps = Array.new
           add_default_extlookup_config!(ret_ps)
@@ -38,7 +38,7 @@ module XYZ
             ret_ps << " " #space between stages
             puppet_stage = PuppetStage.new(stage,@import_statement_modules)
             stage_ids.each do |cmp_id| 
-              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }
+              cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }       
               puppet_stage.generate_manifest!(cmp_with_attrs)
             end
             puppet_stage.add_lines_for_stage!(ret_ps)

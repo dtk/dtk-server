@@ -10,7 +10,7 @@ module DTK
           :library_to_target
         end
         
-        attr_reader :project,:module_version_constraints
+        attr_reader :project,:component_module_refs
 
         def service_add_on_node_bindings()
           @service_add_on_proc ? @service_add_on_proc.node_bindings() : []
@@ -27,15 +27,15 @@ module DTK
           super(source_obj,opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
           @service_add_on_proc = opts[:service_add_on_info] && ServiceAddOnProc.new(opts[:service_add_on_info])
-          @module_version_constraints = get_module_version_constraints(source_obj)
+          @component_module_refs = get_component_module_refs(source_obj)
         end
 
-        def get_module_version_constraints(source_obj)
+        def get_component_module_refs(source_obj)
           sp_hash = {
             :cols => [:id],
             :filter => [:eq,:id,source_obj.get_field?(:module_branch_id)]
           }
-          Model.get_obj(source_obj.model_handle(:module_branch),sp_hash).get_module_version_constraints()
+          Model.get_obj(source_obj.model_handle(:module_branch),sp_hash).get_component_module_refs()
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)

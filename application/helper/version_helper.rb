@@ -6,7 +6,7 @@ module Ramaze::Helper
     end
     def is_legal_version_format?(version)
       return true unless version
-      !!(version =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
+      ::DTK::ModuleCommon.string_has_version_format?(version)
     end
 
     def raise_error_if_version_illegal_format(version)

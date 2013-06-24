@@ -69,6 +69,7 @@ R8::ReactorRoute.draw do
   post  'component_module/create_new_version' => 'component_module#create_new_version'
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
+  post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
 
 
    # DEPENDENCY

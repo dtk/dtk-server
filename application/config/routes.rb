@@ -41,6 +41,7 @@ R8::ReactorRoute.draw do
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
   post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
+  post  'assembly/get_action_results' => 'assembly#get_action_results'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'

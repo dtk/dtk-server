@@ -67,6 +67,9 @@ R8::ReactorRoute.draw do
   post  'component_module/delete_remote' => 'component_module#delete_remote'
   post  'component_module/export' => 'component_module#export'
   post  'component_module/create_new_version' => 'component_module#create_new_version'
+  post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
+  post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
+
 
    # DEPENDENCY
   post  'dependency/add_component_dependency' => 'dependency#add_component_dependency'
@@ -138,6 +141,9 @@ R8::ReactorRoute.draw do
   post  'service_module/set_component_module_version' => 'service_module#set_component_module_version'
   post  'service_module/delete' => 'service_module#delete'
   post  'service_module/delete_remote' => 'service_module#delete_remote'
+  post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
+  post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
+
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 
    # STATE_CHANGE

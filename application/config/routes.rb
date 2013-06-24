@@ -39,6 +39,7 @@ R8::ReactorRoute.draw do
   post  'assembly/stage' => 'assembly#stage'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
+  post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'
@@ -70,6 +71,7 @@ R8::ReactorRoute.draw do
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
+  post  'component_module/list' => 'component_module#list'
 
 
    # DEPENDENCY

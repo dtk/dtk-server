@@ -48,7 +48,12 @@ module XYZ
      private
 
       def is_cancel_response(msg)
-        return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
+        # DEBUG SNIPPET >>>> REMOVE <<<<
+        require 'ap'
+        ap "????????????????????????????"
+        ap msg
+        return false
+        #return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
       end
 
       def process_request_timeout(request_id)

@@ -23,18 +23,11 @@ class DtkCommon
 	def initialize(assembly_name, assembly_template)
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
-		#@SERVER = 'dev10.r8network.com'
-		#@PORT = 7000
-		#@ENDPOINT = "http://dev10.r8network.com:7000"
-		#@USERNAME = 'dtk10'
-		#@PASSWORD = 'r8server'
-
-		#Tenant9
-		@SERVER = 'dev9.r8network.com'
-		@PORT = 3001
-		@ENDPOINT = "http://dev9.r8network.com:3001"
-		@USERNAME = 'dtk9'
-		@PASSWORD = 'r8server'
+		@SERVER = 'dev10.r8network.com'
+		@PORT = 7000
+		@ENDPOINT = "http://dev10.r8network.com:7000"
+		@USERNAME = 'dtk10'
+	  @PASSWORD = 'r8server'
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
@@ -808,10 +801,10 @@ class DtkCommon
 			puts "Import versioned module response:"
 			pretty_print_JSON(import_response)
 			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {})
+			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
 			pretty_print_JSON(modules_list)
 
-			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['version'].include? version) }.first)
+			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
 				puts "Versioned module imported successfully."
 				module_imported = true
 			else

@@ -105,6 +105,8 @@ R8::ReactorRoute.draw do
   post  'node/task_status' => 'node#task_status'
   post  'node/image_upgrade' => 'node#image_upgrade'
   post  'node/stage' => 'node#stage'
+  post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
+  post  'node/get_action_results' => 'node#get_action_results'
 
    # NODE_GROUP
   post  'node_group/list' => 'node_group#list'

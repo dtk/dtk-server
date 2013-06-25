@@ -60,15 +60,15 @@ describe "Test Case 49: Rename existing component from dtk.model.json file, push
   end
 
   context "Check if sink component exists in module" do
-    include_context "Check if component exists in module", dtk_common, module_name, "temp::sink"
+    include_context "Check if component exists in module", dtk_common, module_name, "sink"
   end
 
   context "Check if source2 component exists in module" do
-    include_context "Check if component exists in module", dtk_common, module_name, "temp::source2"
+    include_context "Check if component exists in module", dtk_common, module_name, "source2"
   end
 
   context "Check if source component exists in module after rename" do
-    include_context "NEG - Check if component exists in module", dtk_common, module_name, "temp::source"
+    include_context "NEG - Check if component exists in module", dtk_common, module_name, "source"
   end
 
   context "Delete module" do

@@ -60,11 +60,11 @@ describe "Test Case 48: Remove existing component from dtk.model.json file, push
   end
 
   context "Check if sink component exists in module after remove" do
-    include_context "NEG - Check if component exists in module", dtk_common, module_name, "temp::sink"
+    include_context "NEG - Check if component exists in module", dtk_common, module_name, "sink"
   end
 
   context "Check if source component exists in module" do
-    include_context "Check if component exists in module", dtk_common, module_name, "temp::source"
+    include_context "Check if component exists in module", dtk_common, module_name, "source"
   end
 
   context "Delete module" do

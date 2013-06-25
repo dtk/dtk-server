@@ -10,6 +10,7 @@ R8::ReactorRoute.draw do
 
    # ASSEMBLY
   post  'assembly/create_new_template' => 'assembly#create_new_template'
+  post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
   post  'assembly/add__service_add_on' => 'assembly#add__service_add_on'
@@ -39,6 +40,8 @@ R8::ReactorRoute.draw do
   post  'assembly/stage' => 'assembly#stage'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
+  post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
+  post  'assembly/get_action_results' => 'assembly#get_action_results'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'
@@ -69,6 +72,8 @@ R8::ReactorRoute.draw do
   post  'component_module/create_new_version' => 'component_module#create_new_version'
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
+  post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
+  post  'component_module/list' => 'component_module#list'
 
 
    # DEPENDENCY
@@ -100,6 +105,8 @@ R8::ReactorRoute.draw do
   post  'node/task_status' => 'node#task_status'
   post  'node/image_upgrade' => 'node#image_upgrade'
   post  'node/stage' => 'node#stage'
+  post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
+  post  'node/get_action_results' => 'node#get_action_results'
 
    # NODE_GROUP
   post  'node_group/list' => 'node_group#list'

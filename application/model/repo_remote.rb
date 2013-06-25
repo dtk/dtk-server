@@ -32,7 +32,7 @@ module DTK
 
     def self.get_remote_repo(repo_remote_mh,repo_id, module_name, repo_namespace)
       matches = get_matching_remote_repos(repo_remote_mh,repo_id, module_name, repo_namespace)
-      if matches.size > 0
+      if matches.size > 1
         raise Error.new("Unexpected to have multiple matches in get_remote_repo (#{matches.map{|r|r[:display_name]}.join(',')})")
       else
         matches.first

@@ -197,7 +197,7 @@ class DtkCommon
 		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 		pretty_print_JSON(assembly_attributes)
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/#{attribute_name_to_check}" }.first)		
+		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
 			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
@@ -227,7 +227,9 @@ class DtkCommon
 		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 		pretty_print_JSON(assembly_attributes)
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/cmp[#{component_name}]/#{attribute_name_to_check}" }.first)		
+		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}" 
+
+		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
 			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
@@ -769,10 +771,10 @@ class DtkCommon
 			puts "Versioning response:"
 			pretty_print_JSON(versioning_response)
 			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {})
+			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
 			pretty_print_JSON(modules_list)
 
-			if (versioning_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['version'].include? version) }.first)
+			if (versioning_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
 				puts "Module #{module_name} versioned successfully."
 				module_versioned = true
 			else

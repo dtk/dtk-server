@@ -186,6 +186,15 @@ module DTK
         else
           ret = {:message => String.new}
         end
+        # ??>>>>>>>> REMOVE <<<<<<<
+        if error.is_a? String
+          error,temp = {},error
+          error[:message] = temp
+        end
+
+        # DEBUG SNIPPET >>>> REMOVE <<<<
+        require 'ap'
+        ap errors.first.class
 
         error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
         error_msg << (error[:message]||"error")

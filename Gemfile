@@ -12,12 +12,13 @@ gem 'pg','0.14.1'
 gem 'json','1.5.2'
 gem 'rspec','2.11.0'
 gem 'sshkey','1.3.1'
-gem 'ruby-debug','0.10.4'
-#gem 'thin'
+#gem 'ruby-debug','0.10.4'
+gem 'thin'
 #gem 'debugger'
 gem 'awesome_print','1.1.0'
 
 # required to successfully run it
+# Minor change
 
 # Version That will work, bumped it so we could 
 # bump fog as well.

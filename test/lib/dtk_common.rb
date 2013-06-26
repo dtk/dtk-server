@@ -24,8 +24,8 @@ class DtkCommon
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
 		@SERVER = 'dev10.r8network.com'
-		@PORT = 3001
-		@ENDPOINT = "http://dev10.r8network.com:3001"
+		@PORT = 7000
+		@ENDPOINT = "http://dev10.r8network.com:7000"
 		@USERNAME = 'dtk10'
 	  @PASSWORD = 'r8server'
 

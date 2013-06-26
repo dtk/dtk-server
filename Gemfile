@@ -18,6 +18,7 @@ gem 'ruby-debug','0.10.4'
 gem 'awesome_print','1.1.0'
 
 # required to successfully run it
+# Minor change
 
 # Version That will work, bumped it so we could 
 # bump fog as well.

@@ -15,8 +15,8 @@ ActiveRecord::Base.establish_connection(dbconfig["dbconnection"])
 build_id = ARGV[0]
 @query = "select * from test_runs where build LIKE '#{build_id}'"
 
-report = "DTK Server regression results:\n"
-report << "------------------------------\n"
+report = "Execution stats:\n"
+report << "----------------\n"
 
 @test_runs = TestRun.find_by_sql(@query)
 @test_runs.each do |test_run|

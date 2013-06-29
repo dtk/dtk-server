@@ -10,6 +10,7 @@ R8::ReactorRoute.draw do
 
    # ASSEMBLY
   post  'assembly/create_new_template' => 'assembly#create_new_template'
+  post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
   post  'assembly/add__service_add_on' => 'assembly#add__service_add_on'
@@ -39,6 +40,8 @@ R8::ReactorRoute.draw do
   post  'assembly/stage' => 'assembly#stage'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
+  post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
+  post  'assembly/get_action_results' => 'assembly#get_action_results'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'
@@ -67,7 +70,11 @@ R8::ReactorRoute.draw do
   post  'component_module/delete_remote' => 'component_module#delete_remote'
   post  'component_module/export' => 'component_module#export'
   post  'component_module/create_new_version' => 'component_module#create_new_version'
-  post 'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
+  post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
+  post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
+  post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
+  post  'component_module/list' => 'component_module#list'
+
 
    # DEPENDENCY
   post  'dependency/add_component_dependency' => 'dependency#add_component_dependency'
@@ -98,6 +105,8 @@ R8::ReactorRoute.draw do
   post  'node/task_status' => 'node#task_status'
   post  'node/image_upgrade' => 'node#image_upgrade'
   post  'node/stage' => 'node#stage'
+  post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
+  post  'node/get_action_results' => 'node#get_action_results'
 
    # NODE_GROUP
   post  'node_group/list' => 'node_group#list'
@@ -140,6 +149,8 @@ R8::ReactorRoute.draw do
   post  'service_module/delete' => 'service_module#delete'
   post  'service_module/delete_remote' => 'service_module#delete_remote'
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
+  post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
+
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 
    # STATE_CHANGE

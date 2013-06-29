@@ -273,14 +273,14 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       self[:content] = 
         if hash.empty? then hash
         elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
-          reify_component_module_contraints(hash.values.first)
+          reify_component_module_version_info(hash.values.first)
         elsif
           raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
         end
     end
 
-    def reify_component_module_contraints(hash)
-      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Constraint.reify?(hash[k]))}}
+    def reify_component_module_version_info(hash)
+      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}}
     end
 
     def create_component_modules_hash?()

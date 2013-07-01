@@ -1,3 +1,4 @@
+=begin
 Sequel.migration do
   change do
     alter_table(:node__node) do
@@ -5,3 +6,4 @@ Sequel.migration do
     end
   end
 end
+=end

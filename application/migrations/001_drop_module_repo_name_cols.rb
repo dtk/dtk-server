@@ -1,3 +1,4 @@
+=begin
 Sequel.migration do
   change do
     alter_table(:module__component) do
@@ -8,3 +9,5 @@ Sequel.migration do
     end
   end
 end
+=end
+

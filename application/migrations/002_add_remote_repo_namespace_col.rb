@@ -1,3 +1,4 @@
+=begin
 Sequel.migration do
   change do
     alter_table(:repo__repo) do
@@ -5,3 +6,5 @@ Sequel.migration do
     end
   end
 end
+=end
+

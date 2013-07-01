@@ -27,6 +27,8 @@ class DTKMigration
     end
     
     def dtk_create(model_name,parent_model_name,rows,old_model_name=nil)
+      ret = Array.new
+      return ret if rows.empty?
       ndx_user_date_ref_info = Hash.new 
       if old_model_name 
         ids = rows.map{|r|r[:old_id]}.compact

@@ -1,3 +1,4 @@
+=begin
 Sequel.migration do
   change do
     rename_table(:module__version_constraints, :module__component_module_refs)
@@ -6,4 +7,6 @@ Sequel.migration do
     end
   end
 end
+=end
+
 

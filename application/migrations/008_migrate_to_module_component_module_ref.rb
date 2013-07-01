@@ -33,13 +33,10 @@ Sequel.migration do
 
       #will have to clean this up later
       rename_table :module__component_module_refs,"module__old---component_module_refs".to_sym
-      cmr = dtk_select(:component_module_ref,:cols => [:id,:owner_id,:group_id,:ref,:ref_num,:created_at,:component_module,:version_info,:branch_id])
-      pp cmr
-      pp  DB[:top__id_info].filter(:relation_id => cmr.map{|r|r[:id]}).all()
-      pp DB["module__old---component_module_refs".to_sym].all
-      pp DB[:module__component_module_refs].all #this wil trigger an errror so dont get to forced error
+#      cmr = dtk_select(:component_module_ref,:cols => [:id,:owner_id,:group_id,:ref,:ref_num,:created_at,:component_module,:version_info,:branch_id])
+ #     pp cmr
+  #    pp  DB[:top__id_info].filter(:relation_id => cmr.map{|r|r[:id]}).all()
+   #   pp DB["module__old---component_module_refs".to_sym].all
      end
-     raise "forced error"
- 
   end
 end

@@ -61,7 +61,7 @@ def check_param_existance_on_attribute(assembly_id, node_name, param_name_list)
 	assembly_attributes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 
 	param_name_list.each do |param_name_to_check|
-		content = assembly_attributes['data'].select { |x| x['display_name'].include? "node[#{node_name}]/#{param_name_to_check}" }
+		content = assembly_attributes['data'].select { |x| x['display_name'].include? "#{node_name}/#{param_name_to_check}" }
 		dtk_common.pretty_print_JSON(content)
  		if (!content.empty?)
 			puts "Parameter with name #{param_name_to_check} exists"

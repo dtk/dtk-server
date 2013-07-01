@@ -27,7 +27,7 @@ class DtkCommon
 		@PORT = 7000
 		@ENDPOINT = "http://dev10.r8network.com:7000"
 		@USERNAME = 'dtk10'
-		@PASSWORD = 'r8server'
+	  @PASSWORD = 'r8server'
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
@@ -197,7 +197,7 @@ class DtkCommon
 		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 		pretty_print_JSON(assembly_attributes)
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/#{attribute_name_to_check}" }.first)		
+		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
 			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
@@ -227,7 +227,9 @@ class DtkCommon
 		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 		pretty_print_JSON(assembly_attributes)
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "node[#{node_name}]/cmp[#{component_name}]/#{attribute_name_to_check}" }.first)		
+		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}" 
+
+		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
 			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
@@ -602,6 +604,63 @@ class DtkCommon
 		puts ""
 	end
 
+	def get_module_attributes_list(module_name, filter_component)
+		#Filter component used on client side after retrieving all attributes from all components
+		puts "Get module attributes list:", "---------------------------"
+		attribute_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			puts "List of module attributes:"
+			pretty_print_JSON(module_attributes_list)
+
+			module_attributes_list['data'].each do |x|
+				if (filter_component != "")
+					attribute_list << x['display_name'] if x['display_name'].include? filter_component
+					puts "module attribute: #{x['display_name']}"
+				else
+					attribute_list << x['display_name']
+					puts "module attribute: #{x['display_name']}"
+				end
+			end
+		end
+		puts ""
+		return attribute_list
+	end
+
+	def get_module_attributes_list_by_component(module_name, component_name)
+		#Filter by component name used on server side to retrieve only attributes for specific component in module
+		puts "Get module attributes list by component:", "----------------------------------------"
+		attribute_list = Array.new()
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
+			puts "List of module components:"
+			pretty_print_JSON(module_components_list)
+
+			if (module_components_list['data'].select { |x| x['display_name'] == component_name}.first)
+				puts "Component #{component_name} exists in the list. Get component id..."
+				component_id = module_components_list['data'].select { |x| x['display_name'] == component_name}.first['id']
+				component_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id, :component_template_id=>component_id})
+				puts "List of component attributes:"
+				pretty_print_JSON(component_attributes_list)
+
+				component_attributes_list['data'].each do |x|
+					attribute_list << x['display_name']
+					puts "component attribute: #{x['display_name']}"
+				end
+			end
+		end
+		puts ""
+		return attribute_list
+	end
+
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)
 		puts "Check if component exists in module:", "------------------------------------"
 		component_exists_in_module = false
@@ -712,10 +771,10 @@ class DtkCommon
 			puts "Versioning response:"
 			pretty_print_JSON(versioning_response)
 			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {})
+			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
 			pretty_print_JSON(modules_list)
 
-			if (versioning_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['version'].include? version) }.first)
+			if (versioning_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
 				puts "Module #{module_name} versioned successfully."
 				module_versioned = true
 			else
@@ -742,10 +801,10 @@ class DtkCommon
 			puts "Import versioned module response:"
 			pretty_print_JSON(import_response)
 			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {})
+			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
 			pretty_print_JSON(modules_list)
 
-			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['version'].include? version) }.first)
+			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
 				puts "Versioned module imported successfully."
 				module_imported = true
 			else

@@ -16,7 +16,7 @@ gem 'sshkey','1.3.1'
 gem 'thin'
 #gem 'debugger'
 gem 'awesome_print','1.1.0'
-gem 'dtk-common', '0.1.9'
+
 # required to successfully run it
 # Minor change
 

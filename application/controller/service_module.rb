@@ -2,6 +2,7 @@ module DTK
   class Service_moduleController < AuthController
     helper :module_helper
     helper :component_template_helper
+    helper :assembly_helper
     
     #TODO: for debugging; will be removed
     def rest__debug_get_project_trees()
@@ -131,6 +132,12 @@ module DTK
       project = get_default_project()
       ServiceModule.delete_remote(project,remote_params)
       rest_ok_response 
+    end
+
+    def rest__delete_assembly_template()
+      # using ret_assembly_params_id_and_subtype to get asembly_template_id
+      assembly_id, subtype = ret_assembly_params_id_and_subtype()
+      rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
     end
 
     def rest__add_user_direct_access()

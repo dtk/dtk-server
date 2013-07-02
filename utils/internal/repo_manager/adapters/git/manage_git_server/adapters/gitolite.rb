@@ -179,7 +179,7 @@ module XYZ
           raise Error.new("Repo (#{repo_name}) does not exist")
         end
         #expections is that has form given by ConfigFileTemplate)
-        raw_content.each do |l|
+        raw_content.each_line do |l|
           l.chomp!()
           if l =~ /^[ ]*repo[ ]+([^ ]+)/
             unless $1 == repo_name

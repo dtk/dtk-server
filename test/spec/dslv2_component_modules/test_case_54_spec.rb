@@ -22,8 +22,8 @@ module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_54_dtk.model.json"
 file_for_change = "dtk.model.json"
-puppet_file_location = "./spec/dslv2_component_modules/resources/source_test.pp"
-puppet_file_name = "source_test.pp"
+puppet_file_location = "./spec/dslv2_component_modules/resources/test_case_54.pp"
+puppet_file_name = "test_case_54.pp"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)

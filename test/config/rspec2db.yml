@@ -1,6 +1,6 @@
 options:
   suite: "default_suite" #this can be used in a setup where multiple projects share the same test results database 
-  build: "12345" #
+  build: "abc12345" #
   backtrace: true #set backtrace to true for more details and metadata
 dbconnection:
   adapter: postgresql

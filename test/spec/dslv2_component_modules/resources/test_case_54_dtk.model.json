@@ -27,7 +27,7 @@
     },
     "source_test": {
       "external_ref": {
-        "puppet_class": "temp::source_test"
+        "puppet_class": "temp::test_case_54"
       },
       "attributes": {
         "param2": {

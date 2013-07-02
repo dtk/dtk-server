@@ -10,7 +10,7 @@ require 'bundler/setup'
 require 'ramaze'
 require 'json'
 require 'yaml'
-$: << "/usr/lib/ruby/1.8/" ;$: << "." #TODO: put in to get around path problem in rvm 1.9.2 environment
+#$: << "/usr/lib/ruby/1.8/" ;$: << "." #TODO: put in to get around path problem in rvm 1.9.2 environment
 
 ##### temp until convert to DTK
 module XYZ

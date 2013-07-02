@@ -65,7 +65,7 @@ describe "Test Case 54: Converge assembly with modified module (added new compon
   context "Add new puppet file for component #{component_name3}" do
     it "adds new puppet file to manifest" do
       pass = false
-      `mv #{puppet_file_location} #{module_filesystem_location}/#{module_name}/manifests`
+      `cp #{puppet_file_location} #{module_filesystem_location}/#{module_name}/manifests`
       value = `ls #{module_filesystem_location}/#{module_name}/manifests/#{puppet_file_name}`
       pass = !value.include?("No such file or directory")
       pass.should eq(true)

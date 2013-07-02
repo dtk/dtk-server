@@ -62,13 +62,21 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
         :filter => [:eq,:branch_id,branch.id()]
       }
       mh = branch.model_handle(:component_module_ref)
-      content_hash_content = Model.get_obj(mh,sp_hash).inject(Hash.new){|h,r|h.merge(r[:component_module] => r)}
-      new().reify_and_set_content(:component_modules => content_hash_content)
+      content_hash_content = Model.get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(key(r[:component_module]) => r)
+      end
+      new(content_hash_content)
     end
 
-    def set_and_save_content!(content_hash_form,opts={})
-      reify_and_set_content(content_hash_form)
-      save!(nil,opts)
+    def update_and_save_content!(hash_from_dsl,opts={})
+      if hash_from_dsl.empty?
+      elsif hash_from_dsl.size == 1 and hash_from_dsl.keys.first.to_sym == :component_modules
+        @component_modules = reify_content(hash_from_dsl.values.first)
+        save!(nil,opts)
+      else
+        raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
+      end
+      self
     end
 
     def ret_versions_indexed_by_modules()
@@ -82,34 +90,23 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
     
    private
-    def initialize()
-      @content = Hash.new
+    attr_reader :component_modules
+    def initialize(content_hash_form)
+      @component_modules = reify_content(content_hash_form)
     end
 
-    def component_modules()
-      @content[:component_modules]||{}
-    end
-
-    def reify_and_set_content(hash)
-      @content = 
-        if hash.empty? then hash
-        elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
-          reify_component_module_version_info(hash.values.first)
-        elsif
-          raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
-        end
-      self
+    def reify_content(hash)
+      if hash.empty? then hash
+      else
+        reify_component_module_version_info(hash)
+      end
     end
 
     def reify_component_module_version_info(hash)
       #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
-      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}}
+      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}
     end
 
-    def create_component_modules_hash?()
-      @content[:component_modules] ||= Hash.new
-    end
-    
     def key(el)
       el.to_sym
     end
@@ -232,12 +229,13 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def content_in_hash_form()
-      self.class.hash_form(@content)
+      self.class.hash_form(@component_modules)
     end
 
    private
 
     def get_hash_content(service_module_branch)
+      raise Error.new("Need to factor out  :component_modules")
       ret = SimpleOrderedHash.new()
       component_module_refs = self.class.get_component_module_refs(service_module_branch)
       unordered_hash = component_module_refs.content_in_hash_form()

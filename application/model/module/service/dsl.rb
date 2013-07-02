@@ -51,7 +51,7 @@ module DTK
           content_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end
         cmp_module_refs = ComponentModuleRefs.get_component_module_refs(module_branch)
-        cmp_module_refs.set_and_save_content!(content_hash_form,opts)
+        cmp_module_refs.update_and_save_content!(content_hash_form,opts)
       end
 
       def update_assemblies_from_dsl(module_branch,component_module_refs)

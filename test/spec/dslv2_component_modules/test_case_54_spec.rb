@@ -16,14 +16,14 @@ assembly_template = 'bootstrap::test1'
 node_name = 'test1'
 component_name1 = 'temp::sink'
 component_name2 = 'temp::source'
-component_name3 = 'temp::test_case_54'
+component_name3 = 'temp::source_test'
 module_name = 'temp'
 module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_54_dtk.model.json"
 file_for_change = "dtk.model.json"
-puppet_file_location = "./spec/dslv2_component_modules/resources/test_case_54.pp"
-puppet_file_name = "test_case_54.pp"
+puppet_file_location = "./spec/dslv2_component_modules/resources/source_test.pp"
+puppet_file_name = "source_test.pp"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
@@ -58,7 +58,7 @@ describe "Test Case 54: Converge assembly with modified module (added new compon
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Remove existing component attribute in dtk.model.json file" do
+  context "Add new component and new attribute in dtk.model.json file" do
     include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds new source_test component with new param_test attribute dtk.model.json"
   end
 

@@ -1,4 +1,4 @@
-class temp::test_case_54(
+class temp::source_test(
   $param2 = 'param2-val',
   $param_test = 'some_value'
 )

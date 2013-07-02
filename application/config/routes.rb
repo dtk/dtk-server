@@ -3,6 +3,8 @@
 r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
+  # ACCOUNT
+  post 'service_module/add_user_direct_access' => 'service_module#add_user_direct_access'
 
   # USER
   post 'user/process_login'    => "user#process_login"

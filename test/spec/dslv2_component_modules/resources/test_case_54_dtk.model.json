@@ -12,18 +12,7 @@
           "description": "Param2",
           "type": "string"
         }
-      },
-      "depends_on": [
-        {
-          "member": {
-            "component": "temp::sink",
-            "location": "remote",
-            "attribute_mappings": [
-              "host_address <- $members"
-            ]
-          }
-        }
-      ]
+      }
     },
     "source_test": {
       "external_ref": {

@@ -149,6 +149,7 @@ R8::ReactorRoute.draw do
   post  'service_module/set_component_module_version' => 'service_module#set_component_module_version'
   post  'service_module/delete' => 'service_module#delete'
   post  'service_module/delete_remote' => 'service_module#delete_remote'
+  post  'service_module/delete_assembly_template' => 'service_module#delete_assembly_template'
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
 

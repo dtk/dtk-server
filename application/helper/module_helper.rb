@@ -1,5 +1,22 @@
 module Ramaze::Helper
   module ModuleHelper
+
+    def rest_async_response
+      body = DeferrableBody.new
+
+      # Get the headers out there asap, let the client know we're alive...
+      EM.next_tick do
+        request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
+      end
+
+      ::DTK::CreateThread.defer do
+        yield(body)
+        body.succeed
+      end
+
+      throw :async
+    end
+
     def import_method_helper(module_class)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
@@ -58,5 +75,17 @@ module Ramaze::Helper
         ::DTK::Library.get_public_library(model_handle(:library)).id_handle()
       end
     end
+  end
+end
+
+class DeferrableBody
+  include EventMachine::Deferrable
+
+  def send(data)
+    @body_callback.call data
+  end
+
+  def each(&blk)
+    @body_callback = blk
   end
 end

@@ -17,32 +17,42 @@ module XYZ
 
       ramaze_user = user_object()
 
+
+      # DEBUG SNIPPET >>>> REMOVE <<<<
+      # ramaze_user = User.get_user_by_id( { :model_name => :user, :c => 2 }, 2147483717)
+      # user_login(ramaze_user.merge(:access_time => Time.now))
+
+
       unless route.first == "user"
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
-            Log.debug "Session cookie has been used to temporary revive user session"
+            if request.cookies["dtk-user-info"]
+              Log.debug "Session cookie is beeing used to revive this session"
 
-            # using cookie to take session information
-            # composed data is consistent form user_id, expire timestamp, and tenant id
-            # URL encoding is transfering + sign to ' ', so we correct that via gsub
-            cookie_data = Base64.decode64(request.cookies["dtk-user-info"].gsub(' ','+'))
-            composed_data = ::AESCrypt.decrypt(cookie_data, ENCRYPTION_SALT, ENCRYPTION_SALT)
+              # using cookie to take session information
+              # composed data is consistent form user_id, expire timestamp, and tenant id
+              # URL encoding is transfering + sign to ' ', so we correct that via gsub
+              cookie_data = Base64.decode64(request.cookies["dtk-user-info"].gsub(' ','+'))
+              composed_data = ::AESCrypt.decrypt(cookie_data, ENCRYPTION_SALT, ENCRYPTION_SALT)
 
-            user_id, time_integer, c = composed_data.split('_')
+              user_id, time_integer, c = composed_data.split('_')
 
-            # make sure that cookie has not expired
-            if (time_integer.to_i >= Time.now.to_i)
-              # due to tight coupling between model_handle and user_object we will set
-              # model handle manually 
-              ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
-   
-              # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
-              # this is easiest way to do it. But does feel dirty.
-              # TODO: [Haris] This does not work since user is not persisted, look into this after cookie bug is resolved
-              user_login(ramaze_user.merge(:access_time => Time.now))
+              # make sure that cookie has not expired
+              if (time_integer.to_i >= Time.now.to_i)
+                # due to tight coupling between model_handle and user_object we will set
+                # model handle manually 
+                ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
+     
+                # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
+                # this is easiest way to do it. But does feel dirty.
+                # TODO: [Haris] This does not work since user is not persisted, look into this after cookie bug is resolved
+                user_login(ramaze_user.merge(:access_time => Time.now))
 
-              # we set :last_ts as access time for later check
-              session.store(:last_ts, Time.now.to_i)
+                # we set :last_ts as access time for later check
+                session.store(:last_ts, Time.now.to_i)
+
+                Log.debug "Session cookie has been used to temporary revive user session"
+              end
             end
           end
         end

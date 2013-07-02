@@ -17,4 +17,13 @@ else
   puts "**** DEVELOPMENT MODE - NO LOGS ****"
 end
 
+
+#require 'rack/contrib'
+#
+#
+#Ramaze.middleware! :dev do |m|
+#  m.use ::Middleware::Banlist
+#  m.run Ramaze.middleware
+#end
+
 Ramaze.start(:adapter => :thin, :port => server_port, :file => __FILE__)

@@ -65,7 +65,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       content_hash_content = Model.get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
         h.merge(key(r[:component_module]) => r)
       end
-      new(content_hash_content)
+      new(branch,content_hash_content)
     end
 
     def update_and_save_content!(hash_from_dsl,opts={})
@@ -91,7 +91,8 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     
    private
     attr_reader :component_modules
-    def initialize(content_hash_form)
+    def initialize(parent,content_hash_form)
+      @parent = parent
       @component_modules = reify_content(content_hash_form)
     end
 

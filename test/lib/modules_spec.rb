@@ -11,7 +11,7 @@ shared_context "Import remote module" do |module_name|
     puts "Import remote module:", "---------------------"
     pass = false
     value = `dtk module import-r8n #{module_name}`
-    pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client"))
     puts "Import of remote module #{module_name} completed successfully!" if pass == true
     puts "Import of remote module #{module_name} did not complete successfully!" if pass == false
     puts ""
@@ -24,7 +24,7 @@ shared_context "Import module from puppet forge" do |puppet_forge_module_name|
     puts "Import module from puppet forge:", "---------------------"
     pass = false
     value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
-    pass = true if ((!value.include? "[ERROR]") || (!value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
     puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
     puts "Import of puppet forge module #{puppet_forge_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -37,7 +37,7 @@ shared_context "NEG - Import module from puppet forge" do |puppet_forge_module_n
     puts "NEG - Import module from puppet forge:", "---------------------"
     pass = false
     value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
-    pass = true if ((value.include? "[ERROR]") || (value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
+    pass = true if ((value.include? "ERROR") || (value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
     puts "Import of incorrect puppet forge module #{puppet_forge_module_name} was not completed successfully!" if pass == true
     puts "Import of incorrect puppet forge module #{puppet_forge_module_name} was completed successfully!" if pass == false
     puts ""
@@ -50,7 +50,7 @@ shared_context "Create module from provided git repo" do |module_name, git_ssh_r
     puts "Create module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
-    pass = true if ((!value.include? "[ERROR]") || (!value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
     puts "Module #{module_name} created successfully from provided git repo!" if pass == true
     puts "Module #{module_name} was not created successfully from provided git repo!" if pass == false
     puts ""
@@ -63,7 +63,7 @@ shared_context "NEG - Create module from provided git repo" do |module_name, git
     puts "NEG - Create module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
-    pass = true if ((value.include? "[ERROR]") || (value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    pass = true if ((value.include? "ERROR") || (value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
     puts "Module #{module_name} was not created successfully from provided incorrect git repo!" if pass == true
     puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == false
     puts ""

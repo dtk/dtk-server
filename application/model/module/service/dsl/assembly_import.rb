@@ -12,19 +12,21 @@ module DTK; class ServiceModule
       @module_name = module_name
       @service_module = get_service_module(container_idh,module_name)
       @component_module_refs = component_module_refs
+      @ndx_version_proc_classes = Hash.new
     end
 
     def process(module_name,hash_content)
       #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
       integer_version = determine_integer_version(hash_content)
-      @version_proc_class = load_and_return_version_adapter_class(integer_version)
-      @version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      version_proc_class = load_and_return_version_adapter_class(integer_version)
+      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           dangling_errors.aggregate_errors! do
-            @db_updates_assemblies["component"].merge!(@version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(@version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
+            @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
+            @db_updates_assemblies["node"].merge!(version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
             @ndx_assembly_hashes[ref] ||= assem
+            @ndx_version_proc_classes[ref] ||= version_proc_class
           end
         end
         dangling_errors.raise_error?()

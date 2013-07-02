@@ -46,14 +46,30 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
      private
       def get_component_module_refs(service_version=nil)
-        get_module_branch_matching_version(service_version).get_component_module_refs()
+        branch = get_module_branch_matching_version(service_version)
+        ComponentModuleRefs.get_component_module_refs(branch)
       end
 
     end
   end
 
-  class ComponentModuleRefs < Model 
+  class ComponentModuleRefs 
     r8_nested_require('component_module_refs','version_info')
+
+    def self.get_component_module_refs(branch)
+      sp_hash = {
+        :cols => [:id,:display_name,:group_id,:component_module,:version_info,:remote_info],
+        :filter => [:eq,:branch_id,branch.id()]
+      }
+      mh = branch.model_handle(:component_module_ref)
+      content_hash_content = Model.get_obj(mh,sp_hash).inject(Hash.new){|h,r|h.merge(r[:component_module] => r)}
+      new().reify_and_set_content(:component_modules => content_hash_content)
+    end
+
+    def set_and_save_content!(content_hash_form,opts={})
+      reify_and_set_content(content_hash_form)
+      save!(nil,opts)
+    end
 
     def ret_versions_indexed_by_modules()
       component_modules.inject(Hash.new) do |h,(mod,mod_info)|
@@ -64,11 +80,41 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     def self.meta_filename_path()
       "global_module_refs.json"
     end
-
-    def self.create_and_reify?(module_branch_parent,component_module_refs=nil)
-      component_module_refs ||= create_stub(module_branch_parent.model_handle(:component_module_refs))
-      component_module_refs.reify!(module_branch_parent)
+    
+   private
+    def initialize()
+      @content = Hash.new
     end
+
+    def component_modules()
+      @content[:component_modules]||{}
+    end
+
+    def reify_and_set_content(hash)
+      @content = 
+        if hash.empty? then hash
+        elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
+          reify_component_module_version_info(hash.values.first)
+        elsif
+          raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
+        end
+      self
+    end
+
+    def reify_component_module_version_info(hash)
+      #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
+      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}}
+    end
+
+    def create_component_modules_hash?()
+      @content[:component_modules] ||= Hash.new
+    end
+    
+    def key(el)
+      el.to_sym
+    end
+    
+  public
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
@@ -154,17 +200,6 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
-    def reify!(parent)
-      @parent = parent
-      cmp_module_objs = component_modules()
-      cmp_module_objs.each do |mod,mod_ref|
-        if version_assignment_obj = VersionInfo::Assignment.reify?(mod_ref)
-          cmp_module_objs[mod] = version_assignment_obj
-        end
-      end
-      self
-    end
-
     def save!(parent_idh=nil,opts={})
       parent_idh ||= parent_idh()
 
@@ -196,23 +231,15 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       self
     end
 
-    def set_and_save_content!(content_hash_form,opts={})
-      reify_and_set_content(content_hash_form)
-      save!(nil,opts)
-    end
-
     def content_in_hash_form()
-      ret = Hash.new
-      unless content = self[:content]
-        return ret
-      end
-      self.class.hash_form(content)
+      self.class.hash_form(@content)
     end
 
    private
+
     def get_hash_content(service_module_branch)
       ret = SimpleOrderedHash.new()
-      component_module_refs = service_module_branch.get_component_module_refs()
+      component_module_refs = self.class.get_component_module_refs(service_module_branch)
       unordered_hash = component_module_refs.content_in_hash_form()
       if unordered_hash.empty?
         return ret
@@ -263,32 +290,6 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def module_version(cmp_module_name)
       VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
-    end
-    
-    def component_modules()
-      ((self[:content]||{})[:component_modules])||{}
-    end
-
-    def reify_and_set_content(hash)
-      self[:content] = 
-        if hash.empty? then hash
-        elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
-          reify_component_module_version_info(hash.values.first)
-        elsif
-          raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
-        end
-    end
-
-    def reify_component_module_version_info(hash)
-      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}}
-    end
-
-    def create_component_modules_hash?()
-      (self[:content] ||= Hash.new)[:component_modules] ||= Hash.new
-    end
-    
-    def key(el)
-      el.to_sym
     end
     
     def self.hash_form(el)

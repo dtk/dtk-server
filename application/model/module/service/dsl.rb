@@ -50,7 +50,7 @@ module DTK
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
           content_hash_form = Aux.json_parse(json_content,meta_filename_path)
         end
-        cmp_module_refs = module_branch.get_component_module_refs()
+        cmp_module_refs = ComponentModuleRefs.get_component_module_refs(module_branch)
         cmp_module_refs.set_and_save_content!(content_hash_form,opts)
       end
 

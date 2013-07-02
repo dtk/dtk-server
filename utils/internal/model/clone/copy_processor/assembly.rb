@@ -35,7 +35,8 @@ module DTK
             :cols => [:id],
             :filter => [:eq,:id,source_obj.get_field?(:module_branch_id)]
           }
-          Model.get_obj(source_obj.model_handle(:module_branch),sp_hash).get_component_module_refs()
+          branch = Model.get_obj(source_obj.model_handle(:module_branch),sp_hash)
+          ComponentModuleRefs.get_component_module_refs(branch)
         end
 
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)

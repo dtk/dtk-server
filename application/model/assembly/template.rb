@@ -48,7 +48,7 @@ module DTK; class Assembly
           unless pntr 
             module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
-              :version_constraints => ComponentModuleRefs.create_and_reify?(module_branch,r[:component_module_refs])
+              :version_constraints => ComponentModuleRefs.get_component_module_refs(module_branch)
             }
           end
           aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))

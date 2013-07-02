@@ -8,15 +8,6 @@ module DTK
       update_object!(:type)[:type].to_sym
     end
 
-    def get_component_module_refs()
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id,:content],
-        :filter => [:eq,:branch_id,id()]
-      }
-      mh = model_handle(:component_module_refs)
-      ComponentModuleRefs.create_and_reify?(self,Model.get_obj(mh,sp_hash))
-    end
-    
     def get_module_repo_info()
       repo = get_repo(:repo_name)
       module_obj = get_module()

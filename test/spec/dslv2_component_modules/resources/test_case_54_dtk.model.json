@@ -37,7 +37,7 @@
         "members": {
           "description": "Members gotten from connected sources",
           "type": "array(string)",
-          "required": true
+          "required": false
         },
         "param1": {
           "description": "Param1",

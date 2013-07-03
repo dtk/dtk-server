@@ -196,8 +196,13 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def self.reify_component_module_version_info(hash)
-      #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
-      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => ComponentModuleRef::VersionInfo::Assignment.reify?(hash[k]))}
+      ret = Hash.new
+      hash.each_pair do |k,v|
+        if version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(v)
+          ret.merge!(key(k) => version_info)
+        end
+      end
+      ret
     end
 
     def self.key(el)

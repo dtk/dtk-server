@@ -28,7 +28,6 @@ module DTK; class Assembly
       get_objs(node_mh,sp_hash)
     end
 
-    #TODO: this can be expensive call; may move to factoring in :component_module_refs relatsionship to what component_ref component_template_id is pointing to
     def self.get_augmented_component_refs(mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
@@ -41,7 +40,7 @@ module DTK; class Assembly
       assembly_rows.each do |r|
         component_ref = r[:component_ref]
         unless component_type = component_ref[:component_type]||(r[:component_template]||{})[:component_type]
-          Log.error("Component ref with id #{r[:id]}) does not have a compoennt type ssociated with it")
+          Log.error("Component ref with id #{r[:id]}) does not have a component type associated with it")
         else
           service_module_name = service_module_name(r[:component_type])
           pntr = aug_cmp_refs_ndx_by_vc[service_module_name]

@@ -177,12 +177,8 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
-    def content_in_hash_form()
-      self.class.hash_form(@component_modules)
-    end
-
-   private
     attr_reader :component_modules
+   private
     def initialize(parent,content_hash_form)
       @parent = parent
       @component_modules = self.class.reify_content(content_hash_form)
@@ -217,24 +213,38 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
       unless opts[:donot_make_repo_changes]
         meta_filename_path = meta_filename_path()
-        parent.serialize_and_save_to_repo(meta_filename_path,get_hash_content(parent))
+        parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form(parent))
       end
     end
 
-    def self.get_hash_content(service_module_branch)
+    #TODO: right now just simple form with scalar denoting version; update to treat remote info
+    def self.dsl_hash_form(service_module_branch)
       ret = SimpleOrderedHash.new()
       component_module_refs = get_component_module_refs(service_module_branch)
-      unordered_hash = component_module_refs.content_in_hash_form()
-      if unordered_hash.empty?
+      dsl_hash_form = dsl_hash_form_aux(component_module_refs.component_modules)
+      if dsl_hash_form.empty?
         return ret
       end
-      unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
-        raise Error.new("Unexpected key(s) in component_module_refs (#{unordered_hash.keys.join(',')})")
-      end
       
-      cmp_mods = unordered_hash[:component_modules]
-        cmp_mod_contraints = cmp_mods.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
-      ret.merge(:component_modules => cmp_mod_contraints)
+      sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
+        h.merge(k => dsl_hash_form[k.to_sym])
+      end
+      ret.merge(:component_modules => sorted_dsl_hash_form)
+    end
+    def self.dsl_hash_form_aux(el)
+      if el.kind_of?(Hash)
+        el.inject(Hash.new) do |h,(k,v)|
+          if val = dsl_hash_form_aux(v)
+            h.merge(k => val)
+          else
+            h
+          end
+        end
+      elsif el.kind_of?(ComponentModuleRef::VersionInfo)
+        el.to_s
+      else
+        el
+      end
     end
 
     class ComponentTypeToCheck < Array
@@ -276,22 +286,6 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       ComponentModuleRef::VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
     end
     
-    def self.hash_form(el)
-      if el.kind_of?(Hash)
-        el.inject(Hash.new) do |h,(k,v)|
-          if val = hash_form(v)
-             h.merge(k => val)
-          else
-            h
-          end
-        end
-      elsif el.kind_of?(ComponentModuleRef::VersionInfo)
-        el.to_s
-      else
-        el
-      end
-    end
-
     def project_idh()
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)

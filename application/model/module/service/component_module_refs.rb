@@ -68,13 +68,12 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       new(branch,content_hash_content)
     end
 
-    def update_and_save_content!(hash_from_dsl,opts={})
-      if hash_from_dsl.empty?
-      elsif hash_from_dsl.size == 1 and hash_from_dsl.keys.first.to_sym == :component_modules
-        @component_modules = reify_content(hash_from_dsl.values.first)
-        save!(nil,opts)
+    def self.update_from_dsl_hash(module_branch,dsl_hash,opts={})
+      if dsl_hash.empty?
+      elsif dsl_hash.size == 1 and dsl_hash.keys.first.to_sym == :component_modules
+        update(module_branch,reify_content(dsl_hash.values.first),opts)
       else
-        raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
+        raise Error.new("Do not treat module verions contraints of form (#{dsl_hash.inspect})")
       end
       self
     end
@@ -93,17 +92,17 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     attr_reader :component_modules
     def initialize(parent,content_hash_form)
       @parent = parent
-      @component_modules = reify_content(content_hash_form)
+      @component_modules = self.class.reify_content(content_hash_form)
     end
 
-    def reify_content(hash)
+    def self.reify_content(hash)
       if hash.empty? then hash
       else
         reify_component_module_version_info(hash)
       end
     end
 
-    def reify_component_module_version_info(hash)
+    def self.reify_component_module_version_info(hash)
       #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
       hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}
     end
@@ -192,12 +191,39 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def set_module_version(cmp_module_name,version)
+      cmp_module_key = key(cmp_module_name)
       #TODO: update to do merge when self has more than version info
-      create_component_modules_hash?()[key(cmp_module_name)] = VersionInfo::Assignment.new(version)
-      save!()
+      pntr = @component_modules[cmp_module_key] = VersionInfo::Assignment.new(version)
+      self.class.update(@parent,{cmp_module_key => pntr})
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
 
+    def content_in_hash_form()
+      self.class.hash_form(@component_modules)
+    end
+
+   private
+    def self.update(parent,cmp_modules,opts={})
+      branch_id =
+        if parent.id_handle(:model_name) == :module_branch
+          parent.id()
+        else
+          raise Error.new("curerntly not implemented compoennt module refs with a parent otehr than a module_branch")
+        end
+      update_rows = cmp_modules.map do |cmp_mod_ref,content|
+        if content.kind_of?(VersionInfo::Assignment)
+          {
+            :component_module => cmp_mod_ref, 
+            :version_info => content.version_info,
+            :branch_id = branch_id
+          }
+        else
+          raise Error.new("Not treated yet component module ref content other than VersionInfo::Assignment")
+        end
+      end
+      raise Error.new("in midst of writing this")
+    end
+=begin
     def save!(parent_idh=nil,opts={})
       parent_idh ||= parent_idh()
 
@@ -228,12 +254,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
       self
     end
-
-    def content_in_hash_form()
-      self.class.hash_form(@component_modules)
-    end
-
-   private
+=end
 
     def get_hash_content(service_module_branch)
       raise Error.new("Need to factor out  :component_modules")

@@ -16,7 +16,10 @@ module XYZ
           where_clause = SQL.and(where_clause,{parent_fk_col => parent_id_info[:id]})
         end
 
-        db_rel = DB_REL_DEF[model_name]
+        unless db_rel = DB_REL_DEF[model_name]
+          raise Error.new("Illegal model name (#{model_name})")
+        end
+
         filter = DB.augment_for_authorization(where_clause,model_handle) #SQL.and({CONTEXT_ID => c},where_clause)
 	ds = ret_dataset_with_scalar_columns(db_rel,opts).filter(filter)
         return SQL::Dataset.new(model_handle,ds.from_self(:alias => model_name)) if opts[:return_just_sequel_dataset]

@@ -50,6 +50,17 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
         ComponentModuleRefs.get_component_module_refs(branch)
       end
 
+      def update_component_template_ids(component_module)
+        #first get filter so can call get_augmented_component_refs
+        assembly_templates = component_module.get_associated_assembly_templates()
+        return if assembly_templates.empty?
+        filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
+        opts = {:filter => filter,:force_compute_template_id => true}
+        aug_cmp_refs = Assembly::Template.get_augmented_component_refs(model_handle(:component),opts)
+        return if aug_cmp_refs.empty?
+        cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
+        Model.update_from_rows(model_handle(:component_ref),cmp_ref_update_rows)
+      end
     end
   end
 
@@ -80,31 +91,6 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     def self.meta_filename_path()
       "global_module_refs.json"
     end
-    
-   private
-    attr_reader :component_modules
-    def initialize(parent,content_hash_form)
-      @parent = parent
-      @component_modules = self.class.reify_content(content_hash_form)
-    end
-
-    def self.reify_content(hash)
-      if hash.empty? then hash
-      else
-        reify_component_module_version_info(hash)
-      end
-    end
-
-    def self.reify_component_module_version_info(hash)
-      #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
-      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => ComponentModuleRef::VersionInfo::Assignment.reify?(hash[k]))}
-    end
-
-    def key(el)
-      el.to_sym
-    end
-    
-  public
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
     #augmented with :component_template key which points to associated component template or nil 
@@ -196,6 +182,31 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
    private
+    attr_reader :component_modules
+    def initialize(parent,content_hash_form)
+      @parent = parent
+      @component_modules = self.class.reify_content(content_hash_form)
+    end
+
+    def self.reify_content(hash)
+      if hash.empty? then hash
+      else
+        reify_component_module_version_info(hash)
+      end
+    end
+
+    def self.reify_component_module_version_info(hash)
+      #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
+      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => ComponentModuleRef::VersionInfo::Assignment.reify?(hash[k]))}
+    end
+
+    def self.key(el)
+      el.to_sym
+    end
+    def key(el)
+      self.class.key(el)
+    end
+
     def self.update(parent,cmp_modules,opts={})
       ComponentModuleRef.create_or_update(parent,cmp_modules)
 
@@ -205,10 +216,9 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       end
     end
 
-    def get_hash_content(service_module_branch)
-      raise Error.new("Need to factor out  :component_modules")
+    def self.get_hash_content(service_module_branch)
       ret = SimpleOrderedHash.new()
-      component_module_refs = self.class.get_component_module_refs(service_module_branch)
+      component_module_refs = get_component_module_refs(service_module_branch)
       unordered_hash = component_module_refs.content_in_hash_form()
       if unordered_hash.empty?
         return ret

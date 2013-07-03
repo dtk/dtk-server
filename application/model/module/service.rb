@@ -209,18 +209,6 @@ module DTK
       module_branch.set_sha(commit_sha)
     end
 
-    def update_component_template_ids(component_module)
-      #first get filter so can call get_augmented_component_refs
-      assembly_templates = component_module.get_associated_assembly_templates()
-      return if assembly_templates.empty?
-      filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
-      opts = {:filter => filter,:force_compute_template_id => true}
-      aug_cmp_refs = Assembly::Template.get_augmented_component_refs(model_handle(:component),opts)
-      return if aug_cmp_refs.empty?
-      cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
-      Model.update_from_rows(model_handle(:component_ref),cmp_ref_update_rows)
-    end
-
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version)
       project = get_project()

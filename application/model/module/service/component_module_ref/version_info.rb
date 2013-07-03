@@ -1,4 +1,4 @@
-module DTK; class ComponentModuleRefs
+module DTK; class ComponentModuleRef
   class VersionInfo
     class Assignment < self
       def initialize(string_or_obj)

@@ -88,6 +88,11 @@ module XYZ
       end
     end
 
+    #parent_id field name for child_model_name with parent this
+    def parent_id_field_name(child_model_name)
+      id_handle().create_childMH(child_model_name).parent_id_field_name()
+    end
+
     def self.normalize_model(model_name)
       (model_name  == :datacenter ? :target : model_name)
     end

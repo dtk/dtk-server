@@ -54,15 +54,8 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
   end
 
   class ComponentModuleRefs 
-    r8_nested_require('component_module_refs','version_info')
-
     def self.get_component_module_refs(branch)
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id,:component_module,:version_info,:remote_info],
-        :filter => [:eq,:branch_id,branch.id()]
-      }
-      mh = branch.model_handle(:component_module_ref)
-      content_hash_content = Model.get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+      content_hash_content = ComponentModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
         h.merge(key(r[:component_module]) => r)
       end
       new(branch,content_hash_content)
@@ -104,7 +97,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def self.reify_component_module_version_info(hash)
       #TODO: hash values can be string or ComponentModuleRef object; for later want also the id
-      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Assignment.reify?(hash[k]))}
+      hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => ComponentModuleRef::VersionInfo::Assignment.reify?(hash[k]))}
     end
 
     def key(el)
@@ -193,7 +186,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     def set_module_version(cmp_module_name,version)
       cmp_module_key = key(cmp_module_name)
       #TODO: update to do merge when self has more than version info
-      pntr = @component_modules[cmp_module_key] = VersionInfo::Assignment.new(version)
+      pntr = @component_modules[cmp_module_key] = ComponentModuleRef::VersionInfo::Assignment.new(version)
       self.class.update(@parent,{cmp_module_key => pntr})
       #TODO: here may search through 'linked' component instances and change version associated with them
     end
@@ -204,57 +197,13 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
    private
     def self.update(parent,cmp_modules,opts={})
-      branch_id =
-        if parent.id_handle(:model_name) == :module_branch
-          parent.id()
-        else
-          raise Error.new("curerntly not implemented compoennt module refs with a parent otehr than a module_branch")
-        end
-      update_rows = cmp_modules.map do |cmp_mod_ref,content|
-        if content.kind_of?(VersionInfo::Assignment)
-          {
-            :component_module => cmp_mod_ref, 
-            :version_info => content.version_info,
-            :branch_id = branch_id
-          }
-        else
-          raise Error.new("Not treated yet component module ref content other than VersionInfo::Assignment")
-        end
-      end
-      raise Error.new("in midst of writing this")
-    end
-=begin
-    def save!(parent_idh=nil,opts={})
-      parent_idh ||= parent_idh()
+      ComponentModuleRef.create_or_update(parent,cmp_modules)
 
-      #update model
-      if id() 
-        #persisted already, needs update
-        update_row = {
-          :id => id(),
-          :content => content_in_hash_form()
-        }
-        #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified content hash
-        Model.update_from_rows(model_handle(),[update_row])
-      else
-        mh = parent_idh.create_childMH(:component_module_refs) 
-        row = {
-          mh.parent_id_field_name() => parent_idh.get_id(),
-          :ref => "content", #max one per parent so this can be constant
-          :content => content_in_hash_form(),
-        }
-        @id_handle = Model.create_from_row(mh,row,:convert => true)
-      end
-
-      #update git repo
       unless opts[:donot_make_repo_changes]
-        meta_filename_path = self.class.meta_filename_path()
-        @parent.serialize_and_save_to_repo(meta_filename_path,get_hash_content(@parent))
+        meta_filename_path = meta_filename_path()
+        parent.serialize_and_save_to_repo(meta_filename_path,get_hash_content(parent))
       end
-
-      self
     end
-=end
 
     def get_hash_content(service_module_branch)
       raise Error.new("Need to factor out  :component_modules")
@@ -309,7 +258,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def module_version(cmp_module_name)
-      VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
+      ComponentModuleRef::VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
     end
     
     def self.hash_form(el)
@@ -321,16 +270,13 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
             h
           end
         end
-      elsif el.kind_of?(VersionInfo)
+      elsif el.kind_of?(ComponentModuleRef::VersionInfo)
         el.to_s
       else
         el
       end
     end
 
-    def parent_idh()
-      @parent.id_handle()
-    end
     def project_idh()
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)

@@ -7,14 +7,9 @@ module DTK
 
 
     def rest__test_em_defer()
+      
       rest_async_response do |body|
-        body.send "#{Time.now}"
-        sleep(2)
-        body.send "#{Time.now}"
-        sleep(2)
-        body.send "#{Time.now}"
-        sleep(2)
-        body.send "#{Time.now}"
+        repeat(body, 20)
       end
     end
 

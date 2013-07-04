@@ -345,6 +345,27 @@ module DTK; class  Assembly
       end
     end
 
+    def get_components_module(component_id)
+      component, version = nil, nil
+      aug_cmps = get_augmented_components()
+
+      ret = aug_cmps.map do |r|
+        component = r if r[:id]==component_id.to_i
+      end
+      
+      if branch_id = component[:module_branch_id]
+        sp_hash = {
+          :cols => [:id,:display_name,:version],
+          :filter => [:eq, :id, branch_id]
+        }
+        module_branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+        component = module_branch.get_module()
+        version   = module_branch[:version]
+      end
+
+      {:component => component, :version => (version=="master" ? nil : version)}
+    end
+
     def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
       #has lookup taht includes each satisfied_by_component
       ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}

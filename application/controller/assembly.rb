@@ -70,6 +70,12 @@ module DTK
       rest_ok_response components
     end
 
+    def rest__get_components_module()
+      assembly = ret_assembly_instance_object()
+      component_id = ret_non_null_request_params(:component_id)
+      rest_ok_response assembly.get_components_module(component_id)
+    end
+
     # checks element trough set of fields
     def check_element(element, fields, element_id_val)
       return true if (element_id_val.nil? || element_id_val.empty?)

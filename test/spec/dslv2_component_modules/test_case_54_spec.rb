@@ -22,8 +22,13 @@ module_namespace = 'r8'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/dslv2_component_modules/resources/test_case_54_dtk.model.json"
 file_for_change = "dtk.model.json"
+
 puppet_file_location = "./spec/dslv2_component_modules/resources/source_test.pp"
 puppet_file_name = "source_test.pp"
+
+puppet_file_location2 = "./spec/dslv2_component_modules/resources/sink.pp"
+puppet_file_name2 = "sink.pp"
+
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
@@ -58,15 +63,25 @@ describe "Test Case 54: Converge assembly with modified module (added new compon
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Remove existing component attribute in dtk.model.json file" do
+  context "Add new component and new attribute in dtk.model.json file" do
     include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds new source_test component with new param_test attribute dtk.model.json"
   end
 
   context "Add new puppet file for component #{component_name3}" do
     it "adds new puppet file to manifest" do
       pass = false
-      `mv #{puppet_file_location} #{module_filesystem_location}/#{module_name}/manifests`
+      `cp #{puppet_file_location} #{module_filesystem_location}/#{module_name}/manifests`
       value = `ls #{module_filesystem_location}/#{module_name}/manifests/#{puppet_file_name}`
+      pass = !value.include?("No such file or directory")
+      pass.should eq(true)
+    end
+  end
+
+  context "Replace existing puppet file for component #{component_name1}" do
+    it "replaces existing puppet file in manifest" do
+      pass = false
+      `cp #{puppet_file_location2} #{module_filesystem_location}/#{module_name}/manifests`
+      value = `ls #{module_filesystem_location}/#{module_name}/manifests/#{puppet_file_name2}`
       pass = !value.include?("No such file or directory")
       pass.should eq(true)
     end

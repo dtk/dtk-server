@@ -14,7 +14,8 @@ gem 'rspec','2.11.0'
 gem 'sshkey','1.3.1'
 #gem 'ruby-debug','0.10.4'
 gem 'thin'
-#gem 'debugger'
+# gem 'rack-contrib'
+gem 'debugger'
 gem 'awesome_print','1.1.0'
 
 # required to successfully run it
@@ -24,6 +25,7 @@ gem 'awesome_print','1.1.0'
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
 gem 'chef','10.16.2'
+gem 'mcollective','2.2.3'
 #gem 'puppet','2.7.6'
 gem 'puppet','3.1.0'
 gem 'stomp','1.1.9'

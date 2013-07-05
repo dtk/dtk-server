@@ -24,13 +24,17 @@ class MyController < Ramaze::Controller
       request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
     end
     repeat(body,Count)
+    puts request.env['REMOTE_ADDR']
     throw :async
   end
+
 
   def repeat(body,index)
     #emulate pieces of work being completed
     EM.add_timer(Frequency) do
-      body.send "part #{(Count-index).to_s}\n"
+        puts "YOOYOY"
+      body.send "part #{(Count-index).to_s}\n + #{Time.now}"
+      puts "YOOYOY"
       EM.next_tick do
         if index == 0
           body.succeed
@@ -41,7 +45,7 @@ class MyController < Ramaze::Controller
     end   
   end
 end
-Ramaze::Log.level = Logger::WARN
+Ramaze::Log.level = Logger::INFO
 
 Ramaze.start(:root => __DIR__, :started => true)
 run Ramaze

@@ -515,6 +515,21 @@ class DtkCommon
 		return module_imported
 	end
 
+	def check_if_module_exists(module_name)
+		puts "Check if module exists:", "-----------------------"
+		module_exists = false
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name }.first)
+			puts "Module #{module_name} exists in module list."
+			module_exists = true
+		else
+			puts "Module #{module_name} does not exist in module list"
+		end
+		puts ""
+		return module_exists
+	end
+
 	def export_module_to_remote(module_to_export, namespace)
 		puts "Export module to remote:", "------------------------"
 		module_exported = false
@@ -998,6 +1013,36 @@ class DtkCommon
 		end
 		puts ""
 		return service_contains_template
+	end
+
+	def check_component_modules_in_service(service_name, components_list_to_check)
+		puts "Check component modules in service:", "-----------------------------------"
+		all_components_exist_in_service = false
+		components_exist = Array.new()
+		service_list = send_request('/rest/service_module/list', {})
+
+		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
+			puts "Service exists in service list. Try to find all component modules that belong to #{service_name} service..."
+			service_id = service_list['data'].select { |x| x['display_name'] == service_name }.first['id']
+			component_modules_list = send_request('/rest/service_module/list_component_modules', {:service_module_id => service_id})
+			pretty_print_JSON(component_modules_list)
+
+			components_list_to_check.each do |component|
+				if (component_modules_list['data'].select {|x| x['display_name'] == component}.first)
+					components_exist << true
+				else
+					components_exist << false
+				end
+			end
+
+			if (!components_exist.include? false)
+				all_components_exist_in_service = true
+				puts "All components #{components_list_to_check.inspect} exist in #{service_name} service"
+			end
+		else
+			puts "Service #{service_name} does not exist in service list."
+		end
+		return all_components_exist_in_service
 	end
 
 	def stage_node_template(node_name, staged_node_name)

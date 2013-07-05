@@ -11,7 +11,7 @@ require './lib/services_spec'
 require './lib/modules_spec'
 
 service_name = 'bakir_test_apache'
-service_namespace = 'r8'
+service_namespace = 'dtk10'
 module_name = 'apache'
 service_filesystem_location = '~/dtk/service_modules'
 module_filesystem_location = '~/dtk/component_modules'
@@ -46,7 +46,7 @@ describe "Test Case 86: Import new service and import all modules for that servi
   end
 
   context "Check component modules exist in service" do
-    include_context "Check component modules in service", service_filesystem_location, service_name, components_list_to_check
+    include_context "Check component modules in service", dtk_common, service_name, components_list_to_check
   end
 
   context "Check that module exists" do

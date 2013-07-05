@@ -60,7 +60,7 @@ describe "Test Case 88: Import new service but some modules already exists for t
   end
 
   context "Check component modules exist in service" do
-    include_context "Check component modules in service", service_filesystem_location, service_name, components_list_to_check
+    include_context "Check component modules in service", dtk_common, service_name, components_list_to_check
   end
 
   context "Check that module #{module_name3} exists (automatically imported with service)" do

@@ -65,7 +65,7 @@ describe "Test Case 87: Import new service but all modules for that service alre
   end
 
   context "Check component modules exist in service" do
-    include_context "Check component modules in service", service_filesystem_location, service_name, components_list_to_check
+    include_context "Check component modules in service", dtk_common, service_name, components_list_to_check
   end
 
   context "Delete service function" do

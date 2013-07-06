@@ -25,6 +25,7 @@ gem 'awesome_print','1.1.0'
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
 gem 'chef','10.16.2'
+gem 'mcollective','2.2.3'
 #gem 'puppet','2.7.6'
 gem 'puppet','3.1.0'
 gem 'stomp','1.1.9'

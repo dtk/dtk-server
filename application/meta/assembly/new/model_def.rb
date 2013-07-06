@@ -209,7 +209,7 @@ lambda__instance_nodes_and_components =
       ]
     },
     :instance_nodes_and_cmps=> lambda__instance_nodes_and_components.call(Node.common_columns,Component.common_columns),
-    :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:admin_op_status,:external_ref],[:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version]),
+    :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:admin_op_status,:external_ref],[:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]),
     :instance_nested_component_attributes=> {
       :type=>:json,
       :hidden=>true,

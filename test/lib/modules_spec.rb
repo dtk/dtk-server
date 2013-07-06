@@ -98,6 +98,20 @@ shared_context "Import versioned module from remote" do |dtk_common, module_name
   end
 end
 
+shared_context "Check if module exists" do |dtk_common, module_name|
+  it "checks that module #{module_name} exists on server" do
+    module_exists = dtk_common.check_if_module_exists(module_name)
+    module_exists.should eq(true)
+  end
+end
+
+shared_context "NEG - Check if module exists" do |dtk_common, module_name|
+  it "checks that module #{module_name} does not exist on server" do
+    module_exists = dtk_common.check_if_module_exists(module_name)
+    module_exists.should_not eq(true)
+  end
+end
+
 shared_context "Get module components list" do |dtk_common, module_name|
   it "gets list of all components in #{module_name} module" do
     #delete previous elements in array

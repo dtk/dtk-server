@@ -170,11 +170,9 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def set_module_version(cmp_module_name,version)
-      cmp_module_key = key(cmp_module_name)
-      #TODO: update to do merge when self has more than version info
-      pntr = @component_modules[cmp_module_key] = ComponentModuleRef::VersionInfo::Assignment.new(version)
-      self.class.update(@parent,{cmp_module_key => pntr})
-      #TODO: here may search through 'linked' component instances and change version associated with them
+      #TODO: update to do deep merge when self has more than version info
+      @component_modules[key(cmp_module_name)] = ComponentModuleRef::VersionInfo::Assignment.new(version)
+      self.class.update(@parent,@component_modules)
     end
 
     attr_reader :component_modules

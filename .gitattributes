@@ -1,4 +1,4 @@
 # Forces line-ending to LF (Unix) due to fact that most of ABH developers use windows + sftp when working on server
-*.rb   text eol=lf
-*.json text eol=lf
-*.conf text eol=lf
+*.rb   text=auto
+*.json text=auto
+*.conf text=auto

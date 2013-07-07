@@ -2,7 +2,7 @@ module DTK; class Component
   class Template < self
 
     #type_version_list is an array with each element having keys :component_type, :version_field
-    def self.get_matching_type_and_version(project_idh,type_version_field_list)
+    def self.get_matching_type_and_version(project_idh,type_version_field_list,opts={})
       ret = Array.new
       cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
       versions = type_version_field_list.map{|r|r[:version_field]}
@@ -24,8 +24,10 @@ module DTK; class Component
           unmatched << tv
         end
       end
-      unless unmatched.empty?()
-        ct_print_form = unmatched.map{|r|"#{r[:component_type]}:#{r[:version]}"}.join(',')
+      if opts[:raise_errors_if_unmatched] and not unmatched.empty?()
+        ct_print_form = unmatched.map do |r|
+          r[:version] ? "#{r[:component_type]}:#{r[:version]}" : r[:component_type]
+        end.join(',')
         raise Error.new("No match for component templates (#{ct_print_form})")
       end
       ret

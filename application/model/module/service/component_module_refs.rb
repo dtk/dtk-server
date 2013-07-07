@@ -76,7 +76,8 @@ module DTK
       opts = {
         :filter => filter,
         :component_module_refs => self,
-        :force_compute_template_id => true
+        :force_compute_template_id => true,
+        :raise_errors_if_unmatched => true
       }
       aug_cmp_refs = Assembly::Template.get_augmented_component_refs(component_module.model_handle(:component),opts)
       return if aug_cmp_refs.empty?
@@ -126,7 +127,7 @@ module DTK
       #Lookup up modules mapping
       #mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
       #component_template will be null if no match is found
-      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
+      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys,opts)
 
       #set the component template ids; raise error if there is a required element that does not have a matching component template
       reference_errors = Array.new
@@ -250,7 +251,7 @@ module DTK
       end
     end
 
-    def get_component_type_to_template_mappings?(cmp_types)
+    def get_component_type_to_template_mappings?(cmp_types,opts={})
       ret = Hash.new
       return ret if cmp_types.empty?
       #first put in ret info about component type and version
@@ -260,7 +261,7 @@ module DTK
       end
 
       #get matching component template info and insert matches into ret
-      Component::Template.get_matching_type_and_version(project_idh(),ret.values).each do |cmp_template|
+      Component::Template.get_matching_type_and_version(project_idh(),ret.values,opts).each do |cmp_template|
         ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
       end
       ret

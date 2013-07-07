@@ -1,24 +1,24 @@
 module DTK; class ComponentModuleRef
   class VersionInfo
     class Assignment < self
-      def initialize(string)
-        @version = string
+      def initialize(version_string)
+        @version_string = version_string
       end
 
-      attr_reader :version      
+      attr_reader :version_string      
 
       def self.reify?(string_or_obj)
         version_string = 
           if string_or_obj.kind_of?(String) then string_or_obj
           elsif string_or_obj.kind_of?(ComponentModuleRef) then string_or_obj[:version_info]
           end
-        if version_string  and ModuleCommon.string_has_version_format?(version_string)
+        if version_string and ModuleCommon.string_has_version_format?(version_string)
           new(version_string)
         end
       end
 
       def to_s()
-        @version.to_s()
+        @version_string
       end
     end
 

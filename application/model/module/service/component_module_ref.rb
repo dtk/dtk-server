@@ -19,7 +19,6 @@ module DTK
       rows = component_module_refs.map do |cmp_mod_ref,content|
         if content.kind_of?(VersionInfo::Assignment)
           {
-            :ref => cmp_mod_ref.to_s,
             :component_module => cmp_mod_ref.to_s, 
             :version_info => content.to_s()
           }.merge(parent_id_assign)
@@ -28,7 +27,8 @@ module DTK
         end
       end
       model_handle = parent.model_handle(:component_module_ref)
-      modify_children_from_rows(model_handle,parent.id_handle(),rows)
+      matching_cols = [:component_module]
+      modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
     end
   end
 end

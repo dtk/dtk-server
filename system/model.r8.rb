@@ -347,8 +347,11 @@ module XYZ
       updated_rows = Array.new
       rows.each do |r|
         if match = match_found(r,existing,match_cols)
-          ret << model_handle.createIDH(:id => match[:id])
-          updated_rows << r if opts[:update_matching]
+          match_id = match[:id]
+          ret << model_handle.createIDH(:id => match_id)
+          if opts[:update_matching]
+            updated_rows << (r[:id] ? r : r.merge(:id => match_id))
+          end
         else
           pruned_rows << r
         end

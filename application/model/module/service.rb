@@ -37,10 +37,10 @@ module DTK
       project = get_project()
       ret = ComponentRef.get_referenced_component_modules(project,cmp_refs)
       if opts.array(:detail_to_include).include?(:versions)
-        ndx_versions = get_component_module_refs().ret_versions_indexed_by_modules()
+        ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
         ret.each do |mod|
-          if version = ndx_versions[mod.module_name()]
-            mod[:version] = version
+          if version_obj = ndx_versions[mod.module_name()]
+            mod[:version] = version_obj
           end
         end
       end

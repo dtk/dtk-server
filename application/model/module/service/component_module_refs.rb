@@ -58,9 +58,12 @@ module DTK
       new(branch,dsl_hash)
     end
 
-    def ret_versions_indexed_by_modules()
+    def version_objs_indexed_by_modules()
       component_modules.inject(Hash.new) do |h,(mod,mod_info)|
-        h.merge(mod.to_s => mod_info.version())
+        unless mod_info.kind_of?(ComponentModuleRef::VersionInfo)
+          raise Error.new("Need to update to reflect component_module_refs now has more than version info")
+        end
+        h.merge(mod.to_s => mod_info)
       end
     end
 
@@ -153,9 +156,15 @@ module DTK
       raise ErrorUsage::DanglingComponentRefs.new(reference_errors) unless reference_errors.empty?
       ret
     end
+
+    attr_reader :component_modules
                                                                           
-    def has_module_version?(cmp_module_name,version)
-      module_version(cmp_module_name).version == version
+    def has_module_version?(cmp_module_name,version_string)
+      if cmp_module_ref = ret_component_module_ref(cmp_module_name)
+        if cmp_module_ref.respond_to?(:version_string)
+          cmp_module_ref.version_string() == version_string
+        end
+      end
     end
 
     def include_module?(cmp_module_name)
@@ -168,12 +177,18 @@ module DTK
       self.class.update(@parent,@component_modules)
     end
 
-    attr_reader :component_modules
    private
+
+    def ret_component_module_ref(cmp_module_name)
+      @component_modules[key(cmp_module_name)]
+    end
+
     def initialize(parent,content_hash_form)
       @parent = parent
       @component_modules = self.class.reify_content(content_hash_form)
     end
+
+   
 
     def self.reify_content(hash)
       if hash.empty? then hash
@@ -246,7 +261,7 @@ module DTK
 
     def get_needed_component_type_version_pairs(cmp_types)
       cmp_types.map do |cmp_type|
-        version = ret_selected_version(cmp_type)
+        version = ret_selected_version_string(cmp_type)
         {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
       end
     end
@@ -256,7 +271,7 @@ module DTK
       return ret if cmp_types.empty?
       #first put in ret info about component type and version
       ret = cmp_types.inject(Hash.new) do |h,cmp_type|
-        version = ret_selected_version(cmp_type)
+        version = ret_selected_version_string(cmp_type)
         h.merge(cmp_type => {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)})
       end
 
@@ -267,16 +282,12 @@ module DTK
       ret
     end
 
-    def ret_selected_version(component_type)
-      if version_info = component_modules[key(Component.module_name(component_type))]
-        version_info.version()
+    def ret_selected_version_string(component_type)
+      if cmp_module_ref = component_modules[key(Component.module_name(component_type))]
+        cmp_module_ref.version_string()
       end
     end
 
-    def module_version(cmp_module_name)
-      ComponentModuleRef::VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
-    end
-    
     def project_idh()
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)

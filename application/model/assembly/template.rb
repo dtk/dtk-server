@@ -47,7 +47,7 @@ module DTK; class Assembly
           unless pntr 
             module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
-              :version_constraints => ComponentModuleRefs.get_component_module_refs(module_branch)
+              :component_module_refs => ComponentModuleRefs.get_component_module_refs(module_branch)
             }
           end
           aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))
@@ -56,7 +56,7 @@ module DTK; class Assembly
       end
       set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
-        r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs],set_matching_opts)
+        r[:component_module_refs].set_matching_component_template_info!(r[:aug_cmp_refs],set_matching_opts)
       end
       aug_cmp_refs_ndx_by_vc.values.map{|r|r[:aug_cmp_refs]}.flatten
     end

@@ -72,14 +72,14 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       new(branch,content_hash_content)
     end
 
-    def self.update_from_dsl_hash(module_branch,dsl_hash,opts={})
+    def self.update_from_dsl_hash(branch,dsl_hash,opts={})
       if dsl_hash.empty?
       elsif dsl_hash.size == 1 and dsl_hash.keys.first.to_sym == :component_modules
-        update(module_branch,reify_content(dsl_hash.values.first),opts)
+        update(branch,reify_content(dsl_hash.values.first),opts)
       else
         raise Error.new("Do not treat module verions contraints of form (#{dsl_hash.inspect})")
       end
-      self
+      new(branch,dsl_hash)
     end
 
     def ret_versions_indexed_by_modules()

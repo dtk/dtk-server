@@ -65,7 +65,7 @@ module DTK; class ServiceModule
       }
     end
 
-    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs)
       #compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
@@ -99,7 +99,7 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -124,7 +124,7 @@ module DTK; class ServiceModule
       }
     end
 
-    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs)
       #compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
@@ -158,7 +158,7 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -226,7 +226,7 @@ module DTK; class ServiceModule
       end
     end
 
-    def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)
+    def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = component_ref_parse(cmp_input)
         cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
@@ -247,7 +247,7 @@ module DTK; class ServiceModule
       end
       #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
-      version_constraints.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
+      component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(container_idh,ret)
       ret
     end

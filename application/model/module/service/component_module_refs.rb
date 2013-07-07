@@ -22,24 +22,11 @@ module DTK
           return ret_clone_update_info(service_version)
         end
         
-=begin
-TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
-        #make sure that the service module references the component module
-        unless cmp_module_refs.include_module?(cmp_module_name)
-
-          #quick check is looking in component_module_refs, if no match then do more expensive
-          #get_referenced_component_modules()
-          unless service_module.get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
-            raise ErrorUsage.new("Service module (#{module_name()}) does not reference component module (#{cmp_module_name})")
-          end        
-        end
-=end
-
         #set in cmp_module_refs the module have specfied value and update both model and service's global refs
         cmp_module_refs.set_module_version(cmp_module_name,component_version)
         
         #update the component refs with the new component_template_ids
-        update_component_template_ids(component_module,cmp_module_refs)
+        cmp_module_refs.update_component_template_ids(component_module)
         
         ret_clone_update_info(service_version)
       end
@@ -50,21 +37,6 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
         ComponentModuleRefs.get_component_module_refs(branch)
       end
 
-      def update_component_template_ids(component_module,component_module_refs)
-        #first get filter so can call get_augmented_component_refs
-        assembly_templates = component_module.get_associated_assembly_templates()
-        return if assembly_templates.empty?
-        filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
-        opts = {
-          :filter => filter,
-          :component_module_refs => component_module_refs,
-          :force_compute_template_id => true
-        }
-        aug_cmp_refs = Assembly::Template.get_augmented_component_refs(model_handle(:component),opts)
-        return if aug_cmp_refs.empty?
-        cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
-        Model.update_from_rows(model_handle(:component_ref),cmp_ref_update_rows)
-      end
     end
   end
 
@@ -94,6 +66,22 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def self.meta_filename_path()
       "global_module_refs.json"
+    end
+
+    def update_component_template_ids(component_module)
+      #first get filter so can call get_augmented_component_refs
+      assembly_templates = component_module.get_associated_assembly_templates()
+      return if assembly_templates.empty?
+      filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
+      opts = {
+        :filter => filter,
+        :component_module_refs => self,
+        :force_compute_template_id => true
+      }
+      aug_cmp_refs = Assembly::Template.get_augmented_component_refs(component_module.model_handle(:component),opts)
+      return if aug_cmp_refs.empty?
+      cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
+      Model.update_from_rows(component_module.model_handle(:component_ref),cmp_ref_update_rows)
     end
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below

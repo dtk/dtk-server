@@ -45,9 +45,10 @@ module DTK; class Assembly
           service_module_name = service_module_name(r[:component_type])
           pntr = aug_cmp_refs_ndx_by_vc[service_module_name]
           unless pntr 
-            module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
+            component_module_refs = opts[:component_module_refs] || ComponentModuleRefs.get_component_module_refs(mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object())
+            
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
-              :component_module_refs => ComponentModuleRefs.get_component_module_refs(module_branch)
+              :component_module_refs => component_module_refs
             }
           end
           aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))

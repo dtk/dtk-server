@@ -188,8 +188,7 @@ module DTK
           if error_msg && !error_msg.empty?
             raise ErrorUsage.new(error_msg)
           else
-            # TODO: [Haris] Possibly 'dead' code check this later
-            raise Error.new(error_msg(response))
+            raise ErrorUsage.new(error_msg(response))
           end
         end
           response.data

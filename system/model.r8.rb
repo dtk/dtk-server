@@ -526,8 +526,20 @@ module XYZ
       @id_handle[:group_id] ||= group_id()
       self
     end
+    #TODO: deprecate above for below
+    def update_obj!(*cols)
+      cols_to_get =  cols.reject{|col|self.has_key?(col)}
+      return self if cols_to_get.empty?
+      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
+      vals = get_objs({:cols => cols_to_get},opts).first
+      vals.each{|k,v|self[k]=v} if vals
+      if cols.include?(:group_id)
+        @id_handle[:group_id] ||= group_id()
+      end
+      self
+    end
     
-    #this returns fiueld if exists, otherways gets it
+    #this returns field if exists, otherways gets it
     def get_field?(field)
       self[field]||update_object!(field)[field]
     end

@@ -91,7 +91,7 @@ module DTK
     end
 
     def create_attr_links(parent_idh)
-      update_object!(:input_id,:output_id)
+      update_obj!(:input_id,:output_id)
       augmented_opts = Opts.new(:port_link_idh => id_handle,:donot_create_port_link => true)
       PortLink.create_port_and_attr_links(parent_idh,self,augmented_opts)
     end

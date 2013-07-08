@@ -197,7 +197,7 @@ module DTK
         if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           el.merge(:link_def_id => link_def_match[:id])
         else
-          el
+          el.merge(:link_def_id => nil)
         end
       end
       update_from_rows(port_mh,update_rows)

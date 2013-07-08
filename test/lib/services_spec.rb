@@ -26,6 +26,42 @@ shared_context "Import remote service" do |dtk_common, service_name|
   end
 end
 
+shared_context "NEG - Import remote service" do |dtk_common, service_name|
+  it "will not import #{service_name} service from remote repo since there are referenced modules on local filesystem which are not deleted" do
+    puts "NEG - Import remote service:", "----------------------------"
+    pass = false
+    value = `dtk service import-r8n #{service_name}`
+    pass = true if (value.include? "exists on client")
+    puts "Import of remote service #{service_name} did not complete successfully because of the referenced module that exists on local filesystem!" if pass == true
+    puts "Import of remote service #{service_name} completed successfully which is not expected!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Check service imported on local filesystem" do |service_filesystem_location, service_name|
+  it "checks that #{service_name} service is imported on local filesystem on location #{service_filesystem_location}" do
+    puts "Check service imported on local filesystem:", "-------------------------------------------"
+    pass = false
+    `ls #{service_filesystem_location}/#{service_name}`
+    pass = true if $?.exitstatus == 0
+    if (pass == true)
+      puts "Service #{service_name} imported on local filesystem successfully!" 
+    else
+      puts "Service #{service_name} was not imported on local filesystem successfully!"
+    end
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "Check component modules in service" do |dtk_common, service_name, components_list_to_check|
+  it "verifies that all component modules #{components_list_to_check.inspect} exist in #{service_name} service" do
+    components_exist = dtk_common.check_component_modules_in_service(service_name, components_list_to_check)
+    components_exist.should eq(true)
+  end
+end
+
 shared_context "List all services" do |dtk_common, service_name|
   it "verifies that #{service_name} service exists on server" do
     service_exists = dtk_common.check_if_service_exists(service_name)

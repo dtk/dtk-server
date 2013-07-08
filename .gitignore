@@ -9,4 +9,5 @@ ruote_work/
 sftp-config.json
 application/config/newrelic.yml
 application/log/
+.gitattributes
 

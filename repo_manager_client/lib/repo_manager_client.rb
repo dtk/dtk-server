@@ -114,6 +114,14 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+=begin
+    def module_info(filter=nil)
+      route = "/rest/system/module/list"
+      body = (filter ? {:filter => filter} : {})
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+=end
+
     def list_modules(filter=nil)
       route = "/rest/system/module/list"
       body = (filter ? {:filter => filter} : {})

@@ -257,7 +257,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def ret_selected_version(component_type)
       if version_info = component_modules[key(Component.module_name(component_type))]
-        version_info.version()
+        version_info.ret_version()
       end
     end
 

@@ -186,8 +186,7 @@ module DTK
           if error_msg && !error_msg.empty?
             raise ErrorUsage.new(error_msg)
           else
-            # TODO: [Haris] Possibly 'dead' code check this later
-            raise Error.new(error_msg(response))
+            raise ErrorUsage.new(error_msg(response))
           end
         end
           response.data
@@ -199,11 +198,8 @@ module DTK
     def error_msg(response)
       if response.kind_of?(Common::Response::Error) and response["errors"] 
         errors = response["errors"]
-        if include_error_code?(errors,"connection_refused") 
-          "Repo Manager refused the connection; it may be down"
-        else
-          "Repo Manager Connection Error: #{errors.inspect}"
-        end
+        #if include_error_code?(errors,"connection_refused") 
+        "Repo Manager refused the connection; it may be down"
       else
         "Repo Manager Connection Error: #{response.inspect}"
       end

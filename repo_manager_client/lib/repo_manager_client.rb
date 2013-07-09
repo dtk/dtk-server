@@ -200,11 +200,8 @@ module DTK
     def error_msg(response)
       if response.kind_of?(Common::Response::Error) and response["errors"] 
         errors = response["errors"]
-        if include_error_code?(errors,"connection_refused") 
-          "Repo Manager refused the connection; it may be down"
-        else
-          "Repo Manager Connection Error: #{errors.inspect}"
-        end
+        #if include_error_code?(errors,"connection_refused") 
+        "Repo Manager refused the connection; it may be down"
       else
         "Repo Manager Connection Error: #{response.inspect}"
       end

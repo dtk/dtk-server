@@ -49,7 +49,7 @@ module DTK
     end
 
     def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
-      content_hash_content = reify_content(parsed_info)
+      content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
       update(branch,content_hash_content,opts)
       new(branch,content_hash_content,:content_hash_form_is_reified => true)
     end
@@ -183,22 +183,25 @@ module DTK
       @parent = parent
       @component_modules = opts[:content_hash_form_is_reified] ?
         content_hash_form :
-        self.class.reify_content(content_hash_form)
+        self.class.reify_content(parent.model_handle(:component_model_ref),content_hash_form)
     end
 
     #TODO: it nows throws away remote repo info; need to treat
-    def self.reify_content(object)
-      hash_form = 
+    def self.reify_content(mh,object)
+      index_form = 
         if object.kind_of?(Hash)
           object
         elsif object.kind_of?(ServiceModule::DSLParser::Output)
-          object.inject(Hash.new){|h,r|h.merge(r[:component_module] => r[:version_info])}
+          object.inject(Hash.new) do |h,r|
+            h.merge(r[:component_module] => ComponentModuleRef.create_stub(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+          end
         else
           raise Error.new("Unexpected input (#{object.class})")
         end
-      reify_component_module_version_info(hash_form)
+      reify_component_module_version_info(index_form)
     end
-
+    ReifyParsingColMapping = [:component_module,:version_info,{:remote_namespace => :remote_info}]
+    
     def self.reify_component_module_version_info(hash)
       ret = Hash.new
       hash.each_pair do |k,v|

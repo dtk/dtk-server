@@ -50,6 +50,7 @@ module DTK
 
     def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
       content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
+pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
       update(branch,content_hash_content,opts)
       new(branch,content_hash_content,:content_hash_form_is_reified => true)
     end
@@ -184,33 +185,47 @@ module DTK
       @component_modules = opts[:content_hash_form_is_reified] ?
         content_hash_form :
         self.class.reify_content(parent.model_handle(:component_model_ref),content_hash_form)
+unless opts[:content_hash_form_is_reified]
+  pp ["after reify_content in initialize",@component_modules]
+end
     end
 
-    #TODO: it nows throws away remote repo info; need to treat
     def self.reify_content(mh,object)
-      index_form = 
-        if object.kind_of?(Hash)
-          object
-        elsif object.kind_of?(ServiceModule::DSLParser::Output)
-          object.inject(Hash.new) do |h,r|
-            h.merge(r[:component_module] => ComponentModuleRef.create_stub(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+      if object.kind_of?(Hash)
+        object.inject(Hash.new) do |h,(k,v)|
+          if v.kind_of?(ComponentModuleRef)
+            h.merge(k.to_sym => reify_content_element(mh,v))
+          elsif v.kind_of?(String)
+            #TODO: this clause will be deprecated
+            h.merge(k.to_sym => reify_content_element(mh,:component_module => k,:version_info => v))
+          else
+            raise Error.new("Unexpected value associated with component module ref: #{v.class}")
           end
-        else
-          raise Error.new("Unexpected input (#{object.class})")
         end
-      reify_component_module_version_info(index_form)
+      elsif object.kind_of?(ServiceModule::DSLParser::Output)
+        object.inject(Hash.new) do |h,r|
+          h.merge(r[:component_module].to_sym => reify_content_element(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+        end
+      else
+        raise Error.new("Unexpected input (#{object.class})")
+      end
     end
     ReifyParsingColMapping = [:component_module,:version_info,{:remote_namespace => :remote_info}]
-    
-    def self.reify_component_module_version_info(hash)
-      ret = Hash.new
-      hash.each_pair do |k,v|
-        if version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(v)
-          ret.merge!(key(k) => version_info)
+
+    def self.reify_content_element(mh,object)    
+      ret = version_info = nil
+      if object.kind_of?(ComponentModuleRef)
+        ret = object
+        version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(object)
+      else #object.kind_of?(Hash)  
+        ret = ComponentModuleRef.create_stub(mh,object)
+        if v = object[:version_info]
+          version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(v)
         end
       end
-      ret
+      version_info ? object.merge(:version_info => version_info) : object
     end
+
 
     def self.key(el)
       el.to_sym

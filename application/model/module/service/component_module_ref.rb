@@ -13,18 +13,17 @@ module DTK
 
     def self.create_or_update(parent,component_module_refs)
       return if component_module_refs.empty?
-      parent_id_assign = {
+      parent_id_assigns = {
         parent.parent_id_field_name(:component_module_ref) => parent.id()
       }
-      rows = component_module_refs.map do |cmp_mod_ref,content|
-        if content.kind_of?(VersionInfo::Assignment)
-          {
-            :component_module => cmp_mod_ref.to_s, 
-            :version_info => content.to_s()
-          }.merge(parent_id_assign)
-        else
-          raise Error.new("Not treated yet component module ref content other than VersionInfo::Assignment")
-        end
+      rows = component_module_refs.values.map do |cmr_hash|
+        assigns = 
+          if version_info = cmr_hash[:version_info]
+            parent_id_assigns.merge(:version_info => version_info.to_s)
+          else
+            assigns = parent_id_assigns
+          end
+        Aux.hash_subset(cmr_hash,[:component_module,:remote_info]).merge(assigns)
       end
       model_handle = parent.model_handle(:component_module_ref)
       matching_cols = [:component_module]

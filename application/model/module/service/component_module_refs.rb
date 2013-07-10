@@ -56,12 +56,13 @@ pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
     end
 
     def version_objs_indexed_by_modules()
-      component_modules.inject(Hash.new) do |h,(mod,mod_info)|
-        unless mod_info.kind_of?(ComponentModuleRef::VersionInfo)
-          raise Error.new("Need to update to reflect component_module_refs now has more than version info")
+      ret = Hash.new
+      component_modules.each_pair do |mod,cmr|
+        if version_info =  cmr[:version_info]
+          ret.merge!(mod.to_s => version_info)
         end
-        h.merge(mod.to_s => mod_info)
       end
+      ret
     end
 
     def self.meta_filename_path()
@@ -304,7 +305,9 @@ end
 
     def ret_selected_version_string(component_type)
       if cmp_module_ref = component_modules[key(Component.module_name(component_type))]
-        cmp_module_ref.version_string()
+        if version_info = cmp_module_ref[:version_info]
+            version_info.version_string()
+        end
       end
     end
 

@@ -159,9 +159,7 @@ pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
                                                                           
     def has_module_version?(cmp_module_name,version_string)
       if cmp_module_ref = ret_component_module_ref(cmp_module_name)
-        if cmp_module_ref.respond_to?(:version_string)
-          cmp_module_ref.version_string() == version_string
-        end
+        cmp_module_ref.version_string() == version_string
       end
     end
 
@@ -305,9 +303,7 @@ end
 
     def ret_selected_version_string(component_type)
       if cmp_module_ref = component_modules[key(Component.module_name(component_type))]
-        if version_info = cmp_module_ref[:version_info]
-            version_info.version_string()
-        end
+        cmp_module_ref.version_string()
       end
     end
 

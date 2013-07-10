@@ -29,5 +29,9 @@ module DTK
       matching_cols = [:component_module]
       modify_children_from_rows(model_handle,parent.id_handle(),rows,matching_cols,:update_matching => true)
     end
+
+    def version_string()
+      self[:version_info] && self[:version_info].version_string()
+    end
   end
 end

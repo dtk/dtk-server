@@ -77,7 +77,9 @@ module XYZ
       def hash_subset_aux(seed,hash,keys,opts={},&block)
         keys.inject(seed) do |ret,k|
           index = k.kind_of?(Hash) ? k.keys.first : k
-          unless hash.has_key?(index) or opts[:include_virtual_columns]
+          if opts[:only_non_nil] and hash[index].nil?
+            ret
+          elsif not (hash.has_key?(index) or opts[:include_virtual_columns])
             ret
           else
             key = k.kind_of?(Hash) ? k.values.first : k

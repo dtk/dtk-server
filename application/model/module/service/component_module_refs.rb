@@ -237,6 +237,11 @@ end
     def self.dsl_hash_form(service_module_branch)
       ret = SimpleOrderedHash.new()
       component_modules = get_component_module_refs(service_module_branch).component_modules
+
+      seed = ServiceModule::DSLParser.file_parser_output_array_class()
+      output_array = component_modules.values.map{|cmr|cmr.parser_output_array(:seed => seed) }
+      pp ServiceModule::DSLParser.generate_hash(:component_module_refs,output_array)
+
       dsl_hash_form = component_modules.inject(Hash.new) do |h,(cmp_module_name,cmr)|
         h.merge(cmp_module_name.to_s => cmr.dsl_hash_form())
       end

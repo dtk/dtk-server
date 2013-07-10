@@ -3,13 +3,13 @@ module DTK
     r8_nested_require('component_module_ref','version_info')
 
     def self.reify(mh,object)
-      crm_mh = mh.createMH(:component_model_ref)
+      cmr_mh = mh.createMH(:component_model_ref)
       ret = version_info = nil
       if object.kind_of?(ComponentModuleRef)
         ret = object
         version_info = VersionInfo::Assignment.reify?(object)
       else #object.kind_of?(Hash)  
-        ret = ComponentModuleRef.create_stub(cr_mh,object)
+        ret = ComponentModuleRef.create_stub(cmr_mh,object)
         if v = object[:version_info]
           version_info = VersionInfo::Assignment.reify?(v)
         end
@@ -53,6 +53,15 @@ module DTK
     def version_string()
       self[:version_info] && self[:version_info].version_string()
     end
+
+    def parser_output_array(opts={})
+      ret = Aux.hash_subset(self,ColsToOutputArray,:seed => opts[:seed], :only_non_nil => true)
+      if version_info = ret[:version_info]
+        ret[:version_info] = version_info.to_s
+      end
+      ret
+    end
+    ColsToOutputArray = [:component_module,:version_info,{:remote_info => :remote_namespace}]
 
     def dsl_hash_form()
       hash_subset = Aux.hash_subset(self,[:version_info,{:remote_info => :remote_namespace}]) 

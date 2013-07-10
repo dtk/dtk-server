@@ -18,6 +18,8 @@ gem 'thin'
 gem 'debugger'
 gem 'awesome_print','1.1.0'
 
+gem 'rugged','0.17.0.b7'
+
 # required to successfully run it
 # Minor change
 

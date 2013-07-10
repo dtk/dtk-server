@@ -31,17 +31,22 @@ module DTK
 
     #for binding to existing local repo
     def self.create(path,branch,opts={})
-      root = R8::Config[:repo][:base_directory]
-      full_path = 
-        if opts[:absolute_path] then path
-        else (path == "__top" ? root : "#{root}/#{path}")
-        end
+      full_path = repo_full_path(path,opts)
       if Aux::platform_is_linux?()
         RepomanagerGitLinux.new(full_path,branch,opts)
       elsif  Aux::platform_is_windows?()
         RepoManagerGitWindows.new(full_path,branch,opts)
       else
         raise Error.new("platform #{Aux::platform} not treated")
+      end
+    end
+
+    def self.repo_full_path(path,opts={})
+      if opts[:absolute_path] 
+        path
+      else
+        @root ||= R8::Config[:repo][:base_directory]
+        (path == "__top" ? @root : "#{@root}/#{path}")
       end
     end
 

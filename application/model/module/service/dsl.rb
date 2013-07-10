@@ -2,7 +2,7 @@ module DTK
   class ServiceModule
     r8_nested_require('dsl','assembly_import')
     r8_nested_require('dsl','assembly_export')
-    r8_nested_require('dsl','directory_parser')
+    r8_nested_require('dsl','parser')
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_idh)
         sp_hash = {
@@ -46,21 +46,23 @@ module DTK
 
      private
       def update_component_module_refs(module_branch,opts={})
-        if DirectoryParser.implements_method?(:parse_directory)
-          parsed_info = DirectoryParser.parse_directory(module_branch,:component_module_refs)
-          pp [:dtk_common_parsed_info,parsed_info]
-          #TODO: dont call legacy and instead use this parsed info
-        end
-        update_component_module_refs_legacy(module_branch,opts)
+        parsed_info = 
+          if DSLParser.implements_method?(:parse_directory)
+            DSLParser.parse_directory(module_branch,:component_module_refs)
+          else
+            DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
+          end
+        ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
-      def update_component_module_refs_legacy(module_branch,opts={})
-        content_hash_form = Hash.new
+      #TODO: deprecate when DSLParser methods stabke
+      def legacy_component_module_refs_parsed_info(module_branch,opts={})
+        ret = Hash.new
         meta_filename_path = ComponentModuleRefs.meta_filename_path()
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
-          content_hash_form = Aux.json_parse(json_content,meta_filename_path)
+          ret = Aux.json_parse(json_content,meta_filename_path)
         end
-        ComponentModuleRefs.update_from_dsl_hash(module_branch,content_hash_form,opts)
+        ret
       end
 
       def update_assemblies_from_dsl(module_branch,component_module_refs)

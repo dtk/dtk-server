@@ -48,14 +48,10 @@ module DTK
       new(branch,content_hash_content)
     end
 
-    def self.update_from_dsl_hash(branch,dsl_hash,opts={})
-      if dsl_hash.empty?
-      elsif dsl_hash.size == 1 and dsl_hash.keys.first.to_sym == :component_modules
-        update(branch,reify_content(dsl_hash.values.first),opts)
-      else
-        raise Error.new("Do not treat module verions contraints of form (#{dsl_hash.inspect})")
-      end
-      new(branch,dsl_hash)
+    def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
+      content_hash_content = reify_content(parsed_info)
+      update(branch,content_hash_content,opts)
+      new(branch,content_hash_content,:content_hash_form_is_reified => true)
     end
 
     def version_objs_indexed_by_modules()
@@ -183,18 +179,24 @@ module DTK
       @component_modules[key(cmp_module_name)]
     end
 
-    def initialize(parent,content_hash_form)
+    def initialize(parent,content_hash_form,opts={})
       @parent = parent
-      @component_modules = self.class.reify_content(content_hash_form)
+      @component_modules = opts[:content_hash_form_is_reified] ?
+        content_hash_form :
+        self.class.reify_content(content_hash_form)
     end
 
-   
-
-    def self.reify_content(hash)
-      if hash.empty? then hash
-      else
-        reify_component_module_version_info(hash)
-      end
+    #TODO: it nows throws away remote repo info; need to treat
+    def self.reify_content(object)
+      hash_form = 
+        if object.kind_of?(Hash)
+          object
+        elsif object.kind_of?(ServiceModule::DSLParser::Output)
+          object.inject(Hash.new){|h,r|h.merge(r[:component_module] => r[:version_info])}
+        else
+          raise Error.new("Unexpected input (#{object.class})")
+        end
+      reify_component_module_version_info(hash_form)
     end
 
     def self.reify_component_module_version_info(hash)

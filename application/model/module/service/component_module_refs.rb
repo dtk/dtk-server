@@ -168,13 +168,20 @@ pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
     end
 
     def set_module_version(cmp_module_name,version)
-      #TODO: update to do deep merge when self has more than version info
-      @component_modules[key(cmp_module_name)] = ComponentModuleRef::VersionInfo::Assignment.new(version)
+      key = key(cmp_module_name)
+      if cmr = @component_modules[key]
+        cmr.set_module_version(version)
+      else
+        hash_content = {
+          :component_module => cmp_module_name,
+          :version_info => version
+        }
+        @component_modules[key] = ComponentModuleRef.reify(@parent.model_handle,hash_content)
+      end
       self.class.update(@parent,@component_modules)
     end
 
    private
-
     def ret_component_module_ref(cmp_module_name)
       @component_modules[key(cmp_module_name)]
     end
@@ -193,38 +200,23 @@ end
       if object.kind_of?(Hash)
         object.inject(Hash.new) do |h,(k,v)|
           if v.kind_of?(ComponentModuleRef)
-            h.merge(k.to_sym => reify_content_element(mh,v))
+            h.merge(k.to_sym => ComponentModuleRef.reify(mh,v))
           elsif v.kind_of?(String)
             #TODO: this clause will be deprecated
-            h.merge(k.to_sym => reify_content_element(mh,:component_module => k,:version_info => v))
+            h.merge(k.to_sym => ComponentModuleRef.reify(mh,:component_module => k,:version_info => v))
           else
             raise Error.new("Unexpected value associated with component module ref: #{v.class}")
           end
         end
       elsif object.kind_of?(ServiceModule::DSLParser::Output)
         object.inject(Hash.new) do |h,r|
-          h.merge(r[:component_module].to_sym => reify_content_element(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+          h.merge(r[:component_module].to_sym => ComponentModuleRef.reify(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
         end
       else
         raise Error.new("Unexpected input (#{object.class})")
       end
     end
     ReifyParsingColMapping = [:component_module,:version_info,{:remote_namespace => :remote_info}]
-
-    def self.reify_content_element(mh,object)    
-      ret = version_info = nil
-      if object.kind_of?(ComponentModuleRef)
-        ret = object
-        version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(object)
-      else #object.kind_of?(Hash)  
-        ret = ComponentModuleRef.create_stub(mh,object)
-        if v = object[:version_info]
-          version_info = ComponentModuleRef::VersionInfo::Assignment.reify?(v)
-        end
-      end
-      version_info ? object.merge(:version_info => version_info) : object
-    end
-
 
     def self.key(el)
       el.to_sym
@@ -242,34 +234,21 @@ end
       end
     end
 
-    #TODO: right now just simple form with scalar denoting version; update to treat remote info
     def self.dsl_hash_form(service_module_branch)
       ret = SimpleOrderedHash.new()
-      component_module_refs = get_component_module_refs(service_module_branch)
-      dsl_hash_form = dsl_hash_form_aux(component_module_refs.component_modules)
+      component_modules = get_component_module_refs(service_module_branch).component_modules
+      dsl_hash_form = component_modules.inject(Hash.new) do |h,(cmp_module_name,cmr)|
+        h.merge(cmp_module_name.to_s => cmr.dsl_hash_form())
+      end
+
       if dsl_hash_form.empty?
         return ret
       end
       
       sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
-        h.merge(k => dsl_hash_form[k.to_sym])
+        h.merge(k => dsl_hash_form[k])
       end
       ret.merge(:component_modules => sorted_dsl_hash_form)
-    end
-    def self.dsl_hash_form_aux(el)
-      if el.kind_of?(Hash)
-        el.inject(Hash.new) do |h,(k,v)|
-          if val = dsl_hash_form_aux(v)
-            h.merge(k => val)
-          else
-            h
-          end
-        end
-      elsif el.kind_of?(ComponentModuleRef::VersionInfo)
-        el.to_s
-      else
-        el
-      end
     end
 
     class ComponentTypeToCheck < Array

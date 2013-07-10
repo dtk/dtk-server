@@ -2,6 +2,26 @@ module DTK
   class ComponentModuleRef < Model
     r8_nested_require('component_module_ref','version_info')
 
+    def self.reify(mh,object)
+      crm_mh = mh.createMH(:component_model_ref)
+      ret = version_info = nil
+      if object.kind_of?(ComponentModuleRef)
+        ret = object
+        version_info = VersionInfo::Assignment.reify?(object)
+      else #object.kind_of?(Hash)  
+        ret = ComponentModuleRef.create_stub(cr_mh,object)
+        if v = object[:version_info]
+          version_info = VersionInfo::Assignment.reify?(v)
+        end
+      end
+      version_info ? ret.merge(:version_info => version_info) : ret
+    end
+
+    def set_module_version(version)
+      merge!(:version_info => VersionInfo::Assignment.reify?(version))
+      self
+    end
+
     def self.get_component_module_refs(branch)
       sp_hash = {
         :cols => [:id,:display_name,:group_id,:component_module,:version_info,:remote_info],
@@ -33,5 +53,15 @@ module DTK
     def version_string()
       self[:version_info] && self[:version_info].version_string()
     end
+
+    def dsl_hash_form()
+      hash_subset = Aux.hash_subset(self,[:version_info,{:remote_info => :remote_namespace}]) 
+      if version_string = version_string()
+          hash_subset.merge!(:version_info => version_string)
+      end
+      #TODO: remove when treat dsl with remote info
+      hash_subset[:version_info] 
+    end
+
   end
 end

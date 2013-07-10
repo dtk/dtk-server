@@ -12,8 +12,12 @@ module DTK; class ComponentModuleRef
           if object.kind_of?(String) then object
           elsif object.kind_of?(ComponentModuleRef) then object[:version_info]
           end
-        if version_string and ModuleCommon.string_has_version_format?(version_string)
-          new(version_string)
+        if version_string 
+          if ModuleCommon.string_has_version_format?(version_string)
+            new(version_string)
+          else
+            raise Error.new("Unexpected form of version string (#{version_string})")
+          end
         end
       end
 

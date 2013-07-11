@@ -1,6 +1,10 @@
 module DTK; class Task
   class Action
     class OnNode < self
+      def self.create_from_node(node)
+        state_change = {:node => node}
+        new(:state_change,state_change,nil)
+      end
       def self.create_from_state_change(state_change,assembly_idh=nil)
         new(:state_change,state_change,nil,assembly_idh)
       end

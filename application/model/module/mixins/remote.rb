@@ -100,8 +100,27 @@ module DTK
   module ModuleRemoteClassMixin
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
+
+    #  remote_params = {
+    #    :repo
+    #    :module_namespace
+    #    :module_name
+    #    :version
+    #  }
+    #  local_params = {
+    #    :module_name
+    #  }
+
     def import(project,remote_params,local_params)
+      #repo_client = Repo::Remote.new(remote_params[:repo])
+      #repo_client.get_remote_module_components(remote_params[:module_name], component_type(), remote_params[:module_version], remote_params[:module_namespace])
+      #return 1
+
       repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
+
+      # DEBUG SNIPPET >>>> REMOVE <<<<
+      # require 'ap'
+      # ap "I am here!!!"
 
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])

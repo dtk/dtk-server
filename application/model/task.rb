@@ -181,20 +181,6 @@ module XYZ
       task_action.add_internal_guards!(guards)
     end
 
-    def self.create_from_nodes_to_converge(node_idhs)
-      config_nodes_task = config_nodes_task(grouped_state_changes[Action::ConfigNode])
-      if create_nodes_task and config_nodes_task
-        ret = create_new_task(:temporal_order => "sequential")
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-        ret
-      else
-        ret = create_new_task(:temporal_order => "sequential")
-        ret.add_subtask(create_nodes_task||config_nodes_task) #only one wil be non null
-        ret
-      end
-    end
-
     def self.get_top_level_most_recent_task(model_handle,filter=nil)
       #TODO: can be more efficient if do sql query with order and limit 1
       tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}

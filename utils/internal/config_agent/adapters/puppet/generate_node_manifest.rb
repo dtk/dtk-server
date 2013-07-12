@@ -50,24 +50,24 @@ module XYZ
           ret << ret_ps
         end
         
-        return ret
+        ret
       end      
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)
-        ret = Array.new
-        add_default_extlookup_config!(ret)
-        add_assembly_attributes!(ret,assembly_attrs||[])
-        ret << generate_stage_statements(cmps_with_attrs.size)
+        lines = Array.new
+        add_default_extlookup_config!(lines)
+        add_assembly_attributes!(lines,assembly_attrs||[])
+        lines << generate_stage_statements(cmps_with_attrs.size)
         cmps_with_attrs.each_with_index do |cmp_with_attrs,i|
           stage = i+1
-          ret << " " #space between stages
-          PuppetStage.new(stage,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(ret)
+          lines << " " #space between stages
+          PuppetStage.new(stage,@import_statement_modules).generate_manifest!(cmp_with_attrs).add_lines_for_stage!(lines)
         end
 
         if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
-          ret += attr_val_stmts
+          lines += attr_val_stmts
         end
-        return ret
+        [lines] #putting lines in [] because pupept apply agent is just lookingfor multiple invocations form
       end
 
       def generate_stage_statements(size)

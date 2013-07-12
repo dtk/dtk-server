@@ -116,6 +116,16 @@ module DTK
         RemoteModuleRepoInfo.new(self,branch_obj,remote_params)
       end
 
+      def get_remote_module_components(module_name, type, version, namespace)
+        params = {
+          :name => module_name,
+          :version => version,
+          :namespace => namespace,
+          :type => type
+        }
+        @client.get_components_info(params)
+      end
+
       def initialize(remote_repo=nil)
         @remote_repo = remote_repo
         @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo))
@@ -177,7 +187,7 @@ module DTK
           raise ErrorUsage.new("Remote component/service (#{qualified_module_name(remote_params)}) does not exist")
         end
         if remote_params[:version]
-          versions = branch_names_to_versions(ret[:branches])
+          versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote_params[:version])
             raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not have version (#{remote_params[:version]||"CURRENT"})")
           end
@@ -209,6 +219,14 @@ module DTK
         return nil unless branch_names and not branch_names == [HeadBranchName]
         (branch_names.include?(HeadBranchName) ? ["CURRENT"] : []) + branch_names.reject{|b|b == HeadBranchName}.sort
       end
+
+      #
+      # method will not return 'v' in version name, when used for comparison
+      def branch_names_to_versions_stripped(branch_names)
+        versions = branch_names_to_versions(branch_names)
+        versions ? versions.collect { |v| v.gsub(/^v/,'') } : nil
+      end
+
       private :branch_names_to_versions
 
       def version_to_branch_name(version)
@@ -242,7 +260,7 @@ module DTK
       # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default
       # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
 
-
+      # example: 
       #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
         split = qualified_name.split("/")

@@ -1,4 +1,4 @@
-module XYZ 
+module DTK 
   module WorkflowAdapter
     module RuoteParticipant
       class Top
@@ -381,7 +381,7 @@ module XYZ
 
             node = task[:executable_action][:node]
             installed_agent_git_commit_id = node[:agent_git_commit_id]
-            head_git_commit_id = ::DTK::WorkflowAdapter::AgentGritAdapter.get_head_git_commit_id()
+            head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
               set_result_succeeded(workitem,nil,task,action) if task_end
               pp ["task_complete_skipped_already_synced #{self.class.to_s}",task[:id]]
@@ -399,7 +399,7 @@ module XYZ
                 result = msg[:body].merge("task_id" => task_id)
                 if result[:statuscode] != 0
                   event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                  pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                  pp ["task_complete_failed SyncAgentCode", task_id,event,{:errors => errors}] if event
                   # Amar: SyncAgentCode will be skipped 99% of times, 
                   #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
                   #cancel_upstream_subtasks(workitem)
@@ -407,12 +407,12 @@ module XYZ
                 else
                   node.update_agent_git_commit_id(head_git_commit_id)
                   event = task.add_event(:complete_succeeded,result)
-                  pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
+                  pp ["task_complete_succeeded SyncAgentCode", task_id,event] if event
                   set_result_succeeded(workitem,result,task,action) if task_end 
                   action.get_and_propagate_dynamic_attributes(result)
                 end
                 # If there was a change on agents, wait for node's mcollective process to restart
-                sleep(5)
+                sleep(10)
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,

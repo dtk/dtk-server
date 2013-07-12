@@ -34,7 +34,7 @@ module XYZ
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      return ret
+      ret
     end
 
     def task_when_nodes_ready_from_assembly(assembly, component_type)
@@ -48,7 +48,7 @@ module XYZ
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_nodes_start", :temporal_order => "sequential",:commit_message => nil)
       main_task.add_subtask(running_node_task)
 
-      return main_task
+      main_task
     end
 
     def create_from_node_group(node_group_idh,commit_msg=nil)
@@ -113,7 +113,7 @@ module XYZ
       node = node_idh.create_object().update_object!(:display_name)
 
       power_on_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
-      power_on_nodes_task = create_running_node_task(task_mh,power_on_nodes_changes)
+      power_on_nodes_task = create_running_node_task(task_mh,power_on_nodes_changes, :node => node)
 
       ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "node_converge", :commit_message => commit_msg)
       if power_on_nodes_task
@@ -185,8 +185,18 @@ module XYZ
       ret
     end
 
-    def create_running_node_task(task_mh,state_change_list)
-      return nil unless state_change_list and not state_change_list.empty?
+    def create_running_node_task(task_mh,state_change_list,opts={})
+      #for powering on node with no components
+      unless state_change_list and not state_change_list.empty?
+        unless node = opts[:node]
+          raise Error.new("Expected that :node passed in as options")
+        end
+        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+        attr_mh = task_mh.createMH(:attribute)
+        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+        return create_new_task(task_mh,:executable_action => executable_action)
+      end
+
       #each element will be list with single element
       ret = nil
       all_actions = Array.new

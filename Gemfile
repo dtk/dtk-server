@@ -15,7 +15,7 @@ gem 'sshkey','1.3.1'
 #gem 'ruby-debug','0.10.4'
 gem 'thin'
 # gem 'rack-contrib'
-gem 'debugger'
+#gem 'debugger'
 gem 'awesome_print','1.1.0'
 
 gem 'rugged','0.17.0.b7'

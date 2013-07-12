@@ -57,6 +57,22 @@ module DTK; class ComponentModule
       {:module_name => module_name()}
     end
 
+    def delete_version(version)
+      module_branch  = get_module_branch_matching_version(version)
+      raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
+
+      version_constraints = module_branch.get_component_version_constraints()
+      raise ErrorUsage.new("Cannot delete the component module version because the service module(s) '#{version_constraints[:service_module]}' reference it") if version_constraints
+      
+      id_handle      = module_branch.id_handle()
+      implementation = module_branch.get_implementation()
+      impl_idh       = implementation.id_handle()
+
+      module_branch.delete_instance(id_handle)
+      implementation.delete_instance(impl_idh)
+      {:module_name => module_name()}
+    end
+
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version)
       create_needed_objects_and_dsl?(repo_for_new_branch,new_version)

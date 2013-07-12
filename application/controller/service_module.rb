@@ -119,6 +119,13 @@ module DTK
       rest_ok_response module_info
     end
 
+    def rest__delete_version()
+      service_module = create_obj(:service_module_id)
+      version = ret_version()
+      module_info = service_module.delete_version(version)
+      rest_ok_response module_info
+    end
+
     def rest__delete_remote()
       name = ret_non_null_request_params(:remote_service_name)
       remote_namespace,remote_service_name,version = Repo::Remote::split_qualified_name(name)

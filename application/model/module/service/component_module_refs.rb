@@ -147,6 +147,14 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       component_modules.has_key?(key(cmp_module_name))
     end
 
+    def ret_service_module_info()
+      sp_hash = {
+        :cols => [:service_module_info]
+      }
+      service_module = get_obj(sp_hash)
+      service_module
+    end
+
     def set_module_version(cmp_module_name,version)
       #TODO: update to do merge when self has more than version info
       create_component_modules_hash?()[key(cmp_module_name)] = VersionInfo::Assignment.new(version)

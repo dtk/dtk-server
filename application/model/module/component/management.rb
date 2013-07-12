@@ -61,8 +61,9 @@ module DTK; class ComponentModule
       module_branch  = get_module_branch_matching_version(version)
       raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
 
-      version_constraints = module_branch.get_component_version_constraints()
-      raise ErrorUsage.new("Cannot delete the component module version because the service module(s) '#{version_constraints[:service_module]}' reference it") if version_constraints
+      #TODO: remove after reading: Rich: get_component_version_constraints has been deprecated and also it applies only to a service module
+      #version_constraints = module_branch.get_component_version_constraints()
+      #raise ErrorUsage.new("Cannot delete the component module version because the service module(s) '#{version_constraints[:service_module]}' reference it") if version_constraints
       
       id_handle      = module_branch.id_handle()
       implementation = module_branch.get_implementation()

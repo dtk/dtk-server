@@ -167,6 +167,14 @@ pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
       component_modules.has_key?(key(cmp_module_name))
     end
 
+    def ret_service_module_info()
+      sp_hash = {
+        :cols => [:service_module_info]
+      }
+      service_module = get_obj(sp_hash)
+      service_module
+    end
+
     def set_module_version(cmp_module_name,version)
       key = key(cmp_module_name)
       if cmr = @component_modules[key]

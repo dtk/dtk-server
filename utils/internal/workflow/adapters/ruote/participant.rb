@@ -437,7 +437,7 @@ module XYZ
             receiver_context = {:callbacks => callbacks, :expected_count => 1}
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
-              sleep(5) # to avoid race condition #TODO: can remove when mcollective agent is not restarted
+              sleep(10) # to avoid race condition #TODO: can remove this when mcollective agent is not restarted
             rescue Exception => e
               e.backtrace
             end

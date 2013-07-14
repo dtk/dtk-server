@@ -180,8 +180,10 @@ module DTK; class ComponentDSL; class V2
               if opts[:constant_attribute]
                 Attribute::Constant.ret_external_ref()
               else
-                {"type" => "puppet_attribute", #TODO: hard-wired
-                 "path" => "node[#{cmp_type}][#{name}]"
+                type = "puppet_attribute" #TODO: hard-wired
+                external_ref_name = (info["external_ref"]||{})[type]||name
+                {"type" => type,
+                 "path" => "node[#{cmp_type}][#{external_ref_name}]"
               }
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)

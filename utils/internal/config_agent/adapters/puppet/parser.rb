@@ -1,6 +1,8 @@
 #TODO: think better to move assumptions about ast form into the initialization functions to capture their assumptions
 module Puppet
 end
+require 'puppet/resource'
+require 'puppet/type'
 require 'puppet/parser'
 
 module DTK

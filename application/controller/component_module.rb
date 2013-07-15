@@ -81,7 +81,9 @@ module DTK
 
     def rest__versions()
       component_module = create_obj(:component_module_id)
-      rest_ok_response component_module.versions()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+
+      rest_ok_response component_module.versions(module_id)
     end
 
     def rest__info_about()

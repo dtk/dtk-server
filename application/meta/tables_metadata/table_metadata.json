@@ -426,10 +426,12 @@
   },
   "module_version": {
     "order": [
-      "version"
+      "namespace",
+      "version(s)"
     ],
     "mapping": {
-      "version": "version"
+      "namespace": "namespace",
+      "version(s)": "versions"
     }
   }
 }

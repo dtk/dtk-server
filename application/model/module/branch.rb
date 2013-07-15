@@ -26,8 +26,10 @@ module DTK
       name    = get_module_name()
       version = version_print_form()
       service_constraint = nil
-      version_constraints.each do |constraint|
-        service_constraint = constraint.ret_service_module_info() if constraint.has_module_version?(name,version)
+      if version_constraints
+        version_constraints.each do |constraint|
+          service_constraint = constraint.ret_service_module_info() if constraint.has_module_version?(name,version)
+        end
       end
       
       return service_constraint

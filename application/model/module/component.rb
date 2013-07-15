@@ -43,7 +43,7 @@ module DTK
       local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.reject{|v| v.nil?}
       # get all remote modules versions, and take only versions for current component module name
       info = ComponentModule.info(model_handle(), module_id)
-      module_name = info[:remote_repos].last[:repo_name].strip()
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip()
       remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}
       
       [{:namespace => "local", :versions => local_versions}, {:namespace => "remote", :versions => remote_versions}]

@@ -96,6 +96,40 @@ module DTK
       config_agent_type
     end
 
+    # Method will check if given component modules are present on the system
+    #
+    def self.cross_reference_modules(opts, required_modules, service_namespace)
+      project_idh = opts.required(:project_idh)
+
+      req_names = required_modules.collect { |m| m['component_module']}
+
+      sp_hash = {
+        :cols => [:id, :display_name, :module_branches_with_repos].compact,
+        :filter => [:and,[:oneof, :display_name, req_names],[:eq, :project_project_id, project_idh.get_id()]]
+      }
+      mh = project_idh.createMH(model_type())
+      installed_modules = get_objs(mh,sp_hash)
+
+      missing_modules = []
+
+      required_modules.each do |r_module|
+        is_found   = false
+        name    = r_module["component_module"]
+        version = r_module["version_info"]
+
+        installed_modules.each do |i_module|
+          if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
+            is_found = true
+            break
+          end
+        end
+
+        missing_modules << { :name => name, :version => version, :namespace => service_namespace} unless is_found
+      end
+
+      return missing_modules
+    end
+
     def self.get_all_workspace_library_diffs(mh)
       #TODO: not treating versions yet and removing modules wheer component not in workspace
       #TODO: much more efficeint is use bulk version 

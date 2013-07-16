@@ -47,21 +47,19 @@ module DTK
 
     # export to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def export(remote_repo,version=nil,request_params={})
+    def export(remote_repo,version=nil, remote_component_name = "")
       # TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()
 
-
-      # we now support remote module name to be specified by client
-      module_name = request_params[:remote_component_name] || module_name()
-      remote_ns = request_params[:remote_component_namespace] ||= DTK::Repo::Remote.default_user_namespace()
-
+      component_namespace, component_name, component_version = Repo::Remote::split_qualified_name(remote_component_name)
+      version ||= component_version
 
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
-      if module_name() != request_params[:remote_component_name]
+      if module_name() != component_name
         raise ErrorUsage.new("We do not support custom module names (via export) at this time.")
       end
+
       # if repo.linked_remote?(remote_repo)
       #   raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       # end
@@ -74,7 +72,7 @@ module DTK
       export_preprocess(module_branch_obj)
 
       #create module on remote repo manager
-      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type(),request_params)
+      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type(), component_namespace)
 
       remote_repo_name = module_info[:git_repo_name]
 
@@ -88,7 +86,7 @@ module DTK
       repo.push_to_remote(local_branch,remote_repo_name)
 
       # we create remote repo for given namespace
-      RepoRemote.create_repo_remote(model_handle(:repo_remote), module_name, remote_repo_name, remote_ns, repo.id,Opts.new(:set_as_default_if_first => true))
+      RepoRemote.create_repo_remote(model_handle(:repo_remote), module_name, remote_repo_name, component_namespace, repo.id,Opts.new(:set_as_default_if_first => true))
 
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
@@ -117,10 +115,6 @@ module DTK
       #return 1
 
       repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
-
-      # DEBUG SNIPPET >>>> REMOVE <<<<
-      # require 'ap'
-      # ap "I am here!!!"
 
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])

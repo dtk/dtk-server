@@ -179,7 +179,7 @@ lambda__segment_impls =
       :hidden=>true,
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id,:repo_id,:version]),
-       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
+       lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir,:remote_repo_namespace])
      ]
     },
     :implementations=>{

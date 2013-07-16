@@ -8,10 +8,11 @@ class NilClass
 end
 ### end of monkey patch
 
-module XYZ
+module DTK
   module CloudConnect
     class Top
       def get_compute_params()
+        ENV["FOG_RC"] ||= R8::Config[:ec2][:fog_credentials_path]
         compute_params = Fog.credentials()
         
         if region = R8::Config[:ec2][:region]

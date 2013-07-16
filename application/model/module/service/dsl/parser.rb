@@ -36,6 +36,11 @@ module DTK
           @file_type = file_type
           if object.kind_of?(ExtMod::FileParser::OutputArray)
             object.each{|r|self << r}
+          elsif object.kind_of?(Hash)
+            #TODO: deprecate
+            object.each_pair do |component_module,info|
+              self << info.merge(:component_module => component_module)
+            end
           else
             raise Error.new("Not implemented yet: Output parser for #{object.class}")
           end

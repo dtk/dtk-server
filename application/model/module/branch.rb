@@ -16,6 +16,24 @@ module DTK
       mh = model_handle(:component_module_refs)
       ComponentModuleRefs.create_and_reify?(self,Model.get_obj(mh,sp_hash))
     end
+
+    def get_component_version_constraints()
+      sp_hash = {
+        :cols => [:constraints, :branch_id]
+      }
+      # get all module.version_constraints and remove those that don't have any component_module references
+      version_constraints = Model.get_objs(model_handle(:component_module_refs), sp_hash).select{|r|!r[:constraints].empty?}.reject!{|r| r[:constraints][:component_modules].empty?}
+      name    = get_module_name()
+      version = version_print_form()
+      service_constraint = nil
+      if version_constraints
+        version_constraints.each do |constraint|
+          service_constraint = constraint.ret_service_module_info() if constraint.has_module_version?(name,version)
+        end
+      end
+      
+      return service_constraint
+    end
     
     def get_module_repo_info()
       repo = get_repo(:repo_name)

@@ -504,8 +504,10 @@ module DTK
           if e.err.nil? or e.err.empty?
             Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
           else
-            error_msg = "Grit error: #{e.err}; exitstatus=#{e.exitstatus}; command='#{e.command}'"
-            raise Error.new(error_msg)
+            #write more info to server log, but to client return user friendly message
+            Log.info("Grit error: #{e.err} exitstatus=#{e.exitstatus}; command='#{e.command}'")
+            error_msg = "Grit error: #{e.err.strip()}"
+            raise ErrorUsage.new(error_msg)
           end
          rescue => e
           raise e

@@ -71,6 +71,24 @@ module DTK
       {:module_name => module_name}
     end
 
+    def delete_version(version)
+      module_branch  = get_module_branch_matching_version(version)
+      raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
+
+      assembly_templates = module_branch.get_assemblies()
+      assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
+      unless assoc_assemblies.empty?
+        assembly_names = assoc_assemblies.map{|a|a[:display_name]}
+        raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
+      end
+
+      Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
+
+      id_handle = module_branch.id_handle()
+      module_branch.delete_instance(id_handle)
+      {:module_name => module_name}
+    end
+
     def get_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]

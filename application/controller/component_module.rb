@@ -45,6 +45,13 @@ module DTK
       rest_ok_response module_info
     end
 
+    def rest__delete_version()
+      component_module = create_obj(:component_module_id)
+      version = ret_version()
+      module_info = component_module.delete_version(version)
+      rest_ok_response module_info
+    end
+
     #### end: create and delete actions ###
 
     #### list and info actions ###
@@ -75,7 +82,9 @@ module DTK
 
     def rest__versions()
       component_module = create_obj(:component_module_id)
-      rest_ok_response component_module.versions()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+
+      rest_ok_response component_module.versions(module_id)
     end
 
     def rest__info_about()

@@ -51,7 +51,7 @@ module XYZ
                 # we set :last_ts as access time for later check
                 session.store(:last_ts, Time.now.to_i)
 
-                Log.debug "Session cookie has been used to temporary revive user session"
+                #Log.debug "Session cookie has been used to temporary revive user session"
               end
             end
           end

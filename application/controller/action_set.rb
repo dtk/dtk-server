@@ -27,7 +27,7 @@ module XYZ
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
             if request.cookies["dtk-user-info"]
-              Log.debug "Session cookie is beeing used to revive this session"
+              #Log.debug "Session cookie is beeing used to revive this session"
 
               # using cookie to take session information
               # composed data is consistent form user_id, expire timestamp, and tenant id

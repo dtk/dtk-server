@@ -191,11 +191,7 @@ module DTK
           error,temp = {},error
           error[:message] = temp
         end
-
-        # DEBUG SNIPPET >>>> REMOVE <<<<
-        require 'ap'
-        ap errors.first.class
-
+        
         error_msg = (error[:component] ? "Component #{error[:component].gsub("__","::")}: " : "")
         error_msg << (error[:message]||"error")
         ret[:message] << error_msg

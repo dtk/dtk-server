@@ -61,6 +61,7 @@ module DTK
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
+      
       rest_ok_response ComponentModule.list(opts), :datatype => :module
     end
 
@@ -81,7 +82,9 @@ module DTK
 
     def rest__versions()
       component_module = create_obj(:component_module_id)
-      rest_ok_response component_module.versions()
+      module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+
+      rest_ok_response component_module.versions(module_id)
     end
 
     def rest__info_about()
@@ -135,9 +138,9 @@ module DTK
 
     def rest__export()
       component_module = create_obj(:component_module_id)
-      name_and_ns_params = ret_params_hash_with_nil(:remote_component_name, :remote_component_namespace)
+      remote_component_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
       remote_repo = ret_remote_repo()
-      component_module.export(remote_repo, nil, name_and_ns_params)
+      component_module.export(remote_repo, nil, remote_component_name)
       rest_ok_response 
     end
 

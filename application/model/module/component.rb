@@ -38,8 +38,15 @@ module DTK
     ##
     # Returnes versions for specified module
     #
-    def versions()
-      get_objs(:cols => [:version_info]).collect { |v_info| { :version => ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) } }
+    def versions(module_id)
+      # get local versions list and remove master(nil) from list
+      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.reject{|v| v.nil?}
+      # get all remote modules versions, and take only versions for current component module name
+      info = ComponentModule.info(model_handle(), module_id)
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip()
+      remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}
+      
+      [{:namespace => "local", :versions => local_versions}, {:namespace => "remote", :versions => remote_versions}]
     end
 
     def info_about(about, cmp_id=nil)
@@ -94,6 +101,40 @@ module DTK
 
     def self.module_specific_type(config_agent_type)
       config_agent_type
+    end
+
+    # Method will check if given component modules are present on the system
+    #
+    def self.cross_reference_modules(opts, required_modules, service_namespace)
+      project_idh = opts.required(:project_idh)
+
+      req_names = required_modules.collect { |m| m['component_module']}
+
+      sp_hash = {
+        :cols => [:id, :display_name, :module_branches_with_repos].compact,
+        :filter => [:and,[:oneof, :display_name, req_names],[:eq, :project_project_id, project_idh.get_id()]]
+      }
+      mh = project_idh.createMH(model_type())
+      installed_modules = get_objs(mh,sp_hash)
+
+      missing_modules = []
+
+      required_modules.each do |r_module|
+        is_found   = false
+        name    = r_module["component_module"]
+        version = r_module["version_info"]
+
+        installed_modules.each do |i_module|
+          if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
+            is_found = true
+            break
+          end
+        end
+
+        missing_modules << { :name => name, :version => version, :namespace => service_namespace} unless is_found
+      end
+
+      return missing_modules
     end
 
     def self.get_all_workspace_library_diffs(mh)

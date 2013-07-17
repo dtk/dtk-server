@@ -132,18 +132,17 @@ module DTK
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
-      # TODO: [Haris] Refactor later so that params order makes more sense
-      # request_params: hash map containing remote_component_name, remote_component_namespace
-      def create_module(name, type, request_params = {})
+      def create_module(name, type, namespace = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
         client.create_user(username,rsa_pub_key,:update_if_exists => true)
         #namespace = self.class.default_namespace()
-        namespace = request_params[:remote_component_namespace] || CurrentSession.new.get_user_object().get_namespace()
+        namespace ||= CurrentSession.new.get_user_object().get_namespace()
+
         params = {
           :username => username,
-          :name => request_params[:remote_component_name] || name,
+          :name => name,
           :access_rights => "RW+",
           :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type),

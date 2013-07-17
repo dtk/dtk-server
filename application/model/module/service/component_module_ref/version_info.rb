@@ -1,5 +1,8 @@
 module DTK; class ComponentModuleRef
   class VersionInfo
+
+    DEFAULT_VERSION = "master"
+
     class Assignment < self
       def initialize(version_string)
         @version_string = version_string
@@ -8,6 +11,9 @@ module DTK; class ComponentModuleRef
       attr_reader :version_string      
 
       def self.reify?(object)
+        if ModuleCommon.string_master_or_emtpy?(object)
+          return new(DEFAULT_VERSION)
+        end
         version_string = 
           if object.kind_of?(String) then object
           elsif object.kind_of?(ComponentModuleRef) then object[:version_info]

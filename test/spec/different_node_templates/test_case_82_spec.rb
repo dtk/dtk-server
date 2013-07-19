@@ -11,7 +11,7 @@ require './lib/node_operations_spec'
 
 STDOUT.sync = true
 
-node_name = 'natty micro'
+node_name = 'precise-micro'
 staged_node_name = 'test_case_82_instance'
 
 dtk_common = DtkCommon.new('', '')

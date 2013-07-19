@@ -23,11 +23,11 @@ class DtkCommon
 	def initialize(assembly_name, assembly_template)
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
-		@SERVER = 'dev10.r8network.com'
+		@SERVER = 'dev17.r8network.com'
 		@PORT = 7000
-		@ENDPOINT = "http://dev10.r8network.com:7000"
-		@USERNAME = 'dtk10'
-	  @PASSWORD = 'r8server'
+		@ENDPOINT = "http://ec2-54-235-208-104.compute-1.amazonaws.com:7000"
+		@USERNAME = 'dtk17-client'
+	  	@PASSWORD = 'r8server'
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()

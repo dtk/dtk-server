@@ -14,7 +14,7 @@ STDOUT.sync = true
 
 assembly_name = 'test_case_4_instance'
 assembly_template = 'bootstrap::node_with_params'
-os = 'natty'
+os = 'precise'
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'

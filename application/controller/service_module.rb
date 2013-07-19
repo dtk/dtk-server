@@ -141,6 +141,15 @@ module DTK
       rest_ok_response 
     end
 
+    #
+    # Method will check new dependencies on repo manager and import new modules on server.
+    # Response will return list of modules for given component.
+    #
+    def rest__resolve_pull_from_remote()
+      # For pull check grit adapter
+      rest_ok_response check_service_dependencies(ServiceModule)
+    end
+
     def rest__delete_assembly_template()
       # using ret_assembly_params_id_and_subtype to get asembly_template_id
       assembly_id, subtype = ret_assembly_params_id_and_subtype()

@@ -9,13 +9,19 @@ module DTK
       !!(str =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
     end
 
-    def self.string_master_or_emtpy?(str)
-      str.nil? || str.empty? || str.casecmp("master").eql?(0) || str.casecmp("default").eql?(0)
+    def self.string_master_or_empty?(object)
+      ret =
+        if object.nil? 
+          true
+        elsif object.kind_of?(String)
+          object.casecmp("master").eql?(0) || object.casecmp("default").eql?(0)
+        end
+      !!ret
     end
 
     # Compares version, return true if same
     def self.versions_same?(str1, str2)
-      return true if (string_master_or_emtpy?(str1) && string_master_or_emtpy?(str2))
+      return true if (string_master_or_empty?(str1) && string_master_or_empty?(str2))
       # ignore prefix 'v' if present e.g. v4.2.3
       return (str1||'').gsub(/^v/,'').eql?((str2||'').gsub(/^v/,''))
     end 

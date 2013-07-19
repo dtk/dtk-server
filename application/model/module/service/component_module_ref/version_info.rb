@@ -11,12 +11,11 @@ module DTK; class ComponentModuleRef
       attr_reader :version_string      
 
       def self.reify?(object)
-        if ModuleCommon.string_master_or_emtpy?(object)
-          return new(DEFAULT_VERSION)
-        end
         version_string = 
-          if object.kind_of?(String) then object
-          elsif object.kind_of?(ComponentModuleRef) then object[:version_info]
+          if object.kind_of?(String) 
+            ModuleCommon.string_master_or_empty?(object) ? DEFAULT_VERSION : object
+          elsif object.kind_of?(ComponentModuleRef) 
+            object[:version_info]
           end
         if version_string 
           if ModuleCommon.string_has_version_format?(version_string)

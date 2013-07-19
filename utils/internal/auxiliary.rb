@@ -116,6 +116,10 @@ module XYZ
       end
 
       def json_parse(json,file_path=nil)
+        ret = Hash.new
+        if json.empty?
+          return ret
+        end
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e

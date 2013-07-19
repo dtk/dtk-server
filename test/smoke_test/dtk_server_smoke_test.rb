@@ -13,7 +13,7 @@ require './lib/modules_spec'
 
 assembly_name = 'smoke_test_instance'
 assembly_template = 'bootstrap::node_with_params'
-os = 'natty'
+os = 'precise'
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'

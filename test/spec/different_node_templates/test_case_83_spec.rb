@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 83: Stage node template, add apache component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info
+#Test Case 83: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info
 
 require 'rubygems'
 require 'rest_client'
@@ -19,11 +19,11 @@ component_name = 'rsync'
 dtk_common = DtkCommon.new('', '')
 $node_id = 0
 
-describe "Test Case 83: Stage node template, add apache component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info" do
+describe "Test Case 83: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info" do
 
   before(:all) do
     puts "************************************************************************************************************************************************"
-    puts "Test Case 83: Stage node template, add apache component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info"
+    puts "Test Case 83: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info"
     puts "************************************************************************************************************************************************"
     puts ""
   end

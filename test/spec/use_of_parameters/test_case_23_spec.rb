@@ -12,7 +12,7 @@ require './lib/parameters_setting_spec.rb'
 
 assembly_name = 'test_case_23_instance'
 assembly_template = 'bootstrap::node_with_params'
-os = 'natty'
+os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
 

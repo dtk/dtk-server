@@ -111,7 +111,6 @@ module DTK
       update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
     end
 
-
     def get_project()
       #caching
       return self[:project] if self[:project]

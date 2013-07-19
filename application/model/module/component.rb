@@ -134,7 +134,8 @@ module DTK
         missing_modules << { :name => name, :version => version, :namespace => service_namespace} unless is_found
       end
 
-      return missing_modules
+      # return both missing and required modules
+      return missing_modules, required_modules
     end
 
     def self.get_all_workspace_library_diffs(mh)

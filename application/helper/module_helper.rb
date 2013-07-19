@@ -17,6 +17,20 @@ module Ramaze::Helper
       throw :async
     end
 
+    #
+    # Method will return list missing and required for given service (via request.params) dependencies
+    #
+    def check_service_dependencies(module_class)
+      # simple check for proper use of this method
+      raise Error.new("This functionality is only available for service modules") if is_service_module?(module_class)
+
+      remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_repo, project = ret_remote_repo(), get_default_project()
+      missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
+
+      return { :missing_modules => missing_modules, :required_modules => required_modules }
+    end
+
     def import_method_helper(module_class)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
@@ -34,14 +48,9 @@ module Ramaze::Helper
       }
 
       # check for missing module dependencies
-      if (module_class == DTK::ServiceModule)
-        repo_client = ::DTK::Repo::Remote.new(remote_repo)
-        response = repo_client.get_remote_module_components(remote_module_name, :service_module, version, remote_namespace)
+      if is_service_module?(module_class)
 
-        project = get_default_project()
-        opts = ::DTK::Opts.new(:project_idh => project.id_handle()) 
-
-        missing_modules = DTK::ComponentModule.cross_reference_modules(opts, response, remote_namespace)
+        missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
         
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
@@ -80,6 +89,20 @@ module Ramaze::Helper
         ::DTK::Library.get_public_library(model_handle(:library)).id_handle()
       end
     end
+
+    private
+
+    def is_service_module?(module_clazz)
+      (module_clazz == DTK::ServiceModule)
+    end
+
+    def get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
+      repo_client = ::DTK::Repo::Remote.new(remote_repo)
+      response = repo_client.get_remote_module_components(remote_module_name, :service_module, version, remote_namespace)
+      opts = ::DTK::Opts.new(:project_idh => project.id_handle()) 
+      DTK::ComponentModule.cross_reference_modules(opts, response, remote_namespace)
+    end
+
   end
 end
 

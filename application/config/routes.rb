@@ -141,7 +141,7 @@ R8::ReactorRoute.draw do
   post  'service_module/update_model_from_clone' => 'service_module#update_model_from_clone'
   post  'service_module/import' => 'service_module#import'
   post  'service_module/create' => 'service_module#create'
-  post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
+  post  'service_module/resolve_pull_from_remote' => 'service_module#resolve_pull_from_remote'
   post  'service_module/list' => 'service_module#list'
   post  'service_module/list_remote' => 'service_module#list_remote'
   post  'service_module/list_assemblies' => 'service_module#list_assemblies'

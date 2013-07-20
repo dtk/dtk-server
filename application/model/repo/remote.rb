@@ -292,10 +292,10 @@ module DTK
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
       def dtk_instance_remote_repo_username()
-        @dtk_instance_remote_repo_username ||= Common::Aux.dtk_instance_repo_username()
+        "dtk-instance"
       end
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
-        "#{dtk_instance_remote_repo_username()}--#{RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]}"
+        RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]
       end
  
     end

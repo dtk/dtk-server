@@ -13,7 +13,7 @@ require './lib/modules_spec'
 
 assembly_name = 'test_case_29_instance'
 assembly_template = 'bootstrap::node_with_params'
-os = 'natty'
+os = 'precise'
 os_attribute = 'os_identifier'
 node_name = 'node1'
 module_name = "mysql"

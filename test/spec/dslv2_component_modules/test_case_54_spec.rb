@@ -12,7 +12,11 @@ require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
 assembly_name = 'test_case_54_instance'
-assembly_template = 'bootstrap::test1'
+assembly_template = 'bootstrap::node_with_params'
+os_attribute = 'os_identifier'
+memory_size_attribute = 'memory_size'
+os = 'precise'
+memory_size = 't1.micro'
 node_name = 'test1'
 component_name1 = 'temp::sink'
 component_name2 = 'temp::source'
@@ -101,6 +105,14 @@ describe "Test Case 54: Converge assembly with modified module (added new compon
 
   context "List assemblies after stage" do    
     include_context "List assemblies after stage", dtk_common
+  end
+
+  context "Set os attribute function" do
+    include_context "Set attribute", dtk_common, os_attribute, os
+  end
+
+  context "Set memory size attribute function" do
+    include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
   end
 
   context "Add components to assembly node" do

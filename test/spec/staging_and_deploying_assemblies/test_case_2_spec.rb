@@ -23,7 +23,7 @@ describe "Test Case 2: Stage existing assembly and then delete assembly" do
 		puts "Test Case 2: Stage existing assembly and then delete assembly"
 		puts "*************************************************************"
 		puts ""
-  end
+  	end
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common

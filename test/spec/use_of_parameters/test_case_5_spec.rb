@@ -11,10 +11,15 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec.rb'
 
 assembly_name = 'test_case_5_instance'
-assembly_template = 'bootstrap::test1'
+assembly_template = 'bootstrap::node_with_params'
 new_assembly_name = 'test_case_5_instance2'
 new_assembly_template = 'test_case_5_temp'
 service_name = 'bootstrap'
+
+os_attribute = 'os_identifier'
+memory_size_attribute = 'memory_size'
+os = 'precise'
+memory_size = 't1.micro'
 
 $assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
@@ -51,6 +56,14 @@ describe "Test Case 5: Check possibility to create assembly template from existi
 
   context "List assemblies after stage of new assembly" do 
     include_context "List assemblies after stage", dtk_common2
+  end
+
+  context "Set os attribute function" do
+    include_context "Set attribute", dtk_common, os_attribute, os
+  end
+
+  context "Set memory size attribute function" do
+    include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
   end
 
   context "Converge function" do

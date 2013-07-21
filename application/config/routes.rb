@@ -42,6 +42,7 @@ R8::ReactorRoute.draw do
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
   post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
   post  'assembly/get_action_results' => 'assembly#get_action_results'
+  post  'assembly/delete_node' => 'assembly#delete_node'
   post  'assembly/delete_component' => 'assembly#delete_component'
   post  'assembly/get_components_module' => 'assembly#get_components_module'
 

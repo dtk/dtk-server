@@ -21,6 +21,13 @@ module DTK
       rest_ok_response
     end
 
+    def rest__delete_node()
+      node_id = ret_non_null_request_params(:node_id)
+      assembly = ret_assembly_instance_object()
+      assembly.delete_node(id_handle(node_id,:node),:destroy_nodes => true)
+      rest_ok_response
+    end
+
     def rest__delete_component()
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
       node_id = ret_non_null_request_params(:node_id)

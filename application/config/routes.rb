@@ -18,7 +18,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'
   post  'assembly/add_ad_hoc_attribute_mapping' => 'assembly#add_ad_hoc_attribute_mapping'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
-  post  'assembly/add_ad_hoc_service_link' => 'assembly#add_ad_hoc_service_link'
+  post  'assembly/add_service_link' => 'assembly#add_service_link'
   post  'assembly/list_service_links' => 'assembly#list_service_links'
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'

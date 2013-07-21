@@ -102,13 +102,13 @@ module DTK
       rest_ok_response
     end
 
-    def rest__add_ad_hoc_service_link()
+    def rest__add_service_link()
       assembly = ret_assembly_instance_object()
       assembly_id = assembly.id()
       service_type = ret_non_null_request_params(:service_type)
       input_cmp_idh = ret_component_id_handle(:input_component_id,:assembly_id => assembly_id)
       output_cmp_idh = ret_component_id_handle(:output_component_id,:assembly_id => assembly_id)
-      service_link_idh = assembly.add_ad_hoc_service_link?(service_type,input_cmp_idh,output_cmp_idh)
+      service_link_idh = assembly.add_service_link?(service_type,input_cmp_idh,output_cmp_idh)
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
@@ -118,16 +118,6 @@ module DTK
       attribute_mapping = ret_non_null_request_params(:attribute_mapping)
       assembly.add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
       rest_ok_response 
-    end
-
-    def rest__add_connection() #TODO: deprecate
-      assembly = ret_assembly_instance_object()
-      assembly_idh = assembly.id_handle()
-      conn_type = ret_non_null_request_params(:connection_type)
-      input_port = ret_port_object(:input_service_ref_id,assembly_idh,conn_type)
-      output_port = ret_port_object(:output_service_ref_id,assembly_idh,conn_type)
-      port_link_idh = assembly.add_connection(input_port,output_port)
-      rest_ok_response :connection_id => port_link_idh.get_id()
     end
 
     def rest__list_attribute_mappings()

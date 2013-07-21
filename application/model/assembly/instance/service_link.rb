@@ -1,8 +1,8 @@
 module DTK
   class Assembly::Instance
     module ServiceLinkMixin
-      def add_ad_hoc_service_link?(service_type,input_cmp_idh,output_cmp_idh)
-        ServiceLink::AdHocLink.new(self,service_type,input_cmp_idh,output_cmp_idh).add?()
+      def add_service_link?(service_type,input_cmp_idh,output_cmp_idh)
+        ServiceLink::Factory.new(self,service_type,input_cmp_idh,output_cmp_idh).add?()
       end
 
       def add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
@@ -14,21 +14,6 @@ module DTK
         pp_opts = Aux.hash_subset(opts,[:context])
         get_augmented_port_links(get_opts).map{|r|ServiceLink.print_form_hash(r,pp_opts)} +
           get_augmented_ports(:mark_unconnected=>true).select{|r|r[:unconnected]}.map{|r|ServiceLink.print_form_hash(r,pp_opts)}
-      end
-
-      #TODO: need to hamrmonize the add/list conenctions which were written from perspective of theer is link defs defined
-      #add the add service commands
-      def add_connection(input_port,output_port)
-        port_link_hash = {
-          :input_id => input_port.id(),
-          :output_id  => output_port.id(),
-        }
-        override_attrs = {
-          :assembly_id => id()
-        }
-        target = get_target()
-        port_link = PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,Opts.new(:override_attrs => override_attrs))
-        port_link.id_handle()
       end
 
       def list_connections__possible()
@@ -53,7 +38,7 @@ module DTK
     end
     
     class ServiceLink
-      r8_nested_require('service_link','ad_hoc_link')    
+      r8_nested_require('service_link','factory')    
       r8_nested_require('service_link','attribute_mapping')
 
       def initialize(assembly_instance)

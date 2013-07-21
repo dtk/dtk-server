@@ -72,7 +72,7 @@ module XYZ
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
-          create_options.merge!(:groups => external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]])
+          create_options.merge!(:groups => external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default")
 
           #TODO: fix up
           create_options.merge!(:key_name => R8::Config[:ec2][:keypair])

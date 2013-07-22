@@ -21,7 +21,7 @@ module DTK; class Assembly
       ret = Array.new
       return ret if assembly_idhs.empty?()
       sp_hash = {
-        :cols => opts[:cols]||[:id, :group_id, :display_name],
+        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       node_mh = assembly_idhs.first.createMH(:node)

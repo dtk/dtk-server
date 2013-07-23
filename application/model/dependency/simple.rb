@@ -63,13 +63,15 @@ module DTK; class Dependency
     end
 
     def set_satisfied_by_component_id?(satisify_cmps)
-      if match_cmp = satisify_cmps.find{|cmp|@dependency_obj.component_satisfies_dependency?(cmp)}
-        @satisfied_by_component_id = match_cmp.id()
-      end 
+      match_cmp = satisify_cmps.find do |cmp|
+        (cmp[:node_node_id] == @node[:id]) and @dependency_obj.component_satisfies_dependency?(cmp)
+      end
+      @satisfied_by_component_id = match_cmp.id() if match_cmp
     end
 
     attr_reader :dependency_obj, :node
-    private
+   private
+
     def self.get_components_that_satisify_deps(dep_list)
       ret = Array.new
       query_disjuncts = dep_list.map do |simple_dep|

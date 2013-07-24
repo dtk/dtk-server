@@ -101,7 +101,12 @@ module DTK
       if project = get_project()
         opts.merge!(:project_idh => project.id_handle())
       end
-      Assembly::Template.get(model_handle(:component),opts)
+      ndx_ret = Assembly::Template.get(model_handle(:component),opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      Assembly::Template.get_nodes(ndx_ret.values.map{|r|r.id_handle}).each do |node|
+        assembly = ndx_ret[node[:assembly_id]]
+        (assembly[:nodes] ||= Array.new)  << node
+      end
+      ndx_ret.values
     end
 
     def info_about(about)

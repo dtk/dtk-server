@@ -7,5 +7,5 @@ dbconnection:
   database: rspec_test_report
   username: postgres
   password: password
-  host: ec2-54-246-3-66.eu-west-1.compute.amazonaws.com
+  host: backup.r8network.com
   port: 5432

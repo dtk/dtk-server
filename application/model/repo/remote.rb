@@ -260,7 +260,7 @@ module DTK
       # example: 
       #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
-        split = qualified_name.split("/")
+        split = qualified_name.split("/") if qualified_name
         case split.size
          when 1 then [default_namespace(),qualified_name]
          when 2,3 then split

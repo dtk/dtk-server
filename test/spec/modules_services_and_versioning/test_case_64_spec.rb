@@ -11,9 +11,9 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "dtk17"
-existing_module_name = "test"
+existing_module_name = "java"
 module_namespace = "r8"
+namespace = "dtk17"
 module_name = "bakir_test1"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0

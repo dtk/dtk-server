@@ -16,9 +16,9 @@ assembly_template = 'bootstrap::node_with_params'
 os = 'precise'
 os_attribute = 'os_identifier'
 node_name = 'node1'
-module_name = "mysql"
+module_name = "test"
 module_version = "0.0.1"
-module_namespace = "r8"
+module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 

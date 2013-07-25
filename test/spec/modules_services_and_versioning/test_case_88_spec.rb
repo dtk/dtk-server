@@ -12,12 +12,11 @@ require './lib/modules_spec'
 
 service_name = 'test_apache'
 service_namespace = 'r8'
-module_name1 = 'r8_base'
 module_name2 = 'stdlib'
 module_name3 = 'apache'
 service_filesystem_location = '~/dtk/service_modules'
 module_filesystem_location = '~/dtk/component_modules'
-components_list_to_check = ['apache','r8_base','stdlib']
+components_list_to_check = ['apache','stdlib']
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
@@ -32,15 +31,7 @@ describe "Test Case 88: Import new service but some modules already exists for t
   end
 
   context "Check that module exists" do
-    include_context "Check if module exists", dtk_common, module_name1
-  end
-
-  context "Check that module exists" do
     include_context "Check if module exists", dtk_common, module_name2
-  end
-
-  context "Check if module #{module_name1} imported on local filesystem" do
-    include_context "Check module imported on local filesystem", module_filesystem_location, module_name1
   end
 
   context "Check if module #{module_name2} imported on local filesystem" do

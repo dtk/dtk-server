@@ -11,8 +11,8 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "dtk10"
-existing_module_name = "bakir_test"
+namespace = "dtk17"
+existing_module_name = "test"
 module_namespace = "r8"
 module_name = "bakir_test1"
 module_filesystem_location = "~/dtk/component_modules"

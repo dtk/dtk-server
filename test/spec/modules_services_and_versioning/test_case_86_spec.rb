@@ -11,7 +11,7 @@ require './lib/services_spec'
 require './lib/modules_spec'
 
 service_name = 'bakir_test_apache'
-service_namespace = 'dtk10'
+service_namespace = 'r8'
 module_name = 'apache'
 service_filesystem_location = '~/dtk/service_modules'
 module_filesystem_location = '~/dtk/component_modules'

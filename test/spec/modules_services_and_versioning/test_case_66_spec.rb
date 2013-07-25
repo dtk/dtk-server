@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/services_spec'
 
-namespace = "dtk10"
+namespace = "dtk17"
 service_name = "bakir_test1"
 service_filesystem_location = '~/dtk/service_modules'
 $assembly_id = 0

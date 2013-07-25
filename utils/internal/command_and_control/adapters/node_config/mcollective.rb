@@ -220,27 +220,29 @@ module DTK
       class Config
         require 'tempfile'
         require 'erubis'
+        Lock = Mutex.new
         def self.mcollective_client()
-          return @mcollective_client if @mcollective_client
+          Lock.synchronize do
+            @mcollective_client ||= create_mcollective_client()
+          end
+        end
+       private
+        def self.create_mcollective_client()
           erubis_content = File.open(File.expand_path("mcollective/client.cfg.erb", File.dirname(__FILE__))).read
-          config_file_content = ::Erubis::Eruby.new(erubis_content).result(
-           :logfile => logfile(),
-           :stomp_host => Mcollective.server_host()
-          )
-          ret = nil
+          config_file_content = ::Erubis::Eruby.new(erubis_content).result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
           #TODO: see if can pass args and not need to use tempfile
           begin
             config_file = Tempfile.new("client.cfg")
             config_file.write(config_file_content)
             config_file.close
             ret = ::MCollective::Client.new(config_file.path)
-          ensure
+            ret.options = {}
+            ret
+           ensure
             config_file.unlink
           end
-          ret.options = {}
-          @mcollective_client = ret
         end
-       private
+
         def self.logfile()
           "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
         end

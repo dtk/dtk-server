@@ -22,52 +22,68 @@ module DTK
           return ret_clone_update_info(service_version)
         end
         
-=begin
-TODO: probably remove; ran into case where this is blocker; e.g., when want to change version before push-clone-changes
-        #make sure that the service module references the component module
-        unless cmp_module_refs.include_module?(cmp_module_name)
-
-          #quick check is looking in component_module_refs, if no match then do more expensive
-          #get_referenced_component_modules()
-          unless service_module.get_referenced_component_modules().find{|r|r.module_name() == cmp_module_name}
-            raise ErrorUsage.new("Service module (#{module_name()}) does not reference component module (#{cmp_module_name})")
-          end        
-        end
-=end
-
         #set in cmp_module_refs the module have specfied value and update both model and service's global refs
         cmp_module_refs.set_module_version(cmp_module_name,component_version)
         
         #update the component refs with the new component_template_ids
-        update_component_template_ids(component_module)
+        cmp_module_refs.update_component_template_ids(component_module)
         
         ret_clone_update_info(service_version)
       end
 
      private
       def get_component_module_refs(service_version=nil)
-        get_module_branch_matching_version(service_version).get_component_module_refs()
+        branch = get_module_branch_matching_version(service_version)
+        ComponentModuleRefs.get_component_module_refs(branch)
       end
 
     end
   end
 
-  class ComponentModuleRefs < Model 
-    r8_nested_require('component_module_refs','version_info')
-
-    def ret_version_indexed_by_modules()
-      component_modules.inject(Hash.new) do |h,(mod,mod_info)|
-        h.merge(mod.to_s => mod_info.version())
+  class ComponentModuleRefs 
+    def self.get_component_module_refs(branch)
+      content_hash_content = ComponentModuleRef.get_component_module_refs(branch).inject(Hash.new) do |h,r|
+        h.merge(key(r[:component_module]) => r)
       end
+      new(branch,content_hash_content)
+    end
+
+    def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
+      content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
+pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
+      update(branch,content_hash_content,opts)
+      new(branch,content_hash_content,:content_hash_form_is_reified => true)
+    end
+
+    def version_objs_indexed_by_modules()
+      ret = Hash.new
+      component_modules.each_pair do |mod,cmr|
+        if version_info =  cmr[:version_info]
+          ret.merge!(mod.to_s => version_info)
+        end
+      end
+      ret
     end
 
     def self.meta_filename_path()
       "global_module_refs.json"
     end
 
-    def self.create_and_reify?(module_branch_parent,component_module_refs=nil)
-      component_module_refs ||= create_stub(module_branch_parent.model_handle(:component_module_refs))
-      component_module_refs.reify!(module_branch_parent)
+    def update_component_template_ids(component_module)
+      #first get filter so can call get_augmented_component_refs
+      assembly_templates = component_module.get_associated_assembly_templates()
+      return if assembly_templates.empty?
+      filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
+      opts = {
+        :filter => filter,
+        :component_module_refs => self,
+        :force_compute_template_id => true,
+        :raise_errors_if_unmatched => true
+      }
+      aug_cmp_refs = Assembly::Template.get_augmented_component_refs(component_module.model_handle(:component),opts)
+      return if aug_cmp_refs.empty?
+      cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
+      Model.update_from_rows(component_module.model_handle(:component_ref),cmp_ref_update_rows)
     end
 
     #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
@@ -112,7 +128,7 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       #Lookup up modules mapping
       #mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
       #component_template will be null if no match is found
-      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
+      mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys,opts)
 
       #set the component template ids; raise error if there is a required element that does not have a matching component template
       reference_errors = Array.new
@@ -138,9 +154,13 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
       raise ErrorUsage::DanglingComponentRefs.new(reference_errors) unless reference_errors.empty?
       ret
     end
+
+    attr_reader :component_modules
                                                                           
-    def has_module_version?(cmp_module_name,version)
-      module_version(cmp_module_name).version == version
+    def has_module_version?(cmp_module_name,version_string)
+      if cmp_module_ref = ret_component_module_ref(cmp_module_name)
+        cmp_module_ref.version_string() == version_string
+      end
     end
 
     def include_module?(cmp_module_name)
@@ -156,82 +176,92 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
     end
 
     def set_module_version(cmp_module_name,version)
-      #TODO: update to do merge when self has more than version info
-      create_component_modules_hash?()[key(cmp_module_name)] = VersionInfo::Assignment.new(version)
-      save!()
-      #TODO: here may search through 'linked' component instances and change version associated with them
-    end
-
-    def reify!(parent)
-      @parent = parent
-      cmp_module_objs = component_modules()
-      cmp_module_objs.each do |mod,mod_ref|
-        if version_assignment_obj = VersionInfo::Assignment.reify?(mod_ref)
-          cmp_module_objs[mod] = version_assignment_obj
-        end
-      end
-      self
-    end
-
-    def save!(parent_idh=nil,opts={})
-      parent_idh ||= parent_idh()
-
-      #update model
-      if id() 
-        #persisted already, needs update
-        update_row = {
-          :id => id(),
-          :constraints => constraints_in_hash_form()
-        }
-        #using Model.update_from_row rather than Model#update, because later updates object with set values which serve to overrite the reified constraint hash
-        Model.update_from_rows(model_handle(),[update_row])
+      key = key(cmp_module_name)
+      if cmr = @component_modules[key]
+        cmr.set_module_version(version)
       else
-        mh = parent_idh.create_childMH(:component_module_refs) 
-        row = {
-          mh.parent_id_field_name() => parent_idh.get_id(),
-          :ref => "constraint", #max one per parent so this can be constant
-          :constraints => constraints_in_hash_form(),
+        hash_content = {
+          :component_module => cmp_module_name,
+          :version_info => version
         }
-        @id_handle = Model.create_from_row(mh,row,:convert => true)
+        @component_modules[key] = ComponentModuleRef.reify(@parent.model_handle,hash_content)
       end
-
-      #update git repo
-      unless opts[:donot_make_repo_changes]
-        meta_filename_path = self.class.meta_filename_path()
-        @parent.serialize_and_save_to_repo(meta_filename_path,get_hash_content(@parent))
-      end
-
-      self
-    end
-
-    def set_and_save_constraints!(constraints_hash_form,opts={})
-      reify_and_set_constraints(constraints_hash_form)
-      save!(nil,opts)
-    end
-
-    def constraints_in_hash_form()
-      ret = Hash.new
-      unless constraints = self[:constraints]
-        return ret
-      end
-      self.class.hash_form(constraints)
+      self.class.update(@parent,@component_modules)
     end
 
    private
-    def get_hash_content(service_module_branch)
+    def ret_component_module_ref(cmp_module_name)
+      @component_modules[key(cmp_module_name)]
+    end
+
+    def initialize(parent,content_hash_form,opts={})
+      @parent = parent
+      @component_modules = opts[:content_hash_form_is_reified] ?
+        content_hash_form :
+        self.class.reify_content(parent.model_handle(:component_model_ref),content_hash_form)
+unless opts[:content_hash_form_is_reified]
+  pp ["after reify_content in initialize",@component_modules]
+end
+    end
+
+    def self.reify_content(mh,object)
+      if object.kind_of?(Hash)
+        object.inject(Hash.new) do |h,(k,v)|
+          if v.kind_of?(ComponentModuleRef)
+            h.merge(k.to_sym => ComponentModuleRef.reify(mh,v))
+          elsif v.kind_of?(String)
+            #TODO: this clause will be deprecated
+            h.merge(k.to_sym => ComponentModuleRef.reify(mh,:component_module => k,:version_info => v))
+          else
+            raise Error.new("Unexpected value associated with component module ref: #{v.class}")
+          end
+        end
+      elsif object.kind_of?(ServiceModule::DSLParser::Output)
+        object.inject(Hash.new) do |h,r|
+          h.merge(r[:component_module].to_sym => ComponentModuleRef.reify(mh,Aux.hash_subset(r,ReifyParsingColMapping)))
+        end
+      else
+        raise Error.new("Unexpected input (#{object.class})")
+      end
+    end
+    ReifyParsingColMapping = [:component_module,:version_info,{:remote_namespace => :remote_info}]
+
+    def self.key(el)
+      el.to_sym
+    end
+    def key(el)
+      self.class.key(el)
+    end
+
+    def self.update(parent,cmp_modules,opts={})
+      ComponentModuleRef.create_or_update(parent,cmp_modules)
+
+      unless opts[:donot_make_repo_changes]
+        meta_filename_path = meta_filename_path()
+        parent.serialize_and_save_to_repo(meta_filename_path,dsl_hash_form(parent))
+      end
+    end
+
+    def self.dsl_hash_form(service_module_branch)
       ret = SimpleOrderedHash.new()
-      component_module_refs = service_module_branch.get_component_module_refs()
-      unordered_hash = component_module_refs.constraints_in_hash_form()
-      if unordered_hash.empty?
+      component_modules = get_component_module_refs(service_module_branch).component_modules
+
+      seed = ServiceModule::DSLParser.file_parser_output_array_class()
+      output_array = component_modules.values.map{|cmr|cmr.parser_output_array(:seed => seed) }
+      pp ServiceModule::DSLParser.generate_hash(:component_module_refs,output_array)
+
+      dsl_hash_form = component_modules.inject(Hash.new) do |h,(cmp_module_name,cmr)|
+        h.merge(cmp_module_name.to_s => cmr.dsl_hash_form())
+      end
+
+      if dsl_hash_form.empty?
         return ret
       end
-      unless unordered_hash.size == 1 and unordered_hash.keys.first == :component_modules
-        raise Error.new("Unexpected key(s) in component_module_refs (#{unordered_hash.keys.join(',')})")
-      end
       
-      cmp_mods = unordered_hash[:component_modules]
-        cmp_mod_contraints = cmp_mods.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()){|h,k|h.merge(k => cmp_mods[k.to_sym])}
-      ret.merge(:component_modules => cmp_mod_contraints)
+      sorted_dsl_hash_form = dsl_hash_form.keys.map{|x|x.to_s}.sort().inject(SimpleOrderedHash.new()) do |h,k|
+        h.merge(k => dsl_hash_form[k])
+      end
+      ret.merge(:component_modules => sorted_dsl_hash_form)
     end
 
     class ComponentTypeToCheck < Array
@@ -242,82 +272,33 @@ TODO: probably remove; ran into case where this is blocker; e.g., when want to c
 
     def get_needed_component_type_version_pairs(cmp_types)
       cmp_types.map do |cmp_type|
-        version = ret_selected_version(cmp_type)
+        version = ret_selected_version_string(cmp_type)
         {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)}
       end
     end
 
-    def get_component_type_to_template_mappings?(cmp_types)
+    def get_component_type_to_template_mappings?(cmp_types,opts={})
       ret = Hash.new
       return ret if cmp_types.empty?
       #first put in ret info about component type and version
       ret = cmp_types.inject(Hash.new) do |h,cmp_type|
-        version = ret_selected_version(cmp_type)
+        version = ret_selected_version_string(cmp_type)
         h.merge(cmp_type => {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)})
       end
 
       #get matching component template info and insert matches into ret
-      Component::Template.get_matching_type_and_version(project_idh(),ret.values).each do |cmp_template|
+      Component::Template.get_matching_type_and_version(project_idh(),ret.values,opts).each do |cmp_template|
         ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
       end
       ret
     end
 
-    def ret_selected_version(component_type)
-      if version_info = component_modules[key(Component.module_name(component_type))]
-        version_info.ret_version()
+    def ret_selected_version_string(component_type)
+      if cmp_module_ref = component_modules[key(Component.module_name(component_type))]
+        cmp_module_ref.version_string()
       end
     end
 
-    def module_version(cmp_module_name)
-      VersionInfo::Assignment.new(component_modules[key(cmp_module_name)])
-    end
-    
-    def component_modules()
-      ((self[:constraints]||{})[:component_modules])||{}
-    end
-
-    def reify_and_set_constraints(hash)
-      self[:constraints] = 
-        if hash.empty? then hash
-        elsif hash.size == 1 and hash.keys.first.to_sym == :component_modules
-          reify_component_module_contraints(hash.values.first)
-        elsif
-          raise Error.new("Do not treat module verions contraints of form (#{hash.inspect})")
-        end
-    end
-
-    def reify_component_module_contraints(hash)
-      {:component_modules => hash.keys.inject(Hash.new){|h,k|h.merge(key(k) => VersionInfo::Constraint.reify?(hash[k]))}}
-    end
-
-    def create_component_modules_hash?()
-      (self[:constraints] ||= Hash.new)[:component_modules] ||= Hash.new
-    end
-    
-    def key(el)
-      el.to_sym
-    end
-    
-    def self.hash_form(el)
-      if el.kind_of?(Hash)
-        el.inject(Hash.new) do |h,(k,v)|
-          if val = hash_form(v)
-             h.merge(k => val)
-          else
-            h
-          end
-        end
-      elsif el.kind_of?(VersionInfo)
-        el.to_s
-      else
-        el
-      end
-    end
-
-    def parent_idh()
-      @parent.id_handle()
-    end
     def project_idh()
       return @project_idh if @project_idh
       unless service_id = @parent.get_field?(:service_id)

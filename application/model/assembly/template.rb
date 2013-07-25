@@ -21,14 +21,13 @@ module DTK; class Assembly
       ret = Array.new
       return ret if assembly_idhs.empty?()
       sp_hash = {
-        :cols => opts[:cols]||[:id, :group_id, :display_name],
+        :cols => opts[:cols]||[:id, :group_id, :display_name, :assembly_id],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       node_mh = assembly_idhs.first.createMH(:node)
       get_objs(node_mh,sp_hash)
     end
 
-    #TODO: this can be expensive call; may move to factoring in :component_module_refs relatsionship to what component_ref component_template_id is pointing to
     def self.get_augmented_component_refs(mh,opts={})
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:module_branch_id,:augmented_component_refs],
@@ -41,23 +40,24 @@ module DTK; class Assembly
       assembly_rows.each do |r|
         component_ref = r[:component_ref]
         unless component_type = component_ref[:component_type]||(r[:component_template]||{})[:component_type]
-          Log.error("Component ref with id #{r[:id]}) does not have a compoennt type ssociated with it")
+          Log.error("Component ref with id #{r[:id]}) does not have a component type associated with it")
         else
           service_module_name = service_module_name(r[:component_type])
           pntr = aug_cmp_refs_ndx_by_vc[service_module_name]
           unless pntr 
-            module_branch = mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object()
+            component_module_refs = opts[:component_module_refs] || ComponentModuleRefs.get_component_module_refs(mh.createIDH(:model_name => :module_branch, :id => r[:module_branch_id]).create_object())
+            
             pntr = aug_cmp_refs_ndx_by_vc[service_module_name] = {
-              :version_constraints => ComponentModuleRefs.create_and_reify?(module_branch,r[:component_module_refs])
+              :component_module_refs => component_module_refs
             }
           end
           aug_cmp_ref = r[:component_ref].merge(r.hash_subset(:component_template,:node))
           (pntr[:aug_cmp_refs] ||= Array.new) << aug_cmp_ref
         end
       end
-      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id])
+      set_matching_opts = Aux.hash_subset(opts,[:force_compute_template_id,:raise_errors_if_unmatched])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
-        r[:version_constraints].set_matching_component_template_info!(r[:aug_cmp_refs],set_matching_opts)
+        r[:component_module_refs].set_matching_component_template_info!(r[:aug_cmp_refs],set_matching_opts)
       end
       aug_cmp_refs_ndx_by_vc.values.map{|r|r[:aug_cmp_refs]}.flatten
     end

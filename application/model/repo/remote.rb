@@ -144,7 +144,6 @@ module DTK
           :username => username,
           :name => name,
           :access_rights => "RW+",
-          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type),
           :namespace => namespace,
           :noop_if_exists => true
@@ -162,7 +161,6 @@ module DTK
         params = {
           :name => name,
           :namespace => namespace,
-          :tenant_name => R8::Config[:ec2][:security_group],
           :type => type_for_remote_module(type)
         }
         client.delete_module(params)
@@ -262,6 +260,8 @@ module DTK
       # example: 
       #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
+        raise ErrorUsage.new("Please provide module name to export") unless qualified_name
+
         split = qualified_name.split("/")
         case split.size
          when 1 then [default_namespace(),qualified_name]
@@ -292,10 +292,10 @@ module DTK
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
       def dtk_instance_remote_repo_username()
-        @dtk_instance_remote_repo_username ||= Common::Aux.dtk_instance_repo_username()
+        "dtk-instance"
       end
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
-        "#{dtk_instance_remote_repo_username()}--#{RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]}"
+        RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]
       end
  
     end

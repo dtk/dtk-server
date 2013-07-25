@@ -437,7 +437,7 @@ module DTK
             receiver_context = {:callbacks => callbacks, :expected_count => 1}
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
-            rescue Exception => e
+             rescue Exception => e
               e.backtrace
             end
           end

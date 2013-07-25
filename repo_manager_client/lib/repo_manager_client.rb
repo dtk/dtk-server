@@ -87,24 +87,31 @@ module DTK
     end
 
     ## systsem access
-    #required keys: [:username,:tenant_name,:repo,:type]
+    #required keys: [:username,:repo,:type]
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
-      body = DefaultsForCreateModule.merge(params_hash)
+      body = defaults_for_create_module().merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
-    DefaultsForCreateModule = {
-      :access_rights => "R"
-    }
+
+    def defaults_for_create_module()
+      {:tenant_name => default_tenant_name(),:access_rights => "R"}
+    end
+    private :defaults_for_create_module
 
     #keys: [:name,namespace,:type,:id]
     #constraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      body = params_hash
+      body = {:tenant_name => default_tenant_name()}.merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true)
     end
+
+    def default_tenant_name()
+      dtk_instance_repo_username()
+    end
+    private :default_tenant_name
 
     #keys: [:name,namespace,:type,:id]
     #constraints :id or (:name, :namespace, and :type)
@@ -129,15 +136,13 @@ module DTK
     #require_keys => [:name,namespace,:type,username,accesss_rights]
     def grant_user_access_to_module(params_hash)
       route = "/rest/system/module/grant_user_access"
-      dtk_instance_name = Common::Aux::dtk_instance_repo_username()
-      body = params_hash.merge(:dtk_instance_name => dtk_instance_name)
+      body = params_hash.merge(:dtk_instance_name => dtk_instance_repo_username())
       post_rest_request_data(route,body,:raise_error => true)
     end
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"
-      dtk_instance_name = Common::Aux::dtk_instance_repo_username()
-      body = {:username => username, :rsa_pub_key => rsa_pub_key, :dtk_instance_name => dtk_instance_name}
+      body = {:username => username, :rsa_pub_key => rsa_pub_key, :dtk_instance_name => dtk_instance_repo_username()}
       [:update_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
@@ -209,7 +214,6 @@ module DTK
         el.kind_of?(Hash) and el["code"] == code
       end
     end
-    private :error_msg,:include_error_code?
 
     RestClientWrapper = Common::Response::RestClientWrapper
     def get_rest_request_data(route,opts={})
@@ -231,6 +235,10 @@ module DTK
       DefaultTimeoutOpts.merge(to_merge)
     end
     DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
+
+    def dtk_instance_repo_username()
+      ::DtkCommon::Aux::dtk_instance_repo_username()
+    end
 
     #repo access
     class BranchInstance < self

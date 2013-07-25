@@ -180,16 +180,16 @@ module DTK; class ComponentDSL; class V2
               if opts[:constant_attribute]
                 Attribute::Constant.ret_external_ref()
               else
-                {"type" => "puppet_attribute", #TODO: hard-wired
-                 "path" => "node[#{cmp_type}][#{name}]"
+                type = "puppet_attribute" #TODO: hard-wired
+                external_ref_name = (info["external_ref"]||{})[type]||name
+                {"type" => type,
+                 "path" => "node[#{cmp_type}][#{external_ref_name}]"
               }
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
             attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
-            attr_props.set_if_not_nil("description",info["description"])
-            attr_props.set_if_not_nil("required",info["required"])
-            attr_props.set_if_not_nil("hidden",info["hidden"])
+            %w{description required dynamic hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
             attrs.merge!(name => attr_props)
           end
           if ret["attribute"]

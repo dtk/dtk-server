@@ -2,6 +2,7 @@
 r8_nested_require('../assembly','import_export_common')
 module DTK
   class ServiceModule < Model
+    r8_nested_require('service','component_module_ref') 
     r8_nested_require('service','component_module_refs') 
     r8_nested_require('service','dsl')
 
@@ -36,10 +37,10 @@ module DTK
       project = get_project()
       ret = ComponentRef.get_referenced_component_modules(project,cmp_refs)
       if opts.array(:detail_to_include).include?(:versions)
-        ndx_versions = get_component_module_refs().ret_version_indexed_by_modules()
+        ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
         ret.each do |mod|
-          if version = ndx_versions[mod.module_name()]
-            mod[:version] = version
+          if version_obj = ndx_versions[mod.module_name()]
+            mod[:version] = version_obj
           end
         end
       end
@@ -100,7 +101,12 @@ module DTK
       if project = get_project()
         opts.merge!(:project_idh => project.id_handle())
       end
-      Assembly::Template.get(model_handle(:component),opts)
+      ndx_ret = Assembly::Template.get(model_handle(:component),opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+      Assembly::Template.get_nodes(ndx_ret.values.map{|r|r.id_handle}).each do |node|
+        assembly = ndx_ret[node[:assembly_id]]
+        (assembly[:nodes] ||= Array.new)  << node
+      end
+      ndx_ret.values
     end
 
     def info_about(about)
@@ -224,18 +230,6 @@ module DTK
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
       update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
-    end
-
-    def update_component_template_ids(component_module)
-      #first get filter so can call get_augmented_component_refs
-      assembly_templates = component_module.get_associated_assembly_templates()
-      return if assembly_templates.empty?
-      filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
-      opts = {:filter => filter,:force_compute_template_id => true}
-      aug_cmp_refs = Assembly::Template.get_augmented_component_refs(model_handle(:component),opts)
-      return if aug_cmp_refs.empty?
-      cmp_ref_update_rows = aug_cmp_refs.map{|r|r.hash_subset(:id,:component_template_id)}
-      Model.update_from_rows(model_handle(:component_ref),cmp_ref_update_rows)
     end
 
    private

@@ -2,4 +2,4 @@
 root = File.expand_path('../', File.dirname(__FILE__))
 
 require root + '/app'
-XYZ::Model.migrate_data(DBinstance)
+XYZ::Model.migrate_data(:db => DBinstance)

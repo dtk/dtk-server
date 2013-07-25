@@ -24,7 +24,7 @@ module XYZ
     end
     
     def clone_or_match(target,opts={})
-      update_object!(:type,:rules)
+      update_object!(:type,:rules,:ref)
       case self[:type]
        when "clone"
         clone(target,opts)
@@ -66,6 +66,11 @@ module XYZ
     def clone(target,opts={})
       node_template = find_matching_node_template(target)
       override_attrs = opts[:override_attrs]||Hash.new 
+
+      #special processing of :display_name
+      display_name = override_attrs[:display_name]||get_field?(:ref)
+      override_attrs.merge!(:display_name => Node::Instance.get_unique_instance_name(model_handle(:node),display_name))
+
       clone_opts = node_template.source_clone_info_opts()
       new_obj = target.clone_into(node_template,override_attrs,clone_opts)
       new_obj && new_obj.id_handle()

@@ -12,19 +12,21 @@ module DTK; class ServiceModule
       @module_name = module_name
       @service_module = get_service_module(container_idh,module_name)
       @component_module_refs = component_module_refs
+      @ndx_version_proc_classes = Hash.new
     end
 
     def process(module_name,hash_content)
       #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
       integer_version = determine_integer_version(hash_content)
-      @version_proc_class = load_and_return_version_adapter_class(integer_version)
-      @version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      version_proc_class = load_and_return_version_adapter_class(integer_version)
+      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           dangling_errors.aggregate_errors! do
-            @db_updates_assemblies["component"].merge!(@version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(@version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
+            @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
+            @db_updates_assemblies["node"].merge!(version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
             @ndx_assembly_hashes[ref] ||= assem
+            @ndx_version_proc_classes[ref] ||= version_proc_class
           end
         end
         dangling_errors.raise_error?()
@@ -63,7 +65,7 @@ module DTK; class ServiceModule
       }
     end
 
-    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs)
       #compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
@@ -97,7 +99,7 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -122,7 +124,7 @@ module DTK; class ServiceModule
       }
     end
 
-    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,version_constraints)
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs)
       #compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
@@ -156,7 +158,7 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],version_constraints)
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs)
           unless cmps_output.empty?
             node_output["component_ref"] = cmps_output
           end
@@ -224,7 +226,7 @@ module DTK; class ServiceModule
       end
     end
 
-    def self.import_component_refs(container_idh,assembly_name,components_hash,version_constraints)
+    def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = component_ref_parse(cmp_input)
         cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
@@ -245,7 +247,7 @@ module DTK; class ServiceModule
       end
       #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
-      version_constraints.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
+      component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(container_idh,ret)
       ret
     end

@@ -186,6 +186,12 @@ module XYZ
       CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir,branch)
     end
 
+    def self.repo_full_path_and_branch(context)
+      repo_rel_path,branch = ret_repo_dir_and_branch(context)
+      adapter_class = load_and_return_adapter_class()
+      [adapter_class.repo_full_path(repo_rel_path),branch]
+    end
+
    private
     CachedRepoObjects = Hash.new
     def self.ret_repo_dir_and_branch(context)

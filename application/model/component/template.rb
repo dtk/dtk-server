@@ -2,7 +2,7 @@ module DTK; class Component
   class Template < self
 
     #type_version_list is an array with each element having keys :component_type, :version_field
-    def self.get_matching_type_and_version(project_idh,type_version_field_list)
+    def self.get_matching_type_and_version(project_idh,type_version_field_list,opts={})
       ret = Array.new
       cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
       versions = type_version_field_list.map{|r|r[:version_field]}
@@ -13,9 +13,24 @@ module DTK; class Component
                     [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
                     [:oneof, :component_type, cmp_types]]
       }
-      get_objs(project_idh.createMH(:component),sp_hash).select do |r|
-        type_version_field_list.find{|tv|tv[:version_field] == r[:version] and tv[:component_type] == r[:component_type]}
+      component_rows = get_objs(project_idh.createMH(:component),sp_hash)
+
+      ret = Array.new
+      unmatched = Array.new
+      type_version_field_list.each do |tv|
+        if match = component_rows.find{|r|tv[:version_field] == r[:version] and tv[:component_type] == r[:component_type]}
+          ret << match
+        else
+          unmatched << tv
+        end
       end
+      if opts[:raise_errors_if_unmatched] and not unmatched.empty?()
+        ct_print_form = unmatched.map do |r|
+          r[:version] ? "#{r[:component_type]}:#{r[:version]}" : r[:component_type]
+        end.join(',')
+        raise Error.new("No match for component templates (#{ct_print_form})")
+      end
+      ret
     end
       
     def self.list(mh,opts=Opts.new)

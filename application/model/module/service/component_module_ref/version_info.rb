@@ -1,24 +1,33 @@
-module DTK; class ComponentModuleRefs
+module DTK; class ComponentModuleRef
   class VersionInfo
 
     DEFAULT_VERSION = "master"
 
     class Assignment < self
-      def initialize(string_or_obj)
-        string_or_obj = "master" if string_or_obj.empty?
-        @version = string_or_obj.to_s
+      def initialize(version_string)
+        @version_string = version_string
       end
 
-      attr_reader :version      
+      attr_reader :version_string      
 
-      def self.reify?(string_or_obj)
-        if string_or_obj.kind_of?(String) and (ModuleCommon.string_has_version_format?(string_or_obj) or ModuleCommon.string_master_or_emtpy?(string_or_obj))
-          new(string_or_obj)
+      def self.reify?(object)
+        version_string = 
+          if object.kind_of?(String) 
+            ModuleCommon.string_master_or_empty?(object) ? DEFAULT_VERSION : object
+          elsif object.kind_of?(ComponentModuleRef) 
+            object[:version_info]
+          end
+        if version_string 
+          if ModuleCommon.string_has_version_format?(version_string)
+            new(version_string)
+          else
+            raise Error.new("Unexpected form of version string (#{version_string})")
+          end
         end
       end
 
       def to_s()
-        @version.to_s()
+        @version_string
       end
     end
 

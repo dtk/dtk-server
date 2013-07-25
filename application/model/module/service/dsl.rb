@@ -2,6 +2,7 @@ module DTK
   class ServiceModule
     r8_nested_require('dsl','assembly_import')
     r8_nested_require('dsl','assembly_export')
+    r8_nested_require('dsl','parser')
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_idh)
         sp_hash = {
@@ -38,20 +39,30 @@ module DTK
     module DSLMixin
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
-        component_module_refs = update_global_refs(module_branch,opts)
+        component_module_refs = update_component_module_refs(module_branch,opts)
         update_assemblies_from_dsl(module_branch,component_module_refs)
         set_dsl_parsed!(true)
       end
 
      private
-      def update_global_refs(module_branch,opts={})
-        constraints_hash_form = Hash.new
+      def update_component_module_refs(module_branch,opts={})
+        parsed_info = 
+          if DSLParser.implements_method?(:parse_directory)
+            DSLParser.parse_directory(module_branch,:component_module_refs)
+          else
+            DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
+          end
+        ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
+      end
+
+      #TODO: deprecate when DSLParser methods stabke
+      def legacy_component_module_refs_parsed_info(module_branch,opts={})
+        ret = Hash.new
         meta_filename_path = ComponentModuleRefs.meta_filename_path()
         if json_content = RepoManager.get_file_content(meta_filename_path,module_branch,:no_error_if_not_found=>true)
-          constraints_hash_form = Aux.json_parse(json_content,meta_filename_path)
+          ret = Aux.json_parse(json_content,meta_filename_path)
         end
-        cmp_module_refs = module_branch.get_component_module_refs()
-        cmp_module_refs.set_and_save_constraints!(constraints_hash_form,opts)
+        ret
       end
 
       def update_assemblies_from_dsl(module_branch,component_module_refs)

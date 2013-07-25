@@ -1,3 +1,4 @@
+=begin
 Sequel.migration do
   change do
     alter_table(:link_def__link_def) do
@@ -5,3 +6,5 @@ Sequel.migration do
     end
   end
 end
+=end
+

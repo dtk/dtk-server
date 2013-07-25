@@ -1,7 +1,7 @@
 module DTK
   class Assembly::Instance
     class ServiceLink
-      class AdHocLink < self
+      class Factory < self
         def initialize(assembly_instance,service_type,input_cmp_idh,output_cmp_idh)
           super(assembly_instance)
           @service_type = service_type
@@ -12,7 +12,7 @@ module DTK
         end
         
         def add?()
-         port_link = nil
+          port_link = nil
           input_port,output_port,new_port_created = add_or_ret_ports?()
           unless new_port_created
             #see if there is an existing port link
@@ -25,11 +25,11 @@ module DTK
               raise Error.new("Unexpected result that matches more than one port link (#{pl_matches.inspect})")
             end
           end
-          port_link ||= create_new_port_link(input_port,output_port)
-          
-          port_link && port_link.id_handle() 
+          port_link ||= create_new_port_and_atttrs_link(input_port,output_port)
+          port_link.id_handle() 
         end
-        private
+        
+       private
         #returns input_port,output_port,new_port_created (boolean)
         def add_or_ret_ports?()
           new_port_created = false
@@ -70,16 +70,19 @@ module DTK
           new_port_idh = Model.create_from_rows(port_mh,[create_hash]).first
           new_port_idh.create_object()
         end
-       
-        def create_new_port_link(input_port,output_port)
-          target_idh = @assembly_instance.id_handle().get_parent_id_handle_with_auth_info()
-          hash_to_create = {
-            :assembly_id => @assembly_instance.id(),
+        
+        def create_new_port_and_atttrs_link(input_port,output_port)
+          port_link_hash = {
             :input_id => input_port.id(),
-            :output_id => output_port.id()
-          } 
-          PortLink.create_from_hash(target_idh,hash_to_create)
+            :output_id  => output_port.id(),
+          }
+          override_attrs = {
+            :assembly_id => @assembly_instance.id()
+          }
+          target = @assembly_instance.get_target()
+          PortLink.create_port_and_attr_links(target.id_handle(),port_link_hash,Opts.new(:override_attrs => override_attrs))
         end
+
       end
     end
   end

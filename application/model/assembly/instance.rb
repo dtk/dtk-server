@@ -411,13 +411,30 @@ module DTK; class  Assembly
           :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
         }
         node_mh = assembly_idhs.first.createMH(:node)
-        assembly_nodes = get_objs(node_mh,sp_hash)
-        if opts[:destroy_nodes]
-          assembly_nodes.map{|r|r.destroy_and_delete()}
-        else
-          assembly_nodes.map{|r|r.delete_object()}
-        end
+        get_objs(node_mh,sp_hash).map{|node|delete_node_aux(node,opts)}
       end
+
+    end
+    def self.delete_node_aux(node,opts={})
+      if opts[:destroy_nodes]
+        node.destroy_and_delete()
+      else
+        node.delete_object()
+      end
+    end
+
+    def delete_node(node_idh,opts={})
+      node =  node_idh.create_object()
+      #check that node_idh belongs to assembly
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and,[:eq, :assembly_id, id()],[:eq,:id,node_idh.get_id()]]
+      }
+      unless Model.get_obj(model_handle(:node),sp_hash)
+        raise ErrorUsage.new("Node (#{node.get_field?(:display_name)}) does not belong to assembly (#{get_field?(:display_name)})")
+      end
+      Log.error("Not yet implemented yet; cleaning up danglinglinks when assembly node deleted")
+      self.class.delete_node_aux(node,opts)
     end
 
     def add_node(node_template_idh,node_name)

@@ -16,7 +16,7 @@ module XYZ
     extend ExportObject
     class << self
       attr_reader :db
-      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
+      expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
     end
 
     #TODO: looking to use this as step to transform to simpler object model calls
@@ -86,6 +86,11 @@ module XYZ
         nested = DTK.const_get(Aux.camelize(parent_model_name))
         nested.const_get(Aux.camelize(model_name))
       end
+    end
+
+    #parent_id field name for child_model_name with parent this
+    def parent_id_field_name(child_model_name)
+      id_handle().create_childMH(child_model_name).parent_id_field_name()
     end
 
     def self.normalize_model(model_name)
@@ -305,6 +310,12 @@ module XYZ
       create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
     end
 
+    def self.create_from_rows_for_migrate(model_handle,rows)
+      select_ds = SQL::ArrayDataset.create(db,rows,model_handle,:convert_for_create => true)
+      field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
+      create_from_select_for_migrate(model_handle,field_set,select_ds)
+    end
+
     def self.create_from_row(model_handle,row,opts={})
       create_from_rows(model_handle,[row],opts).first
     end
@@ -336,8 +347,11 @@ module XYZ
       updated_rows = Array.new
       rows.each do |r|
         if match = match_found(r,existing,match_cols)
-          ret << model_handle.createIDH(:id => match[:id])
-          updated_rows << r if opts[:update_matching]
+          match_id = match[:id]
+          ret << model_handle.createIDH(:id => match_id)
+          if opts[:update_matching]
+            updated_rows << (r[:id] ? r : r.merge(:id => match_id))
+          end
         else
           pruned_rows << r
         end
@@ -512,8 +526,20 @@ module XYZ
       @id_handle[:group_id] ||= group_id()
       self
     end
+    #TODO: deprecate above for below
+    def update_obj!(*cols)
+      cols_to_get =  cols.reject{|col|self.has_key?(col)}
+      return self if cols_to_get.empty?
+      opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
+      vals = get_objs({:cols => cols_to_get},opts).first
+      vals.each{|k,v|self[k]=v} if vals
+      if cols.include?(:group_id)
+        @id_handle[:group_id] ||= group_id()
+      end
+      self
+    end
     
-    #this returns fiueld if exists, otherways gets it
+    #this returns field if exists, otherways gets it
     def get_field?(field)
       self[field]||update_object!(field)[field]
     end

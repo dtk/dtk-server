@@ -1,10 +1,5 @@
 #TODO: either add schema or advance schema
 
-puts "
-Dont have provision to call add schema; so just use dbrebuild
-"
-Sequel.migration do
-end
 =begin
 Sequel.migration do
   change do

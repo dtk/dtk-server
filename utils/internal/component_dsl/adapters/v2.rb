@@ -4,7 +4,7 @@ module DTK
       r8_nested_require('v2','migrate_processor')
       r8_nested_require('v2','parser')
       r8_nested_require('v2','dsl_object')
-      r8_nested_require('v2','convert_to_object_model_form')
+      r8_nested_require('v2','object_model_form')
       def self.parse_check(input_hash)
         #TODO: stub
       end

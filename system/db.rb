@@ -71,7 +71,15 @@ module XYZ
     def self.create(db_params)
       require File.expand_path(UTILS_DIR+'/internal/db/adapters/' + db_params[:type] , File.dirname(__FILE__))
       db_class = XYZ.const_get db_params[:type].capitalize
-      return db_class.new(db_params)
+      db_class.new(db_params)
+    end
+
+    def self.create_for_migrate()
+      sequel_db = ::DB
+      db_type = sequel_db.adapter_scheme 
+      require File.expand_path("#{UTILS_DIR}/internal/db/adapters/#{db_type}", File.dirname(__FILE__))
+      db_class = XYZ.const_get db_type.to_s.capitalize
+      db_class.new({},Opts.new(:sequel_db => sequel_db))
     end
 
     #TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 

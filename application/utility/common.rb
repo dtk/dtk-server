@@ -98,8 +98,7 @@ class R8Server
       "iaas_type" : "ec2",
       "is_default_target": true,
       "iaas_properties" : {
-        "region" : "<%= ec2_region %>",
-	"security_group_set" : ["default"]
+        "region" : "<%= ec2_region %>"
       },     
       "type": "staging",
       "*project_id": "/project/<%= project_ref %>"

@@ -2,24 +2,50 @@ module XYZ
   #class methods
   module MigrationMethods #methods that can be called within a migration
 
-    def db_rebuild(db)
-
+    #if model_names given then just (re)building these tables
+    def db_rebuild(model_names=nil,opts=Opts.new)
+      db = opts[:db]||DB.create(R8::Config[:database])
+      #if model_naems check all are defined
+      if model_names
+        model_names.each do |model_name|
+          begin 
+            Model.model_class(model_name)
+          rescue
+            error_msg = "Model (#{model_name}) is not defined\n"
+            if opts[:raise_error]
+              raise Error.new(error_msg)
+            else
+              puts error_msg
+              exit(1)
+            end
+          end
+        end
+      end
       #associate database handle DBInstance with all models
-      set_db_for_all_models(db)
+      if model_names
+        set_db_for_specfic_models(db,model_names)
+      else
+        set_db_for_all_models(db)
+      end
 
       #setup infra tables if they don't exist already
       setup_infrastructure_tables?(db)
       
       # create the domain-related tables if tehy don't exist already
-      migrate_all_models(:up) 
-      
+      dir = :up
+      if model_names
+        migrate_specfic_models(dir,model_names)
+      else
+        migrate_all_models(dir)
+      end
       # add the top level factorories if they don't exist
       #has to be done after db added to class and models been added
       IDInfoTable.add_top_factories?() 
-
     end
 
+    #TODO: this is specific migration; will have this subsumed and removed
     def migrate_data(db)
+      db = opts[:db]||DB.create(R8::Config[:database])
       puts "Migrating data ... "
 
       c = 2

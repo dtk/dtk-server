@@ -18,8 +18,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'
   post  'assembly/add_ad_hoc_attribute_mapping' => 'assembly#add_ad_hoc_attribute_mapping'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
-  post  'assembly/add_ad_hoc_service_link' => 'assembly#add_ad_hoc_service_link'
-  post  'assembly/add_connection' => 'assembly#add_connection'
+  post  'assembly/add_service_link' => 'assembly#add_service_link'
   post  'assembly/list_service_links' => 'assembly#list_service_links'
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'
@@ -33,6 +32,7 @@ R8::ReactorRoute.draw do
   post  'assembly/add_component' => 'assembly#add_component'
   post  'assembly/initiate_get_log' => 'assembly#initiate_get_log'
   post  'assembly/initiate_grep' => 'assembly#initiate_grep'
+  post  'assembly/initiate_get_ps' => 'assembly#initiate_get_ps'
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
@@ -42,6 +42,7 @@ R8::ReactorRoute.draw do
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
   post  'assembly/initiate_get_netstats' => 'assembly#initiate_get_netstats'
   post  'assembly/get_action_results' => 'assembly#get_action_results'
+  post  'assembly/delete_node' => 'assembly#delete_node'
   post  'assembly/delete_component' => 'assembly#delete_component'
   post  'assembly/get_components_module' => 'assembly#get_components_module'
 
@@ -111,6 +112,7 @@ R8::ReactorRoute.draw do
   post  'node/stage' => 'node#stage'
   post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
   post  'node/get_action_results' => 'node#get_action_results'
+  post  'node/initiate_get_ps' => 'node#initiate_get_ps'
 
    # NODE_GROUP
   post  'node_group/list' => 'node_group#list'

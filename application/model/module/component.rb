@@ -124,7 +124,9 @@ module DTK
         is_found   = false
         name      = r_module["component_module"]
         version   = r_module["version_info"]
-        namespace = r_module["namespace"]
+        namespace = r_module["remote_namespace"] || service_namespace
+
+
 
         installed_modules.each do |i_module|
           if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
@@ -133,7 +135,7 @@ module DTK
           end
         end
 
-        data = { :name => name, :version => version, :namespace => namespace || service_namespace }
+        data = { :name => name, :version => version, :namespace => namespace }
 
         is_found ? found_modules << data : missing_modules << data
       end

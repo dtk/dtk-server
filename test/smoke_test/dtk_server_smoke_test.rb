@@ -19,8 +19,8 @@ memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 
 node_name = 'node1'
-module_name = "mysql"
-module_namespace = "r8"
+module_name = "test"
+module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -63,7 +63,7 @@ describe "DTK Server smoke test" do
     include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
   end
 
-  context "Add components from mysql module to assembly node" do
+  context "Add components from test module to assembly node" do
     include_context "Add component to assembly node", dtk_common, node_name
   end
 

@@ -13,7 +13,6 @@ STDOUT.sync = true
 
 node_name = 'precise-micro'
 staged_node_name = 'test_case_83_instance'
-attribute_value = 'true'
 component_name = 'rsync'
 
 dtk_common = DtkCommon.new('', '')
@@ -39,10 +38,6 @@ describe "Test Case 83: Stage node template, add rsync component, set attribute 
   context "Add component to node function" do
     include_context "Add component to node", dtk_common, staged_node_name, component_name
   end
-
-  #context "Set sudo/autoupgrade attribute value" do
-  #  include_context "Set node attribute", dtk_common, staged_node_name, '2147586639', attribute_value
-  #end
 
   context "Converge node function" do
     include_context "Converge node", dtk_common, staged_node_name

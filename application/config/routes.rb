@@ -112,6 +112,7 @@ R8::ReactorRoute.draw do
   post  'node/stage' => 'node#stage'
   post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
   post  'node/get_action_results' => 'node#get_action_results'
+  post  'node/initiate_get_ps' => 'node#initiate_get_ps'
 
    # NODE_GROUP
   post  'node_group/list' => 'node_group#list'

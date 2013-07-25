@@ -156,6 +156,7 @@ R8::ReactorRoute.draw do
   post  'service_module/delete_assembly_template' => 'service_module#delete_assembly_template'
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
+  post  'service_module/info' => 'service_module#info'
   post  'service_module/add_user_direct_access' => 'service_module#add_user_direct_access'
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 

@@ -545,8 +545,9 @@ class DtkCommon
    			module_exported = false
 			else
 				puts "Module #{module_to_export} was not found in list of remote modules. Proceed with export of module..."
-				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']				
-				export_response = send_request('/rest/component_module/export', {:remote_component_name=>module_to_export, :component_module_id=>component_module_id, :remote_component_namespace=>namespace})
+				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']
+
+				export_response = send_request('/rest/component_module/export', {:remote_component_name=>"#{namespace}/#{module_to_export}", :component_module_id=>component_module_id})
 
 				puts "Module export response:"
 				pretty_print_JSON(export_response)
@@ -618,6 +619,8 @@ class DtkCommon
 		end
 		puts ""
 	end
+
+
 
 	def get_module_attributes_list(module_name, filter_component)
 		#Filter component used on client side after retrieving all attributes from all components

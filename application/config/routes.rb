@@ -159,6 +159,8 @@ R8::ReactorRoute.draw do
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
   post  'service_module/add_user_direct_access' => 'service_module#add_user_direct_access'
+  post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
+
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 
    # STATE_CHANGE

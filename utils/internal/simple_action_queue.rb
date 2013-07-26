@@ -57,7 +57,7 @@ module DTK
     end
 
     def set_result(el)
-      @result = el
+      @result = el.data
     end
   end
 end

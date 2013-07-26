@@ -11,7 +11,7 @@ require './lib/modules_spec'
 
 assembly_name = 'test_case_30_instance'
 assembly_template = 'bootstrap::test1'
-module_name = 'test'
+module_name = 'temp'
 module_version = '0.0.1'
 module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"

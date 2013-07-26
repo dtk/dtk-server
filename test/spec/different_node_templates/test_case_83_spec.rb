@@ -13,7 +13,6 @@ STDOUT.sync = true
 
 node_name = 'precise-micro'
 staged_node_name = 'test_case_83_instance'
-attribute_value = 'true'
 component_name = 'rsync'
 
 dtk_common = DtkCommon.new('', '')

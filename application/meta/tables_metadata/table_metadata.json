@@ -416,8 +416,8 @@
       "command"
     ],
     "mapping": {
-      "node_name": "node_name",
-      "node_id": "node_id",
+      "node_name": "display_name",
+      "node_id": "dtk_id",
       "uid": "uid",
       "pid": "pid",
       "start_time": "start_time",

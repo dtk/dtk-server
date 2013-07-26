@@ -17,7 +17,7 @@ module XYZ
       node = create_node_obj(:node_id)
       queue = ActionResultsQueue.new
       
-      Assembly::Instance::Action::GetPs.initiate([node], queue) 
+      Assembly::Instance::Action::GetPs.initiate([node], queue, :node) 
       rest_ok_response :action_results_id => queue.id
     end
 
@@ -26,12 +26,14 @@ module XYZ
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
-
+      response = nil
       if ret_request_param_boolean(:using_simple_queue)
-        rest_ok_response SimpleActionQueue.get_results(action_results_id)
+        respone  = rest_ok_response SimpleActionQueue.get_results(action_results_id)
       else
-        rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
+        response = rest_ok_response ActionResultsQueue.get_results(action_results_id,ret_only_if_complete,disable_post_processing)
       end
+
+      return response
     end
 
     #### create and delete actions ###

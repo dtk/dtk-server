@@ -17,7 +17,7 @@ module DTK
       def initiate_get_ps(action_results_queue, node_id=nil)
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-        Action::GetPs.initiate(nodes,action_results_queue)
+        Action::GetPs.initiate(nodes,action_results_queue, :assembly)
       end
 
       module Action
@@ -95,7 +95,7 @@ module DTK
           end
         end
         class GetPs < ActionResultsQueue::Result
-          def self.initiate(nodes,action_results_queue)
+          def self.initiate(nodes,action_results_queue, type)
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -107,7 +107,8 @@ module DTK
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   raw_data = response[:data].map{|r|node_info.merge(r)}
-                  action_results_queue.push(node_info[:id], new(node_info[:display_name],raw_data))
+                  packaged_data = new(node_info[:display_name],raw_data)
+                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
                 end
               end
             }

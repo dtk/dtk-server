@@ -1,36 +1,69 @@
-module XYZ 
+module DTK
   module WorkflowAdapter
-  	class AgentGritAdapter
-
+    class AgentGritAdapter
       # Mutex is required, as this method will be invoked from concurrent subtasks, and grit is not thread safe
       @@grit_lock = Mutex.new
-
-  		def self.get_head_git_commit_id()          
-          head_commit_id = nil
-          @@grit_lock.synchronize do 
-            # TODO Amar put this into configuration if needed
-            agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
-            agent_repo_url = "https://github.com/rich-reactor8/dtk-node-agent.git"
-            # Clone will be invoked only when DTK Server is started for the first time
-            unless File.directory?("#{agent_repo_dir}")
-              cmd_opts = { :raise => true, :timeout => 10 }
-              clone_args = [agent_repo_url, agent_repo_dir]
-              ::Grit::Git.new("").clone(cmd_opts, *clone_args)
+      def self.get_head_git_commit_id()          
+        head_commit_id = nil
+        @@grit_lock.synchronize do 
+          # TODO Amar put this into configuration if needed
+          agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
+          agent_repo_url = R8::Config[:node_agent_git_clone][:remote_url]
+          agent_repo_branch = R8::Config[:node_agent_git_clone][:branch]
+          repo = nil
+          # Clone will be invoked only when DTK Server is started for the first time
+          #or agent_repo_branch changed
+          unless File.directory?(agent_repo_dir)
+            cmd_opts = { :raise => true, :timeout => 10 }
+            clone_args = [agent_repo_url, agent_repo_dir]
+            unless agent_repo_branch == 'master'
+              clone_args += ['-b',agent_repo_branch]
             end
-
-            # Amar:
-            # git pull(fetch/merge) will be invoked each time, 
-            # but this operation is very fast (few ms of roundtrip) when no changes present 
-            # To execute git pull from outside project directory, work-tree param must be set.
-            # I haven't found a way through grit to set it, but to execute lowest method and make my own command
-            repo = ::Grit::Repo.new("#{agent_repo_dir}")
-            repo.git.run("", "--work-tree=#{agent_repo_dir} fetch", "", {}, {})
-            repo.git.run("", "--work-tree=#{agent_repo_dir} merge 'origin/master'", "", {}, {})
-            
-            head_commit_id = repo.commits.first.id
+            GitCommandHelper.clone(cmd_opts,clone_args)
+          else
+            #check if R8::Config[:node_agent_git_clone][:branch] changed
+            git_cmd_helper = GitCommandHelper.new(agent_repo_dir)
+            unless agent_repo_branch == git_cmd_helper.branch_head_name()
+              git_cmd_helper.execute("fetch")
+              git_cmd_helper.execute("checkout #{agent_repo_branch}")
+            end
           end
-          return head_commit_id
+
+          git_cmd_helper ||= GitCommandHelper.new(agent_repo_dir)
+          # Amar:
+          # git pull(fetch/merge) will be invoked each time, 
+          # but this operation is very fast (few ms of roundtrip) when no changes present 
+          git_cmd_helper.execute("fetch")
+          git_cmd_helper.execute("merge 'origin/#{agent_repo_branch}'")
+          head_commit_id = git_cmd_helper.branch_head_id()
         end
-  	end
+        head_commit_id
+      end
+     private
+      class GitCommandHelper
+        # Amar
+        # To execute git pull from outside project directory, work-tree param must be set.
+        # I haven't found a way through grit to set it, but to execute lowest method and make my own command
+        def initialize(agent_repo_dir)
+          @repo = ::Grit::Repo.new(agent_repo_dir)
+          @work_tree = agent_repo_dir
+        end
+
+        def self.clone(cmd_opts,clone_args)
+           ::Grit::Git.new("").clone(cmd_opts, *clone_args)
+        end
+
+        def execute(cmd_args_str)
+          @repo.git.run("", "--work-tree=#{@work_tree} #{cmd_args_str}", "", {}, {})
+        end
+        
+        def branch_head_name()
+          @repo.head.name
+        end
+        def branch_head_id()
+          @repo.commits.first.id
+        end
+      end
+    end
   end
 end

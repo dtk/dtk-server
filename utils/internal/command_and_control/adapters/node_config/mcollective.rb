@@ -41,7 +41,7 @@ module DTK
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
 
-        agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
+        agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
         node_commit_id = config_node[:node][:agent_git_commit_id]
         agents = Hash.new
         name_regex = /\/agent\/(.+)/

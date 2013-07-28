@@ -1,3 +1,4 @@
+#TODO: when move to Rugged clean up the git refernces
 module DTK
   module WorkflowAdapter
     class AgentGritAdapter
@@ -24,8 +25,8 @@ module DTK
             #check if R8::Config[:node_agent_git_clone][:branch] changed
             git_cmd_helper = GitCommandHelper.new(agent_repo_dir)
             unless agent_repo_branch == git_cmd_helper.branch_head_name()
-              git_cmd_helper.execute("fetch")
-              git_cmd_helper.execute("checkout #{agent_repo_branch}")
+              git_cmd_helper.execute(:fetch)
+              git_cmd_helper.execute(:checkout,agent_repo_branch)
             end
           end
 
@@ -33,17 +34,14 @@ module DTK
           # Amar:
           # git pull(fetch/merge) will be invoked each time, 
           # but this operation is very fast (few ms of roundtrip) when no changes present 
-          git_cmd_helper.execute("fetch")
-          git_cmd_helper.execute("merge 'origin/#{agent_repo_branch}'")
+          git_cmd_helper.execute(:fetch)
+          git_cmd_helper.execute(:merge,"origin/#{agent_repo_branch}")
           head_commit_id = git_cmd_helper.branch_head_id()
         end
         head_commit_id
       end
      private
       class GitCommandHelper
-        # Amar
-        # To execute git pull from outside project directory, work-tree param must be set.
-        # I haven't found a way through grit to set it, but to execute lowest method and make my own command
         def initialize(agent_repo_dir)
           @repo = ::Grit::Repo.new(agent_repo_dir)
           @work_tree = agent_repo_dir
@@ -53,8 +51,13 @@ module DTK
            ::Grit::Git.new("").clone(cmd_opts, *clone_args)
         end
 
-        def execute(cmd_args_str)
-          @repo.git.run("", "--work-tree=#{@work_tree} #{cmd_args_str}", "", {}, {})
+        def execute(cmd,*cmd_args)
+          # Amar
+          # To execute git pull from outside project directory, work-tree param must be set.
+          # I haven't found a way through grit to set it, but to execute lowest method and make my own command
+          #TODO: Rich; not sure if this is needed, but will keep in; woudl be moot if we move to rugged
+         # @repo.git.send(cmd,cmd_opts(),["--work-tree",@work_tree]+cmd_args)
+          @repo.git.send(cmd,cmd_opts(),cmd_args)
         end
         
         def branch_head_name()
@@ -62,6 +65,10 @@ module DTK
         end
         def branch_head_id()
           @repo.commits.first.id
+        end
+       private
+        def cmd_opts()
+          {:raise => true, :timeout => 10}
         end
       end
     end

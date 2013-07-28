@@ -117,12 +117,16 @@ module DTK
       mh = project_idh.createMH(model_type())
       installed_modules = get_objs(mh,sp_hash)
 
-      missing_modules = []
+      missing_modules   = []
+      found_modules = []
 
       required_modules.each do |r_module|
         is_found   = false
-        name    = r_module["component_module"]
-        version = r_module["version_info"]
+        name      = r_module["component_module"]
+        version   = r_module["version_info"]
+        namespace = r_module["remote_namespace"] || service_namespace
+
+
 
         installed_modules.each do |i_module|
           if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
@@ -131,11 +135,13 @@ module DTK
           end
         end
 
-        missing_modules << { :name => name, :version => version, :namespace => service_namespace} unless is_found
+        data = { :name => name, :version => version, :namespace => namespace }
+
+        is_found ? found_modules << data : missing_modules << data
       end
 
       # return both missing and required modules
-      return missing_modules, required_modules
+      return missing_modules, found_modules
     end
 
     def self.get_all_workspace_library_diffs(mh)

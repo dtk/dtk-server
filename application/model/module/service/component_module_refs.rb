@@ -21,7 +21,7 @@ module DTK
         if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
           return ret_clone_update_info(service_version)
         end
-        
+
         #set in cmp_module_refs the module have specfied value and update both model and service's global refs
         cmp_module_refs.set_module_version(cmp_module_name,component_version)
         

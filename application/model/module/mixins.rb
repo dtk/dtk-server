@@ -263,6 +263,21 @@ module DTK
       name_to_id_default(model_handle,name)
     end
 
+    #
+    # returns Array with: name, namespace, version
+    #
+    def get_basic_info(target_mh, id, opts={})
+      sp_hash = {
+        :cols => [:id, :display_name, :version, :remote_repos],
+        :filter => [:eq,:id,id]
+      }
+
+      response = get_obj(target_mh, sp_hash.merge(opts))
+
+      # return name, namespace and version
+      return response[:display_name], response[:repo_remote][:repo_namespace], response[:module_branch][:version] 
+    end
+
     def info(target_mh, id, opts={})
       remote_repo_cols = [:id, :display_name, :version, :remote_repos]
       components_cols = [:id, :display_name, :version]

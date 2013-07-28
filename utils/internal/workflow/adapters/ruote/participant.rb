@@ -381,7 +381,7 @@ module DTK
           execution_context(task,workitem,task_start) do
 
             node = task[:executable_action][:node]
-            installed_agent_git_commit_id = node[:agent_git_commit_id]
+            installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
             head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
               set_result_succeeded(workitem,nil,task,action) if task_end

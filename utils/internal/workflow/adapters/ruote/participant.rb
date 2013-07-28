@@ -376,6 +376,7 @@ module DTK
           
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
 
+          head_git_commit_id = nil
           # TODO Amar: test to remove dyn attrs and errors_in_result part
           execution_context(task,workitem,task_start) do
 

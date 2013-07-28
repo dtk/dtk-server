@@ -40,10 +40,11 @@ module DTK
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
+        context = opts[:receiver_context]
 
         agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
         node_commit_id = config_node[:node][:agent_git_commit_id]
-        unless head_git_commit_id = opts[:head_git_commit_id]
+        unless head_git_commit_id = context[:head_git_commit_id]
           raise Error.new("Unexpected that opts[:head_git_commit_id ] is nil")
         end
         agents = Hash.new
@@ -71,7 +72,6 @@ module DTK
         msg_content = { :agent_files => agents }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
-        context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
       end

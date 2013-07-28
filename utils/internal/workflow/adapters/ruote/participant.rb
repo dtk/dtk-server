@@ -412,7 +412,9 @@ module DTK
                   action.get_and_propagate_dynamic_attributes(result)
                 end
                 # If there was a change on agents, wait for node's mcollective process to restart
-                sleep(10)
+                unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
+                  sleep(10)
+                end
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
@@ -434,7 +436,7 @@ module DTK
                 reply_to_engine(workitem)
               end
             }
-            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            receiver_context = {:callbacks => callbacks, :head_git_commit_id => head_git_commit_id, :expected_count => 1}
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
              rescue Exception => e

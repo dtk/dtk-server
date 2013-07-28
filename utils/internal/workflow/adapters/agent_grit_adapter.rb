@@ -30,12 +30,9 @@ module DTK
             end
           end
 
+          #when get heer will be on right branch
           git_cmd_helper ||= GitCommandHelper.new(agent_repo_dir)
-          # Amar:
-          # git pull(fetch/merge) will be invoked each time, 
-          # but this operation is very fast (few ms of roundtrip) when no changes present 
-          git_cmd_helper.execute(:fetch)
-          git_cmd_helper.execute(:merge,"origin/#{agent_repo_branch}")
+          git_cmd_helper.execute(:pull,"origin",agent_repo_branch)
           head_commit_id = git_cmd_helper.branch_head_id()
         end
         head_commit_id
@@ -52,11 +49,6 @@ module DTK
         end
 
         def execute(cmd,*cmd_args)
-          # Amar
-          # To execute git pull from outside project directory, work-tree param must be set.
-          # I haven't found a way through grit to set it, but to execute lowest method and make my own command
-          #TODO: Rich; not sure if this is needed, but will keep in; woudl be moot if we move to rugged
-         # @repo.git.send(cmd,cmd_opts(),["--work-tree",@work_tree]+cmd_args)
           @repo.git.send(cmd,cmd_opts(),cmd_args)
         end
         

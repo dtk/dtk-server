@@ -51,13 +51,13 @@ module DTK
 
     def create_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/create_repo"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      body = user_params(username).merge(:repo_name => repo_name, :access_rights => access_rights)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
     def add_git_user(username,rsa_pub_key,opts={})
       route = "/rest/admin/add_user"
-      body = {:username => username, :rsa_pub_key => rsa_pub_key}
+      body =  user_params(username,rsa_pub_key)
       [:noop_if_exists,:delete_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
@@ -66,7 +66,7 @@ module DTK
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/set_user_rights_in_repo"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      body = user_params(username).merge(:repo_name => repo_name,:access_rights => access_rights)
       post_rest_request_data(route,body,:raise_error => true)
     end
 
@@ -91,7 +91,7 @@ module DTK
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
-      body = defaults_for_create_module().merge(params_hash)
+      body = defaults_for_create_module().merge(update_user_params(params_hash))
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
@@ -104,7 +104,8 @@ module DTK
     #constraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      body = {:tenant_name => default_tenant_name()}.merge(params_hash)
+      #TODO: see if update_user_params(params_hash) needed
+      body = {:tenant_name => default_tenant_name()}.merge(update_user_params(params_hash))
       post_rest_request_data(route,body,:raise_error => true)
     end
 
@@ -136,13 +137,13 @@ module DTK
     #require_keys => [:name,namespace,:type,username,accesss_rights]
     def grant_user_access_to_module(params_hash)
       route = "/rest/system/module/grant_user_access"
-      body = params_hash.merge(:dtk_instance_name => dtk_instance_repo_username())
+      body = update_user_params(params_hash)
       post_rest_request_data(route,body,:raise_error => true)
     end
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"
-      body = {:username => username, :rsa_pub_key => rsa_pub_key, :dtk_instance_name => dtk_instance_repo_username()}
+      body = user_params(username,rsa_pub_key)
       [:update_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
@@ -266,6 +267,18 @@ module DTK
         body = {:repo_name => @repo,:mirror_host => mirror_host}
         post_rest_request_data(route,body,:raise_error => true)
       end 
+
+      def user_params(username,rsa_pub_key=nil)
+        ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
+        rsa_pub_key ? ret.merge(:rsa_pub_key => rsa_pub_key) : ret
+      end
+      def update_user_params(params_hash)
+        if params_hash[:username]
+          {:dtk_instance_name => params_hash[:dtk_instance_name]}.merge(params_hash)
+        else
+          params_hash
+        end
+      end
 
     end
   end

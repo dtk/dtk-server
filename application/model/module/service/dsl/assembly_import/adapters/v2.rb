@@ -66,8 +66,10 @@ module DTK; class ServiceModule
           (node_hash["components"]||[]).each do |input_cmp|
             if input_cmp.kind_of?(Hash) 
               input_cmp_name = input_cmp.keys.first
-              (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,target|
-                ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,link_def_type => target)
+              (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
+                Array(targets).each do |target|
+                  ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,link_def_type => target)
+                end
               end
             end
           end

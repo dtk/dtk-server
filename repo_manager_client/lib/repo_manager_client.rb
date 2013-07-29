@@ -189,30 +189,30 @@ module DTK
           Log.error(response.inspect)
           {}
         end
-      elsif opts[:raise_error]
-        unless response.ok?
-          error_msg = response.error_message()
-          if error_msg && !error_msg.empty?
-            raise ErrorUsage.new(error_msg)
-          else
-            raise ErrorUsage.new(error_msg(response))
-          end
-        end
-          response.data
+      elsif opts[:raise_error] and not response.ok?
+        raise Error.new(error_msg(response))
       else
         response.data
       end
     end
 
     def error_msg(response)
-      if response.kind_of?(Common::Response::Error) and response["errors"] 
-        errors = response["errors"]
+      errors = response["errors"]
+      if response.kind_of?(Common::Response::Error) and errors
         #if include_error_code?(errors,"connection_refused") 
         "Repo Manager refused the connection; it may be down"
       else
-        "Repo Manager Connection Error: #{response.inspect}"
+        error_detail = nil
+        if errors.kind_of?(Array) and errors.size > 0 
+          err_msgs = errors.map{|err|err["message"]}.compact
+          unless err_msgs.empty?
+            error_detail = err_msgs.join(', ')
+          end
+        end
+        "Repo Manager Connection Error: #{error_detail||response.inspect}"
       end
     end
+
     def include_error_code?(errors,code)
       !!errors.find do |el|
         el.kind_of?(Hash) and el["code"] == code
@@ -251,7 +251,7 @@ module DTK
 
     def update_user_params(params_hash)
       if params_hash[:username]
-        {:dtk_instance_name => params_hash[:dtk_instance_name]}.merge(params_hash)
+        {:dtk_instance_name => dtk_instance_repo_username()}.merge(params_hash)
       else
         params_hash
       end

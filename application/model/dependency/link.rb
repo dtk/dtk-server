@@ -1,6 +1,7 @@
 module DTK; class Dependency
   class Link < All
     def initialize(link_def)
+      super()
       @link_def = link_def
     end
 
@@ -26,17 +27,16 @@ module DTK; class Dependency
         end
         if opts[:ret_statisfied_by] and not link_deps.empty?
           aug_port_links = assembly.get_augmented_port_links()
-          link_deps.each{|link_dep|link_dep.set_satisfied_by_component_id?(aug_port_links)}
+          link_deps.each{|link_dep|link_dep.set_satisfied_by_component_ids?(aug_port_links)}
         end
       end
       components
     end
 
-    def set_satisfied_by_component_id?(aug_port_links)
+    def set_satisfied_by_component_ids?(aug_port_links)
       link_def_id = @link_def[:id]
-      if match = aug_port_links.find{|aug_port|aug_port[:input_port][:link_def_id] == link_def_id}
-        @satisfied_by_component_id = match[:output_port][:component_id]
-      end 
+      matches = aug_port_links.select{|aug_port|aug_port[:input_port][:link_def_id] == link_def_id}
+      @satisfied_by_component_ids = matches.map{|match|match[:output_port][:component_id]}
     end
 
   end

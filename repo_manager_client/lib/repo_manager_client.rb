@@ -1,3 +1,4 @@
+#TODO: need to better unify username passed adn tenant name
 r8_require_common_lib('auxiliary')
 r8_require_common_lib('response')
 module DTK
@@ -70,6 +71,7 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    ### for utility/backup_repo_manager.rb
     def get_server_dtk_username()
       route = "/rest/admin/server_dtk_username"
       get_rest_request_data(route,:raise_error => true)["dtk_username"]
@@ -86,7 +88,7 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    ## systsem access
+    ## system access
     #required keys: [:username,:repo,:type]
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
@@ -104,8 +106,7 @@ module DTK
     #constraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      #TODO: see if update_user_params(params_hash) needed
-      body = {:tenant_name => default_tenant_name()}.merge(update_user_params(params_hash))
+      body = {:tenant_name => default_tenant_name()}.merge(params_hash)
       post_rest_request_data(route,body,:raise_error => true)
     end
 
@@ -118,8 +119,7 @@ module DTK
     #constraints :id or (:name, :namespace, and :type)
     def get_module_info(params_hash)
       route = "/rest/system/module/info"
-      body = params_hash
-      post_rest_request_data(route,body,:raise_error => true)
+      post_rest_request_data(route,params_hash,:raise_error => true)
     end
 
     def get_components_info(params_hash)
@@ -150,15 +150,23 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    def list_users()
+      route = "/rest/system/user/list"
+      body = {}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+=begin
+#TODO: this needs fixing up
     #TODO: does not work if user has access right; so shoudl fix on repo manager and allow names
     def delete_user(user_id_or_name) 
-      #TODO: this is temporary until enale repo manager to take name or id or we cache id
+      #TODO: this is temporary until enable repo manager to take name or id or we cache id
       if user_id_or_name.kind_of?(Fixnum)
         delete_user_given_id(user_id_or_name)
       else
         user_info = list_users()
         unless matching_user = user_info.find{|r|r["username"] == user_id_or_name}
-          raise ErrorUsage.new("User (#{user_id_or_name} does not exsit")
+          raise ErrorUsage.new("User (#{user_id_or_name} does not exist")
         end
         delete_user_given_id(matching_user["id"])
       end
@@ -169,12 +177,7 @@ module DTK
       body = {:id => user_id}
       post_rest_request_data(route,body,:raise_error => true)
     end
-
-    def list_users()
-      route = "/rest/system/user/list"
-      body = {}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
+=end
 
    private
     def handle_error(opts={},&rest_call_block)
@@ -241,6 +244,19 @@ module DTK
       ::DtkCommon::Aux::dtk_instance_repo_username()
     end
 
+    def user_params(username,rsa_pub_key=nil)
+      ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
+      rsa_pub_key ? ret.merge(:rsa_pub_key => rsa_pub_key) : ret
+    end
+
+    def update_user_params(params_hash)
+      if params_hash[:username]
+        {:dtk_instance_name => params_hash[:dtk_instance_name]}.merge(params_hash)
+      else
+        params_hash
+      end
+    end
+
     #repo access
     class BranchInstance < self
       def initialize(rest_base_url,repo,branch,opts={})
@@ -267,18 +283,6 @@ module DTK
         body = {:repo_name => @repo,:mirror_host => mirror_host}
         post_rest_request_data(route,body,:raise_error => true)
       end 
-
-      def user_params(username,rsa_pub_key=nil)
-        ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
-        rsa_pub_key ? ret.merge(:rsa_pub_key => rsa_pub_key) : ret
-      end
-      def update_user_params(params_hash)
-        if params_hash[:username]
-          {:dtk_instance_name => params_hash[:dtk_instance_name]}.merge(params_hash)
-        else
-          params_hash
-        end
-      end
 
     end
   end

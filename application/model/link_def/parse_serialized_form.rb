@@ -65,7 +65,7 @@ module DTK; class LinkDef
           :type => possible_link_type
         }
         if order = possible_link_info["order"]
-          el.merge!(:order => order)
+          el.merge!(:temporal_order => order)
         end
         h.merge(ref => el)
       end

@@ -79,6 +79,8 @@ module DTK
 
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+
+      get_namespace_and_version
       rest_ok_response ServiceModule.info(model_handle(), module_id)
     end
 
@@ -146,8 +148,10 @@ module DTK
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()
-      # For pull check grit adapter
-      rest_ok_response check_service_dependencies(ServiceModule)
+      module_id = ret_non_null_request_params(:service_module_id)
+
+      name, namespace, version = ServiceModule.get_basic_info(model_handle(), module_id)
+      rest_ok_response get_service_dependencies(name, namespace, version)
     end
 
     def rest__delete_assembly_template()

@@ -36,10 +36,9 @@ module DTK
             raise Error.new("Cannot find matching node for input port")
           end
 
-          #TODO: does this need fixing up in cases whare a component can appear multiple times?
           cmps = matching_node[:components]
           i = 0; found = false
-          while i < cmps.size and !found
+          while i < cmps.size
             if match_component?(cmps[i],in_parsed_port[:component_name])
               cmps[i] = add_service_link_to_cmp(cmps[i],out_parsed_port)
               found = true
@@ -81,9 +80,17 @@ module DTK
           ret = {component_in_ret => {:service_links => service_links}}
         end
         output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
-        service_link = {out_parsed_port[:link_def_ref] => output_target}
-        #TODO: this assumes that no component can have two port links with same link def ref
-        service_links.merge!(service_link)
+        link_def_ref = out_parsed_port[:link_def_ref]
+        if existing_links = service_links[link_def_ref]
+          if existing_links.kind_of?(Array)
+            existing_links << output_target
+          else #existing_links.kind_of?(String)
+            #turn into array with existing plus new element
+            service_links[link_def_ref] = [service_links[link_def_ref],output_target]
+          end
+        else
+          service_links.merge!(link_def_ref => output_target)
+        end
         ret 
       end
 

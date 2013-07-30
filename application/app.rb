@@ -10,7 +10,12 @@ require 'bundler/setup'
 require 'ramaze'
 require 'json'
 require 'yaml'
-#$: << "/usr/lib/ruby/1.8/" ;$: << "." #TODO: put in to get around path problem in rvm 1.9.2 environment
+
+#TODO: probably better way to do this; below makes sure that if program staretd in different directory than this, that still finds helpers
+helper_paths = Innate.options[:helpers_helper][:paths]||[]
+unless helper_paths.include?(File.dirname(__FILE__))
+  Innate.options[:helpers_helper][:paths] = [File.dirname(__FILE__)] + helper_paths
+end
 
 ##### temp until convert to DTK
 module XYZ

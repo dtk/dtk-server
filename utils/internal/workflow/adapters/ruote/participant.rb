@@ -376,11 +376,12 @@ module DTK
           
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
 
+          head_git_commit_id = nil
           # TODO Amar: test to remove dyn attrs and errors_in_result part
           execution_context(task,workitem,task_start) do
 
             node = task[:executable_action][:node]
-            installed_agent_git_commit_id = node[:agent_git_commit_id]
+            installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
             head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
             if head_git_commit_id == installed_agent_git_commit_id
               set_result_succeeded(workitem,nil,task,action) if task_end
@@ -412,7 +413,9 @@ module DTK
                   action.get_and_propagate_dynamic_attributes(result)
                 end
                 # If there was a change on agents, wait for node's mcollective process to restart
-                sleep(10)
+                unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
+                  sleep(10)
+                end
                 delete_task_info(workitem)
                 reply_to_engine(workitem)
               end,
@@ -434,7 +437,7 @@ module DTK
                 reply_to_engine(workitem)
               end
             }
-            receiver_context = {:callbacks => callbacks, :expected_count => 1}
+            receiver_context = {:callbacks => callbacks, :head_git_commit_id => head_git_commit_id, :expected_count => 1}
             begin
               workflow.initiate_sync_agent_action(task,receiver_context)
              rescue Exception => e

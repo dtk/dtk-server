@@ -330,11 +330,13 @@ module DTK; class  Assembly
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
           if deps = aug_cmp[:dependencies]
             deps.map do |dep|
-              satisfied_by = (dep.satisfied_by_component_id && ndx_component_print_form[dep.satisfied_by_component_id])
-              {
-                :depends_on => dep.depends_on_print_form?(),
-                :satisfied_by => satisfied_by 
-              }
+              el = {:depends_on => dep.depends_on_print_form?()}
+              sb_cmp_ids = dep.satisfied_by_component_ids
+              unless sb_cmp_ids.empty?
+                satisfied_by = sb_cmp_ids.map{|cmp_id|ndx_component_print_form[cmp_id]}.join(', ')
+                el.merge!(:satisfied_by => satisfied_by)
+              end
+              el
             end.compact
           end
         end
@@ -374,11 +376,11 @@ module DTK; class  Assembly
       needed_cmp_ids = Array.new
       aug_cmps.each do |aug_cmp|
         if deps = aug_cmp[:dependencies]
-          needed_cmp_ids += deps.map do |dep|
-            if cmp_id = dep.satisfied_by_component_id
-              cmp_id if ret[cmp_id].nil? 
+          deps.map do |dep|
+            dep.satisfied_by_component_ids.each do |cmp_id|
+              needed_cmp_ids << cmp_id if ret[cmp_id].nil?
             end
-          end.compact
+          end
         end
       end
       return ret if needed_cmp_ids.empty?

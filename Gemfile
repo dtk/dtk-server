@@ -19,10 +19,12 @@ gem 'awesome_print','1.1.0'
 #TODO: can upgrade this after fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>, ["/home/dtk18/server/utils/internal/cloud_connect.rb:27:in `hash_form'"
 gem 'excon', '0.16.10'
 
-case RUBY_VERSION
-  when '1.8.7' then gem 'rugged','0.17.0.b7'
-  when '1.9.3' then gem 'rugged','0.19.0'
-end
+#TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
+gem 'rugged','0.17.0.b7'
+#case RUBY_VERSION
+#  when '1.8.7' then gem 'rugged','0.17.0.b7'
+#  when '1.9.3' then gem 'rugged','0.19.0'
+#end
 
 case RUBY_VERSION
   when '1.8.7' then gem 'ruby-debug','0.10.4'

@@ -1,6 +1,7 @@
 module DTK; class Dependency
   class Simple < All
     def initialize(dependency_obj,node)
+      super()
       @dependency_obj = dependency_obj
       @node = node
      end
@@ -34,7 +35,7 @@ module DTK; class Dependency
         satisify_cmps = get_components_that_satisify_deps(simple_deps)
         
         unless satisify_cmps.empty?
-          simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_id?(satisify_cmps)}
+          simple_deps.each{|simple_dep|simple_dep.set_satisfied_by_component_ids?(satisify_cmps)}
         end
       end
       components
@@ -62,11 +63,11 @@ module DTK; class Dependency
       Model.create_from_row(dep_mh,create_row)
     end
 
-    def set_satisfied_by_component_id?(satisify_cmps)
+    def set_satisfied_by_component_ids?(satisify_cmps)
       match_cmp = satisify_cmps.find do |cmp|
         (cmp[:node_node_id] == @node[:id]) and @dependency_obj.component_satisfies_dependency?(cmp)
       end
-      @satisfied_by_component_id = match_cmp.id() if match_cmp
+      @satisfied_by_component_ids << match_cmp.id() if match_cmp
     end
 
     attr_reader :dependency_obj, :node

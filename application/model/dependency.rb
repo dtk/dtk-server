@@ -4,10 +4,10 @@ module DTK
     #TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
     class All 
       def initialize()
-        @satisfied_by_component_id = nil
+        @satisfied_by_component_ids = []
       end
 
-      attr_reader :satisfied_by_component_id
+      attr_reader :satisfied_by_component_ids
 
       def self.augment_component_instances!(assembly,components,opts=Opts.new)
         return components if components.empty?

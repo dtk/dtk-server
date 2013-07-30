@@ -64,6 +64,9 @@ module DTK; class LinkDef
           :content => parse_possible_link_content(possible_link_info),
           :type => possible_link_type
         }
+        if order = possible_link_info["order"]
+          el.merge!(:order => order)
+        end
         h.merge(ref => el)
       end
     end

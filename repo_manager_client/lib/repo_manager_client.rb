@@ -209,7 +209,7 @@ module DTK
             error_detail = err_msgs.join(', ')
           end
         end
-        "Repo Manager Connection Error: #{error_detail||response.inspect}"
+        "Repo Manager Error: #{error_detail||response.inspect}"
       end
     end
 

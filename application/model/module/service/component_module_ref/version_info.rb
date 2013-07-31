@@ -1,7 +1,7 @@
 module DTK; class ComponentModuleRef
   class VersionInfo
 
-    DEFAULT_VERSION = "master"
+    DEFAULT_VERSION = nil
 
     class Assignment < self
       def initialize(version_string)

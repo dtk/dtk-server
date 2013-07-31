@@ -913,7 +913,7 @@ class DtkCommon
 			else
 				puts "Service #{service_name} was not found in list of remote services. Proceed with export of service..."
 				service_module_id = service_list['data'].select { |x| x['display_name'] == service_name}.first['id']				
-				export_response = send_request('/rest/service_module/export', {:remote_component_name=>service_name, :service_module_id=>service_module_id, :remote_component_namespace=>namespace})
+				export_response = send_request('/rest/service_module/export', {:remote_component_name=>"#{namespace}/#{service_name}", :service_module_id=>service_module_id})
 
 				puts "Service export response:"
 				pretty_print_JSON(export_response)

@@ -25,7 +25,7 @@ module XYZ
       config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
 
       # Amar: Generating Stages for inter node dependencies
-      staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes)
+      staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes,assembly)
       stages_config_nodes_task = Array.new
       staged_config_nodes_changes.each_index do |i| 
         config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i+1}")

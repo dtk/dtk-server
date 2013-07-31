@@ -1,4 +1,3 @@
-
 # TODO AMAR: Following case is possibly a bug: n1=[c1[c2],c3[c1]] n2=[c2]. c3 should be moved into stage2 along with c1.
 # CHECK ALGORITHM OF THIS CASE
 module DTK
@@ -13,8 +12,8 @@ module DTK
         stages = Array.new
         nodes = Array.new
         
-        # Rich: get_internode_dependencies will do things that are redundant with what is below, but shoudl eb acceptable for now
-        internode_dependencies = Component.get_internode_dependencies(state_change_list)
+        # Rich: get_internode_dependencies will do things that are redundant with what is below, but should be acceptable for now
+        internode_dependencies = get_internode_dependencies(state_change_list,assembly)
         return [state_change_list] if internode_dependencies.empty?
         
         state_change_list.each do |node_change_list|
@@ -51,6 +50,80 @@ module DTK
       end
       
      private
+      
+      def self.get_internode_dependencies(state_change_list,assembly)
+        deps = get_internode_dependencies__guards(state_change_list) 
+        deps + get_internode_dependencies__port_link_order(state_change_list,assembly,deps)
+      end
+      
+      def self.get_internode_dependencies__guards(state_change_list)
+        ret = Array.new
+        aug_attr_list = Attribute.aug_attr_list_from_state_change_list(state_change_list)
+        guard_rels = Array.new
+        Attribute.dependency_analysis(aug_attr_list) do |attr_in,link,attr_out|
+          if attr_guard = GuardedAttribute.create(attr_in,link,attr_out)
+            guard = attr_guard[:guard]
+            guarded = attr_guard[:guarded]
+            cmp_dep = {
+              :guard => {:component => guard[:component], :node => guard[:node]},
+              :guarded => {:component => guarded[:component], :node => guarded[:node]}
+            }
+            #guarded has to go after guard
+            #flat list of dependencies as oppossed to collecting all deps for one component
+            #attr_guard has relationship between attributes; stripping out attr info; consequently same compoennt relationship can be in more than once
+            guard_rels << cmp_dep
+          end
+        end
+        
+        # Amar: output format
+        guard_rels.map do |dep|
+          {
+            :node_dependency => { dep[:guarded][:node][:id] => dep[:guard][:node][:id] },
+            :node_dependency_names => { dep[:guarded][:node][:display_name] => dep[:guard][:node][:display_name] },
+            :component_dependency => { dep[:guarded][:component][:id] => [dep[:guard][:component][:id]] },
+            :component_dependency_names => { dep[:guarded][:component][:display_name] => [dep[:guard][:component][:display_name]] }
+          }
+        end
+      end
+      
+      def self.get_internode_dependencies__port_link_order(state_change_list,assembly,existing_deps)
+        ret = Array.new
+        #TODO: should we filter by members of state_change_list
+        ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
+        return ret if ordered_port_links.empty?
+        #TODO: isntead just filter against  state_change_list
+        sp_hash = {
+          :cols => [:ports,:temporal_order],
+          :filter => [:oneof, :id, ordered_port_links.map{|r|r.id}]
+        }
+        aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
+        pp aug_port_links
+        raise Error.new("got here")
+        ret
+      end
+=begin
+[{:type=>"converge_component",
+   :component=>
+    {:id=>2147487138,
+     :display_name=>"dtk_user__simple_ssh_key",
+     :basic_type=>"service",
+     :external_ref=>
+      {:definition_name=>"dtk_user::simple_ssh_key",
+       :type=>"puppet_definition"},
+     :node_node_id=>2147487003,
+     :only_one_per_node=>false,
+     :implementation_id=>2147487022,
+     :group_id=>2147483719,
+     :extended_base=>nil},
+   :node=>
+    {:id=>2147494459,
+     :display_name=>"sink",
+     :external_ref=>
+      {:image_id=>"ami-6295ea0b", :size=>"t1.micro", :type=>"ec2_image"},
+     :ordered_component_ids=>nil,
+     :agent_git_commit_id=>nil}},
+=end
+      
       def self.detect_internode_cycle(internode_dependencies, prev_deps_count)
         cur_deps_count = internode_dependencies.size
         if prev_deps_count == cur_deps_count

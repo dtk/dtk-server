@@ -1,7 +1,7 @@
 module DTK
   class PortLink < Model
     def self.common_columns()
-      [:id,:group_id,:input_id,:output_id,:assembly_id]
+      [:id,:group_id,:input_id,:output_id,:assembly_id,:temporal_order]
     end
 
     def self.check_valid_id(model_handle,id,opts={}) 

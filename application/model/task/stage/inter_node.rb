@@ -50,7 +50,6 @@ module DTK
       end
       
      private
-      
       def self.get_internode_dependencies(state_change_list,assembly)
         deps = get_internode_dependencies__guards(state_change_list) 
         deps + get_internode_dependencies__port_link_order(state_change_list,assembly,deps)
@@ -97,32 +96,42 @@ module DTK
           :filter => [:oneof, :id, ordered_port_links.map{|r|r.id}]
         }
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
-        pp aug_port_links
-        raise Error.new("got here")
-        ret
+        ndx_scs = Hash.new
+        state_change_list.flatten(1).each do |sc|
+          if sc[:type] == "converge_component"
+            node = sc[:node]
+            cmp = sc[:component]
+            unless node and cmp
+              Log.error("Unexpected that node or cmp is nil")
+              next
+            end
+            (ndx_scs[node[:id]] ||= Hash.new)[cmp[:id]] = sc
+          end
+        end
+        aug_port_links.map do |pl|
+          before_index = DirIndex[pl[:temporal_order].to_sym][:before_sc]
+          after_index = DirIndex[pl[:temporal_order].to_sym][:after_sc]
+          before_sc = (ndx_scs[pl[before_index][:node_id]]||{})[pl[before_index][:component_id]]
+          after_sc = (ndx_scs[pl[after_index][:node_id]]||{})[pl[after_index][:component_id]]
+          unless before_sc and after_sc
+            Log.error("Unexpected that cannot find the input and output statae changes")
+            nil
+          else
+            #TODO: see if for component should instead use :component_type; what about also using 'title' for non-singletons? 
+            {
+              :node_dependency => { after_sc[:node][:id] => before_sc[:node][:id] },
+              :node_dependency_names => { after_sc[:node][:display_name] => before_sc[:node][:display_name] },
+              :component_dependency => { after_sc[:component][:id] => [before_sc[:component][:id]] },
+              :component_dependency_names => { after_sc[:component][:display_name] => [before_sc[:component][:display_name]] }
+            }
+          end
+        end.compact
       end
-=begin
-[{:type=>"converge_component",
-   :component=>
-    {:id=>2147487138,
-     :display_name=>"dtk_user__simple_ssh_key",
-     :basic_type=>"service",
-     :external_ref=>
-      {:definition_name=>"dtk_user::simple_ssh_key",
-       :type=>"puppet_definition"},
-     :node_node_id=>2147487003,
-     :only_one_per_node=>false,
-     :implementation_id=>2147487022,
-     :group_id=>2147483719,
-     :extended_base=>nil},
-   :node=>
-    {:id=>2147494459,
-     :display_name=>"sink",
-     :external_ref=>
-      {:image_id=>"ami-6295ea0b", :size=>"t1.micro", :type=>"ec2_image"},
-     :ordered_component_ids=>nil,
-     :agent_git_commit_id=>nil}},
-=end
+      #TODO: make sure getting direction right            
+      DirIndex = {
+        :before => {:before_sc => :input_port,  :after_sc => :output_port},  
+        :after =>  {:before_sc => :output_port, :after_sc => :input_port}  
+      }
       
       def self.detect_internode_cycle(internode_dependencies, prev_deps_count)
         cur_deps_count = internode_dependencies.size

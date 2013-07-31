@@ -35,37 +35,35 @@ module DTK
       end
     end
 
-    #method name is somewhat of misnomer since with :donot_create_port_link, port links are not created
-    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts=Opts.new)
+    def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
       #get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
-      if opts[:donot_create_port_link]
-        port_link = port_link_hash 
-        unless port_link_idh = opts[:port_link_idh]
-          raise Error.new("if option :donot_create_port_link give, option :port_link_idh must be set")
-        end
-      else
-        port_link = create_from_links_hash(parent_idh,[port_link_hash],opts).first
-        port_link_idh = port_link.id_handle
-      end
-      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_idh))
+      link_to_create = port_link_hash.merge(:temporal_order => link_def_link[:temporal_order])
+      port_link = create_from_links_hash(parent_idh,[link_to_create],opts).first
+      link_def_link.process(parent_idh,components,Opt.new(opts).merge(:port_link_idh => port_link_link.id_handle))
       port_link
     end
 
-    def self.create_from_hash(parent_idh,hash)
-      link_to_create = Hash.new
-      override_attrs = Hash.new
-      hash.each do |k,v|
-        if [:input_id,:output_id].include?(k)
-          link_to_create[k] = v
-        else
-          override_attrs[k] = v
-        end
+    #this sets temporal order if have option :set_port_link_temporal_order
+    def create_attr_links!(parent_idh,opts={})
+      update_obj!(:input_id,:output_id)
+      #get the associated link_def_link TODO: if it does not exist means constraint violation
+      link_def_link, components = self.class.get_link_def_and_components(parent_idh,self)
+      raise PortLinkError.new("Illegal link") unless link_def_link
+      if opts[:set_port_link_temporal_order] and link_def_link[:temporal_order]
+        update(:temporal_order => link_def_link[:temporal_order])
       end
-      create_from_links_hash(parent_idh,[link_to_create],:override_attrs => override_attrs).first
+      link_def_link.process(parent_idh,components,Opts.new(:port_link_idh => id_handle()))
+      self
     end
 
+    #TODO: think need to change to use logical rdns instead of ids to support a more efficient service/pull_from_remote so can determine diffs
+    def self.ref_from_ids(input_id,output_id)
+      "port_link:#{input_id}-#{output_id}"
+    end
+
+   private
     def self.create_from_links_hash(parent_idh,links_to_create,opts={})
       parent_mn = parent_idh[:model_name]
       parent_id = parent_idh.get_id()
@@ -84,18 +82,6 @@ module DTK
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
-
-    #TODO: think need to change to use locgical rdns instaed of ids to support a more efficient service/pull_from_remote so can determine diffs
-    def self.ref_from_ids(input_id,output_id)
-      "port_link:#{input_id}-#{output_id}"
-    end
-
-    def create_attr_links(parent_idh)
-      update_obj!(:input_id,:output_id)
-      augmented_opts = Opts.new(:port_link_idh => id_handle,:donot_create_port_link => true)
-      PortLink.create_port_and_attr_links(parent_idh,self,augmented_opts)
-    end
-   private
     def self.get_link_def_and_components(parent_idh,port_link_hash)
       #returns [link_def_link,relevant_components]
       ret = [nil,nil]

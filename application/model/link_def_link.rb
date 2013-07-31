@@ -3,7 +3,7 @@ module DTK
   class LinkDefLink < Model
 
     def self.common_columns()
-      [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type]
+      [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
     end
 
     #TODO: when add cardinality info, woudl check it heer
@@ -60,7 +60,6 @@ module DTK
       end
     end
     
-
     def attribute_mappings()
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}
     end

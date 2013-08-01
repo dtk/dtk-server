@@ -99,6 +99,11 @@ module XYZ
         adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{opts[:remote_branch]||branch}",opts)
       end
 
+      def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch)
+        adapter_repo = get_adapter_repo(context(repo_name,module_branch))
+        adapter_repo.is_different_than_remote?(remote_r)
+      end
+
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
         adapter_repo.push_changes(remote_name,remote_branch)

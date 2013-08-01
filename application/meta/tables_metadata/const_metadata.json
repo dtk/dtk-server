@@ -85,7 +85,7 @@
       "id",
       "description"
    ],
-   "module_diff":[
+   "list_diffs":[
       "name",
       "id",
       "has_diff"

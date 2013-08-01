@@ -69,12 +69,20 @@ module DTK
     #### end actions to interact with remote repos ###
 
     def rest__list()
-      project = get_default_project()
+      diff        = ret_request_params(:diff)
+      project     = get_default_project()
+      datatype    = :module
+      remote_repo = ret_remote_repo()
+
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
-      rest_ok_response ServiceModule.list(opts), :datatype => :module
+
+      opts.merge!(:remote_rep => remote_repo, :diff => diff)
+      datatype = :module_diff if diff
+
+      rest_ok_response ServiceModule.list(opts), :datatype => datatype
     end
 
     def rest__info()

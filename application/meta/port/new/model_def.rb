@@ -103,7 +103,7 @@
          :convert => true,
          :join_type=>:left_outer,
          :join_cond=>{:link_def_id=>:link_def__id},
-         :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type]
+         :cols=>[:id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
        }]
     },
     :attribute=>{

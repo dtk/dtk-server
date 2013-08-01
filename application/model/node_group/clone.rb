@@ -42,15 +42,12 @@ module DTK; class NodeGroup
     end
 
     def clone_external_attribute_links(node_external_ports,node)
-      #first create a port_link_hash array that mirrors ng links to new node, 
-      #then  use PortLink.create_port_and_attr_links to create the attribute links
       port_link_info = ret_port_link_info(node_external_ports)
       return if port_link_info.empty?
       #TODO: can also look at approach were if one node member exists already can do simpler copy
       port_link_info.each do |pl|
-        port_link_idh = pl[:node_group_port_link].id_handle
-        opts = {:donot_create_port_link => true, :port_link_idh => port_link_idh}
-        PortLink.create_port_and_attr_links(node.id_handle,pl[:node_port_link_hash],opts)
+        port_link = pl[:node_group_port_link]
+        port_link.create_attr_links!(node.id_handle)
       end
     end
 
@@ -69,9 +66,9 @@ module DTK; class NodeGroup
       ng_ports = Model.get_objs(model_handle(:port),sp_hash)
       ng_port_ids = ng_ports.map{|r|r[:id]}
       
-      #get the ng_ports
+      #get the ng_port links
       sp_hash = {
-        :cols => [:id, :group_id,:input_id, :output_id],
+        :cols => [:id, :group_id,:input_id,:output_id,:temporal_order],
         :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
       }
       ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)

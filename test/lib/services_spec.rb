@@ -13,6 +13,19 @@ shared_context "Create service" do |dtk_common, service_name|
   end
 end
 
+shared_context "Import service" do |service_name|
+  it "imports #{service_name} service from local filesystem to server" do
+    puts "Import service:", "---------------"
+    pass = false
+    value = `dtk service import #{service_name}`
+    pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists already"))
+    puts "Import of service #{service_name} completed successfully!" if pass == true
+    puts "Import of service #{service_name} did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Import remote service" do |dtk_common, service_name|
   it "imports #{service_name} service from remote repo" do
     puts "Import remote service:", "---------------------"

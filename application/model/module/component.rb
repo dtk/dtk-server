@@ -126,10 +126,13 @@ module DTK
         version   = r_module["version_info"]
         namespace = r_module["remote_namespace"] || service_namespace
 
-
-
         installed_modules.each do |i_module|
-          if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
+          if (
+              name.eql?(i_module[:display_name]) && 
+              ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
+              namespace.eql?(i_module.fetch(:repo,{})[:remote_repo_namespace])
+             )
+
             is_found = true
             break
           end

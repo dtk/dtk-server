@@ -85,10 +85,10 @@ module DTK
       end
     end
 
-    def self.create(top_task,guards=nil)
-      adapter = Adapter.klass.new(top_task,guards)
-      @@Lock.synchronize{ @@active_workflows[top_task[:id].to_s] = adapter }
-      return adapter
+    def self.create(top_task)
+      ret = Adapter.klass.new(top_task)
+      @@Lock.synchronize{ @@active_workflows[top_task[:id].to_s] = ret }
+      ret
     end
 
     def process_executable_action(task)
@@ -115,24 +115,12 @@ module DTK
         end
       end
     end
-=begin
-    klass = self
-    begin
-      type = R8::Config[:workflow][:type]
-      r8_nested_require("workflow","adapters/#{type}")
-      klass = XYZ::WorkflowAdapter.const_get type.capitalize
-     rescue LoadError => e
-      pp [e,e.backtrace[0..5]]
-      raise.Error.new("cannot find workflow adapter")
-    end
-    Adapter = klass
-=end
-    def initialize(top_task,guards)
+
+    def initialize(top_task)
       @top_task = top_task
       @guards = {:internal => Array.new, :external => Array.new}
-      (guards||[]).each do |guard|
-        type = guard[:guarded][:node][:id] ==  guard[:guard][:node][:id] ? :internal : :external
-        @guards[type] << guard
+      Guard.ret_guards(top_task).each do |guard|
+        @guards[guard.internal_or_external()] << guard
       end
     end
 

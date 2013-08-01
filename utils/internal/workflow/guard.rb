@@ -1,16 +1,20 @@
 module DTK; class Workflow
   class Guard < SimpleHashObject
-    def guards(top_level_task)
-      Attribute.guards(top_level_task)
+    def self.ret_guards(top_level_task)
+      GuardedAttribute.ret_guards(top_level_task)
+    end
+    
+    def internal_or_external()
+      self[:guarded][:node][:id] ==  self[:guard][:node][:id] ? :internal : :external
     end
 
    private
-    class Attribute < self
-      def self.guards(top_level_task)
+    class GuardedAttribute < self
+      def self.ret_guards(top_level_task)
         ret = Array.new
-        augmented_attr_list = augmented_attribute_list_from_task(top_level_task)
+        augmented_attr_list = Attribute.augmented_attribute_list_from_task(top_level_task)
         #augmented_attr_list does not contain node level attributes => attr_out can be null
-        dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
+        Attribute.dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
           if guard = create(attr_in,link,attr_out)
             ret << guard
           end

@@ -2,7 +2,6 @@ files =
   [
    'dependency_analysis',
    'group',
-   'guard',
    'complex_type',
    'datatype',
    'propagate_changes',
@@ -21,7 +20,6 @@ module XYZ
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
-    extend AttributeGuardClassMixin
     extend  AttrPropagateChangesClassMixin
     include ConstantMixin
     include PrintFormMixin

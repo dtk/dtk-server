@@ -117,8 +117,8 @@ module DTK
       end
 
      private 
-      def initialize(top_task,guards)
-        super(top_task,guards)
+      def initialize(top_task)
+        super
         @process_def = nil
       end
       def process_def()

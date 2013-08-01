@@ -2,7 +2,7 @@ r8_nested_require('stage','intra_node')
 r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
 module DTK
-  module TaskCreateClassMixin
+  module CreateClassMixin
     def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)

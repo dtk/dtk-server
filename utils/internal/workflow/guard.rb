@@ -70,7 +70,7 @@ module DTK; class Workflow
         ret
       end
 
-    private
+#TODO: so can temporaily call from inetre_node    private
       def self.create(guarded_attr,link,guard_attr)
         #guard_attr can be null if guard refers to node level attr
         #TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'

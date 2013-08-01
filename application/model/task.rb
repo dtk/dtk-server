@@ -1,10 +1,10 @@
-r8_nested_require('task','create')
 module DTK
   class Task < Model
+    r8_nested_require('task','create')
     r8_nested_require('task','status')
     r8_nested_require('task','action')
     r8_nested_require('task','template')
-    extend TaskCreateClassMixin
+    extend CreateClassMixin
     include StatusMixin
     #returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)

@@ -60,7 +60,7 @@ module DTK
         aug_attr_list = Attribute.aug_attr_list_from_state_change_list(state_change_list)
         guard_rels = Array.new
         Attribute.dependency_analysis(aug_attr_list) do |attr_in,link,attr_out|
-          if attr_guard = GuardedAttribute.create(attr_in,link,attr_out)
+          if attr_guard = Workflow::Guard::GuardedAttribute.create(attr_in,link,attr_out)
             guard = attr_guard[:guard]
             guarded = attr_guard[:guarded]
             cmp_dep = {

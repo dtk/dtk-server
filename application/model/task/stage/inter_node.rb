@@ -90,7 +90,6 @@ module DTK
         #TODO: should we filter by members of state_change_list
         ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
         return ret if ordered_port_links.empty?
-        #TODO: isntead just filter against  state_change_list
         sp_hash = {
           :cols => [:ports,:temporal_order],
           :filter => [:oneof, :id, ordered_port_links.map{|r|r.id}]
@@ -127,7 +126,6 @@ module DTK
           end
         end.compact
       end
-      #TODO: make sure getting direction right            
       DirIndex = {
         :before => {:before_sc => :input_port,  :after_sc => :output_port},  
         :after =>  {:before_sc => :output_port, :after_sc => :input_port}  

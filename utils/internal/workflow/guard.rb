@@ -1,14 +1,62 @@
 module DTK; class Workflow
   class Guard < SimpleHashObject
     def self.ret_guards(top_level_task)
-      GuardedAttribute.ret_guards(top_level_task)
+      ret = GuardedAttribute.ret_guards(top_level_task)
+      if assembly = top_level_task.assembly()
+        ret += AssemblyPortLinks.ret_guards(assembly)
+      end
+      ret
     end
-    
     def internal_or_external()
       self[:guarded][:node][:id] ==  self[:guard][:node][:id] ? :internal : :external
     end
 
    private
+    class Element < SimpleHashObject
+      def initialize(node,component,task_id,other_vals={})
+        el = {
+          :node => node.hash_subset(:id,:display_name), 
+          :component => component.hash_subset(:id,:display_name),
+          :task_id => task_id
+        }.merge(other_vals)
+        el[:task_type] ||= Task::Action::ConfigNode
+        super(el)
+      end
+    end
+
+    class AssemblyPortLinks < self
+      def self.ret_guards(assembly)
+        #TODO: should share code with Stage::Internode.get_internode_dependencies__port_link_order(
+        ret = Array.new
+        #TODO: may want to filter to see if any assembly dependencies not in task
+        ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
+        return ret if ordered_port_links.empty?
+        sp_hash = {
+          :cols => [:augmented_ports,:temporal_order],
+          :filter => [:oneof, :id, ordered_port_links.map{|r|r.id}]
+        }
+        aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
+        pp aug_port_links
+        raise Error,new("Got here; need to bring in task info and look at that to find component and node; node is not below")
+
+        aug_port_links.map do |pl|
+          before = DirIndex[pl[:temporal_order].to_sym][:before_index]
+          after = DirIndex[pl[:temporal_order].to_sym][:after_index]
+          #TODO: need to get task_id
+          task_id = nil
+          guard = Element.new(pl[before[:node]],pl[before[:cmp]],task_id)
+          guarded = Element.new(pl[after[:node]],pl[after[:cmp]],task_id)
+          new(:guarded => guarded, :guard => guard)
+        end
+      end
+      InputKeys = {:node => :input_node, :cmp => :input_component}
+      OutputKeys = {:node => :output_node, :cmp => :output_component}
+      DirIndex = {
+        :before => {:before_index => InputKeys,  :after_index => OutputKeys},  
+        :after =>  {:before_index => OutputKeys, :after_index => InputKeys}
+      }
+    end
+
     class GuardedAttribute < self
       def self.ret_guards(top_level_task)
         ret = Array.new
@@ -42,14 +90,8 @@ module DTK; class Workflow
         #right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
         
-        guard = {
-          :task_type => guard_task_type
-        }.merge(attr_info(guard_attr))
-        
-        guarded = {
-          :task_type => Task::Action::ConfigNode
-        }.merge(attr_info(guarded_attr))
-        
+        guard = element(guard_attr,guard_task_type)
+        guarded = element(guarded_attr)
         new(:guarded => guarded, :guard => guard, :link => link)
       end
 
@@ -82,24 +124,10 @@ module DTK; class Workflow
         end
       end
 
-      def self.attr_info(attr,keys=nil)
-        ret = {
-          :node => {
-            :id => attr[:node][:id],
-            :display_name =>  attr[:node][:display_name]
-          },
-          :component => {
-          :id => attr[:component][:id],
-            :display_name =>  attr[:component][:display_name]
-          },
-          :attribute => {
-            :id => attr[:id],
-            :display_name =>  attr[:display_name]
-        },
-        :task_id => attr[:task_id]
-        }
-        return ret unless keys
-        keys.inject({}){|h,(k,v)| keys.include?(k) ? h.merge(k => v) : h}
+      def self.element(attr,task_type=nil)
+        other_vals = {:attribute => attr.hash_subset(:id,:display_name)}
+        other_vals[:task_type] = task_type if task_type
+        Element.new(attr[:node],attr[:component],attr[:task_id],other_vals)
       end
     end
   end

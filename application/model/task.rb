@@ -14,6 +14,12 @@ module XYZ
       task_ids.map{|task_id|id_handle(:id => task_id)}
     end
 
+    def assembly()
+      if assembly_id = get_field?(:assembly_id)
+        id_handle(:model_name => :assembly,:id => assembly_id).create_object()
+      end
+    end
+
     def get_errors()
       sp_hash = {
         :cols => [:content]
@@ -367,7 +373,8 @@ module XYZ
        :position,
        :executable_action_type,
        :executable_action,
-       :commit_message
+       :commit_message,
+       :assembly_id
       ]
     end
 

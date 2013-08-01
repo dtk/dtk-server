@@ -22,7 +22,7 @@
          :model_name=>:implementation,
          :convert => true,
          :join_type=>:left_outer,
-         :join_cond=>{:id=>:include_module__implementation_id},
+         :join_cond=>{:id=>:component_include_module__implementation_id},
          :cols=>[:id,:display_name,:group_id,:repo,:branch,:module_name,:version]
        }]
     }

@@ -47,6 +47,10 @@ module DTK
         remote_branch = Remote.version_to_branch_name(version)
         RepoManager.ret_remote_merge_relationship(self[:repo_name],local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
       end
+
+      def ret_loaded_and_remote_diffs(remote_r, module_branch)
+        return RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch)
+      end
       
       def push_to_remote(branch,remote_repo_name,version=nil)
         unless remote_repo_name

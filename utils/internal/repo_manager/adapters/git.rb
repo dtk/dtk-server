@@ -342,6 +342,24 @@ module DTK
       end
     end
 
+    def is_different_than_remote?(remote_r)
+      git_command__fetch(remote_r)
+      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_r.to_s)}
+      local  = @grit_repo.heads.first
+
+      raise Error.new("Cannot find remote repo (#{remote_r})") unless remote
+
+      remote_sha = remote.commit.id
+      local_sha = local.commit.id
+
+      if remote_sha == local_sha 
+        return true
+      else
+        return true unless any_diffs?(local_sha,remote_sha)
+        return false
+      end
+    end
+
     def push_changes(remote_name=nil,remote_branch=nil)
       git_command__push(@branch,remote_name,remote_branch)
     end

@@ -1,8 +1,9 @@
 r8_nested_require('task','create')
-module XYZ
+module DTK
   class Task < Model
     r8_nested_require('task','status')
     r8_nested_require('task','action')
+    r8_nested_require('task','template')
     extend TaskCreateClassMixin
     include StatusMixin
     #returns list (possibly empty) of subtask idhs that guard this

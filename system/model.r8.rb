@@ -67,11 +67,20 @@ module XYZ
     private :augmented_form
 
     def self.model_name()
-      model_name_x = Aux::underscore(Aux::demodulize(self.to_s)).to_sym
-      SubClassRelations[model_name_x]|| model_name_x
+      @model_name ||= model_name_helper(self)
     end
     def model_name()
       @relation_type || self.class.model_name() 
+    end
+
+    class << self
+      private
+      def model_name_helper(klass,opts={})
+        klass_parts = klass.to_s.split('::')
+        klass_parts.shift
+        ret = Aux.underscore(klass_parts.join('')).to_sym
+        opts[:no_subclass]  ? ret : ( SubClassRelations[ret] || ret)
+      end
     end
 
     def self.model_class(model_name)
@@ -79,7 +88,8 @@ module XYZ
     end
     #TODO: make the exception list be deduced from declarations in actual class
     NestedModuleClasses = {
-      :include_module => :component
+      :component_include_module => :component,
+      :task_template => :template
     }
     def self.model_class_nested(model_name)
       if parent_model_name = NestedModuleClasses[model_name]

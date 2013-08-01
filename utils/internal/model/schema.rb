@@ -4,7 +4,7 @@
 #base field defs for id,date_created/modified, created_by user, modified_user, etc
 
 require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
-module XYZ
+module DTK
   #class methods
   #TODO partition into public and private
   module ModelSchemaClassMixins
@@ -92,7 +92,7 @@ module XYZ
     end
 
     def ret_relation_type(klass)
-      Aux.underscore(Aux.demodulize(klass.to_s)).to_sym
+      model_name_helper(klass,:no_subclass => true)
     end
 
     #------common column defs -----------

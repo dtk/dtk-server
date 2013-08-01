@@ -6,7 +6,7 @@ module XYZ
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
-        context = RuoteGenerateProcessDefsContext.create_top(guards,top_task_idh)
+        context = Context.new(guards,top_task_idh)
         tasks = sequence(compute_process_body(task,context),
                           participant(:end_of_task))
         #for testing
@@ -126,27 +126,27 @@ module XYZ
           h.merge((k.kind_of?(Symbol) ? k.to_s : k) => (v.kind_of?(Symbol) ? v.to_s : v))
         end
       end
-    end
-      class RuoteGenerateProcessDefsContext < HashObject
-        def self.create_top(guards,top_task_idh)
-          new(:guards => guards, :top_task_idh => top_task_idh)
+
+      class Context 
+        def initialize(guards,top_task_idh,peer_tasks=nil)
+          @guards = guards||[]
+          @top_task_idh = top_task_idh
+          @peer_tasks = peer_tasks||[]
         end
-        def top_task_idh()
-          self[:top_task_idh]
-        end
+
+        attr_reader :top_task_idh
 
         def get_guard_tasks(action)
-
-          # If 'STAGES' temporal mode set, don't generate workflow with guards
-          return nil unless XYZ::Workflow.guards_mode?
-
           ret = nil
+          # If 'STAGES' temporal mode set, don't generate workflow with guards
+          return ret unless  Workflow.guards_mode?
+
           #short cuircuit; must be multiple peers in order there to be guard tasks
-          return ret if peer_tasks.size < 2
+          return ret if @peer_tasks.size < 2
           node_id = action[:node][:id]
           task_type = action.class
           #find guards for this action
-          matching_guards = guards.select do |g|
+          matching_guards = @guards.select do |g|
             guarded = g[:guarded]
             guarded[:task_type] == task_type and guarded[:node][:id] == node_id
           end.map{|g|g[:guard]}
@@ -154,7 +154,7 @@ module XYZ
           
           #see if any of the guards are peers
           ndx_ret = Hash.new
-          peer_tasks.each do |t|
+          @peer_tasks.each do |t|
             task_id = t.id()
             next if ndx_ret[task_id]
             if ea = t[:executable_action]
@@ -169,25 +169,19 @@ module XYZ
         end
 
         def new_concurrent_context(task_list)
-          if self[:peer_tasks]
+          unless @peer_tasks.empty?
             Log.error("nested concurrent under concurrent context not implemented")
           end
-          self.class.new(self).merge(:peer_tasks => task_list) 
+          self.class.new(@guards,@top_task_idh,task_list)
         end
         def new_sequential_context(task)
-          if self[:peer_tasks]
+          unless @peer_tasks.empty?
             Log.error("nested sequential under concurrent context not implemented")
           end
           self
         end
-       private
-        def guards()
-          self[:guards]||[]
-        end
-        def peer_tasks()
-          self[:peer_tasks] || []
-        end
       end
     end
+  end
 end
 

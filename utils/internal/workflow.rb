@@ -1,5 +1,6 @@
 module DTK
   class Workflow
+    r8_nested_require('workflow','guard')
 
     #Rich: moved thess to be in config file so each developer can test different configs
     # Configuration for 'inter_node_temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'

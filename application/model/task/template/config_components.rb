@@ -43,8 +43,8 @@ module DTK; class Task; class Template
         aug_port_links.map do |pl|
           before_port = pl[DirField[pl[:temporal_order].to_sym][:before_field]]
           after_port = pl[DirField[pl[:temporal_order].to_sym][:after_field]]
-          before_cmp_list_el = ndx_cmp_list.el(pl[before_port[:node_id]],before_port[:component_id])
-          after_cmp_list_el = ndx_cmp_list.el(pl[after_port[:node_id]],after_port[:component_id])
+          before_cmp_list_el = ndx_cmp_list.el(before_port[:node_node_id],before_port[:component_id])
+          after_cmp_list_el = ndx_cmp_list.el(after_port[:node_node_id],after_port[:component_id])
           if before_cmp_list_el and after_cmp_list_el
             TemporalConstraint.new(:port_link_order,before_cmp_list_el,after_cmp_list_el)
           end

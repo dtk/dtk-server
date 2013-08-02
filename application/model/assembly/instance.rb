@@ -13,11 +13,12 @@ module DTK; class  Assembly
       assembly_source = {:type => "asssembly", :object => hash_subset(:id,:display_name)}
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_titles!(rows)
-      rows.inject(opts[:seed]||Array.new) do |a,r|
+      ret = opts[:add_on_to]||opts[:seed]||Array.new
+      rows.each do |r|
         el = r.hash_subset(:id,:component_type,:title)
-        el.merge!(:node => r[:node].hash_subset(:id,:display_name),:source => assembly_source)
-        a + [el]
+        ret << el.merge(:node => r[:node].hash_subset(:id,:display_name),:source => assembly_source)
       end
+      ret
     end
 
     def get_augmented_node_attributes(filter_proc=nil)

@@ -4,7 +4,7 @@ module DTK
     include CloneMixin
 
     def self.get_component_list(nodes,opts={})
-      ret = Array.new
+      ret = opts[:add_on_to]||opts[:seed]||Array.new
       return ret if nodes.empty? 
       #find node_to_ng mapping
       node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
@@ -30,17 +30,15 @@ module DTK
       #strip away all uneeded cols
       ndx_cmps.each_pair{|cmp_id,cmp|ndx_cmps[cmp_id] = cmp.hash_subset(:id,:component_type,:title)}
 
-      ret = opts[:seed]||Array.new
       nodes.each do |node|
         #find components on the node group
         (node_to_ng[node[:id]]||{}).each_key do |ng_id|
           if node_ng_info = ndx_node_ng_info[ng_id]
             node_ng_info[:component_ids].each do |cmp_id|
-              el = {
-                :component => ndx_cmps[cmp_id],
+              el = ndx_cmps[cmp_id].merge(
                 :node => node,
                 :source => {:type => "node_group", :object => node_ng_info[:node_or_ng]}
-              }
+              )
               ret << el
             end
           end
@@ -48,11 +46,10 @@ module DTK
 
         #find components on the node
         ((ndx_node_ng_info[node[:id]]||{})[:component_ids]||[]).each do |cmp_id|
-          el = {
-            :component => ndx_cmps[cmp_id],
+          el = ndx_cmps[cmp_id].merge(
             :node => node,
             :source => {:type => "node", :object => node}
-          }
+          )
           ret << el
         end
       end

@@ -11,7 +11,10 @@ module DTK; class  Assembly
     def get_component_list(opts={})
       ret = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_titles!(ret)
-      ret
+      ret.map do |r|
+        el = r.hash_subset(:id,:component_type,:title)
+        el.merge(:node => r[:node].hash_subset(:id,:display_name))
+      end
     end
 
     def get_augmented_node_attributes(filter_proc=nil)

@@ -1,5 +1,8 @@
 module DTK; class Component
   class Instance < self
+    def self.component_list_fields()
+      [:id,:group_id,:display_name,:component_type,:basic_type,:version,:only_one_per_node]
+    end
 
     def self.add_titles!(cmps)
       ret = cmps

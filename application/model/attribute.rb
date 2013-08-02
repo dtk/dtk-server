@@ -50,7 +50,6 @@ module XYZ
       attrs
     end
 
-
     def self.fields_for_title()
       [:value,:external_ref,:display_name]
     end

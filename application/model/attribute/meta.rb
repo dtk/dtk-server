@@ -4,6 +4,7 @@ module XYZ
     def up()
       external_ref_column_defs()
       virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
+      virtual_column :title, :type => :string, :local_dependencies => [:value_asserted,:value_derived,:external_ref,:display_name]
 
       #columns related to the value
       column :value_asserted, :json, :ret_keys_as_symbols => false

@@ -135,7 +135,7 @@ module DTK
     end
 
     def hash_subset(*cols)
-      Aux::hash_subset(self,cols)
+      Aux::hash_subset(self,cols,:seed=>id_handle().create_object())
     end
 
     module Delim

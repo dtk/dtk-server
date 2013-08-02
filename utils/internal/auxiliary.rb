@@ -66,7 +66,7 @@ module XYZ
 
       #key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
-        hash_subset_aux(Hash.new(),hash,keys,opts,&block)
+        hash_subset_aux(opts[:seed]||Hash.new(),hash,keys,opts,&block)
       end
       def ordered_hash_subset(hash,keys,opts={},&block)
         seed = ActiveSupport::OrderedHash.new()

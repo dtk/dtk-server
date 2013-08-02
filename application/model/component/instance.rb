@@ -12,12 +12,12 @@ module DTK; class Component
       end
       return ret if cmps_needing_titles.empty?
       sp_hash = {
-        :cols => ([:id,:group_id,:display_name,:component_component_id]+Attribute.fields_for_title()).uniq,
+        :cols => [:id,:group_id,:display_name,:component_component_id,:title],
         :filter => [:oneof, :component_component_id, cmps_needing_titles.map{|cmp|cmp[:id]}]
       }
-      ndx_attrs = hash.new
-      get_objs(cmps.first.model_handle(:component),sp_hash).each do |a|
-        if title = a.title?()
+      ndx_attrs = Hash.new
+      get_objs(cmps.first.model_handle(:attribute),sp_hash).each do |a|
+        if title = a[:title]
           ndx_attrs[a[:component_component_id]] = title
         end
       end

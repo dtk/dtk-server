@@ -41,7 +41,7 @@ module XYZ
       attrs = get_objs(model_handle,sp_hash)
       return ret if attrs.empty?
       attrs.each do |r|
-        r.delete(:compoennt) if r[:component].nil? #get rio of nil :component cols
+        r.delete(:component) if r[:component].nil? #get rid of nil :component cols
 
         if node = r.delete(:direct_node)||r.delete(:component_node)
           r.merge!(:node => node)

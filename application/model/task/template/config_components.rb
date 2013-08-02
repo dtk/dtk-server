@@ -7,7 +7,7 @@ module DTK; class Task; class Template
       #indexed by [node_id][:cmp_id]
       ndx_cmp_list = cmp_list.indexed
       cmp_order_constraints = TemporalConstraints.get(assembly,ndx_cmp_list)
-      pp [:cmp_order_constraints,cmp_order_constraints]
+      #pp [:cmp_order_constraints,cmp_order_constraints]
       ret
     end
 
@@ -27,7 +27,9 @@ module DTK; class Task; class Template
         # port links with temporal order set
         # component_ordering link def setting
         # component dependencies
-        get_from_port_links(assembly,ndx_cmp_list)
+        pp [:get_from_port_links,get_from_port_links(assembly,ndx_cmp_list)]
+        pp [:get_from_dynamic_link_rel,get_from_dynamic_link_rel(ndx_cmp_list)]
+        ret
       end
      private
       def self.get_from_port_links(assembly,ndx_cmp_list)
@@ -54,6 +56,27 @@ module DTK; class Task; class Template
         :before => {:before_field => :input_port,  :after_field => :output_port},  
         :after =>  {:before_field => :output_port, :after_field => :input_port}  
       }
+
+      def self.get_from_dynamic_link_rel(ndx_cmp_list)
+        ret = Array.new
+        attr_mh = ndx_cmp_list.model_handle(:attribute)
+        filter = [:oneof,:component_component_id,ndx_cmp_list.component_ids]
+        #shortcut if no dynamic attributes
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:and, [:eq,:dynamic,true], filter]
+        }
+        return ret if Model.get_objs(attr_mh,sp_hash).empty?
+
+        #get augmented attr list, needed for dependency analysis
+        aug_attr_list = Attribute.get_augmented(attr_mh,filter)
+        Attribute.dependency_analysis(aug_attr_list) do |attr_in,link,attr_out|
+          if attr_guard = Workflow::Guard::GuardedAttribute.create(attr_in,link,attr_out)
+            pp [:guard_rel,  attr_guard]
+          end
+        end
+        ret
+      end
     end
 
     class ComponentList < Array
@@ -73,16 +96,25 @@ module DTK; class Task; class Template
       class Indexed < SimpleHashObject
         def initialize(component_list)
           super()
+          @component_ids = component_list.map{|cmp|cmp[:id]}.uniq
+          @cmp_model_handle = component_list.first && component_list.first.model_handle()
           component_list.each do |r|
             node_id = r[:node][:id]
             cmp_id = r[:id]
             (self[node_id] ||= Hash.new)[cmp_id] = r
           end
         end
+
+        attr_reader :component_ids
         
         def el(node_id,cmp_id)
           (self[node_id]||{})[cmp_id]
         end
+
+        def model_handle(model_name)
+          @cmp_model_handle && @cmp_model_handle.createMH(model_name)
+        end
+        
       end
     end
   end

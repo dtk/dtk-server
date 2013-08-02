@@ -7,7 +7,9 @@ module DTK; class Task; class Template
       #indexed by [node_id][:cmp_id]
       ndx_cmp_list = cmp_list.indexed
       cmp_order_constraints = TemporalConstraints.get(assembly,ndx_cmp_list)
-      #pp [:cmp_order_constraints,cmp_order_constraints]
+      pp "-----------------"
+      pp [:cmp_order_constraints,cmp_order_constraints]
+      pp "-----------------"
       ret
     end
 
@@ -27,14 +29,14 @@ module DTK; class Task; class Template
     module TemporalConstraints
       def self.get(assembly,ndx_cmp_list)
         ret = Array.new
+        return ret if ndx_cmp_list.empty?
         #ordering constrainst come from teh following sources
         # dynamic attributes
         # port links with temporal order set
-        # component_ordering link def setting
-        # component dependencies
-        pp [:get_from_port_links,get_from_port_links(assembly,ndx_cmp_list)]
-        pp [:get_from_dynamic_attribute_rel,get_from_dynamic_attribute_rel(ndx_cmp_list)]
-        ret
+        # intra_node rels - (from teh component_oredr and dependency rels)
+        get_from_port_links(assembly,ndx_cmp_list) +
+        get_from_dynamic_attribute_rel(ndx_cmp_list) +
+        get_intra_node_rels(ndx_cmp_list)
       end
      private
       def self.get_from_port_links(assembly,ndx_cmp_list)
@@ -84,8 +86,29 @@ module DTK; class Task; class Template
         end
         ret
       end
+      def self.get_intra_node_rels(ndx_cmp_list)
+        ret = Array.new
+        #TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from 
+        #component templates, not component instances
+        cmp_deps = Component::Instance.get_ndx_intra_node_rels(ndx_cmp_list.component_idhs())
+        cmp_deps.reject!{|cmp_id,info|info[:component_dependencies].empty?}
+        return ret if cmp_deps.empty?
+        
+        #component dependencies just have component type;
+        #TODO: may extend so that it can match on title
+        cmp_deps.each do |cmp_id,dep_info|
+          ndx_cmp_list.els(cmp_id) do |node_id,after_cmp_list_el|
+            dep_info[:component_dependencies].each do |before_cmp_type|
+              if before_cmp_list_el = ndx_cmp_list.index_by_node_id_cmp_type(node_id,before_cmp_type)
+                ret << TemporalConstraint.create?(:intra_node,before_cmp_list_el,after_cmp_list_el)
+              end
+            end
+          end
+        end
+        ret
+      end
     end
-    
+
     class ComponentList < Array
       def self.get(assembly,component_type=nil)
         opts = Hash.new
@@ -103,25 +126,47 @@ module DTK; class Task; class Template
       class Indexed < SimpleHashObject
         def initialize(component_list)
           super()
-          @component_ids = component_list.map{|cmp|cmp[:id]}.uniq
+          @component_id_info = Hash.new
+          @ndx_by_node_id_cmp_type = Hash.new
           @cmp_model_handle = component_list.first && component_list.first.model_handle()
-          component_list.each do |r|
-            node_id = r[:node][:id]
-            cmp_id = r[:id]
-            (self[node_id] ||= Hash.new)[cmp_id] = r
+
+          component_list.each do |cmp|
+            cmp_id = cmp[:id]
+            node_id = cmp[:node][:id]
+            (self[node_id] ||= Hash.new)[cmp_id] = cmp
+            @component_id_info[cmp_id] ||= cmp.id_handle()
+            pntr = @ndx_by_node_id_cmp_type[node_id] ||= Hash.new
+            (pntr[cmp[:component_type]] ||= Array.new) << cmp
           end
         end
 
-        attr_reader :component_ids
+        def component_ids()
+          @component_id_info.keys
+        end
+        def component_idhs()
+          @component_id_info.values
+        end
         
         def el(node_id,cmp_id)
           (self[node_id]||{})[cmp_id]
         end
 
+        #block has params node_id, cmp_list_el
+        def els(cmp_id,&block)
+          each_pair do |node_id,ndx_by_cmp|
+            if cmp_list_el = ndx_by_cmp[cmp_id]
+              block.call(node_id,cmp_list_el)
+            end
+          end
+        end
+        def index_by_node_id_cmp_type(node_id,cmp_type)
+          (@ndx_by_node_id_cmp_type[node_id]||{})[cmp_type]
+        end
+
         def model_handle(model_name)
           @cmp_model_handle && @cmp_model_handle.createMH(model_name)
         end
-        
+
       end
     end
   end

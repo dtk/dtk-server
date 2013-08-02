@@ -29,6 +29,11 @@ module DTK; class Component
       ret
     end
 
+    def self.get_ndx_intra_node_rels(cmp_idhs)
+      cmps_with_deps = Component::Instance.get_components_with_dependency_info(cmp_idhs)
+      ComponentOrder.get_ndx_cmp_type_and_derived_order(cmps_with_deps)
+    end
+
     #TODO: may be able to deprecate below seeing that dependencies are on instances
     def self.get_components_with_dependency_info(cmp_idhs)
       ret = Array.new

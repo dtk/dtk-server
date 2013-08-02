@@ -50,6 +50,25 @@ module XYZ
       attrs
     end
 
+
+    def self.fields_for_title()
+      [:value,:external_ref,:display_name]
+    end
+    def title?()
+      #TODO: may make this be Boolean field in attribute
+      if self[:display_name] == "name" or ext_ref_indicates_title?(self[:external_ref])
+        self[:value]
+      end
+    end
+    def ext_ref_indicates_title?(ext_ref)
+      if ext_ref["type"] == "puppet_attribute"
+        if path = ext_ref["path"]
+          path =~ /\[name\]$/
+        end
+      end
+    end
+    private :ext_ref_indicates_title?
+
     ### virtual column defs
     def config_agent_type()
       external_ref_type = (self[:external_ref]||{})[:type]

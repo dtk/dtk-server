@@ -8,6 +8,12 @@ module DTK; class  Assembly
     include ServiceLinkMixin
 
     ### standard get methods
+    def get_component_list(opts={})
+      ret = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
+      Component::Instance.add_titles!(ret)
+      ret
+    end
+
     def get_augmented_node_attributes(filter_proc=nil)
       get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
     end

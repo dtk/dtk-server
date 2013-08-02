@@ -4,6 +4,14 @@ r8_nested_require('stage','puppet_stage_generator')
 module DTK
   module CreateClassMixin
     def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
+#TODO: will replace this with calls to Task::Template
+test_flag = true
+if test_flag
+  pp Task::Template::ConfigComponents.get_components(assembly,component_type)
+  raise Error.new("got here")
+end
+
+#######
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
 

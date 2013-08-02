@@ -1,5 +1,6 @@
 module XYZ
   module AttrDepAnalaysisClassMixin
+    # block params are attr_in,link,attr_out
     def dependency_analysis(aug_attr_list,&block)
       #find attributes that are required
       return if aug_attr_list.empty?
@@ -27,6 +28,18 @@ module XYZ
         if attr_out = find_matching_output_attr(aug_attr_list,attr_in,link)
           block.call(attr_in,link,attr_out)
         end
+      end
+    end
+
+    #block params is guard_rel which is hash with keys guard_attr,link,guarded_attr
+    def guarded_attribute_rels(aug_attr_list,&block)
+      Attribute.dependency_analysis(aug_attr_list) do |in_attr,link,out_attr|
+        guard_rel = {
+          :guarded_attr => in_attr,
+          :guard_attr => out_attr,
+          :link => link
+        }
+        block.call(guard_rel) if GuardRel.needs_guard?(guard_rel)
       end
     end
 
@@ -73,7 +86,6 @@ module XYZ
       true
     end
 
-
     def find_matching_links(attr,links)
       links.select{|link|link[:input_id] == attr[:id] and index_match(link,attr[:item_path])}
     end
@@ -97,6 +109,56 @@ module XYZ
         end
       end
       ret
+    end
+
+    module GuardRel
+      def self.needs_guard?(guard_rel)
+        guard_attr,guarded_attr,link = guard_rel[:guard_attr],guard_rel[:guarded_attr],guard_rel[:link]
+        #guard_attr can be null if guard refers to node level attr
+        #TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
+        #TODO: below works if guard is node level attr
+        return nil unless guard_attr 
+
+        #guarding attributes that are unset and are feed by dynamic attribute 
+        #TODO: should we assume that what gets here are only requierd attributes
+        #TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
+        return nil unless guard_attr[:dynamic] and unset_guarded_attr?(guarded_attr,link)
+        
+        #TODO: clean up; not sure if still needed
+        guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
+        #right now only using config node to config node guards
+        return nil if guard_task_type == Task::Action::CreateNode
+        true
+      end
+     private
+      #if dont know for certain better to err as being a guard
+      def self.unset_guarded_attr?(guarded_attr,link)
+        val = guarded_attr[:attribute_value]
+        if val.nil?
+          true
+        elsif link[:function] == "array_append"
+          unset_guarded_attr__array_append?(val,link)
+        end
+      end
+      
+      def self.unset_guarded_attr__array_append?(guarded_attr_val,link)
+        if input_map = link[:index_map]
+          unless input_map.size == 1
+            raise Error.new("Not treating index map with more than one member")
+          end
+          input_index = input_map.first[:input]
+          unless input_index.size == 1
+            raise Error.new("Not treating input index with more than one member")
+          end
+          input_num = input_index.first
+          unless input_num.kind_of?(Fixnum)
+            raise Error.new("Not treating input index that is non-numeric")
+          end
+          guarded_attr_val.kind_of?(Array) and guarded_attr_val[input_num].nil?
+        else
+          true
+        end
+      end
     end
   end
 end

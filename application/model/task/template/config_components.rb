@@ -17,6 +17,11 @@ module DTK; class Task; class Template
         @before_cmp_list_el = before_cmp_list_el
         @after_cmp_list_el = after_cmp_list_el
       end
+      def self.create?(type,before_cmp_list_el,after_cmp_list_el)
+        if before_cmp_list_el and after_cmp_list_el
+          new(type,before_cmp_list_el,after_cmp_list_el)
+        end
+      end
     end
 
     module TemporalConstraints
@@ -28,7 +33,7 @@ module DTK; class Task; class Template
         # component_ordering link def setting
         # component dependencies
         pp [:get_from_port_links,get_from_port_links(assembly,ndx_cmp_list)]
-        pp [:get_from_dynamic_link_rel,get_from_dynamic_link_rel(ndx_cmp_list)]
+        pp [:get_from_dynamic_attribute_rel,get_from_dynamic_attribute_rel(ndx_cmp_list)]
         ret
       end
      private
@@ -47,9 +52,7 @@ module DTK; class Task; class Template
           after_port = pl[DirField[pl[:temporal_order].to_sym][:after_field]]
           before_cmp_list_el = ndx_cmp_list.el(before_port[:node_node_id],before_port[:component_id])
           after_cmp_list_el = ndx_cmp_list.el(after_port[:node_node_id],after_port[:component_id])
-          if before_cmp_list_el and after_cmp_list_el
-            TemporalConstraint.new(:port_link_order,before_cmp_list_el,after_cmp_list_el)
-          end
+            TemporalConstraint.create?(:port_link_order,before_cmp_list_el,after_cmp_list_el)
         end.compact
       end
       DirField = {
@@ -57,7 +60,7 @@ module DTK; class Task; class Template
         :after =>  {:before_field => :output_port, :after_field => :input_port}  
       }
 
-      def self.get_from_dynamic_link_rel(ndx_cmp_list)
+      def self.get_from_dynamic_attribute_rel(ndx_cmp_list)
         ret = Array.new
         attr_mh = ndx_cmp_list.model_handle(:attribute)
         filter = [:oneof,:component_component_id,ndx_cmp_list.component_ids]
@@ -70,15 +73,19 @@ module DTK; class Task; class Template
 
         #get augmented attr list, needed for dependency analysis
         aug_attr_list = Attribute.get_augmented(attr_mh,filter)
-        Attribute.dependency_analysis(aug_attr_list) do |attr_in,link,attr_out|
-          if attr_guard = Workflow::Guard::GuardedAttribute.create(attr_in,link,attr_out)
-            pp [:guard_rel,  attr_guard]
+        Attribute.guarded_attribute_rels(aug_attr_list) do |guard_rel|
+          guard_attr = guard_rel[:guard_attr]
+          guarded_attr = guard_rel[:guarded_attr]
+          before_cmp_list_el = ndx_cmp_list.el(guard_attr[:node][:id],guard_attr[:component][:id])
+          after_cmp_list_el = ndx_cmp_list.el(guarded_attr[:node][:id],guarded_attr[:component][:id])
+          if temporal_constraint = TemporalConstraint.create?(:dynamic_attribute_rel,before_cmp_list_el,after_cmp_list_el)
+            ret << temporal_constraint
           end
         end
         ret
       end
     end
-
+    
     class ComponentList < Array
       def self.get(assembly,component_type=nil)
         opts = Hash.new

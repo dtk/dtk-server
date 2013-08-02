@@ -34,12 +34,12 @@ module DTK
       nodes.each do |node|
         #find components on the node group
         (node_to_ng[node[:id]]||{}).each_key do |ng_id|
-          (ndx_node_ng_info[ng_id]||{}).each do |node_ng_info|
+          if node_ng_info = ndx_node_ng_info[ng_id]
             node_ng_info[:component_ids].each do |cmp_id|
               el = {
                 :component => ndx_cmps[cmp_id],
                 :node => node,
-                :source => {:type => "node_group", :object => node_ng_inf[:node_or_ng]}
+                :source => {:type => "node_group", :object => node_ng_info[:node_or_ng]}
               }
               ret << el
             end

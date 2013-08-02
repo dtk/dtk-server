@@ -9,11 +9,13 @@ module DTK; class  Assembly
 
     ### standard get methods
     def get_component_list(opts={})
+      get_field?(:display_name)
+      assembly_source = {:type => "asssembly", :object => hash_subset(:id,:display_name)}
       ret = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_titles!(ret)
       ret.map do |r|
         el = r.hash_subset(:id,:component_type,:title)
-        el.merge(:node => r[:node].hash_subset(:id,:display_name))
+        el.merge(:node => r[:node].hash_subset(:id,:display_name),:source => assembly_source)
       end
     end
 

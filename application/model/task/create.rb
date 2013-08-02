@@ -7,7 +7,8 @@ module DTK
 #TODO: will replace this with calls to Task::Template
 test_flag = true
 if test_flag
-  pp Task::Template::ConfigComponents.get_components(assembly,component_type)
+  task_template = Task::Template::ConfigComponents.generate(assembly,component_type)
+pp [:task_template,task_template]
   raise Error.new("got here")
 end
 

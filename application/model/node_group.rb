@@ -30,7 +30,7 @@ module DTK
       #strip away all uneeded cols
       ndx_cmps.each_pair{|cmp_id,cmp|ndx_cmps[cmp_id] = cmp.hash_subset(:id,:component_type,:title)}
 
-      ret = Array.new
+      ret = opts[:seed]||Array.new
       nodes.each do |node|
         #find components on the node group
         (node_to_ng[node[:id]]||{}).each_key do |ng_id|

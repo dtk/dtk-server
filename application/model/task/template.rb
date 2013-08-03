@@ -1,5 +1,23 @@
 module DTK; class Task
   class Template < Model
-    r8_nested_require('template','config_components')
+    r8_nested_require('template','temporal_constraint')
+    r8_nested_require('template','temporal_constraints')
+    r8_nested_require('template','action_list')
+
+    class ConfigComponents < self
+      def self.generate(assembly,component_type=nil)
+        ret = create_stub(assembly.model_handle(:task_template))
+        cmp_list = ActionList::ConfigComponents.get(assembly,component_type)
+        #indexed by [node_id][:cmp_id]
+        ndx_cmp_list = cmp_list.indexed
+        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,ndx_cmp_list)
+        pp [:temporal_constraints,temporal_constraints]
+        
+        #TODO: probably remove      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}
+        #stage indexes is of form [[2,3],[1],[4,5]]
+        indexes_in_stages = temporal_constraints.indexes_in_stages()
+        ret
+      end
+    end
   end
 end; end

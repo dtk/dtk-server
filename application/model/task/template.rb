@@ -7,10 +7,8 @@ module DTK; class Task
     class ConfigComponents < self
       def self.generate(assembly,component_type=nil)
         ret = create_stub(assembly.model_handle(:task_template))
-        cmp_list = ActionList::ConfigComponents.get(assembly,component_type)
-        #indexed by [node_id][:cmp_id]
-        ndx_cmp_list = cmp_list.indexed
-        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,ndx_cmp_list)
+        cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
+        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
         pp [:temporal_constraints,temporal_constraints]
         
         #TODO: probably remove      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}

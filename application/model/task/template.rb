@@ -10,10 +10,9 @@ module DTK; class Task
         cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
         pp [:temporal_constraints,temporal_constraints]
-        
-        #TODO: probably remove      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}
         #stage indexes is of form [[2,3],[1],[4,5]]
-        indexes_in_stages = temporal_constraints.indexes_in_stages()
+        indexes_in_stages = temporal_constraints.indexes_in_stages(cmp_action_list)
+        pp [:indexes_in_stages,indexes_in_stages]
         ret
       end
     end

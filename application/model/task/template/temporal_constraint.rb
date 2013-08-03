@@ -16,10 +16,10 @@ module DTK; class Task
       end
 
       def before_action_index()
-        @before_action[:action_index]
+        @before_action.index
       end
       def after_action_index()
-        @after_action[:action_index]
+        @after_action.index
       end
     end
   end

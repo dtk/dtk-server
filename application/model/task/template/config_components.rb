@@ -3,32 +3,44 @@ module DTK; class Task; class Template
     def self.generate(assembly,component_type=nil)
       ret = create_stub(assembly.model_handle(:task_template))
       cmp_list = ComponentList.get(assembly,component_type)
-      pp [:cmp_list,cmp_list]
       #indexed by [node_id][:cmp_id]
       ndx_cmp_list = cmp_list.indexed
-      cmp_order_constraints = TemporalConstraints.get(assembly,ndx_cmp_list)
-      pp "-----------------"
-      pp [:cmp_order_constraints,cmp_order_constraints]
-      pp "-----------------"
+      temporal_constraints = TemporalConstraints.get(assembly,ndx_cmp_list)
+      pp [:temporal_constraints,temporal_constraints]
+      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}
+      #stage indexes is of form [[2,3],[1],[4,5]]
+      indexes_in_stages = temporal_constraints.indexes_in_stages(index_hash)
+      pp [:stage_indexes,stage_indexes]
       ret
+    end
+   private
+    def compute_stage_indexes(partial_order,cmp_indexes)
     end
 
     class TemporalConstraint
       def initialize(type,before_cmp_list_el,after_cmp_list_el)
-        @type = type
+        @type = type #values: :port_link_order,:dynamic_attribute_rel,:intra_node
         @before_cmp_list_el = before_cmp_list_el
         @after_cmp_list_el = after_cmp_list_el
       end
+      attr_writer :index
       def self.create?(type,before_cmp_list_el,after_cmp_list_el)
         if before_cmp_list_el and after_cmp_list_el
           new(type,before_cmp_list_el,after_cmp_list_el)
         end
       end
+
+      def intra_node?()
+        @type == :intra_node
+      end
+      def inter_node?()
+        [:port_link_order,:dynamic_attribute_rel].include?(@type)
+      end
     end
 
-    module TemporalConstraints
+    class TemporalConstraints < Array
       def self.get(assembly,ndx_cmp_list)
-        ret = Array.new
+        ret = new()
         return ret if ndx_cmp_list.empty?
         #ordering constrainst come from teh following sources
         # dynamic attributes
@@ -38,9 +50,44 @@ module DTK; class Task; class Template
         get_from_dynamic_attribute_rel(ndx_cmp_list) +
         get_intra_node_rels(ndx_cmp_list)
       end
+
+      def indexes_in_stages(index_hash,carry_over=nil)
+        ret = carry_over||Array.new
+        if cmp_index_hash.empty?
+          return ret
+        end
+        indexes = index_hash.keys
+        foo = indexes - indexes_after_refs(indexes)
+        pp foo
+        ret
+      end
+
+      def +(temporal_contraints)
+        ret = self.class.new(self)
+        temporal_contraints.each{|a|ret << a}
+        ret
+      end
      private
-      def self.get_from_port_links(assembly,ndx_cmp_list)
+      def initialize(array=nil)
+        super()
+        array.each{|a|self << a} if array
+        @after_relation = nil
+      end
+
+      def compute_after_relation()
+      end
+
+      def indexes_after_refs(ref_indexes)
         ret = Array.new
+        ref_indexes.each do |ref_index|
+          indexes_that_are_after = select do |constraint|
+            constraint.before_index == ref_index
+          end.map{|constraint|constraint.after_index}
+        end
+      end
+
+      def self.get_from_port_links(assembly,ndx_cmp_list)
+        ret = new()
         ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
         return ret if ordered_port_links.empty?
         sp_hash = {
@@ -54,8 +101,11 @@ module DTK; class Task; class Template
           after_port = pl[DirField[pl[:temporal_order].to_sym][:after_field]]
           before_cmp_list_el = ndx_cmp_list.el(before_port[:node_node_id],before_port[:component_id])
           after_cmp_list_el = ndx_cmp_list.el(after_port[:node_node_id],after_port[:component_id])
-            TemporalConstraint.create?(:port_link_order,before_cmp_list_el,after_cmp_list_el)
-        end.compact
+          if constraint = TemporalConstraint.create?(:port_link_order,before_cmp_list_el,after_cmp_list_el)
+            ret << constraint
+          end
+        end
+        ret
       end
       DirField = {
         :before => {:before_field => :input_port,  :after_field => :output_port},  
@@ -63,7 +113,7 @@ module DTK; class Task; class Template
       }
 
       def self.get_from_dynamic_attribute_rel(ndx_cmp_list)
-        ret = Array.new
+        ret = new()
         attr_mh = ndx_cmp_list.model_handle(:attribute)
         filter = [:oneof,:component_component_id,ndx_cmp_list.component_ids]
         #shortcut if no dynamic attributes
@@ -80,14 +130,15 @@ module DTK; class Task; class Template
           guarded_attr = guard_rel[:guarded_attr]
           before_cmp_list_el = ndx_cmp_list.el(guard_attr[:node][:id],guard_attr[:component][:id])
           after_cmp_list_el = ndx_cmp_list.el(guarded_attr[:node][:id],guarded_attr[:component][:id])
-          if temporal_constraint = TemporalConstraint.create?(:dynamic_attribute_rel,before_cmp_list_el,after_cmp_list_el)
-            ret << temporal_constraint
+          if constraint = TemporalConstraint.create?(:dynamic_attribute_rel,before_cmp_list_el,after_cmp_list_el)
+            ret << constraint
           end
         end
         ret
       end
+
       def self.get_intra_node_rels(ndx_cmp_list)
-        ret = Array.new
+        ret = new()
         #TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from 
         #component templates, not component instances
         cmp_deps = Component::Instance.get_ndx_intra_node_rels(ndx_cmp_list.component_idhs())
@@ -100,7 +151,9 @@ module DTK; class Task; class Template
           ndx_cmp_list.els(cmp_id) do |node_id,after_cmp_list_el|
             dep_info[:component_dependencies].each do |before_cmp_type|
               if before_cmp_list_el = ndx_cmp_list.index_by_node_id_cmp_type(node_id,before_cmp_type)
-                ret << TemporalConstraint.create?(:intra_node,before_cmp_list_el,after_cmp_list_el)
+                if constraint = TemporalConstraint.create?(:intra_node,before_cmp_list_el,after_cmp_list_el)
+                  ret << constraint
+                end
               end
             end
           end
@@ -116,7 +169,9 @@ module DTK; class Task; class Template
           opts.merge!(:filter_proc => lambda{|el|el[:basic_type] == "smoketest"}) 
         end
         assembly_cmps = assembly.get_component_list(:seed => ComponentList.new())
-        NodeGroup.get_component_list(assembly_cmps.map{|r|r[:node]},:add_on_to => assembly_cmps)
+        ret = NodeGroup.get_component_list(assembly_cmps.map{|r|r[:node]},:add_on_to => assembly_cmps)
+        ret.each_with_index{|r,i|r[:element_id] = i}
+        ret
       end
 
       def indexed()

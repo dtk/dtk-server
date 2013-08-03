@@ -1,7 +1,7 @@
 module DTK; class Task; class Template
   class TemporalConstraint
     class ConfigComponent < self
-      class IntraNode
+      class IntraNode < self
         def intra_node?()
           true
         end
@@ -13,7 +13,7 @@ module DTK; class Task; class Template
         end
       end
 
-      class DynamicAttribute
+      class DynamicAttribute < self
         def inter_node?()
           true
         end

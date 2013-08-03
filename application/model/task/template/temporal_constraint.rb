@@ -1,4 +1,4 @@
-module DTK; class Task; 
+module DTK; class Task 
   class Template
     class TemporalConstraint
       r8_nested_require('temporal_constraint','config_component')

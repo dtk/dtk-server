@@ -91,9 +91,9 @@ module DTK; class Task; class Template
       def self.create_temporal_constraint?(type,before_cmp_list_el,after_cmp_list_el)
         klass = 
           case type 
-            when :intra_node then TCBase::IntraNode
-            when :port_link_order then TCBase::PortLinkOrder
-            when :dynamic_attribute then TCBase::DynamicAttribute
+            when :intra_node then TCBase()::IntraNode
+            when :port_link_order then TCBase()::PortLinkOrder
+            when :dynamic_attribute then TCBase()::DynamicAttribute
           end 
         klass.new(before_cmp_list_el,after_cmp_list_el) if klass
       end

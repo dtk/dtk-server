@@ -7,23 +7,20 @@ module DTK; class Task; class Template
       ndx_cmp_list = cmp_list.indexed
       temporal_constraints = TemporalConstraints.get(assembly,ndx_cmp_list)
       pp [:temporal_constraints,temporal_constraints]
-      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}
+
+#TODO: probably remove      index_hash = (0..cmp_list.size-1).inject(Hash.new){|h,i|h.merge(i => true)}
       #stage indexes is of form [[2,3],[1],[4,5]]
-      indexes_in_stages = temporal_constraints.indexes_in_stages(index_hash)
-      pp [:stage_indexes,stage_indexes]
+      indexes_in_stages = temporal_constraints.indexes_in_stages()
       ret
     end
    private
-    def compute_stage_indexes(partial_order,cmp_indexes)
-    end
-
     class TemporalConstraint
       def initialize(type,before_cmp_list_el,after_cmp_list_el)
         @type = type #values: :port_link_order,:dynamic_attribute_rel,:intra_node
         @before_cmp_list_el = before_cmp_list_el
         @after_cmp_list_el = after_cmp_list_el
       end
-      attr_writer :index
+
       def self.create?(type,before_cmp_list_el,after_cmp_list_el)
         if before_cmp_list_el and after_cmp_list_el
           new(type,before_cmp_list_el,after_cmp_list_el)
@@ -35,6 +32,13 @@ module DTK; class Task; class Template
       end
       def inter_node?()
         [:port_link_order,:dynamic_attribute_rel].include?(@type)
+      end
+
+      def before_element_id()
+        @before_cmp_list_el[:element_id]
+      end
+      def after_element_id()
+        @after_cmp_list_el[:element_id]
       end
     end
 
@@ -51,15 +55,9 @@ module DTK; class Task; class Template
         get_intra_node_rels(ndx_cmp_list)
       end
 
-      def indexes_in_stages(index_hash,carry_over=nil)
-        ret = carry_over||Array.new
-        if cmp_index_hash.empty?
-          return ret
-        end
-        indexes = index_hash.keys
-        foo = indexes - indexes_after_refs(indexes)
-        pp foo
-        ret
+      def indexes_in_stages()
+        before_index_hash = create_before_index_hash()
+        pp [:tsort_input,before_index_hash.tsort_form()]
       end
 
       def +(temporal_contraints)
@@ -72,18 +70,6 @@ module DTK; class Task; class Template
         super()
         array.each{|a|self << a} if array
         @after_relation = nil
-      end
-
-      def compute_after_relation()
-      end
-
-      def indexes_after_refs(ref_indexes)
-        ret = Array.new
-        ref_indexes.each do |ref_index|
-          indexes_that_are_after = select do |constraint|
-            constraint.before_index == ref_index
-          end.map{|constraint|constraint.after_index}
-        end
       end
 
       def self.get_from_port_links(assembly,ndx_cmp_list)
@@ -150,7 +136,7 @@ module DTK; class Task; class Template
         cmp_deps.each do |cmp_id,dep_info|
           ndx_cmp_list.els(cmp_id) do |node_id,after_cmp_list_el|
             dep_info[:component_dependencies].each do |before_cmp_type|
-              if before_cmp_list_el = ndx_cmp_list.index_by_node_id_cmp_type(node_id,before_cmp_type)
+              ndx_cmp_list.index_by_node_id_cmp_type(node_id,before_cmp_type).each do |before_cmp_list_el|
                 if constraint = TemporalConstraint.create?(:intra_node,before_cmp_list_el,after_cmp_list_el)
                   ret << constraint
                 end
@@ -159,6 +145,24 @@ module DTK; class Task; class Template
           end
         end
         ret
+      end
+
+      def create_before_index_hash()
+        ret = BeforeIndexHash.new()
+        each{|constraint|ret.add(constraint.after_element_id,constraint.before_element_id)}
+        ret
+      end
+
+      class BeforeIndexHash < Hash
+        def add(after_element_id,before_element_id)
+          (self[after_element_id] ||= Hash.new)[before_element_id] = true
+        end
+        
+        def tsort_form()
+          inject(Hash.new) do |h,(after_index,index_info)|
+            h.merge(after_index => index_info.keys)
+          end
+        end
       end
     end
 
@@ -215,7 +219,7 @@ module DTK; class Task; class Template
           end
         end
         def index_by_node_id_cmp_type(node_id,cmp_type)
-          (@ndx_by_node_id_cmp_type[node_id]||{})[cmp_type]
+          (@ndx_by_node_id_cmp_type[node_id]||{})[cmp_type]||[]
         end
 
         def model_handle(model_name)

@@ -3,6 +3,7 @@ module DTK; class Task
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
     r8_nested_require('template','action_list')
+    r8_nested_require('template','stage')
     r8_nested_require('template','stages')
 
     class ConfigComponents < self

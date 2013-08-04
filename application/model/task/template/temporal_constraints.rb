@@ -3,9 +3,11 @@ module DTK; class Task;
     class TemporalConstraints < Array
       r8_nested_require('temporal_constraints','config_components')
       def indexes_in_stages(action_list)
+        ret = Array.new
+        return ret if action_list.empty?
+
         before_index_hash = create_before_index_hash(action_list)
         pp [:tsort_input,before_index_hash.tsort_form()]
-        ret = Array.new
         done = false
         while not done do
           if before_index_hash.empty?
@@ -27,6 +29,12 @@ module DTK; class Task;
         temporal_contraints.each{|a|ret << a}
         ret
       end
+      def select(&body)
+        ret = self.class.new()
+        each{|r|ret << r if body.call(r)}
+        ret
+      end
+
      private
       def initialize(array=nil)
         super()

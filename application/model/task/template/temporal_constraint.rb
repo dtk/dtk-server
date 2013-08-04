@@ -9,10 +9,10 @@ module DTK; class Task
 
       #subclasses over ride
       def intra_node?()
-        nil
+        @before_action.node_id == @after_action.node_id
       end
       def inter_node?()
-        nil
+        @before_action.node_id != @after_action.node_id
       end
 
       def before_action_index()

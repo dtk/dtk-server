@@ -1,22 +1,27 @@
 module DTK; class Task 
   class Template
     class Stages < Array
-      def self.create_internode_stages(temporal_constraints,action_list)
-        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
-        new(action_list).create_internode_stages!(inter_node_constraints)
+      def self.create_stages(temporal_constraints,action_list)
+        new(action_list).create_stages!(temporal_constraints)
       end
 
       def print_form()
-        map{|stage|stage.print_form(@action_list)}
+        map{|stage|stage.print_form()}
       end
 
-      def create_internode_stages!(inter_node_constraints)
-        return if @action_list.empty?
+      def create_stages!(temporal_constraints)
+        ret = self
+        #outer loop creates inter node stages
+        return ret if @action_list.empty?
         unless empty?()
           raise Error.new("internode_stages has been created already")
         end
+        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
+
+        stage_factory = Stage::Factory.new(@action_list,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(@action_list)
         done = false
+        #before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
             done = true
@@ -26,10 +31,10 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            self << Stage.create_with_unordered_intra_node_stages(stage_action_indexes,@action_list)
+            self << stage_factory.create(stage_action_indexes)
           end
         end
-        self
+        ret
       end
 
      private

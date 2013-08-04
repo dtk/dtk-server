@@ -10,10 +10,9 @@ module DTK; class Task
         ret = create_stub(assembly.model_handle(:task_template))
         cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
-        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
-        #internode_stages is of form [[2,3],[1],[4,5]]
 
-        internode_stages = Stages.new(inter_node_constraints,cmp_action_list)
+        #internode_stages is of form [[2,3],[1],[4,5]]
+        internode_stages = Stages.create_internode_stages(temporal_constraints,cmp_action_list)
         pp [:internode_stages,internode_stages.print_form()]
         ret
       end

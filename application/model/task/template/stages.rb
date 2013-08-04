@@ -1,12 +1,22 @@
 module DTK; class Task 
   class Template
     class Stages < Array
-      def initialize(temporal_constraints,action_list)
-        @action_list = action_list
-        super()
-        return if action_list.empty?
-        before_index_hash = temporal_constraints.create_before_index_hash(action_list)
-        pp [:tsort_input,before_index_hash.tsort_form()]
+      #TODO: make inner part indeexd by node; put in all temporal constraints; tehn for each stage use intra node to sert
+      def self.create_internode_stages(temporal_constraints,action_list)
+        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
+        new(action_list).create_internode_stages!(inter_node_constraints)
+      end
+
+      def print_form()
+        map{|stage|stage.map{|i|@action_list[i].print_form()}}
+      end
+
+      def create_internode_stages!(inter_node_constraints)
+        return if @action_list.empty?
+        unless empty?()
+          raise Error.new("internode_stages has been created already")
+        end
+        before_index_hash = inter_node_constraints.create_before_index_hash(@action_list)
         done = false
         while not done do
           if before_index_hash.empty?
@@ -20,10 +30,12 @@ module DTK; class Task
             self << stage
           end
         end
+        self
       end
 
-      def print_form()
-        map{|stage|stage.map{|i|@action_list[i].print_form()}}
+     private
+      def initialize(action_list)
+        @action_list = action_list
       end
     end
   end

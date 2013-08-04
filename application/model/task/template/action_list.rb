@@ -32,6 +32,23 @@ module DTK; class Task;
       def respond_to?(name)
         @action.espond_to?(name) || super
       end
+
+      def print_form()
+        if @action.kind_of?(Component)
+          print_form_component_action(@action)
+        else
+          raise Error.new("Not yet implemented pretty print of action of type {#{@action.class.to_s})")
+        end
+      end
+     private
+      def print_form_component_action(cmp)
+        node_name = cmp[:node][:display_name]
+        cmp_name = Component.component_type_print_form(cmp[:component_type])
+        if title = cmp[:title]
+          cmp_name = ComponentTitle.print_form_with_title(cmp_name,title)
+        end
+        "#{node_name}/#{cmp_name}"
+      end
     end
   end
 end; end

@@ -11,8 +11,13 @@ module DTK; class Task
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
         pp [:temporal_constraints,temporal_constraints]
         #stage indexes is of form [[2,3],[1],[4,5]]
+
         indexes_in_stages = temporal_constraints.indexes_in_stages(cmp_action_list)
-        pp [:indexes_in_stages,indexes_in_stages]
+
+        pp_indexes_in_stages = indexes_in_stages.map do |stage|
+          stage.map{|i|cmp_action_list[i].print_form()}
+        end
+        pp [:indexes_in_stages,pp_indexes_in_stages]
         ret
       end
     end

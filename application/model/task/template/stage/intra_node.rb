@@ -10,6 +10,7 @@ module DTK; class Task; class Template
           #then order each execution block
           #TODO: right now just ordering within each execution block; want to expand to look for global inconsistencies
           exec_blocks = intra_node_unordered.break_into_execution_blocks()
+          exec_blocks.order_each_block(@intra_node_contraints)
         end
       end
       #although in an array, order does not make a difference
@@ -19,7 +20,7 @@ module DTK; class Task; class Template
           each do |action|
             (ndx_ret[execution_block_index(action)] ||= ExecutionBlock::Unordered.new) << action
           end
-          ret = ExecutionBlocks .new
+          ret = ExecutionBlocks.new
           ndx_ret.keys.sort.each{|exec_block_index|ret << ndx_ret[exec_block_index]}
           ret
         end
@@ -41,16 +42,41 @@ module DTK; class Task; class Template
       end
       
       class ExecutionBlocks < Array
+        def order_each_block(intra_node_contraints)
+          ret = self.class.new()
+          each do |unordered_exec_block|
+            ret << unordered_exec_block.order(intra_node_contraints)
+          end
+          ret
+        end
       end
       
       class ExecutionBlock < Array
         class Unordered < self
+          def order(intra_node_contraints,strawman_order=nil)
+            #short-cut, no ordering if singleton
+            if size < 2
+              return Ordered.new(self)
+            end
+            ret = Ordered.new()
+            before_index_hash = intra_node_contraints.create_before_index_hash(self)
+            pp [:intra_before_index_hash,before_index_hash]
+            #TODO: need to make sure that 
+            #TODO: stub
+            Ordered.new(self)
+          end
           def serialization_form()
             map{|a|a.serialization_form()}
           end
         end
         
         class Ordered < self
+          def initialize(array=nil)
+            super()
+            if array
+              array.each{|el|self << el}
+            end
+          end
         end
       end
     end

@@ -12,8 +12,8 @@ module DTK; class Task
         cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
 
-        stages = Stages.create_stages(temporal_constraints,cmp_action_list)
-        pp [:stages,stages.print_form()]
+        stages = Stages::Internode.create_stages(temporal_constraints,cmp_action_list)
+        pp [:stages,stages.serialization_form()]
         ret
       end
     end

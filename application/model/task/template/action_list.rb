@@ -37,8 +37,8 @@ module DTK; class Task;
         @action.respond_to?(name) || super
       end
 
-      def print_form()
-        apply(PrintForm)
+      def serialization_form()
+        apply(SerializationForm)
       end
      private
       def action_type()
@@ -57,7 +57,7 @@ module DTK; class Task;
           cmp[:node] && cmp[:node][:id]
         end
       end
-      class PrintForm
+      class SerializationForm
         def self.component_action(cmp)
           node_name = cmp[:node][:display_name]
           cmp_name = Component.component_type_print_form(cmp[:component_type])

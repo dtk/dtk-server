@@ -123,7 +123,8 @@ module XYZ
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          raise ErrorUsage::JSONParsing.new(e,file_path)
+          return ErrorUsage::JSONParsing.new(e,file_path)
+          # raise ErrorUsage::JSONParsing.new(e,file_path)
         end
       end
 

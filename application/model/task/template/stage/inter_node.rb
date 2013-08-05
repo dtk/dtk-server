@@ -1,12 +1,19 @@
 module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
+      #returns all actions generated
+      def add_subtasks!(internode_stage_task)
+        ret = Array.new
+        pp [:debug,serialization_form()]
+        ret
+      end
+
       class Factory
         def initialize(action_list,temporal_constraints)
           @action_list = action_list
           @temporal_constraints = temporal_constraints
         end
-        
+
         def create(stage_action_indexes)
           #first break each state into unordered list per node
           ret = InterNode.new()

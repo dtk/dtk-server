@@ -8,14 +8,13 @@ module DTK; class Task
     r8_nested_require('template','stages')
 
     class ConfigComponents < self
-      def self.generate(assembly,component_type=nil)
-        ret = create_stub(assembly.model_handle(:task_template))
+      #TODO: put in logic that looks at the assembly and sees if tehre is a an assembly template persisted with it
+      #in which case it will reify the serialized content to for a stages object and return it here
+      def self.get_or_generate_stages(assembly,component_type=nil)
         cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
 
-        stages = Stages::Internode.create_stages(temporal_constraints,cmp_action_list)
-        pp [:stages,stages.serialization_form()]
-        ret
+        Stages::Internode.create_stages(temporal_constraints,cmp_action_list)
       end
     end
   end

@@ -2,6 +2,8 @@ module DTK; class Task
   class Template
     class Stages 
       class Internode < Array
+        r8_nested_require('stages','create_task')
+        include CreateTaskMixin
         def self.create_stages(temporal_constraints,action_list)
           new(action_list).create_stages!(temporal_constraints)
         end

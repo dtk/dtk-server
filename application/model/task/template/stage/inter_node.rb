@@ -4,9 +4,27 @@ module DTK; class Task; class Template
       #returns all actions generated
       def add_subtasks!(internode_stage_task)
         ret = Array.new
-        pp [:debug,serialization_form()]
+        each_node_actions do |node_actions|
+          pp [:debug_node_actions,node_actions.serialization_form()]
+        end
         ret
       end
+      
+      def serialization_form()
+        ret = Array.new
+        return ret if empty?
+        each{|node_id,node_actions|ret << node_actions.serialization_form()}
+        ret
+      end
+      
+      def each_node_id(&block)
+        each_key{|node_id|block.call(node_id)}
+      end
+
+      def each_node_actions(&block)
+        each_value{|node_actions|block.call(node_actions)}
+      end
+      private :each_node_actions
 
       class Factory
         def initialize(action_list,temporal_constraints)
@@ -23,19 +41,12 @@ module DTK; class Task; class Template
           end
           
           intra_node_proc = Stage::IntraNode::Processor.new(@temporal_constraints)
-          ret.each_key{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
+          ret.each_node_id{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
           ret
         end
       end
       
-      def serialization_form()
-        ret = Array.new
-        return ret if empty?
-        each do |node_id,node_actions|
-          ret << node_actions.map{|a|a.serialization_form()}
-        end
-        ret
-      end
+
     end
   end
 end; end; end

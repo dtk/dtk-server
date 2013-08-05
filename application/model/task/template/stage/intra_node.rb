@@ -49,6 +49,10 @@ module DTK; class Task; class Template
           end
           ret
         end
+
+        def serialization_form()
+          map{|a|a.serialization_form()}
+        end
       end
       
       class ExecutionBlock < Array
@@ -64,7 +68,6 @@ module DTK; class Task; class Template
             end
             ret = Ordered.new()
             sorted_action_indexes = intra_node_contraints.ret_sorted_action_indexes(self)
-            pp [:sorted_action_indexes,sorted_action_indexes]
             ndx_action_list = inject(Hash.new){|h,a|h.merge(a.index => a)}
             sorted_action_indexes.each{|index|ret << ndx_action_list[index]}
             ret

@@ -38,10 +38,15 @@ module DTK
 
     module DSLMixin
       def update_model_from_dsl(module_branch,opts={})
-        set_dsl_parsed!(false)
-        component_module_refs = update_component_module_refs(module_branch,opts)
-        update_assemblies_from_dsl(module_branch,component_module_refs)
-        set_dsl_parsed!(true)
+        begin
+          set_dsl_parsed!(false)
+          component_module_refs = update_component_module_refs(module_branch,opts)
+          update_assemblies_from_dsl(module_branch,component_module_refs)
+          set_dsl_parsed!(true)
+        rescue Exception => e
+          return {:dsl_errors => "\nModule is imported with errors while parsing dsl: \n#{e}.\nYou are able to fix errors and import fixed module to server/remote.\n"} if (e.is_a?(ErrorUsage::JSONParsing) || ErrorUsage::JSONParse)
+          raise Error.new(e)
+        end
       end
 
      private

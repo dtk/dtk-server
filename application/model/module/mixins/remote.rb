@@ -114,7 +114,7 @@ module DTK
       #repo_client.get_remote_module_components(remote_params[:module_name], component_type(), remote_params[:module_version], remote_params[:module_namespace])
       #return 1
 
-      repo, version, module_and_branch_info, commit_sha, module_obj = nil, nil, nil, nil, nil
+      repo, version, module_and_branch_info, commit_sha, module_obj, parsed = nil, nil, nil, nil, nil, nil
 
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
@@ -156,10 +156,12 @@ module DTK
         module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
-        module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+        parsed = module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
       end
 
       response = module_repo_info(repo,module_and_branch_info,version)
+      response[:dsl_errors] = parsed[:dsl_errors] if parsed
+
       response
     end
 

@@ -324,7 +324,7 @@ module DTK
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
       sp_hash = {
-        :cols => [:id, :display_name, include_any_detail && :module_branches_with_repos].compact,
+        :cols => [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact,
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
@@ -465,10 +465,15 @@ module DTK
 
     #returns hash with keys :module_idh :module_branch_idh
     def initialize_module(project,module_name,config_agent_type,version=nil)
-      project_idh = project.id_handle()
-      if module_exists?(project_idh,module_name)
+      is_parsed     = false
+      project_idh   = project.id_handle()
+      module_exists = module_exists?(project_idh,module_name)
+      is_parsed     = module_exists[:dsl_parsed] if module_exists
+
+      if is_parsed
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
+
       ws_branch = ModuleBranch.workspace_branch_name(project,version)
       create_opts = {
         :create_branch => ws_branch,
@@ -606,7 +611,7 @@ module DTK
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
       sp_hash = {
-        :cols => [:id,:display_name],
+        :cols => [:id,:display_name, :dsl_parsed],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }

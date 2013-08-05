@@ -2,7 +2,6 @@
 r8_nested_require('../assembly','import_export_common')
 module DTK
   class ServiceModule < Model
-    r8_nested_require('service','component_module_ref') 
     r8_nested_require('service','component_module_refs') 
     r8_nested_require('service','dsl')
 
@@ -228,8 +227,10 @@ module DTK
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch)
+      parsed = update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
+
+      return parsed
     end
 
    private

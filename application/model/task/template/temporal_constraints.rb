@@ -14,9 +14,21 @@ module DTK; class Task
         ret
       end
 
+      def ret_sorted_action_indexes(action_list)
+        before_index_hash = create_before_index_hash(action_list)
+        before_index_hash.tsort_form.tsort()
+      end
+      #only uses a constraint if both members belong to action_list
       def create_before_index_hash(action_list)
-        ret = BeforeIndexHash.new(action_list.map{|a|a.index})
-        each{|constraint|ret.add(constraint.after_action_index,constraint.before_action_index)}
+        action_indexes =  action_list.map{|a|a.index}
+        ret = BeforeIndexHash.new(action_indexes)
+        each do |constraint|
+          after_action_index = constraint.after_action_index
+          before_action_index = constraint.before_action_index 
+          if action_indexes.include?(after_action_index) and action_indexes.include?(before_action_index)
+            ret.add(after_action_index,before_action_index)
+          end
+        end
         ret
       end
       
@@ -38,7 +50,7 @@ module DTK; class Task
         end
         
         def tsort_form()
-          inject(Hash.new) do |h,(after_index,index_info)|
+          inject(TSortHash.new) do |h,(after_index,index_info)|
             h.merge(after_index => index_info.keys)
           end
         end

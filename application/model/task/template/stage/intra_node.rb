@@ -52,6 +52,10 @@ module DTK; class Task; class Template
       end
       
       class ExecutionBlock < Array
+        def serialization_form()
+          map{|a|a.serialization_form()}
+        end
+
         class Unordered < self
           def order(intra_node_contraints,strawman_order=nil)
             #short-cut, no ordering if singleton
@@ -59,14 +63,11 @@ module DTK; class Task; class Template
               return Ordered.new(self)
             end
             ret = Ordered.new()
-            before_index_hash = intra_node_contraints.create_before_index_hash(self)
-            pp [:intra_before_index_hash,before_index_hash]
-            #TODO: need to make sure that 
-            #TODO: stub
-            Ordered.new(self)
-          end
-          def serialization_form()
-            map{|a|a.serialization_form()}
+            sorted_action_indexes = intra_node_contraints.ret_sorted_action_indexes(self)
+            pp [:sorted_action_indexes,sorted_action_indexes]
+            ndx_action_list = inject(Hash.new){|h,a|h.merge(a.index => a)}
+            sorted_action_indexes.each{|index|ret << ndx_action_list[index]}
+            ret
           end
         end
         

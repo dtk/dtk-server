@@ -14,9 +14,19 @@ module DTK; class Task; class Template
         end
         private
         def execution_block_index(action)
-          #TODO: stub
-          0
+          unless source_type = action.source_type
+            raise Error.new("Cannot find source type for action (#{action.inspect})")
+          end
+          unless ret = ExecBlockOrder[source_type]
+            raise Error.new("Not yet implemented, finding execution block order for action with source of type (#{source_type})")
+          end
+          ret
         end
+        ExecBlockOrder = {
+          :node_group => 0,
+          :node => 0,
+          :assembly => 1
+        }
       end
       
       class ExecutionBlocks < Array

@@ -10,7 +10,7 @@ module DTK; class  Assembly
     ### standard get methods
     def get_component_list(opts={})
       get_field?(:display_name)
-      assembly_source = {:type => "asssembly", :object => hash_subset(:id,:display_name)}
+      assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_titles!(rows)
       ret = opts[:add_on_to]||opts[:seed]||Array.new

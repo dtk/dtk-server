@@ -5,10 +5,8 @@ module DTK; class ComponentModule
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-      parsed = create_needed_objects_and_dsl?(repo,version)
+      create_needed_objects_and_dsl?(repo,version)
       module_branch.set_sha(commit_sha)
-
-      return parsed
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
@@ -98,15 +96,12 @@ module DTK; class ComponentModule
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       dsl_created_info = Hash.new()
-      dsl_parsed_info  = Hash.new()
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
+        parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-
-      dsl_errors = dsl_parsed_info[:dsl_errors] if dsl_parsed_info
-      {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :dsl_errors => dsl_errors}
+      {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
     end
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
@@ -114,43 +109,35 @@ module DTK; class ComponentModule
       #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
       dsl_created_info = Hash.new
-      dsl_parsed_info  = Hash.new
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
-          dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
+          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-
-      dsl_errors = dsl_parsed_info[:dsl_errors] if dsl_parsed_info
-      {:dsl_created_info => dsl_created_info, :dsl_errors => dsl_errors}
+      {:dsl_created_info => dsl_created_info}
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
-      begin
-        aug_component_templates = get_aug_associated_component_templates()
-        Transaction do
-          ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
-          #TODO: have ComponentDSL.parse_and_update_model return if any deletes
-          #below is teh conservative thing to do if dont know if any deletes
-          any_deletes = true
-          if opts[:no_deletes_performed]
-            any_deletes = false
-          end
-          if any_deletes
-            raise_errors_if_dangling_cmp_refs(aug_component_templates)
-          end
+      aug_component_templates = get_aug_associated_component_templates()
+      Transaction do
+        ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
+        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
+        #below is teh conservative thing to do if dont know if any deletes
+        any_deletes = true
+        if opts[:no_deletes_performed]
+          any_deletes = false
         end
-        set_dsl_parsed!(true)
-      rescue Exception => e
-        return {:dsl_errors => "\nModule is imported with errors while parsing dsl: \n#{e}.\nYou are able to fix errors and import fixed module to server/remote.\n"} if (e.is_a?(ErrorUsage::JSONParsing) || ErrorUsage::JSONParse)
-        raise Error.new(e)
+        if any_deletes
+          raise_errors_if_dangling_cmp_refs(aug_component_templates)
+        end
       end
+      set_dsl_parsed!(true)
     end
 
     def raise_errors_if_dangling_cmp_refs(aug_component_templates)

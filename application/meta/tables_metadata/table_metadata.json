@@ -138,15 +138,13 @@
       "id",
       "name",
       "version(s)",
-      "linked_remote(s)",
-      "dsl_parsed"
+      "linked_remote(s)"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "version(s)": "versions",
-      "linked_remote(s)": "linked_remotes",
-      "dsl_parsed": "dsl_parsed"
+      "linked_remote(s)": "linked_remotes"
     }
   },
   "module_diff": {

@@ -15,10 +15,8 @@ module DTK; class Task; class Template
             (ret[action.node_id] ||= IntraNode::Unordered.new()) << action
           end
           
-          #next break each unordered node into execution blocks
-          ret.each_key{|node_id|ret[node_id] = ret[node_id].break_into_execution_blocks()}
-          
-          #order each execution block
+          intra_node_proc = Stage::IntraNode::Processor.new(@temporal_constraints)
+          ret.each_key{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
           ret
         end
       end

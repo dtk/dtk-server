@@ -1,6 +1,17 @@
 module DTK; class Task; class Template
   class Stage 
     class IntraNode
+      class Processor
+        def initialize(temporal_constraints)
+          @intra_node_contraints = temporal_constraints.select{|r|r.intra_node?()}
+        end
+        def process(intra_node_unordered)
+          #first break unordered node into execution blocks          
+          #then order each execution block
+          #TODO: right now just ordering within each execution block; want to expand to look for global inconsistencies
+          exec_blocks = intra_node_unordered.break_into_execution_blocks()
+        end
+      end
       #although in an array, order does not make a difference
       class Unordered < Array
         def break_into_execution_blocks()

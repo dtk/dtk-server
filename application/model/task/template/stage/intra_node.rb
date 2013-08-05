@@ -42,6 +42,11 @@ module DTK; class Task; class Template
       end
       
       class ExecutionBlocks < Array
+        def add_subtask!(parent_task)
+          pp [:debug_exec_block,serialization_form()]
+          nil
+        end
+
         def order_each_block(intra_node_contraints)
           ret = self.class.new()
           each do |unordered_exec_block|
@@ -72,6 +77,7 @@ module DTK; class Task; class Template
             sorted_action_indexes.each{|index|ret << ndx_action_list[index]}
             ret
           end
+          
         end
         
         class Ordered < self
@@ -81,6 +87,7 @@ module DTK; class Task; class Template
               array.each{|el|self << el}
             end
           end
+          
         end
       end
     end

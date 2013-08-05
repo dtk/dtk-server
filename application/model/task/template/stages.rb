@@ -12,6 +12,9 @@ module DTK; class Task
             internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{stage_index}", :temporal_order => "concurrent")
             all_actions += internode_stage.add_subtasks!(internode_stage_task)
           end
+          attr_mh = task_mh.createMH(:attribute)
+          Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
+          ret
         end
 =begin
 each do |sc|
@@ -25,9 +28,7 @@ each do |sc|
             end
             raise ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
           end
-          attr_mh = task_mh.createMH(:attribute)
-          Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
-          ret
+
         end
 =end
 

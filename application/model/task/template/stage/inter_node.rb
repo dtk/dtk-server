@@ -2,10 +2,12 @@ module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
       #returns all actions generated
-      def add_subtasks!(internode_stage_task)
+      def add_subtasks!(parent_task)
         ret = Array.new
         each_node_actions do |node_actions|
-          pp [:debug_node_actions,node_actions.serialization_form()]
+          if action = node_actions.add_subtask!(parent_task)
+            ret << action
+          end
         end
         ret
       end

@@ -9,6 +9,7 @@ test_flag = true
 if test_flag
   task_template = Task::Template::ConfigComponents.generate(assembly,component_type)
 pp [:task_template,task_template]
+  #task_template should could back with a reified object and then taht is used to create the config nodes sub task
   raise Error.new("got here")
 end
 

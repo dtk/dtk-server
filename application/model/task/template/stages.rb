@@ -8,8 +8,10 @@ module DTK; class Task
           all_actions = Array.new
           each_with_index do |internode_stage,internode_stage_index|
             internode_stage_index = internode_stage_index+1
+            #TODO: if only one node then dont need the outside 'concurrent wrapper'
             internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{internode_stage_index.to_s}", :temporal_order => "concurrent")
             all_actions += internode_stage.add_subtasks!(internode_stage_task,internode_stage_index)
+            ret << internode_stage_task
           end
           attr_mh = task_mh.createMH(:attribute)
           Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)

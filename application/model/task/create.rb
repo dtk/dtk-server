@@ -23,7 +23,6 @@ module DTK
       if test_flag
         stages = Task::Template::ConfigComponents.get_or_generate_stages(assembly,component_type)
         stages_config_nodes_task = stages.create_subtasks(task_mh,assembly.id_handle())
-        
       else
         #replaceing this part with above
         assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)

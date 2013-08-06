@@ -44,7 +44,9 @@ module DTK; class Task; class Template
       class ExecutionBlocks < Array
         def add_subtask!(parent_task)
           pp [:debug_exec_block,serialization_form()]
-          nil
+          ret = Task::Action::ConfigNode.create_from_exec_block(self,assembly_idh)
+          ret[:node][:inter_node_stage] = stage_index
+          ret
         end
 
         def order_each_block(intra_node_contraints)

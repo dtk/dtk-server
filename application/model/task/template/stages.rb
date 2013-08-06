@@ -16,23 +16,6 @@ module DTK; class Task
           Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
           ret
         end
-=begin
-each do |sc|
-              executable_action, error_msg = get_executable_action_from_state_change(sc, assembly_idh, stage_index)
-              unless executable_action
-                all_errors << error_msg
-                next
-              end
-              all_actions << executable_action
-              ret.add_subtask_from_hash(:executable_action => executable_action)
-            end
-            raise ErrorUsage.new("\n" + all_errors.join("\n")) unless all_errors.empty?
-          end
-
-        end
-=end
-
-        
 
         def self.create_stages(temporal_constraints,action_list)
           new(action_list).create_stages!(temporal_constraints)

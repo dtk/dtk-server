@@ -19,7 +19,7 @@ module DTK
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
-      test_flag = true
+      test_flag = (R8::Config[:task]||{})[:use_task_templates]
       if test_flag
         stages = Task::Template::ConfigComponents.get_or_generate_stages(assembly,component_type)
         stages_config_nodes_task = stages.create_subtasks(task_mh,assembly.id_handle())

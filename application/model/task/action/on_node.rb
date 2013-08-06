@@ -8,7 +8,7 @@ module DTK; class Task
       def self.create_from_state_change(state_change,assembly_idh=nil)
         new(:state_change,state_change,nil,assembly_idh)
       end
-      def self.create_from_hash(task_action_type,hash,task_idh)
+      def self.create_from_hash(task_action_type,hash,task_idh=nil)
         case task_action_type
           when "CreateNode"  then CreateNode.new(:hash,hash,task_idh)
           when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
@@ -242,6 +242,10 @@ module DTK; class Task
     end
 
     class ConfigNode < OnNode
+      def self.create_from_execution_blocks(exec_blocks)
+        new(:execution_blocks,exec_blocks)
+      end
+
       def self.status(object,opts)
         ret = PrettyPrintHash.new
         ret[:node] = node_status(object,opts)
@@ -386,6 +390,7 @@ module DTK; class Task
       end
 
      private
+      #argument hash is a minsomer; this can be difefernt forms
       def initialize(type,hash,task_idh=nil,assembly_idh=nil)
          hash =
           case type
@@ -404,6 +409,17 @@ module DTK; class Task
               component_actions.each_with_index{|ca,i|component_actions[i] = OnComponent.create_from_hash(ca,task_idh)}
             end
             hash
+           when :execution_blocks
+            h = {
+              :node => hash.node(),
+              :state_change_types => ["converge_component"],
+              :config_agent_type => hash.config_agent_type(),
+              :component_actions => hash.components().map{|ca|OnComponent.create_from_hash(ca)}
+            }
+            if assembly_idh = hash.assembly_idh()
+              h.merge!(:assembly_idh => assembly_idh)
+            end
+            h
            else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end

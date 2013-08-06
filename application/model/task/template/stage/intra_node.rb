@@ -44,7 +44,7 @@ module DTK; class Task; class Template
       class ExecutionBlocks < Array
         def add_subtask!(parent_task)
           pp [:debug_exec_block,serialization_form()]
-          ret = Task::Action::ConfigNode.create_from_exec_block(self,assembly_idh)
+          ret = Task::Action::ConfigNode.create_from_execution_blocks(self)
           ret[:node][:inter_node_stage] = stage_index
           ret
         end
@@ -57,12 +57,42 @@ module DTK; class Task; class Template
           ret
         end
 
+        def node()
+          #all the elements have same node so can just pick first
+          first && first.node()
+        end
+
+        def config_agent_type()
+          #TODO: for now all  elements have same config_agent_type, so can just pick first
+          first && first.config_agent_type()
+        end
+
+        def components()
+          ret = Array.new
+          each{|exec_block|ret += exec_block.components()}
+          ret
+        end
+
         def serialization_form()
           map{|a|a.serialization_form()}
         end
       end
       
       class ExecutionBlock < Array
+        def node()
+          #all the elements have same node so can just pick first
+          first && first[:node]
+        end
+
+        def config_agent_type()
+          #TODO: for now all  elements have same config_agent_type, so can just pick first
+          first && first.config_agent_type()
+        end
+
+        def components()
+          map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
+        end
+
         def serialization_form()
           map{|a|a.serialization_form()}
         end
@@ -79,7 +109,6 @@ module DTK; class Task; class Template
             sorted_action_indexes.each{|index|ret << ndx_action_list[index]}
             ret
           end
-          
         end
         
         class Ordered < self

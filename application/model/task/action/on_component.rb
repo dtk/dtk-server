@@ -25,8 +25,15 @@ module DTK; class Task
         end
         ret
       end
-      def self.create_from_hash(hash,task_idh)
-        hash[:component] &&= Component.create_from_model_handle(hash[:component],task_idh.createMH(:component))
+      def self.create_from_hash(hash,task_idh=nil)
+        if component = hash[:component]
+          unless component.kind_of?(Component)
+            unless task_idh
+              raise Error.new("If hash[:component] is not of type Component then task_idh must be supplied")
+            end
+            hash[:component] = Component.create_from_model_handle(component,task_idh.createMH(:component))
+          end
+        end
         if attrs = hash[:attributes]
           attr_mh = task_idh.createMH(:attribute)
           attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}

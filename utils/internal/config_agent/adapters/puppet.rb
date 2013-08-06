@@ -14,7 +14,7 @@ module XYZ
         msg_content = {
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest => puppet_manifests, 
-          :inter_node_stage => config_node[:node][:inter_node_stage]
+          :inter_node_stage => config_node.inter_node_stage()
         }
         return msg_content
       end

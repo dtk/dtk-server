@@ -244,19 +244,32 @@ module DTK; class Task
     class ConfigNode < OnNode
       def self.create_from_execution_blocks(exec_blocks)
         ret = new(:execution_blocks,exec_blocks)
-        ret.infra_node_stages = (exec_blocks.infra_node_stages())
+        ret.intra_node_stages = (exec_blocks.intra_node_stages())
         ret
       end
 
 
-      def infra_node_stages=(infra_node_stages)
+      def intra_node_stages=(intra_node_stages)
         unless node = self[:node]
-          raise Error.new("The method infra_node_stages= shoudl not be called if node is not set")
+          raise Error.new("The method intra_node_stages= shoudl not be called if node is not set")
         end
-        self[:node][:infra_node_stages] = infra_node_stages
+        self[:node][:intra_node_stages] = intra_node_stages
       end
-      def infra_node_stages()
-        (self[:node]||{})[:infra_node_stages]
+      def intra_node_stages()
+        (self[:node]||{})[:intra_node_stages]
+      end
+      def set_inter_node_stage(internode_stage_index)
+        unless node = self[:node]
+          raise Error.new("The method inter_node_stage shoudl not be called if node is not set")
+        end
+        self[:node][:inter_node_stage] = internode_stage_index.to_s
+      end
+      def inter_node_stage()
+        (self[:node]||{})[:inter_node_stage]
+      end
+      def is_first_inter_node_stage?()
+        inter_node_stage = inter_node_stage()
+        inter_node_stage.nil? or inter_node_stage == "1"
       end
 
       def self.status(object,opts)
@@ -427,7 +440,7 @@ module DTK; class Task
               :node => hash.node(),
               :state_change_types => ["converge_component"],
               :config_agent_type => hash.config_agent_type(),
-              :component_actions => hash.components().map{|ca|OnComponent.create_from_hash(:component => ca)}
+              :component_actions => hash.components().map{|ca|OnComponent.create_from_hash(:component => ca,:attributes=>[])}
             }
             if assembly_idh = hash.assembly_idh?()
               h.merge!(:assembly_idh => assembly_idh)

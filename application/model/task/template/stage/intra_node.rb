@@ -42,10 +42,10 @@ module DTK; class Task; class Template
       end
       
       class ExecutionBlocks < Array
-        def add_subtask!(parent_task)
+        def add_subtask!(parent_task,internode_stage_index)
           pp [:debug_exec_block,serialization_form()]
           ret = Task::Action::ConfigNode.create_from_execution_blocks(self)
-          ret[:node][:inter_node_stage] = stage_index
+          ret.set_inter_node_stage(internode_stage_index)
           ret
         end
 
@@ -57,11 +57,11 @@ module DTK; class Task; class Template
           ret
         end
 
-        def infra_node_stages()
+        def intra_node_stages()
           ret = Array.new
           return ret if empty?()
           if find{|eb|!eb.kind_of?(ExecutionBlock::Ordered)}
-            raise Error.new("The method ExecutionBlocks#infra_node_stages can only be caleld if all its elements are orederd")
+            raise Error.new("The method ExecutionBlocks#intra_node_stages can only be caleld if all its elements are orederd")
           end
           map{|eb|eb.components.map{|cmp|cmp[:id]}}
         end

@@ -35,8 +35,10 @@ module DTK; class Task
           end
         end
         if attrs = hash[:attributes]
-          attr_mh = task_idh.createMH(:attribute)
-          attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}
+          unless attrs.empty?
+            attr_mh = task_idh.createMH(:attribute)
+            attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}
+          end
         end
         new(hash)
       end

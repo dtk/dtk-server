@@ -7,9 +7,9 @@ module DTK; class Task
           return ret if empty?()
           all_actions = Array.new
           each_with_index do |internode_stage,internode_stage_index|
-            stage_index = (internode_stage_index+1).to_s
-            internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{stage_index}", :temporal_order => "concurrent")
-            all_actions += internode_stage.add_subtasks!(internode_stage_task)
+            internode_stage_index = internode_stage_index+1
+            internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{internode_stage_index.to_s}", :temporal_order => "concurrent")
+            all_actions += internode_stage.add_subtasks!(internode_stage_task,internode_stage_index)
           end
           attr_mh = task_mh.createMH(:attribute)
           Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)

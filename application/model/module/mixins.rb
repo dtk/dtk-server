@@ -358,7 +358,8 @@ module DTK
           
           if diff
             repo = r[:repo]
-            is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch)
+            linked_remote = repo.linked_remote?(remote_rep)
+            is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch) if linked_remote
           end
                     
           repo_remotes_added = false

@@ -11,7 +11,7 @@ module DTK
       node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group),node_filter)
       node_group_ids = node_to_ng.values.map{|r|r.keys}.flatten.uniq
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_list],
+        :cols => Node::Instance.component_list_fields() + [:component_list],
         :filter => [:oneof, :id, node_group_ids + nodes.map{|n|n[:id]}]
       }
       rows = get_objs(nodes.first.model_handle(),sp_hash)
@@ -27,8 +27,6 @@ module DTK
       end
       #add titles to components that are non singletons
       Component::Instance.add_titles!(ndx_cmps.values)
-      #strip away all uneeded cols
-      ndx_cmps.each_pair{|cmp_id,cmp|ndx_cmps[cmp_id] = cmp.hash_subset(:id,:component_type,:title)}
 
       nodes.each do |node|
         #find components on the node group

@@ -218,7 +218,7 @@ lambda__instance_nodes_components_assembly_template =
     },
     :instance_nodes_and_cmps=> lambda__instance_nodes_components_assembly_template.call(Node.common_columns,Component.common_columns),
     :instance_nodes_and_cmps_summary=> lambda__instance_nodes_components_assembly_template.call([:id,:display_name,:os_type,:admin_op_status,:external_ref],[:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]),
-    :instance_component_list=> lambda__instance_nodes_and_components.call([:id,:group_id,:display_name],Component::Instance.component_list_fields()),
+    :instance_component_list=> lambda__instance_nodes_and_components.call(Node::Instance.component_list_fields(),Component::Instance.component_list_fields()),
     :instance_nested_component_attributes=> {
       :type=>:json,
       :hidden=>true,

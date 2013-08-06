@@ -33,6 +33,10 @@ module XYZ
     end
 
     class Instance < self
+     def self.component_list_fields()
+       [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
+     end
+
       def self.get(mh,opts={})
         sp_hash = {
           :cols => ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,

@@ -2,7 +2,6 @@ module DTK; class Task
   class Template
     class Stages 
       class Internode < Array
-
         def create_subtasks(task_mh,assembly_idh)
           ret = Array.new
           return ret if empty?()

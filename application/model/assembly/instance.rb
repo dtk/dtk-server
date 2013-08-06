@@ -14,10 +14,7 @@ module DTK; class  Assembly
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
       Component::Instance.add_titles!(rows)
       ret = opts[:add_on_to]||opts[:seed]||Array.new
-      rows.each do |r|
-        el = r.hash_subset(:id,:component_type,:title)
-        ret << el.merge(:node => r[:node].hash_subset(:id,:display_name),:source => assembly_source)
-      end
+      rows.each{|r|ret << r.merge(:source => assembly_source)}
       ret
     end
 

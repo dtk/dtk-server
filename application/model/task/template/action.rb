@@ -48,6 +48,13 @@ module DTK; class Task; class Template
         ret = (component()[:source]||{})[:type]
         ret && ret.to_sym
       end
+
+      def assembly_idh?()
+        if source_type() == :assembly
+          component()[:source][:object].id_handle()
+        end
+      end
+
      private
       def component()
         @action

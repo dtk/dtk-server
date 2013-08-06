@@ -57,16 +57,31 @@ module DTK; class Task; class Template
           ret
         end
 
+        def infra_node_stages()
+          ret = Array.new
+          return ret if empty?()
+          if find{|eb|!eb.kind_of?(ExecutionBlock::Ordered)}
+            raise Error.new("The method ExecutionBlocks#infra_node_stages can only be caleld if all its elements are orederd")
+          end
+          map{|eb|eb.components.map{|cmp|cmp[:id]}}
+        end
+
         def node()
           #all the elements have same node so can just pick first
           first && first.node()
         end
-
         def config_agent_type()
           #TODO: for now all  elements have same config_agent_type, so can just pick first
           first && first.config_agent_type()
         end
-
+        def assembly_idh?()
+          #if any elements asseociated with assembly, all wil be assocaited with same one
+          each do |eb|
+            if ret = eb.assembly_idh?()
+              return ret
+            end
+          end
+        end
         def components()
           ret = Array.new
           each{|exec_block|ret += exec_block.components()}
@@ -83,12 +98,16 @@ module DTK; class Task; class Template
           #all the elements have same node so can just pick first
           first && first[:node]
         end
-
         def config_agent_type()
           #TODO: for now all  elements have same config_agent_type, so can just pick first
           first && first.config_agent_type()
         end
-
+        def assembly_idh?()
+          #if any elements asseociated with assembly, all wil be assocaited with same one
+          if matched_action = find{|a|a.source_type() == :assembly}
+            matched_action.assembly_idh?()
+          end
+        end
         def components()
           map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
         end

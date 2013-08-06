@@ -243,7 +243,20 @@ module DTK; class Task
 
     class ConfigNode < OnNode
       def self.create_from_execution_blocks(exec_blocks)
-        new(:execution_blocks,exec_blocks)
+        ret = new(:execution_blocks,exec_blocks)
+        ret.infra_node_stages = (exec_blocks.infra_node_stages())
+        ret
+      end
+
+
+      def infra_node_stages=(infra_node_stages)
+        unless node = self[:node]
+          raise Error.new("The method infra_node_stages= shoudl not be called if node is not set")
+        end
+        self[:node][:infra_node_stages] = infra_node_stages
+      end
+      def infra_node_stages()
+        (self[:node]||{})[:infra_node_stages]
       end
 
       def self.status(object,opts)
@@ -392,7 +405,7 @@ module DTK; class Task
      private
       #argument hash is a minsomer; this can be difefernt forms
       def initialize(type,hash,task_idh=nil,assembly_idh=nil)
-         hash =
+         processed_hash =
           case type
            when :state_change
             sample_state_change = hash.first
@@ -414,16 +427,16 @@ module DTK; class Task
               :node => hash.node(),
               :state_change_types => ["converge_component"],
               :config_agent_type => hash.config_agent_type(),
-              :component_actions => hash.components().map{|ca|OnComponent.create_from_hash(ca)}
+              :component_actions => hash.components().map{|ca|OnComponent.create_from_hash(:component => ca)}
             }
-            if assembly_idh = hash.assembly_idh()
+            if assembly_idh = hash.assembly_idh?()
               h.merge!(:assembly_idh => assembly_idh)
             end
             h
            else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
-        super
+        super(type,processed_hash,task_idh,assembly_idh)
       end
     end
   end

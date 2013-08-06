@@ -42,7 +42,7 @@ module DTK
         component_module_refs = update_component_module_refs(module_branch,opts)
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
         
-        set_dsl_parsed!(true) unless (parsed.is_a?(ErrorUsage::JSONParsing) || parsed.is_a?(ErrorUsage::JSONParsing))
+        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::JSONParsing)
         parsed
       end
 
@@ -82,7 +82,7 @@ module DTK
             json_content = RepoManager.get_file_content(meta_file,module_branch)
             hash_content = Aux.json_parse(json_content,meta_file)
 
-            return hash_content if(hash_content.is_a?(ErrorUsage::JSONParsing) || hash_content.is_a?(ErrorUsage::JSONParsing))
+            return hash_content if hash_content.is_a?(ErrorUsage::JSONParsing)
             assembly_import_helper.process(module_name,hash_content)
           end
         end
@@ -95,7 +95,7 @@ module DTK
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = Aux.json_parse(json_content,meta_file)
           
-          return hash_content if(hash_content.is_a?(ErrorUsage::JSONParsing) || hash_content.is_a?(ErrorUsage::JSONParsing))
+          return hash_content if hash_content.is_a?(ErrorUsage::JSONParsing)
           ServiceAddOn.import(project_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
         end
       end

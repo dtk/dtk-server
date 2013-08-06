@@ -471,7 +471,7 @@ module DTK
       project_idh = project.id_handle()
       module_exists = module_exists?(project_idh,module_name)
       
-      is_parsed = module_exists[:dsl_parsed]
+      is_parsed = module_exists[:dsl_parsed] if module_exists
       if is_parsed
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end

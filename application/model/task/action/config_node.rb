@@ -171,40 +171,42 @@ module DTK; class Task
      private
       
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
-         hash =
-          case type
-           when :state_change
+        intra_node_stages = hash = nil
+        case type
+          when :state_change
             sc = object
             sample_state_change = sc.first
             node = sample_state_change[:node]
             component_actions,intra_node_stages = OnComponent.order_and_group_by_component(sc)
-            set_intra_node_stages!(intra_node_stages)
-            h = {
+            hash = {
               :node => node,
               :state_change_types => sc.map{|sc|sc[:type]}.uniq,
               :config_agent_type => sc.first.on_node_config_agent_type,
               :component_actions => component_actions
             }
-            assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
-           when :hash
+            hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
+          when :hash
             if component_actions = object[:component_actions]
               component_actions.each_with_index{|ca,i|component_actions[i] = OnComponent.create_from_hash(ca,task_idh)}
             end
-            object
-           when :execution_blocks
+            hash = object
+          when :execution_blocks
             exec_blocks = object
-            h = {
+            config_agent_type = exec_blocks.config_agent_type()
+            hash = {
               :node => exec_blocks.node(),
               :state_change_types => ["converge_component"],
-              :config_agent_type => exec_blocks.config_agent_type(),
-              :component_actions => exec_blocks.components().map{|ca|OnComponent.create_from_hash(:component => ca,:attributes=>[])}
+              :config_agent_type => config_agent_type,
+              :component_actions => OnComponent.create_list_from_execution_blocks(exec_blocks,config_agent_type)
             }
-            set_intra_node_stages!(exec_blocks.intra_node_stages())
-            assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
+            hash.merge!(:assembly_idh => assembly_idh) if assembly_idh
+            intra_node_stages = exec_blocks.intra_node_stages()
            else
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
         super(type,hash,task_idh)
+        #set_intra_node_stages must be done after super
+        set_intra_node_stages!(intra_node_stages) if intra_node_stages
       end
     end
   end

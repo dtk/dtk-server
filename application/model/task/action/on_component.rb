@@ -181,6 +181,17 @@ module DTK; class Task
         end
       end
 
+      def self.create_list_from_execution_blocks(exec_blocks,config_agent_type)
+        exec_blocks.components.map do |cmp|
+          hash = {
+            :attributes => Array.new,
+            :component => cmp,
+            :on_node_config_agent_type => config_agent_type
+          }
+          new(hash)
+        end
+      end
+
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
@@ -198,7 +209,7 @@ module DTK; class Task
         if incremental_change
           hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 
         end
-        self.new(hash)
+        new(hash)
       end
     end
   end

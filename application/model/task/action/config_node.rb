@@ -174,14 +174,15 @@ module DTK; class Task
          hash =
           case type
            when :state_change
-            sample_state_change = object.first
+            sc = object
+            sample_state_change = sc.first
             node = sample_state_change[:node]
-            component_actions,intra_node_stages = OnComponent.order_and_group_by_component(object)
+            component_actions,intra_node_stages = OnComponent.order_and_group_by_component(sc)
             set_intra_node_stages!(intra_node_stages)
             h = {
               :node => node,
-              :state_change_types => object.map{|sc|sc[:type]}.uniq,
-              :config_agent_type => object.first.on_node_config_agent_type,
+              :state_change_types => sc.map{|sc|sc[:type]}.uniq,
+              :config_agent_type => sc.first.on_node_config_agent_type,
               :component_actions => component_actions
             }
             assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
@@ -191,11 +192,12 @@ module DTK; class Task
             end
             object
            when :execution_blocks
+            exec_blocks = object
             h = {
-              :node => object.node(),
+              :node => exec_blocks.node(),
               :state_change_types => ["converge_component"],
-              :config_agent_type => object.config_agent_type(),
-              :component_actions => object.components().map{|ca|OnComponent.create_from_hash(:component => ca,:attributes=>[])}
+              :config_agent_type => exec_blocks.config_agent_type(),
+              :component_actions => exec_blocks.components().map{|ca|OnComponent.create_from_hash(:component => ca,:attributes=>[])}
             }
             set_intra_node_stages!(exec_blocks.intra_node_stages())
             assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h

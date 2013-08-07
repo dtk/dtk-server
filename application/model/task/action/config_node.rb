@@ -165,7 +165,7 @@ module DTK; class Task
       end
 
       def update_state_change_status(task_mh,status)
-        update_state_change_status_aux(task_mh,status,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.flatten)
+        update_state_change_status_aux(task_mh,status,self[:component_actions].map{|x|x[:state_change_pointer_ids]}.compact.flatten)
       end
 
      private

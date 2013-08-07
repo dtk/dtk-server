@@ -1,7 +1,7 @@
 module DTK; class Component
   class Instance < self
     def self.component_list_fields()
-      [:id,:group_id,:display_name,:component_type,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
+      [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
     end
 
     def self.add_titles!(cmps)

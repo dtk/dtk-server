@@ -15,8 +15,7 @@ module XYZ
         begin
           yield
         rescue Exception => e
-          Log.error "[ERROR IN THREAD] #{e.message}"
-          pp e.backtrace
+          Log.error_pp(["ERROR IN THREAD",e.message,e.backtrace])
         end
       end
     end

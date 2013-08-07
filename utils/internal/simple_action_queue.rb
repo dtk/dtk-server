@@ -13,7 +13,6 @@ module DTK
   end
 
   class SimpleActionQueue
-
     def self.get_results(queue_id)
       queue, response_results = self[queue_id], nil
 
@@ -57,7 +56,8 @@ module DTK
     end
 
     def set_result(el)
-      @result = el.data
+      #TODO: Rich: thik this is an error @result = el.data
+      @result = el
     end
   end
 end

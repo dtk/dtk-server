@@ -4,27 +4,21 @@ module DTK; class Task
       def self.create_from_execution_blocks(exec_blocks,assembly_idh=nil)
         task_idh = nil #not needed in new
         ret = new(:execution_blocks,exec_blocks,task_idh,assembly_idh)
-        ret.intra_node_stages = (exec_blocks.intra_node_stages())
+        pp [:fooooooooooooooooooo_set,exec_blocks.intra_node_stages(),ret[:component_actions].map{|x|x[:component][:id]} ]
         ret
       end
 
-      def intra_node_stages=(intra_node_stages)
-        unless node = self[:node]
-          raise Error.new("The method intra_node_stages= shoudl not be called if node is not set")
-        end
-        self[:node][:intra_node_stages] = intra_node_stages
+      def set_intra_node_stages!(intra_node_stages)
+        self[:intra_node_stages] = intra_node_stages
       end
       def intra_node_stages()
-        (self[:node]||{})[:intra_node_stages]
+        self[:intra_node_stages]
       end
-      def set_inter_node_stage(internode_stage_index)
-        unless node = self[:node]
-          raise Error.new("The method inter_node_stage shoudl not be called if node is not set")
-        end
-        self[:node][:inter_node_stage] = internode_stage_index.to_s
+      def set_inter_node_stage!(internode_stage_index)
+        self[:inter_node_stage] = internode_stage_index.to_s
       end
       def inter_node_stage()
-        (self[:node]||{})[:inter_node_stage]
+        self[:inter_node_stage]
       end
       def is_first_inter_node_stage?()
         inter_node_stage = inter_node_stage()
@@ -182,11 +176,13 @@ module DTK; class Task
            when :state_change
             sample_state_change = object.first
             node = sample_state_change[:node]
+            component_actions,intra_node_stages = OnComponent.order_and_group_by_component(object)
+            set_intra_node_stages!(intra_node_stages)
             h = {
               :node => node,
               :state_change_types => object.map{|sc|sc[:type]}.uniq,
               :config_agent_type => object.first.on_node_config_agent_type,
-              :component_actions => OnComponent.order_and_group_by_component(object)
+              :component_actions => component_actions
             }
             assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
            when :hash
@@ -201,6 +197,7 @@ module DTK; class Task
               :config_agent_type => object.config_agent_type(),
               :component_actions => object.components().map{|ca|OnComponent.create_from_hash(:component => ca,:attributes=>[])}
             }
+            set_intra_node_stages!(exec_blocks.intra_node_stages())
             assembly_idh ? h.merge(:assembly_idh => assembly_idh) : h
            else
             raise Error.new("Unexpected ConfigNode.initialize type")

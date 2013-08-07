@@ -9,8 +9,9 @@ module XYZ
       include PuppetGenerateNodeManifest
       def ret_msg_content(config_node)
         cmps_with_attrs = components_with_attributes(config_node)
+        pp [:foooooooooooooooooooo_get,config_node.intra_node_stages(),config_node[:component_actions].map{|x|x[:component][:id]}]
         assembly_attrs = assembly_attributes(config_node)
-        puppet_manifests = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node[:node][:intra_node_stages])
+        puppet_manifests = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node.intra_node_stages())
         msg_content = {
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest => puppet_manifests, 

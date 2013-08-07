@@ -39,7 +39,7 @@ module DTK
         staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes,assembly)
         stages_config_nodes_task = Array.new
         staged_config_nodes_changes.each_index do |i| 
-          config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i+1}")
+          config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), i+1)
           stages_config_nodes_task << config_nodes_task if config_nodes_task
         end
       end
@@ -269,7 +269,7 @@ module DTK
       error_msg = nil
       begin 
         executable_action = Task::Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
-        executable_action[:node][:inter_node_stage] = stage_index
+        executable_action.set_inter_node_stage!(stage_index)
       rescue TSort::Cyclic => e
         node = state_change.first[:node]
         display_name = node[:display_name]

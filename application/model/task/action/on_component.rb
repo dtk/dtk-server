@@ -43,44 +43,44 @@ module DTK; class Task
         new(hash)
       end
 
+      #returns component_actions,intra_node_stages
       def self.order_and_group_by_component(state_change_list)
+        intra_node_stages = nil
         ndx_cmp_idhs = Hash.new
-        node = state_change_list.first[:node]
         state_change_list.each do |sc|
           cmp = sc[:component]
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
         end
         components = Component::Instance.get_components_with_dependency_info(ndx_cmp_idhs.values)
         cmp_deps = ComponentOrder.get_ndx_cmp_type_and_derived_order(components)
-        cmp_order = 
-          if Workflow.intra_node_stages?
-            get_intra_node_stages(cmp_deps, state_change_list, node) 
-          elsif Workflow.intra_node_total_order?
-            get_total_component_order(cmp_deps, node) 
-          else
-            raise Error.new("No intra node ordering strategy found")
-          end
-        cmp_order.map do |(component_id,deps)|
+        if Workflow.intra_node_stages?
+          cmp_order,intra_node_stages = get_intra_node_stages(cmp_deps, state_change_list)
+        elsif Workflow.intra_node_total_order?
+          node = state_change_list.first[:node]
+          cmp_order = get_total_component_order(cmp_deps, node) 
+        else
+          raise Error.new("No intra node ordering strategy found")
+        end
+        component_actions = cmp_order.map do |(component_id,deps)|
           create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end
+        [component_actions,intra_node_stages]
       end
 
-      def self.get_intra_node_stages(cmp_deps, state_change_list, node)
+      #returns cmp_ids_with_deps,intra_node_stages
+      def self.get_intra_node_stages(cmp_deps, state_change_list)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
         cd_ppt_stgs, scl_ppt_stgs = Stage::PuppetStageGenerator.generate_stages(cmp_ids_with_deps.dup, state_change_list.dup)
-        puppet_with_intranode_stages = Array.new
+        intra_node_stages = Array.new
         cd_ppt_stgs.each_with_index do |cd, i|
           cmp_ids_with_deps_ps = cd_ppt_stgs[i].dup
           state_change_list_ps = scl_ppt_stgs[i]
           intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
-          intranode_stages = Array.new
-          intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
-          puppet_with_intranode_stages << intranode_stages
+          intra_node_stages << intranode_stages_with_deps.map{|stage|stage.keys }
         end
         # Amar: to enable multiple puppet calls inside one puppet_apply agent call, 
         # puppet_stages are added to intra node stages. Check PuppetStageGenerator class docs for more details
-        node[:intra_node_stages] = puppet_with_intranode_stages
-        return cmp_ids_with_deps
+        [cmp_ids_with_deps,intra_node_stages]
       end
 
       # Amar

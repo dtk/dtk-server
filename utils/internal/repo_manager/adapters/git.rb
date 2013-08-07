@@ -349,6 +349,7 @@ module DTK
         git_command__fetch(remote_r)
       rescue Exception => e
         synced = initial_sync_with_remote_repo(remote_n,remote_u,remote_b)
+        next
       end
       
       # if fetch failed first time, do fetch again after doing initial_sync

@@ -119,8 +119,10 @@ module DTK
     def initialize(top_task)
       @top_task = top_task
       @guards = {:internal => Array.new, :external => Array.new}
-      Guard.ret_guards(top_task).each do |guard|
-        @guards[guard.internal_or_external()] << guard
+      if Workflow.guards_mode?
+        Guard.ret_guards(top_task).each do |guard|
+          @guards[guard.internal_or_external()] << guard
+        end
       end
     end
 

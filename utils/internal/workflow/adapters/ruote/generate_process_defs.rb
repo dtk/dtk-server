@@ -140,11 +140,12 @@ module XYZ
 
         def get_guard_tasks(action)
           ret = nil
-          # If 'STAGES' temporal mode set, don't generate workflow with guards
-          return ret unless  Workflow.guards_mode?
+          #short circuit if no guards
+          return ret if @guards.empty?
 
-          #short cuircuit; must be multiple peers in order there to be guard tasks
+          #short circuit; must be multiple peers in order there to be guard tasks
           return ret if @peer_tasks.size < 2
+
           node_id = action[:node][:id]
           task_type = action.class
           #find guards for this action

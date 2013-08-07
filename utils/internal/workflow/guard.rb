@@ -37,7 +37,7 @@ module DTK; class Workflow
         }
         aug_port_links = Model.get_objs(assembly.model_handle(:port_link),sp_hash)
         pp aug_port_links
-        raise Error,new("Got here; need to bring in task info and look at that to find component and node; node is not below")
+        raise Error.new("Got here; need to bring in task info and look at that to find component and node; node is not below")
 
         aug_port_links.map do |pl|
           before = DirIndex[pl[:temporal_order].to_sym][:before_index]

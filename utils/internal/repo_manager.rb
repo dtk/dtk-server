@@ -100,7 +100,6 @@ module XYZ
       end
 
       def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_n, remote_b)
-        # RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch, remote_url, remote_name, remote_branch)
         adapter_repo = get_adapter_repo(context(repo_name,module_branch))
         adapter_repo.is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)
       end

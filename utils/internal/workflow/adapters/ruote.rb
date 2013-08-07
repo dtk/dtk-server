@@ -49,13 +49,12 @@ module DTK
           if errors.nil? or errors.empty?
             pp :normal_completion
           else
-            p "intercepted errors:"
+            Log.error "-------- intercepted errors ------"
             errors.each  do |e|
-              p e.message
-              depth = 5
-              STDOUT << e.trace
-              pp "----------------"
+              Log.error_pp e.message
+              Log.error_pp e.trace
             end
+            Log.error "-------- end: intercepted errors ------"
 
             #different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)

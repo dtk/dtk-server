@@ -257,6 +257,14 @@ module DTK
       push_changes()
     end
 
+    def pull_from_remote_repo(remote_name,remote_url,remote_branch)
+      unless remote_exists?(remote_name)
+        add_remote(remote_name,remote_url)
+      end
+
+      pull_changes(remote_name,remote_branch)
+    end
+
     #MOD_RESTRUCT: TODO: may deprecate
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)

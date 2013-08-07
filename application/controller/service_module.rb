@@ -66,6 +66,11 @@ module DTK
       rest_ok_response service_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
     end
 
+
+    def rest__pull_from_remote()
+      rest_ok_response pull_from_remote_helper(ServiceModule)
+    end
+
     #### end actions to interact with remote repos ###
 
     def rest__list()

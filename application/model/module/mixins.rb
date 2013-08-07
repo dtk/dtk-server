@@ -120,9 +120,20 @@ module DTK
       end
     end
 
+     # raises exception if more repos found
+    def get_repo!()
+      repos = get_repos()
+      unless repos.size == 1
+        raise Error.new("unexpected that number of matching repos is not equal to 1")
+      end
+      
+      return repos.first()
+    end
+
     def get_repos()
       get_objs_uniq(:repos)
     end
+
     def get_workspace_repo()
       sp_hash = {
         :cols => [:id,:display_name,:workspace_info,:project_project_id]

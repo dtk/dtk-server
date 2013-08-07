@@ -162,6 +162,16 @@ module DTK
       self[:module_branch]
     end
 
+    # raises exception if more repos found
+    def get_repo!()
+      repos = get_repos()
+      unless repos.size == 1
+        raise Error.new("unexpected that number of matching repos is not equal to 1")
+      end
+      
+      return repos.first()
+    end
+
     def get_repos()
       get_objs_helper(:repos,:repo)
     end

@@ -34,6 +34,15 @@ module Ramaze::Helper
       return { :missing_modules => missing_modules, :required_modules => required_modules }
     end
 
+
+    def pull_from_remote_helper(module_class)
+      local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
+      version = ret_request_params(:version)
+      project = get_default_project()
+
+      module_class.pull_from_remote(project, local_module_name, remote_repo, version = nil)
+    end
+
     def import_method_helper(module_class)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 

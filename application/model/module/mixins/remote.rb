@@ -96,6 +96,20 @@ module DTK
   end
 
   module ModuleRemoteClassMixin
+
+    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      local_branch = ModuleBranch.workspace_branch_name(project, version)
+      module_obj = module_exists?(project.id_handle(), local_module_name)
+
+      # validate presence of module (this should never happen)
+      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
+      # validate presence of brach
+      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{module_name}'") unless module_obj.get_module_branch(local_branch)
+      
+      repo = module_obj.get_repo!
+      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+    end
+
     #import from remote repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
 
@@ -132,11 +146,7 @@ module DTK
 
         #case on whether the module is created already
         if module_obj
-          repos = module_obj.get_repos()
-          unless repos.size == 1
-            raise Error.new("unexpected that number of matching repos is not equal to 1")
-          end
-          repo = repos.first()
+          repo = module_obj.get_repo!()
         else
           #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
           remote_repo.authorize_dtk_instance(remote_params[:module_name],remote_params[:module_namespace],module_type())

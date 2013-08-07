@@ -131,8 +131,8 @@ module DTK
       end
 
       def initialize(remote_repo=nil)
-        @remote_repo = remote_repo
-        @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo))
+        @remote_repo = remote_repo ? remote_repo.to_sym : remote_repo
+        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo))
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 

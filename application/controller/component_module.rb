@@ -87,6 +87,10 @@ module DTK
       rest_ok_response ComponentModule.info(model_handle(), module_id)
     end
 
+    def rest__pull_from_remote()
+      rest_ok_response pull_from_remote_helper(ComponentModule)
+    end
+
     def rest__versions()
       component_module = create_obj(:component_module_id)
       module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)

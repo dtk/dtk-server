@@ -1,4 +1,5 @@
 require 'base64'
+
 r8_require('../../utils/performance_service')
 
 module XYZ
@@ -9,7 +10,8 @@ module XYZ
       model_name = route[0].to_sym
 
       route = R8::ReactorRoute.validate_route(request.request_method, route_key)
-      raise Error.new("Path '#{route_key}' not found!") unless route
+      return Ramaze::Helper::Error.new.error_404("Path '#{route_key}' not found!") unless route
+      # raise Error.new("Path '#{route_key}' not found!") 
       # we set new model
       model_name = route.first.to_sym
       # we rewrite route key to new mapped one
@@ -203,6 +205,7 @@ module XYZ
           :js_exe_list => @js_exe_list
         )
       end
+
       a = Ramaze::Action.create(
         :node => controller_class,
         :method => method.to_sym,

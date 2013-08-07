@@ -42,9 +42,9 @@ module DTK; class Task; class Template
       end
       
       class ExecutionBlocks < Array
-        def add_subtask!(parent_task,internode_stage_index)
+        def add_subtask!(parent_task,internode_stage_index,assembly_idh=nil)
           pp [:debug_exec_block,serialization_form()]
-          executable_action = Task::Action::ConfigNode.create_from_execution_blocks(self)
+          executable_action = Task::Action::ConfigNode.create_from_execution_blocks(self,assembly_idh)
           executable_action.set_inter_node_stage(internode_stage_index)
           sub_task = Task.create_stub(parent_task.model_handle(),:executable_action => executable_action)
           parent_task.add_subtask(sub_task)
@@ -76,14 +76,6 @@ module DTK; class Task; class Template
           #TODO: for now all  elements have same config_agent_type, so can just pick first
           first && first.config_agent_type()
         end
-        def assembly_idh?()
-          #if any elements asseociated with assembly, all wil be assocaited with same one
-          each do |eb|
-            if ret = eb.assembly_idh?()
-              return ret
-            end
-          end
-        end
         def components()
           ret = Array.new
           each{|exec_block|ret += exec_block.components()}
@@ -103,12 +95,6 @@ module DTK; class Task; class Template
         def config_agent_type()
           #TODO: for now all  elements have same config_agent_type, so can just pick first
           first && first.config_agent_type()
-        end
-        def assembly_idh?()
-          #if any elements asseociated with assembly, all wil be assocaited with same one
-          if matched_action = find{|a|a.source_type() == :assembly}
-            matched_action.assembly_idh?()
-          end
         end
         def components()
           map{|a|a.hash_subset(*Component::Instance.component_list_fields)}

@@ -53,11 +53,7 @@ module DTK
             errors.each  do |e|
               p e.message
               depth = 5
-              e.trace.each do |l|
-                p l.chomp
-                depth -= 1
-                break if depth < 0
-              end
+              STDOUT << e.trace
               pp "----------------"
             end
 

@@ -324,7 +324,7 @@ module DTK
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
       sp_hash = {
-        :cols => [:id, :display_name, include_any_detail && :module_branches_with_repos].compact,
+        :cols => [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact,
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
@@ -607,7 +607,7 @@ module DTK
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
       sp_hash = {
-        :cols => [:id,:display_name],
+        :cols => [:id,:display_name, :dsl_parsed],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }

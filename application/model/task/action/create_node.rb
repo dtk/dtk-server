@@ -1,7 +1,7 @@
 module DTK; class Task
   class Action
     class CreateNode < NodeLevel
-      def initialize(type,hash,task_idh=nil,assembly_idh=nil)
+      def initialize(type,object,task_idh=nil,assembly_idh=nil)
         hash = 
           case type 
            when :state_change

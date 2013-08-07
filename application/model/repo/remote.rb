@@ -48,8 +48,11 @@ module DTK
         RepoManager.ret_remote_merge_relationship(self[:repo_name],local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
       end
 
-      def ret_loaded_and_remote_diffs(remote_r, module_branch)
-        return RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch)
+      def ret_loaded_and_remote_diffs(remote_r, module_branch, version=nil)
+        remote_url = Remote.new(remote_r).repo_url_ssh_access(self[:remote_repo_name])
+        remote_name = remote_name_for_push_pull(remote_r)
+        remote_branch = Remote.version_to_branch_name(version)
+        return RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch, remote_url, remote_name, remote_branch)
       end
       
       def push_to_remote(branch,remote_repo_name,version=nil)

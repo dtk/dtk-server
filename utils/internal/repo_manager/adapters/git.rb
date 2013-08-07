@@ -343,14 +343,17 @@ module DTK
     end
 
     def is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)
-      # If fails to fetch remote, do initial sync to load remote repo name and try to fetch again
+      # If fails to fetch remote, do initial sync to load remote repo name
+      synced = nil
       begin
         git_command__fetch(remote_r)
       rescue Exception => e
-        initial_sync_with_remote_repo(remote_n,remote_u,remote_b)
-        git_command__fetch(remote_r)
+        synced = initial_sync_with_remote_repo(remote_n,remote_u,remote_b)
+        next
       end
-
+      
+      # if fetch failed first time, do fetch again after doing initial_sync
+      git_command__fetch(remote_r) unless synced.nil?
       remote = @grit_repo.remotes.find{|r|r.name.include?(remote_r.to_s)}
       local  = @grit_repo.heads.first
 

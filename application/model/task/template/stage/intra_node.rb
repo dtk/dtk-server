@@ -43,7 +43,6 @@ module DTK; class Task; class Template
       
       class ExecutionBlocks < Array
         def add_subtask!(parent_task,internode_stage_index,assembly_idh=nil)
-          pp [:debug_exec_block,serialization_form()]
           executable_action = Task::Action::ConfigNode.create_from_execution_blocks(self,assembly_idh)
           executable_action.set_inter_node_stage!(internode_stage_index)
           sub_task = Task.create_stub(parent_task.model_handle(),:executable_action => executable_action)

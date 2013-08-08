@@ -1,20 +1,29 @@
 module DTK; class Task
   class Template < Model
+    r8_nested_require('template','content')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
     r8_nested_require('template','action')
     r8_nested_require('template','action_list')
     r8_nested_require('template','stage')
-    r8_nested_require('template','stages')
+    r8_nested_require('template','config_components')
 
-    class ConfigComponents < self
-      #TODO: put in logic that looks at the assembly and sees if there is a an assembly template persisted with it
-      #in which case it will reify the serialized content to for a stages object and return it here
-      def self.get_or_generate_stages(assembly,component_type=nil)
-        cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
-        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
-        Stages::Internode.create_stages(temporal_constraints,cmp_action_list)
-      end
+   private
+    def self.reify(serialized_content)
+      raise Error.new("Templae.reify is not yet implemented")
     end
+
+    module ActionType
+      Create = "__create_action"
+    end
+
+    def self.get_serialized_content(mh,task_action,filter)
+      sp_hash = {
+        :cols => [:content],
+        :filter => [:and,filter,[:eq,:task_action,task_action]]
+      }
+      (get_obj(mh,sp_hash)||{})[:content]
+    end
+
   end
 end; end

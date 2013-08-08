@@ -3,10 +3,7 @@ r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
 module DTK
   module CreateClassMixin
-    #TODO: Eventually replace all satte change based code; just like creating config change tasks has been conveted to be driven from a stages object
     def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
-      #TODO: fix so that top level task with nothing on it is returned right away and thena defered job that does both create task and execute
-
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
@@ -19,12 +16,13 @@ module DTK
         create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
       end
 
-      test_flag = (R8::Config[:task]||{})[:use_task_templates]
-      if test_flag
-        stages = Task::Template::ConfigComponents.get_or_generate_stages(assembly,component_type)
-        stages_config_nodes_task = stages.create_subtasks(task_mh,assembly.id_handle())
-
+      if R8::Config[:task][:use_task_templates]
+        task_template_content = Task::Template::ConfigComponents.get_or_generate(assembly,component_type)
+        stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+        pp task_template_content.serialization_form()
+#        raise ErrorUsage.new("Stop here")
       else
+#TODO: will deprecate this
         #replaceing this part with above
         assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
         nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
@@ -42,9 +40,8 @@ module DTK
           config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), i+1)
           stages_config_nodes_task << config_nodes_task if config_nodes_task
         end
+#TODO: end of deprecate section
       end
-      #end of replaceing this part with above
-
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret

@@ -3,9 +3,7 @@ module DTK; class Task
     class ConfigNode < OnNode
       def self.create_from_execution_blocks(exec_blocks,assembly_idh=nil)
         task_idh = nil #not needed in new
-        ret = new(:execution_blocks,exec_blocks,task_idh,assembly_idh)
-        pp [:fooooooooooooooooooo_set,exec_blocks.intra_node_stages(),ret[:component_actions].map{|x|x[:component][:id]} ]
-        ret
+        new(:execution_blocks,exec_blocks,task_idh,assembly_idh)
       end
 
       def set_intra_node_stages!(intra_node_stages)

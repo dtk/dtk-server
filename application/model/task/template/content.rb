@@ -24,11 +24,16 @@ module DTK; class Task
       end
       
       def serialization_form()
-        subtasks = map{|internode_stage|internode_stage.serialization_form()}
-        {
-          Field::TemporalOrder => Constant::Sequential,
-          Field::Subtasks => subtasks
-        }
+        #Dont put in sequential block if just single stage
+        if size == 1
+          first.serialization_form(:no_inter_node_satge_name=>true)
+        else
+          subtasks = map{|internode_stage|internode_stage.serialization_form()}
+          {
+            Field::TemporalOrder => Constant::Sequential,
+            Field::Subtasks => subtasks
+          }
+        end
       end
 
     private        

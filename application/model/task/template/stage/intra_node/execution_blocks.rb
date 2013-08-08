@@ -10,17 +10,17 @@ module DTK; class Task; class Template
         executable_action
       end
 
-      def serialization_form()
+      def serialization_form(opts={})
+        node_name = node_name()
+        ret = (node_name ? {:node  => node_name} : Hash.new)
+
+        opts_x = {:no_node_name_prefix => true}.merge(opts)
         #if single execution block then we remove this level of nesting
         if size == 1
-          {:execution_block => first.serialization_form()}
+          ret.merge(:ordered_components => first.serialization_form(opts_x))
         else
-          {
-            Field::Subtasks => {
-              Field::TemporalOrder => Constant::Concurrent,
-              :execution_blocks =>  map{|a|a.serialization_form()}
-            }
-          }
+          ret[Field::TemporalOrder] = Constant::Sequential
+          ret.merge(:execution_blocks =>  map{|a|a.serialization_form(opts_x)})
         end
       end
       

@@ -34,14 +34,14 @@ module DTK; class Task; class Template
         (component[:node]||{})[:id]
       end
 
-      def serialization_form()
+      def serialization_form(opts={})
         cmp =  component()
-        node_name = cmp[:node][:display_name]
+        node_name = ((!opts[:no_node_name_prefix]) && cmp[:node][:display_name])
         cmp_name = Component.component_type_print_form(cmp[:component_type])
         if title = cmp[:title]
           cmp_name = ComponentTitle.print_form_with_title(cmp_name,title)
         end
-        "#{node_name}/#{cmp_name}"          
+        node_name ? "#{node_name}/#{cmp_name}" : cmp_name
       end
         
       def source_type()

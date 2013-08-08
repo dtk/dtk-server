@@ -13,8 +13,8 @@ module DTK; class Task; class Template
         map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
       end
       
-      def serialization_form()
-        map{|a|a.serialization_form()}
+      def serialization_form(opts={})
+        map{|a|a.serialization_form(opts)}
       end
       
       class Unordered < self

@@ -18,22 +18,28 @@ module DTK; class Task; class Template
         ret
       end
       
-      def serialization_form()
+      def serialization_form(opts={})
         ret = Hash.new
-        ret[:name] = @name if @name
-        node_info = map_node_actions do |node_actions|
-          node_name = node_actions.node_name()
-          el = (node_name ? {:node  => node_name} : Hash.new).merge(Field::TemporalOrder => Constant::Concurrent)
-          el.merge(node_actions.serialization_form())
+        ret[:name] = @name if @name and !opts[:no_inter_node_satge_name]
+        
+        #Dont put in concurrent block if there is just one node
+        if single_stage = single_inter_node_stage?()
+          ret.merge(single_stage.serialization_form(opts))
+        else
+          ret[Field::TemporalOrder] = Constant::Concurrent
+          ret.merge(Field::Subtasks => map_node_actions{|node_actions|node_actions.serialization_form(opts)})
         end
-        ret.merge(Field::Subtasks => node_info)
       end
-      
+
       def each_node_id(&block)
         each_key{|node_id|block.call(node_id)}
       end
 
      private
+      def single_inter_node_stage?()
+        values.first if size() == 1
+      end
+
       def each_node_actions(&block)
         each_value{|node_actions|block.call(node_actions)}
       end

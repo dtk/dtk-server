@@ -13,7 +13,7 @@ module DTK; class Task
         self[:intra_node_stages]
       end
       def set_inter_node_stage!(internode_stage_index)
-        self[:inter_node_stage] = internode_stage_index.to_s
+        self[:inter_node_stage] = internode_stage_index && internode_stage_index.to_s
       end
       def inter_node_stage()
         self[:inter_node_stage]

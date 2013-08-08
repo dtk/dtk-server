@@ -98,6 +98,7 @@ module DTK
       create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh,:node => node)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
+      #TODO: need to update this to :use_task_templates
       config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 

@@ -23,7 +23,7 @@ module DTK; class Task; class Template
         node_info = map_node_actions do |node_actions|
           node_name = node_actions.node_name()
           el = (node_name ? {:node  => node_name} : Hash.new).merge(:temporal_order => "concurrent")
-          el.merge(:ordered_components => node_actions.serialization_form())
+          el.merge(node_actions.serialization_form())
         end
         ret.merge(Serialization::Field::Subtasks => node_info)
       end

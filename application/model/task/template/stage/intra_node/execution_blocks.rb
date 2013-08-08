@@ -1,12 +1,27 @@
 module DTK; class Task; class Template
   class Stage; class IntraNode
     class ExecutionBlocks < Array
+      include Serialization
       def add_subtask!(parent_task,internode_stage_index,assembly_idh=nil)
         executable_action = Task::Action::ConfigNode.create_from_execution_blocks(self,assembly_idh)
         executable_action.set_inter_node_stage!(internode_stage_index)
         sub_task = Task.create_stub(parent_task.model_handle(),:executable_action => executable_action)
         parent_task.add_subtask(sub_task)
         executable_action
+      end
+
+      def serialization_form()
+        #if single execution block then we remove this level of nesting
+        if size == 1
+          {:execution_block => first.serialization_form()}
+        else
+          {
+            Field::Subtasks => {
+              Field::TemporalOrder => Constant::Concurrent,
+              :execution_blocks =>  map{|a|a.serialization_form()}
+            }
+          }
+        end
       end
       
       def order_each_block(intra_node_contraints)
@@ -21,7 +36,7 @@ module DTK; class Task; class Template
         ret = Array.new
         return ret if empty?()
         if find{|eb|!eb.kind_of?(ExecutionBlock::Ordered)}
-          raise Error.new("The method ExecutionBlocks#intra_node_stages can only be caleld if all its elements are orederd")
+          raise Error.new("The method ExecutionBlocks#intra_node_stages can only be caleld if all its elements are ordered")
         end
         map{|eb|eb.components.map{|cmp|cmp[:id]}}
       end
@@ -45,9 +60,6 @@ module DTK; class Task; class Template
         ret
       end
       
-      def serialization_form()
-        map{|a|a.serialization_form()}
-      end
     end
   end; end
 end; end; end

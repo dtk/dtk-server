@@ -1,6 +1,7 @@
 module DTK; class Task
   class Template
     class Content < Array
+      include Serialization
       def initialize(temporal_constraints,action_list,opts={})
         super()
         create_stages!(temporal_constraints,action_list,opts)
@@ -25,8 +26,8 @@ module DTK; class Task
       def serialization_form()
         subtasks = map{|internode_stage|internode_stage.serialization_form()}
         {
-          :temporal_order => "sequential",
-          Serialization::Field::Subtasks => subtasks
+          Field::TemporalOrder => Constant::Sequential,
+          Field::Subtasks => subtasks
         }
       end
 

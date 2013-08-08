@@ -1,5 +1,20 @@
 module DTK; class Task
   class Template < Model
+
+    module ActionType
+      Create = "__create_action"
+    end
+
+    module Serialization
+      module Field
+        Subtasks = :subtasks
+        TemporalOrder = :temporal_order
+      end
+      module Constant
+        Concurrent = :concurrent
+        Sequential = :sequential
+      end
+    end
     r8_nested_require('template','content')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
@@ -11,16 +26,6 @@ module DTK; class Task
    private
     def self.reify(serialized_content)
       raise Error.new("Templae.reify is not yet implemented")
-    end
-
-    module ActionType
-      Create = "__create_action"
-    end
-
-    module Serialization
-      module Field
-        Subtasks = :subtasks
-      end
     end
 
     def self.get_serialized_content(mh,task_action,filter)

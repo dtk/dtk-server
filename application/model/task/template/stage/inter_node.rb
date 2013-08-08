@@ -1,6 +1,7 @@
 module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
+      include Serialization
       def initialize(name=nil)
         super()
         @name = name
@@ -22,18 +23,17 @@ module DTK; class Task; class Template
         ret[:name] = @name if @name
         node_info = map_node_actions do |node_actions|
           node_name = node_actions.node_name()
-          el = (node_name ? {:node  => node_name} : Hash.new).merge(:temporal_order => "concurrent")
+          el = (node_name ? {:node  => node_name} : Hash.new).merge(Field::TemporalOrder => Constant::Concurrent)
           el.merge(node_actions.serialization_form())
         end
-        ret.merge(Serialization::Field::Subtasks => node_info)
+        ret.merge(Field::Subtasks => node_info)
       end
       
       def each_node_id(&block)
         each_key{|node_id|block.call(node_id)}
       end
 
-      private
-
+     private
       def each_node_actions(&block)
         each_value{|node_actions|block.call(node_actions)}
       end

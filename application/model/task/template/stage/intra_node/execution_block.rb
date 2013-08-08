@@ -30,13 +30,13 @@ module DTK; class Task; class Template
           ret
         end
       end
-    end
     
-    class Ordered < self
-      def initialize(array=nil)
-        super()
-        if array
-          array.each{|el|self << el}
+      class Ordered < self
+        def initialize(array=nil)
+          super()
+          if array
+            array.each{|el|self << el}
+          end
         end
       end
     end

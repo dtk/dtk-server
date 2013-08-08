@@ -13,7 +13,7 @@ module DTK; class Task
       end
 
       def self.generate_internode_stage_name(internode_stage_index)
-        "config_node_stage_#{internode_stage_index.to_s}"
+        "config_nodes_stage_#{internode_stage_index.to_s}"
       end
       
      private

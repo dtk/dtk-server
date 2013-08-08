@@ -20,7 +20,7 @@ module DTK
         task_template_content = Task::Template::ConfigComponents.get_or_generate(assembly,component_type)
         stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
         pp task_template_content.serialization_form()
-        raise ErrorUsage.new("Stop here")
+#        raise ErrorUsage.new("Stop here")
       else
 #TODO: will deprecate this
         #replaceing this part with above

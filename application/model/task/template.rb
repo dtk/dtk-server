@@ -17,6 +17,12 @@ module DTK; class Task
       Create = "__create_action"
     end
 
+    module Serialization
+      module Field
+        Subtasks = :subtasks
+      end
+    end
+
     def self.get_serialized_content(mh,task_action,filter)
       sp_hash = {
         :cols => [:content],

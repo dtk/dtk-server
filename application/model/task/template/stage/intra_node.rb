@@ -71,6 +71,11 @@ module DTK; class Task; class Template
           #all the elements have same node so can just pick first
           first && first.node()
         end
+
+        def node_name()
+          (node()||{})[:display_name]
+        end
+
         def config_agent_type()
           #TODO: for now all  elements have same config_agent_type, so can just pick first
           first && first.config_agent_type()

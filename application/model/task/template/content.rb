@@ -23,7 +23,11 @@ module DTK; class Task
       end
       
       def serialization_form()
-        {:internode_stages => map{|internode_stage|internode_stage.serialization_form()}}
+        subtasks = map{|internode_stage|internode_stage.serialization_form()}
+        {
+          :temporal_order => "sequential",
+          Serialization::Field::Subtasks => subtasks
+        }
       end
 
     private        

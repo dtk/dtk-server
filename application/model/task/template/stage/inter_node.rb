@@ -18,14 +18,14 @@ module DTK; class Task; class Template
       end
       
       def serialization_form()
-        ret = Array.new
-        return ret if empty?
-        each do |node_id,node_actions|
-          el = {:node => node_id}
-          el[:name] = @name if @name
-          ret << el.merge(:ordered_components => node_actions.serialization_form())
+        ret = Hash.new
+        ret[:name] = @name if @name
+        node_info = map_node_actions do |node_actions|
+          node_name = node_actions.node_name()
+          el = (node_name ? {:node  => node_name} : Hash.new).merge(:temporal_order => "concurrent")
+          el.merge(:ordered_components => node_actions.serialization_form())
         end
-        ret
+        ret.merge(Serialization::Field::Subtasks => node_info)
       end
       
       def each_node_id(&block)
@@ -36,6 +36,10 @@ module DTK; class Task; class Template
 
       def each_node_actions(&block)
         each_value{|node_actions|block.call(node_actions)}
+      end
+
+      def map_node_actions(&block)
+        values.map{|node_actions|block.call(node_actions)}
       end
 
       class Factory

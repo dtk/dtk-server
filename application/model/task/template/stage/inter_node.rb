@@ -1,6 +1,11 @@
 module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
+      def initialize(name=nil)
+        super()
+        @name = name
+      end
+
       #returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)
         ret = Array.new
@@ -15,7 +20,11 @@ module DTK; class Task; class Template
       def serialization_form()
         ret = Array.new
         return ret if empty?
-        each{|node_id,node_actions|ret << node_actions.serialization_form()}
+        each do |node_id,node_actions|
+          el = {:node => node_id}
+          el[:name] = @name if @name
+          ret << el.merge(:ordered_components => node_actions.serialization_form())
+        end
         ret
       end
       
@@ -23,10 +32,11 @@ module DTK; class Task; class Template
         each_key{|node_id|block.call(node_id)}
       end
 
+      private
+
       def each_node_actions(&block)
         each_value{|node_actions|block.call(node_actions)}
       end
-      private :each_node_actions
 
       class Factory
         def initialize(action_list,temporal_constraints)
@@ -34,9 +44,9 @@ module DTK; class Task; class Template
           @temporal_constraints = temporal_constraints
         end
 
-        def create(stage_action_indexes)
+        def create(stage_action_indexes,name=nil)
           #first break each state into unordered list per node
-          ret = InterNode.new()
+          ret = InterNode.new(name)
           stage_action_indexes.each do |index|
             action = @action_list[index]
             (ret[action.node_id] ||= IntraNode::Unordered.new()) << action

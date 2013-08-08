@@ -7,9 +7,15 @@ module DTK; class Task
         else
           cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
           temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
-          Content.new(temporal_constraints,cmp_action_list)
+          opts = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}
+          Content.new(temporal_constraints,cmp_action_list,opts)
         end
       end
+
+      def self.generate_internode_stage_name(internode_stage_index)
+        "config_node_stage_#{internode_stage_index.to_s}"
+      end
+      
      private
       def self.get_serialized_content_from_assembly(assembly,action_type)
         task_template_mh = assembly.model_handle(:task_template)

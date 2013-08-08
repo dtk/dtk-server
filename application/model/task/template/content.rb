@@ -1,9 +1,9 @@
 module DTK; class Task
   class Template
     class Content < Array
-      def initialize(temporal_constraints,action_list)
+      def initialize(temporal_constraints,action_list,opts={})
         super()
-        create_stages!(temporal_constraints,action_list)
+        create_stages!(temporal_constraints,action_list,opts)
       end
 
       def create_subtask_instances(task_mh,assembly_idh)
@@ -21,13 +21,13 @@ module DTK; class Task
         Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
         ret
       end
-
+      
       def serialization_form()
-        map{|stage|stage.serialization_form()}
+        {:internode_stages => map{|internode_stage|internode_stage.serialization_form()}}
       end
 
     private        
-      def create_stages!(temporal_constraints,action_list)
+      def create_stages!(temporal_constraints,action_list,opts={})
         return if action_list.empty?
         unless empty?()
           raise Error.new("stages have been created already")
@@ -37,6 +37,9 @@ module DTK; class Task
         stage_factory = Stage::InterNode::Factory.new(action_list,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(action_list)
         done = false
+        internode_stage_index = 0
+        internode_stage_name_proc = opts[:internode_stage_name_proc]
+
         #before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
@@ -47,7 +50,9 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            self << stage_factory.create(stage_action_indexes)
+            internode_stage_index += 1
+            name = (internode_stage_name_proc && internode_stage_name_proc.call(internode_stage_index))
+            self << stage_factory.create(stage_action_indexes,name)
           end
         end
       end

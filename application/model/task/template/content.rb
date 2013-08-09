@@ -37,7 +37,10 @@ module DTK; class Task
       end
       def self.parse_and_reify(serialized_content,action_list)
         #normalize wrt whether there are explicit subtasks and then call create stages
-        new(SerializedContentArray.new(serialized_content[Field::Subtasks]||[serialized_content]),action_list)
+        ret = new(SerializedContentArray.new(serialized_content[Field::Subtasks]||[serialized_content]),action_list)
+        pp [:parse_and_reify,ret.serialization_form()]
+        raise ErrorUsage.new("stop here")
+        ret
       end
 
       class SerializedContentArray < Array
@@ -60,7 +63,6 @@ module DTK; class Task
 
       def create_stages_from_serialzied_content!(serialized_content_array,action_list,opts={})
         serialized_content_array.each{|a| self <<  Stage::InterNode.parse_and_reify(a,action_list)}
-        raise ErrorUsage.new("Stop here")
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,action_list,opts={})

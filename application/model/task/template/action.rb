@@ -36,9 +36,22 @@ module DTK; class Task; class Template
       def node_id()
         (node()||{})[:id]
       end
-
       def node_name()
         (node()||{})[:display_name]
+      end
+
+      def match?(node_name,component_name_ref=nil)
+         ret = 
+          if node_name() == node_name
+            if component_name_ref.nil?
+              true
+            else
+              #strip off node_name prefix if it exists
+              component_name_ref_x = component_name_ref.split("/").last
+              component_name_ref_x ==  serialization_form(:no_node_name_prefix => true)
+            end
+          end
+        !!ret
       end
 
       def serialization_form(opts={})

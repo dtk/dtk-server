@@ -6,13 +6,18 @@ module DTK; class Task; class Template
       self
     end
 
-    def get_matching_node_id?(node_name)
-      if match = find{|a|a.node_name() == node_name}
+    def find_matching_node_id(node_name)
+      #teher can be multiple matches, but first match is fien since they will all agree on node_id
+      if match = find_matching_action(node_name)
         unless node_id = match.node_id()
           Log.error("Unexpected that node id is nil for node name (#{node_name})")
         end
         node_id
       end
+    end
+
+    def find_matching_action(node_name,component_name_ref=nil)
+      find{|a|a.match?(node_name,component_name_ref)}
     end
 
     def <<(el)

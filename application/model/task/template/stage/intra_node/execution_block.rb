@@ -16,7 +16,23 @@ module DTK; class Task; class Template
       def serialization_form(opts={})
         map{|a|a.serialization_form(opts)}
       end
-      
+      def self.parse_and_reify(serialized_eb,node_name,action_list)
+        ret = new()
+        serialized_eb.each do |serialized_action|
+          if serialized_action.kind_of?(String)
+            component_name_ref = serialized_action
+            if action = action_list.find_matching_action(node_name,component_name_ref)
+              ret << action
+            else
+              ParseError.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+            end
+          else
+            raise ParseError.new("Parse error for action of form (#{serialized_action.inspect})")
+          end
+        end
+        ret
+      end
+
       class Unordered < self
         def order(intra_node_contraints,strawman_order=nil)
           #short-cut, no ordering if singleton

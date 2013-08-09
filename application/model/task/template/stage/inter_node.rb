@@ -37,10 +37,10 @@ module DTK; class Task; class Template
           unless node_name = serialized_node_actions[:node]
             ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
           end
-          unless node_id = action_list.get_matching_node_id?(node_name)
+          unless node_id = action_list.find_matching_node_id(node_name)
             ParseError.new("Node ref (#{node_name}) cannot be resolved")
           end
-          h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,action_list))
+          h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,node_name,action_list))
         end
       end
 

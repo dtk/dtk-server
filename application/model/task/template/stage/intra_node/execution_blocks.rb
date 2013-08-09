@@ -15,7 +15,6 @@ module DTK; class Task; class Template
         if node_name = node_name()
           ret[:node] = node_name
         end
-
         opts_x = {:no_node_name_prefix => true}.merge(opts)
         #if single execution block then we remove this level of nesting
         if size == 1
@@ -25,9 +24,12 @@ module DTK; class Task; class Template
           ret.merge(:execution_blocks =>  map{|a|a.serialization_form(opts_x)})
         end
       end
-      def self.parse_and_reify(serialized_node_actions,action_list)
-        pp [:serialized_node_actions,serialized_node_actions]
-        new()
+      def self.parse_and_reify(serialized_node_actions,node_name,action_list)
+        #normalize to take into account it may be single execution block
+        normalized_content = serialized_node_actions[:execution_blocks]||[serialized_node_actions[:ordered_components]]
+        ret = new()
+        normalized_content.each{|serialized_eb|ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb,node_name,action_list)}
+        ret
       end
 
       def order_each_block(intra_node_contraints)

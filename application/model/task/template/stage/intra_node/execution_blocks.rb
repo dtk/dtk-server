@@ -25,7 +25,11 @@ module DTK; class Task; class Template
           ret.merge(:execution_blocks =>  map{|a|a.serialization_form(opts_x)})
         end
       end
-      
+      def self.parse_and_reify(serialized_node_actions,action_list)
+        pp [:serialized_node_actions,serialized_node_actions]
+        new()
+      end
+
       def order_each_block(intra_node_contraints)
         ret = self.class.new()
         each do |unordered_exec_block|
@@ -38,7 +42,7 @@ module DTK; class Task; class Template
         ret = Array.new
         return ret if empty?()
         if find{|eb|!eb.kind_of?(ExecutionBlock::Ordered)}
-          raise Error.new("The method ExecutionBlocks#intra_node_stages can only be caleld if all its elements are ordered")
+          raise Error.new("The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered")
         end
         map{|eb|eb.components.map{|cmp|cmp[:id]}}
       end

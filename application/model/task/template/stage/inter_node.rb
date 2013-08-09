@@ -31,18 +31,17 @@ module DTK; class Task; class Template
         end
       end
       def self.parse_and_reify(serialized_content,action_list)
-        ret = new(serialized_content[:name])
         #content could be either a concurrent block with multiple nodes, or a single node
-        normalized = 
-          if subtasks = serialized_content[Field::Subtasks] # test if a concurrent block with multiple nodes
-            subtasks
-          else
-            [serialized_content]
+        normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
+        normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
+          unless node_name = serialized_node_actions[:node]
+            ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
           end
-        #TODO: this can be called at more outer later to avoid wastful behavior where lookup can be done for same node if in multiple stages
-        ndx_node_ids = get_indexed_node_ids(normalized,action_list)
-        pp [:ndx_node_ids,ndx_node_ids]
-        ret
+          unless node_id = action_list.get_matching_node_id?(node_name)
+            ParseError.new("Node ref (#{node_name}) cannot be resolved")
+          end
+          h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,action_list))
+        end
       end
 
       def each_node_id(&block)
@@ -63,15 +62,7 @@ module DTK; class Task; class Template
       end
 
       def self.get_indexed_node_ids(normalized_content,action_list)
-        ndx_node_names = Hash.new
-        normalized_content.each do |r|
-          if node_name = r[:node]
-            ndx_node_names[node_name] ||= true
-          else
-            raise ParseError.new("Missing node refernce in (#{r.inspect})")
-          end
-        end
-        action_list.get_indexed_node_ids(ndx_node_names.keys)
+
       end
 
       class Factory

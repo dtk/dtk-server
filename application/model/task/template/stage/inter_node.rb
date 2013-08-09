@@ -30,6 +30,20 @@ module DTK; class Task; class Template
           ret.merge(Field::Subtasks => map_node_actions{|node_actions|node_actions.serialization_form(opts)})
         end
       end
+      def self.parse_and_reify(serialized_content,action_list)
+        ret = new(serialized_content[:name])
+        #content could be either a concurrent block with multiple nodes, or a single node
+        normalized = 
+          if subtasks = serialized_content[Field::Subtasks] # test if a concurrent block with multiple nodes
+            subtasks
+          else
+            [serialized_content]
+          end
+        #TODO: this can be called at more outer later to avoid wastful behavior where lookup can be done for same node if in multiple stages
+        ndx_node_ids = get_indexed_node_ids(normalized,action_list)
+        pp [:ndx_node_ids,ndx_node_ids]
+        ret
+      end
 
       def each_node_id(&block)
         each_key{|node_id|block.call(node_id)}
@@ -46,6 +60,18 @@ module DTK; class Task; class Template
 
       def map_node_actions(&block)
         values.map{|node_actions|block.call(node_actions)}
+      end
+
+      def self.get_indexed_node_ids(normalized_content,action_list)
+        ndx_node_names = Hash.new
+        normalized_content.each do |r|
+          if node_name = r[:node]
+            ndx_node_names[node_name] ||= true
+          else
+            raise ParseError.new("Missing node refernce in (#{r.inspect})")
+          end
+        end
+        action_list.get_indexed_node_ids(ndx_node_names.keys)
       end
 
       class Factory

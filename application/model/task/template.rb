@@ -14,6 +14,8 @@ module DTK; class Task
         Concurrent = :concurrent
         Sequential = :sequential
       end
+      class ParseError < ::DTK::ErrorUsage
+      end
 
       #TOD: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
       class OrderedHash < ::Hash

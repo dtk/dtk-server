@@ -30,8 +30,15 @@ module DTK; class Task; class Template
     end
 
     class ComponentAction < self
+      def node()
+        component[:node]
+      end
       def node_id()
-        (component[:node]||{})[:id]
+        (node()||{})[:id]
+      end
+
+      def node_name()
+        (node()||{})[:display_name]
       end
 
       def serialization_form(opts={})

@@ -30,7 +30,7 @@ pp [:persisted_serialized_content,serialized_content]
       end
 
       def self.persist_serialized_content_on_assembly(assembly,serialized_content,task_action=nil)
-        task_template_mh = assembly.model_handle(:task_template)
+        task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
         match_assigns = {:component_component_id => assembly.id()}
         Template.persist_serialized_content(task_template_mh,serialized_content,match_assigns,task_action)
       end

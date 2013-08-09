@@ -30,7 +30,7 @@ module XYZ
         #TODO: temp for debugging; theer are top leevl objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
           unless [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
-            Log.error("missing :parent_model_name in (#{[model_handle,caller[0..5]].inspect}) in create_from_select")
+            Log.error_pp(["missing :parent_model_name in create_from_select", model_handle,caller[0..10]])
           end
         end
 

@@ -25,15 +25,28 @@ module DTK; class Task
 
    private
     def self.reify(serialized_content)
-      raise Error.new("Templae.reify is not yet implemented")
+      raise Error.new("Template.reify is not yet implemented")
     end
 
-    def self.get_serialized_content(mh,task_action,filter)
+    def self.get_serialized_content(mh,filter,task_action=nil)
+      task_action ||= default_task_action()
       sp_hash = {
         :cols => [:content],
         :filter => [:and,filter,[:eq,:task_action,task_action]]
       }
       (get_obj(mh,sp_hash)||{})[:content]
+    end
+
+    def self.persist_serialized_content(mh,serialized_content,match_assigns,task_action=nil)
+      task_action ||= default_task_action()
+      all_match_assigns = {:task_action => task_action}.merge(match_assigns)
+      other_assigns = {:content => serialized_content}
+      ref = task_action
+      create_from_row?(mh,ref,all_match_assigns,other_assigns,:convert => true)
+    end
+
+    def self.default_task_action()
+      ActionType::Create
     end
 
   end

@@ -11,8 +11,10 @@ module DTK; class Task; class Template
       end
 
       def serialization_form(opts={})
-        node_name = node_name()
-        ret = (node_name ? {:node  => node_name} : Hash.new)
+        ret = OrderedHash.new()
+        if node_name = node_name()
+          ret[:node] = node_name
+        end
 
         opts_x = {:no_node_name_prefix => true}.merge(opts)
         #if single execution block then we remove this level of nesting

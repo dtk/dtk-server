@@ -14,7 +14,16 @@ module DTK; class Task
         Concurrent = :concurrent
         Sequential = :sequential
       end
+
+      #TOD: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
+      class OrderedHash < ::Hash
+        def initialize(initial_val=nil)
+          super()
+          replace(initial_val) if initial_val
+        end
+      end
     end
+
     r8_nested_require('template','content')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
@@ -34,7 +43,8 @@ module DTK; class Task
         :cols => [:content],
         :filter => [:and,filter,[:eq,:task_action,task_action]]
       }
-      (get_obj(mh,sp_hash)||{})[:content]
+      ret = (get_obj(mh,sp_hash)||{})[:content]
+      ret && Serialization::OrderedHash.new(ret)
     end
 
     def self.persist_serialized_content(mh,serialized_content,match_assigns,task_action=nil)

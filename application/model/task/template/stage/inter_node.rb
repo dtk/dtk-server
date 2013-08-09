@@ -19,8 +19,8 @@ module DTK; class Task; class Template
       end
       
       def serialization_form(opts={})
-        ret = Hash.new
-        ret[:name] = @name if @name and !opts[:no_inter_node_satge_name]
+        ret = OrderedHash.new
+        ret[:name] = @name if @name and !opts[:no_inter_node_stage_name]
         
         #Dont put in concurrent block if there is just one node
         if single_stage = single_inter_node_stage?()

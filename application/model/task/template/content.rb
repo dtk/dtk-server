@@ -26,7 +26,7 @@ module DTK; class Task
       def serialization_form()
         #Dont put in sequential block if just single stage
         if size == 1
-          first.serialization_form(:no_inter_node_satge_name=>true)
+          first.serialization_form(:no_inter_node_stage_name=>true)
         else
           subtasks = map{|internode_stage|internode_stage.serialization_form()}
           {

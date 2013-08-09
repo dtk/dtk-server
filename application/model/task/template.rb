@@ -33,10 +33,6 @@ module DTK; class Task
     r8_nested_require('template','config_components')
 
    private
-    def self.reify(serialized_content)
-      raise Error.new("Template.reify is not yet implemented")
-    end
-
     def self.get_serialized_content(mh,filter,task_action=nil)
       task_action ||= default_task_action()
       sp_hash = {

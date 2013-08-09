@@ -2,19 +2,29 @@ module DTK; class Task
   class Template
     class ConfigComponents < self
       def self.get_or_generate(assembly,component_type=nil)
-        if serialized_content = get_serialized_content_from_assembly(assembly)
-pp [:persisted_serialized_content,serialized_content]
-          unless need_to_recalculate_template?(assembly)
-            return Template.reify(serialized_content)
-          end
+        #first see if cached content
+        if template_content = get_cached_template_content?(assembly)
+          return template_content
         end
 
+        #next see if there is a persistent serialized task template
+        #TODO: modify to handle case where serialized_content is just assembly actions vs assembly plus node-centric actions
+        #in former case want to splice in node centric
+        if serialized_content = get_serialized_content_from_assembly(assembly)
+          cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
+          return Content.parse_and_reify(serialized_content,cmp_action_list)
+        end
+
+        #otherwise do the temporal processing to generate template_content
         cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_action_list)
         opts = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}
         template_content = Content.new(temporal_constraints,cmp_action_list,opts)
+
+        #persist serialized form
         serialized_content = template_content.serialization_form()
         persist_serialized_content_on_assembly(assembly,serialized_content)
+
         template_content
       end
 
@@ -35,10 +45,10 @@ pp [:persisted_serialized_content,serialized_content]
         Template.persist_serialized_content(task_template_mh,serialized_content,match_assigns,task_action)
       end
         
-      def self.need_to_recalculate_template?(assembly,task_action=nil)
+      def self.get_cached_template_content?(assembly,task_action=nil)
         task_action ||= default_task_action()
         #TODO: stub
-        true 
+        nil
       end
     end
   end

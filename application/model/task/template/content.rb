@@ -2,9 +2,9 @@ module DTK; class Task
   class Template
     class Content < Array
       include Serialization
-      def initialize(temporal_constraints,action_list,opts={})
+      def initialize(object,action_list,opts={})
         super()
-        create_stages!(temporal_constraints,action_list,opts)
+        create_stages!(object,action_list,opts)
       end
 
       def create_subtask_instances(task_mh,assembly_idh)
@@ -35,9 +35,35 @@ module DTK; class Task
           }
         end
       end
+      def self.parse_and_reify(serialized_content,action_list)
+        #normalize wrt whether there are explicit subtasks and then call create stages
+        new(SerializedContent.new(serialized_content[Field::Subtasks]||[serialized_content]),action_list)
+      end
+
+      class SerializedContent < Array
+        def initialize(array)
+          super()
+          array.each{|a|self << a}
+        end
+      end
 
     private        
-      def create_stages!(temporal_constraints,action_list,opts={})
+      def create_stages!(object,action_list,opts={})
+        if object.kind_of?(TemporalConstraints)
+          create_stages_from_temporal_constraints!(object,action_list,opts)
+        elsif object.kind_of?(SerializedContent)
+          create_stages_from_serialzied_content!(object,action_list,opts)
+        else
+          raise Error.new("create_stages! does not treat argument of type (#{object.class})")
+        end
+      end
+
+      def create_stages_from_serialzied_content!(serialized_content,action_list,opts={})
+        pp [:serialized_content,serialized_content]
+        raise Error.new("Not implemented yet")
+      end
+
+      def create_stages_from_temporal_constraints!(temporal_constraints,action_list,opts={})
         return if action_list.empty?
         unless empty?()
           raise Error.new("stages have been created already")

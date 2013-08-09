@@ -404,10 +404,15 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
+    #TODO: channge name because it is misnomer and deprecate Task::Status::Assembly.get_status()
     def rest__task_status()
-      assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
-      format = (ret_request_params(:format)||:hash).to_sym
-      response = Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
+      #  assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
+      #format = (ret_request_params(:format)||:hash).to_sym
+      #response = Task::Status::Assembly.get_status(id_handle(assembly_id),:format => format)
+      assembly = ret_assembly_instance_object()
+      task_action = ret_request_params(:task_action)
+      format = :hash #TODO: hard coded because only format supported now
+      response = assembly.get_task_template(task_action,:format => format)
       rest_ok_response response
     end
 

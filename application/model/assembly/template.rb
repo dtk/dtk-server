@@ -186,7 +186,7 @@ module DTK; class Assembly
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def self.create_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info=nil,version=nil)
+    def self.create_or_update_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info=nil,version=nil)
       project_idh = project.id_handle()
       #1) get a content object, 2) modify, and 3) persist
       port_links,dangling_links = Node.get_conn_port_links(node_idhs)

@@ -578,19 +578,15 @@ module DTK; class  Assembly
       new_sub_assembly && new_sub_assembly.id_handle()
     end
 
-    def create_new_template(service_module,new_template_name)
+    def create_or_update_template(service_module,template_name)
       service_module_name = service_module.get_field?(:display_name)
       project = service_module.get_project()
-      if Assembly::Template.exists?(project.id_handle(),service_module_name,new_template_name)
-        raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
+      node_idhs = get_nodes().map{|r|r.id_handle()}
+      if node_idhs.empty?
+        raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
       end
-
-      name_info = {
-        :service_module_name => service_module_name,
-        :assembly_template_name => new_template_name
-      }
-      create_assembly_template_from_instance(project,name_info)
-    end      
+      Assembly::Template.create_or_update_from_instance(project,node_idhs,template_name,service_module_name)
+    end
 
     def get_attributes_print_form(opts=Opts.new)
       if filter = opts[:filter]
@@ -679,20 +675,6 @@ module DTK; class  Assembly
       end
     end
 
-    def create_assembly_template_from_instance(project,name_info=nil)
-      if name_info
-        service_module_name = name_info[:service_module_name]
-        template_name = name_info[:assembly_template_name]
-      else
-        component_type = get_field?(:component_type)
-        service_module_name,template_name = Assembly::Template.parse_component_type(component_type)
-      end
-      node_idhs = get_nodes().map{|r|r.id_handle()}
-      if node_idhs.empty?
-        raise Error.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
-      end
-      Assembly::Template.create_from_instance(project,node_idhs,template_name,service_module_name)
-    end
   end
 end 
 #TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get

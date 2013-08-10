@@ -81,6 +81,9 @@ module DTK
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
         @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
         Transaction do 
+          if assembly_template_idh = id_handle_if_object_exists?()
+            self.class.delete_model_objects(assembly_template_idh)
+          end
           @template_output.save_to_model()
           @template_output.serialize_and_save_to_repo()
         end
@@ -93,8 +96,8 @@ module DTK
           :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
           :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
         }
-        if assembly_template = get_obj(assembly_mh,sp_hash)
-          subclass_model(assembly_template) #so what is returned is object of type Assembly::Templaet::Factory
+        if assembly_template = get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
+          subclass_model(assembly_template) #so that what is returned is object of type Assembly::Template::Factory
         end
       end
 

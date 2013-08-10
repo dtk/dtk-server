@@ -206,9 +206,13 @@ module DTK; class Assembly
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes
       #do not need to delete port links which use a cascade foreign key
+      delete_model_objects(assembly_idh)
+      module_repo_info
+    end
+
+    def self.delete_model_objects(assembly_idh)
       delete_assemblies_nodes([assembly_idh])
       delete_instance(assembly_idh)
-      module_repo_info
     end
 
     def self.delete_assemblies_nodes(assembly_idhs)

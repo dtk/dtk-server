@@ -6,6 +6,11 @@ module DTK
     def qualified_ref(obj_hash)
       "#{obj_hash[:ref]}#{obj_hash[:ref_num] ? "-#{obj_hash[:ref_num].to_s}" : ""}"
     end
+
+    def id_handle_if_object_exists?()
+      ret = id_handle()
+      ret if ret.get_id()
+    end
   end
   module FactoryObjectClassMixin
     def create(model_handle,hash_values)

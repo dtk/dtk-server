@@ -14,11 +14,14 @@ module DTK; class Task; class Template
       end
       
       def serialization_form(opts={})
-        map{|a|a.serialization_form(opts)}
+        {:ordered_components => map{|a|a.serialization_form(opts)}}
       end
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
-        serialized_eb.each do |serialized_action|
+        unless ordered_actions = serialized_eb[:ordered_components]
+          ParseError.new("Ill-formed Execution block (#{serialized_eb.inspect})")
+        end
+        ordered_actions.each do |serialized_action|
           if serialized_action.kind_of?(String)
             component_name_ref = serialized_action
             if action = action_list.find_matching_action(node_name,component_name_ref)

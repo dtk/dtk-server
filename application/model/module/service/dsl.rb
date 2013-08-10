@@ -70,33 +70,47 @@ module DTK
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
         assembly_dsl_path_info = assembly_dsl_filename_path_info()
-        add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
-        depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
+        #TODO: SERVICE_ADD_ON: may deprecate:     add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
+        #depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
+        depth = assembly_dsl_path_info[:path_depth]
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           dangling_errors.aggregate_errors!()  do
-            json_content = RepoManager.get_file_content(meta_file,module_branch)
-            hash_content = Aux.json_parse(json_content,meta_file)
+            file_content = RepoManager.get_file_content(meta_file,module_branch)
+            format_type = meta_file_format_type(meta_file)
+            hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
             assembly_import_helper.process(module_name,hash_content)
           end
         end
         dangling_errors.raise_error?()
 
         assembly_import_helper.import()
+=begin        
+#TODO: SERVICE_ADD_ON: may deprecate:
         ports = assembly_import_helper.ports()
         aug_assembly_nodes = assembly_import_helper.augmented_assembly_nodes()
+
         files.select{|f| f =~ add_on_dsl_path_info[:regexp]}.each do |meta_file|
           json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
           hash_content = Aux.json_parse(json_content,meta_file)
           ServiceAddOn.import(project_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
         end
+=end
+      end
+
+      def meta_file_format_type(path)
+        if path =~ /\.(json|yaml)$/
+          $1.to_sym
+        else
+          raise Error.new("Unexpected meta file path name (#{path})")
+        end
       end
 
       def assembly_dsl_filename_path_info()
         {
-          :regexp => Regexp.new("^assemblies/[^/]+/assembly.json$"),
+          :regexp => Regexp.new("^assemblies/[^/]+/assembly\.(json|yaml)$"),
           :path_depth => 3
         }
       end

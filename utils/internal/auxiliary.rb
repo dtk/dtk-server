@@ -171,10 +171,10 @@ module XYZ
         end
       end
 
-      def convert_to_hash(content,format_type)
+      def convert_to_hash(content,format_type,file_path=nil)
         case format_type
           when :json
-            json_parse(content)
+            json_parse(content,file_path)
           when :yaml
             YAML.load(content)
           else

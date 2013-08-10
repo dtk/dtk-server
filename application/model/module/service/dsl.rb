@@ -69,15 +69,9 @@ module DTK
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
-        assembly_dsl_path_info = assembly_dsl_filename_path_info()
-        #TODO: SERVICE_ADD_ON: may deprecate:     add_on_dsl_path_info = ServiceAddOn.dsl_filename_path_info()
-        #depth = [assembly_dsl_path_info[:path_depth],add_on_dsl_path_info[:path_depth]].max
-        depth = assembly_dsl_path_info[:path_depth]
-        files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
-        #Assuming that for meta have json or yaml meta file; error wil be produced if both are present
-        files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
+        assembly_meta_file_paths(module_branch).each do |meta_file|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
@@ -88,17 +82,50 @@ module DTK
         dangling_errors.raise_error?()
 
         assembly_import_helper.import()
-=begin        
-#TODO: SERVICE_ADD_ON: may deprecate:
-        ports = assembly_import_helper.ports()
-        aug_assembly_nodes = assembly_import_helper.augmented_assembly_nodes()
+      end
 
-        files.select{|f| f =~ add_on_dsl_path_info[:regexp]}.each do |meta_file|
-          json_content = RepoManager.get_file_content({:path => meta_file},module_branch)
-          hash_content = Aux.json_parse(json_content,meta_file)
-          ServiceAddOn.import(project_idh,module_name,meta_file,hash_content,ports,aug_assembly_nodes)
+      def assembly_meta_file_paths(module_branch)
+        assembly_dsl_path_info = assembly_dsl_filename_path_info()
+        depth = assembly_dsl_path_info[:path_depth]
+        ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
+        ret.reject!{|f|not (f =~ assembly_dsl_path_info[:regexp])}
+        ret_with_removed_variants(ret)
+      end
+
+      def ret_with_removed_variants(paths)
+        #if multiple files that match where one is json and one yaml, fafavor the default one
+        two_variants_found = false
+        common_paths = Hash.new
+        paths.each do |path|
+          if path  =~ /(^.+)\.([^\.]+$)/
+            all_but_type,type = $1,$2
+            if common_paths[all_but_type]
+              two_variants_found = true
+            else
+              common_paths[all_but_type] = Array.new
+            end
+            common_paths[all_but_type] << {:type => type, :path => path}
+          else
+            Log.error("Path (#{path}) has unexpected form; skipping 'removing variants analysis'")
+          end
         end
-=end
+        #shortcut
+        return paths unless two_variants_found
+        format_type_default = R8::Config[:dsl][:service][:format_type][:default]
+        ret = Array.new
+        common_paths.each_value do |variant_info|
+          if variant_info.size == 1
+            ret << variant_info[:path]
+          else
+            if match = variant_info.find{|vi|vi[:type] == format_type_default}
+              ret << match[:path]
+            else
+              choices = variant_info.amp{|vi|vi[:path]}.join(', ')
+              raise ErrorUsage.new("Cannot decide between the following meta files to use (#{choices}); deleet all but desired one")
+            end
+          end
+        end
+        ret
       end
 
       def meta_file_format_type(path)

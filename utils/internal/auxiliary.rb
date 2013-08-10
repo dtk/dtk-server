@@ -133,41 +133,42 @@ module XYZ
           when :yaml
             YAML.dump(hash_content)
           when :yaml_simple
-            yaml_simple_form(hash_content)
+            YamlHelper.simple_form(hash_content)
           else
             raise Error.new("Format (#{format_format}) is not treated")
         end
       end
 
-      YamlProcLock = Mutex.new
-      def yaml_simple_form(obj)
-        unless RUBY_VERSION =~ /^1\.9\./
-          raise Error.new("yaml_simple_form only supported in Ruby version 1.9.x")
+      module YamlHelper
+        def self.simple_form(obj)
+          ::YAML.dump(simple_form_aux(obj))
         end
-        ret = nil
-        yamler = YAML::ENGINE.yamler
-        if 'syck' == yamler 
-          ret = YAML.dump(yaml_simple_form_aux(obj))
-        else
-          YamlProcLock.synchronize do
-            YAML::ENGINE.yamler = 'syck'
-            ret = YAML.dump(yaml_simple_form_aux(obj))
-            YAML::ENGINE.yamler = yamler
+       private
+        def self.simple_form_aux(obj)
+          if obj.kind_of?(::Hash)
+            ret = ::Hash.new
+            obj.each_pair{|k,v|ret[string_form(k.to_s)] = simple_form_aux(v)}
+            ret
+          elsif obj.kind_of?(::Array)
+            obj.map{|el|simple_form_aux(el)}
+          elsif obj.kind_of?(::String)
+            string_form(obj)
+          elsif obj.kind_of?(::Fixnum)
+            obj
+          elsif obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
+            obj
+          elsif obj.respond_to?(:to_s)
+            string_form(obj.to_s)
+          else 
+            string_form(obj.inspect)
           end
         end
-        ret
-      end
-      def yaml_simple_form_aux(obj)
-        if obj.kind_of?(Hash)
-          ret = ::Hash.new
-          obj.each_pair{|k,v|ret[k.to_s]=yaml_simple_form_aux(v)}
-          ret
-        elsif obj.kind_of?(::Array)
-          obj.map{|el|yaml_simple_form_aux(el)}
-        elsif obj.respond_to?(:to_s)
-          obj.to_s
-        else 
-          obj.inspect
+        def self.string_form(str)
+          if str.respond_to?(:force_encoding)
+            str.force_encoding(Encoding::UTF_8)
+          else
+            str
+          end
         end
       end
 

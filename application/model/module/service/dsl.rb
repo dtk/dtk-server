@@ -76,6 +76,7 @@ module DTK
         files = RepoManager.ls_r(depth,{:file_only => true},module_branch)
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
+        #Assuming that for meta have json or yaml meta file; error wil be produced if both are present
         files.select{|f|f =~ assembly_dsl_path_info[:regexp]}.each do |meta_file|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)

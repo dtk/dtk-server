@@ -35,7 +35,6 @@ module XYZ
         RUBY_PLATFORM
       end
 
-
       def now_time_stamp()
         SQL.now
         #TODO: change to use app server clock
@@ -133,8 +132,42 @@ module XYZ
             JSON.pretty_generate(hash_content)
           when :yaml
             YAML.dump(hash_content)
+          when :yaml_simple
+            yaml_simple_form(hash_content)
           else
             raise Error.new("Format (#{format_format}) is not treated")
+        end
+      end
+
+      YamlProcLock = Mutex.new
+      def yaml_simple_form(obj)
+        unless RUBY_VERSION =~ /^1\.9\./
+          raise Error.new("yaml_simple_form only supported in Ruby version 1.9.x")
+        end
+        ret = nil
+        yamler = YAML::ENGINE.yamler
+        if 'syck' == yamler 
+          ret = YAML.dump(yaml_simple_form_aux(obj))
+        else
+          YamlProcLock.synchronize do
+            YAML::ENGINE.yamler = 'syck'
+            ret = YAML.dump(yaml_simple_form_aux(obj))
+            YAML::ENGINE.yamler = yamler
+          end
+        end
+        ret
+      end
+      def yaml_simple_form_aux(obj)
+        if obj.kind_of?(Hash)
+          ret = ::Hash.new
+          obj.each_pair{|k,v|ret[k.to_s]=yaml_simple_form_aux(v)}
+          ret
+        elsif obj.kind_of?(::Array)
+          obj.map{|el|yaml_simple_form_aux(el)}
+        elsif obj.respond_to?(:to_s)
+          obj.to_s
+        else 
+          obj.inspect
         end
       end
 

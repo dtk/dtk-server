@@ -8,7 +8,8 @@ module DTK; class Task
     module Serialization
       module Field
         Subtasks = :subtasks
-        TemporalOrder = :temporal_order
+        TemporalOrder = :subtask_order
+        ExecutionBlocks = :exec_blocks
       end
       module Constant
         Concurrent = :concurrent

@@ -20,12 +20,12 @@ module DTK; class Task; class Template
         if size == 1
           ret.merge(first.serialization_form(opts_x))
         else
-          ret.merge(:execution_blocks =>  map{|eb|eb.serialization_form(opts_x)})
+          ret.merge(Field::ExecutionBlocks =>  map{|eb|eb.serialization_form(opts_x)})
         end
       end
       def self.parse_and_reify(serialized_node_actions,node_name,action_list)
         #normalize to take into account it may be single execution block
-        normalized_content = serialized_node_actions[:execution_blocks]||[serialized_node_actions]
+        normalized_content = serialized_node_actions[Field::ExecutionBlocks]||[serialized_node_actions]
         ret = new()
         normalized_content.each{|serialized_eb|ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb,node_name,action_list)}
         ret

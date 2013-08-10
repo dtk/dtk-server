@@ -195,7 +195,7 @@ module DTK; class Assembly
 
       service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
 
-      assembly_factory = Factory.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      assembly_factory = Factory.create_container_for_clone?(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
       ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
       assembly_factory.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
       assembly_factory.create_assembly_template(project_idh,service_module_branch)
@@ -259,20 +259,11 @@ module DTK; class Assembly
       assembly_templates.each do |assembly|
         components << assembly.info_about(:components)
       end
-
-      return components.flatten
+      components.flatten
     end
 
-    def self.exists?(project_idh,service_module_name,template_name)
-      component_type = component_type(service_module_name,template_name)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
-      }
-      get_obj(project_idh.createMH(:component),sp_hash)
-    end
     #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
-        def self.check_valid_id(model_handle,id)
+    def self.check_valid_id(model_handle,id)
       begin
         check_valid_id__library_parent(model_handle,id)
        rescue ErrorIdInvalid 

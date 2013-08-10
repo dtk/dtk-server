@@ -10,7 +10,10 @@ module DTK
   module FactoryObjectClassMixin
     def create(model_handle,hash_values)
       idh = (hash_values[:id] ? model_handle.createIDH(:id => hash_values[:id]) : model_handle.create_stubIDH())
-      self.new(hash_values,model_handle[:c],model_name(),idh)
+      new(hash_values,model_handle[:c],model_name(),idh)
+    end
+    def subclass_model(model_object)
+      new(model_object,model_object.model_handle[:c],model_name(),model_object.id_handle())
     end
   end
 end

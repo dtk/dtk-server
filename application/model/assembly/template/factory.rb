@@ -4,7 +4,13 @@ module DTK
     class Factory < self
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
-      def self.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      #creates a new assembly template if does not exist
+      def self.create_container_for_clone?(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+        assembly_mh = project_idh.create_childMH(:component)
+        if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)
+          return ret
+        end
+
         assembly_mh = project_idh.create_childMH(:component)
         hash_values = {
           :project_project_id => project_idh.get_id(),
@@ -81,6 +87,17 @@ module DTK
       end
 
      private
+      def self.exists?(assembly_mh,project_idh,service_module_name,template_name)
+        component_type = component_type(service_module_name,template_name)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
+          :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
+        }
+        if assembly_template = get_obj(assembly_mh,sp_hash)
+          subclass_model(assembly_template) #so what is returned is object of type Assembly::Templaet::Factory
+        end
+      end
+
       def create_port_link_content(port_link)
         in_port = @ndx_ports[port_link[:input_id]]
         in_node_ref = node_ref(@ndx_nodes[in_port[:node_node_id]])

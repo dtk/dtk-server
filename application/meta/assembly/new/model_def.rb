@@ -80,7 +80,7 @@ lambda__instance_nodes_and_components =
   {
     :type => :json, 
     :hidden => true,
-    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) + [segment_assembly_template]
+    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) 
   }
 }
 lambda__instance_nodes_components_assembly_template = 

@@ -73,23 +73,30 @@ module DTK
         self
       end
       def create_assembly_template(project_idh,service_module_branch)
-        nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
-        port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
+        nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
+        port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
+        mark_as_complete?(nodes,port_links)
 
         @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
         assembly_ref = self[:ref]
         assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
         @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
         Transaction do 
-          if assembly_template_idh = id_handle_if_object_exists?()
-            self.class.delete_model_objects(assembly_template_idh)
-          end
           @template_output.save_to_model()
           @template_output.serialize_and_save_to_repo()
         end
       end
 
-     private
+      private
+      def mark_as_complete?(nodes,port_links)
+        #only need to mark as complete if assembly templaet exists already
+        if assembly_template_idh = id_handle_if_object_exists?()
+          mark_as_complete_constraint = {:assembly_id=>assembly_template_idh.get_id()}
+          nodes.mark_as_complete(mark_as_complete_constraint,:apply_recursively => true)
+          port_links.mark_as_complete(mark_as_complete_constraint)
+        end
+      end
+
       def self.exists?(assembly_mh,project_idh,service_module_name,template_name)
         component_type = component_type(service_module_name,template_name)
         sp_hash = {

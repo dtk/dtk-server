@@ -1,5 +1,5 @@
 #TODO: unify with file_asset/r8_meta
-module XYZ
+module DTK
   module CommonInputImport
     def uri_qualified_by_username(relation_type,ref,username)
       username ? "/#{relation_type}/#{ref}-#{username}" : "/#{relation_type}/#{ref}"

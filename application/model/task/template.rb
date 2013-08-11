@@ -18,7 +18,7 @@ module DTK; class Task
       class ParseError < ::DTK::ErrorUsage
       end
 
-      #TOD: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
+      #TODO: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)
           super()
@@ -35,27 +35,25 @@ module DTK; class Task
     r8_nested_require('template','stage')
     r8_nested_require('template','config_components')
 
-   private
-    def self.get_serialized_content(mh,filter,task_action=nil)
-      task_action ||= default_task_action()
-      sp_hash = {
-        :cols => [:content],
-        :filter => [:and,filter,[:eq,:task_action,task_action]]
-      }
-      ret = (get_obj(mh,sp_hash)||{})[:content]
-      ret && Serialization::OrderedHash.new(ret)
+    def self.common_columns()
+      [:id,:display_name,:content]
     end
 
+    def self.default_task_action()
+      ActionType::Create
+    end
+
+    def serialized_content_hash_form()
+      Serialization::OrderedHash.new(self)
+    end
+
+   private
     def self.persist_serialized_content(mh,serialized_content,match_assigns,task_action=nil)
       task_action ||= default_task_action()
       all_match_assigns = {:task_action => task_action}.merge(match_assigns)
       other_assigns = {:content => serialized_content}
       ref = task_action
       create_from_row?(mh,ref,all_match_assigns,other_assigns,:convert => true)
-    end
-
-    def self.default_task_action()
-      ActionType::Create
     end
 
   end

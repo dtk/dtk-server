@@ -8,13 +8,28 @@ module DTK; class  Assembly
     include ServiceLinkMixin
 
     ### standard get methods
+    def get_task_templates()
+      sp_hash = {
+        :cols => Task::Template.common_columns(),
+        :filter => [:eq,:component_component_id,id()]
+      }
+      Model.get_objs(model_handle(:task_template),sp_hash)
+    end
+    def get_task_template(task_action=nil)
+      task_action ||= Task::Template.default_task_action()
+      sp_hash = {
+        :cols => Task::Template.common_columns(),
+        :filter => [:and,[:eq,:component_component_id,id()],
+                    [:eq,:task_action,task_action]]
+      }
+      Model.get_obj(model_handle(:task_template),sp_hash)
+    end
 
-    def get_task_template(task_action=nil,opts={})
-      filter = [:eq,:component_component_id,id()]
+    def get_task_template_serialized_content(task_action=nil,opts={})
       format = opts[:format]||:hash
       if format == :hash
-        ret = Task::Template.get_serialized_content(model_handle(:task_template),filter,task_action)
-        ret || {:message => "Task not yet generated for assembly (#{get_field?(:display_name)})"}
+        ret = get_task_template(task_action)
+        ret && ret.serialized_content_hash_form()
       else
         raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
       end

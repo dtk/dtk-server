@@ -36,9 +36,8 @@ module DTK; class Task
       
      private
       def self.get_serialized_content_from_assembly(assembly,task_action=nil)
-        task_template_mh = assembly.model_handle(:task_template)
-        filter = [:eq,:component_component_id,assembly.id()]
-        Template.get_serialized_content(task_template_mh,filter,task_action)
+        ret = assembly.get_task_template(task_action)
+        ret && ret.serialized_content_hash_form()
       end
 
       def self.persist_serialized_content_on_assembly(assembly,serialized_content,task_action=nil)

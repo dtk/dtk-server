@@ -143,7 +143,7 @@ module DTK; class ServiceModule
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
         dangling_errors.aggregate_errors!(h) do
-          node_ref = "#{assembly_ref_with_version}--#{node_hash_ref}"
+          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => "stub",

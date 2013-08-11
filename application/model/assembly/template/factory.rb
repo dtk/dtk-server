@@ -156,6 +156,7 @@ module DTK
 
         assembly_ref = self[:ref]
         #TODO: make port_link_ref and port_refs shorter
+        #TODO: they dont match the numeric ref that is put in in original popultaion; so od are deleted and new asserted
         #TODO: may a prori look up port ids
         port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
@@ -167,8 +168,9 @@ module DTK
       end
       
       def node_ref(node)
-        "#{self[:ref]}-#{node[:display_name]}"
+        assembly_template_node_ref(self[:ref],node[:display_name])
       end
+
       def create_node_content(node)
         node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}

@@ -3,6 +3,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     r8_nested_require('assembly_import','port')
     include PortMixin
+    include FactoryObjectClassMixin
     def initialize(container_idh,module_branch,module_name,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
@@ -83,7 +84,7 @@ module DTK; class ServiceModule
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
         dangling_errors.aggregate_errors!(h) do
-          node_ref = "#{assembly_ref_with_version}--#{node_hash_ref}"
+          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
           node_output = {
             "display_name" => node_hash_ref, 
             "type" => "stub",

@@ -1106,6 +1106,9 @@ POSSIBLE CHANGES TO HASH
     end
 
     def clone_assembly_ide(explicit_hash=nil)
+raise Error.new("Not implemented")
+=begin
+TODO: rewrite using refactored Assembly::Template.create_or_update_from_instance
       #TODO: temp hack
       assembly_name, service_id = ret_non_null_request_params(:name,:service_id)
       item_list = JSON.parse(ret_non_null_request_params(:item_list))
@@ -1123,6 +1126,7 @@ POSSIBLE CHANGES TO HASH
       project = get_default_project()
       Assembly::Template.create_or_update_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
+=end
     end
   end
 end

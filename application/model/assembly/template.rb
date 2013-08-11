@@ -13,6 +13,10 @@ module DTK; class Assembly
       new_assembly_obj
     end
 
+    def self.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version=nil)
+      Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version)
+    end
+
     ### standard get methods
     def get_nodes(opts={})
       self.class.get_nodes([id_handle()],opts)
@@ -184,21 +188,6 @@ module DTK; class Assembly
         include_nodes ? el.merge(:nodes => r[:ndx_nodes].values) : el
       end
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-
-    def self.create_or_update_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info=nil,version=nil)
-      project_idh = project.id_handle()
-      #1) get a content object, 2) modify, and 3) persist
-      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
-      #TODO: raise error to user if dangling link
-      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-
-      service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
-
-      assembly_factory = Factory.create_container_for_clone?(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
-      assembly_factory.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
-      assembly_factory.create_assembly_template(project_idh,service_module_branch)
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)

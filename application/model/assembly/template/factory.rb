@@ -4,11 +4,46 @@ module DTK
     class Factory < self
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
-      #creates a new assembly template if does not exist
-      def self.create_container_for_clone?(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      #creates a new assembly template if it does not exist
+      def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,version=nil)
+
+        node_idhs = assembly_instance.get_nodes().map{|r|r.id_handle()}
+        if node_idhs.empty?
+          raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
+        end
+        ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
+
+        #1) get a content object, 2) modify, and 3) persist
+        port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+        #TODO: raise error to user if dangling link
+        Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+
+        task_templates = [] #TODO: stub
+        assembly_factory = create_container_for_clone?(service_module,assembly_name,version)
+        assembly_factory.create_assembly_template(node_idhs,port_links,task_templates,ws_branches)
+      end
+
+      def create_assembly_template(node_idhs,port_links,task_templates,ws_branches)
+        add_content_for_clone!(node_idhs,port_links,task_templates,ws_branches)
+        create_assembly_template_aux()
+      end
+
+      def set_attrs!(project_idh,service_module_branch)
+        @project_idh = project_idh
+        @service_module_branch = service_module_branch
+        self
+      end
+
+     private
+      def self.create_container_for_clone?(service_module,assembly_name,version=nil)
+        project = service_module.get_project()
+        project_idh = project.id_handle()
+        service_module_name = service_module.get_field?(:display_name)        
+        service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
+
         assembly_mh = project_idh.create_childMH(:component)
         if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)
-          return ret
+          return ret.set_attrs!(project_idh,service_module_branch)
         end
 
         assembly_mh = project_idh.create_childMH(:component)
@@ -16,15 +51,18 @@ module DTK
           :project_project_id => project_idh.get_id(),
           :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
-          :ui => icon_info,
+          #TODO: was used in GUI  :ui => icon_info,
           :type => "composite",
           :module_branch_id => service_module_branch[:id],
           :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
         }
-        create(assembly_mh,hash_values)
+        ret = create(assembly_mh,hash_values)
+        ret.set_attrs!(project_idh,service_module_branch)
       end
 
-      def add_content_for_clone!(project_idh,node_idhs,port_links,augmented_branches)
+      attr_reader :project_idh,:service_module_branch
+
+      def add_content_for_clone!(node_idhs,port_links,task_templates,augmented_branches)
         node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
@@ -68,11 +106,12 @@ module DTK
             matching_cmp[:non_default_attributes] << attr
           end
         end
-        self[:nodes] = @ndx_nodes.values
-        self[:port_links] = port_links
+
+        merge!(:nodes => @ndx_nodes.values, :port_links => port_links, :task_templates => task_templates)
         self
       end
-      def create_assembly_template(project_idh,service_module_branch)
+
+      def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
         mark_as_complete?(nodes,port_links)
@@ -87,7 +126,6 @@ module DTK
         end
       end
 
-      private
       def mark_as_complete?(nodes,port_links)
         #only need to mark as complete if assembly templaet exists already
         if assembly_template_idh = id_handle_if_object_exists?()

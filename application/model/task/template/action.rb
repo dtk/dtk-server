@@ -55,6 +55,13 @@ module DTK; class Task; class Template
       end
 
       def serialization_form(opts={})
+        if filter = opts[:filter]
+          if filter.keys == [:source]
+            return nil unless filter[:source] == source_type()
+          else
+            raise Error.new("Not treating filter of form (#{filter.inspect})")
+          end
+        end
         cmp =  component()
         node_name = ((!opts[:no_node_name_prefix]) && cmp[:node][:display_name])
         cmp_name = Component.component_type_print_form(cmp[:component_type])

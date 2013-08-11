@@ -14,7 +14,8 @@ module DTK; class Task; class Template
       end
       
       def serialization_form(opts={})
-        {:ordered_components => map{|a|a.serialization_form(opts)}}
+        ordered_components = map{|a|a.serialization_form(opts)}.compact
+        {:ordered_components => ordered_components} unless ordered_components.empty?
       end
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()

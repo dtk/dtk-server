@@ -20,11 +20,17 @@ module DTK
         task_template_content = Task::Template::ConfigComponents.get_or_generate(assembly,component_type)
         stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
+        pp "---encoding of task_template_content.serialization_form(:filter => {:source => :assembly})"
+        serialization_hash = task_template_content.serialization_form(:filter => {:source => :assembly})
+        STDOUT << Aux.serialize(serialization_hash,:yaml_simple)
+        STDOUT << "\n\n"
+        pp "--- end: encodings of task_template_content.serialization_form(:filter => {:source => :assembly})"
         pp "---encoding of task_template_content.serialization_form()"
         serialization_hash = task_template_content.serialization_form()
         STDOUT << Aux.serialize(serialization_hash,:yaml_simple)
         STDOUT << "\n\n"
         pp "--- end: encodings of task_template_content.serialization_form()"
+
         raise ErrorUsage.new("stop here")
       else
 #TODO: will deprecate this

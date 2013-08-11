@@ -23,12 +23,12 @@ module DTK; class Task
         ret
       end
       
-      def serialization_form()
+      def serialization_form(opts={})
         #Dont put in sequential block if just single stage
         if size == 1
-          first.serialization_form(:no_inter_node_stage_name=>true)
+          first.serialization_form({:no_inter_node_stage_name=>true}.merge(opts))
         else
-          subtasks = map{|internode_stage|internode_stage.serialization_form()}
+          subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}
           {
             Field::TemporalOrder => Constant::Sequential,
             Field::Subtasks => subtasks

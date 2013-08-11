@@ -135,7 +135,8 @@ module DTK
     end
 
     def hash_subset(*cols)
-      Aux::hash_subset(self,cols,:seed=>id_handle().create_object())
+      #set seed to model class w/o any keys
+      Aux::hash_subset(self,cols,:seed=>self.class.create_stub(model_handle()))
     end
 
     module Delim

@@ -9,7 +9,7 @@ R8::ReactorRoute.draw do
   get 'user/process_logout'   => "user#process_logout"
 
    # ASSEMBLY
-  post  'assembly/create_new_template' => 'assembly#create_new_template'
+  post  'assembly/promote_to_template' => 'assembly#promote_to_template'
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'

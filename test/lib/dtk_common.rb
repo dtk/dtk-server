@@ -428,7 +428,7 @@ class DtkCommon
 	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
 		puts "Create assembly template from assembly:", "---------------------------------------"
 		template_created = false	
-		create_assembly_template_response = send_request('/rest/assembly/create_new_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
+		create_assembly_template_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
 		if (create_assembly_template_response['status'] == 'ok')
 			puts "Assembly template #{assembly_template_name} created in service #{service_name}"
 			template_created = true

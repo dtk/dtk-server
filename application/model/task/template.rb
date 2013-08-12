@@ -44,7 +44,9 @@ module DTK; class Task
     end
 
     def serialized_content_hash_form()
-      Serialization::OrderedHash.new(self)
+      if content = get_field?(:content)
+      Serialization::OrderedHash.new(content)
+      end
     end
 
    private

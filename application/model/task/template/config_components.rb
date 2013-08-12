@@ -24,9 +24,6 @@ module DTK; class Task
         #persist serialized form
         serialized_content = template_content.serialization_form()
         persist_serialized_content_on_assembly(assembly,serialized_content)
-        pp [:serialized_content,serialized_content]
-        raise ErrorUsage.new("Exercising the other path after saving")
-
         template_content
       end
 

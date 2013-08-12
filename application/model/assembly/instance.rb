@@ -8,17 +8,17 @@ module DTK; class  Assembly
     include ServiceLinkMixin
 
     ### standard get methods
-    def get_task_templates()
+    def get_task_templates(opts={})
       sp_hash = {
         :cols => Task::Template.common_columns(),
         :filter => [:eq,:component_component_id,id()]
       }
       Model.get_objs(model_handle(:task_template),sp_hash)
     end
-    def get_task_template(task_action=nil)
+    def get_task_template(task_action=nil,opts={})
       task_action ||= Task::Template.default_task_action()
       sp_hash = {
-        :cols => Task::Template.common_columns(),
+        :cols => opts[:cols]||Task::Template.common_columns(),
         :filter => [:and,[:eq,:component_component_id,id()],
                     [:eq,:task_action,task_action]]
       }

@@ -18,7 +18,7 @@ module DTK
         #TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
-        task_templates = 
+        task_templates = assembly_instance.get_task_templates()
         assembly_factory = create_container_for_clone?(service_module,assembly_name,version)
         assembly_factory.create_assembly_template(node_idhs,port_links,task_templates,ws_branches)
       end
@@ -114,24 +114,25 @@ module DTK
       def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
-        mark_as_complete?(nodes,port_links)
+        task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
+
+        #only need to mark as complete if assembly template exists already
+        if assembly_template_idh = id_handle_if_object_exists?()
+          assembly_template_id = assembly_template_idh.get_id()
+          nodes.mark_as_complete({:assembly_id=>assembly_template_id},:apply_recursively => true)
+          port_links.mark_as_complete(:assembly_id=>assembly_template_id)
+          task_templates.mark_as_complete(:component_component_id=>assembly_template_id)
+        end
 
         @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
         assembly_ref = self[:ref]
-        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
+#        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
+        assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
+        assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
         Transaction do 
           @template_output.save_to_model()
           @template_output.serialize_and_save_to_repo()
-        end
-      end
-
-      def mark_as_complete?(nodes,port_links)
-        #only need to mark as complete if assembly templaet exists already
-        if assembly_template_idh = id_handle_if_object_exists?()
-          mark_as_complete_constraint = {:assembly_id=>assembly_template_idh.get_id()}
-          nodes.mark_as_complete(mark_as_complete_constraint,:apply_recursively => true)
-          port_links.mark_as_complete(mark_as_complete_constraint)
         end
       end
 
@@ -167,8 +168,9 @@ module DTK
         {port_link_ref => port_link_hash}
       end
       
-      def node_ref(node)
-        assembly_template_node_ref(self[:ref],node[:display_name])
+      def create_task_template_content(task_template)
+        ref,create_hash = Task::Template.ref_and_create_hash(task_template[:content],task_template[:task_action])
+        {ref => create_hash}
       end
 
       def create_node_content(node)
@@ -195,6 +197,10 @@ module DTK
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
         add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}
+      end
+
+      def node_ref(node)
+        assembly_template_node_ref(self[:ref],node[:display_name])
       end
 
       def add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)

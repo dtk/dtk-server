@@ -36,7 +36,7 @@ module DTK; class Task
     r8_nested_require('template','config_components')
 
     def self.common_columns()
-      [:id,:display_name,:content]
+      [:id,:group_id,:display_name,:task_action,:content]
     end
 
     def self.default_task_action()
@@ -45,16 +45,31 @@ module DTK; class Task
 
     def serialized_content_hash_form()
       if content = get_field?(:content)
-      Serialization::OrderedHash.new(content)
+        Serialization::OrderedHash.new(content)
       end
     end
 
+    #returns [ref,create_hash]
+    def self.ref_and_create_hash(serialized_content,task_action=nil)
+      task_action ||= default_task_action()
+      ref = ref(task_action)
+      create_hash = {
+        :task_action => task_action,
+        :content => serialized_content
+      }
+      [ref,create_hash]
+    end
+
    private
+    def self.ref(task_action)
+      task_action||default_task_action()
+    end
+
     def self.persist_serialized_content(mh,serialized_content,match_assigns,task_action=nil)
       task_action ||= default_task_action()
       all_match_assigns = {:task_action => task_action}.merge(match_assigns)
       other_assigns = {:content => serialized_content}
-      ref = task_action
+      ref = ref(task_action)
       create_from_row?(mh,ref,all_match_assigns,other_assigns,:convert => true)
     end
 

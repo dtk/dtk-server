@@ -36,9 +36,17 @@ module DTK; class Task
         end
       end
       def self.parse_and_reify(serialized_content,action_list)
-        #normalize wrt whether there are explicit subtasks and then call create stages
-        normalized_content = (serialized_content[Field::Subtasks]||[serialized_content])
-        new(SerializedContentArray.new(normalized_content),action_list)
+        #normalize to handle case wheer single stage; test fro single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
+        temporal_order = serialized_content[Field::TemporalOrder]
+        has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
+        subtasks = serialized_content[Field::Subtasks]
+        normalized_subtasks = 
+          if subtasks
+            has_multi_internode_stages ? subtasks : [{Field::Subtasks => subtasks}]
+          else
+            [serialized_content]
+          end
+        new(SerializedContentArray.new(normalized_subtasks),action_list)
       end
 
       class SerializedContentArray < Array

@@ -8,8 +8,6 @@ module DTK; class Task
         end
 
         #next see if there is a persistent serialized task template
-        #TODO: modify to handle case where serialized_content is just assembly actions vs assembly plus node-centric actions
-        #in former case want to splice in node centric
         if serialized_content = get_serialized_content_from_assembly(assembly)
           cmp_action_list = ActionList::ConfigComponents.get(assembly,component_type)
           return Content.parse_and_reify(serialized_content,cmp_action_list)

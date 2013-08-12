@@ -131,8 +131,6 @@ module XYZ
           when :json
             JSON.pretty_generate(hash_content)
           when :yaml
-            YAML.dump(hash_content)
-          when :yaml_simple
             YamlHelper.simple_form(hash_content)
           else
             raise Error.new("Format (#{format_format}) is not treated")
@@ -165,7 +163,7 @@ module XYZ
         end
         def self.string_form(str)
           if str.respond_to?(:force_encoding)
-            str.force_encoding(Encoding::UTF_8)
+            str.dup.force_encoding(Encoding::UTF_8)
           else
             str
           end

@@ -40,7 +40,7 @@ module DTK
       end
 
       def assembly_meta_filename_path()
-        ServiceModule::assembly_meta_filename_path(assembly_hash()[:display_name])
+        ServiceModule.assembly_meta_filename_path(assembly_hash()[:display_name])
       end
 
       def assembly_hash()

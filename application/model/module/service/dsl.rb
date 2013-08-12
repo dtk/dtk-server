@@ -32,8 +32,19 @@ module DTK
         "assemblies/#{assembly_name}"
       end
       def assembly_meta_filename_path(assembly_name)
-        "#{assembly_meta_directory_path(assembly_name)}/assembly.json"
+        file_type = dsl_files_format_type()
+        "#{assembly_meta_directory_path(assembly_name)}/assembly.#{file_type}"
       end
+
+      def dsl_files_format_type()
+        format_type_default = R8::Config[:dsl][:service][:format_type][:default]
+        case format_type_default
+        when "json" then "json"
+        when "yaml" then "yaml"
+          else raise Error.new("Unexepcted value for dsl.service.format_type.default: #{format_type_default}")
+        end
+      end
+      private :dsl_files_format_type
     end
 
     module DSLMixin

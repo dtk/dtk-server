@@ -5,12 +5,14 @@ module DTK
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
-        SimpleOrderedHash.new(
+        temporal_ordering = temporal_ordering_hash()
+        ret = SimpleOrderedHash.new(
          [
           {:name => assembly_hash()[:display_name]},
           {:node_bindings => node_bindings_hash}, 
-          {:assembly => assembly_hash}
-         ])
+          {:assembly => assembly_hash},
+          temporal_ordering && {:ordering => temporal_ordering}
+         ].compact)
       end
 
       def assembly_output_hash()
@@ -18,7 +20,7 @@ module DTK
         #add assembly level attributes
         #TODO: stub
       
-        #TODO: need to add in component overide values
+        #TODO: need to add in component override values
         #add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
@@ -50,6 +52,12 @@ module DTK
           end
         end
         ret
+      end
+
+      def temporal_ordering_hash()
+        if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
+          default_action_task_template[:content]
+        end
       end
 
       def parse_port_ref(qualified_port_ref,node_ref_to_name)

@@ -126,7 +126,6 @@ module DTK
 
         @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
         assembly_ref = self[:ref]
-#        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
         assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
         assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
         @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})

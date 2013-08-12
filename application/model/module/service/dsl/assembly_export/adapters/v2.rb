@@ -11,7 +11,7 @@ module DTK
           {:name => assembly_hash()[:display_name]},
           {:node_bindings => node_bindings_hash}, 
           {:assembly => assembly_hash},
-          temporal_ordering && {:ordering => temporal_ordering}
+          temporal_ordering && {:workflow => temporal_ordering}
          ].compact)
       end
 
@@ -56,7 +56,7 @@ module DTK
 
       def temporal_ordering_hash()
         if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
-          default_action_task_template[:content]
+          SimpleOrderedHash.new(:action => "create_assembly").merge(default_action_task_template[:content])
         end
       end
 

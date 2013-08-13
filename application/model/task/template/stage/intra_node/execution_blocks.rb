@@ -11,21 +11,19 @@ module DTK; class Task; class Template
       end
 
       def serialization_form(opts={})
+        opts_x = {:no_node_name_prefix => true}.merge(opts)
+        execution_blocks =  map{|eb|eb.serialization_form(opts_x)}.compact
+        return nil if execution_blocks.empty?()
+
         ret = OrderedHash.new()
         if node_name = node_name()
           ret[:node] = node_name
         end
-        opts_x = {:no_node_name_prefix => true}.merge(opts)
-        execution_blocks =  map{|eb|eb.serialization_form(opts_x)}.compact
-        size = execution_blocks.size
-        if size > 1
-          ret.merge(Field::ExecutionBlocks =>  execution_blocks)
-        elsif size == 1
+        if execution_blocks.size == 1
           #if single execution block then we remove this level of nesting
           ret.merge(execution_blocks.first)
-        else #size == 0
-          #TODO: may prune this case
-          ret
+        else          
+          ret.merge(Field::ExecutionBlocks =>  execution_blocks)
         end
       end
       def self.parse_and_reify(serialized_node_actions,node_name,action_list)
@@ -36,10 +34,10 @@ module DTK; class Task; class Template
         ret
       end
 
-      def order_each_block(intra_node_contraints)
+      def order_each_block(intra_node_constraints)
         ret = self.class.new()
         each do |unordered_exec_block|
-          ret << unordered_exec_block.order(intra_node_contraints)
+          ret << unordered_exec_block.order(intra_node_constraints)
         end
         ret
       end

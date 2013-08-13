@@ -24,11 +24,15 @@ module DTK; class Task
       end
       
       def serialization_form(opts={})
+        subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}.compact
+        if subtasks.empty?()
+          raise Error.new("Not implemented: treatment of the task template with no actions")
+        end
         #Dont put in sequential block if just single stage
-        if size == 1
-          first.serialization_form({:no_inter_node_stage_name=>true}.merge(opts))
+        if subtasks.size == 1
+          subtasks.first.delete(:name)
+          subtasks.first
         else
-          subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}
           {
             Field::TemporalOrder => Constant::Sequential,
             Field::Subtasks => subtasks

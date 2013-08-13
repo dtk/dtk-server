@@ -221,14 +221,14 @@ module DTK
       get_objs(mh,sp_hash)
     end 
 
-    def import__dsl(commit_sha,repo,module_and_branch_info,version)
+    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts = {})
       unless version.nil?
         raise Error.new("Not implemented yet ServiceModule#import__dsl with version not equal to nil")
       end
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch)
+      update_model_from_dsl(module_branch, opts)
       module_branch.set_sha(commit_sha)
     end
 

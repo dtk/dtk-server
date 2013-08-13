@@ -1,7 +1,7 @@
 #Methods for creating, importing, importing, etc modules
 module DTK; class ComponentModule
   module ManagementMixin
-    def import__dsl(commit_sha,repo,module_and_branch_info,version)
+    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()

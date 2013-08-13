@@ -1,5 +1,5 @@
 module DTK; class Task; class Template
-  class ActionList < Array
+  class ActionList < ::Array
     r8_nested_require('action_list','config_components')
 
     def initialize(action_list=nil)
@@ -10,6 +10,8 @@ module DTK; class Task; class Template
           unless i =  a.index
             raise Error.new("An action list passed into ActionList.new must have actions with set indexes")
           end
+          @action_index[i] = a
+          self << a
         end
       end
     end
@@ -42,7 +44,7 @@ module DTK; class Task; class Template
     end
 
     def <<(el)
-      super(Action.create(el))
+      super(el.kind_of?(Action) ? el : Action.create(el))
     end
   end
 end; end; end

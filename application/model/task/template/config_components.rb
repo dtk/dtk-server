@@ -10,8 +10,11 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,component_type)
 
         #next see if there is a persistent serialized task template
-        if serialized_content = get_serialized_content_from_assembly(assembly)
-          return Content.parse_and_reify(serialized_content,cmp_actions)
+        test_create_or_get_from_template = true
+        unless test_create_or_get_from_template
+          if serialized_content = get_serialized_content_from_assembly(assembly)
+            return Content.parse_and_reify(serialized_content,cmp_actions)
+          end
         end
 
         #next see if the assembly template that the assembly instance came from has a serialized task template

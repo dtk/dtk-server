@@ -40,7 +40,8 @@ module DTK
       def self.get_or_create_task_templates(assembly_instance)
         ret = Array.new
         #TODO: only returning now the task templates for the default (assembly create action)
-        #TODO: this is hack that shoudl be cleaned up
+        #TODO: this is hack that should be cleaned up; getting content from Task::Template::ConfigComponents.get_or_generate
+        # object from  assembly_instance.get_task_template and spliciing in content with all but assembly actions filtered out
 
         task_template_content = Task::Template::ConfigComponents.get_or_generate(assembly_instance)
         

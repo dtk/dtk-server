@@ -22,6 +22,10 @@ module DTK; class Task
         Task::Action::ConfigNode.add_attributes!(attr_mh,all_actions)
         ret
       end
+
+      def splice_in(template_content)
+        raise Error.new("write splice_in")
+      end
       
       def serialization_form(opts={})
         subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}.compact

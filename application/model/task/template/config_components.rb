@@ -2,16 +2,10 @@ module DTK; class Task
   class Template
     class ConfigComponents < self
       def self.get_or_generate(assembly,component_type=nil)
-        #first see if cached content
-        if template_content = get_cached_template_content?(assembly)
-          return template_content
-        end
-
         cmp_actions = ActionList::ConfigComponents.get(assembly,component_type)
 
-        #next see if there is a persistent serialized task template
-        test_create_or_get_from_template = true
-        unless test_create_or_get_from_template
+        #first see if there is a persistent serialized task template for assembly instance and that it should be used
+        if assembly_instance_persistence?()
           if serialized_content = get_serialized_content_from_assembly(assembly)
             return Content.parse_and_reify(serialized_content,cmp_actions)
           end
@@ -27,15 +21,18 @@ module DTK; class Task
               assembly_content
             else
               node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions)
-              assembly_content.combine(node_centric_content)
+              assembly_content.splice_in(node_centric_content)
             end
           else
             generate_from_temporal_contraints(assembly,cmp_actions)
           end
 
         #persist serialized form  on assembly instance
-        serialized_content = template_content.serialization_form()
-        persist_serialized_content_on_assembly(assembly,serialized_content)
+        if assembly_instance_persistence?()
+          serialized_content = template_content.serialization_form()
+          persist_serialized_content_on_assembly(assembly,serialized_content)
+        end
+
         template_content
       end
 
@@ -44,6 +41,11 @@ module DTK; class Task
       end
       
      private
+      #whether should store/retrieve task template on assembly instance
+      def self.assembly_instance_persistence?()
+        R8::Config[:task][:template][:assembly_instance][:use_persistence]
+      end
+
       def self.generate_from_temporal_contraints(assembly,cmp_actions)
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
         opts = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}
@@ -66,11 +68,6 @@ module DTK; class Task
         Template.persist_serialized_content(task_template_mh,serialized_content,match_assigns,task_action)
       end
         
-      def self.get_cached_template_content?(assembly,task_action=nil)
-        task_action ||= default_task_action()
-        #TODO: stub
-        nil
-      end
     end
   end
 end; end

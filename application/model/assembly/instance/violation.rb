@@ -4,15 +4,16 @@ module DTK
       def find_violations()
         nodes_and_cmps = get_info__flat_list(:detail_level => "components").select{|r|r[:nested_component]}
         cmps = nodes_and_cmps.map{|r|r[:nested_component]}
-        
+
         unset_attr_viols = find_violations__unset_attrs()
         cmp_constraint_viols = find_violations__cmp_constraints(nodes_and_cmps,cmps.map{|cmp|cmp.id_handle()})
+        cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_incl_viols = find_violations__module_includes(cmps)
-unless mod_incl_viols.empty?
-  raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
-end
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols
+        unless mod_incl_viols.empty?
+          raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
+        end
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols + cmp_parsing_errors
       end
      private
       def find_violations__unset_attrs()
@@ -51,6 +52,22 @@ end
         ret
       end
 
+      def find_violations__cmp_parsing_error(cmps)
+        ret = Array.new
+        return ret if cmps.empty?
+
+        cmps.each do |cmp|
+          cmp_module = get_parsed_info(cmp[:module_branch_id], "Component")
+          ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+        end
+
+        assembly_branch_id = get_obj(model_handle())[:module_branch_id]
+        cmp_module = get_parsed_info(assembly_branch_id, "Service")
+        ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Service") unless cmp_module[:dsl_parsed]
+
+        ret
+      end
+
       #thjis also serves to set implementation_id on module includes that are not set already
       def find_violations__module_includes(cmps)
         ret = Array.new
@@ -69,6 +86,28 @@ end
         }
         impl_mh = cmps.first.model_handle(:implementation)
         get_objs(impl_mh,sp_hash)
+      end
+
+      def get_parsed_info(module_branch_id, type)
+        sp_hash = {
+          :cols => [:id, :type, :component_id, :service_id],
+          :filter => [:eq, :id, module_branch_id]
+        }
+        branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+
+        if (type == "Component")
+          sp_cmp_hash = {
+            :cols => [:id, :display_name, :dsl_parsed],
+            :filter => [:eq, :id, branch[:component_id]]
+          }
+          return cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
+        else
+          sp_cmp_hash = {
+            :cols => [:id, :display_name, :dsl_parsed],
+            :filter => [:eq, :id, branch[:service_id]]
+          }
+          return cmp_module = Model.get_obj(model_handle(:service_module),sp_cmp_hash)
+        end
       end
 
     end
@@ -106,6 +145,18 @@ end
         end
         def description()
           "Service ref (#{@augmented_port.display_name_print_form()}) is not connected, but required to be"
+        end
+      end
+      class ComponentParsingError < self
+        def initialize(component, type)
+          @component = component
+          @type = type
+        end
+        def type()
+          :parsing_error
+        end
+        def description()
+          "#{@type} '#{@component}' has syntax errors in DSL files."
         end
       end
     end

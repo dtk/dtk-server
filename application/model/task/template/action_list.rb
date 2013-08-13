@@ -1,9 +1,30 @@
 module DTK; class Task; class Template
   class ActionList < Array
     r8_nested_require('action_list','config_components')
+
+    def initialize(action_list=nil)
+      super()
+      @action_index = Hash.new
+      if action_list
+        action_list.each do |a|
+          unless i =  a.index
+            raise Error.new("An action list passed into ActionList.new must have actions with set indexes")
+          end
+        end
+      end
+    end
+
     def set_action_indexes!()
-      each_with_index{|a,i|a.index = i}
+      #sets both indexes on actions @action_index
+      each_with_index do |a,i|
+        a.index = i
+        @action_index[i] = a
+      end
       self
+    end
+
+    def index(i)
+      @action_index[i]
     end
 
     def find_matching_node_id(node_name)

@@ -19,7 +19,7 @@ module DTK; class Task
         template_content = 
           if serialized_content = get_serialized_content_from_assembly_template(assembly)
             assembly_content = Content.parse_and_reify(serialized_content,cmp_actions)
-            node_centric_cmp_actions = cmp_actions.select{|a|a.source_type() == :node_group}
+            node_centric_cmp_actions = ActionList.new(cmp_actions.select{|a|a.source_type() == :node_group})
             if node_centric_cmp_actions.empty?
               assembly_content
             else

@@ -72,8 +72,8 @@ module DTK; class Task; class Template
         def create(stage_action_indexes,name=nil)
           #first break each state into unordered list per node
           ret = InterNode.new(name)
-          stage_action_indexes.each do |index|
-            action = @action_list[index]
+          stage_action_indexes.each do |i|
+            action = @action_list.index(i)
             (ret[action.node_id] ||= IntraNode::Unordered.new()) << action
           end
           

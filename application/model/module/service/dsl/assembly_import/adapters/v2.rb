@@ -2,10 +2,18 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
       def self.assembly_iterate(module_name,hash_content,&block)
-        name = hash_content["name"]
-        assemblies_hash = {ServiceModule.assembly_ref(module_name,name) => hash_content["assembly"].merge("name" => name)}
+        assembly_hash = hash_content["assembly"].merge(Aux::hash_subset(hash_content,["name","workflow"]))
+        assemblies_hash = {ServiceModule.assembly_ref(module_name,name) => assembly_hash}
         node_bindings_hash = hash_content["node_bindings"]
         block.call(assemblies_hash,node_bindings_hash)
+      end
+
+      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
+        ret = super
+        if task_templates = import_task_templates(assembly_hash)
+          ret.merge!("task_template" => task_templates)
+        end
+        ret
       end
 
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
@@ -29,6 +37,27 @@ module DTK; class ServiceModule
 
      private
       include AssemblyImportExportCommon
+
+      def self.import_task_templates(assembly_hash)
+        #TODO: just treating the default action
+        unless workflow =  assembly_hash["workflow"]
+          return nil
+        end
+
+        #its ok to delete from assembly_hash/workflow
+        if assembly_action = workflow.delete("assembly_action")
+          unless  assembly_action == "create"
+            raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
+          end
+        end
+        task_template_ref = task_action = Task::Template.default_task_action()
+        {
+          task_template_ref => {
+            "task_action" => task_action,
+            "content" => workflow
+          }
+        }
+      end
 
       def self.pp_port_ref(port_ref)
         ret = "#{port_ref[:node]}/#{port_ref[:component_type].gsub(/__/,"::")}"

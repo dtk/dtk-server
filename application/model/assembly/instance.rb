@@ -24,6 +24,10 @@ module DTK; class  Assembly
       }
       Model.get_obj(model_handle(:task_template),sp_hash)
     end
+    def get_parents_task_template(task_action=nil)
+      task_action ||= Task::Template.default_task_action()
+      get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
+    end
 
     def get_task_template_serialized_content(task_action=nil,opts={})
       format = opts[:format]||:hash

@@ -346,6 +346,25 @@ lambda__instance_nodes_components_assembly_template =
          :cols=>[:id,:display_name,:ui,:type]
        }]
     },
+    :parents_task_templates=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :alias => :template,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__ancestor_id},
+         :cols=>[:id,:display_name]
+       },
+       {
+         :model_name=>:task_template,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:component_component_id=>:template__id},
+         :cols=>Task::Template.common_columns()
+       }]
+    },
     :service_add_ons_from_instance=> {
       :type=>:json,
       :hidden=>true,

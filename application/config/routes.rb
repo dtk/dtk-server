@@ -99,6 +99,7 @@ R8::ReactorRoute.draw do
   post  'node/list' => 'node#list'
   post  'node/info' => 'node#info'
   post  'node/info_about' => 'node#info_about'
+  post  'node/find_violations' => 'node#find_violations'
   post  'node/get_attributes' => 'node#get_attributes'
   post  'node/set_attributes' => 'node#set_attributes'
   post  'node/add_component' => 'node#add_component'

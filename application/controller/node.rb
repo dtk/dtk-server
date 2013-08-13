@@ -186,6 +186,15 @@ module XYZ
       rest_ok_response :node_id => node_instance_idh.get_id()
     end
 
+    def rest__find_violations()
+      node = create_node_obj(:node_id)
+      violation_objects = node.find_violations()
+      violation_table = violation_objects.map do |v|
+        {:type => v.type(),:description => v.description()}
+      end.sort{|a,b|a[:type].to_s <=> b[:type].to_s}
+      rest_ok_response violation_table
+    end
+
     def rest__create_task()
       node_idh = ret_request_param_id_handle(:node_id)
       commit_msg = ret_request_params(:commit_msg)

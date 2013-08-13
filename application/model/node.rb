@@ -207,6 +207,31 @@ module XYZ
       end
     end
 
+    def find_violations()
+      cmps = get_objs(:cols => [:components],:keep_ref_cols => true)
+      
+      ret = Array.new
+      return ret if cmps.empty?
+      
+      cmps.each do |cmp|
+        sp_hash = {
+          :cols => [:id, :type, :component_id, :service_id],
+          :filter => [:eq, :id, cmp[:component][:module_branch_id]]
+        }
+        branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+
+        sp_cmp_hash = {
+          :cols => [:id, :display_name, :dsl_parsed],
+          :filter => [:eq, :id, branch[:component_id]]
+        }
+        cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
+        
+        ret << NodeViolations::NodeComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+      end
+
+      ret
+    end
+
     def get_attributes_print_form(opts=Opts.new)
       if filter = opts[:filter]
         case filter
@@ -781,6 +806,21 @@ module XYZ
 
     ### object access functions
     #######################
+  end
+
+  class NodeViolations
+    class NodeComponentParsingError < self
+      def initialize(component, type)
+        @component = component
+        @type = type
+      end
+      def type()
+        :parsing_error
+      end
+      def description()
+        "#{@type} '#{@component}' has syntax errors in DSL files."
+      end
+    end
   end
 end
 

@@ -37,6 +37,7 @@ R8::ReactorRoute.draw do
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
   post  'assembly/info_about' => 'assembly#info_about'
+  post  'assembly/info_about_task' => 'assembly#info_about_task'
   post  'assembly/stage' => 'assembly#stage'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'

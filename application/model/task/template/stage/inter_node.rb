@@ -6,6 +6,7 @@ module DTK; class Task; class Template
         super()
         @name = name
       end
+      attr_reader :name
 
       #returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)

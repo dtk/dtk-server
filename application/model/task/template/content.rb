@@ -11,12 +11,14 @@ module DTK; class Task
         ret = Array.new
         return ret if empty?()
         all_actions = Array.new
-        each_with_index do |internode_stage,internode_stage_index|
-          internode_stage_index = internode_stage_index+1
-          #TODO: if only one node then dont need the outside 'concurrent wrapper'; to leverage the logic from serialization_form()
-          #TODO: get display name from self
-          internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{internode_stage_index.to_s}", :temporal_order => "concurrent")
-          all_actions += internode_stage.add_subtasks!(internode_stage_task,internode_stage_index,assembly_idh)
+        each_with_index do |internode_stage,stage_index|
+          stage_index += 1
+          task_hash = {
+            :display_name => internode_stage.name || "config_node_stage#{size == 1 ? '' : ('_'+stage_index.to_s)}",
+            :temporal_order => "concurrent"
+          }
+          internode_stage_task = Task.create_stub(task_mh,task_hash)
+          all_actions += internode_stage.add_subtasks!(internode_stage_task,stage_index,assembly_idh)
           ret << internode_stage_task
         end
         attr_mh = task_mh.createMH(:attribute)
@@ -94,7 +96,7 @@ module DTK; class Task
         stage_factory = Stage::InterNode::Factory.new(action_list,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(action_list)
         done = false
-        internode_stage_index = 0
+        stage_index = 0
         internode_stage_name_proc = opts[:internode_stage_name_proc]
 
         #before_index_hash gets destroyed in while loop
@@ -107,8 +109,8 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            internode_stage_index += 1
-            name = (internode_stage_name_proc && internode_stage_name_proc.call(internode_stage_index))
+            stage_index += 1
+            name = (internode_stage_name_proc && internode_stage_name_proc.call(stage_index))
             self << stage_factory.create(stage_action_indexes,name)
           end
         end

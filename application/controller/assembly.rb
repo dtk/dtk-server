@@ -301,9 +301,8 @@ module DTK
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
       end
 
-      commit_msg = ret_request_params(:commit_msg)
-      puppet_version = ret_request_params(:puppet_version)
-      task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg, puppet_version)
+      opts = ret_params_hash(:commit_msg,:puppet_version)
+      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
       # TODO: this was call from gui commit window
       # pp Attribute.augmented_attribute_list_from_task(task)
@@ -313,8 +312,8 @@ module DTK
     #TODO: replace or given options to specify specific smoketests to run
     def rest__create_smoketests_task()
       assembly = ret_assembly_instance_object()
-      commit_msg = ret_request_params(:commit_msg)
-      task = Task.create_from_assembly_instance(assembly,:smoketest,commit_msg)
+      opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
+      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
       rest_ok_response :task_id => task.id
     end

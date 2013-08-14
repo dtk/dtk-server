@@ -9,7 +9,8 @@ module DTK; class Task
         #getting content from Task::Template::ConfigComponents.get_or_generate and 
         #template object from assembly_instance.get_task_template and spliciing in content with all but assembly actions filtered out
 
-        task_template_content = get_or_generate_template_content(assembly_instance,:component_type_filter => :service,:task_action => task_action)
+        opts = {:component_type_filter => :service, :task_action => task_action}
+        task_template_content = get_or_generate_template_content(assembly_instance,opts)
         
         #special processing to strip out actions from nodes or node groups and only keep assembly actions
         unless default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])

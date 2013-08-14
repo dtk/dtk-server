@@ -4,7 +4,7 @@ module DTK; class Task; class Template
       def self.get(assembly,opts={})
         opts_assembly_cmps = {:seed => new()}
         if cmp_type_filter = opts[:component_type_filter]
-          opts_assembly_cmps.merge!(:filter_proc => lambda{|el|el[:basic_type] == cmp_type_filter.to_s}) 
+          opts_assembly_cmps.merge!(:filter_proc => lambda{|el|(el[:nested_component]||{})[:basic_type] == cmp_type_filter.to_s}) 
         end
         assembly_cmps = assembly.get_component_list(opts_assembly_cmps)
         #TODO: may treat filter on NodeGroup.get_component_list

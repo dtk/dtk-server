@@ -3,22 +3,29 @@ r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
 module DTK
   module CreateClassMixin
-    def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
+    def create_from_assembly_instance(assembly,opts={})
+      component_type = opts[:component_type]||:service
+      commit_msg = opts[:commit_msg]
+      puppet_version = opts[:puppet_version]
+
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
 
-      # smoketest should not create a node
-      if component_type == :smoketest
-        create_nodes_task = nil
-      else
-        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
-        create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
-      end
+      create_nodes_task = 
+        case component_type
+          # smoketest should not create a node
+          when :smoketest then nil
+          when :service 
+            create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
+            create_nodes_task(task_mh,create_nodes_changes)
+          else
+          raise Error.new("Unexpected component_type (#{component_type})")
+        end
 
       if R8::Config[:task][:template][:enabled]
         opts = {:component_type_filter => component_type}
-        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content(assembly,component_type,opts)
+        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content(assembly,opts)
         stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
         pp "---encoding of task_template_content.serialization_form()"

@@ -32,9 +32,8 @@ module DTK; class  Assembly
     def get_task_template_serialized_content(task_action=nil,opts={})
       format = opts[:format]||:hash
       if format == :hash
-        Task::Template::ConfigComponents.get_or_generate_template_content(:task_action => task_action).serialization_form()
-        ret = get_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
+        ret = Task::Template::ConfigComponents.get_or_generate_template_content(self,:task_action => task_action)
+        ret && ret.serialization_form()
       else
         raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
       end

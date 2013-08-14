@@ -51,8 +51,10 @@ module DTK
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         component_module_refs = update_component_module_refs(module_branch,opts)
-        update_assemblies_from_dsl(module_branch,component_module_refs)
-        set_dsl_parsed!(true)
+        parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
+        
+        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::JSONParsing)
+        parsed
       end
 
      private
@@ -87,6 +89,8 @@ module DTK
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
             hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
+            #TODO: FOR-ALDIN: extend to handle yaml parsing errors
+            return hash_content if hash_content.is_a?(ErrorUsage::JSONParsing)
             assembly_import_helper.process(module_name,hash_content)
           end
         end

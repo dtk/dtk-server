@@ -239,8 +239,9 @@ module DTK
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch, opts)
+      parsed = update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
+      parsed
     end
 
    private

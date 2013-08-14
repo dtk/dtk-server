@@ -88,6 +88,11 @@ assembly_nodes  =
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name]),
        lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id,:is_default],:join_type=>:left_outer)
      ]
+    },
+    :version_info=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:version])]
     },    
     #MOD_RESTRUCT: deprecate below for above
     :library_repo=>{

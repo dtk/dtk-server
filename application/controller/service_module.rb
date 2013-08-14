@@ -90,6 +90,13 @@ module DTK
       rest_ok_response ServiceModule.list(opts), :datatype => datatype
     end
 
+    def rest__versions()
+      service_module = create_obj(:service_module_id)
+      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+
+      rest_ok_response service_module.versions(module_id)
+    end
+
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
 

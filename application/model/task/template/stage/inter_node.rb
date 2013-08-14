@@ -17,7 +17,21 @@ module DTK; class Task; class Template
         end
         ret
       end
-      
+
+      def splice_in_at_beginning!(internode_stage)
+        ndx_splice_in_node_ids = internode_stage.node_ids().inject(Hash.new){|h,node_id|h.merge(node_id => true)}
+        each_node_id do |node_id|
+          if matching = internode_stage[node_id]
+            self[node_id].splice_in_at_beginning!(matching)
+            ndx_splice_in_node_ids.delete(node_id)
+          end
+        end
+        ndx_splice_in_node_ids.keys.each do |node_id|
+          merge!(node_id => internode_stage[node_id])
+        end
+        self
+      end
+
       def serialization_form(opts={})
         subtasks = map_node_actions{|node_actions|node_actions.serialization_form(opts)}.compact
         return nil if subtasks.empty?
@@ -49,6 +63,9 @@ module DTK; class Task; class Template
       def each_node_id(&block)
         each_key{|node_id|block.call(node_id)}
       end
+      def node_ids()
+        keys()
+      end
 
      private
       def each_node_actions(&block)
@@ -57,10 +74,6 @@ module DTK; class Task; class Template
 
       def map_node_actions(&block)
         values.map{|node_actions|block.call(node_actions)}
-      end
-
-      def self.get_indexed_node_ids(normalized_content,action_list)
-
       end
 
       class Factory

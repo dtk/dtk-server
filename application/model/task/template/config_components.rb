@@ -21,7 +21,7 @@ module DTK; class Task
               assembly_content
             else
               node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions)
-              assembly_content.splice_in(node_centric_content)
+              assembly_content.splice_in_at_beginning!(node_centric_content)
             end
           else
             generate_from_temporal_contraints(assembly,cmp_actions)

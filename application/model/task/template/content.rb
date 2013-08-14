@@ -13,7 +13,8 @@ module DTK; class Task
         all_actions = Array.new
         each_with_index do |internode_stage,internode_stage_index|
           internode_stage_index = internode_stage_index+1
-          #TODO: if only one node then dont need the outside 'concurrent wrapper'
+          #TODO: if only one node then dont need the outside 'concurrent wrapper'; to leverage the logic from serialization_form()
+          #TODO: get display name from self
           internode_stage_task = Task.create_stub(task_mh,:display_name => "config_node_stage_#{internode_stage_index.to_s}", :temporal_order => "concurrent")
           all_actions += internode_stage.add_subtasks!(internode_stage_task,internode_stage_index,assembly_idh)
           ret << internode_stage_task
@@ -23,8 +24,12 @@ module DTK; class Task
         ret
       end
 
-      def splice_in(template_content)
-        raise Error.new("write splice_in")
+      def splice_in_at_beginning!(template_content)
+        unless template_content.size == 1
+          raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
+        end
+        first.splice_in_at_beginning!(template_content.first) 
+        self
       end
       
       def serialization_form(opts={})

@@ -10,6 +10,11 @@ module DTK; class Task; class Template
         executable_action
       end
 
+      def splice_in_at_beginning!(execution_blocks)
+        pp [:fooooo,serialization_form(),execution_blocks.serialization_form()]
+        self
+      end
+
       def serialization_form(opts={})
         opts_x = {:no_node_name_prefix => true}.merge(opts)
         execution_blocks =  map{|eb|eb.serialization_form(opts_x)}.compact

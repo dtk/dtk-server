@@ -18,7 +18,7 @@ module DTK
         #TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
-        task_templates = get_or_create_task_templates(assembly_instance)
+        task_templates = Task::Template::ConfigComponents.get_or_create_templates(assembly_instance)
 
         assembly_factory = create_container_for_clone?(service_module,assembly_name,version)
         assembly_factory.create_assembly_template(node_idhs,port_links,task_templates,ws_branches)
@@ -36,24 +36,6 @@ module DTK
       end
 
      private
-
-      def self.get_or_create_task_templates(assembly_instance)
-        ret = Array.new
-        #TODO: only returning now the task templates for the default (assembly create action)
-        #TODO: this is hack that should be cleaned up; getting content from Task::Template::ConfigComponents.get_or_generate
-        # object from  assembly_instance.get_task_template and spliciing in content with all but assembly actions filtered out
-
-        task_template_content = Task::Template::ConfigComponents.get_or_generate(assembly_instance)
-        
-        #special processing to strip out actions from nodes or node groups and only keep assembly actions
-        task_action = Task::Template.default_task_action()
-        unless default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
-          return ret
-        end
-        content = task_template_content.serialization_form(:filter => {:source => :assembly})
-        [default_action_task_template.merge(:content => content)]
-      end
-
       def self.create_container_for_clone?(service_module,assembly_name,version=nil)
         project = service_module.get_project()
         project_idh = project.id_handle()

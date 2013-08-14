@@ -1,8 +1,29 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      def self.get_or_generate(assembly,component_type=nil)
-        cmp_actions = ActionList::ConfigComponents.get(assembly,component_type)
+      def self.get_or_create_templates(assembly_instance)
+        ret = Array.new
+        #TODO: only returning now the task templates for the default (assembly create action)
+        task_action = default_task_action()
+
+        #getting content from Task::Template::ConfigComponents.get_or_generate and 
+        #template object from assembly_instance.get_task_template and spliciing in content with all but assembly actions filtered out
+
+        task_template_content = get_or_generate_template_content(assembly_instance,:component_type_filter => :service,:task_action => task_action)
+        
+        #special processing to strip out actions from nodes or node groups and only keep assembly actions
+        unless default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
+          return ret
+        end
+        serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly})
+        ret << default_action_task_template.merge(:content => serialized_content)
+        ret
+      end
+
+      def self.get_or_generate_template_content(assembly,opts={})
+        task_action = opts[:task_action]||default_task_action()
+        action_list_opts = Aux.hash_subset(opts,[:component_type_filter])
+        cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
         if assembly_instance_persistence?()

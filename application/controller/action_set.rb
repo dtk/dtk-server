@@ -10,7 +10,8 @@ module XYZ
       model_name = route[0].to_sym
 
       route = R8::ReactorRoute.validate_route(request.request_method, route_key)
-      return Ramaze::Helper::Error.new.error_404("Path '#{route_key}' not found!") unless route
+      #return Ramaze::Helper::Error.new.error_404("Path '#{route_key}' not found!") unless route
+      raise Error.new("Path '#{route_key}' not found!") unless route
       # raise Error.new("Path '#{route_key}' not found!") 
       # we set new model
       model_name = route.first.to_sym

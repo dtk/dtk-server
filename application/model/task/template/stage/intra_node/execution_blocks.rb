@@ -11,7 +11,7 @@ module DTK; class Task; class Template
       end
 
       def splice_in_at_beginning!(execution_blocks)
-        pp [:fooooo,serialization_form(),execution_blocks.serialization_form()]
+        insert(0,*execution_blocks)
         self
       end
 

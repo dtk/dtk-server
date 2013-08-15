@@ -304,7 +304,7 @@ module DTK
       opts = ret_params_hash(:commit_msg,:puppet_version)
       task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
-      # TODO: this was call from gui commit window
+      # TODO: this was called from gui commit window
       # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end

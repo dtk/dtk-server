@@ -99,12 +99,16 @@ module DTK; class ComponentModule
 
       dsl_created_info = Hash.new()
       dsl_parsed_info  = Hash.new()
+
       if ComponentDSL.contains_dsl_file?(impl_obj)
         dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info, :dsl_parsed_info => dsl_parsed_info}
+      dsl_info = {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless (dsl_parsed_info.nil? || dsl_parsed_info.empty?)
+      
+      dsl_info
     end
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
@@ -114,7 +118,6 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new
       dsl_parsed_info  = Hash.new
 
-
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
           dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
@@ -123,7 +126,10 @@ module DTK; class ComponentModule
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      {:dsl_created_info => dsl_created_info, :dsl_parsed_info => dsl_parsed_info}
+      dsl_info = {:dsl_created_info => dsl_created_info}
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless (dsl_parsed_info.nil? || dsl_parsed_info.empty?)
+      
+      dsl_info
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})

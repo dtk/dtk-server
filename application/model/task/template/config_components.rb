@@ -1,23 +1,25 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      def self.get_or_create_templates(assembly_instance)
+      def self.get_existing_or_stub_templates(assembly_instance)
         ret = Array.new
         #TODO: only returning now the task templates for the default (assembly create action)
         task_action = default_task_action()
 
         #getting content from Task::Template::ConfigComponents.get_or_generate and 
-        #template object from assembly_instance.get_task_template and spliciing in content with all but assembly actions filtered out
+        #template object from assembly_instance.get_task_template of stub and spliciing in content 
+        #with all but assembly actions filtered out
 
         opts = {:component_type_filter => :service, :task_action => task_action}
-        task_template_content = get_or_generate_template_content(assembly_instance,opts)
-        
-        #special processing to strip out actions from nodes or node groups and only keep assembly actions
-        unless default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
+        unless task_template_content = get_or_generate_template_content(assembly_instance,opts)
           return ret
         end
         serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly})
+        
+        default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
+        default_action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
         ret << default_action_task_template.merge(:content => serialized_content)
+
         ret
       end
 

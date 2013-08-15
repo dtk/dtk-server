@@ -18,7 +18,7 @@ module DTK
         #TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
-        task_templates = Task::Template::ConfigComponents.get_or_create_templates(assembly_instance)
+        task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(assembly_instance)
 
         assembly_factory = create_container_for_clone?(service_module,assembly_name,version)
         assembly_factory.create_assembly_template(node_idhs,port_links,task_templates,ws_branches)

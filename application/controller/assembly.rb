@@ -74,8 +74,13 @@ module DTK
       task_action = ret_request_params(:task_action)
       format = :hash #TODO: hard coded because only format supported now
       response = assembly.get_task_template_serialized_content(task_action,:format => format)
-      response ||= {:message => "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})"}
-      rest_ok_response response
+      response_opts = Hash.new
+      if response
+        response_opts.merge!(:encode_into => :yaml)
+      else
+        response = {:message => "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})"}
+      end
+      rest_ok_response response, response_opts
     end
 
     def rest__list_modules()

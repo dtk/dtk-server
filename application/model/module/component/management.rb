@@ -30,9 +30,9 @@ module DTK; class ComponentModule
       previous_dsl_version = new_dsl_integer_version-1 
       module_branch = get_module_branch_matching_version(module_version)
 
-      #create in memory dsl object using old version
+      #create in-memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
-      #create from component_dsl teh new version dsl
+      #create from component_dsl the new version dsl
       dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end

@@ -65,7 +65,8 @@ module DTK
       if args.size == 1
         args[0]
       else
-        [{:path => args[0],:hash_content => args[1],:format_type => args[2]||default_dsl_format_type()}]
+        path,hash_content,format_type = args
+        [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
       end
       unless files.empty?
         files.each do |file_info|
@@ -75,6 +76,19 @@ module DTK
         push_changes_to_repo()
       end
     end
+
+    def dsl_format_type_form_path(path)
+      extension = (path =~ /\.([^\.]+$)/; $1)
+      unless ret = FormatTypeFromExtension[extension]
+        raise Error.new("Cannot find format type from file path (#{path})")
+      end
+      ret
+    end
+    private :dsl_format_type_form_path
+    FormatTypeFromExtension = {
+      "json" => :json,
+      "yaml" => :yaml
+    }
 
     def push_changes_to_repo()
       commit_sha = RepoManager.push_changes(self)

@@ -75,7 +75,7 @@ module XYZ
           create_options.merge!(:groups => external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default")
 
           # set the ec2 name tag
-          ec2_name = "#{::DTK::Common::Aux.running_process_user()[0...127]}:#{node[:display_name][0...255]}"
+          ec2_name = "#{task_action[:datacenter][:display_name][0...127]}:#{node[:display_name][0...255]}"
           create_options.merge!(:tags => {"Name" => ec2_name})
 
           #TODO: fix up

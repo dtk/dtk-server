@@ -61,7 +61,8 @@ module DTK; class ServiceModule
           "type" => "composite",
           "module_branch_id" => module_branch[:id],
           "version" => version_field,
-          "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
+          "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"]),
+          "attribute" => import_assembly_attributes(assembly_hash["attributes"])
         }
       }
     end
@@ -72,7 +73,6 @@ module DTK; class ServiceModule
       nb_rs_to_id = Hash.new
       unless node_to_nb_rs.empty?
         filter = [:oneof, :ref, node_to_nb_rs.values]
-        #TODO: hard coded that nodding in public library
         nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
         nb_rs_to_id = nb_rs_containter.get_node_binding_rulesets(filter).inject(Hash.new) do |h,r|
           h.merge(r[:ref] => r[:id])
@@ -109,20 +109,6 @@ module DTK; class ServiceModule
       end
       dangling_errors.raise_error?()
       ret
-    end
-
-    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
-      version_field = module_branch.get_field?(:version)
-      assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
-      {
-        assembly_ref => {
-          "display_name" => assembly_hash["name"], 
-          "type" => "composite",
-          "module_branch_id" => module_branch[:id],
-          "version" => version_field,
-          "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"])
-        }
-      }
     end
 
     def augmented_assembly_nodes()
@@ -212,6 +198,19 @@ module DTK; class ServiceModule
       ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
       ret = {:component_type => type, :ref => ref, :display_name => ref}
       ret.merge!(:version => version) if version
+      ret
+    end
+
+    #These are attributes at the assembly level, as opposed to being at the component or node level
+    def self.import_assembly_attributes(assembly_attrs_hash)
+      ret = DBUpdateHash.new()
+      (assembly_attrs_hash||{}).each_pair do |attr_name,attr_val|
+        ref = dispaly_name = attr_name
+        ret[ref] = {
+          "display_name" => attr_name,
+          "value_asserted" => attr_val
+        }
+      end
       ret
     end
 

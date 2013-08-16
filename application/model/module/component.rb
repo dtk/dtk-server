@@ -39,14 +39,23 @@ module DTK
     # Returnes versions for specified module
     #
     def versions(module_id)
+      module_name, remote_versions = nil, []
+
       # get local versions list and remove master(nil) from list
       local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
+      
       # get all remote modules versions, and take only versions for current component module name
       info = ComponentModule.info(model_handle(), module_id)
-      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip()
-      remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
+      remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
       
-      [{:namespace => "local", :versions => local_versions}, {:namespace => "remote", :versions => remote_versions}]
+      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
+      remote_hash = {:namespace => "remote", :versions => remote_versions}
+
+      versions = [local_hash]
+      versions << remote_hash unless remote_versions.empty?
+
+      versions
     end
 
     def info_about(about, cmp_id=nil)

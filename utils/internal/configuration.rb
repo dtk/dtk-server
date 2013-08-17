@@ -2,11 +2,6 @@
 require 'singleton'
 require 'etc'
 module DTK
-  #TODO: this will be used to replace references to R8::Config 
-  def Config
-    ::R8::Config
-  end
-
   #Methods to set configuration
   class Configuration
     include Singleton

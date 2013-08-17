@@ -48,6 +48,7 @@ module DTK; class Task
               assembly_content.splice_in_at_beginning!(node_centric_content)
             end
           else
+#            generate_from_temporal_contraints(assembly,cmp_actions,:node_centric_first_stage => true)
             generate_from_temporal_contraints(assembly,cmp_actions)
           end
 
@@ -70,10 +71,10 @@ module DTK; class Task
         R8::Config[:task][:template][:assembly_instance][:use_persistence]
       end
 
-      def self.generate_from_temporal_contraints(assembly,cmp_actions)
+      def self.generate_from_temporal_contraints(assembly,cmp_actions,opts={})
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
-        opts = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}
-        Content.new(temporal_constraints,cmp_actions,opts)
+        opts_new_content = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}.merge(opts)
+        Content.new(temporal_constraints,cmp_actions,opts_new_content)
       end
 
       def self.get_serialized_content_from_assembly(assembly,task_action=nil)

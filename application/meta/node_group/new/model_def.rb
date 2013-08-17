@@ -1,5 +1,6 @@
 {
   :columns=>{
+    :task_template_stage_name => {:type=>:varchar,:size=>50},
     :profile_template_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:node,

@@ -2,6 +2,8 @@ module DTK; class Task
   class Template
     class Content < Array
       include Serialization
+      include Stage::InterNode::Factory::StageName
+
       def initialize(object,actions,opts={})
         super()
         create_stages!(object,actions,opts)
@@ -14,7 +16,7 @@ module DTK; class Task
         each_with_index do |internode_stage,stage_index|
           stage_index += 1
           task_hash = {
-            :display_name => internode_stage.name || "config_node_stage#{size == 1 ? '' : ('_'+stage_index.to_s)}",
+            :display_name => internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
             :temporal_order => "concurrent"
           }
           internode_stage_task = Task.create_stub(task_mh,task_hash)
@@ -91,12 +93,11 @@ module DTK; class Task
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})
-        generate_stage_name = Stage::InterNode::Factory::StageName
-        default_stage_name_proc = {:internode_stage_name_proc => generate_stage_name::DefaultProc}
+        default_stage_name_proc = {:internode_stage_name_proc => DefaultNameProc}
         if opts[:node_centric_first_stage]
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
           #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
-          opts_x = {:internode_stage_name_proc => generate_stage_name::DefaultNodeGroupProc}.merge(opts)
+          opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
           assembly_actions = actions.select{|a|a.source_type() == :assembly}

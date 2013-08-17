@@ -26,15 +26,16 @@ module DTK; class Task
         ret
       end
 
-      def splice_in_at_beginning!(template_content)
-        insert(0,*template_content)
-        self
-        #TODO: took at this deeper splicing; may deprecate
-        #unless template_content.size == 1
-        #  raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
-        #end
-        #first.splice_in_at_beginning!(template_content.first)
-        #self  
+      def splice_in_at_beginning!(template_content,opts={})
+        if opts[:node_centric_first_stage]
+          insert(0,*template_content)
+        else
+          unless template_content.size == 1
+            raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
+          end
+          first.splice_in_at_beginning!(template_content.first)
+        end
+        self  
       end
       
       def serialization_form(opts={})
@@ -54,7 +55,7 @@ module DTK; class Task
         end
       end
       def self.parse_and_reify(serialized_content,actions)
-        #normalize to handle case wheer single stage; test fro single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
+        #normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
         has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
         subtasks = serialized_content[Field::Subtasks]
@@ -90,28 +91,29 @@ module DTK; class Task
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})
+        generate_stage_name = Stage::InterNode::Factory::StageName
+        default_stage_name_proc = {:internode_stage_name_proc => generate_stage_name::DefaultProc}
         if opts[:node_centric_first_stage]
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
-          create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts)
+          #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
+          opts_x = {:internode_stage_name_proc => generate_stage_name::DefaultNodeGroupProc}.merge(opts)
+          create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
+
           assembly_actions = actions.select{|a|a.source_type() == :assembly}
-          create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,opts)
+          create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,default_stage_name_proc.merge(opts))
         else
-          create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts)
+          create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,default_stage_name_proc.merge(opts))
         end
       end
 
       def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
         return if actions.empty?
-        unless empty?()
-          Log.error("stages have been created already; dynamically set stage_index")
-        end
         inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
         
         stage_factory = Stage::InterNode::Factory.new(actions,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)
         done = false
-        stage_index = 0
-        internode_stage_name_proc = opts[:internode_stage_name_proc]
+        existing_num_stages = size()
 
         #before_index_hash gets destroyed in while loop
         while not done do
@@ -123,9 +125,20 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            stage_index += 1
-            name = (internode_stage_name_proc && internode_stage_name_proc.call(stage_index))
-            self << stage_factory.create(stage_action_indexes,name)
+            self << stage_factory.create(stage_action_indexes)
+          end
+        end
+        set_internode_stage_names!(existing_num_stages,opts[:internode_stage_name_proc])
+        self
+      end
+
+      def set_internode_stage_names!(offset,internode_stage_name_proc)
+        return unless internode_stage_name_proc
+        is_single_stage = ((size() - offset) == 1)
+        each_with_index do |internode_stage,i|
+          unless internode_stage.name           
+            stage_index = offset+i+1
+            internode_stage.name = internode_stage_name_proc.call(stage_index,is_single_stage)
           end
         end
       end

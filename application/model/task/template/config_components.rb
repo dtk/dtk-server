@@ -45,10 +45,12 @@ module DTK; class Task
               assembly_content
             else
               node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions)
-              assembly_content.splice_in_at_beginning!(node_centric_content)
+              opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+              assembly_content.splice_in_at_beginning!(node_centric_content,opts)
             end
           else
-            generate_from_temporal_contraints(assembly,cmp_actions,:node_centric_first_stage => true)
+            opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+            generate_from_temporal_contraints(assembly,cmp_actions,opts)
           end
 
         #persist serialized form  on assembly instance
@@ -60,20 +62,19 @@ module DTK; class Task
         template_content
       end
 
-      def self.generate_internode_stage_name(internode_stage_index)
-        "config_nodes_stage_#{internode_stage_index.to_s}"
-      end
-      
      private
       #whether should store/retrieve task template on assembly instance
       def self.assembly_instance_persistence?()
         R8::Config[:task][:template][:assembly_instance][:use_persistence]
       end
 
+      def self.node_centric_first_stage?()
+        true
+      end
+
       def self.generate_from_temporal_contraints(assembly,cmp_actions,opts={})
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
-        opts_new_content = {:internode_stage_name_proc => lambda{|x|generate_internode_stage_name(x)}}.merge(opts)
-        Content.new(temporal_constraints,cmp_actions,opts_new_content)
+        Content.new(temporal_constraints,cmp_actions,opts)
       end
 
       def self.get_serialized_content_from_assembly(assembly,task_action=nil)

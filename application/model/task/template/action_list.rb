@@ -43,8 +43,16 @@ module DTK; class Task; class Template
       find{|a|a.match?(node_name,component_name_ref)}
     end
 
+    def select(&block)
+      ret = self.class.new()
+      each{|el|ret << el if block.call(el)}
+      ret.set_action_indexes!()
+    end
+
     def <<(el)
       super(el.kind_of?(Action) ? el : Action.create(el))
     end
+
+
   end
 end; end; end

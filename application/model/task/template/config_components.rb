@@ -48,8 +48,7 @@ module DTK; class Task
               assembly_content.splice_in_at_beginning!(node_centric_content)
             end
           else
-#            generate_from_temporal_contraints(assembly,cmp_actions,:node_centric_first_stage => true)
-            generate_from_temporal_contraints(assembly,cmp_actions)
+            generate_from_temporal_contraints(assembly,cmp_actions,:node_centric_first_stage => true)
           end
 
         #persist serialized form  on assembly instance

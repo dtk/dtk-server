@@ -94,7 +94,7 @@ module DTK; class Task
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts)
           assembly_actions = actions.select{|a|a.source_type() == :assembly}
-         create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,opts)
+          create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,opts)
         else
           create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts)
         end
@@ -103,7 +103,7 @@ module DTK; class Task
       def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
         return if actions.empty?
         unless empty?()
-          raise Error.new("stages have been created already")
+          Log.error("stages have been created already; dynamically set stage_index")
         end
         inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
         

@@ -38,7 +38,6 @@ module DTK; class ServiceModule
       module_branch_id = @module_branch[:id]
       mark_as_complete_cmp_constraint = {:module_branch_id=>module_branch_id} #so only delete extra components that belong to same module
       @db_updates_assemblies["component"].mark_as_complete(mark_as_complete_cmp_constraint)
-
       sp_hash = {
         :cols => [:id],
         :filter => [:eq,:module_branch_id, module_branch_id]
@@ -211,6 +210,7 @@ module DTK; class ServiceModule
           "value_asserted" => attr_val
         }
       end
+      ret.mark_as_complete()
       ret
     end
 

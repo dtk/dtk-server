@@ -190,7 +190,8 @@ module DTK
         ref = display_name = attr[:display_name]
         create_hash = {
           :display_name => display_name,
-          :value_asserted => attr[:attribute_value]
+          :value_asserted => attr[:attribute_value],
+          :data_type => attr[:data_type]||AttributeDatatype.default()
         }
         {ref => create_hash}
       end

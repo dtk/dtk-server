@@ -11,7 +11,7 @@ module DTK; class Task; class Template
         #ordering constraint come from teh following sources
         # dynamic attributes
         # port links with temporal order set
-        # intra_node rels - (from teh component_oredr and dependency rels)
+        # intra_node rels - (from the component_order and dependency rels)
         get_from_port_links(assembly,ndx_cmp_list) +
         get_from_dynamic_attribute_rel(ndx_cmp_list) +
         get_intra_node_rels(ndx_cmp_list)

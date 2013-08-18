@@ -98,9 +98,12 @@ module DTK; class Task
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
           #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
           opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
+          Log.error("Need to pass into create_stages_from_temporal_constraints_aux!(temporal_constraints..) pruned temporal constraints")
+          #TODO: may do this in Stage::InterNode::Factory, putting only @temporal_constraints that have both actions in action_list
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
           assembly_actions = actions.select{|a|a.source_type() == :assembly}
+          Log.error("May Need to pass into create_stages_from_temporal_constraints_aux!(temporal_constraints..) pruned temporal constraints")
           create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,default_stage_name_proc.merge(opts))
         else
           create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,default_stage_name_proc.merge(opts))
@@ -115,7 +118,7 @@ module DTK; class Task
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)
         done = false
         existing_num_stages = size()
-
+        new_stages = Array.new
         #before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
@@ -126,19 +129,21 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            self << stage_factory.create(stage_action_indexes)
+            internode_stage = stage_factory.create(stage_action_indexes)
+            self << internode_stage
+            new_stages << internode_stage
           end
         end
-        set_internode_stage_names!(existing_num_stages,opts[:internode_stage_name_proc])
+        set_internode_stage_names!(new_stages,opts[:internode_stage_name_proc])
         self
       end
 
-      def set_internode_stage_names!(offset,internode_stage_name_proc)
+      def set_internode_stage_names!(new_stages,internode_stage_name_proc)
         return unless internode_stage_name_proc
-        is_single_stage = ((size() - offset) == 1)
-        each_with_index do |internode_stage,i|
+        is_single_stage = (new_stages.size() == 1)
+        new_stages.each_with_index do |internode_stage,i|
           unless internode_stage.name           
-            stage_index = offset+i+1
+            stage_index = i+1
             internode_stage.name = internode_stage_name_proc.call(stage_index,is_single_stage)
           end
         end

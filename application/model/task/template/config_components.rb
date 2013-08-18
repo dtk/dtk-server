@@ -44,7 +44,10 @@ module DTK; class Task
             if node_centric_cmp_actions.empty?
               assembly_content
             else
-              node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions)
+              #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
+              #and encapsute with call from create_stages_from_temporal_constraints
+              opts_generate = {:internode_stage_name_proc => Stage::InterNode::Factory::StageName::DefaultNodeGroupNameProc}
+              node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions,opts_generate)
               opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
               assembly_content.splice_in_at_beginning!(node_centric_content,opts)
             end

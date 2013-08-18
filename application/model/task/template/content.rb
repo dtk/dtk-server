@@ -98,12 +98,9 @@ module DTK; class Task
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
           #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
           opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
-          Log.error("Need to pass into create_stages_from_temporal_constraints_aux!(temporal_constraints..) pruned temporal constraints")
-          #TODO: may do this in Stage::InterNode::Factory, putting only @temporal_constraints that have both actions in action_list
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
           assembly_actions = actions.select{|a|a.source_type() == :assembly}
-          Log.error("May Need to pass into create_stages_from_temporal_constraints_aux!(temporal_constraints..) pruned temporal constraints")
           create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,default_stage_name_proc.merge(opts))
         else
           create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,default_stage_name_proc.merge(opts))
@@ -112,7 +109,7 @@ module DTK; class Task
 
       def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
         return if actions.empty?
-        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
+        inter_node_constraints = temporal_constraints.select{|tc|tc.inter_node?()}
         
         stage_factory = Stage::InterNode::Factory.new(actions,temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)

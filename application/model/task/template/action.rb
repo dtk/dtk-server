@@ -8,13 +8,7 @@ module DTK; class Task; class Template
       end
     end
 
-    attr_writer :index
-    def index()
-      unless ret = @index
-        raise Error.new("index() should not be called if @index hash not been set")
-      end
-      ret
-    end
+    attr_accessor :index
 
     def method_missing(name,*args,&block)
       @action.send(name,*args,&block)

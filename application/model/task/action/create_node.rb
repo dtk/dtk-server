@@ -9,7 +9,8 @@ module DTK; class Task
               :state_change_id => object[:id],
               :state_change_types => [object[:type]],
               :attributes => Array.new,
-              :node => object[:node]
+              :node => object[:node],
+              :datacenter => object[:datacenter]
             }
            when :hash
             object

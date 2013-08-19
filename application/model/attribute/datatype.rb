@@ -1,6 +1,6 @@
 #TODO: initially scaffolds SemanticType then will remove semantic type
 #TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
-module XYZ
+module DTK
   module AttributeDatatype
     def self.ret_datatypes()
       scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes()
@@ -36,6 +36,29 @@ module XYZ
       end
     end
 
+    def self.convert_value_to_ruby_object(attr)
+      string_val = attr[:value_asserted]
+      return nil if string_val.nil?
+      case (attr[:data_type]||"string")
+        when "string" 
+          string_val
+        when "boolean"
+          case string_val
+            when "true" then true
+            when "false" then false
+            else raise Error.new("Unexpected Boolean value (#{string_val})")
+          end
+        when "integer"
+          if string_val =~ /^[0-9]+$/
+            string_val.to_i
+          else 
+            raise Error.new("Unexpected Integer value (#{string_val})")
+          end
+        else 
+          raise Error.new("Unexpected Datatype (#{attr[:data_type]})")
+      end
+    end 
+
     def self.attr_def_to_internal_form(hash)
       ret = Hash.new
       #check if it is an array
@@ -55,6 +78,10 @@ module XYZ
         ret[:semantic_type] = is_array ? {":array".to_sym => datatype} : datatype
       end
       ret
+    end
+
+    def self.default()
+      "string"
     end
 
    private

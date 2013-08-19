@@ -2,6 +2,7 @@
 require 'singleton'
 require 'etc'
 module DTK
+  #Methods to set configuration
   class Configuration
     include Singleton
     def set_configuration(config_file_location=nil)

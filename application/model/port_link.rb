@@ -41,7 +41,7 @@ module DTK
       raise PortLinkError.new("Illegal link") unless link_def_link
       link_to_create = port_link_hash.merge(:temporal_order => link_def_link[:temporal_order])
       port_link = create_from_links_hash(parent_idh,[link_to_create],opts).first
-      link_def_link.process(parent_idh,components,Opt.new(opts).merge(:port_link_idh => port_link_link.id_handle))
+      link_def_link.process(parent_idh,components,opts.merge(:port_link_idh => port_link_link.id_handle))
       port_link
     end
 
@@ -54,7 +54,7 @@ module DTK
       if opts[:set_port_link_temporal_order] and link_def_link[:temporal_order]
         update(:temporal_order => link_def_link[:temporal_order])
       end
-      link_def_link.process(parent_idh,components,Opts.new(:port_link_idh => id_handle()))
+      link_def_link.process(parent_idh,components,:port_link_idh => id_handle())
       self
     end
 

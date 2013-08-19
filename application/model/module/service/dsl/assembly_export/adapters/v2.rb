@@ -18,9 +18,10 @@ module DTK
       def assembly_output_hash()
         ret = SimpleOrderedHash.new()
         #add assembly level attributes
-        #TODO: stub
-      
-        #TODO: need to add in component override values
+        if assembly_level_attrs = assembly_level_attributes_hash()
+          ret[:attributes] = assembly_level_attrs
+        end
+
         #add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
@@ -52,6 +53,15 @@ module DTK
           end
         end
         ret
+      end
+
+      def assembly_level_attributes_hash()
+        if attrs = assembly_hash()[:attribute]
+          ret = attrs.values.inject(SimpleOrderedHash.new()) do |h,a|
+            h.merge(a[:display_name] => AttributeDatatype.convert_value_to_ruby_object(a))
+          end
+          ret unless ret.empty?
+        end
       end
 
       def temporal_ordering_hash()

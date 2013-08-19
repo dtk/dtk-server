@@ -2,9 +2,11 @@ module DTK; class Task
   class Template
     class Content < Array
       include Serialization
-      def initialize(object,action_list,opts={})
+      include Stage::InterNode::Factory::StageName
+
+      def initialize(object,actions,opts={})
         super()
-        create_stages!(object,action_list,opts)
+        create_stages!(object,actions,opts)
       end
 
       def create_subtask_instances(task_mh,assembly_idh)
@@ -14,7 +16,7 @@ module DTK; class Task
         each_with_index do |internode_stage,stage_index|
           stage_index += 1
           task_hash = {
-            :display_name => internode_stage.name || "config_node_stage#{size == 1 ? '' : ('_'+stage_index.to_s)}",
+            :display_name => internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
             :temporal_order => "concurrent"
           }
           internode_stage_task = Task.create_stub(task_mh,task_hash)
@@ -26,12 +28,16 @@ module DTK; class Task
         ret
       end
 
-      def splice_in_at_beginning!(template_content)
-        unless template_content.size == 1
-          raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
+      def splice_in_at_beginning!(template_content,opts={})
+        if opts[:node_centric_first_stage]
+          insert(0,*template_content)
+        else
+          unless template_content.size == 1
+            raise ErrorUsage.new("Can only splice in template content that has a single inter node stage")
+          end
+          first.splice_in_at_beginning!(template_content.first)
         end
-        first.splice_in_at_beginning!(template_content.first) 
-        self
+        self  
       end
       
       def serialization_form(opts={})
@@ -50,8 +56,8 @@ module DTK; class Task
           }
         end
       end
-      def self.parse_and_reify(serialized_content,action_list)
-        #normalize to handle case wheer single stage; test fro single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
+      def self.parse_and_reify(serialized_content,actions)
+        #normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
         has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
         subtasks = serialized_content[Field::Subtasks]
@@ -61,7 +67,7 @@ module DTK; class Task
           else
             [serialized_content]
           end
-        new(SerializedContentArray.new(normalized_subtasks),action_list)
+        new(SerializedContentArray.new(normalized_subtasks),actions)
       end
 
       class SerializedContentArray < Array
@@ -72,33 +78,44 @@ module DTK; class Task
       end
 
     private        
-      def create_stages!(object,action_list,opts={})
+      def create_stages!(object,actions,opts={})
         if object.kind_of?(TemporalConstraints)
-          create_stages_from_temporal_constraints!(object,action_list,opts)
+          create_stages_from_temporal_constraints!(object,actions,opts)
         elsif object.kind_of?(SerializedContentArray)
-          create_stages_from_serialzied_content!(object,action_list,opts)
+          create_stages_from_serialzied_content!(object,actions,opts)
         else
           raise Error.new("create_stages! does not treat argument of type (#{object.class})")
         end
       end
 
-      def create_stages_from_serialzied_content!(serialized_content_array,action_list,opts={})
-        serialized_content_array.each{|a| self <<  Stage::InterNode.parse_and_reify(a,action_list)}
+      def create_stages_from_serialzied_content!(serialized_content_array,actions,opts={})
+        serialized_content_array.each{|a| self <<  Stage::InterNode.parse_and_reify(a,actions)}
       end
 
-      def create_stages_from_temporal_constraints!(temporal_constraints,action_list,opts={})
-        return if action_list.empty?
-        unless empty?()
-          raise Error.new("stages have been created already")
-        end
-        inter_node_constraints = temporal_constraints.select{|r|r.inter_node?()}
-        
-        stage_factory = Stage::InterNode::Factory.new(action_list,temporal_constraints)
-        before_index_hash = inter_node_constraints.create_before_index_hash(action_list)
-        done = false
-        stage_index = 0
-        internode_stage_name_proc = opts[:internode_stage_name_proc]
+      def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})
+        default_stage_name_proc = {:internode_stage_name_proc => DefaultNameProc}
+        if opts[:node_centric_first_stage]
+          node_centric_actions = actions.select{|a|a.source_type() == :node_group}
+          #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
+          opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
+          create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
+          assembly_actions = actions.select{|a|a.source_type() == :assembly}
+          create_stages_from_temporal_constraints_aux!(temporal_constraints,assembly_actions,default_stage_name_proc.merge(opts))
+        else
+          create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,default_stage_name_proc.merge(opts))
+        end
+      end
+
+      def create_stages_from_temporal_constraints_aux!(temporal_constraints,actions,opts={})
+        return if actions.empty?
+        inter_node_constraints = temporal_constraints.select{|tc|tc.inter_node?()}
+        
+        stage_factory = Stage::InterNode::Factory.new(actions,temporal_constraints)
+        before_index_hash = inter_node_constraints.create_before_index_hash(actions)
+        done = false
+        existing_num_stages = size()
+        new_stages = Array.new
         #before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
@@ -109,9 +126,22 @@ module DTK; class Task
               #TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
-            stage_index += 1
-            name = (internode_stage_name_proc && internode_stage_name_proc.call(stage_index))
-            self << stage_factory.create(stage_action_indexes,name)
+            internode_stage = stage_factory.create(stage_action_indexes)
+            self << internode_stage
+            new_stages << internode_stage
+          end
+        end
+        set_internode_stage_names!(new_stages,opts[:internode_stage_name_proc])
+        self
+      end
+
+      def set_internode_stage_names!(new_stages,internode_stage_name_proc)
+        return unless internode_stage_name_proc
+        is_single_stage = (new_stages.size() == 1)
+        new_stages.each_with_index do |internode_stage,i|
+          unless internode_stage.name           
+            stage_index = i+1
+            internode_stage.name = internode_stage_name_proc.call(stage_index,is_single_stage)
           end
         end
       end

@@ -143,7 +143,7 @@ module DTK
 
     def rest__delete_version()
       service_module = create_obj(:service_module_id)
-      version = ret_version_component()
+      version = ret_version()
       module_info = service_module.delete_version(version)
       rest_ok_response module_info
     end

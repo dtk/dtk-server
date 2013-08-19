@@ -29,35 +29,16 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
-        if assembly_instance_persistence?()
-          if serialized_content = get_serialized_content_from_assembly(assembly)
-            return Content.parse_and_reify(serialized_content,cmp_actions)
-          end
+        if serialized_content = get_serialized_content_from_assembly(assembly)
+          return Content.parse_and_reify(serialized_content,cmp_actions)
         end
 
-        #next see if the assembly template that the assembly instance came from has a serialized task template
         #otherwise do the temporal processing to generate template_content
-        template_content = 
-          if serialized_content = get_serialized_content_from_assembly_template(assembly)
-            assembly_content = Content.parse_and_reify(serialized_content,cmp_actions)
-            node_centric_cmp_actions = ActionList::ConfigComponents.new(cmp_actions.select{|a|a.source_type() == :node_group})
-            if node_centric_cmp_actions.empty?
-              assembly_content
-            else
-              #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
-              #and encapsute with call from create_stages_from_temporal_constraints
-              opts_generate = {:internode_stage_name_proc => Stage::InterNode::Factory::StageName::DefaultNodeGroupNameProc}
-              node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions,opts_generate)
-              opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-              assembly_content.splice_in_at_beginning!(node_centric_content,opts)
-            end
-          else
-            opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-            generate_from_temporal_contraints(assembly,cmp_actions,opts)
-          end
+        opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+        template_content = generate_from_temporal_contraints(assembly,cmp_actions,opts)
 
-        #persist serialized form  on assembly instance
-        if assembly_instance_persistence?()
+        unless opts[:dont_persist_generated_template]
+          #persist what is generated
           serialized_content = template_content.serialization_form()
           persist_serialized_content_on_assembly(assembly,serialized_content)
         end
@@ -66,11 +47,6 @@ module DTK; class Task
       end
 
      private
-      #whether should store/retrieve task template on assembly instance
-      def self.assembly_instance_persistence?()
-        R8::Config[:task][:template][:assembly_instance][:use_persistence]
-      end
-
       def self.node_centric_first_stage?()
         true
       end

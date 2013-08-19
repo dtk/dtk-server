@@ -43,7 +43,7 @@ module DTK
           assembly_obj_info = assembly_objs_info.first
           get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,opts,&block)
           override_attrs = {}
-          opts_generate = {:include_list => [:attribute],:standard_child_context => true}
+          opts_generate = {:include_list => [:attribute,:task_template],:standard_child_context => true}
           ChildContext.generate(self,model_handle,[assembly_obj_info],override_attrs,opts_generate,&block)
         end          
 

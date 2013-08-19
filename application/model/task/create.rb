@@ -34,7 +34,7 @@ module DTK
         STDOUT << "\n\n"
         pp "--- end: encodings of task_template_content.serialization_form()"
 
-#        raise ErrorUsage.new("stop here")
+        raise ErrorUsage.new("stop here")
       else
 #TODO: will deprecate this
         #replaceing this part with above

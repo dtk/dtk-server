@@ -164,7 +164,7 @@ module DTK
     end
 
     #
-    # Method will check new dependencies on repo manager and import new modules on server.
+    # Method will check new dependencies on repo manager and report missing dependencies.
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()

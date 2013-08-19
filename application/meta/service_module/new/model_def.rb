@@ -25,7 +25,7 @@ lambda__segment_remote_repos =
   {
     :model_name=>:repo_remote,
     :convert => true,
-    :join_type=>args[:join_type]||:inner,
+    :join_type=>args[:join_type]||:left_outer,
     :join_cond=>{:repo_id =>:repo__id},
     :cols=>args[:cols]
   }

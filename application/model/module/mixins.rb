@@ -125,6 +125,7 @@ module DTK
      # raises exception if more repos found
     def get_repo!()
       repos = get_repos()
+     
       unless repos.size == 1
         raise Error.new("unexpected that number of matching repos is not equal to 1")
       end
@@ -282,13 +283,13 @@ module DTK
     def get_basic_info(target_mh, id, opts={})
       sp_hash = {
         :cols => [:id, :display_name, :version, :remote_repos],
-        :filter => [:eq,:id,id]
+        :filter => [:eq,:id, id.to_i]
       }
 
       response = get_obj(target_mh, sp_hash.merge(opts))
 
       # return name, namespace and version
-      return response[:display_name], response[:repo_remote][:repo_namespace], response[:module_branch][:version] 
+      return response[:display_name], (response[:repo_remote]||{})[:repo_namespace], response[:module_branch][:version] 
     end
 
     def info(target_mh, id, opts={})

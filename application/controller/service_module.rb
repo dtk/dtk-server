@@ -143,7 +143,7 @@ module DTK
 
     def rest__delete_version()
       service_module = create_obj(:service_module_id)
-      version = ret_version()
+      version = ret_version_component()
       module_info = service_module.delete_version(version)
       rest_ok_response module_info
     end
@@ -164,7 +164,7 @@ module DTK
     end
 
     #
-    # Method will check new dependencies on repo manager and import new modules on server.
+    # Method will check new dependencies on repo manager and report missing dependencies.
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()

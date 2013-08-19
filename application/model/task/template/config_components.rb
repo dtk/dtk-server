@@ -1,6 +1,8 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
+      r8_nested_require('config_components','peristence')
+
       def self.get_existing_or_stub_templates(assembly_instance)
         ret = Array.new
         #TODO: only returning now the task templates for the default (assembly create action)

@@ -3,6 +3,7 @@ module DTK; class  Assembly
     r8_nested_require('instance','action')
     r8_nested_require('instance','violation')
     r8_nested_require('instance','service_link')
+    r8_nested_require('instance','update')
     include ActionMixin
     include ViolationMixin
     include ServiceLinkMixin

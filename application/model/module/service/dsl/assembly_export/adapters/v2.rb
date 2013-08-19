@@ -22,7 +22,6 @@ module DTK
           ret[:attributes] = assembly_level_attrs
         end
 
-        #TODO: need to add in component override values
         #add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|

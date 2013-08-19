@@ -26,9 +26,16 @@ module DTK; class Attribute
 
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
-      
+
+      #TODO: clean up; modified because attr can be of type attribute or may have field :attribute]
       filter_proc = Proc.new do |attr|
-        attr_ids.include?(attr[:attribute][:id])
+        attr_id =
+          if attr.kind_of?(Attribute) then attr[:id]
+          elsif attr[:attribute] then attr[:attribute][:id]
+          else
+            raise Error.new("Unexpected argument attr (#{attr.inspect})")
+          end
+        attr_ids.include?(attr_id)
       end
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))

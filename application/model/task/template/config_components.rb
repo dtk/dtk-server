@@ -1,3 +1,10 @@
+=begin
+modify so that rather than petrsistence logic whetehr using cached version of the reified content, so move caching logic to
+helper class on content
+put in option to promote as to whether you save the task template as part of what is saved in promote
+future work will have sussytem try to generilze accross nodes
+
+=end
 module DTK; class Task
   class Template
     class ConfigComponents < self
@@ -31,6 +38,8 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
+        #TODO: collapse these two together so can fold in caching logic on content
+        #get content from persisted 
         if serialized_content = get_serialized_content_from_assembly(assembly)
           return Content.parse_and_reify(serialized_content,cmp_actions)
         end

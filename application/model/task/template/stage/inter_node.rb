@@ -1,10 +1,14 @@
 module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
+      r8_nested_require('inter_node','factory')
+      r8_nested_require('inter_node','multi_node')
       include Serialization
+      
       def initialize(name=nil)
         super()
         @name = name
+        @multi_node = nil
       end
       attr_accessor :name
 
@@ -51,13 +55,18 @@ module DTK; class Task; class Template
         #content could be either a concurrent block with multiple nodes, or a single node
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
-          unless node_name = serialized_node_actions[:node]
-            ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+          if multi_node_type = serialized_node_actions[:nodes]
+            @multi_node = MultiNode.parse_type(multi_node_type)
+            @multi_node.parse_and_reify(serialized_node_actions,action_list)
+          else
+            unless node_name = serialized_node_actions[:node]
+              raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+            end
+            unless node_id = action_list.find_matching_node_id(node_name)
+              raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
+            end
+            h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,node_name,action_list))
           end
-          unless node_id = action_list.find_matching_node_id(node_name)
-            ParseError.new("Node ref (#{node_name}) cannot be resolved")
-          end
-          h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,node_name,action_list))
         end
       end
 

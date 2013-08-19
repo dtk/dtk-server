@@ -106,7 +106,10 @@ module DTK; class ComponentModule
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       dsl_info = {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless (dsl_parsed_info.nil? || dsl_parsed_info.empty?)
+
+      unless dsl_parsed_info.nil?
+        dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless dsl_parsed_info.empty?
+      end
       
       dsl_info
     end
@@ -127,7 +130,10 @@ module DTK; class ComponentModule
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       dsl_info = {:dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless (dsl_parsed_info.nil? || dsl_parsed_info.empty?)
+      
+      unless (dsl_parsed_info.nil?
+        dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless dsl_parsed_info.empty?
+      end
       
       dsl_info
     end

@@ -51,6 +51,8 @@ module DTK
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         component_module_refs = update_component_module_refs(module_branch,opts)
+        return component_module_refs if component_module_refs.is_a?(ErrorUsage::JSONParse)
+
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
         
         set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::JSONParsing)
@@ -65,6 +67,7 @@ module DTK
           else
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
+        return parsed_info if parsed_info.is_a?(ErrorUsage::JSONParse)
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 

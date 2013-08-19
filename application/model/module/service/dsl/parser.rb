@@ -17,6 +17,9 @@ module DTK
         repo_full_path,branch = RepoManager.repo_full_path_and_branch(module_branch)
         dir_parser = ExtMod::DirectoryParser::Git.new(:service_module,repo_full_path,branch)
         parsed_info = dir_parser.parse_directory(file_type)
+
+        return parsed_info if parsed_info.is_a?(ErrorUsage::JSONParse)
+
         file_type ? 
           Output.new(file_type,parsed_info) :
           parsed_info.inject(Hash.new){|h,(file_type,v)|h.merge(file_type => Output.new(file_type,v))} 

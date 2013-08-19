@@ -131,7 +131,7 @@ module DTK; class ComponentModule
       end
       dsl_info = {:dsl_created_info => dsl_created_info}
       
-      unless (dsl_parsed_info.nil?
+      unless dsl_parsed_info.nil?
         dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) unless dsl_parsed_info.empty?
       end
       

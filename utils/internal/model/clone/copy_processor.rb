@@ -7,12 +7,7 @@ module DTK
 
       def self.create(target_obj,source_obj,opts={})
         if source_obj.is_assembly?
-          if target_obj.kind_of?(Library)
-            #TODO: probably deprecate; hanlded by using method that craetes full nested hash
-            AssemblyTemplate.new(source_obj,opts)
-          else
-            Assembly.new(target_obj,source_obj,opts)
-          end
+          Assembly.new(target_obj,source_obj,opts)
         else
           new(source_obj,opts)
         end
@@ -72,7 +67,6 @@ module DTK
         fk_info.shift_foregn_keys()
         @ret
       end
-
       def get_nested_objects_top_level(model_handle,target_parent_mh,objs_info,recursive_override_attrs,opts={},&block)
         ChildContext.generate(self,model_handle,objs_info,recursive_override_attrs,&block)
       end

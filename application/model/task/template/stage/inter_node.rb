@@ -6,7 +6,7 @@ module DTK; class Task; class Template
         super()
         @name = name
       end
-      attr_reader :name
+      attr_accessor :name
 
       #returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)
@@ -95,6 +95,19 @@ module DTK; class Task; class Template
           ret.each_node_id{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
           ret
         end
+
+        module StageName
+          DefaultNameProc = lambda do |index,is_single_stage|
+            ret = "config_nodes"
+            is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
+          end
+        
+          DefaultNodeGroupNameProc = lambda do |index,is_single_stage|
+            ret = "config_node_group_components"
+            is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
+          end
+        end
+
       end
     end
   end

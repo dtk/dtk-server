@@ -22,9 +22,10 @@ module DTK
       end
     end
 
-    def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,omit_list=[],&block)
+    def self.generate(clone_proc,model_handle,objs_info,recursive_override_attrs,opts={},&block)
       ret = Array.new
-      get_children_model_handles(model_handle,omit_list) do |child_mh|
+      opts_generate = Aux.hash_subset(opts,[:include_list])
+      get_children_model_handles(model_handle,opts_generate) do |child_mh|
         override_attrs = clone_proc.ret_child_override_attrs(child_mh,recursive_override_attrs)
         parent_id_col = child_mh.parent_id_field_name()
         old_parent_rel_col = ret_old_parent_rel_col(clone_proc,child_mh)
@@ -35,8 +36,19 @@ module DTK
             raise Error.new("Column (#{old_parent_rel_col}) not found in objs_info")
           end
         end
-        create_opts = {:duplicate_refs => :no_check, :returning_sql_cols => returning_sql_cols(parent_id_col)}
-        child_context = create_from_hash(clone_proc,{:model_handle => child_mh, :clone_par_col => parent_id_col, :parent_rels => parent_rels, :override_attrs => override_attrs, :create_opts => create_opts, :parent_objs_info => objs_info})
+        child_context_hash = {
+          :model_handle => child_mh, 
+          :clone_par_col => parent_id_col, 
+          :parent_rels => parent_rels, 
+          :override_attrs => override_attrs, 
+          :create_opts => {
+            :duplicate_refs => :no_check, 
+            :returning_sql_cols => returning_sql_cols(parent_id_col)
+          },
+          :parent_objs_info => objs_info
+        }
+        opts_x = Aux.hash_subset(opts,[:standard_child_context])
+        child_context = create_from_hash(clone_proc,child_context_hash,opts_x)
         if block
           block.call(child_context)
         else
@@ -50,7 +62,10 @@ module DTK
       [:ancestor_id,parent_id_col]
     end
 
-    def self.create_from_hash(clone_proc,hash)
+    def self.create_from_hash(clone_proc,hash,opts={})
+      if opts[:standard_child_context]
+        return new(clone_proc,hash)
+      end
       unless clone_proc.cloning_assembly?()
         return new(clone_proc,hash)
       end
@@ -96,9 +111,12 @@ module DTK
       @clone_proc.db()
     end
 
-    def self.get_children_model_handles(model_handle,omit_list=[],&block)
+    def self.get_children_model_handles(model_handle,opts={},&block)
+      include_list = opts[:include_list]
       model_handle.get_children_model_handles(:clone_context => true).each do |child_mh|
-        next if omit_list.include?(child_mh[:model_name])
+        if include_list
+          next if not include_list.include?(child_mh[:model_name])
+        end
         block.call(child_mh)
       end
     end

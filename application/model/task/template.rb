@@ -27,12 +27,12 @@ module DTK; class Task
       end
     end
 
-    r8_nested_require('template','content')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
     r8_nested_require('template','action')
     r8_nested_require('template','action_list')
     r8_nested_require('template','stage')
+    r8_nested_require('template','content')
     r8_nested_require('template','config_components')
 
     def self.common_columns()

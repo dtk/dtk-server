@@ -40,7 +40,7 @@ module DTK
       create_from_rows(model_handle,rows)
     end
 
-    def process(parent_idh,components,opts=Opts.new)
+    def process(parent_idh,components,opts={})
       link_defs_info = components.map{|cmp| {:component => cmp}}
       context = LinkDefContext.create(self,link_defs_info)
 
@@ -48,7 +48,7 @@ module DTK
 
       #TODO: not bulking up procssing multiple node group members because dont yet handle case when
       #theer are multiple members taht are output that feed into a node attribute
-      links_array = AttributeMapping.ret_links_array(attribute_mappings,context,opts.slice(:raise_error))
+      links_array = AttributeMapping.ret_links_array(attribute_mappings,context,:raise_error => opts[:raise_error])
       links_array.each do |links|
         #ret_links returns nil only if error such as not being able to find input_id or output_id
         next if links.empty?
@@ -69,12 +69,12 @@ module DTK
     end
 
     class AttributeMapping < HashObject
-      def self.ret_links_array(attribute_mappings,context,opts=Opts.new)
+      def self.ret_links_array(attribute_mappings,context,opts={})
         contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
         contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
       end
 
-      def ret_link(context,opts=Opts.new)
+      def ret_link(context,opts={})
         input_attr,input_path = get_attribute_with_unravel_path(:input,context)
         output_attr,output_path = get_attribute_with_unravel_path(:output,context)
         

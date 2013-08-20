@@ -1,14 +1,7 @@
-=begin
-modify so that rather than petrsistence logic whetehr using cached version of the reified content, so move caching logic to
-helper class on content
-put in option to promote as to whether you save the task template as part of what is saved in promote
-future work will have sussytem try to generilze accross nodes
-
-=end
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      r8_nested_require('config_components','peristence')
+      r8_nested_require('config_components','persistence')
 
       def self.get_existing_or_stub_templates(assembly_instance)
         ret = Array.new
@@ -38,10 +31,9 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
-        #TODO: collapse these two together so can fold in caching logic on content
         #get content from persisted 
-        if serialized_content = get_serialized_content_from_assembly(assembly)
-          return Content.parse_and_reify(serialized_content,cmp_actions)
+        if ret = Persistence.get_content_for(assembly,cmp_actions)
+          return ret
         end
 
         #otherwise do the temporal processing to generate template_content
@@ -65,16 +57,6 @@ module DTK; class Task
       def self.generate_from_temporal_contraints(assembly,cmp_actions,opts={})
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
         Content.new(temporal_constraints,cmp_actions,opts)
-      end
-
-      def self.get_serialized_content_from_assembly(assembly,task_action=nil)
-        ret = assembly.get_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
-      end
-
-      def self.get_serialized_content_from_assembly_template(assembly,task_action=nil)
-        ret = assembly.get_parents_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
       end
 
       def self.persist_serialized_content_on_assembly(assembly,serialized_content,task_action=nil)

@@ -1,7 +1,6 @@
 module DTK; class Task; class Template; class Stage 
   class InterNode
     class MultiNode
-
       def self.parse_type(multi_node_type)
         case multi_node_type
           when "All_applicable" then Applicable

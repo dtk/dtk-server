@@ -5,10 +5,10 @@ module DTK; class Task; class Template
       r8_nested_require('inter_node','multi_node')
       include Serialization
       
-      def initialize(name=nil)
+      def initialize(name=nil,multi_node=nil)
         super()
         @name = name
-        @multi_node = nil
+        @multi_node = multi_node
       end
       attr_accessor :name
 
@@ -56,13 +56,17 @@ module DTK; class Task; class Template
         end
       end
       def self.parse_and_reify(serialized_content,action_list)
-        #content could be either a concurrent block with multiple nodes, or a single node
+        #content could be either 
+        # 1) a concurrent block with multiple nodes, 
+        # 2) a single node,
+        # 3) a multi-node specfication
+        #TODO: fix up so looking for multi node is at top level
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           el = 
             if multi_node_type = serialized_node_actions[:nodes]
-              @multi_node = MultiNode.parse_type(multi_node_type)
-              @multi_node.parse_and_reify(serialized_node_actions,action_list)
+              multi_node = MultiNode.parse_type(multi_node_type)
+              multi_node.parse_and_reify(serialized_node_actions,action_list)
             else
               unless node_name = serialized_node_actions[:node]
                 raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")

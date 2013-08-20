@@ -1,7 +1,7 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      r8_nested_require('config_components','persistence')
+      r8_nested_require('config_components','assembly_action_persistence')
 
       def self.get_existing_or_stub_templates(assembly_instance)
         ret = Array.new
@@ -25,14 +25,28 @@ module DTK; class Task
         ret
       end
 
-      def self.get_or_generate_template_content(assembly,opts={})
+      #action_types can be 
+      # :assembly
+      # :node_centric
+      def self.get_or_generate_template_content(action_types,assembly,opts={})
+        action_types = Array(action_types)
+        illegal_action_types = (action_types - [:assembly,:node_centric])
+        unless illegal_action_types.empty?
+          raise Error.new("Illegal action type(s) (#{illegal_action_types.join(',')})")
+        end
         task_action = opts[:task_action]||default_task_action()
         action_list_opts = Aux.hash_subset(opts,[:component_type_filter])
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
         #get content from persisted 
-        if ret = Persistence.get_content_for(assembly,cmp_actions)
+        if assembly_action_content = Persistence::AssemblyAction.get_content_for(assembly,cmp_actions)
+          ret = 
+            if action_types == [:assembly]
+              assembly_action_content
+            else
+              raise Error.new("Not implemented yet: splicing in node centric task template content")
+            end
           return ret
         end
 

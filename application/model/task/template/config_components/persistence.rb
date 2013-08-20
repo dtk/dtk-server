@@ -1,8 +1,10 @@
 #methods used to maintain the peristence of an assembly instance task template
-#TODO: more sophistiacted is using assembly_update to modify the task template if possible
-module DTK; class Task; class Template
-  class ConfigComponents 
-    class Persistence
+#The content can be both node centeric and assembly actions; the class Persistence is responsible for both
+#and class AssemblyActions is responsible for just the assembly actions
+#TODO: currently just persisting just the assembly action parts so there is no methods directly under Persistence  
+module DTK; class Task; class Template; class ConfigComponents 
+  class Persistence
+    class AssemblyActions
       def self.get_content_for(assembly,cmp_actions,task_action=nil)
         if ret = ReifiedObjectCache.get(assembly,task_action)
           return ret
@@ -11,17 +13,18 @@ module DTK; class Task; class Template
           Content.parse_and_reify(serialized_content,cmp_actions)
         end
       end
-
-      def self.remove_any_outdated_items(assembly_update)
-        ReifiedObjectCache.remove_any_outdated_items(assembly_update)
-      end
-
+      
       def self.persist(assembly,template_content,task_action=nil)
-        serialized_content = template_content.serialization_form()
+        serialized_content = template_content.serialization_form(:filter => {:source => :assembly})
         task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
         match_assigns = {:component_component_id => assembly.id()}
         task_template_idh = Template.create_from_serialized_content?(task_template_mh,serialized_content,match_assigns,task_action)
         ReifiedObjectCache.add_or_update_item(task_template_idh,template_content)
+      end
+      
+    
+      def self.remove_any_outdated_items(assembly_update)
+        ReifiedObjectCache.remove_any_outdated_items(assembly_update)
       end
 
      private
@@ -77,4 +80,4 @@ module DTK; class Task; class Template
       end
     end
   end
-end; end; end
+end; end; end; end

@@ -123,7 +123,18 @@ module XYZ
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
           return ErrorUsage::JSONParsing.new(e,file_path)
-          # raise ErrorUsage::JSONParsing.new(e,file_path)
+        end
+      end
+
+      def yaml_parse(content,file_path=nil)
+        ret = Hash.new
+        if content.empty?
+          return ret
+        end
+        begin 
+          YAML.load(content)
+        rescue Exception => e
+          return ErrorUsage::YAMLParsing.new(e,file_path)
         end
       end
 
@@ -176,7 +187,7 @@ module XYZ
           when :json
             json_parse(content,file_path)
           when :yaml
-            YAML.load(content)
+            yaml_parse(content,file_path)
           else
             raise Error.new("Format (#{format_type}) is not treated")
         end

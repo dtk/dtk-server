@@ -55,7 +55,7 @@ module DTK
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
         
-        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::JSONParsing)
+        set_dsl_parsed!(true) unless(parsed.is_a?(ErrorUsage::JSONParsing) || parsed.is_a?(ErrorUsage::YAMLParsing))
         parsed
       end
 
@@ -93,7 +93,7 @@ module DTK
             format_type = meta_file_format_type(meta_file)
             hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
             #TODO: FOR-ALDIN: extend to handle yaml parsing errors
-            return hash_content if hash_content.is_a?(ErrorUsage::JSONParsing)
+            return hash_content if(hash_content.is_a?(ErrorUsage::JSONParsing) || hash_content.is_a?(ErrorUsage::YAMLParsing))
             assembly_import_helper.process(module_name,hash_content)
           end
         end

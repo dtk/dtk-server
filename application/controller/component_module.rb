@@ -56,13 +56,20 @@ module DTK
 
     #### list and info actions ###
     def rest__list()
-      project = get_default_project()
+      diff        = ret_request_params(:diff)
+      project     = get_default_project()
+      datatype    = :module
+      remote_repo = ret_remote_repo()
+
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
-      
-      rest_ok_response ComponentModule.list(opts), :datatype => :module
+
+      opts.merge!(:remote_rep => remote_repo, :diff => diff)
+      datatype = :module_diff if diff
+
+      rest_ok_response ComponentModule.list(opts), :datatype => datatype
     end
 
     def rest__get_workspace_branch_info()
@@ -78,6 +85,10 @@ module DTK
     def rest__info()
       module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
       rest_ok_response ComponentModule.info(model_handle(), module_id)
+    end
+
+    def rest__pull_from_remote()
+      rest_ok_response pull_from_remote_helper(ComponentModule)
     end
 
     def rest__versions()

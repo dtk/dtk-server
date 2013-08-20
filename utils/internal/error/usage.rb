@@ -11,6 +11,17 @@ module DTK
       end
     end
 
+    class YAMLParsing < self
+      def initialize(base_yaml_error,file_path=nil)
+        super(err_msg(base_yaml_error,file_path))
+      end
+     private
+      def err_msg(base_yaml_error,file_path=nil)
+        file_ref = file_path && " in file (#{file_path})"
+        "YAML parsing error#{file_ref}: #{base_yaml_error}"
+      end
+    end
+
     class ReferencedComponentTemplates < self
       def initialize(aug_cmp_templates)
         super(err_msg(aug_cmp_templates))

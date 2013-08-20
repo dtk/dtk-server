@@ -9,7 +9,7 @@ R8::ReactorRoute.draw do
   get 'user/process_logout'   => "user#process_logout"
 
    # ASSEMBLY
-  post  'assembly/create_new_template' => 'assembly#create_new_template'
+  post  'assembly/promote_to_template' => 'assembly#promote_to_template'
   post  'assembly/get_action_results' => 'assembly#get_action_results'
   post  'assembly/find_violations' => 'assembly#find_violations'
   post  'assembly/create_task' => 'assembly#create_task'
@@ -37,6 +37,7 @@ R8::ReactorRoute.draw do
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
   post  'assembly/info_about' => 'assembly#info_about'
+  post  'assembly/info_about_task' => 'assembly#info_about_task'
   post  'assembly/stage' => 'assembly#stage'
   post  'assembly/task_status' => 'assembly#task_status'
   post  'assembly/remove_from_system' => 'assembly#remove_from_system'
@@ -65,6 +66,7 @@ R8::ReactorRoute.draw do
   post  'component_module/create_new_dsl_version' => 'component_module#create_new_dsl_version'
   post  'component_module/info' => 'component_module#info'
   post  'component_module/list' => 'component_module#list'
+  post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
   post  'component_module/list_remote' => 'component_module#list_remote'
   post  'component_module/versions' => 'component_module#versions'
   get   'component_module/get_all_workspace_library_diffs' => 'component_module#get_all_workspace_library_diffs'
@@ -98,6 +100,7 @@ R8::ReactorRoute.draw do
   post  'node/list' => 'node#list'
   post  'node/info' => 'node#info'
   post  'node/info_about' => 'node#info_about'
+  post  'node/find_violations' => 'node#find_violations'
   post  'node/get_attributes' => 'node#get_attributes'
   post  'node/set_attributes' => 'node#set_attributes'
   post  'node/add_component' => 'node#add_component'
@@ -143,9 +146,11 @@ R8::ReactorRoute.draw do
   post  'service_module/update_model_from_clone' => 'service_module#update_model_from_clone'
   post  'service_module/import' => 'service_module#import'
   post  'service_module/create' => 'service_module#create'
+  post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
   post  'service_module/resolve_pull_from_remote' => 'service_module#resolve_pull_from_remote'
   post  'service_module/list' => 'service_module#list'
   post  'service_module/list_remote' => 'service_module#list_remote'
+  post  'service_module/versions' => 'service_module#versions'
   post  'service_module/list_assemblies' => 'service_module#list_assemblies'
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/import_version' => 'service_module#import_version'
@@ -158,7 +163,10 @@ R8::ReactorRoute.draw do
   post  'service_module/delete_assembly_template' => 'service_module#delete_assembly_template'
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
+  post  'service_module/info' => 'service_module#info'
   post  'service_module/add_user_direct_access' => 'service_module#add_user_direct_access'
+  post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
+
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'
 
    # STATE_CHANGE

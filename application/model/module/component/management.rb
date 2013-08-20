@@ -1,12 +1,14 @@
 #Methods for creating, importing, importing, etc modules
 module DTK; class ComponentModule
   module ManagementMixin
-    def import__dsl(commit_sha,repo,module_and_branch_info,version)
+    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-      create_needed_objects_and_dsl?(repo,version)
+      parsed = create_needed_objects_and_dsl?(repo,version)
       module_branch.set_sha(commit_sha)
+
+      return parsed
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
@@ -28,9 +30,9 @@ module DTK; class ComponentModule
       previous_dsl_version = new_dsl_integer_version-1 
       module_branch = get_module_branch_matching_version(module_version)
 
-      #create in memory dsl object using old version
+      #create in-memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
-      #create from component_dsl teh new version dsl
+      #create from component_dsl the new version dsl
       dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
@@ -96,12 +98,17 @@ module DTK; class ComponentModule
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       dsl_created_info = Hash.new()
+      dsl_parsed_info  = Hash.new()
+
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
+        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
+      dsl_info = {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::JSONParsing)
+      
+      dsl_info
     end
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
@@ -109,24 +116,29 @@ module DTK; class ComponentModule
       #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
       dsl_created_info = Hash.new
+      dsl_parsed_info  = Hash.new
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
-          parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
+          dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      {:dsl_created_info => dsl_created_info}
+      dsl_info = {:dsl_created_info => dsl_created_info}
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::JSONParsing)
+      
+      dsl_info
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
       aug_component_templates = get_aug_associated_component_templates()
+      model_parsed = nil
       Transaction do
-        ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
+        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
         #below is teh conservative thing to do if dont know if any deletes
         any_deletes = true
@@ -137,6 +149,8 @@ module DTK; class ComponentModule
           raise_errors_if_dangling_cmp_refs(aug_component_templates)
         end
       end
+
+      return model_parsed if model_parsed.is_a?(ErrorUsage::JSONParsing)
       set_dsl_parsed!(true)
     end
 

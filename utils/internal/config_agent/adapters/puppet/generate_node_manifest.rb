@@ -25,32 +25,35 @@ module XYZ
         UseAnchorsForClassWrapper
       end
 
-      def generate_with_stages(cmps_with_attrs,assembly_attrs=nil,stages_ids=nil)
-        # Amar: 'ret' variable will contain list of puppet manifests, each will be one puppet call inside puppet_apply agent
-        ret = Array.new  
-        stages_ids.each do |stage_ids_ps|
-          ret_ps = Array.new
-          add_default_extlookup_config!(ret_ps)
-          add_assembly_attributes!(ret_ps,assembly_attrs||[])
-          ret_ps << generate_stage_statements(stage_ids_ps.size)
-          stage_ids_ps.each_with_index do |stage_ids, i|
+      #stage_ids can be of form
+      #[[cmp_id1,cmp_id2],[cmp_id3,cmp_id4,cmp_id5]]
+      # or
+      ##[[[cmp_id1],[cmp_id2]],[[cmp_id3,cmp_id4],[cmp_id5]]]
+      #In both cases teh top leevl shows sepearte puppet runs
+      #in the first case for each puppet run, each comp wil be in sepearte puppet stage
+      #in case 2, extra grouping shows how components are grouped into puppet stages
+      def generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
+        stages_ids.map do |stage_ids_exec_block|
+          exec_block = Array.new
+          add_default_extlookup_config!(exec_block)
+          add_assembly_attributes!(exec_block,assembly_attrs||[])
+          exec_block << generate_stage_statements(stage_ids_exec_block.size)
+          stage_ids_exec_block.each_with_index do |stage_ids, i|
             stage = i+1
-            ret_ps << " " #space between stages
+            exec_block << " " #space between stages
             puppet_stage = PuppetStage.new(stage,@import_statement_modules)
-            stage_ids.each do |cmp_id| 
+            Array(stage_ids).each do |cmp_id| 
               cmp_with_attrs = cmps_with_attrs.find { |cmp| cmp["id"] == cmp_id }       
               puppet_stage.generate_manifest!(cmp_with_attrs)
             end
-            puppet_stage.add_lines_for_stage!(ret_ps)
+            puppet_stage.add_lines_for_stage!(exec_block)
           end
 
           if attr_val_stmts = get_attr_val_statements(cmps_with_attrs)
-            ret_ps += attr_val_stmts
+            exec_block += attr_val_stmts
           end
-          ret << ret_ps
+          exec_block
         end
-        
-        ret
       end      
 
       def generate_with_total_ordering(cmps_with_attrs,assembly_attrs=nil)

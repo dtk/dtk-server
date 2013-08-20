@@ -428,7 +428,7 @@ class DtkCommon
 	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
 		puts "Create assembly template from assembly:", "---------------------------------------"
 		template_created = false	
-		create_assembly_template_response = send_request('/rest/assembly/create_new_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
+		create_assembly_template_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
 		if (create_assembly_template_response['status'] == 'ok')
 			puts "Assembly template #{assembly_template_name} created in service #{service_name}"
 			template_created = true
@@ -545,8 +545,9 @@ class DtkCommon
    			module_exported = false
 			else
 				puts "Module #{module_to_export} was not found in list of remote modules. Proceed with export of module..."
-				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']				
-				export_response = send_request('/rest/component_module/export', {:remote_component_name=>module_to_export, :component_module_id=>component_module_id, :remote_component_namespace=>namespace})
+				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']
+
+				export_response = send_request('/rest/component_module/export', {:remote_component_name=>"#{namespace}/#{module_to_export}", :component_module_id=>component_module_id})
 
 				puts "Module export response:"
 				pretty_print_JSON(export_response)
@@ -618,6 +619,8 @@ class DtkCommon
 		end
 		puts ""
 	end
+
+
 
 	def get_module_attributes_list(module_name, filter_component)
 		#Filter component used on client side after retrieving all attributes from all components
@@ -910,7 +913,7 @@ class DtkCommon
 			else
 				puts "Service #{service_name} was not found in list of remote services. Proceed with export of service..."
 				service_module_id = service_list['data'].select { |x| x['display_name'] == service_name}.first['id']				
-				export_response = send_request('/rest/service_module/export', {:remote_component_name=>service_name, :service_module_id=>service_module_id, :remote_component_namespace=>namespace})
+				export_response = send_request('/rest/service_module/export', {:remote_component_name=>"#{namespace}/#{service_name}", :service_module_id=>service_module_id})
 
 				puts "Service export response:"
 				pretty_print_JSON(export_response)

@@ -21,7 +21,7 @@ module DTK
         if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
           return ret_clone_update_info(service_version)
         end
-        
+
         #set in cmp_module_refs the module have specfied value and update both model and service's global refs
         cmp_module_refs.set_module_version(cmp_module_name,component_version)
         
@@ -50,7 +50,7 @@ module DTK
 
     def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
       content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
-pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
+      pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
       update(branch,content_hash_content,opts)
       new(branch,content_hash_content,:content_hash_form_is_reified => true)
     end

@@ -39,14 +39,23 @@ module DTK
     # Returnes versions for specified module
     #
     def versions(module_id)
+      module_name, remote_versions = nil, []
+
       # get local versions list and remove master(nil) from list
-      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.reject{|v| v.nil?}
+      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
+      
       # get all remote modules versions, and take only versions for current component module name
       info = ComponentModule.info(model_handle(), module_id)
-      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip()
-      remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
+      remote_versions = ComponentModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
       
-      [{:namespace => "local", :versions => local_versions}, {:namespace => "remote", :versions => remote_versions}]
+      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
+      remote_hash = {:namespace => "remote", :versions => remote_versions}
+
+      versions = [local_hash]
+      versions << remote_hash unless remote_versions.empty?
+
+      versions
     end
 
     def info_about(about, cmp_id=nil)
@@ -117,25 +126,34 @@ module DTK
       mh = project_idh.createMH(model_type())
       installed_modules = get_objs(mh,sp_hash)
 
-      missing_modules = []
+      missing_modules   = []
+      found_modules = []
 
       required_modules.each do |r_module|
         is_found   = false
-        name    = r_module["component_module"]
-        version = r_module["version_info"]
+        name      = r_module["component_module"]
+        version   = r_module["version_info"]
+        namespace = r_module["remote_namespace"] || service_namespace
 
         installed_modules.each do |i_module|
-          if(name.eql?(i_module[:display_name]) &&  ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]))
+          if (
+              name.eql?(i_module[:display_name]) && 
+              ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
+              namespace.eql?(i_module.fetch(:repo,{})[:remote_repo_namespace])
+             )
+
             is_found = true
             break
           end
         end
 
-        missing_modules << { :name => name, :version => version, :namespace => service_namespace} unless is_found
+        data = { :name => name, :version => version, :namespace => namespace }
+
+        is_found ? found_modules << data : missing_modules << data
       end
 
       # return both missing and required modules
-      return missing_modules, required_modules
+      return missing_modules, found_modules
     end
 
     def self.get_all_workspace_library_diffs(mh)
@@ -151,6 +169,16 @@ module DTK
     def module_branches()
       self.update_object!(:module_branches)
       self[:module_branch]
+    end
+
+    # raises exception if more repos found
+    def get_repo!()
+      repos = get_repos()
+      unless repos.size == 1
+        raise Error.new("unexpected that number of matching repos is not equal to 1")
+      end
+      
+      return repos.first()
     end
 
     def get_repos()

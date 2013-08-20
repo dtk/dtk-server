@@ -108,7 +108,9 @@ module DTK
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
 
-      update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      return :dsl_parsed_info => response if response.is_a?(ErrorUsage::JSONParsing)
+      return response
     end
 
     def get_project()
@@ -120,9 +122,21 @@ module DTK
       end
     end
 
+     # raises exception if more repos found
+    def get_repo!()
+      repos = get_repos()
+     
+      unless repos.size == 1
+        raise Error.new("unexpected that number of matching repos is not equal to 1")
+      end
+      
+      return repos.first()
+    end
+
     def get_repos()
       get_objs_uniq(:repos)
     end
+
     def get_workspace_repo()
       sp_hash = {
         :cols => [:id,:display_name,:workspace_info,:project_project_id]
@@ -263,6 +277,21 @@ module DTK
       name_to_id_default(model_handle,name)
     end
 
+    #
+    # returns Array with: name, namespace, version
+    #
+    def get_basic_info(target_mh, id, opts={})
+      sp_hash = {
+        :cols => [:id, :display_name, :version, :remote_repos],
+        :filter => [:eq,:id, id.to_i]
+      }
+
+      response = get_obj(target_mh, sp_hash.merge(opts))
+
+      # return name, namespace and version
+      return response[:display_name], (response[:repo_remote]||{})[:repo_namespace], response[:module_branch][:version] 
+    end
+
     def info(target_mh, id, opts={})
       remote_repo_cols = [:id, :display_name, :version, :remote_repos]
       components_cols = [:id, :display_name, :version]
@@ -302,29 +331,34 @@ module DTK
 
 
     def list(opts=opts.new)
-      project_idh = opts.required(:project_idh)
-      include_remotes = opts.array(:detail_to_include).include?(:remotes)
-      include_versions = opts.array(:detail_to_include).include?(:versions)
+      diff               = opts[:diff]
+      project_idh        = opts.required(:project_idh)
+      remote_rep         = opts[:remote_rep]
+      include_remotes    = opts.array(:detail_to_include).include?(:remotes)
+      include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
       sp_hash = {
-        :cols => [:id, :display_name, include_any_detail && :module_branches_with_repos].compact,
+        :cols => [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact,
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
       unsorted_ret = get_objs(mh,sp_hash)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
-        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions))
+        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions, :remote_rep => remote_rep, :diff => diff))
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
     module ListMethodHelpers
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
+        diff       = opts[:diff]
+        remote_rep = opts[:remote_rep]
+
         if opts[:include_remotes]
           augment_with_remotes_info!(branch_module_rows,module_mh)
         end
-
+        
         #there can be dupliactes for a module when multiple repos; in which case will agree on all fields
         #except :repo, :module_branch, and :repo_remotes
         #index by module
@@ -334,12 +368,21 @@ module DTK
           module_branch = r[:module_branch]
           ndx_repo_remotes = r[:ndx_repo_remotes]
           ndx = r[:id]
+          is_equal = nil
+          
+          if diff
+            repo = r[:repo]
+            linked_remote = repo.linked_remote?(remote_rep)
+            is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch) if linked_remote
+          end
+                    
           repo_remotes_added = false
           unless mdl = ndx_ret[ndx]
             r.delete(:repo)
             r.delete(:module_branch)
             mdl = ndx_ret[ndx] = r
           end
+          mdl.merge!(:is_equal => is_equal)
 
           if opts[:include_versions]
             (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
@@ -364,6 +407,7 @@ module DTK
             mdl.merge!(:linked_remotes => ret_linked_remotes_print_form(ndx_repo_remotes.values))
           end
         end
+
         ndx_ret.values
       end
       DefaultVersionString = "CURRENT"
@@ -436,8 +480,12 @@ module DTK
 
     #returns hash with keys :module_idh :module_branch_idh
     def initialize_module(project,module_name,config_agent_type,version=nil)
+      is_parsed   = false
       project_idh = project.id_handle()
-      if module_exists?(project_idh,module_name)
+      module_exists = module_exists?(project_idh,module_name)
+      
+      is_parsed = module_exists[:dsl_parsed] if module_exists
+      if is_parsed
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
       ws_branch = ModuleBranch.workspace_branch_name(project,version)
@@ -577,7 +625,7 @@ module DTK
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
       end
       sp_hash = {
-        :cols => [:id,:display_name],
+        :cols => [:id, :display_name, :dsl_parsed],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }

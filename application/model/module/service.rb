@@ -129,6 +129,26 @@ module DTK
       end
     end
 
+    def versions(module_id)
+      module_name, remote_versions = nil, []
+
+      # get local versions list and remove master(nil) from list
+      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
+      
+      # get all remote modules versions, and take only versions for current service module name
+      info = ServiceModule.info(model_handle(), module_id)
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
+      remote_versions = ServiceModule.list_remotes(model_handle).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
+      
+      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
+      remote_hash = {:namespace => "remote", :versions => remote_versions}
+
+      versions = [local_hash]
+      versions << remote_hash unless remote_versions.empty?
+
+      versions
+    end
+
     def self.get_project_trees(mh)
       sp_hash = {
         :cols => [:id,:display_name,:module_branches]
@@ -221,15 +241,16 @@ module DTK
       get_objs(mh,sp_hash)
     end 
 
-    def import__dsl(commit_sha,repo,module_and_branch_info,version)
+    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts = {})
       unless version.nil?
         raise Error.new("Not implemented yet ServiceModule#import__dsl with version not equal to nil")
       end
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch)
+      parsed = update_model_from_dsl(module_branch)
       module_branch.set_sha(commit_sha)
+      parsed
     end
 
    private

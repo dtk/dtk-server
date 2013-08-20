@@ -5,20 +5,23 @@ module DTK
       def serialize()
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
-        SimpleOrderedHash.new(
+        temporal_ordering = temporal_ordering_hash()
+        ret = SimpleOrderedHash.new(
          [
           {:name => assembly_hash()[:display_name]},
           {:node_bindings => node_bindings_hash}, 
-          {:assembly => assembly_hash}
-         ])
+          {:assembly => assembly_hash},
+          temporal_ordering && {:workflow => temporal_ordering}
+         ].compact)
       end
 
       def assembly_output_hash()
         ret = SimpleOrderedHash.new()
         #add assembly level attributes
-        #TODO: stub
-      
-        #TODO: need to add in component overide values
+        if assembly_level_attrs = assembly_level_attributes_hash()
+          ret[:attributes] = assembly_level_attrs
+        end
+
         #add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
@@ -36,10 +39,9 @@ module DTK
             raise Error.new("Cannot find matching node for input port")
           end
 
-          #TODO: does this need fixing up in cases whare a component can appear multiple times?
           cmps = matching_node[:components]
           i = 0; found = false
-          while i < cmps.size and !found
+          while i < cmps.size
             if match_component?(cmps[i],in_parsed_port[:component_name])
               cmps[i] = add_service_link_to_cmp(cmps[i],out_parsed_port)
               found = true
@@ -51,6 +53,21 @@ module DTK
           end
         end
         ret
+      end
+
+      def assembly_level_attributes_hash()
+        if attrs = assembly_hash()[:attribute]
+          ret = attrs.values.inject(SimpleOrderedHash.new()) do |h,a|
+            h.merge(a[:display_name] => AttributeDatatype.convert_value_to_ruby_object(a))
+          end
+          ret unless ret.empty?
+        end
+      end
+
+      def temporal_ordering_hash()
+        if default_action_task_template = (assembly_hash()[:task_template]||{})[Task::Template.default_task_action()]
+          SimpleOrderedHash.new(:assembly_action => "create").merge(default_action_task_template[:content])
+        end
       end
 
       def parse_port_ref(qualified_port_ref,node_ref_to_name)
@@ -81,9 +98,17 @@ module DTK
           ret = {component_in_ret => {:service_links => service_links}}
         end
         output_target = "#{out_parsed_port[:node_name]}#{Seperators[:node_component]}#{out_parsed_port[:component_name]}"
-        service_link = {out_parsed_port[:link_def_ref] => output_target}
-        #TODO: this assumes that no component can have two port links with same link def ref
-        service_links.merge!(service_link)
+        link_def_ref = out_parsed_port[:link_def_ref]
+        if existing_links = service_links[link_def_ref]
+          if existing_links.kind_of?(Array)
+            existing_links << output_target
+          else #existing_links.kind_of?(String)
+            #turn into array with existing plus new element
+            service_links[link_def_ref] = [service_links[link_def_ref],output_target]
+          end
+        else
+          service_links.merge!(link_def_ref => output_target)
+        end
         ret 
       end
 

@@ -51,7 +51,7 @@ module DTK; class Component
       unless impls_to_set_on_incl_mods.empty? 
         #not doing updates if any errors
         if ret.empty?
-          incl_mod_mh = component_idhs.first.createMH(:include_module)
+          incl_mod_mh = component_idhs.first.createMH(:component_include_module)
           update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
         end
       end
@@ -130,7 +130,7 @@ module DTK; class Component
         :cols => [:id,:group_id,:display_name,:module,:version_constraint,:implementation],
         :filter => [:oneof,:component_id,component_idhs.map{|idh|idh.get_id()}]
       }
-      incl_mod_mh = component_idhs.first.createMH(:include_module)
+      incl_mod_mh = component_idhs.first.createMH(:component_include_module)
       get_objs(incl_mod_mh,sp_hash)
     end
 

@@ -23,9 +23,30 @@
     },
     #these two used when parent is service_add_on
     :required=>{:type=>:boolean}, 
+    :temporal_order=>{:type=>:varchar,:size => 20}, #output_first | #input_first
     :output_is_local=>{:type=>:boolean} 
   },
   :virtual_columns=>{
+    :ports=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{:model_name=>:port,
+         :alias=>:input_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__input_id},
+         :cols => Port.common_columns()
+       },
+       {
+         :model_name=>:port,
+         :alias=>:output_port,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:port_link__output_id},
+         :cols => Port.common_columns()
+       }]
+    },
     :augmented_ports=> {
       :type=>:json,
       :hidden=>true,

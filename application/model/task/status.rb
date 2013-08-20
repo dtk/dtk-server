@@ -238,24 +238,25 @@ module DTK
 
     #TODO: probably better to set when creating
     def set_and_return_types!()
-      type = nil
-      if self[:task_id].nil?
-        #TODO: stub that gets changed when different ways to generate tasks
-        type = "commit_cfg_changes"
-      else
-        if action_type = self[:executable_action_type]
-          type = ActionTypeCodes[action_type.to_s]
+      type = 
+        if self[:task_id].nil?
+          self[:display_name]||"commit_cfg_changes"
+        elsif action_type = self[:executable_action_type]
+          ActionTypeCodes[action_type.to_s]
+        elsif self[:display_name]
+          self[:display_name]
         else
+          #TODO: probably deprecate below; it at least needs fixing up
           #assumption that all subtypes some type
           if sample_st = subtasks.first
             if sample_st[:executable_action_type]
               sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
               suffix = /config_node(\w.+)/.match(self[:display_name])[1] if sample_st[:executable_action_type] == "ConfigNode"
-              type = (sample_type && "#{sample_type}s#{suffix}") #make plural
+              sample_type && "#{sample_type}s#{suffix}" #make plural
             end
           end 
         end
-      end
+
       subtasks.each{|st|st.set_and_return_types!()}
       self[:type] = type
     end

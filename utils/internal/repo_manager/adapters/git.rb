@@ -257,6 +257,14 @@ module DTK
       push_changes()
     end
 
+    def pull_from_remote_repo(remote_name,remote_url,remote_branch)
+      unless remote_exists?(remote_name)
+        add_remote(remote_name,remote_url)
+      end
+
+      pull_changes(remote_name,remote_branch)
+    end
+
     #MOD_RESTRUCT: TODO: may deprecate
     def synchronize_with_remote_repo(remote_name,remote_url,opts={})
       if remote_exists?(remote_name)
@@ -339,6 +347,31 @@ module DTK
         elsif git_command__rev_list_contains?(other_sha,local_sha) then :local_behind
         else :branchpoint
         end
+      end
+    end
+
+    def is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)
+      # If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
+      begin
+        git_command__fetch(remote_r)
+      rescue Exception => e
+        initial_sync_with_remote_repo(remote_n,remote_u,remote_b)
+        git_command__fetch(remote_r)
+      end
+      
+      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_r.to_s)}
+      local  = @grit_repo.heads.first
+
+      raise Error.new("Cannot find remote repo (#{remote_r})") unless remote
+
+      remote_sha = remote.commit.id
+      local_sha = local.commit.id
+
+      if remote_sha == local_sha 
+        return true
+      else
+        return true unless any_diffs?(local_sha,remote_sha)
+        return false
       end
     end
 

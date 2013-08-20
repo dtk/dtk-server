@@ -68,6 +68,20 @@ module DTK
       datatype = opts.return_value(:datatype)
       rest_ok_response data, :datatype => datatype
     end
+    #TODO: may unify with above
+    def rest__info_about_task()
+      assembly = ret_assembly_instance_object()
+      task_action = ret_request_params(:task_action)
+      format = :hash #TODO: hard coded because only format supported now
+      response = assembly.get_task_template_serialized_content(task_action,:format => format)
+      response_opts = Hash.new
+      if response
+        response_opts.merge!(:encode_into => :yaml)
+      else
+        response = {:message => "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})"}
+      end
+      rest_ok_response response, response_opts
+    end
 
     def rest__list_modules()
       ids = ret_request_params(:assemblies)
@@ -207,12 +221,13 @@ module DTK
     end
 
     #### actions to update and create assembly templates
-    def rest__create_new_template()
+    def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
       service_module = create_obj(:service_module_name,ServiceModule)
       assembly_template_name = ret_non_null_request_params(:assembly_template_name)
-      assembly.create_new_template(service_module,assembly_template_name)
-      rest_ok_response
+      Assembly::Template.create_or_update_from_instance(assembly,service_module,assembly_template_name)
+      clone_update_info = service_module.ret_clone_update_info()
+      rest_ok_response clone_update_info
     end
     #### end: actions to update and create assembly templates
 
@@ -291,11 +306,10 @@ module DTK
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
       end
 
-      commit_msg = ret_request_params(:commit_msg)
-      puppet_version = ret_request_params(:puppet_version)
-      task = Task.create_from_assembly_instance(assembly,:assembly,commit_msg, puppet_version)
+      opts = ret_params_hash(:commit_msg,:puppet_version)
+      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
-      # TODO: this was call from gui commit window
+      # TODO: this was called from gui commit window
       # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
@@ -303,12 +317,13 @@ module DTK
     #TODO: replace or given options to specify specific smoketests to run
     def rest__create_smoketests_task()
       assembly = ret_assembly_instance_object()
-      commit_msg = ret_request_params(:commit_msg)
-      task = Task.create_from_assembly_instance(assembly,:smoketest,commit_msg)
+      opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
+      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
       rest_ok_response :task_id => task.id
     end
 
+    #TODO: cleanup and take logic out of controller
     def rest__start()
       assembly = ret_assembly_instance_object()
       assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)

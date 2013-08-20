@@ -2,6 +2,7 @@ module DTK
   class ServiceNodeBinding
    private
     class Import
+      include FactoryObjectMixin
       def initialize(aug_assembly_nodes)
         @aug_assembly_nodes = aug_assembly_nodes
       end
@@ -32,7 +33,7 @@ module DTK
           r[:assembly][:display_name] == assembly_name and r[:display_name] == node_name
         end
         if match
-          ref = "#{assembly_name}--#{node_name}"
+          ref = assembly_template_node_ref(assembly_name,node_name)
           [match[:id],ref]
         else
           raise ErrorParsing.new("Assembly node ref (#{assembly_node_ref}) does not match any existing assembly node ids")

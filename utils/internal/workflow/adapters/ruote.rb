@@ -49,17 +49,12 @@ module DTK
           if errors.nil? or errors.empty?
             pp :normal_completion
           else
-            p "intercepted errors:"
+            Log.error "-------- intercepted errors ------"
             errors.each  do |e|
-              p e.message
-              depth = 5
-              e.trace.each do |l|
-                p l.chomp
-                depth -= 1
-                break if depth < 0
-              end
-              pp "----------------"
+              Log.error_pp e.message
+              Log.error_pp e.trace
             end
+            Log.error "-------- end: intercepted errors ------"
 
             #different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)
@@ -117,8 +112,8 @@ module DTK
       end
 
      private 
-      def initialize(top_task,guards)
-        super(top_task,guards)
+      def initialize(top_task)
+        super
         @process_def = nil
       end
       def process_def()

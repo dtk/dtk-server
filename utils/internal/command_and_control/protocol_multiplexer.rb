@@ -41,12 +41,12 @@ module XYZ
             Log.error msg
           end
          rescue Exception => e
+          #TODO: this is last resort trap; if this is reached teh user will haev to manually cancel the task
           Callbacks.process_error(callbacks,e)
         end
       end
 
      private
-
       def is_cancel_response(msg)
         return false
         #return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
@@ -102,9 +102,8 @@ module XYZ
 
         def self.process_error(callbacks,error_obj)
           unless callbacks and callbacks.process_error(error_obj)
-          #TODO: rmove need for this catchall          
-            Log.error error_obj.backtrace.inspect
             Log.error("error in proceess_response: #{error_obj.inspect}")
+            Log.error_pp(error_obj.backtrace)
           end
         end
 

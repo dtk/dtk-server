@@ -259,7 +259,10 @@ module DTK; class ComponentDSL; class V2
           end
         end
         ret[:link_defs] = link_defs unless link_defs.empty?
-        ret[:component_order] = component_order(input_hash)
+        #TODO: is this redundant with 'order', which just added
+        if component_order = component_order(input_hash)
+          ret[:component_order] = component_order
+        end
         ret
       end
 
@@ -334,6 +337,9 @@ module DTK; class ComponentDSL; class V2
         end
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_info["component"])
         ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
+        if order = order(dep_cmp_info)
+          ret_info["order"] = order 
+        end
         in_attr_mappings = (dep_cmp_info["attribute_mappings"]||[]) + (parent_info["attribute_mappings"]||[])
         unless in_attr_mappings.empty?
           ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
@@ -343,6 +349,16 @@ module DTK; class ComponentDSL; class V2
       end
 
      private
+      def order(dep_cmp_info)
+        if ret = dep_cmp_info["order"]
+          unless LegalOrderVals.include?(ret)
+            raise ParsingError.new("Value of order param (?1) is ill-formed; it should be one of (#{LegalOrderVals}.join(', '))",ret)
+          end
+          ret
+        end
+      end
+      LegalOrderVals = ["after","before"]
+
       def self.convert_choice(dep_cmp_info,base_cmp,parent_info={},opts={})
         new().convert(dep_cmp_info,base_cmp,parent_info,opts)
       end

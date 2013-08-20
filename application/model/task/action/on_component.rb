@@ -25,53 +25,62 @@ module DTK; class Task
         end
         ret
       end
-      def self.create_from_hash(hash,task_idh)
-        hash[:component] &&= Component.create_from_model_handle(hash[:component],task_idh.createMH(:component))
+      def self.create_from_hash(hash,task_idh=nil)
+        if component = hash[:component]
+          unless component.kind_of?(Component)
+            unless task_idh
+              raise Error.new("If hash[:component] is not of type Component then task_idh must be supplied")
+            end
+            hash[:component] = Component.create_from_model_handle(component,task_idh.createMH(:component))
+          end
+        end
         if attrs = hash[:attributes]
-          attr_mh = task_idh.createMH(:attribute)
-          attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}
+          unless attrs.empty?
+            attr_mh = task_idh.createMH(:attribute)
+            attrs.each_with_index{|attr,i|attrs[i] = Attribute.create_from_model_handle(attr,attr_mh)}
+          end
         end
         new(hash)
       end
 
+      #returns component_actions,intra_node_stages
       def self.order_and_group_by_component(state_change_list)
+        intra_node_stages = nil
         ndx_cmp_idhs = Hash.new
-        node = state_change_list.first[:node]
         state_change_list.each do |sc|
           cmp = sc[:component]
           ndx_cmp_idhs[cmp[:id]] ||= cmp.id_handle() 
         end
         components = Component::Instance.get_components_with_dependency_info(ndx_cmp_idhs.values)
         cmp_deps = ComponentOrder.get_ndx_cmp_type_and_derived_order(components)
-        cmp_order = 
-          if Workflow.intra_node_stages?
-            get_intra_node_stages(cmp_deps, state_change_list, node) 
-          elsif Workflow.intra_node_total_order?
-            get_total_component_order(cmp_deps, node) 
-          else
-            raise Error.new("No intra node ordering strategy found")
-          end
-        cmp_order.map do |(component_id,deps)|
+        if Workflow.intra_node_stages?
+          cmp_order,intra_node_stages = get_intra_node_stages(cmp_deps, state_change_list)
+        elsif Workflow.intra_node_total_order?
+          node = state_change_list.first[:node]
+          cmp_order = get_total_component_order(cmp_deps, node) 
+        else
+          raise Error.new("No intra node ordering strategy found")
+        end
+        component_actions = cmp_order.map do |(component_id,deps)|
           create_from_state_change(state_change_list.select{|a|a[:component][:id] == component_id},deps) 
         end
+        [component_actions,intra_node_stages]
       end
 
-      def self.get_intra_node_stages(cmp_deps, state_change_list, node)
+      #returns cmp_ids_with_deps,intra_node_stages
+      def self.get_intra_node_stages(cmp_deps, state_change_list)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
         cd_ppt_stgs, scl_ppt_stgs = Stage::PuppetStageGenerator.generate_stages(cmp_ids_with_deps.dup, state_change_list.dup)
-        puppet_with_intranode_stages = Array.new
+        intra_node_stages = Array.new
         cd_ppt_stgs.each_with_index do |cd, i|
           cmp_ids_with_deps_ps = cd_ppt_stgs[i].dup
           state_change_list_ps = scl_ppt_stgs[i]
           intranode_stages_with_deps = Stage::IntraNode.generate_stages(cmp_ids_with_deps_ps, state_change_list_ps)
-          intranode_stages = Array.new
-          intranode_stages_with_deps.each { |stage| intranode_stages << stage.keys }
-          puppet_with_intranode_stages << intranode_stages
+          intra_node_stages << intranode_stages_with_deps.map{|stage|stage.keys }
         end
         # Amar: to enable multiple puppet calls inside one puppet_apply agent call, 
         # puppet_stages are added to intra node stages. Check PuppetStageGenerator class docs for more details
-        node[:intra_node_stages] = puppet_with_intranode_stages
-        return cmp_ids_with_deps
+        [cmp_ids_with_deps,intra_node_stages]
       end
 
       # Amar
@@ -172,6 +181,17 @@ module DTK; class Task
         end
       end
 
+      def self.create_list_from_execution_blocks(exec_blocks,config_agent_type)
+        exec_blocks.components.map do |cmp|
+          hash = {
+            :attributes => Array.new,
+            :component => cmp,
+            :on_node_config_agent_type => config_agent_type
+          }
+          new(hash)
+        end
+      end
+
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
         #TODO: may deprecate need for ||[sc[:id]
@@ -189,7 +209,7 @@ module DTK; class Task
         if incremental_change
           hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 
         end
-        self.new(hash)
+        new(hash)
       end
     end
   end

@@ -13,7 +13,7 @@ assembly_name = 'test_case_35_instance'
 assembly_template = 'bootstrap::test1'
 module_name = 'test'
 module_version = '0.0.1'
-module_namespace = "r8"
+module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 

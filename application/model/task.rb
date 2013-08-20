@@ -1,9 +1,10 @@
-r8_nested_require('task','create')
-module XYZ
+module DTK
   class Task < Model
+    r8_nested_require('task','create')
     r8_nested_require('task','status')
     r8_nested_require('task','action')
-    extend TaskCreateClassMixin
+    r8_nested_require('task','template')
+    extend CreateClassMixin
     include StatusMixin
     #returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
@@ -12,6 +13,12 @@ module XYZ
       return ret unless node_id = ea.respond_to?(:node_id) && ea.node_id
       task_ids = external_guards.select{|g|g[:guarded][:node][:id]}.map{|g|g[:guard][:task_id]}.uniq
       task_ids.map{|task_id|id_handle(:id => task_id)}
+    end
+
+    def assembly()
+      if assembly_id = get_field?(:assembly_id)
+        id_handle(:model_name => :assembly,:id => assembly_id).create_object()
+      end
     end
 
     def get_errors()
@@ -367,7 +374,8 @@ module XYZ
        :position,
        :executable_action_type,
        :executable_action,
-       :commit_message
+       :commit_message,
+       :assembly_id
       ]
     end
 

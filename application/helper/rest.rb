@@ -9,10 +9,19 @@ module Ramaze::Helper
 
     def rest_ok_response(data=nil,opts={})
       data ||= Hash.new
-      payload = {:status => :ok,:data => data}
-      if opts[:datatype]
-        payload.merge!(:datatype => opts[:datatype])
+      if encode_format = opts[:encode_into]
+        #This might be a misnomer in taht payload is still a hash which then in RestResponse.new becomes json
+        #for case of yaml, the data wil be a string formed by yaml encoding
+        data = 
+          case encode_format
+            when :yaml
+              ::DTK::Aux.serialize(data,:yaml) + "/n"
+            else raise Error.new("Unexpected encode format (#{encode_format})")
+          end
       end
+
+      payload = {:status => :ok,:data => data}
+      payload.merge!(:datatype => opts[:datatype]) if opts[:datatype]
       RestResponse.new(payload)
     end
 

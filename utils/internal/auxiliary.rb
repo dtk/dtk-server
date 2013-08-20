@@ -35,7 +35,6 @@ module XYZ
         RUBY_PLATFORM
       end
 
-
       def now_time_stamp()
         SQL.now
         #TODO: change to use app server clock
@@ -66,7 +65,7 @@ module XYZ
 
       #key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
-        hash_subset_aux(Hash.new(),hash,keys,opts,&block)
+        hash_subset_aux(opts[:seed]||Hash.new(),hash,keys,opts,&block)
       end
       def ordered_hash_subset(hash,keys,opts={},&block)
         seed = ActiveSupport::OrderedHash.new()
@@ -123,7 +122,19 @@ module XYZ
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          raise ErrorUsage::JSONParsing.new(e,file_path)
+          return ErrorUsage::JSONParsing.new(e,file_path)
+        end
+      end
+
+      def yaml_parse(content,file_path=nil)
+        ret = Hash.new
+        if content.empty?
+          return ret
+        end
+        begin 
+          YAML.load(content)
+        rescue Exception => e
+          return ErrorUsage::YAMLParsing.new(e,file_path)
         end
       end
 
@@ -132,18 +143,51 @@ module XYZ
           when :json
             JSON.pretty_generate(hash_content)
           when :yaml
-            YAML.dump(hash_content)
+            YamlHelper.simple_form(hash_content)
           else
             raise Error.new("Format (#{format_format}) is not treated")
         end
       end
 
-      def convert_to_hash(content,format_type)
+      module YamlHelper
+        def self.simple_form(obj)
+          ::YAML.dump(simple_form_aux(obj))
+        end
+       private
+        def self.simple_form_aux(obj)
+          if obj.kind_of?(::Hash)
+            ret = ::Hash.new
+            obj.each_pair{|k,v|ret[string_form(k.to_s)] = simple_form_aux(v)}
+            ret
+          elsif obj.kind_of?(::Array)
+            obj.map{|el|simple_form_aux(el)}
+          elsif obj.kind_of?(::String)
+            string_form(obj)
+          elsif obj.kind_of?(::Fixnum)
+            obj
+          elsif obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
+            obj
+          elsif obj.respond_to?(:to_s)
+            string_form(obj.to_s)
+          else 
+            string_form(obj.inspect)
+          end
+        end
+        def self.string_form(str)
+          if str.respond_to?(:force_encoding)
+            str.dup.force_encoding(Encoding::UTF_8)
+          else
+            str
+          end
+        end
+      end
+
+      def convert_to_hash(content,format_type,file_path=nil)
         case format_type
           when :json
-            json_parse(content)
+            json_parse(content,file_path)
           when :yaml
-            YAML.load(content)
+            yaml_parse(content,file_path)
           else
             raise Error.new("Format (#{format_type}) is not treated")
         end

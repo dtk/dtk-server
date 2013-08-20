@@ -1,7 +1,59 @@
-module XYZ
+module DTK
   class NodeGroup < Node
     r8_nested_require('node_group','clone')
     include CloneMixin
+
+    def self.get_component_list(nodes,opts={})
+      ret = opts[:add_on_to]||opts[:seed]||Array.new
+      return ret if nodes.empty? 
+      #find node_to_ng mapping
+      node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
+      node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group),node_filter)
+      node_group_ids = node_to_ng.values.map{|r|r.keys}.flatten.uniq
+      sp_hash = {
+        :cols => Node::Instance.component_list_fields() + [:component_list],
+        :filter => [:oneof, :id, node_group_ids + nodes.map{|n|n[:id]}]
+      }
+      rows = get_objs(nodes.first.model_handle(),sp_hash)
+      
+      ndx_cmps = Hash.new
+      ndx_node_ng_info = Hash.new
+      rows.each do |r|
+        cmp = r[:component]
+        cmp_id = cmp[:id]
+        ndx_cmps[cmp_id] ||= cmp
+        pntr = ndx_node_ng_info[r[:id]] ||= {:node_or_ng => r.hash_subset(:id,:display_name)}
+        (pntr[:component_ids] ||= Array.new) << cmp_id
+      end
+      #add titles to components that are non singletons
+      Component::Instance.add_titles!(ndx_cmps.values)
+
+      nodes.each do |node|
+        #find components on the node group
+        (node_to_ng[node[:id]]||{}).each_key do |ng_id|
+          if node_ng_info = ndx_node_ng_info[ng_id]
+            node_ng_info[:component_ids].each do |cmp_id|
+              el = ndx_cmps[cmp_id].merge(
+                :node => node,
+                :source => {:type => "node_group", :object => node_ng_info[:node_or_ng]}
+              )
+              ret << el
+            end
+          end
+        end
+
+        #find components on the node
+        ((ndx_node_ng_info[node[:id]]||{})[:component_ids]||[]).each do |cmp_id|
+          el = ndx_cmps[cmp_id].merge(
+            :node => node,
+            :source => {:type => "node", :object => node}
+          )
+          ret << el
+        end
+      end
+
+      ret
+    end
 
     def self.create_instance(target_idh,display_name,opts={})
       create_row = {

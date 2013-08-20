@@ -87,6 +87,11 @@ module XYZ
         adapter_repo.initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts)
       end
 
+     def pull_from_remote_repo(branch,repo_name,remote_name,remote_url,remote_branch,opts={})
+        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo.pull_from_remote_repo(remote_name,remote_url,remote_branch,opts)
+      end
+
       #MOD_RESTRUCT: TODO: may deprecate      
       def synchronize_with_remote_repo(repo_name,branch,remote_name,remote_url,opts={})
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
@@ -97,6 +102,11 @@ module XYZ
       def ret_remote_merge_relationship(repo_name,branch,remote_name,opts={})
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
         adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{opts[:remote_branch]||branch}",opts)
+      end
+
+      def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_n, remote_b)
+        adapter_repo = get_adapter_repo(context(repo_name,module_branch))
+        adapter_repo.is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)
       end
 
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)

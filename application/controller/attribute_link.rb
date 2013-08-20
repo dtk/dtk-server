@@ -3,6 +3,7 @@ module XYZ
 
     #deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})
+      raise Error.new("TODO: this is now deprecated: PortLink.create_port_and_attr_links has changed")
       hash = explicit_hash || request.params
       return Error.new("not implemented update of port link") if hash["id"]
 

@@ -1,37 +1,61 @@
 r8_nested_require('stage','intra_node')
 r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
-module XYZ
-  module TaskCreateClassMixin
-    def create_from_assembly_instance(assembly,component_type,commit_msg=nil, puppet_version=nil)
+module DTK
+  module CreateClassMixin
+    def create_from_assembly_instance(assembly,opts={})
+      component_type = opts[:component_type]||:service
+      commit_msg = opts[:commit_msg]
+      puppet_version = opts[:puppet_version]
+
       target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
-
-      # smoketest should not create a node
-      if component_type == :smoketest
-        create_nodes_task = nil
-      else
-        create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
-        create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
-      end
-
-      assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-      nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
-      node_mh = assembly.model_handle(:node)
-      node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
-      config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-
-      # Amar: Adding puppet version on node hash so it can be sent in mcollective request on node side
-      config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
-
-      # Amar: Generating Stages for inter node dependencies
-      staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes)
-      stages_config_nodes_task = Array.new
-      staged_config_nodes_changes.each_index do |i| 
-        config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), "_#{i+1}")
-        stages_config_nodes_task << config_nodes_task if config_nodes_task
-      end
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
+
+      create_nodes_task = 
+        case component_type
+          # smoketest should not create a node
+          when :smoketest then nil
+          when :service 
+            create_nodes_changes = StateChange::Assembly::node_state_changes(assembly,target_idh)
+            create_nodes_task(task_mh,create_nodes_changes)
+          else
+          raise Error.new("Unexpected component_type (#{component_type})")
+        end
+
+      if R8::Config[:task][:template][:enabled]
+        opts = {:component_type_filter => component_type}
+        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content(assembly,opts)
+        stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+
+        pp "---encoding of task_template_content.serialization_form()"
+        serialization_hash = task_template_content.serialization_form()
+        STDOUT << Aux.serialize(serialization_hash,:yaml)
+        STDOUT << "\n\n"
+        pp "--- end: encodings of task_template_content.serialization_form()"
+
+#        raise ErrorUsage.new("stop here")
+      else
+#TODO: will deprecate this
+        #replaceing this part with above
+        assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
+        nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
+        node_mh = assembly.model_handle(:node)
+        node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
+        config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
+        
+        # Amar: Adding puppet version on node hash so it can be sent in mcollective request on node side
+        config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
+
+        # Amar: Generating Stages for inter node dependencies
+        staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes,assembly)
+        stages_config_nodes_task = Array.new
+        staged_config_nodes_changes.each_index do |i| 
+          config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), i+1)
+          stages_config_nodes_task << config_nodes_task if config_nodes_task
+        end
+#TODO: end of deprecate section
+      end
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
@@ -88,6 +112,7 @@ module XYZ
       create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh,:node => node)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
+      #TODO: need to update this to :use_task_templates
       config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
@@ -256,7 +281,7 @@ module XYZ
       error_msg = nil
       begin 
         executable_action = Task::Action::ConfigNode.create_from_state_change(state_change, assembly_idh)
-        executable_action[:node][:inter_node_stage] = stage_index
+        executable_action.set_inter_node_stage!(stage_index)
       rescue TSort::Cyclic => e
         node = state_change.first[:node]
         display_name = node[:display_name]

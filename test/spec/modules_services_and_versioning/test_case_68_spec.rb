@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-namespace = "dtk10"
+namespace = "dtk17"
 module_name = "apache"
 module_namespace = "r8"
 module_filesystem_location = "~/dtk/component_modules"

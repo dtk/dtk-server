@@ -2,7 +2,6 @@ files =
   [
    'dependency_analysis',
    'group',
-   'guard',
    'complex_type',
    'datatype',
    'propagate_changes',
@@ -21,7 +20,6 @@ module XYZ
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
-    extend AttributeGuardClassMixin
     extend  AttrPropagateChangesClassMixin
     include ConstantMixin
     include PrintFormMixin
@@ -43,7 +41,7 @@ module XYZ
       attrs = get_objs(model_handle,sp_hash)
       return ret if attrs.empty?
       attrs.each do |r|
-        r.delete(:compoennt) if r[:component].nil? #get rio of nil :component cols
+        r.delete(:component) if r[:component].nil? #get rid of nil :component cols
 
         if node = r.delete(:direct_node)||r.delete(:component_node)
           r.merge!(:node => node)
@@ -53,6 +51,23 @@ module XYZ
     end
 
     ### virtual column defs
+    #TODO: may make this a real field in attribute
+    def title()
+      if self[:display_name] == "name" or ext_ref_indicates_title?(self[:external_ref])
+        self[:attribute_value]
+      end
+    end
+    def ext_ref_indicates_title?(ext_ref)
+      ret = 
+        if ext_ref[:type] == "puppet_attribute"
+          if path = ext_ref[:path]
+            path =~ /\[name\]$/
+          end
+        end
+      !!ret
+    end
+    private :ext_ref_indicates_title?
+
     def config_agent_type()
       external_ref_type = (self[:external_ref]||{})[:type]
       case external_ref_type

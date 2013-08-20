@@ -795,9 +795,7 @@ pp datacenter
 
       top_level_task.save!()
 
-      guards = Attribute.ret_attribute_guards(top_level_task)
-
-      workflow = Workflow.create(top_level_task,guards)
+      workflow = Workflow.create(top_level_task)
       workflow.defer_execution()
 
       run_javascript("R8.IDE.showAlert('Commit Logged,Pending Execution');")
@@ -1108,6 +1106,9 @@ POSSIBLE CHANGES TO HASH
     end
 
     def clone_assembly_ide(explicit_hash=nil)
+raise Error.new("Not implemented")
+=begin
+TODO: rewrite using refactored Assembly::Template.create_or_update_from_instance
       #TODO: temp hack
       assembly_name, service_id = ret_non_null_request_params(:name,:service_id)
       item_list = JSON.parse(ret_non_null_request_params(:item_list))
@@ -1123,8 +1124,9 @@ POSSIBLE CHANGES TO HASH
         id_handle(id,model)
       end
       project = get_default_project()
-      Assembly::Template.create_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info) 
+      Assembly::Template.create_or_update_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info) 
       return {:content => nil}
+=end
     end
   end
 end

@@ -8,6 +8,47 @@ module DTK; class  Assembly
     include ServiceLinkMixin
 
     ### standard get methods
+    def get_task_templates(opts={})
+      sp_hash = {
+        :cols => Task::Template.common_columns(),
+        :filter => [:eq,:component_component_id,id()]
+      }
+      Model.get_objs(model_handle(:task_template),sp_hash)
+    end
+    def get_task_template(task_action=nil,opts={})
+      task_action ||= Task::Template.default_task_action()
+      sp_hash = {
+        :cols => opts[:cols]||Task::Template.common_columns(),
+        :filter => [:and,[:eq,:component_component_id,id()],
+                    [:eq,:task_action,task_action]]
+      }
+      Model.get_obj(model_handle(:task_template),sp_hash)
+    end
+    def get_parents_task_template(task_action=nil)
+      task_action ||= Task::Template.default_task_action()
+      get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
+    end
+
+    def get_task_template_serialized_content(task_action=nil,opts={})
+      format = opts[:format]||:hash
+      if format == :hash
+        ret = Task::Template::ConfigComponents.get_or_generate_template_content(self,:task_action => task_action)
+        ret && ret.serialization_form()
+      else
+        raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
+      end
+    end
+
+    def get_component_list(opts={})
+      get_field?(:display_name)
+      assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}
+      rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
+      Component::Instance.add_titles!(rows)
+      ret = opts[:add_on_to]||opts[:seed]||Array.new
+      rows.each{|r|ret << r.merge(:source => assembly_source)}
+      ret
+    end
+
     def get_augmented_node_attributes(filter_proc=nil)
       get_objs_helper(:node_attributes,:attribute,:filter_proc => filter_proc,:augmented => true)
     end
@@ -330,11 +371,13 @@ module DTK; class  Assembly
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
           if deps = aug_cmp[:dependencies]
             deps.map do |dep|
-              satisfied_by = (dep.satisfied_by_component_id && ndx_component_print_form[dep.satisfied_by_component_id])
-              {
-                :depends_on => dep.depends_on_print_form?(),
-                :satisfied_by => satisfied_by 
-              }
+              el = {:depends_on => dep.depends_on_print_form?()}
+              sb_cmp_ids = dep.satisfied_by_component_ids
+              unless sb_cmp_ids.empty?
+                satisfied_by = sb_cmp_ids.map{|cmp_id|ndx_component_print_form[cmp_id]}.join(', ')
+                el.merge!(:satisfied_by => satisfied_by)
+              end
+              el
             end.compact
           end
         end
@@ -374,11 +417,11 @@ module DTK; class  Assembly
       needed_cmp_ids = Array.new
       aug_cmps.each do |aug_cmp|
         if deps = aug_cmp[:dependencies]
-          needed_cmp_ids += deps.map do |dep|
-            if cmp_id = dep.satisfied_by_component_id
-              cmp_id if ret[cmp_id].nil? 
+          deps.map do |dep|
+            dep.satisfied_by_component_ids.each do |cmp_id|
+              needed_cmp_ids << cmp_id if ret[cmp_id].nil?
             end
-          end.compact
+          end
         end
       end
       return ret if needed_cmp_ids.empty?
@@ -554,19 +597,15 @@ module DTK; class  Assembly
       new_sub_assembly && new_sub_assembly.id_handle()
     end
 
-    def create_new_template(service_module,new_template_name)
+    def create_or_update_template(service_module,template_name)
       service_module_name = service_module.get_field?(:display_name)
       project = service_module.get_project()
-      if Assembly::Template.exists?(project.id_handle(),service_module_name,new_template_name)
-        raise ErrorUsage.new("Assembly template (#{new_template_name}) already exists in service module (#{service_module_name})")
+      node_idhs = get_nodes().map{|r|r.id_handle()}
+      if node_idhs.empty?
+        raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
       end
-
-      name_info = {
-        :service_module_name => service_module_name,
-        :assembly_template_name => new_template_name
-      }
-      create_assembly_template_from_instance(project,name_info)
-    end      
+      Assembly::Template.create_or_update_from_instance(project,node_idhs,template_name,service_module_name)
+    end
 
     def get_attributes_print_form(opts=Opts.new)
       if filter = opts[:filter]
@@ -655,20 +694,6 @@ module DTK; class  Assembly
       end
     end
 
-    def create_assembly_template_from_instance(project,name_info=nil)
-      if name_info
-        service_module_name = name_info[:service_module_name]
-        template_name = name_info[:assembly_template_name]
-      else
-        component_type = get_field?(:component_type)
-        service_module_name,template_name = Assembly::Template.parse_component_type(component_type)
-      end
-      node_idhs = get_nodes().map{|r|r.id_handle()}
-      if node_idhs.empty?
-        raise Error.new("Cannot find any nodes associated with assembly (#{get_field?(:display_name)})")
-      end
-      Assembly::Template.create_from_instance(project,node_idhs,template_name,service_module_name)
-    end
   end
 end 
 #TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get

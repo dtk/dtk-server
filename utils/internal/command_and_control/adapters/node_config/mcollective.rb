@@ -40,16 +40,19 @@ module DTK
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
+        context = opts[:receiver_context]
 
-        agent_repo_dir = "#{R8::Config[:repo][:base_directory]}/dtk-node-agent"
+        agent_repo_dir = R8::Config[:node_agent_git_clone][:local_dir]
         node_commit_id = config_node[:node][:agent_git_commit_id]
+        unless head_git_commit_id = context[:head_git_commit_id]
+          raise Error.new("Unexpected that opts[:head_git_commit_id ] is nil")
+        end
         agents = Hash.new
         name_regex = /\/agent\/(.+)/
 
         if node_commit_id
           repo = ::Grit::Repo.new(agent_repo_dir)
-          head = repo.commits().first
-          diffs = repo.diff(node_commit_id, head.id, "mcollective_additions/plugins/v2.2/agent")
+          diffs = repo.diff(node_commit_id, head_git_commit_id, MCAgentPluginDir)
 
           diffs.each do |diff|
             agent_name = name_regex.match(diff.b_path)[1]
@@ -60,7 +63,7 @@ module DTK
             end          
           end
         else
-          agent_paths = Dir.glob("#{agent_repo_dir}/mcollective_additions/plugins/v2.2/agent/*")
+          agent_paths = Dir.glob("#{agent_repo_dir}/#{MCAgentPluginDir}/*")
           agent_paths.each do |agent_path|
             File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
           end
@@ -69,10 +72,10 @@ module DTK
         msg_content = { :agent_files => agents }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact("pbuilderid",pbuilderid)
-        context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
       end
+      MCAgentPluginDir = "mcollective_additions/plugins/v2.2/agent"
 
       def self.authorize_node(node,callbacks,context_x={})
         repo_user_mh = node.id_handle.createMH(:repo_user)

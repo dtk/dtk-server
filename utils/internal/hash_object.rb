@@ -248,9 +248,9 @@ module DTK
   class TSortHash < Hash
     #defining tsort on this
     include TSort
-    def initialize(initial_val)
+    def initialize(initial_val=nil)
       super()
-      replace(initial_val)
+      replace(initial_val) if initial_val
     end
     alias tsort_each_node each_key
     def tsort_each_child(node, &block)

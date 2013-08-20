@@ -1,3 +1,4 @@
+#TODO: need to better unify username passed adn tenant name
 r8_require_common_lib('auxiliary')
 r8_require_common_lib('response')
 module DTK
@@ -51,13 +52,13 @@ module DTK
 
     def create_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/create_repo"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      body = user_params(username).merge(:repo_name => repo_name, :access_rights => access_rights)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
     def add_git_user(username,rsa_pub_key,opts={})
       route = "/rest/admin/add_user"
-      body = {:username => username, :rsa_pub_key => rsa_pub_key}
+      body =  user_params(username,rsa_pub_key)
       [:noop_if_exists,:delete_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
@@ -66,10 +67,11 @@ module DTK
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/set_user_rights_in_repo"
-      body = {:repo_name => repo_name, :username => username, :access_rights => access_rights}
+      body = user_params(username).merge(:repo_name => repo_name,:access_rights => access_rights)
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    ### for utility/backup_repo_manager.rb
     def get_server_dtk_username()
       route = "/rest/admin/server_dtk_username"
       get_rest_request_data(route,:raise_error => true)["dtk_username"]
@@ -86,12 +88,12 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    ## systsem access
+    ## system access
     #required keys: [:username,:repo,:type]
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
-      body = defaults_for_create_module().merge(params_hash)
+      body = defaults_for_create_module().merge(update_user_params(params_hash))
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
 
@@ -117,8 +119,7 @@ module DTK
     #constraints :id or (:name, :namespace, and :type)
     def get_module_info(params_hash)
       route = "/rest/system/module/info"
-      body = params_hash
-      post_rest_request_data(route,body,:raise_error => true)
+      post_rest_request_data(route,params_hash,:raise_error => true)
     end
 
     def get_components_info(params_hash)
@@ -136,28 +137,36 @@ module DTK
     #require_keys => [:name,namespace,:type,username,accesss_rights]
     def grant_user_access_to_module(params_hash)
       route = "/rest/system/module/grant_user_access"
-      body = params_hash.merge(:dtk_instance_name => dtk_instance_repo_username())
+      body = update_user_params(params_hash)
       post_rest_request_data(route,body,:raise_error => true)
     end
 
     def create_user(username,rsa_pub_key,opts={})
       route = "/rest/system/user/create"
-      body = {:username => username, :rsa_pub_key => rsa_pub_key, :dtk_instance_name => dtk_instance_repo_username()}
+      body = user_params(username,rsa_pub_key)
       [:update_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
       post_rest_request_data(route,body,:raise_error => true)
     end
 
+    def list_users()
+      route = "/rest/system/user/list"
+      body = {}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+=begin
+#TODO: this needs fixing up
     #TODO: does not work if user has access right; so shoudl fix on repo manager and allow names
     def delete_user(user_id_or_name) 
-      #TODO: this is temporary until enale repo manager to take name or id or we cache id
+      #TODO: this is temporary until enable repo manager to take name or id or we cache id
       if user_id_or_name.kind_of?(Fixnum)
         delete_user_given_id(user_id_or_name)
       else
         user_info = list_users()
         unless matching_user = user_info.find{|r|r["username"] == user_id_or_name}
-          raise ErrorUsage.new("User (#{user_id_or_name} does not exsit")
+          raise ErrorUsage.new("User (#{user_id_or_name} does not exist")
         end
         delete_user_given_id(matching_user["id"])
       end
@@ -168,12 +177,7 @@ module DTK
       body = {:id => user_id}
       post_rest_request_data(route,body,:raise_error => true)
     end
-
-    def list_users()
-      route = "/rest/system/user/list"
-      body = {}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
+=end
 
    private
     def handle_error(opts={},&rest_call_block)
@@ -185,30 +189,30 @@ module DTK
           Log.error(response.inspect)
           {}
         end
-      elsif opts[:raise_error]
-        unless response.ok?
-          error_msg = response.error_message()
-          if error_msg && !error_msg.empty?
-            raise ErrorUsage.new(error_msg)
-          else
-            raise ErrorUsage.new(error_msg(response))
-          end
-        end
-          response.data
+      elsif opts[:raise_error] and not response.ok?
+        raise Error.new(error_msg(response))
       else
         response.data
       end
     end
 
     def error_msg(response)
-      if response.kind_of?(Common::Response::Error) and response["errors"] 
-        errors = response["errors"]
+      errors = response["errors"]
+      if response.kind_of?(Common::Response::Error) and errors
         #if include_error_code?(errors,"connection_refused") 
         "Repo Manager refused the connection; it may be down"
       else
-        "Repo Manager Connection Error: #{response.inspect}"
+        error_detail = nil
+        if errors.kind_of?(Array) and errors.size > 0 
+          err_msgs = errors.map{|err|err["message"]}.compact
+          unless err_msgs.empty?
+            error_detail = err_msgs.join(', ')
+          end
+        end
+        "Repo Manager Error: #{error_detail||response.inspect}"
       end
     end
+
     def include_error_code?(errors,code)
       !!errors.find do |el|
         el.kind_of?(Hash) and el["code"] == code
@@ -238,6 +242,19 @@ module DTK
 
     def dtk_instance_repo_username()
       ::DtkCommon::Aux::dtk_instance_repo_username()
+    end
+
+    def user_params(username,rsa_pub_key=nil)
+      ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
+      rsa_pub_key ? ret.merge(:rsa_pub_key => rsa_pub_key) : ret
+    end
+
+    def update_user_params(params_hash)
+      if params_hash[:username]
+        {:dtk_instance_name => dtk_instance_repo_username()}.merge(params_hash)
+      else
+        params_hash
+      end
     end
 
     #repo access

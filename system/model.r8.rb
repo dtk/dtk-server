@@ -8,7 +8,9 @@ require File.expand_path(UTILS_DIR+'/internal/model/get_items', File.dirname(__F
 require File.expand_path(UTILS_DIR+'/internal/model/schema', File.dirname(__FILE__))
 require File.expand_path(UTILS_DIR+'/internal/model/data', File.dirname(__FILE__))
 
-module XYZ
+module DTK
+  #TODO: change to be under a simpler more efficient hash object; dont need autovivification and may eventually reserve virtual attrs
+
   class Model < HashObject 
     include R8Tpl::Utility::I18n
     extend R8Tpl::Utility::I18n
@@ -67,25 +69,52 @@ module XYZ
     private :augmented_form
 
     def self.model_name()
-      model_name_x = Aux::underscore(Aux::demodulize(self.to_s)).to_sym
-      SubClassRelations[model_name_x]|| model_name_x
+      @model_name ||= model_name_helper(self)
     end
     def model_name()
       @relation_type || self.class.model_name() 
     end
 
-    def self.model_class(model_name)
-      model_class_nested(model_name) || DTK.const_get(Aux.camelize(model_name))
-    end
-    #TODO: make the exception list be deduced from declarations in actual class
-    NestedModuleClasses = {
-      :include_module => :component
-    }
-    def self.model_class_nested(model_name)
-      if parent_model_name = NestedModuleClasses[model_name]
-        nested = DTK.const_get(Aux.camelize(parent_model_name))
-        nested.const_get(Aux.camelize(model_name))
+    class << self
+      private
+      def model_name_helper(klass,opts={})
+        ret = Aux.underscore(class_parts(klass).join('')).to_sym
+        opts[:no_subclass]  ? ret : ( SubClassRelations[ret] || ret)
       end
+
+      def class_parts(klass)
+        ret = klass.to_s.split('::')
+        ret.shift
+        ret
+      end
+    end
+
+    def self.model_class(model_name)
+      unless ret = @model_classes[model_name]
+        if ret = models_to_add(model_name)
+          @model_classes[model_name] = ret
+        else
+          raise Error.new("Need to put model name (#{model_name}) in IndirectlyInheritedModels")
+        end
+      end
+      ret
+    end
+    #TODO: See if can automatically pick up below rather than needing below; tehse are models that indirectly inherit from Model
+    #add the datacenter <-> taregt equiv
+    def self.models_to_add(model_name)
+      case model_name
+        when :assembly then Assembly
+        when :assembly_template then Assembly::Template
+        when :assembly_instance then Assembly::Instance
+        when :datacenter then Target
+        when :node_group then NodeGroup
+      end
+    end
+
+    def self.inherited(child_class)
+      return unless self == Model
+      model_name = child_class.model_name
+      (@model_classes ||= Hash.new)[model_name] = child_class
     end
 
     #parent_id field name for child_model_name with parent this
@@ -106,7 +135,8 @@ module XYZ
     end
 
     def hash_subset(*cols)
-      Aux::hash_subset(self,cols)
+      #set seed to model class w/o any keys
+      Aux::hash_subset(self,cols,:seed=>self.class.create_stub(model_handle()))
     end
 
     module Delim
@@ -178,6 +208,7 @@ module XYZ
       :assembly => :component,
       :node_group => :node
     }
+
     SubClassTargets = SubClassRelations.values
     #so can use calling cobntroller to shortcut needing datbase lookup
     def self.subclass_controllers(model_name,opts)

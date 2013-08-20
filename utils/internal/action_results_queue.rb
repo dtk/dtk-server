@@ -54,7 +54,6 @@ module DTK
     end
 
     def push(index,el)
-      #TODO: error message if unexpected index
       @results[index] = el
     end
     def all_if_complete()

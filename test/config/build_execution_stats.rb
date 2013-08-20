@@ -13,7 +13,8 @@ dbconfig = YAML::load(File.open('./test/config/rspec2db.yml'))
 ActiveRecord::Base.establish_connection(dbconfig["dbconnection"])
 
 build_id = ARGV[0]
-@query = "select * from test_runs where build LIKE '#{build_id}'"
+suite_name = dbconfig["options"]["suite"]
+@query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}'"
 
 report = "Execution stats:\n"
 report << "----------------\n"

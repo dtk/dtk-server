@@ -66,19 +66,41 @@ module DTK
       rest_ok_response service_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
     end
 
+
+    def rest__pull_from_remote()
+      rest_ok_response pull_from_remote_helper(ServiceModule)
+    end
+
     #### end actions to interact with remote repos ###
 
     def rest__list()
-      project = get_default_project()
+      diff        = ret_request_params(:diff)
+      project     = get_default_project()
+      datatype    = :module
+      remote_repo = ret_remote_repo()
+
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
-      rest_ok_response ServiceModule.list(opts), :datatype => :module
+
+      opts.merge!(:remote_rep => remote_repo, :diff => diff)
+      datatype = :module_diff if diff
+
+      rest_ok_response ServiceModule.list(opts), :datatype => datatype
+    end
+
+    def rest__versions()
+      service_module = create_obj(:service_module_id)
+      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+
+      rest_ok_response service_module.versions(module_id)
     end
 
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+
+      get_namespace_and_version
       rest_ok_response ServiceModule.info(model_handle(), module_id)
     end
 
@@ -142,12 +164,14 @@ module DTK
     end
 
     #
-    # Method will check new dependencies on repo manager and import new modules on server.
+    # Method will check new dependencies on repo manager and report missing dependencies.
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()
-      # For pull check grit adapter
-      rest_ok_response check_service_dependencies(ServiceModule)
+      module_id = ret_non_null_request_params(:service_module_id)
+
+      name, namespace, version = ServiceModule.get_basic_info(model_handle(), module_id)
+      rest_ok_response get_service_dependencies(name, namespace, version)
     end
 
     def rest__delete_assembly_template()
@@ -173,8 +197,8 @@ module DTK
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_request_params(:version)
       diffs_summary = ret_diffs_summary()
-      service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
-      rest_ok_response 
+      
+      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
     end
 
     def rest__set_component_module_version()

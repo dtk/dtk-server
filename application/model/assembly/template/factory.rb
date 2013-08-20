@@ -4,26 +4,75 @@ module DTK
     class Factory < self
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
-      def self.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
+      #creates a new assembly template if it does not exist
+      def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,version=nil)
+        assembly_factory = assembly_factory(assembly_instance,service_module,assembly_name,version)
+        assembly_factory.create_assembly_template()
+      end
+
+      def create_assembly_template()
+        add_content_for_clone!()
+        create_assembly_template_aux()
+      end
+
+      def set_attrs!(project_idh,assembly_instance,service_module_branch)
+        @project_idh = project_idh
+        @assembly_instance = assembly_instance 
+        @service_module_branch = service_module_branch
+        self
+      end
+
+     private
+      def self.assembly_factory(assembly_instance,service_module,assembly_name,version=nil)
+        project = service_module.get_project()
+        project_idh = project.id_handle()
+        service_module_name = service_module.get_field?(:display_name)        
+        service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
+
+        assembly_mh = project_idh.create_childMH(:component)
+        if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)
+          return ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
+        end
+
         assembly_mh = project_idh.create_childMH(:component)
         hash_values = {
           :project_project_id => project_idh.get_id(),
           :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
           :display_name => assembly_name,
-          :ui => icon_info,
+          #TODO: was used in GUI  :ui => icon_info,
           :type => "composite",
           :module_branch_id => service_module_branch[:id],
           :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
         }
-        create(assembly_mh,hash_values)
+        ret = create(assembly_mh,hash_values)
+        ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
       end
 
-      def add_content_for_clone!(project_idh,node_idhs,port_links,augmented_branches)
+      attr_reader :assembly_instance,:project_idh,:service_module_branch
+
+      def add_content_for_clone!()
+        node_idhs = assembly_instance.get_nodes().map{|r|r.id_handle()}
+        if node_idhs.empty?
+          raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
+        end
+
+        #1) get a content object, 2) modify, and 3) persist
+        port_links,dangling_links = Node.get_conn_port_links(node_idhs)
+        #TODO: raise error to user if dangling link
+        Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
+
+        task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(assembly_instance)
+
         node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
         sample_node_idh = node_idhs.first
         node_mh = sample_node_idh.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
 
+        #get assembly-level attributes
+        assembly_level_attrs = assembly_instance.get_assembly_level_attributes().reject do |a|
+          a[:attribute_value].nil?
+        end
+        
         #get contained ports
         sp_hash = {
           :cols => [:id,:display_name,:ports_for_clone],
@@ -62,25 +111,55 @@ module DTK
             matching_cmp[:non_default_attributes] << attr
           end
         end
-        self[:nodes] = @ndx_nodes.values
-        self[:port_links] = port_links
+        update_hash = {
+          :nodes => @ndx_nodes.values, 
+          :port_links => port_links, 
+          :task_templates => task_templates,
+          :assembly_level_attributes => assembly_level_attrs
+        }
+        merge!(update_hash)
         self
       end
-      def create_assembly_template(project_idh,service_module_branch)
-        nodes = self[:nodes].inject(Hash.new){|h,node|h.merge(create_node_content(node))}
-        port_links = self[:port_links].inject(Hash.new){|h,pl|h.merge(create_port_link_content(pl))}
+
+      #TODO: can collapse above and below; aboves looks like extra intermediate level
+      def create_assembly_template_aux()
+        nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
+        port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
+        task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
+        assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
+
+        #only need to mark as complete if assembly template exists already
+        if assembly_template_idh = id_handle_if_object_exists?()
+          assembly_template_id = assembly_template_idh.get_id()
+          nodes.mark_as_complete({:assembly_id=>assembly_template_id},:apply_recursively => true)
+          port_links.mark_as_complete(:assembly_id=>assembly_template_id)
+          task_templates.mark_as_complete(:component_component_id=>assembly_template_id)
+          assembly_level_attributes.mark_as_complete(:component_component_id=>assembly_template_id)
+        end
 
         @template_output = ServiceModule::AssemblyExport.create(project_idh,service_module_branch)
         assembly_ref = self[:ref]
-        assembly_hash = Aux::hash_subset(self,[:display_name,:type,:ui,:module_branch_id,:component_type])
-        @template_output.merge!(:node => nodes, :port_link => port_links, :component => {assembly_ref => assembly_hash})
+        assembly_hash = hash_subset(:display_name,:type,:ui,:module_branch_id,:component_type)
+        assembly_hash.merge!(:task_template => task_templates) unless task_templates.empty?
+        assembly_hash.merge!(:attribute => assembly_level_attributes) unless assembly_level_attributes.empty?
+        @template_output.merge!(:node => nodes,:port_link => port_links,:component => {assembly_ref => assembly_hash})
         Transaction do 
           @template_output.save_to_model()
           @template_output.serialize_and_save_to_repo()
         end
       end
 
-     private
+      def self.exists?(assembly_mh,project_idh,service_module_name,template_name)
+        component_type = component_type(service_module_name,template_name)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
+          :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
+        }
+        if assembly_template = get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
+          subclass_model(assembly_template) #so that what is returned is object of type Assembly::Template::Factory
+        end
+      end
+
       def create_port_link_content(port_link)
         in_port = @ndx_ports[port_link[:input_id]]
         in_node_ref = node_ref(@ndx_nodes[in_port[:node_node_id]])
@@ -91,6 +170,7 @@ module DTK
 
         assembly_ref = self[:ref]
         #TODO: make port_link_ref and port_refs shorter
+        #TODO: they dont match the numeric ref that is put in in original popultaion; so od are deleted and new asserted
         #TODO: may a prori look up port ids
         port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
@@ -101,9 +181,21 @@ module DTK
         {port_link_ref => port_link_hash}
       end
       
-      def node_ref(node)
-        "#{self[:ref]}-#{node[:display_name]}"
+      def create_task_template_content(task_template)
+        ref,create_hash = Task::Template.ref_and_create_hash(task_template[:content],task_template[:task_action])
+        {ref => create_hash}
       end
+
+      def create_assembly_level_attributes(attr)
+        ref = display_name = attr[:display_name]
+        create_hash = {
+          :display_name => display_name,
+          :value_asserted => attr[:attribute_value],
+          :data_type => attr[:data_type]||AttributeDatatype.default()
+        }
+        {ref => create_hash}
+      end
+
       def create_node_content(node)
         node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
@@ -128,6 +220,10 @@ module DTK
         cmp_ref_hash.merge!(:component_template_id => cmp_template_id)
         add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)
         {cmp_ref_ref => cmp_ref_hash}
+      end
+
+      def node_ref(node)
+        assembly_template_node_ref(self[:ref],node[:display_name])
       end
 
       def add_attribute_overrides!(cmp_ref_hash,cmp,cmp_template_id)

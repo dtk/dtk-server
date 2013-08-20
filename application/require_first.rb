@@ -41,6 +41,7 @@ def dtk_require_common_lib(*files_x)
 end
 ######
 
+#TODO: deprecate of make thsi applicable to 1.9.3
 ##### for upgrading to ruby 1.9.2
 class Hash
   if RUBY_VERSION == "1.9.2"

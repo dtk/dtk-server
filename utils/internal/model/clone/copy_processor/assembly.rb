@@ -38,11 +38,16 @@ module DTK
           branch = Model.get_obj(source_obj.model_handle(:module_branch),sp_hash)
           ComponentModuleRefs.get_component_module_refs(branch)
         end
-
         def get_nested_objects_top_level(model_handle,target_parent_mh,assembly_objs_info,recursive_override_attrs,opts={},&block)
-          ret = Array.new
           raise Error.new("Not treating assembly_objs_info with more than 1 element") unless assembly_objs_info.size == 1
           assembly_obj_info = assembly_objs_info.first
+          get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,opts,&block)
+          override_attrs = {}
+          opts_generate = {:include_list => [:attribute],:standard_child_context => true}
+          ChildContext.generate(self,model_handle,[assembly_obj_info],override_attrs,opts_generate,&block)
+        end          
+
+        def get_nested_objects_top_level_aux(model_handle,target_parent_mh,assembly_obj_info,recursive_override_attrs,opts={},&block)
           ancestor_id = assembly_obj_info[:ancestor_id]
           target_parent_mn = target_parent_mh[:model_name]
           model_name = model_handle[:model_name]
@@ -65,13 +70,8 @@ module DTK
             end
             target_idh = target_parent_mh.createIDH(:id => assembly_obj_info[:parent_id])
             child_context = ChildContext.create_from_hash(self,{:model_handle => nested_mh, :clone_par_col => :assembly_id, :parent_rels => [parent_rel], :override_attrs => override_attrs, :create_opts => create_opts, :ancestor_id => ancestor_id, :target_idh => target_idh})
-            if block
-              block.call(child_context)
-            else
-              ret << child_context
-            end
+            block.call(child_context)
           end
-          ret unless block
         end
       end
     end

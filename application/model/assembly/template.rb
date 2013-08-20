@@ -13,6 +13,10 @@ module DTK; class Assembly
       new_assembly_obj
     end
 
+    def self.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version=nil)
+      Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version)
+    end
+
     ### standard get methods
     def get_nodes(opts={})
       self.class.get_nodes([id_handle()],opts)
@@ -186,29 +190,18 @@ module DTK; class Assembly
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def self.create_from_instance(project,node_idhs,assembly_name,service_module_name,icon_info=nil,version=nil)
-      project_idh = project.id_handle()
-      #1) get a content object, 2) modify, and 3) persist
-      port_links,dangling_links = Node.get_conn_port_links(node_idhs)
-      #TODO: raise error to user if dangling link
-      Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
-
-      service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
-
-      assembly_factory = Factory.create_container_for_clone(project_idh,assembly_name,service_module_name,service_module_branch,icon_info)
-      ws_branches = ModuleBranch.get_component_workspace_branches(node_idhs)
-      assembly_factory.add_content_for_clone!(project_idh,node_idhs,port_links,ws_branches)
-      assembly_factory.create_assembly_template(project_idh,service_module_branch)
-    end
-
     def self.delete_and_ret_module_repo_info(assembly_idh)
       #first delete the dsl files
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
       #need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes
       #do not need to delete port links which use a cascade foreign key
+      delete_model_objects(assembly_idh)
+      module_repo_info
+    end
+
+    def self.delete_model_objects(assembly_idh)
       delete_assemblies_nodes([assembly_idh])
       delete_instance(assembly_idh)
-      module_repo_info
     end
 
     def self.delete_assemblies_nodes(assembly_idhs)
@@ -259,20 +252,11 @@ module DTK; class Assembly
       assembly_templates.each do |assembly|
         components << assembly.info_about(:components)
       end
-
-      return components.flatten
+      components.flatten
     end
 
-    def self.exists?(project_idh,service_module_name,template_name)
-      component_type = component_type(service_module_name,template_name)
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
-      }
-      get_obj(project_idh.createMH(:component),sp_hash)
-    end
     #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
-        def self.check_valid_id(model_handle,id)
+    def self.check_valid_id(model_handle,id)
       begin
         check_valid_id__library_parent(model_handle,id)
        rescue ErrorIdInvalid 

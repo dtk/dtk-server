@@ -80,6 +80,14 @@ lambda__instance_nodes_and_components =
   {
     :type => :json, 
     :hidden => true,
+    :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) 
+  }
+}
+lambda__instance_nodes_components_assembly_template = 
+  lambda{|node_cols,cmp_cols|
+  {
+    :type => :json, 
+    :hidden => true,
     :remote_dependencies => lambda__segments_nodes_and_components.call(node_cols,cmp_cols) + [segment_assembly_template]
   }
 }
@@ -208,8 +216,9 @@ lambda__instance_nodes_and_components =
        segment_assembly_template
       ]
     },
-    :instance_nodes_and_cmps=> lambda__instance_nodes_and_components.call(Node.common_columns,Component.common_columns),
-    :instance_nodes_and_cmps_summary=> lambda__instance_nodes_and_components.call([:id,:display_name,:os_type,:admin_op_status,:external_ref],[:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]),
+    :instance_nodes_and_cmps=> lambda__instance_nodes_components_assembly_template.call(Node.common_columns,Component.common_columns),
+    :instance_nodes_and_cmps_summary=> lambda__instance_nodes_components_assembly_template.call([:id,:display_name,:os_type,:admin_op_status,:external_ref],[:id,:display_name,:component_type,:basic_type,:extended_base,:description,:version,:module_branch_id]),
+    :instance_component_list=> lambda__instance_nodes_and_components.call(Node::Instance.component_list_fields(),Component::Instance.component_list_fields()),
     :instance_nested_component_attributes=> {
       :type=>:json,
       :hidden=>true,
@@ -335,6 +344,25 @@ lambda__instance_nodes_and_components =
          :join_type=>:inner,
          :join_cond=>{:assembly_id=>:component__id},
          :cols=>[:id,:display_name,:ui,:type]
+       }]
+    },
+    :parents_task_templates=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:component,
+         :alias => :template,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:component__ancestor_id},
+         :cols=>[:id,:display_name]
+       },
+       {
+         :model_name=>:task_template,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:component_component_id=>:template__id},
+         :cols=>Task::Template.common_columns()
        }]
     },
     :service_add_ons_from_instance=> {

@@ -34,10 +34,10 @@ module DTK
         STDOUT << "\n\n"
         pp "--- end: encodings of task_template_content.serialization_form()"
 
-        raise ErrorUsage.new("stop here")
+#        raise ErrorUsage.new("stop here")
       else
 #TODO: will deprecate this
-        #replaceing this part with above
+        #replacing this part with above
         assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
         nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
         node_mh = assembly.model_handle(:node)

@@ -5,10 +5,9 @@ module DTK; class Task; class Template
       r8_nested_require('inter_node','multi_node')
       include Serialization
       
-      def initialize(name=nil,multi_node=nil)
+      def initialize(name=nil)
         super()
         @name = name
-        @multi_node = multi_node
       end
       attr_accessor :name
 
@@ -38,15 +37,10 @@ module DTK; class Task; class Template
       end
 
       def serialization_form(opts={})
-        if @multi_node and not (opts[:form] == :explicit_instances)
-          return @multi_node.serialization_form(opts)
-        end
-
         subtasks = map_node_actions{|node_actions|node_actions.serialization_form(opts)}.compact
         return nil if subtasks.empty?
         
-        ret = OrderedHash.new
-        ret[:name] = @name if @name
+        ret = serialized_form_with_name()
         
         #Dont put in concurrent block if there is just one node
         if subtasks.size == 1
@@ -59,11 +53,10 @@ module DTK; class Task; class Template
         #content could be either 
         # 1) a concurrent block with multiple nodes, 
         # 2) a single node,
-        # 3) a multi-node specfication
+        # 3) a multi-node specification
 
         if multi_node_type = (serialized_content||{})[:nodes]
-          multi_node = MultiNode.parse_type(multi_node_type)
-          return multi_node.parse_and_reify(serialized_content,action_list)
+          return MultiNode.parse_and_reify(multi_node_type,serialized_content,action_list)
         end
 
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
@@ -86,6 +79,10 @@ module DTK; class Task; class Template
       end
 
      private
+      def serialized_form_with_name()
+        @name ? OrderedHash.new(:name => @name) : OrderedHash.new
+      end
+
       def self.parse_and_reify_node_actions(node_actions,node_name,node_id,action_list)
         {node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list)}
       end

@@ -21,7 +21,7 @@ module DTK; class Task; class Template
         task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
         match_assigns = {:component_component_id => assembly.id()}
         task_template_idh = Template.create_from_serialized_content?(task_template_mh,serialized_content,match_assigns,task_action)
-        ReifiedObjectCache.add_or_update_item(task_template_idh,template_conten)
+        ReifiedObjectCache.add_or_update_item(task_template_idh,template_content)
       end
 
      private
@@ -33,17 +33,20 @@ module DTK; class Task; class Template
       class ReifiedObjectCache
         #using task_template_id is cache key
         @@cache = Hash.new
+
+###TODO: these are in no op mode until implememnt
         def self.get(assembly,task_action=nil)
           #TODO: stub; nothing in cache
           nil
         end
+        def self.add_or_update_item(task_template_idh,content)
+          #@@cache[key(task_template_idh)] = content
+        end
+###TODO: end: these are in no op mode until implememnt
+
 
         def self.remove_any_outdated_items(assembly_update)
           find_impacted_template_idhs(assembly_update).each{|idh|delete_item?(idh)}
-        end
-
-        def self.add_or_update_item(task_template_idh,content)
-          @@cache[key(task_template_idh)] = content
         end
 
        private
@@ -54,7 +57,7 @@ module DTK; class Task; class Template
           end
         end
 
-        def key(task_template_idh)
+        def self.key(task_template_idh)
           task_template_idh.get_id()
         end
           

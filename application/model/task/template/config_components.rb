@@ -42,7 +42,7 @@ module DTK; class Task
 
         unless opts[:dont_persist_generated_template]
           #persist what is generated
-          Persistence.assembly,template_content)
+          Persistence.persist(assembly,template_content,task_action)
         end
 
         template_content
@@ -57,7 +57,6 @@ module DTK; class Task
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
         Content.new(temporal_constraints,cmp_actions,opts)
       end
-
         
     end
   end

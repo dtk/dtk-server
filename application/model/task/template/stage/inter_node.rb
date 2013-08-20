@@ -38,6 +38,10 @@ module DTK; class Task; class Template
       end
 
       def serialization_form(opts={})
+        if @multi_node and not (opts[:form] == :explicit_instances)
+          return @multi_node.serialization_form(opts)
+        end
+
         subtasks = map_node_actions{|node_actions|node_actions.serialization_form(opts)}.compact
         return nil if subtasks.empty?
         

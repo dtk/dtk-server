@@ -42,8 +42,7 @@ module DTK; class Task
 
         unless opts[:dont_persist_generated_template]
           #persist what is generated
-          serialized_content = template_content.serialization_form()
-          persist_serialized_content_on_assembly(assembly,serialized_content)
+          Persistence.assembly,template_content)
         end
 
         template_content
@@ -59,11 +58,6 @@ module DTK; class Task
         Content.new(temporal_constraints,cmp_actions,opts)
       end
 
-      def self.persist_serialized_content_on_assembly(assembly,serialized_content,task_action=nil)
-        task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
-        match_assigns = {:component_component_id => assembly.id()}
-        Template.persist_serialized_content(task_template_mh,serialized_content,match_assigns,task_action)
-      end
         
     end
   end

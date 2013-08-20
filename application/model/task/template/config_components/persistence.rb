@@ -16,6 +16,14 @@ module DTK; class Task; class Template
         ReifiedObjectCache.remove_any_outdated_items(assembly_update)
       end
 
+      def self.persist(assembly,template_content,task_action=nil)
+        serialized_content = template_content.serialization_form()
+        task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
+        match_assigns = {:component_component_id => assembly.id()}
+        task_template_idh = Template.create_from_serialized_content?(task_template_mh,serialized_content,match_assigns,task_action)
+        ReifiedObjectCache.add_or_update_item(task_template_idh,template_conten)
+      end
+
      private
       def self.get_serialized_content_from_assembly(assembly,task_action=nil)
         ret = assembly.get_task_template(task_action)
@@ -34,6 +42,10 @@ module DTK; class Task; class Template
           find_impacted_template_idhs(assembly_update).each{|idh|delete_item?(idh)}
         end
 
+        def self.add_or_update_item(task_template_idh,content)
+          @@cache[key(task_template_idh)] = content
+        end
+
        private
         def self.delete_item?(task_template_idh)
           key = key(task_template_idh)
@@ -42,10 +54,6 @@ module DTK; class Task; class Template
           end
         end
 
-        def self.add_or_update_item(task_template_idh,content)
-          @@cache[key(task_template_idh)] = content
-        end
-        
         def key(task_template_idh)
           task_template_idh.get_id()
         end

@@ -40,8 +40,8 @@ module DTK; class Task; class Template; class Stage
               pntr[:actions] << cmp_ref
             end
           end
-          info_per_node.values.inject(self) do |h,n|
-            h.merge(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
+          info_per_node.each_value do |n|
+            merge!(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
           end
           self
         end

@@ -1,6 +1,6 @@
 module DTK; class Task; class Template; class Stage 
   class InterNode
-    class MultiNode
+    class MultiNode < self
       def self.parse_type(multi_node_type)
         case multi_node_type
           when "All_applicable" then Applicable
@@ -22,7 +22,8 @@ module DTK; class Task; class Template; class Stage
               pntr[:actions] << cmp_ref
             end
           end
-          info_per_node.values.inject(Hash.new) do |h,n|
+          name = serialized_node_actions[:name]
+          info_per_node.values.inject(new(name,self)) do |h,n|
             h.merge(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
           end
         end

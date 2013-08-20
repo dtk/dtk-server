@@ -60,23 +60,21 @@ module DTK; class Task; class Template
         # 1) a concurrent block with multiple nodes, 
         # 2) a single node,
         # 3) a multi-node specfication
-        #TODO: fix up so looking for multi node is at top level
+
+        if multi_node_type = (serialized_content||{})[:nodes]
+          multi_node = MultiNode.parse_type(multi_node_type)
+          return multi_node.parse_and_reify(serialized_content,action_list)
+        end
+
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
-          el = 
-            if multi_node_type = serialized_node_actions[:nodes]
-              multi_node = MultiNode.parse_type(multi_node_type)
-              multi_node.parse_and_reify(serialized_node_actions,action_list)
-            else
-              unless node_name = serialized_node_actions[:node]
-                raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
-              end
-              unless node_id = action_list.find_matching_node_id(node_name)
-                raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
-              end
-              parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list)
-            end
-          h.merge(el)
+          unless node_name = serialized_node_actions[:node]
+            raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+          end
+          unless node_id = action_list.find_matching_node_id(node_name)
+            raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
+          end
+          h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))
         end
       end
 

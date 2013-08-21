@@ -1,7 +1,10 @@
 module DTK; class Task; class Template
   class Stage 
     class InterNode < Hash
+      r8_nested_require('inter_node','factory')
+      r8_nested_require('inter_node','multi_node')
       include Serialization
+      
       def initialize(name=nil)
         super()
         @name = name
@@ -37,8 +40,7 @@ module DTK; class Task; class Template
         subtasks = map_node_actions{|node_actions|node_actions.serialization_form(opts)}.compact
         return nil if subtasks.empty?
         
-        ret = OrderedHash.new
-        ret[:name] = @name if @name
+        ret = serialized_form_with_name()
         
         #Dont put in concurrent block if there is just one node
         if subtasks.size == 1
@@ -48,16 +50,24 @@ module DTK; class Task; class Template
         end
       end
       def self.parse_and_reify(serialized_content,action_list)
-        #content could be either a concurrent block with multiple nodes, or a single node
+        #content could be either 
+        # 1) a concurrent block with multiple nodes, 
+        # 2) a single node,
+        # 3) a multi-node specification
+
+        if multi_node_type = (serialized_content||{})[:nodes]
+          return MultiNode.parse_and_reify(multi_node_type,serialized_content,action_list)
+        end
+
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           unless node_name = serialized_node_actions[:node]
-            ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+            raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
           end
           unless node_id = action_list.find_matching_node_id(node_name)
-            ParseError.new("Node ref (#{node_name}) cannot be resolved")
+            raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
           end
-          h.merge(node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(serialized_node_actions,node_name,action_list))
+          h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))
         end
       end
 
@@ -69,45 +79,20 @@ module DTK; class Task; class Template
       end
 
      private
+      def serialized_form_with_name()
+        @name ? OrderedHash.new(:name => @name) : OrderedHash.new
+      end
+
+      def self.parse_and_reify_node_actions(node_actions,node_name,node_id,action_list)
+        {node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list)}
+      end
+
       def each_node_actions(&block)
         each_value{|node_actions|block.call(node_actions)}
       end
 
       def map_node_actions(&block)
         values.map{|node_actions|block.call(node_actions)}
-      end
-
-      class Factory
-        def initialize(action_list,temporal_constraints)
-          @action_list = action_list
-          @temporal_constraints = temporal_constraints
-        end
-
-        def create(stage_action_indexes,name=nil)
-          #first break each state into unordered list per node
-          ret = InterNode.new(name)
-          stage_action_indexes.each do |i|
-            action = @action_list.index(i)
-            (ret[action.node_id] ||= IntraNode::Unordered.new()) << action
-          end
-          
-          intra_node_proc = Stage::IntraNode::Processor.new(@temporal_constraints)
-          ret.each_node_id{|node_id|ret[node_id] = intra_node_proc.process(ret[node_id])}
-          ret
-        end
-
-        module StageName
-          DefaultNameProc = lambda do |index,is_single_stage|
-            ret = "config_nodes"
-            is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
-          end
-        
-          DefaultNodeGroupNameProc = lambda do |index,is_single_stage|
-            ret = "config_node_group_components"
-            is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
-          end
-        end
-
       end
     end
   end

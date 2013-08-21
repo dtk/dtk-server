@@ -25,7 +25,7 @@ module DTK
 
       if R8::Config[:task][:template][:enabled]
         opts = {:component_type_filter => component_type}
-        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content(assembly,opts)
+        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
         stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
         pp "---encoding of task_template_content.serialization_form()"
@@ -37,7 +37,7 @@ module DTK
 #        raise ErrorUsage.new("stop here")
       else
 #TODO: will deprecate this
-        #replaceing this part with above
+        #replacing this part with above
         assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
         nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
         node_mh = assembly.model_handle(:node)

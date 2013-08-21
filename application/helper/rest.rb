@@ -15,7 +15,7 @@ module Ramaze::Helper
         data = 
           case encode_format
             when :yaml
-              ::DTK::Aux.serialize(data,:yaml) + "/n"
+              ::DTK::Aux.serialize(data,:yaml) + "\n"
             else raise Error.new("Unexpected encode format (#{encode_format})")
           end
       end

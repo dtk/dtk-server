@@ -17,7 +17,7 @@ module DTK
       content = RepoManager.get_file_content(dsl_filename,module_branch)
       input_hash = convert_to_hash(content,format_type)
       config_agent_type = ret_config_agent_type(input_hash)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::JSONParsing)
+      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::DSLParsing)
     end
     #TODO: should unify above and two below
     def self.create_dsl_object_from_impl(source_impl,container_idh=nil,target_impl=nil)
@@ -36,7 +36,7 @@ module DTK
       input_hash = convert_to_hash(content,parsed_name[:format_type])
       config_agent_type = ret_config_agent_type(input_hash)
 
-      return config_agent_type if config_agent_type.is_a?(ErrorUsage::JSONParsing)
+      return config_agent_type if config_agent_type.is_a?(ErrorUsage::DSLParsing)
       new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
     end
 
@@ -192,7 +192,7 @@ pp [:normalize,ret]
       end
 
       def ret_config_agent_type(input_hash)
-        return input_hash if input_hash.is_a?(ErrorUsage::JSONParsing)
+        return input_hash if input_hash.is_a?(ErrorUsage::DSLParsing)
         if type = input_hash["module_type"]
           case type
            when "puppet_module" then :puppet

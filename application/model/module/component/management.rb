@@ -106,7 +106,7 @@ module DTK; class ComponentModule
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       dsl_info = {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::JSONParsing)
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing)
       
       dsl_info
     end
@@ -127,7 +127,7 @@ module DTK; class ComponentModule
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       dsl_info = {:dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::JSONParsing)
+      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing)
       
       dsl_info
     end
@@ -150,7 +150,7 @@ module DTK; class ComponentModule
         end
       end
 
-      return model_parsed if model_parsed.is_a?(ErrorUsage::JSONParsing)
+      return model_parsed if model_parsed.is_a?(ErrorUsage::DSLParsing)
       set_dsl_parsed!(true)
     end
 

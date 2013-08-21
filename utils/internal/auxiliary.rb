@@ -122,7 +122,7 @@ module XYZ
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          return ErrorUsage::JSONParsing.new(e,file_path)
+          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",file_path)
         end
       end
 
@@ -134,7 +134,7 @@ module XYZ
         begin 
           YAML.load(content)
         rescue Exception => e
-          return ErrorUsage::YAMLParsing.new(e,file_path)
+          return ErrorUsage::DSLParsing::YAMLParsing.new("YAML #{e} in file",file_path)
         end
       end
 

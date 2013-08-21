@@ -145,7 +145,7 @@ module DTK
       
         remote_repo = Repo::Remote.new(remote_params[:repo])
         remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
-
+        
         #case on whether the module is created already
         if module_obj
           repo = module_obj.get_repo!()
@@ -172,8 +172,8 @@ module DTK
       end
       
       response = module_repo_info(repo,module_and_branch_info,version)
-      
-      if (parsed.is_a?(ErrorUsage::JSONParsing) || parsed.is_a?(ErrorUsage::JSONParse) || parsed.is_a?(ErrorUsage::YAMLParsing))
+
+      if parsed.is_a?(ErrorUsage::DSLParsing)
         response[:dsl_parsed_info] = parsed
       else  
         response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)

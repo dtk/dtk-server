@@ -18,7 +18,7 @@ module DTK
         dir_parser = ExtMod::DirectoryParser::Git.new(:service_module,repo_full_path,branch)
         parsed_info = dir_parser.parse_directory(file_type)
 
-        return parsed_info if parsed_info.is_a?(ErrorUsage::JSONParse)
+        return parsed_info if parsed_info.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
         file_type ? 
           Output.new(file_type,parsed_info) :

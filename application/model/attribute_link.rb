@@ -1,6 +1,8 @@
-require  File.expand_path('attribute_link/propagate_changes', File.dirname(__FILE__))
-module XYZ
+r8_nested_require('attribute_link','propagate_changes')
+module DTK
   class AttributeLink < Model
+    r8_nested_require('attribute_link','ad_hoc')
+
     extend AttrLinkPropagateChangesClassMixin
 
     #virtual attribute defs    
@@ -41,6 +43,13 @@ module XYZ
     ########################## end: get links ##################
 
     ##########################  add new links ##################
+    def self.create_assembly_ad_hoc_link(assembly_idh,target_attr_expr,source_attr_expr)
+      attr_link_hash = AdHoc.attribute_link_hash(assembly_idh,target_attr_expr,source_attr_expr)
+      ret = create_attribute_links(parent_idh,[attr_link_hash],:donot_update_port_info => true)
+pp [:debug_output_create_ad_hoc_link,ret]
+      nil
+    end
+
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})
       return Array.new if rows_to_create.empty?
       attr_mh = parent_idh.create_childMH(:attribute)
@@ -68,7 +77,7 @@ module XYZ
       returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
       #augment attributes with port info; this is needed only if port is external
-      Attribute.update_port_info(attr_mh,rows_to_create)
+      Attribute.update_port_info(attr_mh,rows_to_create) unless opts[:donot_update_port_info]
 
       #want to use auth_info from parent_idh in case more specific than datacenter
       change_parent_idh = parent_idh.get_top_container_id_handle(:datacenter,:auth_info_from_self => true)

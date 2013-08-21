@@ -202,7 +202,7 @@ module DTK
     end
 
     #### end: list and info actions ###
-
+    #TODO: update what input can be
     #the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
     #pat can be one of three forms

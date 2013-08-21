@@ -1,5 +1,9 @@
 module DTK; class Attribute
   class Pattern 
+    def self.get_attribute(base_object_idh,attr_term)
+      create(attr_term).ret_or_create_attributes(base_object_idh).first
+    end
+
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
@@ -42,6 +46,11 @@ module DTK; class Attribute
   
     class Assembly < self
       def self.create(attr_term,opts={})
+        #considering attribute id to belong to any format so processing here
+        if attr_term =~ /^[0-9]+$/
+          return Type::ExplicitId.new(attr_term)
+        end
+
         format = opts[:format]||Format::Default
         klass = 
           case format
@@ -72,9 +81,7 @@ module DTK; class Attribute
       class CanonicalForm
         def self.create(attr_term,opts={})
           #can be an assembly, node or component level attribute
-          if attr_term =~ /^[0-9]+$/
-            Type::ExplicitId.new(attr_term)
-          elsif attr_term =~ /^attribute/
+          if attr_term =~ /^attribute/
             Type::AssemblyLevel.new(attr_term)
           elsif attr_term  =~ /^node[^\/]*\/component/
             Type::ComponentLevel.new(attr_term)

@@ -1,4 +1,3 @@
-#TODO: wil eventually persist so can save and reuse; wil put under probablty project
 module DTK; class Attribute
   class Pattern 
     def self.set_attributes(base_object,av_pairs,opts={})
@@ -40,11 +39,10 @@ module DTK; class Attribute
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
     end
-
   
     class Assembly < self
       def self.create(attr_term,opts={})
-        format = opts[:format]||DefaultFormat
+        format = opts[:format]||Format::Default
         klass = 
           case format
             when :simple then Simple
@@ -53,8 +51,6 @@ module DTK; class Attribute
           end
         klass.create(attr_term,opts)
       end
-#      DefaultFormat = :canonical_form
-       DefaultFormat = :simple
 
       class Simple
         def self.create(attr_term,opts={})
@@ -64,9 +60,9 @@ module DTK; class Attribute
           end
           case split_term.size          
             when 1 
-              Type::AssemblyLevel.new(split_term[0])
+              Type::AssemblyLevel.new("attribute[#{split_term[0]}]")
             when 2 
-              Type::NodeLevel.new("node[#{split_term[0]}]/attribute/[#{split_term[1]}]")
+              Type::NodeLevel.new("node[#{split_term[0]}]/attribute[#{split_term[1]}]")
             when 3 
               Type::ComponentLevel.new("node[#{split_term[0]}]/component[#{split_term[1]}]/attribute[#{split_term[2]}]")
           end
@@ -117,10 +113,10 @@ module DTK; class Attribute
       end
 
       class AssemblyLevel < self
-        def ret_or_create_attributes(assembly_idh)
+        def ret_or_create_attributes(assembly_idh,opts={})
           ret = ret_matching_attribute_idhs([assembly_idh],pattern)
           #if does not exist then create the attribute
-          if ret.empty?
+          if ret.empty? and opts[:create]
             af = ret_filter(pattern,:attribute)
             #attribute must have simple form 
             unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]

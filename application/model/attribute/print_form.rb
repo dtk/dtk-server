@@ -21,6 +21,11 @@ module DTK
 
     end
 
+    module Format
+      #possible valeus are [:canonical,:simple]
+      Default = :simple
+    end
+
     class PrintForm
       def self.print_form(aug_attr,opts=Opts.new)
         new(aug_attr,opts).print_form()
@@ -78,7 +83,7 @@ module DTK
 
       def display_name_prefix(opts=Opts.new)
         level = opts.required(:level)
-        format = DisplayNamePrefixFormats[opts[:format]||:default][level]
+        format = DisplayNamePrefixFormats[opts[:format]||Format::Default][level]
         case level
          when :assembly
           format
@@ -90,12 +95,12 @@ module DTK
       end
 
       DisplayNamePrefixFormats = {
-        :default => {
-          :assembly => "a:",
+        :simple => {
+          :assembly => "",
           :node => "$node/",
           :component => "$node/$component/"
         },
-        :bracket_form => {
+        :canonical => {
           :assembly => "",
           :node => "node[$node]/",
           :component => "node[$node]/cmp[$component]/"

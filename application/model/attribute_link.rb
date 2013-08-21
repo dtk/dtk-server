@@ -43,11 +43,13 @@ module DTK
     ########################## end: get links ##################
 
     ##########################  add new links ##################
-    def self.create_assembly_ad_hoc_link(assembly_idh,target_attr_expr,source_attr_expr)
-      attr_link_hash = AdHoc.attribute_link_hash(assembly_idh,target_attr_expr,source_attr_expr)
-      ret = create_attribute_links(parent_idh,[attr_link_hash],:donot_update_port_info => true)
-pp [:debug_output_create_ad_hoc_link,ret]
-      nil
+    #TODO: right now just treating as preprocessing operation when target attribute term matches a set
+    #may enhance to store the inputted info to trigger it for any match when assembly gets compoennt or attributes added
+    def self.create_assembly_ad_hoc_links(assembly_idh,target_attr_term,source_attr_term)
+      attr_link_hashes = AdHoc.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)
+pp [:debug_attr_link_hashes,attr_link_hashes]
+raise ErrorUsage.new("stop here")
+      create_attribute_links(assembly__idh,attr_link_hashes,:donot_update_port_info => true)
     end
 
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})

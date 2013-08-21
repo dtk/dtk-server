@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class Pattern 
-    def self.get_attribute(base_object_idh,attr_term)
-      create(attr_term).ret_or_create_attributes(base_object_idh).first
+    def self.get_attribute_idhs(base_object_idh,attr_term)
+      create(attr_term).ret_or_create_attributes(base_object_idh)
     end
 
     def self.set_attributes(base_object,av_pairs,opts={})
@@ -10,7 +10,7 @@ module DTK; class Attribute
       av_pairs.each do |av_pair|
         pattern = create(av_pair[:pattern],opts)
         #conditionally based on type ret_or_create_attributes may only ret and not create attributes
-        attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle())
+        attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle(),Aux.hash_subset(opts,[:create]))
         unless attr_idhs.empty?
           attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end
@@ -105,12 +105,12 @@ module DTK; class Attribute
     end
 
     class Type
-      def ret_or_create_attributes(assembly_idh)
+      def ret_or_create_attributes(assembly_idh,opts={})
         raise Error.new("Should be overwritten")
       end
 
       class ExplicitId < self
-        def ret_or_create_attributes(assembly_idh)
+        def ret_or_create_attributes(assembly_idh,opts={})
           [assembly_idh.createIDH(:model_name => :attribute, :id => id())]
         end
         private
@@ -122,7 +122,8 @@ module DTK; class Attribute
       class AssemblyLevel < self
         def ret_or_create_attributes(assembly_idh,opts={})
           ret = ret_matching_attribute_idhs([assembly_idh],pattern)
-          #if does not exist then create the attribute
+          #if does not exist then create the attribute if carete flag set
+          #if exists and create flag exsists we just assign it new value
           if ret.empty? and opts[:create]
             af = ret_filter(pattern,:attribute)
             #attribute must have simple form 
@@ -137,7 +138,7 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def ret_or_create_attributes(assembly_idh)
+        def ret_or_create_attributes(assembly_idh,opts={})
         ret = Array.new
           node_idhs = ret_matching_node_idhs(assembly_idh)
           return ret if node_idhs.empty?

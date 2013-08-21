@@ -48,6 +48,10 @@ module DTK; class Task; class Template
         !!ret
       end
 
+      def match_component_type?(component_type)
+        component_type == component_type(:without_title=>true)
+      end
+
       def serialization_form(opts={})
         if filter = opts[:filter]
           if filter.keys == [:source]
@@ -56,13 +60,9 @@ module DTK; class Task; class Template
             raise Error.new("Not treating filter of form (#{filter.inspect})")
           end
         end
-        cmp =  component()
-        node_name = ((!opts[:no_node_name_prefix]) && cmp[:node][:display_name])
-        cmp_name = Component.component_type_print_form(cmp[:component_type])
-        if title = cmp[:title]
-          cmp_name = ComponentTitle.print_form_with_title(cmp_name,title)
-        end
-        node_name ? "#{node_name}/#{cmp_name}" : cmp_name
+        node_name = ((!opts[:no_node_name_prefix]) && component()[:node][:display_name])
+        component_type = component_type()
+        node_name ? "#{node_name}/#{component_type}" : component_type
       end
         
       def source_type()
@@ -80,6 +80,18 @@ module DTK; class Task; class Template
       def component()
         @action
       end
+      
+      def component_type(opts={})
+        cmp =  component()
+        cmp_type = Component.component_type_print_form(cmp[:component_type])
+        unless opts[:without_title] 
+          if title = cmp[:title]
+            cmp_type = ComponentTitle.print_form_with_title(cmp_type,title)
+          end
+        end
+        cmp_type
+      end
+
     end
   end
 end; end; end

@@ -65,7 +65,7 @@ module DTK; class Task
       task_action||default_task_action()
     end
 
-    def self.persist_serialized_content(mh,serialized_content,match_assigns,task_action=nil)
+    def self.create_from_serialized_content?(mh,serialized_content,match_assigns,task_action=nil)
       task_action ||= default_task_action()
       all_match_assigns = {:task_action => task_action}.merge(match_assigns)
       other_assigns = {:content => serialized_content}

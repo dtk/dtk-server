@@ -1,7 +1,9 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      def self.get_existing_or_stub_templates(assembly_instance)
+      r8_nested_require('config_components','persistence')
+
+      def self.get_existing_or_stub_templates(action_types,assembly_instance)
         ret = Array.new
         #TODO: only returning now the task templates for the default (assembly create action)
         task_action = default_task_action()
@@ -11,7 +13,7 @@ module DTK; class Task
         #with all but assembly actions filtered out
 
         opts = {:component_type_filter => :service, :task_action => task_action}
-        unless task_template_content = get_or_generate_template_content(assembly_instance,opts)
+        unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
           return ret
         end
         serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly})
@@ -23,77 +25,69 @@ module DTK; class Task
         ret
       end
 
-      def self.get_or_generate_template_content(assembly,opts={})
+      #action_types can be 
+      # :assembly
+      # :node_centric
+      def self.get_or_generate_template_content(action_types,assembly,opts={})
+        action_types = Array(action_types)
+        raise_error_if_unsupported_action_types(action_types)
+
         task_action = opts[:task_action]||default_task_action()
         action_list_opts = Aux.hash_subset(opts,[:component_type_filter])
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
-        if assembly_instance_persistence?()
-          if serialized_content = get_serialized_content_from_assembly(assembly)
-            return Content.parse_and_reify(serialized_content,cmp_actions)
-          end
+        #get content from persisted 
+        if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly,cmp_actions)
+          ret = 
+            if action_types == [:assembly]
+              assembly_action_content
+            else #action_types has both and assembly and node_centric
+              node_centric_content = generate_from_temporal_contraints(:node_centric,assembly,cmp_actions)
+              opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+              assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
+            end
+          return ret
         end
 
-        #next see if the assembly template that the assembly instance came from has a serialized task template
         #otherwise do the temporal processing to generate template_content
-        template_content = 
-          if serialized_content = get_serialized_content_from_assembly_template(assembly)
-            assembly_content = Content.parse_and_reify(serialized_content,cmp_actions)
-            node_centric_cmp_actions = ActionList::ConfigComponents.new(cmp_actions.select{|a|a.source_type() == :node_group})
-            if node_centric_cmp_actions.empty?
-              assembly_content
-            else
-              #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
-              #and encapsute with call from create_stages_from_temporal_constraints
-              opts_generate = {:internode_stage_name_proc => Stage::InterNode::Factory::StageName::DefaultNodeGroupNameProc}
-              node_centric_content = generate_from_temporal_contraints(assembly,node_centric_cmp_actions,opts_generate)
-              opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-              assembly_content.splice_in_at_beginning!(node_centric_content,opts)
-            end
-          else
-            opts = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-            generate_from_temporal_contraints(assembly,cmp_actions,opts)
-          end
+        opts_generate = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+        template_content = generate_from_temporal_contraints([:assembly,:node_centric],assembly,cmp_actions,opts_generate)
 
-        #persist serialized form  on assembly instance
-        if assembly_instance_persistence?()
-          serialized_content = template_content.serialization_form()
-          persist_serialized_content_on_assembly(assembly,serialized_content)
+        unless opts[:dont_persist_generated_template]
+          #persist assembly action part of what is generated
+          Persistence::AssemblyActions.persist(assembly,template_content,task_action)
         end
 
         template_content
       end
 
      private
-      #whether should store/retrieve task template on assembly instance
-      def self.assembly_instance_persistence?()
-        R8::Config[:task][:template][:assembly_instance][:use_persistence]
+      def self.raise_error_if_unsupported_action_types(action_types)
+        unless action_types.include?(:assembly)
+          raise Error.new("Not supported when action types does not contain :assembly")
+        end
+        illegal_action_types = (action_types - [:assembly,:node_centric])
+        unless illegal_action_types.empty?
+          raise Error.new("Illegal action type(s) (#{illegal_action_types.join(',')})")
+        end
       end
-
       def self.node_centric_first_stage?()
         true
       end
 
-      def self.generate_from_temporal_contraints(assembly,cmp_actions,opts={})
-        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,cmp_actions)
-        Content.new(temporal_constraints,cmp_actions,opts)
-      end
-
-      def self.get_serialized_content_from_assembly(assembly,task_action=nil)
-        ret = assembly.get_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
-      end
-
-      def self.get_serialized_content_from_assembly_template(assembly,task_action=nil)
-        ret = assembly.get_parents_task_template(task_action)
-        ret && ret.serialized_content_hash_form()
-      end
-
-      def self.persist_serialized_content_on_assembly(assembly,serialized_content,task_action=nil)
-        task_template_mh = assembly.model_handle(:model_name => :task_template,:parent_model_name => :assembly)
-        match_assigns = {:component_component_id => assembly.id()}
-        Template.persist_serialized_content(task_template_mh,serialized_content,match_assigns,task_action)
+      def self.generate_from_temporal_contraints(action_types,assembly,cmp_actions,opts={})
+        action_types =  Array(action_types)
+        relevant_actions = 
+          if action_types == [:assembly]
+            cmp_actions.select{|a|a.source_type() == :assembly}
+          elsif action_types == [:node_centric]
+            cmp_actions.select{|a|a.source_type() == :node_group}
+          else #action_types consists of :assembly nad :node_centric
+            cmp_actions
+          end
+        temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,relevant_actions)
+        Content.new(temporal_constraints,relevant_actions,opts)
       end
         
     end

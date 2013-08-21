@@ -47,9 +47,12 @@ module DTK
     #may enhance to store the inputted info to trigger it for any match when assembly gets compoennt or attributes added
     def self.create_assembly_ad_hoc_links(assembly_idh,target_attr_term,source_attr_term)
       attr_link_hashes = AdHoc.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)
-pp [:debug_attr_link_hashes,attr_link_hashes]
-raise ErrorUsage.new("stop here")
-      create_attribute_links(assembly__idh,attr_link_hashes,:donot_update_port_info => true)
+      opts = {
+        :donot_update_port_info => true,
+        :donot_create_pending_changes => true        
+      }
+      create_attribute_links(assembly_idh,attr_link_hashes,opts)
+      nil
     end
 
     def self.create_attribute_links(parent_idh,rows_to_create,opts={})

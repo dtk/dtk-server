@@ -61,6 +61,22 @@ module DTK; class Attribute
         klass.create(attr_term,opts)
       end
 
+      #for attribute relation sources
+      class Source < self
+        def self.get_attribute_idh(base_object_idh,source_attr_term)
+          if source_attr_term =~ /^\?(.+$)/
+            attr_term = $1
+            attr_idhs = get_attribute_idhs(base_object_idh,attr_term)
+            if attr_idhs.size > 1
+              raise ErrorUsage.new("Source attribute term must match just one, not multiple attributes")
+            end
+            attr_idhs.first
+          else
+            raise ErrorParse.new(source_attr_term)
+          end
+        end
+      end
+
       class Simple
         def self.create(attr_term,opts={})
           split_term = attr_term.split("/")
@@ -200,7 +216,6 @@ module DTK; class Attribute
       end
 
       def ret_filter(fragment,type)
-pp [:fragment,fragment]
         if fragment =~ /[a-z]\[([^\]]+)\]/
           filter = $1
           if type == :component

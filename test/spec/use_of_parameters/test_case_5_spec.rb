@@ -59,11 +59,11 @@ describe "Test Case 5: Check possibility to create assembly template from existi
   end
 
   context "Set os attribute function" do
-    include_context "Set attribute", dtk_common, os_attribute, os
+    include_context "Set attribute", dtk_common2, os_attribute, os
   end
 
   context "Set memory size attribute function" do
-    include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
+    include_context "Set attribute", dtk_common2, memory_size_attribute, memory_size
   end
 
   context "Converge function" do

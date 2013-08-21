@@ -14,7 +14,9 @@ require './lib/services_spec'
 namespace = "dtk17"
 existing_service_name = "test_service"
 service_name = "bakir_test1"
+module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
+module_name = "test"
 $assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
@@ -93,7 +95,15 @@ describe "Test Case 66: Export service using full name #{service_name} to users 
 
   context "Delete #{existing_service_name} service from local filesystem" do
     include_context "Delete service from local filesystem", service_filesystem_location, existing_service_name
-  end  
+  end
+
+  context "Delete module" do
+    include_context "Delete module", dtk_common, module_name
+  end
+
+  context "Delete module from local filesystem" do
+    include_context "Delete module from local filesystem", module_filesystem_location, module_name
+  end
 
   after(:all) do
     puts "", ""

@@ -213,7 +213,8 @@ module DTK
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
-      response = assembly.set_attributes(av_pairs)
+      opts = ret_params_hash(:format,:context)
+      response = assembly.set_attributes(av_pairs,opts)
       if response.empty?
         raise ErrorUsage.new("No attributes match")
       end

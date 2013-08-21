@@ -1,11 +1,10 @@
-#TODO: wil eventually persist so can save and reuse; wil put under probablty project
 module DTK; class Attribute
   class Pattern 
-    def self.set_attributes(base_object,av_pairs)
+    def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
-        pattern = create(av_pair[:pattern])
+        pattern = create(av_pair[:pattern],opts)
         #conditionally based on type ret_or_create_attributes may only ret and not create attributes
         attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle())
         unless attr_idhs.empty?
@@ -40,25 +39,54 @@ module DTK; class Attribute
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
     end
-
   
     class Assembly < self
-      def self.create(pattern)
-        #can be an assembly, node or component level attribute
-        if pattern =~ /^[0-9]+$/
-          Type::ExplicitId.new(pattern)
-        elsif pattern =~ /^attribute/
-          Type::AssemblyLevel.new(pattern)
-        elsif pattern  =~ /^node[^\/]*\/component/
-          Type::ComponentLevel.new(pattern)
-        elsif pattern  =~ /^node[^\/]*\/attribute/
-          Type::NodeLevel.new(pattern)
-        else
-          raise ErrorParse.new(pattern)
+      def self.create(attr_term,opts={})
+        format = opts[:format]||Format::Default
+        klass = 
+          case format
+            when :simple then Simple
+            when :canonical_form then CanonicalForm
+          else raise Error.new("Unexpected format (#{format})")
+          end
+        klass.create(attr_term,opts)
+      end
+
+      class Simple
+        def self.create(attr_term,opts={})
+          split_term = attr_term.split("/")
+          if split_term.size > 3 
+            raise ErrorParse.new(attr_term)
+          end
+          case split_term.size          
+            when 1 
+              Type::AssemblyLevel.new("attribute[#{split_term[0]}]")
+            when 2 
+              Type::NodeLevel.new("node[#{split_term[0]}]/attribute[#{split_term[1]}]")
+            when 3 
+              Type::ComponentLevel.new("node[#{split_term[0]}]/component[#{split_term[1]}]/attribute[#{split_term[2]}]")
+          end
+        end
+      end
+
+      class CanonicalForm
+        def self.create(attr_term,opts={})
+          #can be an assembly, node or component level attribute
+          if attr_term =~ /^[0-9]+$/
+            Type::ExplicitId.new(attr_term)
+          elsif attr_term =~ /^attribute/
+            Type::AssemblyLevel.new(attr_term)
+          elsif attr_term  =~ /^node[^\/]*\/component/
+            Type::ComponentLevel.new(attr_term)
+          elsif attr_term  =~ /^node[^\/]*\/attribute/
+            Type::NodeLevel.new(attr_term)
+          else
+            raise ErrorParse.new(attr_term)
+          end
         end
       end
     end
-    
+
     class Node < self
       def self.create(pattern)
         if pattern =~ /^[0-9]+$/
@@ -85,10 +113,10 @@ module DTK; class Attribute
       end
 
       class AssemblyLevel < self
-        def ret_or_create_attributes(assembly_idh)
+        def ret_or_create_attributes(assembly_idh,opts={})
           ret = ret_matching_attribute_idhs([assembly_idh],pattern)
           #if does not exist then create the attribute
-          if ret.empty?
+          if ret.empty? and opts[:create]
             af = ret_filter(pattern,:attribute)
             #attribute must have simple form 
             unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]

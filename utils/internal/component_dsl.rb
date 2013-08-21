@@ -37,7 +37,12 @@ module DTK
       config_agent_type = ret_config_agent_type(input_hash)
 
       return config_agent_type if config_agent_type.is_a?(ErrorUsage::DSLParsing)
-      new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+      begin
+        new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
+      rescue Exception => e
+        return ErrorUsage::DSLParsing::JSONParsing.new("#{e} in (dtk.model.json) file") if e.is_a?(ObjectModelForm::ParsingError)
+        raise e
+      end
     end
 
     #returns array where each element with keys :path,:hash_content

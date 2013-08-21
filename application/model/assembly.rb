@@ -132,8 +132,8 @@ module DTK
       Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
     end
 
-    def set_attributes(av_pairs)
-      Attribute::Pattern::Assembly.set_attributes(self,av_pairs)
+    def set_attributes(av_pairs,opts={})
+      Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
     end
 
     def self.ret_component_type(service_module_name,assembly_name)

@@ -17,7 +17,7 @@ module DTK; class Attribute
 
       class AssemblyLevel < self
         def ret_or_create_attributes(assembly_idh,opts={})
-          ret = ret_matching_attribute_idhs([assembly_idh],pattern)
+          ret = ret_matching_attribute_idhs(:component,[assembly_idh],pattern)
           #if does not exist then create the attribute if carete flag set
           #if exists and create flag exsists we just assign it new value
           if ret.empty? and opts[:create]
@@ -37,9 +37,20 @@ module DTK; class Attribute
         def ret_or_create_attributes(assembly_idh,opts={})
           ret = Array.new
           node_idhs = ret_matching_node_idhs(assembly_idh)
-          pp [:foo,node_idhs]
           return ret if node_idhs.empty?
-          ret
+
+          pattern =~ /^node[^\/]*\/(attribute.+$)/  
+          attr_fragment = attr_name_special_processing($1)
+          ret_matching_attribute_idhs(:node,node_idhs,attr_fragment)
+        end
+       private
+        def attr_name_special_processing(attr_fragment)
+          #TODO: make this obtained from shared logic
+          if attr_fragment == 'attribute[host_address]'
+            'attribute[host_addresses_ipv4]'
+          else
+            attr_fragment
+          end
         end
       end
 
@@ -56,7 +67,7 @@ module DTK; class Attribute
           
           cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
           attr_fragment = $1
-          ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
+          ret_matching_attribute_idhs(:component,cmp_idhs,attr_fragment)
         end
       end
 
@@ -92,8 +103,8 @@ module DTK; class Attribute
         Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|r.id_handle()}
       end
 
-      def ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
-        filter = [:oneof, :component_component_id, cmp_idhs.map{|idh|idh.get_id()}]
+      def ret_matching_attribute_idhs(type,idhs,attr_fragment)
+        filter = [:oneof, TypeToIdField[type], idhs.map{|idh|idh.get_id()}]
         if attr_filter = ret_filter(attr_fragment,:attribute)
           filter = [:and, filter, attr_filter]
         end
@@ -101,9 +112,13 @@ module DTK; class Attribute
           :cols => [:display_name,:id],
           :filter => filter
         }
-        sample_idh = cmp_idhs.first
+        sample_idh = idhs.first
         Model.get_objs(sample_idh.createMH(:attribute),sp_hash).map{|r|r.id_handle()}
       end
+      TypeToIdField = {
+        :component => :component_component_id,
+        :node => :node_node_id
+      }
 
       def ret_filter(fragment,type)
         if fragment =~ /[a-z]\[([^\]]+)\]/

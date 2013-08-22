@@ -16,6 +16,9 @@ module DTK
     extend R8Tpl::Utility::I18n
     extend ImportObject
     extend ExportObject
+
+    @@debug_dev_flag = false
+
     class << self
       attr_reader :db
       expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
@@ -44,6 +47,19 @@ module DTK
       else
         rows.map{|r|r[result_col]}
       end
+    end
+
+    def self.enable_debug
+      @@debug_dev_flag = true
+    end
+    
+    def self.debug_flag?
+      @@debug_dev_flag
+    end
+
+
+    def self.disable_debug
+      @@debug_dev_flag = false
     end
 
     def get_obj_helper(virtual_attr,result_col=nil,opts={})
@@ -511,11 +527,13 @@ module DTK
       PerformanceService.start("PERF_SQL", search_object.object_id)
       dataset = search_object.create_dataset()
       # [Haris] DEBUG SQL DEBUG HERE
-      # require 'ap'
-      # ap "SQL OUTPUT: #{self}"
-      # puts dataset.sequel_ds.sql.gsub('"','').gsub('SELECT', "\nSELECT") if dataset
-      # ap "OUTPUT:"
-      # ap dataset.all(opts) if dataset
+      if @@debug_dev_flag
+        require 'ap'
+        ap "SQL OUTPUT: #{self}"
+        puts dataset.sequel_ds.sql.gsub('"','').gsub('SELECT', "\nSELECT") if dataset
+        ap "OUTPUT:"
+        ap dataset.all(opts) if dataset
+      end
       
       ret_val = dataset ? dataset.all(opts) : nil
 

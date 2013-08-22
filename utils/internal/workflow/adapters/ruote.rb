@@ -36,8 +36,7 @@ module DTK
         Engine.kill_process(@wfid)
       end
 
-      def execute(top_task_id) 
-        TaskInfo.initialize_task_info()
+      def execute(top_task_id)
         begin
           @wfid = Engine.launch(process_def())
 
@@ -63,7 +62,7 @@ module DTK
           end
          rescue Exception => e
           pp "error trap in ruote#execute"
-          pp [e,e.backtrace[0..10]]
+          pp [e,e.backtrace[0..50]]
           #TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)
@@ -216,22 +215,27 @@ end
 module Ruote
   class DispatchPool
 
+    def retrive_user_info(msg)
+      # content generated here can be found in generate_process_defs#participant
+      user = ::DTK::User.from_json(msg['workitem']['fields']['params']['user_info']['user'])
+      return user
+    end
     def do_threaded_dispatch(participant, msg)
-
+      
       msg = Rufus::Json.dup(msg)
-        #
-        # the thread gets its own copy of the message
-        # (especially important if the main thread does something with
-        # the message 'during' the dispatch)
+
+      #
+      # the thread gets its own copy of the message
+      # (especially important if the main thread does something with
+      # the message 'during' the dispatch)
 
       # Maybe at some point a limit on the number of dispatch threads
       # would be OK.
       # Or maybe it's the job of an extension / subclass
 
-      DTK::CreateThread.defer do
+      DTK::CreateThread.defer_with_session(retrive_user_info(msg)) do
         begin
           do_dispatch(participant, msg)
-
         rescue => exception
           @context.error_handler.msg_handle(msg, exception)
         end

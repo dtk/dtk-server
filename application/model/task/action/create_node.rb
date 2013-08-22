@@ -3,14 +3,15 @@ module DTK; class Task
     class CreateNode < NodeLevel
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
         hash = 
-          case type 
+          case type
            when :state_change
             {
               :state_change_id => object[:id],
               :state_change_types => [object[:type]],
               :attributes => Array.new,
               :node => object[:node],
-              :datacenter => object[:datacenter]
+              :datacenter => object[:datacenter],
+              :user_object => CurrentSession.new.get_user_object()
             }
            when :hash
             object

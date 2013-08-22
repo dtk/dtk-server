@@ -1,3 +1,5 @@
+require 'json'
+
 module XYZ
   module WorkflowAdapter
     module RuoteGenerateProcessDefs
@@ -7,8 +9,7 @@ module XYZ
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
         context = Context.new(guards,top_task_idh)
-        tasks = sequence(compute_process_body(task,context),
-                          participant(:end_of_task))
+        tasks = sequence(compute_process_body(task,context), participant(:end_of_task))
         #for testing
         #tasks = concurrence(tasks,participant(:debug_task))
         ["define", {"name" => name}, [tasks]]
@@ -74,6 +75,7 @@ module XYZ
       def participant_executable_action(name,task,context,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
         executable_action = task[:executable_action]
+
         task_info = {
           "action" => executable_action,
           "workflow" => self,
@@ -95,6 +97,9 @@ module XYZ
 
       #formatting fns
       def participant(name,opts={})
+        # we set user and session information so that we can reflect that information on newly created threads via Ruote
+        opts.merge!(:user_info => { :user => CurrentSession.new.get_user_object.to_json })
+
         ["participant",to_str_form({"ref" => name}.merge(opts)),[]]
       end
 

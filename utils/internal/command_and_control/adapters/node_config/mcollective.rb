@@ -79,6 +79,7 @@ module DTK
 
       def self.authorize_node(node,callbacks,context_x={})
         repo_user_mh = node.id_handle.createMH(:repo_user)
+
         node_repo_user = RepoUser.get_matching_repo_user(repo_user_mh, {:type => :node}, [:ssh_rsa_private_key,:ssh_rsa_pub_key])
 
         unless node_repo_user and node_repo_user[:ssh_rsa_private_key]
@@ -90,6 +91,7 @@ module DTK
 
         pbuilderid = Node.pbuilderid(node)
         filter = filter_single_fact("pbuilderid",pbuilderid)
+
         params = {
           :agent_ssh_key_public => node_repo_user[:ssh_rsa_pub_key],
           :agent_ssh_key_private => node_repo_user[:ssh_rsa_private_key],
@@ -98,6 +100,7 @@ module DTK
         context = {:timeout =>  DefaultTimeoutAuthNode}.merge(context_x)
         async_agent_call("git_access","add_rsa_info",params,filter,callbacks,context)
       end
+
       DefaultTimeoutAuthNode = 5
 
       #TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)

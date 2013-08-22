@@ -96,7 +96,9 @@ module XYZ
         :cols => [:id,:group_id,:display_name] + additional_columns,
         :filter => [:eq,:id,target_id()]
       }
-      Model.get_obj(model_handle(:target),sp_hash)
+      target = Model.get_obj(model_handle(:target),sp_hash)
+
+      return target
     end
 
     def get_target_iaas_type()

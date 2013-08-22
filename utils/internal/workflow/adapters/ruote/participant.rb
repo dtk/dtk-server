@@ -185,36 +185,43 @@ module DTK
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
+
+          user_object  = ::DTK::CurrentSession.new.user_object()
+
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                # Amar: PERFORMANCE
-                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                DTK::CreateThread.defer_with_session(user_object) do
+                  # Amar: PERFORMANCE
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
-                result = {:type => :power_on_node, :task_id => task_id}
-                node = task[:executable_action][:node]
-                # TODO should update_admin_op_status be set initially to running meaning want it to be running
-                node.update_operational_status!(:running)
-                node.update_admin_op_status!(:running)
+                  result = {:type => :power_on_node, :task_id => task_id}
+                  node = task[:executable_action][:node]
+                  # TODO should update_admin_op_status be set initially to running meaning want it to be running
+                  node.update_operational_status!(:running)
+                  node.update_admin_op_status!(:running)
 
-                # these must be called before get_and_propagate_dynamic_attributes
-                node.associate_elastic_ip?()
-                node.associate_persistent_dns?()
+                  # these must be called before get_and_propagate_dynamic_attributes
+                  node.associate_elastic_ip?()
+                  node.associate_persistent_dns?()
 
-                action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-                Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
-                set_result_succeeded(workitem,result,task,action)
+                  action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+                  Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"
+                  set_result_succeeded(workitem,result,task,action)
 
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
               end,
               :on_timeout => proc do 
-                Log.error("Timeout detecting node is ready to be powered on!")
-                result = {:type => :timeout_create_node, :task_id => task_id}
-                set_result_failed(workitem,result,task)
-                cancel_upstream_subtasks(workitem)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
+                DTK::CreateThread.defer_with_session(user_object) do
+                  Log.error("Timeout detecting node is ready to be powered on!")
+                  result = {:type => :timeout_create_node, :task_id => task_id}
+                  set_result_failed(workitem,result,task)
+                  cancel_upstream_subtasks(workitem)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
               end
             }
             poll_to_detect_node_ready(workflow, action[:node], callbacks)
@@ -242,35 +249,45 @@ module DTK
           params = get_params(workitem) 
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
+
+          user_object  = ::DTK::CurrentSession.new.user_object()
+  
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                # Amar: PERFORMANCE
-                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                
-                result = {:type => :completed_create_node, :task_id => task_id} 
-   
-                Log.info_pp [:found,msg[:senderid]]
-                node = task[:executable_action][:node]
-                node.update_operational_status!(:running)
+                  DTK::CreateThread.defer_with_session(user_object) do
 
-                #these must be called before get_and_propagate_dynamic_attributes
-                node.associate_elastic_ip?()
-                node.associate_persistent_dns?()
+                    # Amar: PERFORMANCE
+                    PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                    
+                    result = {:type => :completed_create_node, :task_id => task_id}
 
-                action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-                set_result_succeeded(workitem,result,task,action)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
-              end,
-              :on_timeout => proc do 
-                Log.error("Timeout detecting if node is ready")
-                result = {:type => :timeout_create_node, :task_id => task_id}
-                set_result_failed(workitem,result,task)
-                cancel_upstream_subtasks(workitem)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
-              end
+       
+                    Log.info_pp [:found,msg[:senderid]]
+                    node = task[:executable_action][:node]
+                    node.update_operational_status!(:running)
+
+                    #these must be called before get_and_propagate_dynamic_attributes
+                    node.associate_elastic_ip?()
+                    node.associate_persistent_dns?()
+
+                    action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
+                    set_result_succeeded(workitem,result,task,action)
+                    delete_task_info(workitem)
+
+                    reply_to_engine(workitem)
+                  end
+                end,
+                :on_timeout => proc do
+                  DTK::CreateThread.defer_with_session(user_object) do
+                    Log.error("Timeout detecting if node is ready")
+                    result = {:type => :timeout_create_node, :task_id => task_id}
+                    set_result_failed(workitem,result,task)
+                    cancel_upstream_subtasks(workitem)
+                    delete_task_info(workitem)
+                    reply_to_engine(workitem)
+                  end
+                end
             }
             poll_to_detect_node_ready(workflow, action[:node], callbacks)
           end
@@ -315,36 +332,44 @@ module DTK
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
 
+          user_object  = ::DTK::CurrentSession.new.user_object()
+
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                # Amar: PERFORMANCE
-                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                
-                result = msg[:body].merge("task_id" => task_id)
-                if errors = errors_in_result?(result)
-                  event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
-                  pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  set_result_failed(workitem,result,task)
-                else
-                  pp ["task_complete_succeeded #{action.class.to_s}"]
-                  #task[:executable_action][:node].set_authorized()
-                  set_result_succeeded(workitem,result,task,action) if task_end 
+                DTK::CreateThread.defer_with_session(user_object) do
+                  # Amar: PERFORMANCE
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  
+                  result = msg[:body].merge("task_id" => task_id)
+                  if errors = errors_in_result?(result)
+                    event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
+                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    set_result_failed(workitem,result,task)
+                  else
+                    pp ["task_complete_succeeded #{action.class.to_s}"]
+                    #task[:executable_action][:node].set_authorized()
+                    set_result_succeeded(workitem,result,task,action) if task_end 
+                  end
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
                 end
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
               end,
-              :on_timeout => proc do 
-                result = {:type => :timeout_authorize_node, :task_id => task_id}
-                cancel_upstream_subtasks(workitem)
-                set_result_failed(workitem,result,task)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
+              :on_timeout => proc do
+                DTK::CreateThread.defer_with_session(user_object) do
+                  result = {:type => :timeout_authorize_node, :task_id => task_id}
+                  cancel_upstream_subtasks(workitem)
+                  set_result_failed(workitem,result,task)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
               end,
               :on_error => proc do |error_obj|
-                cancel_upstream_subtasks(workitem)
-                delete_task_info(workitem)
-                pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
+                DTK::CreateThread.defer_with_session(user_object) do
+                  cancel_upstream_subtasks(workitem)
+                  delete_task_info(workitem)
+                  pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
+                end
               end 
             }
             context = {:expected_count => 1}
@@ -392,49 +417,57 @@ module DTK
               return reply_to_engine(workitem)
             end
 
+            user_object  = ::DTK::CurrentSession.new.user_object()
+
             callbacks = {
               :on_msg_received => proc do |msg|
-                # Amar: PERFORMANCE
-                PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                
-                result = msg[:body].merge("task_id" => task_id)
-                if result[:statuscode] != 0
-                  event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                  pp ["task_complete_failed SyncAgentCode", task_id,event,{:errors => errors}] if event
-                  # Amar: SyncAgentCode will be skipped 99% of times, 
-                  #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
+                DTK::CreateThread.defer_with_session(user_object) do
+                  # Amar: PERFORMANCE
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  
+                  result = msg[:body].merge("task_id" => task_id)
+                  if result[:statuscode] != 0
+                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
+                    pp ["task_complete_failed SyncAgentCode", task_id,event,{:errors => errors}] if event
+                    # Amar: SyncAgentCode will be skipped 99% of times, 
+                    #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
+                    #cancel_upstream_subtasks(workitem)
+                    set_result_failed(workitem,result,task)
+                  else
+                    node.update_agent_git_commit_id(head_git_commit_id)
+                    event = task.add_event(:complete_succeeded,result)
+                    pp ["task_complete_succeeded SyncAgentCode", task_id,event] if event
+                    set_result_succeeded(workitem,result,task,action) if task_end 
+                    action.get_and_propagate_dynamic_attributes(result)
+                  end
+                  # If there was a change on agents, wait for node's mcollective process to restart
+                  unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
+                    sleep(10)
+                  end
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
+              end,
+              :on_timeout => proc do
+                DTK::CreateThread.defer_with_session(user_object) do
+                  result = {
+                    :status => "timeout" 
+                  }
+                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
                   #cancel_upstream_subtasks(workitem)
-                  set_result_failed(workitem,result,task)
-                else
-                  node.update_agent_git_commit_id(head_git_commit_id)
-                  event = task.add_event(:complete_succeeded,result)
-                  pp ["task_complete_succeeded SyncAgentCode", task_id,event] if event
-                  set_result_succeeded(workitem,result,task,action) if task_end 
-                  action.get_and_propagate_dynamic_attributes(result)
+                  set_result_timeout(workitem,result,task)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
                 end
-                # If there was a change on agents, wait for node's mcollective process to restart
-                unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
-                  sleep(10)
+              end,
+              :on_cancel => proc do
+                DTK::CreateThread.defer_with_session(user_object) do
+                  pp ["task_complete_canceled #{action.class.to_s}", task_id]
+                  set_result_canceled(workitem, task)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
                 end
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
-              end,
-              :on_timeout => proc do 
-                result = {
-                  :status => "timeout" 
-                }
-                event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
-                pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                #cancel_upstream_subtasks(workitem)
-                set_result_timeout(workitem,result,task)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
-              end,
-              :on_cancel => proc do 
-                pp ["task_complete_canceled #{action.class.to_s}", task_id]
-                set_result_canceled(workitem, task)
-                delete_task_info(workitem)
-                reply_to_engine(workitem)
               end
             }
             receiver_context = {:callbacks => callbacks, :head_git_commit_id => head_git_commit_id, :expected_count => 1}
@@ -487,42 +520,51 @@ module DTK
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task,workitem,task_start) do
             if action.long_running?
+
+              user_object  = ::DTK::CurrentSession.new.user_object()
+
               callbacks = {
                 :on_msg_received => proc do |msg|
-                  # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                  
-                  result = msg[:body].merge("task_id" => task_id)
-                  if errors_in_result = errors_in_result?(result)
-                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    cancel_upstream_subtasks(workitem)
-                    set_result_failed(workitem,result,task)
-                  else
-                    event = task.add_event(:complete_succeeded,result)
-                    pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
-                    set_result_succeeded(workitem,result,task,action) if task_end 
-                    action.get_and_propagate_dynamic_attributes(result)
+                  DTK::CreateThread.defer_with_session(user_object) do
+                    # Amar: PERFORMANCE
+                    PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                    
+                    result = msg[:body].merge("task_id" => task_id)
+                    if errors_in_result = errors_in_result?(result)
+                      event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
+                      pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                      cancel_upstream_subtasks(workitem)
+                      set_result_failed(workitem,result,task)
+                    else
+                      event = task.add_event(:complete_succeeded,result)
+                      pp ["task_complete_succeeded #{action.class.to_s}", task_id,event] if event
+                      set_result_succeeded(workitem,result,task,action) if task_end 
+                      action.get_and_propagate_dynamic_attributes(result)
+                    end
+                    delete_task_info(workitem)
+                    reply_to_engine(workitem)
                   end
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
                 end,
-                :on_timeout => proc do 
-                  result = {
-                    :status => "timeout" 
-                  }
-                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
-                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  cancel_upstream_subtasks(workitem)
-                  set_result_timeout(workitem,result,task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
+                :on_timeout => proc do
+                  DTK::CreateThread.defer_with_session(user_object) do
+                    result = {
+                      :status => "timeout" 
+                    }
+                    event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
+                    pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
+                    cancel_upstream_subtasks(workitem)
+                    set_result_timeout(workitem,result,task)
+                    delete_task_info(workitem)
+                    reply_to_engine(workitem)
+                  end
                 end,
                 :on_cancel => proc do 
-                  pp ["task_complete_canceled #{action.class.to_s}", task_id]
-                  set_result_canceled(workitem, task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
+                  DTK::CreateThread.defer_with_session(user_object) do
+                    pp ["task_complete_canceled #{action.class.to_s}", task_id]
+                    set_result_canceled(workitem, task)
+                    delete_task_info(workitem)
+                    reply_to_engine(workitem)
+                  end
                 end
               }
               receiver_context = {:callbacks => callbacks, :expected_count => 1}

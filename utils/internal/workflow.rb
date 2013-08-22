@@ -41,7 +41,7 @@ module DTK
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
-          pp "starting top_task_id = #{@top_task.id.to_s}"
+          pp "starting top_task_id = #{@top_task.id.to_s}"          
           execute(@top_task.id.to_s)
          rescue Exception => e
           Log.error("error in commit background job: #{e.inspect}")

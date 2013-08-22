@@ -90,7 +90,7 @@ module XYZ
               else  
                 hash[index]
               end
-            ret.merge(key => val)
+            ret.merge(key => val) if ret.respond_to?(:merge)
           end
         end
       end

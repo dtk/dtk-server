@@ -375,6 +375,7 @@ module DTK
     end
 
     #adds or deletes children based on match_cols
+    #returns the list of idhs that have been created or modified
     def self.modify_children_from_rows(model_handle,parent_idh,rows,match_cols=[:ref],opts={})
       parent_id_col = DB.parent_field(parent_idh[:model_name],model_handle[:model_name])
       parent_fields = {parent_id_col => parent_idh.get_id(), :group_id => parent_idh[:group_id]}
@@ -405,13 +406,13 @@ module DTK
       end
     
       unless updated_rows.empty?
-        update_from_rows(model_handle,updated_rows)
+        ret += update_from_rows(model_handle,updated_rows)
       end
 
       #add only ones not existing
       unless pruned_rows.empty?
         create_rows = pruned_rows.map{|r|parent_fields.merge(r)}
-        create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check) 
+        ret += create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check) 
       end
       
       #delete ones that not in rows

@@ -116,7 +116,7 @@
       "path": "display_name",
       "id": "dtk_id",
       "value": "value",
-      "linked_to": "linked_to.map{|r|r['display_name']}.join(', ')"
+      "linked_to": "linked_to_display_form"
     }
   },
   "attribute_w_version": {

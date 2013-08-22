@@ -30,7 +30,7 @@ shared_context "Import remote service" do |dtk_common, service_name|
   it "imports #{service_name} service from remote repo" do
     puts "Import remote service:", "---------------------"
     pass = false
-    value = `dtk service import-r8n #{service_name}`
+    value = `dtk service import-r8n #{service_name} -y`
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
     puts "Import of remote service #{service_name} completed successfully!" if pass == true
     puts "Import of remote service #{service_name} did not complete successfully!" if pass == false

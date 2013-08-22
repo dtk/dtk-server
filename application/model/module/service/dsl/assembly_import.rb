@@ -25,7 +25,11 @@ module DTK; class ServiceModule
         assemblies_hash.each do |ref,assem|
           dangling_errors.aggregate_errors! do
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
-            @db_updates_assemblies["node"].merge!(version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs))
+            # if bad node reference, return error and continue with module import
+            imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs)
+            return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
+            
+            @db_updates_assemblies["node"].merge!(imported_nodes)
             @ndx_assembly_hashes[ref] ||= assem
             @ndx_version_proc_classes[ref] ||= version_proc_class
           end
@@ -94,7 +98,10 @@ module DTK; class ServiceModule
               node_output["node_binding_rs_id"] = nb_rs_id
             else
               #TODO: extend dangling_errors.aggregate_errors to handle this
-              raise ErrorUsage.new("Bad node reference #{nb_rs})")
+              # We want to import module still even if there are bad node references
+              # we stop importing nodes when run into bad node reference but still continue with module import
+              
+              return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
             end
           else
             node_output["node_binding_rs_id"] = nil

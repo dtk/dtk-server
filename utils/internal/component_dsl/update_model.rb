@@ -101,8 +101,8 @@ module DTK; class ComponentDSL
       component_dsl_obj = create_dsl_object_from_impl(impl_obj)
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version
-
-      return component_dsl_obj if component_dsl_obj.is_a?(ErrorUsage::JSONParsing)
+      
+      return component_dsl_obj if (component_dsl_obj.is_a?(ErrorUsage::DSLParsing) || component_dsl_obj.is_a?(ObjectModelForm::ParsingError))
       component_dsl_obj.update_model(update_opts)
     end
 

@@ -1,15 +1,59 @@
 module DTK
   class ErrorUsage < Error
-    class JSONParsing < self
+    class DSLParsing < self
       def initialize(base_json_error,file_path=nil)
         super(err_msg(base_json_error,file_path))
       end
      private
       def err_msg(base_json_error,file_path=nil)
         file_ref = file_path && " in file (#{file_path})"
-        "JSON parsing error#{file_ref}: #{base_json_error}"
+        # "JSON parsing error#{file_ref}: #{base_json_error}"
+        "#{base_json_error}: #{file_path}"
+      end
+
+      class JSONParsing < self
+      end
+
+      class YAMLParsing < self
+      end
+
+      class BadNodeReference < self
       end
     end
+
+    # class JSONParsing < self
+    #   def initialize(base_json_error,file_path=nil)
+    #     super(err_msg(base_json_error,file_path))
+    #   end
+    #  private
+    #   def err_msg(base_json_error,file_path=nil)
+    #     file_ref = file_path && " in file (#{file_path})"
+    #     "JSON parsing error#{file_ref}: #{base_json_error}"
+    #   end
+    # end
+
+    # class YAMLParsing < self
+    #   def initialize(base_yaml_error,file_path=nil)
+    #     super(err_msg(base_yaml_error,file_path))
+    #   end
+    #  private
+    #   def err_msg(base_yaml_error,file_path=nil)
+    #     file_ref = file_path && " in file (#{file_path})"
+    #     "YAML parsing error#{file_ref}: #{base_yaml_error}"
+    #   end
+    # end
+
+    # class BadNodeReference< self
+    #   def initialize(base_yaml_error,file_path=nil)
+    #     super(err_msg(base_yaml_error,file_path))
+    #   end
+    #  private
+    #   def err_msg(base_yaml_error,file_path=nil)
+    #     # file_ref = file_path && " in file (#{file_path})"
+    #     # "YAML parsing error#{file_ref}: #{base_yaml_error}"
+    #     "#{base_yaml_error} '#{file_path}'"
+    #   end
+    # end
 
     class ReferencedComponentTemplates < self
       def initialize(aug_cmp_templates)

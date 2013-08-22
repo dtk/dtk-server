@@ -51,9 +51,11 @@ module DTK
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         component_module_refs = update_component_module_refs(module_branch,opts)
+        return component_module_refs if component_module_refs.is_a?(ErrorUsage::DSLParsing::JSONParsing)
+
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
+        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::DSLParsing)
         
-        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::JSONParsing)
         parsed
       end
 
@@ -65,6 +67,7 @@ module DTK
           else
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
+        return parsed_info if parsed_info.is_a?(ErrorUsage::DSLParsing::JSONParsing)
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
@@ -90,8 +93,10 @@ module DTK
             format_type = meta_file_format_type(meta_file)
             hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
             #TODO: FOR-ALDIN: extend to handle yaml parsing errors
-            return hash_content if hash_content.is_a?(ErrorUsage::JSONParsing)
-            assembly_import_helper.process(module_name,hash_content)
+            return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
+            # if assembly/node import returns error continue with module import
+            imported = assembly_import_helper.process(module_name,hash_content)
+            return imported if imported.is_a?(ErrorUsage::DSLParsing)
           end
         end
         dangling_errors.raise_error?()

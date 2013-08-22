@@ -145,7 +145,7 @@ module DTK
       
         remote_repo = Repo::Remote.new(remote_params[:repo])
         remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
-
+        
         #case on whether the module is created already
         if module_obj
           repo = module_obj.get_repo!()
@@ -173,7 +173,7 @@ module DTK
       
       response = module_repo_info(repo,module_and_branch_info,version)
       
-      if parsed.is_a?(ErrorUsage::JSONParsing)
+      if (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
         response[:dsl_parsed_info] = parsed
       else  
         response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
@@ -213,7 +213,7 @@ module DTK
         module_obj.get_repos().each do |repo|
           # we remove remote repos
           unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
-            raise ErrorUsage.new("R8 remote repo record '#{remote_params[:module_namespace]}/#{remote_params[:module_name]}' does not exist") 
+            raise ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist") 
           end
 
           repo.unlink_remote(remote_params[:repo])

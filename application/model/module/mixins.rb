@@ -109,7 +109,7 @@ module DTK
       return unless pull_was_needed or parse_needed
 
       response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
-      return :dsl_parsed_info => response if response.is_a?(ErrorUsage::JSONParsing)
+      return :dsl_parsed_info => response if response.is_a?(ErrorUsage::DSLParsing)
       return response
     end
 

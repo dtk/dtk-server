@@ -305,7 +305,7 @@ class DtkCommon
 
 		if (@error_message == "")
 			task_id = create_task_response['data']['task_id']
-			puts task_id
+			puts "Task id: #{task_id}"
 			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
 			end_loop = false
 			count = 0
@@ -320,10 +320,13 @@ class DtkCommon
 				if (status.include? 'succeeded')
 					task_status = status
 					assembly_converged = true
+					puts "Task execution status: #{task_status}"
 					puts "Converge process finished successfully!"
 				elsif (status.include? 'failed')
 					task_status = status
+					puts "Task execution status: #{task_status}"
 					puts "Converge process was not finished successfully! Some tasks failed!"
+					end_loop = true
 				end
 				puts "Task execution status: #{task_status}"
 

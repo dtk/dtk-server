@@ -17,6 +17,7 @@ R8::ReactorRoute.draw do
   post  'assembly/create_smoketests_task' => 'assembly#create_smoketests_task'
   post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'
   post  'assembly/add_ad_hoc_attribute_mapping' => 'assembly#add_ad_hoc_attribute_mapping'
+  post  'assembly/add_ad_hoc_attribute_links' => 'assembly#add_ad_hoc_attribute_links'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
   post  'assembly/add_service_link' => 'assembly#add_service_link'
   post  'assembly/list_service_links' => 'assembly#list_service_links'

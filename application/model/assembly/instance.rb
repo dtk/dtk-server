@@ -3,6 +3,7 @@ module DTK; class  Assembly
     r8_nested_require('instance','action')
     r8_nested_require('instance','violation')
     r8_nested_require('instance','service_link')
+    r8_nested_require('instance','update')
     include ActionMixin
     include ViolationMixin
     include ServiceLinkMixin
@@ -32,7 +33,7 @@ module DTK; class  Assembly
     def get_task_template_serialized_content(task_action=nil,opts={})
       format = opts[:format]||:hash
       if format == :hash
-        ret = Task::Template::ConfigComponents.get_or_generate_template_content(self,:task_action => task_action)
+        ret = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],self,:task_action => task_action)
         ret && ret.serialization_form()
       else
         raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
@@ -65,8 +66,8 @@ module DTK; class  Assembly
         :filter => [:eq,:assembly_id,id()]
       }
       port_links = Model.get_objs(model_handle(:port_link),sp_hash)
-      return ret if port_links.empty?
-      AttributeLink.get_augmented(model_handle(:attribute_link),[:oneof,:port_link_id,port_links.map{|r|r.id()}])
+      filter = [:or,[:oneof,:port_link_id,port_links.map{|r|r.id()}],[:eq,:assembly_id,id()]]
+      AttributeLink.get_augmented(model_handle(:attribute_link),filter)
     end
 
     def get_service_add_ons()
@@ -334,7 +335,7 @@ module DTK; class  Assembly
       case about 
        when :attributes
         get_attributes_print_form_aux(opts).map do |a|
-          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to])
+          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to_display_form])
         end.sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :components

@@ -39,7 +39,7 @@ module DTK; class Task
         end
         self  
       end
-      
+
       def serialization_form(opts={})
         subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}.compact
         if subtasks.empty?()

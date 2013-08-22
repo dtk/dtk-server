@@ -117,6 +117,13 @@ module DTK
       :attributes => lambda{|attr|not attr[:hidden]}
     }
 
+    def rest__add_ad_hoc_attribute_links()
+      assembly = ret_assembly_instance_object()
+      target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
+      AttributeLink.create_assembly_ad_hoc_links(assembly,target_attr_term,source_attr_term)
+      rest_ok_response 
+    end
+
     def rest__delete_service_link()
       port_link = ret_port_link()
       Model.delete_instance(port_link.id_handle())
@@ -133,6 +140,7 @@ module DTK
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
+    #this adds attribute mappings as part of service link
     def rest__add_ad_hoc_attribute_mapping()
       assembly = ret_assembly_instance_object()
       port_link = ret_port_link(assembly)
@@ -202,7 +210,7 @@ module DTK
     end
 
     #### end: list and info actions ###
-
+    #TODO: update what input can be
     #the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
     #pat can be one of three forms
@@ -213,7 +221,8 @@ module DTK
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
-      response = assembly.set_attributes(av_pairs)
+      opts = ret_params_hash(:format,:context,:create)
+      response = assembly.set_attributes(av_pairs,opts)
       if response.empty?
         raise ErrorUsage.new("No attributes match")
       end

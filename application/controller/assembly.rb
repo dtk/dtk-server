@@ -118,9 +118,9 @@ module DTK
     }
 
     def rest__add_ad_hoc_attribute_links()
-      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+      assembly = ret_assembly_instance_object()
       target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
-      AttributeLink.create_assembly_ad_hoc_links(assembly_idh,target_attr_term,source_attr_term)
+      AttributeLink.create_assembly_ad_hoc_links(assembly,target_attr_term,source_attr_term)
       rest_ok_response 
     end
 

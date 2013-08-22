@@ -9,9 +9,14 @@ module DTK
         unless source_attr_idh = Attribute::Pattern::Assembly::Source.get_attribute_idh(assembly_idh,source_attr_term)
           raise ErrorUsage.new("No matching attribute to source term (#{target_attr_term}")
         end
+        #TODO: need to do more chaecking and processing to include:
+        #  if has a relation set already and scalar conditionally reject or replace
+        # if has relation set already and array, ...
         source_attr_id = source_attr_idh.get_id()
+        assembly_id = assembly_idh.get_id()
         target_attr_idhs.map do |target_attr_idh|
           {
+            :assembly_id => assembly_id,
             :input_id => target_attr_idh.get_id(),
             :output_id => source_attr_id
           }

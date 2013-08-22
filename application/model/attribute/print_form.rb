@@ -60,7 +60,10 @@ module DTK
             ndx_attr_mappings[ndx] << r[:output].print_form(opts)
           end
         end
-        ret.each{|r|r.merge!(:linked_to => ndx_attr_mappings[r[:id]]||[])}
+        ret.each do |r|
+          linked_to_obj = ndx_attr_mappings[r[:id]]||[]
+          r.merge!(:linked_to => linked_to_obj, :linked_to_display_form => linked_to_display_form(linked_to_obj))
+        end
         ret
       end
 
@@ -69,6 +72,10 @@ module DTK
         @aug_attr = aug_attr #needs to be done first
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
         @index_map = opts[:index_map]
+      end
+
+      def self.linked_to_display_form(linked_to_obj)
+        linked_to_obj.map{|r|r[:display_name]}.join(', ')
       end
 
       def attr_name_default()

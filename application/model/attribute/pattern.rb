@@ -1,12 +1,18 @@
 module DTK; class Attribute
   class Pattern 
+    r8_nested_require('pattern','type')
+
+    def self.get_attribute_idhs(base_object_idh,attr_term)
+      create(attr_term).ret_or_create_attributes(base_object_idh)
+    end
+
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
         pattern = create(av_pair[:pattern],opts)
         #conditionally based on type ret_or_create_attributes may only ret and not create attributes
-        attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle())
+        attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle(),Aux.hash_subset(opts,[:create]))
         unless attr_idhs.empty?
           attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end
@@ -42,6 +48,11 @@ module DTK; class Attribute
   
     class Assembly < self
       def self.create(attr_term,opts={})
+        #considering attribute id to belong to any format so processing here
+        if attr_term =~ /^[0-9]+$/
+          return Type::ExplicitId.new(attr_term)
+        end
+
         format = opts[:format]||Format::Default
         klass = 
           case format
@@ -50,6 +61,22 @@ module DTK; class Attribute
           else raise Error.new("Unexpected format (#{format})")
           end
         klass.create(attr_term,opts)
+      end
+
+      #for attribute relation sources
+      class Source < self
+        def self.get_attribute_idh(base_object_idh,source_attr_term)
+          if source_attr_term =~ /^\$(.+$)/
+            attr_term = $1
+            attr_idhs = get_attribute_idhs(base_object_idh,attr_term)
+            if attr_idhs.size > 1
+              raise ErrorUsage.new("Source attribute term must match just one, not multiple attributes")
+            end
+            attr_idhs.first
+          else
+            raise ErrorParse.new(source_attr_term)
+          end
+        end
       end
 
       class Simple
@@ -72,9 +99,7 @@ module DTK; class Attribute
       class CanonicalForm
         def self.create(attr_term,opts={})
           #can be an assembly, node or component level attribute
-          if attr_term =~ /^[0-9]+$/
-            Type::ExplicitId.new(attr_term)
-          elsif attr_term =~ /^attribute/
+          if attr_term =~ /^attribute/
             Type::AssemblyLevel.new(attr_term)
           elsif attr_term  =~ /^node[^\/]*\/component/
             Type::ComponentLevel.new(attr_term)
@@ -93,129 +118,6 @@ module DTK; class Attribute
           Type::ExplicitId.new(pattern)
         else
           raise ErrorParse.new(pattern)
-        end
-      end
-    end
-
-    class Type
-      def ret_or_create_attributes(assembly_idh)
-        raise Error.new("Should be overwritten")
-      end
-
-      class ExplicitId < self
-        def ret_or_create_attributes(assembly_idh)
-          [assembly_idh.createIDH(:model_name => :attribute, :id => id())]
-        end
-        private
-        def id()
-          @pattern
-        end
-      end
-
-      class AssemblyLevel < self
-        def ret_or_create_attributes(assembly_idh,opts={})
-          ret = ret_matching_attribute_idhs([assembly_idh],pattern)
-          #if does not exist then create the attribute
-          if ret.empty? and opts[:create]
-            af = ret_filter(pattern,:attribute)
-            #attribute must have simple form 
-            unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
-              raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
-            end
-            field_def = {"display_name" => af[2]}
-            ret = assembly_idh.create_object().create_or_modify_field_def(field_def)
-          end
-          ret
-        end
-      end
-
-      class ComponentLevel < self
-        def ret_or_create_attributes(assembly_idh)
-        ret = Array.new
-          node_idhs = ret_matching_node_idhs(assembly_idh)
-          return ret if node_idhs.empty?
-
-          pattern  =~ /^node[^\/]*\/(component.+$)/
-          cmp_fragment = $1
-          cmp_idhs = ret_matching_component_idhs(node_idhs,cmp_fragment)
-          return ret if cmp_idhs.empty?
-          
-          cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
-          attr_fragment = $1
-          ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
-        end
-      end
-
-      private 
-      def initialize(pattern)
-        @pattern = pattern
-      end
-      attr_reader :pattern
-
-      #TODO: more efficient to use joins of below
-      def ret_matching_node_idhs(assembly_idh)
-        filter = [:eq, :assembly_id, assembly_idh.get_id()]
-        if node_filter = ret_filter(pattern,:node)
-          filter = [:and, filter, node_filter]
-        end
-        sp_hash = {
-          :cols => [:display_name,:id],
-          :filter => filter
-        }
-        Model.get_objs(assembly_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
-      end
-
-      def ret_matching_component_idhs(node_idhs,cmp_fragment)
-        filter = [:oneof, :node_node_id, node_idhs.map{|idh|idh.get_id()}]
-        if cmp_filter = ret_filter(cmp_fragment,:component)
-          filter = [:and, filter, cmp_filter]
-        end
-        sp_hash = {
-          :cols => [:display_name,:id],
-          :filter => filter
-        }
-        sample_idh = node_idhs.first
-        Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|r.id_handle()}
-      end
-
-      def ret_matching_attribute_idhs(cmp_idhs,attr_fragment)
-        filter = [:oneof, :component_component_id, cmp_idhs.map{|idh|idh.get_id()}]
-        if attr_filter = ret_filter(attr_fragment,:attribute)
-          filter = [:and, filter, attr_filter]
-        end
-        sp_hash = {
-          :cols => [:display_name,:id],
-          :filter => filter
-        }
-        sample_idh = cmp_idhs.first
-        Model.get_objs(sample_idh.createMH(:attribute),sp_hash).map{|r|r.id_handle()}
-      end
-
-      def ret_filter(fragment,type)
-pp [:fragment,fragment]
-        if fragment =~ /[a-z]\[([^\]]+)\]/
-          filter = $1
-          if type == :component
-            filter = Component.component_type_from_user_friendly_name(filter)
-          end
-          if filter == "*"
-            nil
-          elsif filter =~ /^[a-z0-9_-]+$/
-            case type
-            when :attribute
-              [:eq,:display_name,filter]
-            when :component
-              [:eq,:component_type,filter]
-            when :node
-              [:eq,:display_name,filter]
-            else
-              raise ErrorNotImplementedYet.new("Component filter of type (#{type})")
-            end
-          else
-            raise ErrorNotImplementedYet.new("Parsing of component filter (#{filter})")
-          end
-        else
-          nil #without qualification means all (no filter)
         end
       end
     end

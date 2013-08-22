@@ -21,7 +21,7 @@
     :index_map=>{:type=>:json},
     :assembly_id=>{
       :type=>:bigint,
-      :foreign_key_rel_type=>:component, #TODO: may instead just determine by seeing attributes contained and what is linked
+      :foreign_key_rel_type=>:component, 
       :on_delete=>:set_null,
       :on_update=>:set_null
     },

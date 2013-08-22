@@ -66,7 +66,7 @@ module DTK; class Attribute
       #for attribute relation sources
       class Source < self
         def self.get_attribute_idh(base_object_idh,source_attr_term)
-          if source_attr_term =~ /^\?(.+$)/
+          if source_attr_term =~ /^\$(.+$)/
             attr_term = $1
             attr_idhs = get_attribute_idhs(base_object_idh,attr_term)
             if attr_idhs.size > 1

@@ -172,8 +172,8 @@ module DTK
       end
       
       response = module_repo_info(repo,module_and_branch_info,version)
-
-      if parsed.is_a?(ErrorUsage::DSLParsing)
+      
+      if (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
         response[:dsl_parsed_info] = parsed
       else  
         response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)

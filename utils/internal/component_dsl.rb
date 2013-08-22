@@ -40,7 +40,8 @@ module DTK
       begin
         new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
       rescue Exception => e
-        return ErrorUsage::DSLParsing::JSONParsing.new("#{e} in (dtk.model.json) file") if e.is_a?(ObjectModelForm::ParsingError)
+        return e if e.is_a?(ObjectModelForm::ParsingError)
+        # return ErrorUsage::DSLParsing::JSONParsing.new("#{e} in (dtk.model.json) file") if e.is_a?(ObjectModelForm::ParsingError)
         raise e
       end
     end

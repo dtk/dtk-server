@@ -38,11 +38,13 @@ module DTK
       end
 
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
-      #TODO: may have commit_sha returned in this fn so client can do a reliable pull
-      commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
-      local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
-      create_new_version__type_specific(local_repo_for_imported_version,version)
-      get_workspace_branch_info(version)
+      Transaction do
+        #TODO: may have commit_sha returned in this fn so client can do a reliable pull
+        commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
+        local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
+        create_new_version__type_specific(local_repo_for_imported_version,version)
+        return get_workspace_branch_info(version)
+      end
     end
 
     # export to a remote repo

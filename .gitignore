@@ -1,4 +1,5 @@
 .tmp*
+test.rb
 cache/
 application/r8server.log*
 application/config/config.rb

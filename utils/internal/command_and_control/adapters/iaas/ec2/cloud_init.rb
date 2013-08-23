@@ -72,6 +72,20 @@ cat << EOF > /etc/mcollective/facts.yaml
 git-server: "<%=git_server_url %>"
 EOF
 
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF >> /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
+EOF
+
 ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
 cat << EOF >>/root/.ssh/known_hosts
 <%=fingerprint %>
@@ -90,6 +104,20 @@ EOF
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
+EOF
+
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF >> /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
 EOF
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
@@ -111,6 +139,20 @@ EOF
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
+EOF
+
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF >> /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
 EOF
 
 mkdir /root/.ssh

@@ -6,11 +6,17 @@ module DTK; module CommandAndControlAdapter
         git_server_dns = RepoManager.repo_server_dns()
         node_config_server_host = CommandAndControl.node_config_server_host()
         fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
+        mcollective_ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
+        mcollective_ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
+        mcollective_ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
         template_bindings = {
           :node_config_server_host => node_config_server_host,
           :git_server_url => git_server_url, 
           :git_server_dns => git_server_dns,
-          :fingerprint => fingerprint
+          :fingerprint => fingerprint,
+          :mcollective_ssh_remote_public_key => mcollective_ssh_remote_public_key,
+          :mcollective_ssh_remote_private_key => mcollective_ssh_remote_private_key,
+          :mcollective_ssh_local_public_key => mcollective_ssh_local_public_key
         }
         unbound_bindings = template_bindings.reject{|k,v|v}
         raise Error.new("Unbound cloudint var(s) (#{unbound_bindings.values.join(",")}") unless unbound_bindings.empty?
@@ -31,6 +37,20 @@ EOF
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
+EOF
+
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF >> /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
 EOF
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>

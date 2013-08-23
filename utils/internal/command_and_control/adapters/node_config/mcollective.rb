@@ -232,7 +232,13 @@ module DTK
        private
         def self.create_mcollective_client()
           erubis_content = File.open(File.expand_path("mcollective/client.cfg.erb", File.dirname(__FILE__))).read
-          config_file_content = ::Erubis::Eruby.new(erubis_content).result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
+          config_file_content = ::Erubis::Eruby.new(erubis_content).result(
+            :logfile => logfile(),
+            :stomp_host => Mcollective.server_host(),
+            :mcollective_ssh_local_public_key => R8::Config[:mcollective][:ssh][:local][:public_key],
+            :mcollective_ssh_local_private_key => R8::Config[:mcollective][:ssh][:local][:private_key],
+            :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
+            )
           #TODO: see if can pass args and not need to use tempfile
           begin
             config_file = Tempfile.new("client.cfg")

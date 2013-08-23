@@ -98,7 +98,7 @@ module XYZ
       #formatting fns
       def participant(name,opts={})
         # we set user and session information so that we can reflect that information on newly created threads via Ruote
-        opts.merge!(:user_info => { :user => CurrentSession.new.get_user_object.to_json })
+        opts.merge!(:user_info => { :user => CurrentSession.new.get_user_object.to_json_hash })
 
         ["participant",to_str_form({"ref" => name}.merge(opts)),[]]
       end

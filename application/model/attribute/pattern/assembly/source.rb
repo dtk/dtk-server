@@ -36,7 +36,7 @@ module DTK; class Attribute; class Pattern
             str_part2 = $3
             fn = {
               :function => {
-                :name => :attribute_embded_in_text,
+                :name => :var_embedded_in_text,
                 :constants => {
                   :text_parts => [str_part1,str_part2]
                 }

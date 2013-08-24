@@ -1,3 +1,4 @@
+#TODO: this needs a lot of cleanup
 module DTK; class AttributeLink
   class PropagateProcessor
     class Output < HashObject
@@ -12,25 +13,30 @@ module DTK; class AttributeLink
       #function 'eq' short circuited
       return {:value_derived => output_value_aux()} if function == "eq"
       hash_ret = 
-        case function
-         when "eq_indexed"
-          propagate_when_eq_indexed()
-         when "array_append"
-          propagate_when_array_append()
-          #TODO: may deprecate rest
-         when "select_one"
-          propagate_when_select_one()
-         when "sap_config__l4" 
-          propagate_when_sap_config__l4()
-         when "host_address_ipv4"
-          propagate_when_host_address_ipv4()
-         when "sap_conn__l4__db" 
-          propagate_when_sap_conn__l4__db()
-         when "sap_config_conn__db"
-          propagate_when_sap_config_conn__db()
-         else
-          raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
+        if function.kind_of?(String)
+          case function
+            when "eq_indexed"
+             propagate_when_eq_indexed()
+            when "array_append"
+              propagate_when_array_append()
+            #TODO: may deprecate rest
+             when "select_one"
+              propagate_when_select_one()
+            when "sap_config__l4" 
+              propagate_when_sap_config__l4()
+            when "host_address_ipv4"
+              propagate_when_host_address_ipv4()
+            when "sap_conn__l4__db" 
+              propagate_when_sap_conn__l4__db()
+            when "sap_config_conn__db"
+              propagate_when_sap_config_conn__db()
+          end
+        elsif function.kind_of?(Hash) and function.has_key?(:function)
+          propagate_when_function_specified(function[:function])
         end
+      unless hash_ret
+        raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
+      end
       hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
     end
 
@@ -44,6 +50,42 @@ module DTK; class AttributeLink
       @output_path = attr_link[:output_path]
     end
    private
+    def propagate_when_function_specified(function_def)
+      if output_semantic_type().is_array? 
+        raise ErrorNotImplemented.new("specified functions not implemented when output is an array")
+      end
+      if input_semantic_type().is_array? 
+        raise ErrorNotImplemented.new("specified functions not implemented when input is an array")
+      end
+
+      computed_value = SpecifiedFunction.ret_computed_value(function_def,output_value)
+      {:value_derived => computed_value}
+    end
+    
+    class SpecifiedFunction
+      def self.ret_computed_value(function_def,output_value)
+        function_class(function_def).compute_value(function_def,output_value)
+      end
+     private
+      def self.function_class(function_def)
+        case function_def[:name].to_sym
+          when :var_embedded_in_text then VarEmbeddedInText
+          else raise Error.new("propagate value not implemented yet for #{function_def[:name]})")
+        end
+      end
+                              
+      class VarEmbeddedInText < self
+        def self.compute_value(function_def,param)
+          text_parts = function_def[:constants][:text_parts].dup
+          ret = text_parts.shift
+          text_parts.each do |text_part|
+            ret << param
+            ret << text_part
+          end
+          ret
+        end
+      end
+    end
 
     #TODO: need to simplify so we dont need all these one ofs
     #######function-specfic propagation

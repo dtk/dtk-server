@@ -49,7 +49,7 @@ module DTK
       attr_link_hashes = AdHoc.attribute_link_hashes(assembly.id_handle(),target_attr_term,source_attr_term)
       opts = {
         :donot_update_port_info => true,
-        :donot_create_pending_changes => true        
+        :donot_create_pending_changes => true
       }
       create_attribute_links(assembly.get_target_idh(),attr_link_hashes,opts)
       nil
@@ -63,7 +63,7 @@ module DTK
       attr_rows = opts[:attr_rows]||get_attribute_info(attr_mh,rows_to_create)
       attr_info = attr_rows.inject({}){|h,attr|h.merge(attr[:id] => attr)}
       
-      add_link_fns!(rows_to_create,attr_info) unless opts[:link_fns_are_set]
+      add_link_fns!(rows_to_create,attr_info)
 
       #add parent_col and ref
       parent_col = attr_link_mh.parent_id_field_name()
@@ -148,10 +148,10 @@ module DTK
     end
 
     def self.add_link_fns!(rows_to_create,attr_info)
-      rows_to_create.each do |row|
-        input_attr = attr_info[row[:input_id]].merge(row[:input_path] ? {:input_path => row[:input_path]} : {})
-        output_attr = attr_info[row[:output_id]].merge(row[:output_path] ? {:output_path => row[:output_path]} : {})
-        row[:function] = SemanticType.find_link_function(input_attr,output_attr)
+      rows_to_create.select{|r|r[:function].nil?}.each do |r|
+        input_attr = attr_info[r[:input_id]].merge(r[:input_path] ? {:input_path => r[:input_path]} : {})
+        output_attr = attr_info[r[:output_id]].merge(r[:output_path] ? {:output_path => r[:output_path]} : {})
+        r[:function] = SemanticType.find_link_function(input_attr,output_attr)
       end
     end
     add_to_remove_keys :input_path,:output_path

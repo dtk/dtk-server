@@ -1,5 +1,5 @@
-#TODO: chaneg name from semantio type to data type
-module XYZ
+#TODO: change name from semantio type to convery deals with attribute Function Type
+module DTK
   #TODO: may move PropagateProcessor under model/attribute_link
   class PropagateProcessor
     class Output < HashObject
@@ -136,8 +136,6 @@ module XYZ
         OutputPartial.new(:attr_link_id => @attr_link_id, :output_value => output_value, :index_map => index_map, :index_map_persisted => index_map_persisted)
       end
     end
-
-
 
     def ret_cartesian_product()
       output_v = 

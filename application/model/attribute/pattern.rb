@@ -1,6 +1,7 @@
 module DTK; class Attribute
   class Pattern 
     r8_nested_require('pattern','type')
+    r8_nested_require('pattern','assembly')
 
     def self.get_attribute_idhs(base_object_idh,attr_term)
       create(attr_term).ret_or_create_attributes(base_object_idh)
@@ -44,72 +45,6 @@ module DTK; class Attribute
       end
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
-    end
-  
-    class Assembly < self
-      def self.create(attr_term,opts={})
-        #considering attribute id to belong to any format so processing here
-        if attr_term =~ /^[0-9]+$/
-          return Type::ExplicitId.new(attr_term)
-        end
-
-        format = opts[:format]||Format::Default
-        klass = 
-          case format
-            when :simple then Simple
-            when :canonical_form then CanonicalForm
-          else raise Error.new("Unexpected format (#{format})")
-          end
-        klass.create(attr_term,opts)
-      end
-
-      #for attribute relation sources
-      class Source < self
-        def self.get_attribute_idh(base_object_idh,source_attr_term)
-          if source_attr_term =~ /^\$(.+$)/
-            attr_term = $1
-            attr_idhs = get_attribute_idhs(base_object_idh,attr_term)
-            if attr_idhs.size > 1
-              raise ErrorUsage.new("Source attribute term must match just one, not multiple attributes")
-            end
-            attr_idhs.first
-          else
-            raise ErrorParse.new(source_attr_term)
-          end
-        end
-      end
-
-      class Simple
-        def self.create(attr_term,opts={})
-          split_term = attr_term.split("/")
-          if split_term.size > 3 
-            raise ErrorParse.new(attr_term)
-          end
-          case split_term.size          
-            when 1 
-              Type::AssemblyLevel.new("attribute[#{split_term[0]}]")
-            when 2 
-              Type::NodeLevel.new("node[#{split_term[0]}]/attribute[#{split_term[1]}]")
-            when 3 
-              Type::ComponentLevel.new("node[#{split_term[0]}]/component[#{split_term[1]}]/attribute[#{split_term[2]}]")
-          end
-        end
-      end
-
-      class CanonicalForm
-        def self.create(attr_term,opts={})
-          #can be an assembly, node or component level attribute
-          if attr_term =~ /^attribute/
-            Type::AssemblyLevel.new(attr_term)
-          elsif attr_term  =~ /^node[^\/]*\/component/
-            Type::ComponentLevel.new(attr_term)
-          elsif attr_term  =~ /^node[^\/]*\/attribute/
-            Type::NodeLevel.new(attr_term)
-          else
-            raise ErrorParse.new(attr_term)
-          end
-        end
-      end
     end
 
     class Node < self

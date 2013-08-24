@@ -140,7 +140,7 @@ alternative is adding links at time that node to ng link is added and special pr
            :function => "eq"
          }
        end
-       opts = {:link_fns_are_set => true, :donot_create_pending_changes => true, :attr_rows => attrs} 
+       opts = {:donot_create_pending_changes => true, :attr_rows => attrs} 
        parent_idh =  id_handle().get_top_container_id_handle(:target,:auth_info_from_self => true)
        AttributeLink.create_attribute_links(parent_idh,attr_link_rows,opts)
      end

@@ -1,9 +1,10 @@
-r8_nested_require('attribute_link','propagate_changes')
 module DTK
   class AttributeLink < Model
+    r8_nested_require('attribute_link','propagate_changes')
+    r8_nested_require('attribute_link','propagate_processor')
     r8_nested_require('attribute_link','ad_hoc')
 
-    extend AttrLinkPropagateChangesClassMixin
+    extend PropagateChangesClassMixin
 
     #virtual attribute defs    
     def output_index_map()
@@ -107,7 +108,7 @@ module DTK
           :parent_idh => change_parent_idh
         }
       end
-      AttributeLink.propagate(attr_mh,attrs_links_to_update)
+      propagate(attr_mh,attrs_links_to_update)
     end
 
     #mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that

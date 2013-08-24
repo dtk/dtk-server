@@ -4,13 +4,13 @@ files =
    'group',
    'complex_type',
    'datatype',
-   'propagate_changes',
    'update_derived_values',
    'meta'
   ]
 r8_nested_require('attribute',files)
-module XYZ
+module DTK
   class Attribute < Model
+    r8_nested_require('attribute','propagate_changes')
     r8_nested_require('attribute','pattern')
     r8_nested_require('attribute','legal_value')
     r8_nested_require('attribute','special_processing')
@@ -20,11 +20,10 @@ module XYZ
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin
     extend AttributeGroupClassMixin
-    extend  AttrPropagateChangesClassMixin
     include ConstantMixin
     include PrintFormMixin
     extend PrintFormClassMixin
-
+    extend PropagateChangesClassMixin
     set_relation_name(:attribute,:attribute)
     extend AttributeMetaClassMixin
 

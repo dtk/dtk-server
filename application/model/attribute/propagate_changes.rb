@@ -1,5 +1,5 @@
-module XYZ
-  module AttrPropagateChangesClassMixin
+module DTK; class Attribute
+  module PropagateChangesClassMixin
     #assume attribute_rows  all have :value_asserted or all have :value_derived
     def update_and_propagate_attributes(attr_mh,attribute_rows,opts={})
       ret = Array.new
@@ -144,4 +144,5 @@ module XYZ
       attr.kind_of?(Array) ? attr.map{|x|nil} : nil
     end
   end
-end
+end; end
+

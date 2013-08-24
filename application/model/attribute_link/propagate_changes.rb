@@ -1,5 +1,5 @@
-module XYZ
-  module AttrLinkPropagateChangesClassMixin
+module DTK; class AttributeLink
+  module PropagateChangesClassMixin
     #hash top level with :input_attribute,:output_attribute,:attribute_link, :parent_idh (optional)
     #with **_attribute having :id,:value_asserted,:value_derived,:semantic_type
     #  :attribute_link having :function, :input_id, :output_id, :index_map
@@ -50,4 +50,4 @@ module XYZ
       end
     end
   end
-end
+end; end

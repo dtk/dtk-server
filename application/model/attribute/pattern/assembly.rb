@@ -3,10 +3,10 @@ module DTK; class Attribute
     class Assembly < self
       r8_nested_require('assembly','source')
 
-      def self.create(attr_term,opts={})
+      def self.create(attr_term,assembly,opts={})
         #considering attribute id to belong to any format so processing here
         if attr_term =~ /^[0-9]+$/
-          return Type::ExplicitId.new(attr_term)
+          return Type::ExplicitId.new(attr_term,assembly)
         end
 
         format = opts[:format]||Format::Default

@@ -612,13 +612,28 @@ module DTK; class  Assembly
       if filter = opts[:filter]
         case filter
           when :required_unset_attributes
-            filter_proc = lambda{|r|r[:attribute].required_unset_attribute?()}
-            opts.merge!(:filter_proc => filter_proc)
+            opts.merge!(:filter_proc => FilterProc)
           else 
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
         end  
       end
       get_attributes_print_form_aux(opts)
+    end
+    FilterProc = lambda do |r|
+      attr = 
+        if r.kind_of?(Attribute) then r
+        elsif r[:attribute] then r[:attribute]
+        else raise Error.new("Unexpected form for filtered element (#{r.inspect})")
+        end
+      attr.required_unset_attribute?()
+    end
+
+    def get_attributes_all_levels()
+      assembly_attrs = get_assembly_level_attributes()
+      #TODO: more efficient is tahey do not need to be augmenetd
+      component_attrs = get_augmented_nested_component_attributes()
+      node_attrs = get_augmented_node_attributes()
+      assembly_attrs + component_attrs + node_attrs
     end
 
     def get_attributes_print_form_aux(opts=Opts.new)

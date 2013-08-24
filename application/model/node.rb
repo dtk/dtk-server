@@ -238,7 +238,7 @@ module XYZ
       ret
     end
 
-    def get_attributes_print_form(opts=Opts.new)
+    def get_attributes_print_form(opts={})
       if filter = opts[:filter]
         case filter
           when :required_unset_attributes
@@ -251,11 +251,20 @@ module XYZ
       end
     end
 
+    def get_node_attributes()
+      Array.new #TODO: stub
+    end
+
+    def get_node_and_component_attributes(opts={})
+      node_attrs = get_node_attributes()
+      component_attrs = get_objs(:cols => [:components_and_attrs]).map{|r|r[:attribute]}
+      component_attrs + node_attrs
+    end
     def get_attributes_print_form_aux(filter_proc=nil)
-      node_attrs = Array.new #TODO: stub
+      node_attrs = get_node_attributes()
       component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
         attr = r[:attribute]
-        #TODO: more efficient to have sql query do filtering
+       #TODO: more efficient to have sql query do filtering
         if filter_proc.nil? or filter_proc.call(attr)
           display_name_prefix = "#{r[:component].display_name_print_form()}/"
           attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))

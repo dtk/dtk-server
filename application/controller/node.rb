@@ -147,8 +147,8 @@ module XYZ
     def rest__get_attributes()
       node = create_node_obj(:node_id)
       filter = ret_request_params(:filter)
-      filter = filter && filter.to_sym
-      rest_ok_response node.get_attributes_print_form(filter)
+      opts = (filter ?  {filter.to_sym => true} : {})
+      rest_ok_response node.get_attributes_print_form(opts)
     end
 
     #the body has an array each element of form

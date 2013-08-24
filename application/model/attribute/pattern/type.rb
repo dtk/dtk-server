@@ -1,17 +1,39 @@
+#TODO: this are written to focus on assemblies; need to modify to treat nodes too
 module DTK; class Attribute
   class Pattern 
     class Type
-      def ret_or_create_attributes(assembly_idh,opts={})
-        raise Error.new("Should be overwritten")
+      def initialize(pattern)
+        @pattern = pattern
       end
+     private
+      attr_reader :pattern, :id
 
       class ExplicitId < self
+        def initialize(pattern,base_obj)
+          super(pattern)
+          @id = pattern.to_i
+          if base_obj.kind_of?(::DTK::Node)
+            raise_error_if_not_node_attr_id(@id,base_obj)
+          elsif base_obj.kind_of?(::DTK::Assembly)
+            raise_error_if_not_assembly_attr_id(@id,base_obj)
+          else
+            raise Error.new("Unexpected base object type (#{base_obj.class.to_s})")
+          end
+        end
+
         def ret_or_create_attributes(assembly_idh,opts={})
           [assembly_idh.createIDH(:model_name => :attribute, :id => id())]
         end
-        private
-        def id()
-          @pattern
+       private
+        def raise_error_if_not_node_attr_id(attr_id,node)
+          unless node.get_node_and_component_attributes().find{|r|r[:id] == attr_id}
+            raise ErrorUsage.new("Illegal attribute id (#{attr_id.to_s}) for node")
+          end
+        end
+        def raise_error_if_not_assembly_attr_id(attr_id,assembly)
+          unless assembly.get_attributes_all_levels().find{|r|r[:id] == attr_id}
+            raise ErrorUsage.new("Illegal attribute id (#{attr_id.to_s}) for assembly")
+          end
         end
       end
 
@@ -70,12 +92,6 @@ module DTK; class Attribute
           ret_matching_attribute_idhs(:component,cmp_idhs,attr_fragment)
         end
       end
-
-     private 
-      def initialize(pattern)
-        @pattern = pattern
-      end
-      attr_reader :pattern
 
       #TODO: more efficient to use joins of below
       def ret_matching_node_idhs(assembly_idh)

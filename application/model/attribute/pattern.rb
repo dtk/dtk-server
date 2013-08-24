@@ -2,16 +2,17 @@ module DTK; class Attribute
   class Pattern 
     r8_nested_require('pattern','type')
     r8_nested_require('pattern','assembly')
+    r8_nested_require('pattern','node')
 
     def self.get_attribute_idhs(base_object_idh,attr_term)
-      create(attr_term).ret_or_create_attributes(base_object_idh)
+      create(attr_term,base_object_idh.create_object()).ret_or_create_attributes(base_object_idh)
     end
 
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
-        pattern = create(av_pair[:pattern],opts)
+        pattern = create(av_pair[:pattern],base_object,opts)
         #conditionally based on type ret_or_create_attributes may only ret and not create attributes
         attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle(),Aux.hash_subset(opts,[:create]))
         unless attr_idhs.empty?
@@ -45,16 +46,6 @@ module DTK; class Attribute
       end
       #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
       base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
-    end
-
-    class Node < self
-      def self.create(pattern)
-        if pattern =~ /^[0-9]+$/
-          Type::ExplicitId.new(pattern)
-        else
-          raise ErrorParse.new(pattern)
-        end
-      end
     end
 
     class ErrorParse < ErrorUsage

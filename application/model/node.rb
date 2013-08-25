@@ -175,10 +175,6 @@ module XYZ
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def info()
-      get_obj(:cols => InfoCols).hash_subset(*InfoCols)
-    end
-
     class << self
      private
       def user_friendly_name(node_name,assembly_name=nil)
@@ -196,9 +192,22 @@ module XYZ
     end
     InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
 
-    def info()
-      get_obj(:cols => InfoCols).hash_subset(*InfoCols)
+    def info(opts={})
+      ret = get_obj(:cols => InfoCols).hash_subset(*InfoCols)
+      opts[:print_form] ? info_print_form_processing!(ret) : ret
     end
+
+    def info_print_form_processing!(info_hash)
+      if external_ref = info_hash[:external_ref]
+        private_dns = external_ref[:private_dns_name]
+        if private_dns.kind_of?(Hash)
+          #then :private_dns_name is of form <public dns> => <private dns>
+          external_ref[:private_dns_name] = private_dns.values.first 
+        end
+      end
+      info_hash
+    end
+
     
     def info_about(about,opts={})
       case about

@@ -128,7 +128,7 @@ module XYZ
        unless subtype == :instance
          raise ErrorUsage::BadParamValue.new(:subtype,subtype)
        end
-      rest_ok_response node.info(), :encode_into => :yaml
+      rest_ok_response node.info(:print_form=>true), :encode_into => :yaml
     end
 
     def rest__info_about()

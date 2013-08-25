@@ -14,8 +14,7 @@ module Ramaze::Helper
         #for case of yaml, the data wil be a string formed by yaml encoding
         data = 
           case encode_format
-            when :yaml
-              ::DTK::Aux.serialize(data,:yaml) + "\n"
+            when :yaml then encode_into_yaml(data)
             else raise Error.new("Unexpected encode format (#{encode_format})")
           end
       end
@@ -57,7 +56,24 @@ module Ramaze::Helper
       RestResponse.new(:status => :notok, :errors => errors)
     end
 
-    private
+   private
+    def encode_into_yaml(data)
+      #first remove empty keys 
+      ::DTK::Aux.serialize(remove_null_keys(data),:yaml) + "\n"
+    end
+
+    def remove_null_keys(data)
+      if data.kind_of?(Hash)
+        ret = Hash.new
+        data.each_pair{|k,v|ret[k]=v unless v.nil?}
+        ret
+      elsif data.kind_of?(Array)
+        data.map{|el|remove_null_keys(el)}
+      else
+        data
+      end
+    end
+
     class RestResponse < Hash
       def initialize(hash)
         replace(hash)

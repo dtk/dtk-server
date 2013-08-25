@@ -1,4 +1,3 @@
-#TODO: this are written to focus on assemblies; need to modify to treat nodes too
 module DTK; class Attribute
   class Pattern 
     class Type
@@ -9,20 +8,20 @@ module DTK; class Attribute
       attr_reader :pattern, :id
 
       class ExplicitId < self
-        def initialize(pattern,base_obj)
+        def initialize(pattern,parent_obj)
           super(pattern)
           @id = pattern.to_i
-          if base_obj.kind_of?(::DTK::Node)
-            raise_error_if_not_node_attr_id(@id,base_obj)
-          elsif base_obj.kind_of?(::DTK::Assembly)
-            raise_error_if_not_assembly_attr_id(@id,base_obj)
+          if parent_obj.kind_of?(::DTK::Node)
+            raise_error_if_not_node_attr_id(@id,parent_obj)
+          elsif parent_obj.kind_of?(::DTK::Assembly)
+            raise_error_if_not_assembly_attr_id(@id,parent_obj)
           else
-            raise Error.new("Unexpected base object type (#{base_obj.class.to_s})")
+            raise Error.new("Unexpected parent object type (#{parent_obj.class.to_s})")
           end
         end
 
-        def ret_or_create_attributes(assembly_idh,opts={})
-          [assembly_idh.createIDH(:model_name => :attribute, :id => id())]
+        def ret_or_create_attributes(parent_idh,opts={})
+          [parent_idh.createIDH(:model_name => :attribute, :id => id())]
         end
        private
         def raise_error_if_not_node_attr_id(attr_id,node)
@@ -38,9 +37,9 @@ module DTK; class Attribute
       end
 
       class NodeLevel < self
-        def ret_or_create_attributes(assembly_idh,opts={})
+        def ret_or_create_attributes(parent_idh,opts={})
           ret = Array.new
-          node_idhs = ret_matching_node_idhs(assembly_idh)
+          node_idhs = ret_matching_node_idhs(parent_idh)
           return ret if node_idhs.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
@@ -59,9 +58,9 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def ret_or_create_attributes(assembly_idh,opts={})
+        def ret_or_create_attributes(parent_idh,opts={})
           ret = Array.new
-          node_idhs = ret_matching_node_idhs(assembly_idh)
+          node_idhs = ret_matching_node_idhs(parent_idh)
           return ret if node_idhs.empty?
 
           pattern  =~ /^node[^\/]*\/(component.+$)/
@@ -75,9 +74,12 @@ module DTK; class Attribute
         end
       end
 
-      #TODO: more efficient to use joins of below
-      def ret_matching_node_idhs(assembly_idh)
-        filter = [:eq, :assembly_id, assembly_idh.get_id()]
+      #parent will be node_idh or assembly_idh
+      def ret_matching_node_idhs(parent_idh)
+        if parent_idh[:model_name] == :node
+          return [parent_idh]
+        end
+        filter = [:eq, :assembly_id, parent_idh.get_id()]
         if node_filter = ret_filter(pattern,:node)
           filter = [:and, filter, node_filter]
         end
@@ -85,7 +87,7 @@ module DTK; class Attribute
           :cols => [:display_name,:id],
           :filter => filter
         }
-        Model.get_objs(assembly_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(parent_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
       end
 
       def ret_matching_component_idhs(node_idhs,cmp_fragment)

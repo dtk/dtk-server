@@ -3,13 +3,17 @@ module DTK; class Attribute
     class Node < self
       def self.create(pattern,node,opts={})
         if pattern =~ /^[0-9]+$/
-          Type::ExplicitId.new(pattern,node)
-        elsif pattern =~ /^[0-9a-zA-Z\-_]+$/
-          node_name = node.get_field?(:display_name)
-          attr_term = pattern
-          Type::NodeLevel.new("node[#{node_name}]/attribute[#{attr_term}]")
-        else
-          raise ErrorParse.new(pattern)
+          return Type::ExplicitId.new(pattern,node)
+        end
+        split_term = pattern.split("/")
+        node_name = node.get_field?(:display_name)
+        case split_term.size          
+          when 1 
+            Type::NodeLevel.new("node[#{node_name}]/attribute[#{split_term[0]}]")        
+          when 2 
+            Type::ComponentLevel.new("node[#{node_name}]/component[#{split_term[0]}]/attribute[#{split_term[1]}]")
+          else        
+            raise ErrorParse.new(pattern)
         end
       end
     end

@@ -44,7 +44,7 @@ module DTK
     def rest__info()
       assembly = ret_assembly_object()
       node_id, component_id, attribute_id = ret_request_params(:node_id, :component_id, :attribute_id)
-      rest_ok_response assembly.info(node_id, component_id, attribute_id)
+      rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
     end
 
     def rest__info_about()

@@ -65,7 +65,7 @@ module Ramaze::Helper
     def remove_null_keys(data)
       if data.kind_of?(Hash)
         ret = Hash.new
-        data.each_pair{|k,v|ret[k]=v unless v.nil?}
+        data.each_pair{|k,v|ret[k]=remove_null_keys(v) unless v.nil?}
         ret
       elsif data.kind_of?(Array)
         data.map{|el|remove_null_keys(el)}

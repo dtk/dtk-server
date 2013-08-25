@@ -19,6 +19,26 @@ module DTK; class Attribute
         klass.create(attr_term,opts)
       end
 
+      class Type < Pattern::Type
+        class AssemblyLevel < self
+          def ret_or_create_attributes(assembly_idh,opts={})
+            ret = ret_matching_attribute_idhs(:component,[assembly_idh],pattern)
+            #if does not exist then create the attribute if carete flag set
+            #if exists and create flag exsists we just assign it new value
+            if ret.empty? and opts[:create]
+            af = ret_filter(pattern,:attribute)
+              #attribute must have simple form 
+              unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
+                raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
+              end
+              field_def = {"display_name" => af[2]}
+              ret = assembly_idh.create_object().create_or_modify_field_def(field_def)
+            end
+            ret
+          end
+        end
+      end
+
       class Simple
         def self.create(attr_term,opts={})
           split_term = attr_term.split("/")

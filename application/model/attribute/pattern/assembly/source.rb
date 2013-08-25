@@ -4,7 +4,7 @@ module DTK; class Attribute; class Pattern
     class Source < self
       def self.get_attribute_idh_and_fn(base_object_idh,source_attr_term)
         attr_term,fn = Simple.parse(source_attr_term) || 
-                       AttributeInString.parse(source_attr_term)
+                       VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
           raise ErrorParse.new(source_attr_term)
         end
@@ -20,17 +20,17 @@ module DTK; class Attribute; class Pattern
       
       class Simple
         def self.parse(source_term)
-          if source_term =~ /^\$(.+$)/
+          if source_term =~ /^\$([a-z-_0-9]+$)/
             attr_term = $1
             [attr_term,nil]
           end
         end
       end
 
-      class AttributeInString
+      class VarEmbeddedInText
         def self.parse(source_term)
           #TODO: change after fix stripping off of ""
-          if source_term =~ /(^[^\$].*)\$\{([^\}]+)\}(.*)/
+          if source_term =~ /(^[^\$]*)\$\{([^\}]+)\}(.*)/
             str_part1 = $1
             attr_term = $2
             str_part2 = $3

@@ -24,106 +24,62 @@ module DTK; module CommandAndControlAdapter
       end
     #TODO: put this as boothook because if not get race condition with start of mcollective
 #need to check if this now runs on every boot; if so might want to put provision in so only runs on first boot
+
+USER_DATA_SH = <<eos
+cat << EOF >> /etc/mcollective/server.cfg
+---
+plugin.stomp.host = <%=node_config_server_host %>
+EOF
+
+cat << EOF > /etc/mcollective/facts.yaml
+---
+git-server: "<%=git_server_url %>"
+EOF
+
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF >> /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF >> /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
+EOF
+
+ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
+cat << EOF >>/root/.ssh/known_hosts
+<%=fingerprint %>
+EOF
+
+eos
+
 UserDataTemplates = Hash.new 
+# Ubuntu template
 UserDataTemplates[:ubuntu] = Erubis::Eruby.new <<eos
 #cloud-boothook
 #!/bin/sh 
 
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-EOF
-
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-EOF
-
-mkdir -p /etc/mcollective/ssh
-
-cat << EOF >> /etc/mcollective/ssh/mcollective
-<%=mcollective_ssh_remote_private_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/mcollective.pub
-<%=mcollective_ssh_remote_public_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/authorized_keys
-<%=mcollective_ssh_local_public_key %>
-EOF
-
-ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
-cat << EOF >>/root/.ssh/known_hosts
-<%=fingerprint %>
-EOF
+#{USER_DATA_SH}
 
 eos
+
+# Red Hat template
 UserDataTemplates[:redhat] = Erubis::Eruby.new <<eos
 #!/bin/sh 
 
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-EOF
-
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-EOF
-
-mkdir -p /etc/mcollective/ssh
-
-cat << EOF >> /etc/mcollective/ssh/mcollective
-<%=mcollective_ssh_remote_private_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/mcollective.pub
-<%=mcollective_ssh_remote_public_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/authorized_keys
-<%=mcollective_ssh_local_public_key %>
-EOF
-
-ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
-cat << EOF >>/root/.ssh/known_hosts
-<%=fingerprint %>
-EOF
+#{USER_DATA_SH}
 
 eos
 
+# CentOS template
 UserDataTemplates[:centos] = Erubis::Eruby.new <<eos
 #!/bin/sh
 
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-EOF
-
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-EOF
-
-mkdir -p /etc/mcollective/ssh
-
-cat << EOF >> /etc/mcollective/ssh/mcollective
-<%=mcollective_ssh_remote_private_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/mcollective.pub
-<%=mcollective_ssh_remote_public_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/authorized_keys
-<%=mcollective_ssh_local_public_key %>
-EOF
-
-ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
-cat << EOF >>/root/.ssh/known_hosts
-<%=fingerprint %>
-EOF
+#{USER_DATA_SH}
 
 eos
 
@@ -131,35 +87,7 @@ eos
 UserDataTemplates[:debian] = Erubis::Eruby.new <<eos
 #!/bin/sh 
 
-cat << EOF >> /etc/mcollective/server.cfg
----
-plugin.stomp.host = <%=node_config_server_host %>
-EOF
-
-cat << EOF > /etc/mcollective/facts.yaml
----
-git-server: "<%=git_server_url %>"
-EOF
-
-mkdir -p /etc/mcollective/ssh
-
-cat << EOF >> /etc/mcollective/ssh/mcollective
-<%=mcollective_ssh_remote_private_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/mcollective.pub
-<%=mcollective_ssh_remote_public_key %>
-EOF
-
-cat << EOF >> /etc/mcollective/ssh/authorized_keys
-<%=mcollective_ssh_local_public_key %>
-EOF
-
-mkdir /root/.ssh
-touch /root/.ssh/known_hosts
-cat << EOF >>/root/.ssh/known_hosts
-<%=fingerprint %>
-EOF
+#{USER_DATA_SH}
 
 eos
 

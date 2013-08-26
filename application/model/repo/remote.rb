@@ -253,7 +253,9 @@ module DTK
       end
 
       def self.default_user_namespace()
-        CurrentSession.new.get_user_object().get_namespace()
+        # CurrentSession.new.get_user_object().get_namespace()
+        # we don't want username as default namespace, we will use tenant unique name instead
+        ::DTK::Common::Aux.running_process_user()
       end
 
       def self.default_namespace()

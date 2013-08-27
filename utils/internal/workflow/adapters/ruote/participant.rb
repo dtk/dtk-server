@@ -407,10 +407,21 @@ module DTK
 
             node = task[:executable_action][:node]
             installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
-            head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
-            if head_git_commit_id == installed_agent_git_commit_id
+            head_git_commit_id = nil
+            begin
+              head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
+             rescue => e
+              Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
+              head_git_commit_id = -1
+            end
+            if (head_git_commit_id == installed_agent_git_commit_id) or head_git_commit_id == -1
               set_result_succeeded(workitem,nil,task,action) if task_end
-              pp ["task_complete_skipped_already_synced #{self.class.to_s}",task[:id]]
+              if head_git_commit_id == -1
+                Log.info("task_complete_skipped_because_of_error #{self.class.to_s}")
+              else
+                Log.info("task_complete_skipped_already_synced #{self.class.to_s}")
+              end
+
               delete_task_info(workitem)
               # Amar: PERFORMANCE
               PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)

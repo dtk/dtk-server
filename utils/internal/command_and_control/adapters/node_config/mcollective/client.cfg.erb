@@ -6,8 +6,10 @@ logfile = <%= logfile %>
 loglevel = info
 
 # Plugins
-securityprovider = psk
-plugin.psk = unset
+securityprovider = sshkey
+plugin.sshkey.client.send_key = <%= mcollective_ssh_local_public_key %>
+plugin.sshkey.client.private_key = <%= mcollective_ssh_local_private_key %>
+plugin.sshkey.client.authorized_keys = <%= mcollective_ssh_local_authorized_keys %>
 
 connector = stomp_em
 plugin.stomp.host = <%= stomp_host %>

@@ -38,15 +38,15 @@ EOF
 
 mkdir -p /etc/mcollective/ssh
 
-cat << EOF >> /etc/mcollective/ssh/mcollective
+cat << EOF > /etc/mcollective/ssh/mcollective
 <%=mcollective_ssh_remote_private_key %>
 EOF
 
-cat << EOF >> /etc/mcollective/ssh/mcollective.pub
+cat << EOF > /etc/mcollective/ssh/mcollective.pub
 <%=mcollective_ssh_remote_public_key %>
 EOF
 
-cat << EOF >> /etc/mcollective/ssh/authorized_keys
+cat << EOF > /etc/mcollective/ssh/authorized_keys
 <%=mcollective_ssh_local_public_key %>
 EOF
 

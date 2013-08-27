@@ -119,7 +119,7 @@ module DTK
       attr_rows = attr_rows.select { |attr| attr[:id] == attribute_id.to_i }  unless (attribute_id.nil? || attribute_id.empty?)
       
       # reconfigure response fields that will be returned to the client
-      self.class.list_aux(assembly_rows,attr_rows, opts).first      
+      self.class.list_aux(assembly_rows,attr_rows, {:print_form=>true}.merge(opts)).first      
     end
 
     def self.get_default_component_attributes(assembly_mh,assembly_rows,opts={})
@@ -209,11 +209,14 @@ module DTK
             node = pntr[:ndx_nodes][node_id] = {
               :node_name  => r[:node][:display_name], 
               :node_id    => node_id,
-              :components => Array.new
+              :os_type    => r[:node][:os_type],
+              :admin_op_status => r[:node][:admin_op_status]
             }
-            node[:admin_op_status] = r[:node][:admin_op_status] if r[:node][:admin_op_status]
-            node[:external_ref]    = r[:node][:external_ref] if r[:node][:external_ref]
-            node[:os_type]         = r[:node][:os_type] if r[:node][:os_type]
+            node.reject!{|k,v|v.nil?}
+            if node_ext_ref = r[:node][:external_ref]
+              node[:external_ref]  = (opts[:print_form] ? node_external_ref_print_form(node_ext_ref) : node_ext_ref) 
+            end
+            node[:components] = Array.new
           end
 
           cmp_hash = list_aux__component_template(r)
@@ -241,25 +244,40 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
-          op_status      = ''
-          pending_status = nil
-          stop_status    = nil
+          op_status = nil
+          if self == Instance
+            pending_status = nil
+            stop_status    = nil
 
-          r[:ndx_nodes].each do |node|
-            if (status = node[1][:admin_op_status]).eql? "stopped"
-              stop_status = "stopped"; break
-            elsif status.eql? "pending"
-              pending_status = "pending"
+            r[:ndx_nodes].each do |node|
+              if (status = node[1][:admin_op_status]).eql? "stopped"
+                stop_status = "stopped"; break
+              elsif status.eql? "pending"
+                pending_status = "pending"
+              end
             end
+            op_status = stop_status||pending_status||"running"    
           end
-
-          op_status = stop_status||pending_status||"running"    
-
-          r.slice(:id,:display_name,:execution_status,:module_branch_id,:version,:assembly_template).merge(:nodes => r[:ndx_nodes].values, :op_status => op_status)
+          r.merge(:op_status => op_status,:nodes => r[:ndx_nodes].values).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
+
+      def node_external_ref_print_form(node_ext_ref)
+        ret = node_ext_ref.class.new()
+        node_ext_ref.each_pair do |k,v|
+          if [:dns_name].include?(k) 
+            #no op
+          elsif k == :private_dns_name and v.kind_of?(Hash)            
+            ret[k] = v.values.first
+          else
+            ret[k] = v
+          end
+        end
+        ret
+      end
+      private :node_external_ref_print_form
 
       #MOD_RESTRUCT: TODO: r[:nested_component] is temp until move over to assembly virtual attributes that use :component_template rather than :nested_component
       def list_aux__component_template(r)

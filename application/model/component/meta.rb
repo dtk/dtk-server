@@ -114,6 +114,17 @@ module XYZ
            :cols => [:id,:group_id,:display_name]
          }]
 
+     virtual_column :name_attribute, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         { :model_name => :attribute,
+           :convert => true,
+           :join_type => :left_outer,
+           :filter => [:eq,:display_name,'name'],
+           :join_cond=>{:component_component_id => q(:component,:id)} ,
+           :cols => [:id,:group_id,:display_name]
+         }]
+
       ###### end of virtual columns related to attributes, ports, and link_defs
 
     virtual_column :library, :type => :json, :hidden => true,

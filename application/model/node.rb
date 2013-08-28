@@ -289,21 +289,32 @@ module XYZ
     end
 
     def add_component(component_template_idh,component_title=nil)
-=begin
-TODO
-title processing
-put in call to Component::Template#get_title_attribute? that returns non null
-if title is needed and if so wil return the title attribute 
-then raise error if needs title and one not given or vicea versa
-this function can make join call looking for 'name' and second call if dont find name
-the set override_attrs so that ref, display_name, and component_type are set to the conventions used for parsing assemblies
-their values need to be sql casted
-=end
+      title_attr_name = check_and_ret_title_attribute_name?(component_template_idh,component_title)
       override_attrs = Hash.new
+      if title_attr_name
+        component_type = component_template_idh.get_field?(:component_type)
+        override_attrs = {
+          :ref => SQL.cast(ComponentTitle.ref_with_title(component_type,component_title),:text),
+          :display_name => SQL.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text),
+          :attribute => {title_attr_name => {:value_asserted => SQL.cast(component_title,:text)}}
+        }
+      end
       clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
       new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
       new_cmp.id_handle()
     end
+
+    def check_and_ret_title_attribute_name?(component_template_idh,component_title)
+      title_attr_name = Component::Template.get_title_attribute_name?(component_template_idh)
+      if component_title and title_attr_name.nil?
+        component_name = Component::Template.print_form(component_title)
+        raise ErrorUsage.new("Component (#{component_name}) given a title but should not have one")
+      elsif component_title.nil? and title_attr_name
+        raise Error.new("Component (#{component_name}) needs atitle, but not given one")
+      end 
+      title_attr_name
+    end
+    private :check_and_ret_title_attribute_name?
 
     def delete_component(component_idh)
       #first check that component_idh belongs to this instance

@@ -103,6 +103,10 @@ module XYZ
       Model.model_class(model_name).new({:id => get_id()},self[:c],nil,self)
     end
 
+    def get_field?(field)
+      create_object().get_field?(field)
+    end
+
     def i18n_language()
       #TODO: stub
        R8::Config[:default_language]

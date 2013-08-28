@@ -10,6 +10,7 @@ require './lib/dtk_common'
 require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/services_spec'
+require './lib/modules_spec'
 
 namespace = "dtk17"
 existing_service_name = "test_service"

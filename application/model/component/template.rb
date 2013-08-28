@@ -20,7 +20,7 @@ module DTK; class Component
     end
 
     def self.print_form(component_template_idh)
-      component_type_print_form(component_template_idh.get_field?(component_template_idh))
+      component_type_print_form(component_template_idh.get_field?(:component_type))
     end
 
     #type_version_list is an array with each element having keys :component_type, :version_field

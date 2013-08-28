@@ -14,7 +14,11 @@ module Ramaze::Helper
       if subtype == :template
         ::DTK::Node::Template.list(model_handle, opts)
       else
-        ::DTK::Node.list_wo_assembly_nodes(model_handle)
+        if (opts[:is_list_all] == 'true')
+          ::DTK::Node.list(model_handle, opts)
+        else
+          ::DTK::Node.list_wo_assembly_nodes(model_handle)
+        end
       end
     end
 

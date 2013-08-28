@@ -1,7 +1,6 @@
 module DTK
   class Service_moduleController < AuthController
     helper :module_helper
-    helper :component_template_helper
     helper :assembly_helper
     
     #TODO: for debugging; will be removed

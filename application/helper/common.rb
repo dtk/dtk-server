@@ -358,6 +358,15 @@ module Ramaze::Helper
       ret
     end
 
+
+    #returns [component_template, component_title] where component_title could be nil
+    def ret_component_template_and_title(param)
+      component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template)
+      component_template = component_template_idh.create_object(:model_name => :component_template)
+      component_title = ::DTK::ComponentTitle.parse_title?(ret_non_null_request_params(param))
+      [component_template,component_title]
+    end
+
     def raise_error_null_params?(*null_params)
       unless null_params.empty?
         error_msg = (null_params.size == 1 ? "Rest post parameter (#{null_params.first}) is missing" : "Rest post parameters (#{null_params.join(',')} are missing")

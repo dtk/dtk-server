@@ -494,7 +494,7 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
-    def add_component(node_idh,component_template_idh,component_title,order_index=nil)
+    def add_component(node_idh,component_template,component_title,order_index=nil)
       #first check that node_idh belongs to this instance
       sp_hash = {
         :cols => [:id, :display_name,:group_id, :ordered_component_ids],
@@ -508,7 +508,7 @@ module DTK; class  Assembly
       order = node.get_ordered_component_ids()
       raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
 
-      component = node.add_component(component_template_idh,component_title)
+      component = node.add_component(component_template,component_title)
 
       # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array
       if order_index.nil?

@@ -185,7 +185,7 @@ module DTK
     end
 
     def component_type_print_form()
-      self[:component_type] && self.class.component_type_print_form(self[:component_type])
+      self.class.component_type_print_form(get_field?(:component_type))
     end
 
     def convert_to_print_form!()

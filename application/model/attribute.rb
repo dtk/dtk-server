@@ -49,13 +49,13 @@ module DTK
       attrs
     end
 
-    def self.get_title_attribute(component_idh)
+    def self.get_title_attribute(component)
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:external_ref],
-        :filter => [:eq,:component_component_id,component_idh.get_id()]
+        :filter => [:eq,:component_component_id,component.id()]
       }
-      unless ret = get_objs(component_idh.createMH(:attribute),sp_hash).find{|r|r.is_title_attribute?()}
-        component_name = component_idh.get_field?(:display_name)
+      unless ret = get_objs(component.model_handle(:attribute),sp_hash).find{|r|r.is_title_attribute?()}
+        component_name = component.get_field?(:display_name)
         Log.error("Expected to have a title attribute on component (#{component_name})")
       end
       ret

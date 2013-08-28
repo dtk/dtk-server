@@ -252,12 +252,12 @@ module DTK
 
     def rest__add_component()
       assembly = ret_assembly_instance_object()
-      component_template_idh, component_title = ret_component_template_idh_and_title(:component_template_id)
+      component_template, component_title = ret_component_template_and_title(:component_template_id)
 
       #not checking here if node_id points to valid object; check is in add_component
       node_id = ret_non_null_request_params(:node_id)
       order_index = ret_request_params(:order_index) 
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template_idh,component_title,order_index)
+      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template,component_title,order_index)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

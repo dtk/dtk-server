@@ -30,13 +30,6 @@ module Ramaze::Helper
       (ret_request_params(:subtype)||:instance).to_sym
     end
 
-    #returns [component_template_idh, component_title] where component_title could be nil
-    def ret_component_template_idh_and_title(param)
-      component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template)
-      component_title = ::DTK::ComponentTitle.parse_title?(ret_non_null_request_params(param))
-      [component_template_idh,component_title]
-    end
-
     def ret_port_object(param,assembly_idh,conn_type)
       extra_context = {:assembly_idh => assembly_idh,:connection_type => conn_type}
       create_obj(param,::DTK::Port,extra_context)

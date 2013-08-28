@@ -1,26 +1,17 @@
 module DTK; class Component
   class Template < self
     #returns non-nill only if this is a component that takes a title and if so returns the attribute object taht stores the title
-    def self.get_title_attribute_name?(component_template_idh)
-      if attr = get_title_attribute?(component_template_idh)
-        attr[:display_name]
-      end
-    end
-    #returns non-nill only if this is a component that takes a title and if so returns the title attribute name
-    def self.get_title_attribute?(component_template_idh)
+    def get_title_attribute_name?()
       #first see if not only_one_per_node and has the 'name' attribute
       sp_hash = {
         :cols => [:name_attribute],
         :filter => [:eq,:only_one_per_node,false]
       }
-      if row = component_template_idh.create_object().get_obj(sp_hash)
-        #Attribute.get_title_attribute used in case the nitle attribute is different than 'name'
-        row[:attribute]||Attribute.get_title_attribute(component_template_idh)
+      if row = get_obj(sp_hash)
+        #Attribute.get_title_attribute used in case the title attribute is different than 'name'
+        title_attribute = row[:attribute]||Attribute.get_title_attribute(self)
+        title_attribute && title_attribute[:display_name]
       end
-    end
-
-    def self.print_form(component_template_idh)
-      component_type_print_form(component_template_idh.get_field?(:component_type))
     end
 
     #type_version_list is an array with each element having keys :component_type, :version_field

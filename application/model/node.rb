@@ -288,38 +288,24 @@ module XYZ
       Attribute::Pattern::Node.set_attributes(self,av_pairs)
     end
 
-    def add_component(component_template_idh,component_title=nil)
-      title_attr_name = check_and_ret_title_attribute_name?(component_template_idh,component_title)
+    def add_component(component_template,component_title=nil)
+      title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
       override_attrs = Hash.new
       if title_attr_name
-        component_type = component_template_idh.get_field?(:component_type)
+        component_type = component_template.get_field?(:component_type)
         override_attrs = {
           :ref => SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type,component_title),:text),
           :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)
         }
       end
       clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
-      new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)
+      new_cmp = clone_into(component_template,override_attrs,clone_opts)
       new_cmp_idh = new_cmp.id_handle()
       if title_attr_name
         Component::Instance.set_title(new_cmp_idh,component_title,title_attr_name)
       end
       new_cmp_idh
     end
-
-    def check_and_ret_title_attribute_name?(component_template_idh,component_title)
-      #TODO: also check here when takes title tha component with that title is not already present
-      title_attr_name = Component::Template.get_title_attribute_name?(component_template_idh)
-      if component_title and title_attr_name.nil?
-        component_name = Component::Template.print_form(component_template_idh)
-        raise ErrorUsage.new("Component (#{component_name}) given a title but should not have one")
-      elsif component_title.nil? and title_attr_name
-        component_name = Component::Template.print_form(component_template_idh)
-        raise ErrorUsage.new("Component (#{component_name}) needs a title, but not given one")
-      end 
-      title_attr_name
-    end
-    private :check_and_ret_title_attribute_name?
 
     def delete_component(component_idh)
       #first check that component_idh belongs to this instance
@@ -332,6 +318,43 @@ module XYZ
       end
       Model.delete_instance(component_idh)
     end
+
+    def check_and_ret_title_attribute_name?(component_template,component_title)
+      title_attr_name = component_template.get_title_attribute_name?()
+      if component_title and title_attr_name.nil?
+        raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) given a title but should not have one")
+      elsif component_title.nil? and title_attr_name
+        raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) needs a title, but not given one")
+      end 
+
+      if title_attr_name
+        component_type = component_template.get_field?(:component_type)
+        if matching_component_instance_exists?(component_type,title_attr_name)
+          raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) already exists with title (#{component_title})")
+        end
+      end
+
+      title_attr_name
+    end
+    private :check_and_ret_title_attribute_name?
+
+    def matching_component_instance_exists?(component_type,title_attr_name)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and,[:eq,:node_node_id,id()],[:eq,:component_type,component_type]]
+      }
+      cmps = Model.get_objs(model_handle(:component),sp_hash)
+      unless cmps.empty?
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:and,[:oneof,:component_component_id,cmps.map{|cmp|cmp[:id]}],
+                       [:eq,:display_name,title_attr_name]]
+        }
+        not Model.get_obj(model_handle(:attribute),sp_hash).nil?
+      end
+    end
+    private :matching_component_instance_exists?
+
 
     def self.check_valid_id(model_handle,id)
       filter = 

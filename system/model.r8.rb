@@ -122,6 +122,8 @@ module DTK
         when :assembly then Assembly
         when :assembly_template then Assembly::Template
         when :assembly_instance then Assembly::Instance
+        when :component_template then Component::Template
+        when :component_instance then Component::Instance
         when :datacenter then Target
         when :node_group then NodeGroup
       end
@@ -222,6 +224,7 @@ module DTK
 
     SubClassRelations = {
       :assembly => :component,
+      :component_template => :component,
       :node_group => :node
     }
 

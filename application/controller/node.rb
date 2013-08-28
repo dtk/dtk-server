@@ -2,7 +2,6 @@ module XYZ
   class NodeController < AuthController
     helper :node_helper
     helper :rest_async
-    helper :component_template_helper
 
     ### mcollective actions
     def rest__initiate_get_netstats()
@@ -39,8 +38,8 @@ module XYZ
     #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)
-      component_template_idh = ret_component_template_idh()
-      new_component_idh = node.add_component(component_template_idh)
+      component_template, component_title = ret_component_template_and_title(:component_template_id)
+      new_component_idh = node.add_component(component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

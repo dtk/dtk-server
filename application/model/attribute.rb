@@ -54,7 +54,7 @@ module DTK
         :cols => [:id,:group_id,:display_name,:external_ref],
         :filter => [:eq,:component_component_id,component_idh.get_id()]
       }
-      unless ret = get_objs(component_idh.createMH(:attribute),sp_hash).find{|r|r.title()}
+      unless ret = get_objs(component_idh.createMH(:attribute),sp_hash).find{|r|r.is_title_attribute?()}
         component_name = component_idh.get_field?(:display_name)
         Log.error("Expected to have a title attribute on component (#{component_name})")
       end
@@ -64,10 +64,13 @@ module DTK
                                                                          
     #TODO: may make this a real field in attribute
     def title()
-      if self[:display_name] == "name" or ext_ref_indicates_title?(self[:external_ref])
-        self[:attribute_value]
-      end
+      self[:attribute_value] if is_title_attribute?()
     end
+
+    def is_title_attribute?()
+      self[:display_name] == "name" or ext_ref_indicates_title?(self[:external_ref])
+    end
+
     def ext_ref_indicates_title?(ext_ref)
       ret = 
         if ext_ref[:type] == "puppet_attribute"

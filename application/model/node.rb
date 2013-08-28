@@ -302,7 +302,7 @@ module XYZ
       new_cmp = clone_into(component_template,override_attrs,clone_opts)
       new_cmp_idh = new_cmp.id_handle()
       if title_attr_name
-        Component::Instance.set_title(new_cmp_idh,component_title,title_attr_name)
+        Component::Instance.create_title_attribute(new_cmp_idh,component_title,title_attr_name)
       end
       new_cmp_idh
     end
@@ -329,7 +329,7 @@ module XYZ
 
       if title_attr_name #and component_title
         component_type = component_template.get_field?(:component_type)
-        if matching_component_instance_exists?(component_type,component_title,title_attr_name)
+        if matching_component_instance_exists?(component_type,component_title)
           raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) already exists with title (#{component_title})")
         end
       end
@@ -338,22 +338,13 @@ module XYZ
     end
     private :check_and_ret_title_attribute_name?
 
-    def matching_component_instance_exists?(component_type,component_title,title_attr_name=nil)
-      title_attr_name ||= 'name'
+    def matching_component_instance_exists?(component_type,component_title)
       sp_hash = {
         :cols => [:id],
-        :filter => [:and,[:eq,:node_node_id,id()],[:eq,:component_type,component_type]]
+        :filter => [:and,[:eq,:node_node_id,id()],
+                    [:eq,:ref,ComponentTitle.ref_with_title(component_type,component_title)]]
       }
-      cmps = Model.get_objs(model_handle(:component),sp_hash)
-      unless cmps.empty?
-        sp_hash = {
-          :cols => [:id],
-          :filter => [:and,[:oneof,:component_component_id,cmps.map{|cmp|cmp[:id]}],
-                       [:eq,:display_name,title_attr_name],
-                       [:eq,:value_asserted,component_title]]
-        }
-        not Model.get_obj(model_handle(:attribute),sp_hash).nil?
-      end
+      not Model.get_obj(model_handle(:component),sp_hash).nil?
     end
     private :matching_component_instance_exists?
 

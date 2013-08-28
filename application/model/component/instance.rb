@@ -4,6 +4,13 @@ module DTK; class Component
       [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
     end
 
+    def self.create_title_attribute(cmp_idh,component_title,title_attr_name=nil)
+      title_attr_name ||=  'name'
+      ref = title_attr_name
+      match_assigns = {:display_name => title_attr_name,:component_component_id => cmp_idh.get_id()}
+      create_from_row?(cmp_idh.createMH(:attribute),ref,match_assigns,{:value_asserted=>component_title})
+    end
+
     def self.add_titles!(cmps)
       ret = cmps
       #TODO: may make this be field in component instance

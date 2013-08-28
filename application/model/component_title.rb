@@ -22,6 +22,11 @@ module DTK
         [cmp_display_name,nil]
       end
     end
+    def self.parse_title?(cmp_display_name)
+      if cmp_display_name = /(^.+)\[(.+)\]$/
+        $2
+      end
+    end
 
     #component can be a hash or object
     def self.title?(component)

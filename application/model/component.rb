@@ -138,7 +138,8 @@ module DTK
     end
 
     def self.component_type_from_user_friendly_name(user_friendly_name)
-      user_friendly_name.gsub(/::/,"__")
+      component_type,title = ComponentTitle.parse_component_display_name(user_friendly_name.gsub(/::/,"__"))
+      component_type
     end
 
     ### display name functions

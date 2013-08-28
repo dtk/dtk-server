@@ -49,26 +49,7 @@ module DTK; class Component
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
     def self.check_valid_id(model_handle,id)
-      begin
-        check_valid_id__library_parent(model_handle,id)
-       rescue ErrorIdInvalid 
-        check_valid_id__project_parent(model_handle,id)
-      end
-    end
-    def self.name_to_id(model_handle,name,version=nil)
-      if version
-        name_to_id__project_parent(model_handle,name,version)
-      else
-        begin
-          name_to_id__library_parent(model_handle,name)
-         rescue ErrorNameDoesNotExist
-          name_to_id__project_parent(model_handle,name)
-        end
-      end
-    end
-    def self.check_valid_id__project_parent(model_handle,id)
       filter = 
         [:and,
          [:eq, :id, id],
@@ -77,7 +58,7 @@ module DTK; class Component
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-    def self.name_to_id__project_parent(model_handle,name,version=nil)
+    def self.name_to_id(model_handle,name,version=nil)
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
@@ -87,24 +68,6 @@ module DTK; class Component
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,version_display_name(name,version),sp_hash)
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for above
-    def self.check_valid_id__library_parent(model_handle,id)
-      filter = 
-        [:and,
-         [:eq, :id, id],
-         [:eq, :type, "template"],
-         [:neq, :library_library_id, nil]]
-      check_valid_id_helper(model_handle,id,filter)
-    end
-    def self.name_to_id__library_parent(model_handle,name)
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:and,
-                    [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
-                    [:neq, :library_library_id, nil]]
-      }
-      name_to_id_helper(model_handle,name,sp_hash)
     end
   end
 

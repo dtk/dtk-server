@@ -186,6 +186,9 @@ R8::ReactorRoute.draw do
   post  'task/list' => 'task#list'
   post  'task/status' => 'task#status'
   post  'task/create_task_from_pending_changes' => 'task#create_task_from_pending_changes'
+
+  # DEVELOPER
+  post  'developer/inject_agent' => 'developer#inject_agent'
 end
 
 R8::Routes[:login] = {

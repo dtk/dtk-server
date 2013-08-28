@@ -23,7 +23,7 @@ module DTK
       end
     end
     def self.parse_title?(cmp_display_name)
-      if cmp_display_name = /(^.+)\[(.+)\]$/
+      if cmp_display_name =~ ComponentTitleRegex
         $2
       end
     end

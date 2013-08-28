@@ -288,7 +288,17 @@ module XYZ
       Attribute::Pattern::Node.set_attributes(self,av_pairs)
     end
 
-    def add_component(component_template_idh)
+    def add_component(component_template_idh,component_title=nil)
+=begin
+TODO
+title processing
+put in call to Component::Template#get_title_attribute? that returns non null
+if title is needed and if so wil return the title attribute 
+then raise error if needs title and one not given or vicea versa
+this function can make join call looking for 'name' and second call if dont find name
+the set override_attrs so that ref, display_name, and component_type are set to the conventions used for parsing assemblies
+their values need to be sql casted
+=end
       override_attrs = Hash.new
       clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}
       new_cmp = clone_into(component_template_idh.create_object(),override_attrs,clone_opts)

@@ -427,6 +427,14 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
+    def rest__initiate_grep()
+      assembly = ret_assembly_instance_object()
+      params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)
+      queue = ActionResultsQueue.new
+      assembly.initiate_grep(queue, params)
+      rest_ok_response :action_results_id => queue.id
+    end
+
     def rest__task_status()
       assembly_id = ret_request_param_id(:assembly_id,Assembly::Instance)
       format = (ret_request_params(:format)||:hash).to_sym

@@ -327,9 +327,9 @@ module XYZ
         raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) needs a title, but not given one")
       end 
 
-      if title_attr_name
+      if title_attr_name #and component_title
         component_type = component_template.get_field?(:component_type)
-        if matching_component_instance_exists?(component_type,title_attr_name)
+        if matching_component_instance_exists?(component_type,component_title,title_attr_name)
           raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) already exists with title (#{component_title})")
         end
       end
@@ -338,7 +338,8 @@ module XYZ
     end
     private :check_and_ret_title_attribute_name?
 
-    def matching_component_instance_exists?(component_type,title_attr_name)
+    def matching_component_instance_exists?(component_type,component_title,title_attr_name=nil)
+      title_attr_name ||= 'name'
       sp_hash = {
         :cols => [:id],
         :filter => [:and,[:eq,:node_node_id,id()],[:eq,:component_type,component_type]]
@@ -348,7 +349,8 @@ module XYZ
         sp_hash = {
           :cols => [:id],
           :filter => [:and,[:oneof,:component_component_id,cmps.map{|cmp|cmp[:id]}],
-                       [:eq,:display_name,title_attr_name]]
+                       [:eq,:display_name,title_attr_name],
+                       [:eq,:value_asserted,component_title]]
         }
         not Model.get_obj(model_handle(:attribute),sp_hash).nil?
       end

@@ -4,11 +4,32 @@ module DTK; class Component
       [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
     end
 
-    def self.create_title_attribute(cmp_idh,component_title,title_attr_name=nil)
+    def self.get_matching?(node_idh,component_type,component_title)
+      sp_hash = {
+        :cols => [:id,:display_name,:component_type,:ref],
+        :filter => [:and,[:eq,:node_node_id,node_idh.get_id()],
+                    [:eq,:ref,ComponentTitle.ref_with_title(component_type,component_title)]]
+      }
+      ret = Model.get_obj(node_idh.createMH(:component),sp_hash)
+      ret && component_template_from_component(ret)
+    end
+
+    def self.set_title_attribute(cmp_idh,component_title,title_attr_name=nil)
       title_attr_name ||=  'name'
       ref = title_attr_name
-      match_assigns = {:display_name => title_attr_name,:component_component_id => cmp_idh.get_id()}
-      create_from_row?(cmp_idh.createMH(:attribute),ref,match_assigns,{:value_asserted=>component_title})
+      sp_hash = {
+        :cols => [:id,:value_asserted],
+        :filter => [:and,[:eq,:display_name,title_attr_name],
+                    [:eq,:component_component_id,cmp_idh.get_id()]]
+      }
+      unless title_attr = get_obj(cmp_idh.createMH(:attribute),sp_hash)
+        Log.error("Unexpected that cannot find the title attribute")
+        return
+      end
+      unless title_attr[:value_asserted]
+        Log.error("Unexpected that title attribute has value_asserted when set_title_attribute called")
+      end
+      title_attr.update(:value_asserted=>component_title,:cannot_change=>true)
     end
 
     def self.add_titles!(cmps)
@@ -53,6 +74,10 @@ module DTK; class Component
       Model.get_objs(cmp_mh,sp_hash)
     end
 
+    def print_form()
+      self.class.print_form(self)
+    end
+
     def self.print_form(component)
       component.get_field?(:display_name).gsub(/__/,"::")
     end
@@ -60,6 +85,9 @@ module DTK; class Component
     def self.version_print_form(component)
       ModuleBranch.version_from_version_field(component.get_field?(:version))
     end
-
+   private
+    def self.component_template_from_component(cmp)
+      cmp.id_handle().create_object(:model_name => :component_instance).merge(cmp)
+    end
   end
 end; end

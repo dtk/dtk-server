@@ -38,7 +38,7 @@ module XYZ
     #### create and delete actions ###
     def rest__add_component()
       node = create_node_obj(:node_id)
-      component_template, component_title = ret_component_template_and_title(:component_template_id)
+      component_template, component_title = ret_component_template_and_title(:component_template_name)
       new_component_idh = node.add_component(component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end

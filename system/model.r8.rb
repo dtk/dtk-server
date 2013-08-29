@@ -225,6 +225,7 @@ module DTK
     SubClassRelations = {
       :assembly => :component,
       :component_template => :component,
+      :component_instance => :component,
       :node_group => :node
     }
 

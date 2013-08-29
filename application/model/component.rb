@@ -176,6 +176,14 @@ module DTK
       component_type.gsub(/__.+$/,'')
     end
 
+    def self.display_name_print_form(display_name,opts=Opts.new)
+      if opts[:no_module_name]
+        display_name.gsub(/^.+__/,"")
+      else
+        display_name.gsub(/__/,"::")
+      end
+    end
+    #TODO: may deprecate two below for above
     def self.component_type_print_form(component_type,opts=Opts.new)
       if opts[:no_module_name]
         component_type.gsub(/^.+__/,"")
@@ -183,15 +191,14 @@ module DTK
         component_type.gsub(/__/,"::")
       end
     end
-
     def component_type_print_form()
       self.class.component_type_print_form(get_field?(:component_type))
     end
 
     def convert_to_print_form!()
-      update_object!(:component_type,:ref_num,:version)
+      update_object!(:display_name,:version)
       component_type = component_type_print_form()
-      self[:display_name] = (self[:ref_num] ? "#{component_type}:#{self[:ref_num]}" : component_type)
+      self[:display_name] = self.class.display_name_print_form(self[:display_name])
       if has_default_version?()
         self[:version] = nil
       end 

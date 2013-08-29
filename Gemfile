@@ -28,8 +28,8 @@ gem 'rugged','0.17.0.b7'
 #end
 
 case RUBY_VERSION
-  when '1.8.7' then gem 'ruby-debug','0.10.4'
-  when '1.9.3' then gem 'debugger'
+  when /1.8.7.*/ then gem 'ruby-debug','0.10.4'
+  when /1.9.3.*/ then gem 'debugger'
 end
 
 

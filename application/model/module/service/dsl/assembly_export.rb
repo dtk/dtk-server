@@ -48,7 +48,7 @@ module DTK
       end
 
       def component_output_form(component_hash)
-        name = component_name_output_form(component_hash[:component_type])
+        name = component_name_output_form(component_hash[:display_name])
         if attr_overrides = component_hash[:attribute_override]
           {name => attr_overrides_output_form(attr_overrides)}
         else

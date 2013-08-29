@@ -29,7 +29,7 @@ module DTK; class Component
       unless title_attr[:value_asserted]
         Log.error("Unexpected that title attribute has value_asserted when set_title_attribute called")
       end
-      title_attr.update(:value_asserted=>component_title,:cannot_change=>true)
+      title_attr.update(:value_asserted=>component_title,:cannot_change=>true,:is_instance_value=>true)
     end
 
     def self.add_titles!(cmps)

@@ -108,7 +108,9 @@ module DTK
             cmps << matching_cmp
           end
           if attr = r[:non_default_attribute]
-            matching_cmp[:non_default_attributes] << attr
+            unless attr.is_title_attribute?()
+              matching_cmp[:non_default_attributes] << attr
+            end
           end
         end
         update_hash = {

@@ -141,6 +141,9 @@ module DTK
       component_type,title = ComponentTitle.parse_component_display_name(user_friendly_name.gsub(/::/,"__"))
       component_type
     end
+    def self.display_name_from_user_friendly_name(user_friendly_name)
+      user_friendly_name.gsub(/::/,"__")
+    end
 
     ### display name functions
     #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template

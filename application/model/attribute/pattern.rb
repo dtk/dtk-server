@@ -1,11 +1,11 @@
 module DTK; class Attribute
   class Pattern 
+    CanonLeftDelim = '<'
+    CanonRightDelim = '>'
+
     r8_nested_require('pattern','type')
     r8_nested_require('pattern','assembly')
     r8_nested_require('pattern','node')
-
-    CanonLeftDelim = '<'
-    CanonRightDelim = '>'
 
     def self.get_attribute_idhs(base_object_idh,attr_term)
       create(attr_term,base_object_idh.create_object()).ret_or_create_attributes(base_object_idh)

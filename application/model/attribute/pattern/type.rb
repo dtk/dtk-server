@@ -119,33 +119,33 @@ module DTK; class Attribute
         :component => :component_component_id,
         :node => :node_node_id
       }
-
       def ret_filter(fragment,type)
-        if fragment =~ /[a-z]\[([^\]]+)\]/
-          filter = $1
+        if fragment =~ FilterFragmentRegexp
+          term = $1
           if type == :component
-            filter = Component.component_type_from_user_friendly_name(filter)
+            term = Component.display_name_from_user_friendly_name(term)
           end
-          if filter == "*"
+
+          if term == "*"
             nil
-          elsif filter =~ /^[a-z0-9_-]+$/
+          elsif term =~ /^[a-z0-9_\[\]-]+$/
             case type
-            when :attribute
-              [:eq,:display_name,filter]
-            when :component
-              [:eq,:component_type,filter]
-            when :node
-              [:eq,:display_name,filter]
+            when :attribute, :component, :node
+              [:eq,:display_name,term]
             else
               raise ErrorNotImplementedYet.new("Component filter of type (#{type})")
             end
           else
-            raise ErrorNotImplementedYet.new("Parsing of component filter (#{filter})")
+            raise ErrorNotImplementedYet.new("Parsing of component filter (#{term})")
           end
         else
           nil #without qualification means all (no filter)
         end
       end
+      #just for succinctness
+      LD = Pattern::CanonLeftDelim
+      RD = Pattern::CanonRightDelim
+      FilterFragmentRegexp = Regexp.new("[a-z]\\#{LD}([^\\#{RD}]+)\\#{RD}")
     end
 
   end

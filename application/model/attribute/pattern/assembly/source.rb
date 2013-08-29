@@ -20,7 +20,7 @@ module DTK; class Attribute; class Pattern
       
       class Simple
         def self.parse(source_term)
-          if source_term =~ /^\$([a-z\-_0-9\/]+$)/
+          if source_term =~ /^\$([a-z\-_0-9:\[\]\/]+$)/
             attr_term = $1
             [attr_term,nil]
           end

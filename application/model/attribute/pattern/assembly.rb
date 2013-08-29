@@ -40,19 +40,24 @@ module DTK; class Attribute
       end
 
       class Simple
+
         def self.create(attr_term,opts={})
-          split_term = attr_term.split("/")
-          if split_term.size > 3 
+          tokens = attr_term.split("/")
+          if tokens.size > 3 
             raise ErrorParse.new(attr_term)
           end
-          case split_term.size          
+          case tokens.size          
             when 1 
-              Type::AssemblyLevel.new("attribute[#{split_term[0]}]")
+              Type::AssemblyLevel.new(t(:attribute,tokens[0]))
             when 2 
-              Type::NodeLevel.new("node[#{split_term[0]}]/attribute[#{split_term[1]}]")
+              Type::NodeLevel.new("#{t(:node,tokens[0])}/#{t(:attribute,tokens[1])}")
             when 3 
-              Type::ComponentLevel.new("node[#{split_term[0]}]/component[#{split_term[1]}]/attribute[#{split_term[2]}]")
+              Type::ComponentLevel.new("#{t(:node,tokens[0])}/#{t(:component,tokens[1])}/#{t(:attribute,tokens[2])}")
           end
+        end
+       private 
+        def self.t(type,val)
+          "#{type}#{Pattern::CanonLeftDelim}#{val}#{Pattern::CanonRightDelim}"
         end
       end
 

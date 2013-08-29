@@ -166,10 +166,12 @@ module DTK
         # if namespace omitted we will use default one
         namespace ||= self.class.default_namespace()
         params = {
+          :username => dtk_instance_remote_repo_username(),
           :name => name,
           :namespace => namespace,
           :type => type_for_remote_module(type)
         }
+        
         client.delete_module(params)
       end
 

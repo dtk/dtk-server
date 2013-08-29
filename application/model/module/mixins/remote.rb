@@ -87,7 +87,6 @@ module DTK
       repo.link_to_remote(local_branch,remote_repo_name)
       repo.push_to_remote(local_branch,remote_repo_name)
 
-      # we create remote repo for given namespace
       RepoRemote.create_repo_remote(model_handle(:repo_remote), module_name, remote_repo_name, component_namespace, repo.id,Opts.new(:set_as_default_if_first => true))
 
       #update last for idempotency (i.e., this is idempotent check)

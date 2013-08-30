@@ -123,7 +123,14 @@ module DTK; class ServiceModule
       end
 
       def self.ret_attribute_overrides(cmp_input)
-        (cmp_input.kind_of?(Hash) && cmp_input.values.first["attributes"])||{}
+        ret =
+          if cmp_input.kind_of?(Hash) 
+            unless cmp_input.values.first.kind_of?(Hash)
+              raise ErrorUsage.new("Parsing error with term (#{cmp_input.inspect})")
+            end
+            cmp_input.values.first["attributes"]||{}
+          end
+        ret||{}
       end
       
     end

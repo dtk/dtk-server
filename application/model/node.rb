@@ -1,5 +1,5 @@
 r8_nested_require('node','meta')
-module XYZ
+module DTK
   class Node < Model
     set_relation_name(:node,:node)
 
@@ -180,7 +180,7 @@ module XYZ
       def user_friendly_name(node_name,assembly_name=nil)
         assembly_name ? "#{assembly_name}::#{node_name}" : node_name
       end
-      #returns [node_name, assembly_name] later which coudl be null
+      #returns [node_name, assembly_name] later which could be null
       def parse_user_friendly_name(name)
         if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
           [$2,$1]
@@ -339,18 +339,20 @@ module XYZ
     private :check_and_ret_title_attribute_name?
 
 
-    def self.check_valid_id(model_handle,id)
+    def self.check_valid_id(model_handle,id,assembly_id=nil)
       filter = 
         [:and,
          [:eq, :id, id],
          [:oneof, :type, ["instance","staged"]],
-         [:neq, :datacenter_datacenter_id, nil]]
+         [:neq, :datacenter_datacenter_id, nil],
+         assembly_id && [:eq, :assembly_id, assembly_id]
+        ].compact
       check_valid_id_helper(model_handle,id,filter)
     end
 
-    def self.name_to_id(model_handle,name)
+    def self.name_to_id(model_handle,name,assembly_id=nil)
       node_name, assembly_name = parse_user_friendly_name(name)
-      assembly_id = assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component),assembly_name)
+      assembly_id ||= assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component),assembly_name)
       sp_hash =  {
         :cols => [:id,:assembly_id],
         :filter => [:and,

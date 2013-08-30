@@ -2,7 +2,7 @@ module DTK; class Component
   class Template < self
     #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
     def get_title_attribute_name?()
-      rows = get_title_attributes([id_handle])
+      rows = self.class.get_title_attributes([id_handle])
       rows.first[:display_name] unless rows.empty?
     end
 

@@ -48,6 +48,10 @@ module Ramaze::Helper
       id_handle(id,:component)
     end
 
+    def ret_node_id_handle(node_name_param,assembly)
+      ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
+    end
+
     #assuming that service link is identified by either
     #:service_link_id, or
     #:service_type and :input_component_id

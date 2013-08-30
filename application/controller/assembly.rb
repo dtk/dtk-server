@@ -22,9 +22,9 @@ module DTK
     end
 
     def rest__delete_node()
-      node_id = ret_non_null_request_params(:node_id)
       assembly = ret_assembly_instance_object()
-      assembly.delete_node(id_handle(node_id,:node),:destroy_nodes => true)
+      node_idh = ret_node_id_handle(:node_id,assembly)
+      assembly.delete_node(node_idh,:destroy_nodes => true)
       rest_ok_response
     end
 

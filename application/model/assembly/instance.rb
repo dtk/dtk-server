@@ -501,10 +501,6 @@ module DTK; class  Assembly
 
     def delete_node(node_idh,opts={})
       node =  node_idh.create_object()
-      #check that node_idh belongs to assembly
-      unless get_node?([:eq,:id,node_idh.get_id()])
-        raise ErrorUsage.new("Node (#{node.get_field?(:display_name)}) does not belong to assembly (#{get_field?(:display_name)})")
-      end
       Log.error("Not yet implemented yet; cleaning up danglinglinks when assembly node deleted")
       self.class.delete_node_aux(node,opts)
     end

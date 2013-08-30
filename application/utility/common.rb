@@ -75,10 +75,22 @@ class R8Server
     Model.import_objects_from_hash(container_idh,hash_content)
 
     # return idhs of new targets and new projects
-    {
+    ret = {
       :target_idhs => ret_idhs("datacenter",hash_content,container_idh), 
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
+
+    #create workspace
+    unless project_idh = ret[:project_idhs].first
+      Log.error("No project found so not creating a workspace")
+      return ret
+    end
+    if ret[:project_idhs].size > 1
+      Log.error("Unexpected taht multiple projects found; pikcing arbirary one for workspace")
+    end
+    (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh,project_idh)}
+
+    ret
   end
 
   #TODO: this is hack that should be fixed up; no need to use josn here

@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class NodeBindingRuleset < Model
     def self.common_columns()
       [:id,:display_name,:type,:os_type,:rules, :ref]

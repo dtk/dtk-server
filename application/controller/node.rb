@@ -173,11 +173,9 @@ module XYZ
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__stage()
       target = create_target_obj_with_default(:target_id)
-      #TODO: would like to use form, but need to fix these fns up to do so: node_binding_rs =  create_obj(:node_template_id,NodeBindingRuleset)
-      node_binding_identifier = ret_request_params(:node_template_identifier)
-      node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset),node_binding_identifier)
-      node_binding_rs = create_object_from_id(node_binding_rs_id,:node_binding_ruleset)
-
+      unless node_binding_rs = node_binding_ruleset?(:node_template_identifier)
+        raise ErrorUsage.new("Missing node template identifier")
+      end
       opts = Hash.new
       if node_name = ret_request_params(:name)
         opts[:override_attrs] = {:display_name => node_name}

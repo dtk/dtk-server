@@ -500,9 +500,15 @@ module DTK; class  Assembly
       self.class.delete_node_aux(node,opts)
     end
 
-    def add_node(node_template_idh,node_name)
-      node_template = node_template_idh.create_object()
+    def add_node(node_name,node_binding_rs=nil)
       target = get_target()
+      node_template = 
+        if node_binding_rs
+          node_binding_rs.find_matching_node_template(target)
+        else
+          Node::Template.null_node_template(model_handle(:node))
+        end
+
       #TODO: see if node name used in assembly already and if so add -n suffix
       override_attrs = {
         :display_name => node_name,

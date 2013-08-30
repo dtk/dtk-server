@@ -358,6 +358,14 @@ module Ramaze::Helper
       ret
     end
 
+    def node_binding_ruleset?(node_template_identifier_param)
+      if node_binding_identifier = ret_request_node_params(node_template_identifier_param)
+        unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset),node_binding_identifier)
+          raise ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier })")
+        end
+        create_object_from_id(node_binding_rs_id,:node_binding_ruleset)
+      end
+    end
 
     #returns [component_template, component_title] where component_title could be nil
     def ret_component_template_and_title(param)

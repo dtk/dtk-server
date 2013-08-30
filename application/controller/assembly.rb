@@ -245,9 +245,8 @@ module DTK
     def rest__add_node()
       assembly = ret_assembly_instance_object()
       assembly_node_name = ret_non_null_request_params(:assembly_node_name)
-      node_template_id = ret_request_params(:node_template_id)
-      node_template_idh = (node_template_id ? id_handle(node_template_id,:node) : Node::Template.null_node_template(model_handle(:node)).id_handle())
-      node_instance_idh = assembly.add_node(node_template_idh,assembly_node_name)
+      node_binding_rs = node_binding_ruleset?(:node_template_identifier)
+      node_instance_idh = assembly.add_node(assembly_node_name,node_binding_rs)
       rest_ok_response :node_id => node_instance_idh.get_id()
     end
 

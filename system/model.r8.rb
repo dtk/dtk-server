@@ -75,11 +75,12 @@ module DTK
     def augmented_form(r,result_col)
       if r.kind_of?(Hash)
         ret = r.delete(result_col)
+        return nil unless ret.kind_of?(Hash)
         result_col_keys = ret.keys
         r.each{|k,v|ret[k] = v unless result_col_keys.include?(k)}
         ret
       else # r.kind_of?(Array)
-        r.map{|el|augmented_form(el,result_col)}
+        r.map{|el|augmented_form(el,result_col)}.compact
       end
     end
     private :augmented_form

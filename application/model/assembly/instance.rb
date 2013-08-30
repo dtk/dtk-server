@@ -116,8 +116,11 @@ module DTK; class  Assembly
       end
       return ret if rows.empty?
 
-      components = rows.map do |r|
-        r[:nested_component].merge(r.hash_subset(:node))
+      components = Array.new
+      rows.each do |r|
+        if cmp = r[:nested_component]
+          components << cmp.merge(r.hash_subset(:node))
+        end
       end
 
       if opts.array(:detail_to_include).include?(:component_dependencies)

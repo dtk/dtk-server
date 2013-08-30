@@ -175,16 +175,15 @@ module DTK; class ServiceModule
     end
 
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs)
+      cmps_with_titles = Array.new
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = component_ref_parse(cmp_input)
         cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
         if cmp_ref[:version]
           cmp_ref[:has_override_version] = true
         end
-        #if there is a component title then put it under attribute 'name'
-        #TODO: see if have any case where component title differs from 'name'
         if cmp_title = parse[:component_title] 
-          cmp_ref[:attribute_override] = import_attribute_overrides("name",cmp_title)
+          cmps_with_titles << {:cmp_ref => cmp_ref, :cmp_title => cmp_title}
         end
 
         ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
@@ -197,6 +196,7 @@ module DTK; class ServiceModule
       #just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(container_idh,ret)
+      add_title_attribute_overrides!(ret,cmps_with_titles) unless cmps_with_titles.empty?
       ret
     end
 
@@ -257,6 +257,12 @@ module DTK; class ServiceModule
         end
       end
       cmp_ref
+    end
+
+    #cmps_with_titles is an array of hashes with keys :cmp_ref, :cmp_title
+    def self.add_title_attribute_overrides!(ret,cmps_with_titles)
+      pp [:add_title_attribute_overrides,cmps_with_titles]
+      raise ErrorUsage.new("Need to write add_title_attribute_overrides")
     end
 
   end

@@ -1,5 +1,9 @@
 module DTK
   module ComponentTitle
+    def self.default_title_attribute_display_name()
+      'name'
+    end
+
     def self.print_form_with_title(component_name,title)
       "#{component_name}[#{title.to_s}]"
     end

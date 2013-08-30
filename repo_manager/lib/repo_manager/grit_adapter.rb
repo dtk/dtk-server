@@ -1,4 +1,10 @@
 require 'grit'
+
+# GRIT DEBUG HERE
+# 
+# Grit.debug = true
+#
+#
 module DTK::RepoManager
   class GritAdapter
   end

@@ -118,6 +118,7 @@ module XYZ
     #### list and info actions ###
     def rest__list()
       target_name, is_list_all = ret_request_params(:target_indentifier, :is_list_all)
+
       target_id = DTK::Datacenter.name_to_id(model_handle(:datacenter), target_name) if target_name && !target_name.empty?
       response = ret_nodes_by_subtype_class(model_handle(), { :target_id => target_id, :is_list_all => is_list_all })
       rest_ok_response response

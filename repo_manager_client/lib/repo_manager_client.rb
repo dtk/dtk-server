@@ -93,27 +93,17 @@ module DTK
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash)
       route = "/rest/system/module/create"
-      body = defaults_for_create_module().merge(update_user_params(params_hash))
+      body = update_user_params(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
-
-    def defaults_for_create_module()
-      {:tenant_name => default_tenant_name(),:access_rights => "R"}
-    end
-    private :defaults_for_create_module
 
     #keys: [:name,namespace,:type,:id]
     #constraints :id or (:name, :namespace, and :type)
     def delete_module(params_hash)
       route = "/rest/system/module/delete"
-      body = {:tenant_name => default_tenant_name()}.merge(params_hash)
+      body = update_user_params(params_hash)
       post_rest_request_data(route,body,:raise_error => true)
     end
-
-    def default_tenant_name()
-      dtk_instance_repo_username()
-    end
-    private :default_tenant_name
 
     #keys: [:name,namespace,:type,:id]
     #constraints :id or (:name, :namespace, and :type)

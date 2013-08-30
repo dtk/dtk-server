@@ -350,7 +350,7 @@ module Ramaze::Helper
       ret = Array.new
       if av_pairs_hash
         av_pairs_hash.each{|k,v|ret << {:pattern => k, :value => v}}
-      elsif pattern and value
+      elsif pattern
         ret = [{:pattern => pattern, :value => value}]
       else
         raise ::DTK::ErrorUsage.new("Missing parameters")

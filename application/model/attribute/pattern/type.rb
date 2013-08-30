@@ -49,8 +49,8 @@ module DTK; class Attribute
        private
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
-          if attr_fragment == 'attribute[host_address]'
-            'attribute[host_addresses_ipv4]'
+          if attr_fragment == Pattern::Term.canonical_form(:attribute,'host_address')
+            Pattern::Term.canonical_form(:attribute,'host_addresses_ipv4')
           else
             attr_fragment
           end
@@ -120,8 +120,7 @@ module DTK; class Attribute
         :node => :node_node_id
       }
       def ret_filter(fragment,type)
-        if fragment =~ FilterFragmentRegexp
-          term = $1
+        if term = Pattern::Term.extract_term?(fragment)
           if type == :component
             term = Component.display_name_from_user_friendly_name(term)
           end
@@ -142,10 +141,6 @@ module DTK; class Attribute
           nil #without qualification means all (no filter)
         end
       end
-      #just for succinctness
-      LD = Pattern::CanonLeftDelim
-      RD = Pattern::CanonRightDelim
-      FilterFragmentRegexp = Regexp.new("[a-z]\\#{LD}([^\\#{RD}]+)\\#{RD}")
     end
 
   end

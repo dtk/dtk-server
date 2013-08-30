@@ -218,6 +218,7 @@ module DTK
     #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
     #3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
+    #TODO: this is a minsnomer in that it can be used to just create attributes
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()

@@ -56,8 +56,8 @@ module DTK; class Attribute
           end
         end
        private 
-        def self.t(type,val)
-          "#{type}#{Pattern::CanonLeftDelim}#{val}#{Pattern::CanonRightDelim}"
+        def self.t(type,term)
+          Pattern::Term.canonical_form(type,term)
         end
       end
 

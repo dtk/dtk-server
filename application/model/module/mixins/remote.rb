@@ -91,7 +91,9 @@ module DTK
 
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
-      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+      
+      # NOT SURE WHEN WE NEED THIS (Haris)
+      #repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
       
       remote_repo_name
     end

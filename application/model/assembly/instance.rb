@@ -212,12 +212,12 @@ module DTK; class  Assembly
       return ret unless needs_empty_nodes
 
       #add in in assembly nodes without components on them
-      nodes_ids = ret.map{|r|r[:node][:id]}
+      nodes_ids = ret.map{|r|(r[:node]||{})[:id]}.compact
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
         :filter => filter
       }
-      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?(r[:node][:id])}
+      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
       ret + assembly_empty_nodes
     end
     
@@ -317,15 +317,17 @@ module DTK; class  Assembly
         end
         #TODO: make sure this is right
         assembly_rows.each do |r|
-          unless execution_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
-            execution_status =
-              case r[:node][:admin_op_status]
-                when "stopped" then "stopped"
-                when "running" then "running"
-                when "pending" then "staged"
-              end
+          if node = r[:node]
+            unless execution_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
+              execution_status =
+                case node[:admin_op_status]
+                  when "stopped" then "stopped"
+                  when "running" then "running"
+                  when "pending" then "staged"
+                end
+            end
+            r[:execution_status] = execution_status
           end
-          r[:execution_status] = execution_status
         end
         assembly_rows
       end

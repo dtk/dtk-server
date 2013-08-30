@@ -204,19 +204,22 @@ module DTK
             #just triggers for assembly instances; indicates the assembly templaet that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
           end
-          node_id = r[:node][:id]
-          unless node = pntr[:ndx_nodes][node_id] 
-            node = pntr[:ndx_nodes][node_id] = {
-              :node_name  => r[:node][:display_name], 
-              :node_id    => node_id,
-              :os_type    => r[:node][:os_type],
-              :admin_op_status => r[:node][:admin_op_status]
-            }
-            node.reject!{|k,v|v.nil?}
-            if node_ext_ref = r[:node][:external_ref]
-              node[:external_ref]  = (opts[:print_form] ? node_external_ref_print_form(node_ext_ref) : node_ext_ref) 
+
+          if r[:node]
+            node_id = r[:node][:id]
+            unless node = pntr[:ndx_nodes][node_id] 
+              node = pntr[:ndx_nodes][node_id] = {
+                :node_name  => r[:node][:display_name], 
+                :node_id    => node_id,
+                :os_type    => r[:node][:os_type],
+                :admin_op_status => r[:node][:admin_op_status]
+              }
+              node.reject!{|k,v|v.nil?}
+              if node_ext_ref = node[:external_ref]
+                node[:external_ref]  = (opts[:print_form] ? node_external_ref_print_form(node_ext_ref) : node_ext_ref) 
+              end
+              node[:components] = Array.new
             end
-            node[:components] = Array.new
           end
 
           cmp_hash = list_aux__component_template(r)
@@ -318,9 +321,11 @@ module DTK
       sp_hash = {:cols => [:instance_nodes_and_cmps]}
       node_col_rows = get_objs(sp_hash)
       node_col_rows.each do |r|
-        n = r[:node].materialize!(Node.common_columns)
-        node = ndx_nodes[n[:id]] ||= n.merge(:components => Array.new)
-        node[:components] << r[:nested_component].materialize!(Component.common_columns())
+        if node = r[:node]
+          n = node.materialize!(Node.common_columns)
+          node = ndx_nodes[n[:id]] ||= n.merge(:components => Array.new)
+          node[:components] << r[:nested_component].materialize!(Component.common_columns())
+        end
       end
 
       nested_node_ids = ndx_nodes.keys

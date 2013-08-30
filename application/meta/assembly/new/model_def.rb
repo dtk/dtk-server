@@ -52,14 +52,14 @@ lambda__segments_nodes_and_components =
        :model_name => :component,
        :convert => true,
        :alias => :nested_component,
-       :join_type => :inner,
+       :join_type => :left_outer,
        :join_cond=>{:assembly_id => q(:component,:id)},
        :cols => (cmp_cols + [:node_node_id]).uniq
      },
      {
        :model_name => :node,
        :convert => true,
-       :join_type => :inner,
+       :join_type => :left_outer,
        :join_cond=>{:id => q(:nested_component,:node_node_id)},
        :cols => node_cols
      }]

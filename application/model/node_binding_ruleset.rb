@@ -18,7 +18,7 @@ module DTK
     end
 
     def find_matching_node_template(target)
-      match = CommandAndControl.find_matching_node_binding_rule(self[:rules],target)
+      match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules),target)
       raise Error.new("No rules in the node being match the target") unless match
       get_node_template(match[:node_template])
     end

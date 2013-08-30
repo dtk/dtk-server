@@ -123,11 +123,15 @@ module DTK
     end
 
     def self.get_default_component_attributes(assembly_mh,assembly_rows,opts={})
-      #by defualt do not include derived values
+      ret = Array.new
+      cmp_ids = assembly_rows.map{|r|(r[:nested_component]||{})[:id]}.compact
+      return ret if cmp_ids.empty?
+
+      #by defalut do not include derived values
       cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])
       sp_hash = {
         :cols => cols,
-        :filter => [:oneof, :component_component_id,assembly_rows.map{|r|r[:nested_component][:id]}]
+        :filter => [:oneof, :component_component_id,cmp_ids]
       }
       Model.get_objs(assembly_mh.createMH(:attribute),sp_hash)
     end
@@ -247,21 +251,9 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
-          op_status = nil
-          if self == Instance
-            pending_status = nil
-            stop_status    = nil
-
-            r[:ndx_nodes].each do |node|
-              if (status = node[1][:admin_op_status]).eql? "stopped"
-                stop_status = "stopped"; break
-              elsif status.eql? "pending"
-                pending_status = "pending"
-              end
-            end
-            op_status = stop_status||pending_status||"running"    
-          end
-          r.merge(:op_status => op_status,:nodes => r[:ndx_nodes].values).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes)
+          nodes = r[:ndx_nodes].values
+          op_status = (op_status(nodes) if respond_to?(:op_status))
+          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

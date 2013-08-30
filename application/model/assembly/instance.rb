@@ -194,6 +194,20 @@ module DTK; class  Assembly
     end
     private :get_augmented_ports__mark_unconnected!
 
+    def self.op_status(assembly_nodes)
+      return "pending" if assembly_nodes.empty?
+      pending_status = nil
+      stop_status    = nil
+      assembly_nodes.each do |node|
+        if (status = node[:admin_op_status]).eql? "stopped"
+          stop_status = "stopped"; break
+        elsif status.eql? "pending"
+          pending_status = "pending"
+        end
+      end
+      stop_status||pending_status||"running"    
+    end
+
     def get_info__flat_list(opts={})
       filter = [:eq,:id,id()]
       self.class.get_info__flat_list(model_handle(),{:filter => filter}.merge(opts))

@@ -82,6 +82,19 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def get_node?(filter)
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and,[:eq, :assembly_id, id()],filter]
+      }
+      rows = Model.get_objs(model_handle(:node),sp_hash)
+      if rows.size > 1
+        Log.error("Unexpected that more than one row returned for filter (#{filter.inspect})")
+        return nil
+      end
+      rows.first
+    end
+
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
@@ -489,11 +502,7 @@ module DTK; class  Assembly
     def delete_node(node_idh,opts={})
       node =  node_idh.create_object()
       #check that node_idh belongs to assembly
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and,[:eq, :assembly_id, id()],[:eq,:id,node_idh.get_id()]]
-      }
-      unless Model.get_obj(model_handle(:node),sp_hash)
+      unless get_node?([:eq,:id,node_idh.get_id()])
         raise ErrorUsage.new("Node (#{node.get_field?(:display_name)}) does not belong to assembly (#{get_field?(:display_name)})")
       end
       Log.error("Not yet implemented yet; cleaning up danglinglinks when assembly node deleted")
@@ -501,15 +510,20 @@ module DTK; class  Assembly
     end
 
     def add_node(node_name,node_binding_rs=nil)
+      #check if node has been added already
+      if get_node?([:eq,:display_name,node_name])
+        raise ErrorUsage.new("Node (#{node_name}) already belongs to assembly (#{get_field?(:display_name)})")
+      end
+
       target = get_target()
+
       node_template = 
         if node_binding_rs
           node_binding_rs.find_matching_node_template(target)
         else
           Node::Template.null_node_template(model_handle(:node))
         end
-
-      #TODO: see if node name used in assembly already and if so add -n suffix
+      
       override_attrs = {
         :display_name => node_name,
         :assembly_id => id(),

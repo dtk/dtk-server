@@ -24,7 +24,7 @@ module DTK; class Component
       #these we need to make the more expensive call Attribute.get_title_attributes
       need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map{|r|r.id_handle()}
       ret = rows.map{|r|r[:attribute]}.compact
-      unless need_title_attrs.empty?
+      unless need_title_attrs_cmp_idhs.empty?
         ret += Attribute.get_title_attributes(need_title_attrs_cmp_idhs)
       end
       ret

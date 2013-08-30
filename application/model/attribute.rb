@@ -58,7 +58,7 @@ module DTK
       return ret if cmp_idhs.empty?
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:external_ref,:component_component_id],
-        :filter => [:eq,:component_component_id,cmp_idhs.map{|idh|idh.get_id()}]
+        :filter => [:oneof,:component_component_id,cmp_idhs.map{|idh|idh.get_id()}]
       }
       get_objs(cmp_idhs.first.createMH(:attribute),sp_hash).select{|r|r.is_title_attribute?()}
     end

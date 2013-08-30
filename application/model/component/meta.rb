@@ -114,13 +114,14 @@ module XYZ
            :cols => [:id,:group_id,:display_name]
          }]
 
-     virtual_column :name_attribute, :type => :json, :hidden => true,
+     #this wil match if the component has an attribute that uses the default field
+     virtual_column :attribute_default_title_field, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
          { :model_name => :attribute,
            :convert => true,
            :join_type => :left_outer,
-           :filter => [:eq,:display_name,'name'],
+           :filter => [:eq,:display_name,Attribute.default_title_field()],
            :join_cond=>{:component_component_id => q(:component,:id)} ,
            :cols => [:id,:group_id,:display_name]
          }]

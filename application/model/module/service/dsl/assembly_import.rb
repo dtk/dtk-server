@@ -195,8 +195,8 @@ module DTK; class ServiceModule
       #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
-      set_attribute_template_ids!(container_idh,ret)
-      add_title_attribute_overrides!(ret,cmps_with_titles) unless cmps_with_titles.empty?
+      set_attribute_template_ids!(ret,container_idh)
+      add_title_attribute_overrides!(ret,container_idh,cmps_with_titles) unless cmps_with_titles.empty?
       ret
     end
 
@@ -233,7 +233,8 @@ module DTK; class ServiceModule
       {attr_name => {:display_name => attr_name, :attribute_value => attr_val}}
     end
 
-    def self.set_attribute_template_ids!(container_idh,cmp_ref)
+    #TODO: this not working right
+    def self.set_attribute_template_ids!(cmp_ref,container_idh)
       cmp_ref_info = cmp_ref.values.first
       if attrs = cmp_ref_info[:attribute_override]
         sp_hash = {
@@ -260,11 +261,26 @@ module DTK; class ServiceModule
     end
 
     #cmps_with_titles is an array of hashes with keys :cmp_ref, :cmp_title
-    def self.add_title_attribute_overrides!(ret,cmps_with_titles)
-      pp [:add_title_attribute_overrides,cmps_with_titles]
-      raise ErrorUsage.new("Need to write add_title_attribute_overrides")
-    end
+    def self.add_title_attribute_overrides!(ret,container_idh,cmps_with_titles)
+      cmp_mh = container_idh.createMH(:component)
+      cmp_idhs = cmps_with_titles.map{|r|cmp_mh.createIDH(:id => r[:cmp_ref][:component_template_id])}
+      ndx_title_attributes = Component::Template.get_title_attributes(cmp_idhs).inject(Hash.new) do |h,a|
+        h.merge(a[:component_component_id] => a)
+      end
+      bad_attrs = Array.new
+      cmps_with_titles.each do |r|
+        cmp_ref = r[:cmp_ref]
+        if title_attribute = ndx_title_attributes[cmp_ref[:component_template_id]]
+          pntr = cmp_ref[:attribute_override] ||= Hash.new
+          pntr.merge!(import_attribute_overrides(title_attribute[:display_name],r[:cmp_title]))
 
+        else
+          cmp_name = Component.display_name_print_form(cmp_ref[:display_name])
+          #This should be caught when importing component module and is a component module, not an service module problem; so just logging as error here
+          Log.error("Component module for #{cmp_name} missing the title field")
+        end
+      end
+    end
   end
 end; end
 

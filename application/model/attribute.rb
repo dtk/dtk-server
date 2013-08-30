@@ -31,6 +31,10 @@ module DTK
       [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port]
     end
 
+    def self.default_title_field()
+      'name'
+    end
+
     def self.get_augmented(model_handle,filter)
       ret = Array.new
       sp_hash = {
@@ -49,19 +53,16 @@ module DTK
       attrs
     end
 
-    def self.get_title_attribute(component)
+    def self.get_title_attributes(cmp_idhs)
+      ret = Array.new
+      return ret if cmp_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:external_ref],
-        :filter => [:eq,:component_component_id,component.id()]
+        :cols => [:id,:group_id,:display_name,:external_ref,:component_component_id],
+        :filter => [:eq,:component_component_id,cmp_idhs.map{|idh|idh.get_id()}]
       }
-      unless ret = get_objs(component.model_handle(:attribute),sp_hash).find{|r|r.is_title_attribute?()}
-        component_name = component.get_field?(:display_name)
-        Log.error("Expected to have a title attribute on component (#{component_name})")
-      end
-      ret
+      get_objs(cmp_idhs.first.createMH(:attribute),sp_hash).select{|r|r.is_title_attribute?()}
     end
 
-                                                                         
     #TODO: may make this a real field in attribute
     def title()
       self[:attribute_value] if is_title_attribute?()

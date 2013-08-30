@@ -406,7 +406,7 @@ module DTK
       end
     
       unless updated_rows.empty?
-        ret += update_from_rows(model_handle,updated_rows)
+        ret += update_from_rows(model_handle,updated_rows)||[]
       end
 
       #add only ones not existing

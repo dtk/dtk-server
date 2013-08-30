@@ -205,17 +205,17 @@ module DTK
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
           end
 
-          if r[:node]
-            node_id = r[:node][:id]
+          if raw_node = r[:node]
+            node_id = raw_node[:id]
             unless node = pntr[:ndx_nodes][node_id] 
               node = pntr[:ndx_nodes][node_id] = {
-                :node_name  => r[:node][:display_name], 
+                :node_name  => raw_node[:display_name], 
                 :node_id    => node_id,
-                :os_type    => r[:node][:os_type],
-                :admin_op_status => r[:node][:admin_op_status]
+                :os_type    => raw_node[:os_type],
+                :admin_op_status => raw_node[:admin_op_status]
               }
               node.reject!{|k,v|v.nil?}
-              if node_ext_ref = node[:external_ref]
+              if node_ext_ref = raw_node[:external_ref]
                 node[:external_ref]  = (opts[:print_form] ? node_external_ref_print_form(node_ext_ref) : node_ext_ref) 
               end
               node[:components] = Array.new

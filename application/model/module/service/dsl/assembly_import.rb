@@ -196,7 +196,7 @@ module DTK; class ServiceModule
       #just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(ret,container_idh)
-      add_title_attribute_overrides!(ret,container_idh,cmps_with_titles) unless cmps_with_titles.empty?
+      add_title_attribute_overrides!(cmps_with_titles,container_idh)
       ret
     end
 
@@ -229,39 +229,67 @@ module DTK; class ServiceModule
       ret
     end
 
-    def self.import_attribute_overrides(attr_name,attr_val)
-      {attr_name => {:display_name => attr_name, :attribute_value => attr_val}}
+    def self.import_attribute_overrides(attr_name,attr_val,opts={})
+      attr_info = {:display_name => attr_name, :attribute_value => attr_val}
+      if opts[:cannot_change]
+        attr_info.merge!(:cannot_change => true)
+      end
+      {attr_name => attr_info}
     end
 
-    #TODO: this not working right
-    def self.set_attribute_template_ids!(cmp_ref,container_idh)
-      cmp_ref_info = cmp_ref.values.first
-      if attrs = cmp_ref_info[:attribute_override]
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:and, [:eq, :component_component_id, cmp_ref_info[:component_template_id]],
-                      [:oneof, :display_name, attrs.keys]]
-        }
-        attr_mh = container_idh.createMH(:attribute)
-        Model.get_objs(attr_mh,sp_hash).each do |r|
-          #relies on cmp_ref_info[:attribute_override] keys matching display_name
-          attrs[r[:display_name]].merge!(:attribute_template_id => r[:id])
-        end
 
-        bad_attrs = attrs.reject{|ref,info|info[:attribute_template_id]}
-        unless bad_attrs.empty?
-          #TODO: extend dangling_errors.aggregate_errors to handle this
-          bad_attrs_list = bad_attrs.keys.join(",")
-          attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")
-          cmp_ref_name = cmp_ref_info[:component_type].gsub(/__/,"::")
-          raise ErrorUsage.new("Bad #{attribute} (#{bad_attrs_list}) on component ref (#{cmp_ref_name})")
+    def self.set_attribute_template_ids!(cmp_refs,container_idh)
+      ret = cmp_refs
+      filter_disjuncts = Array.new
+      ndx_attrs = Hash.new
+      cmp_refs.each_value do |cmp_ref_info|
+        if attrs = cmp_ref_info[:attribute_override]
+          cmp_template_id = cmp_ref_info[:component_template_id]
+          ndx_attrs[cmp_template_id] = {:attrs => attrs,:cmp_ref => cmp_ref_info}
+          disjunct = [:and, [:eq, :component_component_id, cmp_template_id],
+                      [:oneof, :display_name, attrs.keys]]
+          filter_disjuncts << disjunct
         end
       end
-      cmp_ref
+      return ret if filter_disjuncts.empty?
+      
+      filter = (filter_disjuncts.size == 1 ? filter_disjuncts.first : ([:or] + filter_disjuncts))
+      sp_hash = {
+        :cols => [:id,:display_name,:component_component_id],
+        :filter => filter
+      }
+      Model.get_objs(container_idh.createMH(:attribute),sp_hash).each do |r|
+        cmp_template_id = r[:component_component_id]
+        #relies on cmp_ref_info[:attribute_override] keys matching display_name
+        if match = ndx_attrs[cmp_template_id][:attrs][r[:display_name]]
+          match.merge!(:attribute_template_id => r[:id])
+        end
+      end
+      
+      #now check attributes not matched; 
+      bad_attrs = Array.new
+      ndx_attrs.each_value do |r|
+        r[:attrs].each_pair do |ref,info|
+          unless info[:attribute_template_id]
+            bad_attrs << info.merge(:component_display_name => r[:cmp_ref][:display_name])
+          end 
+        end
+      end
+      unless bad_attrs.empty?
+        #TODO: extend dangling_errors.aggregate_errors to handle this
+        bad_attrs_list = bad_attrs.map do |attr_info|
+          cmp_name = Component.display_name_print_form(attr_info[:component_display_name])          
+          "#{cmp_name}/#{attr_info[:display_name]}"
+        end
+        attribute = (bad_attrs.size == 1 ? "attribute" : "attributes")
+        raise ErrorUsage.new("Bad #{attribute} (#{bad_attrs_list.join(', ')})")
+      end
+      ret
     end
 
     #cmps_with_titles is an array of hashes with keys :cmp_ref, :cmp_title
-    def self.add_title_attribute_overrides!(ret,container_idh,cmps_with_titles)
+    def self.add_title_attribute_overrides!(cmps_with_titles,container_idh)
+      return if cmps_with_titles.empty?
       cmp_mh = container_idh.createMH(:component)
       cmp_idhs = cmps_with_titles.map{|r|cmp_mh.createIDH(:id => r[:cmp_ref][:component_template_id])}
       ndx_title_attributes = Component::Template.get_title_attributes(cmp_idhs).inject(Hash.new) do |h,a|
@@ -272,11 +300,11 @@ module DTK; class ServiceModule
         cmp_ref = r[:cmp_ref]
         if title_attribute = ndx_title_attributes[cmp_ref[:component_template_id]]
           pntr = cmp_ref[:attribute_override] ||= Hash.new
-          pntr.merge!(import_attribute_overrides(title_attribute[:display_name],r[:cmp_title]))
-
+          pntr.merge!(import_attribute_overrides(title_attribute[:display_name],r[:cmp_title],:cannot_change => true))
         else
           cmp_name = Component.display_name_print_form(cmp_ref[:display_name])
-          #This should be caught when importing component module and is a component module, not an service module problem; so just logging as error here
+          #This should be caught when importing component module and is a component module, 
+          #not a service module problem; so just logging as error here
           Log.error("Component module for #{cmp_name} missing the title field")
         end
       end

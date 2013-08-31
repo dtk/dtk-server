@@ -14,7 +14,7 @@ module DTK; class Task; class Template
       end
 
       def includes_action?(action)
-        nil
+        self if find{|a|a.match_component_action?(action)}
       end
       
       def serialization_form(opts={})

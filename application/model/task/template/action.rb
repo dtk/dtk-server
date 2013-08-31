@@ -45,6 +45,10 @@ module DTK; class Task; class Template
         end
       end
 
+      def match_component_action?(cmp_action)
+        node_name() == cmp_action.node_name and component_type() == cmp_action.component_type()
+      end
+
       def match?(node_name,component_name_ref=nil)
          ret = 
           if node_name() == node_name
@@ -87,13 +91,8 @@ module DTK; class Task; class Template
         end
       end
 
-     private
-      def component()
-        @action
-      end
-      
       def component_type(opts={})
-        cmp =  component()
+        cmp = component()
         cmp_type = Component.component_type_print_form(cmp.get_field?(:component_type))
         unless opts[:without_title] 
           if title = cmp[:title]
@@ -103,6 +102,11 @@ module DTK; class Task; class Template
         cmp_type
       end
 
+     private
+      def component()
+        @action
+      end
+      
     end
   end
 end; end; end

@@ -10,6 +10,10 @@ module DTK; class Task; class Template
         executable_action
       end
 
+      def includes_action?(action)
+        find{|eb|eb.includes_action?(action)}
+      end
+
       def splice_in_at_beginning!(execution_blocks)
         insert(0,*execution_blocks)
         self

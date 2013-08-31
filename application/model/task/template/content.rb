@@ -91,6 +91,7 @@ module DTK; class Task
       end
 
       def insert_action(action)
+        pp [:foooo,:insert_action,action]
         nil
         #TODO: stub
       end

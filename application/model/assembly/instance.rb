@@ -472,9 +472,17 @@ module DTK; class  Assembly
       else
         assembly_idhs = [assembly_idhs]
       end
+      #cannot deleet workspaces
+      if workspace = assembly_idhs.find{|idh|Workspace.is_workspace?(idh.create_object())}
+        raise ErrorUsage.new("Cannot delete a workspace")
+      end
+      delete_contents(assembly_idhs,opts)
+      delete_instances(assembly_idhs)
+    end
+
+    def self.delete_contents(assembly_idhs,opts={})
       delete(get_sub_assemblies(assembly_idhs).id_handles())
       delete_assembly_nodes(assembly_idhs,opts)
-      delete_instances(assembly_idhs)
     end
 
     class << self

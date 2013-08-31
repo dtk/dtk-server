@@ -15,8 +15,11 @@ module DTK
       object.kind_of?(self) or (Ref == object.get_field?(:ref))
     end
 
-   private
+    def purge(opts={})
+      self.class.delete_contents([id_handle()],opts)
+    end
 
+   private
     def self.create_aux?(type,cmp_mh,assigns)
       match_assigns = {:ref => Ref}.merge(assigns)
       other_assigns = {

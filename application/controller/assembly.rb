@@ -15,6 +15,12 @@ module DTK
       end
     end
 
+    def rest__purge()
+      workspace = ret_workspace_object?()
+      workspace.purge(:destroy_nodes => true)
+      rest_ok_response
+    end
+
     def rest__remove_from_system()
       assembly = ret_assembly_instance_object()
       Assembly::Instance.delete(assembly.id_handle())

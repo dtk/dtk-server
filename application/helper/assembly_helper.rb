@@ -10,11 +10,17 @@ module Ramaze::Helper
       [obj,subtype]
     end
 
-    def ret_assembly_instance_or_workspace_object?(id_param=nil)
+    def ret_workspace_object?(id_param=nil,opts={})
+      ret_assembly_instance_or_workspace_object?(id_param,:only_workspace=>true)
+    end
+    def ret_assembly_instance_or_workspace_object?(id_param=nil,opts={})
       assembly_instance = ret_assembly_instance_object(id_param)
       if ::DTK::Workspace.is_workspace?(assembly_instance)
         assembly_instance.id_handle().create_object(:model_name => :assembly_workspace)
       else
+        if opts[:only_workspace]
+          raise ::DTK::ErrorUsage.new("The command can ony be applied to a workspace")
+        end
         assembly_instance
       end
     end

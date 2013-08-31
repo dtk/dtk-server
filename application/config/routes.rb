@@ -26,6 +26,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_smoketests' => 'assembly#list_smoketests'
   post  'assembly/info' => 'assembly#info'
   post  'assembly/delete' => 'assembly#delete'
+  post  'assembly/purge' => 'assembly#purge' #workspace command
   post  'assembly/set_attributes' => 'assembly#set_attributes'
   post  'assembly/get_attributes' => 'assembly#get_attributes'
   post  'assembly/add_assembly_template' => 'assembly#add_assembly_template'

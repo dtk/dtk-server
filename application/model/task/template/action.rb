@@ -1,10 +1,10 @@
 module DTK; class Task; class Template
   class Action
-    def self.create(action)
-      if action.kind_of?(Component)
-        ComponentAction.new(action)
+    def self.create(object)
+      if object.kind_of?(Component)
+        ComponentAction.new(object)
       else
-        raise Error.new("Not yet implemented treatment of action of type {#{action.class.to_s})")
+        raise Error.new("Not yet implemented treatment of action of type {#{object.class.to_s})")
       end
     end
 
@@ -24,14 +24,25 @@ module DTK; class Task; class Template
     end
 
     class ComponentAction < self
+      def initialize(component)
+        unless component[:node].kind_of?(Node)
+          raise Error.new("ComponentAction.new must be given component argument with :node key")
+        end
+        super(component)
+      end
+
       def node()
         component[:node]
       end
       def node_id()
-        (node()||{})[:id]
+        if node = node()
+          node.get_field?(:id)
+        end
       end
       def node_name()
-        (node()||{})[:display_name]
+        if node = node()
+          node.get_field?(:display_name)
+        end
       end
 
       def match?(node_name,component_name_ref=nil)
@@ -83,7 +94,7 @@ module DTK; class Task; class Template
       
       def component_type(opts={})
         cmp =  component()
-        cmp_type = Component.component_type_print_form(cmp[:component_type])
+        cmp_type = Component.component_type_print_form(cmp.get_field?(:component_type))
         unless opts[:without_title] 
           if title = cmp[:title]
             cmp_type = ComponentTitle.print_form_with_title(cmp_type,title)

@@ -28,6 +28,14 @@ module DTK; class Task
         ret
       end
 
+      #if action is not included in task templaet that insert the action and update databes
+      def insert_action_and_update?(action)
+        unless includes_action?(action)
+          insert_action(action)
+          #TODO: and then update db
+        end
+      end
+
       def splice_in_at_beginning!(template_content,opts={})
         if opts[:node_centric_first_stage]
           insert(0,*template_content)
@@ -77,7 +85,16 @@ module DTK; class Task
         end
       end
 
-    private        
+     private        
+      def includes_action?(action)
+        find{|internode_stage|internode_stage.includes_action?(action)}
+      end
+
+      def insert_action(action)
+        nil
+        #TODO: stub
+      end
+
       def create_stages!(object,actions,opts={})
         if object.kind_of?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object,actions,opts)

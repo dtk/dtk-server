@@ -25,7 +25,7 @@ module DTK; class Task
         ret
       end
 
-      #action_types can be 
+      #action_types is scalar or array with elements
       # :assembly
       # :node_centric
       def self.get_or_generate_template_content(action_types,assembly,opts={})
@@ -38,17 +38,7 @@ module DTK; class Task
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
         #get content from persisted 
-        if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly,cmp_actions)
-          ret = 
-            if action_types == [:assembly]
-              assembly_action_content
-            else #action_types has both and assembly and node_centric
-              node_centric_content = generate_from_temporal_contraints(:node_centric,assembly,cmp_actions)
-              opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
-              assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
-            end
-          return ret
-        end
+        assembly_action_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
 
         #otherwise do the temporal processing to generate template_content
         opts_generate = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
@@ -60,6 +50,14 @@ module DTK; class Task
         end
 
         template_content
+      end
+
+      def self.get_template_content?(action_types,assembly,opts={})
+        action_types = Array(action_types)
+        raise_error_if_unsupported_action_types(action_types)
+        task_action = opts[:task_action]||default_task_action()
+        cmp_actions = ActionList::ConfigComponents.get(assembly)
+        get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
       end
 
      private
@@ -74,6 +72,18 @@ module DTK; class Task
       end
       def self.node_centric_first_stage?()
         true
+      end
+
+      def self.get_template_content_aux?(action_types,assembly,cmp_actions,task_action=nil)
+        if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly,cmp_actions,task_action)
+          if action_types == [:assembly]
+            assembly_action_content
+          else #action_types has both and assembly and node_centric
+            node_centric_content = generate_from_temporal_contraints(:node_centric,assembly,cmp_actions)
+            opts_splice = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
+            assembly_action_content.splice_in_at_beginning!(node_centric_content,opts_splice)
+          end
+        end
       end
 
       def self.generate_from_temporal_contraints(action_types,assembly,cmp_actions,opts={})

@@ -22,6 +22,12 @@ module DTK; class Task; class Template
         ret
       end
 
+      def includes_action?(action)
+        if node_actions = self[action.node_id()]
+          node_actions.includes_action?(action)
+        end
+      end
+
       def splice_in_at_beginning!(internode_stage)
         ndx_splice_in_node_ids = internode_stage.node_ids().inject(Hash.new){|h,node_id|h.merge(node_id => true)}
         each_node_id do |node_id|

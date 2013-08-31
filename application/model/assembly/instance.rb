@@ -548,11 +548,14 @@ module DTK; class  Assembly
       end
 
       # Checking if 'order_index' is valid (number and correct value)
-      order = node.get_ordered_component_ids()
-      raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
+      #TODO: Deprecating DEPENDENCY-ORDER-INDEX
+      #order = node.get_ordered_component_ids()
+      #raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
 
-      component = node.add_component(component_template,component_title)
-
+      cmp_instance_idh = node.add_component(component_template,component_title)
+      update_task_templates_when_add_component?(cmp_instance_idh,node,component_title)
+=begin
+#TODO: Deprecating DEPENDENCY-ORDER-INDEX
       # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array
       if order_index.nil?
         order.push(component[:guid])
@@ -560,7 +563,18 @@ module DTK; class  Assembly
         order.insert(order_index.to_i, component[:guid])
       end
       node.update_ordered_component_ids(order)
-      return component
+=end
+      cmp_instance_idh
+    end
+
+    def update_task_templates_when_add_component?(cmp_instance_idh,node,title=nil)
+      #only updating create task template
+      if create_action_task_content = Task::Template::ConfigComponents.get_template_content?(:assembly,self)
+        cmp_for_action = cmp_instance_idh.create_object().merge(:node => node)
+        cmp_for_action.merge!(:title => title) if title
+        cmp_action = Task::Template::Action.create(cmp_for_action)
+        create_action_task_content.insert_action_and_update?(cmp_action)
+      end
     end
 
     def is_order_index_valid(order_index, order)

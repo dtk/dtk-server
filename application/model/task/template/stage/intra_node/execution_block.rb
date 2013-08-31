@@ -12,6 +12,10 @@ module DTK; class Task; class Template
       def components()
         map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
       end
+
+      def includes_action?(action)
+        nil
+      end
       
       def serialization_form(opts={})
         ordered_components = map{|a|a.serialization_form(opts)}.compact

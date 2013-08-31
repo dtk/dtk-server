@@ -10,7 +10,13 @@ module DTK
       }
       create_aux?(:instance,cmp_mh,instance_assigns)
     end
+
+    def self.is_workspace?(object)
+      object.kind_of?(self) or (Ref == object.get_field?(:ref))
+    end
+
    private
+
     def self.create_aux?(type,cmp_mh,assigns)
       match_assigns = {:ref => Ref}.merge(assigns)
       other_assigns = {

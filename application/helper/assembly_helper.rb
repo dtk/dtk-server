@@ -9,6 +9,16 @@ module Ramaze::Helper
       obj = id_handle(assembly_id,:component).create_object(:model_name => (subtype == :instance) ? :assembly_instance : :assembly_template) 
       [obj,subtype]
     end
+
+    def ret_assembly_instance_or_workspace_object?(id_param=nil)
+      assembly_instance = ret_assembly_instance_object(id_param)
+      if ::DTK::Workspace.is_workspace?(assembly_instance)
+        assembly_instance.id_handle().create_object(:model_name => :assembly_workspace)
+      else
+        assembly_instance
+      end
+    end
+
     def ret_assembly_instance_object(id_param=nil)
       id_param ||= :assembly_id
       assembly_id = ret_request_param_id(id_param,::DTK::Assembly::Instance)

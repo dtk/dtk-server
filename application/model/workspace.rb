@@ -18,7 +18,8 @@ module DTK
         :description => 'Private workspace',
         :type => (type == :template) ? 'template' : 'composite'
       }
-      create_from_row?(cmp_mh,Ref,match_assigns,other_assigns)
+      cmp_mh_with_parent = cmp_mh.merge(:parent_model_name => (type == :template ? :project : :datacenter))
+      create_from_row?(cmp_mh_with_parent,Ref,match_assigns,other_assigns)
     end
     
     Ref = '__workspace'

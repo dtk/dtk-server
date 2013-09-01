@@ -59,13 +59,15 @@ module DTK
 
         cmps.each do |cmp|
           cmp_module = get_parsed_info(cmp[:module_branch_id], "Component")
-          ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+          if cmp_module
+            ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Component") unless cmp_module[:dsl_parsed]
+          end
         end
 
         assembly_branch_id = get_obj(model_handle())[:module_branch_id]
-        cmp_module = get_parsed_info(assembly_branch_id, "Service")
-        ret << Violation::ComponentParsingError.new(cmp_module[:display_name], "Service") unless cmp_module[:dsl_parsed]
-
+        if service_module = get_parsed_info(assembly_branch_id, "Service")
+          ret << Violation::ComponentParsingError.new(service_module[:display_name], "Service") unless service_module[:dsl_parsed]
+        end
         ret
       end
 
@@ -90,24 +92,28 @@ module DTK
       end
 
       def get_parsed_info(module_branch_id, type)
+        ret = nil
         sp_hash = {
           :cols => [:id, :type, :component_id, :service_id],
           :filter => [:eq, :id, module_branch_id]
         }
-        branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+        unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
+        #assembly, such as workspace does not have a branch associated with it
+          return ret
+        end
 
         if (type == "Component")
           sp_cmp_hash = {
             :cols => [:id, :display_name, :dsl_parsed],
             :filter => [:eq, :id, branch[:component_id]]
           }
-          return cmp_module = Model.get_obj(model_handle(:component_module),sp_cmp_hash)
+          Model.get_obj(model_handle(:component_module),sp_cmp_hash)
         else
           sp_cmp_hash = {
             :cols => [:id, :display_name, :dsl_parsed],
             :filter => [:eq, :id, branch[:service_id]]
           }
-          return cmp_module = Model.get_obj(model_handle(:service_module),sp_cmp_hash)
+          Model.get_obj(model_handle(:service_module),sp_cmp_hash)
         end
       end
 

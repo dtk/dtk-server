@@ -10,6 +10,15 @@ module DTK; class Task; class Template
         executable_action
       end
 
+      def find_earliest_match?(action_match,actions)
+        each_with_index do |eb,i|
+          if eb.find_earliest_match?(action_match,actions)
+            action_match.execution_block_index = i+1
+            true
+          end
+        end
+      end
+
       def includes_action?(action)
         find{|eb|eb.includes_action?(action)}
       end

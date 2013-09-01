@@ -13,6 +13,18 @@ module DTK; class Task; class Template
         map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
       end
 
+      def find_earliest_match?(action_match,actions)
+        each_with_index do |a,i|
+          actions.each do |action_to_match|
+            if a.match_action?(action_to_match)
+              action_match.action = a
+              action_match.action_position = i+1
+              return true
+            end
+          end
+        end
+      end
+
       def includes_action?(action)
         self if find{|a|a.match_action?(action)}
       end

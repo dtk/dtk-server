@@ -22,17 +22,14 @@ module DTK; class Task; class Template
         ret
       end
 
-      def find_earliest_match?(insert_action_info)
-=begin
-TODO: reqrite to use insert_action_info
-        ndx_actions = Hash.new
-        actions.each do |a|
-          (ndx_actions[a.node_id] ||= Array.new) << a
+      def find_earliest_match?(action_match,ndx_actions)
+        ndx_actions.each_pair do |node_id,actions_to_match|
+          if node_actions = self[node_id]
+            if node_actions.find_earliest_match?(action_match,actions_to_match)
+              return true
+            end
+          end
         end
-        ndx_actions.each_pair do |node_id,action_to_match|
-        end
-=end
-        nil
       end
 
       def includes_action?(action)

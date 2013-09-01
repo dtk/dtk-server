@@ -2,6 +2,7 @@ module DTK; class Task
   class Template
     class Content < Array
       r8_nested_require('content','insert_action_info')
+      r8_nested_require('content','action_match')
 
       include Serialization
       include Stage::InterNode::Factory::StageName
@@ -88,12 +89,20 @@ module DTK; class Task
         end
       end
 
-      def find_earliest_match(insert_action_info)
+      def find_earliest_match?(actions)
         ret = nil
+        return ret if actions.empty?()
+
+        ndx_actions = Hash.new
+        actions.each do |a|
+          (ndx_actions[a.node_id] ||= Array.new) << a
+        end
+
         each_internode_stage do |internode_stage,stage_index|
-          if internode_stage_match = internode_stage.find_earliest_match?(insert_action_info)
-            ret = {:internode_stage_index =>stage_index}.merge(internode_stage_match)
-            return ret
+          action_match = ActionMatch.new()
+          if internode_stage.find_earliest_match?(action_match,ndx_actions)
+            action_match.internode_stage_index = stage_index
+            return action_match
           end
         end
         ret

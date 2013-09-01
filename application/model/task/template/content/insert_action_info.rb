@@ -5,7 +5,6 @@ module DTK; class Task; class Template
         insert_strategy_class(insert_strategy).new(new_action,action_list,temporal_constraints)
       end
 
-      attr_reader :internode_before_actions,:internode_after_actions,:samenode_before_actions,:samenode_after_actions
      private
       def initialize(new_action,action_list,temporal_constraints,insert_strategy=nil)
         @new_action = new_action
@@ -64,10 +63,9 @@ module DTK; class Task; class Template
       class InsertAtEnd < self
         def insert_action(template_content)
           pp [:in_insert_action,self]
-          unless @internode_after_actions.empty? and @samenode_after_actions.empty?
-            earliest_match = template_content.find_earliest_match(self)
-            pp [:earliest_match,earliest_match]
-          end
+          samenode_match = template_content.find_earliest_match?(@samenode_after_actions)
+          internode_match = template_content.find_earliest_match?(@internode_after_actions)
+          pp [:earliest_match,samenode_match,internode_match]
         end
       end
 

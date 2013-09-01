@@ -561,8 +561,11 @@ module DTK; class  Assembly
       #order = node.get_ordered_component_ids()
       #raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
 
-      cmp_instance_idh = node.add_component(component_template,component_title)
-      Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title)
+      cmp_instance_idh = nil
+      Transaction do
+        cmp_instance_idh = node.add_component(component_template,component_title)
+        Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title)
+      end
 =begin
 #TODO: Deprecating DEPENDENCY-ORDER-INDEX
       # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array

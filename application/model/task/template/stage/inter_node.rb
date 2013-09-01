@@ -22,8 +22,16 @@ module DTK; class Task; class Template
         ret
       end
 
-      def find_earliest_match(actions)
-        Log.error("need to write internode find_earliest_match")
+      def find_earliest_match?(insert_action_info)
+=begin
+TODO: reqrite to use insert_action_info
+        ndx_actions = Hash.new
+        actions.each do |a|
+          (ndx_actions[a.node_id] ||= Array.new) << a
+        end
+        ndx_actions.each_pair do |node_id,action_to_match|
+        end
+=end
         nil
       end
 

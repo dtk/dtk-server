@@ -1,6 +1,8 @@
 module DTK; class Task
   class Template
     class Content < Array
+      r8_nested_require('content','insert_action_info')
+
       include Serialization
       include Stage::InterNode::Factory::StageName
 
@@ -32,6 +34,7 @@ module DTK; class Task
         unless includes_action?(new_action)
           temporal_contraints = gen_temporal_constraints.call()
           insert_action(new_action,action_list,temporal_contraints)
+          raise ErrorUsage.new("Got here: insert_action_and_update?")
           #TODO: and then update db
         end
       end
@@ -85,49 +88,25 @@ module DTK; class Task
         end
       end
 
+      def find_earliest_match(insert_action_info)
+        ret = nil
+        each_internode_stage do |internode_stage,stage_index|
+          if internode_stage_match = internode_stage.find_earliest_match?(insert_action_info)
+            ret = {:internode_stage_index =>stage_index}.merge(internode_stage_match)
+            return ret
+          end
+        end
+        ret
+      end
+
      private        
       def includes_action?(action)
         find{|internode_stage|internode_stage.includes_action?(action)}
       end
 
       def insert_action(new_action,action_list,temporal_constraints)
-        before_actions = Array.new #these are before new action
-        after_actions = Array.new #these are after new action
-        unless temporal_constraints.empty? 
-          unless new_action_with_index = action_list.find{|a|a.match_action?(new_action)}
-            Log.error("Cannot find action in action list; using no constraints")
-          else
-            new_action_index = new_action_with_index.index
-            temporal_constraints.each do |tc|
-              if tc.before_action_index == new_action_index
-                after_actions << tc.after_action
-              elsif tc.after_action_index == new_action_index
-                before_actions << tc.before_action
-              end
-            end
-          end
-        end
-        insert_action_aux(new_action,before_actions,after_actions)
-      end
-
-      #default insert strategy is to put the new action in teh latest existing internode stage at the latest point
-      def insert_action_aux(new_action,before_actions,after_actions,insert_strategy=nil)
-        pp [:in_insert_action_aux,before_actions,after_actions]
-        unless after_actions.empty?
-          earliest_match = find_earliest_match(after_actions)
-          pp [:earliest_match,earliest_match]
-        end
-      end
-
-      def find_earliest_match(actions)
-        ret = nil
-        each_internode_stage do |internode_stage,stage_index|
-          if internode_stage_match = internode_stage.find_earliest_match(actions)
-            ret = {:internode_stage_index =>stage_index}.merge(internode_stage_match)
-            return ret
-          end
-        end
-        ret
+        insert_action_helper = InsertActionInfo.create(new_action,action_list,temporal_constraints)
+        insert_action_helper.insert_action(self)
       end
 
       def create_stages!(object,actions,opts={})

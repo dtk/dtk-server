@@ -45,8 +45,10 @@ module DTK; class Task; class Template
         end
       end
 
-      def match_component_action?(cmp_action)
-        node_name() == cmp_action.node_name and component_type() == cmp_action.component_type()
+      def match_action?(action)
+        action.kind_of?(self.class) and 
+        node_name() == action.node_name and 
+        component_type() == action.component_type()
       end
 
       def match?(node_name,component_name_ref=nil)

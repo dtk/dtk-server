@@ -7,7 +7,9 @@ module DTK; class Task
         @after_action = after_action
       end
 
-      #subclasses over ride
+      attr_reader :before_action,:after_action
+
+      #subclasses override
       def intra_node?()
         @before_action.node_id == @after_action.node_id
       end

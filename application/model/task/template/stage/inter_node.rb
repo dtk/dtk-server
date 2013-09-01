@@ -22,6 +22,11 @@ module DTK; class Task; class Template
         ret
       end
 
+      def find_earliest_match(actions)
+        Log.error("need to write internode find_earliest_match")
+        nil
+      end
+
       def includes_action?(action)
         if node_actions = self[action.node_id()]
           node_actions.includes_action?(action)

@@ -13,8 +13,7 @@ module DTK; class Task
         ret = Array.new
         return ret if empty?()
         all_actions = Array.new
-        each_with_index do |internode_stage,stage_index|
-          stage_index += 1
+        each_internode_stage do |internode_stage,stage_index|
           task_hash = {
             :display_name => internode_stage.name || DefaultNameProc.call(stage_index,size == 1),
             :temporal_order => "concurrent"
@@ -92,27 +91,43 @@ module DTK; class Task
       end
 
       def insert_action(new_action,action_list,temporal_constraints)
-        before_action_indexes = Array.new
-        after_action_indexes = Array.new
+        before_actions = Array.new #these are before new action
+        after_actions = Array.new #these are after new action
         unless temporal_constraints.empty? 
-          unless new_action_with_index = action_list.find{|a|a.match_component_action?(new_action)}
-            Log.error("Cannot find action in action list; using no contraints")
+          unless new_action_with_index = action_list.find{|a|a.match_action?(new_action)}
+            Log.error("Cannot find action in action list; using no constraints")
           else
             new_action_index = new_action_with_index.index
             temporal_constraints.each do |tc|
               if tc.before_action_index == new_action_index
-                after_action_indexes << tc.after_action_index
+                after_actions << tc.after_action
               elsif tc.after_action_index == new_action_index
-                before_action_indexes << tc.before_action_index
+                before_actions << tc.before_action
               end
             end
           end
         end
-        insert_action_aux(new_action,before_action_indexes,after_action_indexes)
+        insert_action_aux(new_action,before_actions,after_actions)
       end
 
-      def insert_action_aux(new_action,before_action_indexes,after_action_indexes)
-        pp [:insert_action_aux,new_action,before_action_indexes,after_action_indexes]
+      #default insert strategy is to put the new action in teh latest existing internode stage at the latest point
+      def insert_action_aux(new_action,before_actions,after_actions,insert_strategy=nil)
+        pp [:in_insert_action_aux,before_actions,after_actions]
+        unless after_actions.empty?
+          earliest_match = find_earliest_match(after_actions)
+          pp [:earliest_match,earliest_match]
+        end
+      end
+
+      def find_earliest_match(actions)
+        ret = nil
+        each_internode_stage do |internode_stage,stage_index|
+          if internode_stage_match = internode_stage.find_earliest_match(actions)
+            ret = {:internode_stage_index =>stage_index}.merge(internode_stage_match)
+            return ret
+          end
+        end
+        ret
       end
 
       def create_stages!(object,actions,opts={})
@@ -182,6 +197,10 @@ module DTK; class Task
           end
         end
       end
+
+      def each_internode_stage(&block)
+        each_with_index{|internode_stage,i|block.call(internode_stage,i+1)}
+      end        
 
     end
   end

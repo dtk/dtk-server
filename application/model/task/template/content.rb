@@ -29,9 +29,10 @@ module DTK; class Task
       end
 
       #if action is not included in task templaet that insert the action and update databes
-      def insert_action_and_update?(new_action,action_list)
+      def insert_action_and_update?(new_action,action_list,&gen_temporal_constraints)
         unless includes_action?(new_action)
-          insert_action(new_action,action_list)
+          temporal_contraints = gen_temporal_constraints.call()
+          insert_action(new_action,action_list,temporal_contraints)
           #TODO: and then update db
         end
       end
@@ -51,7 +52,7 @@ module DTK; class Task
       def serialization_form(opts={})
         subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}.compact
         if subtasks.empty?()
-          raise Error.new("Not implemented: treatment of the task template with no actions")
+          raise ErrorUsage.new("The task has no actions")
         end
         #Dont put in sequential block if just single stage
         if subtasks.size == 1
@@ -90,10 +91,28 @@ module DTK; class Task
         find{|internode_stage|internode_stage.includes_action?(action)}
       end
 
-      def insert_action(new_action,action_list)
-        pp [:foooo,:insert_action,action]
-        nil
-        #TODO: stub
+      def insert_action(new_action,action_list,temporal_constraints)
+        before_action_indexes = Array.new
+        after_action_indexes = Array.new
+        unless temporal_constraints.empty? 
+          unless new_action_with_index = action_list.find{|a|a.match_component_action?(new_action)}
+            Log.error("Cannot find action in action list; using no contraints")
+          else
+            new_action_index = new_action_with_index.index
+            temporal_constraints.each do |tc|
+              if tc.before_action_index == new_action_index
+                after_action_indexes << tc.after_action_index
+              elsif tc.after_action_index == new_action_index
+                before_action_indexes << tc.before_action_index
+              end
+            end
+          end
+        end
+        insert_action_aux(new_action,before_action_indexes,after_action_indexes)
+      end
+
+      def insert_action_aux(new_action,before_action_indexes,after_action_indexes)
+        pp [:insert_action_aux,new_action,before_action_indexes,after_action_indexes]
       end
 
       def create_stages!(object,actions,opts={})

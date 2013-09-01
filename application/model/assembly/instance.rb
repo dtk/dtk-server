@@ -481,23 +481,32 @@ module DTK; class  Assembly
     end
 
     def self.delete_contents(assembly_idhs,opts={})
+      return if assembly_idhs.empty?
       delete(get_sub_assemblies(assembly_idhs).id_handles())
-      delete_assembly_nodes(assembly_idhs,opts)
+      assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
+      idh = assembly_idhs.first
+      delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
+      delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
 
     class << self
      private
-      def delete_assembly_nodes(assembly_idhs,opts={})
-        return if assembly_idhs.empty?
+      def delete_task_templates(task_template_mh,assembly_ids)
+        sp_hash = {
+          :cols => [:id,:display_name],
+          :filter => [:oneof,:component_component_id,assembly_ids] 
+        }
+        delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
+      end
+
+      def delete_assembly_nodes(node_mh,assembly_ids,opts={})
         #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
         sp_hash = {
           :cols => [:id,:display_name],
-          :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
+          :filter => [:oneof,:assembly_id,assembly_ids]
         }
-        node_mh = assembly_idhs.first.createMH(:node)
         get_objs(node_mh,sp_hash).map{|node|delete_node_aux(node,opts)}
       end
-
     end
     def self.delete_node_aux(node,opts={})
       if opts[:destroy_nodes]

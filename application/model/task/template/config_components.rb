@@ -37,8 +37,9 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
-        #get content from persisted 
-        assembly_action_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
+        if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
+          return template_conten
+        end
 
         #otherwise do the temporal processing to generate template_content
         opts_generate = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
@@ -52,12 +53,13 @@ module DTK; class Task
         template_content
       end
 
-      def self.get_template_content?(action_types,assembly,opts={})
-        action_types = Array(action_types)
-        raise_error_if_unsupported_action_types(action_types)
-        task_action = opts[:task_action]||default_task_action()
-        cmp_actions = ActionList::ConfigComponents.get(assembly)
-        get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
+      def self.update_when_added_component?(assembly,node,new_component,component_title)
+        #only updating the create action task template and only if it is persisted
+        assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
+        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+          new_action = Action.create(new_component.merge(:node => node,:title => component_title))
+          task_template_content.insert_action_and_update?(new_action,assembly_cmp_actions)
+        end
       end
 
      private
@@ -93,7 +95,7 @@ module DTK; class Task
             cmp_actions.select{|a|a.source_type() == :assembly}
           elsif action_types == [:node_centric]
             cmp_actions.select{|a|a.source_type() == :node_group}
-          else #action_types consists of :assembly nad :node_centric
+          else #action_types consists of :assembly and :node_centric
             cmp_actions
           end
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly,relevant_actions)

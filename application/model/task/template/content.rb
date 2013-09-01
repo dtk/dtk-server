@@ -29,9 +29,9 @@ module DTK; class Task
       end
 
       #if action is not included in task templaet that insert the action and update databes
-      def insert_action_and_update?(action)
-        unless includes_action?(action)
-          insert_action(action)
+      def insert_action_and_update?(new_action,action_list)
+        unless includes_action?(new_action)
+          insert_action(new_action,action_list)
           #TODO: and then update db
         end
       end
@@ -90,7 +90,7 @@ module DTK; class Task
         find{|internode_stage|internode_stage.includes_action?(action)}
       end
 
-      def insert_action(action)
+      def insert_action(new_action,action_list)
         pp [:foooo,:insert_action,action]
         nil
         #TODO: stub
@@ -100,13 +100,13 @@ module DTK; class Task
         if object.kind_of?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object,actions,opts)
         elsif object.kind_of?(SerializedContentArray)
-          create_stages_from_serialzied_content!(object,actions,opts)
+          create_stages_from_serialized_content!(object,actions,opts)
         else
           raise Error.new("create_stages! does not treat argument of type (#{object.class})")
         end
       end
 
-      def create_stages_from_serialzied_content!(serialized_content_array,actions,opts={})
+      def create_stages_from_serialized_content!(serialized_content_array,actions,opts={})
         serialized_content_array.each{|a| self <<  Stage::InterNode.parse_and_reify(a,actions)}
       end
 

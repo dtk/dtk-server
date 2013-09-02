@@ -118,10 +118,6 @@ module DTK; class Task
       end
 
       def includes_action?(action)
-        find{|internode_stage|internode_stage.includes_action?(action)}
-      end
-
-      def includes_action?(action)
         ndx_action_indexes = add_ndx_action_index!(Hash.new,action)
         return nil if ndx_action_indexes.empty?()
         each_internode_stage do |internode_stage,stage_index|

@@ -24,10 +24,6 @@ module DTK; class Task; class Template
         false
       end
 
-      def includes_action?(action)
-        self if find{|a|a.match_action?(action)}
-      end
-  
       def splice_in_action!(action_match,insert_point)
         case insert_point
           when :end

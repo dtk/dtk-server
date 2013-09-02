@@ -46,12 +46,6 @@ module DTK; class Task; class Template
         false
       end
 
-      def includes_action?(action)
-        if node_actions = self[action.node_id()]
-          node_actions.includes_action?(action)
-        end
-      end
-
       def splice_in_action!(action_match,insert_point)
         unless node_action = self[action_match.node_id]
           raise Error.new("Illegal node_id (#{action_match.node_id})")

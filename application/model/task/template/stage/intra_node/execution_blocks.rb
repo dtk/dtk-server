@@ -20,10 +20,6 @@ module DTK; class Task; class Template
         false
       end
 
-      def includes_action?(action)
-        find{|eb|eb.includes_action?(action)}
-      end
-
       def splice_in_action!(action_match,insert_point)
         case insert_point
           when :end_last_execution_block

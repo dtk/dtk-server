@@ -31,15 +31,10 @@ module DTK; class Task
       end
 
       #if action is not included in task templaet that insert the action and update databes
-      def insert_action_and_update?(new_action,action_list,&gen_temporal_constraints)
+      def insert_action_and_update?(new_action,action_list,gen_constraints_proc)
         pp [:before_insert,serialization_form()]
-        unless includes_action?(new_action)
-          pp [:insert_needed]
-          temporal_constraints = gen_temporal_constraints.call()
-          insert_action_helper = InsertActionHelper.create(new_action,action_list,temporal_constraints)
-          insert_action_helper.insert_action(self)
-          #TODO: and then update db
-        end
+        insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
+        insert_action_helper.insert_action_and_update?(self)
         pp [:after_insert,serialization_form()]
         raise ErrorUsage.new("Got here: insert_action_and_update?")
       end
@@ -114,6 +109,31 @@ module DTK; class Task
         each_with_index{|internode_stage,i|block.call(internode_stage,i+1)}
       end        
 
+      def add_ndx_action_index!(hash,action)
+        self.class.add_ndx_action_index!(hash,action)
+      end
+      def self.add_ndx_action_index!(hash,action)
+        (hash[action.node_id] ||= Array.new) << action.index
+        hash
+      end
+
+      def includes_action?(action)
+        find{|internode_stage|internode_stage.includes_action?(action)}
+      end
+
+      def includes_action?(action)
+        ndx_action_indexes = add_ndx_action_index!(Hash.new,action)
+        return nil if ndx_action_indexes.empty?()
+        each_internode_stage do |internode_stage,stage_index|
+          action_match = ActionMatch.new(action)
+          if internode_stage.find_earliest_match?(action_match,ndx_action_indexes)
+            action_match.internode_stage_index = stage_index
+            return action_match
+          end
+        end
+        nil
+      end
+
      private        
       def internode_stage(internode_stage_index)
         if internode_stage_index == :last
@@ -121,10 +141,6 @@ module DTK; class Task
         else
           self[internode_stage_index-1]
         end
-      end
-
-      def includes_action?(action)
-        find{|internode_stage|internode_stage.includes_action?(action)}
       end
 
       def create_stages!(object,actions,opts={})

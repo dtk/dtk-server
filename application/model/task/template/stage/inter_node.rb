@@ -38,6 +38,7 @@ module DTK; class Task; class Template
         ndx_action_indexes.each_pair do |node_id,action_indexes|
           if node_actions = self[node_id]
             if node_actions.find_earliest_match?(action_match,action_indexes)
+              action_match.in_multinode_stage = true if kind_of?(MultiNode)
               return true
             end
           end

@@ -1,16 +1,28 @@
 module DTK; class Task; class Template
   class Content
     class InsertActionHelper
-      def self.create(new_action,action_list,temporal_constraints,insert_strategy=nil)
-        insert_strategy_class(insert_strategy).new(new_action,action_list,temporal_constraints)
+      r8_nested_require('insert_action_helper','insert_at_end')
+
+      def self.create(new_action,action_list,gen_constraints_proc,insert_strategy=nil)
+        insert_strategy_class(insert_strategy).new(new_action,action_list,gen_constraints_proc)
+      end
+
+      def insert_action_and_update?(component_template)
+        unless component_template.includes_action?(@new_action)
+          pp [:insert_needed]
+          compute_before_after_relations!()
+          insert_action(component_template)
+          #TODO: and then update db
+        end
+        nil #TODO: stub
       end
 
      private
-      def initialize(new_action,action_list,temporal_constraints,insert_strategy=nil)
-        @new_action = new_action
+      def initialize(new_action,action_list,gen_constraints_proc,insert_strategy=nil)
+        @new_action = action_list.find{|a|a.match_action?(new_action)}
         @new_action_node_id = new_action.node_id
+        @gen_constraints_proc = gen_constraints_proc
         @ndx_action_indexes = NdxActionIndexes.new()
-        compute_before_after_relations!(temporal_constraints,action_list)
       end
 
       class NdxActionIndexes < Hash
@@ -21,7 +33,8 @@ module DTK; class Task; class Template
           (self[inter_or_same]||{})[before_or_after]||{}
         end
         def add(inter_or_same,before_or_after,action)
-          (((self[inter_or_same] ||= Hash.new)[before_or_after] ||= Hash.new)[action.node_id] ||= Array.new) << action.index
+          pntr = ((self[inter_or_same] ||= Hash.new)[before_or_after] ||= Hash.new)
+          Content.add_ndx_action_index!(pntr,action)
           self
         end
       end
@@ -38,19 +51,20 @@ module DTK; class Task; class Template
         end
       end
 
-      def compute_before_after_relations!(temporal_constraints,action_list)
-        if temporal_constraints.empty? 
-          return
-        end
-        #find and set the new action's index 
-        if new_action_with_index = action_list.find{|a|a.match_action?(@new_action)}
-          @new_action = new_action_with_index
-        else
+      InsertStrategies = {
+        :insert_at_end => InsertAtEnd
+      }
+
+      def compute_before_after_relations!()
+        unless new_action_index = @new_action.index
+          #if @new_action does not have an index it means that it is not in action list
           Log.error("Cannot find action in action list; using no constraints")
           return
         end
+
+        temporal_constraints = @gen_constraints_proc.call()
+        return if temporal_constraints.empty? 
         
-        new_action_index = @new_action.index
         temporal_constraints.each do |tc|
           if tc.before_action_index == new_action_index
             after_action = tc.after_action
@@ -77,40 +91,6 @@ module DTK; class Task; class Template
         @ndx_action_indexes.add(inter_or_same,before_or_after,action)
       end
 
-      class InsertAtEnd < self
-        def insert_action(template_content)
-          pp [:in_insert_action]
-          
-          template_content.each_internode_stage do |internode_stage,stage_index|
-            if action_match = find_earliest_match?(internode_stage,stage_index,:internode,:after)
-              #if match here then need to put in stage earlier than matched one
-              template_content.splice_in_action!(action_match,:before_internode_stage)
-              return
-            end
-            if action_match = find_earliest_match?(internode_stage,stage_index,:samenode,:after)
-              #if match here then need to put in this stage earlier than matched one
-              template_content.splice_in_action!(action_match,:before_action_pos)
-              return
-            end
-          end
-           action_match = ActionMatch.new(@new_action)
-           template_content.splice_in_action!(action_match,:end_last_internode_stage)
-        end
-      end
-        
-      def find_earliest_match?(internode_stage,stage_index,inter_or_same,before_or_after)
-        ndx_action_indexes = get_ndx_action_indexes(inter_or_same,before_or_after)
-        return nil if ndx_action_indexes.empty?()
-        action_match = ActionMatch.new(@new_action)
-        if internode_stage.find_earliest_match?(action_match,ndx_action_indexes)
-          action_match.internode_stage_index = stage_index
-          action_match
-        end
-      end
-
-      InsertStrategies = {
-        :insert_at_end => InsertAtEnd
-      }
     end
   end
 end;end;end

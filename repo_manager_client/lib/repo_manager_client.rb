@@ -241,7 +241,10 @@ module DTK
 
     def update_user_params(params_hash)
       if params_hash[:username]
-        {:dtk_instance_name => dtk_instance_repo_username()}.merge(params_hash)
+        {
+          :dtk_instance_name => dtk_instance_repo_username(), 
+          :default_namespace => ::DTK::Common::Aux.running_process_user()
+        }.merge(params_hash)
       else
         params_hash
       end

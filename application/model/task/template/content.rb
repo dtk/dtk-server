@@ -32,12 +32,15 @@ module DTK; class Task
 
       #if action is not included in task templaet that insert the action and update databes
       def insert_action_and_update?(new_action,action_list,&gen_temporal_constraints)
+        pp [:before_insert,serialization_form()]
         unless includes_action?(new_action)
+          pp [:insert_needed]
           temporal_constraints = gen_temporal_constraints.call()
           insert_action_helper = InsertActionHelper.create(new_action,action_list,temporal_constraints)
           insert_action_helper.insert_action(self)
           #TODO: and then update db
         end
+        pp [:after_insert,serialization_form()]
         raise ErrorUsage.new("Got here: insert_action_and_update?")
       end
 
@@ -45,13 +48,13 @@ module DTK; class Task
         case insert_point
           when :before_internode_stage
             if action_match.internode_stage_index == 1
-              new_internode_stage = create_internode_stage(action_match.insert_action)
+              new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
               insert(action_match.internode_stage_index-1,new_internode_stage)
             else
-              internode_stage(match.internode_stage_index).splice_in_action!(action_match,:end_last_execution_block)
+              internode_stage(action_match.internode_stage_index).splice_in_action!(action_match,:end_last_execution_block)
             end
           when :before_action_pos
-            internode_stage(match.internode_stage_index).splice_in_action!(action_match,:before_action_pos)
+            internode_stage(action_match.internode_stage_index).splice_in_action!(action_match,:before_action_pos)
           when :end_last_internode_stage
             internode_stage(:last).splice_in_action!(action_match,:end_last_execution_block) 
           else raise Error.new("Unexpected insert_point (#{insert_point})")

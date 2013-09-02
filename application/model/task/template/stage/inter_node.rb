@@ -11,6 +11,18 @@ module DTK; class Task; class Template
       end
       attr_accessor :name
 
+      def self.create_from_single_action(action)
+        component_type = action.component_type()
+        stage_name = "stage_#{component_type}"
+        ret = new(stage_name)
+        #leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
+        node_actions = [component_type]
+        node_name = action.node_name()
+        action_list = [action]
+        ret.merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list))
+        ret
+      end
+
       #returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)
         ret = Array.new

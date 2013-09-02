@@ -33,7 +33,7 @@ module DTK; class Task; class Template
           when :end
             self << action_match.insert_action
           when :before_action_pos
-            insert(action_match.action_position,action_match.insert_action)
+            insert(action_match.action_position-1,action_match.insert_action)
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end

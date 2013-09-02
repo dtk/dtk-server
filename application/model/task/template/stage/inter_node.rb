@@ -47,11 +47,20 @@ module DTK; class Task; class Template
       end
 
       def splice_in_action!(action_match,insert_point)
-        unless node_action = self[action_match.node_id]
-          raise Error.new("Illegal node_id (#{action_match.node_id})")
+        unless node_id = action_match.insert_action.node_id
+          raise Error.new("Unexepected that node_id is nil")
         end
         case insert_point
-          when :end_last_execution_block,:before_action_pos
+          when :end_last_execution_block
+            if node_action = self[node_id]
+              node_action.splice_in_action!(action_match,insert_point)
+            else
+              raise Error.new("Need to write code that creates a new node action object")
+            end
+          when :before_action_pos
+            unless node_action = self[node_id]
+              raise Error.new("Illegal node_id (#{action_match.node_id})")
+            end
             node_action.splice_in_action!(action_match,insert_point)
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end

@@ -41,6 +41,23 @@ module DTK; class Task
         raise ErrorUsage.new("Got here: insert_action_and_update?")
       end
 
+      def splice_in_action!(action_match,insert_point)
+        case insert_point
+          when :before_internode_stage
+            if action_match.internode_stage_index == 1
+              new_internode_stage = create_internode_stage(action_match.insert_action)
+              insert(action_match.internode_stage_index-1,new_internode_stage)
+            else
+              internode_stage(match.internode_stage_index).splice_in_action!(action_match,:end_last_execution_block)
+            end
+          when :before_action_pos
+            internode_stage(match.internode_stage_index).splice_in_action!(action_match,:before_action_pos)
+          when :end_last_internode_stage
+            internode_stage(:last).splice_in_action!(action_match,:end_last_execution_block) 
+          else raise Error.new("Unexpected insert_point (#{insert_point})")
+        end
+      end
+      #TODO: have above subsume below  
       def splice_in_at_beginning!(template_content,opts={})
         if opts[:node_centric_first_stage]
           insert(0,*template_content)
@@ -95,6 +112,14 @@ module DTK; class Task
       end        
 
      private        
+      def internode_stage(internode_stage_index)
+        if internode_stage_index == :last
+          last()
+        else
+          self[internode_stage_index-1]
+        end
+      end
+
       def includes_action?(action)
         find{|internode_stage|internode_stage.includes_action?(action)}
       end

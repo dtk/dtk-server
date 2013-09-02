@@ -27,7 +27,17 @@ module DTK; class Task; class Template
       def includes_action?(action)
         self if find{|a|a.match_action?(action)}
       end
-      
+  
+      def splice_in_action!(action_match,insert_point)
+        case insert_point
+          when :end
+            self << action_match.insert_action
+          when :before_action_pos
+            insert(action_match.action_position,action_match.insert_action)
+          else raise Error.new("Unexpected insert_point (#{insert_point})")
+        end
+      end
+        
       def serialization_form(opts={})
         ordered_components = map{|a|a.serialization_form(opts)}.compact
         {:ordered_components => ordered_components} unless ordered_components.empty?

@@ -24,6 +24,16 @@ module DTK; class Task; class Template
         find{|eb|eb.includes_action?(action)}
       end
 
+      def splice_in_action!(action_match,insert_point)
+        case insert_point
+          when :end_last_execution_block
+            execution_block(:last).splice_in_action!(action_match,:end)
+          when :before_action_pos
+            execution_block(action_match.execution_block_index()).splice_in_action!(action_match,insert_point)
+          else raise Error.new("Unexpected insert_point (#{insert_point})")
+        end
+      end
+      #TODO: have above subsume below  
       def splice_in_at_beginning!(execution_blocks)
         insert(0,*execution_blocks)
         self
@@ -88,7 +98,14 @@ module DTK; class Task; class Template
         each{|exec_block|ret += exec_block.components()}
         ret
       end
-      
+     private
+      def execution_block(execution_block_index)
+        if execution_block_index == :last
+          last()
+        else
+          self[execution_block_index-1]
+        end
+      end
     end
   end; end
 end; end; end

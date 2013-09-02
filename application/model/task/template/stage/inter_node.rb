@@ -39,6 +39,17 @@ module DTK; class Task; class Template
         end
       end
 
+      def splice_in_action!(action_match,insert_point)
+        unless node_action = self[action_match.node_id]
+          raise Error.new("Illegal node_id (#{action_match.node_id})")
+        end
+        case insert_point
+          when :end_last_execution_block,:before_action_pos
+            node_action.splice_in_action!(action_match,insert_point)
+          else raise Error.new("Unexpected insert_point (#{insert_point})")
+        end
+      end
+      #TODO: have above subsume below  
       def splice_in_at_beginning!(internode_stage)
         ndx_splice_in_node_ids = internode_stage.node_ids().inject(Hash.new){|h,node_id|h.merge(node_id => true)}
         each_node_id do |node_id|

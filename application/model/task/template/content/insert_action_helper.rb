@@ -1,6 +1,6 @@
 module DTK; class Task; class Template
   class Content
-    class InsertActionInfo
+    class InsertActionHelper
       def self.create(new_action,action_list,temporal_constraints,insert_strategy=nil)
         insert_strategy_class(insert_strategy).new(new_action,action_list,temporal_constraints)
       end
@@ -9,10 +9,11 @@ module DTK; class Task; class Template
       def initialize(new_action,action_list,temporal_constraints,insert_strategy=nil)
         @new_action = new_action
         @new_action_node_id = new_action.node_id
-        @internode_before_actions = Array.new
-        @internode_after_actions = Array.new
-        @samenode_before_actions = Array.new
-        @samenode_after_actions = Array.new
+        #These are all index by node_id
+        @internode_before_actions = Hash.new
+        @internode_after_actions = Hash.new
+        @samenode_before_actions = Hash.new
+        @samenode_after_actions = Hash.new
         compute_before_after_relations!(temporal_constraints,action_list)
       end
 
@@ -45,27 +46,53 @@ module DTK; class Task; class Template
           if tc.before_action_index == new_action_index
             after_action = tc.after_action
             if after_action.node_id == @new_action_node_id
-              @samenode_after_actions <<  after_action
+              add_indexed_action(@samenode_after_actions,after_action)
             else
-              @internode_after_actions <<  after_action
+              add_indexed_action(@internode_after_actions,after_action)
             end
           elsif tc.after_action_index == new_action_index
             before_action = tc.before_action 
             if before_action.node_id == @new_action_node_id
-              @samenode_before_actions <<  before_action
+              add_indexed_action(@samenode_before_actions,before_action)
             else
-              @internode_before_actions <<  before_action
+              add_indexed_action(@internode_before_actions,before_action)
             end
           end
         end
       end
 
+      def add_indexed_action(ndx_actions,action)
+        ndx_actions.merge!(action.node_id => action)
+      end
+
       class InsertAtEnd < self
         def insert_action(template_content)
-          pp [:in_insert_action,self]
-          samenode_match = template_content.find_earliest_match?(@samenode_after_actions)
-          internode_match = template_content.find_earliest_match?(@internode_after_actions)
-          pp [:earliest_match,samenode_match,internode_match]
+          pp [:in_insert_action]
+          
+          template_content.each_internode_stage do |internode_stage,stage_index|
+            if internode_match = find_earliest_match?(internode_stage,stage_index,@internode_after_actions)
+              #if match here then need to put in stage earlier than matched one
+              #TODO: stub
+              pp [:internode_match_found,internode_match]
+              return
+            end
+            if samenode_match = find_earliest_match?(internode_stage,stage_index,@samenode_after_actions)
+              #if match here then need to put in stage earlier than matched one
+              #TODO: stub
+              pp [:smaenode_match_found,samenode_match]
+              return
+            end
+          end
+          pp [:no_match]
+        end
+      end
+        
+      def find_earliest_match?(internode_stage,stage_index,ndx_actions)
+        return nil if ndx_actions.empty?()
+        action_match = ActionMatch.new()
+        if internode_stage.find_earliest_match?(action_match,ndx_actions)
+          action_match.internode_stage_index = stage_index
+          action_match
         end
       end
 

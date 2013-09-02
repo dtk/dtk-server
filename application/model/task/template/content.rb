@@ -1,7 +1,7 @@
 module DTK; class Task
   class Template
     class Content < Array
-      r8_nested_require('content','insert_action_info')
+      r8_nested_require('content','insert_action_helper')
       r8_nested_require('content','action_match')
 
       include Serialization
@@ -33,11 +33,12 @@ module DTK; class Task
       #if action is not included in task templaet that insert the action and update databes
       def insert_action_and_update?(new_action,action_list,&gen_temporal_constraints)
         unless includes_action?(new_action)
-          temporal_contraints = gen_temporal_constraints.call()
-          insert_action(new_action,action_list,temporal_contraints)
-          raise ErrorUsage.new("Got here: insert_action_and_update?")
+          temporal_constraints = gen_temporal_constraints.call()
+          insert_action_helper = InsertActionHelper.create(new_action,action_list,temporal_constraints)
+          insert_action_helper.insert_action(self)
           #TODO: and then update db
         end
+        raise ErrorUsage.new("Got here: insert_action_and_update?")
       end
 
       def splice_in_at_beginning!(template_content,opts={})
@@ -89,33 +90,13 @@ module DTK; class Task
         end
       end
 
-      def find_earliest_match?(actions)
-        ret = nil
-        return ret if actions.empty?()
-
-        ndx_actions = Hash.new
-        actions.each do |a|
-          (ndx_actions[a.node_id] ||= Array.new) << a
-        end
-
-        each_internode_stage do |internode_stage,stage_index|
-          action_match = ActionMatch.new()
-          if internode_stage.find_earliest_match?(action_match,ndx_actions)
-            action_match.internode_stage_index = stage_index
-            return action_match
-          end
-        end
-        ret
-      end
+      def each_internode_stage(&block)
+        each_with_index{|internode_stage,i|block.call(internode_stage,i+1)}
+      end        
 
      private        
       def includes_action?(action)
         find{|internode_stage|internode_stage.includes_action?(action)}
-      end
-
-      def insert_action(new_action,action_list,temporal_constraints)
-        insert_action_helper = InsertActionInfo.create(new_action,action_list,temporal_constraints)
-        insert_action_helper.insert_action(self)
       end
 
       def create_stages!(object,actions,opts={})
@@ -185,10 +166,6 @@ module DTK; class Task
           end
         end
       end
-
-      def each_internode_stage(&block)
-        each_with_index{|internode_stage,i|block.call(internode_stage,i+1)}
-      end        
 
     end
   end

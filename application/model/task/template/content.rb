@@ -31,12 +31,9 @@ module DTK; class Task
       end
 
       #if action is not included in task templaet that insert the action and update databes
-      def insert_action_and_update?(new_action,action_list,gen_constraints_proc)
-        pp [:before_insert,serialization_form()]
+      def insert_action?(new_action,action_list,gen_constraints_proc)
         insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
-        insert_action_helper.insert_action_and_update?(self)
-        pp [:after_insert,serialization_form()]
-        raise ErrorUsage.new("Got here: insert_action_and_update?")
+        insert_action_helper.insert_action?(self)
       end
 
       def splice_in_action!(action_match,insert_point)

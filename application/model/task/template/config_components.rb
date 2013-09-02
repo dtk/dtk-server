@@ -59,7 +59,9 @@ module DTK; class Task
         if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
           new_action = Action.create(new_component.merge(:node => node,:title => component_title))
           gen_constraints_proc = proc{TemporalConstraints::ConfigComponents.get(assembly,assembly_cmp_actions)}
-          task_template_content.insert_action_and_update?(new_action,assembly_cmp_actions,gen_constraints_proc)
+          if updated_template_content = task_template_content.insert_action?(new_action,assembly_cmp_actions,gen_constraints_proc)
+            Persistence::AssemblyActions.persist(assembly,updated_template_content)
+          end
         end
       end
 

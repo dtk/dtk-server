@@ -9,12 +9,21 @@ module DTK; class Task; class Template
       def initialize(new_action,action_list,temporal_constraints,insert_strategy=nil)
         @new_action = new_action
         @new_action_node_id = new_action.node_id
-        #These are all index by node_id
-        @internode_before_actions = Hash.new
-        @internode_after_actions = Hash.new
-        @samenode_before_actions = Hash.new
-        @samenode_after_actions = Hash.new
+        @ndx_action_indexes = NdxActionIndexes.new()
         compute_before_after_relations!(temporal_constraints,action_list)
+      end
+
+      class NdxActionIndexes < Hash
+        #These are of form
+        #[:internode|:samenode][:before|:after]
+        # which has value {node_id => [action_indexex],,,}
+        def get(inter_or_same,before_or_after)
+          (self[inter_or_same]||{})[before_or_after]||{}
+        end
+        def add(inter_or_same,before_or_after,action)
+          (((self[inter_or_same] ||= Hash.new)[before_or_after] ||= Hash.new)[action.node_id] ||= Array.new) << action.index
+          self
+        end
       end
 
       def self.insert_strategy_class(insert_strategy=nil)
@@ -46,23 +55,26 @@ module DTK; class Task; class Template
           if tc.before_action_index == new_action_index
             after_action = tc.after_action
             if after_action.node_id == @new_action_node_id
-              add_indexed_action(@samenode_after_actions,after_action)
+              add_ndx_action_index(:samenode,:after,after_action)
             else
-              add_indexed_action(@internode_after_actions,after_action)
+              add_ndx_action_index(:internode,:after,after_action)
             end
           elsif tc.after_action_index == new_action_index
             before_action = tc.before_action 
             if before_action.node_id == @new_action_node_id
-              add_indexed_action(@samenode_before_actions,before_action)
+              add_ndx_action_index(:samenode,:before,before_action)
             else
-              add_indexed_action(@internode_before_actions,before_action)
+              add_ndx_action_index(:internode,:before,before_action)
             end
           end
         end
       end
 
-      def add_indexed_action(ndx_actions,action)
-        ndx_actions.merge!(action.node_id => action)
+      def get_ndx_action_indexes(inter_or_same,before_or_after)
+        @ndx_action_indexes.get(inter_or_same,before_or_after)
+      end
+      def add_ndx_action_index(inter_or_same,before_or_after,action)
+        @ndx_action_indexes.add(inter_or_same,before_or_after,action)
       end
 
       class InsertAtEnd < self
@@ -70,16 +82,16 @@ module DTK; class Task; class Template
           pp [:in_insert_action]
           
           template_content.each_internode_stage do |internode_stage,stage_index|
-            if internode_match = find_earliest_match?(internode_stage,stage_index,@internode_after_actions)
+            if internode_match = find_earliest_match?(internode_stage,stage_index,:internode,:after)
               #if match here then need to put in stage earlier than matched one
               #TODO: stub
               pp [:internode_match_found,internode_match]
               return
             end
-            if samenode_match = find_earliest_match?(internode_stage,stage_index,@samenode_after_actions)
+            if samenode_match = find_earliest_match?(internode_stage,stage_index,:samenode,:after)
               #if match here then need to put in stage earlier than matched one
               #TODO: stub
-              pp [:smaenode_match_found,samenode_match]
+              pp [:samenode_match_found,samenode_match]
               return
             end
           end
@@ -87,10 +99,11 @@ module DTK; class Task; class Template
         end
       end
         
-      def find_earliest_match?(internode_stage,stage_index,ndx_actions)
-        return nil if ndx_actions.empty?()
+      def find_earliest_match?(internode_stage,stage_index,inter_or_same,before_or_after)
+        ndx_action_indexes = get_ndx_action_indexes(inter_or_same,before_or_after)
+        return nil if ndx_action_indexes.empty?()
         action_match = ActionMatch.new()
-        if internode_stage.find_earliest_match?(action_match,ndx_actions)
+        if internode_stage.find_earliest_match?(action_match,ndx_action_indexes)
           action_match.internode_stage_index = stage_index
           action_match
         end

@@ -22,14 +22,15 @@ module DTK; class Task; class Template
         ret
       end
 
-      def find_earliest_match?(action_match,ndx_actions)
-        ndx_actions.each_pair do |node_id,actions_to_match|
+      def find_earliest_match?(action_match,ndx_action_indexes)
+        ndx_action_indexes.each_pair do |node_id,action_indexes|
           if node_actions = self[node_id]
-            if node_actions.find_earliest_match?(action_match,actions_to_match)
+            if node_actions.find_earliest_match?(action_match,action_indexes)
               return true
             end
           end
         end
+        false
       end
 
       def includes_action?(action)

@@ -45,7 +45,11 @@ module XYZ
               if (time_integer.to_i >= Time.now.to_i)
                 # due to tight coupling between model_handle and user_object we will set
                 # model handle manually 
-                ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
+                begin
+                  ramaze_user = User.get_user_by_id( { :model_name => :user, :c => c }, user_id)
+                rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
+                  respond(e, 403)
+                end
      
                 # TODO: [Haris] This is workaround to make sure that user is logged in, due to Ramaze design
                 # this is easiest way to do it. But does feel dirty.

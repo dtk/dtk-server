@@ -12,7 +12,7 @@ module DTK; class Task
         #template object from assembly_instance.get_task_template of stub and spliciing in content 
         #with all but assembly actions filtered out
 
-        opts = {:component_type_filter => :service, :task_action => task_action}
+        opts = {:component_type_filter => :service, :task_action => task_action, :dont_persist_generated_template => true}
         unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
           return ret
         end

@@ -65,13 +65,21 @@ module DTK; class Task
       task_action||default_task_action()
     end
 
-    def self.create_from_serialized_content?(mh,serialized_content,match_assigns,task_action=nil)
+    def self.create_or_update_from_serialized_content?(mh,assembly_idh,serialized_content,task_action=nil)
       task_action ||= default_task_action()
-      all_match_assigns = {:task_action => task_action}.merge(match_assigns)
-      other_assigns = {:content => serialized_content}
-      ref = ref(task_action)
-      create_from_row?(mh,ref,all_match_assigns,other_assigns,:convert => true)
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:and,[:eq,:component_component_id,assembly_idh.get_id],
+                    [:eq,:task_action,task_action]]
+      }
+      if task_template = get_obj(mh,sp_hash)
+        task_template.update(:content => serialized_content)
+        task_template.id_handle()
+      else
+        ref,create_hash = ref_and_create_hash(serialized_content,task_action)
+        create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id()) 
+        create_from_row(mh,create_hash)
+      end
     end
-
   end
 end; end

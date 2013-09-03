@@ -12,15 +12,8 @@ module DTK; class Task; class Template
       attr_accessor :name
 
       def self.create_from_single_action(action)
-        component_type = action.component_type()
-        stage_name = "stage_#{component_type}"
-        ret = new(stage_name)
-        #leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
-        node_actions = [component_type]
-        node_name = action.node_name()
-        action_list = [action]
-        ret.merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list))
-        ret
+        stage_name = "stage_#{action.component_type()}"
+        new(stage_name).add_new_execution_block_for_action!(action)
       end
 
       #returns all actions generated
@@ -55,7 +48,7 @@ module DTK; class Task; class Template
             if node_action = self[node_id]
               node_action.splice_in_action!(action_match,insert_point)
             else
-              raise Error.new("Need to write code that creates a new node action object")
+              add_new_execution_block_for_action!(action_match.insert_action)
             end
           when :before_action_pos
             unless node_action = self[node_id]
@@ -113,6 +106,14 @@ module DTK; class Task; class Template
           end
           h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))
         end
+      end
+
+      def add_new_execution_block_for_action!(action)
+        #leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
+        node_actions = [action.component_type()]
+        node_name = action.node_name()
+        action_list = [action]
+        merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list))
       end
 
       def each_node_id(&block)

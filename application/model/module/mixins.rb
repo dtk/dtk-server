@@ -67,7 +67,7 @@ module DTK
 
       #aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
       unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
-        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) taht meets filter conditions")
+        raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) with namespace '#{opts[:filter][:remote_namespace]}'")
       end
       module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
     end

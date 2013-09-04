@@ -99,8 +99,6 @@ module DTK
 
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
-
-      get_namespace_and_version
       rest_ok_response ServiceModule.info(model_handle(), module_id)
     end
 

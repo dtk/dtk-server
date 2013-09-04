@@ -53,7 +53,8 @@ module DTK; class Task; class Template
       end
       def self.parse_and_reify(serialized_node_actions,node_name,action_list)
         #normalize to take into account it may be single execution block
-        normalized_content = serialized_node_actions[Field::ExecutionBlocks]||[serialized_node_actions]
+        normalized_content = serialized_node_actions.kind_of?(Hash) && serialized_node_actions[Field::ExecutionBlocks]
+        normalized_content ||= [serialized_node_actions]
         ret = new()
         normalized_content.each{|serialized_eb|ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb,node_name,action_list)}
         ret

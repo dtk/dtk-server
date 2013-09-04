@@ -18,8 +18,11 @@ module XYZ
       model_name = route.first.to_sym
       # we rewrite route key to new mapped one
       route_key = route.join('/')
-
-      ramaze_user = user_object()
+      begin
+        ramaze_user = user_object()
+      rescue ::Sequel::DatabaseDisconnectError, ::Sequel::DatabaseConnectionError => e
+        respond(e, 403)
+      end
 
 
       # DEBUG SNIPPET >>>> REMOVE <<<<

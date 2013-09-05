@@ -20,20 +20,23 @@ module DTK
       new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::DSLParsing)
     end
     #TODO: should unify above and two below
-    def self.create_dsl_object_from_impl(source_impl,container_idh=nil,target_impl=nil)
+    def self.create_dsl_object_from_impl(source_impl,opts={})
+      target_impl = opts[:target_impl]
+
       unless dsl_filename = contains_dsl_file?(source_impl)
         raise Error.new("Cannot find DSL file")
       end
       content = RepoManager.get_file_content(dsl_filename, :implementation => source_impl)
       target_impl ||= source_impl
-      create_from_file_obj_hash?(target_impl,dsl_filename,content,container_idh)
+      create_from_file_obj_hash?(target_impl,dsl_filename,content,opts)
     end
     #creates a ComponentDSL if file_obj_hash is a r8meta file
-    def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,container_idh=nil)
+    def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,opts={})
+      container_idh = opts[:container_idh]
       return nil unless isa_dsl_filename?(dsl_filename)
       parsed_name = parse_dsl_filename(dsl_filename)
       module_branch_idh = target_impl.get_module_branch().id_handle()
-      input_hash = convert_to_hash(content,parsed_name[:format_type])
+      input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
       config_agent_type = ret_config_agent_type(input_hash)
 
       return config_agent_type if config_agent_type.is_a?(ErrorUsage::DSLParsing)
@@ -209,9 +212,9 @@ pp [:normalize,ret]
         end
       end
 
-      def convert_to_hash(content,format_type)
+      def convert_to_hash(content,format_type,opts={})
         begin
-          Aux.convert_to_hash(content,format_type)
+          Aux.convert_to_hash(content,format_type,opts)
          rescue ArgumentError => e
           raise ErrorUsage.new("Error parsing the component dsl file; #{e.to_s}")
         end

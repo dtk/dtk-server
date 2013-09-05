@@ -53,7 +53,7 @@ module DTK
         component_module_refs = update_component_module_refs(module_branch,opts)
         return component_module_refs if component_module_refs.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
-        parsed = update_assemblies_from_dsl(module_branch,component_module_refs)
+        parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
         set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::DSLParsing)
         
         parsed
@@ -63,7 +63,7 @@ module DTK
       def update_component_module_refs(module_branch,opts={})
         parsed_info = 
           if DSLParser.implements_method?(:parse_directory)
-            DSLParser.parse_directory(module_branch,:component_module_refs)
+            DSLParser.parse_directory(module_branch,:component_module_refs,opts)
           else
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
@@ -81,7 +81,7 @@ module DTK
         ret
       end
 
-      def update_assemblies_from_dsl(module_branch,component_module_refs)
+      def update_assemblies_from_dsl(module_branch,component_module_refs,opts={})
         project_idh = get_project.id_handle()
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
@@ -91,7 +91,9 @@ module DTK
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
-            hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
+            opts[:file_path] = meta_file
+            # hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
+            hash_content = Aux.convert_to_hash(file_content,format_type,opts)
             #TODO: FOR-ALDIN: extend to handle yaml parsing errors
             return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
             # if assembly/node import returns error continue with module import

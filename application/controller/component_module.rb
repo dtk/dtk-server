@@ -25,17 +25,20 @@ module DTK
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold}
+      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true}
       dsl_created_info = component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
       rest_ok_response dsl_created_info
     end
 
     def rest__update_model_from_clone()
+      opts = {}
       component_module = create_obj(:component_module_id)
+      internal_trigger = ret_request_params(:internal_trigger)
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
       diffs_summary = ret_diffs_summary()
-      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version)
+
+      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_trigger)
       rest_ok_response dsl_created_info
     end
 

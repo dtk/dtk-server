@@ -101,14 +101,17 @@ module DTK
       create_new_version__type_specific(repo_for_new_version,new_version)
     end
 
-    def update_model_from_clone_changes?(commit_sha,diffs_summary,version=nil)
+    def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)
+      opts = {}
       module_branch = get_workspace_module_branch(version)
+      
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
 
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
-
-      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+      opts = {:do_not_raise => true} if internal_triger=='true'
+      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts)
+      
       return :dsl_parsed_info => response if response.is_a?(ErrorUsage::DSLParsing)
       return response
     end

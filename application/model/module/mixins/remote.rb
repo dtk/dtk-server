@@ -171,7 +171,8 @@ module DTK
         module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
-        parsed = module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version)
+        opts = {:do_not_raise => true}
+        parsed = module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version, opts)
       end
       
       response = module_repo_info(repo,module_and_branch_info,version)

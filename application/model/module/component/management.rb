@@ -5,7 +5,7 @@ module DTK; class ComponentModule
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-      parsed = create_needed_objects_and_dsl?(repo,version)
+      parsed = create_needed_objects_and_dsl?(repo,version, opts)
       module_branch.set_sha(commit_sha)
 
       return parsed
@@ -81,7 +81,7 @@ module DTK; class ComponentModule
       create_needed_objects_and_dsl?(repo_for_new_branch,new_version)
     end
 
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
     end
 
@@ -101,7 +101,7 @@ module DTK; class ComponentModule
       dsl_parsed_info  = Hash.new()
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version)
+        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
@@ -138,7 +138,7 @@ module DTK; class ComponentModule
       aug_component_templates = get_aug_associated_component_templates()
       model_parsed = nil
       Transaction do
-        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version)
+        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version, opts)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
         #below is teh conservative thing to do if dont know if any deletes
         any_deletes = true

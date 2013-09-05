@@ -248,7 +248,7 @@ module DTK
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      parsed = update_model_from_dsl(module_branch)
+      parsed = update_model_from_dsl(module_branch, opts)
       module_branch.set_sha(commit_sha)
       parsed
     end
@@ -263,9 +263,10 @@ module DTK
       update_model_from_dsl(module_branch)
     end
 
-    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version)
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       #TODO: for more efficiency can push in diffs_summary to below
-      opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
+      # opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
+      opts[:donot_make_repo_changes] = true
       update_model_from_dsl(module_branch,opts)
     end
 

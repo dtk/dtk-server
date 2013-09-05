@@ -114,7 +114,7 @@ module XYZ
         key_value.values.first
       end
 
-      def json_parse(json,file_path=nil)
+      def json_parse(json,opts={})
         ret = Hash.new
         if json.empty?
           return ret
@@ -122,11 +122,12 @@ module XYZ
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",file_path)
+          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",opts[:file_path]) if opts[:do_not_raise]
+          raise ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",opts[:file_path])
         end
       end
 
-      def yaml_parse(content,file_path=nil)
+      def yaml_parse(content,opts={})
         ret = Hash.new
         if content.empty?
           return ret
@@ -134,7 +135,7 @@ module XYZ
         begin 
           YAML.load(content)
         rescue Exception => e
-          return ErrorUsage::DSLParsing::YAMLParsing.new("YAML #{e} in file",file_path)
+          return ErrorUsage::DSLParsing::YAMLParsing.new("YAML #{e} in file",opts[:file_path])
         end
       end
 
@@ -182,12 +183,12 @@ module XYZ
         end
       end
 
-      def convert_to_hash(content,format_type,file_path=nil)
+      def convert_to_hash(content,format_type,opts)
         case format_type
           when :json
-            json_parse(content,file_path)
+            json_parse(content,opts)
           when :yaml
-            yaml_parse(content,file_path)
+            yaml_parse(content,opts)
           else
             raise Error.new("Format (#{format_type}) is not treated")
         end

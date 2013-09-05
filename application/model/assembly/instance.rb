@@ -45,7 +45,7 @@ module DTK; class  Assembly
       get_field?(:display_name)
       assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}
       rows = get_objs_helper(:instance_component_list,:nested_component,opts.merge(:augmented => true))
-      Component::Instance.add_titles!(rows)
+      Component::Instance.add_title_fields?(rows)
       ret = opts[:add_on_to]||opts[:seed]||Array.new
       rows.each{|r|ret << r.merge(:source => assembly_source)}
       ret
@@ -567,8 +567,11 @@ module DTK; class  Assembly
         cmp_instance_idh = node.add_component(component_template,component_title)
         Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title)
       end
+      cmp_instance_idh
+    end
 =begin
 #TODO: Deprecating DEPENDENCY-ORDER-INDEX
+...
       # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array
       if order_index.nil?
         order.push(component[:guid])
@@ -576,14 +579,12 @@ module DTK; class  Assembly
         order.insert(order_index.to_i, component[:guid])
       end
       node.update_ordered_component_ids(order)
-=end
-      cmp_instance_idh
-    end
 
     def is_order_index_valid(order_index, order)
       return ((order_index && order_index.to_i.to_s == order_index && order_index.to_i <= order.size && order_index.to_i > -1) || order_index.nil? || order_index.empty?)
     end
-    
+=end    
+
     def delete_component(component_idh, node_id=nil)
       component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
       node = nil
@@ -602,16 +603,25 @@ module DTK; class  Assembly
  
       # also check that component_idh belongs to this instance and to this node
       sp_hash = {
-        :cols => [:id, :display_name, :node_node_id],
+        #:only_one_per_node,:ref are put in for info needed when getting title
+        :cols => [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
         :filter => component_filter
       }
-      component = Model.get_obj(model_handle(:component),sp_hash)
+      component = Component::Instance.get_obj(model_handle(:component),sp_hash)
       unless component
         raise ErrorIdInvalid.new(component_idh.get_id(),:component)
       end
-      
-      Model.delete_instance(component_idh)
-      
+      node ||= component_idh.createIDH(:model_name => :node,:id => component[:node_node_id]).create_object()
+      ret = nil
+      Transaction do
+        Task::Template::ConfigComponents.update_when_deleted_component?(self,node,component)
+        ret = Model.delete_instance(component_idh)
+      end
+      ret
+    end
+=begin
+#TODO: Deprecating DEPENDENCY-ORDER-INDEX
+...      
       # Amar: Retrieving node object to update components order
       sp_hash = {
         :cols => [:id, :ordered_component_ids],
@@ -622,6 +632,7 @@ module DTK; class  Assembly
       order.delete(component_idh.get_id())
       node.update_ordered_component_ids(order)
     end
+=end
 
     def add_assembly_template(assembly_template)
       target = get_target()

@@ -7,10 +7,10 @@ module DTK; class Task; class Template
         insert_strategy_class(insert_strategy).new(new_action,action_list,gen_constraints_proc)
       end
 
-      def insert_action?(component_template)
-        unless component_template.includes_action?(@new_action)
+      def insert_action?(template_content)
+        unless template_content.includes_action?(@new_action)
           compute_before_after_relations!()
-          insert_action!(component_template)
+          insert_action!(template_content)
         end
       end
 

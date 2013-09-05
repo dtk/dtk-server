@@ -26,7 +26,7 @@ module DTK
         (pntr[:component_ids] ||= Array.new) << cmp_id
       end
       #add titles to components that are non singletons
-      Component::Instance.add_titles!(ndx_cmps.values)
+      Component::Instance.add_title_fields?(ndx_cmps.values)
 
       nodes.each do |node|
         #find components on the node group

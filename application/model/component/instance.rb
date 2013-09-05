@@ -1,5 +1,14 @@
 module DTK; class Component
   class Instance < self
+
+    def self.get_obj(mh,sp_hash)
+      create_from_component(super(mh,sp_hash))
+    end
+
+    def self.create_from_component(cmp)
+      cmp && cmp.id_handle().create_object(:model_name => :component_instance).merge(cmp)
+    end
+
     def self.component_list_fields()
       [:id,:group_id,:display_name,:component_type,:implementation_id,:basic_type,:version,:only_one_per_node,:external_ref,:node_node_id,:extended_base]
     end
@@ -32,9 +41,13 @@ module DTK; class Component
       title_attr.update(:value_asserted=>component_title,:cannot_change=>true,:is_instance_value=>true)
     end
 
-    def self.add_titles!(cmps)
+    def add_title_field?()
+      self.class.add_title_fields?([self])
+      self
+    end
+    def self.add_title_fields?(cmps)
       ret = cmps
-      #TODO: may make this be field in component instance
+      #TODO: for efficiency can look at ref it exsits and see if it indicates a title
       cmps_needing_titles = cmps.select do |cmp|
         cmp[:title].nil? and cmp.get_field?(:only_one_per_node) == false
       end

@@ -3,6 +3,30 @@ module DTK; class Task
     class ConfigComponents < self
       r8_nested_require('config_components','persistence')
 
+      def self.update_when_added_component?(assembly,node,new_component,component_title)
+        #only updating the create action task template and only if it is persisted
+        assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
+        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+          new_action = Action.create(new_component.merge(:node => node,:title => component_title))
+          gen_constraints_proc = proc{TemporalConstraints::ConfigComponents.get(assembly,assembly_cmp_actions)}
+          if updated_template_content = task_template_content.insert_action?(new_action,assembly_cmp_actions,gen_constraints_proc)
+            Persistence::AssemblyActions.persist(assembly,updated_template_content)
+          end
+        end
+      end
+
+      def self.update_when_deleted_component?(assembly,node,component)
+        #TODO: currently only updating the create action task template and only if it is persisted
+        #makes sense to also automtically delete component in other actions
+        assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
+        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+          action_to_delete = Action.create(component.add_title_field?().merge(:node => node))
+          if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete,assembly_cmp_actions)
+            Persistence::AssemblyActions.persist(assembly,updated_template_content)
+          end
+        end
+      end
+
       def self.get_existing_or_stub_templates(action_types,assembly_instance)
         ret = Array.new
         #TODO: only returning now the task templates for the default (assembly create action)
@@ -51,18 +75,6 @@ module DTK; class Task
         end
 
         template_content
-      end
-
-      def self.update_when_added_component?(assembly,node,new_component,component_title)
-        #only updating the create action task template and only if it is persisted
-        assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
-        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
-          new_action = Action.create(new_component.merge(:node => node,:title => component_title))
-          gen_constraints_proc = proc{TemporalConstraints::ConfigComponents.get(assembly,assembly_cmp_actions)}
-          if updated_template_content = task_template_content.insert_action?(new_action,assembly_cmp_actions,gen_constraints_proc)
-            Persistence::AssemblyActions.persist(assembly,updated_template_content)
-          end
-        end
       end
 
      private

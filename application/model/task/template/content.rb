@@ -2,6 +2,7 @@ module DTK; class Task
   class Template
     class Content < Array
       r8_nested_require('content','insert_action_helper')
+      r8_nested_require('content','delete_action_helper')
       r8_nested_require('content','action_match')
 
       include Serialization
@@ -30,10 +31,18 @@ module DTK; class Task
         ret
       end
 
-      #if action is not included in task templaet that insert the action and update databes
+      #if action is not included in task template than insert the action in this object and return updated object
+      #else return  nil
       def insert_action?(new_action,action_list,gen_constraints_proc)
         insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
         insert_action_helper.insert_action?(self)
+      end
+
+      #if action is explicitly included in task template then delete the action from this object and return updated object
+      #else return nil
+      def delete_explicit_action?(action,action_list)
+        delete_action_helper = DeleteActionHelper.new(action,action_list)
+        delete_action_helper.delete_explicit_action?(self)
       end
 
       def splice_in_action!(action_match,insert_point)

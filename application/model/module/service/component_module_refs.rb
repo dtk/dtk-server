@@ -246,12 +246,10 @@ end
       ret = SimpleOrderedHash.new()
       component_modules = get_component_module_refs(service_module_branch).component_modules
 
-      seed = ServiceModule::DSLParser.file_parser_output_array_class()
-      output_array = component_modules.values.map{|cmr|cmr.parser_output_array(:seed => seed) }
-      pp ServiceModule::DSLParser.generate_hash(:component_module_refs,output_array)
-
-      dsl_hash_form = component_modules.inject(Hash.new) do |h,(cmp_module_name,cmr)|
-        h.merge(cmp_module_name.to_s => cmr.dsl_hash_form())
+      dsl_hash_form = Hash.new
+      component_modules.each_pair do |cmp_module_name,cmr|
+        hf = cmr.dsl_hash_form()
+        dsl_hash_form[cmp_module_name.to_s] = hf unless hf.empty?
       end
 
       if dsl_hash_form.empty?

@@ -54,23 +54,16 @@ module DTK
       self[:version_info] && self[:version_info].version_string()
     end
 
-    def parser_output_array(opts={})
-      ret = Aux.hash_subset(self,ColsToOutputArray,:seed => opts[:seed], :only_non_nil => true)
-      if version_info = ret[:version_info]
-        ret[:version_info] = version_info.to_s
+    def dsl_hash_form()
+      ret = Aux.hash_subset(self,DSLHashCols,:only_non_nil=>true) 
+      if version_string = version_string()
+        ret.merge!(:version_info => version_string)
+      end
+      if ret[:version_info] and ret[:remote_info].nil?
+        return ret[:version_info] # simple form
       end
       ret
     end
-    ColsToOutputArray = [:component_module,:version_info,{:remote_info => :remote_namespace}]
-
-    def dsl_hash_form()
-      hash_subset = Aux.hash_subset(self,[:version_info,{:remote_info => :remote_namespace}]) 
-      if version_string = version_string()
-          hash_subset.merge!(:version_info => version_string)
-      end
-      #TODO: remove when treat dsl with remote info
-      hash_subset[:version_info] 
-    end
-
+    DSLHashCols = [:version_info,{:remote_info => :remote_namespace}]
   end
 end

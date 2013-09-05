@@ -387,7 +387,11 @@ module DTK
       existing = get_objs(model_handle,sp_hash,:keep_ref_cols => true)
       if existing.empty? #shortcut
         create_rows = rows.map{|r|parent_fields.merge(r)}
-        return create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check)
+        model_handle_with_par = model_handle
+        unless model_handle_with_par[:parent_model_name] 
+          model_handle_with_par = model_handle_with_par.merge(:parent_model_name => parent_idh[:model_name])
+        end
+        return create_from_rows(model_handle_with_par,create_rows,:duplicate_refs => :no_check)
       end
 
       ret = Array.new

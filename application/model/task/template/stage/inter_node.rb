@@ -39,6 +39,17 @@ module DTK; class Task; class Template
         false
       end
 
+      def delete_action!(action_match)
+        node_id = action_match.action.node_id
+        unless node_action = self[node_id]
+          raise Error.new("Unexepected that no node action can be found")
+        end
+        if :empty == node_action.delete_action!(action_match)
+          delete(node_id)
+          :empty if empty?()
+        end
+      end
+
       def splice_in_action!(action_match,insert_point)
         unless node_id = action_match.insert_action.node_id
           raise Error.new("Unexepected that node_id is nil")

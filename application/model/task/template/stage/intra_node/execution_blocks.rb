@@ -20,6 +20,14 @@ module DTK; class Task; class Template
         false
       end
 
+      def delete_action!(action_match)
+        eb_index = action_match.execution_block_index()
+        if :empty == execution_block(eb_index).delete_action!(action_match)
+          delete_execution_block!(eb_index)
+          :empty if empty?()
+        end
+      end
+
       def splice_in_action!(action_match,insert_point)
         case insert_point
           when :end_last_execution_block

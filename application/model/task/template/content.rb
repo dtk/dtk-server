@@ -2,7 +2,6 @@ module DTK; class Task
   class Template
     class Content < Array
       r8_nested_require('content','insert_action_helper')
-      r8_nested_require('content','delete_action_helper')
       r8_nested_require('content','action_match')
 
       include Serialization
@@ -41,8 +40,14 @@ module DTK; class Task
       #if action is explicitly included in task template then delete the action from this object and return updated object
       #else return nil
       def delete_explicit_action?(action,action_list)
-        delete_action_helper = DeleteActionHelper.new(action,action_list)
-        delete_action_helper.delete_explicit_action?(self)
+        if indexed_action = action_list.find{|a|a.match_action?(action)}
+          if action_match = includes_action?(indexed_action)
+            unless action_match.in_multinode_stage
+              delete_action!(action_match)
+              self
+            end
+          end
+        end
       end
 
       def splice_in_action!(action_match,insert_point)
@@ -137,12 +142,25 @@ module DTK; class Task
       end
 
      private        
+
+      def delete_action!(action_match)
+        internode_stage_index = action_match.internode_stage_index
+        if :empty == internode_stage(internode_stage_index).delete_action!(action_match)
+          delete_internode_stage!(internode_stage_index)
+          :empty if empty?()
+        end
+      end
+
       def internode_stage(internode_stage_index)
         if internode_stage_index == :last
           last()
         else
           self[internode_stage_index-1]
         end
+      end
+
+      def delete_internode_stage!(internode_stage_index)
+        delete_at(internode_stage_index-1)
       end
 
       def create_stages!(object,actions,opts={})

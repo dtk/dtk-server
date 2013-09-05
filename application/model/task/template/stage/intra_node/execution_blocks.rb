@@ -111,6 +111,10 @@ module DTK; class Task; class Template
           self[execution_block_index-1]
         end
       end
+
+      def delete_execution_block!(execution_block_index)
+        delete_at(execution_block_index-1)
+      end
     end
   end; end
 end; end; end

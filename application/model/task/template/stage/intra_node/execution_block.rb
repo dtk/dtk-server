@@ -24,6 +24,11 @@ module DTK; class Task; class Template
         false
       end
 
+      def delete_action!(action_match)
+        delete_at(action_match.action_position()-1)
+        :empty if empty?()
+      end
+       
       def splice_in_action!(action_match,insert_point)
         case insert_point
           when :end

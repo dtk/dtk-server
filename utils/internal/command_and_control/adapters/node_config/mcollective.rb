@@ -234,16 +234,9 @@ module DTK
         end
        private
         def self.create_mcollective_client()
-          erubis_content = File.open(File.expand_path("mcollective/client.cfg.erb", File.dirname(__FILE__))).read
-          config_file_content = ::Erubis::Eruby.new(erubis_content).result(
-            :logfile => logfile(),
-            :stomp_host => Mcollective.server_host(),
-            :mcollective_ssh_local_public_key => R8::Config[:mcollective][:ssh][:local][:public_key],
-            :mcollective_ssh_local_private_key => R8::Config[:mcollective][:ssh][:local][:private_key],
-            :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
-            )
-          #TODO: see if can pass args and not need to use tempfile
+          config_file_content = ConfigFile.content()
           begin
+            #TODO: see if can pass args and not need to use tempfile
             config_file = Tempfile.new("client.cfg")
             config_file.write(config_file_content)
             config_file.close
@@ -255,8 +248,46 @@ module DTK
           end
         end
 
-        def self.logfile()
-          "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
+        class ConfigFile
+          def self.content()
+            type = (R8::Config[:mcollective][:auth_type]||:default).to_sym
+            klass = 
+              case type
+                when :ssh then Ssh
+                else Default
+              end
+            klass.new.content(type)
+          end
+         private
+          def initialize(type)
+            @type = type
+          end
+          def erubis_object()
+            erubis_content = File.open(File.expand_path("mcollective/auth/#{type}/client.cfg.erb", File.dirname(__FILE__))).read
+            ::Erubis::Eruby.new(erubis_content)
+          end
+
+          def logfile()
+            "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
+          end
+
+          class Default < self
+            def content()
+              erubis_object().result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
+            end
+          end
+
+          class Ssh < self
+            def content()
+              erubis_object().result(
+                :logfile => logfile(),
+                :stomp_host => Mcollective.server_host(),
+                :mcollective_ssh_local_public_key => R8::Config[:mcollective][:ssh][:local][:public_key],
+                :mcollective_ssh_local_private_key => R8::Config[:mcollective][:ssh][:local][:private_key],
+                :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
+              )
+            end
+          end
         end
       end
     end

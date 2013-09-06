@@ -11,9 +11,15 @@ module DTK
           end
         end
 
-        def self.ret_cloud_init_user_data()
-          create().cloud_init_user_data()
+        def self.ret_cloud_init_user_data(bindings)
+          create().cloud_init_user_data(bindings)
         end
+
+        def cloud_init_user_data(bindings)
+          all_bindings = cloud_init_user_data_bindings(bindings)
+          erubis_object(cloud_init_user_data_erb()).result(all_bindings)
+        end
+
        private
         def self.create_mcollective_client()
           config_file_content = mcollective_config_file()
@@ -48,25 +54,33 @@ module DTK
           create().mcollective_config_file()
         end
 
-        def erubis_object()
+        def mcollective_config_erubis_object()
           erubis_content = File.open(File.expand_path("auth/#{@type}/client.cfg.erb", File.dirname(__FILE__))).read
-          ::Erubis::Eruby.new(erubis_content)
+          erubis_object(erubis_content)
         end
 
         def logfile()
           "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
         end
 
+        def erubis_object(erubis_content)
+          ::Erubis::Eruby.new(erubis_content)
+        end
+
         class Default < self
           def mcollective_config_file()
-            erubis_object().result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
+            mcollective_config_erubis_object().result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
+          end
+         private
+          def cloud_init_user_data_erb()
+            USER_DATA_SH_ERB
+          end
+          
+          def cloud_init_user_data_bindings(bindings)
+            bindings
           end
 
-          def cloud_init_user_data()
-            USER_DATA_SH
-          end
-
-          USER_DATA_SH = <<eos
+          USER_DATA_SH_ERB = <<eos
 cat << EOF >> /etc/mcollective/server.cfg
 ---
 plugin.stomp.host = <%=node_config_server_host %>
@@ -88,7 +102,7 @@ eos
         class Ssh < self
           #TODO: validate the R8::Config[:mcollective][:ssh] params
           def mcollective_config_file()
-            erubis_object().result(
+            mcollective_config_erubis_object().result(
               :logfile => logfile(),
               :stomp_host => Mcollective.server_host(),
               :mcollective_ssh_local_public_key => R8::Config[:mcollective][:ssh][:local][:public_key],
@@ -96,12 +110,25 @@ eos
               :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
             )
           end
+         private
 
-          def cloud_init_user_data()
-            USER_DATA_SH
+          def cloud_init_user_data_bindings(bindings)
+            #TODO: clean up to have error checking
+            ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
+            ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
+            ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            bindings.merge(
+              :mcollective_ssh_remote_public_key => ssh_remote_public_key,
+              :mcollective_ssh_remote_private_key => ssh_remote_private_key,
+              :mcollective_ssh_local_public_key => ssh_local_public_key
+            )
           end
 
-          USER_DATA_SH = <<eos
+          def cloud_init_user_data_erb()
+            USER_DATA_SH_ERB
+          end
+
+          USER_DATA_SH_ERB = <<eos
 cat << EOF >> /etc/mcollective/server.cfg
 ---
 plugin.stomp.host = <%=node_config_server_host %>

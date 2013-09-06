@@ -108,10 +108,10 @@ module XYZ
       klass.poll_to_detect_node_ready(node,opts)
     end
 
-    def self.cloud_init_user_data()
+    def self.cloud_init_user_data(bindings)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
-      klass.ret_cloud_init_user_data()
+      klass.ret_cloud_init_user_data(bindings)
     end
 
    private

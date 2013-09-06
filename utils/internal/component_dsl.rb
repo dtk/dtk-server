@@ -36,6 +36,7 @@ module DTK
       return nil unless isa_dsl_filename?(dsl_filename)
       parsed_name = parse_dsl_filename(dsl_filename)
       module_branch_idh = target_impl.get_module_branch().id_handle()
+      opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
       config_agent_type = ret_config_agent_type(input_hash)
 

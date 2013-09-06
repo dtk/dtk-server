@@ -10,6 +10,10 @@ module DTK
             @mcollective_client ||= create_mcollective_client()
           end
         end
+
+        def self.ret_cloud_init_user_data()
+          create().cloud_init_user_data()
+        end
        private
         def self.create_mcollective_client()
           config_file_content = mcollective_config_file()
@@ -26,10 +30,6 @@ module DTK
           end
         end
 
-        def self.mcollective_config_file()
-          create().mcollective_config_file()
-        end
-
         def self.create()
           type = (R8::Config[:mcollective][:auth_type]||:default).to_sym
           klass = 
@@ -44,9 +44,12 @@ module DTK
           @type = type
         end
 
+        def self.mcollective_config_file()
+          create().mcollective_config_file()
+        end
 
         def erubis_object()
-          erubis_content = File.open(File.expand_path("mcollective/auth/#{@type}/client.cfg.erb", File.dirname(__FILE__))).read
+          erubis_content = File.open(File.expand_path("auth/#{@type}/client.cfg.erb", File.dirname(__FILE__))).read
           ::Erubis::Eruby.new(erubis_content)
         end
 
@@ -58,6 +61,28 @@ module DTK
           def mcollective_config_file()
             erubis_object().result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
           end
+
+          def cloud_init_user_data()
+            USER_DATA_SH
+          end
+
+          USER_DATA_SH = <<eos
+cat << EOF >> /etc/mcollective/server.cfg
+---
+plugin.stomp.host = <%=node_config_server_host %>
+EOF
+
+cat << EOF > /etc/mcollective/facts.yaml
+---
+git-server: "<%=git_server_url %>"
+EOF
+
+ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
+cat << EOF >>/root/.ssh/known_hosts
+<%=fingerprint %>
+EOF
+
+eos
         end
 
         class Ssh < self
@@ -71,6 +96,43 @@ module DTK
               :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
             )
           end
+
+          def cloud_init_user_data()
+            USER_DATA_SH
+          end
+
+          USER_DATA_SH = <<eos
+cat << EOF >> /etc/mcollective/server.cfg
+---
+plugin.stomp.host = <%=node_config_server_host %>
+EOF
+
+cat << EOF > /etc/mcollective/facts.yaml
+---
+git-server: "<%=git_server_url %>"
+EOF
+
+mkdir -p /etc/mcollective/ssh
+
+cat << EOF > /etc/mcollective/ssh/mcollective
+<%=mcollective_ssh_remote_private_key %>
+EOF
+
+cat << EOF > /etc/mcollective/ssh/mcollective.pub
+<%=mcollective_ssh_remote_public_key %>
+EOF
+
+cat << EOF > /etc/mcollective/ssh/authorized_keys
+<%=mcollective_ssh_local_public_key %>
+EOF
+
+ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
+cat << EOF >>/root/.ssh/known_hosts
+<%=fingerprint %>
+EOF
+
+eos
+
         end
       end
     end

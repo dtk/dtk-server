@@ -108,6 +108,12 @@ module XYZ
       klass.poll_to_detect_node_ready(node,opts)
     end
 
+    def self.cloud_init_user_data()
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.ret_cloud_init_user_data()
+    end
+
    private
     def self.load_iaas_for(key_val)
       key = key_val.keys.first

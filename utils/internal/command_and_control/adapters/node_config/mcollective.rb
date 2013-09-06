@@ -10,6 +10,11 @@ module DTK
       def self.server_host()
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
+
+      def self.ret_cloud_init_user_data()
+        Config.ret_cloud_init_user_data()
+      end
+
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         version_context = get_version_context(config_node)

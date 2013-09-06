@@ -5,6 +5,8 @@ module DTK; module CommandAndControlAdapter
         git_server_url = RepoManager.repo_url()
         git_server_dns = RepoManager.repo_server_dns()
         node_config_server_host = CommandAndControl.node_config_server_host()
+pp [:foo_debug,CommandAndControl.cloud_init_user_data()]
+raise ErrorUsage.new("Got here")
         fingerprint = RepoManager.repo_server_ssh_rsa_fingerprint()
         mcollective_ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
         mcollective_ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }

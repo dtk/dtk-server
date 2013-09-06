@@ -12,7 +12,7 @@ require './lib/services_spec'
 
 assembly_template1 = 'redhat_bigtop_namenode'
 assembly_template2 = 'redhat_hdp_namenode'
-service_name = 'bakir_test'
+service_name = 'bakir_test_apache'
 service_namespace = 'r8'
 service_filesystem_location = '~/dtk/service_modules'
 $assembly_id = 0

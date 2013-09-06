@@ -539,15 +539,37 @@ module DTK
       row && row[:attribute]
     end
 
-    def delete_object()
-      update_dangling_links()
-      Model.delete_instance(id_handle())
-    end
-    def destroy_and_delete()
+    def destroy_and_delete(opts={})
       update_object!(:external_ref,:hostname_external_ref)
-      suceeeded = CommandAndControl.destroy_node?(self)
-      delete_object() if suceeeded
+      if suceeeded = CommandAndControl.destroy_node?(self)
+        delete_object(opts)
+      end
+      suceeeded
     end
+
+    def delete_object(opts={})
+      update_dangling_links()
+      if opts[:update_task_template]
+        unless assembly = opts[:assembly]
+          raise Error.new("If update_task_template is assembled :assembly must be given as an option")
+        end
+        update_task_templates_when_deleted_node?(assembly)
+      end
+      Model.delete_instance(id_handle())
+      true
+    end
+
+    def update_task_templates_when_deleted_node?(assembly)
+      #TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
+      sp_hash = {
+        #:only_one_per_node,:ref are put in for info needed when getting title
+        :cols => [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
+        :filter => [:eq, :node_node_id, id()]
+      }
+      components = Component::Instance.get_objs(model_handle(:component),sp_hash)
+      components.map{|cmp|Task::Template::ConfigComponents.update_when_deleted_component?(assembly,self,cmp)}
+    end
+    private :update_task_templates_when_deleted_node?
 
     def update_dangling_links()
       dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])

@@ -510,17 +510,22 @@ module DTK; class  Assembly
       end
     end
     def self.delete_node_aux(node,opts={})
-      if opts[:destroy_nodes]
-        node.destroy_and_delete()
-      else
-        node.delete_object()
+      ret = nil
+      Transaction do 
+        ret = 
+          if opts[:destroy_nodes]
+            node.destroy_and_delete(opts)
+          else
+            node.delete_object(opts)
+          end
       end
+      ret
     end
 
     def delete_node(node_idh,opts={})
       node =  node_idh.create_object()
-      Log.error("Not yet implemented yet; cleaning up danglinglinks when assembly node deleted")
-      self.class.delete_node_aux(node,opts)
+      #TODO: check if cleaning up dangling links when assembly node deleted
+      self.class.delete_node_aux(node,opts.merge(:update_task_template=>true,:assembly=>self))
     end
 
     def add_node(node_name,node_binding_rs=nil)

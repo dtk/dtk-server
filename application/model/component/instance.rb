@@ -1,8 +1,7 @@
 module DTK; class Component
   class Instance < self
-
-    def self.get_obj(mh,sp_hash)
-      create_from_component(super(mh,sp_hash))
+    def self.get_objs(mh,sp_hash,opts={})
+      super.map{|cmp|create_from_component(cmp)}
     end
 
     def self.create_from_component(cmp)

@@ -1,0 +1,21 @@
+topicprefix = /topic/
+main_collective = mcollective
+collectives = mcollective
+libdir = /usr/share/mcollective/plugins
+logfile = <%= logfile %>
+loglevel = info
+
+# Plugins
+securityprovider = psk
+plugin.psk = unset
+
+connector = stomp_em
+plugin.stomp.host = <%= stomp_host %>
+plugin.stomp.port = 6163
+plugin.stomp.user = mcollective
+plugin.stomp.password = marionette
+
+# Facts
+factsource = yaml
+plugin.yaml = /etc/mcollective/facts.yaml
+

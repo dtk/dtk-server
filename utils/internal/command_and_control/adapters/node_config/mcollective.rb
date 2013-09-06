@@ -256,14 +256,14 @@ module DTK
                 when :ssh then Ssh
                 else Default
               end
-            klass.new.content(type)
+            klass.new(type).content()
           end
          private
           def initialize(type)
             @type = type
           end
           def erubis_object()
-            erubis_content = File.open(File.expand_path("mcollective/auth/#{type}/client.cfg.erb", File.dirname(__FILE__))).read
+            erubis_content = File.open(File.expand_path("mcollective/auth/#{@type}/client.cfg.erb", File.dirname(__FILE__))).read
             ::Erubis::Eruby.new(erubis_content)
           end
 
@@ -278,6 +278,7 @@ module DTK
           end
 
           class Ssh < self
+            #TODO: validate the R8::Config[:mcollective][:ssh] params
             def content()
               erubis_object().result(
                 :logfile => logfile(),

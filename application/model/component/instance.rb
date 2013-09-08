@@ -1,5 +1,10 @@
 module DTK; class Component
   class Instance < self
+
+    def self.create_assembly_modules_during_clone(cmps)
+      pp [:create_assembly_modules_during_clone,cmps.map{|r|r.class},cmps]
+    end
+
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :component
         super.map{|cmp|create_from_component(cmp)}

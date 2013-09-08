@@ -62,11 +62,14 @@ module XYZ
 
 
         level = 2
+        component_instances = clone_copy_output.children_objects(level,:component_instance)
+        return if component_instances.empty?
+        Component::Instance.create_assembly_modules_during_clone(component_instances)
+
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         component_new_items = component_child_hashes.map do |child_hash| 
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
-        return if component_new_items.empty?
         StateChange.create_pending_change_items(component_new_items)
       end
 

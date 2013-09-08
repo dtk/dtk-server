@@ -92,6 +92,10 @@ module DTK
       @relation_type || self.class.model_name() 
     end
 
+    def self.model_name_with_subclass()
+      model_name_helper(self,:no_subclass => true)
+    end
+
     class << self
       private
       def model_name_helper(klass,opts={})

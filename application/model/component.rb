@@ -424,6 +424,10 @@ module DTK
       indexed_ret.values
     end
 
+    def self.create_subclass_object(cmp)
+      cmp && cmp.id_handle().create_object(:model_name => model_name_with_subclass()).merge(cmp)
+    end
+
   private
     def sub_item_model_names()
       [:node,:component]

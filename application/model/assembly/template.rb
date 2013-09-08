@@ -10,8 +10,9 @@ module DTK; class Assembly
       new_assembly_obj = nil
       Transaction do
         new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
+#        raise ErrorUsage.new("Got here")
       end
-      Assembly::Instance.create_from_component(new_assembly_obj)
+      Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 
     def self.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version=nil)

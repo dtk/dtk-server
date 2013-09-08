@@ -8,10 +8,6 @@ module DTK; class  Assembly
     include ViolationMixin
     include ServiceLinkMixin
 
-    def self.create_from_component(cmp)
-      cmp && cmp.id_handle().create_object(:model_name => :assembly_instance).merge(cmp)
-    end
-
     ### standard get methods
     def get_task_templates(opts={})
       sp_hash = {

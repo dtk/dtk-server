@@ -14,6 +14,12 @@
       :foreign_key_rel_type=>:repo,
       :on_delete=>:set_null,
       :on_update=>:set_null
+    },
+    :assembly_id=>{ #non-null if branch for an assembly instance
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
   :virtual_columns=>{
@@ -102,6 +108,6 @@
        }]
     }
   },
-  :many_to_one=>[:library,:project],
+  :many_to_one=>[:project,:library], #MOD_RESTRUCT: may remove library as parent
   :one_to_many=>[:file_asset]
 }

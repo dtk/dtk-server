@@ -127,6 +127,7 @@ lambda__matching_library_branches =
          :cols => [:id,:display_name]
        }]
     },
+    #TODO: now that assembly_id is added, can we remove this?
     :assemblies=>{
       :type=>:json,
       :hidden=>true,

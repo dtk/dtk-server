@@ -3,6 +3,7 @@ module DTK; class Assembly
     r8_nested_require('template','factory')
 
     def stage(target,assembly_name=nil)
+      # TODO: if name given and not unique either reject or generate a -n suffix
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}

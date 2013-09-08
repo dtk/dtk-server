@@ -66,6 +66,12 @@ lambda__matching_library_branches =
       :foreign_key_rel_type=>:project,
       :on_delete=>:cascade,
       :on_update=>:cascade
+    },
+    :assembly_id=>{ #non-null if branch for an assembly instance
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
   :virtual_columns=>{

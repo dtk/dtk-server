@@ -286,13 +286,17 @@ module DTK
     #### method(s) related to staging assembly template
     def rest__stage()
       target_id = ret_request_param_id_optional(:target_id, ::DTK::Target)
-
       target = target_idh_with_default(target_id).create_object()
       assembly_template = ret_assembly_template_object()
-      # TODO: if name given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 
       new_assembly_obj = assembly_template.stage(target,assembly_name)
-      rest_ok_response :assembly_id => new_assembly_obj[:id]
+      response = {
+        :new_assembly_instance => {
+          :name => new_assembly_obj.display_name_print_form, 
+          :id => new_assembly_obj.id()
+        }
+      }
+      rest_ok_response(response,:encode_into => :yaml)
     end
 
     #### end: method(s) related to staging assembly template

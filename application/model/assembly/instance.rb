@@ -8,6 +8,10 @@ module DTK; class  Assembly
     include ViolationMixin
     include ServiceLinkMixin
 
+    def self.create_from_component(cmp)
+      cmp && cmp.id_handle().create_object(:model_name => :assembly_instance).merge(cmp)
+    end
+
     ### standard get methods
     def get_task_templates(opts={})
       sp_hash = {
@@ -295,6 +299,10 @@ module DTK; class  Assembly
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
+    def display_name_print_form(opts={})
+      self.class.pretty_print_name(self,opts)
+    end
+
     class << self
       def get_assemblies_with_nodes(mh,opts={})
         Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
@@ -316,6 +324,10 @@ module DTK; class  Assembly
         ndx_ret.values
       end
 
+      def pretty_print_name(assembly,opts={})
+        assembly.get_field?(:display_name)
+      end
+
      private
       def list_aux__no_details(assembly_rows)
         assembly_rows.map do |r|
@@ -323,10 +335,6 @@ module DTK; class  Assembly
           #get_objs do this (using possibly option flag for subtype processing)
           r.id_handle.create_object().merge(:display_name => pretty_print_name(r))
         end
-      end
-
-      def pretty_print_name(assembly,opts={})
-        assembly[:display_name]
       end
 
       def add_execution_status!(assembly_rows,assembly_mh)

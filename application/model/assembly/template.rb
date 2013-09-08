@@ -10,7 +10,7 @@ module DTK; class Assembly
       Transaction do
         new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
       end
-      new_assembly_obj
+      Assembly::Instance.create_from_component(new_assembly_obj)
     end
 
     def self.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version=nil)

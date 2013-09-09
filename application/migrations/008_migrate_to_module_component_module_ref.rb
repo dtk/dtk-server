@@ -1,3 +1,4 @@
+=begin
 require File.expand_path("common", File.dirname(__FILE__))
 require 'pp'
 Sequel.migration do
@@ -40,3 +41,4 @@ Sequel.migration do
      end
   end
 end
+=end

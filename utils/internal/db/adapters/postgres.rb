@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class Postgres < DB
     def initialize(db_params,opts=Opts.new)
       super()
@@ -160,6 +160,31 @@ module XYZ
                      col.attrelid = rel.oid AND
                      col.attname = '#{column.to_s}'"
       db_fetch(query) {|r| return r[:count] == 1 ? true : nil}
+    end
+
+    def modify_column_varchar_size?(db_rel,col_name,size)
+      query = "SELECT character_maximum_length 
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE table_schema='#{db_rel[:schema]}' AND
+        table_name='#{db_rel[:table]}' AND
+        column_name='#{col_name}' AND 
+        not character_maximum_length IS NULL"
+      results = db_fetch(query).all
+      if results.size == 0
+        return
+      elsif results.size > 1
+        Log.error("Unexpected that size > 1")
+        return
+      end
+      existing_size = results.first[:character_maximum_length]
+      if existing_size == size
+        return
+      end
+      qualified_table = "#{db_rel[:schema]}.#{db_rel[:table]}"
+      sql = "ALTER TABLE #{qualified_table} ALTER COLUMN #{col_name} TYPE varchar(#{size.to_s})"
+      db_run(sql)
+      Log.info("Changed table (#{qualified_table}) varchar column (#{col_name}) from size #{existing_size.to_s} to #{size.to_s}")
+      nil
     end
 
     def foreign_key_exists?(db_rel,foreign_key_field,db_rel_pointed_to)

@@ -28,7 +28,7 @@ module DTK
   end
 
   r8_nested_require('mixins','remote')  
-
+  
   module ModuleMixin
     include ModuleRemoteMixin
 
@@ -86,7 +86,7 @@ module DTK
       matches.first
     end
 
-    def create_new_version(new_version)
+    def create_new_version(new_version,opts={})
       unless aug_ws_branch = get_augmented_workspace_branch()
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
@@ -95,10 +95,8 @@ module DTK
       if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
-      #TODO: may check that version number is greater than existing versions, locally and possibly remotely
-
       repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_new_version__type_specific(repo_for_new_version,new_version)
+      create_new_version__type_specific(repo_for_new_version,new_version,opts)
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)

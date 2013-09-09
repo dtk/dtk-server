@@ -10,7 +10,12 @@ module DTK
         ndx_component_modules[cmp_mod[:id]] ||= cmp_mod
       end
       pp [:component_modules,ndx_component_modules.values]
-      #TODO: now call ComponentModule#create_new_version(<new version for assembly>) for component module
+      #TODO: very expensive call; will refine
+      module_version = ModuleVersion.create_for_assembly(assembly)
+      ndx_component_modules.values.map do |component_module|
+        #TODO: need to pass option taht indiactes which existing branch to branch from
+        component_module.create_new_version(module_version,:assembly_module=>true)
+      end
       nil
     end
   end

@@ -64,7 +64,7 @@ module XYZ
         level = 2
         component_instances = clone_copy_output.children_objects(level,:component_instance)
         return if component_instances.empty?
-        Component::Instance.create_assembly_modules_during_clone(component_instances)
+        create_assembly_modules_during_clone(component_instances)
 
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         component_new_items = component_child_hashes.map do |child_hash| 
@@ -107,6 +107,20 @@ module XYZ
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
           port_link.create_attr_links!(target.id_handle,:set_port_link_temporal_order=>true)
         end
+      end
+     private
+      def self.create_assembly_modules_during_clone(component_instances)
+        pp [:create_assembly_modules_during_clone,component_instances.map{|r|r.class},component_instances]
+        cmp_template_idhs = component_instances.map{|r|r.id_handle(:id => r[:component_template_id])}
+        cmp_tmpl_ndx_component_modules = Component::Template.get_indexed_component_modules(cmp_template_idhs)
+        pp [:ndx_component_modules,cmp_tmpl_ndx_component_modules]
+        ndx_component_modules = Hash.new
+        cmp_tmpl_ndx_component_modules.each_value do |cmp_mod|
+          ndx_component_modules[cmp_mod[:id]] ||= cmp_mod
+        end
+        pp [:component_modules,ndx_component_modules.values]
+        #TODO: now call ComponentModule#create_new_version(<new version for assembly>) for component module
+        nil
       end
     end
   end

@@ -188,6 +188,24 @@ module XYZ
          }
         ]
 
+      virtual_column :component_modules, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :module_branch,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :cols => [:id,:component_id]
+         },
+         {
+           :model_name => :component_module,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:module_branch,:component_id)},
+           :cols => [:id,:group_id,:display_name,:dsl_parsed]
+         }
+        ]
+
         virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [

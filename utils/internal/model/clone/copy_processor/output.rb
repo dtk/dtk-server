@@ -44,9 +44,8 @@ module DTK
           children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
         end
 
-        def is_assembly?()
-          #TODO: cleanup; this assumes that assembly call wil create an object
-          objects and objects.first and objects.first.is_assembly?
+        def assembly?(opts={})
+          objects && objects.first && objects.first.assembly?(opts)
         end
 
         def set_new_objects!(objs_info,target_mh)

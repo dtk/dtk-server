@@ -424,8 +424,17 @@ module DTK
       indexed_ret.values
     end
 
-    def self.create_subclass_object(cmp)
-      cmp && cmp.id_handle().create_object(:model_name => model_name_with_subclass()).merge(cmp)
+    def self.create_subclass_object(cmp,subclass_model_name=nil)
+      cmp && cmp.id_handle().create_object(:model_name => subclass_model_name||model_name_with_subclass()).merge(cmp)
+    end
+
+    def is_assembly?()
+      "composite" == get_field?(:type)
+    end
+    def assembly?(opts={})
+      if is_assembly?()
+        Assembly.create_assembly_subclass_object(self)
+      end
     end
 
   private
@@ -808,13 +817,6 @@ module DTK
       assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),:component_id => self[:id])
       return Array.new if assocs.nil?
       assocs.map{|assoc|Model.get_object(IDHandle[:c=>@c,:guid => assoc[:node_id]])}
-    end
-
-    def is_assembly?()
-      self[:type] == "composite"
-    end
-    def is_base_component?()
-      not self[:type] == "composite"
     end
 
     def get_obj_with_common_cols()

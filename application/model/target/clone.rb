@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module TargetCloneMixin
     def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
@@ -31,14 +31,14 @@ module XYZ
       end
 
       def self.component(target,clone_copy_output,opts)
-        if clone_copy_output.is_assembly?()
-          assembly(target,clone_copy_output,opts)
+        if assembly = clone_copy_output.assembly?(:subclass_object=>true)
+          assembly(target,assembly,clone_copy_output,opts)
         else
           raise Error.new("Not implemented clone of non assembly component to target")
         end
       end
 
-      def self.assembly(target,clone_copy_output,opts)
+      def self.assembly(target,assembly,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
 
         #adjust link_def_id on ports
@@ -64,7 +64,7 @@ module XYZ
         level = 2
         component_instances = clone_copy_output.children_objects(level,:component_instance)
         return if component_instances.empty?
-        create_assembly_modules_during_clone(component_instances)
+        AssemblyModules.create_component_modules(assembly,component_instances)
 
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         component_new_items = component_child_hashes.map do |child_hash| 
@@ -107,20 +107,6 @@ module XYZ
         Model.get_objs(port_link_mh,sp_hash).each do |port_link|
           port_link.create_attr_links!(target.id_handle,:set_port_link_temporal_order=>true)
         end
-      end
-     private
-      def self.create_assembly_modules_during_clone(component_instances)
-        pp [:create_assembly_modules_during_clone,component_instances.map{|r|r.class},component_instances]
-        cmp_template_idhs = component_instances.map{|r|r.id_handle(:id => r[:component_template_id])}
-        cmp_tmpl_ndx_component_modules = Component::Template.get_indexed_component_modules(cmp_template_idhs)
-        pp [:ndx_component_modules,cmp_tmpl_ndx_component_modules]
-        ndx_component_modules = Hash.new
-        cmp_tmpl_ndx_component_modules.each_value do |cmp_mod|
-          ndx_component_modules[cmp_mod[:id]] ||= cmp_mod
-        end
-        pp [:component_modules,ndx_component_modules.values]
-        #TODO: now call ComponentModule#create_new_version(<new version for assembly>) for component module
-        nil
       end
     end
   end

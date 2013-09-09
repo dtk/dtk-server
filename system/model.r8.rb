@@ -555,7 +555,7 @@ module DTK
 
       PerformanceService.end("PERF_SQL", search_object.object_id)
       PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
-      PerformanceService.log("SQL=#{dataset.sequel_ds.sql.gsub('"','')}")
+      PerformanceService.log("SQL="+dataset.sequel_ds.sql.gsub(/"/,'')) 
 
       return ret_val
     end
@@ -725,8 +725,8 @@ module DTK
     def is_assembly?()
       nil
     end
-    def is_base_component?()
-      nil
+    def assembly?(opts={})
+     nil
     end
 
     #may deprecate below

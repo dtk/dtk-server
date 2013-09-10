@@ -6,14 +6,13 @@ module DTK
 
     class AssemblyModule < self
       attr_reader :assembly_name
+
      private
       def initialize(assembly)
-        @assembly_name = assembly_name(assembly)
-        super(version_string(assembly))
+        @assembly_name = assembly.get_field?(:display_name)
+        super(version_string(@assembly_name))
       end
-      def assembly_name(assembly)
-        assembly.get_field?(:display_name)
-      end
+
       def version_string(assembly_name)
         "assembly--#{assembly_name}"
       end

@@ -62,11 +62,14 @@ module DTK
 
 
         level = 2
-        component_instances = clone_copy_output.children_objects(level,:component_instance)
-        return if component_instances.empty?
-        AssemblyModules.create_component_modules(assembly,component_instances)
+#TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
+#TODO: one alternative is to make minimal changes that just creates the assembly branch and feeds it to the config_node implementation id
+component_instances = clone_copy_output.children_objects(level,:component_instance)
+return if component_instances.empty?
+AssemblyModules.create_component_modules?(assembly,component_instances)
 
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
+        return if component_child_hashes.empty?
         component_new_items = component_child_hashes.map do |child_hash| 
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end

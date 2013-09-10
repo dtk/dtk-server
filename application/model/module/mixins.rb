@@ -87,7 +87,11 @@ module DTK
     end
 
     def create_new_version(new_version,opts={})
-      unless aug_ws_branch = get_augmented_workspace_branch()
+      opts_get_aug = Opts.new
+      if base_version = opts[:base_version]
+        opts_get_aug.merge(:filter => {:version => base_version})
+      end
+      unless aug_ws_branch = get_augmented_workspace_branch(opts_get_aug)
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
 

@@ -162,7 +162,7 @@ pp [:normalize,ret]
 
     VersionsTreated = DSLFilenameRegexp.keys
     ExtensionToType = {
-      "yml" => :yaml,
+      "yaml" => :yaml,
       "json" => :json
     }
     TypeToExtension = ExtensionToType.inject(Hash.new){|h,(k,v)|h.merge(v => k)}

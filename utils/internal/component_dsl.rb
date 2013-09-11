@@ -193,7 +193,7 @@ pp [:normalize,ret]
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
           file_extension = $1
           unless format_type = ExtensionToType[file_extension]
-            raise Error.new("illegal file extension #{file_extension}") unless file_extension
+            raise Error.new("illegal file extension #{file_extension}") 
           end
           {:format_type => format_type}
         else

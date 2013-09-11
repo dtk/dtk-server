@@ -1,26 +1,48 @@
 module DTK
-  class AssemblyModules
+  class AssemblyModule
+    def self.prepare_for_edit_component_module(assembly,component_module)
+      assembly_id = assembly.id()
+      cmp_instances = component_module.get_associated_component_instances().select do |cmp|
+        cmp[:assembly_id] == assembly_id
+      end
+      if cmp_instances.empty?()
+        assembly_name = assembly.display_name_print_form()
+        raise ErrorUsage.new("Assembly (#{assembly_name}) does not have any components belonging to module (#{component_module.get_field?(:display_name)})")
+      end
+      create_component_module_version?(assembly,component_module,cmp_instances)
+      module_version = ModuleVersion.create_for_assembly(assembly)
+      component_module.get_workspace_branch_info(module_version)
+    end
+
     def self.create_component_modules?(assembly,cmp_instances_to_prune)
       module_version = ModuleVersion.create_for_assembly(assembly)
       cmp_instances = reject_matching_component_instances(cmp_instances_to_prune,module_version)
       return if cmp_instances.empty?
-      pp [:create_component_modules,assembly.class,cmp_instances.map{|r|r.class},cmp_instances]
       cmp_template_idhs = cmp_instances.map{|r|r.id_handle(:id => r.get_field?(:component_template_id))}
       cmp_tmpl_ndx_cmp_modules = Component::Template.get_indexed_component_modules(cmp_template_idhs)
-      pp [:ndx_cmp_modules,cmp_tmpl_ndx_cmp_modules]
       ndx_cmp_modules = Hash.new
       cmp_tmpl_ndx_cmp_modules.each_value do |cmp_mod|
         ndx_cmp_modules[cmp_mod[:id]] ||= cmp_mod
       end
-      pp [:cmp_modules,ndx_cmp_modules.values]
-      #TODO: very expensive call; will refine
       ndx_cmp_modules.values.map do |cmp_module|
-        opts = {:base_version=>cmp_module.get_field?(:version),:assembly_module=>true}
-        cmp_module.create_new_version(module_version,opts)
+        create_component_module_version(cmp_module,module_version)
       end
       nil
     end
    private
+    def self.create_component_module_version?(assembly,component_module,cmp_instances)
+      module_version = ModuleVersion.create_for_assembly(assembly)
+      unless reject_matching_component_instances(cmp_instances,module_version).empty?
+        create_component_module_version(component_module,module_version)
+      end
+    end
+
+    def self.create_component_module_version(component_module,module_version)
+      opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
+      #TODO: very expensive call; will refine
+      component_module.create_new_version(module_version,opts)
+    end
+
     def self.reject_matching_component_instances(cmp_instances,module_version)
       ret = cmp_instances
       return ret if ret.empty?

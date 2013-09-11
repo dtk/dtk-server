@@ -4,7 +4,7 @@ module DTK
   r8_nested_require('module','service')
   r8_nested_require('module','branch')
   r8_nested_require('module','version')
-  r8_nested_require('module','assembly_modules')
+  r8_nested_require('module','assembly_module')
   class ModuleCommon
     # This has been moved to DTK Common TODO [Haris] replace
     def self.string_has_version_format?(str)

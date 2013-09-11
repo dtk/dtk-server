@@ -49,6 +49,7 @@ R8::ReactorRoute.draw do
   post  'assembly/delete_node' => 'assembly#delete_node'
   post  'assembly/delete_component' => 'assembly#delete_component'
   post  'assembly/get_components_module' => 'assembly#get_components_module'
+  post  'assembly/prepare_for_edit_module' => 'assembly#prepare_for_edit_module'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'

@@ -29,8 +29,8 @@ module DTK
     def get_associated_component_instances()
       ndx_ret = Hash.new
       get_objs(:cols => [:component_instances]).each do |r|
-        component = r[:component]
-        ndx_ret[component[:id]] ||= component
+        cmp = r[:component]
+        ndx_ret[cmp[:id]] ||= Component::Instance.create_subclass_object(cmp)
       end
      ndx_ret.values
     end

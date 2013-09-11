@@ -103,6 +103,18 @@ module DTK
       rest_ok_response assembly.get_components_module(component_id)
     end
 
+    def rest__prepare_for_edit_module()
+      assembly = ret_assembly_instance_object()
+      module_type = ret_non_null_request_params(:module_type)
+      unless module_type.to_sym == :component_module
+        raise Error.new("prepare_for_edit_module only treats component_module type") 
+      end
+      module_name = ret_non_null_request_params(:module_name)
+      component_module = create_obj(:module_name,ComponentModule)
+
+      rest_ok_response AssemblyModule.prepare_for_edit_component_module(assembly,component_module)
+    end
+
     # checks element trough set of fields
     def check_element(element, fields, element_id_val)
       return true if (element_id_val.nil? || element_id_val.empty?)

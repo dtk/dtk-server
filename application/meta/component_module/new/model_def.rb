@@ -256,7 +256,7 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
-        :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id],
+        :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id,:project_project_id,:component_template_id],
         :filter=>[:neq,:node_node_id,nil])
       ]
     },

@@ -81,14 +81,7 @@ class R8Server
     }
 
     #create workspace
-    unless project_idh = ret[:project_idhs].first
-      Log.error("No project found so not creating a workspace")
-      return ret
-    end
-    if ret[:project_idhs].size > 1
-      Log.error("Unexpected taht multiple projects found; pikcing arbirary one for workspace")
-    end
-    (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh,project_idh)}
+    (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh)}
 
     ret
   end

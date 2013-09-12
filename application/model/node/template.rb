@@ -42,7 +42,11 @@ module DTK
       end
 
       def self.legal_os_identifiers(model_handle)
-        return @legal_os_types if @legal_os_types
+        # ALDIN: I will comment this return statement until we figure out if we need this,
+        # because it's causing issues when we add new OS it will return OS list that is already assigned to
+        # @legal_os_types variable which does not containe newly added OS
+        # return @legal_os_types if @legal_os_types
+        
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
           :cols => [:id,:os_identifier],

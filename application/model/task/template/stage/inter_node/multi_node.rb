@@ -10,7 +10,7 @@ module DTK; class Task; class Template; class Stage
         if opts[:form] == :explicit_instances
           super
         else
-          serialized_form_with_name().merge(:ordered_components => @ordered_components)
+          serialized_form_with_name().merge(:nodes => serialized_multi_node_type(),:ordered_components => @ordered_components)
         end
       end
 
@@ -44,6 +44,10 @@ module DTK; class Task; class Template; class Stage
             merge!(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
           end
           self
+        end
+
+        def serialized_multi_node_type()
+          "All_applicable"
         end
 
       end

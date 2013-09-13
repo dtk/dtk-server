@@ -20,7 +20,6 @@ module DTK; class Task; class Template; class ConfigComponents
         task_template_idh = Template.create_or_update_from_serialized_content?(task_template_mh,assembly.id_handle(),serialized_content,task_action)
         ReifiedObjectCache.add_or_update_item(task_template_idh,template_content)
       end
-      
     
       def self.remove_any_outdated_items(assembly_update)
         ReifiedObjectCache.remove_any_outdated_items(assembly_update)

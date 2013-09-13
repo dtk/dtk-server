@@ -264,13 +264,13 @@ module DTK
     end
 
    private
-    def create_new_version__type_specific(repo_for_new_branch,new_version)
+    def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
       project = get_project()
       repo_idh = repo_for_new_branch.id_handle()
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo_for_new_branch) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch)
+      update_model_from_dsl(module_branch,opts)
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
@@ -280,14 +280,20 @@ module DTK
       update_model_from_dsl(module_branch,opts)
     end
 
-    def export_preprocess(module_branch)
+    def export_preprocess(module_branch, module_obj)
       #get module info for every component in an assembly in the service module
+      is_parsed   = false
       module_info = get_component_modules_info(module_branch)
 
       #check that all component modules are linked to a remote component module
       unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?()}
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
+      end
+
+      is_parsed = module_obj[:dsl_parsed] if module_obj
+      unless is_parsed
+        raise ErrorUsage.new("Unable to export module that has parsing errors. Please fix errors and try export again.")
       end
     end
 

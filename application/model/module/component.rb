@@ -211,8 +211,15 @@ module DTK
     def config_agent_type_default()
       :puppet
     end
-    def export_preprocess(branch)
-      #noop
+
+    def export_preprocess(branch, module_obj)
+      is_parsed   = false
+      
+      is_parsed = module_obj[:dsl_parsed] if module_obj
+      unless is_parsed
+        raise ErrorUsage.new("Unable to export module that has parsing errors. Please fix errors and try export again.")
+      end
     end
+    
   end
 end

@@ -77,8 +77,8 @@ module DTK; class ComponentModule
     end
 
    private
-    def create_new_version__type_specific(repo_for_new_branch,new_version)
-      create_needed_objects_and_dsl?(repo_for_new_branch,new_version)
+    def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
+      create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
@@ -111,7 +111,7 @@ module DTK; class ComponentModule
       dsl_info
     end
 
-    def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
+    def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       impl_obj = module_branch.get_implementation()
       #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
@@ -120,7 +120,7 @@ module DTK; class ComponentModule
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
-          dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version)
+          dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
       else
         config_agent_type = config_agent_type_default()

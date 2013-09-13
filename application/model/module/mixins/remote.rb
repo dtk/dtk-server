@@ -42,7 +42,9 @@ module DTK
         #TODO: may have commit_sha returned in this fn so client can do a reliable pull
         commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
-        create_new_version__type_specific(local_repo_for_imported_version,version)
+
+        opts = {:do_not_raise => true}
+        create_new_version__type_specific(local_repo_for_imported_version,version,opts)
         return get_workspace_branch_info(version)
       end
     end
@@ -71,7 +73,13 @@ module DTK
       unless module_branch_obj = get_module_branch(local_branch)
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
       end
-      export_preprocess(module_branch_obj)
+
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :display_name, module_name()], [:eq, :project_project_id,project[:id]]]
+      } 
+      module_obj = get_obj(project.model_handle(module_type()),sp_hash)
+      export_preprocess(module_branch_obj, module_obj)
 
       #create module on remote repo manager
       module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type(), component_namespace)

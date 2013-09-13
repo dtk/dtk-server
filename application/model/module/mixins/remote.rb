@@ -109,10 +109,13 @@ module DTK
       # validate presence of module (this should never happen)
       raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
       # validate presence of brach
-      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{module_name}'") unless module_obj.get_module_branch(local_branch)
+      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
       
       repo = module_obj.get_repo!
       repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info)
     end
 
     #import from remote repo; directly in this method handles the module/branc and repo level items

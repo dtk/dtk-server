@@ -36,8 +36,10 @@ module DTK
       return ret if cmp_refs.empty?
       project = get_project()
       ret = ComponentRef.get_referenced_component_modules(project,cmp_refs)
+
       if opts.array(:detail_to_include).include?(:versions)
         ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
+        
         ret.each do |mod|
           if version_obj = ndx_versions[mod.module_name()]
             mod[:version] = version_obj
@@ -240,6 +242,14 @@ module DTK
       mh = assembly_templates.first.model_handle(:component)
       get_objs(mh,sp_hash)
     end 
+
+    def pull_from_remote__update_from_dsl(repo, module_and_branch_info)
+      info = module_and_branch_info #for succinctness
+      module_branch_idh = info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object().merge(:repo => repo)
+
+      update_model_from_dsl(module_branch)
+    end
 
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts = {})
       unless version.nil?

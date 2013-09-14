@@ -50,7 +50,6 @@ module DTK; module CommandAndControlAdapter
             Log.info("Persistent hostname needed for node '#{node[:display_name]}', assigned #{elastic_ip}")
            rescue Fog::Compute::AWS::Error => e
             Log.error "Not able to set Elastic IP, reason: #{e.message}"
-          # TODO: Check with Rich if this is recovarable error, for now it is not
             raise e
           end
         end

@@ -1,3 +1,6 @@
+#TODO: think want to replace some of the DTK::CreateThread.defer_with_session(user_object) do
+#with  create_thread_in_callback_context(task,workitem) 
+#and also do teh same for non threaded callbacks to make sure that have proper bahvior if fail in callback (i.e., canceling task)
 module DTK 
   module WorkflowAdapter
     module RuoteParticipant
@@ -90,7 +93,10 @@ module DTK
           if event = add_start_task_event?(task)
             Log.info_pp [:start_task_event, event]
           end
-  
+          execution_context_block(task,workitem,&body)
+        end
+
+        def execution_context_block(task,workitem,&body)
           begin
             yield
           rescue Exception => e
@@ -101,6 +107,13 @@ module DTK
             end
             task.update_at_task_completion("failed",{:errors => errors})
             reply_to_engine(workitem)
+          end
+        end
+
+        def create_thread_in_callback_context(task,workitem,&body)
+          user_object  = CurrentSession.new.user_object()
+          CreateThread.defer_with_session(user_object) do
+            execution_context_block(task,workitem,&body)
           end
         end
 
@@ -185,13 +198,12 @@ module DTK
           # task_id,action,workflow,task = %w{task_id action workflow task}.map{|k|params[k]}
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
-
           user_object  = ::DTK::CurrentSession.new.user_object()
 
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                DTK::CreateThread.defer_with_session(user_object) do
+                create_thread_in_callback_context(task,workitem) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
@@ -255,39 +267,38 @@ module DTK
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                  DTK::CreateThread.defer_with_session(user_object) do
-
-                    # Amar: PERFORMANCE
-                    PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                    
-                    result = {:type => :completed_create_node, :task_id => task_id}
-
-       
-                    Log.info_pp [:found,msg[:senderid]]
-                    node = task[:executable_action][:node]
-                    node.update_operational_status!(:running)
-
+                create_thread_in_callback_context(task,workitem) do
+                  # Amar: PERFORMANCE
+                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  
+                  result = {:type => :completed_create_node, :task_id => task_id}
+                  
+                  
+                  Log.info_pp [:found,msg[:senderid]]
+                  node = task[:executable_action][:node]
+                  node.update_operational_status!(:running)
+                  
                     #these must be called before get_and_propagate_dynamic_attributes
-                    node.associate_elastic_ip?()
-                    node.associate_persistent_dns?()
-
+                  node.associate_elastic_ip?()
+                  node.associate_persistent_dns?()
+                  
                     action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-                    set_result_succeeded(workitem,result,task,action)
-                    delete_task_info(workitem)
-
-                    reply_to_engine(workitem)
-                  end
-                end,
-                :on_timeout => proc do
-                  DTK::CreateThread.defer_with_session(user_object) do
-                    Log.error("Timeout detecting if node is ready")
-                    result = {:type => :timeout_create_node, :task_id => task_id}
-                    set_result_failed(workitem,result,task)
-                    cancel_upstream_subtasks(workitem)
-                    delete_task_info(workitem)
-                    reply_to_engine(workitem)
-                  end
+                  set_result_succeeded(workitem,result,task,action)
+                  delete_task_info(workitem)
+                  
+                  reply_to_engine(workitem)
                 end
+              end,
+              :on_timeout => proc do
+                DTK::CreateThread.defer_with_session(user_object) do
+                  Log.error("Timeout detecting if node is ready")
+                  result = {:type => :timeout_create_node, :task_id => task_id}
+                  set_result_failed(workitem,result,task)
+                  cancel_upstream_subtasks(workitem)
+                  delete_task_info(workitem)
+                  reply_to_engine(workitem)
+                end
+              end
             }
             poll_to_detect_node_ready(workflow, action[:node], callbacks)
           end

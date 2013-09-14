@@ -34,15 +34,15 @@ module DTK
         dns = Fog::DNS::AWS.new(get_compute_params())
         @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
       end
-
+      
       def all_records()
-        @r8zone.records
+        request_context do
+          @r8zone.records
+        end
       end
 
-      Lock = Mutex.new
-
       def get_record(name, type=nil)
-        Lock.synchronize do
+        request_context do
           5.times do
             begin
               return @r8zone.records.get(name,type)
@@ -59,7 +59,9 @@ module DTK
 
       def destroy_record(name, type=nil)
         record = get_record(name,type)
-        return (record.nil? ? false : record.destroy)
+        request_context do
+          record.nil? ? false : record.destroy
+        end
       end
 
       ##
@@ -68,17 +70,30 @@ module DTK
       # type           => DNS Record type supports A, AAA, CNAME, NS, etc.
       #
       def create_record(name, value, type = 'CNAME', ttl=300)
-        create_hash = { :type => type, :name => name, :value => value, :ttl => ttl }
-        @r8zone.records.create(create_hash)
+        request_context do
+          create_hash = { :type => type, :name => name, :value => value, :ttl => ttl }
+          @r8zone.records.create(create_hash)
+        end
       end
 
       ##
       # New value for records to be linked to
       #
       def update_record(record, value)
-        # record is changed via Fog's modify
-        record.modify(:value => value)
+        request_context do
+          # record is changed via Fog's modify
+          record.modify(:value => value)
+        end
       end
+
+      private
+      LockRequest = Mutex.new
+       def request_context(&block)
+         #TODO: put up in heer some handling of errors such as ones that should be handled by doing a retry
+         LockRequest.synchronize do
+           yield
+         end
+       end
 
     end # => Route53 class
 

@@ -16,7 +16,7 @@ module DTK; class ServiceModule
       @ndx_version_proc_classes = Hash.new
     end
 
-    def process(module_name,hash_content)
+    def process(module_name,hash_content,opts={})
       #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
       integer_version = determine_integer_version(hash_content)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
@@ -26,7 +26,7 @@ module DTK; class ServiceModule
           dangling_errors.aggregate_errors! do
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
             # if bad node reference, return error and continue with module import
-            imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs)
+            imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
             
             @db_updates_assemblies["node"].merge!(imported_nodes)
@@ -70,7 +70,7 @@ module DTK; class ServiceModule
       }
     end
 
-    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs)
+    def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs,opts={})
       #compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
@@ -85,34 +85,43 @@ module DTK; class ServiceModule
       dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
       version_field = module_branch.get_field?(:version)
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
-      ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
-        dangling_errors.aggregate_errors!(h) do
-          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
-          node_output = {
-            "display_name" => node_hash_ref, 
-            "type" => "stub",
-            "*assembly_id" => "/component/#{assembly_ref_with_version}" 
-          }
-          if nb_rs = node_to_nb_rs[node_hash_ref]
-            if nb_rs_id = nb_rs_to_id[nb_rs]
-              node_output["node_binding_rs_id"] = nb_rs_id
+
+      if assembly_hash["nodes"]
+        ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+          dangling_errors.aggregate_errors!(h) do
+            node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
+            node_output = {
+              "display_name" => node_hash_ref, 
+              "type" => "stub",
+              "*assembly_id" => "/component/#{assembly_ref_with_version}" 
+            }
+            if nb_rs = node_to_nb_rs[node_hash_ref]
+              if nb_rs_id = nb_rs_to_id[nb_rs]
+                node_output["node_binding_rs_id"] = nb_rs_id
+              else
+                #TODO: extend dangling_errors.aggregate_errors to handle this
+                # We want to import module still even if there are bad node references
+                # we stop importing nodes when run into bad node reference but still continue with module import
+                
+                return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
+              end
             else
-              #TODO: extend dangling_errors.aggregate_errors to handle this
-              # We want to import module still even if there are bad node references
-              # we stop importing nodes when run into bad node reference but still continue with module import
-              
-              return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
+              node_output["node_binding_rs_id"] = nil
             end
-          else
-            node_output["node_binding_rs_id"] = nil
+            cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
+            return cmps_output if cmps_output.is_a?(ErrorUsage::DSLParsing)
+
+            unless cmps_output.empty?
+              node_output["component_ref"] = cmps_output
+            end
+            h.merge(node_ref => node_output)
           end
-          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs)
-          unless cmps_output.empty?
-            node_output["component_ref"] = cmps_output
-          end
-          h.merge(node_ref => node_output)
         end
+      else
+        # if nodes section missing from assembly.json file return error but still import service 
+        return ErrorUsage::DSLParsing::BadNodeReference.new("Missing nodes section or you misspelled 'nodes' part in",opts[:file_path])
       end
+
       dangling_errors.raise_error?()
       ret
     end
@@ -174,24 +183,31 @@ module DTK; class ServiceModule
       end
     end
 
-    def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs)
+    def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
       cmps_with_titles = Array.new
-      ret = components_hash.inject(Hash.new) do |h,cmp_input|
-        parse = component_ref_parse(cmp_input)
-        cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
-        if cmp_ref[:version]
-          cmp_ref[:has_override_version] = true
-        end
-        if cmp_title = parse[:component_title] 
-          cmps_with_titles << {:cmp_ref => cmp_ref, :cmp_title => cmp_title}
-        end
 
-        ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
-          pntr = cmp_ref[:attribute_override] ||= Hash.new
-          pntr.merge!(import_attribute_overrides(attr_name,attr_val))
+      if components_hash
+        ret = components_hash.inject(Hash.new) do |h,cmp_input|
+          parse = component_ref_parse(cmp_input)
+          cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
+          if cmp_ref[:version]
+            cmp_ref[:has_override_version] = true
+          end
+          if cmp_title = parse[:component_title] 
+            cmps_with_titles << {:cmp_ref => cmp_ref, :cmp_title => cmp_title}
+          end
+
+          ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
+            pntr = cmp_ref[:attribute_override] ||= Hash.new
+            pntr.merge!(import_attribute_overrides(attr_name,attr_val))
+          end
+          h.merge(parse[:ref] => cmp_ref)
         end
-        h.merge(parse[:ref] => cmp_ref)
+      else
+        return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section or you misspelled 'components' part in",opts[:file_path])
       end
+
+
       #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)

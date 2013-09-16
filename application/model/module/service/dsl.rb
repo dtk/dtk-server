@@ -97,7 +97,7 @@ module DTK
             #TODO: FOR-ALDIN: extend to handle yaml parsing errors
             return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
             # if assembly/node import returns error continue with module import
-            imported = assembly_import_helper.process(module_name,hash_content)
+            imported = assembly_import_helper.process(module_name,hash_content,opts)
             return imported if imported.is_a?(ErrorUsage::DSLParsing)
           end
         end

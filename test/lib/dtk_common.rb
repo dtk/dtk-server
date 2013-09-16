@@ -101,7 +101,7 @@ class DtkCommon
 			puts "Assembly template #{@assembly_template} not found!"
 		end
 		puts ""
-		return assembly_id
+		return assembly_id.to_i
 	end
 
 	def check_if_assembly_exists(assembly_id)
@@ -109,6 +109,7 @@ class DtkCommon
 		puts "Check if assembly exists:", "-------------------------"
 		assembly_exists = false
 		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		pretty_print_JSON(assembly_list)
 		test_assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }
 
 		puts "Assembly with id #{assembly_id}: "

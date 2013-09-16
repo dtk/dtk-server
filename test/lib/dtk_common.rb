@@ -73,7 +73,7 @@ class DtkCommon
 		puts "Stage assembly:", "---------------"
 		assembly_id = nil
 		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
-
+ 
 		puts "List of avaliable assembly templates: "
 		pretty_print_JSON(assembly_template_list)
 
@@ -84,9 +84,9 @@ class DtkCommon
 			template_assembly_id = test_template['id']
 			puts "Assembly template id: #{template_assembly_id}"
 
-			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})		
+			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})	
 
-			if (stage_assembly_response['data']['assembly_id'])
+			if (stage_assembly_response['data'].include? 'name: smoke_test_instance')
 				puts "Stage of #{assembly_template} assembly template completed successfully!"
 				assembly_id = stage_assembly_response['data']['assembly_id']
 				puts "Assembly id for a staged assembly: #{assembly_id}"

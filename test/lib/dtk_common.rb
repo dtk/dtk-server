@@ -91,8 +91,9 @@ class DtkCommon
 
 			if (stage_assembly_response['data'].include? 'name: smoke_test_instance')
 				puts "Stage of #{assembly_template} assembly template completed successfully!"
-				assembly_id = stage_assembly_response['data'].match(extract_id_regex)
-				puts "Assembly id for a staged assembly: #{assembly_id[1]}"
+				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
+				assembly_id = assembly_id_match[1]
+				puts "Assembly id for a staged assembly: #{assembly_id}"
 			else
 				puts "Stage assembly didnt pass!"
 			end
@@ -100,7 +101,7 @@ class DtkCommon
 			puts "Assembly template #{@assembly_template} not found!"
 		end
 		puts ""
-		return assembly_id[1]
+		return assembly_id
 	end
 
 	def check_if_assembly_exists(assembly_id)

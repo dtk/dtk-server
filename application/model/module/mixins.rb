@@ -13,7 +13,12 @@ module DTK
         :repo_url => RepoManager.repo_url(repo_name),
         :workspace_branch => branch_obj.get_field?(:branch)
       }
-      hash.merge!(:version => version) if version
+      if version
+        hash.merge!(:version => version)
+        if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
+          hash.merge!(:assembly_name => assembly_name)
+        end
+      end
       replace(hash)
     end
   end

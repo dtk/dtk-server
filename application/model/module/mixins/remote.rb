@@ -26,6 +26,7 @@ module DTK
 
     #this should be called when the module is linked, but the specfic version is not
     def import_version(remote_repo,version)
+      parsed = nil
       module_name = module_name()
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch()
@@ -44,9 +45,17 @@ module DTK
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
 
         opts = {:do_not_raise => true}
-        create_new_version__type_specific(local_repo_for_imported_version,version,opts)
-        return get_workspace_branch_info(version)
+        parsed = create_new_version__type_specific(local_repo_for_imported_version,version,opts)
       end
+      response = get_workspace_branch_info(version)
+
+      if (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
+        response[:dsl_parsed_info] = parsed
+      else  
+        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
+      end
+
+      return response
     end
 
     # export to a remote repo

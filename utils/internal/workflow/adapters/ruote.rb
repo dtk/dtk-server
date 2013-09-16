@@ -41,7 +41,7 @@ module DTK
           @wfid = Engine.launch(process_def())
 
           #TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
-          Engine.wait_for(@wfid, :timeout => TopTaskDefualtTimeOut)
+          Engine.wait_for(@wfid, :timeout => TopTaskDefaultTimeOut)
           
           #detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(@wfid)
@@ -70,7 +70,7 @@ module DTK
         nil
       end
       #in seconds
-      TopTaskDefualtTimeOut = 60 * 10
+      TopTaskDefaultTimeOut = 60 * 20
 
       def initiate_executable_action(task,receiver_context)
         opts = {

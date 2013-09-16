@@ -72,8 +72,9 @@ class DtkCommon
 		#Get list of assembly templates, extract selected template, stage assembly and return its assembly id
 		puts "Stage assembly:", "---------------"
 		assembly_id = nil
+		extract_id_regex = /id: (\d+)/
 		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
-
+ 
 		puts "List of avaliable assembly templates: "
 		pretty_print_JSON(assembly_template_list)
 
@@ -84,11 +85,14 @@ class DtkCommon
 			template_assembly_id = test_template['id']
 			puts "Assembly template id: #{template_assembly_id}"
 
-			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})		
+			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})	
 
-			if (stage_assembly_response['data']['assembly_id'])
+			pretty_print_JSON(stage_assembly_response)
+
+			if (stage_assembly_response['data'].include? 'name: smoke_test_instance')
 				puts "Stage of #{assembly_template} assembly template completed successfully!"
-				assembly_id = stage_assembly_response['data']['assembly_id']
+				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
+				assembly_id = assembly_id_match[1]
 				puts "Assembly id for a staged assembly: #{assembly_id}"
 			else
 				puts "Stage assembly didnt pass!"
@@ -97,7 +101,7 @@ class DtkCommon
 			puts "Assembly template #{@assembly_template} not found!"
 		end
 		puts ""
-		return assembly_id
+		return assembly_id.to_i
 	end
 
 	def check_if_assembly_exists(assembly_id)
@@ -105,6 +109,7 @@ class DtkCommon
 		puts "Check if assembly exists:", "-------------------------"
 		assembly_exists = false
 		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		pretty_print_JSON(assembly_list)
 		test_assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }
 
 		puts "Assembly with id #{assembly_id}: "

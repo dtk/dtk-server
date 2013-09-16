@@ -72,6 +72,7 @@ class DtkCommon
 		#Get list of assembly templates, extract selected template, stage assembly and return its assembly id
 		puts "Stage assembly:", "---------------"
 		assembly_id = nil
+		extract_id_regex = /id: (\d+)/
 		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
  
 		puts "List of avaliable assembly templates: "
@@ -86,9 +87,11 @@ class DtkCommon
 
 			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})	
 
+			pretty_print_JSON(stage_assembly_response)
+
 			if (stage_assembly_response['data'].include? 'name: smoke_test_instance')
 				puts "Stage of #{assembly_template} assembly template completed successfully!"
-				assembly_id = stage_assembly_response['data']['assembly_id']
+				assembly_id = stage_assembly_response['data'].match(extract_id_regex)
 				puts "Assembly id for a staged assembly: #{assembly_id}"
 			else
 				puts "Stage assembly didnt pass!"

@@ -16,7 +16,12 @@ module DTK; class ServiceModule
           assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
           ports = add_ports_during_import(assembly_idh)
           version_proc_class = @ndx_version_proc_classes[ref]
-          db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
+          # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
+
+          port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports)
+          return port_links if port_links.is_a?(ErrorUsage::DSLParsing)
+
+          db_updates_port_links.merge!(port_links)
           ports.each{|p|@ndx_ports[p[:id]] = p}
         end
         #Within import_port_links does the mark as complete for port links

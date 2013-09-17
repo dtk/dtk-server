@@ -24,7 +24,10 @@ module DTK; class ServiceModule
         port_links = parse_service_links(assembly_hash).inject(DBUpdateHash.new) do |h,parsed_service_link|
           input = parsed_service_link[:input]
           output = parsed_service_link[:output]
-          input_id = input.matching_id(ports)
+          
+          input_id = input.matching_id(ports,:do_not_throw_error => true)
+          return input_id if input_id.is_a?(ErrorUsage::DSLParsing)
+          
           #only need to test output because this is embedded within input
           unless output_id = output.matching_id(ports,:do_not_throw_error => true)
             raise ErrorUsage.new("The service link reference (#{pp_port_ref(output)}) does not match")

@@ -14,6 +14,10 @@ module DTK
       component_module.get_workspace_branch_info(module_version)
     end
 
+    def self.finalize_edit_component_module(component_module,module_branch)
+      pp [:in_finalize_edit_component_module,component_module,module_branch]
+    end
+
     def self.create_component_modules?(assembly,cmp_instances_to_prune)
       module_version = ModuleVersion.create_for_assembly(assembly)
       cmp_instances = reject_matching_component_instances(cmp_instances_to_prune,module_version)

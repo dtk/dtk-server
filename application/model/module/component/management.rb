@@ -126,7 +126,12 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new
       dsl_parsed_info  = Hash.new
 
-      if ComponentDSL.contains_dsl_file?(impl_obj)
+      if ModuleVersion::AssemblyModule.string_has_version_format?(version)
+        if diffs_summary.meta_file_changed?()
+          raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
+        end
+        AssemblyModule.finalize_edit_component_module(self,module_branch)
+      elsif ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
           dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
@@ -134,6 +139,7 @@ module DTK; class ComponentModule
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
+
       dsl_info = {:dsl_created_info => dsl_created_info}
       dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if(dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
       

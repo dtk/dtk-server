@@ -13,12 +13,12 @@ module DTK; class ComponentModuleRef
       def self.reify?(object)
         version_string = 
           if object.kind_of?(String) 
-            ModuleCommon.string_master_or_empty?(object) ? DEFAULT_VERSION : object
+            ModuleVersion.string_master_or_empty?(object) ? DEFAULT_VERSION : object
           elsif object.kind_of?(ComponentModuleRef) 
             object[:version_info]
           end
         if version_string 
-          if ModuleCommon.string_has_version_format?(version_string)
+          if ModuleVersion.string_has_numeric_version_format?(version_string)
             new(version_string)
           else
             raise Error.new("Unexpected form of version string (#{version_string})")

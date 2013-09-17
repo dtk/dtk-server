@@ -17,7 +17,7 @@ module Ramaze::Helper
 
     def is_legal_version_format?(version)
       return true unless version
-      ::DTK::ModuleCommon.string_has_version_format?(version)
+      ::DTK::ModuleVersion.string_has_version_format?(version)
     end
 
     def raise_error_if_version_illegal_format(version)

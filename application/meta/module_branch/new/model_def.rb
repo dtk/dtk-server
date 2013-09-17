@@ -50,8 +50,8 @@ lambda__matching_library_branches =
   :schema=>:module,
   :table=>:branch,
   :columns=>{
-    :branch => {:type=>:varchar, :size => 50},
-    :version => {:type=>:varchar, :size => 50},
+    :branch => {:type=>:varchar, :size => 100},
+    :version => {:type=>:varchar, :size => 100},
     :is_workspace => {:type =>:boolean},
     :type => {:type=>:varchar, :size => 20}, #service_module or component_module
     :current_sha => {:type=>:varchar, :size => 50}, #indicates the sha of the branch that is currently synchronized with object model 

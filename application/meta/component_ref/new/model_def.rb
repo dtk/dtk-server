@@ -3,7 +3,7 @@
   :table=>:ref,
   :columns=>{
     :component_type=>{:type =>:varchar,:size=>50},
-    :version=>{:type=>:varchar,:size =>50},
+    :version=>{:type=>:varchar,:size =>100},
     :has_override_version=>{:type=>:boolean,:default=>false}, #whether this has an insstance assigned to this instance, which oevrrides any global version setting of assembly this is in
     #must point to :component_template_id or have :component_type and version set
     :component_template_id=>{

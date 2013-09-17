@@ -14,7 +14,7 @@ module XYZ
       
       #columns related to version
       #TODO: think we want to deprecate these; versioning is at module level
-      column :version, :varchar, :size => 50 #non-normalized: comes from module_branch
+      column :version, :varchar, :size => 100 #non-normalized: comes from module_branch
       column :updated, :boolean, :default => false
 
       #columns related to type

@@ -207,7 +207,6 @@ module DTK; class ServiceModule
         return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section or you misspelled 'components' part in",opts[:file_path])
       end
 
-
       #find and insert component template ids in first component_refs and then for the attribute_overrides
       #just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)

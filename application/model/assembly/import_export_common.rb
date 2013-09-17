@@ -90,7 +90,9 @@ module DTK
         end
         if match
           match[:id]
-        elsif not opts[:do_not_throw_error]
+        elsif opts[:do_not_throw_error]
+          return ErrorUsage::DSLParsing::BadComponentReference.new("Cannot find match for service link (#{self.inspect})")
+        else
           raise Error.new("Cannot find match to (#{self.inspect})")
         end
       end

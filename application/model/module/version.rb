@@ -1,15 +1,15 @@
 module DTK
   class ModuleVersion < String
     def self.create_for_assembly(assembly)
-      AssemblyModule.new(assembly)
+      AssemblyModule.new(assembly.get_field?(:display_name))
     end
 
-    def self.string_has_version_format?(str)
-      string_has_numeric_version_format?(str) or AssemblyModule.string_has_version_format?(str)
-    end
-
-    def self.string_has_numeric_version_format?(str)
-      !!(str =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
+    def self.create_from_string(str)
+      if Semantic.legal_format?(str)
+        Semantic.create_from_string(str)
+      elsif AssemblyModule.legal_format?(str)
+        AssemblyModule.create_from_string(str)
+      end
     end
 
     def self.string_master_or_empty?(object)
@@ -29,17 +29,33 @@ module DTK
       return (str1||'').gsub(/^v/,'').eql?((str2||'').gsub(/^v/,''))
     end 
 
+    class Semantic < self
+      def self.create_from_string(str)
+        new(str)
+      end
+      def self.legal_format?(str)
+        !!(str =~ /\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
+      end
+    end
+
     class AssemblyModule < self
       attr_reader :assembly_name
 
-      def self.string_has_version_format?(str)
-        !!(str =~ /^assembly--/)
+      def self.legal_format?(str)
+        !!(str =~StringPattern)
       end
+      def self.create_from_string(str)
+        if str =~ StringPattern
+          assembly_name = $1
+          new(assembly_name)
+        end
+      end
+      StringPattern = /^assembly--(.+$)/
 
      private
-      def initialize(assembly)
-        @assembly_name = assembly.get_field?(:display_name)
-        super(version_string(@assembly_name))
+      def initialize(assembly_name)
+        @assembly_name = assembly_name
+        super(version_string(assembly_name))
       end
 
       def version_string(assembly_name)

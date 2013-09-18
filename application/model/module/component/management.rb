@@ -126,7 +126,7 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new
       dsl_parsed_info  = Hash.new
 
-      if ModuleVersion::AssemblyModule.string_has_version_format?(version)
+      if version.kind_of?(ModuleVersion::AssemblyModule)
         if diffs_summary.meta_file_changed?()
           raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
         end

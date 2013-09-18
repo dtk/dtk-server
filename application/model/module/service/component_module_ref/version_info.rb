@@ -18,7 +18,7 @@ module DTK; class ComponentModuleRef
             object[:version_info]
           end
         if version_string 
-          if ModuleVersion.string_has_numeric_version_format?(version_string)
+          if ModuleVersion::Semantic.legal_format?(version_string)
             new(version_string)
           else
             raise Error.new("Unexpected form of version string (#{version_string})")

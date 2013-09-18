@@ -89,8 +89,8 @@ class DtkCommon
 
 			pretty_print_JSON(stage_assembly_response)
 
-			if (stage_assembly_response['data'].include? 'name: smoke_test_instance')
-				puts "Stage of #{assembly_template} assembly template completed successfully!"
+			if (stage_assembly_response['data'].include? "name: #{@assembly_name}")
+				puts "Stage of #{@assembly_template} assembly template completed successfully!"
 				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
 				assembly_id = assembly_id_match[1]
 				puts "Assembly id for a staged assembly: #{assembly_id}"

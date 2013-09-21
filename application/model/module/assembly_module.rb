@@ -9,8 +9,7 @@ module DTK
 
     def self.finalize_edit_component_module(assembly,component_module,module_branch)
       cmp_instances = get_applicable_component_instances(assembly,component_module)
-      #if this fn called then cmp_instances will not be empty
-      pp [:in_finalize_edit_component_module,cmp_instances,module_branch]
+      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
     def self.create_component_modules?(assembly,cmp_instances_to_prune)
@@ -30,6 +29,35 @@ module DTK
     end
 
    private
+    def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
+      module_branch_id = module_branch[:id]
+      cmp_instances_needing_update = cmp_instances.reject{|cmp|cmp[:module_branch_id] == module_branch_id}
+      return if cmp_instances_needing_update.empty?
+      component_types = cmp_instances_needing_update.map{|cmp|cmp[:component_type]}.uniq
+      version_field = module_branch[:version]
+      type_version_field_list = component_types.map{|ct|{:component_type => ct, :version_field => version_field}}
+      ndx_cmp_templates = Component::Template.get_matching_type_and_version(project_idh,type_version_field_list).inject(Hash.new) do |h,r|
+        h.merge(r[:component_type] => r)
+      end
+      rows_to_update = cmp_instances_needing_update.map do |cmp|
+        if cmp_template = ndx_cmp_templates[cmp[:component_type]]
+          {
+            :id => cmp[:id],
+            :module_branch_id => module_branch_id,
+            :version => cmp_template[:version],
+            :implementation_id => cmp_template[:implementation_id],
+            :ancestor_id => cmp_template[:id]
+          }
+        else
+          Log.error("Cannot find matching component template for component instance (#{cmp.inspect}) for version (#{version_field})")
+          nil
+        end
+      end.compact
+      unless rows_to_update.empty?
+        Model.update_from_rows(project_idh.createMH(:component),rows_to_update)
+      end
+    end
+
     def self.get_applicable_component_instances(assembly,component_module,opts={})
       assembly_id = assembly.id()
       ret = component_module.get_associated_component_instances().select do |cmp|

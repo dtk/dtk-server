@@ -130,7 +130,8 @@ module DTK; class ComponentModule
         if diffs_summary.meta_file_changed?()
           raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
         end
-        AssemblyModule.finalize_edit_component_module(self,module_branch)
+        assembly = version.get_assembly(model_handle(:component))
+        AssemblyModule.finalize_edit_component_module(assembly,self,module_branch)
       elsif ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
           dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)

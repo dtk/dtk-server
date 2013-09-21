@@ -41,6 +41,21 @@ module DTK
     class AssemblyModule < self
       attr_reader :assembly_name
 
+      def get_assembly(mh)
+        sp_hash = {
+          :cols=> [:id,:group_id,:display_name],
+          :filter => [:eq,:display_name,@assembly_name]
+        }
+        rows = Assembly::Instance.get_objs(mh.createMH(:assembly_instance),sp_hash)
+        if rows.size == 1
+           rows.first
+        elsif rows.size == 0
+          raise Error.new("Unexpected that no assemblies associated with (#{inspect})" )
+        else
+          raise Error.new("Unexpected that #{rows.size.to_s} assemblies are associated with (#{inspect})" )
+        end
+      end
+
       def self.legal_format?(str)
         !!(str =~StringPattern)
       end

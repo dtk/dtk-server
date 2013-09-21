@@ -1,21 +1,16 @@
 module DTK
   class AssemblyModule
     def self.prepare_for_edit_component_module(assembly,component_module)
-      assembly_id = assembly.id()
-      cmp_instances = component_module.get_associated_component_instances().select do |cmp|
-        cmp[:assembly_id] == assembly_id
-      end
-      if cmp_instances.empty?()
-        assembly_name = assembly.display_name_print_form()
-        raise ErrorUsage.new("Assembly (#{assembly_name}) does not have any components belonging to module (#{component_module.get_field?(:display_name)})")
-      end
+      cmp_instances = get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       create_component_module_version?(assembly,component_module,cmp_instances)
       module_version = ModuleVersion.create_for_assembly(assembly)
       component_module.get_workspace_branch_info(module_version)
     end
 
-    def self.finalize_edit_component_module(component_module,module_branch)
-      pp [:in_finalize_edit_component_module,component_module,module_branch]
+    def self.finalize_edit_component_module(assembly,component_module,module_branch)
+      cmp_instances = get_applicable_component_instances(assembly,component_module)
+      #if this fn called then cmp_instances will not be empty
+      pp [:in_finalize_edit_component_module,cmp_instances,module_branch]
     end
 
     def self.create_component_modules?(assembly,cmp_instances_to_prune)
@@ -33,7 +28,20 @@ module DTK
       end
       nil
     end
+
    private
+    def self.get_applicable_component_instances(assembly,component_module,opts={})
+      assembly_id = assembly.id()
+      ret = component_module.get_associated_component_instances().select do |cmp|
+        cmp[:assembly_id] == assembly_id
+      end
+      if opts[:raise_error_if_empty] and ret.empty?()
+        assembly_name = assembly.display_name_print_form()
+        raise ErrorUsage.new("Assembly (#{assembly_name}) does not have any components belonging to module (#{component_module.get_field?(:display_name)})")
+      end
+      ret
+    end
+
     def self.create_component_module_version?(assembly,component_module,cmp_instances)
       module_version = ModuleVersion.create_for_assembly(assembly)
       unless reject_matching_component_instances(cmp_instances,module_version).empty?

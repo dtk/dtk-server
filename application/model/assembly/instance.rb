@@ -8,6 +8,18 @@ module DTK; class  Assembly
     include ViolationMixin
     include ServiceLinkMixin
 
+    def self.get_objs(mh,sp_hash,opts={})
+      if mh[:model_name] == :assembly_instance
+        super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
+      else
+        super
+      end
+    end
+
+    def self.create_from_component(cmp)
+      cmp && cmp.id_handle().create_object(:model_name => :assembly_instance).merge(cmp)
+    end
+
     ### standard get methods
     def get_task_templates(opts={})
       sp_hash = {

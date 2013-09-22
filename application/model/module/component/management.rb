@@ -59,9 +59,18 @@ module DTK; class ComponentModule
       {:module_name => module_name()}
     end
 
-    def delete_version(version)
-      module_branch  = get_module_branch_matching_version(version)
-      raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
+    def delete_version?(version)
+      delete_version(version,:no_error_if_does_not_exist=>true)
+    end
+    def delete_version(version,opts={})
+      ret = {:module_name => module_name()}
+      unless module_branch = get_module_branch_matching_version(version)
+        if opts[:no_error_if_does_not_exist]
+          return ret
+        else
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+        end
+      end
 
       #TODO: remove after reading: Rich: get_component_version_constraints has been deprecated and also it applies only to a service module
       #version_constraints = module_branch.get_component_version_constraints()
@@ -73,7 +82,7 @@ module DTK; class ComponentModule
 
       module_branch.delete_instance(id_handle)
       implementation.delete_instance(impl_idh)
-      {:module_name => module_name()}
+      ret
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)

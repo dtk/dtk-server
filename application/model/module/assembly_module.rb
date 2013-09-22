@@ -28,6 +28,12 @@ module DTK
       nil
     end
 
+    def self.delete_assembly_modules(assembly)
+      aug_component_modules = assembly.get_augmented_component_modules()
+      pp [:delete_assembly_modules,aug_component_modules]
+      #TODO: finish
+    end
+
    private
     def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]

@@ -455,17 +455,9 @@ module DTK; class  Assembly
       end
     end
 
-    def get_component_modules()
-      ndx_ret = Hash.new
-      get_objs(:cols=>[:component_modules]).each do |r|
-        component_module = r[:component_module]
-        ndx_ret[component_module[:id]] ||= component_module
-      end
-      ndx_ret.values
-    end
     def get_augmented_component_modules()
       ndx_ret = Hash.new
-      get_objs(:cols=>[:component_modules]).each do |r|
+      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
         pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
         pntr[:module_branches] << r[:module_branch]
@@ -537,9 +529,10 @@ module DTK; class  Assembly
       delete(get_sub_assemblies(assembly_idhs).id_handles())
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
+      delete_assembly_modules(assembly_idhs)
+      #delete_assembly_modules needs to be done before delete_assembly_nodes
       delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
-      delete_assembly_modules(assembly_idhs)
     end
 
     class << self

@@ -76,12 +76,9 @@ module DTK; class ComponentModule
       #version_constraints = module_branch.get_component_version_constraints()
       #raise ErrorUsage.new("Cannot delete the component module version because the service module(s) '#{version_constraints[:service_module]}' reference it") if version_constraints
       
-      id_handle      = module_branch.id_handle()
       implementation = module_branch.get_implementation()
-      impl_idh       = implementation.id_handle()
-
-      module_branch.delete_instance(id_handle)
-      implementation.delete_instance(impl_idh)
+      delete_instance(implementation.id_handle())
+      module_branch.delete_instance_and_repo_branch()
       ret
     end
 

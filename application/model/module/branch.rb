@@ -25,6 +25,11 @@ module DTK
       get_module().module_name()
     end
 
+    def delete_instance_and_repo_branch()
+      RepoManager.delete_branch(self)
+      delete_instance(id_handle())
+    end
+
     #returns true if actual pull was needed
     def pull_repo_changes?(commit_sha)
       update_object!(:branch,:current_sha)

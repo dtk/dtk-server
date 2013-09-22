@@ -436,10 +436,11 @@ module DTK
 
     def delete_branch()
       raise Error.new("Cannot delete master branch") if @branch == "master"
-      checkout("master")
-      git_command__delete_local_branch(@branch)      
-      #TODO: need to make conditional on whether remote branch exists
-      git_command__delete_remote_branch(@branch)      
+      checkout('master') do
+        #TODO: need to write git_command__delete_local_branch? and git_command__delete_remote_branch?
+        git_command__delete_local_branch?(@branch)      
+        git_command__delete_remote_branch?(@branch)      
+      end
     end
 
     def get_branches()

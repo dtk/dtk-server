@@ -455,6 +455,8 @@ module DTK; class  Assembly
       end
     end
 
+
+
     def get_augmented_component_modules()
       ndx_ret = Hash.new
       get_objs(:cols=> [:instance_component_module_branches]).each do |r|
@@ -464,7 +466,15 @@ module DTK; class  Assembly
       end
       ndx_ret.values
     end
-
+    def get_component_modules()
+      ndx_ret = Hash.new
+      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
+        component_module = r[:component_module]
+        ndx_ret[component_module[:id]] ||= component_module
+      end
+      ndx_ret.values
+    end
+    #TODO: see if below can use above
     def get_components_module(component_id)
       component, version = nil, nil
       aug_cmps = get_augmented_components()

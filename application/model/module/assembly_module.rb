@@ -29,9 +29,10 @@ module DTK
     end
 
     def self.delete_assembly_modules(assembly)
-      aug_component_modules = assembly.get_augmented_component_modules()
-      pp [:delete_assembly_modules,aug_component_modules]
-      #TODO: finish
+      version = ModuleVersion.create_for_assembly(assembly)
+      assembly.get_component_modules().each do |component_module|
+        component_module.delete_version?(version)
+      end
     end
 
    private

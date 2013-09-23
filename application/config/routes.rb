@@ -38,6 +38,7 @@ R8::ReactorRoute.draw do
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
+  post  'assembly/workspace_object' => 'assembly#workspace_object'
   post  'assembly/info_about' => 'assembly#info_about'
   post  'assembly/info_about_task' => 'assembly#info_about_task'
   post  'assembly/stage' => 'assembly#stage'

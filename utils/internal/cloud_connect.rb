@@ -11,15 +11,15 @@ end
 module DTK
   module CloudConnect
     class Top
-      def get_compute_params()
+      def get_compute_params(opts={})
         ENV["FOG_RC"] ||= R8::Config[:ec2][:fog_credentials_path]
-        compute_params = Fog.credentials()
-        
-        if region = R8::Config[:ec2][:region]
-          compute_params[:region] = region
+        ret = Fog.credentials()
+        unless opts[:just_credentials]
+          if region = R8::Config[:ec2][:region]
+            ret = ret.merge(:region => region)
+          end
         end
-
-        return compute_params
+        ret
       end
 
       private
@@ -31,7 +31,7 @@ module DTK
     class Route53 < Top
       def initialize(dns_domain)
         @dns_domain = dns_domain
-        dns = Fog::DNS::AWS.new(get_compute_params())
+        dns = Fog::DNS::AWS.new(get_compute_params(:just_credentials=>true))
         @r8zone = dns.zones().find { |z| z.domain.include? dns_domain}
       end
       

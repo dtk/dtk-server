@@ -120,8 +120,11 @@ module MCollective
           end     
 =end
         raw_msg = Message.new(msg.body, msg, :base64 => @base64, :headers => msg.headers)
-        msg = @@decode_context.r8_decode_receive(raw_msg)
-        @@multiplexer.process_response(msg,msg[:requestid])
+        if decode_msg = @@decode_context.r8_decode_receive(raw_msg)
+          @@multiplexer.process_response(decode_msg,decode_msg[:requestid])
+        else
+          ::DTK::Log.error_pp(["Cannot decode msg; dropping it",msg.headers])
+        end
       end
 
       #TODO: make automic subscribe_and_send because need subscribe to happen before send does

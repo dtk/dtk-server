@@ -54,7 +54,7 @@ module DTK
         return component_module_refs if component_module_refs.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        set_dsl_parsed!(true) unless parsed.is_a?(ErrorUsage::DSLParsing)
+        set_dsl_parsed!(true) unless (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
         
         parsed
       end
@@ -92,16 +92,17 @@ module DTK
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
             opts[:file_path] = meta_file
-            # hash_content = Aux.convert_to_hash(file_content,format_type,meta_file)
+            
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)
-            #TODO: FOR-ALDIN: extend to handle yaml parsing errors
             return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
+
             # if assembly/node import returns error continue with module import
             imported = assembly_import_helper.process(module_name,hash_content,opts)
             return imported if imported.is_a?(ErrorUsage::DSLParsing)
           end
         end
-        dangling_errors.raise_error?()
+        errors = dangling_errors.raise_error?(:do_not_raise => true)
+        return errors if errors.is_a?(XYZ::ErrorUsage::DanglingComponentRefs)
 
         assembly_import_helper.import()
       end

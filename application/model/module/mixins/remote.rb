@@ -167,7 +167,12 @@ module DTK
         end
       
         remote_repo = Repo::Remote.new(remote_params[:repo])
-        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
+        begin
+          remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
+        rescue Exception => e
+          # return ErrorUsage::ComponentDoesNotExist.new("#{local_module_name}#{version && "-#{version}"}") if e.is_a?(XYZ::Error)
+          return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if e.is_a?(XYZ::Error)
+        end
         
         #case on whether the module is created already
         if module_obj
@@ -197,7 +202,7 @@ module DTK
       
       response = module_repo_info(repo,module_and_branch_info,version)
       
-      if (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
+      if (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError) || parsed.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
         response[:dsl_parsed_info] = parsed
       else  
         response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)

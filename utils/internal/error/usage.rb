@@ -96,9 +96,10 @@ module DTK
           end
         end
 
-        def raise_error?()
+        def raise_error?(opts={})
           unless @cmp_ref_info_list.empty?()
             @error_cleanup.call() if @error_cleanup
+            return DanglingComponentRefs.new(@cmp_ref_info_list) if opts[:do_not_raise]
             raise DanglingComponentRefs.new(@cmp_ref_info_list)
           end
         end

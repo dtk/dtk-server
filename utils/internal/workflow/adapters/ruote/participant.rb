@@ -467,7 +467,7 @@ module DTK
                   end
                   # If there was a change on agents, wait for node's mcollective process to restart
                   unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
-                    sleep(10)
+                    sleep(R8::Config[:node_agent_git_clone][:delay]||NodeAgentGitCloneDefaultDelay)
                   end
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
@@ -503,6 +503,7 @@ module DTK
             end
           end
         end
+        NodeAgentGitCloneDefaultDelay = 10
 
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(fei, flavour)

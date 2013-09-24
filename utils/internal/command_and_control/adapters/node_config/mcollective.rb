@@ -93,7 +93,7 @@ module DTK
             if debug_config[:new_files]
               debug_config[:new_files].split(';').map{|fn|"#{new_files_dir}/#{fn}"}
             else
-              Dir.glob(new_files_dir)  
+              Dir.glob("#{new_files_dir}/*")  
             end
           new_files.each do |path|
             file_name = path.split('/').last

@@ -69,9 +69,14 @@ module DTK
             end          
           end
         else
+          #TODO: this only works if file tehre already
           agent_paths = Dir.glob("#{agent_repo_dir}/#{MCAgentPluginDir}/*")
           agent_paths.each do |agent_path|
-            File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+            unless R8::Config[:node_agent_git_clone][:mode] == 'debug'
+              File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+            else
+              node_agent_git_clone_debug_mode_set_agents!(agents,agent_path)
+            end
           end
         end
 
@@ -82,6 +87,27 @@ module DTK
         async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
       end
       MCAgentPluginDir = "mcollective_additions/plugins/v2.2/agent"
+
+      def self.node_agent_git_clone_debug_mode_set_agents!(agents,agent_path)
+        debug_config = R8::Config[:node_agent_git_clone][:debug_mode]
+        begin
+          new_path = debug_config[:new_files_dir]
+          new_files = 
+            if debug_config[:new_files]
+              debug_config[:new_files].split(';')
+            else
+              Dir.glob(new_files_dir)  
+            end
+          agent_file = agent_path.split('/').last
+          if new_files.include?(agent_file)
+            modified_agent_path = "#{new_path}/#{agent_file}"
+            Log.info("Putting in modified file (#{modified_agent_path}) for debug sync agent")
+            File.open(modified_agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+          end
+        rescue => e
+          Log.error("Trapped error in node_agent_git_clone_debug_mode_set_agents!: #{e.to_s}")
+        end
+      end
 
       def self.authorize_node(node,callbacks,context_x={})
         repo_user_mh = node.id_handle.createMH(:repo_user)

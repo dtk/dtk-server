@@ -421,6 +421,9 @@ module DTK
             head_git_commit_id = nil
             begin
               head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
+              if R8::Config[:node_agent_git_clone][:mode] == 'debug'
+                installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
+              end
              rescue => e
               Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
               head_git_commit_id = -1

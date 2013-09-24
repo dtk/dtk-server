@@ -30,6 +30,9 @@ module DTK
 
     def self.delete_assembly_modules(assembly)
       version = ModuleVersion.create_for_assembly(assembly)
+pp [:temp_comment_out]
+return
+
       assembly.get_component_modules().each do |component_module|
         component_module.delete_version?(version)
       end

@@ -249,7 +249,7 @@ module DTK; class  Assembly
     def self.get_info__flat_list(assembly_mh,opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"],[:neq, :ref, '__workspace'], target_filter,opts[:filter]].compact
+      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       sp_hash = {
         :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,

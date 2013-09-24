@@ -234,6 +234,18 @@ module DTK; class  Assembly
       self.class.get_info__flat_list(model_handle(),{:filter => filter}.merge(opts))
     end
 
+    def self.get_workspace_object(assembly_mh, opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"],[:eq, :ref, '__workspace'], target_filter,opts[:filter]].compact
+      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
+        :filter => filter
+      }
+      ret = get_objs(assembly_mh,sp_hash)
+    end
+
     def self.get_info__flat_list(assembly_mh,opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
@@ -283,12 +295,14 @@ module DTK; class  Assembly
     
     def self.list(assembly_mh,opts={})
       assembly_rows = get_info__flat_list(assembly_mh,opts)
+
       if opts[:detail_level].nil?
         list_aux__no_details(assembly_rows)
       else
         get_attrs = [opts[:detail_level]].flatten.include?("attributes")
         attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
         add_execution_status!(assembly_rows,assembly_mh)
+        
         list_aux(assembly_rows,attr_rows,opts)
       end
     end

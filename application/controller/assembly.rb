@@ -201,6 +201,11 @@ module DTK
       rest_ok_response assembly.get_attributes_print_form(Opts.new(:filter => filter))
     end
 
+
+    def rest__workspace_object()
+      rest_ok_response Assembly::Instance.get_workspace_object(model_handle(),{})
+    end
+    
     def rest__list()
       subtype = ret_assembly_subtype()
       result = 

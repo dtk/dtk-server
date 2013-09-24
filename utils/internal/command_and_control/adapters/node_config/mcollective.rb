@@ -68,15 +68,12 @@ module DTK
               File.open("#{agent_repo_dir}/#{diff.b_path}") { |file| agents[agent_name] = Base64.encode64(file.read) }
             end          
           end
+        elsif R8::Config[:node_agent_git_clone][:mode] == 'debug'
+          node_agent_git_clone_debug_mode_set_agents!(agents)
         else
-          #TODO: this only works if file tehre already
           agent_paths = Dir.glob("#{agent_repo_dir}/#{MCAgentPluginDir}/*")
           agent_paths.each do |agent_path|
-            unless R8::Config[:node_agent_git_clone][:mode] == 'debug'
-              File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
-            else
-              node_agent_git_clone_debug_mode_set_agents!(agents,agent_path)
-            end
+            File.open(agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
           end
         end
 
@@ -88,21 +85,20 @@ module DTK
       end
       MCAgentPluginDir = "mcollective_additions/plugins/v2.2/agent"
 
-      def self.node_agent_git_clone_debug_mode_set_agents!(agents,agent_path)
+      def self.node_agent_git_clone_debug_mode_set_agents!(agents)
         debug_config = R8::Config[:node_agent_git_clone][:debug_mode]
         begin
-          new_path = debug_config[:new_files_dir]
+          new_files_dir = debug_config[:new_files_dir]
           new_files = 
             if debug_config[:new_files]
-              debug_config[:new_files].split(';')
+              debug_config[:new_files].split(';').map{|fn|"#{new_files_dir}/#{fn}"}
             else
               Dir.glob(new_files_dir)  
             end
-          agent_file = agent_path.split('/').last
-          if new_files.include?(agent_file)
-            modified_agent_path = "#{new_path}/#{agent_file}"
-            Log.info("Putting in modified file (#{modified_agent_path}) for debug sync agent")
-            File.open(modified_agent_path) { |file| agents[name_regex.match(agent_path)[1]] = Base64.encode64(file.read) }
+          new_files.each do |path|
+            file_name = path.split('/').last
+            Log.info("Putting in modified file (#{path}) for debug sync agent")
+            File.open(path){ |f| agents[file_name] = Base64.encode64(f.read)}
           end
         rescue => e
           Log.error("Trapped error in node_agent_git_clone_debug_mode_set_agents!: #{e.to_s}")
@@ -160,7 +156,7 @@ module DTK
         params = nil
         async_agent_call("discovery","ping",params,filter,callbacks,context)
       end
-      PollCycleDefault = 10
+      PollCycleDefault = 40
       PollCountDefault = 6
 
       def self.request__get_logs(task,nodes,callbacks,context)

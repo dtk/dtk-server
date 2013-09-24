@@ -435,13 +435,23 @@ module DTK
     end
 
     def delete_branch()
-      raise Error.new("Cannot delete master branch") if @branch == "master"
-      checkout('master') do
-        #TODO: need to write git_command__delete_local_branch? and git_command__delete_remote_branch?
-        git_command__delete_local_branch?(@branch)      
-        git_command__delete_remote_branch?(@branch)      
+      if @branch != current_branch()
+        delete_branch_aux()
+      else
+        #need to checkout to some other branch since on branch taht is being deleted
+        unless other_branch = get_branches().find{|br|br != @branch}
+          raise Error.new("Cannot delete the last remanining branch (#{@branch})")
+        end
+        checkout(other_branch) do
+          delete_branch_aux()
+        end
       end
     end
+    def delete_branch_aux()
+      git_command__delete_local_branch?(@branch)      
+      git_command__delete_remote_branch?(@branch)      
+    end
+    private :delete_branch_aux
 
     def get_branches()
       @grit_repo.branches.map{|b|b.name}
@@ -474,10 +484,14 @@ module DTK
       end
     end
 
+    def current_branch()
+      @grit_repo.head.name
+    end
+
     def checkout(branch_name,&block)
       ret = nil
       Dir.chdir(@path) do 
-        current_head = @grit_repo.head.name
+        current_head = current_branch()
         git_command__checkout(branch_name) unless current_head == branch_name
         return ret unless block
         ret = yield
@@ -653,8 +667,19 @@ module DTK
     def git_command__create_local_branch(branch_name)
       git_command.branch(cmd_opts(),branch_name)
     end
+    def git_command__delete_local_branch?(branch_name)
+      if get_branches().include?(branch_name)
+        git_command__delete_local_branch(branch_name)
+      end
+    end
     def git_command__delete_local_branch(branch_name)
       git_command.branch(cmd_opts(),"-D",branch_name)
+    end
+
+    def git_command__delete_remote_branch?(branch_name)
+      if remote_exists?(branch_name)
+        git_command__delete_remote_branch(branch_name)
+      end
     end
     def git_command__delete_remote_branch(branch_name)
       git_command.push(cmd_opts(),default_remote_name(),":refs/heads/#{branch_name}")

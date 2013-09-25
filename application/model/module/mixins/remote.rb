@@ -148,7 +148,7 @@ module DTK
     #    :module_name
     #  }
 
-    def import(project,remote_params,local_params)
+    def import(project,remote_params,local_params,opts={})
       #repo_client = Repo::Remote.new(remote_params[:repo])
       #repo_client.get_remote_module_components(remote_params[:module_name], component_type(), remote_params[:module_version], remote_params[:module_namespace])
       #return 1
@@ -170,8 +170,7 @@ module DTK
         begin
           remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
         rescue Exception => e
-          # return ErrorUsage::ComponentDoesNotExist.new("#{local_module_name}#{version && "-#{version}"}") if e.is_a?(XYZ::Error)
-          return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if e.is_a?(XYZ::Error)
+          return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
         end
         
         #case on whether the module is created already

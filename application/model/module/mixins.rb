@@ -112,7 +112,7 @@ module DTK
       opts = {:do_not_raise => true} if internal_triger=='true'
       response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts)
       
-      return :dsl_parsed_info => response if response.is_a?(ErrorUsage::DSLParsing)
+      return :dsl_parsed_info => response if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
       return response
     end
 

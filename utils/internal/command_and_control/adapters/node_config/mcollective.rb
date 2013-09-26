@@ -237,7 +237,7 @@ module DTK
 
         ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
         impls.each do |impl|
-          ret << impl.hash_subset(:repo,:branch,:implementation,:sha)
+          ret << Aux::hash_subset(impl,[:repo,:branch,:implementation,:sha])
         end
         ret
       end

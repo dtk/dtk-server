@@ -232,14 +232,7 @@ module DTK
         end.values
 
         impl_idhs = get_impl_idhs(config_node)
-
-        vcs = Component::IncludeModule.get_version_context_info(component_idhs,vc_idhs)
-
-        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
-        vcs.each do |vc|
-          ret << Aux::hash_subset(vc,[:repo,:branch,{:module_name=>:implementation},:sha])
-        end
-        ret
+        ComponentModule::VersionContextInfo.get_in_hash_form(component_idhs,impl_idhs)
       end
 
       def self.get_impl_idhs(config_node)

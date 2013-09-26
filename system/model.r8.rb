@@ -163,6 +163,11 @@ module DTK
       Aux::hash_subset(self,cols,:seed=>self.class.create_stub(model_handle()))
     end
 
+    def hash_form_subset(*cols)
+      #set seed to model class w/o any keys
+      Aux::hash_subset(self,cols,:seed=>Hash.new())
+    end
+
     module Delim
       Char = "_"
       Common = "#{Char}#{Char}"

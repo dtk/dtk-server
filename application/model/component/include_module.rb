@@ -2,8 +2,7 @@ module DTK; class Component
   class IncludeModule < Model
     #a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
     def self.get_version_context_info(component_idhs,impl_idhs)
-      impls = get_implementations(impl_idhs)
-      ret = impls.map{|impl|hash_form(impl)}
+      ret = impls = get_implementations(impl_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)
       return ret if include_modules.empty?()
 
@@ -19,7 +18,7 @@ module DTK; class Component
 
       include_modules.each do |incl_mod|
         if impl = incl_mod[:implementation]
-          ret << hash_form(impl)
+          ret << impl
         else
           incl_mod.delete(:implementation) #for cosmetics when printing error
           raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
@@ -114,10 +113,6 @@ module DTK; class Component
     end
 
    private
-    def self.hash_form(impl)
-      impl.inject(Hash.new){|h,(k,v)|h.merge(k=>v)}
-    end
-
     def self.get_implementations(impl_idhs)
       ret = Array.new
       return ret if impl_idhs.empty?

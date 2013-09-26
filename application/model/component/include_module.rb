@@ -20,7 +20,7 @@ module DTK; class Component
         if impl = incl_mod[:implementation]
           ret << impl
         else
-          incl_mod.delete(:implementation) #for cosmetics when prinint in error
+          incl_mod.delete(:implementation) #for cosmetics when printingerror
           raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
         end
       end

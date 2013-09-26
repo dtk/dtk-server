@@ -18,7 +18,6 @@ module DTK
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
     include ComponentClone
-    extend ComponentCloneClassMixin
     extend ComponentUserClassMixin
     extend ComponentMetaClassMixin 
     extend BranchNamesClassMixin

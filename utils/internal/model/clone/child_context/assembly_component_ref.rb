@@ -40,14 +40,9 @@ module DTK
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_to_find_cmp_ref_id = Hash.new
 
-        cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
-        ndx_component_templates = Component.find_ndx_workspace_templates(@clone_proc.project.id_handle(),cmps)
-        #TODO: feature-assembly-module: have find_ndx_workspace_templates come back with sha info
-        #replace above with
         cmp_mh = @clone_proc.project.model_handle(:component) 
         cmp_template_idhs = matches.map{|m|m[:component_template_id]}.uniq.map{|id|cmp_mh.createIDH(:id => id)}
-        new_ndx_component_templates = Component::Template.get_info_for_clone(cmp_template_idhs).inject(Hash.new){|h,r|h.merge(r[:id]=>r)}
-        pp [:new_ndx_component_templates,new_ndx_component_templates.values]
+        ndx_component_templates = Component::Template.get_info_for_clone(cmp_template_idhs).inject(Hash.new){|h,r|h.merge(r[:id]=>r)}
         
         mapping_rows = matches.map do |m|
           node = m[:node]

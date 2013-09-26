@@ -187,17 +187,18 @@ module XYZ
            :cols => [:id,:module_name]
          }
         ]
-=begin
+
       virtual_column :module_branch, :type => :json, :hidden => true,
       :remote_dependencies =>
         [
          {
            :model_name => :module_branch,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:id => q(:component,:module_branch_id)},
-           :cols => [:id,:display_name,:group_id,:branch,:version,:current_sha,:type]
+           :cols => [:id,:display_name,:group_id,:branch,:repo_id,:version,:current_sha,:type,:is_workspace]
          }]
-=end
+
       virtual_column :component_module, :type => :json, :hidden => true,
       :remote_dependencies =>
         [

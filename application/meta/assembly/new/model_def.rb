@@ -106,12 +106,6 @@ lambda__instance_nodes_components_assembly_template =
          :cols=>[:id,:group_id,:display_name]
        }]
     },
-    :module_branch=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:is_workspace])]
-    },
     :service_module=>{
       :type=>:json,
       :hidden=>true,

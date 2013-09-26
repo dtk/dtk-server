@@ -1,5 +1,8 @@
 require 'fileutils'
 require 'grit'
+
+Grit.debug = R8::Config[:debug][:grit]
+
 module XYZ
   class RepoManager 
     class << self

@@ -243,7 +243,7 @@ module DTK
       get_objs(mh,sp_hash)
     end 
 
-    def pull_from_remote__update_from_dsl(repo, module_and_branch_info)
+    def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version=nil)
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo)

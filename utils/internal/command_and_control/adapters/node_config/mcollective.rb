@@ -233,11 +233,11 @@ module DTK
 
         impl_idhs = get_impl_idhs(config_node)
 
-        impls = Component::IncludeModule.get_impls_for_version_context(component_idhs,impl_idhs)
+        vcs = Component::IncludeModule.get_version_context_info(component_idhs,vc_idhs)
 
         ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
-        impls.each do |impl|
-          ret << Aux::hash_subset(impl,[:repo,:branch,{:module_name=>:implementation},:sha])
+        vcs.each do |vc|
+          ret << Aux::hash_subset(vc,[:repo,:branch,{:module_name=>:implementation},:sha])
         end
         ret
       end

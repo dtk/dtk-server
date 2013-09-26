@@ -1,8 +1,9 @@
 module DTK; class Component
   class IncludeModule < Model
-    #a version context element is hash with keys: :repo,:branch,:implementation
-    def self.get_impls_for_version_context(component_idhs,impl_idhs)
-      ret = impls = get_implementations(impl_idhs)
+    #a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
+    def self.get_version_context_info(component_idhs,impl_idhs)
+      impls = get_implementations(impl_idhs)
+      ret = impls.map{|impl|hash_form(impl)}
       include_modules = get_include_mods_with_impls(component_idhs)
       return ret if include_modules.empty?()
 
@@ -18,17 +19,16 @@ module DTK; class Component
 
       include_modules.each do |incl_mod|
         if impl = incl_mod[:implementation]
-          ret << impl
+          ret << hash_form(impl)
         else
-          incl_mod.delete(:implementation) #for cosmetics when printingerror
+          incl_mod.delete(:implementation) #for cosmetics when printing error
           raise Error.new("Unexpected that incl_mod #{incl_mod.inspect} does not have a linked implementation")
         end
       end
-
       ret
     end
 
-    #TODO: below is done as first part of converge and above is done as part of procssing converge node tasks; tehy have related
+    #TODO: below is done as first part of converge and above is done as part of processing converge node tasks; they have related
     #logic; may want to consolidate so only done in one place
     #this method looks for include_modules on a component in component_idhs
     #for each include_module it finds it looks to find a matching implementation if one does not exist
@@ -114,7 +114,11 @@ module DTK; class Component
     end
 
    private
-     def self.get_implementations(impl_idhs)
+    def self.hash_form(impl)
+      impl.inject(Hash.new){|h,(k,v)|h.merge(k=>v)}
+    end
+
+    def self.get_implementations(impl_idhs)
       ret = Array.new
       return ret if impl_idhs.empty?
        sp_hash = {

@@ -42,7 +42,11 @@ module DTK
 
         cmps = matches.map{|m|component_mh.createIDH(:id => m[:component_template_id]).create_object()}
         ndx_component_templates = Component.find_ndx_workspace_templates(@clone_proc.project.id_handle(),cmps)
-
+        #TODO: feature-assembly-module: have find_ndx_workspace_templates come back with sha info
+        #replace above with
+        #cmp_mh = @clone_proc.project.model_handle(:component) 
+        #cmp_template_idhs = matches.map{|m|m[:component_template_id]}.uniq.map{|id|cmp_mh.createIDH(:id => id)}
+        #ndx_component_templates = Component::Template.get_info_for_clone(cmp_template_idhs).inject(Hash.new){|h,r|h.merge(r[:id]=>r)}
         mapping_rows = matches.map do |m|
           node = m[:node]
           old_par_id = node[:id]

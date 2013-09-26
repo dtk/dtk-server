@@ -48,7 +48,7 @@ module Ramaze::Helper
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       remote_repo = ret_remote_repo()
       project = get_default_project()
-      do_not_import = ret_request_params(:do_not_import)
+      do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
 
       remote_params = {
         :repo => remote_repo,
@@ -61,13 +61,13 @@ module Ramaze::Helper
       }
 
       # check for missing module dependencies
-      if (is_service_module?(module_class) && !do_not_import)
+      if (is_service_module?(module_class) && !do_not_raise)
         missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
 
-      response = module_class.import(project,remote_params,local_params)
+      response = module_class.import(project,remote_params,local_params,:do_not_raise=>do_not_raise)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

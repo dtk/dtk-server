@@ -2,6 +2,10 @@
 require 'grit'
 require 'fileutils'
 r8_nested_require('git','manage_git_server')
+
+Grit.debug = R8::Config[:debug][:grit]
+
+
 module DTK
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin

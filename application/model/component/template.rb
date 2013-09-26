@@ -4,14 +4,14 @@ module DTK; class Component
       ret = Array.new
       return ret if cmp_template_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:project_project_id,:component_type,:version],
+        :cols => [:id,:group_id,:display_name,:project_project_id,:component_type,:version,:module_branch],
         :filter => [:oneof,:id,cmp_template_idhs.map{|idh|idh.get_id()}]
       }
       mh = cmp_template_idhs.first.createMH()
       get_objs(mh,sp_hash)
     end
 
-    #component modules indexed by component_templaet ids 
+    #component modules indexed by component_template ids 
     def self.get_indexed_component_modules(component_template_idhs)
       ret = Hash.new
       return ret if component_template_idhs.empty?()

@@ -132,7 +132,7 @@ module DTK
       repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info)
+      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
     end
 
     #import from remote repo; directly in this method handles the module/branc and repo level items

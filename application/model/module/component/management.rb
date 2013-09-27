@@ -76,6 +76,14 @@ module DTK; class ComponentModule
       {:module_name => module_name()}
     end
 
+    def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
+      info = module_and_branch_info #for succinctness
+      module_branch_idh = info[:module_branch_idh]
+      module_branch = module_branch_idh.create_object().merge(:repo => repo)
+
+      create_needed_objects_and_dsl?(repo,version)
+    end
+
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
       create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)

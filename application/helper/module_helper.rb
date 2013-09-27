@@ -40,7 +40,7 @@ module Ramaze::Helper
       version = ret_request_params(:version)
       project = get_default_project()
 
-      module_class.pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      module_class.pull_from_remote(project, local_module_name, remote_repo, version)
     end
 
     def import_method_helper(module_class)

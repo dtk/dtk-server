@@ -2,7 +2,7 @@ module XYZ
   module DataSourceAdapterInstanceMixin
     #Should be overwritten if no dsl
     def normalize(ds_hash)
-      target_obj = DBUpdateHash.create_with_auto_vivification()
+      target_obj = DBUpdateHash.create()
       @ds_object_adapter_class.class_rules.each do |condition,top_level_assign|
         if condition.evaluate_condition(ds_hash)
           top_level_assign.each do |attr,assign|
@@ -44,7 +44,7 @@ module XYZ
       obj[:ds_key] = ds_key_value(ds_hash)
       obj[:ds_source_obj_type] = source_obj_type() if source_obj_type()      
       obj[:data_source] = ds_name()
-      ret = DBUpdateHash.create_with_auto_vivification()
+      ret = DBUpdateHash.create()
       ret[relation_type()][ref(ds_hash)]= obj
       ret.freeze
     end

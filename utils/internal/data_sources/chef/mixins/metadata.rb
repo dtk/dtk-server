@@ -29,7 +29,7 @@ module XYZ
      end
 
      def get_service_info(recipe_name,meta_service_info)
-       ret = HashObject.create_with_auto_vivification()
+       ret = HashObject::AutoViv.create()
        if (meta_service_info[:recipe_names]||[]).include?(recipe_name)
          #TBD: modify use of canonical_service_name
          ret[:canonical_service_name] = meta_service_info[:service_name]
@@ -60,7 +60,7 @@ module XYZ
      end
 
      def ret_normalized_transform_info(transform)
-       ret = HashObject.create_with_auto_vivification()
+       ret = HashObject::AutoViv.create()
        set_attribute_transform_info(ret,0,transform)
        ret.freeze
        ret[0]
@@ -77,7 +77,7 @@ module XYZ
        elsif transform.kind_of?(Array)
          target[key] = transform.map do |child|
            if child.kind_of?(Hash) 
-             child_target = HashObject.create_with_auto_vivification()
+             child_target = HashObject::AutoViv.create()
              child.each{|k,v|set_attribute_transform_info(child_target,k,v)}
              child_target
            else

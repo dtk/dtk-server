@@ -236,7 +236,7 @@ module XYZ
       end
 
       def get_attributes_with_values_aux(recipe_name,metadata,node=nil)
-        ret = DataSourceUpdateHash.create_with_auto_vivification()
+        ret = DataSourceUpdateHash.create()
         (metadata["attributes"]||{}).each do |raw_attr_name,attr_metadata| 
           recipes = attr_metadata["recipes"]||[]
           next unless recipes.empty? or recipes.include?(recipe_name)

@@ -185,7 +185,7 @@ rather than having or having two sap refs and user can remove or add to componen
     }
   end
 
-  class SemanticTypeSchema < HashObject
+  class SemanticTypeSchema < HashObject::AutoViv
     include CommonSemanticTypeMixin
     def self.create_from_attribute(attr)
       semantic_type = attr[:semantic_type]
@@ -200,7 +200,7 @@ rather than having or having two sap refs and user can remove or add to componen
       key = semantic_type_key(semantic_type)
       return TranslationToSchema[key] if TranslationToSchema[key]
 
-      ret = create_with_auto_vivification()
+      ret = create()
       if semantic_type.kind_of?(Hash)
         val = semantic_type.values.first
         return create_json_type() if val.kind_of?(Hash) and val.keys.first == :application

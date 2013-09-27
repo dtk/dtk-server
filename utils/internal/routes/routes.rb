@@ -1,6 +1,6 @@
 
 module R8
-  Routes = XYZ::HashObject.create_with_auto_vivification()
+  Routes = XYZ::HashObject::AutoViv.create()
 
   class Mapper
     def initialize()

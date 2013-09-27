@@ -12,7 +12,7 @@ module XYZ
       end
       
       def self.class_rules()
-        @class_rules ||= DBUpdateHash.create_with_auto_vivification()
+        @class_rules ||= DBUpdateHash.create()
       end
 
       def self.name_delimiter()

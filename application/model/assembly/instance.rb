@@ -536,7 +536,7 @@ module DTK; class  Assembly
 
     def self.delete_contents(assembly_idhs,opts={})
       return if assembly_idhs.empty?
-      delete(get_sub_assemblies(assembly_idhs).id_handles())
+      delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
       delete_assembly_modules(assembly_idhs)

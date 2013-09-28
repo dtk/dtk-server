@@ -50,7 +50,9 @@ module DTK
           unless node_node_id = (parent_rels.find{|r|r[:old_par_id] == old_par_id}||{})[:node_node_id]
             raise Error.new("Cannot find old_par_id #{old_par_id.to_s} in parent_rels") 
           end
-          component_template_id = ndx_component_templates[m[:component_template_id]][:id]
+          component_template = ndx_component_templates[m[:component_template_id]]
+          component_template_id = component_template[:id]
+
           #set  ndx_to_find_cmp_ref_id
           #first index is the associated node instance, second is teh component template
           pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
@@ -59,10 +61,12 @@ module DTK
           end
           pntr[m[:display_name]] = m[:id]
 
-          {:ancestor_id => component_template_id,
+          {
+            :ancestor_id => component_template_id,
             :component_template_id =>  component_template_id,
             :node_node_id =>  node_node_id,
             :assembly_id => node[:assembly_id],
+            :locked_sha => (component_template[:module_branch]||{})[:current_sha],
             :display_name => m[:display_name],
             :ref => m[:ref]
           }
@@ -71,7 +75,7 @@ module DTK
         mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
       
         #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref] + parent_rels.first.keys
+        remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref,:locked_sha] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
         cmp_template_wc = nil
         cmp_template_ds = Model.get_objects_just_dataset(component_mh,cmp_template_wc,Model::FieldSet.opt(cmp_template_fs))

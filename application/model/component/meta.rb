@@ -25,6 +25,8 @@ module XYZ
       column :specific_type, :varchar, :size => 30 
       column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
 
+      column :locked_sha, :varchar, :size => 50
+
       #if set to true only one instance of a component (using component_type to determine 'same') can be on a node
       column :only_one_per_node, :boolean, :default => true
       #refernce used when multiple isnatnces of same component type 

@@ -8,7 +8,14 @@ module DTK; class Component
         :filter => [:oneof,:id,cmp_template_idhs.map{|idh|idh.get_id()}]
       }
       mh = cmp_template_idhs.first.createMH()
-      get_objs(mh,sp_hash)
+      ret = get_objs(mh,sp_hash)
+      #TODO: more efficient if we make sure this is done already
+      #find and set current_sha from repo
+      ret.each do |r|
+        module_branch = r[:module_branch]
+        module_branch.update_current_sha_from_repo!() unless module_branch[:current_sha]
+      end
+      ret
     end
 
     #component modules indexed by component_template ids 

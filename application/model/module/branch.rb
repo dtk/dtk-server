@@ -30,6 +30,13 @@ module DTK
       delete_instance(id_handle())
     end
 
+    def update_current_sha_from_repo!()
+      current_sha = RepoManager.branch_head_sha(self)
+      update(:current_sha => current_sha)
+      self[:current_sha] = current_sha
+      current_sha
+    end
+
     #returns true if actual pull was needed
     def pull_repo_changes?(commit_sha)
       update_object!(:branch,:current_sha)

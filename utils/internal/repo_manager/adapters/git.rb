@@ -314,6 +314,10 @@ module DTK
       ret_config_keys().include?("remote.#{remote_name}.url")
     end
 
+    def branch_head_sha()
+      @grit_repo.commit(@branch).id
+    end
+
     #returns :equal, :local_behind, :local_ahead, or :branchpoint
     #type can be :remote_branch or :local_branch
     def ret_merge_relationship(type,ref,opts={})

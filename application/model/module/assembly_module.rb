@@ -3,7 +3,7 @@ module DTK
     def self.prepare_for_edit_component_module(assembly,component_module)
       cmp_instances = get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       create_component_module_version?(assembly,component_module,cmp_instances)
-      module_version = ModuleVersion.create_for_assembly(assembly)
+      module_version = ModuleVersion.ret(assembly)
       component_module.get_workspace_branch_info(module_version)
     end
 
@@ -12,8 +12,17 @@ module DTK
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
+    def self.promote_module_updates(assembly,component_module)
+       module_version = ModuleVersion.ret(assembly)
+       aug_branch = component_module.get_augmented_workspace_branch(:filter => {:version => module_version})
+       unless ancestor_branch = aug_branch.get_ancestor_branch?()
+         raise Error.new("Cannot find ancestor branch")
+       end
+       component_module.get_workspace_branch_info(module_version)
+    end
+
     def self.create_component_modules?(assembly,cmp_instances_to_prune)
-      module_version = ModuleVersion.create_for_assembly(assembly)
+      module_version = ModuleVersion.ret(assembly)
       cmp_instances = reject_matching_component_instances(cmp_instances_to_prune,module_version)
       return if cmp_instances.empty?
       cmp_template_idhs = cmp_instances.map{|r|r.id_handle(:id => r.get_field?(:component_template_id))}
@@ -29,7 +38,7 @@ module DTK
     end
 
     def self.delete_assembly_modules(assembly)
-      version = ModuleVersion.create_for_assembly(assembly)
+      version = ModuleVersion.ret(assembly)
       assembly.get_component_modules().each do |component_module|
         component_module.delete_version?(version)
       end
@@ -79,7 +88,7 @@ module DTK
     end
 
     def self.create_component_module_version?(assembly,component_module,cmp_instances)
-      module_version = ModuleVersion.create_for_assembly(assembly)
+      module_version = ModuleVersion.ret(assembly)
       unless reject_matching_component_instances(cmp_instances,module_version).empty?
         create_component_module_version(component_module,module_version)
       end

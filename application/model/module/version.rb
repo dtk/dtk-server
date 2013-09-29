@@ -1,14 +1,16 @@
 module DTK
   class ModuleVersion < String
-    def self.create_for_assembly(assembly)
-      AssemblyModule.new(assembly.get_field?(:display_name))
-    end
-
-    def self.create_from_string(str)
-      if Semantic.legal_format?(str)
-        Semantic.create_from_string(str)
-      elsif AssemblyModule.legal_format?(str)
-        AssemblyModule.create_from_string(str)
+    def self.ret(obj)
+      if obj.kind_of?(String)
+        if Semantic.legal_format?(str)
+          Semantic.create_from_string(str)
+        elsif AssemblyModule.legal_format?(str)
+          AssemblyModule.create_from_string(str)
+        end
+      elsif obj.kind_of?(Assembly)
+        AssemblyModule.new(obj.get_field?(:display_name))
+      else
+        raise Error.new("Unexpected object type passed to ModuleVersion.ret (#{obj.class})")
       end
     end
 

@@ -25,7 +25,7 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
+      aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
       super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
       replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
       self[:commit_sha] = aug_branch[:current_sha]
@@ -46,7 +46,7 @@ module DTK
     end
 
     def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version}))
+      aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
       module_name = aug_branch[:module_name]
       ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
     end
@@ -55,7 +55,7 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
-    def get_augmented_workspace_branch(opts=Opts.new)
+    def get_augmented_workspace_branch(opts={})
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
 
@@ -65,7 +65,7 @@ module DTK
       module_rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
       if module_rows.size == 0
         unless opts[:donot_raise_error]
-          raise ErrorUsage.new("Module (#{pp_module_name(version)}) does not exist")
+          raise ErrorUsage.new("Module #{pp_module_name(version)} does not exist")
         end
         return nil
       end
@@ -105,7 +105,7 @@ module DTK
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_new_version__type_specific(repo_for_new_version,new_version,opts)
+      create_new_version__type_specific(repo_for_new_version,new_version,opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle()))
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)
@@ -222,7 +222,7 @@ module DTK
     end
 
     #assumed that all raw_module_rows agree on all except repo_remote
-    def aggregate_by_remote_namespace(raw_module_rows,opts=Opts.new)
+    def aggregate_by_remote_namespace(raw_module_rows,opts={})
       ret = nil
       #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
       if raw_module_rows.empty?()
@@ -579,11 +579,13 @@ module DTK
       version ? "#{module_name} (#{version})" : module_name
     end
 
-    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version)
+    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)
       project_idh = project.id_handle()
       ref = module_name
       module_type = model_name.to_s
-      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project,module_type,repo_idh,input_version)
+      opts = {:version => input_version}
+      opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
+      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project,module_type,repo_idh,opts)
       version = mb_create_hash.values.first[:version]
 
       fields = {

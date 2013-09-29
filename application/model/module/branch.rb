@@ -4,6 +4,10 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def self.common_columns()
+      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id]
+    end
+
     def get_type()
       update_object!(:type)[:type].to_sym
     end
@@ -115,7 +119,7 @@ module DTK
     end
 
     #creates if necessary a new branch from this (so new branch and this branch share history)
-    #returns repo for new branch
+    #returns repo for new branch; this just creates repo branch and does not update object model
     def create_new_branch_from_this_branch?(project,base_repo,new_version)
       branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
@@ -275,7 +279,21 @@ module DTK
       end.values
     end
 
-    def self.ret_workspace_create_hash(project,type,repo_idh,version=nil)
+    def get_ancestor_branch?()
+      ret = nil
+      unless ancestor_branch_id = get_field?(:ancestor_id)
+        return ret
+      end
+      sp_hash = {
+        :cols => self.class.common_columns(),
+        :filter => [:eq,:id,ancestor_branch_id]
+      }
+      Model.get_obj(model_handle(),sp_hash)
+    end
+
+    def self.ret_workspace_create_hash(project,type,repo_idh,opts={})
+      version = opts[:version]
+      ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  workspace_branch_name(project,version)
       assigns = {
         :display_name => branch,
@@ -285,6 +303,7 @@ module DTK
         :type => type,
         :version => version_field(version)
       }
+      assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
       ref = branch
       {ref => assigns}
     end

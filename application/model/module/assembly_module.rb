@@ -52,6 +52,7 @@ module DTK
             :id => cmp[:id],
             :module_branch_id => module_branch_id,
             :version => cmp_template[:version],
+            :locked_sha => nil, #this servers to let component instance get updated as this branch is updated
             :implementation_id => cmp_template[:implementation_id],
             :ancestor_id => cmp_template[:id]
           }

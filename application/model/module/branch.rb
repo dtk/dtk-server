@@ -25,6 +25,7 @@ module DTK
       get_module().module_name()
     end
 
+    #deletes both local and remore branch
     def delete_instance_and_repo_branch()
       RepoManager.delete_branch(self)
       delete_instance(id_handle())

@@ -438,22 +438,23 @@ module DTK
       end
     end
 
-    def delete_branch()
+    #deletes both local and remote branch
+    def delete_branch(remote_name=nil)
       if @branch != current_branch()
-        delete_branch_aux()
+        delete_branch_aux(remote_name)
       else
         #need to checkout to some other branch since on branch taht is being deleted
         unless other_branch = get_branches().find{|br|br != @branch}
           raise Error.new("Cannot delete the last remanining branch (#{@branch})")
         end
         checkout(other_branch) do
-          delete_branch_aux()
+          delete_branch_aux(remote_name)
         end
       end
     end
-    def delete_branch_aux()
+    def delete_branch_aux(remote_name=nil)
       git_command__delete_local_branch?(@branch)      
-      git_command__delete_remote_branch?(@branch)      
+      git_command__delete_remote_branch?(@branch,remote_name)      
     end
     private :delete_branch_aux
 
@@ -539,6 +540,13 @@ module DTK
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
+
+    def remote_branch_exists?(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
+      qualified_branch_name = "#{remote_name}/#{branch_name}"
+      @grit_repo.remotes.find{|h|h.name == qualified_branch_name} ? true : nil
+    end
+
     def git_command()
       #TODO: not sure why this does not work:
       #GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
@@ -680,13 +688,14 @@ module DTK
       git_command.branch(cmd_opts(),"-D",branch_name)
     end
 
-    def git_command__delete_remote_branch?(branch_name)
-      if remote_exists?(branch_name)
-        git_command__delete_remote_branch(branch_name)
+    def git_command__delete_remote_branch?(branch_name,remote_name=nil)
+      if remote_branch_exists?(branch_name,remote_name)
+        git_command__delete_remote_branch(branch_name,remote_name)
       end
     end
-    def git_command__delete_remote_branch(branch_name)
-      git_command.push(cmd_opts(),default_remote_name(),":refs/heads/#{branch_name}")
+    def git_command__delete_remote_branch(branch_name,remote_name)
+      remote_name ||= default_remote_name()
+      git_command.push(cmd_opts(),remote_name,":refs/heads/#{branch_name}")
     end
     def cmd_opts()
       {:raise => true, :timeout => 60}

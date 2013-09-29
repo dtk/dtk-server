@@ -320,7 +320,8 @@ module DTK
         response = get_objs(target_mh, sp_hash.merge(opts))
       else
         # we sort in ascending order, last remote is default one
-        response.sort { |a,b| b[:repo_remote][:created_at] <=> a[:repo_remote][:created_at]}
+        #TODO: need to make more sophisticated so we dont end up comparing a '' to a date
+        response.sort { |a,b| ((b[:repo_remote]||{})[:created_at]||'') <=> ((a[:repo_remote]||{})[:created_at]||'')}
 
         # we switch to ascending order
         response.each_with_index do |e,i|

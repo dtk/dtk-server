@@ -18,7 +18,7 @@ module DTK
        unless ancestor_branch = aug_branch.get_ancestor_branch?()
          raise Error.new("Cannot find ancestor branch")
        end
-       component_module.get_workspace_branch_info(module_version)
+       ancestor_branch.merge_changes_and_update_model?(aug_branch)
     end
 
     def self.create_component_modules?(assembly,cmp_instances_to_prune)

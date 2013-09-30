@@ -42,6 +42,26 @@ module DTK
       current_sha
     end
 
+    def merge_changes_and_update_model?(branch_to_merge_from)
+      diffs = RepoManager.diff(branch_to_merge_from,self)
+      ret = diff.ret_summary()
+      pp [diffs,diff_summary]
+      return ret if diff_summary.no_diffs?()
+#TODO: stub
+      return  ret
+
+      result = RepoManager.fast_foward_merge_from_branch(branch_to_merge_from,self)
+      if result == :merge_needed
+        raise ErrorUsage.new("Cannot promote changes unless a merge is done")
+      end
+      unless :changed
+        raise Error.new("Unexpected result from fast_foward_merge_from_branch")
+      end
+      impl_obj = module_branch.get_implementation()
+      #TODO: need to calculate diffs before merge
+      #impl_obj.modify_file_assets(diffs_summary
+    end
+
     #returns true if actual pull was needed
     def pull_repo_changes?(commit_sha)
       update_object!(:branch,:current_sha)

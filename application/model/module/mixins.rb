@@ -182,7 +182,7 @@ module DTK
     def get_workspace_module_branch(version=nil)
       mb_mh = model_handle().create_childMH(:module_branch)
       sp_hash = {
-        :cols => [:id,:group_id,:display_name,:branch,:version],
+        :cols => ModuleBranch.common_columns(),
         :filter => [:and,[:eq,mb_mh.parent_id_field_name(),id()],
                     [:eq,:is_workspace,true],
                     [:eq,:version,ModuleBranch.version_field(version)]]

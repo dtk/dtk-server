@@ -14,11 +14,11 @@ module DTK
 
     def self.promote_module_updates(assembly,component_module)
        module_version = ModuleVersion.ret(assembly)
-       aug_branch = component_module.get_augmented_workspace_branch(:filter => {:version => module_version})
-       unless ancestor_branch = aug_branch.get_ancestor_branch?()
+       branch = component_module.get_workspace_module_branch(module_version)
+       unless ancestor_branch = branch.get_ancestor_branch?()
          raise Error.new("Cannot find ancestor branch")
        end
-       ancestor_branch.merge_changes_and_update_model?(aug_branch)
+       ancestor_branch.merge_changes_and_update_model?(branch)
     end
 
     def self.create_component_modules?(assembly,cmp_instances_to_prune)

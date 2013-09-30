@@ -43,12 +43,11 @@ module DTK
     end
 
     def merge_changes_and_update_model?(branch_to_merge_from)
-      diffs = RepoManager.diff(branch_to_merge_from,self)
-      ret = diff.ret_summary()
-      pp [diffs,diff_summary]
-      return ret if diff_summary.no_diffs?()
+      diffs_summary = RepoManager.diff(branch_to_merge_from,self).ret_summary()
+      pp diffs_summary
+      return diffs_summary if diffs_summary.no_diffs?()
 #TODO: stub
-      return  ret
+      return  diffs_summary
 
       result = RepoManager.fast_foward_merge_from_branch(branch_to_merge_from,self)
       if result == :merge_needed
@@ -57,9 +56,9 @@ module DTK
       unless :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
+      #TODO: take parts from ComponentModule#update_model_objs_or_create_dsl?
       impl_obj = module_branch.get_implementation()
-      #TODO: need to calculate diffs before merge
-      #impl_obj.modify_file_assets(diffs_summary
+      #impl_obj.modify_file_assets(diffs_summary)
     end
 
     #returns true if actual pull was needed

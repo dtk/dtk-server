@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly
+#Test Case 8: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly
 
 require 'rubygems'
 require 'rest_client'
@@ -20,11 +20,11 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-describe "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
+describe "Test Case 8: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly" do
 
 	before(:all) do
 		puts "*******************************************************************************************************************"
-		puts "Test Case 8: (OS: RedHat, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
+		puts "Test Case 8: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
 		puts "*******************************************************************************************************************"
 		puts ""
   end

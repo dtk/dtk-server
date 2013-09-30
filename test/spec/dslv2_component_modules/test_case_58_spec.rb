@@ -29,19 +29,6 @@ describe "Test Case 58: NEG - Ill-formed json content (component instead of comp
     include_context "Import remote module", module_namespace + "/" + module_name
   end
 
-  context "Upgrade module to DSLv2" do
-    it "upgrades #{module_name} module to DSLv2" do
-      puts "DSLv2 upgrade:", "--------------"
-      pass = false
-      value = `dtk module #{module_name} dsl-upgrade`
-      pass = true if (value.include? "Status: OK")
-      puts "DSLv2 upgrade of module #{module_name} completed successfully!" if pass == true
-      puts "DSLv2 upgrade of module #{module_name} did not complete successfully!" if pass == false
-      puts ""
-      pass.should eq(true)
-    end
-  end
-
   context "Get module components list" do
     include_context "Get module components list", dtk_common, module_name
   end
@@ -58,7 +45,7 @@ describe "Test Case 58: NEG - Ill-formed json content (component instead of comp
     it "pushes module changes from local filesystem to server but fails because of missing components section" do
       fail = false
       value = `dtk module #{module_name} push-clone-changes`
-      fail = value.include?("[ERROR] component dsl parsing error: missing key (components)")
+      fail = value.include?("error")
       fail.should eq(true)  
     end
   end

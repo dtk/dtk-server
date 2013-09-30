@@ -50,7 +50,7 @@ shared_context "Create module from provided git repo" do |module_name, git_ssh_r
     puts "Create module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
-    pass = true if ((!value.include? "ERROR") || (!value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found"))
     puts "Module #{module_name} created successfully from provided git repo!" if pass == true
     puts "Module #{module_name} was not created successfully from provided git repo!" if pass == false
     puts ""
@@ -63,7 +63,7 @@ shared_context "NEG - Create module from provided git repo" do |module_name, git
     puts "NEG - Create module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
-    pass = true if ((value.include? "ERROR") || (value.include? "Git repository URL '#{git_ssh_repo_url}' is invalid."))
+    pass = true if ((value.include? "ERROR") || (value.include? "Repository not found"))
     puts "Module #{module_name} was not created successfully from provided incorrect git repo!" if pass == true
     puts "Module #{module_name} was created successfully from provided incorrect git repo!" if pass == false
     puts ""

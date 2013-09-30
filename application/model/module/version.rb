@@ -2,10 +2,10 @@ module DTK
   class ModuleVersion < String
     def self.ret(obj)
       if obj.kind_of?(String)
-        if Semantic.legal_format?(str)
-          Semantic.create_from_string(str)
-        elsif AssemblyModule.legal_format?(str)
-          AssemblyModule.create_from_string(str)
+        if Semantic.legal_format?(obj)
+          Semantic.create_from_string(obj)
+        elsif AssemblyModule.legal_format?(obj)
+          AssemblyModule.create_from_string(obj)
         end
       elsif obj.kind_of?(Assembly)
         AssemblyModule.new(obj.get_field?(:display_name))

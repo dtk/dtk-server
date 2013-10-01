@@ -11,6 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
+
 assembly_name = 'smoke_test_instance'
 assembly_template = 'bootstrap::node_with_params'
 os = 'precise'

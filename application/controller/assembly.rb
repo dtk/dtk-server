@@ -220,6 +220,11 @@ module DTK
       rest_ok_response result 
     end
 
+    def rest__list_with_workspace()
+      opts = ret_params_hash(:filter)
+      Assembly::Instance.list_with_workspace(model_handle(),opts)
+    end
+
     #### end: list and info actions ###
     #TODO: update what input can be
     #the body has an array each element of form

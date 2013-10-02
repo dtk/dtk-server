@@ -71,6 +71,7 @@ module XYZ
       end
 
       def self.execute(task_idh,top_task_idh,task_action)
+
         node = task_action[:node]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref)
 
@@ -103,6 +104,7 @@ module XYZ
 
           create_options.merge!(:key_name => keypair)
           avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
+
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)
           end
@@ -119,7 +121,7 @@ module XYZ
           target_aws_creds = node.get_target_iaas_credentials()
 
           begin
-            response = conn(target_aws_creds).server_create(create_options)
+            response = Ec2.conn(target_aws_creds).server_create(create_options)
           rescue => e
             return {:status => "failed", :error_object => e}
           end

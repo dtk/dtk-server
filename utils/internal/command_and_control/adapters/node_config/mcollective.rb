@@ -68,6 +68,8 @@ module DTK
               File.open("#{agent_repo_dir}/#{diff.b_path}") { |file| agents[agent_name] = Base64.encode64(file.read) }
             end          
           end
+        elsif R8::Config[:node_agent_git_clone][:mode] == 'debug'
+          node_agent_git_clone_debug_mode_set_agents!(agents)
         else
           agent_paths = Dir.glob("#{agent_repo_dir}/#{MCAgentPluginDir}/*")
           agent_paths.each do |agent_path|
@@ -82,6 +84,26 @@ module DTK
         async_agent_call("dev_manager","inject_agent",msg_content,filter,callbacks,context)
       end
       MCAgentPluginDir = "mcollective_additions/plugins/v2.2/agent"
+
+      def self.node_agent_git_clone_debug_mode_set_agents!(agents)
+        debug_config = R8::Config[:node_agent_git_clone][:debug_mode]
+        begin
+          new_files_dir = debug_config[:new_files_dir]
+          new_files = 
+            if debug_config[:new_files]
+              debug_config[:new_files].split(';').map{|fn|"#{new_files_dir}/#{fn}"}
+            else
+              Dir.glob("#{new_files_dir}/*")  
+            end
+          new_files.each do |path|
+            file_name = path.split('/').last
+            Log.info("Putting in modified file (#{path}) for debug sync agent")
+            File.open(path){ |f| agents[file_name] = Base64.encode64(f.read)}
+          end
+        rescue => e
+          Log.error("Trapped error in node_agent_git_clone_debug_mode_set_agents!: #{e.to_s}")
+        end
+      end
 
       def self.authorize_node(node,callbacks,context_x={})
         repo_user_mh = node.id_handle.createMH(:repo_user)
@@ -134,7 +156,7 @@ module DTK
         params = nil
         async_agent_call("discovery","ping",params,filter,callbacks,context)
       end
-      PollCycleDefault = 10
+      PollCycleDefault = 40
       PollCountDefault = 6
 
       def self.request__get_logs(task,nodes,callbacks,context)
@@ -210,14 +232,7 @@ module DTK
         end.values
 
         impl_idhs = get_impl_idhs(config_node)
-
-        impls = Component::IncludeModule.get_impls_for_version_context(component_idhs,impl_idhs)
-
-        ret = Array.new # using more complicated form rather than straight map becase want it to be a strict array, not DTK array
-        impls.each do |impl|
-          ret << {:repo => impl[:repo],:branch => impl[:branch], :implementation => impl[:module_name]}
-        end
-        ret
+        ComponentModule::VersionContextInfo.get_in_hash_form(component_idhs,impl_idhs)
       end
 
       def self.get_impl_idhs(config_node)

@@ -92,6 +92,10 @@ module DTK
       @relation_type || self.class.model_name() 
     end
 
+    def self.model_name_with_subclass()
+      model_name_helper(self,:no_subclass => true)
+    end
+
     class << self
       private
       def model_name_helper(klass,opts={})
@@ -157,6 +161,11 @@ module DTK
     def hash_subset(*cols)
       #set seed to model class w/o any keys
       Aux::hash_subset(self,cols,:seed=>self.class.create_stub(model_handle()))
+    end
+
+    def hash_form_subset(*cols)
+      #set seed to model class w/o any keys
+      Aux::hash_subset(self,cols,:seed=>Hash.new())
     end
 
     module Delim
@@ -551,7 +560,7 @@ module DTK
 
       PerformanceService.end("PERF_SQL", search_object.object_id)
       PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
-      PerformanceService.log("SQL=#{dataset.sequel_ds.sql.gsub('"','')}")
+      PerformanceService.log("SQL="+dataset.sequel_ds.sql.gsub(/"/,'')) 
 
       return ret_val
     end
@@ -721,8 +730,8 @@ module DTK
     def is_assembly?()
       nil
     end
-    def is_base_component?()
-      nil
+    def assembly?(opts={})
+     nil
     end
 
     #may deprecate below

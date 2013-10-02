@@ -232,7 +232,7 @@ module XYZ
       end
 
       def all(opts={})
-        ret = ArrayObject.new
+        ret = Array.new
         @sequel_ds.all.map do |row|
           Model.process_raw_db_row!(row,model_name,opts)
           new_row = DB_REL_DEF[model_name][:model_class].new(row,@c,model_name)
@@ -339,7 +339,7 @@ module XYZ
         #pull first element from under top level key
         primary_model_name = @model_name_info.first.model_name() 
         rest_model_indexes = @model_name_info[1..@model_name_info.size-1]
-        ret = ArrayObject.new
+        ret = Array.new
         @sequel_ds.all.each do |row|
           primary_cols = row.delete(primary_model_name)
           Model.process_raw_db_row!(primary_cols,primary_model_name,opts)

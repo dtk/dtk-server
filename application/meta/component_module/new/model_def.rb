@@ -133,14 +133,14 @@ lambda__segment_impls =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
+      [lambda__segment_module_branches.call(:cols => ModuleBranch.common_columns(),:filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name])]
     },
     :workspace_info_full=>{
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-      [lambda__segment_module_branches.call(:cols =>[:id,:display_name,:group_id,:branch,:version,:current_sha,:repo_id],:filter=>[:eq,:is_workspace,true]),
+      [lambda__segment_module_branches.call(:cols => ModuleBranch.common_columns(), :filter=>[:eq,:is_workspace,true]),
        lambda__segment_repos.call(:cols=>[:id,:display_name,:group_id,:repo_name,:local_dir,:remote_repo_name]),
        lambda__segment_remote_repos.call(:cols => [:id,:display_name,:group_id,:ref,:repo_name,:repo_namespace,:created_at,:repo_id,:is_default],:join_type=>:left_outer)
      ]
@@ -256,7 +256,7 @@ lambda__segment_impls =
       :remote_dependencies=>
       [lambda__segment_module_branches.call(:cols => [:id]),
        lambda__segment_components.call(
-        :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id],
+        :cols => [:id,:group_id,:display_name,:component_type,:version,:assembly_id,:project_project_id,:component_template_id],
         :filter=>[:neq,:node_node_id,nil])
       ]
     },

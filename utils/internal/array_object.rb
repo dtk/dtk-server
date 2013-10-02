@@ -9,9 +9,5 @@ module XYZ
       each{|x|x.freeze}
       super
     end
-
-    def id_handles()
-      map{|x|x.id_handle()}
-    end
   end
 end

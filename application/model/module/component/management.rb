@@ -59,21 +59,24 @@ module DTK; class ComponentModule
       {:module_name => module_name()}
     end
 
-    def delete_version(version)
-      module_branch  = get_module_branch_matching_version(version)
-      raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
+    def delete_version?(version)
+      delete_version(version,:no_error_if_does_not_exist=>true)
+    end
+    def delete_version(version,opts={})
+      ret = {:module_name => module_name()}
+      unless module_branch = get_module_branch_matching_version(version)
+        if opts[:no_error_if_does_not_exist]
+          return ret
+        else
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+        end
+      end
 
-      #TODO: remove after reading: Rich: get_component_version_constraints has been deprecated and also it applies only to a service module
-      #version_constraints = module_branch.get_component_version_constraints()
-      #raise ErrorUsage.new("Cannot delete the component module version because the service module(s) '#{version_constraints[:service_module]}' reference it") if version_constraints
-      
-      id_handle      = module_branch.id_handle()
-      implementation = module_branch.get_implementation()
-      impl_idh       = implementation.id_handle()
-
-      module_branch.delete_instance(id_handle)
-      implementation.delete_instance(impl_idh)
-      {:module_name => module_name()}
+      if implementation = module_branch.get_implementation()
+        delete_instance(implementation.id_handle())
+      end
+      module_branch.delete_instance_and_repo_branch()
+      ret
     end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info,version=nil)
@@ -102,7 +105,7 @@ module DTK; class ComponentModule
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
       impl_obj.create_file_assets_from_dir_els()
 
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
 
       dsl_created_info = Hash.new()
@@ -126,7 +129,13 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new
       dsl_parsed_info  = Hash.new
 
-      if ComponentDSL.contains_dsl_file?(impl_obj)
+      if version.kind_of?(ModuleVersion::AssemblyModule)
+        if diffs_summary.meta_file_changed?()
+          raise ErrorUsage.new("Modifying dtk meta information in assembly instance is not supported; changes to dtk meta file will not take effect in instance")
+        end
+        assembly = version.get_assembly(model_handle(:component))
+        AssemblyModule.finalize_edit_component_module(assembly,self,module_branch)
+      elsif ComponentDSL.contains_dsl_file?(impl_obj)
         if diffs_summary.meta_file_changed?()
           dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
@@ -134,13 +143,14 @@ module DTK; class ComponentModule
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
+
       dsl_info = {:dsl_created_info => dsl_created_info}
       dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if(dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
       
       dsl_info
     end
 
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
       aug_component_templates = get_aug_associated_component_templates()

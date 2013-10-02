@@ -1,5 +1,35 @@
 module DTK; class Component
   class Template < self
+    def self.get_info_for_clone(cmp_template_idhs)
+      ret = Array.new
+      return ret if cmp_template_idhs.empty?
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:project_project_id,:component_type,:version,:module_branch],
+        :filter => [:oneof,:id,cmp_template_idhs.map{|idh|idh.get_id()}]
+      }
+      mh = cmp_template_idhs.first.createMH()
+      ret = get_objs(mh,sp_hash)
+      #TODO: more efficient if we make sure this is done already
+      #find and set current_sha from repo
+      ret.each do |r|
+        module_branch = r[:module_branch]
+        module_branch.update_current_sha_from_repo!() unless module_branch[:current_sha]
+      end
+      ret
+    end
+
+    #component modules indexed by component_template ids 
+    def self.get_indexed_component_modules(component_template_idhs)
+      ret = Hash.new
+      return ret if component_template_idhs.empty?()
+      sp_hash = {
+        :cols => [:id,:component_modules],
+        :filter => [:oneof,:id,component_template_idhs.map{|idh|idh.get_id()}]
+      }
+      mh = component_template_idhs.first.createMH()
+      get_objs(mh,sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r[:component_module])}
+    end
+
     #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
     def get_title_attribute_name?()
       rows = self.class.get_title_attributes([id_handle])
@@ -36,7 +66,7 @@ module DTK; class Component
       cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
       versions = type_version_field_list.map{|r|r[:version_field]}
       sp_hash = {
-        :cols => [:id,:group_id,:component_type,:version],
+        :cols => [:id,:group_id,:component_type,:version,:implementation_id],
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:oneof, :version, versions],
                     [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances

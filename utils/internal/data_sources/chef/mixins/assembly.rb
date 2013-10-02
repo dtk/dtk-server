@@ -8,13 +8,13 @@ module XYZ
               target[key] = process_external_ref(value["external_ref"],node,metadata)
             else 
               #TODO: this can be a Mash; should probably convert before hand to avoid patch below
-              target[key] ||= HashObject.create_with_auto_vivification() 
+              target[key] ||= HashObject::AutoViv.create() 
               normalize_attribute_values(target[key],value,node,metadata)
             end
           elsif value.kind_of?(Array)
             target[key] = value.map do |child|
               if child.kind_of?(Hash) 
-                child_target = HashObject.create_with_auto_vivification()
+                child_target = HashObject::AutoViv.create()
                 normalize_attribute_values(child_target,child,node,metadata)
               else
                 child 

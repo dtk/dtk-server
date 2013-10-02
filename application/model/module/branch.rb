@@ -4,6 +4,10 @@ module DTK
     include BranchNamesMixin
     extend BranchNamesClassMixin
 
+    def self.common_columns()
+      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id]
+    end
+
     def get_type()
       update_object!(:type)[:type].to_sym
     end
@@ -23,6 +27,46 @@ module DTK
 
     def get_module_name()
       get_module().module_name()
+    end
+
+    #deletes both local and remore branch
+    def delete_instance_and_repo_branch()
+      RepoManager.delete_branch(self)
+      delete_instance(id_handle())
+    end
+
+    def update_current_sha_from_repo!()
+      current_sha = RepoManager.branch_head_sha(self)
+      update(:current_sha => current_sha)
+      self[:current_sha] = current_sha
+      current_sha
+    end
+
+    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from)
+      ret = get_module_repo_info()
+      diffs_summary = RepoManager.diff(branch_name_to_merge_from,self).ret_summary()
+      #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
+      return ret if diffs_summary.no_diffs?()
+      ret = ret.merge!(:any_updates => true)
+
+      result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
+      if result == :merge_needed
+        raise ErrorUsage.new("Cannot promote changes unless a merge is done")
+      end
+      unless :changed
+        raise Error.new("Unexpected result from fast_foward_merge_from_branch")
+      end
+
+      impl_obj = get_implementation()
+      impl_obj.modify_file_assets(diffs_summary)
+      dsl_parsed_info  = Hash.new
+      if diffs_summary.meta_file_changed?()
+        dsl_parsed_info = component_module.parse_dsl_and_update_model(impl_obj,id_handle())
+      end
+      if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
+        ret.merge!(:dsl_parsing_errors => dsl_parsed_info)
+      end
+      ret
     end
 
     #returns true if actual pull was needed
@@ -102,7 +146,7 @@ module DTK
     end
 
     #creates if necessary a new branch from this (so new branch and this branch share history)
-    #returns repo for new branch
+    #returns repo for new branch; this just creates repo branch and does not update object model
     def create_new_branch_from_this_branch?(project,base_repo,new_version)
       branch_name = self.class.workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
@@ -262,7 +306,21 @@ module DTK
       end.values
     end
 
-    def self.ret_workspace_create_hash(project,type,repo_idh,version=nil)
+    def get_ancestor_branch?()
+      ret = nil
+      unless ancestor_branch_id = get_field?(:ancestor_id)
+        return ret
+      end
+      sp_hash = {
+        :cols => self.class.common_columns(),
+        :filter => [:eq,:id,ancestor_branch_id]
+      }
+      Model.get_obj(model_handle(),sp_hash)
+    end
+
+    def self.ret_workspace_create_hash(project,type,repo_idh,opts={})
+      version = opts[:version]
+      ancestor_branch_idh = opts[:ancestor_branch_idh]
       branch =  workspace_branch_name(project,version)
       assigns = {
         :display_name => branch,
@@ -272,6 +330,7 @@ module DTK
         :type => type,
         :version => version_field(version)
       }
+      assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
       ref = branch
       {ref => assigns}
     end

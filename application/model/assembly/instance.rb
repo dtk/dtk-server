@@ -8,8 +8,19 @@ module DTK; class  Assembly
     include ViolationMixin
     include ServiceLinkMixin
 
+    def self.get_objs(mh,sp_hash,opts={})
+      if mh[:model_name] == :assembly_instance
+        super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
+      else
+        super
+      end
+    end
+
+    def self.create_from_id_handle(idh)
+      idh.create_object(:model_name => :assembly_instance)
+    end
     def self.create_from_component(cmp)
-      cmp && cmp.id_handle().create_object(:model_name => :assembly_instance).merge(cmp)
+      cmp && create_from_id_handle(cmp.id_handle()).merge(cmp)
     end
 
     ### standard get methods
@@ -457,6 +468,26 @@ module DTK; class  Assembly
       end
     end
 
+
+
+    def get_augmented_component_modules()
+      ndx_ret = Hash.new
+      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
+        component_module = r[:component_module]
+        pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
+        pntr[:module_branches] << r[:module_branch]
+      end
+      ndx_ret.values
+    end
+    def get_component_modules()
+      ndx_ret = Hash.new
+      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
+        component_module = r[:component_module]
+        ndx_ret[component_module[:id]] ||= component_module
+      end
+      ndx_ret.values
+    end
+    #TODO: see if below can use above
     def get_components_module(component_id)
       component, version = nil, nil
       aug_cmps = get_augmented_components()
@@ -508,7 +539,7 @@ module DTK; class  Assembly
       else
         assembly_idhs = [assembly_idhs]
       end
-      #cannot deleet workspaces
+      #cannot delete workspaces
       if workspace = assembly_idhs.find{|idh|Workspace.is_workspace?(idh.create_object())}
         raise ErrorUsage.new("Cannot delete a workspace")
       end
@@ -518,9 +549,11 @@ module DTK; class  Assembly
 
     def self.delete_contents(assembly_idhs,opts={})
       return if assembly_idhs.empty?
-      delete(get_sub_assemblies(assembly_idhs).id_handles())
+      delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
+      delete_assembly_modules(assembly_idhs)
+      #delete_assembly_modules needs to be done before delete_assembly_nodes
       delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
@@ -533,6 +566,13 @@ module DTK; class  Assembly
           :filter => [:oneof,:component_component_id,assembly_ids] 
         }
         delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
+      end
+
+      def delete_assembly_modules(assembly_idhs)
+        assembly_idhs.each do |assembly_idh|
+          assembly = create_from_id_handle(assembly_idh)
+          AssemblyModule.delete_assembly_modules(assembly)
+        end
       end
 
       def delete_assembly_nodes(node_mh,assembly_ids,opts={})

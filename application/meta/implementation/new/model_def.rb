@@ -6,14 +6,20 @@
     :repo => {:type=>:varchar, :size => 50}, #not normalized TODO: creating problems because it has same name as model :repo
     :module_name => {:type=>:varchar, :size => 50}, 
     :parse_state => {:type=>:varchar, :size => 25},
-    :branch => {:type=>:varchar, :size => 50, :default => "master"}, 
-    :version => {:type=>:varchar, :size => 50, :default => "master"},
+    :branch => {:type=>:varchar, :size => 100, :default => "master"}, 
+    :version => {:type=>:varchar, :size => 100, :default => "master"},
     :updated => {:type=>:boolean, :default => false},
     :repo_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:repo,
       :on_delete=>:set_null,
       :on_update=>:set_null
+    },
+    :assembly_id=>{ #non-null if branch for an assembly instance
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     }
   },
   :virtual_columns=>{
@@ -102,6 +108,6 @@
        }]
     }
   },
-  :many_to_one=>[:library,:project],
+  :many_to_one=>[:project,:library], #MOD_RESTRUCT: may remove library as parent
   :one_to_many=>[:file_asset]
 }

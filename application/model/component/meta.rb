@@ -14,7 +14,7 @@ module XYZ
       
       #columns related to version
       #TODO: think we want to deprecate these; versioning is at module level
-      column :version, :varchar, :size => 25 #non-normalized: comes from module_branch
+      column :version, :varchar, :size => 100 #non-normalized: comes from module_branch
       column :updated, :boolean, :default => false
 
       #columns related to type
@@ -24,6 +24,8 @@ module XYZ
       #leaf type in component type 
       column :specific_type, :varchar, :size => 30 
       column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
+
+      column :locked_sha, :varchar, :size => 50
 
       #if set to true only one instance of a component (using component_type to determine 'same') can be on a node
       column :only_one_per_node, :boolean, :default => true
@@ -185,6 +187,35 @@ module XYZ
            :join_type => :inner,
            :join_cond=>{:id => q(:component,:implementation_id)},
            :cols => [:id,:module_name]
+         }
+        ]
+
+      virtual_column :module_branch, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :module_branch,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :cols => [:id,:display_name,:group_id,:branch,:repo_id,:version,:current_sha,:type,:is_workspace]
+         }]
+
+      virtual_column :component_module, :type => :json, :hidden => true,
+      :remote_dependencies =>
+        [
+         {
+           :model_name => :module_branch,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:module_branch_id)},
+           :cols => [:id,:component_id]
+         },
+         {
+           :model_name => :component_module,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:module_branch,:component_id)},
+           :cols => [:id,:group_id,:display_name,:dsl_parsed]
          }
         ]
 

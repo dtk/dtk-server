@@ -109,40 +109,4 @@ module DTK
       }
     }
   end
-  module ComponentCloneClassMixin
-    #MOD_RESTRUCT: deprecate
-    #indexed by id of matching component_template
-    def find_ndx_workspace_templates(project_idh,cmp_templates)
-      ret = Hash.new
-      return ret if cmp_templates.empty?
-      cmp_templates.each do |cmp|
-        cmp.update_object!(:version,:component_type,:library_library_id)
-        ret[cmp[:id]] = cmp
-      end
-      
-      lib_templates = cmp_templates.select{|cmp|cmp[:library_library_id]} 
-      return ret if lib_templates.empty?
-
-      ndx_cmps = Hash.new
-      ndx_versions = Hash.new
-      lib_templates.each do |cmp|
-        (ndx_cmps[cmp[:component_type]] ||= Hash.new)[cmp[:version]] = cmp[:id]
-        ndx_versions[cmp[:version]] ||= true
-      end
-      sp_hash = {
-        :filter => [:and,
-                    [:eq, :project_project_id, project_idh.get_id()],
-                    [:oneof, :component_type, ndx_cmps.keys],
-                    [:oneof, :version, ndx_versions.keys]
-                   ],
-        :cols => [:id,:group_id,:display_name,:project_project_id,:component_type,:version]
-      }
-      get_objs(project_idh.createMH(:component),sp_hash).each do |r|
-        if cmp_id = ndx_cmps[r[:component_type]][r[:version]]
-          ret[cmp_id] = r
-        end
-      end
-      ret
-    end
-  end
 end

@@ -2,6 +2,7 @@ module DTK
   class ComponentModule < Model
     r8_nested_require('component','management')
     r8_nested_require('component','parse_to_create_dsl')
+    r8_nested_require('component','version_context_info')
     include ManagementMixin
     extend ModuleClassMixin
     include ModuleMixin
@@ -29,8 +30,8 @@ module DTK
     def get_associated_component_instances()
       ndx_ret = Hash.new
       get_objs(:cols => [:component_instances]).each do |r|
-        component = r[:component]
-        ndx_ret[component[:id]] ||= component
+        cmp = r[:component]
+        ndx_ret[cmp[:id]] ||= Component::Instance.create_subclass_object(cmp)
       end
      ndx_ret.values
     end
@@ -138,7 +139,7 @@ module DTK
         installed_modules.each do |i_module|
           if (
               name.eql?(i_module[:display_name]) && 
-              ModuleCommon.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
+              ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
               namespace.eql?(i_module.fetch(:repo,{})[:remote_repo_namespace])
              )
 

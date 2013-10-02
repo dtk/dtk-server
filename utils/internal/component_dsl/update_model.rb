@@ -97,7 +97,7 @@ module DTK; class ComponentDSL
   end
 
   module UpdateModelClassMixin
-    def parse_and_update_model(impl_obj,module_branch_idh,version, opts={})
+    def parse_and_update_model(impl_obj,module_branch_idh,version=nil, opts={})
       component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version

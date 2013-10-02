@@ -238,7 +238,10 @@ module DTK
       } 
 
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
-        module_obj.get_repos().each do |repo|
+        repos = module_obj.get_repos().uniq()
+        
+        # module_obj.get_repos().each do |repo|
+        repos.each do |repo|
           # we remove remote repos
           unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
             raise ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist") 

@@ -106,12 +106,6 @@ lambda__instance_nodes_components_assembly_template =
          :cols=>[:id,:group_id,:display_name]
        }]
     },
-    :module_branch=>{
-      :type=>:json,
-      :hidden=>true,
-      :remote_dependencies=>
-      [lambda__segment_module_branch.call([:id,:group_id,:display_name,:branch,:repo_id,:version,:is_workspace])]
-    },
     :service_module=>{
       :type=>:json,
       :hidden=>true,
@@ -233,7 +227,27 @@ lambda__instance_nodes_components_assembly_template =
        }
       ]
     },
-
+    :instance_component_module_branches=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+        lambda__segments_nodes_and_components.call([:id,:display_name,:group_id],[:id,:display_name,:component_type,:group_id,:module_branch_id]) +
+      [{
+         :model_name=>:module_branch,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:nested_component__module_branch_id},
+         :cols => [:id,:display_name,:group_id,:version,:component_id]
+       },
+       {
+         :model_name=>:component_module,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:id=>:module_branch__component_id},
+         :cols => [:id,:display_name,:group_id]
+       }
+      ]
+    },
     :nested_nodes_summary=> lambda__nodes.call([:id,:display_name,:type,:os_type,:admin_op_status,:external_ref]),
     :template_stub_nodes=>lambda__nodes.call([:id,:group_id,:display_name,:os_type,:external_ref]),
     :augmented_component_refs=>{

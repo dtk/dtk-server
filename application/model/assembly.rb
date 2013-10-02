@@ -339,12 +339,17 @@ module DTK
     def is_assembly?()
       true
     end
-    def assembly_type()
-      #TODO: stub; may use basic_type to distinguish between component and node assemblies
-      :node
+    def assembly?(opts={})
+      if opts[:subclass_object]
+        self.class.create_assembly_subclass_object(self)
+      else
+        self
+      end
     end
-    def is_base_component?()
-      nil
+    def self.create_assembly_subclass_object(obj)
+      obj.update_object!(:datacenter_datacenter_id)
+      subclass_model_name = (obj[:datacenter_datacenter_id] ? :assembly_instance : :assembly_template)
+      create_subclass_object(obj,subclass_model_name)
     end
 
     def get_component_with_attributes_unraveled(attr_filters={})
@@ -368,5 +373,10 @@ module DTK
       attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
       component.merge(:attributes => attributes)
     end
+    def assembly_type()
+      #TODO: stub; may use basic_type to distinguish between component and node assemblies
+      :node
+    end
+    private :assembly_type
   end
 end

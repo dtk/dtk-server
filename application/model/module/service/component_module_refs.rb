@@ -50,7 +50,6 @@ module DTK
 
     def self.update_from_dsl_parsed_info(branch,parsed_info,opts={})
       content_hash_content = reify_content(branch.model_handle(:component_model_ref),parsed_info)
-      pp ["after reify_content in update_from_dsl_parsed_info",content_hash_content]
       update(branch,content_hash_content,opts)
       new(branch,content_hash_content,:content_hash_form_is_reified => true)
     end
@@ -199,9 +198,6 @@ module DTK
       @component_modules = opts[:content_hash_form_is_reified] ?
         content_hash_form :
         self.class.reify_content(parent.model_handle(:component_model_ref),content_hash_form)
-unless opts[:content_hash_form_is_reified]
-  pp ["after reify_content in initialize",@component_modules]
-end
     end
 
     def self.reify_content(mh,object)

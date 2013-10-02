@@ -50,8 +50,8 @@ lambda__matching_library_branches =
   :schema=>:module,
   :table=>:branch,
   :columns=>{
-    :branch => {:type=>:varchar, :size => 50},
-    :version => {:type=>:varchar, :size => 20},
+    :branch => {:type=>:varchar, :size => 100},
+    :version => {:type=>:varchar, :size => 100},
     :is_workspace => {:type =>:boolean},
     :type => {:type=>:varchar, :size => 20}, #service_module or component_module
     :current_sha => {:type=>:varchar, :size => 50}, #indicates the sha of the branch that is currently synchronized with object model 
@@ -64,6 +64,12 @@ lambda__matching_library_branches =
     :project_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:project,
+      :on_delete=>:cascade,
+      :on_update=>:cascade
+    },
+    :assembly_id=>{ #non-null if branch for an assembly instance
+      :type=>:bigint,
+      :foreign_key_rel_type=>:component,
       :on_delete=>:cascade,
       :on_update=>:cascade
     }
@@ -121,6 +127,7 @@ lambda__matching_library_branches =
          :cols => [:id,:display_name]
        }]
     },
+    #TODO: now that assembly_id is added, can we remove this?
     :assemblies=>{
       :type=>:json,
       :hidden=>true,

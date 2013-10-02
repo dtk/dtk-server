@@ -1,6 +1,8 @@
 module DTK; class Component
   class Instance < self
+
     def self.get_objs(mh,sp_hash,opts={})
+      #TODO: might want to change to :model_name == component_instance
       if mh[:model_name] == :component
         super.map{|cmp|create_from_component(cmp)}
       else

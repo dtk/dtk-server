@@ -43,9 +43,14 @@ module DTK
 
     #MOD_RESTRUCT: TODO: this hard codes in assumption that different users have different repos
     def workspace_branch_name(project,version=nil)
-      project.update_object!(:ref)
-      version_prefix = ((version and version != VersionFieldDefault)?  "-v#{version}" : "")
-      "workspace-#{project[:ref]}#{version_prefix}"
+      user_prefix = "workspace-#{project.get_field?(:ref)}"
+      if version.kind_of?(ModuleVersion::AssemblyModule)
+        assembly_suffix = "--assembly-#{version.assembly_name}"
+        "#{user_prefix}#{assembly_suffix}"
+      else
+        version_suffix = ((version and version != VersionFieldDefault)?  "-v#{version}" : "")
+        "#{user_prefix}#{version_suffix}"
+      end
     end
   end
 end

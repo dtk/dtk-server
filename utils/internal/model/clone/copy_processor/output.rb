@@ -23,6 +23,15 @@ module DTK
           ((@children[level]||{})[model_name]||[]).map{|x|x[:obj_info]}
         end
 
+        def children_objects(level,model_name)
+          if hash_form = children_hash_form(level,SubClassRels[model_name]||model_name)
+            hash_form.map{|r|r[:id_handle].create_object(:model_name => model_name).merge(r[:obj_info])}
+          end
+        end
+        SubClassRels = {
+          :component_instance => :component
+        }
+
         def children_hash_form(level,model_name)
           unless @include_children
             Log.error("children should not be called on object with @include_children set to false")
@@ -35,9 +44,8 @@ module DTK
           children_hash_form(level,model_name).map{|child_hash|child_hash[:id_handle]}
         end
 
-        def is_assembly?()
-          #TODO: cleanup; this assumes that assembly call wil create an object
-          objects and objects.first and objects.first.is_assembly?
+        def assembly?(opts={})
+          objects && objects.first && objects.first.assembly?(opts)
         end
 
         def set_new_objects!(objs_info,target_mh)

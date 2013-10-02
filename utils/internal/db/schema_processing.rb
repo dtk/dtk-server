@@ -1,7 +1,5 @@
-
 require 'sequel'
-
-module XYZ
+module DTK
   class DB
     # schema creation methods
     module SchemaProcessing
@@ -31,8 +29,23 @@ module XYZ
       def add_column(db_rel,*args)
         @db.add_column(db_rel.schema_table_symbol(),*args)
       end
+
+      def modify_column?(db_rel,*args)
+        #TODO: this only checks certain things; right now
+        #just can modify a varhcar's size
+        if args[1] == :varchar 
+          if size = args[2].kind_of?(Hash) && args[2][:size]
+            modify_column_varchar_size?(db_rel,args[0],size)
+          end
+        end
+      end
+
       def add_column?(db_rel,*args)
-        add_column(db_rel,*args) if ! column_exists?(db_rel,args[0])
+        if column_exists?(db_rel,args[0])
+          modify_column?(db_rel,*args)
+        else
+          add_column(db_rel,*args) 
+        end
       end
     end
   end

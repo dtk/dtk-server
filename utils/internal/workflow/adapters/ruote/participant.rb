@@ -78,7 +78,7 @@ module DTK
         def poll_to_detect_node_ready(workflow, node, callbacks)
           # num_poll_cycles => number of times we are going to poll given node
           # poll_cycles     => cycle of poll in seconds
-          num_poll_cycles, poll_cycle = 25, 6
+          num_poll_cycles, poll_cycle = 50, 6
           receiver_context = {:callbacks => callbacks, :expected_count => 1}
           opts = {:count => num_poll_cycles,:poll_cycle => poll_cycle}
           workflow.poll_to_detect_node_ready(node,receiver_context,opts)
@@ -421,6 +421,9 @@ module DTK
             head_git_commit_id = nil
             begin
               head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
+              if R8::Config[:node_agent_git_clone][:mode] == 'debug'
+                installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
+              end
              rescue => e
               Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
               head_git_commit_id = -1
@@ -464,7 +467,7 @@ module DTK
                   end
                   # If there was a change on agents, wait for node's mcollective process to restart
                   unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
-                    sleep(10)
+                    sleep(R8::Config[:node_agent_git_clone][:delay]||NodeAgentGitCloneDefaultDelay)
                   end
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
@@ -500,6 +503,7 @@ module DTK
             end
           end
         end
+        NodeAgentGitCloneDefaultDelay = 10
 
         # Ruote dispatch call to this method in case of user's cancel task request
         def cancel(fei, flavour)

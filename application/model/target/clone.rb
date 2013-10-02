@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module TargetCloneMixin
     def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
@@ -31,14 +31,14 @@ module XYZ
       end
 
       def self.component(target,clone_copy_output,opts)
-        if clone_copy_output.is_assembly?()
-          assembly(target,clone_copy_output,opts)
+        if assembly = clone_copy_output.assembly?(:subclass_object=>true)
+          assembly(target,assembly,clone_copy_output,opts)
         else
           raise Error.new("Not implemented clone of non assembly component to target")
         end
       end
 
-      def self.assembly(target,clone_copy_output,opts)
+      def self.assembly(target,assembly,clone_copy_output,opts)
         #clone_copy_output will be of form: assembly - node - component
 
         #adjust link_def_id on ports
@@ -62,11 +62,17 @@ module XYZ
 
 
         level = 2
+#TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
+#TODO: one alternative is to make minimal changes that just creates the assembly branch and feeds it to the config_node implementation id
+#component_instances = clone_copy_output.children_objects(level,:component_instance)
+#return if component_instances.empty?
+#AssemblyModule.create_component_module_versions?(assembly,component_instances)
+
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
+        return if component_child_hashes.empty?
         component_new_items = component_child_hashes.map do |child_hash| 
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
-        return if component_new_items.empty?
         StateChange.create_pending_change_items(component_new_items)
       end
 

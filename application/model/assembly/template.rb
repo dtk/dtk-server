@@ -3,6 +3,7 @@ module DTK; class Assembly
     r8_nested_require('template','factory')
 
     def stage(target,assembly_name=nil)
+      # TODO: if name given and not unique either reject or generate a -n suffix
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
@@ -10,7 +11,7 @@ module DTK; class Assembly
       Transaction do
         new_assembly_obj = target.clone_into(self,override_attrs,clone_opts)
       end
-      Assembly::Instance.create_from_component(new_assembly_obj)
+      Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 
     def self.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version=nil)

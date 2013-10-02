@@ -1,5 +1,7 @@
+#TODO: this needs much cleanup
 #TODO: change HashObject so that it does not have extra overhead of checking if frozen and then introduce variant that deals with frozen for config vars
 module DTK
+  #TODO: may deprecate
   class Opts < Hash
     def initialize(initial_val=nil)
       super()
@@ -176,10 +178,6 @@ module DTK
       def [](x)
         new(x)
       end
-      #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
-      def create_with_auto_vivification()
-        self.new{|h,k| h[k] = self.new(&h.default_proc)}
-      end
 
       def nested_value(hash,path)
         return hash if path.empty?
@@ -212,12 +210,16 @@ module DTK
         obj.each{|k,v| ret[k] = convert_nested_hashes(v)}
         ret
       elsif obj.kind_of?(Array)
-        ret = ArrayObject.new
+        ret = ArrayClass().new
         obj.each{|v|ret << convert_nested_hashes(v)}
         ret
       else
         obj        
       end
+    end
+
+    def ArrayClass()
+      ::Array
     end
 
     # "*" in path means just take whatever is next (assuming singleton; otehrwise takes first
@@ -238,9 +240,21 @@ module DTK
       return hash.has_key?(f) if path.length == 0
       nested_value_private!(hash[f],path)
     end
+
+    class AutoViv < self
+      def ArrayClass()
+        ArrayObject
+      end
+      class << self
+        #auto vivification trick from http://t-a-w.blogspot.com/2006/07/autovivification-in-ruby.html
+        def create()
+          self.new{|h,k| h[k] = self.new(&h.default_proc)}
+        end
+      end
+    end
   end
 
-  class ConfigHash < HashObject
+  class ConfigHash < HashObject::AutoViv
     #TODO: for putting in hooks to better report on config var access errors
   end
 
@@ -259,7 +273,7 @@ module DTK
   end
 
   #Used as input to data source normalizer
-  class DataSourceUpdateHash < HashObject  
+  class DataSourceUpdateHash < HashObject::AutoViv  
     #for efficiency not initializing @completeness_info = nil
     def constraints()
       @completeness_info ? @completeness_info.constraints : nil

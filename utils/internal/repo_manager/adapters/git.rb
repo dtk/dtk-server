@@ -314,6 +314,10 @@ module DTK
       ret_config_keys().include?("remote.#{remote_name}.url")
     end
 
+    def branch_head_sha()
+      @grit_repo.commit(@branch).id
+    end
+
     #returns :equal, :local_behind, :local_ahead, or :branchpoint
     #type can be :remote_branch or :local_branch
     def ret_merge_relationship(type,ref,opts={})
@@ -434,13 +438,25 @@ module DTK
       end
     end
 
-    def delete_branch()
-      raise Error.new("Cannot delete master branch") if @branch == "master"
-      checkout("master")
-      git_command__delete_local_branch(@branch)      
-      #TODO: need to make conditional on whether remote branch exists
-      git_command__delete_remote_branch(@branch)      
+    #deletes both local and remote branch
+    def delete_branch(remote_name=nil)
+      if @branch != current_branch()
+        delete_branch_aux(remote_name)
+      else
+        #need to checkout to some other branch since on branch taht is being deleted
+        unless other_branch = get_branches().find{|br|br != @branch}
+          raise Error.new("Cannot delete the last remanining branch (#{@branch})")
+        end
+        checkout(other_branch) do
+          delete_branch_aux(remote_name)
+        end
+      end
     end
+    def delete_branch_aux(remote_name=nil)
+      git_command__delete_local_branch?(@branch)      
+      git_command__delete_remote_branch?(@branch,remote_name)      
+    end
+    private :delete_branch_aux
 
     def get_branches()
       @grit_repo.branches.map{|b|b.name}
@@ -473,10 +489,14 @@ module DTK
       end
     end
 
+    def current_branch()
+      @grit_repo.head.name
+    end
+
     def checkout(branch_name,&block)
       ret = nil
       Dir.chdir(@path) do 
-        current_head = @grit_repo.head.name
+        current_head = current_branch()
         git_command__checkout(branch_name) unless current_head == branch_name
         return ret unless block
         ret = yield
@@ -520,6 +540,13 @@ module DTK
     def branch_exists?(branch_name)
       @grit_repo.heads.find{|h|h.name == branch_name} ? true : nil
     end
+
+    def remote_branch_exists?(branch_name,remote_name=nil)
+      remote_name ||= default_remote_name()
+      qualified_branch_name = "#{remote_name}/#{branch_name}"
+      @grit_repo.remotes.find{|h|h.name == qualified_branch_name} ? true : nil
+    end
+
     def git_command()
       #TODO: not sure why this does not work:
       #GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
@@ -652,11 +679,23 @@ module DTK
     def git_command__create_local_branch(branch_name)
       git_command.branch(cmd_opts(),branch_name)
     end
+    def git_command__delete_local_branch?(branch_name)
+      if get_branches().include?(branch_name)
+        git_command__delete_local_branch(branch_name)
+      end
+    end
     def git_command__delete_local_branch(branch_name)
       git_command.branch(cmd_opts(),"-D",branch_name)
     end
-    def git_command__delete_remote_branch(branch_name)
-      git_command.push(cmd_opts(),default_remote_name(),":refs/heads/#{branch_name}")
+
+    def git_command__delete_remote_branch?(branch_name,remote_name=nil)
+      if remote_branch_exists?(branch_name,remote_name)
+        git_command__delete_remote_branch(branch_name,remote_name)
+      end
+    end
+    def git_command__delete_remote_branch(branch_name,remote_name)
+      remote_name ||= default_remote_name()
+      git_command.push(cmd_opts(),remote_name,":refs/heads/#{branch_name}")
     end
     def cmd_opts()
       {:raise => true, :timeout => 60}

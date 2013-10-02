@@ -11,8 +11,8 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-module_name = "ruby"
-git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-ruby.git-incorrect"
+module_name = "tftp"
+git_ssh_repo_url = "git@github.com:puppetlabs/puppetlabs-tftp.git-incorrect"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 

@@ -34,9 +34,9 @@ module XYZ
           end
           authorize_action = participant_executable_action(:authorize_node,task,context,:task_type => "authorize_node", :task_start => true)
           main = participant_executable_action(:execute_on_node,task,context,:task_type => "config_node",:task_end => true)
-          # Amar: sync agent code subtask will be generated only in first inter node stage, or if nil (nil is only when converged from node context)
+          # Sync agent code subtask will be generated only in first inter node stage, or if nil (nil is only when converged from node context)
           sync_agent_code = 
-            if task[:executable_action].is_first_inter_node_stage?()
+            if task[:executable_action].is_first_inter_node_stage?() and not (R8::Config[:node_agent_git_clone][:mode] == 'off')
               sync_agent_code = participant_executable_action(:sync_agent_code,task,context,:task_type => "sync_agent_code")
             end
           sequence_tasks = [guards,authorize_action,sync_agent_code,main].compact

@@ -257,7 +257,7 @@ module DTK; class  Assembly
       get_objs(assembly_mh,sp_hash)
     end
 
-    def self.get_info__flat_list(assembly_mh,op2ts={})
+    def self.get_info__flat_list(assembly_mh, opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact

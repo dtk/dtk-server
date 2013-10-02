@@ -245,7 +245,7 @@ module DTK
 
     def rest__list_with_workspace()
       opts = ret_params_hash(:filter)
-      Assembly::Instance.list_with_workspace(model_handle(),opts)
+      rest_ok_response Assembly::Instance.list_with_workspace(model_handle(),opts)
     end
 
     #### end: list and info actions ###

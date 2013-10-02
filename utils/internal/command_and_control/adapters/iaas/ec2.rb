@@ -71,8 +71,6 @@ module XYZ
       end
 
       def self.execute(task_idh,top_task_idh,task_action)
-        # DEBUG SNIPPET >>> REMOVE <<<
-        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         node = task_action[:node]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref)
 

@@ -43,11 +43,10 @@ module DTK
     end
 
     def merge_changes_and_update_model?(branch_to_merge_from)
+      ret = get_module_repo_info()
       diffs_summary = RepoManager.diff(branch_to_merge_from,self).ret_summary()
-      pp diffs_summary
-      return diffs_summary if diffs_summary.no_diffs?()
-#TODO: stub
-      return  diffs_summary
+      return ret if diffs_summary.no_diffs?()
+      ret = ret.merge!(:any_updates => true)
 
       result = RepoManager.fast_foward_merge_from_branch(branch_to_merge_from,self)
       if result == :merge_needed
@@ -56,9 +55,17 @@ module DTK
       unless :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
-      #TODO: take parts from ComponentModule#update_model_objs_or_create_dsl?
+
       impl_obj = module_branch.get_implementation()
-      #impl_obj.modify_file_assets(diffs_summary)
+      impl_obj.modify_file_assets(diffs_summary)
+      dsl_parsed_info  = Hash.new
+      if diffs_summary.meta_file_changed?()
+        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
+      end
+      if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
+        ret.merge!(:dsl_parsing_errors => dsl_parsed_info)
+      end
+      ret
     end
 
     #returns true if actual pull was needed

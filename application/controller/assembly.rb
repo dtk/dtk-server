@@ -123,7 +123,6 @@ module DTK
       end
       module_name = ret_non_null_request_params(:module_name)
       component_module = create_obj(:module_name,ComponentModule)
-
       rest_ok_response AssemblyModule.promote_module_updates(assembly,component_module)
     end
 

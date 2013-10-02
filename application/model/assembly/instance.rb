@@ -243,10 +243,10 @@ module DTK; class  Assembly
         :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
         :filter => filter
       }
-      ret = get_objs(assembly_mh,sp_hash)
+      get_objs(assembly_mh,sp_hash)
     end
 
-    def self.get_info__flat_list(assembly_mh,opts={})
+    def self.get_info__flat_list(assembly_mh,op2ts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
@@ -266,6 +266,19 @@ module DTK; class  Assembly
       }
       assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
       ret + assembly_empty_nodes
+    end
+
+
+    def self.list_with_workspace(assembly_mh,opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+
+      sp_hash = {
+        :cols => [:id, :display_name].compact,
+        :filter => filter
+      }
+      get_objs(assembly_mh,sp_hash)
     end
     
     class << self

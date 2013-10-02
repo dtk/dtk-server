@@ -2,6 +2,8 @@ module XYZ
   class TargetController < AuthController
     helper :target_helper
 
+    PROVIDER_PREFIX = 'provider'
+
     def rest__list()
 
       subtype = ret_target_subtype()
@@ -15,15 +17,36 @@ module XYZ
       rest_ok_response response
     end
 
+
+    def rest__full_list()
+      # templates and instances
+      targets = Target::Instance.full_list(model_handle())
+
+      # add provider prefix to results
+      results = targets.collect do |entry|
+        if (entry[:type] == 'template')
+          entry[:display_name] = "#{PROVIDER_PREFIX}::#{entry[:display_name]}"
+          entry
+        else
+          entry
+        end
+      end
+
+      rest_ok_response results
+    end
+
     def rest__create()
       display_name = ret_non_null_request_params(:target_name)
       template_id  = ret_request_params(:target_template_id)
       params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties)
+      is_no_bootstrap  = ret_request_param_boolean(:no_bootstrap)
+
       project_idh  = get_default_project().id_handle()
+
 
       unless template_id
         # we first check if we are ok with aws credentials
-        CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
+        params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
         # create target template
         target_idh = Target::Template.create_from_user_input(project_idh, display_name, params_hash, true)
         # get object since we will need iaas data to copy
@@ -35,9 +58,21 @@ module XYZ
         params_hash = extract_hash(target_template,:description,:iaas_type,:iaas_properties)
       end
 
-      # create target instance
-      target_idh = Target.create_from_default(project_idh,display_name, params_hash.merge(:parent_id => template_id.to_i))
-      rest_ok_response(:target_id => target_idh.get_id())
+      if is_no_bootstrap
+        # this is when is in bootstrap mode
+        return rest_ok_response(:target_template_id => template_id)
+      else
+        # we defer creation of targets for each region no need to wait for it to finish
+        CreateThread.defer do
+          regions = R8::Config[:ec2][:regions]
+          regions.each do |region|
+            params_hash[:iaas_properties].merge!(:region => region)
+            target_idh = Target.create_from_default(project_idh,"#{display_name}-#{region}", params_hash.merge(:parent_id => template_id.to_i))
+          end
+        end
+      end
+
+      rest_ok_response(:success => true )
     end
 
     def rest__delete()

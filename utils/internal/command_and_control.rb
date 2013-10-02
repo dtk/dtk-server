@@ -34,7 +34,9 @@ module XYZ
 
     def self.prepare_account_for_target(iaas_adapter_name, iaas_credentials)
       klass = load_for_aux(:iaas, iaas_adapter_name)
-      klass.add_security_group_and_key_pair(iaas_credentials)
+
+      # method will add params and return iaas_credentials
+      return klass.check_security_group_and_key_pair(iaas_credentials)
     end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)

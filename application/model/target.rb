@@ -124,6 +124,18 @@ module XYZ
       update_object!(:iaas_type)[:iaas_type]
     end
 
+    def get_security_group()
+      update_object!(:iaas_properties)[:iaas_properties][:security_group]
+    end
+
+    def get_region()
+      update_object!(:iaas_properties)[:iaas_properties][:region]
+    end
+
+    def get_keypair_name()
+      update_object!(:iaas_properties)[:iaas_properties][:keypair]
+    end
+
     # returns aws params if pressent in iaas properties
     def get_aws_compute_params()
       iaas_props = update_object!(:iaas_properties)[:iaas_properties]

@@ -41,14 +41,29 @@ module XYZ
         end
       end
 
-      def self.add_security_group_and_key_pair(iaas_credentials)
+      def self.check_security_group_and_key_pair(iaas_credentials)
         begin
           ec2_creds = get_ec2_credentials(iaas_credentials)
           connection = conn(ec2_creds)
-          connection.create_key_pair(R8::Config[:ec2][:keypair])
-          Log.debug "Created needed R8 key pair (#{R8::Config[:ec2][:keypair]}) for newly created target-template"
-          connection.create_security_group(R8::Config[:ec2][:security_group], 'DTK security group')
-          Log.debug "Created needed security group (#{R8::Config[:ec2][:security_group]})  for newly created target-template"
+
+          # keypair
+          keypair_to_use = iaas_credentials['keypair_name'] || R8::Config[:ec2][:keypair]
+          connection.check_for_key_pair(keypair_to_use)
+          Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_credentials['keypair_name'].nil?})"
+
+          # securiy group
+          security_group_to_use = iaas_credentials['securiy_group'] || R8::Config[:ec2][:security_group]
+          connection.check_for_security_group(security_group_to_use)
+
+          Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_credentials['security_group'].nil?})"
+
+          return {
+            :key            => iaas_credentials['key'],
+            :secret         => iaas_credentials['secret'],
+            :keypair        => keypair_to_use,
+            :security_group => security_group_to_use,
+            :region         => iaas_credentials['region']
+          }
         rescue Fog::Compute::AWS::Error => e
           # probabably this will handle credentials failure
           raise ErrorUsage.new(e.message)
@@ -56,8 +71,12 @@ module XYZ
       end
 
       def self.execute(task_idh,top_task_idh,task_action)
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         node = task_action[:node]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref)
+
+        target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])
 
         external_ref = node[:external_ref]||{}
         instance_id = external_ref[:instance_id]
@@ -72,14 +91,19 @@ module XYZ
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
           create_options = {:image_id => ami,:flavor_id => flavor_id}
 
-          create_options.merge!(:groups => external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default")
+          # check priority for security group
+          security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
+          create_options.merge!(:groups => security_group )
 
           # set the ec2 name tag
+
           ec2_name = "#{task_action[:datacenter][:display_name][0...127]}:#{node[:display_name][0...255]}"
           create_options.merge!(:tags => {"Name" => ec2_name})
 
-          #TODO: fix up
-          create_options.merge!(:key_name => R8::Config[:ec2][:keypair])
+          # check priority of keypair
+          keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
+
+          create_options.merge!(:key_name => keypair)
           avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)

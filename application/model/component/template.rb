@@ -1,5 +1,17 @@
 module DTK; class Component
   class Template < self
+    def self.get_objs(mh,sp_hash,opts={})
+      if mh[:model_name] == :component_template
+        super(mh.merge(:model_name=>:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
+      else
+        super
+      end
+    end
+
+    def self.create_from_component(cmp)
+      cmp && cmp.id_handle().create_object(:model_name => :component_template).merge(cmp)
+    end
+
     def self.get_info_for_clone(cmp_template_idhs)
       ret = Array.new
       return ret if cmp_template_idhs.empty?
@@ -7,7 +19,7 @@ module DTK; class Component
         :cols => [:id,:group_id,:display_name,:project_project_id,:component_type,:version,:module_branch],
         :filter => [:oneof,:id,cmp_template_idhs.map{|idh|idh.get_id()}]
       }
-      mh = cmp_template_idhs.first.createMH()
+      mh = cmp_template_idhs.first.createMH(:component_template)
       ret = get_objs(mh,sp_hash)
       ret.each{|r|r.get_current_sha!()}
       ret

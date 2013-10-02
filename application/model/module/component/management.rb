@@ -150,7 +150,7 @@ module DTK; class ComponentModule
       dsl_info
     end
 
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts={})
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
       #get associated assembly templates before do any updates and use to see if any dangling references
       #within transaction after do update
       aug_component_templates = get_aug_associated_component_templates()

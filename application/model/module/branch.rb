@@ -42,13 +42,14 @@ module DTK
       current_sha
     end
 
-    def merge_changes_and_update_model?(branch_to_merge_from)
+    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from)
       ret = get_module_repo_info()
-      diffs_summary = RepoManager.diff(branch_to_merge_from,self).ret_summary()
+      diffs_summary = RepoManager.diff(branch_name_to_merge_from,self).ret_summary()
+      #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
       ret = ret.merge!(:any_updates => true)
 
-      result = RepoManager.fast_foward_merge_from_branch(branch_to_merge_from,self)
+      result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
       if result == :merge_needed
         raise ErrorUsage.new("Cannot promote changes unless a merge is done")
       end
@@ -56,11 +57,11 @@ module DTK
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
 
-      impl_obj = module_branch.get_implementation()
+      impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
       dsl_parsed_info  = Hash.new
       if diffs_summary.meta_file_changed?()
-        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
+        dsl_parsed_info = component_module.parse_dsl_and_update_model(impl_obj,id_handle())
       end
       if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
         ret.merge!(:dsl_parsing_errors => dsl_parsed_info)

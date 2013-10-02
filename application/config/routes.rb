@@ -24,6 +24,7 @@ R8::ReactorRoute.draw do
   post  'assembly/list_remote' => 'assembly#list_remote'
   post  'assembly/list_connections' => 'assembly#list_connections'
   post  'assembly/list_smoketests' => 'assembly#list_smoketests'
+  post  'assembly/list_with_workspace' => 'assembly#list_with_workspace'
   post  'assembly/info' => 'assembly#info'
   post  'assembly/delete' => 'assembly#delete'
   post  'assembly/purge' => 'assembly#purge' #workspace command
@@ -177,6 +178,7 @@ R8::ReactorRoute.draw do
 
    # TARGET
   post  'target/list' => 'target#list'
+  post  'target/full_list' => 'target#full_list'
   post  'target/create' => 'target#create'
   post  'target/info_about' => 'target#info_about'
   post  'target/delete' => 'target#delete'

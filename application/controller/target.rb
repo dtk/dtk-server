@@ -47,6 +47,7 @@ module XYZ
       unless template_id
         # we first check if we are ok with aws credentials
         params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
+
         # create target template
         target_idh = Target::Template.create_from_user_input(project_idh, display_name, params_hash, true)
         # get object since we will need iaas data to copy

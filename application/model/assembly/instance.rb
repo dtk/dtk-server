@@ -627,7 +627,7 @@ module DTK; class  Assembly
       new_obj && new_obj.id_handle()
     end
 
-    def add_component(node_idh,component_template,component_title,order_index=nil)
+    def add_component(node_idh,component_template,component_title)
       #first check that node_idh belongs to this instance
       sp_hash = {
         :cols => [:id, :display_name,:group_id, :ordered_component_ids],
@@ -637,11 +637,6 @@ module DTK; class  Assembly
         raise ErrorIdInvalid.new(node_idh.get_id(),:node)
       end
 
-      # Checking if 'order_index' is valid (number and correct value)
-      #TODO: Deprecating DEPENDENCY-ORDER-INDEX
-      #order = node.get_ordered_component_ids()
-      #raise ErrorUsage, "Invalid value for DEPENDENCY-ORDER-INDEX: '#{order_index}'" unless is_order_index_valid(order_index, order)
-
       cmp_instance_idh = nil
       Transaction do
         cmp_instance_idh = node.add_component(component_template,component_title)
@@ -649,21 +644,6 @@ module DTK; class  Assembly
       end
       cmp_instance_idh
     end
-=begin
-#TODO: Deprecating DEPENDENCY-ORDER-INDEX
-...
-      # Amar: updating order; if 'order_index' nil push to end, otherwise insert into current array
-      if order_index.nil?
-        order.push(component[:guid])
-      else
-        order.insert(order_index.to_i, component[:guid])
-      end
-      node.update_ordered_component_ids(order)
-
-    def is_order_index_valid(order_index, order)
-      return ((order_index && order_index.to_i.to_s == order_index && order_index.to_i <= order.size && order_index.to_i > -1) || order_index.nil? || order_index.empty?)
-    end
-=end    
 
     def delete_component(component_idh, node_id=nil)
       component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]

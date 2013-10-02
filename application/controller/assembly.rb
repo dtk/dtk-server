@@ -295,8 +295,7 @@ module DTK
 
       #not checking here if node_id points to valid object; check is in add_component
       node_id = ret_non_null_request_params(:node_id)
-      order_index = ret_request_params(:order_index) 
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template,component_title,order_index)
+      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

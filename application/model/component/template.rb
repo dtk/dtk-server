@@ -9,14 +9,23 @@ module DTK; class Component
       }
       mh = cmp_template_idhs.first.createMH()
       ret = get_objs(mh,sp_hash)
-      #TODO: more efficient if we make sure this is done already
-      #find and set current_sha from repo
-      ret.each do |r|
-        module_branch = r[:module_branch]
-        module_branch.update_current_sha_from_repo!() unless module_branch[:current_sha]
-      end
+      ret.each{|r|r.get_current_sha!()}
       ret
     end
+
+    def update_with_clone_info!()
+      clone_info = self.class.get_info_for_clone([id_handle()]).first
+      merge!(clone_info)
+    end
+
+    def get_current_sha!()
+      unless module_branch = self[:module_branch]
+        Log.error("Unexpected that get_current_sha called on object when self[:module_branch] not set")
+        return nil
+      end
+      module_branch[:current_sha] || module_branch.update_current_sha_from_repo!()
+    end
+
 
     #component modules indexed by component_template ids 
     def self.get_indexed_component_modules(component_template_idhs)

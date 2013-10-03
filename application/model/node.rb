@@ -290,14 +290,12 @@ module DTK
 
     def add_component(component_template,component_title=nil)
       component_template.update_with_clone_info!()
-      title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
-      override_attrs = Hash.new
-      if title_attr_name
+      override_attrs = {:locked_sha => component_template.get_current_sha!()}
+      if title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
         component_type = component_template.get_field?(:component_type)
         override_attrs = {
           :ref => SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type,component_title),:text),
-          :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text),
-          :lcoked_sha => component_template.get_current_sha!()
+          :display_name => SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type,component_title),:text)
         }
       end
       clone_opts = {:no_post_copy_hook => true,:ret_new_obj_with_cols => [:id,:display_name]}

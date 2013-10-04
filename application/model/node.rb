@@ -324,7 +324,8 @@ module DTK
       if component_title and title_attr_name.nil?
         raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) given a title but should not have one")
       elsif component_title.nil? and title_attr_name
-        raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) needs a title, but not given one")
+        cmp_name = component_template.component_type_print_form()
+        raise ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
       end 
 
       if title_attr_name #and component_title

@@ -66,7 +66,7 @@ module DTK
             :component_template_id =>  component_template_id,
             :node_node_id =>  node_node_id,
             :assembly_id => node[:assembly_id],
-            :locked_sha => (component_template[:module_branch]||{})[:current_sha],
+            :locked_sha => component_template.get_current_sha!(),
             :display_name => m[:display_name],
             :ref => m[:ref]
           }

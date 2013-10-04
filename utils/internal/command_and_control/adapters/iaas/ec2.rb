@@ -123,6 +123,7 @@ module XYZ
           begin
             response = Ec2.conn(target_aws_creds).server_create(create_options)
           rescue => e
+            Log.error_pp([e,e.backtrace[0..10]])
             return {:status => "failed", :error_object => e}
           end
           instance_id = response[:id]

@@ -38,11 +38,15 @@ module XYZ
     def rest__create()
       display_name = ret_non_null_request_params(:target_name)
       template_id  = ret_request_params(:target_template_id)
+      selected_region  = ret_request_params(:region)
       params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties)
       is_no_bootstrap  = ret_request_param_boolean(:no_bootstrap)
 
-      project_idh  = get_default_project().id_handle()
+      supported_types = R8::Config[:ec2][:iaas_type][:supported]
 
+      raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") unless supported_types.include?(params_hash[:iaas_type].downcase)
+
+      project_idh  = get_default_project().id_handle()
 
       unless template_id
         # we first check if we are ok with aws credentials
@@ -65,7 +69,7 @@ module XYZ
       else
         # we defer creation of targets for each region no need to wait for it to finish
         CreateThread.defer do
-          regions = R8::Config[:ec2][:regions]
+          regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
           regions.each do |region|
             params_hash[:iaas_properties].merge!(:region => region)
             target_idh = Target.create_from_default(project_idh,"#{display_name}-#{region}", params_hash.merge(:parent_id => template_id.to_i))

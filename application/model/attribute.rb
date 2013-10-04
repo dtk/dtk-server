@@ -28,7 +28,7 @@ module DTK
     extend AttributeMetaClassMixin
 
     def self.common_columns()
-      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port]
+      [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:value_derived,:value_asserted,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change,:port_type_asserted,:is_port,:external_ref]
     end
 
     def self.default_title_field()
@@ -69,7 +69,7 @@ module DTK
     end
 
     def is_title_attribute?()
-      self[:display_name] == "name" or ext_ref_indicates_title?(self[:external_ref])
+      get_field?(:display_name) == "name" or ext_ref_indicates_title?(get_field?(:external_ref))
     end
 
     def ext_ref_indicates_title?(ext_ref)

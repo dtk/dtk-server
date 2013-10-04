@@ -739,7 +739,7 @@ module DTK; class  Assembly
       Assembly::Template.create_or_update_from_instance(project,node_idhs,template_name,service_module_name)
     end
 
-    def get_attributes_print_form(opts=Opts.new)
+    def get_attributes_print_form(opts={})
       if filter = opts[:filter]
         case filter
           when :required_unset_attributes
@@ -767,13 +767,13 @@ module DTK; class  Assembly
       assembly_attrs + component_attrs + node_attrs
     end
 
-    def get_attributes_print_form_aux(opts=Opts.new)
+    def get_attributes_print_form_aux(opts={})
       filter_proc = opts[:filter_proc]
       assembly_attrs = get_assembly_level_attributes(filter_proc).map do |attr|
         attr.print_form(opts.merge(:level => :assembly))
       end
 
-      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc)
+      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc).reject{|attr|attr.is_title_attribute?()}
       component_attrs = Attribute.print_form(raw_cmp_attrs,opts.merge(:level => :component,:assembly => self))
 
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|

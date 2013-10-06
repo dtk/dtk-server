@@ -125,9 +125,24 @@ module DTK
         end
       end
 
+      def component_output_form(component_hash)
+        name = component_name_output_form(component_hash[:display_name])
+        if attr_overrides_output_form = attr_overrides_output_form(component_hash[:attribute_override])
+          {name => attr_overrides_output_form}
+        else
+          name 
+        end
+      end
+
       def attr_overrides_output_form(attr_overrides)
-        av_list = attr_overrides.values.map{|attr|{attr[:display_name] => attr[:attribute_value]}}.sort{|a,b|a.keys.first <=> b.keys.first}
-        SimpleOrderedHash.new(:attributes => SimpleOrderedHash.new(av_list))
+        ret = nil
+        return ret unless attr_overrides
+        av_list = attr_overrides.values.map do |attr|
+          unless attr.is_title_attribute()
+            {attr[:display_name] => attr[:attribute_value]}
+          end
+        end.compact.sort{|a,b|a.keys.first <=> b.keys.first}
+        (!av_list.empty?)  && SimpleOrderedHash.new(:attributes => SimpleOrderedHash.new(av_list))
       end
 
     end

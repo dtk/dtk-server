@@ -345,35 +345,76 @@ module DTK
 
     def rest__create_task()
       assembly = ret_assembly_instance_object()
+      task     = nil
+
       if assembly.is_stopped?
-        validate_params = [
-          :action => :start, 
-          :params => {:assembly => assembly[:id]}, 
-          :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
-        ]
-        return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
+        start_assembly = ret_request_params(:start_assembly)
+        return rest_ok_response :confirmation_message=>true if start_assembly.nil?
+        
+        assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+        node_pattern = ret_request_params(:node_pattern)
+
+        # filters only stopped nodes for this assembly
+        nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+
+        nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
+        unless is_valid
+          Log.info(error_msg)
+          return rest_ok_response(:errors => [error_msg])
+        end
+
+        CreateThread.defer do
+          # invoking command to start the nodes
+          CommandAndControl.start_instances(nodes)
+        end
+
+        opts = ret_params_hash(:commit_msg,:puppet_version)
+        task = Task.create_and_start_from_assembly_instance(assembly,opts)
+      else
+        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
+
+        opts = ret_params_hash(:commit_msg,:puppet_version)
+        task = Task.create_from_assembly_instance(assembly,opts)
       end
 
-      if assembly.are_nodes_running?
-        raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
-      end
-
-      opts = ret_params_hash(:commit_msg,:puppet_version)
-      task = Task.create_from_assembly_instance(assembly,opts)
       task.save!()
       # TODO: this was called from gui commit window
       # pp Attribute.augmented_attribute_list_from_task(task)
       rest_ok_response :task_id => task.id
     end
 
-    #TODO: replace or given options to specify specific smoketests to run
-    def rest__create_smoketests_task()
-      assembly = ret_assembly_instance_object()
-      opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
-      task = Task.create_from_assembly_instance(assembly,opts)
-      task.save!()
-      rest_ok_response :task_id => task.id
-    end
+    # leaving this commented until we test out if methode above works properly
+    # def rest__create_task()
+    #   assembly = ret_assembly_instance_object()
+    #   if assembly.is_stopped?
+    #     validate_params = [
+    #       :action => :start, 
+    #       :params => {:assembly => assembly[:id]}, 
+    #       :wait_for_complete => {:type => :assembly, :id => assembly[:id]}
+    #     ]
+    #     return rest_validate_response("Assembly is stopped, you need to start it.", validate_params)
+    #   end
+
+    #   if assembly.are_nodes_running?
+    #     raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete"
+    #   end
+
+    #   opts = ret_params_hash(:commit_msg,:puppet_version)
+    #   task = Task.create_from_assembly_instance(assembly,opts)
+    #   task.save!()
+    #   # TODO: this was called from gui commit window
+    #   # pp Attribute.augmented_attribute_list_from_task(task)
+    #   rest_ok_response :task_id => task.id
+    # end
+
+    # #TODO: replace or given options to specify specific smoketests to run
+    # def rest__create_smoketests_task()
+    #   assembly = ret_assembly_instance_object()
+    #   opts = ret_params_hash(:commit_msg).merge(:component_type => :smoketest)
+    #   task = Task.create_from_assembly_instance(assembly,opts)
+    #   task.save!()
+    #   rest_ok_response :task_id => task.id
+    # end
 
     #TODO: cleanup and take logic out of controller
     def rest__start()

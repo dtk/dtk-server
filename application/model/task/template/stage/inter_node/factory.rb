@@ -21,7 +21,7 @@ module DTK; class Task; class Template; class Stage
 
       module StageName
         DefaultNameProc = lambda do |index,is_single_stage|
-          ret = "config_nodes"
+          ret = "configure_nodes"
           is_single_stage ? ret : (ret + "_stage_#{index.to_s}")
         end
         

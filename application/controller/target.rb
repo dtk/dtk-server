@@ -2,7 +2,8 @@ module XYZ
   class TargetController < AuthController
     helper :target_helper
 
-    PROVIDER_PREFIX = 'provider'
+    PROVIDER_PREFIX    = 'provider'
+    PROVIDER_DELIMITER = ':::'
 
     def rest__list()
 
@@ -25,7 +26,7 @@ module XYZ
       # add provider prefix to results
       results = targets.collect do |entry|
         if (entry[:type] == 'template')
-          entry[:display_name] = "#{PROVIDER_PREFIX}::#{entry[:display_name]}"
+          entry[:display_name] = "#{PROVIDER_PREFIX}#{PROVIDER_DELIMITER}#{entry[:display_name]}"
           entry
         else
           entry

@@ -773,7 +773,9 @@ module DTK; class  Assembly
         attr.print_form(opts.merge(:level => :assembly))
       end
 
-      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc).reject{|attr|attr.is_title_attribute?()}
+      raw_cmp_attrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
+        (not attr[:nested_component].get_field?(:only_one_per_node)) and attr.is_title_attribute?()
+      end
       component_attrs = Attribute.print_form(raw_cmp_attrs,opts.merge(:level => :component,:assembly => self))
 
       node_attrs = get_augmented_node_attributes(filter_proc).map do |aug_attr|

@@ -416,11 +416,12 @@ module DTK
     #   rest_ok_response :task_id => task.id
     # end
 
-    #TODO: cleanup and take logic out of controller
-    def rest__start()
-      assembly = ret_assembly_instance_object()
+
+     def rest__start()
+      assembly     = ret_assembly_instance_object()
       assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)
+      task         = nil
 
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
@@ -437,16 +438,47 @@ module DTK
       CreateThread.defer do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
-
-        # following task will when nodes ready assign elastic IP
-        task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
-        task.save!()
-
-        queue.set_result(:task_id => task.id)
       end
 
-      rest_ok_response :action_results_id => queue.id
+      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
+      task.save!()
+
+      queue.set_result(:task_id => task.id)
+      rest_ok_response :task_id => task.id
     end
+
+    # Will leave this commented for now to check if method above works properly
+    #TODO: cleanup and take logic out of controller
+    # def rest__start()
+    #   assembly = ret_assembly_instance_object()
+    #   assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+    #   node_pattern = ret_request_params(:node_pattern)
+
+    #   # filters only stopped nodes for this assembly
+    #   nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+
+    #   nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
+
+    #   unless is_valid
+    #     Log.info(error_msg)
+    #     return rest_ok_response(:errors => [error_msg])
+    #   end
+
+    #   queue = SimpleActionQueue.new
+
+    #   CreateThread.defer do
+    #     # invoking command to start the nodes
+    #     CommandAndControl.start_instances(nodes)
+
+    #     # following task will when nodes ready assign elastic IP
+    #     task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
+    #     task.save!()
+
+    #     queue.set_result(:task_id => task.id)
+    #   end
+
+    #   rest_ok_response :action_results_id => queue.id
+    # end
 
     def rest__stop()
       assembly = ret_assembly_instance_object()

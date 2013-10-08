@@ -168,7 +168,8 @@ module DTK
       task_mh = target_idh.create_childMH(:task)
 
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-      running_node_task = create_running_node_task(task_mh, assembly_config_changes)
+      # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
+      running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes)
 
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_nodes_start", :temporal_order => "sequential",:commit_message => nil)
       main_task.add_subtask(running_node_task)
@@ -227,63 +228,6 @@ module DTK
         else
           ret = nil
         end
-      end
-      ret
-    end
-
-    def power_on_from_node_aldin(node_idh,commit_msg=nil)
-      ret = nil
-      target_idh = node_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-      node_mh = target_idh.create_childMH(:node)
-      node = node_idh.create_object().update_object!(:display_name)
-
-      power_on_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
-      power_on_nodes_task = create_running_node_task(task_mh,power_on_nodes_changes, :node => node)
-
-      opts = {:node => node}
-      #for powering on node with no components
-      unless power_on_nodes_changes and not power_on_nodes_changes.empty?
-        unless node = opts[:node]
-          raise Error.new("Expected that :node passed in as options")
-        end
-        executable_action = Task::Action::PowerOnNode.create_from_node(node)
-        attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        return create_new_task(task_mh,:executable_action => executable_action)
-      end
-
-      #each element will be list with single element
-      ret1 = nil
-      ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "power_on_node", :commit_message => commit_msg)
-
-      all_actions = Array.new
-      if power_on_nodes_changes.size == 1
-        executable_action = Task::Action::PowerOnNode.create_from_state_change(power_on_nodes_changes.first.first)
-        all_actions << executable_action
-        ret1 = create_new_task(task_mh,:executable_action => executable_action) 
-      else
-        ret1 = create_new_task(task_mh,:display_name => "create_node_stage", :temporal_order => "concurrent")
-        power_on_nodes_changes.each do |sc|
-          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
-          all_actions << executable_action
-          ret.add_subtask_from_hash(:executable_action => executable_action)
-          end
-      end
-      attr_mh = task_mh.createMH(:attribute)
-      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-      ret.add_subtask(ret1) if ret1
-
-
-
-
-
-
-      # ret = create_new_task(task_mh,:temporal_order => "sequential",:node_id => node_idh.get_id(),:display_name => "power_on_node", :commit_message => commit_msg)
-      if power_on_nodes_task
-        ret.add_subtask(power_on_nodes_task)
-      else
-        ret = nil
       end
       ret
     end
@@ -365,6 +309,38 @@ module DTK
       end
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::CreateNode.add_attributes!(attr_mh,all_actions)
+      ret
+    end
+
+    def create_running_node_task_from_assembly(task_mh,state_change_list,opts={})
+      #for powering on node with no components
+      unless state_change_list and not state_change_list.empty?
+        unless node = opts[:node]
+          raise Error.new("Expected that :node passed in as options")
+        end
+        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+        attr_mh = task_mh.createMH(:attribute)
+        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+        return create_new_task(task_mh,:executable_action => executable_action)
+      end
+
+      #each element will be list with single element
+      ret = nil
+      all_actions = Array.new
+      if state_change_list.size == 1
+        executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
+        all_actions << executable_action
+        ret = create_new_task(task_mh,:executable_action => executable_action,:display_name => "power_on_node") 
+      else
+        ret = create_new_task(task_mh,:display_name => "power_on_nodes", :temporal_order => "concurrent")
+        state_change_list.each do |sc|
+          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
+          all_actions << executable_action
+          ret.add_subtask_from_hash(:executable_action => executable_action,:display_name => "power_on_node")
+          end
+      end
+      attr_mh = task_mh.createMH(:attribute)
+      Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
       ret
     end
 

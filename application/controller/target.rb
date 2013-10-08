@@ -40,16 +40,17 @@ module XYZ
       display_name = ret_non_null_request_params(:target_name)
       template_id  = ret_request_params(:target_template_id)
       selected_region  = ret_request_params(:region)
-      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties)
+      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties, :security_group)
       is_no_bootstrap  = ret_request_param_boolean(:no_bootstrap)
 
       supported_types = R8::Config[:ec2][:iaas_type][:supported]
 
-      raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") unless supported_types.include?(params_hash[:iaas_type].downcase)
-
       project_idh  = get_default_project().id_handle()
 
       unless template_id
+        # check iaas type
+        raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") unless supported_types.include?(params_hash[:iaas_type].downcase)
+
         # we first check if we are ok with aws credentials
         params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
 

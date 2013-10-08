@@ -155,7 +155,7 @@ module DTK
       def check_for_security_group(name, description = nil)
         unless sc = @conn.security_groups.get(name)
           #sc = @conn.security_groups.create(:name => name, :description => description)
-          raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery securiy group")
+          raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
         end
         return sc
       end

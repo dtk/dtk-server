@@ -171,7 +171,7 @@ module DTK
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
       running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes)
 
-      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_nodes_start", :temporal_order => "sequential",:commit_message => nil)
+      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => nil)
       main_task.add_subtask(running_node_task)
 
       main_task

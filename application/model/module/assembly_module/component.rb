@@ -4,7 +4,6 @@ module DTK; class AssemblyModule
       cmp_instances = get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       module_version = ModuleVersion.ret(assembly)
       create_assembly_branch?(assembly,component_module,cmp_instances,module_version)
-      component_module.get_workspace_branch_info(module_version)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
@@ -27,6 +26,7 @@ module DTK; class AssemblyModule
       unless reject_matching_component_instances(cmp_instances,module_version).empty?
         create_assembly_branch(component_module,module_version)
       end
+      component_module.get_workspace_branch_info(module_version)
     end
 
     def self.create_assembly_branch(component_module,module_version)

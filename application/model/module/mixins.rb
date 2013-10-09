@@ -45,10 +45,11 @@ module DTK
       get_module_branches().find{|mb|mb.matches_version?(version)}
     end
 
-    def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
-      module_name = aug_branch[:module_name]
-      ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+    def get_workspace_branch_info(version=nil,opts={})
+      if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
+        module_name = aug_branch[:module_name]
+        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+      end
     end
 
     def ret_clone_update_info(version=nil)

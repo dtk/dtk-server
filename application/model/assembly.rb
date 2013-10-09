@@ -18,6 +18,10 @@ module DTK
       end
     end
 
+    def get_service_module()
+      get_obj_helper(:service_module)
+    end
+
     def get_port_links(opts={})
       filter = [:eq,:assembly_id,id()]
       if opts[:filter]

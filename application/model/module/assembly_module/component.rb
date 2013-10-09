@@ -35,10 +35,10 @@ module DTK; class AssemblyModule
       component_module.create_new_version(module_version,opts)
     end
 
-    def self.delete_assembly_modules(assembly)
-      version = ModuleVersion.ret(assembly)
+    def self.delete_modules?(assembly)
+      module_version = ModuleVersion.ret(assembly)
       assembly.get_component_modules().each do |component_module|
-        component_module.delete_version?(version)
+        component_module.delete_version?(module_version)
       end
     end
 

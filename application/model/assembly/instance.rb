@@ -552,8 +552,8 @@ module DTK; class  Assembly
       delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
-      delete_assembly_modules(assembly_idhs)
-      #delete_assembly_modules needs to be done before delete_assembly_nodes
+      delete_assembly_modules?(assembly_idhs)
+      #delete_assembly_modules? needs to be done before delete_assembly_nodes
       delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
@@ -568,10 +568,10 @@ module DTK; class  Assembly
         delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
       end
 
-      def delete_assembly_modules(assembly_idhs)
+      def delete_assembly_modules?(assembly_idhs)
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
-          AssemblyModule.delete_assembly_modules(assembly)
+          AssemblyModule.delete_modules?(assembly)
         end
       end
 

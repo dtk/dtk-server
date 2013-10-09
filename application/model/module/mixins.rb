@@ -106,7 +106,10 @@ module DTK
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_new_version__type_specific(repo_for_new_version,new_version,opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle()))
+      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle())
+      ret = create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
+      opts[:ret_module_branch] = opts_type_spec[:ret_module_branch] if  opts_type_spec[:ret_module_branch]
+      ret
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)

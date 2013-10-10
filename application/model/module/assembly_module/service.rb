@@ -6,7 +6,7 @@ module DTK; class AssemblyModule
     end
 
     def create_and_update_assembly_branch?()
-      module_branch = @service_module.get_workspace_matching_version(@module_version) || create_assembly_branch()
+      module_branch = @service_module.get_module_branch_matching_version(@module_version) || create_assembly_branch()
       update_assembly_branch(module_branch)
       @service_module.get_workspace_branch_info(@module_version)
     end
@@ -63,14 +63,13 @@ module DTK; class AssemblyModule
       end
 
      private
-      def self.splice_in_workflow(module_branch,template_content,task_action=nil)
+      def splice_in_workflow(module_branch,template_content,task_action=nil)
         hash_content = template_content.serialization_form()
-        format = ServiceModule.dsl_files_format_type()
-        module_branch.serialize_and_save_to_repo(file_path(task_action),hash_content,format)
+        module_branch.serialize_and_save_to_repo(file_path(task_action),hash_content)
       end
       def file_path(task_action=nil)
         task_action ||= DefaultTaskAction
-        ServiceModule.assembly_workflow_meta_filename_path(@assembly.get_field?(:dispay_name),task_action)
+        ServiceModule.assembly_workflow_meta_filename_path(@assembly.get_field?(:display_name),task_action)
       end
       #TODO: unify this with code on task/template
       DefaultTaskAction = 'converge'

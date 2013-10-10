@@ -146,7 +146,7 @@ module XYZ
           when :yaml
             YamlHelper.simple_form(hash_content)
           else
-            raise Error.new("Format (#{format_format}) is not treated")
+            raise Error.new("Format (#{format_type}) is not treated")
         end
       end
 

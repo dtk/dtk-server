@@ -49,6 +49,7 @@ module XYZ
           # keypair
           keypair_to_use = iaas_credentials['keypair_name'] || R8::Config[:ec2][:keypair]
           connection.check_for_key_pair(keypair_to_use)
+          
           Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_credentials['keypair_name'].nil?})"
 
           # security group

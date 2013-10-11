@@ -217,7 +217,7 @@ lambda__instance_nodes_components_assembly_template =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=>
-        lambda__segments_nodes_and_components.call([:id,:display_name,:group_id],[:id,:display_name,:component_type,:group_id]) +
+        lambda__segments_nodes_and_components.call([:id,:display_name,:group_id],[:id,:display_name,:component_type,:group_id,:only_one_per_node]) +
       [{
         :model_name=>:attribute,
         :convert => true,

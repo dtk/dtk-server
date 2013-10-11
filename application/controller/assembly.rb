@@ -106,13 +106,17 @@ module DTK
     def rest__prepare_for_edit_module()
       assembly = ret_assembly_instance_object()
       module_type = ret_non_null_request_params(:module_type)
-      unless module_type.to_sym == :component_module
-        raise Error.new("prepare_for_edit_module only treats component_module type") 
-      end
-      module_name = ret_non_null_request_params(:module_name)
-      component_module = create_obj(:module_name,ComponentModule)
-
-      rest_ok_response AssemblyModule.prepare_for_edit_component_module(assembly,component_module)
+      response = 
+        case module_type.to_sym
+          when :component_module
+            component_module = create_obj(:module_name,ComponentModule)
+            AssemblyModule::Component.prepare_for_edit(assembly,component_module)
+          when :service_module
+            AssemblyModule::Service.prepare_for_edit(assembly)
+          else
+            raise ErrorUsage.new("Illegal module_type #{module_type}")
+        end
+      rest_ok_response response
     end
 
     def rest__promote_module_updates()
@@ -123,7 +127,7 @@ module DTK
       end
       module_name = ret_non_null_request_params(:module_name)
       component_module = create_obj(:module_name,ComponentModule)
-      rest_ok_response AssemblyModule.promote_module_updates(assembly,component_module)
+      rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module)
     end
 
     # checks element through set of fields

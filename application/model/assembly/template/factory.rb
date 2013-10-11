@@ -108,7 +108,6 @@ module DTK
             cmps << matching_cmp
           end
           if attr = r[:non_default_attribute]
-            attr.merge!(:is_title_attribute => true) if attr.is_title_attribute?()
             matching_cmp[:non_default_attributes] << attr
           end
         end
@@ -240,18 +239,18 @@ module DTK
         attr_override = cmp_ref_hash[:attribute_override] = Hash.new
         attrs.each do |attr|
           attr_ref =  attr[:ref]
-          attr_hash =  AttrHash.new(attr)
+          attr_hash =  AttrHash.new(attr,cmp)
           attr_hash[:attribute_template_id] = ndx_attrs[attr[:display_name]][:id]
           attr_override[attr_ref] = attr_hash
         end
       end
       class AttrHash < ::Hash
         attr_reader :is_title_attribute
-        def initialize(attr)
+        def initialize(attr,cmp)
           super()
           replace(Aux::hash_subset(attr,[:display_name,:description]))
           self[:attribute_value] = attr[:attribute_value] #TODO: wasnt sure if Aux::hash_subset works for virtual attributes
-          @is_title_attribute = attr.is_title_attribute?()
+          @is_title_attribute = ((not cmp[:only_one_per_node]) and attr.is_title_attribute?())
         end
       end
     end

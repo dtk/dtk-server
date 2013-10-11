@@ -1,5 +1,4 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
-r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class Repo
     module RemoteMixin

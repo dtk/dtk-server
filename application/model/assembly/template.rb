@@ -1,6 +1,10 @@
 module DTK; class Assembly
   class Template < self
     r8_nested_require('template','factory')
+    
+    def self.create_from_id_handle(idh)
+      idh.create_object(:model_name => :assembly_template)
+    end
 
     def stage(target,assembly_name=nil)
       # TODO: if name given and not unique either reject or generate a -n suffix

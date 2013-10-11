@@ -19,9 +19,6 @@ module DTK; class  Assembly
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_instance)
     end
-    def self.create_from_component(cmp)
-      cmp && create_from_id_handle(cmp.id_handle()).merge(cmp)
-    end
 
     ### standard get methods
     def get_task_templates(opts={})
@@ -31,6 +28,11 @@ module DTK; class  Assembly
       }
       Model.get_objs(model_handle(:task_template),sp_hash)
     end
+
+    def get_parent()
+      Template.create_from_component(get_obj_helper(:instance_parent,:assembly_template))
+    end
+
     def get_task_template(task_action=nil,opts={})
       task_action ||= Task::Template.default_task_action()
       sp_hash = {
@@ -40,6 +42,7 @@ module DTK; class  Assembly
       }
       Model.get_obj(model_handle(:task_template),sp_hash)
     end
+
     def get_parents_task_template(task_action=nil)
       task_action ||= Task::Template.default_task_action()
       get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first

@@ -4,6 +4,11 @@ module DTK
   class Assembly < Component
     r8_nested_require('assembly','template')
     r8_nested_require('assembly','instance')
+
+    def self.create_from_component(cmp)
+      cmp && create_from_id_handle(cmp.id_handle()).merge(cmp)
+    end
+
     ### standard get methods
     def get_assembly_level_attributes(filter_proc=nil)
       sp_hash = {

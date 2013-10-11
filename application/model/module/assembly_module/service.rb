@@ -24,6 +24,10 @@ module DTK; class AssemblyModule
 
     def initialize(assembly)
       @assembly = assembly
+      unless @assembly_template = assembly.get_parent()
+        assembly_name = assembly.display_name_print_form()
+        raise ErrorUsage.new("Assembly (#{assembly_name}) is not tied to an assembly template")
+      end
       @service_module = self.class.get_service_module(assembly)
       @module_version = ModuleVersion.ret(assembly)
     end
@@ -69,7 +73,7 @@ module DTK; class AssemblyModule
       end
       def file_path(task_action=nil)
         task_action ||= DefaultTaskAction
-        ServiceModule.assembly_workflow_meta_filename_path(@assembly.get_field?(:display_name),task_action)
+        ServiceModule.assembly_workflow_meta_filename_path(@assembly_template.get_field?(:display_name),task_action)
       end
       #TODO: unify this with code on task/template
       DefaultTaskAction = 'converge'

@@ -66,6 +66,16 @@ module DTK
       @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
     end
 
+    #
+    # Returns boolean indicating if remote git url exists
+    #
+    def self.git_remote_exists?(remote_url)
+      git_object = Grit::Git.new('')
+      
+      !git_object.native('ls-remote',{},remote_url).empty?
+    end
+
+
     def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
       if repo_name

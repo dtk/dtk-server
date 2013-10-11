@@ -11,7 +11,8 @@ module DTK
         :module_name => module_name,
         :module_branch_idh => branch_obj.id_handle(),
         :repo_url => RepoManager.repo_url(repo_name),
-        :workspace_branch => branch_obj.get_field?(:branch)
+        :workspace_branch => branch_obj.get_field?(:branch),
+        :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
       if version
         hash.merge!(:version => version)

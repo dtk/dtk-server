@@ -113,11 +113,13 @@ module DTK
         [{:path => path,:hash_content => hash_content,:format_type => format_type||dsl_format_type_form_path(path)}]
       end
       unless files.empty?
+        any_changes = false
         files.each do |file_info|
           content = Aux.serialize(file_info[:hash_content],file_info[:format_type])
-          RepoManager.add_file({:path => file_info[:path]},content,self)
+          any_change = RepoManager.add_file({:path => file_info[:path]},content,self)
+          any_changes = true if any_change 
         end
-        push_changes_to_repo()
+        push_changes_to_repo() if any_changes
       end
     end
 

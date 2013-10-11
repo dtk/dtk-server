@@ -129,6 +129,7 @@ module DTK
     end
 
     def add_file(file_asset,content,commit_msg=nil)
+      ret = false
       content ||= String.new
       checkout(@branch) do
         path = file_asset[:path]
@@ -137,8 +138,13 @@ module DTK
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
-        commit(commit_msg)
+        # diff(nil) looks at diffs rt to the working dir
+        unless diff(nil).ret_summary().no_diffs?()
+          commit(commit_msg)
+          ret = true
+        end
       end
+      ret
     end
 
     def delete_file?(file_path,opts={})

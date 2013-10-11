@@ -191,12 +191,17 @@ module DTK
 
     def rest__update_model_from_clone()
       service_module = create_obj(:service_module_id)
-      internal_trigger = ret_request_params(:internal_trigger)
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_request_params(:version)
       diffs_summary = ret_diffs_summary()
-
-      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_trigger)
+      opts = Hash.new
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(:internal_trigger => true )
+      end
+      if mod_type = ret_request_params(:modification_type)
+        opts.merge!(:modification_type =>  mod_type.to_sym)
+      end
+      rest_ok_response service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
     end
 
     def rest__set_component_module_version()

@@ -112,19 +112,22 @@ module DTK
       ret
     end
 
-    def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)
-      opts = {}
+    def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
       module_branch = get_workspace_module_branch(version)
-      
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
-      opts = {:do_not_raise => true} if internal_triger=='true'
-      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts)
+
+      opts_update = Hash.new
+      opts_update.merge!(:do_not_raise => true) if opts[:internal_triger]
+      opts_update.merge!(:modification_type => opts[:modification_type]) if opts[:modification_type] 
+      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
       
-      return :dsl_parsed_info => response if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
-      return response
+      if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(ErrorUsage::DanglingComponentRefs))
+        {:dsl_parsed_info => response}
+      else
+        response
+      end
     end
 
     def get_project()

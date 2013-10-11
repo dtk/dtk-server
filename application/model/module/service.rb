@@ -293,6 +293,10 @@ module DTK
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       #TODO: for more efficiency can push in diffs_summary to below
       # opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
+if opts[:modification_type]
+  pp [version.class,opts[:modification_type]]
+  return
+end
       opts[:donot_make_repo_changes] = true
       update_model_from_dsl(module_branch,opts)
     end

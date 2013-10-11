@@ -509,15 +509,21 @@ module DTK
       @grit_repo.head.name
     end
 
+    MutexesForRepos = Hash.new
     def checkout(branch_name,&block)
       ret = nil
-      Dir.chdir(@path) do 
-        current_head = current_branch()
-        git_command__checkout(branch_name) unless current_head == branch_name
-        return ret unless block
-        ret = yield
-        unless current_head == branch_name
-          git_command__checkout(current_head)
+      #TODO: add garbage collection of these mutexs
+      mutex = MutexesForRepos[@path] ||= Mutex.new
+      ret = nil
+      mutex.synchronize do
+        Dir.chdir(@path) do 
+          current_head = current_branch()
+          git_command__checkout(branch_name) unless current_head == branch_name
+          return ret unless block
+          ret = yield
+          unless current_head == branch_name
+            git_command__checkout(current_head)
+          end
         end
       end
       ret

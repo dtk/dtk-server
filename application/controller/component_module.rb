@@ -37,8 +37,11 @@ module DTK
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
       diffs_summary = ret_diffs_summary()
-
-      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_trigger)
+      opts =  Hash.new
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(:internal_trigger => true )
+      end
+      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
       rest_ok_response dsl_created_info
     end
 

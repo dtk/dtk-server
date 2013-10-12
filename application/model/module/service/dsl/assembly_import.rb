@@ -28,7 +28,13 @@ module DTK; class ServiceModule
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
-            
+
+            if workflow_hash = assem["workflow"]
+              if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
+                return parse_errors
+              end
+            end
+
             @db_updates_assemblies["node"].merge!(imported_nodes)
             @ndx_assembly_hashes[ref] ||= assem
             @ndx_version_proc_classes[ref] ||= version_proc_class

@@ -28,7 +28,10 @@ module DTK; class Task; class Template; class Stage
 
       #This is used to include all applicable classes
       class Applicable < self
+        #action_list can be nil for just parsing
         def parse_and_reify!(action_list)
+          ret = self
+          return ret unless action_list
           info_per_node = Hash.new #indexed by node_id
           @ordered_components.each do |cmp_ref|
             #TODO: if there is a title then we need to match on title
@@ -43,7 +46,7 @@ module DTK; class Task; class Template; class Stage
           info_per_node.each_value do |n|
             merge!(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
           end
-          self
+          ret
         end
 
         def serialized_multi_node_type()

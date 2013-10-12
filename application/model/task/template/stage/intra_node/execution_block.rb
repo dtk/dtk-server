@@ -43,8 +43,11 @@ module DTK; class Task; class Template
         ordered_components = map{|a|a.serialization_form(opts)}.compact
         {:ordered_components => ordered_components} unless ordered_components.empty?
       end
+
+      #action list can be nil just for parsing
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
+        return ret unless action_list
         unless ordered_actions = serialized_eb[:ordered_components]
           raise ParseError.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end

@@ -83,7 +83,8 @@ module DTK; class AssemblyModule
           format_type = Aux.format_type(file_path)
           hash_content = Aux.convert_to_hash(file_content,format_type)
           return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
-          pp [:todo_stub_to_process_changed_workflow,hash_content]
+          #TODO: put in parsing check of the task template
+          Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(),hash_content,task_action)
           nil
         end
       end

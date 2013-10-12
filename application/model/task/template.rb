@@ -65,14 +65,15 @@ module DTK; class Task
       task_action||default_task_action()
     end
 
-    def self.create_or_update_from_serialized_content?(mh,assembly_idh,serialized_content,task_action=nil)
+    def self.create_or_update_from_serialized_content?(assembly_idh,serialized_content,task_action=nil)
       task_action ||= default_task_action()
       sp_hash = {
         :cols => [:id],
         :filter => [:and,[:eq,:component_component_id,assembly_idh.get_id],
                     [:eq,:task_action,task_action]]
       }
-      if task_template = get_obj(mh,sp_hash)
+      task_template_mh = assembly_idh.createMH(:model_name => :task_template,:parent_model_name => :assembly)
+      if task_template = get_obj(task_template_mh,sp_hash)
         task_template.update(:content => serialized_content)
         task_template.id_handle()
       else

@@ -44,7 +44,7 @@ module DTK; class ServiceModule
 
       def self.import_task_templates(assembly_hash)
         #TODO: just treating the default action
-        #TODO: enhance to parse teh workflow, such as checking all components in workflow
+        #TODO: enhance to parse the workflow, such as checking all components in workflow
         #are defined
         unless workflow =  assembly_hash["workflow"]
           return nil

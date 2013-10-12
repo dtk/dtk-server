@@ -49,6 +49,16 @@ module DTK; class Task
         ret
       end
 
+      def self.find_parse_errors(assembly,serialized_content)
+        begin
+          cmp_actions = ActionList::ConfigComponents.get(assembly)
+          Content.parse_and_reify(serialized_content,cmp_actions)
+         rescue ErrorUsage::DSLParsing => parse_error
+          return parse_error
+        end
+        nil
+     end
+
       #action_types is scalar or array with elements
       # :assembly
       # :node_centric

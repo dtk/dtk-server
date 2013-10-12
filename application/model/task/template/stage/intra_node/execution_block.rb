@@ -46,7 +46,7 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
         unless ordered_actions = serialized_eb[:ordered_components]
-          ParseError.new("Ill-formed Execution block (#{serialized_eb.inspect})")
+          raise ParseError.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end
         ordered_actions.each do |serialized_action|
           if serialized_action.kind_of?(String)
@@ -54,7 +54,7 @@ module DTK; class Task; class Template
             if action = action_list.find_matching_action(node_name,component_name_ref)
               ret << action
             else
-              ParseError.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+              raise ParseError.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
             end
           else
             raise ParseError.new("Parse error for action of form (#{serialized_action.inspect})")

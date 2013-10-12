@@ -15,7 +15,7 @@ module DTK; class Task
         Concurrent = :concurrent
         Sequential = :sequential
       end
-      class ParseError < ::DTK::ErrorUsage
+      class ParseError < ErrorUsage::DSLParsing
       end
 
       #TODO: if support ruby 1.8.7 need to make this fn of a hash that perserves order 

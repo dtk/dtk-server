@@ -8,8 +8,6 @@ module DTK; class AssemblyModule
     def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
       modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
       modification_type_obj.finalize_edit(module_branch,diffs_summary)
-      is_parsed = false
-      is_parsed
     end
 
     def create_and_update_assembly_branch?()
@@ -80,7 +78,14 @@ module DTK; class AssemblyModule
 
       def finalize_edit(module_branch,diffs_summary,task_action=nil)
         file_path = file_path(task_action)
-        pp [:finalize_edit,diffs_summary,file_path]
+        if diffs_summary.file_changed?(file_path)
+          file_content = RepoManager.get_file_content(file_path,module_branch)
+          format_type = Aux.format_type(file_path)
+          hash_content = Aux.convert_to_hash(file_content,format_type)
+          return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
+          pp [:todo_stub_to_process_changed_workflow,hash_content]
+          nil
+        end
       end
 
      private

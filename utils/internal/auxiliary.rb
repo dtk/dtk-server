@@ -183,7 +183,15 @@ module XYZ
         end
       end
 
-      def convert_to_hash(content,format_type,opts)
+      def format_type(file_path)
+        if file_path =~ /\.(json|yaml)$/
+          $1.to_sym
+        else
+          raise Error.new("Unexpected meta file path name (#{path})")
+        end
+      end
+
+      def convert_to_hash(content,format_type,opts={})
         case format_type
           when :json
             json_parse(content,opts)

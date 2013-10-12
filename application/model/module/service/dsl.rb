@@ -157,11 +157,7 @@ module DTK
       end
 
       def meta_file_format_type(path)
-        if path =~ /\.(json|yaml)$/
-          $1.to_sym
-        else
-          raise Error.new("Unexpected meta file path name (#{path})")
-        end
+        Aux.format_type(path)
       end
 
       def assembly_dsl_filename_path_info()

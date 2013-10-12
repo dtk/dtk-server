@@ -49,9 +49,10 @@ module DTK; class Task
         ret
       end
 
-      def self.find_parse_errors(assembly,serialized_content)
+      def self.find_parse_errors(assembly,hash_content)
         begin
           cmp_actions = ActionList::ConfigComponents.get(assembly)
+          serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(hash_content))
           Content.parse_and_reify(serialized_content,cmp_actions)
          rescue ErrorUsage::DSLParsing => parse_error
           return parse_error

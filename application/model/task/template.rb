@@ -44,9 +44,13 @@ module DTK; class Task
     end
 
     def serialized_content_hash_form()
-      if content = get_field?(:content)
-        Serialization::OrderedHash.new(content)
+      if hash_content = get_field?(:content)
+        self.class.serialized_content_hash_form(hash_content)
       end
+    end
+
+    def self.serialized_content_hash_form(hash)
+      Serialization::OrderedHash.new(hash)
     end
 
     #returns [ref,create_hash]

@@ -293,12 +293,13 @@ module DTK
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       #TODO: for more efficiency can push in diffs_summary to below
       # opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
-if opts[:modification_type]
-  pp [version.class,opts[:modification_type]]
-  return
-end
-      opts[:donot_make_repo_changes] = true
-      update_model_from_dsl(module_branch,opts)
+      if version.kind_of?(ModuleVersion::AssemblyModule)
+        assembly = version.get_assembly(model_handle(:component))
+        AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
+      else
+        opts[:donot_make_repo_changes] = true
+        update_model_from_dsl(module_branch,opts)
+      end
     end
 
     def export_preprocess(module_branch, module_obj)

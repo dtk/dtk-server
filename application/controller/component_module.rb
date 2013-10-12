@@ -31,7 +31,6 @@ module DTK
     end
 
     def rest__update_model_from_clone()
-      opts = {}
       component_module = create_obj(:component_module_id)
       internal_trigger = ret_request_params(:internal_trigger)
       commit_sha = ret_non_null_request_params(:commit_sha)

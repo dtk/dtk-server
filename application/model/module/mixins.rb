@@ -120,7 +120,7 @@ module DTK
       return unless pull_was_needed or parse_needed
 
       opts_update = Hash.new
-      opts_update.merge!(:do_not_raise => true) if opts[:internal_triger]
+      opts_update.merge!(:do_not_raise => true) if opts[:internal_trigger]
       opts_update.merge!(:modification_type => opts[:modification_type]) if opts[:modification_type] 
       response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
       

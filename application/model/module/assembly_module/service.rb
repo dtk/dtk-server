@@ -5,6 +5,13 @@ module DTK; class AssemblyModule
       modification_type_obj.create_and_update_assembly_branch?()
     end
 
+    def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
+      modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
+      modification_type_obj.finalize_edit(module_branch,diffs_summary)
+      is_parsed = false
+      is_parsed
+    end
+
     def create_and_update_assembly_branch?()
       module_branch = @service_module.get_module_branch_matching_version(@module_version) || create_assembly_branch()
       update_assembly_branch(module_branch)
@@ -18,18 +25,23 @@ module DTK; class AssemblyModule
       service_module.delete_version?(module_version,:donot_delete_meta=>true)
     end
 
-    def self.create_modification_type_object(assembly,modification_type)
-      modification_type_class(modification_type).new(assembly)
+    def self.create_modification_type_object(assembly,modification_type,opts={})
+      modification_type_class(modification_type).new(assembly,opts)
     end
 
-    def initialize(assembly)
+    def initialize(assembly,opts={})
       @assembly = assembly
-      unless @assembly_template = assembly.get_parent()
+      @assembly_template_name = assembly_template_name(assembly)
+      @service_module = opts[:service_module] || self.class.get_service_module(assembly)
+      @module_version = ModuleVersion.ret(assembly)
+    end
+
+    def assembly_template_name(assembly)
+      unless assembly_template = assembly.get_parent()
         assembly_name = assembly.display_name_print_form()
         raise ErrorUsage.new("Assembly (#{assembly_name}) is not tied to an assembly template")
       end
-      @service_module = self.class.get_service_module(assembly)
-      @module_version = ModuleVersion.ret(assembly)
+      assembly_template.get_field?(:display_name)
     end
 
     def self.modification_type_class(modification_type)
@@ -66,6 +78,11 @@ module DTK; class AssemblyModule
         splice_in_workflow(module_branch,template_content,task_action)
       end
 
+      def finalize_edit(module_branch,diffs_summary,task_action=nil)
+        file_path = file_path(task_action)
+        pp [:finalize_edit,diffs_summary,file_path]
+      end
+
      private
       def splice_in_workflow(module_branch,template_content,task_action=nil)
         hash_content = template_content.serialization_form()
@@ -73,7 +90,7 @@ module DTK; class AssemblyModule
       end
       def file_path(task_action=nil)
         task_action ||= DefaultTaskAction
-        ServiceModule.assembly_workflow_meta_filename_path(@assembly_template.get_field?(:display_name),task_action)
+        ServiceModule.assembly_workflow_meta_filename_path(@assembly_template_name,task_action)
       end
       #TODO: unify this with code on task/template
       DefaultTaskAction = 'converge'

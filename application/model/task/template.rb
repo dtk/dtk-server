@@ -83,7 +83,8 @@ module DTK; class Task
       else
         ref,create_hash = ref_and_create_hash(serialized_content,task_action)
         create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id()) 
-        create_from_row(assembly_idh.createMH(:task_template),create_hash,:convert=>true)
+        task_template_mh = assembly_idh.create_childMH(:task_template)
+        create_from_row(task_template_mh,create_hash,:convert=>true)
       end
     end
   end

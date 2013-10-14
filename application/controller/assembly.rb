@@ -421,8 +421,13 @@ module DTK
     #   rest_ok_response :task_id => task.id
     # end
 
+    def rest__clear_tasks()
+      assembly = ret_assembly_instance_object()
+      assembly.clear_tasks()
+      rest_ok_response
+    end
 
-     def rest__start()
+    def rest__start()
       assembly     = ret_assembly_instance_object()
       assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)

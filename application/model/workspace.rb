@@ -30,14 +30,7 @@ module DTK
     end
 
     def delete_tasks()
-      sp_hash = {
-        :cols => [:id],
-        :filter => [:eq,:assembly_id,id()]
-      }
-      task_idhs = Model.get_objs(model_handle(:task),sp_hash)
-      unless task_idhs.empty?
-        Model.delete_instances(task_idhs)
-      end
+      clear_tasks(:include_executing_task => true)
     end
 
     Ref = '__workspace'

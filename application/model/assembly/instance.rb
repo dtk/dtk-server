@@ -161,12 +161,24 @@ module DTK; class  Assembly
       components
     end
 
-    def get_tasks(opts=Opts.new)
-      ret = get_objs(:cols => [:tasks])
+    def get_tasks(opts={})
+      rows = get_objs(:cols => [:tasks])
       if opts[:filter_proc]
-        ret.reject!{|r|!opts[:filter_proc].call(r)}
+        rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-      ret
+      rows.map{|r|r[:task]}
+    end
+
+    def clear_tasks(opts={})
+      opts_get_tasks = Hash.new
+      unless opts[:include_executing_task]
+        opts_get_tasks[:filter_proc] = lambda do |r|
+          r[:task][:status] != 'executing'
+        end
+      end
+      task_idhs = get_tasks(opts_get_tasks).map{|r|r.id_handle()}
+      Model.delete_instances(task_idhs) unless task_idhs.empty?
+      task_idhs
     end
 
     def get_target()
@@ -427,9 +439,7 @@ module DTK; class  Assembly
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :tasks
-        get_tasks(opts).map do |r|
-          r[:task]
-        end.compact.sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
+        get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")

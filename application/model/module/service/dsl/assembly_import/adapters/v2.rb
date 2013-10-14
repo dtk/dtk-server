@@ -2,7 +2,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     class V2 < self
       def self.assembly_iterate(module_name,hash_content,&block)
-        assembly_hash = hash_content["assembly"].merge(Aux::hash_subset(hash_content,["name","workflow"]))
+        assembly_hash = (hash_content["assembly"]||{}).merge(Aux::hash_subset(hash_content,["name","workflow"]))
         assembly_ref = ServiceModule.assembly_ref(module_name,hash_content["name"])
         assemblies_hash = {assembly_ref => assembly_hash}
         node_bindings_hash = hash_content["node_bindings"]
@@ -97,7 +97,7 @@ module DTK; class ServiceModule
 
       def self.parse_service_links(assembly_hash)
         ret = Array.new
-        assembly_hash["nodes"].each_pair do |input_node_name,node_hash|
+        (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
           (node_hash["components"]||[]).each do |input_cmp|
             if input_cmp.kind_of?(Hash) 
               input_cmp_name = input_cmp.keys.first

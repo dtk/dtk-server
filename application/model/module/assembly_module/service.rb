@@ -13,7 +13,7 @@ module DTK; class AssemblyModule
     def create_and_update_assembly_branch?()
       module_branch = @service_module.get_module_branch_matching_version(@module_version) || create_assembly_branch()
       update_assembly_branch(module_branch)
-      @service_module.get_workspace_branch_info(@module_version)
+      @service_module.get_workspace_branch_info(@module_version).merge(:edit_file => meta_file_path())
     end
 
    private
@@ -68,7 +68,7 @@ module DTK; class AssemblyModule
         opts = {:base_version=>@service_module.get_field?(:version),:assembly_module=>true}
         create_exact_copy_branch(opts)
       end
-      
+
       def update_assembly_branch(module_branch,task_action=nil)
         opts = Hash.new
         opts.merge!(:task_action => task_action) if task_action
@@ -77,7 +77,7 @@ module DTK; class AssemblyModule
       end
 
       def finalize_edit(module_branch,diffs_summary,task_action=nil)
-        file_path = file_path(task_action)
+        file_path = meta_file_path(task_action)
         if diffs_summary.file_changed?(file_path)
           file_content = RepoManager.get_file_content(file_path,module_branch)
           format_type = Aux.format_type(file_path)
@@ -94,9 +94,9 @@ module DTK; class AssemblyModule
      private
       def splice_in_workflow(module_branch,template_content,task_action=nil)
         hash_content = template_content.serialization_form()
-        module_branch.serialize_and_save_to_repo(file_path(task_action),hash_content)
+        module_branch.serialize_and_save_to_repo(meta_file_path(task_action),hash_content)
       end
-      def file_path(task_action=nil)
+      def meta_file_path(task_action=nil)
         task_action ||= DefaultTaskAction
         ServiceModule.assembly_workflow_meta_filename_path(@assembly_template_name,task_action)
       end

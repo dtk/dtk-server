@@ -14,6 +14,7 @@ module DTK
 
     def purge(opts={})
       self.class.delete_contents([id_handle()],opts)
+      delete_tasks()
     end
 
    private
@@ -27,7 +28,18 @@ module DTK
       cmp_mh_with_parent = cmp_mh.merge(:parent_model_name => (type == :template ? :project : :datacenter))
       create_from_row?(cmp_mh_with_parent,Ref,match_assigns,other_assigns)
     end
-    
+
+    def delete_tasks()
+      sp_hash = {
+        :cols => [:id],
+        :filter => [:eq,:assembly_id,id()]
+      }
+      task_idhs = Model.get_objs(model_handle(:task),sp_hash)
+      unless task_idhs.empty?
+        Model.delete_instances(task_idhs)
+      end
+    end
+
     Ref = '__workspace'
   end
 end

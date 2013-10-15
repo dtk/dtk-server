@@ -473,15 +473,16 @@ module DTK
       self.class.delete_instance(idh)
     end
 
+    def self.has_group_id_col?(model_handle)
+      not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
+    end
+
     class << self
      private
       def match_found(el,el_list,cols)
         el_list.find do |el_in_list|
           not cols.find{|col| not (el[col] == el_in_list[col])}
         end
-      end
-      def has_group_id_col?(model_handle)
-        not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
       end
 
       #helpers for check_valid_id and name_to_id

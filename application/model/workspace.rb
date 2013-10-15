@@ -1,11 +1,15 @@
 module DTK
   class Workspace < Assembly::Instance
-    def self.create?(target_idh)
+  #creates both a service, module branch, assembly instance and assembly templaet for the workspace
+    def self.create?(target_idh,project_idh)
       cmp_mh = target_idh.createMH(:component)
+      module_branch_idh = create_service_and_module_branch?(project_idh)
+      workspace_template_idh = create_assembly?(:template,cmp_mh,:module_branch_id => module_branch_idh.get_id(),:project_project_id => project_idh.get_id())
       instance_assigns = {
-        :datacenter_datacenter_id => target_idh.get_id()
+        :datacenter_datacenter_id => target_idh.get_id(),
+        :ancestor_id => workspace_template_idh.get_id()
       }
-      create_aux?(:instance,cmp_mh,instance_assigns)
+      create_assembly?(:instance,cmp_mh,instance_assigns)
     end
 
     def self.is_workspace?(object)
@@ -18,7 +22,15 @@ module DTK
     end
 
    private
-    def self.create_aux?(type,cmp_mh,assigns)
+    def self.create_service_and_module_branch?(project_idh)
+      config_agent_type = :puupet #TODO: stub
+      version = nil
+      init_hash_response = ServiceModule.initialize_module(project_idh.create_object(),ServiceMoudleName,config_agent_type,version,:no_error_if_exists=>true)
+      init_hash_response[:module_branch_idh]
+    end
+    ServiceMoudleName = '.workspace'
+
+    def self.create_assembly?(type,cmp_mh,assigns)
       match_assigns = {:ref => Ref}.merge(assigns)
       other_assigns = {
         :display_name => 'workspace',

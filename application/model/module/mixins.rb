@@ -498,13 +498,15 @@ module DTK
     end
 
     #returns hash with keys :module_idh :module_branch_idh
-    def initialize_module(project,module_name,config_agent_type,version=nil)
+    def initialize_module(project,module_name,config_agent_type,version=nil,opts={})
       is_parsed   = false
       project_idh = project.id_handle()
       module_exists = module_exists?(project_idh,module_name)
-      
-      is_parsed = module_exists[:dsl_parsed] if module_exists
-      if is_parsed
+      if module_exists
+        is_parsed = module_exists[:dsl_parsed] 
+      end
+
+      if is_parsed and not opts[:no_error_if_exists]
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
       ws_branch = ModuleBranch.workspace_branch_name(project,version)

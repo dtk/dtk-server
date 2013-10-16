@@ -120,10 +120,12 @@ module MCollective
           end     
 =end
         raw_msg = Message.new(msg.body, msg, :base64 => @base64, :headers => msg.headers)
-        if decode_msg = @@decode_context.r8_decode_receive(raw_msg)
-          @@multiplexer.process_response(decode_msg,decode_msg[:requestid])
-        else
-          ::DTK::Log.error_pp(["Cannot decode msg; dropping it",msg.headers])
+        msg = @@decode_context.r8_decode_receive(raw_msg)
+        begin
+          @@multiplexer.process_response(msg,msg[:requestid])
+        rescue => e
+          puts e.backtrace[0..5]
+          Log.error("Something went wrong while processing the message; possibly an auth issue with MCollective")
         end
       end
 

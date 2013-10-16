@@ -107,7 +107,10 @@ eos
               :stomp_host => Mcollective.server_host(),
               :mcollective_ssh_local_public_key => R8::Config[:mcollective][:ssh][:local][:public_key],
               :mcollective_ssh_local_private_key => R8::Config[:mcollective][:ssh][:local][:private_key],
-              :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys]
+              :mcollective_ssh_local_authorized_keys => R8::Config[:mcollective][:ssh][:local][:authorized_keys],
+              :mcollective_username => R8::Config[:mcollective][:username],
+              :mcollective_password => R8::Config[:mcollective][:password],
+              :mcollective_collective => R8::Config[:mcollective][:collective]
             )
           end
          private
@@ -120,7 +123,10 @@ eos
             bindings.merge(
               :mcollective_ssh_remote_public_key => ssh_remote_public_key,
               :mcollective_ssh_remote_private_key => ssh_remote_private_key,
-              :mcollective_ssh_local_public_key => ssh_local_public_key
+              :mcollective_ssh_local_public_key => ssh_local_public_key,
+              :mcollective_username => R8::Config[:mcollective][:username],
+              :mcollective_password => R8::Config[:mcollective][:password],
+              :mcollective_collective => R8::Config[:mcollective][:collective]
             )
           end
 
@@ -132,6 +138,11 @@ eos
 cat << EOF >> /etc/mcollective/server.cfg
 ---
 plugin.stomp.host = <%=node_config_server_host %>
+main_collective = <%=mcollective_collective %>
+collectives = <%=mcollective_collective %>
+
+plugin.stomp.user = <%=mcollective_username %>
+plugin.stomp.password = <%=mcollective_password %>
 EOF
 
 cat << EOF > /etc/mcollective/facts.yaml

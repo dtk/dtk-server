@@ -55,6 +55,11 @@ module DTK
       :service_module
     end
 
+    def self.filter_list!(rows)
+      rows.reject!{|r|Workspace.is_workspace_service_module?(r)}
+      rows
+    end
+
     def delete_object()
       assembly_templates = get_assembly_templates()
 

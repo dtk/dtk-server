@@ -362,6 +362,7 @@ module DTK
       }
       mh = project_idh.createMH(model_type())
       unsorted_ret = get_objs(mh,sp_hash)
+      filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
         unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions, :remote_rep => remote_rep, :diff => diff))
@@ -545,13 +546,15 @@ module DTK
       Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 
-    def get_workspace_module_branch(project,module_name,version=nil)
+    def get_workspace_module_branch(project,module_name,version=nil,opts={})
       project_idh = project.id_handle()
       filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
       branch = ModuleBranch.workspace_branch_name(project,version)
       post_filter = proc{|mb|mb[:branch] == branch}
-      matches = get_matching_module_branches(project_idh,filter,post_filter)
-      if matches.size == 1
+      matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
+      if matches.size == 0
+        nil
+      elsif matches.size == 1
         matches.first
       elsif matches.size > 2
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
@@ -570,7 +573,7 @@ module DTK
       end
     end
 
-    def get_matching_module_branches(mh_or_idh,filter,post_filter=nil)
+    def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
       sp_hash = {
         :cols => [:id,:display_name,:group_id,:module_branches],
         :filter => filter
@@ -579,6 +582,7 @@ module DTK
         r[:module_branch].merge(:module_id => r[:id])
       end
       if rows.empty?
+        return Array.new if opts[:no_error_if_does_not_exist]
         raise ErrorUsage.new("Module does not exist")
       end
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
@@ -633,15 +637,6 @@ module DTK
       {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
 
-   private
-    def get_all_repos(mh)
-      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
-        repo = r[:repo]
-        h[repo[:id]] ||= repo
-        h
-      end.values
-    end
-
     def module_exists?(project_idh,module_name)
       unless project_idh[:model_name] == :project
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
@@ -651,7 +646,16 @@ module DTK
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
+      get_obj(project_idh.createMH(model_name()),sp_hash)
+    end
+
+   private
+    def get_all_repos(mh)
+      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
+        repo = r[:repo]
+        h[repo[:id]] ||= repo
+        h
+      end.values
     end
 
   end

@@ -81,6 +81,19 @@
          :cols=>[:id,:group_id,:display_name,:type,:external_ref,:os_type]
        }]
     },
+    :provider=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:datacenter,
+         :alias=>:provider,
+         :join_type=>:inner,
+         :convert=>true,
+         :join_cond=>{:id => :target__parent_id},
+         :cols=>[:id,:display_name,:iaas_type]
+       }]
+    },
     :node_ports=>{
       :type=>:json,
       :hidden=>true,

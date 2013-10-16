@@ -216,16 +216,25 @@
     "order": [
       "id",
       "target_name",
-      "target_type",
-      "iaas",
-      "description"
+      "provider_name",
+      "provider_type"
     ],
     "mapping": {
-      "iaas": "iaas_type",
+      "provider_type": "provider.iaas_type",
       "target_name": "display_name",
-      "id": "dtk_id",
-      "description": "description",
-      "target_type": "dtk_type"
+      "provider_name": "provider.display_name",
+      "id": "dtk_id"
+    }
+  },  
+  "provider": {
+    "order": [
+      "id",
+      "name",
+      "type"    ],
+    "mapping": {
+      "type": "iaas_type",
+      "name": "display_name",
+      "id": "dtk_id"
     }
   },
   "assembly": {

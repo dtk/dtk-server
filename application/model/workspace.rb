@@ -40,6 +40,7 @@ module DTK
         other_assigns = {
           :display_name => ComponentType,
           :component_type => ComponentType,
+          :version => ComponentVersion,
           :description => 'Private workspace',
           :module_branch_id => @module_branch_idh.get_id(),
           :type => (type == :template) ? 'template' : 'composite'
@@ -48,6 +49,7 @@ module DTK
         Model.create_from_row?(cmp_mh_with_parent,Ref,match_assigns,other_assigns)
       end
       ComponentType = 'workspace'
+      ComponentVersion = 'master'
      private
       def initialize(target_idh,project_idh)
         @component_mh = target_idh.createMH(:component)

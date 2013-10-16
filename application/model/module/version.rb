@@ -46,7 +46,7 @@ module DTK
       def get_assembly(mh)
         sp_hash = {
           :cols=> [:id,:group_id,:display_name],
-          :filter => [:eq,:display_name,@assembly_name]
+          :filter => [:and,[:eq,:display_name,@assembly_name],[:neq,:datacenter_datacenter_id,nil]]
         }
         rows = Assembly::Instance.get_objs(mh.createMH(:assembly_instance),sp_hash)
         if rows.size == 1

@@ -1,9 +1,9 @@
 module DTK; class AssemblyModule
   class Component < self
     def self.prepare_for_edit(assembly,component_module)
-      cmp_instances = get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
+     get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       module_version = ModuleVersion.ret(assembly)
-      create_assembly_branch?(assembly,component_module,cmp_instances,module_version)
+      create_assembly_branch?(assembly,component_module,module_version)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
@@ -22,8 +22,8 @@ module DTK; class AssemblyModule
     end
 
    private
-    def self.create_assembly_branch?(assembly,component_module,cmp_instances,module_version)
-      unless reject_matching_component_instances(cmp_instances,module_version).empty?
+    def self.create_assembly_branch?(assembly,component_module,module_version)
+      unless component_module.get_workspace_module_branch(module_version)
         create_assembly_branch(component_module,module_version)
       end
       component_module.get_workspace_branch_info(module_version)
@@ -82,31 +82,6 @@ module DTK; class AssemblyModule
         raise ErrorUsage.new("Assembly (#{assembly_name}) does not have any components belonging to module (#{component_module.get_field?(:display_name)})")
       end
       ret
-    end
-
-    def self.reject_matching_component_instances(cmp_instances,module_version)
-      ret = cmp_instances
-      return ret if ret.empty?
-      disjuncts = cmp_instances.map do |cmp|
-        cmp.update_object!(:component_type,:project_project_id,:component_template_id)
-        [:and,
-         [:eq,:version,module_version.to_s],
-         [:eq,:component_type,cmp[:component_type]],
-         [:eq,:project_project_id,cmp[:project_project_id]]
-        ]
-      end
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_type,:project_project_id],
-        :filter => [:or] + disjuncts
-      }
-      matching_cmp_templates = Model.get_objs(cmp_instances.first.model_handle(),sp_hash)
-      return ret if matching_cmp_templates.empty?
-      ret.reject do |cmp|
-        matching_cmp_templates.find do |cmp_template|
-          cmp[:component_type] == cmp_template[:component_type] and
-            cmp[:project_project_id] == cmp_template[:project_project_id]
-        end
-      end
     end
   end
 end; end

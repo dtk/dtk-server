@@ -74,6 +74,8 @@ module DTK
         else
           config_agent_type = :puppet #TODO: stub
           module_and_branch_info = ServiceModule.initialize_module(project,service_module_name,config_agent_type)
+          service_module = module_and_branch_info[:module_idh].create_object()
+          service_module.update(:dsl_parsed => true)
           module_and_branch_info[:module_branch_idh]
         end
       end

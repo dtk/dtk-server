@@ -6,13 +6,18 @@ module DTK
     end
 
     def self.is_workspace?(object)
-      object.kind_of?(self) or (Ref == object.get_field?(:ref))
+      object.kind_of?(self) or (workspace_ref() == object.get_field?(:ref))
     end
 
     def purge(opts={})
       self.class.delete_contents([id_handle()],opts)
       delete_tasks()
     end
+
+    def self.workspace_ref()
+      Ref
+    end
+    Ref = '__workspace'
 
    private
     def delete_tasks()
@@ -31,9 +36,10 @@ module DTK
       end
 
       def create_assembly?(type,assigns)
-        match_assigns = {:ref => Ref}.merge(assigns)
+        match_assigns = {:ref => Workspace.workspace_ref()}.merge(assigns)
         other_assigns = {
-          :display_name => 'workspace',
+          :display_name => ComponentType,
+          :component_type => ComponentType,
           :description => 'Private workspace',
           :module_branch_id => @module_branch_idh.get_id(),
           :type => (type == :template) ? 'template' : 'composite'
@@ -41,8 +47,7 @@ module DTK
         cmp_mh_with_parent = @component_mh.merge(:parent_model_name => (type == :template ? :project : :datacenter))
         Model.create_from_row?(cmp_mh_with_parent,Ref,match_assigns,other_assigns)
       end
-      Ref = '__workspace'
-
+      ComponentType = 'workspace'
      private
       def initialize(target_idh,project_idh)
         @component_mh = target_idh.createMH(:component)

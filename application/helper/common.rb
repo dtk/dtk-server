@@ -367,6 +367,13 @@ module Ramaze::Helper
       end
     end
 
+    def ret_component_template(param)
+      component_template,component_title = ret_component_template_and_title(param)
+      if component_title
+        raise ::DTK::ErrorUsage.new("Component title should not be given")
+      end
+      component_template
+    end
     #returns [component_template, component_title] where component_title could be nil
     def ret_component_template_and_title(param)
       component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template)

@@ -131,6 +131,14 @@ module DTK
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module)
     end
 
+    def rest__create_component_dependency()
+      assembly = ret_assembly_instance_object()
+      cmp_template = ret_component_template(:component_template_id)
+      antecedent_cmp_template = ret_component_template(:antecedent_component_template_id)
+      AssemblyModule::Component.create_component_dependency?(assembly,cmp_template,antecedent_cmp_template)
+      rest_ok_response
+    end
+
     # checks element through set of fields
     def check_element(element, fields, element_id_val)
       return true if (element_id_val.nil? || element_id_val.empty?)

@@ -38,17 +38,8 @@ module DTK; class Component
       module_branch[:current_sha] || module_branch.update_current_sha_from_repo!()
     end
 
-
-    #component modules indexed by component_template ids 
-    def self.get_indexed_component_modules(component_template_idhs)
-      ret = Hash.new
-      return ret if component_template_idhs.empty?()
-      sp_hash = {
-        :cols => [:id,:component_modules],
-        :filter => [:oneof,:id,component_template_idhs.map{|idh|idh.get_id()}]
-      }
-      mh = component_template_idhs.first.createMH()
-      get_objs(mh,sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r[:component_module])}
+    def get_component_module()
+      get_obj_helper(:component_module)
     end
 
     #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title

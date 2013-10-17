@@ -2,8 +2,7 @@ module DTK; class AssemblyModule
   class Component < self
     def self.prepare_for_edit(assembly,component_module)
      get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
-      module_version = ModuleVersion.ret(assembly)
-      create_assembly_branch?(assembly,component_module,module_version)
+      create_assembly_branch?(assembly,component_module)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
@@ -11,18 +10,26 @@ module DTK; class AssemblyModule
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
+    def self.create_component_dependency?(assembly,cmp_template,antecedent_cmp_template,opts={})
+      component_module = cmp_template.get_component_module()
+      ret = create_assembly_branch?(assembly,component_module)
+      pp ret
+      ret
+    end
+
     def self.promote_module_updates(assembly,component_module)
-       module_version = ModuleVersion.ret(assembly)
-       branch = component_module.get_workspace_module_branch(module_version)
-       unless ancestor_branch = branch.get_ancestor_branch?()
-         raise Error.new("Cannot find ancestor branch")
-       end
-       branch_name = branch[:branch]
-       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
+      module_version = ModuleVersion.ret(assembly)
+      branch = component_module.get_workspace_module_branch(module_version)
+      unless ancestor_branch = branch.get_ancestor_branch?()
+        raise Error.new("Cannot find ancestor branch")
+      end
+      branch_name = branch[:branch]
+      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
     end
 
    private
-    def self.create_assembly_branch?(assembly,component_module,module_version)
+    def self.create_assembly_branch?(assembly,component_module)
+      module_version = ModuleVersion.ret(assembly)
       unless component_module.get_workspace_module_branch(module_version)
         create_assembly_branch(component_module,module_version)
       end

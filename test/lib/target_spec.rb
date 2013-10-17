@@ -50,7 +50,7 @@ end
 
 shared_context "Stage assembly in specific target" do |dtk_common, target_name|
 	it "stages #{dtk_common.assembly_name} assembly from assembly template #{dtk_common.assembly_template} in target #{target_name}" do
-		assembly_staged = dtk_common.stage_assembly_in_specific_target(target_name)
-		assembly_staged.should eq(true)
+		$assembly_id = dtk_common.stage_assembly_in_specific_target(target_name)
+		$assembly_id.should_not eq(nil)
 	end
 end

@@ -45,7 +45,7 @@ describe "Test Case 43: Add new target to existing provider, stage two assemblie
   	end
 
   	context "Assembly #{assembly_name1}" do		
-		include_context "Check if assembly exists in target", dtk_common, provider_name, target_name
+		include_context "Check if assembly exists in target", dtk_common, assembly_name1, target_name
 	end  
 
 	context "Stage assembly in specific target" do
@@ -53,7 +53,7 @@ describe "Test Case 43: Add new target to existing provider, stage two assemblie
   	end
 
 	context "Assembly #{assembly_name2}" do		
-		include_context "Check if assembly exists in target", dtk_common2, provider_name, target_name
+		include_context "Check if assembly exists in target", dtk_common2, assembly_name2, target_name
 	end
 
 	context "Delete target command" do

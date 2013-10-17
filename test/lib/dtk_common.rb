@@ -1288,6 +1288,7 @@ class DtkCommon
 			provider_id = list_providers['data'].select { |x| x['display_name'].include? provider_name}.first['id']	
 			create_target_response = send_request('/rest/target/create', {:target_name => provider_name, :target_template_id => provider_id, :region => region})
 			target_created = create_target_response['data']['success']
+			puts "Target #{provider_name}-#{region} created successfully!"
 		else
 			puts "Provider #{provider_name} does not exist!"
 		end

@@ -499,7 +499,7 @@ module DTK
     end
 
     #returns hash with keys :module_idh :module_branch_idh
-    def initialize_module(project,module_name,config_agent_type,version=nil,opts={})
+    def create_module(project,module_name,config_agent_type,version=nil,opts={})
       is_parsed   = false
       project_idh = project.id_handle()
       module_exists = module_exists?(project_idh,module_name)

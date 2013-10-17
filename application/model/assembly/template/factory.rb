@@ -4,6 +4,21 @@ module DTK
     class Factory < self
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
+
+      def self.get_or_create_service_module(project,service_module_name)
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:eq,:display_name,service_module_name]
+        }
+        if service_module = get_obj(project.model_handle(:service_module),sp_hash)
+          service_module
+        else
+          config_agent_type = :puppet #TODO: stub
+          module_and_branch_info = ServiceModule.create_module(project,service_module_name,config_agent_type)
+          module_and_branch_info[:module_idh].create_object()
+        end
+      end
+
       #creates a new assembly template if it does not exist
       def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,version=nil)
         assembly_factory = assembly_factory(assembly_instance,service_module,assembly_name,version)

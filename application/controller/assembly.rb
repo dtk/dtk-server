@@ -277,9 +277,9 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
-      service_module = create_obj(:service_module_name,ServiceModule)
-      assembly_template_name = ret_non_null_request_params(:assembly_template_name)
-      Assembly::Template.create_or_update_from_instance(assembly,service_module,assembly_template_name)
+      assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
+      project = get_default_project()
+      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name)
       clone_update_info = service_module.ret_clone_update_info()
       rest_ok_response clone_update_info
     end

@@ -2,6 +2,10 @@ module DTK
   class Dependency < Model
     #because initially Dependency only refered to simple dependencies; introduced Simple and Links and their parent All
     #TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
+
+    class All; end
+    r8_nested_require('dependency','simple')
+    r8_nested_require('dependency','link')
     class All 
       def initialize()
         @satisfied_by_component_ids = []
@@ -16,9 +20,6 @@ module DTK
         components
       end
     end
-
-    r8_nested_require('dependency','simple')
-    r8_nested_require('dependency','link')
 
     #if this has simple filter, meaning test on same node as dependency then return it, normalizing to convert strings into symbols
     def simple_filter_triplet?()

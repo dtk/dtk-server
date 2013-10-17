@@ -30,7 +30,7 @@ describe "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combinati
 		puts "Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it"
 		puts "*********************************************************************************************"
 		puts ""
-  end
+  	end
 
 	os_memory_array.each do |x|
 		os = x[:os]

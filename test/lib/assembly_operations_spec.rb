@@ -20,6 +20,13 @@ shared_context "List assemblies after stage" do |dtk_common|
   end
 end
 
+shared_context "NEG - List assemblies" do |dtk_common|
+  it "does not have #{dtk_common.assembly_name} assembly in assembly list" do
+    assembly_exists = dtk_common.check_if_assembly_exists($assembly_id)
+    assembly_exists.should eq(false)
+  end
+end
+
 shared_context "Converge" do |dtk_common|
   it "converges #{dtk_common.assembly_name} assembly" do
     converge = dtk_common.converge_assembly($assembly_id)

@@ -1,5 +1,7 @@
 module DTK; class AssemblyModule
   class Component < self
+    r8_nested_require('component','dependency')
+
     def self.prepare_for_edit(assembly,component_module)
      get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       create_assembly_branch?(assembly,component_module)
@@ -11,10 +13,7 @@ module DTK; class AssemblyModule
     end
 
     def self.create_component_dependency?(assembly,cmp_template,antecedent_cmp_template,opts={})
-      component_module = cmp_template.get_component_module()
-      ret = create_assembly_branch?(assembly,component_module)
-      pp ret
-      ret
+      Dependency.create_dependency?(assembly,cmp_template,antecedent_cmp_template,opts)
     end
 
     def self.promote_module_updates(assembly,component_module)

@@ -42,14 +42,6 @@ module DTK; class Component
       get_obj_helper(:component_module)
     end
 
-    def get_dependencies_simple()
-      sp_hash = {
-        :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
-        :filter => [:eq,:component_component_id,id()]
-      }
-      Model.get_objs(model_handle(:dependency),sp_hash)
-    end
-
     #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
     def get_title_attribute_name?()
       rows = self.class.get_title_attributes([id_handle])

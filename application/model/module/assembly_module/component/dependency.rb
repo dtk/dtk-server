@@ -33,14 +33,12 @@ module DTK; class AssemblyModule
 
       class Simple < self
         def create_dependency?(opts={})
-          if dependency_exists?()
+          if DTK::Dependency::Simple.dependency_exists?(@branch_cmp_template,@branch_antec_cmp_template)
+            pp ["DTK::Dependency::Simple.dependency_exists? is true"]
+          else
+            pp ["DTK::Dependency::Simple.dependency_exists? is false"]
+#            DTK::Dependency::Simple.create_component_dependency(@branch_cmp_template,@branch_antec_cmp_template)
           end
-        end
-       private
-        def dependency_exists?()
-          existing_deps = @branch_cmp_template.get_dependencies_simple()
-          pp [:existing_deps,existing_deps]
-          nil
         end
       end
 

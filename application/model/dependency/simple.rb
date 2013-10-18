@@ -41,25 +41,27 @@ module DTK; class Dependency
       components
     end
 
-    def self.add_component_dependency(component_idh, type, hash_info)
-      #TODO: bug problem may be need to get parent of component to use craete rows
-      #TODO: stubbed
-#      cmp = component_idh.create_object.update_object!(:display_name,:library_library_id,:group_id)
-      cmp = component_idh.create_object.update_object!(:display_name)
-      other_cmp_idh = component_idh.createIDH(:id => hash_info[:other_component_id])
-      other_cmp = other_cmp_idh.create_object.update_object!(:display_name,:component_type)
+    def self.dependency_exists?(cmp_template,antec_cmp_template)
+      sp_hash = {
+        :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
+        :filter => [:and,[:eq,:component_component_id,cmp_template.id()],
+                    [:eq,:ref,antec_cmp_template.get_field?(:component_type)]]
+      }
+      Model.get_objs(model_handle(:dependency),sp_hash)
+    end
+    def self.create_component_dependency(cmp_template,antec_cmp_template)
+      antec_cmp_template.update_object!(:display_name,:component_type)
       search_pattern = {
-        ":filter" => [":eq", ":component_type",other_cmp[:component_type]]
+        ":filter" => [":eq", ":component_type",antec_cmp_template[:component_type]]
       }
       create_row = {
-        :ref => other_cmp[:component_type],
-        :component_component_id => component_idh.get_id(),
-        :description => "#{other_cmp[:display_name]} #{type} #{cmp[:display_name]}",
+        :ref => antec_cmp_template[:component_type],
+        :component_component_id => cmp_template.id(),
+        :description => "#{antec_cmp_template[:display_name]} is required for #{cmp_template.get_field?(:display_name)}",
         :search_pattern => search_pattern,
-        :severity => "warning",
-        :library_library_id => cmp[:library_library_id]
+        :severity => "warning"
       }
-      dep_mh = component_idh.createMH(:dependency)
+      dep_mh = cmp_template.model_handle().create_childMH(:dependency)
       Model.create_from_row(dep_mh,create_row)
     end
 
@@ -72,7 +74,6 @@ module DTK; class Dependency
 
     attr_reader :dependency_obj, :node
    private
-
     def self.get_components_that_satisify_deps(dep_list)
       ret = Array.new
       query_disjuncts = dep_list.map do |simple_dep|

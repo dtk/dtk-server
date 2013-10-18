@@ -327,6 +327,11 @@ module DTK
       Model.create_from_row(file_asset_mh,create_row)
     end
 
+
+    def get_link_def_links()
+      get_objs(:cols => [:link_def_links])
+    end
+
     def get_config_file(file_name)
       sp_hash = {
         :model_name => :file_asset,

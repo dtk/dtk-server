@@ -34,7 +34,7 @@ module DTK; class AssemblyModule
       end
 
       def self.klass(assembly,cmp_template,antecedent_cmp_template,opts={})
-        Simple #TODO: stub
+        Link #TODO: stub
       end
 
       class Simple < self
@@ -46,6 +46,11 @@ module DTK; class AssemblyModule
       end
 
       class Link < self
+        def create_dependency?(opts={})
+          #TODO: stub
+          link_def_links = @branch_cmp_template.get_link_def_links()
+          pp link_def_links
+        end
       end
     end
   end

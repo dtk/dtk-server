@@ -53,6 +53,7 @@ module XYZ
       foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
       foreign_key :module_branch_id, :module_branch, FK_CASCADE_OPT #treated as containment
 
+      #TODO: thionk this can be deprecated
       column :link_defs, :json
       #deprecate below for above
       #TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
@@ -126,6 +127,22 @@ module XYZ
            :filter => [:eq,:display_name,Attribute.default_title_field()],
            :join_cond=>{:component_component_id => q(:component,:id)} ,
            :cols => [:id,:group_id,:display_name]
+         }]
+
+    virtual_column :link_def_links, :type => :json, :hidden => true,
+        :remote_dependencies =>
+        [
+         { :model_name => :link_def,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:component_component_id => q(:component,:id)},
+           :cols => LinkDef.common_columns()
+         },
+         { :model_name => :link_def_link,
+           :convert => true,
+           :join_type => :inner,
+           :join_cond=>{:link_def_id => q(:link_def,:id)},
+           :cols => LinkDefLink.common_columns()
          }]
 
       ###### end of virtual columns related to attributes, ports, and link_defs

@@ -48,8 +48,20 @@ module DTK; class AssemblyModule
       class Link < self
         def create_dependency?(opts={})
           #TODO: stub
-          link_def_links = @branch_cmp_template.get_link_def_links()
-          pp link_def_links
+          if link_def_link = matching_link_def_link?()
+            pp [:matching_link_def_link?,link_def_link]
+          end
+        end
+       private
+        def matching_link_def_link?()
+          antec_component_type = @antecedent_cmp_template.get_field?(:component_type)
+          matches = @branch_cmp_template.get_link_def_links().select do |r|
+            r[:remote_component_type] == antec_component_type
+          end
+          if matches.size > 1
+            raise Error.new("Not implemented: case where matching_link_def_link? returns multiple matches")
+          end
+          matches.first
         end
       end
     end

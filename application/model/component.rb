@@ -329,7 +329,9 @@ module DTK
 
 
     def get_link_def_links()
-      get_objs(:cols => [:link_def_links])
+      get_objs(:cols => [:link_def_links]).map do |r|
+        r[:link_def_link].merge(:link_def => r[:link_def])
+      end
     end
 
     def get_config_file(file_name)

@@ -83,7 +83,7 @@ module DTK; class Assembly
 
     def self.list(assembly_mh,opts={})
       opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch,list_virtual_column?(opts[:detail_level])].compact)
-      assembly_rows = get__project_parent(assembly_mh,opts)
+      assembly_rows = get(assembly_mh,opts)
       if opts[:detail_level] == "attributes"
         attr_rows = get_component_attributes(assembly_mh,assembly_rows)
         list_aux(assembly_rows,attr_rows,opts)

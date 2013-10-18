@@ -14,9 +14,15 @@ module DTK; class AssemblyModule
 
      private
       def self.get_branch_template(module_branch,cmp_template)
-        #TODO: stub
-        cmp_template
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:component_type],
+          :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
+                      [:eq,:type,'template'],
+                      [:eq,:component_type,cmp_template.get_field?(:component_type)]]
+        }
+        Model.get_obj(cmp_template.model_handle(),sp_hash)
       end
+
       def self.create(assembly,branch_cmp_template,branch_antec_cmp_template,opts={})
         klass(assembly,branch_cmp_template,branch_antec_cmp_template,opts).new(assembly,branch_cmp_template,branch_antec_cmp_template)
       end
@@ -33,11 +39,8 @@ module DTK; class AssemblyModule
 
       class Simple < self
         def create_dependency?(opts={})
-          if DTK::Dependency::Simple.dependency_exists?(@branch_cmp_template,@branch_antec_cmp_template)
-            pp ["DTK::Dependency::Simple.dependency_exists? is true"]
-          else
-            pp ["DTK::Dependency::Simple.dependency_exists? is false"]
-#            DTK::Dependency::Simple.create_component_dependency(@branch_cmp_template,@branch_antec_cmp_template)
+          unless DTK::Dependency::Simple.dependency_exists?(@branch_cmp_template,@branch_antec_cmp_template)
+            DTK::Dependency::Simple.create_component_dependency(@branch_cmp_template,@branch_antec_cmp_template)
           end
         end
       end

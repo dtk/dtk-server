@@ -47,7 +47,7 @@ module DTK; class Dependency
         :filter => [:and,[:eq,:component_component_id,cmp_template.id()],
                     [:eq,:ref,antec_cmp_template.get_field?(:component_type)]]
       }
-      Model.get_objs(model_handle(:dependency),sp_hash)
+      !Model.get_objs(cmp_template.model_handle(:dependency),sp_hash).empty?
     end
     def self.create_component_dependency(cmp_template,antec_cmp_template)
       antec_cmp_template.update_object!(:display_name,:component_type)

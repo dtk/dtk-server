@@ -63,7 +63,7 @@ module DTK; class Dependency
         :severity => 'warning'
       }
       dep_mh = cmp_template.model_handle().create_childMH(:dependency)
-      Model.create_from_row(dep_mh,create_row)
+      Model.create_from_row(dep_mh,create_row,:convert=>true)
     end
 
     def set_satisfied_by_component_ids?(satisify_cmps)

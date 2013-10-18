@@ -516,15 +516,14 @@ module DTK
         rows_raw = get_objs(model_handle,augmented_sp_hash)
         rows = (post_filter ? rows_raw.select{|r|post_filter.call(r)} : rows_raw)
         if rows.size == 0
-          if opts[:no_error_if_no_match]
-            nil
-          else
+          unless opts[:no_error_if_no_match]
             raise ErrorNameDoesNotExist.new(name,pp_object_type())
           end
         elsif rows.size > 1
           raise ErrorNameAmbiguous.new(name,rows.map{|r|r[:id]},pp_object_type())
+        else
+          rows.first[:id]
         end
-        rows.first[:id]
       end
 
       def pp_object_type()

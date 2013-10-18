@@ -92,7 +92,11 @@ module DTK; class ComponentDSL
       "#{ref}__#{version}"
     end
     def component_display_name_with_version(display_name,version)
-      "#{display_name}(#{version})"
+      if version.kind_of?(ModuleVersion::Semantic)
+        "#{display_name}(#{version})"
+      else
+        display_name
+      end
     end
   end
 

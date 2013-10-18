@@ -307,8 +307,8 @@ module DTK
       component_template, component_title = ret_component_template_and_title(:component_template_id)
 
       #not checking here if node_id points to valid object; check is in add_component
-      node_id = ret_non_null_request_params(:node_id)
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template,component_title)
+      node_idh = ret_request_param_id_handle(:node_id,Node)
+      new_component_idh = assembly.add_component(node_idh,component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

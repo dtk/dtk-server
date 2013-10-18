@@ -52,14 +52,15 @@ module DTK; class Dependency
     def self.create_component_dependency(cmp_template,antec_cmp_template)
       antec_cmp_template.update_object!(:display_name,:component_type)
       search_pattern = {
-        ":filter" => [":eq", ":component_type",antec_cmp_template[:component_type]]
+        ':filter' => [':eq', ':component_type',antec_cmp_template[:component_type]]
       }
       create_row = {
         :ref => antec_cmp_template[:component_type],
         :component_component_id => cmp_template.id(),
-        :description => "#{antec_cmp_template[:display_name]} is required for #{cmp_template.get_field?(:display_name)}",
+        :description => "#{antec_cmp_template.component_type_print_form()} is required for #{cmp_template.component_type_print_form()}",
         :search_pattern => search_pattern,
-        :severity => "warning"
+        :type => 'component',
+        :severity => 'warning'
       }
       dep_mh = cmp_template.model_handle().create_childMH(:dependency)
       Model.create_from_row(dep_mh,create_row)

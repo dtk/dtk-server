@@ -3,7 +3,7 @@ module DTK; class AssemblyModule
     r8_nested_require('component','dependency')
 
     def self.prepare_for_edit(assembly,component_module)
-     get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
+      get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
       create_assembly_branch?(assembly,component_module)
     end
 
@@ -43,7 +43,14 @@ module DTK; class AssemblyModule
 
     def self.delete_modules?(assembly)
       module_version = ModuleVersion.ret(assembly)
-      assembly.get_component_modules().each do |component_module|
+      #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_id],
+        :filter => [:eq,:version,module_version]
+      }
+      component_module_mh = assembly.model_handle(:component_module)
+      Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
+        component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
         component_module.delete_version?(module_version)
       end
     end

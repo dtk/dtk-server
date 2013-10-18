@@ -131,7 +131,21 @@ module DTK; class Component
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-    def self.name_to_id(model_handle,name,version=nil)
+    def self.name_to_id(model_handle,name,version_or_versions=nil)
+      if version_or_versions.kind_of?(Array)
+        version_or_versions.each do |version|
+          if ret = name_to_id_aux(model_handle,name,version,:no_error_if_no_match=>true)
+            return ret
+          end
+        end
+        raise ErrorNameDoesNotExist.new(name,pp_object_type())
+      else
+        name_to_id_aux(model_handle,name,version_or_versions)
+      end
+    end
+
+   private 
+    def self.name_to_id_aux(model_handle,name,version,opts={})
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
@@ -140,7 +154,7 @@ module DTK; class Component
                     [:eq, :node_node_id, nil],
                     [:eq, :version, version_field(version)]]
       }
-      name_to_id_helper(model_handle,version_display_name(name,version),sp_hash)
+      name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
     end
   end
 

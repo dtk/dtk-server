@@ -304,8 +304,7 @@ module DTK
 
     def rest__add_component()
       assembly = ret_assembly_instance_object()
-      component_template, component_title = ret_component_template_and_title(:component_template_id)
-
+      component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
       #not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
       new_component_idh = assembly.add_component(node_idh,component_template,component_title)

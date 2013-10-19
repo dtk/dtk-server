@@ -6,12 +6,12 @@ module DTK; class Dependency
       @node = node
      end
 
-    def self.create_dependency?(cmp_template,antec_cmp_template)
+    def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
       unless dependency_exists?(cmp_template,antec_cmp_template)
-        create_dependency(cmp_template,antec_cmp_template)
+        create_dependency(cmp_template,antec_cmp_template,opts)
       end
     end
-    def self.create_dependency(cmp_template,antec_cmp_template)
+    def self.create_dependency(cmp_template,antec_cmp_template,opts={})
       antec_cmp_template.update_object!(:display_name,:component_type)
       search_pattern = {
         ':filter' => [':eq', ':component_type',antec_cmp_template[:component_type]]

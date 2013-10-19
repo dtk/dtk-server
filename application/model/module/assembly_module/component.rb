@@ -12,8 +12,8 @@ module DTK; class AssemblyModule
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
-    def self.create_component_dependency?(assembly,cmp_template,antecedent_cmp_template,opts={})
-      Dependency.create_dependency?(assembly,cmp_template,antecedent_cmp_template,opts)
+    def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
+      Dependency.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
     end
 
     def self.promote_module_updates(assembly,component_module)

@@ -135,7 +135,8 @@ module DTK
       assembly = ret_assembly_instance_object()
       cmp_template = ret_component_template(:component_template_id)
       antecedent_cmp_template = ret_component_template(:antecedent_component_template_id)
-      AssemblyModule::Component.create_component_dependency?(assembly,cmp_template,antecedent_cmp_template)
+      type = :simple 
+      AssemblyModule::Component.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template)
       rest_ok_response
     end
 

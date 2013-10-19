@@ -5,6 +5,27 @@ module DTK; class Dependency
       @link_def = link_def
     end
 
+
+    def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
+      #TODO: stub
+      if link_def_link = matching_link_def_link?(cmp_template,antec_cmp_template)
+        pp [:matching_link_def_link?,link_def_link]
+      end
+    end
+    class << self
+     private
+      def matching_link_def_link?(cmp_template,antec_cmp_template)
+        antec_cmp_type = antec_cmp_template.get_field?(:component_type)
+        matches = cmp_template.get_link_def_links().select do |r|
+          r[:remote_component_type] == antec_cmp_type
+        end
+        if matches.size > 1
+          raise Error.new("Not implemented: case where matching_link_def_link? returns multiple matches")
+        end
+        matches.first
+      end
+    end
+
     def depends_on_print_form?()
       #link_type may be label or component_type
       #TODO: assumption that its safe to process label through component_type_print_form

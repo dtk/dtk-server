@@ -34,14 +34,13 @@ module DTK; class AssemblyModule
       end
 
       def self.klass(assembly,cmp_template,antecedent_cmp_template,opts={})
-        Link #TODO: stub
+        #Link #TODO: stub
+        Simple
       end
 
       class Simple < self
         def create_dependency?(opts={})
-          unless DTK::Dependency::Simple.dependency_exists?(@branch_cmp_template,@antecedent_cmp_template)
-            DTK::Dependency::Simple.create_component_dependency(@branch_cmp_template,@antecedent_cmp_template)
-          end
+          DTK::Dependency::Simple.create_dependency?(@branch_cmp_template,@antecedent_cmp_template)
         end
       end
 

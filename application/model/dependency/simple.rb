@@ -6,6 +6,42 @@ module DTK; class Dependency
       @node = node
      end
 
+    def self.create_dependency?(cmp_template,antec_cmp_template)
+      unless dependency_exists?(cmp_template,antec_cmp_template)
+        create_dependency(cmp_template,antec_cmp_template)
+      end
+    end
+    def self.create_dependency(cmp_template,antec_cmp_template)
+      antec_cmp_template.update_object!(:display_name,:component_type)
+      search_pattern = {
+        ':filter' => [':eq', ':component_type',antec_cmp_template[:component_type]]
+      }
+      create_row = {
+        :ref => antec_cmp_template[:component_type],
+        :component_component_id => cmp_template.id(),
+        :description => "#{antec_cmp_template.component_type_print_form()} is required for #{cmp_template.component_type_print_form()}",
+        :search_pattern => search_pattern,
+        :type => 'component',
+        :severity => 'warning'
+      }
+      dep_mh = cmp_template.model_handle().create_childMH(:dependency)
+      Model.create_from_row(dep_mh,create_row,:convert=>true,:returning_sql_cols=>create_or_exists_cols())
+    end
+    class << self
+      private
+      def dependency_exists?(cmp_template,antec_cmp_template)
+        sp_hash = {
+          :cols => create_or_exists_cols(),
+          :filter => [:and,[:eq,:component_component_id,cmp_template.id()],
+                      [:eq,:ref,antec_cmp_template.get_field?(:component_type)]]
+        }
+        Model.get_obj(cmp_template.model_handle(:dependency),sp_hash)
+      end
+      def create_or_exists_cols()
+        [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity]
+      end
+    end
+    
     def depends_on_print_form?()
       if cmp_type = @dependency_obj.is_simple_filter_component_type?()
         Component.component_type_print_form(cmp_type)
@@ -39,31 +75,6 @@ module DTK; class Dependency
         end
       end
       components
-    end
-
-    def self.dependency_exists?(cmp_template,antec_cmp_template)
-      sp_hash = {
-        :cols => [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity],
-        :filter => [:and,[:eq,:component_component_id,cmp_template.id()],
-                    [:eq,:ref,antec_cmp_template.get_field?(:component_type)]]
-      }
-      !Model.get_objs(cmp_template.model_handle(:dependency),sp_hash).empty?
-    end
-    def self.create_component_dependency(cmp_template,antec_cmp_template)
-      antec_cmp_template.update_object!(:display_name,:component_type)
-      search_pattern = {
-        ':filter' => [':eq', ':component_type',antec_cmp_template[:component_type]]
-      }
-      create_row = {
-        :ref => antec_cmp_template[:component_type],
-        :component_component_id => cmp_template.id(),
-        :description => "#{antec_cmp_template.component_type_print_form()} is required for #{cmp_template.component_type_print_form()}",
-        :search_pattern => search_pattern,
-        :type => 'component',
-        :severity => 'warning'
-      }
-      dep_mh = cmp_template.model_handle().create_childMH(:dependency)
-      Model.create_from_row(dep_mh,create_row,:convert=>true)
     end
 
     def set_satisfied_by_component_ids?(satisify_cmps)

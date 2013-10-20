@@ -26,7 +26,8 @@ module DTK
         replace(hash)
         @assembly_idh = assembly_idh
         @target_attr_pattern = target_attr_pattern
-        @source_attr_pattern = source_attr_pattern
+        @source_attr_pattern = source_attr_pattern.attribute_pattern
+pp [self,@target_attr_pattern,@source_attr_pattern]
       end
 
       def get_attribute(attribute_id)

@@ -9,22 +9,23 @@ module DTK; class Attribute; class Pattern
           raise ErrorParse.new(source_attr_term)
         end
         attr_pattern = super(base_object_idh,attr_term)
+        new(attr_pattern,fn)
+      end
+      
+      attr_reader :attribute_pattern,:fn
+      def attribute_idh()
+        @attribute_pattern.attribute_idhs.first
+      end
+     private
+      def initialize(attr_pattern,fn)
         attr_idhs = attr_pattern.attribute_idhs
         if attr_idhs.empty?
           raise ErrorUsage.new("The term (#{attr_term}) does not match an attribute")
         elsif attr_idhs.size > 1
           raise ErrorUsage.new("Source attribute term must match just one, not multiple attributes")
         end
-        attr_idh = attr_idhs.first
-        new(attr_pattern,fn,attr_idh)
-      end
-      
-      attr_reader :attribute_idh,:fn
-     private
-      def initialize(attr_pattern,fn,attr_idh)
         @attribute_pattern = attr_pattern
         @fn = fn
-        @attribute_idh = attr_idh
       end
 
       class Simple

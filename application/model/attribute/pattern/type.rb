@@ -51,7 +51,7 @@ module DTK; class Attribute
           ret
         end
 
-        def component()
+        def component_instance()
           nil
         end
 
@@ -67,14 +67,14 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def component()
+        def component_instance()
          unless @component_idhs
            raise Error.new("@component_idhs is not set")
          end
           unless @component_idhs.size == 1
-            raise Error.new("component() should only be called with @component_idhs.size == 1")
+            raise Error.new("component_instance() should only be called with @component_idhs.size == 1")
           end
-          @component_idhs.first.create_object()
+          Component::Instance.create_from_component(@component_idhs.first.create_object())
         end
 
         def set_parent_and_attribute_idhs!(parent_idh,opts={})

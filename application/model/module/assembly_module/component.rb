@@ -30,25 +30,10 @@ module DTK; class AssemblyModule
       unless parsed_adhoc_links.size == 1
         raise Error.new("Only implented update_from_adhoc_links  size == 1")
       end
-      update_from_adhoc_link(assembly,parsed_adhoc_links.first)
+      AdHocLink.new(assembly,parsed_adhoc_links.first).update_assembly_module()
     end
-
 
    private
-
-    def self.update_from_adhoc_link(assembly,parsed_adhoc_link)
-      #determine which is the dependent component and which is the antec one 
-      source_attr_pattern = parsed_adhoc_link.attribute_pattern(:source)
-      target_attr_pattern = parsed_adhoc_link.attribute_pattern(:target)
-      unless target_cmp = target_attr_pattern.component()
-        raise Error.new("Unexpected that target_attr_pattern.component() is nil")
-      end
-      #source_cmp can be nill when link to a node attribute
-      source_cmp = source_attr_pattern.component()
-      pp [:debug,source_attr_pattern,target_attr_pattern,target_cmp,source_cmp]
-      #check whether [target_cmp,source_cmp].compact has a dependency defined already and if so use that
-    end
-
     def self.create_assembly_branch?(assembly,component_module)
       module_version = ModuleVersion.ret(assembly)
       unless component_module.get_workspace_module_branch(module_version)

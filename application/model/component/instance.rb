@@ -1,6 +1,5 @@
 module DTK; class Component
   class Instance < self
-
     def self.get_objs(mh,sp_hash,opts={})
       #TODO: might want to change to :model_name == component_instance
       if mh[:model_name] == :component
@@ -73,6 +72,13 @@ module DTK; class Component
         end
       end
       ret
+    end
+
+    def get_component_template_parent()
+      unless row = get_obj(:cols => [:instance_component_template_parent])
+        raise Error.new("Unexpected that get_component_template_parent() called and nil result")
+      end
+      Component::Template.create_from_component(row[:component_template])
     end
 
     def self.get_ndx_intra_node_rels(cmp_idhs)

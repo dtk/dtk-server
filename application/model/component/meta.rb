@@ -235,6 +235,16 @@ module XYZ
            :cols => [:id,:group_id,:display_name,:dsl_parsed]
          }
         ]
+        virtual_column :instance_component_template_parent, :type => :json, :hidden => true, 
+        :remote_dependencies => 
+        [
+         {
+           :model_name => :component,
+           :alias => :component_template,
+           :join_type => :inner,
+           :join_cond=>{:id => q(:component,:ancestor_id)},
+           :cols => [:id,:group_id,:display_name,:component_type]
+         }]
 
         virtual_column :dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
@@ -248,7 +258,7 @@ module XYZ
            :cols => [:id,:search_pattern,:type,:description,:severity]
          }
         ]
-        #above is direct dependencies; below is inheited ones
+        #above is direct dependencies; below is inherited ones
         virtual_column :inherited_dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [

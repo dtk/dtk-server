@@ -17,8 +17,8 @@ module DTK; class Attribute
       FilterFragmentRegexp = Regexp.new("[a-z]\\#{LDelim}([^\\#{RDelim}]+)\\#{RDelim}")
     end
 
-    def self.get_attribute_idhs(base_object_idh,attr_term)
-      create(attr_term,base_object_idh.create_object()).ret_or_create_attributes(base_object_idh)
+    def self.create_attr_pattern(base_object_idh,attr_term)
+      create(attr_term,base_object_idh.create_object()).set_parent_and_attribute_idhs!(base_object_idh)
     end
 
     def self.set_attributes(base_object,av_pairs,opts={})

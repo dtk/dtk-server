@@ -4,6 +4,8 @@ module DTK; class Attribute
       def initialize(pattern)
         @pattern = pattern
       end
+      attr_reader :attribute_idhs
+
      private
       attr_reader :pattern, :id
 
@@ -20,8 +22,9 @@ module DTK; class Attribute
           end
         end
 
-        def ret_or_create_attributes(parent_idh,opts={})
-          [parent_idh.createIDH(:model_name => :attribute, :id => id())]
+        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+          @attribute_idhs = [parent_idh.createIDH(:model_name => :attribute, :id => id())]
+          self
         end
        private
         def raise_error_if_not_node_attr_id(attr_id,node)
@@ -37,14 +40,15 @@ module DTK; class Attribute
       end
 
       class NodeLevel < self
-        def ret_or_create_attributes(parent_idh,opts={})
-          ret = Array.new
-          node_idhs = ret_matching_node_idhs(parent_idh)
+        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+          ret = self
+          @node_idhs = ret_matching_node_idhs(parent_idh)
           return ret if node_idhs.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
           attr_fragment = attr_name_special_processing($1)
-          ret_matching_attribute_idhs(:node,node_idhs,attr_fragment)
+          @attribute_idhs = ret_matching_attribute_idhs(:node,node_idhs,attr_fragment)
+          ret
         end
        private
         def attr_name_special_processing(attr_fragment)
@@ -58,19 +62,20 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def ret_or_create_attributes(parent_idh,opts={})
-          ret = Array.new
-          node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if node_idhs.empty?
+        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+          ret = self
+          @node_idhs = ret_matching_node_idhs(parent_idh)
+          return ret if @node_idhs.empty?
 
           pattern  =~ /^node[^\/]*\/(component.+$)/
           cmp_fragment = $1
-          cmp_idhs = ret_matching_component_idhs(node_idhs,cmp_fragment)
-          return ret if cmp_idhs.empty?
+          @component_idhs = ret_matching_component_idhs(@node_idhs,cmp_fragment)
+          return ret if @component_idhs.empty?
           
           cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
           attr_fragment = $1
-          ret_matching_attribute_idhs(:component,cmp_idhs,attr_fragment)
+          @attribute_idhs = ret_matching_attribute_idhs(:component,@component_idhs,attr_fragment)
+          ret
         end
       end
 

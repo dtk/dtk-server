@@ -8,7 +8,7 @@ module DTK; class Attribute; class Pattern
         unless attr_term
           raise ErrorParse.new(source_attr_term)
         end
-        attr_pattern = create_attr_pattern(base_object_idh,attr_term)
+        attr_pattern = super(base_object_idh,attr_term)
         attr_idhs = attr_pattern.attribute_idhs
         if attr_idhs.empty?
           raise ErrorUsage.new("The term (#{attr_term}) does not match an attribute")

@@ -17,17 +17,16 @@ module DTK; class Attribute
       FilterFragmentRegexp = Regexp.new("[a-z]\\#{LDelim}([^\\#{RDelim}]+)\\#{RDelim}")
     end
 
-    def self.create_attr_pattern(base_object_idh,attr_term)
-      create(attr_term,base_object_idh.create_object()).set_parent_and_attribute_idhs!(base_object_idh)
+    def self.create_attr_pattern(base_object_idh,attr_term,opts={})
+      create(attr_term,base_object_idh.create_object(),opts).set_parent_and_attribute_idhs!(base_object_idh,opts)
     end
 
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
-        pattern = create(av_pair[:pattern],base_object,opts)
-        #conditionally based on type ret_or_create_attributes may only ret and not create attributes
-        attr_idhs = pattern.ret_or_create_attributes(base_object.id_handle(),Aux.hash_subset(opts,[:create]))
+        pattern = create_attr_pattern(base_object.id_handle(),av_pair[:pattern],opts)
+        attr_idhs = pattern.attribute_idhs
         unless attr_idhs.empty?
           attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end

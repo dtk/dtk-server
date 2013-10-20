@@ -43,11 +43,11 @@ module DTK; class Attribute
         def set_parent_and_attribute_idhs!(parent_idh,opts={})
           ret = self
           @node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if node_idhs.empty?
+          return ret if @node_idhs.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
           attr_fragment = attr_name_special_processing($1)
-          @attribute_idhs = ret_matching_attribute_idhs(:node,node_idhs,attr_fragment)
+          @attribute_idhs = ret_matching_attribute_idhs(:node,@node_idhs,attr_fragment)
           ret
         end
        private

@@ -241,6 +241,7 @@ module XYZ
          {
            :model_name => :component,
            :alias => :component_template,
+           :convert => true,
            :join_type => :inner,
            :join_cond=>{:id => q(:component,:ancestor_id)},
            :cols => [:id,:group_id,:display_name,:component_type]

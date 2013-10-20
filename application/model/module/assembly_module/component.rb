@@ -26,6 +26,10 @@ module DTK; class AssemblyModule
       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
     end
 
+    def self.update_from_adhoc_links(assembly,parsed_adhoc_links)
+    end
+
+
    private
     def self.create_assembly_branch?(assembly,component_module)
       module_version = ModuleVersion.ret(assembly)

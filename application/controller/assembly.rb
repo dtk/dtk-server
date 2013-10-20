@@ -164,10 +164,10 @@ module DTK
       assembly = ret_assembly_instance_object()
       target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
       update_meta = ret_request_params(:update_meta)
-      parsed_adhoc_link = AttributeLink::AdHoc.create_ad_hoc_links(assembly,target_attr_term,source_attr_term)
-pp [:debug,parsed_adhoc_link]
+      parsed_adhoc_links = AttributeLink::AdHoc.create_adhoc_links(assembly,target_attr_term,source_attr_term)
+pp [:parsed_adhoc_links,parsed_adhoc_links]
       if update_meta
-        Assembly::AssemblyModule::Component.update_from_ad_hoc_link(assembly,parsed_adhoc_link)
+        Assembly::AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links)
       end
       rest_ok_response 
     end

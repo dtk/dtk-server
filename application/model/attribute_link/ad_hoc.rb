@@ -14,23 +14,20 @@ module DTK
         parsed_adhoc_links
       end
 
-      def input_attribute()
-        get_attribute(self[:input_id])
+      # type should be :source or :target
+      def attribute_pattern(type)
+        @attr_pattern[type]
       end
-      def output_attribute()
-        get_attribute(self[:output_id])
-      end
+
      private
       def initialize(hash,assembly_idh,target_attr_pattern,source_attr_pattern)
         super()
         replace(hash)
         @assembly_idh = assembly_idh
-        @target_attr_pattern = target_attr_pattern
-        @source_attr_pattern = source_attr_pattern.attribute_pattern
-pp [self,@target_attr_pattern,@source_attr_pattern]
-      end
-
-      def get_attribute(attribute_id)
+        @attr_pattern = {
+          :target => target_attr_pattern,
+          :source => source_attr_pattern.attribute_pattern
+        }
       end
 
       def self.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)
@@ -56,28 +53,6 @@ pp [self,@target_attr_pattern,@source_attr_pattern]
           new(hash,assembly_idh,target_attr_pattern,source_attr_pattern)
         end
       end
-=begin
-      def self.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)
-        target_attr_idhs = Attribute::Pattern::Assembly.get_attribute_idhs(assembly_idh,target_attr_term)
-        if target_attr_idhs.empty?
-          raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
-        end
-        source_attr_idh,fn = Attribute::Pattern::Assembly::Source.get_attribute_idh_and_fn(assembly_idh,source_attr_term)
-        
-        #TODO: need to do more chaecking and processing to include:
-        #  if has a relation set already and scalar conditionally reject or replace
-        # if has relation set already and array, ...
-        attr_info = {
-          :assembly_id =>  assembly_idh.get_id(),
-          :output_id => source_attr_idh.get_id()
-        }
-        attr_info.merge!(:function => fn) if fn
-        
-        target_attr_idhs.map do |target_attr_idh|
-          new(assembly_idh,attr_info.merge(:input_id => target_attr_idh.get_id()))
-        end
-      end
-=end
     end
   end
 end

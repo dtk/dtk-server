@@ -50,6 +50,11 @@ module DTK; class Attribute
           @attribute_idhs = ret_matching_attribute_idhs(:node,@node_idhs,attr_fragment)
           ret
         end
+
+        def component()
+          nil
+        end
+
        private
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
@@ -62,6 +67,16 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
+        def component()
+         unless @component_idhs
+           raise Error.new("@component_idhs is not set")
+         end
+          unless @component_idhs.size == 1
+            raise Error.new("component() should only be called with @component_idhs.size == 1")
+          end
+          @component_idhs.first.create_object()
+        end
+
         def set_parent_and_attribute_idhs!(parent_idh,opts={})
           ret = self
           @node_idhs = ret_matching_node_idhs(parent_idh)

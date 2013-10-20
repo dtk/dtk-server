@@ -5,7 +5,6 @@ module DTK; class Dependency
       @link_def = link_def
     end
 
-
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
       #TODO: stub
       if link_def_link = matching_link_def_link?(cmp_template,antec_cmp_template)

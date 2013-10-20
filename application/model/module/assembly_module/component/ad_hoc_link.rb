@@ -12,7 +12,8 @@ module DTK; class AssemblyModule
       #determine which is the dependent component and which is the antec one 
         dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components()
         pp [:debug,dep_cmp_template,antec_cmp_template]
-        #Dependency.create_dependency?(:link,assembly,cmp_template,antecedent_cmp_template,opts)
+        opts = Hash.new #TODO: stub, put in the attribute mapping info
+        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts)
       end
      private
       def determine_dep_and_antec_components()

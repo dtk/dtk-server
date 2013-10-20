@@ -22,10 +22,6 @@ module DTK; class AssemblyModule
         Model.get_obj(cmp_template.model_handle(),sp_hash)
       end
 
-      def self.create(assembly,branch_cmp_template,antecedent_cmp_template,opts={})
-        klass(assembly,branch_cmp_template,antecedent_cmp_template,opts).new(assembly,branch_cmp_template,antecedent_cmp_template)
-      end
-
       def self.dependency_class(type)
         case type 
           when :simple then DTK::Dependency::Simple 

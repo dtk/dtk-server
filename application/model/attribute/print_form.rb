@@ -33,7 +33,9 @@ module DTK
 
       def print_form()
         attr_name = attr_name_special_processing() || attr_name_default()
+
         attr_info = {
+          :name => attr_name,
           :display_name => "#{@display_name_prefix}#{attr_name}",
           :datatype => datatype_print_form(),
           :description => @aug_attr[:description]||@aug_attr[:display_name]

@@ -414,7 +414,7 @@ module DTK; class  Assembly
       case about 
        when :attributes
         get_attributes_print_form_aux(opts).map do |a|
-          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to_display_form])
+          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to_display_form,:datatype,:name])
         end.sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :components

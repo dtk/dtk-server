@@ -39,7 +39,7 @@ module DTK; class Attribute
               attribute_idhs = assembly_idh.create_object().create_or_modify_field_def(field_def)
               attributes = attribute_idhs.map do |idh|
                 attr = idh.create_object()
-                attr.update_object!(:display_name,:attribute_value)
+                attr.update_object!(:display_name)
                 attr
               end
             end
@@ -51,7 +51,6 @@ module DTK; class Attribute
                 :attribute => attr
               }
             end
-            pp [:debug, self]
             self
           end
         end

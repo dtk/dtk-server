@@ -154,7 +154,7 @@ module DTK; class Attribute
           filter = [:and, filter, attr_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:attribute_value,TypeToIdField[type]],
+          :cols => [:id,:group_id,:display_name,TypeToIdField[type]],
           :filter => filter
         }
         sample_idh = idhs.first

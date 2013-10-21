@@ -202,6 +202,11 @@ lambda__instance_nodes_components_assembly_template =
          :cols => [:id,:display_name,:group_id,:hidden,:description,:component_component_id,:attribute_value,:semantic_type,:semantic_type_summary,:data_type,:required,:dynamic,:cannot_change]
        }]
     },
+    :instance_parent=> {
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>[segment_assembly_template]
+    },
     :instance_nodes_and_assembly_template=> {
       :type=>:json,
       :hidden=>true,

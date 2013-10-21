@@ -19,9 +19,6 @@ module DTK; class  Assembly
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_instance)
     end
-    def self.create_from_component(cmp)
-      cmp && create_from_id_handle(cmp.id_handle()).merge(cmp)
-    end
 
     ### standard get methods
     def get_task_templates(opts={})
@@ -31,6 +28,11 @@ module DTK; class  Assembly
       }
       Model.get_objs(model_handle(:task_template),sp_hash)
     end
+
+    def get_parent()
+      Template.create_from_component(get_obj_helper(:instance_parent,:assembly_template))
+    end
+
     def get_task_template(task_action=nil,opts={})
       task_action ||= Task::Template.default_task_action()
       sp_hash = {
@@ -40,6 +42,7 @@ module DTK; class  Assembly
       }
       Model.get_obj(model_handle(:task_template),sp_hash)
     end
+
     def get_parents_task_template(task_action=nil)
       task_action ||= Task::Template.default_task_action()
       get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
@@ -158,12 +161,24 @@ module DTK; class  Assembly
       components
     end
 
-    def get_tasks(opts=Opts.new)
-      ret = get_objs(:cols => [:tasks])
+    def get_tasks(opts={})
+      rows = get_objs(:cols => [:tasks])
       if opts[:filter_proc]
-        ret.reject!{|r|!opts[:filter_proc].call(r)}
+        rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-      ret
+      rows.map{|r|r[:task]}
+    end
+
+    def clear_tasks(opts={})
+      opts_get_tasks = Hash.new
+      unless opts[:include_executing_task]
+        opts_get_tasks[:filter_proc] = lambda do |r|
+          r[:task][:status] != 'executing'
+        end
+      end
+      task_idhs = get_tasks(opts_get_tasks).map{|r|r.id_handle()}
+      Model.delete_instances(task_idhs) unless task_idhs.empty?
+      task_idhs
     end
 
     def get_target()
@@ -424,9 +439,7 @@ module DTK; class  Assembly
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :tasks
-        get_tasks(opts).map do |r|
-          r[:task]
-        end.compact.sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
+        get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
@@ -552,8 +565,8 @@ module DTK; class  Assembly
       delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
-      delete_assembly_modules(assembly_idhs)
-      #delete_assembly_modules needs to be done before delete_assembly_nodes
+      delete_assembly_modules?(assembly_idhs)
+      #delete_assembly_modules? needs to be done before delete_assembly_nodes
       delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
@@ -568,10 +581,10 @@ module DTK; class  Assembly
         delete_instances(get_objs(task_template_mh,sp_hash).map{|tt|tt.id_handle()})
       end
 
-      def delete_assembly_modules(assembly_idhs)
+      def delete_assembly_modules?(assembly_idhs)
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
-          AssemblyModule.delete_assembly_modules(assembly)
+          AssemblyModule.delete_modules?(assembly)
         end
       end
 

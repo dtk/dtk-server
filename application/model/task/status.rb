@@ -187,7 +187,7 @@ module DTK
         else
           ret = {:message => String.new}
         end
-        # ??>>>>>>>> REMOVE <<<<<<<
+
         if error.is_a? String
           error,temp = {},error
           error[:message] = temp

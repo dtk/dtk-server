@@ -112,7 +112,8 @@ module DTK
             component_module = create_obj(:module_name,ComponentModule)
             AssemblyModule::Component.prepare_for_edit(assembly,component_module)
           when :service_module
-            AssemblyModule::Service.prepare_for_edit(assembly)
+          modification_type = ret_non_null_request_params(:modification_type).to_sym
+            AssemblyModule::Service.prepare_for_edit(assembly,modification_type)
           else
             raise ErrorUsage.new("Illegal module_type #{module_type}")
         end
@@ -276,9 +277,9 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
-      service_module = create_obj(:service_module_name,ServiceModule)
-      assembly_template_name = ret_non_null_request_params(:assembly_template_name)
-      Assembly::Template.create_or_update_from_instance(assembly,service_module,assembly_template_name)
+      assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
+      project = get_default_project()
+      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name)
       clone_update_info = service_module.ret_clone_update_info()
       rest_ok_response clone_update_info
     end
@@ -420,8 +421,13 @@ module DTK
     #   rest_ok_response :task_id => task.id
     # end
 
+    def rest__clear_tasks()
+      assembly = ret_assembly_instance_object()
+      assembly.clear_tasks()
+      rest_ok_response
+    end
 
-     def rest__start()
+    def rest__start()
       assembly     = ret_assembly_instance_object()
       assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
       node_pattern = ret_request_params(:node_pattern)

@@ -11,7 +11,8 @@ module DTK
         :module_name => module_name,
         :module_branch_idh => branch_obj.id_handle(),
         :repo_url => RepoManager.repo_url(repo_name),
-        :workspace_branch => branch_obj.get_field?(:branch)
+        :workspace_branch => branch_obj.get_field?(:branch),
+        :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
       }
       if version
         hash.merge!(:version => version)
@@ -45,10 +46,11 @@ module DTK
       get_module_branches().find{|mb|mb.matches_version?(version)}
     end
 
-    def get_workspace_branch_info(version=nil)
-      aug_branch = get_augmented_workspace_branch(:filter => {:version => version})
-      module_name = aug_branch[:module_name]
-      ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+    def get_workspace_branch_info(version=nil,opts={})
+      if aug_branch = get_augmented_workspace_branch({:filter => {:version => version}}.merge(opts))
+        module_name = aug_branch[:module_name]
+        ModuleRepoInfo.new(aug_branch[:repo],module_name,id_handle(),aug_branch,version)
+      end
     end
 
     def ret_clone_update_info(version=nil)
@@ -105,22 +107,28 @@ module DTK
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end
       repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      create_new_version__type_specific(repo_for_new_version,new_version,opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle()))
+      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle())
+      ret = create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
+      opts[:ret_module_branch] = opts_type_spec[:ret_module_branch] if  opts_type_spec[:ret_module_branch]
+      ret
     end
 
-    def update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_triger)
-      opts = {}
+    def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
       module_branch = get_workspace_module_branch(version)
-      
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-
       parse_needed = !dsl_parsed?()
       return unless pull_was_needed or parse_needed
-      opts = {:do_not_raise => true} if internal_triger=='true'
-      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts)
+
+      opts_update = Hash.new
+      opts_update.merge!(:do_not_raise => true) if opts[:internal_trigger]
+      opts_update.merge!(:modification_type => opts[:modification_type]) if opts[:modification_type] 
+      response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
       
-      return :dsl_parsed_info => response if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
-      return response
+      if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(ErrorUsage::DanglingComponentRefs))
+        {:dsl_parsed_info => response}
+      else
+        response
+      end
     end
 
     def get_project()
@@ -354,6 +362,7 @@ module DTK
       }
       mh = project_idh.createMH(model_type())
       unsorted_ret = get_objs(mh,sp_hash)
+      filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
         unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions, :remote_rep => remote_rep, :diff => diff))
@@ -490,13 +499,15 @@ module DTK
     end
 
     #returns hash with keys :module_idh :module_branch_idh
-    def initialize_module(project,module_name,config_agent_type,version=nil)
+    def create_module(project,module_name,config_agent_type,version=nil,opts={})
       is_parsed   = false
       project_idh = project.id_handle()
       module_exists = module_exists?(project_idh,module_name)
-      
-      is_parsed = module_exists[:dsl_parsed] if module_exists
-      if is_parsed
+      if module_exists
+        is_parsed = module_exists[:dsl_parsed] 
+      end
+
+      if is_parsed and not opts[:no_error_if_exists]
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
       ws_branch = ModuleBranch.workspace_branch_name(project,version)
@@ -506,7 +517,6 @@ module DTK
         :donot_create_master_branch => true,
         :delete_if_exists => true
       }
-      
       repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info,version))
@@ -536,13 +546,15 @@ module DTK
       Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
 
-    def get_workspace_module_branch(project,module_name,version=nil)
+    def get_workspace_module_branch(project,module_name,version=nil,opts={})
       project_idh = project.id_handle()
       filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]
       branch = ModuleBranch.workspace_branch_name(project,version)
       post_filter = proc{|mb|mb[:branch] == branch}
-      matches = get_matching_module_branches(project_idh,filter,post_filter)
-      if matches.size == 1
+      matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
+      if matches.size == 0
+        nil
+      elsif matches.size == 1
         matches.first
       elsif matches.size > 2
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
@@ -561,7 +573,7 @@ module DTK
       end
     end
 
-    def get_matching_module_branches(mh_or_idh,filter,post_filter=nil)
+    def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
       sp_hash = {
         :cols => [:id,:display_name,:group_id,:module_branches],
         :filter => filter
@@ -570,6 +582,7 @@ module DTK
         r[:module_branch].merge(:module_id => r[:id])
       end
       if rows.empty?
+        return Array.new if opts[:no_error_if_does_not_exist]
         raise ErrorUsage.new("Module does not exist")
       end
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
@@ -624,15 +637,6 @@ module DTK
       {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
 
-   private
-    def get_all_repos(mh)
-      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
-        repo = r[:repo]
-        h[repo[:id]] ||= repo
-        h
-      end.values
-    end
-
     def module_exists?(project_idh,module_name)
       unless project_idh[:model_name] == :project
         raise Error.new("MOD_RESTRUCT:  module_exists? should take a project, not a (#{project_idh[:model_name]})")
@@ -642,7 +646,16 @@ module DTK
         :filter => [:and, [:eq, :project_project_id, project_idh.get_id()],
                     [:eq, :display_name, module_name]]
       }
-      module_branches = get_obj(project_idh.createMH(model_name()),sp_hash)
+      get_obj(project_idh.createMH(model_name()),sp_hash)
+    end
+
+   private
+    def get_all_repos(mh)
+      get_objs(mh,{:cols => [:repos]}).inject(Hash.new) do |h,r|
+        repo = r[:repo]
+        h[repo[:id]] ||= repo
+        h
+      end.values
     end
 
   end

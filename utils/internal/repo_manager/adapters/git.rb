@@ -66,6 +66,16 @@ module DTK
       @ssh_rsa_fingerprint ||= `ssh-keyscan -H -t rsa #{repo_server_dns()}`
     end
 
+    #
+    # Returns boolean indicating if remote git url exists
+    #
+    def self.git_remote_exists?(remote_url)
+      git_object = Grit::Git.new('')
+      
+      !git_object.native('ls-remote',{},remote_url).empty?
+    end
+
+
     def self.repo_url(repo_name=nil)
       @git_url ||= "#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}"
       if repo_name
@@ -129,6 +139,7 @@ module DTK
     end
 
     def add_file(file_asset,content,commit_msg=nil)
+      ret = false
       content ||= String.new
       checkout(@branch) do
         path = file_asset[:path]
@@ -137,8 +148,13 @@ module DTK
         #TODO: commiting because it looks like file change visible in otehr branches until commit
         commit_msg ||= "Adding #{path} in #{@branch}"
         git_command__add(path)
-        commit(commit_msg)
+        # diff(nil) looks at diffs rt to the working dir
+        unless diff(nil).ret_summary().no_diffs?()
+          commit(commit_msg)
+          ret = true
+        end
       end
+      ret
     end
 
     def delete_file?(file_path,opts={})
@@ -493,15 +509,21 @@ module DTK
       @grit_repo.head.name
     end
 
+    MutexesForRepos = Hash.new
     def checkout(branch_name,&block)
       ret = nil
-      Dir.chdir(@path) do 
-        current_head = current_branch()
-        git_command__checkout(branch_name) unless current_head == branch_name
-        return ret unless block
-        ret = yield
-        unless current_head == branch_name
-          git_command__checkout(current_head)
+      #TODO: add garbage collection of these mutexs
+      mutex = MutexesForRepos[@path] ||= Mutex.new
+      ret = nil
+      mutex.synchronize do
+        Dir.chdir(@path) do 
+          current_head = current_branch()
+          git_command__checkout(branch_name) unless current_head == branch_name
+          return ret unless block
+          ret = yield
+          unless current_head == branch_name
+            git_command__checkout(current_head)
+          end
         end
       end
       ret

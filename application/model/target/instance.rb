@@ -4,7 +4,7 @@ module DTK
 
       def self.list(target_mh,opts={})
         sp_hash = {
-          :cols => common_columns(),
+          :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider],
           :filter => [:neq,:type,'template']
         }
         return get_objs(target_mh, sp_hash.merge(opts))

@@ -55,6 +55,11 @@ module DTK
       :service_module
     end
 
+    def self.filter_list!(rows)
+      rows.reject!{|r|Workspace.is_workspace_service_module?(r)}
+      rows
+    end
+
     def delete_object()
       assembly_templates = get_assembly_templates()
 
@@ -74,22 +79,32 @@ module DTK
       {:module_name => module_name}
     end
 
-    def delete_version(version)
-      module_branch  = get_module_branch_matching_version(version)
-      raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") unless module_branch
-
-      assembly_templates = module_branch.get_assemblies()
-      assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
-      unless assoc_assemblies.empty?
-        assembly_names = assoc_assemblies.map{|a|a[:display_name]}
-        raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
+    def delete_version?(version,opts={})
+      delete_version(version,opts.merge(:no_error_if_does_not_exist=>true))
+    end
+    def delete_version(version,opts={})
+      ret = {:module_name => module_name()}
+      unless module_branch  = get_module_branch_matching_version(version)
+        if opts[:no_error_if_does_not_exist]
+          return ret
+        else
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+        end
       end
 
-      Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
+      unless opts[:donot_delete_meta]
+        assembly_templates = module_branch.get_assemblies()
+        assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
+        unless assoc_assemblies.empty?
+          assembly_names = assoc_assemblies.map{|a|a[:display_name]}
+          raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
+        end
+        Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
+      end
 
       id_handle = module_branch.id_handle()
       module_branch.delete_instance(id_handle)
-      {:module_name => module_name}
+      ret
     end
 
     def get_assembly_templates()
@@ -270,14 +285,26 @@ module DTK
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo_idh,module_name(),new_version)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo_for_new_branch) #repo added to avoid lookup in update_model_from_dsl
-      update_model_from_dsl(module_branch,opts)
+      if opts[:ret_module_branch]
+         opts[:ret_module_branch] = module_branch
+      end
+      is_parsed = true
+      unless opts[:donot_update_model_from_dsl]
+        is_parsed = update_model_from_dsl(module_branch,opts) 
+      end
+      is_parsed
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       #TODO: for more efficiency can push in diffs_summary to below
       # opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
-      opts[:donot_make_repo_changes] = true
-      update_model_from_dsl(module_branch,opts)
+      if version.kind_of?(ModuleVersion::AssemblyModule)
+        assembly = version.get_assembly(model_handle(:component))
+        AssemblyModule::Service.finalize_edit(assembly,opts[:modification_type],self,module_branch,diffs_summary)
+      else
+        opts[:donot_make_repo_changes] = true
+        update_model_from_dsl(module_branch,opts)
+      end
     end
 
     def export_preprocess(module_branch, module_obj)

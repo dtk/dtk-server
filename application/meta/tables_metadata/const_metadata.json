@@ -60,6 +60,11 @@
       "description",
       "type",
       "iaas_type"
+   ],   
+   "provider":[
+      "display_name",
+      "id",
+      "iaas_type"
    ],
    "assembly":[
       "display_name",

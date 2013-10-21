@@ -28,8 +28,13 @@ module DTK; class ServiceModule
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
-            
-            @db_updates_assemblies["node"].merge!(imported_nodes)
+
+            if workflow_hash = assem["workflow"]
+              if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
+                return parse_errors
+              end
+            end
+            @db_updates_assemblies["node"].merge!(imported_nodes) 
             @ndx_assembly_hashes[ref] ||= assem
             @ndx_version_proc_classes[ref] ||= version_proc_class
           end
@@ -86,40 +91,38 @@ module DTK; class ServiceModule
       version_field = module_branch.get_field?(:version)
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
 
-      if assembly_hash["nodes"]
-        ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
-          dangling_errors.aggregate_errors!(h) do
-            node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
-            node_output = {
-              "display_name" => node_hash_ref, 
-              "type" => "stub",
-              "*assembly_id" => "/component/#{assembly_ref_with_version}" 
-            }
-            if nb_rs = node_to_nb_rs[node_hash_ref]
-              if nb_rs_id = nb_rs_to_id[nb_rs]
-                node_output["node_binding_rs_id"] = nb_rs_id
-              else
-                #TODO: extend dangling_errors.aggregate_errors to handle this
-                # We want to import module still even if there are bad node references
-                # we stop importing nodes when run into bad node reference but still continue with module import
-                
-                return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
-              end
+      unless assembly_hash["nodes"]
+        return Hash.new
+      end
+      ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
+        dangling_errors.aggregate_errors!(h) do
+          node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
+          node_output = {
+            "display_name" => node_hash_ref, 
+            "type" => "stub",
+            "*assembly_id" => "/component/#{assembly_ref_with_version}" 
+          }
+          if nb_rs = node_to_nb_rs[node_hash_ref]
+            if nb_rs_id = nb_rs_to_id[nb_rs]
+              node_output["node_binding_rs_id"] = nb_rs_id
             else
-              node_output["node_binding_rs_id"] = nil
+              #TODO: extend dangling_errors.aggregate_errors to handle this
+              # We want to import module still even if there are bad node references
+              # we stop importing nodes when run into bad node reference but still continue with module import
+              
+              return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
             end
-            cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
-            return cmps_output if cmps_output.is_a?(ErrorUsage::DSLParsing)
-
+          else
+            node_output["node_binding_rs_id"] = nil
+          end
+          cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
+          return cmps_output if cmps_output.is_a?(ErrorUsage::DSLParsing)
+          
             unless cmps_output.empty?
               node_output["component_ref"] = cmps_output
             end
-            h.merge(node_ref => node_output)
-          end
+          h.merge(node_ref => node_output)
         end
-      else
-        # if nodes section missing from assembly.json file return error but still import service 
-        return ErrorUsage::DSLParsing::BadNodeReference.new("Missing nodes section or you misspelled 'nodes' part in",opts[:file_path])
       end
 
       dangling_errors.raise_error?()
@@ -147,7 +150,7 @@ module DTK; class ServiceModule
       elsif hash_content["assembly"]
         2
       else
-        raise Error.new("Cannot determine assembly dsl version")
+        R8::Config[:dsl][:service][:integer_version][:default]
       end
     end
 

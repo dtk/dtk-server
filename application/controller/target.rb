@@ -7,10 +7,15 @@ module XYZ
 
     def rest__list()
 
-      subtype = ret_target_subtype()
+      subtype   = ret_target_subtype()
+      parent_id = ret_request_params(:parent_id)
 
       if subtype.eql? :instance
-        response = Target::Instance.list(model_handle())
+        if parent_id
+          response = Target::Instance.list(model_handle(), { :filter => [:eq, :parent_id, parent_id]})
+        else
+          response = Target::Instance.list(model_handle())
+        end
       else
         response = Target::Template.list(model_handle())
       end
@@ -47,6 +52,7 @@ module XYZ
 
       project_idh  = get_default_project().id_handle()
 
+
       unless template_id
         # check iaas type
         raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") unless supported_types.include?(params_hash[:iaas_type].downcase)
@@ -57,8 +63,7 @@ module XYZ
         # create target template
         target_idh = Target::Template.create_from_user_input(project_idh, display_name, params_hash, true)
         # get object since we will need iaas data to copy
-        target_template =  Model.get_objs(target_idh, { :cols => [:id, :description, :iaas_type, :iaas_properties]}).first
-        template_id = target_template[:id]
+        template_id = target_idh.get_id()
       else
         target_template = Target::Template.get(model_handle(),template_id)
          # we extract needed values

@@ -97,6 +97,7 @@ module DTK; class Task; class Template
           ret.merge(Field::TemporalOrder => Constant::Concurrent, Field::Subtasks => subtasks)
         end
       end
+      #action_list nil can be passed if just concerned with parsing
       def self.parse_and_reify(serialized_content,action_list)
         #content could be either 
         # 1) a concurrent block with multiple nodes, 
@@ -112,8 +113,11 @@ module DTK; class Task; class Template
           unless node_name = serialized_node_actions[:node]
             raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
           end
-          unless node_id = action_list.find_matching_node_id(node_name)
-            raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
+          node_id = 0 #dummy value when just used for parsing
+          if action_list
+            unless node_id = action_list.find_matching_node_id(node_name)
+              raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
+            end
           end
           h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))
         end

@@ -15,7 +15,7 @@ module DTK
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
       version = nil
-      module_repo_info = ComponentModule.initialize_module(project,module_name,config_agent_type,version)[:module_repo_info]
+      module_repo_info = ComponentModule.create_module(project,module_name,config_agent_type,version)[:module_repo_info]
       rest_ok_response module_repo_info
     end
 
@@ -31,14 +31,16 @@ module DTK
     end
 
     def rest__update_model_from_clone()
-      opts = {}
       component_module = create_obj(:component_module_id)
       internal_trigger = ret_request_params(:internal_trigger)
       commit_sha = ret_non_null_request_params(:commit_sha)
       version = ret_version()
       diffs_summary = ret_diffs_summary()
-
-      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,internal_trigger)
+      opts =  Hash.new
+      if ret_request_param_boolean(:internal_trigger)
+        opts.merge!(:internal_trigger => true )
+      end
+      dsl_created_info = component_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
       rest_ok_response dsl_created_info
     end
 

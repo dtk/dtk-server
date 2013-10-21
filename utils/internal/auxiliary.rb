@@ -146,7 +146,7 @@ module XYZ
           when :yaml
             YamlHelper.simple_form(hash_content)
           else
-            raise Error.new("Format (#{format_format}) is not treated")
+            raise Error.new("Format (#{format_type}) is not treated")
         end
       end
 
@@ -183,7 +183,15 @@ module XYZ
         end
       end
 
-      def convert_to_hash(content,format_type,opts)
+      def format_type(file_path)
+        if file_path =~ /\.(json|yaml)$/
+          $1.to_sym
+        else
+          raise Error.new("Unexpected meta file path name (#{path})")
+        end
+      end
+
+      def convert_to_hash(content,format_type,opts={})
         case format_type
           when :json
             json_parse(content,opts)

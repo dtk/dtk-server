@@ -1,6 +1,6 @@
 module DTK; class Repo
   class Diffs < Array
-    class Summary < ::DTK::SimpleHashObject
+    class Summary < SimpleHashObject
       def initialize(diffs_hash=nil)
         super()
         (diffs_hash||{}).each do |t,v|
@@ -22,6 +22,10 @@ module DTK; class Repo
       def meta_file_changed?()
         (self[:files_modified] and !!self[:files_modified].find{|r|ComponentDSL.isa_dsl_filename?(path(r))}) or
         (self[:files_added] and !!self[:files_added].find{|r|ComponentDSL.isa_dsl_filename?(path(r))})
+      end
+
+      def file_changed?(path)
+        self[:files_modified] and !!self[:files_modified].find{|r|path(r) == path}
       end
 
       #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 

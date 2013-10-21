@@ -1,24 +1,11 @@
 require 'fileutils'
-require 'grit'
 
-Grit.debug = R8::Config[:debug][:grit]
-
-module XYZ
+module DTK
   class RepoManager 
     class << self
       #admin and repo methods that just pass to lower level object or class
       RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?,:branch_head_sha]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_server_ssh_rsa_fingerprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user,:get_keydir]
-
-
-      #
-      # Returns boolean indicating if remote git url exists
-      #
-      def git_remote_exists?(remote_url)
-        git_object = Grit::Git.new('')
-
-        !git_object.native('ls-remote',{},remote_url).empty?
-      end
 
       def method_missing(name,*args,&block)
         if RepoMethods.include?(name)
@@ -74,8 +61,8 @@ module XYZ
           pp "deleting branch (#{branch}) in repo (#{repo_name})"
           context = {
             :implementation => {
-            :repo => repo_name,
-            :branch => branch
+              :repo => repo_name,
+              :branch => branch
             }
           }
           get_adapter_repo(context).delete_branch()
@@ -118,8 +105,9 @@ module XYZ
         repo_name
       end
 
-      def repo_exists?(repo_name,branch)
-        adapter_repo = get_adapter_repo(context(repo_name,branch))
+      def git_remote_exists?(remote_url)
+        klass = load_and_return_adapter_class()
+        klass.git_remote_exists?(remote_url)
       end
 
       def link_to_remote_repo(repo_name,branch,remote_name,remote_url)

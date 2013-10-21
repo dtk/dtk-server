@@ -36,6 +36,11 @@ module DTK
         "#{assembly_meta_directory_path(assembly_name)}/assembly.#{file_type}"
       end
 
+      def assembly_workflow_meta_filename_path(assembly_name,task_action)
+        file_type = dsl_files_format_type()
+        "#{assembly_meta_directory_path(assembly_name)}/workflows/#{task_action}.#{file_type}"
+      end
+
       def dsl_files_format_type()
         format_type_default = R8::Config[:dsl][:service][:format_type][:default]
         case format_type_default
@@ -152,11 +157,7 @@ module DTK
       end
 
       def meta_file_format_type(path)
-        if path =~ /\.(json|yaml)$/
-          $1.to_sym
-        else
-          raise Error.new("Unexpected meta file path name (#{path})")
-        end
+        Aux.format_type(path)
       end
 
       def assembly_dsl_filename_path_info()

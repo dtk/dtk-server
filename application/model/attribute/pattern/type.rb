@@ -43,21 +43,21 @@ module DTK; class Attribute
 
       class NodeLevel < self
         def attribute_idhs()
-          @attributes.map{|r|r.id_handle()}
+          @attribute_stacks.map{|r|r[:attribute].id_handle()}
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})
           ret = self
-          @attributes = Array.new
-          ndx_nodes = ret_matching_nodes(parent_idh)
-          return ret if ndx_node.empty?
+          @attribute_stacks = Array.new
+          ndx_nodes = ret_matching_nodes(parent_idh).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+          return ret if ndx_nodes.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
           attr_fragment = attr_name_special_processing($1)
-          @attributes = ret_matching_attributes(:node,ndx_node.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+          @attribute_stacks = ret_matching_attributes(:node,ndx_nodes.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
             {
               :attribute => attr,
-              :node => ndx_node[attr[:node_node_id]
+              :node => ndx_nodes[attr[:node_node_id]]
             }
           end
           ret
@@ -80,7 +80,7 @@ module DTK; class Attribute
 
       class ComponentLevel < self
         def attribute_idhs()
-          @attributes.map{|r|r.id_handle()}
+          @attribute_stacks.map{|r|r[:attribute].id_handle()}
         end
 
         def component_instance()
@@ -89,23 +89,23 @@ module DTK; class Attribute
 
         def set_parent_and_attributes!(parent_idh,opts={})
           ret = self
-          @attributes = Array.new
-          ndx_nodes  = ret_matching_nodes(parent_idh).map{|r|r[:id] => r}
+          @attribute_stacks = Array.new
+          ndx_nodes  = ret_matching_nodes(parent_idh).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
           return ret if ndx_nodes.empty?
 
           pattern  =~ /^node[^\/]*\/(component.+$)/
           cmp_fragment = $1
-          ndx_cmps = ret_matching_components(ndx_nodes.values,cmp_fragment)map{|r|r[:id] => r}
+          ndx_cmps = ret_matching_components(ndx_nodes.values,cmp_fragment).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
           return ret if ndx_cmps.empty?
           
           cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
           attr_fragment = $1
-          @attributes = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+          @attribute_stacks = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
             cmp = ndx_cmps[attr[:component_component_id]]
             {
               :attribute => attr,
               :component => cmp,
-              :node => ndx_nodes[:node_node_id]
+              :node => ndx_nodes[cmp[:node_node_id]]
             }
           end 
           ret
@@ -113,9 +113,10 @@ module DTK; class Attribute
       end
 
       def attribute_stack()
-        unless @attributes.size == 1
-          raise Error.new("attribute_stack() should only be called when @attributes.size == 1")
+        unless @attribute_stacks.size == 1
+          raise Error.new("attribute_stack() should only be called when @attribute_stacks.size == 1")
         end
+        @attribute_stacks.first
       end
           
       #parent will be node_idh or assembly_idh
@@ -134,17 +135,17 @@ module DTK; class Attribute
         Model.get_objs(parent_idh.createMH(:node),sp_hash)
       end
 
-      def matching_components(nodes,cmp_fragment)
-        filter = [:oneof, :node_node_id, nodes.map{|r|r.id()}
+      def ret_matching_components(nodes,cmp_fragment)
+        filter = [:oneof, :node_node_id, nodes.map{|r|r.id()}]
         if cmp_filter = ret_filter(cmp_fragment,:component)
           filter = [:and, filter, cmp_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id]
+          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id],
           :filter => filter
         }
-        sample_idh = node_idhs.first
-        Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|Component::Instance.create_from_component(r)}
+        cmp_mh = nodes.first.model_handle(:component)
+        Model.get_objs(cmp_mh,sp_hash).map{|r|Component::Instance.create_from_component(r)}
       end
 
       def ret_matching_attributes(type,idhs,attr_fragment)

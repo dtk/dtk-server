@@ -4,7 +4,6 @@ module DTK; class Attribute
       def initialize(pattern)
         @pattern = pattern
       end
-      attr_reader :attribute_idhs
 
      private
       attr_reader :pattern, :id
@@ -22,10 +21,13 @@ module DTK; class Attribute
           end
         end
 
-        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+        attr_reader :attribute_idhs
+
+        def set_parent_and_attributes!(parent_idh,opts={})
           @attribute_idhs = [parent_idh.createIDH(:model_name => :attribute, :id => id())]
           self
         end
+
        private
         def raise_error_if_not_node_attr_id(attr_id,node)
           unless node.get_node_and_component_attributes().find{|r|r[:id] == attr_id}
@@ -40,14 +42,24 @@ module DTK; class Attribute
       end
 
       class NodeLevel < self
-        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+        def attribute_idhs()
+          @attributes.map{|r|r.id_handle()}
+        end
+
+        def set_parent_and_attributes!(parent_idh,opts={})
           ret = self
-          @node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if @node_idhs.empty?
+          @attributes = Array.new
+          ndx_nodes = ret_matching_nodes(parent_idh)
+          return ret if ndx_node.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
           attr_fragment = attr_name_special_processing($1)
-          @attribute_idhs = ret_matching_attribute_idhs(:node,@node_idhs,attr_fragment)
+          @attributes = ret_matching_attributes(:node,ndx_node.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+            {
+              :attribute => attr,
+              :node => ndx_node[attr[:node_node_id]
+            }
+          end
           ret
         end
 
@@ -67,35 +79,47 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def component_instance()
-         unless @component_idhs
-           raise Error.new("@component_idhs is not set")
-         end
-          unless @component_idhs.size == 1
-            raise Error.new("component_instance() should only be called with @component_idhs.size == 1")
-          end
-          Component::Instance.create_from_component(@component_idhs.first.create_object())
+        def attribute_idhs()
+          @attributes.map{|r|r.id_handle()}
         end
 
-        def set_parent_and_attribute_idhs!(parent_idh,opts={})
+        def component_instance()
+          attribute_stack()[:component]
+        end
+
+        def set_parent_and_attributes!(parent_idh,opts={})
           ret = self
-          @node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if @node_idhs.empty?
+          @attributes = Array.new
+          ndx_nodes  = ret_matching_nodes(parent_idh).map{|r|r[:id] => r}
+          return ret if ndx_nodes.empty?
 
           pattern  =~ /^node[^\/]*\/(component.+$)/
           cmp_fragment = $1
-          @component_idhs = ret_matching_component_idhs(@node_idhs,cmp_fragment)
-          return ret if @component_idhs.empty?
+          ndx_cmps = ret_matching_components(ndx_nodes.values,cmp_fragment)map{|r|r[:id] => r}
+          return ret if ndx_cmps.empty?
           
           cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
           attr_fragment = $1
-          @attribute_idhs = ret_matching_attribute_idhs(:component,@component_idhs,attr_fragment)
+          @attributes = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+            cmp = ndx_cmps[attr[:component_component_id]]
+            {
+              :attribute => attr,
+              :component => cmp,
+              :node => ndx_nodes[:node_node_id]
+            }
+          end 
           ret
         end
       end
 
+      def attribute_stack()
+        unless @attributes.size == 1
+          raise Error.new("attribute_stack() should only be called when @attributes.size == 1")
+        end
+      end
+          
       #parent will be node_idh or assembly_idh
-      def ret_matching_node_idhs(parent_idh)
+      def ret_matching_nodes(parent_idh)
         if parent_idh[:model_name] == :node
           return [parent_idh]
         end
@@ -104,41 +128,42 @@ module DTK; class Attribute
           filter = [:and, filter, node_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name],
           :filter => filter
         }
-        Model.get_objs(parent_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(parent_idh.createMH(:node),sp_hash)
       end
 
-      def ret_matching_component_idhs(node_idhs,cmp_fragment)
-        filter = [:oneof, :node_node_id, node_idhs.map{|idh|idh.get_id()}]
+      def matching_components(nodes,cmp_fragment)
+        filter = [:oneof, :node_node_id, nodes.map{|r|r.id()}
         if cmp_filter = ret_filter(cmp_fragment,:component)
           filter = [:and, filter, cmp_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id]
           :filter => filter
         }
         sample_idh = node_idhs.first
-        Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|Component::Instance.create_from_component(r)}
       end
 
-      def ret_matching_attribute_idhs(type,idhs,attr_fragment)
+      def ret_matching_attributes(type,idhs,attr_fragment)
         filter = [:oneof, TypeToIdField[type], idhs.map{|idh|idh.get_id()}]
         if attr_filter = ret_filter(attr_fragment,:attribute)
           filter = [:and, filter, attr_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name,:attribute_value,TypeToIdField[type]],
           :filter => filter
         }
         sample_idh = idhs.first
-        Model.get_objs(sample_idh.createMH(:attribute),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(sample_idh.createMH(:attribute),sp_hash)
       end
       TypeToIdField = {
         :component => :component_component_id,
         :node => :node_node_id
       }
+
       def ret_filter(fragment,type)
         if term = Pattern::Term.extract_term?(fragment)
           if type == :component
@@ -161,8 +186,8 @@ module DTK; class Attribute
           nil #without qualification means all (no filter)
         end
       end
-    end
 
+    end
   end
 end; end
 

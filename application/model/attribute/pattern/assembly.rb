@@ -21,7 +21,9 @@ module DTK; class Attribute
 
       class Type < Pattern::Type
         class AssemblyLevel < self
-          def set_parent_and_attribute_idhs!(assembly_idh,opts={})
+          attr_reader :attribute_idhs
+
+          def set_parent_and_attributes!(assembly_idh,opts={})
             @attribute_idhs = ret_matching_attribute_idhs(:component,[assembly_idh],pattern)
             #if does not exist then create the attribute if carete flag set
             #if exists and create flag exsists we just assign it new value

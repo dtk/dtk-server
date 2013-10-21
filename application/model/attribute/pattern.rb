@@ -18,7 +18,7 @@ module DTK; class Attribute
     end
 
     def self.create_attr_pattern(base_object_idh,attr_term,opts={})
-      create(attr_term,base_object_idh.create_object(),opts).set_parent_and_attribute_idhs!(base_object_idh,opts)
+      create(attr_term,base_object_idh.create_object(),opts).set_parent_and_attributes!(base_object_idh,opts)
     end
 
     def self.set_attributes(base_object,av_pairs,opts={})

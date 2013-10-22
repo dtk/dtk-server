@@ -7,25 +7,13 @@ module DTK
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
     end
 
-    def self.find_match_with_attribute_patterns(link_def_links,dep_attr_pattern,antec_attr_pattern)
-      external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
-      link_def_links.each do |link|
-        if ret = link.match_attribute_patterns?(external_or_internal,dep_attr_pattern,antec_attr_pattern)
+    def matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
+      attribute_mappings().each do |am|
+        if ret = am.match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
           return ret
         end
       end
       nil
-    end
-
-    def match_attribute_patterns?(external_or_internal,dep_attr_pattern,antec_attr_pattern)
-      if external_or_internal == self[:type]
-        attribute_mappings().each do |am|
-          if ret = am.match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
-            return ret
-          end
-        end
-        nil
-      end
     end
 
     #TODO: when add cardinality info, woudl check it heer

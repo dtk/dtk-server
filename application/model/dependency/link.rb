@@ -11,10 +11,10 @@ module DTK; class Dependency
       unless antec_attr_pattern and  dep_attr_pattern
         raise Error.new("Not implemented: when opts does not include :antec_attr_pattern and :dep_attr_pattern")
       end
-      link_def_links = matching_link_def_links?(cmp_template,antec_cmp_template)
-      unless link_def_links.empty?
-        if match = LinkDefLink.find_match_with_attribute_patterns(link_def_links,dep_attr_pattern,antec_attr_pattern)
-          pp [:debug_match_found, match]
+      external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
+      if link_def_link = matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
+        if attr_mapping = link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
+          pp [:debug_match_found, attr_mapping]
           return 
         end
       end
@@ -55,11 +55,16 @@ module DTK; class Dependency
     end
 
    private
-    def self.matching_link_def_links?(cmp_template,antec_cmp_template)
+    def self.matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
-      cmp_template.get_link_def_links().select do |r|
-        r[:remote_component_type] == antec_cmp_type
+      matches = cmp_template.get_link_def_links().select do |r|
+        r[:remote_component_type] == antec_cmp_type and
+          r[:type] == external_or_internal
       end
+      if matches.size > 1
+        raise Error.new("Not implemented when matching_link_def_link? finds more than 1 match")
+      end
+      matches.first
     end
   end
 end; end

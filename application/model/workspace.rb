@@ -10,6 +10,7 @@ module DTK
     end
 
     def purge(opts={})
+      opts.merge!(:do_not_raise => true)
       self.class.delete_contents([id_handle()],opts)
       delete_tasks()
     end

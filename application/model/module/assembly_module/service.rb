@@ -17,8 +17,9 @@ module DTK; class AssemblyModule
     end
 
    private
-    def self.delete_module?(assembly)
-      service_module = get_service_module(assembly)
+    def self.delete_module?(assembly,opts={})
+      service_module = get_service_module(assembly,opts)
+      return if service_module == false
       module_version = ModuleVersion.ret(assembly)
       service_module.delete_version?(module_version,:donot_delete_meta=>true)
     end
@@ -49,9 +50,10 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.get_service_module(assembly)
+    def self.get_service_module(assembly,opts={})
       unless ret = assembly.get_service_module()
         assembly_name = assembly.display_name_print_form()
+        return false if opts[:do_not_raise]
         raise ErrorUsage.new("Assembly (#{assembly_name}) is not tied to a service")
       end
       ret

@@ -35,6 +35,9 @@ module XYZ
         stop_this_assembly = false
 
         nodes.each do |node|
+          # skip if node is staged
+          next if 'staged'.eql?(node[:type])
+
           # status of the nodes
           response = aws_connection.get_instance_status(node.instance_id())
 

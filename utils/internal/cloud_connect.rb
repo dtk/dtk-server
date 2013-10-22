@@ -123,6 +123,7 @@ module DTK
       end
 
       def get_instance_status(id)
+        Log.info "Checking instance with ID: '#{id}'"
         response = @conn.describe_instances('instance-id' => id)
         unless response.nil?
           status = response.body["reservationSet"].first["instancesSet"].first["instanceState"]["name"].to_sym

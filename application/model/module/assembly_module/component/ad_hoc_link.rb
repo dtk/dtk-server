@@ -5,14 +5,15 @@ module DTK; class AssemblyModule
         @assembly = assembly
         @source_attr_pattern = parsed_adhoc_link.attribute_pattern(:source)
         @target_attr_pattern = parsed_adhoc_link.attribute_pattern(:target)
-        pp [:debug,@source_attr_pattern,@target_attr_pattern]
       end
 
       def update_assembly_module()
       #determine which is the dependent component and which is the antec one 
         dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components()
-        pp [:debug,dep_cmp_template,antec_cmp_template]
-        opts = Hash.new #TODO: stub, put in the attribute mapping info
+        opts = {
+          :antec_attr_pattern => @source_attr_pattern,
+          :dep_attr_pattern => @target_attr_pattern
+        }
         Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts)
       end
      private

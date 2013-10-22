@@ -41,9 +41,23 @@ module DTK; class Attribute
         end
       end
 
-      class NodeLevel < self
+      module CommonNodeComponentLevel
         def attribute_idhs()
           @attribute_stacks.map{|r|r[:attribute].id_handle()}
+        end
+        def attribute_name()
+          attribute_stack()[:attribute][:display_name]
+        end
+        def node()
+          attribute_stack()[:node]
+        end
+      end
+
+      class NodeLevel < self
+        include CommonNodeComponentLevel
+
+        def component_instance()
+          nil
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})
@@ -63,10 +77,6 @@ module DTK; class Attribute
           ret
         end
 
-        def component_instance()
-          nil
-        end
-
        private
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
@@ -79,9 +89,7 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def attribute_idhs()
-          @attribute_stacks.map{|r|r[:attribute].id_handle()}
-        end
+        include CommonNodeComponentLevel
 
         def component_instance()
           attribute_stack()[:component]

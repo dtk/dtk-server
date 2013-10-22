@@ -9,7 +9,7 @@ module DTK; class Attribute; class Pattern
           raise ErrorParse.new(source_attr_term)
         end
         attr_pattern = super(base_object_idh,attr_term)
-        new(attr_pattern,fn)
+        new(attr_pattern,fn,attr_term)
       end
       
       attr_reader :attribute_pattern,:fn
@@ -17,7 +17,7 @@ module DTK; class Attribute; class Pattern
         @attribute_pattern.attribute_idhs.first
       end
      private
-      def initialize(attr_pattern,fn)
+      def initialize(attr_pattern,fn,attr_term)
         attr_idhs = attr_pattern.attribute_idhs
         if attr_idhs.empty?
           raise ErrorUsage.new("The term (#{attr_term}) does not match an attribute")

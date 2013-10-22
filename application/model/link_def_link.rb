@@ -1,9 +1,31 @@
 require  File.expand_path('link_def/context', File.dirname(__FILE__))
 module DTK
   class LinkDefLink < Model
+    r8_nested_require('link_def_link','attribute_mapping')
 
     def self.common_columns()
       [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:temporal_order]
+    end
+
+    def self.find_match_with_attribute_patterns(link_def_links,dep_attr_pattern,antec_attr_pattern)
+      external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
+      link_def_links.each do |link|
+        if ret = link.match_attribute_patterns?(external_or_internal,dep_attr_pattern,antec_attr_pattern)
+          return ret
+        end
+      end
+      nil
+    end
+
+    def match_attribute_patterns?(external_or_internal,dep_attr_pattern,antec_attr_pattern)
+      if external_or_internal == self[:type]
+        attribute_mappings().each do |am|
+          if ret = am.match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
+            return ret
+          end
+        end
+        nil
+      end
     end
 
     #TODO: when add cardinality info, woudl check it heer
@@ -66,65 +88,6 @@ module DTK
 
     def on_create_events()
       self[:on_create_events]||= ((self[:content][:events]||{})[:on_create]||[]).map{|ev|Event.create(ev,self)}
-    end
-
-    class AttributeMapping < HashObject
-      def self.ret_links_array(attribute_mappings,context,opts={})
-        contexts = (context.has_node_group_form?() ? context.node_group_contexts_array() : [context])
-        contexts.map{|context|attribute_mappings.map{|am|am.ret_link(context,opts)}.compact}
-      end
-
-      def ret_link(context,opts={})
-        input_attr,input_path = get_attribute_with_unravel_path(:input,context)
-        output_attr,output_path = get_attribute_with_unravel_path(:output,context)
-        
-        err_msgs = Array.new
-        unless input_attr
-          err_msgs << "attribute (#{pp_form(:input)}) does not exist"
-        end
-        unless output_attr
-          err_msgs << "attribute (#{pp_form(:output)}) does not exist"
-        end
-        unless err_msgs.empty?
-          err_msg = err_msgs.join(" and ").capitalize
-          if opts[:raise_error]
-            raise ErrorUsage.new(err_msg)
-          else
-            Log.error(err_msg)
-            return nil
-          end
-        end
-
-        ret = {:input_id => input_attr[:id],:output_id => output_attr[:id]}
-        ret.merge!(:input_path => input_path) if input_path
-        ret.merge!(:output_path => output_path) if output_path
-        ret
-      end
-
-      def pp_form(direction)
-        ret = 
-          if attr = self[direction]
-            cmp_type = attr[:component_type]
-            attr_name = attr[:attribute_name]
-            if cmp_type and attr_name
-              "#{Component.component_type_print_form(cmp_type)}.#{attr_name}"
-            end
-          end
-        ret||""
-      end
-
-     private
-      
-      #returns [attribute,unravel_path]
-      def get_attribute_with_unravel_path(dir,context)
-        index_map_path = nil
-        attr = nil
-        ret = [attr,index_map_path]
-        attr = context.find_attribute(self[dir][:term_index])
-        index_map_path = self[dir][:path]
-        #TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
-        [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
-      end
     end
 
     class Event < HashObject

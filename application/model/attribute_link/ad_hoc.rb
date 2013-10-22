@@ -1,17 +1,19 @@
 module DTK
   class AttributeLink
     class AdHoc < Hash
-      #TODO: right now just treating as preprocessing operation when target attribute term matches a set
-      #may enhance to store the inputted info to trigger it for any match when assembly gets component or attributes added
-      def self.create_adhoc_links(assembly,target_attr_term,source_attr_term)
+      def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
         parsed_adhoc_links = attribute_link_hashes(assembly.id_handle(),target_attr_term,source_attr_term)
-        opts = {
-          :donot_update_port_info => true,
-          :donot_create_pending_changes => true
-        }
-        #create_attribute_links updates parsed_adhoc_links
-        AttributeLink.create_attribute_links(assembly.get_target_idh(),parsed_adhoc_links,opts)
-        parsed_adhoc_links
+#TODO: debug
+opts[:update_meta] = true
+        if opts[:update_meta]
+          AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links)
+        else
+          opts_create = {
+            :donot_update_port_info => true,
+            :donot_create_pending_changes => true
+          }
+          AttributeLink.create_attribute_links(assembly.get_target_idh(),parsed_adhoc_links,opts_create)
+        end
       end
 
       # type should be :source or :target

@@ -6,22 +6,17 @@ module DTK; class Dependency
     end
 
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
-      #TODO: stub
-      if link_def_link = matching_link_def_link?(cmp_template,antec_cmp_template)
-        pp [:matching_link_def_link?,link_def_link]
+      antec_attr_pattern = opts[:antec_attr_pattern]
+      dep_attr_pattern = opts[:dep_attr_pattern ]
+      unless antec_attr_pattern and  dep_attr_pattern
+        raise Error.new("Not implemented: when opts does not include :antec_attr_pattern and :dep_attr_pattern")
       end
-    end
-    class << self
-     private
-      def matching_link_def_link?(cmp_template,antec_cmp_template)
-        antec_cmp_type = antec_cmp_template.get_field?(:component_type)
-        matches = cmp_template.get_link_def_links().select do |r|
-          r[:remote_component_type] == antec_cmp_type
+      link_def_links = matching_link_def_links?(cmp_template,antec_cmp_template)
+      unless link_def_links.empty?
+        if match = LinkDefLink.find_match_with_attribute_patterns(link_def_links,dep_attr_pattern,antec_attr_pattern)
+          pp [:debug_match_found, match]
+          return 
         end
-        if matches.size > 1
-          raise Error.new("Not implemented: case where matching_link_def_link? returns multiple matches")
-        end
-        matches.first
       end
     end
 
@@ -59,6 +54,13 @@ module DTK; class Dependency
       @satisfied_by_component_ids = matches.map{|match|match[:output_port][:component_id]}
     end
 
+   private
+    def self.matching_link_def_links?(cmp_template,antec_cmp_template)
+      antec_cmp_type = antec_cmp_template.get_field?(:component_type)
+      cmp_template.get_link_def_links().select do |r|
+        r[:remote_component_type] == antec_cmp_type
+      end
+    end
   end
 end; end
 

@@ -1,3 +1,5 @@
+=begin
+#TODO: deprecated
 module DTK
   class Assembly::Instance
     class ServiceLink
@@ -26,3 +28,4 @@ module DTK
     end
   end
 end
+=end

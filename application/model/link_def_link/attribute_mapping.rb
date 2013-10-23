@@ -11,8 +11,9 @@ module DTK
         end
       end
 
-      def self.create_from_attribute_patterns(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)
-        {"hadoop__datanode.dirs"=>"hadoop__namenode.dirs"}
+      def self.create_from_attribute_patterns(dep_attr_pattern,antec_attr_pattern)
+        am_serialized_form = {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
+        LinkDef.parse_serialized_form_attribute_mapping(am_serialized_form)
       end
 
       def match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)

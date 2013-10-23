@@ -186,7 +186,10 @@ module DTK
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
+
+=begin
     #this adds attribute mappings as part of service link
+#deprecated
     def rest__add_ad_hoc_attribute_mapping()
       assembly = ret_assembly_instance_object()
       port_link = ret_port_link(assembly)
@@ -194,7 +197,7 @@ module DTK
       assembly.add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
       rest_ok_response 
     end
-
+=end
     def rest__list_attribute_mappings()
       port_link = ret_port_link()
       #TODO: stub

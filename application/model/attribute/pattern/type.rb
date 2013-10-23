@@ -56,6 +56,10 @@ module DTK; class Attribute
       class NodeLevel < self
         include CommonNodeComponentLevel
 
+        def am_serialized_form()
+          raise Error.new("Not implemented yet")
+        end
+
         def component_instance()
           nil
         end
@@ -90,6 +94,10 @@ module DTK; class Attribute
 
       class ComponentLevel < self
         include CommonNodeComponentLevel
+
+        def am_serialized_form()
+          "#{component_instance()[:component_type]}.#{attribute_name()}"
+        end
 
         def component_instance()
           attribute_stack()[:component]

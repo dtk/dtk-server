@@ -16,8 +16,8 @@ module DTK
       nil
     end
 
-    def add_attribute_mapping(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)
-      updated_attr_mappings = attribute_mappings() + [AttributeMapping.create_from_attribute_patterns(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)]
+    def add_attribute_mapping(dep_attr_pattern,antec_attr_pattern)
+      updated_attr_mappings = attribute_mappings() + [AttributeMapping.create_from_attribute_patterns(dep_attr_pattern,antec_attr_pattern)]
       update_attribute_mappings(updated_attr_mappings)
     end
 
@@ -76,9 +76,12 @@ module DTK
     end
 
     def update_attribute_mappings(new_attribute_mappings)
-      ret = self[:attribute_mappings] = new_attribute_mappings()
+pp [:new_attribute_mappings,new_attribute_mappings]
+      ret = self[:attribute_mappings] = new_attribute_mappings
       self[:content] ||= Hash.new
       self[:content][:attribute_mappings] = ret
+      update({:content => self[:content]},:convert => true)
+      ret
     end
 
     def attribute_mappings()

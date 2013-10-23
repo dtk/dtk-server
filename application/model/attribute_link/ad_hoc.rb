@@ -20,8 +20,9 @@ opts[:update_meta] = true
         @attr_pattern[type]
       end
 
-      def all_dep_component_instances()
+      def all_dep_component_instance_hashes()
         ret = [self]
+        #get peer component instances
         cmp_instance = attribute_pattern(:target).component_instance
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:component_type],
@@ -30,8 +31,24 @@ opts[:update_meta] = true
                       [:neq,:id,cmp_instance.id()]]
         }
         peer_cmps = Model.get_objs(@assembly_idh.createMH(:component),sp_hash)
-        pp [:peer_cmps,@attr_pattern,peer_cmps]
-        ret
+        return ret if peer_cmps.empty?
+        #find the matching attributes on the peer components
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name],
+          :filter => [:and,[:oneof,:component_component_id,peer_cmps.map{|cmp|cmp.id()}],
+                      [:eq,:display_name,attribute_pattern(:target).attribute_name]]
+        }
+        assembly_id = @assembly_idh.get_id()
+        output_attr_id = attribute_pattern(:source).attribute_id()
+        peer_attrs = Model.get_objs(@assembly_idh.createMH(:attribute),sp_hash).map do |input_attr|
+          {
+            :input_id => input_attr.id(),
+            :output_id => output_attr_id,
+            :assembly_id => assembly_id
+          }
+        end
+        
+        ret + peer_attrs
       end
 
      private
@@ -48,7 +65,7 @@ opts[:update_meta] = true
       def self.create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,opts={})
         if opts[:all_dep_component_instances]
           attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
-            a + adhoc_link.all_dep_component_instances()
+            a + adhoc_link.all_dep_component_instance_hashes()
           end
           create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
         else

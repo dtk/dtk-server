@@ -48,6 +48,9 @@ module DTK; class Attribute
         def attribute_name()
           attribute_stack()[:attribute][:display_name]
         end
+        def attribute_id()
+          attribute_stack()[:attribute].id()
+        end
         def node()
           attribute_stack()[:node]
         end
@@ -157,7 +160,7 @@ module DTK; class Attribute
           filter = [:and, filter, cmp_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id],
+          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id,:ancestor_id],
           :filter => filter
         }
         cmp_mh = nodes.first.model_handle(:component)

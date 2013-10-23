@@ -121,12 +121,14 @@
   },
   "workspace_attribute": {
     "order": [
+      "id",
       "name",
       "path",
       "value",
       "type"
     ],
     "mapping": {
+      "id": "dtk_id",
       "path": "display_name",
       "name": "name",
       "value": "value",
@@ -135,6 +137,7 @@
   },
   "workspace_attribute_w_link": {
     "order": [
+      "id",
       "name",
       "path",
       "value",
@@ -142,6 +145,7 @@
       "type"
     ],
     "mapping": {
+      "id": "dtk_id",
       "path": "display_name",
       "name": "name",
       "value": "value",

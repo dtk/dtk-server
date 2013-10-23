@@ -16,7 +16,12 @@ module DTK
       nil
     end
 
-    #TODO: when add cardinality info, woudl check it heer
+    def add_attribute_mapping(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)
+      updated_attr_mappings = attribute_mappings() + [AttributeMapping.create_from_attribute_patterns(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)]
+      update_attribute_mappings(updated_attr_mappings)
+    end
+
+    #TODO: when add cardinality contrsaints on links, would check it here
     #assuming that augmented ports have :port_info
     def ret_matches(in_aug_port,out_aug_ports)
       ret = Array.new
@@ -69,9 +74,15 @@ module DTK
         AttributeLink.create_attribute_links(parent_idh,links)
       end
     end
-    
+
+    def update_attribute_mappings(new_attribute_mappings)
+      ret = self[:attribute_mappings] = new_attribute_mappings()
+      self[:content] ||= Hash.new
+      self[:content][:attribute_mappings] = ret
+    end
+
     def attribute_mappings()
-      self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.new(am)}
+      self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.reify(am)}
     end
 
     def on_create_events()

@@ -1,6 +1,20 @@
 module DTK
   class LinkDefLink
     class AttributeMapping < HashObject
+      def self.reify(object)
+        if object.kind_of?(AttributeMapping)
+          object
+        elsif object.kind_of?(Hash)
+          new(object)
+        else
+          raise Error.new("Unexpected object type (#{object.class})")
+        end
+      end
+
+      def self.create_from_attribute_patterns(dep_cmp,antec_cmp,dep_attr_pattern,antec_attr_pattern)
+        {"hadoop__datanode.dirs"=>"hadoop__namenode.dirs"}
+      end
+
       def match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
         if match_attr_pattern?(self[:input],dep_attr_pattern) and match_attr_pattern?(self[:output],antec_attr_pattern)
           self

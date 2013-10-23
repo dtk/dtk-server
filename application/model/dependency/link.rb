@@ -16,6 +16,8 @@ module DTK; class Dependency
         if attr_mapping = link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
           pp [:debug_match_found, attr_mapping]
           return 
+        else
+          link_def_link.add_attribute_mapping(cmp_template,antec_cmp_template,dep_attr_pattern,antec_attr_pattern)
         end
       end
     end

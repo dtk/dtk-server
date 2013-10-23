@@ -1,24 +1,37 @@
 module DTK
   class AttributeLink
     class AdHoc < Hash
+      #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
+      #TODO: this gives us what is like mixed mode where insatnces created already will have ad hoc attribute links, while new ones wil have service links
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
         parsed_adhoc_links = attribute_link_hashes(assembly.id_handle(),target_attr_term,source_attr_term)
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
           AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links)
+          create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,:all_dep_component_instances=>true)
         else
-          opts_create = {
-            :donot_update_port_info => true,
-            :donot_create_pending_changes => true
-          }
-          AttributeLink.create_attribute_links(assembly.get_target_idh(),parsed_adhoc_links,opts_create)
+          create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)
         end
       end
 
       # type should be :source or :target
       def attribute_pattern(type)
         @attr_pattern[type]
+      end
+
+      def all_dep_component_instances()
+        ret = [self]
+        cmp_instance = attribute_pattern(:target).component_instance
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:component_type],
+          :filter => [:and,[:eq,:ancestor_id,cmp_instance.get_field?(:ancestor_id)],
+                      [:eq,:assembly_id,@assembly_idh.get_id()],
+                      [:neq,:id,cmp_instance.id()]]
+        }
+        peer_cmps = Model.get_objs(@assembly_idh.createMH(:component),sp_hash)
+        pp [:peer_cmps,@attr_pattern,peer_cmps]
+        ret
       end
 
      private
@@ -30,6 +43,50 @@ opts[:update_meta] = true
           :target => target_attr_pattern,
           :source => source_attr_pattern.attribute_pattern
         }
+      end
+
+      def self.create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,opts={})
+        if opts[:all_dep_component_instances]
+          attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
+            a + adhoc_link.all_dep_component_instances()
+          end
+          create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
+        else
+          create_ad_hoc_attribute_links_aux?(assembly,parsed_adhoc_links)
+        end
+      end
+
+      def self.create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
+        ret = Array.new
+        existing_links = get_matching_ad_hoc_attribute_links(assembly,attr_link_rows)
+        new_links = attr_link_rows.reject do |link|
+          existing_links.find do |existing_link|
+            existing_link[:output_id] == link[:output_id] and
+              existing_link[:input_id] == link[:input_id]
+          end
+        end
+        return ret if new_links.empty?
+        opts_create = {
+          :donot_update_port_info => true,
+          :donot_create_pending_changes => true
+        }
+        AttributeLink.create_attribute_links(assembly.id_handle(),new_links,opts_create)
+      end
+
+      def self.get_matching_ad_hoc_attribute_links(assembly,attr_link_rows)
+        ret = Array.new
+        return ret if attr_link_rows.empty?
+        assembly_id = assembly.id()
+        disjunct_array = attr_link_rows.map do |r|
+          [:and,[:eq,:assembly_id,assembly_id],
+           [:eq,:output_id,r[:output_id]],
+           [:eq,:input_id,r[:input_id]]]
+        end
+        sp_hash = {
+          :cols => [:id,:group_id,:assembly_id,:input_id,:output_id],
+          :filter => [:or] + disjunct_array
+        }
+        Model.get_objs(assembly.model_handle(:attribute_link),sp_hash)
       end
 
       def self.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)

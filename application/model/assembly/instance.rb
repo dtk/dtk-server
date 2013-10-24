@@ -774,7 +774,7 @@ module DTK; class  Assembly
 
     def get_attributes_all_levels()
       assembly_attrs = get_assembly_level_attributes()
-      #TODO: more efficient is tahey do not need to be augmenetd
+      #TODO: more efficient is they do not need to be augmenetd
       component_attrs = get_augmented_nested_component_attributes()
       node_attrs = get_augmented_node_attributes()
       assembly_attrs + component_attrs + node_attrs

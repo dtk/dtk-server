@@ -16,8 +16,8 @@ module DTK
       nil
     end
 
-    def add_attribute_mapping(dep_attr_pattern,antec_attr_pattern)
-      updated_attr_mappings = attribute_mappings() + [AttributeMapping.create_from_attribute_patterns(dep_attr_pattern,antec_attr_pattern)]
+    def add_attribute_mapping(am_serialized_form)
+      updated_attr_mappings = attribute_mappings() + [LinkDef.parse_serialized_form_attribute_mapping(am_serialized_form)]
       update_attribute_mappings(updated_attr_mappings)
     end
 

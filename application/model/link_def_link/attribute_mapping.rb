@@ -11,11 +11,6 @@ module DTK
         end
       end
 
-      def self.create_from_attribute_patterns(dep_attr_pattern,antec_attr_pattern)
-        am_serialized_form = {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
-        LinkDef.parse_serialized_form_attribute_mapping(am_serialized_form)
-      end
-
       def match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
         if match_attr_pattern?(self[:input],dep_attr_pattern) and match_attr_pattern?(self[:output],antec_attr_pattern)
           self

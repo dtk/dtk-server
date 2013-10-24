@@ -6,16 +6,17 @@ module DTK; class LinkDef
 
     #This is used to convert from add hoc link commands into internal form
     def parse_serialized_form_attribute_mapping(mapping)
-      #TODO: none of these used in attribute mapping parsing
-      config_agent_type = remote_link_defs = local_cmp_ref = nil
-      ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse_possible_link_attribute_mapping(mapping)
+      ParseSerializedForm.new().parse_possible_link_attribute_mapping(mapping)
     end
 
+    def parse_from_create_dependency(link_def)
+      ParseSerializedForm.new().parse([link_def])
+    end
   end
 
   class ParseSerializedForm
     attr_reader :config_agent_type,:remote_link_defs,:local_cmp_ref
-    def initialize(config_agent_type,remote_link_defs,local_cmp_ref)
+    def initialize(config_agent_type=nil,remote_link_defs={},local_cmp_ref=nil)
       @config_agent_type = config_agent_type
       @remote_link_defs = remote_link_defs
       @local_cmp_ref = local_cmp_ref

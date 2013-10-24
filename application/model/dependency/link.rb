@@ -13,12 +13,11 @@ module DTK; class Dependency
       end
       external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
       if link_def_link = matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
-        if attr_mapping = link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
-          pp [:debug_match_found, attr_mapping]
-          return 
-        else
-          link_def_link.add_attribute_mapping(dep_attr_pattern,antec_attr_pattern)
+        unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
+          link_def_link.add_attribute_mapping(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
         end
+      else
+        create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
       end
     end
 
@@ -57,6 +56,10 @@ module DTK; class Dependency
     end
 
    private
+    def self.attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern)
+      {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
+    end
+
     def self.matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
       matches = cmp_template.get_link_def_links().select do |r|
@@ -67,6 +70,23 @@ module DTK; class Dependency
         raise Error.new("Not implemented when matching_link_def_link? finds more than 1 match")
       end
       matches.first
+    end
+    
+    def self.create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,am_serialized_form)
+      antec_cmp_type = antec_cmp_template[:component_type]
+      serialized_link_def =  
+        {"type" => antec_cmp_type.split('__').last,
+        "required"=>true,
+        "possible_links"=>
+        [{antec_cmp_type=>
+           {"type"=>external_or_internal.to_s,
+             "attribute_mappings"=> am_serialized_form
+           }
+         }]
+      }
+      create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
+      pp [:create_link_def_and_link,create_hash]
+      nil
     end
   end
 end; end

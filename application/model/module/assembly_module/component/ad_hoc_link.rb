@@ -7,17 +7,18 @@ module DTK; class AssemblyModule
         @target_attr_pattern = parsed_adhoc_link.attribute_pattern(:target)
       end
 
-      def update_assembly_module()
+      def update_assembly_module(opts={})
       #determine which is the dependent component and which is the antec one 
-        dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components()
-        opts = {
+        dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components(opts)
+        opts_craete_dep = {
           :antec_attr_pattern => @source_attr_pattern,
           :dep_attr_pattern => @target_attr_pattern
         }
-        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts)
+        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts_craete_dep)
       end
+
      private
-      def determine_dep_and_antec_components()
+      def determine_dep_and_antec_components(opts={})
         unless target_cmp = @target_attr_pattern.component_instance()
           raise Error.new("Unexpected that target_attr_pattern.component() is nil")
         end

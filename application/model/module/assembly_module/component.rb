@@ -27,7 +27,7 @@ module DTK; class AssemblyModule
       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
     end
 
-    def self.update_from_adhoc_links(assembly,parsed_adhoc_links)
+    def self.update_from_adhoc_links(assembly,parsed_adhoc_links,opts={})
       unless parsed_adhoc_links.size == 1
         raise Error.new("Only implented update_from_adhoc_links  size == 1")
       end

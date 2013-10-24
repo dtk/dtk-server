@@ -8,7 +8,7 @@ module DTK
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
-          AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links)
+          AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
           create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,:all_dep_component_instances=>true)
         else
           create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)

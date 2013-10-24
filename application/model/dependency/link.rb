@@ -12,7 +12,8 @@ module DTK; class Dependency
         raise Error.new("Not implemented: when opts does not include :antec_attr_pattern and :dep_attr_pattern")
       end
       external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
-      if link_def_link = matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
+      aug_link_defs = cmp_template.get_augmented_link_defs()
+      if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
         unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
           link_def_link.add_attribute_mapping(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
         end
@@ -60,14 +61,17 @@ module DTK; class Dependency
       {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
     end
 
-    def self.matching_link_def_link?(external_or_internal,cmp_template,antec_cmp_template)
+    def matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
+      ret = nil
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
-      matches = cmp_template.get_link_def_links().select do |r|
-        r[:remote_component_type] == antec_cmp_type and
-          r[:type] == external_or_internal
+      if aug_link_defs.empty?
+        return ret
+      end
+      matches = aug_link_defs.map{|r[:link_def_links]||[]}.flatten(1).select do |link|
+        link[:remote_component_type] == antec_cmp_type and link [:type] == external_or_internal
       end
       if matches.size > 1
-        raise Error.new("Not implemented when matching_link_def_link? finds more than 1 match")
+        raise Error.new("Not implemented when matching_augmented_link_def? finds more than 1 match")
       end
       matches.first
     end

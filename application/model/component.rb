@@ -328,7 +328,7 @@ module DTK
     end
 
 
-    def get_link_def_links()
+    def get_augmented_link_defs()
       get_objs(:cols => [:link_def_links]).map do |r|
         r[:link_def_link].merge(:link_def => r[:link_def])
       end

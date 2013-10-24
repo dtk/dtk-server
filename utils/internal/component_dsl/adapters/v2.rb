@@ -5,6 +5,7 @@ module DTK
       r8_nested_require('v2','parser')
       r8_nested_require('v2','dsl_object')
       r8_nested_require('v2','object_model_form')
+      r8_nested_require('v2','incremental_generator')
       def self.parse_check(input_hash)
         #TODO: stub
       end

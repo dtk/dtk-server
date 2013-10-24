@@ -50,6 +50,12 @@ module DTK
       end
     end
 
+    def self.incremental_generate(augmented_object)
+      integer_version = 2 #TODO: fix this being hard coded
+      klass = load_and_return_version_adapter_class(integer_version)
+      klass.const_get('IncrementalGenerator').generate(augmented_object)
+    end
+
     #returns array where each element with keys :path,:hash_content
     def migrate(module_name,new_dsl_integer_version,format_type)
       ret = Array.new

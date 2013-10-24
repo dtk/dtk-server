@@ -167,6 +167,16 @@
       "version": "version"
     }
   },
+  "account_ssh_keys": {
+    "order": [
+      "id",
+      "name"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "username"
+    }
+  },
   "module": {
     "order": [
       "id",

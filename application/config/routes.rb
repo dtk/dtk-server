@@ -10,6 +10,7 @@ R8::ReactorRoute.draw do
 
   # ACCOUNT
   post  'account/set_password' => 'account#set_password'
+  post  'account/list_ssh_keys' => 'account#list_ssh_keys'
 
    # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'

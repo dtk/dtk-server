@@ -64,6 +64,17 @@ module XYZ
       create_instance(repo_user_mh,repo_user_type,repo_username,index,ssh_rsa_keys)
     end
 
+    def self.get_matching_repo_users(repo_user_mh,filters_keys,username,cols=nil)
+      user_list = []
+      regex = "dtk-client-#{username.to_s}"
+      repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
+      repo_users.each do |user|
+        user_list << user if user[:username].match(regex)
+      end
+
+      return user_list
+    end
+
     def self.get_matching_repo_user(repo_user_mh,filters_keys,cols=nil)
       ret = nil
       repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)

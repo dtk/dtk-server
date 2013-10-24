@@ -119,7 +119,9 @@ module DTK; class Component
       end
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
-        :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
+        :filter => [:and, [:eq, :type, "template"], 
+                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                    [:eq, :project_project_id, project_idh.get_id()]]
       }
       ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
       if constraint = opts[:component_version_constraints]

@@ -80,13 +80,12 @@ module DTK; class Dependency
         "possible_links"=>
         [{antec_cmp_type=>
            {"type"=>external_or_internal.to_s,
-             "attribute_mappings"=> am_serialized_form
+             "attribute_mappings"=> [am_serialized_form]
            }
          }]
       }
-      create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
-      pp [:create_link_def_and_link,create_hash]
-      nil
+      link_def_create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
+      Model.input_hash_content_into_model(cmp_template.id_handle(),:link_def => link_def_create_hash)
     end
   end
 end; end

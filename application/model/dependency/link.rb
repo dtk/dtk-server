@@ -13,15 +13,18 @@ module DTK; class Dependency
       end
       external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
       aug_link_defs = cmp_template.get_augmented_link_defs()
+#TODO: for debugging
+incrementally_update_component_dsl(cmp_template,aug_link_defs)
+
       if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
         unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
-          #aug_link_defs get updated as side effect
-          pp [:pre, aug_link_defs]
+          #aug_link_defs gets updated as side effect
           link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
-          pp [:post, aug_link_defs]
+          incrementally_update_component_dsl(cmp_template,aug_link_defs)
         end
       else
         create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+          incrementally_update_component_dsl(cmp_template)
       end
     end
 
@@ -65,13 +68,14 @@ module DTK; class Dependency
     end
 
     def self.matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
-      ret = nil
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
-      if aug_link_defs.empty?
-        return ret
-      end
-      matches = aug_link_defs.map{|r|r[:link_def_links]||[]}.flatten(1).select do |link|
-        link[:remote_component_type] == antec_cmp_type and link [:type] == external_or_internal
+      matches = Array.new
+      aug_link_defs.each  do |link_def|
+        (link_def[:link_def_links]||[]).each do |link|
+          if link[:remote_component_type] == antec_cmp_type and link [:type] == external_or_internal
+            matches << link
+          end
+        end
       end
       if matches.size > 1
         raise Error.new("Not implemented when matching_augmented_link_def? finds more than 1 match")
@@ -93,6 +97,11 @@ module DTK; class Dependency
       }
       link_def_create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
       Model.input_hash_content_into_model(cmp_template.id_handle(),:link_def => link_def_create_hash)
+    end
+
+    def self.incrementally_update_component_dsl(cmp_template,aug_link_defs=nil)
+      aug_link_defs ||= cmp_template.get_augmented_link_defs()
+      ComponentDSL.incremental_generate(aug_link_defs)
     end
   end
 end; end

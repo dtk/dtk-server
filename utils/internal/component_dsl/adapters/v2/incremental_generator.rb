@@ -1,10 +1,12 @@
 module DTK; class ComponentDSL; class V2
   class IncrementalGenerator
-    def self.generate(augmented_object)
-      klass.generate(augmented_object)
+    def self.generate(aug_object)
+      ref = aug_object.get_field?(:ref)
+      body = klass(aug_object).new().generate(aug_object)
+      {ref => body}
     end
    private
-    def klass(object)
+    def self.klass(object)
       class_last_part = object.class.to_s.split('::').last
       ret = nil
       begin 
@@ -16,7 +18,7 @@ module DTK; class ComponentDSL; class V2
     end
 
     class LinkDef < self
-      def self.external_link_def(aug_link_def)
+      def generate(aug_link_def)
         content = PrettyPrintHash.new
         pls = assigns["possible_links"]
         unless pls.size == 1

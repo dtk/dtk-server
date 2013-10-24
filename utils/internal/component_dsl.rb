@@ -50,10 +50,16 @@ module DTK
       end
     end
 
-    def self.incremental_generate(augmented_object)
+    def self.incremental_generate(augmented_objects)
+      augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
       integer_version = 2 #TODO: fix this being hard coded
-      klass = load_and_return_version_adapter_class(integer_version)
-      klass.const_get('IncrementalGenerator').generate(augmented_object)
+      base_klass = load_and_return_version_adapter_class(integer_version)
+      klass = base_klass.const_get('IncrementalGenerator')
+      augmented_objects.inject(Hash.new) do |h,aug_obj|
+        parsed = klass.generate(aug_obj)
+        pp [:debug,parsed]
+        h.merge(parsed)
+      end
     end
 
     #returns array where each element with keys :path,:hash_content

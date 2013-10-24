@@ -85,6 +85,7 @@ module DTK
     end
 
     def attribute_mappings()
+      #TODO: may convert to using @attribute_mappings; need to make sure no side-effects
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.reify(am)}
     end
 

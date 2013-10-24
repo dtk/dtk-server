@@ -8,6 +8,9 @@ R8::ReactorRoute.draw do
   post 'user/process_login'    => "user#process_login"
   get 'user/process_logout'   => "user#process_logout"
 
+  # ACCOUNT
+  post  'account/set_password' => 'account#set_password'
+
    # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'
   post  'assembly/get_action_results' => 'assembly#get_action_results'

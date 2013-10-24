@@ -16,9 +16,10 @@ module DTK
       nil
     end
 
-    def add_attribute_mapping(am_serialized_form)
+    def add_attribute_mapping!(am_serialized_form)
       updated_attr_mappings = attribute_mappings() + [LinkDef.parse_serialized_form_attribute_mapping(am_serialized_form)]
-      update_attribute_mappings(updated_attr_mappings)
+      update_attribute_mappings!(updated_attr_mappings)
+      self
     end
 
     #TODO: when add cardinality contrsaints on links, would check it here
@@ -75,8 +76,7 @@ module DTK
       end
     end
 
-    def update_attribute_mappings(new_attribute_mappings)
-pp [:new_attribute_mappings,new_attribute_mappings]
+    def update_attribute_mappings!(new_attribute_mappings)
       ret = self[:attribute_mappings] = new_attribute_mappings
       self[:content] ||= Hash.new
       self[:content][:attribute_mappings] = ret

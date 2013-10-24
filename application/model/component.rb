@@ -329,9 +329,13 @@ module DTK
 
 
     def get_augmented_link_defs()
-      get_objs(:cols => [:link_def_links]).map do |r|
-        r[:link_def_link].merge(:link_def => r[:link_def])
+      ndx_ret = Hash.new
+      get_objs(:cols => [:link_def_links]).each do |r|
+        link_def_link =  r.delete(:link_def_link)
+        pntr = ndx_ret[r[:id]] ||= r.merge(:link_def_links => Array.new)
+        pntr[:link_def_links] << link_def_link
       end
+      ndx_ret.values()
     end
 
     def get_config_file(file_name)

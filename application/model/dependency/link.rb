@@ -15,7 +15,10 @@ module DTK; class Dependency
       aug_link_defs = cmp_template.get_augmented_link_defs()
       if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
         unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
-          link_def_link.add_attribute_mapping(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+          #aug_link_defs get updated as side effect
+          pp [:pre, aug_link_defs]
+          link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+          pp [:post, aug_link_defs]
         end
       else
         create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
@@ -61,13 +64,13 @@ module DTK; class Dependency
       {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
     end
 
-    def matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
+    def self.matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
       ret = nil
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
       if aug_link_defs.empty?
         return ret
       end
-      matches = aug_link_defs.map{|r[:link_def_links]||[]}.flatten(1).select do |link|
+      matches = aug_link_defs.map{|r|r[:link_def_links]||[]}.flatten(1).select do |link|
         link[:remote_component_type] == antec_cmp_type and link [:type] == external_or_internal
       end
       if matches.size > 1

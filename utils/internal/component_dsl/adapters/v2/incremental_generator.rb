@@ -155,7 +155,7 @@ module DTK; class ComponentDSL; class V2
         unless split.size == 2
           raise Error.new("Not yet implemented: treating component mapping-attribute of form (#{var.required(:term_index)})")
         end
-        attr = "#{Component.display_name_print_form(split[0])}.#{split[1]}"
+        attr = var.required(:attribute_name)
         [attr,var.required(:component_type) == remote_cmp_type]
       end
 

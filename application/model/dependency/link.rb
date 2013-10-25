@@ -13,18 +13,17 @@ module DTK; class Dependency
       end
       external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
       aug_link_defs = cmp_template.get_augmented_link_defs()
-#TODO: for debugging
-incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
-
-      if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
-        unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
-          #aug_link_defs gets updated as side effect
-          link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+      Model.Transaction do
+        if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
+          unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
+            #aug_link_defs gets updated as side effect
+            link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+            incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
+          end
+        else
+          aug_link_defs = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         end
-      else
-        aug_link_defs = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
-        incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
       end
     end
 
@@ -105,8 +104,8 @@ incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         unless module_branch = update_dsl[:module_branch]
           raise Error.new("If update_dsl is specified then module_branch must be provided")
         end
-        dsl_paths_and_content = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
-#        module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
+        dsl_path,hash_content = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
+        module_branch.serialize_and_save_to_repo(dsl_path,hash_content)
       end
     end
   end

@@ -8,7 +8,7 @@ module DTK
     include UpdateModelMixin
 
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
-      input_hash = get_dsl_file_hash_content(module_branch,dsl_integer_version,format_type)
+      input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
       config_agent_type = ret_config_agent_type(input_hash)
       new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::DSLParsing)
     end
@@ -38,12 +38,14 @@ module DTK
       end
     end
 
+    #returns [dsl_file_path,hash_content]
     def self.incremental_generate(module_branch,augmented_objects,context={})
       augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
       helper = IncrementalGeneratorHelper.new(augmented_objects)
-      full_hash = get_dsl_file_hash_content(module_branch)
+      info = get_dsl_file_hash_content_info(module_branch)
+      full_hash = info[:hash_content]
       helper.update_full_hash!(full_hash,augmented_objects,context)
-      full_hash
+      [info[:dsl_filename],full_hash]
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -141,7 +143,7 @@ module DTK
       end
     end
 
-    def self.get_dsl_file_hash_content(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
+    def self.get_dsl_file_hash_content_info(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
       impl_obj = 
         if impl_or_module_branch_obj.kind_of?(Implementation)
           impl_or_module_branch_obj
@@ -150,7 +152,7 @@ module DTK
         else raise Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
         end
       info = get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version,format_type)
-      convert_to_hash(info[:content],info[:format_type])
+      {:hash_content => convert_to_hash(info[:content],info[:format_type])}.merge(Aux::hash_subset(info,[:format_type,:dsl_filename]))
     end
 
     def self.get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version=nil,format_type=nil)
@@ -173,8 +175,8 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-pp [:input_hash,version_specific_input_hash]
-pp [:normalize,ret]
+#pp [:input_hash,version_specific_input_hash]
+#pp [:normalize,ret]
 =begin
       if self.class.default_integer_version() == 2
         pp ret       

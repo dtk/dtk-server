@@ -10,11 +10,12 @@ module DTK; class AssemblyModule
       def update_assembly_module(opts={})
       #determine which is the dependent component and which is the antec one 
         dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components(opts)
-        opts_craete_dep = {
+        opts_create_dep = {
           :antec_attr_pattern => @source_attr_pattern,
-          :dep_attr_pattern => @target_attr_pattern
+          :dep_attr_pattern => @target_attr_pattern,
+          :update_dsl => true
         }
-        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts_craete_dep)
+        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts_create_dep)
       end
 
      private
@@ -27,7 +28,7 @@ module DTK; class AssemblyModule
         unless source_cmp
           raise Error.new("Not implemented yet when source_cmp is nil")
         end
-        #TODO: stub heuristic that chooses target_cmp as dependency
+        #TODO: stub heuristic that chooses target_cmp as dependent
         dep_cmp_template = target_cmp.get_component_template_parent()
         antec_cmp_template = source_cmp.get_component_template_parent()
         [dep_cmp_template,antec_cmp_template]

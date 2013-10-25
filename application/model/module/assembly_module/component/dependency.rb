@@ -8,6 +8,9 @@ module DTK; class AssemblyModule
         unless branch_cmp_template = get_branch_template(module_branch,cmp_template)
           raise Error.new("Unexpected that branch_cmp_template is nil")
         end
+        if opts[:update_dsl]
+          opts[:update_dsl] = {:module_branch => module_branch}
+        end
         dependency_class(type).create_dependency?(branch_cmp_template,antecedent_cmp_template,opts)
       end
 

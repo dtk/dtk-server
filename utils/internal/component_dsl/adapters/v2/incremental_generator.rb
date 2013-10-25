@@ -67,7 +67,7 @@ module DTK; class ComponentDSL; class V2
         end
         ams = link_def_link.object.attribute_mappings() 
         if ams and not ams.empty?
-          ret['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am,remote_cmp_type))}
+          ret['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}
         end
         ret
       end
@@ -88,7 +88,7 @@ module DTK; class ComponentDSL; class V2
 
       def mapping_attribute(input_or_output,am,remote_cmp_type)
         var = ObjectWrapper.new(am.required(input_or_output))
-        case var.required(:var)
+        case var.required(:type)
           when 'component_attribute' then mapping_attribute__component_type(var,remote_cmp_type)
           when 'node_attribute' then mapping_attribute__node_type(var)
           else raise Error.new("Unexpected mapping-attribute type (#{var.required(:var)})")
@@ -96,7 +96,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       def mapping_attribute__component_type(var,remote_cmp_type)
-        split = var.required(:term_index)
+        split = var.required(:term_index).split('.')
         unless split.size == 2
           raise Error.new("Not yet implemented: treating component mapping-attribute of form (#{var.required(:term_index)})")
         end

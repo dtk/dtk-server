@@ -38,11 +38,12 @@ module DTK
       end
     end
 
-    def self.incremental_generate(module_branch,augmented_objects)
+    def self.incremental_generate(module_branch,augmented_objects,context={})
+      augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
+      helper = IncrementalGeneratorHelper.new(augmented_objects)
       full_hash = get_dsl_file_hash_content(module_branch)
-      helper = IncrementalGeneratorHelper.new()
-      fragment = helper.get_config_fragment_hash_form(augmented_objects)
-      helper.merge_fragment_into_full_hash(full_hash,fragment)
+      helper.update_full_hash!(full_hash,augmented_objects,context)
+      full_hash
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -103,22 +104,40 @@ module DTK
 
    private
     class IncrementalGeneratorHelper < self
-      def initialize()
+      def initialize(augmented_objects)
+        @object_class = object_class(augmented_objects)
+
         integer_version = self.class.default_integer_version()
         base_klass = self.class.load_and_return_version_adapter_class(integer_version)
         @version_klass = base_klass.const_get('IncrementalGenerator')
       end
+
+      def update_full_hash!(full_hash,augmented_objects,context={})
+        fragment = get_config_fragment_hash_form(augmented_objects)
+        merge_fragment_into_full_hash!(full_hash,@object_class,fragment,context)
+        full_hash
+      end
+
+     private
       def get_config_fragment_hash_form(augmented_objects)
-        augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
         augmented_objects.inject(Hash.new) do |h,aug_obj|
           generated_hash = @version_klass.generate(aug_obj)
           h.merge(generated_hash)
         end
       end
-      def merge_fragment_into_full_hash(full_hash,fragment)
-        pp ["got_here",full_hash,fragment]
-        # @version_klass.merge_fragment_into_full_hash(full_hash,fragment)
-        nil
+
+      def merge_fragment_into_full_hash!(full_hash,object_class,fragment,context={})
+        @version_klass.merge_fragment_into_full_hash!(full_hash,object_class,fragment,context)
+        full_hash
+      end
+
+      def object_class(augmented_objects)
+        object_classes = augmented_objects.map{|obj|obj.class}.uniq
+        unless object_classes.size == 1
+          object_classes_print_form = object_classes.map{|r|r.to_s}.join(',')
+          raise Error.new("augmented_objects must have the same type rather than (#{object_classes_print_form})")
+        end
+        object_classes.first
       end
     end
 

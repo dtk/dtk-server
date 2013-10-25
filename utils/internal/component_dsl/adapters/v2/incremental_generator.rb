@@ -3,9 +3,16 @@ module DTK; class ComponentDSL; class V2
     def self.generate(aug_object)
       klass(aug_object).new().generate(ObjectWrapper.new(aug_object))
     end
+
+    def self.merge_fragment_into_full_hash!(full_hash,object_class,fragment,context={})
+      klass(object_class).new().merge_fragment!(full_hash,fragment,context)
+      full_hash
+    end
+
    private
-    def self.klass(object)
-      class_last_part = object.class.to_s.split('::').last
+    def self.klass(object_or_class)
+      klass = (object_or_class.kind_of?(Class) ? object_or_class : object_or_class.class)
+      class_last_part = klass.to_s.split('::').last
       ret = nil
       begin 
         ret = const_get class_last_part
@@ -32,6 +39,23 @@ module DTK; class ComponentDSL; class V2
       end
     end
 
+    class Component < self
+      def self.display_name_print_form(cmp_type)
+        ::DTK::Component.display_name_print_form(cmp_type)
+      end
+      def self.get_fragment(full_hash,cmp_type)
+        unless ret = (full_hash['components']||{})[hash_index(cmp_type)]
+          raise Error.new("Cannot find component (#{display_name_print_form(cmp_type)})")
+        end
+        ret
+      end
+
+     private
+      def self.hash_index(cmp_type)
+        ::DTK::Component.display_name_print_form(cmp_type,:no_module_name => true)
+      end
+    end
+
     class LinkDef < self
       def generate(aug_link_def)
         ref = aug_link_def.required(:link_type)
@@ -50,11 +74,42 @@ module DTK; class ComponentDSL; class V2
           end
         {ref => content}
       end
+
+      def merge_fragment!(full_hash,fragment,context={})
+        component_fragment = component_fragment(full_hash,context[:component_template])
+        if depends_on_fragment = component_fragment['depends_on']
+          fragment.each do |key,content|
+            update_depends_on_fragment!(depends_on_fragment,key,content)
+          end
+        else
+          component_fragment['depends_on'] = [fragment]
+        end
+        full_hash
+      end
+
      private
+      def component_fragment(full_hash,component_template)
+        unless component_type = component_template && component_template.get_field?(:component_type)
+          raise Error.new("The method merge_fragment needs the context :component_template")
+        end
+        Component.get_fragment(full_hash,component_type)
+      end
+
+      def update_depends_on_fragment!(depends_on_fragment,key,content)
+        depends_on_fragment.each_with_index do |depends_on_el,i|
+          if (depends_on_el.kind_of?(Hash) and depends_on_el.keys.first == key) or
+              (depends_on_el.kind_of?(String) and depends_on_el == key)
+            depends_on_fragment[i] = {key => content}
+            return
+          end
+        end
+        depends_on_fragment << {key => content}
+      end
+
       def choice_info(link_def,link_def_link)
         ret = PrettyPrintHash.new
         remote_cmp_type = link_def_link.required(:remote_component_type)
-        ret['component'] = ::DTK::Component.display_name_print_form(remote_cmp_type)
+        ret['component'] = Component.display_name_print_form(remote_cmp_type)
         location = 
           case link_def_link.required(:type)
             when 'internal' then 'local'
@@ -100,7 +155,7 @@ module DTK; class ComponentDSL; class V2
         unless split.size == 2
           raise Error.new("Not yet implemented: treating component mapping-attribute of form (#{var.required(:term_index)})")
         end
-        attr = "#{DTK::Component.display_name_print_form(split[0])}.#{split[1]}"
+        attr = "#{Component.display_name_print_form(split[0])}.#{split[1]}"
         [attr,var.required(:component_type) == remote_cmp_type]
       end
 

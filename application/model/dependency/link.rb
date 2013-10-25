@@ -105,7 +105,7 @@ incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         unless module_branch = update_dsl[:module_branch]
           raise Error.new("If update_dsl is specified then module_branch must be provided")
         end
-        dsl_paths_and_content = ComponentDSL.incremental_generate(module_branch,aug_link_defs)
+        dsl_paths_and_content = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
 #        module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
       end
     end

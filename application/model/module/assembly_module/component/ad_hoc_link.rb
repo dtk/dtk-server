@@ -37,9 +37,9 @@ module DTK; class AssemblyModule
           raise Error.new("Not implemented yet when source_cmp is nil")
         end
         #TODO: stub heuristic that chooses target_cmp as dependent
-        dep_cmp_template = target_cmp.get_component_template_parent()
-        antec_cmp_template = source_cmp.get_component_template_parent()
-        [dep_cmp_template,antec_cmp_template]
+        dep_cmp = target_cmp
+        antec_cmp = source_cmp
+        [dep_cmp,antec_cmp]
       end
     end
   end

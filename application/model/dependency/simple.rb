@@ -7,10 +7,13 @@ module DTK; class Dependency
      end
 
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
+      ret = Hash.new
       unless dependency_exists?(cmp_template,antec_cmp_template)
         create_dependency(cmp_template,antec_cmp_template,opts)
       end
+      ret
     end
+
     def self.create_dependency(cmp_template,antec_cmp_template,opts={})
       antec_cmp_template.update_object!(:display_name,:component_type)
       search_pattern = {

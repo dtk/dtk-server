@@ -9,13 +9,21 @@ module DTK; class AssemblyModule
 
       def update_assembly_module(opts={})
       #determine which is the dependent component and which is the antec one 
-        dep_cmp_template,antec_cmp_template = determine_dep_and_antec_components(opts)
+        dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
+        dep_cmp_template = dep_cmp.get_component_template_parent()
+        antec_cmp_template = antec_cmp.get_component_template_parent()
         opts_create_dep = {
           :antec_attr_pattern => @source_attr_pattern,
           :dep_attr_pattern => @target_attr_pattern,
           :update_dsl => true
         }
-        Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts_create_dep)
+        Model.Transaction do
+          result = Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,opts_create_dep)
+          if link_def_info = result[:link_def_created]
+            service_type = link_def_info[:type]
+            assembly.add_service_link?(service_type,dep_cmp.id_handle(),antec_cmp.id_handle())
+          end
+        end
       end
 
      private

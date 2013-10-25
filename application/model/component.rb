@@ -335,7 +335,9 @@ module DTK
         pntr = ndx_ret[link_def[:id]] ||= link_def.merge(:link_def_links => Array.new)
         pntr[:link_def_links] << r[:link_def_link]
       end
-      ndx_ret.values()
+      ret =  ndx_ret.values()
+      ret.each{|r|r[:link_def_links].sort!{|a,b|a[:position] <=> b[:position]}}
+      ret
     end
 
     def get_config_file(file_name)

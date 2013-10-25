@@ -56,9 +56,9 @@ module DTK
       base_klass = load_and_return_version_adapter_class(integer_version)
       klass = base_klass.const_get('IncrementalGenerator')
       augmented_objects.inject(Hash.new) do |h,aug_obj|
-        parsed = klass.generate(aug_obj)
-        pp [:debug,parsed]
-        h.merge(parsed)
+        generated_hash = klass.generate(aug_obj)
+        pp [:debug,generated_hash]
+        h.merge(generated_hash)
       end
     end
 

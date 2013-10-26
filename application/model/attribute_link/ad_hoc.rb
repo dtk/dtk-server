@@ -8,7 +8,7 @@ module DTK
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
-Model.Transaction do
+#Model.Transaction do
           result = AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
@@ -20,7 +20,7 @@ Model.Transaction do
             #alos it looks like it can get which end is dependent wrong
             create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,:all_dep_component_instances=>true)
           end
-end
+#end
         else
           create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)
         end

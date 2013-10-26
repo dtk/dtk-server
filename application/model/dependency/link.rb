@@ -21,12 +21,13 @@ module DTK; class Dependency
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         end
       else
-        aug_link_defs = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+        link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+        aug_link_defs = cmp_template.get_augmented_link_defs()
         fragment_hash = incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         unless fragment_hash.size == 1
           raise Error.new("Not implemented when fragment hash has more than one element")
         end
-        ret = {:link_def_created => {:hash_form => fragment_hash}}
+        ret = {:link_def_created => {:hash_form => link_def_create_hash}}
       end
       ret
     end
@@ -100,7 +101,7 @@ module DTK; class Dependency
       }
       link_def_create_hash = LinkDef.parse_from_create_dependency(serialized_link_def)
       Model.input_hash_content_into_model(cmp_template.id_handle(),:link_def => link_def_create_hash)
-      cmp_template.get_augmented_link_defs()
+      link_def_create_hash
     end
 
     def self.incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts={})

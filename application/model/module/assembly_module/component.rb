@@ -35,12 +35,17 @@ module DTK; class AssemblyModule
     end
 
    private
-    def self.create_assembly_branch?(assembly,component_module)
+    def self.create_assembly_branch?(assembly,component_module,opts={})
       module_version = ModuleVersion.ret(assembly)
       unless component_module.get_workspace_module_branch(module_version)
         create_assembly_branch(component_module,module_version)
       end
-      component_module.get_workspace_branch_info(module_version)
+      ret = component_module.get_workspace_branch_info(module_version)
+      if opts[:ret_module_branch]
+        ret[:module_branch_idh].create_object()
+      else
+        ret
+      end
     end
 
     def self.create_assembly_branch(component_module,module_version)

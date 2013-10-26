@@ -38,14 +38,14 @@ module DTK
       end
     end
 
-    #returns [dsl_file_path,hash_content]
+    #returns [dsl_file_path,hash_content,fragment_hash]
     def self.incremental_generate(module_branch,augmented_objects,context={})
       augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
       helper = IncrementalGeneratorHelper.new(augmented_objects)
       info = get_dsl_file_hash_content_info(module_branch)
       full_hash = info[:hash_content]
-      helper.update_full_hash!(full_hash,augmented_objects,context)
-      [info[:dsl_filename],full_hash]
+      fragment_hash = helper.update_full_hash!(full_hash,augmented_objects,context)
+      [info[:dsl_filename],full_hash,fragment_hash]
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -115,12 +115,11 @@ module DTK
       end
 
       def update_full_hash!(full_hash,augmented_objects,context={})
-        fragment = get_config_fragment_hash_form(augmented_objects)
-        merge_fragment_into_full_hash!(full_hash,@object_class,fragment,context)
-        full_hash
+        fragment_hash = get_config_fragment_hash_form(augmented_objects)
+        merge_fragment_into_full_hash!(full_hash,@object_class,fragment_hash,context)
+        fragment_hash
       end
 
-     private
       def get_config_fragment_hash_form(augmented_objects)
         augmented_objects.inject(Hash.new) do |h,aug_obj|
           generated_hash = @version_klass.generate(aug_obj)

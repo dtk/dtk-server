@@ -22,7 +22,11 @@ module DTK; class Dependency
         end
       else
         aug_link_defs = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
-        incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
+        fragment_hash = incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
+        unless fragment_hash.size == 1
+          raise Error.new("Not implemented when fragment hash has more than one element")
+        end
+        ret = {:link_def_created => {:ref => fragment_hash.keys.first}}
       end
       ret
     end
@@ -104,8 +108,9 @@ module DTK; class Dependency
         unless module_branch = update_dsl[:module_branch]
           raise Error.new("If update_dsl is specified then module_branch must be provided")
         end
-        dsl_path,hash_content = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
+        dsl_path,hash_content,fragment_hash = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
         module_branch.serialize_and_save_to_repo(dsl_path,hash_content)
+        fragment_hash
       end
     end
   end

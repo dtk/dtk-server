@@ -3,7 +3,7 @@ module DTK; class Component
     def self.get_objs(mh,sp_hash,opts={})
       #TODO: might want to change to just :model_name == component_instance
       if [:component,:component_instance].include?(mh[:model_name])
-        super.map{|cmp|create_from_component(cmp)}
+        super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
       else
         super
       end

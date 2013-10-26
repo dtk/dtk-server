@@ -10,11 +10,12 @@ module DTK; class AssemblyModule
       def update_assembly_module(opts={})
         #determine which is the dependent component and which is the antec one 
         dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
+        dep_cmp_template = dep_cmp.get_component_template_parent()
+        antec_cmp_template = antec_cmp.get_component_template_parent()
+
         component_module = dep_cmp_template.get_component_module()
         module_branch = self.class.create_assembly_branch?(@assembly,component_module,:ret_module_branch=>true)
 
-        dep_cmp_template = dep_cmp.get_component_template_parent()
-        antec_cmp_template= antec_cmp.get_component_template_parent()
         opts_create_dep = {
           :antec_attr_pattern => @source_attr_pattern,
           :dep_attr_pattern => @target_attr_pattern,

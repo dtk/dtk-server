@@ -8,7 +8,7 @@ module DTK
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
-Transaction do
+Model.Transaction do
           result = AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
@@ -31,11 +31,11 @@ end
         @attr_pattern[type]
       end
 
-      def all_dep_component_instance_hashes()
+      def all_dep_component_instance_hashes(assembly)
         ret = [self]
         #get peer component instances
         cmp_instance = attribute_pattern(:target).component_instance
-        peer_cmps = @assembly_idh.create_object().get_peer_component_instances(cmp_instance)
+        peer_cmps = assembly.get_peer_component_instances(cmp_instance)
         return ret if peer_cmps.empty?
         #find the matching attributes on the peer components
         sp_hash = {
@@ -43,9 +43,9 @@ end
           :filter => [:and,[:oneof,:component_component_id,peer_cmps.map{|cmp|cmp.id()}],
                       [:eq,:display_name,attribute_pattern(:target).attribute_name]]
         }
-        assembly_id = @assembly_idh.get_id()
+        assembly_id = assembly.id()
         output_attr_id = attribute_pattern(:source).attribute_id()
-        peer_attrs = Model.get_objs(@assembly_idh.createMH(:attribute),sp_hash).map do |input_attr|
+        peer_attrs = Model.get_objs(assembly.model_handle(:attribute),sp_hash).map do |input_attr|
           {
             :input_id => input_attr.id(),
             :output_id => output_attr_id,
@@ -57,10 +57,9 @@ end
       end
 
      private
-      def initialize(hash,assembly_idh,target_attr_pattern,source_attr_pattern)
+      def initialize(hash,target_attr_pattern,source_attr_pattern)
         super()
         replace(hash)
-        @assembly_idh = assembly_idh
         @attr_pattern = {
           :target => target_attr_pattern,
           :source => source_attr_pattern.attribute_pattern
@@ -70,9 +69,9 @@ end
       def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
         #This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
         #adds the link_def to it and then service link between this and antec_cmp
-        service_type = link_def_hash.keys
+        service_type = link_def_hash.keys.first
         antec_cmp_idh = antec_cmp.id_handle()
-        (dep_cmp + assembly.get_peer_component_instances(dep_cmp)).each do |cmp|
+        ([dep_cmp] + assembly.get_peer_component_instances(dep_cmp)).each do |cmp|
            #TODO: can be more efficient to combine these two operations and see if can bulk them
            cmp_idh = cmp.id_handle()
            Model.input_hash_content_into_model(cmp_idh,:link_def => link_def_hash)
@@ -83,7 +82,7 @@ end
       def self.create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,opts={})
         if opts[:all_dep_component_instances]
           attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
-            a + adhoc_link.all_dep_component_instance_hashes()
+            a + adhoc_link.all_dep_component_instance_hashes(assembly)
           end
           create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
         else
@@ -144,7 +143,7 @@ end
 
         target_attr_pattern.attribute_idhs.map do |target_attr_idh|
           hash = attr_info.merge(:input_id => target_attr_idh.get_id())
-          new(hash,assembly_idh,target_attr_pattern,source_attr_pattern)
+          new(hash,target_attr_pattern,source_attr_pattern)
         end
       end
     end

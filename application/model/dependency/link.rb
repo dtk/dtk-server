@@ -26,7 +26,7 @@ module DTK; class Dependency
         unless fragment_hash.size == 1
           raise Error.new("Not implemented when fragment hash has more than one element")
         end
-        ret = {:link_def_created => {:ref => fragment_hash.keys.first}}
+        ret = {:link_def_created => {:hash_form => fragment_hash}}
       end
       ret
     end

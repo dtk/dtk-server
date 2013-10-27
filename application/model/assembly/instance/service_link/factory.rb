@@ -57,18 +57,28 @@ module DTK
         def create_port(direction)
           @input_cmp.update_object!(:node_node_id,:component_type)
           @output_cmp.update_object!(:node_node_id,:component_type)
-          link_def_stub = {:link_type => @service_type}
-          if @input_cmp[:node_node_id] == @output_cmp[:node_node_id]
-            link_def_stub[:has_internal_link] = true
-          else
-            link_def_stub[:has_external_link] = true
-          end
+          link_def_stub = link_def_stub(direction)
           component = (direction == :input ? @input_cmp : @output_cmp)
           node = @assembly_instance.id_handle(:model_name => :node,:id => component[:node_node_id]).create_object()
           create_hash = Port.ret_port_create_hash(link_def_stub,node,component,:direction => direction.to_s)
           port_mh = node.child_model_handle(:port)
           new_port_idh = Model.create_from_rows(port_mh,[create_hash]).first
           new_port_idh.create_object()
+        end
+
+        def link_def_stub(direction)
+          link_def_stub = {:link_type => @service_type}
+          if @input_cmp[:node_node_id] == @output_cmp[:node_node_id]
+            link_def_stub[:has_internal_link] = true
+          else
+            link_def_stub[:has_external_link] = true
+          end
+          link_def_stub
+          if direction == :input
+            #TODO: see if matching link_def matching on [:and,[:eq,:component_component,@input_cmp.id()],[:eq,:link_type,<link_type]
+            #and insert it in link_def_stub[:id]
+          end
+          link_def_stub
         end
         
         def create_new_port_and_atttrs_link(input_port,output_port)

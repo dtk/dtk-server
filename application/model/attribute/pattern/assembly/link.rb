@@ -43,8 +43,7 @@ module DTK; class Attribute::Pattern
           hash = attr_info.merge(:input_id => target_attr_idh.get_id())
           parent.new(hash,target_attr_pattern.attribute_pattern,source_attr_pattern)
         end
-        opts = {:target_attr_term => target_attr_term,:source_attr_term=>source_attr_term}
-        dep_cmp,antec_cmp = determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern,opts)
+        dep_cmp,antec_cmp = determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
         Info.new(parsed_adhoc_links,dep_cmp,antec_cmp)
       end
 

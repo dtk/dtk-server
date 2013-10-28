@@ -3,12 +3,13 @@ module DTK; class Attribute::Pattern
     #for attribute relation sources
     class Source < self
       def self.create_attr_pattern(base_object,source_attr_term)
-        attr_term,fn = Simple.parse(source_attr_term) || 
+        attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) || 
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
           raise ErrorParse.new(source_attr_term)
         end
         attr_pattern = super(base_object,attr_term)
+pp [attr_pattern,attr_term,fn,node_cmp_type]
         new(attr_pattern,fn,attr_term)
       end
       
@@ -32,16 +33,31 @@ module DTK; class Attribute::Pattern
         @fn = fn
       end
 
-      class Simple
+      module Simple
         def self.parse(source_term)
           if source_term =~ /^\$([a-z\-_0-9:\[\]\/]+$)/
-            attr_term = $1
-            [attr_term,nil]
+            attr_term_x = $1
+            fn = nil
+            attr_term,node_cmp_type = strip_special_symbols(attr_term_x)
+            [attr_term,fn,node_cmp_type]
           end
+        end
+
+       private
+        #TODO: need better way to do this; there is alsso an ambiguity if component level attribute host_address
+        #returns [attr_term,node_cmp_type] where last term can be nil
+        def self.strip_special_symbols(attr_term)
+          ret = [attr_term,nil]
+          split = attr_term.split('/')
+          if split.size == 3 and split[2] == 'host_address'
+            node_name,cmp_name,attr_name = split
+            ret = ["#{node_name}/#{attr_name}",Component.display_name_from_user_friendly_name(cmp_name)]
+          end
+          ret
         end
       end
 
-      class VarEmbeddedInText
+      module VarEmbeddedInText
         def self.parse(source_term)
           #TODO: change after fix stripping off of ""
           if source_term =~ /(^[^\$]*)\$\{([^\}]+)\}(.*)/
@@ -56,7 +72,8 @@ module DTK; class Attribute::Pattern
                 }
               }
             }
-            [attr_term,fn]
+            node_cmp_type =  nil
+            [attr_term,fn,node_cmp_type]
           end        
         end
         

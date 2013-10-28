@@ -51,6 +51,12 @@ module DTK; class Attribute
         def attribute_id()
           attribute_stack()[:attribute].id()
         end
+        def component_instance()
+          attribute_stack()[:component]
+        end
+        def set_component_instance!(cmp_instance)
+          attribute_stack()[:component] = cmp_instance
+        end
         def node()
           attribute_stack()[:node]
         end
@@ -61,10 +67,6 @@ module DTK; class Attribute
 
         def am_serialized_form()
           raise Error.new("Not implemented yet")
-        end
-
-        def component_instance()
-          nil
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})
@@ -100,10 +102,6 @@ module DTK; class Attribute
 
         def am_serialized_form()
           "#{component_instance()[:component_type]}.#{attribute_name()}"
-        end
-
-        def component_instance()
-          attribute_stack()[:component]
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})

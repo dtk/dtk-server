@@ -15,8 +15,6 @@ opts[:update_meta] = true
             antec_cmp = result[:antec_component]
             create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
           else
-            #TODO: this should be changed to adding service links rather than adhoc links
-            #alos it looks like it can get which end is dependent wrong
             create_attribute_links?(assembly,parsed_adhoc_links,dep_cmp)
           end
         else

@@ -9,8 +9,7 @@ module DTK; class AssemblyModule
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
-      cmp_instances = get_applicable_component_instances(assembly,component_module)
-      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
+      modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
     end
 
     def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
@@ -54,6 +53,11 @@ module DTK; class AssemblyModule
       component_module.create_new_version(module_version,opts)
     end
 
+    def self.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
+      cmp_instances = get_applicable_component_instances(assembly,component_module)
+      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
+    end
+
     def self.delete_modules?(assembly)
       module_version = ModuleVersion.ret(assembly)
       #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
@@ -70,10 +74,10 @@ module DTK; class AssemblyModule
 
     def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]
-      cmp_instances_needing_update = cmp_instances.reject{|cmp|cmp[:module_branch_id] == module_branch_id}
+      cmp_instances_needing_update = cmp_instances.reject{|cmp|cmp.get_field?(:module_branch_id) == module_branch_id}
       return if cmp_instances_needing_update.empty?
-      component_types = cmp_instances_needing_update.map{|cmp|cmp[:component_type]}.uniq
-      version_field = module_branch[:version]
+      component_types = cmp_instances_needing_update.map{|cmp|cmp.get_field?(:component_type)}.uniq
+      version_field = module_branch.get_field?(:version)
       type_version_field_list = component_types.map{|ct|{:component_type => ct, :version_field => version_field}}
       ndx_cmp_templates = DTK::Component::Template.get_matching_type_and_version(project_idh,type_version_field_list).inject(Hash.new) do |h,r|
         h.merge(r[:component_type] => r)

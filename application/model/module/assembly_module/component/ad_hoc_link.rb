@@ -22,7 +22,9 @@ module DTK; class AssemblyModule
           :update_dsl => true
         }
         result = Dependency.create_dependency?(:link,@assembly,dep_cmp_template,antec_cmp_template,module_branch,opts_create_dep)
-
+        if result[:component_module_updated]
+          self.class.modify_cmp_instances_with_new_parents(@assembly,component_module,module_branch)
+        end
         result.merge(:dep_component => dep_cmp, :antec_component => antec_cmp) 
       end
 

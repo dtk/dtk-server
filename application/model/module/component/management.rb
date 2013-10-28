@@ -94,7 +94,7 @@ module DTK; class ComponentModule
       Transaction do
         model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version, opts)
         #TODO: have ComponentDSL.parse_and_update_model return if any deletes
-        #below is teh conservative thing to do if dont know if any deletes
+        #below is the conservative thing to do if dont know if any deletes
         any_deletes = true
         if opts[:no_deletes_performed]
           any_deletes = false

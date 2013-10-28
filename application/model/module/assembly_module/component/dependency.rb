@@ -21,6 +21,7 @@ module DTK; class AssemblyModule
           :cols => [:id,:group_id,:display_name,:component_type],
           :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
                       [:eq,:type,'template'],
+                      [:eq,:node_node_id,nil],
                       [:eq,:component_type,cmp_template.get_field?(:component_type)]]
         }
         Model.get_obj(cmp_template.model_handle(),sp_hash)

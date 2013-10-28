@@ -6,7 +6,7 @@ module DTK; class Dependency
     end
 
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
-      ret = Hash.new
+      result = Hash.new
       antec_attr_pattern = opts[:antec_attr_pattern]
       dep_attr_pattern = opts[:dep_attr_pattern ]
       unless antec_attr_pattern and  dep_attr_pattern
@@ -19,6 +19,7 @@ module DTK; class Dependency
           #aug_link_defs gets updated as side effect
           link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
+          result.merge!(:component_module_updated => true)
         end
       else
         link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
@@ -27,9 +28,9 @@ module DTK; class Dependency
         unless fragment_hash.size == 1
           raise Error.new("Not implemented when fragment hash has more than one element")
         end
-        ret = {:link_def_created => {:hash_form => link_def_create_hash}}
+        result.merge!(:component_module_updated => true, :link_def_created => {:hash_form => link_def_create_hash})
       end
-      ret
+      result
     end
 
     def depends_on_print_form?()

@@ -16,6 +16,10 @@ module DTK; class Attribute::Pattern
       def attribute_idh()
         @attribute_pattern.attribute_idhs.first
       end
+      def component_instance()
+        @attribute_pattern.component_instance()
+      end
+
      private
       def initialize(attr_pattern,fn,attr_term)
         attr_idhs = attr_pattern.attribute_idhs

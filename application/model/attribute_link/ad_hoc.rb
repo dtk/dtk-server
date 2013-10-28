@@ -8,7 +8,6 @@ module DTK
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
-#Model.Transaction do
           result = AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
@@ -20,7 +19,6 @@ opts[:update_meta] = true
             #alos it looks like it can get which end is dependent wrong
             create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,:all_dep_component_instances=>true)
           end
-#end
         else
           create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)
         end
@@ -69,7 +67,7 @@ opts[:update_meta] = true
       def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
         #This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
         #adds the link_def to it and then service link between this and antec_cmp
-        service_type = link_def_hash.keys.first
+        service_type = link_def_hash.values.first[:link_type]
         antec_cmp_idh = antec_cmp.id_handle()
         ([dep_cmp] + assembly.get_peer_component_instances(dep_cmp)).each do |cmp|
            #TODO: can be more efficient to combine these two operations and see if can bulk them

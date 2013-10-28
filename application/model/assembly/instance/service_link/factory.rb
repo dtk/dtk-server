@@ -25,7 +25,7 @@ module DTK
               raise Error.new("Unexpected result that matches more than one port link (#{pl_matches.inspect})")
             end
           end
-          port_link ||= create_new_port_and_atttrs_link(input_port,output_port)
+          port_link ||= create_new_port_and_attr_links(input_port,output_port)
           port_link.id_handle() 
         end
         
@@ -73,15 +73,22 @@ module DTK
           else
             link_def_stub[:has_external_link] = true
           end
-          link_def_stub
           if direction == :input
-            #TODO: see if matching link_def matching on [:and,[:eq,:component_component,@input_cmp.id()],[:eq,:link_type,<link_type]
-            #and insert it in link_def_stub[:id]
+            sp_hash = {
+              :cols => [:id],
+              :filter => [:and,[:eq,:component_component_id,@input_cmp.id()],
+                          [:eq,:link_type,link_def_stub[:link_type]]]
+            }
+            if match = Model.get_obj(@input_cmp.model_handle(:link_def),sp_hash)
+              link_def_stub[:id] =  match[:id]
+            else
+              Log.error("Unexpected that input component does not have a matching link def")
+            end
           end
           link_def_stub
         end
         
-        def create_new_port_and_atttrs_link(input_port,output_port)
+        def create_new_port_and_attr_links(input_port,output_port)
           port_link_hash = {
             :input_id => input_port.id(),
             :output_id  => output_port.id(),

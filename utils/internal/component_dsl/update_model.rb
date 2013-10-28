@@ -82,17 +82,9 @@ module DTK; class ComponentDSL
 
       input_hash.keys.inject(Hash.new()) do |h,k|
         cmp_info = input_hash[k]
-        modified_cmp_info = cmp_info.merge(override_attrs).merge("display_name" => component_display_name_with_version(cmp_info["display_name"],version))
-        h.merge(component_ref_with_version(k,version) => modified_cmp_info)
+        modified_cmp_info = cmp_info.merge(override_attrs).merge("display_name" => Component.name_with_version(cmp_info["display_name"],version))
+        h.merge(Component.ref_with_version(k,version) => modified_cmp_info)
       end
-    end
-
-    #TODO: move to more central place
-    def component_ref_with_version(ref,version)
-      "#{ref}__#{version}"
-    end
-    def component_display_name_with_version(display_name,version)
-      "#{display_name}(#{version})"
     end
   end
 

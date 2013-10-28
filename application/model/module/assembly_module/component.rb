@@ -1,9 +1,11 @@
 module DTK; class AssemblyModule
   class Component < self
+    r8_nested_require('component','dependency')
+    r8_nested_require('component','ad_hoc_link')
+
     def self.prepare_for_edit(assembly,component_module)
-     get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
-      module_version = ModuleVersion.ret(assembly)
-      create_assembly_branch?(assembly,component_module,module_version)
+      get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
+      create_assembly_branch?(assembly,component_module)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
@@ -11,22 +13,39 @@ module DTK; class AssemblyModule
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
+    def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
+      Dependency.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
+    end
+
     def self.promote_module_updates(assembly,component_module)
-       module_version = ModuleVersion.ret(assembly)
-       branch = component_module.get_workspace_module_branch(module_version)
-       unless ancestor_branch = branch.get_ancestor_branch?()
-         raise Error.new("Cannot find ancestor branch")
-       end
-       branch_name = branch[:branch]
-       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
+      module_version = ModuleVersion.ret(assembly)
+      branch = component_module.get_workspace_module_branch(module_version)
+      unless ancestor_branch = branch.get_ancestor_branch?()
+        raise Error.new("Cannot find ancestor branch")
+      end
+      branch_name = branch[:branch]
+      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
+    end
+
+    def self.update_from_adhoc_links(assembly,parsed_adhoc_links,opts={})
+      unless parsed_adhoc_links.size == 1
+        raise Error.new("Only implented update_from_adhoc_links  size == 1")
+      end
+      AdHocLink.new(assembly,parsed_adhoc_links.first).update_assembly_module()
     end
 
    private
-    def self.create_assembly_branch?(assembly,component_module,module_version)
+    def self.create_assembly_branch?(assembly,component_module,opts={})
+      module_version = ModuleVersion.ret(assembly)
       unless component_module.get_workspace_module_branch(module_version)
         create_assembly_branch(component_module,module_version)
       end
-      component_module.get_workspace_branch_info(module_version)
+      ret = component_module.get_workspace_branch_info(module_version)
+      if opts[:ret_module_branch]
+        ret[:module_branch_idh].create_object()
+      else
+        ret
+      end
     end
 
     def self.create_assembly_branch(component_module,module_version)
@@ -37,7 +56,14 @@ module DTK; class AssemblyModule
 
     def self.delete_modules?(assembly)
       module_version = ModuleVersion.ret(assembly)
-      assembly.get_component_modules().each do |component_module|
+      #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_id],
+        :filter => [:eq,:version,module_version]
+      }
+      component_module_mh = assembly.model_handle(:component_module)
+      Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
+        component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
         component_module.delete_version?(module_version)
       end
     end

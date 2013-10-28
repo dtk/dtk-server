@@ -20,7 +20,6 @@ R8::ReactorRoute.draw do
   post  'assembly/add__service_add_on' => 'assembly#add__service_add_on'
   post  'assembly/create_smoketests_task' => 'assembly#create_smoketests_task'
   post  'assembly/list_attribute_mappings' => 'assembly#list_attribute_mappings'
-  post  'assembly/add_ad_hoc_attribute_mapping' => 'assembly#add_ad_hoc_attribute_mapping'
   post  'assembly/add_ad_hoc_attribute_links' => 'assembly#add_ad_hoc_attribute_links'
   post  'assembly/delete_service_link' => 'assembly#delete_service_link'
   post  'assembly/add_service_link' => 'assembly#add_service_link'
@@ -55,6 +54,7 @@ R8::ReactorRoute.draw do
   post  'assembly/delete_component' => 'assembly#delete_component'
   post  'assembly/get_components_module' => 'assembly#get_components_module'
   post  'assembly/prepare_for_edit_module' => 'assembly#prepare_for_edit_module'
+  post  'assembly/create_component_dependency' => 'assembly#create_component_dependency'
   post  'assembly/promote_module_updates' => 'assembly#promote_module_updates'
   post  'assembly/clear_tasks' => 'assembly#clear_tasks'
 

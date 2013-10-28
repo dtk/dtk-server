@@ -7,8 +7,7 @@ module DTK; class ComponentModule
       module_branch = module_branch_idh.create_object()
       parsed = create_needed_objects_and_dsl?(repo,version, opts)
       module_branch.set_sha(commit_sha)
-
-      return parsed
+      parsed
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
@@ -87,6 +86,28 @@ module DTK; class ComponentModule
       create_needed_objects_and_dsl?(repo,version)
     end
 
+    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
+      #get associated assembly templates before do any updates and use to see if any dangling references
+      #within transaction after do update
+      aug_component_templates = get_aug_associated_component_templates()
+      model_parsed = nil
+      Transaction do
+        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version, opts)
+        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
+        #below is teh conservative thing to do if dont know if any deletes
+        any_deletes = true
+        if opts[:no_deletes_performed]
+          any_deletes = false
+        end
+        if any_deletes
+          raise_errors_if_dangling_cmp_refs(aug_component_templates)
+        end
+      end
+
+      return model_parsed if (model_parsed.is_a?(ErrorUsage::DSLParsing) || model_parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
+      set_dsl_parsed!(true)
+    end
+
    private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
       create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
@@ -148,28 +169,6 @@ module DTK; class ComponentModule
       dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if(dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
       
       dsl_info
-    end
-
-    def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
-      #get associated assembly templates before do any updates and use to see if any dangling references
-      #within transaction after do update
-      aug_component_templates = get_aug_associated_component_templates()
-      model_parsed = nil
-      Transaction do
-        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version, opts)
-        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
-        #below is teh conservative thing to do if dont know if any deletes
-        any_deletes = true
-        if opts[:no_deletes_performed]
-          any_deletes = false
-        end
-        if any_deletes
-          raise_errors_if_dangling_cmp_refs(aug_component_templates)
-        end
-      end
-
-      return model_parsed if (model_parsed.is_a?(ErrorUsage::DSLParsing) || model_parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
-      set_dsl_parsed!(true)
     end
 
     def raise_errors_if_dangling_cmp_refs(aug_component_templates)

@@ -4,10 +4,12 @@ module DTK
       def add_service_link?(service_type,input_cmp_idh,output_cmp_idh)
         ServiceLink::Factory.new(self,service_type,input_cmp_idh,output_cmp_idh).add?()
       end
-
+=begin
+#TODO: deprecated
       def add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
         ServiceLink::AttributeMapping.add(self,port_link,attribute_mapping)
       end
+=end
 
       def list_service_links(opts={})
         get_opts = Aux.hash_subset(opts,[:filter])

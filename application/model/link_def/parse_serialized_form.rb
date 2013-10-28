@@ -4,18 +4,19 @@ module DTK; class LinkDef
       ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse(link_defs)
     end
 
-    #TODO: this is here so that can put attribute mappings from add hoc link commands in proper form
+    #This is used to convert from add hoc link commands into internal form
     def parse_serialized_form_attribute_mapping(mapping)
-      #TODO: none of these used in attribute mapping parsing
-      config_agent_type = remote_link_defs = local_cmp_ref = nil
-      ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse_possible_link_attribute_mapping(mapping)
+      ParseSerializedForm.new().parse_possible_link_attribute_mapping(mapping)
     end
 
+    def parse_from_create_dependency(link_def)
+      ParseSerializedForm.new().parse([link_def])
+    end
   end
 
   class ParseSerializedForm
     attr_reader :config_agent_type,:remote_link_defs,:local_cmp_ref
-    def initialize(config_agent_type,remote_link_defs,local_cmp_ref)
+    def initialize(config_agent_type=nil,remote_link_defs={},local_cmp_ref=nil)
       @config_agent_type = config_agent_type
       @remote_link_defs = remote_link_defs
       @local_cmp_ref = local_cmp_ref
@@ -29,12 +30,12 @@ module DTK; class LinkDef
           :has_internal_link=>false,
           :has_external_link=>false
         }
-        possible_link = parse_possible_links_local(link_def["possible_links"],link_def_type,has_external_internal)
+        possible_links = parse_possible_links_local(link_def["possible_links"],link_def_type,has_external_internal)
         el = {
           :display_name => ref,
           :local_or_remote => "local",
           :link_type => link_def_type,
-          :link_def_link => possible_link
+          :link_def_link => possible_links
         }.merge(has_external_internal)
         el.merge!(:required => link_def["required"]) if link_def.has_key?("required")
         el.merge!(:description => link_def["description"]) if link_def.has_key?("description")

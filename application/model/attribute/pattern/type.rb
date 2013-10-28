@@ -4,6 +4,7 @@ module DTK; class Attribute
       def initialize(pattern)
         @pattern = pattern
       end
+
      private
       attr_reader :pattern, :id
 
@@ -20,9 +21,13 @@ module DTK; class Attribute
           end
         end
 
-        def ret_or_create_attributes(parent_idh,opts={})
-          [parent_idh.createIDH(:model_name => :attribute, :id => id())]
+        attr_reader :attribute_idhs
+
+        def set_parent_and_attributes!(parent_idh,opts={})
+          @attribute_idhs = [parent_idh.createIDH(:model_name => :attribute, :id => id())]
+          self
         end
+
        private
         def raise_error_if_not_node_attr_id(attr_id,node)
           unless node.get_node_and_component_attributes().find{|r|r[:id] == attr_id}
@@ -36,16 +41,49 @@ module DTK; class Attribute
         end
       end
 
+      module CommonNodeComponentLevel
+        def attribute_idhs()
+          @attribute_stacks.map{|r|r[:attribute].id_handle()}
+        end
+        def attribute_name()
+          attribute_stack()[:attribute][:display_name]
+        end
+        def attribute_id()
+          attribute_stack()[:attribute].id()
+        end
+        def node()
+          attribute_stack()[:node]
+        end
+      end
+
       class NodeLevel < self
-        def ret_or_create_attributes(parent_idh,opts={})
-          ret = Array.new
-          node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if node_idhs.empty?
+        include CommonNodeComponentLevel
+
+        def am_serialized_form()
+          raise Error.new("Not implemented yet")
+        end
+
+        def component_instance()
+          nil
+        end
+
+        def set_parent_and_attributes!(parent_idh,opts={})
+          ret = self
+          @attribute_stacks = Array.new
+          ndx_nodes = ret_matching_nodes(parent_idh).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+          return ret if ndx_nodes.empty?
 
           pattern =~ /^node[^\/]*\/(attribute.+$)/  
           attr_fragment = attr_name_special_processing($1)
-          ret_matching_attribute_idhs(:node,node_idhs,attr_fragment)
+          @attribute_stacks = ret_matching_attributes(:node,ndx_nodes.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+            {
+              :attribute => attr,
+              :node => ndx_nodes[attr[:node_node_id]]
+            }
+          end
+          ret
         end
+
        private
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
@@ -58,24 +96,50 @@ module DTK; class Attribute
       end
 
       class ComponentLevel < self
-        def ret_or_create_attributes(parent_idh,opts={})
-          ret = Array.new
-          node_idhs = ret_matching_node_idhs(parent_idh)
-          return ret if node_idhs.empty?
+        include CommonNodeComponentLevel
+
+        def am_serialized_form()
+          "#{component_instance()[:component_type]}.#{attribute_name()}"
+        end
+
+        def component_instance()
+          attribute_stack()[:component]
+        end
+
+        def set_parent_and_attributes!(parent_idh,opts={})
+          ret = self
+          @attribute_stacks = Array.new
+          ndx_nodes  = ret_matching_nodes(parent_idh).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+          return ret if ndx_nodes.empty?
 
           pattern  =~ /^node[^\/]*\/(component.+$)/
           cmp_fragment = $1
-          cmp_idhs = ret_matching_component_idhs(node_idhs,cmp_fragment)
-          return ret if cmp_idhs.empty?
+          ndx_cmps = ret_matching_components(ndx_nodes.values,cmp_fragment).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+          return ret if ndx_cmps.empty?
           
           cmp_fragment =~ /^component[^\/]*\/(attribute.+$)/  
           attr_fragment = $1
-          ret_matching_attribute_idhs(:component,cmp_idhs,attr_fragment)
+          @attribute_stacks = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+            cmp = ndx_cmps[attr[:component_component_id]]
+            {
+              :attribute => attr,
+              :component => cmp,
+              :node => ndx_nodes[cmp[:node_node_id]]
+            }
+          end 
+          ret
         end
       end
 
+      def attribute_stack()
+        unless @attribute_stacks.size == 1
+          raise Error.new("attribute_stack() should only be called when @attribute_stacks.size == 1")
+        end
+        @attribute_stacks.first
+      end
+          
       #parent will be node_idh or assembly_idh
-      def ret_matching_node_idhs(parent_idh)
+      def ret_matching_nodes(parent_idh)
         if parent_idh[:model_name] == :node
           return [parent_idh]
         end
@@ -84,41 +148,42 @@ module DTK; class Attribute
           filter = [:and, filter, node_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name],
           :filter => filter
         }
-        Model.get_objs(parent_idh.createMH(:node),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(parent_idh.createMH(:node),sp_hash)
       end
 
-      def ret_matching_component_idhs(node_idhs,cmp_fragment)
-        filter = [:oneof, :node_node_id, node_idhs.map{|idh|idh.get_id()}]
+      def ret_matching_components(nodes,cmp_fragment)
+        filter = [:oneof, :node_node_id, nodes.map{|r|r.id()}]
         if cmp_filter = ret_filter(cmp_fragment,:component)
           filter = [:and, filter, cmp_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name,:component_type,:node_node_id,:ancestor_id],
           :filter => filter
         }
-        sample_idh = node_idhs.first
-        Model.get_objs(sample_idh.createMH(:component),sp_hash).map{|r|r.id_handle()}
+        cmp_mh = nodes.first.model_handle(:component)
+        Model.get_objs(cmp_mh,sp_hash).map{|r|Component::Instance.create_from_component(r)}
       end
 
-      def ret_matching_attribute_idhs(type,idhs,attr_fragment)
+      def ret_matching_attributes(type,idhs,attr_fragment)
         filter = [:oneof, TypeToIdField[type], idhs.map{|idh|idh.get_id()}]
         if attr_filter = ret_filter(attr_fragment,:attribute)
           filter = [:and, filter, attr_filter]
         end
         sp_hash = {
-          :cols => [:display_name,:id],
+          :cols => [:id,:group_id,:display_name,TypeToIdField[type]],
           :filter => filter
         }
         sample_idh = idhs.first
-        Model.get_objs(sample_idh.createMH(:attribute),sp_hash).map{|r|r.id_handle()}
+        Model.get_objs(sample_idh.createMH(:attribute),sp_hash)
       end
       TypeToIdField = {
         :component => :component_component_id,
         :node => :node_node_id
       }
+
       def ret_filter(fragment,type)
         if term = Pattern::Term.extract_term?(fragment)
           if type == :component
@@ -141,8 +206,8 @@ module DTK; class Attribute
           nil #without qualification means all (no filter)
         end
       end
-    end
 
+    end
   end
 end; end
 

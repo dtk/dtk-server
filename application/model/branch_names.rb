@@ -8,9 +8,6 @@ module DTK
       version.nil? or  (version == VersionFieldDefault)
     end
 
-    def version_display_name(display_name,version)
-      self.class.version_display_name(display_name,version)
-    end
    protected
     def workspace_branch_name(project)
       self.class.workspace_branch_name(project,self[:version])
@@ -29,10 +26,7 @@ module DTK
       (version_field == VersionFieldDefault) ? nil : version_field
     end
 
-    def version_display_name(display_name,version)
-      version ? "#{display_name}(#{version})" : display_name
-    end
-
+    #TODO: deprecate
     def library_branch_name(library_idh,version=nil)
       #TODO: when have multiple libraries that can host same module will need to refine
       #      library = library_idh.create_object().update_object!(:ref)

@@ -8,29 +8,17 @@ module DTK
     include UpdateModelMixin
 
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
-      impl = module_branch.get_implementation()
-      unless dsl_filename = contains_dsl_file?(impl,dsl_integer_version,format_type)
-        raise Error.new("Cannot find DSL file")
-      end
-      parsed_name = parse_dsl_filename(dsl_filename,dsl_integer_version)
-      format_type ||= parsed_name[:format_type]
-      content = RepoManager.get_file_content(dsl_filename,module_branch)
-      input_hash = convert_to_hash(content,format_type)
+      input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
       config_agent_type = ret_config_agent_type(input_hash)
       new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::DSLParsing)
     end
     #TODO: should unify above and two below
     def self.create_dsl_object_from_impl(source_impl,opts={})
-      target_impl = opts[:target_impl]
-
-      unless dsl_filename = contains_dsl_file?(source_impl)
-        raise Error.new("Cannot find DSL file")
-      end
-      content = RepoManager.get_file_content(dsl_filename, :implementation => source_impl)
-      target_impl ||= source_impl
-      create_from_file_obj_hash?(target_impl,dsl_filename,content,opts)
+      target_impl = opts[:target_impl]||source_impl
+      info = get_dsl_file_raw_content_and_info(source_impl)
+      create_from_file_obj_hash?(target_impl,info[:dsl_filename],info[:content],opts)
     end
-    #creates a ComponentDSL if file_obj_hash is a r8meta file
+    #creates a ComponentDSL if file_obj_hash is a dtk meta file
     def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,opts={})
       container_idh = opts[:container_idh]
       return nil unless isa_dsl_filename?(dsl_filename)
@@ -48,6 +36,16 @@ module DTK
         # return ErrorUsage::DSLParsing::JSONParsing.new("#{e} in (dtk.model.json) file") if e.is_a?(ObjectModelForm::ParsingError)
         raise e
       end
+    end
+
+    #returns [dsl_file_path,hash_content,fragment_hash]
+    def self.incremental_generate(module_branch,augmented_objects,context={})
+      augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
+      helper = IncrementalGeneratorHelper.new(augmented_objects)
+      info = get_dsl_file_hash_content_info(module_branch)
+      full_hash = info[:hash_content]
+      fragment_hash = helper.update_full_hash!(full_hash,augmented_objects,context)
+      [info[:dsl_filename],full_hash,fragment_hash]
     end
 
     #returns array where each element with keys :path,:hash_content
@@ -107,6 +105,65 @@ module DTK
     end
 
    private
+    class IncrementalGeneratorHelper < self
+      def initialize(augmented_objects)
+        @object_class = object_class(augmented_objects)
+
+        integer_version = self.class.default_integer_version()
+        base_klass = self.class.load_and_return_version_adapter_class(integer_version)
+        @version_klass = base_klass.const_get('IncrementalGenerator')
+      end
+
+      def update_full_hash!(full_hash,augmented_objects,context={})
+        fragment_hash = get_config_fragment_hash_form(augmented_objects)
+        merge_fragment_into_full_hash!(full_hash,@object_class,fragment_hash,context)
+        fragment_hash
+      end
+
+      def get_config_fragment_hash_form(augmented_objects)
+        augmented_objects.inject(Hash.new) do |h,aug_obj|
+          generated_hash = @version_klass.generate(aug_obj)
+          h.merge(generated_hash)
+        end
+      end
+
+      def merge_fragment_into_full_hash!(full_hash,object_class,fragment,context={})
+        @version_klass.merge_fragment_into_full_hash!(full_hash,object_class,fragment,context)
+        full_hash
+      end
+
+      def object_class(augmented_objects)
+        object_classes = augmented_objects.map{|obj|obj.class}.uniq
+        unless object_classes.size == 1
+          object_classes_print_form = object_classes.map{|r|r.to_s}.join(',')
+          raise Error.new("augmented_objects must have the same type rather than (#{object_classes_print_form})")
+        end
+        object_classes.first
+      end
+    end
+
+    def self.get_dsl_file_hash_content_info(impl_or_module_branch_obj,dsl_integer_version=nil,format_type=nil)
+      impl_obj = 
+        if impl_or_module_branch_obj.kind_of?(Implementation)
+          impl_or_module_branch_obj
+        elsif impl_or_module_branch_obj.kind_of?(ModuleBranch)
+          impl_or_module_branch_obj.get_implementation()
+        else raise Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
+        end
+      info = get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version,format_type)
+      {:hash_content => convert_to_hash(info[:content],info[:format_type])}.merge(Aux::hash_subset(info,[:format_type,:dsl_filename]))
+    end
+
+    def self.get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version=nil,format_type=nil)
+      unless dsl_filename = contains_dsl_file?(impl_obj,dsl_integer_version,format_type)
+        raise Error.new("Cannot find DSL file")
+      end
+      parsed_name = parse_dsl_filename(dsl_filename,dsl_integer_version)
+      format_type ||= parsed_name[:format_type]
+      content = RepoManager.get_file_content(dsl_filename,:implementation => impl_obj)
+      {:content => content,:format_type => format_type,:dsl_filename => dsl_filename}
+    end
+
     def version_parse_check_and_normalize(version_specific_input_hash)
       version = version_specific_input_hash["dsl_version"]
       integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
@@ -117,8 +174,8 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-pp [:input_hash,version_specific_input_hash]
-pp [:normalize,ret]
+#pp [:input_hash,version_specific_input_hash]
+#pp [:normalize,ret]
 =begin
       if self.class.default_integer_version() == 2
         pp ret       

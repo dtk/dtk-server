@@ -367,12 +367,25 @@ module Ramaze::Helper
       end
     end
 
+    def ret_component_template(param,opts={})
+      component_template,component_title = ret_component_template_and_title(param,opts)
+      if component_title
+        raise ::DTK::ErrorUsage.new("Component title should not be given")
+      end
+      component_template
+    end
     #returns [component_template, component_title] where component_title could be nil
-    def ret_component_template_and_title(param)
-      component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template)
+    def ret_component_template_and_title(param,opts={})
+      version = opts[:versions]||opts[:version]
+      component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template,version)
       component_template = component_template_idh.create_object(:model_name => :component_template)
       component_title = ::DTK::ComponentTitle.parse_title?(ret_non_null_request_params(param))
       [component_template,component_title]
+    end
+
+    def ret_component_template_and_title_for_assembly(param,assembly)
+      opts = {:versions => [::DTK::ModuleVersion.ret(assembly),nil]} #so first tries the assembly module context and then the component module context
+      ret_component_template_and_title(param,opts)
     end
 
     def raise_error_null_params?(*null_params)

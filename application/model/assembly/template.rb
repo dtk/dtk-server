@@ -81,34 +81,18 @@ module DTK; class Assembly
       end
     end
 
-    #MOD_RESTRUCT: TODO: when deprecate self.list__library_parent(mh,opts={}), sub .list__project_parent for this method
-    def self.list(mh,opts={})
-      if project_id = opts[:project_idh]
-        ndx_ret = list__library_parent(mh,opts).inject(Hash.new) do |h,r|
-          ndx = version_display_name(r[:display_name],nil)
-          h.merge(ndx => r)
-        end
-        list__project_parent(mh,opts).each do |r|
-          ndx = version_display_name(r[:display_name],r[:version])
-          ndx_ret[ndx] ||= r
-        end
-        ndx_ret.values.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    def self.list(assembly_mh,opts={})
+      opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch,list_virtual_column?(opts[:detail_level])].compact)
+      assembly_rows = get(assembly_mh,opts)
+      if opts[:detail_level] == "attributes"
+        attr_rows = get_component_attributes(assembly_mh,assembly_rows)
+        list_aux(assembly_rows,attr_rows,opts)
       else
-        list__library_parent(mh,opts)
+        list_aux__simple(assembly_rows,opts)
       end
     end
 
     def self.get(mh,opts={})
-      if project_id = opts[:project_idh]
-        ndx_ret = list__library_parent(mh,opts).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
-        get__project_parent(mh,opts).each{|r|ndx_ret[r[:id]] ||= r}
-        ndx_ret.values
-      else
-        get__library_parent(mh,opts)
-      end
-    end
-
-    def self.get__project_parent(mh,opts={})
       sp_hash = {
         :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch],
         :filter => [:and, [:eq, :type, "composite"], 
@@ -120,38 +104,6 @@ module DTK; class Assembly
       #TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
-    end
-
-    def self.list__project_parent(assembly_mh,opts={})
-      opts = opts.merge(:cols => [:id, :group_id,:display_name,:component_type,:module_branch_id,:module_branch,list_virtual_column?(opts[:detail_level])].compact)
-      assembly_rows = get__project_parent(assembly_mh,opts)
-      if opts[:detail_level] == "attributes"
-        attr_rows = get_component_attributes(assembly_mh,assembly_rows)
-        list_aux(assembly_rows,attr_rows,opts)
-      else
-        list_aux__simple(assembly_rows,opts)
-      end
-    end
-    #MOD_RESTRUCT: TODO: deprecate two below for above
-    def self.list__library_parent(assembly_mh,opts={})
-      sp_hash = {
-        :cols => [:id, :display_name,:component_type,:module_branch_id,list_virtual_column?(opts[:detail_level])].compact,
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
-      }
-      assembly_rows = get_objs(assembly_mh,sp_hash)
-      if opts[:detail_level] == "attributes"
-        attr_rows = get_component_attributes(assembly_mh,assembly_rows)
-        list_aux(assembly_rows,attr_rows,opts)
-      else
-        list_aux__simple(assembly_rows,opts)
-      end
-    end
-    def self.get__library_parent(mh,opts={})
-      sp_hash = {
-        :cols => opts[:cols] || [:id, :group_id,:display_name,:component_type],
-        :filter => [:and, [:eq, :type, "composite"], [:neq, :library_library_id, nil], opts[:filter]].compact
-      }
-      get_objs(mh.createMH(:component),sp_hash)
     end
 
     def self.list_virtual_column?(detail_level=nil)

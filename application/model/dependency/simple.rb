@@ -6,6 +6,45 @@ module DTK; class Dependency
       @node = node
      end
 
+    def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
+      ret = Hash.new
+      unless dependency_exists?(cmp_template,antec_cmp_template)
+        create_dependency(cmp_template,antec_cmp_template,opts)
+      end
+      ret
+    end
+
+    def self.create_dependency(cmp_template,antec_cmp_template,opts={})
+      antec_cmp_template.update_object!(:display_name,:component_type)
+      search_pattern = {
+        ':filter' => [':eq', ':component_type',antec_cmp_template[:component_type]]
+      }
+      create_row = {
+        :ref => antec_cmp_template[:component_type],
+        :component_component_id => cmp_template.id(),
+        :description => "#{antec_cmp_template.component_type_print_form()} is required for #{cmp_template.component_type_print_form()}",
+        :search_pattern => search_pattern,
+        :type => 'component',
+        :severity => 'warning'
+      }
+      dep_mh = cmp_template.model_handle().create_childMH(:dependency)
+      Model.create_from_row(dep_mh,create_row,:convert=>true,:returning_sql_cols=>create_or_exists_cols())
+    end
+    class << self
+      private
+      def dependency_exists?(cmp_template,antec_cmp_template)
+        sp_hash = {
+          :cols => create_or_exists_cols(),
+          :filter => [:and,[:eq,:component_component_id,cmp_template.id()],
+                      [:eq,:ref,antec_cmp_template.get_field?(:component_type)]]
+        }
+        Model.get_obj(cmp_template.model_handle(:dependency),sp_hash)
+      end
+      def create_or_exists_cols()
+        [:id,:group_id,:component_component_id,:search_pattern,:type,:description,:severity]
+      end
+    end
+    
     def depends_on_print_form?()
       if cmp_type = @dependency_obj.is_simple_filter_component_type?()
         Component.component_type_print_form(cmp_type)
@@ -41,28 +80,6 @@ module DTK; class Dependency
       components
     end
 
-    def self.add_component_dependency(component_idh, type, hash_info)
-      #TODO: bug problem may be need to get parent of component to use craete rows
-      #TODO: stubbed
-#      cmp = component_idh.create_object.update_object!(:display_name,:library_library_id,:group_id)
-      cmp = component_idh.create_object.update_object!(:display_name)
-      other_cmp_idh = component_idh.createIDH(:id => hash_info[:other_component_id])
-      other_cmp = other_cmp_idh.create_object.update_object!(:display_name,:component_type)
-      search_pattern = {
-        ":filter" => [":eq", ":component_type",other_cmp[:component_type]]
-      }
-      create_row = {
-        :ref => other_cmp[:component_type],
-        :component_component_id => component_idh.get_id(),
-        :description => "#{other_cmp[:display_name]} #{type} #{cmp[:display_name]}",
-        :search_pattern => search_pattern,
-        :severity => "warning",
-        :library_library_id => cmp[:library_library_id]
-      }
-      dep_mh = component_idh.createMH(:dependency)
-      Model.create_from_row(dep_mh,create_row)
-    end
-
     def set_satisfied_by_component_ids?(satisify_cmps)
       match_cmp = satisify_cmps.find do |cmp|
         (cmp[:node_node_id] == @node[:id]) and @dependency_obj.component_satisfies_dependency?(cmp)
@@ -72,7 +89,6 @@ module DTK; class Dependency
 
     attr_reader :dependency_obj, :node
    private
-
     def self.get_components_that_satisify_deps(dep_list)
       ret = Array.new
       query_disjuncts = dep_list.map do |simple_dep|

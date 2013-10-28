@@ -12,6 +12,7 @@ module DTK
     def purge(opts={})
       opts.merge!(:do_not_raise => true)
       self.class.delete_contents([id_handle()],opts)
+      delete_assembly_level_attributes()
       delete_tasks()
     end
 
@@ -22,6 +23,12 @@ module DTK
    private
     def delete_tasks()
       clear_tasks(:include_executing_task => true)
+    end
+
+    def delete_assembly_level_attributes()
+      assembly_attrs = get_assembly_level_attributes()
+      return if assembly_attrs.empty?()
+      Model.delete_instances(assembly_attrs.map{|r|r.id_handle()})
     end
 
     AssemblyFields = {

@@ -38,17 +38,8 @@ module DTK; class Component
       module_branch[:current_sha] || module_branch.update_current_sha_from_repo!()
     end
 
-
-    #component modules indexed by component_template ids 
-    def self.get_indexed_component_modules(component_template_idhs)
-      ret = Hash.new
-      return ret if component_template_idhs.empty?()
-      sp_hash = {
-        :cols => [:id,:component_modules],
-        :filter => [:oneof,:id,component_template_idhs.map{|idh|idh.get_id()}]
-      }
-      mh = component_template_idhs.first.createMH()
-      get_objs(mh,sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r[:component_module])}
+    def get_component_module()
+      get_obj_helper(:component_module)
     end
 
     #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
@@ -119,7 +110,9 @@ module DTK; class Component
       end
       sp_hash = {
         :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
-        :filter => [:and, [:eq, :type, "template"], [:eq, :project_project_id, project_idh.get_id()]]
+        :filter => [:and, [:eq, :type, "template"], 
+                    [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
+                    [:eq, :project_project_id, project_idh.get_id()]]
       }
       ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
       if constraint = opts[:component_version_constraints]
@@ -138,7 +131,21 @@ module DTK; class Component
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-    def self.name_to_id(model_handle,name,version=nil)
+    def self.name_to_id(model_handle,name,version_or_versions=nil)
+      if version_or_versions.kind_of?(Array)
+        version_or_versions.each do |version|
+          if ret = name_to_id_aux(model_handle,name,version,:no_error_if_no_match=>true)
+            return ret
+          end
+        end
+        raise ErrorNameDoesNotExist.new(name,pp_object_type())
+      else
+        name_to_id_aux(model_handle,name,version_or_versions)
+      end
+    end
+
+   private 
+    def self.name_to_id_aux(model_handle,name,version,opts={})
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
@@ -147,7 +154,7 @@ module DTK; class Component
                     [:eq, :node_node_id, nil],
                     [:eq, :version, version_field(version)]]
       }
-      name_to_id_helper(model_handle,version_display_name(name,version),sp_hash)
+      name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
     end
   end
 

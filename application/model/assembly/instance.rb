@@ -33,6 +33,16 @@ module DTK; class  Assembly
       Template.create_from_component(get_obj_helper(:instance_parent,:assembly_template))
     end
 
+    def get_peer_component_instances(cmp_instance)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_type],
+        :filter => [:and,[:eq,:ancestor_id,cmp_instance.get_field?(:ancestor_id)],
+                    [:eq,:assembly_id,id()],
+                    [:neq,:id,cmp_instance.id()]]
+      }
+      Component::Instance.get_objs(model_handle(:component_instance),sp_hash)
+    end
+
     def get_task_template(task_action=nil,opts={})
       task_action ||= Task::Template.default_task_action()
       sp_hash = {
@@ -774,7 +784,7 @@ module DTK; class  Assembly
 
     def get_attributes_all_levels()
       assembly_attrs = get_assembly_level_attributes()
-      #TODO: more efficient is tahey do not need to be augmenetd
+      #TODO: more efficient is they do not need to be augmenetd
       component_attrs = get_augmented_nested_component_attributes()
       node_attrs = get_augmented_node_attributes()
       assembly_attrs + component_attrs + node_attrs

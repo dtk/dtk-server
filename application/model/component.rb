@@ -147,7 +147,7 @@ module DTK
     ### display name functions
     #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
-      cols_to_get = [:component_type,:display_name,:ref_name]
+      cols_to_get = [:component_type,:display_name]
       unless opts[:without_version] 
         cols_to_get += [:version]
       end
@@ -155,14 +155,15 @@ module DTK
       component_type = component_type_print_form()
 
       #handle version
-      ret = component_type
-      unless opts[:without_version] or has_default_version?()
-        ret << "(#{self[:version]})"
-      end 
+      ret = 
+        if opts[:without_version] or has_default_version?()
+          component_type
+        else
+          self.class.name_with_version(component_type,self[:version])
+        end 
 
       #handle component title
-      #NOTE: ref_num is for dsl versions before v2
-      if title = ComponentTitle.title?(self)||self[:ref_num]
+      if title = ComponentTitle.title?(self)
         ret = ComponentTitle.print_form_with_title(ret,title)
       end
 
@@ -172,6 +173,18 @@ module DTK
         end
       end
       ret 
+    end
+
+    def self.name_with_version(name,version)
+      if version.kind_of?(ModuleVersion::Semantic)
+        "#{name}(#{version})"
+      else
+        name
+      end
+    end
+
+    def self.ref_with_version(ref,version)
+      "#{ref}__#{version}"
     end
 
     def self.module_name(component_type)
@@ -312,6 +325,19 @@ module DTK
 
       file_asset_mh = id_handle().create_childMH(:file_asset)
       Model.create_from_row(file_asset_mh,create_row)
+    end
+
+
+    def get_augmented_link_defs()
+      ndx_ret = Hash.new
+      get_objs(:cols => [:link_def_links]).each do |r|
+        link_def =  r[:link_def]
+        pntr = ndx_ret[link_def[:id]] ||= link_def.merge(:link_def_links => Array.new)
+        pntr[:link_def_links] << r[:link_def_link]
+      end
+      ret =  ndx_ret.values()
+      ret.each{|r|r[:link_def_links].sort!{|a,b|a[:position] <=> b[:position]}}
+      ret
     end
 
     def get_config_file(file_name)

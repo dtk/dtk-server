@@ -131,6 +131,15 @@ module DTK
       rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module)
     end
 
+    def rest__create_component_dependency()
+      assembly = ret_assembly_instance_object()
+      cmp_template = ret_component_template(:component_template_id)
+      antecedent_cmp_template = ret_component_template(:antecedent_component_template_id)
+      type = :simple 
+      AssemblyModule::Component.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template)
+      rest_ok_response
+    end
+
     # checks element through set of fields
     def check_element(element, fields, element_id_val)
       return true if (element_id_val.nil? || element_id_val.empty?)
@@ -154,7 +163,10 @@ module DTK
     def rest__add_ad_hoc_attribute_links()
       assembly = ret_assembly_instance_object()
       target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
-      AttributeLink.create_assembly_ad_hoc_links(assembly,target_attr_term,source_attr_term)
+      update_meta = ret_request_params(:update_meta)
+      opts = Hash.new
+      opts.merge!(:update_meta => true) if update_meta
+      AttributeLink::AdHoc.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts)
       rest_ok_response 
     end
 
@@ -174,7 +186,10 @@ module DTK
       rest_ok_response :service_link => service_link_idh.get_id()
     end
 
+
+=begin
     #this adds attribute mappings as part of service link
+#deprecated
     def rest__add_ad_hoc_attribute_mapping()
       assembly = ret_assembly_instance_object()
       port_link = ret_port_link(assembly)
@@ -182,7 +197,7 @@ module DTK
       assembly.add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
       rest_ok_response 
     end
-
+=end
     def rest__list_attribute_mappings()
       port_link = ret_port_link()
       #TODO: stub
@@ -296,11 +311,10 @@ module DTK
 
     def rest__add_component()
       assembly = ret_assembly_instance_object()
-      component_template, component_title = ret_component_template_and_title(:component_template_id)
-
+      component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
       #not checking here if node_id points to valid object; check is in add_component
-      node_id = ret_non_null_request_params(:node_id)
-      new_component_idh = assembly.add_component(id_handle(node_id,:node),component_template,component_title)
+      node_idh = ret_request_param_id_handle(:node_id,Node)
+      new_component_idh = assembly.add_component(node_idh,component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
     end
 

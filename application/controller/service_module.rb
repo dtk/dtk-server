@@ -179,13 +179,14 @@ module DTK
 
     def rest__add_user_direct_access()
       rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      ServiceModule.add_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      username = ret_request_params(:username)
+      ServiceModule.add_user_direct_access(model_handle_with_private_group(), rsa_pub_key, username)
       rest_ok_response(:repo_manager_fingerprint => RepoManager.repo_server_ssh_rsa_fingerprint(), :repo_manager_dns => RepoManager.repo_server_dns())
     end
 
     def rest__remove_user_direct_access()
-      rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
-      ServiceModule.remove_user_direct_access(model_handle_with_private_group(),rsa_pub_key)
+      username = ret_non_null_request_params(:username)
+      ServiceModule.remove_user_direct_access(model_handle_with_private_group(),username)
       rest_ok_response
     end
 

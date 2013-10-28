@@ -459,11 +459,10 @@ module DTK
       end
     end
 
-    def add_user_direct_access(model_handle,rsa_pub_key)
-      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key})
+    def add_user_direct_access(model_handle,rsa_pub_key,username=nil)
+      repo_user = RepoUser.add_repo_user?(:client,model_handle.createMH(:repo_user),{:public => rsa_pub_key},username)
       model_name = model_handle[:model_name]
       
-      #raise ErrorUsage.new("Provided rsa public key exists already") if repo_user.has_direct_access?(model_name,:donot_update => true)
       repo_user.update_direct_access(model_name,true)
       repos = get_all_repos(model_handle)
       unless repos.empty?
@@ -475,14 +474,13 @@ module DTK
     end
     DefaultAccessRights = "RW+"
 
-    def remove_user_direct_access(model_handle,rsa_pub_key)
-      repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:ssh_rsa_pub_key => rsa_pub_key)
+    def remove_user_direct_access(model_handle,username)
+      repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:username => username)
       return unless repo_user
 
       model_name = model_handle[:model_name]
       return unless repo_user.has_direct_access?(model_name)
 
-      username = repo_user[:username]
       RepoManager.delete_user(username)
       repos = get_all_repos(model_handle)
       unless repos.empty?

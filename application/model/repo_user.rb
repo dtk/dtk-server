@@ -22,7 +22,7 @@ module XYZ
     end
 
     #returns an object or calls block (with new or existing object) 
-    def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={})
+    def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={},username=nil)
       #for match on type; use following logic
       # if ssh public key given look for match on this
       #otherwise return error if there is multiple matches for node or admin type
@@ -52,12 +52,12 @@ module XYZ
         end
       end
 
-      add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users)
+      add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys,existing_users,username)
     end
 
     # ssh_rsa_keys[:public].nil? means that expected that key already exists in the gitolite admin db 
-    def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[])
-      repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users)
+    def self.add_repo_user(repo_user_type,repo_user_mh,ssh_rsa_keys={},existing_users=[],username=nil)
+      repo_username,index =  ret_new_repo_username_and_index(repo_user_type,existing_users,username)
       if ssh_rsa_keys[:public]
         RepoManager.add_user(repo_username,ssh_rsa_keys[:public],:noop_if_exists => true)
       end
@@ -65,14 +65,7 @@ module XYZ
     end
 
     def self.get_matching_repo_users(repo_user_mh,filters_keys,username,cols=nil)
-      user_list = []
-      regex = "dtk-client-#{username.to_s}"
       repo_users = get_existing_repo_users(repo_user_mh,filters_keys,cols)
-      repo_users.each do |user|
-        user_list << user if user[:username].match(regex)
-      end
-
-      return user_list
     end
 
     def self.get_matching_repo_user(repo_user_mh,filters_keys,cols=nil)
@@ -135,11 +128,14 @@ module XYZ
 
 
     #returns [new_repo_username,new_index]
-    def self.ret_new_repo_username_and_index(type,existing_matches)
+    def self.ret_new_repo_username_and_index(type,existing_matches,username)
       if type == :admin
         #TODO: r8sserver will eb deprecated
         new_repo_username = R8::Config[:admin_repo_user]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
         new_index = 1
+      elsif username
+        new_repo_username = username
+        new_index = 0
       else
         max = 0
         existing_matches.each do |m|

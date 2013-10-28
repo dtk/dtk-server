@@ -4,7 +4,7 @@ module DTK
       #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
       #TODO: this gives us what is like mixed mode where insatnces created already will have ad hoc attribute links, while new ones wil have service links
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
-        parsed_adhoc_links = attribute_link_hashes(assembly.id_handle(),target_attr_term,source_attr_term)
+        parsed_adhoc_links = attribute_link_hashes(assembly,target_attr_term,source_attr_term)
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
@@ -125,12 +125,13 @@ opts[:update_meta] = true
         Model.get_objs(assembly.model_handle(:attribute_link),sp_hash)
       end
 
-      def self.attribute_link_hashes(assembly_idh,target_attr_term,source_attr_term)
-        target_attr_pattern = Attribute::Pattern::Assembly.create_attr_pattern(assembly_idh,target_attr_term)
+      def self.attribute_link_hashes(assembly,target_attr_term,source_attr_term)
+        assembly_idh = assembly.id_handle()
+        target_attr_pattern = Attribute::Pattern::Assembly.create_attr_pattern(assembly,target_attr_term)
         if target_attr_pattern.attribute_idhs.empty?
           raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
         end
-        source_attr_pattern = Attribute::Pattern::Assembly::Source.create_attr_pattern(assembly_idh,source_attr_term)
+        source_attr_pattern = Attribute::Pattern::Assembly::Source.create_attr_pattern(assembly,source_attr_term)
         
         #TODO: need to do more chaecking and processing to include:
         #  if has a relation set already and scalar conditionally reject or replace

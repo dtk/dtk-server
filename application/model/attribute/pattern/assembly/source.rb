@@ -2,13 +2,13 @@ module DTK; class Attribute; class Pattern
   class Assembly
     #for attribute relation sources
     class Source < self
-      def self.create_attr_pattern(base_object_idh,source_attr_term)
+      def self.create_attr_pattern(base_object,source_attr_term)
         attr_term,fn = Simple.parse(source_attr_term) || 
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
           raise ErrorParse.new(source_attr_term)
         end
-        attr_pattern = super(base_object_idh,attr_term)
+        attr_pattern = super(base_object,attr_term)
         new(attr_pattern,fn,attr_term)
       end
       

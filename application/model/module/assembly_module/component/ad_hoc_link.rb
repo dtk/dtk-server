@@ -2,7 +2,12 @@ module DTK; class AssemblyModule
   class Component
     class AdHocLink < self
       def self.update(assembly,parsed_adhoc_link_info)
-        parsed_adhoc_link = parsed_adhoc_link_info.link
+        parsed_adhoc_links = parsed_adhoc_link_info.links
+        unless  parsed_adhoc_links.size == 1
+          raise Error.new("Only implented #{self}.update when  parsed_adhoc_links.size == 1")
+        end
+        parsed_adhoc_link = parsed_adhoc_links.first
+
         dep_cmp_template = parsed_adhoc_link_info.dep_component_template
         antec_cmp_template = parsed_adhoc_link_info.antec_component_template
 

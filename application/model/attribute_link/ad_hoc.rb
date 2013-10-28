@@ -3,31 +3,19 @@ module DTK
     class AdHoc < Hash
       #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
-        parsed_info = parsed_adhoc_link_info(assembly,target_attr_term,source_attr_term,opts)
+        parsed_info = Attribute::Pattern::Assembly::Link.parsed_adhoc_link_info(self,assembly,target_attr_term,source_attr_term)
         if opts[:update_meta]
           result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info,opts)
-          dep_cmp = result[:dep_component]
+          dep_cmp = parsed_info.dep_component_instance
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
-            antec_cmp = result[:antec_component]
+            antec_cmp = parsed_info.antec_component_instance
             create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
           else
             create_attribute_links?(assembly,parsed_info.links,dep_cmp)
           end
         else
           create_ad_hoc_attribute_links?(assembly,parsed_info.links)
-        end
-      end
-
-      class Info
-        attr_reader :links,:dep_component_template,:antec_component_template
-        def initialize(parsed_adhoc_links,dep_component_template,antec_component_template)
-          @links = parsed_adhoc_links
-          @dep_component_template = dep_component_template
-          @antec_component_template = antec_component_template
-        end
-        def link()
-          @links.first
         end
       end
 
@@ -132,60 +120,7 @@ module DTK
         Model.get_objs(assembly.model_handle(:attribute_link),sp_hash)
       end
 
-      def self.parsed_adhoc_link_info(assembly,target_attr_term,source_attr_term,opts={})
-        assembly_idh = assembly.id_handle()
-        target_attr_pattern = Attribute::Pattern::Assembly.create_attr_pattern(assembly,target_attr_term)
-        if target_attr_pattern.attribute_idhs.empty?
-          raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
-        end
-        source_attr_pattern = Attribute::Pattern::Assembly::Source.create_attr_pattern(assembly,source_attr_term)
-        
-        #TODO: need to do more chaecking and processing to include:
-        #  if has a relation set already and scalar conditionally reject or replace
-        # if has relation set already and array, ...
-        attr_info = {
-          :assembly_id =>  assembly_idh.get_id(),
-          :output_id => source_attr_pattern.attribute_idh.get_id()
-        }
-        if fn = source_attr_pattern.fn()
-          attr_info.merge!(:function => fn) 
-        end
-
-        target_attr_pattern.attribute_idhs.map do |target_attr_idh|
-          hash = attr_info.merge(:input_id => target_attr_idh.get_id())
-          new(hash,target_attr_pattern,source_attr_pattern)
-        end
-      end
     end
   end
 end
 
-=begin
-    
-           unless parsed_adhoc_links.size == 1
-             raise Error.new("Only implented update_from_adhoc_links  size == 1")
-           end
-        #determine which is the dependent component and which is the antec one 
-        dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
-        dep_cmp_template = dep_cmp.get_component_template_parent()
-        antec_cmp_template = antec_cmp.get_component_template_parent()
-
-=end
-
-=begin
-
-      def determine_dep_and_antec_components(opts={})
-        unless target_cmp = @target_attr_pattern.component_instance()
-          raise Error.new("Unexpected that target_attr_pattern.component() is nil")
-        end
-        #source_cmp can be nil when link to a node attribute
-        source_cmp = @source_attr_pattern.component_instance()
-        unless source_cmp
-          raise Error.new("Not implemented yet when source_cmp is nil")
-        end
-        #TODO: stub heuristic that chooses target_cmp as dependent
-        dep_cmp = target_cmp
-        antec_cmp = source_cmp
-        [dep_cmp,antec_cmp]
-      end
-=end

@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class Pattern 
     class Assembly < self
-      r8_nested_require('assembly','source')
+      r8_nested_require('assembly','link')
 
       def self.create(attr_term,assembly,opts={})
         #considering attribute id to belong to any format so processing here

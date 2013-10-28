@@ -2,32 +2,32 @@ module DTK
   class AttributeLink
     class AdHoc < Hash
       #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
-      #TODO: this gives us what is like mixed mode where insatnces created already will have ad hoc attribute links, while new ones wil have service links
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
-        parsed_adhoc_links = attribute_link_hashes(assembly,target_attr_term,source_attr_term)
-#TODO: debug
-opts[:update_meta] = true
+        parsed_info = parsed_adhoc_link_info(assembly,target_attr_term,source_attr_term,opts)
         if opts[:update_meta]
-           unless parsed_adhoc_links.size == 1
-             raise Error.new("Only implented update_from_adhoc_links  size == 1")
-           end
-        #determine which is the dependent component and which is the antec one 
-        dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
-        dep_cmp_template = dep_cmp.get_component_template_parent()
-        antec_cmp_template = antec_cmp.get_component_template_parent()
-
-
-          result = AssemblyModule::Component::AdHocLink.update(assembly,dep_cmp_template,antec_cmp_template,opts)
+          result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info,opts)
           dep_cmp = result[:dep_component]
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
             antec_cmp = result[:antec_component]
             create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
           else
-            create_attribute_links?(assembly,parsed_adhoc_links,dep_cmp)
+            create_attribute_links?(assembly,parsed_info.links,dep_cmp)
           end
         else
-          create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)
+          create_ad_hoc_attribute_links?(assembly,parsed_info.links)
+        end
+      end
+
+      class Info
+        attr_reader :links,:dep_component_template,:antec_component_template
+        def initialize(parsed_adhoc_links,dep_component_template,antec_component_template)
+          @links = parsed_adhoc_links
+          @dep_component_template = dep_component_template
+          @antec_component_template = antec_component_template
+        end
+        def link()
+          @links.first
         end
       end
 
@@ -132,7 +132,7 @@ opts[:update_meta] = true
         Model.get_objs(assembly.model_handle(:attribute_link),sp_hash)
       end
 
-      def self.attribute_link_hashes(assembly,target_attr_term,source_attr_term)
+      def self.parsed_adhoc_link_info(assembly,target_attr_term,source_attr_term,opts={})
         assembly_idh = assembly.id_handle()
         target_attr_pattern = Attribute::Pattern::Assembly.create_attr_pattern(assembly,target_attr_term)
         if target_attr_pattern.attribute_idhs.empty?
@@ -160,3 +160,32 @@ opts[:update_meta] = true
   end
 end
 
+=begin
+    
+           unless parsed_adhoc_links.size == 1
+             raise Error.new("Only implented update_from_adhoc_links  size == 1")
+           end
+        #determine which is the dependent component and which is the antec one 
+        dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
+        dep_cmp_template = dep_cmp.get_component_template_parent()
+        antec_cmp_template = antec_cmp.get_component_template_parent()
+
+=end
+
+=begin
+
+      def determine_dep_and_antec_components(opts={})
+        unless target_cmp = @target_attr_pattern.component_instance()
+          raise Error.new("Unexpected that target_attr_pattern.component() is nil")
+        end
+        #source_cmp can be nil when link to a node attribute
+        source_cmp = @source_attr_pattern.component_instance()
+        unless source_cmp
+          raise Error.new("Not implemented yet when source_cmp is nil")
+        end
+        #TODO: stub heuristic that chooses target_cmp as dependent
+        dep_cmp = target_cmp
+        antec_cmp = source_cmp
+        [dep_cmp,antec_cmp]
+      end
+=end

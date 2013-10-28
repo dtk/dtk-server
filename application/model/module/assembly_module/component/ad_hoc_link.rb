@@ -2,9 +2,9 @@ module DTK; class AssemblyModule
   class Component
     class AdHocLink < self
       def self.update(assembly,parsed_adhoc_link_info)
-        parsed_adhoc_link = parsed_adhoc_link_info[:parsed_adhoc_link]
-        dep_cmp_template = parsed_adhoc_link_info[:dep_component_template]
-        antec_cmp_template = parsed_adhoc_link_info[:antec_component_template]
+        parsed_adhoc_link = parsed_adhoc_link_info.link
+        dep_cmp_template = parsed_adhoc_link_info.dep_component_template
+        antec_cmp_template = parsed_adhoc_link_info.antec_component_template
 
         component_module = dep_cmp_template.get_component_module()
         module_branch = self.class.create_assembly_branch?(assembly,component_module,:ret_module_branch=>true)
@@ -55,23 +55,7 @@ module DTK; class AssemblyModule
           raise Error.new("Illegal type")
         end
       end
-=begin
 
-      def determine_dep_and_antec_components(opts={})
-        unless target_cmp = @target_attr_pattern.component_instance()
-          raise Error.new("Unexpected that target_attr_pattern.component() is nil")
-        end
-        #source_cmp can be nil when link to a node attribute
-        source_cmp = @source_attr_pattern.component_instance()
-        unless source_cmp
-          raise Error.new("Not implemented yet when source_cmp is nil")
-        end
-        #TODO: stub heuristic that chooses target_cmp as dependent
-        dep_cmp = target_cmp
-        antec_cmp = source_cmp
-        [dep_cmp,antec_cmp]
-      end
-=end
     end
   end
 end;end

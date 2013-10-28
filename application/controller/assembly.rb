@@ -165,7 +165,10 @@ module DTK
       target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
       update_meta = ret_request_params(:update_meta)
       opts = Hash.new
-      opts.merge!(:update_meta => true) if update_meta
+      #update_meta == true is the default
+      unless !update_meta.nil? and !update_meta
+        opts.merge!(:update_meta => true)
+      end
       AttributeLink::AdHoc.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts)
       rest_ok_response 
     end

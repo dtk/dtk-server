@@ -10,6 +10,9 @@ module DTK; class Attribute::Pattern
         end
         attr_pattern = super(base_object,attr_term)
 pp [attr_pattern,attr_term,fn,node_cmp_type]
+        if node_cmp_type
+          attr_pattern.set_component_instance!(node_cmp_type)
+        end
         new(attr_pattern,fn,attr_term)
       end
       
@@ -50,8 +53,8 @@ pp [attr_pattern,attr_term,fn,node_cmp_type]
           ret = [attr_term,nil]
           split = attr_term.split('/')
           if split.size == 3 and split[2] == 'host_address'
-            node_name,cmp_name,attr_name = split
-            ret = ["#{node_name}/#{attr_name}",Component.display_name_from_user_friendly_name(cmp_name)]
+            node_part,cmp_part,attr_part = split
+            ret = ["#{node_part}/#{attr_part}",cmp_part]
           end
           ret
         end

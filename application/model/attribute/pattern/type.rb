@@ -54,9 +54,6 @@ module DTK; class Attribute
         def component_instance()
           attribute_stack()[:component]
         end
-        def set_component_instance!(cmp_instance)
-          attribute_stack()[:component] = cmp_instance
-        end
         def node()
           attribute_stack()[:node]
         end
@@ -84,6 +81,17 @@ module DTK; class Attribute
             }
           end
           ret
+        end
+
+        def set_component_instance!(component_type)
+          cmp_fragment = Term.canonical_form(:component,component_type)
+          matching_cmps = ret_matching_components([node()],cmp_fragment)
+          if matching_cmps.empty?
+            raise ErrorUsage.new("Illegal component reference (#{component_type})")
+          elsif matching_cmps.size > 1
+            raise Error.new("Unexpected that ret_matching_components wil return more than 1 match")
+          end
+          attribute_stack()[:component] = matching_cmps.first
         end
 
        private

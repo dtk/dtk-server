@@ -43,7 +43,7 @@ module DTK; class Attribute::Pattern
           parent.new(hash,target_attr_pattern,source_attr_pattern)
         end
         dep_cmp,antec_cmp = determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
-        Info.new(parsed_adhoc_links,dep_dep_cmp,antec_cmp)
+        Info.new(parsed_adhoc_links,dep_cmp,antec_cmp)
       end
     private
       def self.determine_dep_and_antec_components(target_attr_pattern,source_attr_pattern)
@@ -51,7 +51,7 @@ module DTK; class Attribute::Pattern
           raise Error.new("Unexpected that target_attr_pattern.component() is nil")
         end
         #source_cmp can be nil when link to a node attribute
-        source_cmp = source_attr_pattern.component_instance()
+        source_cmp = source_attr_pattern.attribute_pattern.component_instance()
         unless source_cmp
           raise Error.new("Not implemented yet when source_cmp is nil")
         end

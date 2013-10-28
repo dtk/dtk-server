@@ -5,12 +5,12 @@ module DTK
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
         parsed_info = Attribute::Pattern::Assembly::Link.parsed_adhoc_link_info(self,assembly,target_attr_term,source_attr_term)
         if opts[:update_meta]
-          result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info,opts)
+          result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info)
           dep_cmp = parsed_info.dep_component_instance
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
             antec_cmp = parsed_info.antec_component_instance
-            create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
+            create_link_defs_and_service_links(assembly,parsed_info.links,dep_cmp,antec_cmp,link_def_hash)
           else
             create_attribute_links?(assembly,parsed_info.links,dep_cmp)
           end

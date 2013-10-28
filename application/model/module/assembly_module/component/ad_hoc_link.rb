@@ -12,7 +12,7 @@ module DTK; class AssemblyModule
         antec_cmp_template = parsed_adhoc_link_info.antec_component_template
 
         component_module = dep_cmp_template.get_component_module()
-        module_branch = self.class.create_assembly_branch?(assembly,component_module,:ret_module_branch=>true)
+        module_branch = create_assembly_branch?(assembly,component_module,:ret_module_branch=>true)
 
         opts_create_dep = {
           :source_attr_pattern => parsed_adhoc_link.attribute_pattern(:source),
@@ -21,7 +21,7 @@ module DTK; class AssemblyModule
         }
         result = create_dependency?(:link,assembly,dep_cmp_template,antec_cmp_template,module_branch,opts_create_dep)
         if result[:component_module_updated]
-          self.class.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
+          modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
         end
         result
       end

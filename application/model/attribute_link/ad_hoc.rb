@@ -9,15 +9,15 @@ module DTK
 opts[:update_meta] = true
         if opts[:update_meta]
           result = AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
+          dep_cmp = result[:dep_component]
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]
-            dep_cmp = result[:dep_component]
             antec_cmp = result[:antec_component]
             create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
           else
             #TODO: this should be changed to adding service links rather than adhoc links
             #alos it looks like it can get which end is dependent wrong
-            create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,:all_dep_component_instances=>true)
+            create_attribute_links?(assembly,parsed_adhoc_links,dep_cmp)
           end
         else
           create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links)
@@ -29,24 +29,32 @@ opts[:update_meta] = true
         @attr_pattern[type]
       end
 
-      def all_dep_component_instance_hashes(assembly)
+      def all_dep_component_instance_hashes(assembly,dep_component)
         ret = [self]
         #get peer component instances
-        cmp_instance = attribute_pattern(:target).component_instance
-        peer_cmps = assembly.get_peer_component_instances(cmp_instance)
+        peer_cmps = assembly.get_peer_component_instances(dep_component)
         return ret if peer_cmps.empty?
+
+        #find whether target or source side matches with dep_component
+        dep_side,antec_side,dep_attr_field,antec_attr_field = 
+          if attribute_pattern(:target).component_instance.id() == dep_component.id() 
+            [:target,:source,:input_id,:output_id] 
+          else
+            [:source,:target,:output_id,:input_id]
+          end
+
         #find the matching attributes on the peer components
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
           :filter => [:and,[:oneof,:component_component_id,peer_cmps.map{|cmp|cmp.id()}],
-                      [:eq,:display_name,attribute_pattern(:target).attribute_name]]
+                      [:eq,:display_name,attribute_pattern(dep_side).attribute_name]]
         }
         assembly_id = assembly.id()
-        output_attr_id = attribute_pattern(:source).attribute_id()
-        peer_attrs = Model.get_objs(assembly.model_handle(:attribute),sp_hash).map do |input_attr|
+        antec_attr_id = attribute_pattern(antec_side).attribute_id()
+        peer_attrs = Model.get_objs(assembly.model_handle(:attribute),sp_hash).map do |dep_attr|
           {
-            :input_id => input_attr.id(),
-            :output_id => output_attr_id,
+            dep_attr_field => dep_attr.id(),
+            antec_attr_field => antec_attr_id,
             :assembly_id => assembly_id
           }
         end
@@ -77,18 +85,14 @@ opts[:update_meta] = true
          end
        end
 
-      def self.create_ad_hoc_attribute_links?(assembly,parsed_adhoc_links,opts={})
-        if opts[:all_dep_component_instances]
-          attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
-            a + adhoc_link.all_dep_component_instance_hashes(assembly)
-          end
-          create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
-        else
-          create_ad_hoc_attribute_links_aux?(assembly,parsed_adhoc_links)
+      def self.create_attribute_links?(assembly,parsed_adhoc_links,dep_component)
+        attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
+          a + adhoc_link.all_dep_component_instance_hashes(assembly,dep_component)
         end
+        create_ad_hoc_attribute_links?(assembly,attr_link_rows)
       end
 
-      def self.create_ad_hoc_attribute_links_aux?(assembly,attr_link_rows)
+      def self.create_ad_hoc_attribute_links?(assembly,attr_link_rows)
         ret = Array.new
         existing_links = get_matching_ad_hoc_attribute_links(assembly,attr_link_rows)
         new_links = attr_link_rows.reject do |link|

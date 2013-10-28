@@ -1,7 +1,7 @@
 module DTK; class Attribute::Pattern
   class Assembly
     class Link < self
-      r8_nested_require('assembly','link')
+      r8_nested_require('link','source')
 
       class Info
         attr_reader :links,:dep_component_instance,:antec_component_instance

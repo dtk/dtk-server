@@ -1,5 +1,5 @@
 module DTK; class Attribute::Pattern
-  class Assembly::Link
+  class Assembly; class Link
     #for attribute relation sources
     class Source < self
       def self.create_attr_pattern(base_object,source_attr_term)
@@ -58,6 +58,6 @@ module DTK; class Attribute::Pattern
         
       end
     end
-  end
+  end; end
 end; end
 

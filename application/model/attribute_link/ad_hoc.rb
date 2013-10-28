@@ -8,7 +8,16 @@ module DTK
 #TODO: debug
 opts[:update_meta] = true
         if opts[:update_meta]
-          result = AssemblyModule::Component.update_from_adhoc_links(assembly,parsed_adhoc_links,opts)
+           unless parsed_adhoc_links.size == 1
+             raise Error.new("Only implented update_from_adhoc_links  size == 1")
+           end
+        #determine which is the dependent component and which is the antec one 
+        dep_cmp,antec_cmp = determine_dep_and_antec_components(opts)
+        dep_cmp_template = dep_cmp.get_component_template_parent()
+        antec_cmp_template = antec_cmp.get_component_template_parent()
+
+
+          result = AssemblyModule::Component::AdHocLink.update(assembly,dep_cmp_template,antec_cmp_template,opts)
           dep_cmp = result[:dep_component]
           if link_def_info = result[:link_def_created]
             link_def_hash = link_def_info[:hash_form]

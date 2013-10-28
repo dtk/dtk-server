@@ -1,6 +1,5 @@
 module DTK; class AssemblyModule
   class Component < self
-    r8_nested_require('component','dependency')
     r8_nested_require('component','ad_hoc_link')
 
     def self.prepare_for_edit(assembly,component_module)
@@ -13,7 +12,7 @@ module DTK; class AssemblyModule
     end
 
     def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
-      Dependency.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
+      AdHocLink.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
     end
 
     def self.promote_module_updates(assembly,component_module)
@@ -24,13 +23,6 @@ module DTK; class AssemblyModule
       end
       branch_name = branch[:branch]
       ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
-    end
-
-    def self.update_from_adhoc_links(assembly,parsed_adhoc_links,opts={})
-      unless parsed_adhoc_links.size == 1
-        raise Error.new("Only implented update_from_adhoc_links  size == 1")
-      end
-      AdHocLink.new(assembly,parsed_adhoc_links.first).update_assembly_module()
     end
 
    private

@@ -122,15 +122,30 @@ module DTK; class Component
       ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def self.check_valid_id(model_handle,id)
+    def self.check_valid_id(model_handle,id,version_or_versions=nil)
+      if version_or_versions.kind_of?(Array)
+        version_or_versions.each do |version|
+          if ret = check_valid_id_aux(model_handle,id,version,:no_error_if_no_match=>true)
+            return ret
+          end
+        end
+        raise ErrorIdInvalid.new(id,pp_object_type())
+      else
+        check_valid_id_aux(model_handle,id,version_or_versions)
+      end
+    end
+
+    def self.check_valid_id_aux(model_handle,id,version,opts={})
       filter = 
         [:and,
          [:eq, :id, id],
          [:eq, :type, "template"],
          [:eq, :node_node_id, nil],
-         [:neq, :project_project_id, nil]]
-      check_valid_id_helper(model_handle,id,filter)
+         [:neq, :project_project_id, nil],
+         [:eq,:version,version_field(version)]]
+      check_valid_id_helper(model_handle,id,filter,opts)
     end
+
     def self.name_to_id(model_handle,name,version_or_versions=nil)
       if version_or_versions.kind_of?(Array)
         version_or_versions.each do |version|

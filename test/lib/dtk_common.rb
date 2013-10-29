@@ -11,7 +11,7 @@ STDOUT.sync = true
 class DtkCommon
 
 	$success == true
-	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success, :error_message
+	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success, :error_message, :server_log
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -28,6 +28,7 @@ class DtkCommon
 		@ENDPOINT = "http://ec2-54-235-208-104.compute-1.amazonaws.com:7000"
 		@USERNAME = 'dtk17-client'
 	  	@PASSWORD = 'r8server'
+	  	@server_log = '/home/dtk17/thin/log/thin.log'
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
@@ -37,6 +38,35 @@ class DtkCommon
 
 		$cookies = response_login.cookies
 		$opts[:cookies] = response_login.cookies
+	end
+
+	def server_log_print(error_message)
+		search_string = "Exiting!"
+		log_part_from_last_restart = []
+
+		#read server log to an array
+		server_log = File.readlines(@server_log)
+		
+		#reverse the array content and go through the log and break when first occurence of restarted server found!
+		#write that part of the log to server_log array
+		server_log.reverse!
+		server_log.each do |line|
+			log_part_from_last_restart << line
+			if line.include? search_string
+				break
+			end
+		end
+
+		#reverse the log_part_from_last_restart array and search for the error that happened in log_part_from_last_restart array and print out next 20 lines in it
+		log_part_from_last_restart.reverse!
+		log_part_from_last_restart.each_with_index do |line, index|
+			if line.include? error_message
+				for i in index..index+20
+					puts log_part_from_last_restart[i]
+				end
+				break
+			end
+		end
 	end
 
 	def send_request(path, body)
@@ -57,6 +87,12 @@ class DtkCommon
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"
 				pretty_print_JSON(response_JSON["errors"].first["backtrace"])
+				puts "", ""
+				puts "Server log part:"
+				puts "----------------"
+				server_log_print(@error_message)
+				puts "----------------"
+				puts "", ""
 			end
 		else
 			@error_message = ""
@@ -729,6 +765,7 @@ class DtkCommon
 		if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
 			puts "Node #{node_name} exists in assembly. Get node id..."
 			node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
+			puts "node id: #{node_id}"
 			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_id, :assembly_id=>assembly_id})
 
 			if (component_add_response['status'] == 'ok')

@@ -62,6 +62,11 @@ module DTK; class Attribute
       class NodeLevel < self
         include CommonNodeComponentLevel
 
+        def match_attribute_mapping_endpoint?(am_endpoint)
+          am_endpoint[:type] == 'node_attribute' and
+          attr_name_normalize(am_endpoint[:attribute_name]) == attr_name_normalize(attribute_name())
+        end
+
         def am_serialized_form()
           "#{local_or_remote()}_node.#{attribute_name()}"
         end
@@ -104,6 +109,13 @@ module DTK; class Attribute
           @local_or_remote
         end
 
+        def attr_name_normalize(attr_name)
+          if attr_name == 'host_addresses_ipv4'
+            'host_address'
+          else
+            attr_name
+          end
+        end
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
           if attr_fragment == Pattern::Term.canonical_form(:attribute,'host_address')
@@ -116,6 +128,12 @@ module DTK; class Attribute
 
       class ComponentLevel < self
         include CommonNodeComponentLevel
+
+        def match_attribute_mapping_endpoint?(am_endpoint)
+          am_endpoint[:type] == 'component_attribute' and
+          am_endpoint[:component_type] == component_instance()[:component_type] and
+          am_endpoint[:attribute_name] == attribute_name()
+        end
 
         def am_serialized_form()
           "#{component_instance()[:component_type]}.#{attribute_name()}"

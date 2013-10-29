@@ -13,8 +13,6 @@ module DTK; class Attribute::Pattern
           attr_pattern.set_component_instance!(node_cmp_type)
           local_or_remote = (source_is_antecdent ? :remote : :local)
           attr_pattern.local_or_remote = local_or_remote
-pp [:local_or_remote,local_or_remote]
-raise ErrorUsage.new
         end
 
         new(attr_pattern,fn,attr_term)

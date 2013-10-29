@@ -14,6 +14,10 @@ module DTK
           else
             create_attribute_links?(assembly,parsed_info.links,dep_cmp)
           end
+          #calling this here, rather than in AssemblyModule::Component::AdHocLink.update because this needs to be done after logic to find peers
+          if result[:component_module_updated]
+            AssemblyModule::Component::AdHocLink.modify_cmp_instances_with_new_parents(assembly,result[:component_module],result[:module_branch])
+          end
         else
           create_ad_hoc_attribute_links?(assembly,parsed_info.links)
         end

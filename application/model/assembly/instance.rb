@@ -344,7 +344,8 @@ module DTK; class  Assembly
     
     def self.list(assembly_mh,opts={})
       assembly_rows = get_info__flat_list(assembly_mh,opts)
-
+      assembly_rows.delete_if{|idh|Workspace.is_workspace?(idh)}
+      
       if opts[:detail_level].nil?
         list_aux__no_details(assembly_rows)
       else

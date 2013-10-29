@@ -40,9 +40,11 @@ class DtkCommon
 		$opts[:cookies] = response_login.cookies
 	end
 
-	def server_log_print(error_message)
+	def server_log_print()
 		search_string = "Exiting!"
 		log_part_from_last_restart = []
+		log_part = []
+		final_log = []
 
 		#read server log to an array
 		server_log = File.readlines(@server_log)
@@ -57,16 +59,25 @@ class DtkCommon
 			end
 		end
 
-		#reverse the log_part_from_last_restart array and search for the error that happened in log_part_from_last_restart array and print out next 20 lines in it
-		log_part_from_last_restart.reverse!
+		#search for the error that happened in log_part_from_last_restart array and print out next 20 lines in it
 		log_part_from_last_restart.each_with_index do |line, index|
-			if line.include? error_message
-				for i in index..index+20
-					puts log_part_from_last_restart[i]
+			if line.include? "error"
+				for i in index-20..index
+					log_part << log_part_from_last_restart[i]
 				end
 				break
 			end
 		end
+
+		log_part.reverse!
+            log_part.each do |line|
+                if line.include? search_string
+                    break
+                else
+                    final_log << line
+                end
+            end
+		return final_log
 	end
 
 	def send_request(path, body)
@@ -86,14 +97,14 @@ class DtkCommon
 			puts @error_message
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"
-				pretty_print_JSON(response_JSON["errors"].first["backtrace"])
-				puts "", ""
-				puts "Server log part:"
-				puts "----------------"
-				server_log_print(@error_message)
-				puts "----------------"
-				puts "", ""
+				pretty_print_JSON(response_JSON["errors"].first["backtrace"])				
 			end
+			puts "", ""
+			puts "Server log part:"
+			puts "----------------"
+			server_log_print()
+			puts "----------------"
+			puts "", ""
 		else
 			@error_message = ""
 		end

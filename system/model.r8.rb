@@ -491,12 +491,15 @@ module DTK
         check_valid_id_helper(model_handle,id,filter)
       end
 
-      def check_valid_id_helper(model_handle,id,filter)
+      def check_valid_id_helper(model_handle,id,filter,opts={})
         sp_hash = {
           :cols => [:id],
           :filter => filter
         }
         rows = get_objs(model_handle,sp_hash)
+        if rows.empty? and opts[:no_error_if_no_match]
+          return nil
+        end
         raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
         id
       end

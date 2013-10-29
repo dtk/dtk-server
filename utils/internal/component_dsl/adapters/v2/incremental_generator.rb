@@ -137,7 +137,7 @@ module DTK; class ComponentDSL; class V2
         elsif (!input_is_remote) and output_is_remote
           "$#{output_attr} -> #{input_attr}"
         else #input_is_remote and (!output_is_remote)
-          "#{input_attr} <- $#{input_attr}"
+          "#{input_attr} <- $#{output_attr}"
         end
       end
 

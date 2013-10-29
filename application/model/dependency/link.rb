@@ -6,30 +6,31 @@ module DTK; class Dependency
     end
 
     def self.create_dependency?(cmp_template,antec_cmp_template,opts={})
-      ret = Hash.new
-      antec_attr_pattern = opts[:antec_attr_pattern]
-      dep_attr_pattern = opts[:dep_attr_pattern ]
-      unless antec_attr_pattern and  dep_attr_pattern
-        raise Error.new("Not implemented: when opts does not include :antec_attr_pattern and :dep_attr_pattern")
+      result = Hash.new
+      source_attr_pattern = opts[:source_attr_pattern]
+      target_attr_pattern = opts[:target_attr_pattern ]
+      unless source_attr_pattern and  target_attr_pattern
+        raise Error.new("Not implemented: when opts does not include :source_attr_pattern and :target_attr_pattern")
       end
-      external_or_internal = (dep_attr_pattern.node().id() == antec_attr_pattern.node().id() ? "internal" : "external")
+      external_or_internal = (target_attr_pattern.node().id() == source_attr_pattern.node().id() ? "internal" : "external")
       aug_link_defs = cmp_template.get_augmented_link_defs()
       if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
-        unless link_def_link.matching_attribute_mapping?(dep_attr_pattern,antec_attr_pattern)
+        unless link_def_link.matching_attribute_mapping?(target_attr_pattern,source_attr_pattern)
           #aug_link_defs gets updated as side effect
-          link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+          link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
+          result.merge!(:component_module_updated => true)
         end
       else
-        link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern))
+        link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
         aug_link_defs = cmp_template.get_augmented_link_defs()
         fragment_hash = incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         unless fragment_hash.size == 1
           raise Error.new("Not implemented when fragment hash has more than one element")
         end
-        ret = {:link_def_created => {:hash_form => link_def_create_hash}}
+        result.merge!(:component_module_updated => true, :link_def_created => {:hash_form => link_def_create_hash})
       end
-      ret
+      result
     end
 
     def depends_on_print_form?()
@@ -67,8 +68,8 @@ module DTK; class Dependency
     end
 
    private
-    def self.attribute_mapping_serialized_form(antec_attr_pattern,dep_attr_pattern)
-      {antec_attr_pattern.am_serialized_form() => dep_attr_pattern.am_serialized_form()}
+    def self.attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern)
+      {source_attr_pattern.am_serialized_form() => target_attr_pattern.am_serialized_form()}
     end
 
     def self.matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)

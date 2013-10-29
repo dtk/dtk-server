@@ -2,7 +2,7 @@ module DTK; class Attribute::Pattern
   class Assembly; class Link
     #for attribute relation sources
     class Source < self
-      def self.create_attr_pattern(base_object,source_attr_term)
+      def self.create_attr_pattern(base_object,source_attr_term,source_is_antecdent)
         attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) || 
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
@@ -11,7 +11,12 @@ module DTK; class Attribute::Pattern
         attr_pattern = super(base_object,attr_term)
         if node_cmp_type
           attr_pattern.set_component_instance!(node_cmp_type)
+          local_or_remote = (source_is_antecdent ? :remote : :local)
+          attr_pattern.local_or_remote = local_or_remote
+pp [:local_or_remote,local_or_remote]
+raise ErrorUsage.new
         end
+
         new(attr_pattern,fn,attr_term)
       end
       

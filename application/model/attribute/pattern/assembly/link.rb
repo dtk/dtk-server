@@ -26,7 +26,8 @@ module DTK; class Attribute::Pattern
         if target_attr_pattern.attribute_idhs.empty?
           raise ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
         end
-        source_attr_pattern = Source.create_attr_pattern(assembly,source_attr_term)
+        source_is_antecdent = !target_attr_pattern.is_antecdent?()
+        source_attr_pattern = Source.create_attr_pattern(assembly,source_attr_term,source_is_antecdent)
         
         #TODO: need to do more checking and processing to include:
         #  if has a relation set already and scalar conditionally reject or replace

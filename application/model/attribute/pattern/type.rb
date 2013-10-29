@@ -63,7 +63,7 @@ module DTK; class Attribute
         include CommonNodeComponentLevel
 
         def am_serialized_form()
-          "local_node.#{attribute_name()}"
+          "#{local_or_remote()}_node.#{attribute_name()}"
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})
@@ -94,7 +94,16 @@ module DTK; class Attribute
           attribute_stack()[:component] = matching_cmps.first
         end
 
+        attr_writer :local_or_remote
+
        private
+        def local_or_remote()
+          unless @local_or_remote
+            raise Error.new("local_or_remote() is caleld when @local_or_remote not set")
+          end
+          @local_or_remote
+        end
+
         def attr_name_special_processing(attr_fragment)
           #TODO: make this obtained from shared logic
           if attr_fragment == Pattern::Term.canonical_form(:attribute,'host_address')

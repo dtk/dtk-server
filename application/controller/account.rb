@@ -4,8 +4,7 @@ module DTK
       password = ret_non_null_request_params(:new_password)
       user = CurrentSession.new.get_user_object()
       
-      user.update_password(password)
-      rest_ok_response
+      rest_ok_response user.update_password(password)
     end
 
     def rest__list_ssh_keys()

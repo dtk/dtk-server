@@ -63,7 +63,7 @@ module DTK; class Attribute
         include CommonNodeComponentLevel
 
         def am_serialized_form()
-          raise Error.new("Not implemented yet")
+          "local_node.#{attribute_name()}"
         end
 
         def set_parent_and_attributes!(parent_idh,opts={})

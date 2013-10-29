@@ -9,7 +9,6 @@ module DTK; class Attribute::Pattern
           raise ErrorParse.new(source_attr_term)
         end
         attr_pattern = super(base_object,attr_term)
-pp [attr_pattern,attr_term,fn,node_cmp_type]
         if node_cmp_type
           attr_pattern.set_component_instance!(node_cmp_type)
         end

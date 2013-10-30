@@ -3,8 +3,15 @@ module DTK; class Attribute
     class ComponentLevel < self
       include CommonNodeComponentLevel
 
-      def create_attribute_on_template(cmp_template)
-        create_attributes([cmp_template]).first
+      def create_attribute_on_template(cmp_template,opts={})
+        new_attr = create_attributes([cmp_template]).first
+        if update_dsl = opts[:update_dsl]
+          unless module_branch = update_dsl[:module_branch]
+            raise Error.new("If update_dsl is specified then module_branch must be provided")
+          end
+          incrementally_update_component_dsl(cmp_template,[new_attr],module_branch)
+        end
+        new_attr.id_handle()
       end
 
       def type()
@@ -45,7 +52,7 @@ module DTK; class Attribute
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
         if attrs.empty? and opts[:create]
           @created = true
-          attrs = create_attributes(ndx_cmps.values,:ret_objects=>true)
+          attrs = create_attributes(ndx_cmps.values)
         end
         @attribute_stacks = attrs.map do |attr|
           cmp = ndx_cmps[attr[:component_component_id]]
@@ -58,26 +65,27 @@ module DTK; class Attribute
         ret
       end
      private
-      def create_attributes(components,opts={})
+      def create_attributes(components)
         attribute_idhs = Array.new
-        field_def = {'display_name' => pattern_attribute_name()}
+        field_def = 
+          {'display_name' => pattern_attribute_name()}
         components.each do |cmp|
           attribute_idhs += cmp.create_or_modify_field_def(field_def)
         end
         
         return attribute_idhs if attribute_idhs.empty?
 
-        unless opts[:ret_objects]
-          attribute_idhs 
-        else
-          #TODO: can make more efficient by having create_or_modify_field_def return object with cols
-          sp_hash = {
-            :cols => [:id,:group_id,:display_name,:component_component_id],
-            :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
-          }
-          attr_mh = attribute_idhs.first.createMH()
-          Model.get_objs(attr_mh,sp_hash)
-        end
+        #TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:component_component_id,:required,:data_type],
+          :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
+        }
+        attr_mh = attribute_idhs.first.createMH()
+        Model.get_objs(attr_mh,sp_hash)
+      end
+
+      def incrementally_update_component_dsl(cmp_template,modified_attrs,module_branch)
+        pp ["in #{self.class}.incrementally_update_component_dsl",self,cmp_template,modified_attrs,module_branch]
       end
 
       def pattern_node_name()

@@ -12,8 +12,7 @@ module DTK; class AssemblyModule
         component_module = cmp_template.get_component_module()
         module_branch = create_assembly_branch?(assembly,component_module,:ret_module_branch=>true)
         branch_cmp_template = get_branch_template(module_branch,cmp_template)
-        new_cmp_template_attr_idh = cmp_level_attr_pattern.create_attribute_on_template(branch_cmp_template)
-        pp ["in #{self}, next step is to update dsl"]
+        cmp_level_attr_pattern.create_attribute_on_template(branch_cmp_template,:update_dsl => {:module_branch => module_branch})
       end
     end
   end

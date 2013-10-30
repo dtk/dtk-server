@@ -70,7 +70,7 @@ module DTK
    private
     #TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)
-      Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map{|r|r[:display_name]}.join(',')})")
+      Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map{|r|r.get_field?(:display_name)}.join(',')})")
       unless (repo_remotes||[]).empty?
         #TODO: enhance so that default is one taht matche's user's default namespace
         #set on augmented_module_branch[:repo] fields associated with the default namespace

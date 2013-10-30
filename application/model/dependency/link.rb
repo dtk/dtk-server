@@ -24,10 +24,7 @@ module DTK; class Dependency
       else
         link_def_create_hash = create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
         aug_link_defs = cmp_template.get_augmented_link_defs()
-        fragment_hash = incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
-        unless fragment_hash.size == 1
-          raise Error.new("Not implemented when fragment hash has more than one element")
-        end
+        incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
         result.merge!(:component_module_updated => true, :link_def_created => {:hash_form => link_def_create_hash})
       end
       result

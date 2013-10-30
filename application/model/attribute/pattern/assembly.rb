@@ -25,6 +25,10 @@ module DTK; class Attribute
             @attributes_stack.map{|attr|attr[:attribute].id_handle()}
           end
 
+          def component_instance()
+            nil
+          end
+
           def set_parent_and_attributes!(assembly_idh,opts={})
             attributes = ret_matching_attributes(:component,[assembly_idh],pattern)
             #if does not exist then create the attribute if carete flag set

@@ -12,7 +12,8 @@ module DTK
       end
 
       def match_attribute_patterns?(dep_attr_pattern,antec_attr_pattern)
-        if match_attr_pattern?(self[:input],dep_attr_pattern) and match_attr_pattern?(self[:output],antec_attr_pattern)
+        if dep_attr_pattern.match_attribute_mapping_endpoint?(self[:input]) and
+            antec_attr_pattern.match_attribute_mapping_endpoint?(self[:output])
           self
         end
       end
@@ -62,11 +63,6 @@ module DTK
       end
 
      private
-      def match_attr_pattern?(attr,attr_pattern)
-        attr[:component_type] == attr_pattern.component_instance()[:component_type] and
-          attr[:attribute_name] == attr_pattern.attribute_name()
-      end
-
       #returns [attribute,unravel_path]
       def get_attribute_with_unravel_path(dir,context)
         index_map_path = nil

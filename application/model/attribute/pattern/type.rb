@@ -9,6 +9,14 @@ module DTK; class Attribute
         @pattern = pattern
       end
 
+      def updated_attribute_idhs()
+        (@created ? Array.new : attribute_idhs())
+      end
+
+      def created_attribute_idhs()
+        (@created ? attribute_idhs() : Array.new)
+      end
+
      private
       attr_reader :pattern, :id
 

@@ -21,15 +21,15 @@ module DTK; class Attribute
       create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
     end
 
-    #returns hash of form {:updated_attributes => [id handles], :created_attributes => [id handles]}
+    #returns hash of form {:updated_attributes => [{:pattern => pattern, :id_handle => idh}..], :created_attributes => [{:pattern => pattern, :id_handle => idh}..]
     def self.set_attributes(base_object,av_pairs,opts={})
       response = {:updated_attributes => Array.new, :created_attributes => Array.new}
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
-        response[:updated_attributes] += pattern.updated_attribute_idhs
-        response[:created_attributes] += pattern.created_attribute_idhs
-        attr_idhs = pattern.updated_attribute_idhs + pattern.created_attribute_idhs
+        pattern.updated_attribute_idhs.each{|idh|response[:updated_attributes] << {:pattern => pattern, :id_handle => idh}}
+        pattern.created_attribute_idhs.each{|idh|response[:created_attributes] << {:pattern => pattern, :id_handle => idh}}
+        attr_idhs = pattern.attribute_idhs
         unless attr_idhs.empty?
           attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end

@@ -148,9 +148,12 @@ module DTK
     def set_attributes(av_pairs,opts={})
       response = Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
       if opts[:update_meta] and not response[:created_attributes].empty?
+        cmp_level_attr_to_create = response[:created_attributes].select{|r|r[:pattern].type == :component_level}
+        unless cmp_level_attr_to_create.empty?
         #TODO stub
-        #reject all but component level attributes
         #update meta
+          pp [:update_meta_for_add_component]
+        end
       end
       response
     end

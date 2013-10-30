@@ -12,6 +12,10 @@ module DTK; class Attribute
           raise Error.new("Unexpected parent object type (#{parent_obj.class.to_s})")
         end
       end
+
+      def type()
+        :explicit_id
+      end
       
       attr_reader :attribute_idhs
       

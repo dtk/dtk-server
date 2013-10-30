@@ -285,6 +285,11 @@ module DTK
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
       opts = ret_params_hash(:format,:context,:create)
+      #update_meta == true is the default
+      update_meta = ret_request_params(:update_meta)
+      unless !update_meta.nil? and !update_meta
+        opts.merge!(:update_meta => true)
+      end
       assembly.set_attributes(av_pairs,opts)
       rest_ok_response 
     end

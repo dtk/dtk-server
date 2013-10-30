@@ -1,6 +1,10 @@
 module DTK; class Attribute
   class Pattern; class Type
     class AssemblyLevel < self
+      def type()
+        :assembly_level
+      end
+
       def attribute_idhs()
         @attributes_stack.map{|attr|attr[:attribute].id_handle()}
       end
@@ -19,6 +23,7 @@ module DTK; class Attribute
           unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
             raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end
+          @created = true
           field_def = {"display_name" => af[2]}
           attribute_idhs = assembly_idh.create_object().create_or_modify_field_def(field_def)
           attributes = attribute_idhs.map do |idh|

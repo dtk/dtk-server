@@ -3,6 +3,10 @@ module DTK; class Attribute
     class NodeLevel < self
       include CommonNodeComponentLevel
 
+      def type()
+        :node_level
+      end
+
       def match_attribute_mapping_endpoint?(am_endpoint)
         am_endpoint[:type] == 'node_attribute' and
           attr_name_normalize(am_endpoint[:attribute_name]) == attr_name_normalize(attribute_name())

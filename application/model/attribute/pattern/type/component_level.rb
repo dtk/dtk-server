@@ -3,6 +3,10 @@ module DTK; class Attribute
     class ComponentLevel < self
       include CommonNodeComponentLevel
 
+      def type()
+        :component_level
+      end
+
       def match_attribute_mapping_endpoint?(am_endpoint)
         am_endpoint[:type] == 'component_attribute' and
           am_endpoint[:component_type] == component_instance()[:component_type] and
@@ -36,6 +40,7 @@ module DTK; class Attribute
         attr_fragment = pattern_attribute_fragment()
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
         if attrs.empty? and opts[:create]
+          @created = true
           attrs = create_attributes(ndx_cmps.values)
         end
         @attribute_stacks = attrs.map do |attr|

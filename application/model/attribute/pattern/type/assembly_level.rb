@@ -11,7 +11,7 @@ module DTK; class Attribute
       
       def set_parent_and_attributes!(assembly_idh,opts={})
         attributes = ret_matching_attributes(:component,[assembly_idh],pattern)
-        #if does not exist then create the attribute if carete flag set
+        #if does not exist then create the attribute if create option is true
         #if exists and create flag exsists we just assign it new value
         if attributes.empty? and opts[:create]
           af = ret_filter(pattern,:attribute)

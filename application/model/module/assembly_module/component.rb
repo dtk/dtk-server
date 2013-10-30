@@ -46,6 +46,17 @@ module DTK; class AssemblyModule
       component_module.create_new_version(module_version,opts)
     end
 
+    def self.get_branch_template(module_branch,cmp_template)
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_type],
+        :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
+                    [:eq,:type,'template'],
+                    [:eq,:node_node_id,nil],
+                    [:eq,:component_type,cmp_template.get_field?(:component_type)]]
+      }
+      Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
+    end
+    
     def self.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
       cmp_instances = get_applicable_component_instances(assembly,component_module)
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())

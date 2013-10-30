@@ -29,9 +29,8 @@ module DTK; class AssemblyModule
 
       def self.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,module_branch,opts={})
         result = Hash.new
-        unless branch_cmp_template = get_branch_template(module_branch,cmp_template)
-          raise Error.new("Unexpected that branch_cmp_template is nil")
-        end
+        branch_cmp_template = get_branch_template(module_branch,cmp_template)
+
         if opts[:update_dsl]
           opts[:update_dsl] = {:module_branch => module_branch}
         end
@@ -42,17 +41,6 @@ module DTK; class AssemblyModule
       end
 
      private
-      def self.get_branch_template(module_branch,cmp_template)
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_type],
-          :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
-                      [:eq,:type,'template'],
-                      [:eq,:node_node_id,nil],
-                      [:eq,:component_type,cmp_template.get_field?(:component_type)]]
-        }
-        Model.get_obj(cmp_template.model_handle(),sp_hash)
-      end
-      
       def self.dependency_class(type)
         case type 
           when :simple then DTK::Dependency::Simple 

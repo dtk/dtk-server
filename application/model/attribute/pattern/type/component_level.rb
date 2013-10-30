@@ -3,6 +3,10 @@ module DTK; class Attribute
     class ComponentLevel < self
       include CommonNodeComponentLevel
 
+      def create_attribute_on_template(cmp_template)
+        create_attributes([cmp_template]).first
+      end
+
       def type()
         :component_level
       end
@@ -41,7 +45,7 @@ module DTK; class Attribute
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
         if attrs.empty? and opts[:create]
           @created = true
-          attrs = create_attributes(ndx_cmps.values)
+          attrs = create_attributes(ndx_cmps.values,:ret_objects=>true)
         end
         @attribute_stacks = attrs.map do |attr|
           cmp = ndx_cmps[attr[:component_component_id]]
@@ -54,21 +58,26 @@ module DTK; class Attribute
         ret
       end
      private
-      def create_attributes(components)
-        ret = Array.new
+      def create_attributes(components,opts={})
         attribute_idhs = Array.new
         field_def = {'display_name' => pattern_attribute_name()}
         components.each do |cmp|
           attribute_idhs += cmp.create_or_modify_field_def(field_def)
         end
-        return ret if attribute_idhs.empty?
-        #TODO: can make more efficient by having create_or_modify_field_def return object with cols
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:component_component_id],
-          :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
-        }
-        attr_mh = attribute_idhs.first.createMH()
-        Model.get_objs(attr_mh,sp_hash)
+        
+        return attribute_idhs if attribute_idhs.empty?
+
+        unless opts[:ret_objects]
+          attribute_idhs 
+        else
+          #TODO: can make more efficient by having create_or_modify_field_def return object with cols
+          sp_hash = {
+            :cols => [:id,:group_id,:display_name,:component_component_id],
+            :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
+          }
+          attr_mh = attribute_idhs.first.createMH()
+          Model.get_objs(attr_mh,sp_hash)
+        end
       end
 
       def pattern_node_name()

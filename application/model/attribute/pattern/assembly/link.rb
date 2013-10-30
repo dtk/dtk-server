@@ -5,11 +5,15 @@ module DTK; class Attribute::Pattern
       r8_nested_require('link','target')
 
       class Info
-        attr_reader :links,:dep_component_instance,:antec_component_instance
         def initialize(parsed_adhoc_links,dep_component_instance,antec_component_instance)
           @links = parsed_adhoc_links
           @dep_component_instance = dep_component_instance
           @antec_component_instance = antec_component_instance
+          @meta_supported = (!dep_component_instance.nil? and !antec_component_instance.nil?)
+        end
+        attr_reader :links,:dep_component_instance,:antec_component_instance
+        def meta_supported?()
+          @meta_supported
         end
         def dep_component_template()
           @dep_component_template ||= @dep_component_instance.get_component_template_parent()
@@ -54,9 +58,6 @@ module DTK; class Attribute::Pattern
           raise Error.new("Unexpected that target_attr_pattern.component() is nil")
         end
         source_cmp = source_attr_pattern.component_instance()
-        unless source_cmp = source_attr_pattern.component_instance()
-          raise Error.new("Unexpected that source_attr_pattern.component() is nil")
-        end
 
         antec_cmp,dep_cmp = 
           if target_attr_pattern.is_antecedent?()
@@ -64,7 +65,6 @@ module DTK; class Attribute::Pattern
           else
             [source_cmp,target_cmp]
           end
-
         [dep_cmp,antec_cmp]
       end    
 

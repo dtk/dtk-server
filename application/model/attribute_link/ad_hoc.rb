@@ -4,22 +4,20 @@ module DTK
       #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
         parsed_info = Attribute::Pattern::Assembly::Link.parsed_adhoc_link_info(self,assembly,target_attr_term,source_attr_term)
-        unless opts[:update_meta] and parsed_info.meta_supported?() 
+        unless opts[:update_meta] and parsed_info.meta_update_supported?() 
           return create_ad_hoc_attribute_links?(assembly,parsed_info.links)
         end
 
-        result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info)
         dep_cmp = parsed_info.dep_component_instance
+        peer_cmps = assembly.get_peer_component_instances(dep_cmp)
+        #get_peer_component_instances must be done before AssemblyModule::Component::AdHocLink, which modifies parents
+        result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info)
         if link_def_info = result[:link_def_created]
           link_def_hash = link_def_info[:hash_form]
           antec_cmp = parsed_info.antec_component_instance
-          create_link_defs_and_service_links(assembly,parsed_info.links,dep_cmp,antec_cmp,link_def_hash)
+          create_link_defs_and_service_links(assembly,parsed_info.links,dep_cmp,peer_cmps,antec_cmp,link_def_hash)
         else
-          create_attribute_links?(assembly,parsed_info.links,dep_cmp)
-        end
-        #calling this here, rather than in AssemblyModule::Component::AdHocLink.update because this needs to be done after logic to find peers
-        if result[:component_module_updated]
-          AssemblyModule::Component::AdHocLink.modify_cmp_instances_with_new_parents(assembly,result[:component_module],result[:module_branch])
+          create_attribute_links?(assembly,parsed_info.links,dep_cmp,peer_cmps)
         end
       end
 
@@ -28,10 +26,9 @@ module DTK
         @attr_pattern[type]
       end
 
-      def all_dep_component_instance_hashes(assembly,dep_component)
+      def all_dep_component_instance_hashes(assembly,dep_component,peer_cmps)
         ret = [self]
         #get peer component instances
-        peer_cmps = assembly.get_peer_component_instances(dep_component)
         return ret if peer_cmps.empty?
 
         #find whether target or source side matches with dep_component
@@ -71,12 +68,12 @@ module DTK
         }
       end
 
-      def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,antec_cmp,link_def_hash)
+      def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,peer_cmps,antec_cmp,link_def_hash)
         #This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
         #adds the link_def to it and then service link between this and antec_cmp
         service_type = link_def_hash.values.first[:link_type]
         antec_cmp_idh = antec_cmp.id_handle()
-        ([dep_cmp] + assembly.get_peer_component_instances(dep_cmp)).each do |cmp|
+        ([dep_cmp] + peer_cmps).each do |cmp|
            #TODO: can be more efficient to combine these two operations and see if can bulk them
            cmp_idh = cmp.id_handle()
            Model.input_hash_content_into_model(cmp_idh,:link_def => link_def_hash)
@@ -84,9 +81,9 @@ module DTK
          end
        end
 
-      def self.create_attribute_links?(assembly,parsed_adhoc_links,dep_component)
+      def self.create_attribute_links?(assembly,parsed_adhoc_links,dep_component,peer_components)
         attr_link_rows = parsed_adhoc_links.inject(Array.new) do |a,adhoc_link|
-          a + adhoc_link.all_dep_component_instance_hashes(assembly,dep_component)
+          a + adhoc_link.all_dep_component_instance_hashes(assembly,dep_component,peer_components)
         end
         create_ad_hoc_attribute_links?(assembly,attr_link_rows)
       end

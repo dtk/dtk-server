@@ -57,11 +57,6 @@ module DTK; class AssemblyModule
       Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
     end
     
-    def self.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
-      cmp_instances = get_applicable_component_instances(assembly,component_module)
-      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
-    end
-
     def self.delete_modules?(assembly)
       module_version = ModuleVersion.ret(assembly)
       #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
@@ -74,6 +69,11 @@ module DTK; class AssemblyModule
         component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
         component_module.delete_version?(module_version)
       end
+    end
+
+    def self.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
+      cmp_instances = get_applicable_component_instances(assembly,component_module)
+      update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
     def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)

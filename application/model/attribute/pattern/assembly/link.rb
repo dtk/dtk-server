@@ -9,11 +9,11 @@ module DTK; class Attribute::Pattern
           @links = parsed_adhoc_links
           @dep_component_instance = dep_component_instance
           @antec_component_instance = antec_component_instance
-          @meta_supported = (!dep_component_instance.nil? and !antec_component_instance.nil?)
+          @meta_update_supported = (!dep_component_instance.nil? and !antec_component_instance.nil?)
         end
         attr_reader :links,:dep_component_instance,:antec_component_instance
-        def meta_supported?()
-          @meta_supported
+        def meta_update_supported?()
+          @meta_update_supported
         end
         def dep_component_template()
           @dep_component_template ||= @dep_component_instance.get_component_template_parent()

@@ -102,7 +102,7 @@ class DtkCommon
 			puts "", ""
 			puts "Server log part:"
 			puts "----------------"
-			server_log_print()
+			puts server_log_print()
 			puts "----------------"
 			puts "", ""
 		else

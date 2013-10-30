@@ -763,6 +763,17 @@ module DTK; class  Assembly
       Assembly::Template.create_or_update_from_instance(project,node_idhs,template_name,service_module_name)
     end
 
+    def set_attributes(av_pairs,opts={})
+      attr_patterns = super
+      if opts[:update_meta]
+        created_cmp_level_attrs = attr_patterns.select{|r|r.type == :component_level and r.created?()}
+        unless created_cmp_level_attrs.empty?
+          AssemblyModule::Component::Attribute.update(self,created_cmp_level_attrs)
+        end
+      end
+      attr_patterns
+    end
+
     def get_attributes_print_form(opts={})
       if filter = opts[:filter]
         case filter

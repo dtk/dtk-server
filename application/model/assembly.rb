@@ -146,16 +146,7 @@ module DTK
     end
 
     def set_attributes(av_pairs,opts={})
-      response = Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
-      if opts[:update_meta] and not response[:created_attributes].empty?
-        cmp_level_attr_to_create = response[:created_attributes].select{|r|r[:pattern].type == :component_level}
-        unless cmp_level_attr_to_create.empty?
-        #TODO stub
-        #update meta
-          pp [:update_meta_for_add_component]
-        end
-      end
-      response
+      attr_patterns = Attribute::Pattern::Assembly.set_attributes(self,av_pairs,opts)
     end
 
     def self.ret_component_type(service_module_name,assembly_name)

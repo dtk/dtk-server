@@ -1,6 +1,7 @@
 module DTK; class AssemblyModule
   class Component < self
     r8_nested_require('component','ad_hoc_link')
+    r8_nested_require('component','attribute')
 
     def self.prepare_for_edit(assembly,component_module)
       get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)

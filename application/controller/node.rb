@@ -161,11 +161,8 @@ module XYZ
     def rest__set_attributes()
       node = create_node_obj(:node_id)
       av_pairs = ret_params_av_pairs()
-      response = node.set_attributes(av_pairs)
-      if response.empty?
-        raise ErrorUsage.new("No attributes match")
-      end
-      rest_ok_response response
+      node.set_attributes(av_pairs)
+      rest_ok_response
     end
 
     #### end: list and info actions ###

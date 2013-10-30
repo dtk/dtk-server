@@ -285,11 +285,8 @@ module DTK
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
       opts = ret_params_hash(:format,:context,:create)
-      response = assembly.set_attributes(av_pairs,opts)
-      if response.empty?
-        raise ErrorUsage.new("No attributes match")
-      end
-      rest_ok_response response
+      assembly.set_attributes(av_pairs,opts)
+      rest_ok_response 
     end
 
     #### actions to update and create assembly templates

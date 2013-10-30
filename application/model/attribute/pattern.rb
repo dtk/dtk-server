@@ -21,17 +21,28 @@ module DTK; class Attribute
       create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
     end
 
+    #returns hash of form {:updated_attributes => [id handles], :created_attributes => [id handles]}
     def self.set_attributes(base_object,av_pairs,opts={})
-      ret = Array.new
+      response = {:updated_attributes => Array.new, :created_attributes => Array.new}
       attribute_rows = Array.new
       av_pairs.each do |av_pair|
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
-        attr_idhs = pattern.attribute_idhs
+        response[:updated_attributes] += pattern.updated_attribute_idhs
+        response[:created_attributes] += pattern.created_attribute_idhs
+        attr_idhs = pattern.updated_attribute_idhs + pattern.created_attribute_idhs
         unless attr_idhs.empty?
           attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
         end
       end
-      return ret if attribute_rows.empty?
+
+      if attribute_rows.empty?
+        if opts[:create]
+          raise ErrorUsage.new("Unable to create a new attribute")
+        else
+          raise ErrorUsage.new("The attribute specified does not match an existing attribute in the assembly")
+        end
+      end
+
       attr_ids = attribute_rows.map{|r|r[:id]}
       attr_mh = base_object.model_handle(:attribute)
 
@@ -45,19 +56,7 @@ module DTK; class Attribute
 
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs,ndx_new_vals)
-
-      #TODO: clean up; modified because attr can be of type attribute or may have field :attribute]
-      filter_proc = Proc.new do |attr|
-        attr_id =
-          if attr.kind_of?(Attribute) then attr[:id]
-          elsif attr[:attribute] then attr[:attribute][:id]
-          else
-            raise Error.new("Unexpected argument attr (#{attr.inspect})")
-          end
-        attr_ids.include?(attr_id)
-      end
-      #filter_proc = proc{|attr|attr_ids.include?(attr[:id])}
-      base_object.info_about(:attributes,Opts.new(:filter_proc => filter_proc))
+      response
     end
 
     class ErrorParse < ErrorUsage

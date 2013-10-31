@@ -218,7 +218,9 @@ module DTK
           val ?  h.merge(a => val) : h
         end
       end
-      ::DTK::Repo::Diffs.new(array_diff_hashes)
+      a_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      b_sha = @grit_repo.heads.find{|r|r.name == other_branch}.commit.id
+      Repo::Diffs.new(array_diff_hashes,a_sha,b_sha)
     end
 
     #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary

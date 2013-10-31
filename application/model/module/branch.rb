@@ -44,7 +44,8 @@ module DTK
 
     def merge_changes_and_update_model?(component_module,branch_name_to_merge_from)
       ret = get_module_repo_info()
-      diffs_summary = RepoManager.diff(branch_name_to_merge_from,self).ret_summary()
+      diffs = RepoManager.diff(branch_name_to_merge_from,self)
+      diffs_summary = diffs.ret_summary()
       #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
       ret = ret.merge!(:any_updates => true)
@@ -56,6 +57,8 @@ module DTK
       unless :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
+      self[:current_sha] =  diffs.b_sha
+      update(:current_sha => self[:current_sha])
 
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)

@@ -218,10 +218,19 @@ module DTK
           val ?  h.merge(a => val) : h
         end
       end
-      a_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
-      b_sha = @grit_repo.heads.find{|r|r.name == other_branch}.commit.id
+      a_sha = branch_sha(@branch)
+      b_sha = branch_sha(other_branch)
       Repo::Diffs.new(array_diff_hashes,a_sha,b_sha)
     end
+
+    def branch_sha(branch)
+      if branch
+        if ref = @grit_repo.heads.find{|r|r.name == branch}
+          ref.commit.id
+        end
+      end
+    end
+    private :branch_sha
 
     #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary
     def any_diffs?(ref1,ref2)

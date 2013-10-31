@@ -110,7 +110,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       def update_attributes_fragment!(attributes_fragment,key,content)
-        (attributes_fragment[key] ||= Hash.new)..merge!(content)
+        (attributes_fragment[key] ||= Hash.new).merge!(content)
       end
     end
 

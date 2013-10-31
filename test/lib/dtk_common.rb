@@ -245,10 +245,6 @@ class DtkCommon
 		return is_attributes_set
 	end
 
-	dtk = DtkCommon.new('','')
-	dtk.set_attribute(2147628750,'os_identifier','precise')
-
-
 	def check_attribute_presence_in_nodes(assembly_id, node_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in nodes:", "----------------------------------"		
 		attribute_check = false

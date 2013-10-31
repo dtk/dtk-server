@@ -22,6 +22,20 @@ module DTK; class ComponentDSL; class V2
       ret
     end
 
+    def set?(key,content,obj)
+      val = obj[key]
+      unless val.nil?
+        content[key.to_s] = val 
+      end
+    end
+
+    def component_fragment(full_hash,component_template)
+      unless component_type = component_template && component_template.get_field?(:component_type)
+        raise Error.new("The method merge_fragment needs the context :component_template")
+      end
+      Component.get_fragment(full_hash,component_type)
+    end
+
     class ObjectWrapper
       attr_reader :object
       def initialize(object)
@@ -53,6 +67,50 @@ module DTK; class ComponentDSL; class V2
      private
       def self.hash_index(cmp_type)
         ::DTK::Component.display_name_print_form(cmp_type,:no_module_name => true)
+      end
+    end
+
+    class Attribute < self
+      def generate(attr)
+        #TODO: treat default and external_ref
+        attr.object.update_object!(:display_name,:description,:data_type,:semantic_type,:required,:dynamic,:external_ref)
+        ref = attr.required(:display_name)
+        content = PrettyPrintHash.new
+        set?(:description,content,attr)
+        type = type(attr[:data_type],attr[:semantic_type])
+        content['type'] = type if type
+        content['required'] = true if attr[:required]
+        content['dynamic'] = true if attr[:dynamic]
+        {ref => content}
+      end
+
+      def merge_fragment!(full_hash,fragment,context={})
+        component_fragment = component_fragment(full_hash,context[:component_template])
+        if attributes_fragment = component_fragment['attributes']
+          fragment.each do |key,content|
+            update_attributes_fragment!(attributes_fragment,key,content)
+          end
+        else
+          component_fragment['attributes'] = fragment
+        end
+        full_hash
+      end
+
+     private
+      def type(data_type,semantic_type)
+        ret = data_type
+        if semantic_type
+          unless semantic_type.kind_of?(Hash) and semantic_type.size == 1 and semantic_type.keys.first == ":array"
+            Log.error("Ignoring because unexpected semantic type (#{semantic_type})")
+          else
+            ret = "array(#{semantic_type.values.first})"
+          end
+        end
+        ret||'string'
+      end
+
+      def update_attributes_fragment!(attributes_fragment,key,content)
+        (attributes_fragment[key] ||= Hash.new)..merge!(content)
       end
     end
 
@@ -88,13 +146,6 @@ module DTK; class ComponentDSL; class V2
       end
 
      private
-      def component_fragment(full_hash,component_template)
-        unless component_type = component_template && component_template.get_field?(:component_type)
-          raise Error.new("The method merge_fragment needs the context :component_template")
-        end
-        Component.get_fragment(full_hash,component_type)
-      end
-
       def update_depends_on_fragment!(depends_on_fragment,key,content)
         depends_on_fragment.each_with_index do |depends_on_el,i|
           if (depends_on_el.kind_of?(Hash) and depends_on_el.keys.first == key) or

@@ -231,7 +231,11 @@ class DtkCommon
 
 		#Set attribute value for given attribute id
 		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :value=>attribute_value, :pattern=>attribute_id})
-		extract_attribute_value = set_attribute_value_response['data'].first['value']
+
+		puts "List of assembly attributes after adding #{attribute_value} value for #{attribute_name} attribute name:"
+		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+		pretty_print_JSON(assembly_attributes)
+		extract_attribute_value = attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
 
 		if (extract_attribute_value == attribute_value)
 			puts "Setting of #{attribute_name} attribute completed successfully!"
@@ -240,6 +244,10 @@ class DtkCommon
 		puts ""
 		return is_attributes_set
 	end
+
+	dtk = DtkCommon.new('','')
+	dtk.set_attribute(2147628750,'os_identifier','precise')
+
 
 	def check_attribute_presence_in_nodes(assembly_id, node_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in nodes:", "----------------------------------"		

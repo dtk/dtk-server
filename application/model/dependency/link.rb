@@ -107,9 +107,7 @@ module DTK; class Dependency
         unless module_branch = update_dsl[:module_branch]
           raise Error.new("If update_dsl is specified then module_branch must be provided")
         end
-        dsl_path,hash_content,fragment_hash = ComponentDSL.incremental_generate(module_branch,aug_link_defs,:component_template=>cmp_template)
-        module_branch.serialize_and_save_to_repo(dsl_path,hash_content)
-        fragment_hash
+        module_branch.incrementally_update_component_dsl(aug_link_defs,:component_template=>cmp_template)
       end
     end
   end

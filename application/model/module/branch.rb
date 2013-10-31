@@ -103,6 +103,12 @@ module DTK
       self[:version] == self.class.version_field(version)
     end
 
+    def incrementally_update_component_dsl(augmented_objects,context={})
+      dsl_path,hash_content,fragment_hash = ComponentDSL.incremental_generate(self,augmented_objects,context)
+      serialize_and_save_to_repo(dsl_path,hash_content)
+      fragment_hash
+    end
+
     #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
     def serialize_and_save_to_repo(*args)
       files = 

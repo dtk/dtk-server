@@ -9,7 +9,7 @@ module DTK; class Attribute
           unless module_branch = update_dsl[:module_branch]
             raise Error.new("If update_dsl is specified then module_branch must be provided")
           end
-          incrementally_update_component_dsl(cmp_template,[new_attr],module_branch)
+          module_branch.incrementally_update_component_dsl([new_attr],:component_template => cmp_template)
         end
         new_attr.id_handle()
       end
@@ -82,10 +82,6 @@ module DTK; class Attribute
         }
         attr_mh = attribute_idhs.first.createMH()
         Model.get_objs(attr_mh,sp_hash)
-      end
-
-      def incrementally_update_component_dsl(cmp_template,modified_attrs,module_branch)
-        pp ["in #{self.class}.incrementally_update_component_dsl",self,cmp_template,modified_attrs,module_branch]
       end
 
       def pattern_node_name()

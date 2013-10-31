@@ -1,6 +1,14 @@
 module DTK; class Assembly
   class Template < self
     r8_nested_require('template','factory')
+
+    def self.get_objs(mh,sp_hash,opts={})
+      if mh[:model_name] == :assembly_template
+        super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
+      else
+        super
+      end
+    end
     
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_template)
@@ -100,7 +108,7 @@ module DTK; class Assembly
                     opts[:filter]
                    ].compact
       }
-      ret = get_objs(mh.createMH(:component),sp_hash)
+      ret = get_objs(mh.createMH(:assembly_template),sp_hash)
       #TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
@@ -147,6 +155,26 @@ module DTK; class Assembly
         include_nodes ? el.merge(:nodes => r[:ndx_nodes].values) : el
       end
       opts[:no_sorting] ? unsorted : unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+
+    def self.pretty_print_name(assembly,opts={})
+      ret = 
+        if cmp_type = assembly.get_field?(:component_type) 
+          if opts[:no_module_prefix]
+            cmp_type.gsub(/^.+__/,"")
+          else
+            cmp_type.gsub(/__/,"::")
+          end
+        else 
+          assembly.get_field?(:display_name)
+        end
+      
+      if opts[:version_suffix] 
+        version = pretty_print_version(assembly)
+        version ? "#{ret}-v#{version}" : ret
+      else
+        ret
+      end
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)

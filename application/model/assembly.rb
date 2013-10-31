@@ -152,25 +152,6 @@ module DTK
     def self.ret_component_type(service_module_name,assembly_name)
       "#{service_module_name}__#{assembly_name}"
     end
-    def self.pretty_print_name(assembly,opts={})
-      ret = 
-        if cmp_type = assembly[:component_type] 
-          if opts[:no_module_prefix]
-            assembly[:component_type].gsub(/^.+__/,"")
-          else
-            assembly[:component_type].gsub(/__/,"::")
-          end
-        else 
-          assembly[:display_name]
-      end
-
-      if opts[:version_suffix] 
-        version = pretty_print_version(assembly)
-        version ? "#{ret}-v#{version}" : ret
-      else
-        ret
-      end
-    end
 
     def self.pretty_print_version(assembly)
       assembly[:version] && ModuleBranch.version_from_version_field(assembly[:version])
@@ -191,6 +172,10 @@ module DTK
       return !interrsecting_nodes.empty?
     end
 
+    def pretty_print_name(opts={})
+      self.class.pretty_print_name(self,opts={})
+    end
+
     class << self
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new
@@ -208,7 +193,7 @@ module DTK
         assembly_rows.each do |r|
           #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
           #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r.pretty_print_name(pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
           pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
           if version = pretty_print_version(r)
             pntr.merge!(:version => version)

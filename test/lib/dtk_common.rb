@@ -1,5 +1,4 @@
 #Common class with methods used for interaction with dtk server
-#aaaaaaaaaaaaaaaaa
 require 'rubygems'
 require 'rest_client'
 require 'pp'

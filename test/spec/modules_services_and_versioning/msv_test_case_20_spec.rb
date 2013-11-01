@@ -10,8 +10,7 @@ require './lib/dtk_common'
 require './lib/assembly_operations_spec'
 require './lib/services_spec'
 
-assembly_template1 = 'redhat_bigtop_namenode'
-assembly_template2 = 'redhat_hdp_namenode'
+assembly_template1 = 'test_apache'
 service_name = 'bakir_test_apache'
 service_namespace = 'r8'
 service_filesystem_location = '~/dtk/service_modules'
@@ -38,10 +37,6 @@ describe "(Modules, Services and Versioning) Test Case 20: Import service from r
 
   context "Check if #{assembly_template1} assembly_template belongs to #{service_name} service" do
     include_context "Check if assembly template belongs to the service", dtk_common, service_name, assembly_template1
-  end
-
-  context "Check if #{assembly_template2} assembly_template belongs to #{service_name} service" do
-    include_context "Check if assembly template belongs to the service", dtk_common, service_name, assembly_template2
   end
 
   context "Delete service function" do

@@ -29,22 +29,12 @@ module DTK
       x && x.attributes 
     end
 
-    class GatedConnection
-      def initialize(conn)
-        @conn = conn
-        #each service has its own mutex
-        @mutex = Mutexs[self.class] ||= Mutex.new
-      end
-
-      def method_missing(name,*args,&block)
-        @mutex.synchronize{@conn.send(name,*args,&block)
-      end
-      def respond_to?(name)
-        @conn.respond_to?(name) || super
-      end
-
-      Mutexs = Hash.new
+    #each service has its own mutex
+    LockRequest = Hash.new
+    def request_context(&block)
+      #TODO: put up in here some handling of errors such as ones that should be handled by doing a retry
+      lock = LockRequest[self.class] ||= Mutex.new
+      lock.synchronize{yield}
     end
-
   end 
 end

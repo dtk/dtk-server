@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#DTK Server smoke test
+#This is DTK Server smoke test
 
 require 'rubygems'
 require 'rest_client'
@@ -18,7 +18,6 @@ os = 'precise'
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
-
 node_name = 'node1'
 module_name = "test"
 module_namespace = "dtk17"

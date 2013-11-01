@@ -582,14 +582,14 @@ module DTK
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)
       child_model_handle = model_handle.createMH(child_model_name)
-      Model.get_objs(child_model_handle,sp_hash,opts)
+      self.class.get_objs(child_model_handle,sp_hash,opts)
     end
     #TODO: deprecate below
     def get_children_from_sp_hash(child_model_name,sp_hash_x,opts={})
       parent_col_clause = [:eq, DB.parent_field(model_name,child_model_name),id()]
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,parent_col_clause)
       child_model_handle = model_handle.createMH(child_model_name)
-      Model.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
+      self.class.get_objects_from_sp_hash(child_model_handle,sp_hash,opts)
     end
 
     def update_object!(*cols_x)
@@ -645,13 +645,14 @@ module DTK
     
     def get_objs(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
-      Model.get_objs(model_handle(),sp_hash,opts)
+      mh = opts[:model_handle]||model_handle()
+      self.class.get_objs(mh,sp_hash,opts)
     end
 
     #TODO: remove get_objects_from_sp_hash
     def get_objects_from_sp_hash(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
-      Model.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
+      self.class.get_objects_from_sp_hash(model_handle(),sp_hash,opts)
     end
 
     def get_objs_uniq(obj_col,col_in_result=nil)
@@ -696,7 +697,7 @@ module DTK
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:oneof, :id, id_handles.map{|idh|idh.get_id()}])
-      Model.get_objects_from_sp_hash(model_handle,sp_hash,opts)
+      get_objects_from_sp_hash(model_handle,sp_hash,opts)
     end
 
     def self.get_obj(model_handle,sp_hash,opts={})
@@ -711,14 +712,14 @@ module DTK
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
-      Model.get_objects_from_search_object(search_object,opts)
+      get_objects_from_search_object(search_object,opts)
     end
     #TODO: remove below
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
-      Model.get_objects_from_search_object(search_object,opts)
+      get_objects_from_search_object(search_object,opts)
     end
 
     def get_object_columns(id_handle,columns)

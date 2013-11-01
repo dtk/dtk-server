@@ -2,6 +2,9 @@ module DTK; class Assembly
   class Template < self
     r8_nested_require('template','factory')
 
+    def get_objs(sp_hash,opts={})
+      super(sp_hash,opts.merge(:model_handle => model_handle().createMH(:assembly_template)))
+    end
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_template
         super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}

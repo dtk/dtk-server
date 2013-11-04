@@ -51,7 +51,8 @@ module DTK; class Attribute
         attr_fragment = pattern_attribute_fragment()
         attrs = ret_matching_attributes(:component,ndx_cmps.values.map{|r|r.id_handle()},attr_fragment)
         if attrs.empty? and opts[:create]
-          set_created!(opts[:create_options])
+          @created = true
+          set_attribute_properties!(opts[:attribute_properties]||{})
           attrs = create_attributes(ndx_cmps.values)
         end
         @attribute_stacks = attrs.map do |attr|
@@ -67,8 +68,9 @@ module DTK; class Attribute
      private
       def create_attributes(components)
         attribute_idhs = Array.new
+        attr_properties = attribute_properties().inject(Hash.new){|h,(k,v)|h.merge(k.to_s => v)}
         field_def = 
-          {'display_name' => pattern_attribute_name()}
+          {'display_name' => pattern_attribute_name()}.merge(attr_properties)
         components.each do |cmp|
           attribute_idhs += cmp.create_or_modify_field_def(field_def)
         end

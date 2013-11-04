@@ -32,7 +32,7 @@ module DTK; class Attribute
             end
             set_attribute_properties!(attr_properties)
           end
-          set_created!()
+          @created = true
           field_def = {"display_name" => af[2]}
           attribute_idhs = assembly_idh.create_object().create_or_modify_field_def(field_def)
           attributes = attribute_idhs.map do |idh|

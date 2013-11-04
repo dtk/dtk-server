@@ -9,9 +9,7 @@ module DTK; class Attribute
         @pattern = pattern
       end
 
-      def set_created!()
-        @created = true
-      end
+      attr_writer :created
       def created?()
         @created
       end

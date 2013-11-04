@@ -319,6 +319,26 @@ module DTK; class  Assembly
       }
       get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
     end
+
+    def self.get_assemblies_with_nodes(mh,opts={})
+      Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:nested_nodes_summary],
+        :filter => [:and, [:eq, :type, "composite"], target_filter]
+      }
+      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
+      
+      ndx_ret = Hash.new
+      assembly_rows.each do |r|
+        node = r.delete(:node)
+        next if node.nil?
+        ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
+      end
+      ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
+      ndx_ret.values
+    end
     
     class << self
      private
@@ -372,26 +392,6 @@ module DTK; class  Assembly
 
     def display_name_print_form(opts={})
       pretty_print_name()
-    end
-
-    def get_assemblies_with_nodes(mh,opts={})
-      Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      sp_hash = {
-        :cols => [:id, :display_name,:nested_nodes_summary],
-        :filter => [:and, [:eq, :type, "composite"], target_filter]
-      }
-      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
-      
-      ndx_ret = Hash.new
-      assembly_rows.each do |r|
-        node = r.delete(:node)
-        next if node.nil?
-        ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
-      end
-      ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
-      ndx_ret.values
     end
     
     class << self

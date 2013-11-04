@@ -16,7 +16,9 @@ module DTK
       end
       def self.is_constant?(external_ref)
         #this is specifically a symbol because external_ref's keys are symbols
-        external_ref[:type] == ExternalRefType
+        if type = (external_ref||{})[:type]
+          type == ExternalRefType
+        end
       end
 
       def initialize(constant,dep_attr_ref,dep_cmp,datatype)

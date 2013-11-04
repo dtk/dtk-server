@@ -23,7 +23,16 @@ module DTK; class Attribute
           unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
             raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end
-          @created = true
+          attr_properties = opts[:attribute_properties]||Hash.new
+          unless attr_properties.empty?
+            if attr_properties[:dynamic]
+              raise ErrorUsage.new("Illegal to include teh :dynamic option on an assembly level attribute")
+            elsif attr_properties[:required]
+              raise Error.new("The option :required not yet supported on assembly leveal attributes")
+            end
+            set_attribute_properties!(attr_properties)
+          end
+          set_created!()
           field_def = {"display_name" => af[2]}
           attribute_idhs = assembly_idh.create_object().create_or_modify_field_def(field_def)
           attributes = attribute_idhs.map do |idh|

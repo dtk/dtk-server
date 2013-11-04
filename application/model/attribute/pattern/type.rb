@@ -9,8 +9,17 @@ module DTK; class Attribute
         @pattern = pattern
       end
 
+      def set_created!()
+        @created = true
+      end
       def created?()
         @created
+      end
+      def attribute_properties()
+        @attribute_properties||{}
+      end
+      def set_attribute_properties!(attr_properties)
+        @attribute_properties = attr_properties
       end
 
      private

@@ -25,12 +25,13 @@ module DTK; class Attribute
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
+      attr_properties = opts[:attribute_properties]||{}
       av_pairs.each do |av_pair|
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
         attr_idhs = pattern.attribute_idhs
         unless attr_idhs.empty?
-          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}}
+          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}.merge(attr_properties)}
         end
       end
 

@@ -66,6 +66,11 @@ module DTK; class AssemblyModule
       }
       component_module_mh = assembly.model_handle(:component_module)
       Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
+        unless r[:component_id]
+          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+          Model.delete_instance(r.id_handle())
+          next
+        end
         component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
         component_module.delete_version?(module_version)
       end

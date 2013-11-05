@@ -70,6 +70,9 @@ module DTK
         opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
         opts.add_value_to_return!(:datatype)
       end
+      if about == :attributes
+        opts.merge!(:truncate_attribute_values => true)
+      end
       data = assembly.info_about(about, opts)
       datatype = opts.return_value(:datatype)
       rest_ok_response data, :datatype => datatype

@@ -41,12 +41,19 @@ module DTK
           :description => @aug_attr[:description]||@aug_attr[:display_name]
         }
         if value = value_print_form()
+          if @truncate_attribute_value
+            if value.kind_of?(String) and value.size > TruncateSize
+              value = "#{value[0..TruncateSize-1]} #{TruncateSymbols}"
+            end
+          end
           attr_info.merge!(:value => value)
         end
         @aug_attr.hash_subset(*PrintForm::UnchangedDisplayCols).merge(attr_info)
       end
       UnchangedDisplayCols = [:id,:required]
       UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
+      TruncateSize = 30
+      TruncateSymbols = '...'
 
       def self.augment_with_attribute_links!(ret,assembly)
         ndx_attr_mappings = Hash.new
@@ -74,6 +81,7 @@ module DTK
         @aug_attr = aug_attr #needs to be done first
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
         @index_map = opts[:index_map]
+        @truncate_attribute_value = opts[:truncate_attribute_values]
       end
 
       def self.linked_to_display_form(linked_to_obj)

@@ -83,7 +83,13 @@ module DTK; class AssemblyModule
 
     def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]
-      cmp_instances_needing_update = cmp_instances.reject{|cmp|cmp.get_field?(:module_branch_id) == module_branch_id}
+
+      #shortcut; do not need to update components that are set already to this module id; and for added protection making
+      #sure that these it does not have :locked_sha set
+      cmp_instances_needing_update = cmp_instances.reject do |cmp|
+        (cmp.get_field?(:module_branch_id) == module_branch_id) and
+          ((cmp.has_key?(:locked_sha) and cmp[:locked_sha].nil?) or cmp.get_field?(:locked_sha).nil?)
+      end
       return if cmp_instances_needing_update.empty?
       component_types = cmp_instances_needing_update.map{|cmp|cmp.get_field?(:component_type)}.uniq
       version_field = module_branch.get_field?(:version)

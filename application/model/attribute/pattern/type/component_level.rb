@@ -57,6 +57,8 @@ module DTK; class Attribute
         end
         @attribute_stacks = attrs.map do |attr|
           cmp = ndx_cmps[attr[:component_component_id]]
+          #TODO: this shoudl be done more internally
+          fill_in_external_ref?(attr,cmp)
           {
             :attribute => attr,
             :component => cmp,
@@ -85,6 +87,21 @@ module DTK; class Attribute
         attr_mh = attribute_idhs.first.createMH()
         Model.get_objs(attr_mh,sp_hash)
       end
+
+      def fill_in_external_ref?(attr,component)
+        unless attr[:external_ref]
+          component_type = component.get_field?(:component_type)
+          attr_name = attr.get_field?(:display_name)
+          external_ref = attr[:external_ref] = {
+            #TODO: hard coded and not centralized logic
+            :type => 'puppet_attribute',
+            :path => "node[#{component_type}][#{attr_name}]"
+          }
+          attr.update({:external_ref => external_ref},:convert => true)
+        end
+        attr
+      end
+
 
       def pattern_node_name()
         pattern() =~ NodeComponentRegexp 

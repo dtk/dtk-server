@@ -48,13 +48,13 @@ module DTK
       diffs_summary = diffs.ret_summary()
       #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
-      ret = ret.merge!(:any_updates => true)
+      ret = ret.merge!(:any_updates => true, :fast_forward_change => true)
 
       result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
       if result == :merge_needed
         if opts[:force]
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
-          ret.merge!(:forced => true)
+          ret.merge!(:fast_forward_change => false)
         else
           raise ErrorUsage.new("Cannot promote changes unless the --force option is used; THIS OPTION WILL WIPE OUT CHANGES IN COMPONENT MODULE")
         end

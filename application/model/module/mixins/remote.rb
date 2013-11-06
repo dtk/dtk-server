@@ -162,7 +162,9 @@ module DTK
 
         if module_obj = module_exists?(project.id_handle(),local_module_name)
           if module_obj.get_module_branch(local_branch)
-            raise ErrorUsage.new("Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})")
+            # do not raise exception if user wants to ignore component import
+            return module_obj if opts[:ignore_component_error]
+            raise ErrorUsage.new("Conflicts with existing server local module (#{pp_module_name(local_module_name,version)}). To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i).")
           end
         end
       

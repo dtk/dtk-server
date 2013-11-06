@@ -16,14 +16,14 @@ module DTK; class AssemblyModule
       AdHocLink.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
     end
 
-    def self.promote_module_updates(assembly,component_module)
+    def self.promote_module_updates(assembly,component_module,opts={})
       module_version = ModuleVersion.ret(assembly)
       branch = component_module.get_workspace_module_branch(module_version)
       unless ancestor_branch = branch.get_ancestor_branch?()
         raise Error.new("Cannot find ancestor branch")
       end
       branch_name = branch[:branch]
-      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
+      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name,opts)
     end
 
    private

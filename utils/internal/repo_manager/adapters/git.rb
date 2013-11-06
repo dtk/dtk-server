@@ -274,6 +274,13 @@ module DTK
       ret
     end
 
+    def hard_reset_to_branch(branch_to_reset_from)
+      checkout(@branch) do
+        git_command__hard_reset(branch_to_reset_from)
+        push_changes(:force=>true)
+      end
+    end
+
     #TODO: prime exampe where much better if we can just push to bare repo
     def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
       unless remote_exists?(remote_name)
@@ -410,8 +417,8 @@ module DTK
       end
     end
 
-    def push_changes(remote_name=nil,remote_branch=nil)
-      git_command__push(@branch,remote_name,remote_branch)
+    def push_changes(opts={})
+      git_command__push(@branch,opts[:remote_name],opts[:remote_branch],opts)
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
@@ -672,12 +679,14 @@ module DTK
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
     #returns sha of remote haed
-    def git_command__push(branch_name,remote_name=nil,remote_branch=nil)
+    def git_command__push(branch_name,remote_name=nil,remote_branch=nil,opts={})
       ret = nil
       Git_command__push_mutex.synchronize do 
         remote_name ||= default_remote_name()
         remote_branch ||= branch_name
-        git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}")
+        args = [cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}"]
+        args << '-f' if opts[:force]
+        git_command.push(*args)
         remote_name = "#{remote_name}/#{remote_branch}"
         ret = @grit_repo.remotes.find{|r|r.name == remote_name}.commit.id
       end
@@ -707,6 +716,10 @@ module DTK
 
     def git_command__merge(branch_to_merge_from)
       git_command.merge(cmd_opts(),branch_to_merge_from)
+    end
+
+    def git_command__hard_reset(branch_to_reset_from)
+      git_command.reset(cmd_opts(),'--hard',branch_to_reset_from)
     end
 
     def git_command__create_local_branch(branch_name)

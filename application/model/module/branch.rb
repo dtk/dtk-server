@@ -42,7 +42,7 @@ module DTK
       current_sha
     end
 
-    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from)
+    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from,opts={})
       ret = get_module_repo_info()
       diffs = RepoManager.diff(branch_name_to_merge_from,self)
       diffs_summary = diffs.ret_summary()
@@ -52,11 +52,16 @@ module DTK
 
       result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
       if result == :merge_needed
-        raise ErrorUsage.new("Cannot promote changes unless a merge is done")
-      end
-      unless :changed
+        if opts[:force]
+          RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
+          ret.merge!(:forced => true)
+        else
+          raise ErrorUsage.new("Cannot promote changes unless the --force option is used; THIS OPTION WILL WIPE OUT CHANGES IN COMPONENT MODULE")
+        end
+      elsif result != :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
+
       self[:current_sha] =  diffs.b_sha
       update(:current_sha => self[:current_sha])
 

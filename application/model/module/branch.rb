@@ -42,20 +42,28 @@ module DTK
       current_sha
     end
 
-    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from)
+    def merge_changes_and_update_model?(component_module,branch_name_to_merge_from,opts={})
       ret = get_module_repo_info()
-      diffs_summary = RepoManager.diff(branch_name_to_merge_from,self).ret_summary()
+      diffs = RepoManager.diff(branch_name_to_merge_from,self)
+      diffs_summary = diffs.ret_summary()
       #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
-      ret = ret.merge!(:any_updates => true)
+      ret = ret.merge!(:any_updates => true, :fast_forward_change => true)
 
       result = RepoManager.fast_foward_merge_from_branch(branch_name_to_merge_from,self)
       if result == :merge_needed
-        raise ErrorUsage.new("Cannot promote changes unless a merge is done")
-      end
-      unless :changed
+        if opts[:force]
+          RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
+          ret.merge!(:fast_forward_change => false)
+        else
+          raise ErrorUsage.new("Cannot promote changes unless the --force option is used; THIS OPTION WILL WIPE OUT CHANGES IN COMPONENT MODULE")
+        end
+      elsif result != :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")
       end
+
+      self[:current_sha] =  diffs.b_sha
+      update(:current_sha => self[:current_sha])
 
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)

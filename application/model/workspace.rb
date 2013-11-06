@@ -5,8 +5,8 @@ module DTK
       Factory.create?(target_idh,project_idh)
     end
 
-    def self.is_workspace?(object)
-      object.kind_of?(self) or (AssemblyFields[:ref] == object.get_field?(:ref))
+    def self.is_workspace?(obj)
+      obj.kind_of?(self) or (AssemblyFields[:ref] == obj.get_field?(:ref))
     end
 
     def purge(opts={})

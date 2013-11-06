@@ -28,11 +28,11 @@ module XYZ
         raise Error.new("display_name required in field_def")
       end
       attr_hash[:ref] = attr_hash[:display_name]
-      attr_hash[:data_type] != "string"
+      attr_hash[:data_type] ||= "string"
       #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
     end
-    CreateFields = [{"display_name" => :display_name}, {"default" => :value_asserted}, {"data_type" => :data_type}]
+    CreateFields = [:display_name,:data_type,:dynamic,:required].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
 
     def self.update_field_def(component,field_def_update)
       #compute default 

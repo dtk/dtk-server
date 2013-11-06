@@ -306,9 +306,15 @@ module Ramaze::Helper
     end
 
     def ret_request_param_boolean(param)
-      v = ret_request_params(param)
+      boolean_form(ret_request_params(param))
+    end
+    def ret_boolean_params_hash(*params)
+      ret_params_hash(*params).inject(Hash.new){|h,(k,v)|h.merge(k => boolean_form(v))}
+    end
+    def boolean_form(v)
       v.kind_of?(TrueClass) or (v.kind_of?(String) and v == "true")
     end
+    private :boolean_form
 
     def ret_non_null_request_params(*params)
       return nil unless request_method_is_post?()

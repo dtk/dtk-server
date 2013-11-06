@@ -9,8 +9,15 @@ module DTK; class Attribute
         @pattern = pattern
       end
 
+      attr_writer :created
       def created?()
         @created
+      end
+      def attribute_properties()
+        @attribute_properties||{}
+      end
+      def set_attribute_properties!(attr_properties)
+        @attribute_properties = attr_properties
       end
 
      private
@@ -28,6 +35,9 @@ module DTK; class Attribute
         end
         def component_instance()
           attribute_stack()[:component]
+        end
+        def component_instances()
+          @attribute_stacks.map{|as|as[:component]}.compact
         end
         def node()
           attribute_stack()[:node]

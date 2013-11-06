@@ -8,6 +8,9 @@ module DTK; class  Assembly
     include ViolationMixin
     include ServiceLinkMixin
 
+    def get_objs(sp_hash,opts={})
+      super(sp_hash,opts.merge(:model_handle => model_handle().createMH(:assembly_instance)))
+    end
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_instance
         super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
@@ -291,7 +294,7 @@ module DTK; class  Assembly
         :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
         :filter => filter
       }
-      ret = get_objs(assembly_mh,sp_hash)
+      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
       return ret unless needs_empty_nodes
 
       #add in in assembly nodes without components on them
@@ -314,7 +317,27 @@ module DTK; class  Assembly
         :cols => [:id, :display_name].compact,
         :filter => filter
       }
-      get_objs(assembly_mh,sp_hash)
+      get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
+    end
+
+    def self.get_assemblies_with_nodes(mh,opts={})
+      Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      sp_hash = {
+        :cols => [:id, :display_name,:nested_nodes_summary],
+        :filter => [:and, [:eq, :type, "composite"], target_filter]
+      }
+      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
+      
+      ndx_ret = Hash.new
+      assembly_rows.each do |r|
+        node = r.delete(:node)
+        next if node.nil?
+        ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
+      end
+      ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
+      ndx_ret.values
     end
     
     class << self
@@ -341,10 +364,10 @@ module DTK; class  Assembly
     end
 
     ### end: standard get methods
-    
     def self.list(assembly_mh,opts={})
       assembly_rows = get_info__flat_list(assembly_mh,opts)
-      assembly_rows.delete_if{|idh|Workspace.is_workspace?(idh)}
+      assembly_rows.reject!{|r|Workspace.is_workspace?(r)}
+#      assembly_rows.reject!{|r|
       
       if opts[:detail_level].nil?
         list_aux__no_details(assembly_rows)
@@ -363,35 +386,15 @@ module DTK; class  Assembly
       nodes_and_cmps.map{|r|r[:nested_component]}.select{|cmp|cmp[:basic_type] == "smoketest"}.map{|cmp|Aux::hash_subset(cmp,[:id,:display_name,:description])}
     end
 
-    def display_name_print_form(opts={})
-      self.class.pretty_print_name(self,opts)
+    def self.pretty_print_name(assembly,opts={})
+      assembly.get_field?(:display_name)
     end
 
+    def display_name_print_form(opts={})
+      pretty_print_name()
+    end
+    
     class << self
-      def get_assemblies_with_nodes(mh,opts={})
-        Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
-        target_idh = opts[:target_idh]
-        target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-        sp_hash = {
-          :cols => [:id, :display_name,:nested_nodes_summary],
-          :filter => [:and, [:eq, :type, "composite"], target_filter]
-        }
-        assembly_rows = get_objs(mh.createMH(:component),sp_hash)
-
-        ndx_ret = Hash.new
-        assembly_rows.each do |r|
-          node = r.delete(:node)
-          next if node.nil?
-          ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
-        end
-        ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
-        ndx_ret.values
-      end
-
-      def pretty_print_name(assembly,opts={})
-        assembly.get_field?(:display_name)
-      end
-
      private
       def list_aux__no_details(assembly_rows)
         assembly_rows.map do |r|

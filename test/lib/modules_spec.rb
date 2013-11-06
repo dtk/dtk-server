@@ -76,7 +76,7 @@ shared_context "Create module" do |module_name|
     puts "Create module:", "--------------"
     pass = false
     value = `dtk module import #{module_name}`
-    pass = value.include? "module_created: #{module_name}"
+    pass = value.include? "Status: OK"
     puts "Module #{module_name} created successfully!" if pass == true
     puts "Module #{module_name} was not created successfully!" if pass == false
     puts ""

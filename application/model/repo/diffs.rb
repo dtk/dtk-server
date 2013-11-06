@@ -1,5 +1,21 @@
 module DTK; class Repo
   class Diffs < Array
+    attr_reader :a_sha,:b_sha
+    def initialize(array_diff_hashes,a_sha,b_sha)
+      super(array_diff_hashes.map{|hash|Diff.new(hash)})
+      @a_sha = a_sha
+      @b_sha = b_sha
+    end
+
+    #returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
+    def ret_summary()
+      DiffTypesAndMethods.inject(Summary.new) do |h,(diff_type, diff_method)|
+#        diff_type, diff_method = tm
+        res = map{|diff|diff.send(diff_method)}.compact
+        res.empty? ? h : h.merge(diff_type => res)
+      end
+    end
+
     class Summary < SimpleHashObject
       def initialize(diffs_hash=nil)
         super()
@@ -45,18 +61,7 @@ module DTK; class Repo
 
     end
 
-    def initialize(array_diff_hashes)
-      super(array_diff_hashes.map{|hash|Diff.new(hash)})
-    end
+    DiffTypesAndMethods = Summary::DiffNames.map{|n|["files_#{n}".to_sym,"file_#{n}".to_sym]}
 
-    #returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
-    def ret_summary()
-      DiffTypesAndMthods.inject(Summary.new) do |h,(diff_type, diff_method)|
-#        diff_type, diff_method = tm
-        res = map{|diff|diff.send(diff_method)}.compact
-        res.empty? ? h : h.merge(diff_type => res)
-      end
-    end
-    DiffTypesAndMthods = Summary::DiffNames.map{|n|["files_#{n}".to_sym,"file_#{n}".to_sym]}
   end
 end; end

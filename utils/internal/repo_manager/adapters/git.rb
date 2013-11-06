@@ -218,8 +218,19 @@ module DTK
           val ?  h.merge(a => val) : h
         end
       end
-      ::DTK::Repo::Diffs.new(array_diff_hashes)
+      a_sha = branch_sha(@branch)
+      b_sha = branch_sha(other_branch)
+      Repo::Diffs.new(array_diff_hashes,a_sha,b_sha)
     end
+
+    def branch_sha(branch)
+      if branch
+        if ref = @grit_repo.heads.find{|r|r.name == branch}
+          ref.commit.id
+        end
+      end
+    end
+    private :branch_sha
 
     #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary
     def any_diffs?(ref1,ref2)
@@ -261,6 +272,13 @@ module DTK
         push_changes()
       end
       ret
+    end
+
+    def hard_reset_to_branch(branch_to_reset_from)
+      checkout(@branch) do
+        git_command__hard_reset(branch_to_reset_from)
+        push_changes(:force=>true)
+      end
     end
 
     #TODO: prime exampe where much better if we can just push to bare repo
@@ -399,8 +417,8 @@ module DTK
       end
     end
 
-    def push_changes(remote_name=nil,remote_branch=nil)
-      git_command__push(@branch,remote_name,remote_branch)
+    def push_changes(opts={})
+      git_command__push(@branch,opts[:remote_name],opts[:remote_branch],opts)
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
@@ -661,12 +679,14 @@ module DTK
     #TODO: see what other commands needs mutex and whether mutex across what boundaries
     Git_command__push_mutex = Mutex.new
     #returns sha of remote haed
-    def git_command__push(branch_name,remote_name=nil,remote_branch=nil)
+    def git_command__push(branch_name,remote_name=nil,remote_branch=nil,opts={})
       ret = nil
       Git_command__push_mutex.synchronize do 
         remote_name ||= default_remote_name()
         remote_branch ||= branch_name
-        git_command.push(cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}")
+        args = [cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}"]
+        args << '-f' if opts[:force]
+        git_command.push(*args)
         remote_name = "#{remote_name}/#{remote_branch}"
         ret = @grit_repo.remotes.find{|r|r.name == remote_name}.commit.id
       end
@@ -696,6 +716,10 @@ module DTK
 
     def git_command__merge(branch_to_merge_from)
       git_command.merge(cmd_opts(),branch_to_merge_from)
+    end
+
+    def git_command__hard_reset(branch_to_reset_from)
+      git_command.reset(cmd_opts(),'--hard',branch_to_reset_from)
     end
 
     def git_command__create_local_branch(branch_name)

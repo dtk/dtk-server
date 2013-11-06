@@ -70,6 +70,9 @@ module DTK
         opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
         opts.add_value_to_return!(:datatype)
       end
+      if about == :attributes
+        opts.merge!(:truncate_attribute_values => true)
+      end
       data = assembly.info_about(about, opts)
       datatype = opts.return_value(:datatype)
       rest_ok_response data, :datatype => datatype
@@ -128,7 +131,8 @@ module DTK
       end
       module_name = ret_non_null_request_params(:module_name)
       component_module = create_obj(:module_name,ComponentModule)
-      rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module)
+      opts = ret_boolean_params_hash(:force)
+      rest_ok_response AssemblyModule::Component.promote_module_updates(assembly,component_module,opts)
     end
 
     def rest__create_component_dependency()
@@ -285,11 +289,19 @@ module DTK
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
       opts = ret_params_hash(:format,:context,:create)
+      create_options = ret_boolean_params_hash(:required,:dynamic)
+      unless create_options.empty? 
+        unless opts[:create]
+          raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")
+        end
+        opts.merge!(:attribute_properties => create_options) 
+      end
       #update_meta == true is the default
       update_meta = ret_request_params(:update_meta)
       unless !update_meta.nil? and !update_meta
         opts.merge!(:update_meta => true)
       end
+
       assembly.set_attributes(av_pairs,opts)
       rest_ok_response 
     end

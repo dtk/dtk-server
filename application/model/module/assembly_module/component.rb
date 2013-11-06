@@ -16,14 +16,14 @@ module DTK; class AssemblyModule
       AdHocLink.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
     end
 
-    def self.promote_module_updates(assembly,component_module)
+    def self.promote_module_updates(assembly,component_module,opts={})
       module_version = ModuleVersion.ret(assembly)
       branch = component_module.get_workspace_module_branch(module_version)
       unless ancestor_branch = branch.get_ancestor_branch?()
         raise Error.new("Cannot find ancestor branch")
       end
       branch_name = branch[:branch]
-      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name)
+      ancestor_branch.merge_changes_and_update_model?(component_module,branch_name,opts)
     end
 
    private
@@ -66,6 +66,11 @@ module DTK; class AssemblyModule
       }
       component_module_mh = assembly.model_handle(:component_module)
       Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
+        unless r[:component_id]
+          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+          Model.delete_instance(r.id_handle())
+          next
+        end
         component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
         component_module.delete_version?(module_version)
       end
@@ -78,7 +83,13 @@ module DTK; class AssemblyModule
 
     def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]
-      cmp_instances_needing_update = cmp_instances.reject{|cmp|cmp.get_field?(:module_branch_id) == module_branch_id}
+
+      #shortcut; do not need to update components that are set already to this module id; and for added protection making
+      #sure that these it does not have :locked_sha set
+      cmp_instances_needing_update = cmp_instances.reject do |cmp|
+        (cmp.get_field?(:module_branch_id) == module_branch_id) and
+          ((cmp.has_key?(:locked_sha) and cmp[:locked_sha].nil?) or cmp.get_field?(:locked_sha).nil?)
+      end
       return if cmp_instances_needing_update.empty?
       component_types = cmp_instances_needing_update.map{|cmp|cmp.get_field?(:component_type)}.uniq
       version_field = module_branch.get_field?(:version)

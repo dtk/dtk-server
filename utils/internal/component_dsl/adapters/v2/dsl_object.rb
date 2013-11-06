@@ -114,7 +114,8 @@ module DTK; class ComponentDSL; class V2
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))
         ret["type"] = required_value(:type)
-        ret.set_unless_nil("default",value(:default_info))
+        #better heuristic is to not set dtk default to parsed implementation default
+        #ret.set_unless_nil("default",value(:default_info))
         ret["required"] = true if value(:required)
         ret.set_unless_nil("dynamic",value(:dynamic))
         ret.set_unless_nil("external_ref",converted_external_ref())

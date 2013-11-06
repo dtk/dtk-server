@@ -50,6 +50,7 @@ module Ramaze::Helper
       project = get_default_project()
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
+      additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
 
       remote_params = {
         :repo => remote_repo,
@@ -67,8 +68,8 @@ module Ramaze::Helper
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
-
-      response = module_class.import(project,remote_params,local_params,{:do_not_raise=>do_not_raise, :ignore_component_error=>ignore_component_error})
+      opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
+      response = module_class.import(project,remote_params,local_params,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

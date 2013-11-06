@@ -101,7 +101,7 @@ module DTK
 
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
         adapter_repo = get_adapter_repo(context(repo_name,branch))      
-        adapter_repo.push_changes(remote_name,remote_branch)
+        adapter_repo.push_changes({:remote_name=>remote_name,:remote_branch=>remote_branch})
         repo_name
       end
 

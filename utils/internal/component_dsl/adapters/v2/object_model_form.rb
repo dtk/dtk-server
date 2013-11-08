@@ -37,13 +37,6 @@ module DTK; class ComponentDSL; class V2
     def convert_to_pp_cmp_form(cmp)
       cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
     end
-    def component_part(cmp_external_form)
-      if cmp_external_form =~ Regexp.new("^.+#{CmpPPDelim}(.+$)")
-        $1
-      else
-        cmp_external_form
-      end
-    end
     #returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
     # '*' means required
     #e.g., keys ["*module","version"]
@@ -274,7 +267,7 @@ module DTK; class ComponentDSL; class V2
           conn_ref
         else
           cmp_external_form = conn_ref
-          component_part(cmp_external_form)
+          cmp_external_form
         end
       end
 

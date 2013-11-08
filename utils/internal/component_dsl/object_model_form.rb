@@ -42,7 +42,7 @@ module DTK; class ComponentDSL
     end
 
     class ParsingError < ErrorUsage
-      def initialize(msg,*args)
+      def initialize(msg='',*args)
         super("component dsl parsing error: #{msg_pp_form(msg,*args)}")
       end
 

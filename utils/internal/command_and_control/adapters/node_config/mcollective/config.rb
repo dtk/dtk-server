@@ -69,7 +69,12 @@ module DTK
 
         class Default < self
           def mcollective_config_file()
-            mcollective_config_erubis_object().result(:logfile => logfile(),:stomp_host => Mcollective.server_host())
+            mcollective_config_erubis_object().result(
+              :logfile => logfile(),
+              :stomp_host => Mcollective.server_host(),
+              :mcollective_username => R8::Config[:mcollective][:username],
+              :mcollective_password => R8::Config[:mcollective][:password],
+              :mcollective_collective => R8::Config[:mcollective][:collective])
           end
          private
           def cloud_init_user_data_erb()

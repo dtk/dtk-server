@@ -121,8 +121,12 @@ module DTK; class ComponentDSL; class V2
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
+        opts = Hash.new
+        if single_choice = (link_def_links.size == 1) 
+          {:omit_component_ref => ref}
+        end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
-          choice_info(aug_link_def,ObjectWrapper.new(link_def_link))
+          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts)
         end
         content = 
           if possible_links.size == 1
@@ -157,10 +161,13 @@ module DTK; class ComponentDSL; class V2
         depends_on_fragment << {key => content}
       end
 
-      def choice_info(link_def,link_def_link)
+      def choice_info(link_def,link_def_link,opts={})
         ret = PrettyPrintHash.new
         remote_cmp_type = link_def_link.required(:remote_component_type)
-        ret['component'] = Component.display_name_print_form(remote_cmp_type)
+        cmp = Component.display_name_print_form(remote_cmp_type)
+        unless opts[:omit_component_ref] == cmp
+          ret['component'] = cmp
+        end
         location = 
           case link_def_link.required(:type)
             when 'internal' then 'local'

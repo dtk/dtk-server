@@ -123,17 +123,12 @@ module DTK; class ComponentDSL; class V2
         end
         opts = Hash.new
         if single_choice = (link_def_links.size == 1) 
-          {:omit_component_ref => ref}
+          opts.merge!(:omit_component_ref => ref)
         end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
           choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts)
         end
-        content = 
-          if possible_links.size == 1
-            possible_links.first
-          else
-            {'choices' => possible_links}
-          end
+        content = (single_choice ? possible_links.first : {'choices' => possible_links})
         {ref => content}
       end
 
@@ -164,9 +159,9 @@ module DTK; class ComponentDSL; class V2
       def choice_info(link_def,link_def_link,opts={})
         ret = PrettyPrintHash.new
         remote_cmp_type = link_def_link.required(:remote_component_type)
-        cmp = Component.display_name_print_form(remote_cmp_type)
-        unless opts[:omit_component_ref] == cmp
-          ret['component'] = cmp
+        cmp_ref = Component.display_name_print_form(remote_cmp_type)
+        unless opts[:omit_component_ref] == cmp_ref
+          ret['component'] = cmp_ref
         end
         location = 
           case link_def_link.required(:type)

@@ -88,7 +88,7 @@ module DTK; class Dependency
     def self.create_link_def_and_link(external_or_internal,cmp_template,antec_cmp_template,am_serialized_form)
       antec_cmp_type = antec_cmp_template[:component_type]
       serialized_link_def =  
-        {"type" => Component.display_name_from_user_friendly_name(antec_cmp_type),
+        {"type" => antec_cmp_template.display_name_print_form(),
         "required"=>true,
         "possible_links"=>
         [{antec_cmp_type=>

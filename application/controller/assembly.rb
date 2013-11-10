@@ -186,13 +186,12 @@ module DTK
     def rest__add_service_link()
       assembly = ret_assembly_instance_object()
       assembly_id = assembly.id()
-      service_type = ret_non_null_request_params(:service_type)
       input_cmp_idh = ret_component_id_handle(:input_component_id,:assembly_id => assembly_id)
       output_cmp_idh = ret_component_id_handle(:output_component_id,:assembly_id => assembly_id)
-      service_link_idh = assembly.add_service_link?(service_type,input_cmp_idh,output_cmp_idh)
+      opts = ret_params_hash(:dependency_name)
+      service_link_idh = assembly.add_service_link?(input_cmp_idh,output_cmp_idh,opts)
       rest_ok_response :service_link => service_link_idh.get_id()
     end
-
 
 =begin
     #this adds attribute mappings as part of service link

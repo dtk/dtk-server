@@ -2,9 +2,9 @@ module DTK
   class Assembly::Instance
     class ServiceLink
       class Factory < self
-        def initialize(assembly_instance,service_type,input_cmp_idh,output_cmp_idh)
+        def initialize(assembly_instance,input_cmp_idh,output_cmp_idh,opts={})
           super(assembly_instance)
-          @service_type = service_type
+          @dependency_name = opts[:dependency_name] || output_cmp_idh.create_object().component_type_print_form()
           @input_cmp_idh = input_cmp_idh
           @output_cmp_idh = output_cmp_idh
           @input_cmp = input_cmp_idh.create_object()
@@ -30,6 +30,7 @@ module DTK
         end
         
        private
+        attr_reader :dependency_name
         #returns input_port,output_port,new_port_created (boolean)
         def add_or_ret_ports?()
           new_port_created = false
@@ -51,7 +52,7 @@ module DTK
             :filter => [:oneof,:component_id,cmp_idhs.map{|idh|idh.get_id()}]
           }
           port_mh = cmp_idhs.first.createMH(:port)
-          Model.get_objs(port_mh,sp_hash).select{|p|p.link_def_name() == @service_type}
+          Model.get_objs(port_mh,sp_hash).select{|p|p.link_def_name() == dependency_name()}
         end
         
         def create_port(direction)
@@ -67,7 +68,7 @@ module DTK
         end
 
         def link_def_stub(direction)
-          link_def_stub = {:link_type => @service_type}
+          link_def_stub = {:link_type => dependency_name()}
           if @input_cmp[:node_node_id] == @output_cmp[:node_node_id]
             link_def_stub[:has_internal_link] = true
           else

@@ -1,8 +1,8 @@
 module DTK
   class Assembly::Instance
     module ServiceLinkMixin
-      def add_service_link?(service_type,input_cmp_idh,output_cmp_idh)
-        ServiceLink::Factory.new(self,service_type,input_cmp_idh,output_cmp_idh).add?()
+      def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
+        ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,opts).add?()
       end
 =begin
 #TODO: deprecated

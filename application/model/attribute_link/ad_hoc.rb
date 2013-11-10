@@ -71,13 +71,13 @@ module DTK
       def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,peer_cmps,antec_cmp,link_def_hash)
         #This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
         #adds the link_def to it and then service link between this and antec_cmp
-        service_type = link_def_hash.values.first[:link_type]
+        dependency_name = link_def_hash.values.first[:link_type]
         antec_cmp_idh = antec_cmp.id_handle()
         ([dep_cmp] + peer_cmps).each do |cmp|
            #TODO: can be more efficient to combine these two operations and see if can bulk them
            cmp_idh = cmp.id_handle()
            Model.input_hash_content_into_model(cmp_idh,:link_def => link_def_hash)
-           assembly.add_service_link?(service_type,cmp_idh,antec_cmp_idh)
+           assembly.add_service_link?(cmp_idh,antec_cmp_idh,:dependency_name => dependency_name)
          end
        end
 

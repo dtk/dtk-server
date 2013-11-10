@@ -8,6 +8,16 @@ module DTK
       [:id,:group_id,:display_name,:description,:local_or_remote,:link_type,:required,:dangling,:has_external_link,:has_internal_link,:component_component_id]
     end
 
+    def self.get_link_defs_matching_antecendent(dep_cmp_template,antec_cmp_template)
+      ret = Array.new
+      link_defs = get([dep_cmp_template.id_handle])
+      return ret if link_defs.empty?
+      link_def_idhs = link_defs.map{|ld|ld.id_handle()}
+      antec_cmp_type = antec_cmp_template.get_field?(:component_type)
+      matching_ld_links = get_link_def_links(link_def_idhs,:cols => [:link_def_id], :filter => [:eq,:remote_component_type,antec_cmp_type])
+      link_defs.select{|ld|matching_ld_ids.include?(ld[:link_def_id])
+    end
+
     def self.get(component_template_idhs)
       ret = Array.new
       return ret if component_template_idhs.empty?()
@@ -20,6 +30,9 @@ module DTK
     end
 
     def self.get_link_def_links(link_def_idhs,opts={})
+if opts[:filter]
+raise Error.new("write code to put filter in")
+end
       ret = Array.new
       return ret if link_def_idhs.empty?
       sp_hash = {

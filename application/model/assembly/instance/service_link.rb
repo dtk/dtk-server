@@ -41,16 +41,20 @@ module DTK
      private
       def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh)
         input_cmp = input_cmp_idh.create_object()
-        output_cmp  output_cmp_idh.create_object()
+        output_cmp = output_cmp_idh.create_object()
         matching_link_defs = LinkDef.get_link_defs_matching_antecendent(input_cmp,output_cmp)
-        if matching_link_defs.empty?
+        matching_link_types = matching_link_defs.map{|ld|ld.get_field?(:link_type)}.uniq
+        if matching_link_types.size == 1
+          matching_link_types.first
+        else
           input_cmp_name = input_cmp.component_type_print_form()
           output_cmp_name = output_cmp.component_type_print_form()
-          raise ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
-        elsif matching_link_defs.size > 2
-          raise ErrorUsage.new("Amibguous TODO WRITE")
+          if matching_link_types.empty?
+            raise ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
+          else #matching_link_types.size > 1
+            raise ErrorUsage.new("Ambiguous which dependency between component type (#{input_cmp_name}) and component type (#{output_cmp_name}) selected; select one of #{matching_link_types.join(',')})")
+          end
         end
-        matching_link_defs.first.get_field?(:link_type)
       end
     end
     

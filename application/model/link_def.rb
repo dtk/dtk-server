@@ -15,7 +15,8 @@ module DTK
       link_def_idhs = link_defs.map{|ld|ld.id_handle()}
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)
       matching_ld_links = get_link_def_links(link_def_idhs,:cols => [:link_def_id], :filter => [:eq,:remote_component_type,antec_cmp_type])
-      link_defs.select{|ld|matching_ld_ids.include?(ld[:link_def_id])
+      matching_ld_ids = matching_ld_links.map{|ld_link|ld_link[:link_def_id]}
+      link_defs.select{|ld|matching_ld_ids.include?(ld[:id])}
     end
 
     def self.get(component_template_idhs)
@@ -30,14 +31,15 @@ module DTK
     end
 
     def self.get_link_def_links(link_def_idhs,opts={})
-if opts[:filter]
-raise Error.new("write code to put filter in")
-end
       ret = Array.new
       return ret if link_def_idhs.empty?
+      filter = [:oneof,:link_def_id,link_def_idhs.map{|idh|idh.get_id()}]
+      if opts[:filter]
+        filter = [:and,filter,opts[:filter]]
+      end
       sp_hash = {
         :cols => opts[:cols]||LinkDefLink.common_columns(),
-        :filter => [:oneof,:link_def_id,link_def_idhs.map{|idh|idh.get_id()}]
+        :filter => filter
       }
       ld_link_mh = link_def_idhs.first.create_childMH(:link_def_link)
       get_objs(ld_link_mh,sp_hash)

@@ -43,7 +43,7 @@ shared_context "NEG - Import remote service" do |dtk_common, service_name|
   it "will not import #{service_name} service from remote repo since there are referenced modules on local filesystem which are not deleted" do
     puts "NEG - Import remote service:", "----------------------------"
     pass = false
-    value = `dtk service import-r8n #{service_name}`
+    value = `dtk service import-dtkn #{service_name}`
     pass = true if (value.include? "exists on client")
     puts "Import of remote service #{service_name} did not complete successfully because of the referenced module that exists on local filesystem!" if pass == true
     puts "Import of remote service #{service_name} completed successfully which is not expected!" if pass == false
@@ -79,6 +79,13 @@ shared_context "List all services" do |dtk_common, service_name|
   it "verifies that #{service_name} service exists on server" do
     service_exists = dtk_common.check_if_service_exists(service_name)
     service_exists.should eq(true)
+  end
+end
+
+shared_context "NEG - List all services" do |dtk_common, service_name|
+  it "verifies that #{service_name} service does not exist on server" do
+    service_exists = dtk_common.check_if_service_exists(service_name)
+    service_exists.should eq(false)
   end
 end
 

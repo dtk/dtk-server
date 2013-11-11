@@ -55,6 +55,7 @@ describe "(Different Node Templates) Test Case 1: Stage existing assembly with O
 		context "For #{os} and #{memory} combination, converge function" do
 			include_context "Converge", dtk_common
 		end
+		
 		context "For #{os} and #{memory} combination, delete and destroy assembly function" do
 			include_context "Delete assemblies", dtk_common
 		end

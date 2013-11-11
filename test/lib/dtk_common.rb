@@ -307,25 +307,6 @@ class DtkCommon
 		return attribute_check
 	end
 
-	def check_components_presence_in_nodes(assembly_id, node_name, component_name_to_check)
-		puts "Check components presence in nodes:", "-----------------------------------"
-		component_check = false
-		puts "List of assembly components:"
-		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
-		pretty_print_JSON(assembly_components)
-		component_name = assembly_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }.first
-
-		if (!component_name.nil?)
-			component_check = true
-			puts "Component with name: #{component_name_to_check} exists!"
-		else
-			component_check = false
-			puts "Node with name #{node_name} or component with name #{component_name_to_check} does not exist!"
-		end
-		puts ""
-		return component_check
-	end
-
 	def check_params_presence_in_nodes(assembly_id, node_name, param_name_to_check, param_value_to_check)
 		puts "Check params presence in nodes:", "-------------------------------"
 		param_check = false
@@ -402,10 +383,10 @@ class DtkCommon
 	def stop_running_assembly(assembly_id)
 		puts "Stop running assembly:", "----------------------"
 		assembly_stopped = false
-		stop_assembly_response = send_request('/rest/assembly/stop', {'assembly_id' => assembly_id})
+		stop_assembly_response = send_request('/rest/assembly/stop', {:assembly_id => assembly_id})
 
 		if (stop_assembly_response['data']['status'] == "ok")
-			puts "Aseembly stopped successfully!"
+			puts "Assembly stopped successfully!"
 			assembly_stopped = true
 		else
 			puts "Assembly was not stopped successfully!"
@@ -414,14 +395,32 @@ class DtkCommon
 		return assembly_stopped
 	end
 
+	def stop_running_node(assembly_id, node_name)
+		puts "Stop running node:", "------------------"
+		node_stopped = false
+
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+		stop_node_response = send_request('/rest/assembly/stop', {:assembly_id => assembly_id, :node_pattern => node_id})
+
+		if (stop_node_response['data']['status'] == "ok")
+			puts "Node #{node_name} stopped successfully!"
+			node_stopped = true
+		else
+			puts "Node #{node_name} was not stopped successfully!"
+		end
+		puts ""
+		return node_stopped
+	end
+
 	def start_running_assembly(assembly_id)
 		puts "Start assembly:", "---------------"
 		assembly_started = false
-		response = send_request('/rest/assembly/start', {'assembly_id' => assembly_id, :node_pattern=>nil})
+		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>nil})
 		action_results_id = response['data']['action_results_id']
 		end_loop = false
 		count = 0
-		max_num_of_retries = 50
+		max_num_of_retries = 20
 
 		while (end_loop == false)
 			sleep 5
@@ -441,6 +440,70 @@ class DtkCommon
 		end
 		puts ""
 		return assembly_started
+	end
+
+	def start_running_node(assembly_id, node_name)
+		puts "Start running node:", "-------------------"
+		node_started = false
+
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>node_id})
+		action_results_id = response['data']['action_results_id']
+
+		end_loop = false
+		count = 0
+		max_num_of_retries = 20
+
+		while (end_loop == false)
+			sleep 5
+		    count += 1
+			response = send_request('/rest/assembly/get_action_results', {:using_simple_queue=>true, :action_results_id=>action_results_id})
+			puts "Start node check:"
+			pretty_print_JSON(response)
+
+			if (count > max_num_of_retries)
+				puts "Max number of retries for starting node #{node_name} reached..."
+				end_loop = true
+			elsif (!response['data']['result'].nil?)
+				puts "Node #{node_name} started!"
+				node_started = true if response['status'] == 'ok'
+				end_loop = true
+			end				
+		end
+		puts ""
+		return node_started
+	end
+
+	def grep_node(assembly_id, node_name, log_location, grep_pattern)
+		puts "Grep node:","----------"
+		grep_pattern_found = false
+
+		response = send_request('/rest/assembly/initiate_grep', {:assembly_id => assembly_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
+		action_results_id = response['data']['action_results_id']
+
+		end_loop = false
+		count = 0
+		max_num_of_retries = 20
+
+		while (end_loop == false)
+			sleep 1
+		    count += 1
+			response = send_request('/rest/assembly/get_action_results', {:return_only_if_complete=>true, :action_results_id=>action_results_id.to_i, :disable_post_processing => true})
+			puts "Starting grep command:"
+			pretty_print_JSON(response)
+
+			if (count > max_num_of_retries)
+				puts "Max number of retries for grep pattern on node #{node_name} is reached..."
+				end_loop = true
+			elsif (response['data']['is_complete'] == true)
+				puts "Grep processing completed!"
+				grep_pattern_found = true if response['data']['results'].include? grep_pattern
+				end_loop = true
+			end				
+		end
+		puts ""
+		return grep_pattern_found
 	end
 
 	def delete_and_destroy_assembly(assembly_id)
@@ -480,8 +543,6 @@ class DtkCommon
 		puts ""
 		return assembly_templated_deleted
 	end
-
-
 
 	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
 		puts "Create assembly template from assembly:", "---------------------------------------"
@@ -1222,6 +1283,20 @@ class DtkCommon
 		return node_deleted
 	end
 
+	def create_node(assembly_id, node_name, node_template)
+		puts "Create node:","------------"
+		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>assembly_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
+		if create_node_response['status'].include? "ok"
+			puts "Node #{node_name} has been created successfully!"
+			puts ""
+			return create_node_response['data']['node_id']
+		else
+			puts "Node #{node_name} has not been created successfully!"
+			puts ""
+			return nil
+		end
+	end
+
 	def add_component_to_node(node_id, component_name)
 		puts "Add component to node:", "----------------------"
 		component_added = false
@@ -1326,7 +1401,7 @@ class DtkCommon
 		end
 		puts ""
 		return list_task_info_check
-	end
+	end	
 
 #Following list of methods is used for interaction with provider/target functionality
 	
@@ -1446,5 +1521,258 @@ class DtkCommon
 		end
 		puts ""
 		return assembly_id.to_i
+	end
+
+#Following list of methods is used for interaction with workspace context
+
+	#Method to get workspace id for further interaction with workspace
+	def get_workspace_id
+		response = send_request('/rest/assembly/list_with_workspace', {})
+		workspace = response['data'].select { |x| x['display_name'] == "workspace"}.first['id']
+		return workspace
+	end
+
+	#Method used to purge content of assembly or workspace
+	def purge_content(assembly_id)
+		puts "Purge content:", "--------------"
+		content_purged = false
+
+		response = send_request('/rest/assembly/purge', {:assembly_id=>assembly_id})
+		if response['status'].include? "ok"
+			puts "Content has been purged successfully!"
+			content_purged = true
+		else
+			puts "Content has not been purged successfully!"
+		end
+		puts ""
+		return content_purged
+	end
+
+	def delete_node(assembly_id, node_name)
+		puts "Delete node:", "------------"
+		node_deleted = false
+
+		delete_node_response = send_request('/rest/assembly/delete_node', {:assembly_id=>assembly_id, :node_id=>node_name})
+
+		if (delete_node_response['status'] == "ok")
+			puts "Node deleted successfully!"
+			node_deleted = true
+		else
+			puts "Node was not deleted successfully!"
+		end
+		puts ""
+		return node_deleted
+	end
+
+	def create_node(assembly_id, node_name, node_template)
+		puts "Create node:","------------"
+		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>assembly_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
+		if create_node_response['status'].include? "ok"
+			puts "Node #{node_name} has been created successfully!"
+			puts ""
+			return create_node_response['data']['node_id']
+		else
+			puts "Node #{node_name} has not been created successfully!"
+			puts ""
+			return nil
+		end
+	end
+
+	def check_if_node_exists_by_node_name(assembly_id, node_name)
+		puts "Check if node exists by name:", "-----------------------------"
+		node_exists = false
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		pretty_print_JSON(node_list)
+		node = node_list['data'].select { |x| x['display_name'] == node_name }.first	
+		
+		if !node.nil?
+			puts "Node #{node_name} exists!"
+			node_exists = true
+		else
+			puts "Node #{node_name} does not exist!"
+		end
+		puts ""
+		return node_exists
+	end
+
+	def add_component_to_assembly_node(assembly_id, node_name, component_name)
+		puts "Add component to node:", "----------------------"
+		component_added = false
+
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		pretty_print_JSON(node_list)
+		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+
+		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_name})
+
+		if (component_add_response['status'] == 'ok')
+			puts "Component #{component_name} added to assembly node!"
+			component_added = true
+		end
+		puts ""
+		return component_added
+	end
+
+	def check_assembly_info(assembly_id, info_to_check)
+		puts "Show assembly info:", "-------------------"
+		info_exist = false
+		assembly_info_response = send_request('/rest/assembly/info', {:assembly_id=>assembly_id, :subtype=>:instance})
+		pretty_print_JSON(assembly_info_response)
+		if assembly_info_response['data'].include? info_to_check
+			puts "#{info_to_check} exists in info output!"
+			info_exist = true
+		else
+			puts "#{info_to_check} does not exist in info output!"
+		end
+		puts ""
+		return info_exist
+	end
+
+	def check_components_presence_in_nodes(assembly_id, node_name, component_name_to_check)
+		puts "Check components presence in nodes:", "-----------------------------------"
+		component_check = false
+		puts "List of assembly components:"
+		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		pretty_print_JSON(assembly_components)
+		component_name = assembly_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }.first
+
+		if (!component_name.nil?)
+			component_check = true
+			puts "Component with name: #{component_name_to_check} exists!"
+		else
+			component_check = false
+			puts "Node with name #{node_name} or component with name #{component_name_to_check} does not exist!"
+		end
+		puts ""
+		return component_check
+	end
+
+	def delete_component_from_assembly_node(assembly_id, node_name, component_to_delete)
+		puts "Delete component from assembly node:", "------------------------------------"
+		component_deleted = false
+		puts "List of assembly components:"
+		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		pretty_print_JSON(assembly_components)
+
+		component = assembly_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
+
+		if !component.nil?
+			node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+			node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+
+			puts "Deleting component #{component_to_delete} from node #{node_name}..."
+			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_id=>component['id']})
+			pretty_print_JSON(component_delete_response)
+			if component_delete_response['status'].include? 'ok'
+				puts "Component #{component_to_delete} has been deleted successfully!"
+				component_deleted = true
+			else
+				puts "Component #{component_to_delete} has not been deleted successfully!"
+			end
+		else
+			puts "Component #{component_to_delete} does not exist on #{node_name} and therefore cannot be deleted!"
+		end
+		puts ""
+		return component_deleted
+	end
+
+	def create_attribute(assembly_id, attribute_name)
+		#Create attribute
+		puts "Create attribute:", "-----------------"
+		attributes_created = false
+
+		create_attribute_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :create=>true, :pattern=>attribute_name})
+
+		puts "List of assembly attributes:"
+		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+		pretty_print_JSON(assembly_attributes)
+		extract_attribute = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
+
+		if (extract_attribute == attribute_name)
+			puts "Creating #{attribute_name} attribute completed successfully!"
+			attributes_created = true
+		end
+		puts ""
+		return attributes_created
+	end
+
+	def check_if_attribute_exists(assembly_id, attribute_name)
+		puts "Check if attribute exists:", "--------------------------"
+		attribute_exists = false
+
+		puts "List of assembly attributes:"
+		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
+		pretty_print_JSON(assembly_attributes)
+		extract_attribute = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
+
+		if (extract_attribute == attribute_name)
+			puts "#{attribute_name} attribute exists!"
+			attributes_created = true
+		else
+			puts "#{attribute_name} attribute exists!"
+		end
+		puts ""
+		return attribute_exists
+	end
+
+	def link_attributes(assembly_id, source_attribute, target_attribute)
+		puts "Link attributes:", "----------------"
+		attributes_linked = false
+
+		link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {:assembly_id=>assembly_id, :target_attribute_term=>target_attribute, :source_attribute_term=>"$#{source_attribute}"})
+		pretty_print_JSON(link_attributes_response)
+
+		if link_attributes_response['status'] == 'ok'
+			puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is established!"
+			attributes_linked = true
+		else
+			puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is not established!"
+		end
+
+		puts ""
+		return attributes_linked
+	end
+
+	def netstats_check_for_specific_node(assembly_id, node_name, port)
+		puts "Netstats check:", "---------------"
+
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+
+		sleep 20 #Before initiating netstats check, wait for services to be up
+ 		netstats_check = false
+		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>assembly_id})
+		action_results_id = response['data']['action_results_id']
+
+		end_loop = false
+		count = 0
+		max_num_of_retries = 50
+
+		while (end_loop == false)
+			sleep 20
+			count += 1
+			response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+			puts "Netstats check:"
+			pretty_print_JSON(response)
+
+			if (count > max_num_of_retries)
+				puts "Max number of retries for getting netstats reached..."
+				end_loop = true
+			elsif (response['data']['is_complete'])
+				port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+
+				if (!port_to_check.nil?)
+					puts "Netstats check completed! Port #{port} avaiable!"
+					netstats_check = true
+					end_loop = true
+				else					
+					puts "Netstats check completed! Port #{port} is not avaiable!"
+					netstats_check = false
+					end_loop = true
+				end
+			end	
+		end
+		puts ""
+		return netstats_check
 	end
 end

@@ -65,8 +65,8 @@ describe "(Modules, Services and Versioning) Test Case 4: Get list of all assemb
 	end
 
 	context "Delete service from local filesystem" do
-    include_context "Delete service from local filesystem", service_filesystem_location, service_name
-  end
+    	include_context "Delete service from local filesystem", service_filesystem_location, service_name
+  	end
 
 	after(:all) do
 		puts "", ""

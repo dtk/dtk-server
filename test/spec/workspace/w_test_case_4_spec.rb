@@ -15,7 +15,7 @@ node_name_1 = 'test1'
 node_name_2 = 'test2'
 node_template = 'precise-micro'
 component_name = 'stdlib'
-port_to_check = '22'
+port_to_check = 22
 
 dtk_common = DtkCommon.new('', '')
 

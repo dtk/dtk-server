@@ -58,7 +58,7 @@ describe "(Workspace) Test Case 11: Create two nodes, add components in both of 
 	end
 
 	context "Link attributes" do		
-		include_context "List attributes", dtk_common, "#{node_name_1}/#{attribute_name_1}", "#{node_name_2}/#{attribute_name_2}"
+		include_context "Link attributes", dtk_common, "#{node_name_1}/#{attribute_name_1}", "#{node_name_2}/#{attribute_name_2}"
 	end
 
 	context "Set attribute value in workspace" do

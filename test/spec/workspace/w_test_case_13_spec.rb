@@ -19,24 +19,25 @@ dtk_common = DtkCommon.new('', '')
 
 def converge_assembly_and_cancel_tasks(workspace_id)
 	puts "Converge assembly and cancel tasks:", "-----------------------------------"
+	dtk_common = DtkCommon.new('', '')
 	tasks_cancelled = false
 
-	puts "Converge process for assembly with id #{assembly_id} started!"
-	create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => workspace_id})
+	puts "Converge process for assembly with id #{workspace_id} started!"
+	create_task_response = dtk_common.send_request('/rest/assembly/create_task', {:assembly_id => workspace_id})
 	task_id = create_task_response['data']['task_id']
 	puts "Task id: #{task_id}"
-	task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
+	task_execute_response = dtk_common.send_request('/rest/task/execute', {:task_id => task_id})
 
 	sleep 10
 
-	cancel_task_response = send_request('/rest/task/cancel_task', {'task_id' => task_id})
-	task_status_response = send_request('/rest/task/status', {'task_id'=> task_id})
+	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', {:task_id => task_id})
+	task_status_response = dtk_common.send_request('/rest/task/status', {:task_id=> task_id})
 
-	if task_status_response.include? 'cancelled'
+	if task_status_response.to_s.include? 'cancelled'
 		tasks_cancelled = true
 		puts "Task execution status: cancelled"
 		puts "Converge process has been cancelled successfully!"
-	else status.include? 'failed'
+	else task_status_response.to_s.include? 'failed'
 		puts "Converge process has not been cancelled successfully!"
 	end
 	return tasks_cancelled

@@ -417,26 +417,34 @@ class DtkCommon
 		puts "Start assembly:", "---------------"
 		assembly_started = false
 		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>nil})
-		action_results_id = response['data']['action_results_id']
-		end_loop = false
-		count = 0
-		max_num_of_retries = 20
+		pretty_print_JSON(response)
+		task_id = response['data']['task_id']
+		response = send_request('/rest/task/execute', {:task_id=>task_id})
 
-		while (end_loop == false)
-			sleep 5
-		  count += 1
-			response = send_request('/rest/assembly/get_action_results', {:using_simple_queue=>true, :action_results_id=>action_results_id})
-			puts "Start instance check:"
-			pretty_print_JSON(response)
+		if (response['status'] == 'ok')
+			end_loop = false
+			count = 0
+			max_num_of_retries = 10
 
-			if (count > max_num_of_retries)
-				puts "Max number of retries for starting instance reached..."
-				end_loop = true
-			elsif (!response['data']['result'].nil?)
-				puts "Instance started!"
-				assembly_started = true if response['status'] == 'ok'
-				end_loop = true
-			end				
+			while (end_loop == false)
+				sleep 10
+		    	count += 1
+				response = send_request('/rest/assembly/info_about', {:assembly_id => assembly_id, :subtype => 'instance', :about => 'tasks'})
+				puts "Start instance check:"
+				status = response['data'].select { |x| x['status'] == 'executing'}.first
+				pretty_print_JSON(status)
+
+				if (count > max_num_of_retries)
+					puts "Max number of retries for starting instance reached..."
+					end_loop = true
+				elsif (status.nil?)
+					puts "Instance started!"
+					assembly_started = true
+					end_loop = true
+				end				
+			end
+		else
+			puts "Start instance is not completed successfully!"
 		end
 		puts ""
 		return assembly_started
@@ -449,27 +457,33 @@ class DtkCommon
 		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>node_id})
-		action_results_id = response['data']['action_results_id']
+		task_id = response['data']['task_id']
+		response = send_request('/rest/task/execute', {:task_id=>task_id})
 
-		end_loop = false
-		count = 0
-		max_num_of_retries = 20
+		if (response['status'] == 'ok')
+			end_loop = false
+			count = 0
+			max_num_of_retries = 10
 
-		while (end_loop == false)
-			sleep 5
-		    count += 1
-			response = send_request('/rest/assembly/get_action_results', {:using_simple_queue=>true, :action_results_id=>action_results_id})
-			puts "Start node check:"
-			pretty_print_JSON(response)
+			while (end_loop == false)
+				sleep 10
+		    	count += 1
+				response = send_request('/rest/assembly/info_about', {:assembly_id => assembly_id, :subtype => 'instance', :about => 'tasks'})
+				puts "Start instance check:"
+				status = response['data'].select { |x| x['status'] == 'executing'}.first
+				pretty_print_JSON(status)
 
-			if (count > max_num_of_retries)
-				puts "Max number of retries for starting node #{node_name} reached..."
-				end_loop = true
-			elsif (!response['data']['result'].nil?)
-				puts "Node #{node_name} started!"
-				node_started = true if response['status'] == 'ok'
-				end_loop = true
-			end				
+				if (count > max_num_of_retries)
+					puts "Max number of retries for starting node #{node_name} reached..."
+					end_loop = true
+				elsif (status.nil?)
+					puts "Node #{node_name} started!"
+					assembly_started = true
+					end_loop = true
+				end				
+			end
+		else
+			puts "Start #{node_name} node is not completed successfully!"
 		end
 		puts ""
 		return node_started
@@ -498,7 +512,9 @@ class DtkCommon
 				end_loop = true
 			elsif (response['data']['is_complete'] == true)
 				puts "Grep processing completed!"
-				grep_pattern_found = true if response['data']['results'].include? grep_pattern
+				if response['data']['results'].to_s.include? grep_pattern
+					grep_pattern_found = true 
+				end
 				end_loop = true
 			end				
 		end
@@ -1707,7 +1723,7 @@ class DtkCommon
 
 		if (extract_attribute == attribute_name)
 			puts "#{attribute_name} attribute exists!"
-			attributes_created = true
+			attribute_exists = true
 		else
 			puts "#{attribute_name} attribute exists!"
 		end

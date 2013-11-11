@@ -14,7 +14,7 @@ STDOUT.sync = true
 node_name = 'test'
 node_template = 'precise-micro'
 component_name = 'stdlib'
-port_to_check = '22'
+port_to_check = 22
 
 dtk_common = DtkCommon.new('', '')
 

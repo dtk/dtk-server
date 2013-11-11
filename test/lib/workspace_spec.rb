@@ -47,7 +47,7 @@ shared_context "Purge workspace content" do |dtk_common|
 end
 
 shared_context "Add component to the node in workspace" do |dtk_common, node_name, component_name|
-  it "adds #{component} component to #{node_name} node in workspace context" do
+  it "adds #{component_name} component to #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
     component_added = dtk_common.add_component_to_assembly_node(workspace_id, node_name, component_name)
     component_added.should eq(true)
@@ -63,7 +63,7 @@ shared_context "Workspace info" do |dtk_common, info_to_check|
 end
 
 shared_context "List components in workspace node" do |dtk_common, node_name, component_name|
-  it "contains #{component} component in #{node_name} node in workspace context" do
+  it "contains #{component_name} component in #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
     component_exists = dtk_common.check_components_presence_in_nodes(workspace_id, node_name, component_name)
     component_exists.should eq(true)
@@ -71,7 +71,7 @@ shared_context "List components in workspace node" do |dtk_common, node_name, co
 end
 
 shared_context "NEG - List components in workspace node" do |dtk_common, node_name, component_name|
-  it "does not contain #{component} component in #{node_name} node in workspace context" do
+  it "does not contain #{component_name} component in #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
     component_exists = dtk_common.check_components_presence_in_nodes(workspace_id, node_name, component_name)
     component_exists.should eq(false)
@@ -79,7 +79,7 @@ shared_context "NEG - List components in workspace node" do |dtk_common, node_na
 end
 
 shared_context "Delete component from workspace node" do |dtk_common, node_name, component_name|
-  it "deletes #{component} component in #{node_name} node in workspace context" do
+  it "deletes #{component_name} component in #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
     component_deleted = dtk_common.delete_component_from_assembly_node(workspace_id, node_name, component_name)
     component_deleted.should eq(true)
@@ -193,7 +193,7 @@ end
 shared_context "Create assembly template from workspace content" do |dtk_common, service_name, assembly_template_name|
   it "creates assembly template #{assembly_template_name} in #{service_name} service" do
   	workspace_id = dtk_common.get_workspace_id
-    assembly_template_created = dtk_common.create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
+    assembly_template_created = dtk_common.create_assembly_template_from_assembly(workspace_id, service_name, assembly_template_name)
     assembly_template_created.should eq(true)
   end
 end

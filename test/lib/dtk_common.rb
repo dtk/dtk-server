@@ -424,7 +424,7 @@ class DtkCommon
 		if (response['status'] == 'ok')
 			end_loop = false
 			count = 0
-			max_num_of_retries = 10
+			max_num_of_retries = 20
 
 			while (end_loop == false)
 				sleep 10
@@ -463,7 +463,7 @@ class DtkCommon
 		if (response['status'] == 'ok')
 			end_loop = false
 			count = 0
-			max_num_of_retries = 10
+			max_num_of_retries = 20
 
 			while (end_loop == false)
 				sleep 10
@@ -478,7 +478,7 @@ class DtkCommon
 					end_loop = true
 				elsif (status.nil?)
 					puts "Node #{node_name} started!"
-					assembly_started = true
+					node_started = true
 					end_loop = true
 				end				
 			end
@@ -1316,11 +1316,23 @@ class DtkCommon
 	def add_component_to_node(node_id, component_name)
 		puts "Add component to node:", "----------------------"
 		component_added = false
-		component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component_name})
 
-		if (component_add_response['status'] == 'ok')
-			puts "Component #{component_name} added to node!"
-			component_added = true
+		components_list = send_request('/rest/component/list', {})
+		pretty_print_JSON(components_list)
+
+		component = components_list['data'].select { |x| x['display_name'] == component_name }.first
+		puts component
+
+		if (!component.nil?)
+			puts "Component #{component_name} exists! Add this component to node #{node_id}..."
+			component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component['id']})
+
+			if (component_add_response['status'] == 'ok')
+				puts "Component #{component_name} added to node!"
+				component_added = true
+			end
+		else
+			puts "Component #{component_name} does not exist!"
 		end
 		puts ""
 		return component_added
@@ -1725,7 +1737,7 @@ class DtkCommon
 			puts "#{attribute_name} attribute exists!"
 			attribute_exists = true
 		else
-			puts "#{attribute_name} attribute exists!"
+			puts "#{attribute_name} attribute does not exist!"
 		end
 		puts ""
 		return attribute_exists

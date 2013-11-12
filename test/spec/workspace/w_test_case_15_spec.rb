@@ -52,7 +52,7 @@ describe "(Workspace) Test Case 15: Create two nodes, add components in it, conv
 	end
 
 	context "Start workspace node" do
-		include_context "Start workspace node", dtk_common, node_name_2
+		include_context "Start workspace node", dtk_common, node_name_1
 	end
 
 	context "Purge workspace content" do

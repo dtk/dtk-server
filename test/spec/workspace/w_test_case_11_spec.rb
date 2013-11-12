@@ -50,11 +50,11 @@ describe "(Workspace) Test Case 11: Create two nodes, add components in both of 
 	end	
 
 	context "Check if attribute exists in workspace" do
-		include_context "Check if attribute exists in workspace", dtk_common, attribute_name_1
+		include_context "Check if attribute exists in workspace", dtk_common, "#{node_name_1}/#{attribute_name_1}"
 	end
 
 	context "Check if attribute exists in workspace" do
-		include_context "Check if attribute exists in workspace", dtk_common, attribute_name_2
+		include_context "Check if attribute exists in workspace", dtk_common, "#{node_name_2}/#{attribute_name_2}"
 	end
 
 	context "Link attributes" do		

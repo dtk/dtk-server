@@ -620,6 +620,7 @@ class DtkCommon
 					else					
 						puts "Netstats check completed! Port #{port} is not available!"
 						netstats_check = false
+						break
 					end
 				end				
 			end
@@ -1818,6 +1819,7 @@ class DtkCommon
 					else					
 						puts "Netstats check completed! Port #{port} is not available!"
 						netstats_check = false
+						break
 					end
 				end				
 			end	

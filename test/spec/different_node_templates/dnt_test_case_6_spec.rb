@@ -60,11 +60,18 @@ def add_document_to_collection(mongodb_host, mongodb_port, database_name, collec
 	puts "Add new document to MongoDB collection:", "---------------------------------------"
 	document_added = false
 
+	puts "MongoDB host: #{mongodb_host}"
+    puts "MongoDB port: #{mongodb_port}"
+    puts "Database name: #{database_name}"
+    puts "Collection name: #{collection_name}"
+    puts "Document: #{document}"
+
 	client = Mongo::MongoClient.new(mongodb_host, mongodb_port)
 	db = client.db(database_name)
 	collection = db.collection(collection_name)
 	id = collection.insert(document)
-	puts collection.find.to_a
+	puts "Document id: #{id}"
+    puts "Collection added: #{collection.find.to_a}"
 	document_added = true if !collection.find({"_id" => id}).to_a.empty?
 	puts ""
 	return document_added

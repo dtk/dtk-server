@@ -75,3 +75,10 @@ shared_context "Create assembly template from assembly" do |dtk_common, service_
     assembly_template_created.should eq(true)
   end
 end
+
+shared_context "Grep log command" do |dtk_common, node_name, log_location, grep_pattern|
+  it "finds #{grep_pattern} pattern in #{log_location} log on converged node" do
+    grep_pattern_found = dtk_common.grep_node($assembly_id, node_name, log_location, grep_pattern)
+    grep_pattern_found.should eq(true)
+  end
+end

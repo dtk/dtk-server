@@ -493,30 +493,38 @@ class DtkCommon
 		puts "Grep node:","----------"
 		grep_pattern_found = false
 
-		response = send_request('/rest/assembly/initiate_grep', {:assembly_id => assembly_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
-		action_results_id = response['data']['action_results_id']
-
 		end_loop = false
 		count = 0
 		max_num_of_retries = 20
 
 		while (end_loop == false)
-			sleep 1
+			sleep 10
 		    count += 1
-			response = send_request('/rest/assembly/get_action_results', {:return_only_if_complete=>true, :action_results_id=>action_results_id.to_i, :disable_post_processing => true})
-			puts "Starting grep command:"
-			pretty_print_JSON(response)
+
+		    response = send_request('/rest/assembly/initiate_grep', {:assembly_id => assembly_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
+			action_results_id = response['data']['action_results_id']
 
 			if (count > max_num_of_retries)
 				puts "Max number of retries for grep pattern on node #{node_name} is reached..."
 				end_loop = true
-			elsif (response['data']['is_complete'] == true)
-				puts "Grep processing completed!"
-				if response['data']['results'].to_s.include? grep_pattern
-					grep_pattern_found = true 
-				end
-				end_loop = true
-			end				
+			end
+
+			5.downto(1) do |i|
+				sleep 1
+				response = send_request('/rest/assembly/get_action_results', {:return_only_if_complete=>true, :action_results_id=>action_results_id.to_i, :disable_post_processing => true})
+				puts "Starting grep command:"
+				pretty_print_JSON(response)
+
+				if response['data']['is_complete'] == true
+					puts "Grep processing completed!"
+
+					if response['data']['results'].to_s.include? grep_pattern
+						grep_pattern_found = true 
+					end
+					end_loop = true
+					break
+				end				
+			end			
 		end
 		puts ""
 		return grep_pattern_found
@@ -578,36 +586,43 @@ class DtkCommon
 		puts "Netstats check:", "---------------"
 		sleep 20 #Before initiating netstats check, wait for services to be up
  		netstats_check = false
-		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
-		action_results_id = response['data']['action_results_id']
 
 		end_loop = false
 		count = 0
 		max_num_of_retries = 50
 
 		while (end_loop == false)
-			sleep 20
+			sleep 10
 			count += 1
-			response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
-			puts "Netstats check:"
-			pretty_print_JSON(response)
 
 			if (count > max_num_of_retries)
 				puts "Max number of retries for getting netstats reached..."
 				end_loop = true
-			elsif (response['data']['is_complete'])
-				port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+			end
 
-				if (!port_to_check.nil?)
-					puts "Netstats check completed! Port #{port} avaiable!"
-					netstats_check = true
-					end_loop = true
-				else					
-					puts "Netstats check completed! Port #{port} is not avaiable!"
-					netstats_check = false
-					end_loop = true
-				end
-			end	
+			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
+			action_results_id = response['data']['action_results_id']
+
+			5.downto(1) do |i|
+				sleep 1
+				response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+				puts "Netstats check:"
+				pretty_print_JSON(response)
+
+				if response['data']['is_complete']
+					port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+
+					if (!port_to_check.nil?)
+						puts "Netstats check completed! Port #{port} available!"
+						netstats_check = true
+						end_loop = true
+						break
+					else					
+						puts "Netstats check completed! Port #{port} is not available!"
+						netstats_check = false
+					end
+				end				
+			end
 		end
 		puts ""
 		return netstats_check
@@ -1769,35 +1784,42 @@ class DtkCommon
 
 		sleep 20 #Before initiating netstats check, wait for services to be up
  		netstats_check = false
-		response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>assembly_id})
-		action_results_id = response['data']['action_results_id']
 
 		end_loop = false
 		count = 0
 		max_num_of_retries = 50
 
 		while (end_loop == false)
-			sleep 20
+			sleep 10
 			count += 1
-			response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
-			puts "Netstats check:"
-			pretty_print_JSON(response)
 
 			if (count > max_num_of_retries)
 				puts "Max number of retries for getting netstats reached..."
 				end_loop = true
-			elsif (response['data']['is_complete'])
-				port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+			end
 
-				if (!port_to_check.nil?)
-					puts "Netstats check completed! Port #{port} avaiable!"
-					netstats_check = true
-					end_loop = true
-				else					
-					puts "Netstats check completed! Port #{port} is not avaiable!"
-					netstats_check = false
-					end_loop = true
-				end
+			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>assembly_id})
+			action_results_id = response['data']['action_results_id']
+
+			5.downto(1) do |i|
+				sleep 1
+				response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+				puts "Netstats check:"
+				pretty_print_JSON(response)
+
+				if response['data']['is_complete']
+					port_to_check = response['data']['results'].select { |x| x['port'] == port}.first
+
+					if (!port_to_check.nil?)
+						puts "Netstats check completed! Port #{port} available!"
+						netstats_check = true
+						end_loop = true
+						break
+					else					
+						puts "Netstats check completed! Port #{port} is not available!"
+						netstats_check = false
+					end
+				end				
 			end	
 		end
 		puts ""

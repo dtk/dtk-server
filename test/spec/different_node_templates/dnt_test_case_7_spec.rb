@@ -91,7 +91,10 @@ def get_collection(mongodb_host, mongodb_port, database_name, collection_name)
 	db = client.db(database_name)
 	collection = db.collection(collection_name)
 
-	collection_exists = true if !collection.find.to_a.empty?
+	if !collection.find.to_a.empty?
+		collection_exists = true 
+		puts "Collection content: #{collection.find.to_a}"
+	end
 	puts ""
 	return collection_exists
 end

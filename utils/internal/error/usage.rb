@@ -22,6 +22,13 @@ module DTK
 
       class BadComponentReference < self
       end
+
+      class BadServiceLink < self
+        private 
+        def err_msg(base_json_error, path=nil)
+          "#{base_json_error} for '#{path}'."
+        end
+      end
     end
 
 

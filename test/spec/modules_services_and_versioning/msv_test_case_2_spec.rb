@@ -66,7 +66,7 @@ describe "(Modules, Services and Versioning) Test Case 2: Import component modul
 	end
 
 	context "Add versioned components to assembly node" do
-		include_context "Add component to assembly node", dtk_common, node_name
+		include_context "Add component to assembly node", dtk_common, node_name, "#{module_name}(#{module_version})"
 	end
 
 	context "Converge function" do

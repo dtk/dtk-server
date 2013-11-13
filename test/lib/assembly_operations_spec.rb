@@ -41,6 +41,13 @@ shared_context "Check if port avaliable" do |dtk_common, port|
   end
 end
 
+shared_context "Check if port avaliable on specific node" do |dtk_common, node_name, port|
+  it "is avaliable on #{node_name} node" do
+    netstat_response = dtk_common.netstats_check_for_specific_node($assembly_id, node_name, port)
+    netstat_response.should eq(true)
+  end
+end
+
 shared_context "Stop assembly" do |dtk_common|
   it "stops #{dtk_common.assembly_name} assembly" do
     stop_status = dtk_common.stop_running_assembly($assembly_id)
@@ -73,5 +80,12 @@ shared_context "Create assembly template from assembly" do |dtk_common, service_
   it "creates #{assembly_template_name} assembly template in #{service_name} service from existing assembly" do
     assembly_template_created = dtk_common.create_assembly_template_from_assembly($assembly_id, service_name, assembly_template_name)
     assembly_template_created.should eq(true)
+  end
+end
+
+shared_context "Grep log command" do |dtk_common, node_name, log_location, grep_pattern|
+  it "finds #{grep_pattern} pattern in #{log_location} log on converged node" do
+    grep_pattern_found = dtk_common.grep_node($assembly_id, node_name, log_location, grep_pattern)
+    grep_pattern_found.should eq(true)
   end
 end

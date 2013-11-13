@@ -13,7 +13,6 @@ STDOUT.sync = true
 
 assembly_name = 'dnt_test_case_2_instance'
 assembly_template = 'bakir_test::redhat_bigtop_namenode'
-memory = 'm1.small'
 namenode_port = 8020
 namenode_web_port = 50070
 $assembly_id = 0
@@ -27,7 +26,7 @@ describe "(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop)
 		puts "(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop) Check possibility to add OS and namenode components and deploy assembly"
 		puts "**********************************************************************************************************************************************"
 		puts ""
-  end
+  	end
 
 	context "Stage assembly function on #{assembly_template} assembly template" do
 		include_context "Stage", dtk_common

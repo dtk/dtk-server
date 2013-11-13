@@ -41,6 +41,13 @@ shared_context "Check if port avaliable" do |dtk_common, port|
   end
 end
 
+shared_context "Check if port avaliable on specific node" do |dtk_common, node_name, port|
+  it "is avaliable on #{node_name} node" do
+    netstat_response = dtk_common.netstats_check_for_specific_node($assembly_id, node_name, port)
+    netstat_response.should eq(true)
+  end
+end
+
 shared_context "Stop assembly" do |dtk_common|
   it "stops #{dtk_common.assembly_name} assembly" do
     stop_status = dtk_common.stop_running_assembly($assembly_id)

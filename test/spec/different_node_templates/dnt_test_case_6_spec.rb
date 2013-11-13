@@ -110,7 +110,7 @@ describe "(Different Node Templates) Test Case 6: MongoDB - Single node scenario
 		include_context "Check if port avaliable", dtk_common, mongodb_instance_port
 	end
 
-	context "MongoDB shard port #{mongodb_webconsole_port}" do
+	context "MongoDB webconsole port #{mongodb_webconsole_port}" do
 		include_context "Check if port avaliable", dtk_common, mongodb_webconsole_port
 	end
 

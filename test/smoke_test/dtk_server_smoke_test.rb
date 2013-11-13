@@ -14,7 +14,7 @@ require './lib/modules_spec'
 
 assembly_name = 'smoke_test_instance'
 assembly_template = 'bootstrap::node_with_params'
-os = 'precise'
+os_templates = ['precise','centos6.4']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
@@ -47,32 +47,34 @@ describe "DTK Server smoke test" do
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Stage assembly function on #{assembly_template} assembly template" do
-    include_context "Stage", dtk_common
-  end
+  os_templates.each do |os|
+    context "Stage assembly function on #{assembly_template} assembly template" do
+      include_context "Stage", dtk_common
+    end
 
-  context "List assemblies after stage" do    
-    include_context "List assemblies after stage", dtk_common
-  end
+    context "List assemblies after stage" do    
+      include_context "List assemblies after stage", dtk_common
+    end
 
-  context "Set os attribute function" do
-    include_context "Set attribute", dtk_common, os_attribute, os
-  end
+    context "Set os attribute function" do
+      include_context "Set attribute", dtk_common, os_attribute, os
+    end
 
-  context "Set memory size attribute function" do
-    include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
-  end
+    context "Set memory size attribute function" do
+      include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
+    end
 
-  context "Add components from test module to assembly node" do
-    include_context "Add component to assembly node", dtk_common, node_name
-  end
+    context "Add components from test module to assembly node" do
+      include_context "Add component to assembly node", dtk_common, node_name
+    end
 
-  context "Converge function" do
-    include_context "Converge", dtk_common
-  end
+    context "Converge function" do
+      include_context "Converge", dtk_common
+    end
 
-  context "Delete and destroy assembly function" do
-    include_context "Delete assemblies", dtk_common
+    context "Delete and destroy assembly function" do
+      include_context "Delete assemblies", dtk_common
+    end
   end
 
   context "Delete module" do

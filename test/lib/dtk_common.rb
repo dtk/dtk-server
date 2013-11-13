@@ -1,7 +1,6 @@
 #Common class with methods used for interaction with dtk server
 require 'rubygems'
 require 'rest_client'
-require 'mongo'
 require 'pp'
 require 'json'
 require 'awesome_print'

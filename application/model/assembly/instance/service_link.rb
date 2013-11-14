@@ -2,7 +2,7 @@ module DTK
   class Assembly::Instance
     module ServiceLinkMixin
       def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
-        dependency_name = opts[:dependency_name] || find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh)
+        dependency_name = find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts)
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
 =begin
@@ -39,21 +39,27 @@ module DTK
       end
 
      private
-      def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh)
+      def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts={})
         input_cmp = input_cmp_idh.create_object()
         output_cmp = output_cmp_idh.create_object()
         matching_link_defs = LinkDef.get_link_defs_matching_antecendent(input_cmp,output_cmp)
         matching_link_types = matching_link_defs.map{|ld|ld.get_field?(:link_type)}.uniq
-        if matching_link_types.size == 1
-          matching_link_types.first
-        else
-          input_cmp_name = input_cmp.component_type_print_form()
-          output_cmp_name = output_cmp.component_type_print_form()
-          if matching_link_types.empty?
-            raise ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
-          else #matching_link_types.size > 1
-            raise ErrorUsage.new("Ambiguous which dependency between component type (#{input_cmp_name}) and component type (#{output_cmp_name}) selected; select one of #{matching_link_types.join(',')})")
+
+        input_cmp_name = input_cmp.component_type_print_form()
+        output_cmp_name = output_cmp.component_type_print_form()
+
+        if dep_name = opts[:dependency_name]
+          if matching_link_types.include?(dep_name)
+            dep_name
+          else
+            raise ErrorUsage.new("Specified dependency name (#{dep_name}) does not match any of the dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name}): #{matching_link_types.join(',')}")
           end
+        elsif matching_link_types.size == 1
+          matching_link_types.first
+        elsif matching_link_types.empty?
+          raise ErrorUsage.new("There are no dependencies defined between component type (#{input_cmp_name}) and component type (#{output_cmp_name})")
+        else #matching_link_types.size > 1
+          raise ErrorUsage.new("Ambiguous which dependency between component type (#{input_cmp_name}) and component type (#{output_cmp_name}) selected; select one of #{matching_link_types.join(',')})")
         end
       end
     end

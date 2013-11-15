@@ -479,8 +479,10 @@ module DTK
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
       end
-
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
+      opts ={}
+      opts.merge!(:node => nodes.first) if (nodes.size == 1)
+      
+      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly, opts)
       task.save!()
 
       queue.set_result(:task_id => task.id)

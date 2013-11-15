@@ -162,14 +162,14 @@ module DTK
       main_task
     end
 
-    def task_when_nodes_ready_from_assembly(assembly, component_type)
+    def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
       assembly_idh = assembly.id_handle()
       target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
       task_mh = target_idh.create_childMH(:task)
-
+      
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
+      running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
-      running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes)
 
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => nil)
       main_task.add_subtask(running_node_task)
@@ -321,9 +321,13 @@ module DTK
         executable_action = Task::Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
         Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        return create_new_task(task_mh,:executable_action => executable_action)
+        return create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
       end
-
+      
+      # if assembly start called from node/node_id context,
+      # do not start all nodes but one that command is executed from
+      state_change_list = state_change_list.select{|s| s.first[:node][:id]==opts[:node][:id]} if opts[:node]
+      
       #each element will be list with single element
       ret = nil
       all_actions = Array.new

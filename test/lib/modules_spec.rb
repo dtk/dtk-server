@@ -11,7 +11,7 @@ shared_context "Import remote module" do |module_name|
     puts "Import remote module:", "---------------------"
     pass = false
     value = `dtk module import-dtkn #{module_name}`
-    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client"))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client") || (!value.include? "denied"))
     puts "Import of remote module #{module_name} completed successfully!" if pass == true
     puts "Import of remote module #{module_name} did not complete successfully!" if pass == false
     puts ""
@@ -50,7 +50,7 @@ shared_context "Create module from provided git repo" do |module_name, git_ssh_r
     puts "Create module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
-    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found"))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     puts "Module #{module_name} created successfully from provided git repo!" if pass == true
     puts "Module #{module_name} was not created successfully from provided git repo!" if pass == false
     puts ""

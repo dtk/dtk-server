@@ -151,10 +151,20 @@ module XYZ
       end
 
       module YamlHelper
+        require 'psych'
         def self.simple_form(obj)
-          ::YAML.dump(simple_form_aux(obj))
+          simple_form = simple_form_aux(obj)
+#To get around Pupept monkey patch which changes YAML.dump
+#          ::YAML.dump(simple_form)
+          yaml_dump(simple_form)
         end
        private
+        def self.yaml_dump(o)
+          visitor = Psych::Visitors::YAMLTree.new
+          visitor << o
+          visitor.tree.yaml 
+        end
+
         def self.simple_form_aux(obj)
           if obj.kind_of?(::Hash)
             ret = ::Hash.new

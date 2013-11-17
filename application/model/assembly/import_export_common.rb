@@ -46,7 +46,7 @@ module DTK
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     
       end
-      def self.parse_service_link(input_node,input_cmp_name,service_link_hash)
+      def self.parse_service_link(input_node,input_cmp_name,service_link_hash,opts={})
         unless service_link_hash.size == 1
           raise Error.new("ill-formed service link (#{service_link_hash.inject})")
         end

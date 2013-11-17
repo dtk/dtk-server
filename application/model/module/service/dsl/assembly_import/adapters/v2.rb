@@ -18,10 +18,10 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
+      def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,opts={})
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        port_links = parse_service_links(assembly_hash).inject(DBUpdateHash.new) do |h,parsed_service_link|
+        port_links = parse_service_links(assembly_hash,opts).inject(DBUpdateHash.new) do |h,parsed_service_link|
           input = parsed_service_link[:input]
           output = parsed_service_link[:output]
           
@@ -95,7 +95,7 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.parse_service_links(assembly_hash)
+      def self.parse_service_links(assembly_hash,opts={})
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
           (node_hash["components"]||[]).each do |input_cmp|
@@ -103,7 +103,8 @@ module DTK; class ServiceModule
               input_cmp_name = input_cmp.keys.first
               (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
-                  ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,link_def_type => target)
+                  service_link_hash = {link_def_type => target}
+                  ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,service_link_hash,opts)
                 end
               end
             end

@@ -14,6 +14,7 @@ module DTK; class ServiceModule
       @service_module = get_service_module(container_idh,module_name)
       @component_module_refs = component_module_refs
       @ndx_version_proc_classes = Hash.new
+      @ndx_assembly_file_paths = Hash.new
     end
 
     def process(module_name,hash_content,opts={})
@@ -23,6 +24,9 @@ module DTK; class ServiceModule
       version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
+          if file_path = opts[:file_path]
+            @ndx_assembly_file_paths[ref] = file_path
+          end
           dangling_errors.aggregate_errors! do
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
             # if bad node reference, return error and continue with module import

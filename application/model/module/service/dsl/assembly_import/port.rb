@@ -17,8 +17,11 @@ module DTK; class ServiceModule
           ports = add_ports_during_import(assembly_idh)
           version_proc_class = @ndx_version_proc_classes[ref]
           # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
-
-          port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports)
+          opts = Hash.new
+          if file_path = @ndx_assembly_file_paths[ref]
+            opts[:file_path] = file_path
+          end
+          port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports,opts)
           return port_links if port_links.is_a?(ErrorUsage::DSLParsing)
 
           db_updates_port_links.merge!(port_links)

@@ -132,7 +132,7 @@ module DTK; class ServiceModule
         ret =
           if cmp_input.kind_of?(Hash) 
             unless cmp_input.values.first.kind_of?(Hash)
-              raise ErrorUsage.new("Parsing error with term (#{cmp_input.inspect})")
+              raise ErrorUsage::DSLParsing.new("Parsing error after component term (#{cmp_input.keys.first})")
             end
             cmp_input.values.first["attributes"]||{}
           end

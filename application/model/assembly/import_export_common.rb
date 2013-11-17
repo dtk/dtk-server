@@ -46,7 +46,7 @@ module DTK
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     
       end
-      def self.parse_service_link(input_node,input_cmp_name,service_link_hash,opts={})
+      def self.parse_service_link(input_node,input_cmp_name,service_link_hash)
         unless service_link_hash.size == 1
           raise Error.new("ill-formed service link (#{service_link_hash.inject})")
         end
@@ -91,7 +91,8 @@ module DTK
         if match
           match[:id]
         elsif opts[:do_not_throw_error]
-          return ErrorUsage::DSLParsing::BadServiceLink.new(self[:node],self[:component_type],self[:link_def_ref])
+          opts_file_path = Aux::hash_subset(opts,[:file_path])
+          return ErrorUsage::DSLParsing::BadServiceLink.new(self[:node],self[:component_type],self[:link_def_ref],opts_file_path)
         else
           raise Error.new("Cannot find match to (#{self.inspect})")
         end

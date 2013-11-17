@@ -21,14 +21,15 @@ module DTK; class ServiceModule
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,opts={})
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        port_links = parse_service_links(assembly_hash,opts).inject(DBUpdateHash.new) do |h,parsed_service_link|
+        port_links = parse_service_links(assembly_hash).inject(DBUpdateHash.new) do |h,parsed_service_link|
           input = parsed_service_link[:input]
           output = parsed_service_link[:output]
-          
-          input_id = input.matching_id(ports,:do_not_throw_error => true)
+          opts_matching_id = opts.merge(:do_not_throw_error => true)
+
+          input_id = input.matching_id(ports,opts_matching_id)
           return input_id if input_id.is_a?(ErrorUsage::DSLParsing)
           
-          output_id = output.matching_id(ports,:do_not_throw_error => true)
+          output_id = output.matching_id(ports,opts_matching_id)
           return output_id if output_id.is_a?(ErrorUsage::DSLParsing)
 
           pl_ref = PortLink.ref_from_ids(input_id,output_id)
@@ -95,7 +96,7 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.parse_service_links(assembly_hash,opts={})
+      def self.parse_service_links(assembly_hash)
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
           (node_hash["components"]||[]).each do |input_cmp|
@@ -104,7 +105,7 @@ module DTK; class ServiceModule
               (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   service_link_hash = {link_def_type => target}
-                  ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,service_link_hash,opts)
+                  ret << AssemblyImportPortRef.parse_service_link(input_node_name,input_cmp_name,service_link_hash)
                 end
               end
             end

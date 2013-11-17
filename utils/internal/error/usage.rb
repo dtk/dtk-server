@@ -23,8 +23,8 @@ module DTK
       end
 
       class BadServiceLink < self
-        def initialize(node_name,component_type,link_def_ref,file_path=nil)
-          super(base_msg(node_name,component_type,link_def_ref),file_path)
+        def initialize(node_name,component_type,link_def_ref,opts={})
+          super(base_msg(node_name,component_type,link_def_ref),opts[:file_path])
         end
        private 
         def base_msg(node_name,component_type,link_def_ref)

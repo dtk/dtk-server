@@ -6,9 +6,8 @@ module DTK
       end
      private
       def err_msg(base_json_error,file_path=nil)
-        file_ref = file_path && " in file (#{file_path})"
-        # "JSON parsing error#{file_ref}: #{base_json_error}"
-        "#{base_json_error}: #{file_path}"
+        file_ref = (file_path && " in file (#{file_path})")
+        "#{base_json_error}#{file_ref}"
       end
 
       class JSONParsing < self
@@ -24,9 +23,12 @@ module DTK
       end
 
       class BadServiceLink < self
-        private 
-        def err_msg(base_json_error, path=nil)
-          "#{base_json_error} for '#{path}'."
+        def initialize(node_name,component_type,link_def_ref,file_path=nil)
+          super(base_msg(node_name,component_type,link_def_ref),file_path)
+        end
+       private 
+        def base_msg(node_name,component_type,link_def_ref)
+          "Bad link (#{link_def_ref}) for component #{node_name}/#{Component.component_type_print_form(component_type)}"
         end
       end
     end

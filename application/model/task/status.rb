@@ -167,6 +167,10 @@ module DTK
           if ea = self[:executable_action]
             el.merge!(Action::CreateNode.status(ea,opts))
           end
+         when "PowerOnNode"
+          if ea = self[:executable_action]
+            el.merge!(Action::CreateNode.status(ea,opts))
+          end
         end
       end
       ret << el

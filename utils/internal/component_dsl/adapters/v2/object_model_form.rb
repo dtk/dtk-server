@@ -174,10 +174,12 @@ module DTK; class ComponentDSL; class V2
                 Attribute::Constant.ret_external_ref()
               else
                 type = "puppet_attribute" #TODO: hard-wired
+                default_variable =  (info["external_ref"]||{})["default_variable"]
                 external_ref_name = (info["external_ref"]||{})[type]||name
-                {"type" => type,
-                 "path" => "node[#{cmp_type}][#{external_ref_name}]"
-              }
+                {
+                  "type" => type,
+                  "path" => "node[#{cmp_type}][#{external_ref_name}]"
+                }.merge(default_variable ? {"default_variable" => default_variable} : {})
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)

@@ -40,8 +40,10 @@ module DTK; class Task
         unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
           return ret
         end
-        serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly})
-        
+        unless serialized_content = task_template_content.serialization_form(:filter => {:source => :assembly}, :allow_empty_task=>true)
+          return ret
+        end
+
         default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
         default_action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
         ret << default_action_task_template.merge(:content => serialized_content)

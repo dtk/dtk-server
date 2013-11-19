@@ -5,7 +5,7 @@ module DTK
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
 
-      def self.get_or_create_service_module(project,service_module_name)
+      def self.get_or_create_service_module(project,service_module_name,opts={})
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
           :filter => [:eq,:display_name,service_module_name]
@@ -13,6 +13,9 @@ module DTK
         if service_module = get_obj(project.model_handle(:service_module),sp_hash)
           service_module
         else
+          if opts[:mode] == :update
+            raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
+          end
           config_agent_type = :puppet #TODO: stub
           module_and_branch_info = ServiceModule.create_module(project,service_module_name,config_agent_type)
           module_and_branch_info[:module_idh].create_object()
@@ -20,8 +23,8 @@ module DTK
       end
 
       #creates a new assembly template if it does not exist
-      def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,version=nil)
-        assembly_factory = assembly_factory(assembly_instance,service_module,assembly_name,version)
+      def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})
+        assembly_factory = assembly_factory(assembly_instance,service_module,assembly_name,opts)
         assembly_factory.create_assembly_template()
       end
 
@@ -38,7 +41,8 @@ module DTK
       end
 
      private
-      def self.assembly_factory(assembly_instance,service_module,assembly_name,version=nil)
+      def self.assembly_factory(assembly_instance,service_module,assembly_name,opts={})
+        version = opts[:version]
         project = service_module.get_project()
         project_idh = project.id_handle()
         service_module_name = service_module.get_field?(:display_name)        
@@ -46,21 +50,27 @@ module DTK
 
         assembly_mh = project_idh.create_childMH(:component)
         if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)
-          return ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
+          if opts[:mode] == :create
+            raise ErrorUsage.new("Assembly (#{assembly_name}) already exists in service module (#{service_module_name})")
+          end
+          ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
+        else
+          if opts[:mode] == :update
+            raise ErrorUsage.new("Assembly (#{assembly_name}) does not exist in service module (#{service_module_name})")
+          end
+          assembly_mh = project_idh.create_childMH(:component)
+          hash_values = {
+            :project_project_id => project_idh.get_id(),
+            :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
+            :display_name => assembly_name,
+            #TODO: was used in GUI  :ui => icon_info,
+            :type => "composite",
+            :module_branch_id => service_module_branch[:id],
+            :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
+          }
+          ret = create(assembly_mh,hash_values)
+          ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
         end
-
-        assembly_mh = project_idh.create_childMH(:component)
-        hash_values = {
-          :project_project_id => project_idh.get_id(),
-          :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
-          :display_name => assembly_name,
-          #TODO: was used in GUI  :ui => icon_info,
-          :type => "composite",
-          :module_branch_id => service_module_branch[:id],
-          :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
-        }
-        ret = create(assembly_mh,hash_values)
-        ret.set_attrs!(project_idh,assembly_instance,service_module_branch)
       end
 
       attr_reader :assembly_instance,:project_idh,:service_module_branch

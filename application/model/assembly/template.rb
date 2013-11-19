@@ -29,9 +29,9 @@ module DTK; class Assembly
       Assembly::Instance.create_subclass_object(new_assembly_obj)
     end
 
-    def self.create_or_update_from_instance(project,assembly_instance,service_module_name,assembly_template_name,version=nil)
-      service_module = Factory.get_or_create_service_module(project,service_module_name)
-      Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,version)
+    def self.create_or_update_from_instance(project,assembly_instance,service_module_name,assembly_template_name,opts={})
+      service_module = Factory.get_or_create_service_module(project,service_module_name,opts)
+      Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,opts)
       service_module
     end
 

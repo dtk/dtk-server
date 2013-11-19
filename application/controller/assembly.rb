@@ -323,7 +323,8 @@ module DTK
       assembly = ret_assembly_instance_object()
       assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
       project = get_default_project()
-      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name)
+      opts = ret_symbol_params_hash(:mode)
+      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)
       clone_update_info = service_module.ret_clone_update_info()
       rest_ok_response clone_update_info
     end

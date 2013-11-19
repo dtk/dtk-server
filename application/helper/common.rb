@@ -308,6 +308,9 @@ module Ramaze::Helper
     def ret_request_param_boolean(param)
       boolean_form(ret_request_params(param))
     end
+    def ret_symbol_params_hash(*params)
+      ret_params_hash(*params).inject(Hash.new){|h,(k,v)|h.merge(k => v.to_s.to_sym)}
+    end
     def ret_boolean_params_hash(*params)
       ret_params_hash(*params).inject(Hash.new){|h,(k,v)|h.merge(k => boolean_form(v))}
     end

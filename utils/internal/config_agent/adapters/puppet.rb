@@ -102,24 +102,18 @@ module XYZ
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
             val = ret_value(attr,node_components)
-
             #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
-            if attr[:dynamic] or (ext_ref[:default_variable] and val.nil?) 
-              #TODO: ignoring ones set already; this implicitly captures assumption that dynamic attribute
-              #once set cnnot change
-              if val.nil?
-                #TODO: making assumption that dynamic attribute as array_form_path of form [<module>,<attrib_name>]
-                dyn_attr = {:name => array_form_path[1], :id => attr[:id]}
-                if ext_ref[:type] == "puppet_exported_resource"
-                  type = "exported_resource"
-                  dyn_attr.merge!(:type => "exported_resource", :title_with_vars => ext_ref[:title_with_vars])
-                elsif ext_ref[:default_variable] and val.nil?
-                  dyn_attr.merge!(:type => "default_variable")
-                else
-                  dyn_attr.merge!(:type => "dynamic")
-                end
-                dynamic_attrs << dyn_attr
+            if attr[:value_asserted].nil? and (attr[:dynamic] or ext_ref[:default_variable]) #TODO: the disjunct 'ext_ref[..]' can be deprecated
+              dyn_attr = {:name => array_form_path[1], :id => attr[:id]}
+              if ext_ref[:type] == "puppet_exported_resource"
+                type = "exported_resource"
+                dyn_attr.merge!(:type => "exported_resource", :title_with_vars => ext_ref[:title_with_vars])
+              elsif ext_ref[:default_variable]
+                dyn_attr.merge!(:type => "default_variable")
+              else
+                dyn_attr.merge!(:type => "dynamic")
               end
+              dynamic_attrs << dyn_attr
             elsif not val.nil?
               add_attribute!(ndx_attributes,array_form_path,val,ext_ref)
               #info that is used to set the name param for the resource

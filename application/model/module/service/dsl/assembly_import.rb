@@ -253,7 +253,6 @@ module DTK; class ServiceModule
         }
       end
       ret.mark_as_complete()
-      ret
     end
 
     def self.import_attribute_overrides(attr_name,attr_val,opts={})

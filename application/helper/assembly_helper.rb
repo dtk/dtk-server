@@ -69,16 +69,21 @@ module Ramaze::Helper
     end
 
     #assuming that service link is identified by either
-    #:service_link_id, or
-    #:service_type and :input_component_id
+    #:service_link_id or
+    #:service_type and :input_component_id or
+    #:dependency_type, :input_component_id, and :output_component_id
     def ret_port_link(assembly=nil)
       assembly ||= ret_assembly_instance_object()
       if ret_request_params(:service_link_id)
         create_obj(:service_link_id,::DTK::PortLink,:assembly_idh => assembly.id_handle())
       else
-        service_type = ret_non_null_request_params(:service_type)
-        input_component_id = ret_component_id(:input_component_id, :assembly_id => assembly.id())
-        filter = {:service_type => service_type, :input_component_id => input_component_id}
+        filter =  {:input_component_id => ret_component_id(:input_component_id, :assembly_id => assembly.id())}
+        if service_type = (ret_request_params(:dependency_name)||ret_request_params(:service_type))
+          filter.merge!(:service_type => service_type)
+        end
+        if ret_request_params(:output_component_id)
+          filter.merge!(:output_component_id => ret_component_id(:output_component_id, :assembly_id => assembly.id()))
+        end
         assembly.get_matching_port_link(filter)
       end
     end

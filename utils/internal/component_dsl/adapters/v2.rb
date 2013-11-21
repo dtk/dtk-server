@@ -10,16 +10,25 @@ module DTK
         #TODO: stub
       end
       def self.normalize(input_hash)
-        ObjectModelForm.convert(ObjectModelForm::InputHash.new(input_hash))
+        object_model_form.convert(object_model_form::InputHash.new(input_hash))
       end
 
       def self.convert_attribute_mapping_helper(input_am,base_cmp,dep_cmp,opts={})
-        ObjectModelForm.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+        object_model_form.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
       end
 
       def self.ret_migrate_processor(config_agent_type,module_name,old_version_hash)
         new_version = version(2)
-        MigrateProcessor.new(new_version,config_agent_type,module_name,old_version_hash)
+        migrate_processor.new(new_version,config_agent_type,module_name,old_version_hash)
+      end
+     private
+
+      # 'self:: form' used below because for example v3 subclasses from v2 and it includes V3::ObjectModelForm
+      def self.object_model_form()
+        self::ObjectModelForm
+      end
+      def self.migrate_processor()
+        self::MigrateProcessor
       end
     end
   end

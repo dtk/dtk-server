@@ -6,11 +6,11 @@ module DTK; class ComponentDSL; class V2
       new.convert(input_hash)
     end
     def convert(input_hash)
-      Component.new(input_hash.req(:module)).convert(input_hash.req(:components))
+      component().new(input_hash.req(:module)).convert(input_hash.req(:components))
     end
 
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
-      Choice.new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+      choice().new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
     end
 
     def convert_to_hash_form(hash_or_array,&block)
@@ -28,6 +28,13 @@ module DTK; class ComponentDSL; class V2
     end
 
    private
+
+    def component()
+      self.class::Component
+    end
+    def choice()
+      self.class::Choice
+    end
 
     ModCmpDelim = "__"
     CmpPPDelim = '::'
@@ -231,7 +238,7 @@ module DTK; class ComponentDSL; class V2
         link_defs  = Array.new
         if in_dep_cmps = input_hash["depends_on"]
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
-            choices = Choice.convert_choices(conn_ref,conn_info,base_cmp,opts)
+            choices = choice().convert_choices(conn_ref,conn_info,base_cmp,opts)
 
             #determine if create a link def and/or a dependency
             #creaet a dependency if just single choice and base adn depnedncy on same node

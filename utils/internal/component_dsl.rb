@@ -203,7 +203,8 @@ module DTK
 
     VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
-      "0.9" => 2
+      "0.9" => 2,
+      "0.9.1" => 3
     }
     VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|
       h.merge(vi=>v)

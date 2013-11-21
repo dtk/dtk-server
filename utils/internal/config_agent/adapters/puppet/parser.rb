@@ -14,7 +14,7 @@ module DTK
       opts = {:just_krt_code => true}
       all_errors = nil
       manifest_file_names.each do |filename|
-        Log.info("calling puppet and r8 processor on file #{filename}")
+        Log.info("calling puppet and dtk processor on file #{filename}")
         begin
           krt_code = parse_given_file_path__manifest(filename,impl_obj,opts)
           ret.add_children(krt_code) unless all_errors #short-circuit once first error found

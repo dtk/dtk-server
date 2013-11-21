@@ -8,7 +8,7 @@ module DTK
         begin
           impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
           dsl_generator = ComponentDSL::GenerateFromImpl.create()
-          #refinement_hash is neutral form but with version specfic objects fro next phase
+          #refinement_hash is version neutral form gotten from version specfic dsl_generator
           refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name(),impl_obj.id_handle())
           render_hash = refinement_hash.render_hash_form()
         rescue ErrorUsage => e

@@ -45,7 +45,22 @@ module DTK; class ComponentModule
 
       components = get_associated_component_instances()
       unless components.empty?
-        component_names = components.map{|r|r.display_name_print_form(:node_prefix=>true)}
+        ndx_assemblies = Hash.new
+        asssembly_ids =  components.map{|r|r[:assembly_id]}.compact
+        unless asssembly_ids.empty?
+          sp_hash = {
+            :cols => [:id,:group_id,:display_name],
+            :filter => [:oneof,:id,asssembly_ids]
+          }
+          ndx_assemblies = Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).inject(Hash.new){|h,r|h.merge(r[:id] => r)}
+        end
+        component_names = components.map do |r|
+          cmp_name = r.display_name_print_form(:node_prefix=>true)
+          if assembly = ndx_assemblies[r[:assembly_id]]
+            cmp_name = "#{assembly.display_name_print_form()}/#{cmp_name}"
+          end
+          cmp_name
+        end
         raise ErrorUsage.new("Cannot delete the component module because the component instance(s) (#{component_names.join(',')}) reference it")
       end
 

@@ -207,12 +207,13 @@ module DTK
       def list_module_info(type=nil)
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter)
-
+        
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
           namespace = r["namespace"] && "#{r["namespace"]}/"
           qualified_name = "#{namespace}#{r["name"]}"
-          el.merge!(:qualified_name => qualified_name)
+          last_updated = Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
+          el.merge!(:qualified_name => qualified_name, :last_updated => last_updated)
           if versions = branch_names_to_versions(r["branches"])
             el.merge!(:versions => versions)
           end

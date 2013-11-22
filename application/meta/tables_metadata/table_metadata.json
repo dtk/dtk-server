@@ -212,11 +212,13 @@
   "module_remote": {
     "order": [
       "name",
-      "version(s)"
+      "version(s)",
+      "last_updated"
     ],
     "mapping": {
       "name": "display_name",
-      "version(s)": "versions"
+      "version(s)": "versions",
+      "last_updated": "last_updated"
     }
   },
   "library": {

@@ -647,7 +647,8 @@ module DTK
       git_command.symbolic_ref(cmd_opts(),"HEAD","refs/heads/#{branch_name}")
     end
     def git_command__add(file_path)
-      git_command.add(cmd_opts(),file_path)
+      #put in -f to avoid error being thrown if try to add an ignored file
+      git_command.add(cmd_opts(),file_path,"-f")
       #took out because could not pass in time out @grit_repo.add(file_path)
     end
     def git_command__rm(file_path)
@@ -762,7 +763,7 @@ module DTK
       `#{git} branch #{branch_name}`
     end
     def git_command__add(file_path)
-      `#{git} add #{file_path}`
+      `#{git} add #{file_path} -f`
     end
     def git_command__push(branch_name)
       `#{git} push origin #{branch}:refs/heads/#{branch_name}`

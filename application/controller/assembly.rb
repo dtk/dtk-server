@@ -1,6 +1,7 @@
 module DTK
   class AssemblyController < AuthController
     helper :assembly_helper
+    helper :task_helper
 
     #### create and delete actions ###
     #TODO: rename to delete_and_destroy
@@ -90,6 +91,18 @@ module DTK
         response = {:message => "Task not yet generated for assembly (#{assembly.get_field?(:display_name)})"}
       end
       rest_ok_response response, response_opts
+    end
+
+    def rest__cancel_task()
+      assembly = ret_assembly_instance_object()
+      unless top_task_id = ret_request_params(:task_id) 
+        unless top_task = get_most_recent_executing_task([:eq,:assembly_id,assembly.id()])
+          raise ErrorUsage.new("No running tasks found")
+        end
+        top_task_id = top_task.id()
+      end
+      cancel_task(top_task_id)
+      rest_ok_response :task_id => top_task_id
     end
 
     def rest__list_modules()
@@ -310,7 +323,8 @@ module DTK
       assembly = ret_assembly_instance_object()
       assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
       project = get_default_project()
-      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name)
+      opts = ret_symbol_params_hash(:mode)
+      service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)
       clone_update_info = service_module.ret_clone_update_info()
       rest_ok_response clone_update_info
     end

@@ -193,8 +193,13 @@ module DTK; class ServiceModule
     def self.import_component_refs(container_idh,assembly_name,components_hash,component_module_refs,opts={})
       cmps_with_titles = Array.new
 
-      if components_hash
-        ret = components_hash.inject(Hash.new) do |h,cmp_input|
+      unless components_hash
+        return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section",opts[:file_path])
+      end
+
+      ret = components_hash.inject(Hash.new) do |h,cmp_input|
+        parse = cmp_ref = nil
+        begin
           parse = component_ref_parse(cmp_input)
           cmp_ref = Aux::hash_subset(parse,[:component_type,:version,:display_name])
           if cmp_ref[:version]
@@ -203,15 +208,15 @@ module DTK; class ServiceModule
           if cmp_title = parse[:component_title] 
             cmps_with_titles << {:cmp_ref => cmp_ref, :cmp_title => cmp_title}
           end
-
+          
           ret_attribute_overrides(cmp_input).each_pair do |attr_name,attr_val|
             pntr = cmp_ref[:attribute_override] ||= Hash.new
             pntr.merge!(import_attribute_overrides(attr_name,attr_val))
           end
-          h.merge(parse[:ref] => cmp_ref)
+         rescue ErrorUsage::DSLParsing => e
+          return ErrorUsage::DSLParsing.new(e.to_s,opts[:file_path])
         end
-      else
-        return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section or you misspelled 'components' part in",opts[:file_path])
+        h.merge(parse[:ref] => cmp_ref)
       end
 
       #find and insert component template ids in first component_refs and then for the attribute_overrides
@@ -248,7 +253,6 @@ module DTK; class ServiceModule
         }
       end
       ret.mark_as_complete()
-      ret
     end
 
     def self.import_attribute_overrides(attr_name,attr_val,opts={})

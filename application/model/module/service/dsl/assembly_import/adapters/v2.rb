@@ -11,10 +11,8 @@ module DTK; class ServiceModule
 
       def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
         ret = super
-        if task_templates = import_task_templates(assembly_hash)
-          ret_assembly_hash = ret.values.first
-          ret_assembly_hash.merge!("task_template" => task_templates)
-        end
+        ret_assembly_hash = ret.values.first
+        ret_assembly_hash.merge!("task_template" => import_task_templates(assembly_hash))
         ret
       end
 
@@ -44,26 +42,27 @@ module DTK; class ServiceModule
       include AssemblyImportExportCommon
 
       def self.import_task_templates(assembly_hash)
+        ret = DBUpdateHash.new()
         #TODO: just treating the default action
         #TODO: enhance to parse the workflow, such as checking all components in workflow
         #are defined
-        unless workflow =  assembly_hash["workflow"]
-          return nil
-        end
-
-        #its ok to delete from assembly_hash/workflow
-        if assembly_action = workflow.delete("assembly_action")
-          unless  assembly_action == "create"
-            raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
+        if workflow = assembly_hash["workflow"]
+          #its ok to delete from assembly_hash/workflow
+          if assembly_action = workflow.delete("assembly_action")
+            unless  assembly_action == "create"
+              raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
+            end
           end
-        end
-        task_template_ref = task_action = Task::Template.default_task_action()
-        {
-          task_template_ref => {
-            "task_action" => task_action,
-            "content" => workflow
+          task_template_ref = task_action = Task::Template.default_task_action()
+          update = {
+            task_template_ref => {
+              "task_action" => task_action,
+              "content" => workflow
+            }
           }
-        }
+          ret.merge!(update)
+        end
+        ret.mark_as_complete()
       end
 
       def self.pp_port_ref(port_ref)
@@ -132,7 +131,7 @@ module DTK; class ServiceModule
         ret =
           if cmp_input.kind_of?(Hash) 
             unless cmp_input.values.first.kind_of?(Hash)
-              raise ErrorUsage.new("Parsing error with term (#{cmp_input.inspect})")
+              raise ErrorUsage::DSLParsing.new("Parsing error after component term (#{cmp_input.keys.first})")
             end
             cmp_input.values.first["attributes"]||{}
           end

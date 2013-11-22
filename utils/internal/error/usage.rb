@@ -1,17 +1,9 @@
 module DTK
+  #TODO: need to clanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
-    class DSLParsing < self
-      def initialize(base_json_error,file_path=nil)
-        super(err_msg(base_json_error,file_path))
-      end
-     private
-      def err_msg(base_json_error,file_path=nil)
-        file_ref = (file_path && " in file (#{file_path})")
-        "#{base_json_error}#{file_ref}"
-      end
-
-      class JSONParsing < self
-      end
+    class DSLParsing < self #comes from dtk-commin/lib/dsl/file_parser
+      #class JSONParsing < self comes from dtk-commin/lib/dsl/file_parser
+      #end
 
       class YAMLParsing < self
       end

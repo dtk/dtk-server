@@ -66,9 +66,8 @@ module XYZ
     end
 
     def rest__cancel_task()
-      top_task_id =  ret_non_null_request_params(:task_id)
-      task = Task.get_hierarchical_structure(id_handle(top_task_id))
-      Workflow.cancel(top_task_id, task)
+      top_task_id = ret_non_null_request_params(:task_id)
+      cancel_task(top_task_id)
       rest_ok_response :task_id => top_task_id
     end
 

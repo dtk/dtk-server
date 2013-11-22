@@ -453,7 +453,7 @@ module DTK; class  Assembly
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :tasks
-        get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsualet in Task; ||foo[:created_at] used in case foo[:started_at] is null
+        get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
        else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")

@@ -148,10 +148,10 @@ module DTK
           @augmented_port = aug_port
         end
         def type()
-          :unconnected_service_ref
+          :unmet_dependency
         end
         def description()
-          "Service ref (#{@augmented_port.display_name_print_form()}) is not connected, but required to be"
+          "Component (#{@augmented_port.display_name_print_form()}) has an unmet dependency"
         end
       end
       class ComponentParsingError < self

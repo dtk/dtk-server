@@ -169,20 +169,25 @@ module DTK; class ComponentDSL; class V2
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
+            dynamic_default_variable = !!(info["external_ref"]||{})["default_variable"]
             external_ref = 
               if opts[:constant_attribute]
                 Attribute::Constant.ret_external_ref()
               else
                 type = "puppet_attribute" #TODO: hard-wired
                 external_ref_name = (info["external_ref"]||{})[type]||name
-                {"type" => type,
-                 "path" => "node[#{cmp_type}][#{external_ref_name}]"
-              }
+                {
+                  "type" => type,
+                  "path" => "node[#{cmp_type}][#{external_ref_name}]"
+                }.merge(dynamic_default_variable ? {"default_variable" => true} : {})
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
             attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
-            %w{description required dynamic hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
+            %w{description dynamic required hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
+            if dynamic_default_variable
+              attr_props["dynamic"] ||= true
+            end
             attrs.merge!(name => attr_props)
           end
           if ret["attribute"]
@@ -362,7 +367,8 @@ module DTK; class ComponentDSL; class V2
 
       DefaultLinkType = "local"
       def link_type(link_info,parent_link_info={})
-        case (link_info["location"]||parent_link_info["location"]||DefaultLinkType)
+        loc = link_info["location"]||parent_link_info["location"]||DefaultLinkType
+        case loc
          when "local" then "internal"
          when "remote" then "external"
          else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)

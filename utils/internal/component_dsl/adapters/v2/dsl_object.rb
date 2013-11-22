@@ -11,7 +11,7 @@ module DTK; class ComponentDSL; class V2
         config_agent_type = config_agent_type()
         case config_agent_type
           when :puppet then "puppet_module"
-          else Log.error("not traeted yet config_agent type (#{config_agent_type})")
+          else Log.error("not treated yet config_agent type (#{config_agent_type})")
         end
       end
 
@@ -130,7 +130,11 @@ module DTK; class ComponentDSL; class V2
         unless attr_name == value(:id)
           ret[ext_ref["type"]] = attr_name
         end
-        (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
+        #do not need its value; just fact that default_variable
+        (ext_ref.keys - ["name","type","default_variable"]).each{|k|ret[k] = ext_ref[k]}
+        if ext_ref["default_variable"]
+          ret["default_variable"] = true
+        end
         ret.empty? ? nil : ret
       end
     end

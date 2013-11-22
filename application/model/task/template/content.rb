@@ -86,9 +86,14 @@ module DTK; class Task
       end
 
       def serialization_form(opts={})
+        ret = nil
         subtasks = map{|internode_stage|internode_stage.serialization_form(opts)}.compact
         if subtasks.empty?()
-          raise ErrorUsage.new("The task has no actions")
+          if opts[:allow_empty_task]
+            return ret
+          else
+            raise ErrorUsage.new("The task has no actions")
+          end
         end
         #Dont put in sequential block if just single stage
         if subtasks.size == 1

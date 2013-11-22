@@ -58,6 +58,10 @@ module XYZ
         Set.new(hash.keys) == Set.new(keys)
       end
 
+      def has_only_these_keys?(hash,keys)
+        Set.new(hash.keys).subset?(Set.new(keys))
+      end
+
       def ordered_hash(array_with_hashes)
         array_with_hashes.inject(ActiveSupport::OrderedHash.new) do |h,x|
           h.merge(x.keys.first => x.values.first)

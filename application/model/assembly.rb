@@ -46,45 +46,67 @@ module DTK
         when 1
           matches.first
         when 0
-          raise ErrorUsage.new("Cannot find service link with condition (#{opts[:ret_match_info][:clause]})")
+          raise ErrorUsage.new("Cannot find component link#{error_message_condition(opts[:ret_match_info])}")
         else
-          raise ErrorUsage.new("Multiple matching service links with condition (#{opts[:ret_match_info][:clause]})")
+          raise ErrorUsage.new("Multiple matching component links#{error_message_condition(opts[:ret_match_info])}")
       end
     end
+
+    def error_message_condition(match_info)
+      if clause = (match_info||{})[:clause]
+        " with condition (#{clause})"
+      else
+        ""
+      end
+    end
+    private :error_message_condition
+
     #augmented with the ports and nodes; component_id is on ports
     def get_augmented_port_links(opts={})
       rows = get_objs(:cols => [:augmented_port_links])
       #TODO: remove when have all create port link calls set port_link display name to service type
       rows.each{|r|r[:port_link][:display_name] ||= r[:input_port].link_def_name()}  
       if filter = opts[:filter]
-        post_filter = 
-          if Aux.has_just_these_keys?(filter,[:port_link_id])
-            port_link_id = filter[:port_link_id]
-            if opts[:ret_match_info]
-              opts[:ret_match_info][:clause] = "port_link_id = #{port_link_id.to_s}"
-            end
-            lambda{|r|r[:port_link][:id] == port_link_id}
-          elsif Aux.has_just_these_keys?(filter,[:input_component_id])
-            input_component_id = filter[:input_component_id]
-            #not setting opts[:ret_match_info][:clause] because :input_component_id internally generated
-            lambda{|r|r[:input_port][:component_id] == input_component_id}
-          elsif Aux.has_just_these_keys?(filter,[:service_type,:input_component_id])
-            input_component_id = filter[:input_component_id]
-            service_type = filter[:service_type]
-            #not including conjunct with :input_component_id because internally generated
-            if opts[:ret_match_info]
-              opts[:ret_match_info][:clause] = "service_type = '#{service_type}'"
-            end
-            lambda{|r|(r[:input_port][:component_id] == input_component_id) and (r[:port_link][:display_name] == service_type)}
-          else
-            raise Error.new("Unexpected filter (#{filter.inspect})")
-          end
+        post_filter =  port_link_filter_lambda_form(filter,opts) 
         rows.reject!{|r|!post_filter.call(r)}
       end
       rows.map do |r|
         r[:port_link].merge(r.slice(:input_port,:output_port,:input_node,:output_node))
       end
     end
+
+
+    def port_link_filter_lambda_form(filter,opts={})
+      if Aux.has_just_these_keys?(filter,[:port_link_id])
+        port_link_id = filter[:port_link_id]
+        if opts[:ret_match_info]
+          opts[:ret_match_info][:clause] = "port_link_id = #{port_link_id.to_s}"
+        end
+        lambda{|r|r[:port_link][:id] == port_link_id}
+      elsif Aux.has_just_these_keys?(filter,[:input_component_id])
+        input_component_id = filter[:input_component_id]
+        #not setting opts[:ret_match_info][:clause] because :input_component_id internally generated
+        lambda{|r|r[:input_port][:component_id] == input_component_id}
+      elsif Aux.has_only_these_keys?(filter,[:service_type,:input_component_id,:output_component_id])
+        unless input_component_id = filter[:input_component_id]
+          raise Error.new("Unexpected filter (#{filter.inspect})")
+        end
+        output_component_id = filter[:output_component_id]
+        service_type = filter[:service_type]
+        #not including conjunct with :input_component_id or output_component_id because internally generated
+        if opts[:ret_match_info] and service_type
+          opts[:ret_match_info][:clause] = "service_type = '#{service_type}'"
+        end
+        lambda do |r|
+          (r[:input_port][:component_id] == input_component_id) and 
+            (service_type.nil? or (r[:port_link][:display_name] == service_type)) and
+            (output_component_id.nil? or (r[:output_port][:component_id] == output_component_id))
+        end
+      else
+        raise Error.new("Unexpected filter (#{filter.inspect})")
+      end
+    end
+    private :port_link_filter_lambda_form
 
     #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     def self.get_component_templates(assembly_mh,filter=nil)

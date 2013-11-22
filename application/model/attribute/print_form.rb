@@ -14,7 +14,7 @@ module DTK
           unless assembly = opts[:assembly]
             raise Error.new("Unexpected to have opts[:assembly] nil")
           end
-          PrintForm.augment_with_attribute_links!(ret,assembly)
+          PrintForm.augment_with_attribute_links!(ret,assembly,raw_attrs)
         end
         ret
       end
@@ -42,8 +42,9 @@ module DTK
         }
         if value = value_print_form()
           if @truncate_attribute_value
-            if value.kind_of?(String) and value.size > TruncateSize
-              value = "#{value[0..TruncateSize-1]} #{TruncateSymbols}"
+            truncate_size = (@truncate_attribute_value.kind_of?(Fixnum) ? @truncate_attribute_value : DefaultTruncateSize)
+            if value.kind_of?(String) and value.size > truncate_size
+              value = "#{value[0..truncate_size-1]} #{TruncateSymbols}"
             end
           end
           attr_info.merge!(:value => value)
@@ -52,10 +53,11 @@ module DTK
       end
       UnchangedDisplayCols = [:id,:required]
       UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
-      TruncateSize = 30
+      DefaultTruncateSize = 40
       TruncateSymbols = '...'
 
-      def self.augment_with_attribute_links!(ret,assembly)
+      def self.augment_with_attribute_links!(ret,assembly,raw_attributes)
+        ndx_attrs = raw_attributes.inject(Hash.new){|h,a|h.merge(a[:id] => a)}
         ndx_attr_mappings = Hash.new
         assembly.get_augmented_attribute_mappings().each do |r|
           ndx = r[:input_id]
@@ -70,8 +72,15 @@ module DTK
           end
         end
         ret.each do |r|
-          linked_to_obj = ndx_attr_mappings[r[:id]]||[]
-          r.merge!(:linked_to => linked_to_obj, :linked_to_display_form => linked_to_display_form(linked_to_obj))
+          attr_id = r[:id]
+          if linked_to_obj = ndx_attr_mappings[attr_id]
+            r.merge!(:linked_to => linked_to_obj,:linked_to_display_form => linked_to_display_form(linked_to_obj))
+          else
+            ext_ref = (ndx_attrs[attr_id]||{})[:external_ref]||{}
+            if ext_ref[:default_variable] and ext_ref[:type] == 'puppet_attribute'
+              r.merge!(:linked_to_display_form => LinkedToPuppetHeader) 
+            end
+          end
         end
         ret
       end
@@ -87,6 +96,7 @@ module DTK
       def self.linked_to_display_form(linked_to_obj)
         linked_to_obj.map{|r|r[:display_name]}.join(', ')
       end
+      LinkedToPuppetHeader = 'external_ref(puppet_header)'
 
       def attr_name_default()
         index_map_string = (@index_map ? @index_map.inspect() : "")

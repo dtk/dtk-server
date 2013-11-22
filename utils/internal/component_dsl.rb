@@ -193,7 +193,7 @@ module DTK
         case integer_version(dsl_integer_version)
          when 1
           "r8meta.#{config_agent_type}"
-         when 2
+         when 2,3
           "dtk.model"
         else
           raise Error.new("DSL type not treated")
@@ -212,7 +212,8 @@ module DTK
 
     DSLFilenameRegexp = {
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
-      2 => /^dtk\.model\.([a-z]+$)/
+      2 => /^dtk\.model\.([a-z]+$)/,
+      3 => /^dtk\.model\.([a-z]+$)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

@@ -176,7 +176,7 @@ module DTK; class ComponentDSL; class V2
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
-            dynamic_default_variable = !!(info["external_ref"]||{})["default_variable"]
+            dynamic_default_variable = dynamic_default_variable?(info)
             external_ref = 
               if opts[:constant_attribute]
                 Attribute::Constant.ret_external_ref()
@@ -190,7 +190,8 @@ module DTK; class ComponentDSL; class V2
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
-            attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
+            #setting even when value_asserted() is nil so this can handle case where remove a default
+            attr_props["value_asserted"] = value_asserted(info)
             %w{description dynamic required hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
             if dynamic_default_variable
               attr_props["dynamic"] ||= true
@@ -204,6 +205,14 @@ module DTK; class ComponentDSL; class V2
           end
         end
         ret
+      end
+
+      def dynamic_default_variable?(info)
+        !!(info["external_ref"]||{})["default_variable"]
+      end
+
+      def value_asserted(info) 
+        info["default"] 
       end
 
       def add_attr_data_type_attrs!(attr_props,info)

@@ -173,13 +173,15 @@ module DTK
       klass = self.class.load_and_return_version_adapter_class(integer_version)
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
-      ret = nil
-      begin 
-        ret = klass.normalize(version_specific_input_hash)
-        rescue => e
-          Log.error_pp(['uninterpreted parsing error',e,e.backtrace[0..20]])
-          raise ObjectModelForm::ParsingError.new()
-        end
+      ret = klass.normalize(version_specific_input_hash)
+# TODO: this mistakenly captures coding errors; we can move this to be more nested within normalize
+#      ret = nil
+#      begin 
+#        ret = klass.normalize(version_specific_input_hash)
+#        rescue => e
+#          Log.error_pp(['uninterpreted parsing error',e,e.backtrace[0..20]])
+#          raise ObjectModelForm::ParsingError.new()
+#        end
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret

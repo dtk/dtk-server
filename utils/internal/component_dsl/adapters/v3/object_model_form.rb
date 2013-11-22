@@ -1,7 +1,8 @@
 module DTK; class ComponentDSL; class V3
-  Parent = ComponentDSL::V2::ObjectModelForm                                  
-  class ObjectModelForm < Parent
-    class Component < Parent::Component
+  Base = ComponentDSL::V2::ObjectModelForm                                  
+  class ObjectModelForm < Base
+    class Component < Base::Component
+     private
       def body(input_hash,cmp)
         pp [:in,self.class]
         ret = OutputHash.new
@@ -20,6 +21,19 @@ module DTK; class ComponentDSL; class V3
         end
         ret
       end
+
+      def dynamic_default_variable?(info)
+        default_indicates_dynamic_default_variable?(info)
+      end
+      def value_asserted(info) 
+        unless default_indicates_dynamic_default_variable?(info)
+          info["default"] 
+        end
+      end
+      def default_indicates_dynamic_default_variable?(info)
+        info["default"] == ExtRefDefaultPuppetHeader
+      end
+      ExtRefDefaultPuppetHeader = 'external_ref(puppet_header)'
 
       def add_attr_data_type_attrs!(attr_props,info)
         type = info.req(:type)

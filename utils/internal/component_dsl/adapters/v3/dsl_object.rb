@@ -1,7 +1,7 @@
 module DTK; class ComponentDSL; class V3
-  Base = ComponentDSL::V2::DSLObject
-  class DSLObject < Base
-    class Attribute < Base::Attribute
+  DSLObjectBase = ComponentDSL::V2::DSLObject
+  class DSLObject < DSLObjectBase
+    class Attribute < DSLObjectBase::Attribute
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))

@@ -1,13 +1,13 @@
 module DTK; class ComponentDSL; class V3
-  Base = ComponentDSL::V2::IncrementalGenerator
-  class IncrementalGenerator < Base
-   private
+  IGBase = ComponentDSL::V2::IncrementalGenerator
+  class IncrementalGenerator < IGBase
+    private
     #altough syntactically different than its parents function 'Component' will resolve differently
     def component()
       Component
     end
 
-    class LinkDef < Base::LinkDef
+    class LinkDef < IGBase::LinkDef
       def generate(aug_link_def)
         ref = aug_link_def.required(:link_type)
         link_def_links = aug_link_def.required(:link_def_links)

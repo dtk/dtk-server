@@ -1,7 +1,7 @@
 module DTK; class ComponentDSL; class V3
-  Base = ComponentDSL::V2::ObjectModelForm                                  
-  class ObjectModelForm < Base
-    class Component < Base::Component
+  OMFBase = ComponentDSL::V2::ObjectModelForm                                  
+  class ObjectModelForm < OMFBase
+    class Component < OMFBase::Component
      private
       def body(input_hash,cmp)
         pp [:in,self.class]

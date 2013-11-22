@@ -1,71 +1,13 @@
-module DTK; class ComponentDSL; class V2
-  class IncrementalGenerator < ComponentDSL::IncrementalGenerator
+module DTK; class ComponentDSL; class V3
+  Base = ComponentDSL::V2::IncrementalGenerator
+  class IncrementalGenerator < Base
    private
+    #altough syntactically different than its parents function 'Component' will resolve differently
     def component()
       Component
     end
-    class Component < self
-      def self.display_name_print_form(cmp_type)
-        ::DTK::Component.display_name_print_form(cmp_type)
-      end
-      def self.get_fragment(full_hash,cmp_type)
-        unless ret = (full_hash['components']||{})[hash_index(cmp_type)]
-          raise Error.new("Cannot find component (#{display_name_print_form(cmp_type)})")
-        end
-        ret
-      end
 
-     private
-      def self.hash_index(cmp_type)
-        ::DTK::Component.display_name_print_form(cmp_type,:no_module_name => true)
-      end
-    end
-
-    class Attribute < self
-      def generate(attr)
-        #TODO: treat default and external_ref
-        attr.object.update_object!(:display_name,:description,:data_type,:semantic_type,:required,:dynamic,:external_ref)
-        ref = attr.required(:display_name)
-        content = PrettyPrintHash.new
-        set?(:description,content,attr)
-        type = type(attr[:data_type],attr[:semantic_type])
-        content['type'] = type if type
-        content['required'] = true if attr[:required]
-        content['dynamic'] = true if attr[:dynamic]
-        {ref => content}
-      end
-
-      def merge_fragment!(full_hash,fragment,context={})
-        component_fragment = component_fragment(full_hash,context[:component_template])
-        if attributes_fragment = component_fragment['attributes']
-          fragment.each do |key,content|
-            update_attributes_fragment!(attributes_fragment,key,content)
-          end
-        else
-          component_fragment['attributes'] = fragment
-        end
-        full_hash
-      end
-
-     private
-      def type(data_type,semantic_type)
-        ret = data_type
-        if semantic_type
-          unless semantic_type.kind_of?(Hash) and semantic_type.size == 1 and semantic_type.keys.first == ":array"
-            Log.error("Ignoring because unexpected semantic type (#{semantic_type})")
-          else
-            ret = "array(#{semantic_type.values.first})"
-          end
-        end
-        ret||'string'
-      end
-
-      def update_attributes_fragment!(attributes_fragment,key,content)
-        (attributes_fragment[key] ||= Hash.new).merge!(content)
-      end
-    end
-
-    class LinkDef < self
+    class LinkDef < Base::LinkDef
       def generate(aug_link_def)
         ref = aug_link_def.required(:link_type)
         link_def_links = aug_link_def.required(:link_def_links)

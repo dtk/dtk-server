@@ -15,15 +15,16 @@ module DTK; class ComponentDSL; class V3
         end
         aug_link_def[:link_def_links].inject(PossibleLinks.new) do |pl,link_def_link|
           cmp,link = choice_info(aug_link_def,ObjectWrapper.new(link_def_link))
-          pl.merge(cmp,link)
+          pl.deep_merge(cmp,link)
         end
       end
 
       def merge_fragment!(full_hash,fragment,context={})
         component_fragment = component_fragment(full_hash,context[:component_template])
         if link_defs_fragment = component_fragment['link_defs']
-          fragment.each do |key,content|
-            update_link_defs_fragment!(link_defs_fragment,key,content)
+          component_fragment['link_defs'] = PossibleLinks.reify(link_defs_fragment)
+          fragment.each do |cmp,link|
+            component_fragment['link_defs'] = component_fragment['link_defs'].deep_merge(cmp,link)
           end
         else
           component_fragment['link_defs'] = fragment
@@ -35,14 +36,20 @@ module DTK; class ComponentDSL; class V3
       #PossibleLinks has form {cmp1 => LINK(s), cmp2 => LINK(s), ..}
       # where LINK(s) ::= LINK | [LINK,LINK,..]
       class PossibleLinks < Hash
-        def merge(cmp,link)
+        def deep_merge(cmp,link)
           new_cmp_val = 
-            if target_links = ret[cmp]
+            if target_links = self[cmp]
               link.merge_into!(target_links.kind_of?(Array) ? target_links : [target_links])
             else
-              ret[cmp] = link
+              link
             end
-          super(cmp => new_cmp_val)
+          merge(cmp => new_cmp_val)
+        end
+
+        def self.reify(possible_links)
+          possible_links.inject(PossibleLinks.new()) do |h,(cmp,v)|
+            h.merge(cmp => v.kind_of?(Array) ? v.map{|el|Link.new(el)} : Link.new(v))
+          end
         end
       end
 
@@ -50,10 +57,8 @@ module DTK; class ComponentDSL; class V3
         def merge_into!(links)
           ret = links
           if match = links.find{|link|match?(link)}
-            am = self['attribute_mappings']
-            match_am = match['attribute_mappings']
-            if am or match_am
-              match['attribute_mappings'] = (match_am||[]) + (am||[])
+            if am = self['attribute_mappings']
+              match['attribute_mappings'] = am
             end
           else
             ret << self
@@ -73,17 +78,6 @@ module DTK; class ComponentDSL; class V3
            end
          end
        end
-
-      def update_link_defs_fragment!(link_defs_fragment,key,content)
-        link_defs_fragment.each_with_index do |link_defs_el,i|
-          if (link_defs_el.kind_of?(Hash) and link_defs_el.keys.first == key) or
-              (link_defs_el.kind_of?(String) and link_defs_el == key)
-            link_defs_fragment[i] = {key => content}
-            return
-          end
-        end
-        link_defs_fragment << {key => content}
-      end
 
       #returns cmp,link
       def choice_info(link_def,link_def_link)

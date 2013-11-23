@@ -66,18 +66,18 @@ module DTK; class ComponentDSL; class V2
     end
 
     class LinkDef < self
-      def generate(aug_link_def)
+      def generate(aug_link_def,opts={})
         ref = aug_link_def.required(:link_type)
         link_def_links = aug_link_def.required(:link_def_links)
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
-        opts = Hash.new
+        opts_choice = opts
         if single_choice = (link_def_links.size == 1) 
-          opts.merge!(:omit_component_ref => ref)
+          opts_choice = opts.merge(:omit_component_ref => ref)
         end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
-          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts)
+          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts_choice)
         end
         content = (single_choice ? possible_links.first : {'choices' => possible_links})
         {ref => content}
@@ -124,9 +124,11 @@ module DTK; class ComponentDSL; class V2
         if (not link_def_link[:required].nil?) and not link_def_link[:required]
           ret['required'] = false 
         end
-        ams = link_def_link.object.attribute_mappings() 
-        if ams and not ams.empty?
-          ret['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}
+        unless opts[:no_attribute_mappings]
+          ams = link_def_link.object.attribute_mappings() 
+          if ams and not ams.empty?
+            ret['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}
+          end
         end
         ret
       end

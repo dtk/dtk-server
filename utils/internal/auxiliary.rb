@@ -53,6 +53,10 @@ module XYZ
           obj
         end
       end
+      
+      def equal_sets(array1,array2)
+        Set.new(array1) == Set.new(array2)
+      end
 
       def has_just_these_keys?(hash,keys)
         Set.new(hash.keys) == Set.new(keys)

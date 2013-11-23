@@ -66,6 +66,10 @@ module DTK; class ComponentDSL; class V3
           ret
         end
         
+        def initialize(seed_hash={})
+          super()
+          merge!(seed_hash)
+        end
        private
          def match?(link)
            pruned_keys = keys-['attribute_mappings']

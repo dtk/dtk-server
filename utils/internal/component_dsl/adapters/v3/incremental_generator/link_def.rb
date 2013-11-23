@@ -3,30 +3,30 @@ module DTK; class ComponentDSL; class V3
     class LinkDef < IGBase::LinkDef
       def generate(aug_link_def,opts={})
         dependencies = super(aug_link_def,:no_attribute_mappings => true)
-        link_defs = LinkDefsSection.generate(aug_link_def)
+        link_defs = LinkDefsSection.new.generate(aug_link_def)
         {'dependencies' => dependencies,'link_defs' => link_defs}
       end
 
       def merge_fragment!(full_hash,fragment,context={})
         merge_fragment__dependencies!(full_hash,fragment['dependencies'],context)
-        LinkDefsSection.merge_fragment!(full_hash,fragment['link_defs'],context)
+        LinkDefsSection.new.merge_fragment!(full_hash,fragment['link_defs'],context)
         full_hash
       end
 
      private
       class LinkDefsSection < self
-        def self.generate(aug_link_def)
+        def generate(aug_link_def)
           link_def_links = aug_link_def.required(:link_def_links)
           if link_def_links.empty?
             raise Error.new("Unexpected that link_def_links is empty")
           end
           aug_link_def[:link_def_links].inject(PossibleLinks.new) do |pl,link_def_link|
-            cmp,link = link_defs(aug_link_def,ObjectWrapper.new(link_def_link))
+            cmp,link = choice_info(aug_link_def,ObjectWrapper.new(link_def_link))
           pl.deep_merge(cmp,link)
           end
         end
 
-        def self.merge_fragment!(full_hash,fragment,context={})
+        def merge_fragment!(full_hash,fragment,context={})
           ret = full_hash
           return ret unless fragment
           component_fragment = component_fragment(full_hash,context[:component_template])
@@ -43,7 +43,7 @@ module DTK; class ComponentDSL; class V3
        private
 
         #returns cmp,link
-        def self.choice_info(link_def,link_def_link)
+        def choice_info(link_def,link_def_link)
           link = Link.new
           remote_cmp_type = link_def_link.required(:remote_component_type)
           cmp = Component.display_name_print_form(remote_cmp_type)

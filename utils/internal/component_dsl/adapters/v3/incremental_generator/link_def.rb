@@ -4,7 +4,7 @@ module DTK; class ComponentDSL; class V3
       r8_nested_require('link_def','dependencies_section')
       r8_nested_require('link_def','link_defs_section')
       def generate(aug_link_def,opts={})
-        dependencies = super(aug_link_def,:no_attribute_mappings => true)
+        dependencies = DependenciesSection.new.generate(aug_link_def)
         link_defs = LinkDefsSection.new.generate(aug_link_def)
         {'dependencies' => dependencies,'link_defs' => link_defs}
       end

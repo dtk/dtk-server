@@ -1,9 +1,9 @@
 module DTK; class ComponentDSL; class V3
   class IncrementalGenerator; class LinkDef
     class DependenciesSection < self
-      def generate(aug_link_def)
-        ref = aug_link_def.required(:link_type)
-        link_def_links = aug_link_def.required(:link_def_links)
+      def generate()
+        ref = @aug_link_def.required(:link_type)
+        link_def_links = @aug_link_def.required(:link_def_links)
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
@@ -11,8 +11,8 @@ module DTK; class ComponentDSL; class V3
         if single_choice = (link_def_links.size == 1) 
           opts_choice.merge!(:omit_component_ref => ref)
         end
-        possible_links = aug_link_def[:link_def_links].map do |link_def_link|
-          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts_choice)
+        possible_links = @aug_link_def[:link_def_links].map do |link_def_link|
+          choice_info(ObjectWrapper.new(link_def_link),opts_choice)
         end
         content = (single_choice ? possible_links.first : {'choices' => possible_links})
         {ref => content}
@@ -33,7 +33,7 @@ module DTK; class ComponentDSL; class V3
       end
 
      private
-      def choice_info(link_def,link_def_link,opts={})
+      def choice_info(link_def_link,opts={})
         ret = PrettyPrintHash.new
         remote_cmp_type = link_def_link.required(:remote_component_type)
         cmp_ref = Component.display_name_print_form(remote_cmp_type)

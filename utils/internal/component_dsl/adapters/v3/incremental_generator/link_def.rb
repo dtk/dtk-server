@@ -19,6 +19,23 @@ module DTK; class ComponentDSL; class V3
         @aug_link_def = aug_link_def
       end
 
+
+      def link_component(link_def_link)
+        Component.display_name_print_form(link_def_link.required(:remote_component_type))
+      end
+
+      def link_location(link_def_link)
+        case link_def_link.required(:type)
+          when 'internal' then 'local'
+          when 'external' then 'remote'
+          else raise new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
+        end
+      end
+
+      def link_required_is_false?(link_def_link)
+        (not link_def_link[:required].nil?) and not link_def_link[:required]
+      end
+
       #PossibleLinks has form {cmp1 => LINK(s), cmp2 => LINK(s), ..}
       # where LINK(s) ::= LINK | [LINK,LINK,..]
       class PossibleLinks < Hash

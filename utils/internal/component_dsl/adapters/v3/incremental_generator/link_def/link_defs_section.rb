@@ -31,25 +31,19 @@ module DTK; class ComponentDSL; class V3
       #returns cmp,link
       def choice_info(link_def_link)
         link = Link.new
-        remote_cmp_type = link_def_link.required(:remote_component_type)
-        cmp = Component.display_name_print_form(remote_cmp_type)
-        location = 
-          case link_def_link.required(:type)
-          when 'internal' then 'local'
-          when 'external' then 'remote'
-          else raise new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
-          end
-        link['location'] = location
+        cmp = link_component(link_def_link)
+        link['location'] = link_location(link_def_link)
         if dependency_name = @aug_link_def[:link_type]
           unless dependency_name == cmp
             link['dependency_name'] = dependency_name
           end
         end
-        if (not link_def_link[:required].nil?) and not link_def_link[:required]
-          link['required'] = false 
+        if link_required_is_false?(link_def_link)
+          ret['required'] = false 
         end
         ams = link_def_link.object.attribute_mappings() 
         if ams and not ams.empty?
+          remote_cmp_type = link_def_link.required(:remote_component_type)
           link['attribute_mappings'] = ams.map{|am|attribute_mapping(ObjectWrapper.new(am),remote_cmp_type)}
         end
         [cmp,link]

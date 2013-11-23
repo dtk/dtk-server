@@ -34,25 +34,17 @@ module DTK; class ComponentDSL; class V3
 
      private
       def choice_info(link_def_link,opts={})
-        ret = PrettyPrintHash.new
-        remote_cmp_type = link_def_link.required(:remote_component_type)
-        cmp_ref = Component.display_name_print_form(remote_cmp_type)
+        ret = Link.new
+        cmp_ref = link_component(link_def_link)
         unless opts[:omit_component_ref] == cmp_ref
           ret['component'] = cmp_ref
         end
-        location = 
-          case link_def_link.required(:type)
-            when 'internal' then 'local'
-            when 'external' then 'remote'
-            else raise new Error.new("unexpected value for type (#{link_def_link.required(:type)})")
-          end
-        ret['location'] = location
-        if (not link_def_link[:required].nil?) and not link_def_link[:required]
+        ret['location'] = link_location(link_def_link)
+        if link_required_is_false?(link_def_link)
           ret['required'] = false 
         end
         ret
       end
-
     end
   end; end
 end; end; end

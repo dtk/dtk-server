@@ -59,19 +59,14 @@ module DTK; class ComponentDSL; class V3
       class Link < PrettyPrintHash
         def merge_into!(links)
           ret = links
-          if match = links.find{|link|match?(link)}
+          if match = links.find{|link|matches?(link)}
             if am = self['attribute_mappings']
               match['attribute_mappings'] = am
             end
           else
             ret << self
           end
-            ret
-        end
-
-        def self.reify(fragment_el)
-          seed_hash = (fragment_el.kind_of?(String) ? {fragment_el => default_properties()} : fragment_el)
-          new(seed_hash)
+          ret
         end
 
         def initialize(seed_hash={})
@@ -79,12 +74,7 @@ module DTK; class ComponentDSL; class V3
           replace(seed_hash)
         end
 
-       private
-        def self.default_properties()
-          {'location' => 'local'}
-        end
-
-        def match?(link)
+        def matches?(link)
           pruned_keys = keys-['attribute_mappings']
           pruned_link_keys = link.keys-['attribute_mappings']
           if Aux.equal_sets(pruned_keys,pruned_link_keys)
@@ -94,6 +84,7 @@ module DTK; class ComponentDSL; class V3
             false
           end
         end
+
       end
     end
   end

@@ -27,7 +27,7 @@ module DTK; class ComponentDSL; class V3
             update_fragment!(dependencies_fragment,key,content)
           end
         else
-          component_fragment['dependencies'] = [simplify_dependency(fragment)]
+          component_fragment['dependencies'] = [fragment]
         end
         ret
       end
@@ -59,7 +59,7 @@ module DTK; class ComponentDSL; class V3
 
       def update_matching_fragment_el!(fragment,i,key,content)
         fragment_el = fragment[i]
-        if Link.reify(fragment_el).matches?(content)
+        if Choice.new(fragment_el).matches?(content)
           return
         end
 
@@ -71,15 +71,21 @@ module DTK; class ComponentDSL; class V3
       class Choices < Hash
         def self.reify(fragment_el)
           if fragment_el.kind_of?(Hash) and fragment_el.keys == ['choices']
-            new('choices' => fragment_el['choices'].map{|choice|Link.reify(choice)})
+            new('choices' => fragment_el['choices'].map{|choice|Choice.new(choice)})
           else
-            new('choices' => [Link.reify(fragment_el)])
+            new('choices' => [Choice.new(fragment_el)])
           end
         end
 
         def update!(link)
           ret = self
-          raise Error.new('need to write')
+          ret['choices'].each_with_index do |choice,i|
+            if choice.matches?(link)
+              ret['choices'][i] = link
+              return ret
+            end
+          end
+          ret['choices'] << link
           ret
         end
 
@@ -90,12 +96,30 @@ module DTK; class ComponentDSL; class V3
         end
       end
 
-      #TODO: work in here or in Link
-      def simplify_dependency(key,content)
-        unsimplified_dependency(key,content)
-      end
-      def unsimplified_dependency(key,content)
-        {key => content}
+      class Choice
+        def initialize(obj)
+          unless obj.size == 1
+            Log.error("Unexpected obj (#{obj.inspect})")
+          end
+          if obj.kind_of?(String)
+            @key = obj
+            @link = default_link()
+          else #obj.kind_of?(Hash)
+            @key = obj.keys.first
+            @link = Link.new(obj.values.first)
+          end
+        end
+
+        def matches?(link)
+          @link.matches?(link)
+        end
+       private
+        def default_link()
+          Link.new('location' => 'local')
+        end
+#        def just_has_default_properties?()
+#          size == 1 and keys.first == 'location' and values.first == 'local'
+#        end
       end
     end
   end; end

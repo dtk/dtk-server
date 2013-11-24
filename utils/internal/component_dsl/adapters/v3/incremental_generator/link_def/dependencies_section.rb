@@ -104,6 +104,7 @@ module DTK; class ComponentDSL; class V3
           if obj.kind_of?(String)
             @key = obj
             @link = default_link()
+            @is_default = true
           else #obj.kind_of?(Hash)
             @key = obj.keys.first
             @link = Link.new(obj.values.first)
@@ -113,13 +114,17 @@ module DTK; class ComponentDSL; class V3
         def matches?(link)
           @link.matches?(link)
         end
+        def to_external_form()
+          if @is_default
+            @key
+          else
+            {@key => @link}
+          end
+        end
        private
         def default_link()
           Link.new('location' => 'local')
         end
-#        def just_has_default_properties?()
-#          size == 1 and keys.first == 'location' and values.first == 'local'
-#        end
       end
     end
   end; end

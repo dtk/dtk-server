@@ -46,34 +46,33 @@ module DTK; class ComponentDSL; class V3
         ret
       end
 
-      def update_fragment!(fragment,key,content)
-        fragment.each_with_index do |el,i|
-          if (el.kind_of?(Hash) and el.keys.first == key) or
-              (el.kind_of?(String) and el == key)
-             update_matching_fragment_el!(fragment,i,key,content)
+      def update_fragment!(fragment,key,link)
+        fragment.each_with_index do |fragment_el,i|
+          if key == Dependency.key(fragment_el)
+             update_matching_fragment_el!(fragment,i,key,link)
             return
           end
         end
-        fragment << {key => content}
+        fragment << {key => link}
       end
 
-      def update_matching_fragment_el!(fragment,i,key,content)
+      def update_matching_fragment_el!(fragment,i,key,link)
         fragment_el = fragment[i]
-        if Choice.new(fragment_el).matches?(content)
+        if Dependency.new(fragment_el).matches?(link)
           return
         end
 
-        choices = Choices.reify(fragment_el)
-        choices.update!(content)
+        choices = Choices.reify(key,Dependency.link(fragment_el))
+        choices.update!(link)
         fragment[i] = choices.external_form()
       end
 
       class Choices < Hash
-        def self.reify(fragment_el)
-          if fragment_el.kind_of?(Hash) and fragment_el.keys == ['choices']
-            new('choices' => fragment_el['choices'].map{|choice|Choice.new(choice)})
+        def self.reify(key,fragment_link)
+          if fragment_link.keys == ['choices']
+            new(key,{'choices' => fragment_link['choices'].map{|choice|Dependency.new(choice)}})
           else
-            new('choices' => [Choice.new(fragment_el)])
+            new(key,{'choices' => [Dependency.new(fragment_link)]})
           end
         end
 
@@ -89,31 +88,31 @@ module DTK; class ComponentDSL; class V3
           ret
         end
         def external_form()
-          #TODO: stub
-          self
+          {@key => self.merge('choices' => self['choices'].map{|dep|dep.external_form()})}
         end
        private
-        def initialize(fragment_el)
+        def initialize(key,fragment_link)
           super()
-          replace(fragment_el)
+          @key = key
+          replace(fragment_link)
         end
       end
 
-      class Choice
+      class Dependency
         def initialize(obj)
           unless obj.size == 1
             Log.error("Unexpected obj (#{obj.inspect})")
           end
-          if obj.kind_of?(String)
-            @key = obj
-            @link = default_link()
-            @is_default = true
-          else #obj.kind_of?(Hash)
-            @key = obj.keys.first
-            @link = Link.new(obj.values.first)
-          end
+          @key,@link,@is_default = self.class.key__link__is_default(obj)
         end
 
+        def self.key(obj)
+          key__link__is_default(obj)[0]
+        end
+        def self.link(obj)
+          key__link__is_default(obj)[1]
+        end
+        
         def matches?(link)
           @link.matches?(link)
         end
@@ -125,6 +124,14 @@ module DTK; class ComponentDSL; class V3
           end
         end
        private
+        def self.key__link__is_default(obj)
+          if obj.kind_of?(String)
+            [obj,default_link(),true]
+          else #obj.kind_of?(Hash)
+            [obj.keys.first,Link.new(obj.values.first),false]
+          end
+        end
+
         def default_link()
           Link.new('location' => 'local')
         end

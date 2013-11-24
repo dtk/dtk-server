@@ -69,11 +69,15 @@ module DTK; class ComponentDSL; class V3
 
       class Choices < Hash
         def self.reify(key,fragment_link)
-          if fragment_link.keys == ['choices']
-            new(key,{'choices' => fragment_link['choices'].map{|choice|Dependency.new(choice)}})
-          else
-            new(key,{'choices' => [Dependency.new(fragment_link)]})
-          end
+          choices = 
+            if fragment_link.keys == ['choices']
+              fragment_link['choices'].map do |choice|
+                 Dependency.new(choice.kind_of?(String) ? choice : {key => choice})
+              end   
+            else
+              [Dependency.new(key => fragment_link)]
+            end
+          new(key,'choices' => choices)
         end
 
         def update!(link)
@@ -88,7 +92,10 @@ module DTK; class ComponentDSL; class V3
           ret
         end
         def external_form()
-          {@key => self.merge('choices' => self['choices'].map{|dep|dep.external_form()})}
+          ext_form_choices = self['choices'].map do |r|
+            r.kind_of?(Dependency) ? r.external_form() : r
+          end
+          {@key => self.merge('choices' => ext_form_choices)}
         end
        private
         def initialize(key,fragment_link)
@@ -100,9 +107,6 @@ module DTK; class ComponentDSL; class V3
 
       class Dependency
         def initialize(obj)
-          unless obj.size == 1
-            Log.error("Unexpected obj (#{obj.inspect})")
-          end
           @key,@link,@is_default = self.class.key__link__is_default(obj)
         end
 
@@ -120,7 +124,7 @@ module DTK; class ComponentDSL; class V3
           if @is_default
             @key
           else
-            {@key => @link}
+            @link
           end
         end
        private

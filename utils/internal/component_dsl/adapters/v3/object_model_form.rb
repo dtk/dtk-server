@@ -49,11 +49,12 @@ module DTK; class ComponentDSL; class V3
         if in_dep_cmps = input_hash["dependencies"]
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
             choices = Choice.convert_choices(conn_ref,conn_info,base_cmp,opts)
-            choices.each do |choice|
-              if choice.is_internal?()
-                ret ||= OutputHash.new
-                add_dependency!(ret,choice.dependent_component(),base_cmp)
-              end
+            #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
+            unless choices.find{|choice|not choice.is_internal?()}
+              #TODO: make sure it is ok to just pick one of these
+              choice = choices.first
+              ret ||= OutputHash.new
+              add_dependency!(ret,choice.dependent_component(),base_cmp)
             end
           end
         end

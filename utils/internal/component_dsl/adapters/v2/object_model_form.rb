@@ -323,7 +323,8 @@ module DTK; class ComponentDSL; class V2
 
       def self.convert_choices(conn_ref,conn_info,base_cmp,opts={})
         if choices = conn_info["choices"]
-          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts)}
+          opts_choices = opts.merge(:conn_ref => conn_ref)
+          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choices)}
         else
           dep_cmp_external_form = conn_info["component"]||conn_ref
           parent_info = Hash.new
@@ -346,10 +347,10 @@ module DTK; class ComponentDSL; class V2
       end
 
       def convert(dep_cmp_info,base_cmp,parent_info={},opts={})
-        unless dep_cmp_info["component"]
+        unless dep_cmp_raw = dep_cmp_info["component"]||opts[:conn_ref]
           raise ParsingError.new("Dependency possible connection (?1) is missing component key",dep_cmp_info)
         end
-        dep_cmp = convert_to_internal_cmp_form(dep_cmp_info["component"])
+        dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
         ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
         if order = order(dep_cmp_info)
           ret_info["order"] = order 

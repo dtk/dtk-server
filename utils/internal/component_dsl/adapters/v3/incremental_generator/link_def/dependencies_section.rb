@@ -65,7 +65,7 @@ module DTK; class ComponentDSL; class V3
 
         choices = Choices.reify(fragment_el)
         choices.update!(content)
-        fragment[i] = choices.update!(content)
+        fragment[i] = choices.external_form()
       end
 
       class Choices < Hash
@@ -88,7 +88,10 @@ module DTK; class ComponentDSL; class V3
           ret['choices'] << link
           ret
         end
-
+        def external_form()
+          #TODO: stub
+          self
+        end
        private
         def initialize(fragment_el)
           super()
@@ -114,7 +117,7 @@ module DTK; class ComponentDSL; class V3
         def matches?(link)
           @link.matches?(link)
         end
-        def to_external_form()
+        def external_form()
           if @is_default
             @key
           else

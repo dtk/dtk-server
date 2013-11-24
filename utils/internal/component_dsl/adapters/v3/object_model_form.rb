@@ -35,43 +35,39 @@ module DTK; class ComponentDSL; class V3
       end
       ExtRefDefaultPuppetHeader = 'external_ref(puppet_header)'
 
-      def add_attr_data_type_attrs!(attr_props,info)
-        type = info.req(:type)
-        if AutomicTypes.include?(type)
-          attr_props.merge!("data_type" => type)
-        elsif type =~ /^array\((.+)\)$/
-          scalar_type = $1
-          if ScalarTypes.include?(scalar_type)
-            semantic_type = {":array" => scalar_type} 
-            attr_props.merge!("data_type" => "json","semantic_type_summary" => type,"semantic_type" => semantic_type)
-          end
-        end
-        unless attr_props["data_type"]
-          raise ParsingError.new("Ill-formed attribute data type (?1)",type)
-        end
-        attr_props
+      #processes "link_defs, "dependencies", and "component_order"
+      def add_dependent_components!(ret,input_hash,base_cmp,opts={})
+        dependencies = dependencies(input_hash,base_cmp,opts)
+        ret.set_if_not_nil("dependency",dependencies)
+        link_defs = link_defs(input_hash,base_cmp,dependencies,opts)
+        ret.set_if_not_nil("link_defs",link_defs)
+        ret.set_if_not_nil("component_order",component_order(input_hash))
       end
-      ScalarTypes = %w{integer string boolean}
-      AutomicTypes = ScalarTypes + %w{json}
 
-      #partitions into link_defs, "dependency", and "component_order"
-      def get_dependent_config(input_hash,base_cmp,opts={})
-        ret = Hash.new
-        link_defs  = Array.new
-        if in_dep_cmps = input_hash["depends_on"]
+      def dependencies(input_hash,base_cmp,opts={})
+        ret = nil
+        if in_dep_cmps = input_hash["dependencies"]
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
             choices = Choice.convert_choices(conn_ref,conn_info,base_cmp,opts)
-
-            #determine if create a link def and/or a dependency
-            #creaet a dependency if just single choice and base adn depnedncy on same node
-            #TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
-            if choices.size == 1 
-              choice = choices.first
+            choices.each do |choice|
               if choice.is_internal?()
-                pntr = ret[:dependencies] ||= OutputHash.new
-                add_dependency!(pntr,choice.dependent_component(),base_cmp)
+                ret ||= OutputHash.new
+                add_dependency!(ret,choice.dependent_component(),base_cmp)
               end
             end
+          end
+        end
+        ret
+      end
+
+      def link_defs(input_hash,base_cmp,dependencies,opts={})
+        ret = nil
+        if in_link_defs = input_hash["link_defs"]
+          pp [:debug,in_link_defs]
+        end
+        ret
+      end
+=begin        
 
             #create link defs if there are multiple choices or theer are attribute mappings
             if choices.size > 1 or (choices.size == 1 and choices.first.has_attribute_mappings?())
@@ -86,12 +82,8 @@ module DTK; class ComponentDSL; class V3
           end
         end
         ret[:link_defs] = link_defs unless link_defs.empty?
-        #TODO: is this redundant with 'order', which just added
-        if component_order = component_order(input_hash)
-          ret[:component_order] = component_order
-        end
-        ret
-      end
+=end
+
     end
   end
 end; end; end

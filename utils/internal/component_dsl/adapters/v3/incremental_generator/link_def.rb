@@ -68,13 +68,22 @@ module DTK; class ComponentDSL; class V3
           end
             ret
         end
-        
+
+        def self.reify(fragment_el)
+          seed_hash = (fragment_el.kind_of?(String) ? {fragment_el => default_properties()} : fragment_el)
+          new(seed_hash)
+        end
+
         def initialize(seed_hash={})
           super()
-          merge!(seed_hash)
+          replace(seed_hash)
         end
 
        private
+        def self.default_properties()
+          {'location' => 'local'}
+        end
+
         def match?(link)
           pruned_keys = keys-['attribute_mappings']
           pruned_link_keys = link.keys-['attribute_mappings']

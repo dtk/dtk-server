@@ -24,10 +24,10 @@ module DTK; class ComponentDSL; class V3
         component_fragment = component_fragment(full_hash,context[:component_template])
         if dependencies_fragment = component_fragment['dependencies']
           fragment.each do |key,content|
-            update_depends_on_fragment!(dependencies_fragment,key,content)
+            update_fragment!(dependencies_fragment,key,content)
           end
         else
-          component_fragment['dependencies'] = [fragment]
+          component_fragment['dependencies'] = [simplify_dependency(fragment)]
         end
         ret
       end
@@ -44,6 +44,58 @@ module DTK; class ComponentDSL; class V3
           ret['required'] = false 
         end
         ret
+      end
+
+      def update_fragment!(fragment,key,content)
+        fragment.each_with_index do |el,i|
+          if (el.kind_of?(Hash) and el.keys.first == key) or
+              (el.kind_of?(String) and el == key)
+             update_matching_fragment_el!(fragment,i,key,content)
+            return
+          end
+        end
+        fragment << {key => content}
+      end
+
+      def update_matching_fragment_el!(fragment,i,key,content)
+        fragment_el = fragment[i]
+        if Link.reify(fragment_el).matches?(content)
+          return
+        end
+
+        choices = Choices.reify(fragment_el)
+        choices.update!(content)
+        fragment[i] = choices.update!(content)
+      end
+
+      class Choices < Hash
+        def self.reify(fragment_el)
+          if fragment_el.kind_of?(Hash) and fragment_el.keys == ['choices']
+            new('choices' => fragment_el['choices'].map{|choice|Link.reify(choice)})
+          else
+            new('choices' => [Link.reify(fragment_el)])
+          end
+        end
+
+        def update!(link)
+          ret = self
+          raise Error.new('need to write')
+          ret
+        end
+
+       private
+        def initialize(fragment_el)
+          super()
+          replace(fragment_el)
+        end
+      end
+
+      #TODO: work in here or in Link
+      def simplify_dependency(key,content)
+        unsimplified_dependency(key,content)
+      end
+      def unsimplified_dependency(key,content)
+        {key => content}
       end
     end
   end; end

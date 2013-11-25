@@ -143,12 +143,20 @@ module DTK; class ComponentDSL; class V3
       end
 
       def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
-        link_def_links.map{|link|convert_link_def_link(link,dep_cmp,base_cmp,opts)}
+        link_def_links.inject(Array.new) do |a,link|
+          a + convert_link_def_link(link,dep_cmp,base_cmp,opts)
+        end
       end
 
       def convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
+        unless type = opts[:link_type] || link_def_link_type(link_def_link)
+          ret = [self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :external).first,
+                 self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :internal).first]
+          return ret
+        end
+        ret_info = {"type" => type.to_s}
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
-        ret_info = {"type" => link_def_link_type(link_def_link)}
+
         #TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
           ret_info["order"] = order 
@@ -159,10 +167,10 @@ module DTK; class ComponentDSL; class V3
           raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
         end
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
-
+        
         @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
         @dependency_name = link_def_link["dependency_name"]
-        self
+        [self]
       end
 
       attr_reader :dependency_name,:link_def_type
@@ -184,13 +192,13 @@ module DTK; class ComponentDSL; class V3
       end
 
     private
-     DefaultLinkDefLinkType = "remote"
      def link_def_link_type(link_info)
-       loc = link_info["location"]||DefaultLinkDefLinkType
-       case loc
-         when "local" then "internal"
-         when "remote" then "external"
-         else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+       if loc = link_info["location"]
+         case loc
+           when "local" then "internal"
+           when "remote" then "external"
+           else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+         end
        end
      end
 

@@ -166,11 +166,7 @@ module DTK
     end
 
     def version_parse_check_and_normalize(version_specific_input_hash)
-      version = version_specific_input_hash["dsl_version"]
-      integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
-      unless integer_version
-        raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
-      end
+      integer_version = integer_version(version_specific_input_hash)
       klass = self.class.load_and_return_version_adapter_class(integer_version)
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
@@ -204,6 +200,13 @@ module DTK
       "#{first_part}.#{TypeToExtension[format_type]}"
     end
 
+    def integer_version(version_specific_input_hash)
+      version = version_specific_input_hash["dsl_version"]
+      unless integer_version = (version ? VersionToVersionInteger[version.to_s] : VersionIntegerWhenVersionMissing)
+        raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
+      end
+      integer_version
+    end
     VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
       "0.9" => 2,

@@ -63,28 +63,51 @@ module DTK; class ComponentDSL; class V3
 
       def link_defs(input_hash,base_cmp,dependencies,opts={})
         ret = nil
-        if in_link_defs = input_hash["link_defs"]
-          pp [:debug,in_link_defs]
+        unless in_link_defs = input_hash["link_defs"]
+          return ret
+        end
+        ret = Array.new
+        convert_to_hash_form(in_link_defs) do |dep_cmp,possible_links|
+          choices = Choice.convert_link_defs_to_choices(dep_cmp,possible_links,base_cmp,opts)
+          choices.each do |choice|
+            link_def = OutputHash.new(
+              "type" => choice.type,
+              "required" =>  true, #TODO: will enhance so that check if also dependency
+              "possible_links" => choices.map{|choice|choice.possible_link()}
+            )
+            ret << link_def
+          end
         end
         ret
       end
-=begin        
+    end
 
-            #create link defs if there are multiple choices or theer are attribute mappings
-            if choices.size > 1 or (choices.size == 1 and choices.first.has_attribute_mappings?())
-              link_def = OutputHash.new(
-                "type" => get_connection_label(conn_ref,conn_info),
-                "required" =>  true, #will be putting optional elements under a key that is peer to 'depends_on'
-                "possible_links" => choices.map{|choice|choice.possible_link()}
-              )
-              link_def.set_if_not_nil("description",conn_info["description"])
-              link_defs << link_def
-            end
-          end
+    class Choice < OMFBase::Choice
+      def self.convert_link_defs_to_choices(dep_cmp,possible_links,base_cmp,opts={})
+        possible_links.map{|pl|convert_possible_link(pl,dep_cmp,base_cmp,opts)}
+      end
+
+      def convert_possible_link(possible_link,dep_cmp_raw,base_cmp,opts={})
+        dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
+        @type = link_type(possible_link) 
+        ret_info = {"type" => @type}
+        #TODO: pass in order from what is on dependency
+        if order = opts[:order]||order(possible_link)
+          ret_info["order"] = order 
         end
-        ret[:link_defs] = link_defs unless link_defs.empty?
-=end
+        unless in_attr_mappings = possible_link["attribute_mappings"]
+          raise ParsingError.new("The link_defs element (#{possible_link.inspect}) is missing the attribute mappings")
+        end
+        @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+        self
+      end
 
+      attr_reader :type
+
+     private
+      def self.convert_possible_link(possible_link,dep_cmp,base_cmp,opts={})
+        new().convert_possible_link(possible_link,dep_cmp,base_cmp,opts)
+      end
     end
   end
 end; end; end

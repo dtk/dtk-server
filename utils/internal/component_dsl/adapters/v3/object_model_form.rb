@@ -94,10 +94,15 @@ module DTK; class ComponentDSL; class V3
         if order = opts[:order]||order(link_def_link)
           ret_info["order"] = order 
         end
-        unless in_attr_mappings = link_def_link["attribute_mappings"]
+
+        in_attr_mappings = link_def_link["attribute_mappings"]
+        if (in_attr_mappings||[]).empty?
           raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
         end
+        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
+
         @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+
         self
       end
 

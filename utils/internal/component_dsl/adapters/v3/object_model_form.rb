@@ -75,11 +75,10 @@ module DTK; class ComponentDSL; class V3
         ndx_link_defs = ndx_link_defs_choice_form(in_link_defs,base_cmp,opts)
         spliced_ndx_link_defs = splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
         ret = Array.new
-        convert_to_hash_form(in_link_defs) do |dep_cmp,link_def_links|
-          choices = Choice.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts)
+        spliced_ndx_link_defs.each do |link_def_type,choices|
           choices.each do |choice|
             link_def = OutputHash.new(
-              "type" => dep_cmp, #TODO: need to factor in use of dependency name
+              "type" => link_def_type,
               "required" =>  true, #TODO: will enhance so that check if also dependency
               "possible_links" => choices.map{|choice|choice.possible_link()}
             )
@@ -121,7 +120,6 @@ module DTK; class ComponentDSL; class V3
             (ret[ndx] ||= Array.new) << link_def_choice
           end
         end
-        pp [:spliced,ret]
         ret
       end
 
@@ -129,7 +127,7 @@ module DTK; class ComponentDSL; class V3
         ret = nil
         ndx_dep_choices.each do |dep_ndx,dep_choices|
           dep_choices.each do |dep_choice|
-            if link_def_matches_dep?(link_def_choice,dep_ndx,dep_choice)
+            if dep_choice.matches?(link_def_choice)
               return dep_ndx
             end
           end
@@ -137,28 +135,20 @@ module DTK; class ComponentDSL; class V3
         ret
       end
 
-      def link_def_matches_dep?(link_def_choice,dep_ndx,dep_choice)
-        ret = nil
-        ld = link_def_choice.possible_link
-        dep = dep_choice.possible_link
-        unless ld.keys.first == dep.keys.first
-          return ret
-        end
-        ld_props = ld.values.first
-        dep_props = dep.values.first
-        #TODO: assumng that they both explicitly have type and that is only thing matching on
-        ld_props["type"] == dep_props["type"]
-      end
     end
 
     class Choice < OMFBase::Choice
+      def print_form()
+        @possible_link.inject()
+      end
+
       def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
         link_def_links.map{|link|convert_link_def_link(link,dep_cmp,base_cmp,opts)}
       end
 
       def convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
-        ret_info = {"type" => LinkDef.link_type(link_def_link)}
+        ret_info = {"type" => link_def_link_type(link_def_link)}
         #TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
           ret_info["order"] = order 
@@ -177,19 +167,32 @@ module DTK; class ComponentDSL; class V3
 
       attr_reader :dependency_name,:link_def_type
 
-     private
-      module LinkDef
-        DefaultLinkDefLinkType = "remote"
-        def self.link_type(link_info)
-          loc = link_info["location"]||DefaultLinkDefLinkType
-          case loc
-            when "local" then "internal"
-            when "remote" then "external"
-            else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
-          end
+      def matches?(choice_with_single_pl)
+        ret = nil
+        if pl_match_props =  matches_on_keys?(choice_with_single_pl)
+          pl_single_props = choice_with_single_pl.possible_link.values.first
+          pl_match_props["type"] == pl_single_props["type"]
         end
       end
+      def matches_on_keys?(choice_with_single_pl)
+        ret = nil
+        pl_single = choice_with_single_pl.possible_link
+        unless pl_single.size == 1
+          raise Error.new("Unexepected that (#{pl_single.print_form}) has size > 1")
+        end
+        possible_link[pl_single.keys.first]
+      end
 
+    private
+     DefaultLinkDefLinkType = "remote"
+     def link_def_link_type(link_info)
+       loc = link_info["location"]||DefaultLinkDefLinkType
+       case loc
+         when "local" then "internal"
+         when "remote" then "external"
+         else raise ParsingError.new("Ill-formed dependency location type (?1)",loc)
+       end
+     end
 
       def self.convert_link_def_link(link_def_link,dep_cmp,base_cmp,opts={})
         new().convert_link_def_link(link_def_link,dep_cmp,base_cmp,opts)

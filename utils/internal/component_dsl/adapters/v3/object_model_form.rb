@@ -67,11 +67,13 @@ module DTK; class ComponentDSL; class V3
       end
 
       def link_defs(input_hash,base_cmp,ndx_dep_choices,opts={})
-pp [:debug,:ndx_dep_choices,ndx_dep_choices]
         ret = nil
         unless in_link_defs = input_hash["link_defs"]
+          #TODO: flag any dep_choices that are remote; saying thaey have no effect without link defs
           return ret
         end
+        ndx_link_defs = ndx_link_defs_choice_form(in_link_defs,base_cmp,opts)
+        spliced_ndx_link_defs = splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
         ret = Array.new
         convert_to_hash_form(in_link_defs) do |dep_cmp,link_def_links|
           choices = Choice.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts)
@@ -85,6 +87,67 @@ pp [:debug,:ndx_dep_choices,ndx_dep_choices]
           end
         end
         ret
+      end
+
+      def ndx_link_defs_choice_form(in_link_defs,base_cmp,opts={})
+        ret = Hash.new
+        convert_to_hash_form(in_link_defs) do |dep_cmp,link_def_links|
+          choices = Choice.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts)
+          choices.each do |choice|
+            ndx = choice.dependency_name || dep_cmp
+            (ret[ndx] ||= Array.new) << choice
+          end
+        end
+        ret
+      end
+
+      def splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
+        ret = Hash.new
+        ndx_link_defs.each do |link_def_ndx,link_def_choices|
+          dep_name_match = false
+          if dep_choices = ndx_dep_choices[link_def_ndx]
+            ndx_dep_choices = {link_def_ndx => dep_choices}
+            dep_name_match = true
+          end
+          link_def_choices.each do |link_def_choice|
+            if dn = link_def_choice.dependency_name
+              unless dep_name_match
+                raise ParsingError.new("The link def segment #{link_def_choice.print_form}) refernces a dependency name (#{dn}) which does not exist")
+              end
+            end
+            unless ndx = find_index(link_def_choice,ndx_dep_choices)
+              raise ParsingError.new("Cannot find dependency match for (#{link_def_choice.print_form})")
+            end
+            (ret[ndx] ||= Array.new) << link_def_choice
+          end
+        end
+        pp [:spliced,ret]
+        ret
+      end
+
+      def find_index(link_def_choice,ndx_dep_choices)
+        ret = nil
+        ndx_dep_choices.each do |dep_ndx,dep_choices|
+          dep_choices.each do |dep_choice|
+            if link_def_matches_dep?(link_def_choice,dep_ndx,dep_choice)
+              return dep_ndx
+            end
+          end
+        end
+        ret
+      end
+
+      def link_def_matches_dep?(link_def_choice,dep_ndx,dep_choice)
+        ret = nil
+        ld = link_def_choice.possible_link
+        dep = dep_choice.possible_link
+        unless ld.keys.first == dep.keys.first
+          return ret
+        end
+        ld_props = ld.values.first
+        dep_props = dep.values.first
+        #TODO: assumng that they both explicitly have type and that is only thing matching on
+        ld_props["type"] == dep_props["type"]
       end
     end
 
@@ -108,9 +171,11 @@ pp [:debug,:ndx_dep_choices,ndx_dep_choices]
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
 
         @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
-
+        @dependency_name = link_def_link["dependency_name"]
         self
       end
+
+      attr_reader :dependency_name,:link_def_type
 
      private
       module LinkDef

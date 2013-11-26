@@ -91,6 +91,7 @@ module DTK; class ComponentDSL; class V3
       def ndx_link_defs_choice_form(in_link_defs,base_cmp,opts={})
         ret = Hash.new
         convert_to_hash_form(in_link_defs) do |dep_cmp,link_def_links|
+          link_def_links = [link_def_links] unless link_def_links.kind_of?(Array)
           choices = Choice.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts)
           choices.each do |choice|
             ndx = choice.dependency_name || dep_cmp

@@ -4,6 +4,7 @@ module DTK
     r8_nested_require('component_dsl','update_model')
     r8_nested_require('component_dsl','generate_from_impl')
     r8_nested_require('component_dsl','object_model_form')
+    r8_nested_require('component_dsl','incremental_generator')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
@@ -165,21 +166,19 @@ module DTK
     end
 
     def version_parse_check_and_normalize(version_specific_input_hash)
-      version = version_specific_input_hash["dsl_version"]
-      integer_version = (version ? VersionToVersionInteger[version] : VersionIntegerWhenVersionMissing)
-      unless integer_version
-        raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
-      end
+      integer_version = integer_version(version_specific_input_hash)
       klass = self.class.load_and_return_version_adapter_class(integer_version)
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
-      ret = nil
-      begin 
-        ret = klass.normalize(version_specific_input_hash)
-        rescue => e
-          Log.error_pp(['uninterpreted parsing error',e,e.backtrace[0..20]])
-          raise ObjectModelForm::ParsingError.new()
-        end
+      ret = klass.normalize(version_specific_input_hash)
+# TODO: this mistakenly captures coding errors; we can move this to be more nested within normalize
+#      ret = nil
+#      begin 
+#        ret = klass.normalize(version_specific_input_hash)
+#        rescue => e
+#          Log.error_pp(['uninterpreted parsing error',e,e.backtrace[0..20]])
+#          raise ObjectModelForm::ParsingError.new()
+#        end
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret
@@ -193,7 +192,7 @@ module DTK
         case integer_version(dsl_integer_version)
          when 1
           "r8meta.#{config_agent_type}"
-         when 2
+         when 2,3
           "dtk.model"
         else
           raise Error.new("DSL type not treated")
@@ -201,9 +200,17 @@ module DTK
       "#{first_part}.#{TypeToExtension[format_type]}"
     end
 
+    def integer_version(version_specific_input_hash)
+      version = version_specific_input_hash["dsl_version"]
+      unless integer_version = (version ? VersionToVersionInteger[version.to_s] : VersionIntegerWhenVersionMissing)
+        raise ErrorUsage.new("Illegal version (#{version}) found in meta file")
+      end
+      integer_version
+    end
     VersionIntegerWhenVersionMissing = 1
     VersionToVersionInteger = {
-      "0.9" => 2
+      "0.9" => 2,
+      "0.9.1" => 3
     }
     VersionIntegerToVersion = VersionToVersionInteger.inject(Hash.new) do |h,(v,vi)|
       h.merge(vi=>v)
@@ -211,7 +218,8 @@ module DTK
 
     DSLFilenameRegexp = {
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
-      2 => /^dtk\.model\.([a-z]+$)/
+      2 => /^dtk\.model\.([a-z]+$)/,
+      3 => /^dtk\.model\.([a-z]+$)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

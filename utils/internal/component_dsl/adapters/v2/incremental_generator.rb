@@ -1,58 +1,9 @@
 module DTK; class ComponentDSL; class V2
-  class IncrementalGenerator
-    def self.generate(aug_object)
-      klass(aug_object).new().generate(ObjectWrapper.new(aug_object))
-    end
-
-    def self.merge_fragment_into_full_hash!(full_hash,object_class,fragment,context={})
-      klass(object_class).new().merge_fragment!(full_hash,fragment,context)
-      full_hash
-    end
-
+  class IncrementalGenerator < ComponentDSL::IncrementalGenerator
    private
-    def self.klass(object_or_class)
-      klass = (object_or_class.kind_of?(Class) ? object_or_class : object_or_class.class)
-      class_last_part = klass.to_s.split('::').last
-      ret = nil
-      begin 
-        ret = const_get class_last_part
-       rescue
-        raise Error.new("Generation of type (#{class_last_part}) not treated")
-      end
-      ret
+    def component()
+      Component
     end
-
-    def set?(key,content,obj)
-      val = obj[key]
-      unless val.nil?
-        content[key.to_s] = val 
-      end
-    end
-
-    def component_fragment(full_hash,component_template)
-      unless component_type = component_template && component_template.get_field?(:component_type)
-        raise Error.new("The method merge_fragment needs the context :component_template")
-      end
-      Component.get_fragment(full_hash,component_type)
-    end
-
-    class ObjectWrapper
-      attr_reader :object
-      def initialize(object)
-        @object = object
-      end
-      def required(key)
-        ret = @object[key]
-        if ret.nil?
-          raise Error.new("Expected that object of type (#{@object}) has non null key (#{key})")
-        end
-        ret
-      end
-      def [](key)
-        @object[key]
-      end
-    end
-
     class Component < self
       def self.display_name_print_form(cmp_type)
         ::DTK::Component.display_name_print_form(cmp_type)
@@ -121,12 +72,12 @@ module DTK; class ComponentDSL; class V2
         if link_def_links.empty?
           raise Error.new("Unexpected that link_def_links is empty")
         end
-        opts = Hash.new
+        opts_choice = Hash.new
         if single_choice = (link_def_links.size == 1) 
-          opts.merge!(:omit_component_ref => ref)
+          opts_choice.merge!(:omit_component_ref => ref)
         end
         possible_links = aug_link_def[:link_def_links].map do |link_def_link|
-          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts)
+          choice_info(aug_link_def,ObjectWrapper.new(link_def_link),opts_choice)
         end
         content = (single_choice ? possible_links.first : {'choices' => possible_links})
         {ref => content}

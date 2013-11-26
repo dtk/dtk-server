@@ -4,11 +4,11 @@ module DTK; class ComponentDSL
     def self.create(integer_version=nil)
       integer_version ||= ComponentDSL.default_integer_version()
       unless SupportedIntegerVersions.include?(integer_version)
-        raise Error.new("Unexpected version (#{version})")
+        raise Error.new("Unexpected integer version (#{integer_version})")
       end
       new(integer_version)
     end
-    SupportedIntegerVersions = [1,2]
+    SupportedIntegerVersions = [1,2,3]
    
     def initialize(integer_version)
       @integer_version = integer_version

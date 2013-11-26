@@ -6,11 +6,11 @@ module DTK; class ComponentDSL; class V2
       new.convert(input_hash)
     end
     def convert(input_hash)
-      Component.new(input_hash.req(:module)).convert(input_hash.req(:components))
+      component().new(input_hash.req(:module)).convert(input_hash.req(:components))
     end
 
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
-      Choice.new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
+      choice().new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
     end
 
     def convert_to_hash_form(hash_or_array,&block)
@@ -28,6 +28,13 @@ module DTK; class ComponentDSL; class V2
     end
 
    private
+
+    def component()
+      self.class::Component
+    end
+    def choice()
+      self.class::Choice
+    end
 
     ModCmpDelim = "__"
     CmpPPDelim = '::'
@@ -169,7 +176,7 @@ module DTK; class ComponentDSL; class V2
         if in_attrs = input_hash["attributes"]
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
-            dynamic_default_variable = !!(info["external_ref"]||{})["default_variable"]
+            dynamic_default_variable = dynamic_default_variable?(info)
             external_ref = 
               if opts[:constant_attribute]
                 Attribute::Constant.ret_external_ref()
@@ -183,7 +190,8 @@ module DTK; class ComponentDSL; class V2
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
-            attr_props["value_asserted"] = info["default"] #setting even when info["default"] so this can handle case where remove a default
+            #setting even when value_asserted() is nil so this can handle case where remove a default
+            attr_props["value_asserted"] = value_asserted(info)
             %w{description dynamic required hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
             if dynamic_default_variable
               attr_props["dynamic"] ||= true
@@ -197,6 +205,14 @@ module DTK; class ComponentDSL; class V2
           end
         end
         ret
+      end
+
+      def dynamic_default_variable?(info)
+        !!(info["external_ref"]||{})["default_variable"]
+      end
+
+      def value_asserted(info) 
+        info["default"] 
       end
 
       def add_attr_data_type_attrs!(attr_props,info)
@@ -231,7 +247,7 @@ module DTK; class ComponentDSL; class V2
         link_defs  = Array.new
         if in_dep_cmps = input_hash["depends_on"]
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
-            choices = Choice.convert_choices(conn_ref,conn_info,base_cmp,opts)
+            choices = choice().convert_choices(conn_ref,conn_info,base_cmp,opts)
 
             #determine if create a link def and/or a dependency
             #creaet a dependency if just single choice and base adn depnedncy on same node
@@ -307,7 +323,8 @@ module DTK; class ComponentDSL; class V2
 
       def self.convert_choices(conn_ref,conn_info,base_cmp,opts={})
         if choices = conn_info["choices"]
-          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts)}
+          opts_choices = opts.merge(:conn_ref => conn_ref)
+          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choices)}
         else
           dep_cmp_external_form = conn_info["component"]||conn_ref
           parent_info = Hash.new
@@ -330,10 +347,10 @@ module DTK; class ComponentDSL; class V2
       end
 
       def convert(dep_cmp_info,base_cmp,parent_info={},opts={})
-        unless dep_cmp_info["component"]
+        unless dep_cmp_raw = dep_cmp_info["component"]||opts[:conn_ref]
           raise ParsingError.new("Dependency possible connection (?1) is missing component key",dep_cmp_info)
         end
-        dep_cmp = convert_to_internal_cmp_form(dep_cmp_info["component"])
+        dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
         ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
         if order = order(dep_cmp_info)
           ret_info["order"] = order 

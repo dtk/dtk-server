@@ -32,6 +32,7 @@ module DTK; class Assembly
     def self.create_or_update_from_instance(project,assembly_instance,service_module_name,assembly_template_name,opts={})
       service_module = Factory.get_or_create_service_module(project,service_module_name,opts)
       Factory.create_or_update_from_instance(assembly_instance,service_module,assembly_template_name,opts)
+      service_module.update(:dsl_parsed => true)
       service_module
     end
 

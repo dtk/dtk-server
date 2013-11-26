@@ -4,6 +4,7 @@ require 'rest_client'
 require 'pp'
 require 'json'
 require 'awesome_print'
+require 'yaml'
 
 STDOUT.sync = true
 
@@ -20,14 +21,16 @@ class DtkCommon
 	}
 
 	def initialize(assembly_name, assembly_template)
+		config_yml = YAML::load(File.open("../config/config.yml"))		
+
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
-		@SERVER = 'dev17.r8network.com'
-		@PORT = 7000
-		@ENDPOINT = "http://ec2-54-235-208-104.compute-1.amazonaws.com:7000"
-		@USERNAME = 'dtk17-client'
-	  	@PASSWORD = 'r8server'
-	  	@server_log = '/home/dtk17/thin/log/thin.log'
+		@SERVER = config_yml['r8server']['server']
+		@PORT = config_yml['r8server']['port']
+		@ENDPOINT = "#{@SERVER}:#{@PORT}"
+		@USERNAME = config_yml['r8server']['username']
+	  	@PASSWORD = config_yml['r8server']['password']
+	  	@server_log = config_yml['r8server']['log']
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()

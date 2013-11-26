@@ -1,0 +1,6 @@
+r8server:
+  server: dev17.r8network.com
+  port: 7000
+  username: dtk17-client
+  password: r8server
+  log: /home/dtk17/thin/log/thin.log

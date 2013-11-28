@@ -12,5 +12,3 @@ application/config/newrelic.yml
 application/log/
 .gitattributes
 Gemfile.lock
-
-

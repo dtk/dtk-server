@@ -55,27 +55,28 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
 	es = Elasticsearch::Client.new hosts: ["#{elasticsearch_host}:#{elasticsearch_http_port}"]
 	es.index index: 'my_index', type: 'blog', id: 1, body: { title: "My first blog", content: "This is some content..." }
 
-	document = es.search index: 'my_index', type: 'blog', body: { query: { match: { title: 'My*' } } }
-	puts "Retrieved document:"
-	ap document
-
-	if !document.nil?
-		query_result = document['hits']['hits'].select { |x| x['_index'].include? 'my_index' and x['_type'].include? 'blog'}.first
-		if !query_result.nil?
-			puts "Relevant document is retrieved!"
-			puts ""
-			document_retrieved = true
-			return document_retrieved
-		else
-			puts "Relevant document is not retrieved!"
-			puts ""
-			return document_retrieved
+	5.downto(1) do |i|
+		sleep 1
+		document = es.search index: 'my_index', type: 'blog', body: { query: { match: { title: 'My*' } } }
+		puts "Retrieved document:"
+		ap document
+		if !document.nil?
+			query_result = document['hits']['hits'].select { |x| x['_index'].include? 'my_index' and x['_type'].include? 'blog'}.first
+			if !query_result.nil?
+				puts "Relevant document is retrieved!"
+				puts ""
+				document_retrieved = true
+				break
+			end
 		end
-	else
-		puts "Document is not retrieved!"
+	end
+
+	if document_retrieved == false
+		puts "Relevant document is not retrieved!"
 		puts ""
-		return document_retrieved
-	end	
+	end
+
+	return document_retrieved	
 end
 
 describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenario" do

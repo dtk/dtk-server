@@ -11,7 +11,7 @@ require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 
-existing_module_name = "java"
+existing_module_name = "jmeter"
 module_namespace = "r8"
 namespace = "dtk17"
 module_name = "bakir_test1"

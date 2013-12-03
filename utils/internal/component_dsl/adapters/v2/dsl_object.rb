@@ -21,7 +21,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       def render_cmp_ref(cmp_ref)
-        strip_module_name(cmp_ref)
+        strip_module_name(cmp_ref).gsub(/::/,'_')
       end
 
       def strip_module_name(cmp_ref)

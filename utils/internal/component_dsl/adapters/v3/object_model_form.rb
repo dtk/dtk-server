@@ -1,9 +1,18 @@
 module DTK; class ComponentDSL; class V3
   OMFBase = ComponentDSL::V2::ObjectModelForm                                  
   class ObjectModelForm < OMFBase
+   private
+    def context(input_hash)
+      ret = super
+      if module_level_includes = input_hash["includes"]
+        ret.merge!(:module_level_includes => module_level_includes)
+      end
+      ret
+    end
+
     class Component < OMFBase::Component
      private
-      def body(input_hash,cmp)
+      def body(input_hash,cmp,context={})
         pp [:in,self.class]
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
@@ -15,11 +24,21 @@ module DTK; class ComponentDSL; class V3
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
-        ret.set_if_not_nil("component_include_module",include_modules?(input_hash["includes"]))
+        ret.set_if_not_nil("component_include_module",include_modules?(input_hash["includes"],context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
         ret
+      end
+
+      def include_modules?(incl_module_array,context={})
+        if module_level_includes = context[:module_level_includes]
+          more_specific_incls = super(incl_module_array)
+          less_specific_incls = super(module_level_includes)
+          combine_includes(more_specific_incls,less_specific_incls)
+        else
+          super(incl_module_array)
+        end
       end
 
       def dynamic_default_variable?(info)

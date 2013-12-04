@@ -6,7 +6,7 @@ module DTK; class ComponentDSL; class V2
       new.convert(input_hash)
     end
     def convert(input_hash)
-      component().new(input_hash.req(:module)).convert(input_hash.req(:components))
+      component().new(input_hash.req(:module)).convert(input_hash.req(:components),context(input_hash))
     end
 
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
@@ -28,6 +28,10 @@ module DTK; class ComponentDSL; class V2
     end
 
    private
+    #can be overwritten
+    def context(input_hash)
+      Hash.new()
+    end
 
     def component()
       self.class::Component
@@ -65,8 +69,8 @@ module DTK; class ComponentDSL; class V2
       def initialize(module_name)
         @module_name = module_name
       end
-      def convert(input_hash)
-        input_hash.inject(OutputHash.new){|h,(k,v)|h.merge(key(k) => body(v,k))}
+      def convert(input_hash,context={})
+        input_hash.inject(OutputHash.new){|h,(k,v)|h.merge(key(k) => body(v,k,context))}
       end
      private
       def key(input_key)
@@ -80,7 +84,7 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
-      def body(input_hash,cmp)
+      def body(input_hash,cmp,context={})
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
         ret["basic_type"] = "service"
@@ -129,7 +133,7 @@ module DTK; class ComponentDSL; class V2
         external_ref["type"] != "puppet_definition"
       end
 
-      def include_modules?(incl_module_array)
+      def include_modules?(incl_module_array,context={})
         return nil if incl_module_array.nil?
         unless incl_module_array.kind_of?(Array)
           raise ParsingError.new("The content in the 'include_modules' key (?1) is ill-formed",incl_module_array)
@@ -151,6 +155,16 @@ module DTK; class ComponentDSL; class V2
           ret.merge!(ref => el)
         end
         ret
+      end
+
+      def combine_includes(more_specific_incls,less_specific_incls)
+        if more_specific_incls.nil?
+          less_specific_incls
+        elsif less_specific_incls.nil?
+          more_specific_incls
+        else
+          less_specific_incls.merge(more_specific_incls)
+        end
       end
 
       IncludeModVersionOps = [">="]

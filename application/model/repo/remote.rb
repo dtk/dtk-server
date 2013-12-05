@@ -2,6 +2,8 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
   class Repo
     module RemoteMixin
+
+      
       def linked_remote?(remote_repo=nil) 
         unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
           raise Error.new("Not implemented yet for remote's other than default")
@@ -93,6 +95,9 @@ module DTK
     end
 
     class Remote
+
+      CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
+
       class RemoteModuleRepoInfo < Hash
         #has keys
         #  :remote_repo_url
@@ -149,7 +154,7 @@ module DTK
         params = {
           :username => username,
           :name => name,
-          :access_rights => "RW+",
+          :permission_hash => CREATE_MODULE_PERMISSIONS,
           :type => type_for_remote_module(type),
           :namespace => namespace,
           :noop_if_exists => true
@@ -205,12 +210,13 @@ module DTK
       private :qualified_module_name
 
       def list_module_info(type=nil)
+
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter)
         
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
-          namespace = r["namespace"] && "#{r["namespace"]}/"
+          namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/"
           qualified_name = "#{namespace}#{r["name"]}"
           last_updated = Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
           el.merge!(:qualified_name => qualified_name, :last_updated => last_updated)

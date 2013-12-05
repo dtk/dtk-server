@@ -30,15 +30,93 @@ module DTK
     end
 
     def repo_url_ssh_access(remote_repo_name,git_user=nil)
-      remote = ::R8::Config[:repo][:remote]
       "#{git_user||GitUser}@#{@host}:#{remote_repo_name}"
     end
+
     DefaultGitUser = 'git'
     DefaultRestServicePort = 7000
 
     def create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)
     end
+
+
+
+    ###
+    ##  V1 namespace methods
+    #
+
+    def list_component_modules
+      response = get_rest_request_data('/v1/component_modules/list', {}, :raise_error => true)
+      response
+    end
+
+    def list_service_modules
+      response = get_rest_request_data('/v1/service_modules/list', {}, :raise_error => true)
+      response
+    end
+
+    def list_modules(filter=nil)
+      if filter[:type].eql? "component"
+        response = list_component_modules
+      else
+        response = list_service_modules
+      end
+      response
+    end
+
+    def create_module(params_hash)
+      route = collection_route_from_type(params_hash)
+      body = update_user_params(params_hash)
+      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+    end
+
+    def delete_module(params_hash)
+      route = collection_route_from_type(params_hash) + '/delete_by_name'
+      body = update_user_params(params_hash)
+      delete_rest_request_data(route, body, :raise_error => true)
+    end
+
+    def get_module_info(params_hash)
+      route = "/rest/system/module/info"
+      post_rest_request_data(route,params_hash,:raise_error => true)
+    end
+
+    def get_components_info(params_hash)
+      route = collection_route_from_type({:type => 'service'}) + '/component_info'
+      get_rest_request_data(route, params_hash)
+    end
+
+    def grant_user_access_to_module(params_hash)
+      route = collection_route_from_type(params_hash) + '/grant_user_access'
+      body = update_user_params(params_hash)
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+
+    ###
+    ##  Legacy methods
+    # 
+
+    def create_user(username,rsa_pub_key,opts={})
+      route = "/rest/system/user/create"
+      body = user_params(username,rsa_pub_key)
+      [:update_if_exists].each do |opt_key|
+        body.merge!(opt_key => true) if opts[opt_key]
+      end
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+    def list_users()
+      route = "/rest/system/user/list"
+      body = {}
+      post_rest_request_data(route,body,:raise_error => true)
+    end
+
+
+    ###
+    ##  Legacy methods (Admin)
+    #
 
     #admin access
     #NOTE: mark better tht these are at git level
@@ -88,63 +166,6 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    ## system access
-    #required keys: [:username,:repo,:type]
-    #optional keys: [::namespace,access_rights,:noop_if_exists]
-    def create_module(params_hash)
-      route = "/rest/system/module/create"
-      body = update_user_params(params_hash)
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
-    end
-
-    #keys: [:name,namespace,:type,:id]
-    #constraints :id or (:name, :namespace, and :type)
-    def delete_module(params_hash)
-      route = "/rest/system/module/delete"
-      body = update_user_params(params_hash)
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    #keys: [:name,namespace,:type,:id]
-    #constraints :id or (:name, :namespace, and :type)
-    def get_module_info(params_hash)
-      route = "/rest/system/module/info"
-      post_rest_request_data(route,params_hash,:raise_error => true)
-    end
-
-    def get_components_info(params_hash)
-      route = "/rest/system/module/component_info"
-      post_rest_request_data(route, params_hash, :raise_error => true)
-    end
-
-
-    def list_modules(filter=nil)
-      route = "/rest/system/module/list"
-      body = (filter ? {:filter => filter} : {})
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    #require_keys => [:name,namespace,:type,username,accesss_rights]
-    def grant_user_access_to_module(params_hash)
-      route = "/rest/system/module/grant_user_access"
-      body = update_user_params(params_hash)
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    def create_user(username,rsa_pub_key,opts={})
-      route = "/rest/system/user/create"
-      body = user_params(username,rsa_pub_key)
-      [:update_if_exists].each do |opt_key|
-        body.merge!(opt_key => true) if opts[opt_key]
-      end
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    def list_users()
-      route = "/rest/system/user/list"
-      body = {}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
 
 =begin
 #TODO: this needs fixing up
@@ -170,8 +191,26 @@ module DTK
 =end
 
    private
+
+    #
+    # returns collection route for specific type
+    # collection route - plural
+    #
+    def collection_route_from_type(params_hash)
+      params_hash[:type].eql?("component") ? '/v1/component_modules' : '/v1/service_modules'
+    end
+
+    #
+    # returns member route for specific type
+    # member route - singular
+    #
+    def member_route_from_type(params_hash)
+      params_hash[:type].eql?("component") ? '/v1/component_module' : '/v1/service_module'
+    end
+
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call
+
       if opts[:log_error]
         if response.ok?
           response.data
@@ -182,7 +221,7 @@ module DTK
       elsif opts[:raise_error] and not response.ok?
         raise Error.new(error_msg(response))
       else
-        response.data
+        return response.data
       end
     end
 
@@ -210,15 +249,22 @@ module DTK
     end
 
     RestClientWrapper = Common::Response::RestClientWrapper
-    def get_rest_request_data(route,opts={})
-      handle_error(opts) do 
-        RestClientWrapper.get("#{@rest_base_url}#{route}",ret_opts(opts))
+
+    def get_rest_request_data(route, req_params, opts={})
+      handle_error(opts) do
+        RestClientWrapper.get("#{@rest_base_url}#{route}",req_params, ret_opts(opts))
       end
     end
 
-    def post_rest_request_data(route,body,opts={})
+    def post_rest_request_data(route, body, opts={})
       handle_error(opts) do
-        RestClientWrapper.post("#{@rest_base_url}#{route}",body,ret_opts(opts))
+        RestClientWrapper.post("#{@rest_base_url}#{route}", body, ret_opts(opts))
+      end
+    end    
+
+    def delete_rest_request_data(route, body, opts={})
+      handle_error(opts) do
+        RestClientWrapper.delete("#{@rest_base_url}#{route}", body, ret_opts(opts))
       end
     end
 

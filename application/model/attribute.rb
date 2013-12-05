@@ -16,6 +16,7 @@ module DTK
     r8_nested_require('attribute','special_processing')
     r8_nested_require('attribute','constant')
     r8_nested_require('attribute','print_form')
+    r8_nested_require('attribute','semantic_datatype')
     include AttributeGroupInstanceMixin
     include AttributeDatatype
     extend AttrDepAnalaysisClassMixin

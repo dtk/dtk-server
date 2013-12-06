@@ -31,7 +31,12 @@ module DTK
             if validation.kind_of?(Proc)
               validation
             elsif validation.kind_of?(Regexp)
-              lambda{|v|v.to_s =~ validation}
+              lambda do |v|
+                v.respond_to?(:to_s) and
+                (not v.kind_of?(Array)) and
+                (not v.kind_of?(Hash)) and
+                v.to_s =~ validation
+              end
             else
               raise Error.new("Illegal validation argument (#{validation.inspect})")
             end

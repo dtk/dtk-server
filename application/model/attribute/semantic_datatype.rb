@@ -17,7 +17,7 @@ module DTK
       r8_nested_require('semantic_datatype','asserted_datatypes')
 
       def self.is_valid?(semantic_datatype,value)
-        lookup(semantic_datatype).is_valid?(value)
+        value.nil? or lookup(semantic_datatype).is_valid?(value)
       end
 
       def self.datatype(semantic_datatype)

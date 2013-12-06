@@ -64,27 +64,44 @@ module DTK; class ComponentDSL; class V3
         attr_props
       end
 
-      module AttributeSemanticType
-        def self.isa?(semantic_type)
-          ::DTK::Attribute::SemanticDatatype.isa?(semantic_type)
-        end
-        def self.datatype(semantic_type)
-          ::DTK::Attribute::SemanticDatatype.datatype(semantic_type)
-        end
-      end
-
       def dynamic_default_variable?(info)
         default_indicates_dynamic_default_variable?(info)
       end
-      def value_asserted(info) 
+      def value_asserted(info,attr_props) 
         unless default_indicates_dynamic_default_variable?(info)
-          info["default"] 
+          if ret = info["default"] 
+            if semantic_data_type = attr_props["semantic_data_type"]
+              unless AttributeSemanticType.is_valid?(semantic_data_type,ret)
+                raise ErrorUsage.new("Attribute (#{attr_props['display_name']}) has default (#{ret.inspect}) that does not match its type (#{semantic_data_type})")
+              end
+            end
+            ret
+          else
+            nil #just to emphasize want to return nil when no value given
+          end
         end
       end
       def default_indicates_dynamic_default_variable?(info)
         info["default"] == ExtRefDefaultPuppetHeader
       end
       ExtRefDefaultPuppetHeader = 'external_ref(puppet_header)'
+
+      module AttributeSemanticType
+        def self.isa?(semantic_type)
+          apply('isa?'.to_sym,semantic_type)
+        end
+        def self.datatype(semantic_type)
+          apply(:datatype,semantic_type)
+        end
+        def self.is_valid?(semantic_type,value)
+          apply('is_valid?'.to_sym,semantic_type,value)
+        end
+
+       private
+        def self.apply(*method_then_args)
+          ::DTK::Attribute::SemanticDatatype.send(*method_then_args)
+        end
+      end
 
       #processes "link_defs, "dependencies", and "component_order"
       def add_dependent_components!(ret,input_hash,base_cmp,opts={})

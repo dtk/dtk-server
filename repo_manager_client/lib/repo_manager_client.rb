@@ -78,8 +78,8 @@ module DTK
     end
 
     def get_module_info(params_hash)
-      route = "/rest/system/module/info"
-      post_rest_request_data(route,params_hash,:raise_error => true)
+      route = collection_route_from_type(params_hash) + '/module_info'
+      get_rest_request_data(route,params_hash,:raise_error => true)
     end
 
     def get_components_info(params_hash)
@@ -274,7 +274,12 @@ module DTK
       end
       DefaultTimeoutOpts.merge(to_merge)
     end
-    DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
+
+    if R8::Config.is_development_mode?
+      DefaultTimeoutOpts = {:timeout => 5000, :open_timeout => 0.5}
+    else
+      DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
+    end
 
     def dtk_instance_repo_username()
       ::DtkCommon::Aux::dtk_instance_repo_username()

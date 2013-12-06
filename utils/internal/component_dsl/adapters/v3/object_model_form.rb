@@ -44,13 +44,13 @@ module DTK; class ComponentDSL; class V3
       def add_attr_data_type_attrs!(attr_props,info)
         type = info.req(:type)
         if AttributeSemanticType.isa?(type)
-          attr_props.merge!("data_type" => type,"semantic_data_type" => AttributeSemanticType.datatype(type).to_s)
+          attr_props.merge!("data_type" => AttributeSemanticType.datatype(type).to_s,"semantic_data_type" => type)
         elsif type =~ /^array\((.+)\)$/
         #TODO: this wil be modified when clean up attribute properties for semantic dataype
           nested_type = $1
           if AttrSemanticType.isa?(nested_type)
             to_add = {
-              "data_type" => AttributeSemanticType.datatype("array"),
+              "data_type" => AttributeSemanticType.datatype("array").to_s,
               "semantic_type_summary" => type,
               "semantic_type" => {":array" => nested_type},
               "semantic_data_type" => "array"

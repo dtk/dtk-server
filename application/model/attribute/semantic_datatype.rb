@@ -2,23 +2,41 @@
 module DTK
   class Attribute 
     class SemanticDatatype
-#TODO: remove; for testing    
-#      require '/home/dtk18/server/application/model/attribute/semantic_datatype/dsl_builder'
-      r8_nested_require('semantic_datatype','asserted_datatypes')
+      r8_nested_require('semantic_datatype','dsl_builder')
       extend SemanticDatatypeClassMixin
       include SemanticDatatypeMixin
+
+      attr_reader :datatype
       def initialize(name)
         @name = name.to_s
         @datatype = nil
         @parent = nil
-        @validation = nil
+        @validation_proc = nil
       end
       #this must be placed here
-#TODO: remove; for testing    
-#      require '/home/dtk18/server/application/model/attribute/semantic_datatype/asserted_datatypes'
-      r8_nested_require('semantic_datatype','dsl_builder')
+      r8_nested_require('semantic_datatype','asserted_datatypes')
 
-      def self.validate_and_find_base_datatype(semantic_datatype)
+      def self.is_valid?(semantic_datatype,value)
+        lookup(semantic_datatype).is_valid?(value)
+      end
+
+      def self.datatype(semantic_datatype)
+        lookup(semantic_datatype).datatype()
+      end
+      
+      def is_valid?(value)
+        @validation_proc.nil? or @validation_proc.call(value)
+      end
+
+      def self.isa?(term)
+        all_types().has_key?(term.to_sym)
+      end
+     private
+      def self.lookup(semantic_datatype)
+        unless ret = all_types()[semantic_datatype.to_sym]
+          raise ErrorUsage.new("Illegal datatype (#{semantic_datatype})")
+        end
+        ret
       end
     end
   end

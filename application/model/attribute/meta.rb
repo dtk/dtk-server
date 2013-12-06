@@ -15,8 +15,10 @@ module XYZ
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
 
+      #TODO: should collapse the semantic types
       #columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
+      column :semantic_data_type, :varchar, :size => 25
       column :semantic_type, :json #points to structural info for a json var 
       column :semantic_type_summary, :varchar, :size => 25 #for efficiency optional token that summarizes info from semantic_type
       virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]

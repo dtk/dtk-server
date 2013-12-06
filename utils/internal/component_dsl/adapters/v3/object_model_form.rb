@@ -41,6 +41,38 @@ module DTK; class ComponentDSL; class V3
         end
       end
 
+      def add_attr_data_type_attrs!(attr_props,info)
+        type = info.req(:type)
+        if AttributeSemanticType.isa?(type)
+          attr_props.merge!("data_type" => type,"semantic_data_type" => AttributeSemanticType.datatype(type).to_s)
+        elsif type =~ /^array\((.+)\)$/
+        #TODO: this wil be modified when clean up attribute properties for semantic dataype
+          nested_type = $1
+          if AttrSemanticType.isa?(nested_type)
+            to_add = {
+              "data_type" => AttributeSemanticType.datatype("array"),
+              "semantic_type_summary" => type,
+              "semantic_type" => {":array" => nested_type},
+              "semantic_data_type" => "array"
+            }
+            attr_props.merge!(to_add)
+          end
+        end
+        unless attr_props["data_type"]
+          raise ParsingError.new("Ill-formed attribute data type (?1)",type)
+        end
+        attr_props
+      end
+
+      module AttributeSemanticType
+        def self.isa?(semantic_type)
+          ::DTK::Attribute::SemanticDatatype.isa?(semantic_type)
+        end
+        def self.datatype(semantic_type)
+          ::DTK::Attribute::SemanticDatatype.datatype(semantic_type)
+        end
+      end
+
       def dynamic_default_variable?(info)
         default_indicates_dynamic_default_variable?(info)
       end

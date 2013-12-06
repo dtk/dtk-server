@@ -14,7 +14,7 @@ module DTK
       end
 
       module SemanticDatatypeMixin
-        def datatype(datatype)
+        def basetype(datatype)
           datatype = datatype.to_sym
           unless DataTypes.include?(datatype)
             raise Error.new("Illegal datatype (#{datatype})")
@@ -27,7 +27,7 @@ module DTK
           @parent = parent.to_s
         end
         def validation(validation)
-          @validation =
+          @validation_proc =
             if validation.kind_of?(Proc)
               validation
             elsif validation.kind_of?(Regexp)

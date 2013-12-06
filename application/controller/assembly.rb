@@ -57,6 +57,14 @@ module DTK
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
       assembly,subtype = ret_assembly_params_object_and_subtype()
+      response_opts = Hash.new
+      if format = ret_request_params(:format)
+        format = format.to_sym
+        unless SupportedFormats.include?(format)
+          raise ErrorUsage.new("Illegal format (#{format}) specified; it must be one of: #{SupportedFormats.join(',')}")
+        end
+      end
+
       about = ret_non_null_request_params(:about).to_sym
       unless AboutEnum[subtype].include?(about)
         raise ErrorUsage::BadParamValue.new(:about,AboutEnum[subtype])
@@ -72,12 +80,23 @@ module DTK
         opts.add_value_to_return!(:datatype)
       end
       if about == :attributes
-        opts.merge!(:truncate_attribute_values => true)
+        if format == :yaml
+          opts.merge!(:raw_attribute_value => true)
+        else
+          opts.merge!(:truncate_attribute_values => true)
+        end
       end
       data = assembly.info_about(about, opts)
       datatype = opts.return_value(:datatype)
-      rest_ok_response data, :datatype => datatype
+      response_opts = Hash.new
+      if format == :yaml
+        response_opts.merge!(:encode_into => :yaml)
+      else
+        response_opts.merge!(:datatype => datatype)
+      end
+      rest_ok_response data, response_opts
     end
+    SupportedFormats = [:yaml]
     #TODO: may unify with above
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()

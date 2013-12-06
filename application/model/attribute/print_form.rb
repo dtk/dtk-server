@@ -53,7 +53,7 @@ module DTK
       end
       UnchangedDisplayCols = [:id,:required]
       UpdateCols = UnchangedDisplayCols + [:description,:display_name,:data_type,:value_derived,:value_asserted]
-      DefaultTruncateSize = 40
+      DefaultTruncateSize = 45
       TruncateSymbols = '...'
 
       def self.augment_with_attribute_links!(ret,assembly,raw_attributes)
@@ -91,6 +91,7 @@ module DTK
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format).merge(:level => opts[:level]||find_level()))
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
+        @raw_attribute_value = opts[:raw_attribute_value] 
       end
 
       def self.linked_to_display_form(linked_to_obj)
@@ -135,8 +136,10 @@ module DTK
       }
 
       def value_print_form()
-        #TODO: handle complex attributes better 
         if value = @aug_attr[:attribute_value]
+          if @raw_attribute_value
+            return value
+          end
           if value.kind_of?(Array)
             #value.map{|el|value_print_form(el)}
             value.inspect

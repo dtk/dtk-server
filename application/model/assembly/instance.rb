@@ -442,10 +442,15 @@ module DTK; class  Assembly
     def info_about(about,opts=Opts.new)
       case about 
        when :attributes
-        get_attributes_print_form_aux(opts).map do |a|
-          Aux::hash_subset(a,[:id,:display_name,:value,:linked_to_display_form,:datatype,:name])
+        cols_to_get = (opts[:raw_attribute_value] ? [:display_name,:value] : [:id,:display_name,:value,:linked_to_display_form,:datatype,:name])
+        ret = get_attributes_print_form_aux(opts).map do |a|
+          Aux::hash_subset(a,cols_to_get)
         end.sort{|a,b| a[:display_name] <=> b[:display_name] }
-
+        if opts[:raw_attribute_value]
+          ret.inject(Hash.new){|h,r|h.merge(r[:display_name] => r[:value])}
+        else
+          ret
+        end
        when :components
         list_components(opts)
 

@@ -48,7 +48,7 @@ module DTK; class ComponentDSL; class V3
         elsif type =~ /^array\((.+)\)$/
         #TODO: this wil be modified when clean up attribute properties for semantic dataype
           nested_type = $1
-          if AttrSemanticType.isa?(nested_type)
+          if AttributeSemanticType.isa?(nested_type)
             to_add = {
               "data_type" => AttributeSemanticType.datatype("array").to_s,
               "semantic_type_summary" => type,

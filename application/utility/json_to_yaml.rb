@@ -15,9 +15,14 @@ if File.exists?(yaml_file_path)
   end
 end
 
+module XYZ; end
+DTK = XYZ
+
 root = File.expand_path('../../', File.dirname(__FILE__))
 require root + '/application/require_first'
+
 require root + '/utils/internal/auxiliary'
+require root + '/utils/internal/yaml_helper'
 require root + '/utils/internal/error'
 require 'json'
 require 'yaml'

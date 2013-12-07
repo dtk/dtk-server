@@ -143,7 +143,7 @@ module DTK
             if opts[:nested]
               PrintValueNil
             else
-              (@mark_unset_required ? PrintValueUnsetRequired : nil)
+              ((@mark_unset_required and @aug_attr[:required]) ? PrintValueUnsetRequired : nil)
             end
           return ret
         end

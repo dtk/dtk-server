@@ -57,9 +57,12 @@ module Ramaze::Helper
     end
 
    private
-    def encode_into_yaml(data)
-      #first remove empty keys 
-      ::DTK::Aux.serialize(remove_null_keys(data),:yaml) + "\n"
+    def encode_into_yaml(data,opts={})
+      data_to_encode = data
+      if opts[:remove_null_keys]
+        data_to_encode = remove_null_keys(data)
+      end
+      ::DTK::Aux.serialize(data_to_encode,:yaml) + "\n"
     end
 
     def remove_null_keys(data)

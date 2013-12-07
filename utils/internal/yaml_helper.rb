@@ -41,6 +41,8 @@ module DTK
         obj
       elsif obj.kind_of?(TrueClass) or obj.kind_of?(FalseClass)
         obj
+      elsif obj.nil?
+        obj
       elsif obj.respond_to?(:to_s)
         string_form(obj.to_s)
       else 

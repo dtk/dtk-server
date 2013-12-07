@@ -92,6 +92,7 @@ module DTK
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
         @raw_attribute_value = opts[:raw_attribute_value] 
+        @mark_unset_required = opts[:mark_unset_required]
       end
 
       def self.linked_to_display_form(linked_to_obj)
@@ -135,35 +136,46 @@ module DTK
         }
       }
 
-      def value_print_form()
-        if value = @aug_attr[:attribute_value]
-          if @raw_attribute_value
-            return value
-          end
-          if value.kind_of?(Array)
-            #value.map{|el|value_print_form(el)}
-            value.inspect
-          elsif value.kind_of?(Hash)
-            ret = Hash.new
-            value.each do |k,v|
-              ret[k] = value_print_form(v)
+      def value_print_form(opts={})
+        value = (opts.has_key?(:nested_val) ? opts[:nested_val] : @aug_attr[:attribute_value])
+        if value.nil?
+          ret = 
+            if opts[:nested]
+              PrintValueNil
+            else
+              (@mark_unset_required ? PrintValueUnsetRequired : nil)
             end
-            ret
-          elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
-            value
-          else
-            value.inspect
+          return ret
+        end
+
+        if @raw_attribute_value
+          return value
+        end
+
+        if value.kind_of?(Array)
+          "[#{value.map{|el|value_print_form(:nested_val=>el,:nested=>true)}.join(', ')}]"
+          #value.inspect
+        elsif value.kind_of?(Hash)
+          comma = ''
+          internal = value.inject(String.new) do |s,(k,val)|
+            item = s + comma
+            comma = ', '
+            el = value_print_form(:nested_val=>val,:nested=>true)
+            "#{item}#{k}=>#{el}"
           end
+          "{#{internal}}"
+          #value.inspect
+        elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
+          value
+        else
+          value.inspect
         end
       end
+      PrintValueUnsetRequired = '*REQUIRED*'
+      PrintValueNil = 'nil'
 
       def datatype_print_form()
-        case @aug_attr[:data_type]
-         when "integer" then "integer"
-         when "boolean" then "boolean"
-         when "json" then @aug_attr[:semantic_type_summary]||"json"
-         else "string"
-        end
+        @aug_attr[:semantic_data_type]
       end
 
       def node()

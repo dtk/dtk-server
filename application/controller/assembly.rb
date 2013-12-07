@@ -81,9 +81,9 @@ module DTK
       end
       if about == :attributes
         if format == :yaml
-          opts.merge!(:raw_attribute_value => true)
+          opts.merge!(:raw_attribute_value => true,:mark_unset_required => true)
         else
-          opts.merge!(:truncate_attribute_values => true)
+          opts.merge!(:truncate_attribute_values => true,:mark_unset_required => true)
         end
       end
       data = assembly.info_about(about, opts)

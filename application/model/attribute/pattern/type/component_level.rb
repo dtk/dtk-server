@@ -90,8 +90,6 @@ module DTK; class Attribute
 
       def fill_in_external_ref?(attr,component)
         unless attr.get_field?(:external_ref)
-          #TODO: think can deprecate
-          Log.error("unexpected that attr[:external_ref] is nil")
           component_type = component.get_field?(:component_type)
           attr_name = attr.get_field?(:display_name)
           external_ref = attr[:external_ref] = {

@@ -321,6 +321,9 @@ module DTK
       av_pairs = ret_params_av_pairs()
       opts = ret_params_hash(:format,:context,:create)
       create_options = ret_boolean_params_hash(:required,:dynamic)
+      if semantic_data_type = ret_request_params(:datatype)
+        create_options.merge!(:semantic_data_type => semantic_data_type)
+      end
       unless create_options.empty? 
         unless opts[:create]
           raise ErrorUsage.new("Options (#{create_options.values.join(',')}) can only be given if :create is true")

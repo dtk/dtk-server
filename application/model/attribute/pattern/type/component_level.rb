@@ -81,7 +81,7 @@ module DTK; class Attribute
 
         #TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref],
+          :cols => [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
           :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
         }
         attr_mh = attribute_idhs.first.createMH()

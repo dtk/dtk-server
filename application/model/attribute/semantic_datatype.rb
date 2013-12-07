@@ -16,6 +16,11 @@ module DTK
       #this must be placed here
       r8_nested_require('semantic_datatype','asserted_datatypes')
 
+      def self.default()
+        DefaultDatatype
+      end
+      DefaultDatatype = :string
+
       def self.is_valid?(semantic_datatype,value)
         value.nil? or lookup(semantic_datatype).is_valid?(value)
       end

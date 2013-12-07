@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module ComponentModelDefProcessor
     def get_model_def(attr_filters={:hidden => true})
       cmp_attrs_obj = get_component_with_attributes_unraveled(attr_filters)
@@ -28,12 +28,13 @@ module XYZ
         raise Error.new("display_name required in field_def")
       end
       attr_hash[:ref] = attr_hash[:display_name]
-      attr_hash[:data_type] ||= "string"
+      attr_hash[:semantic_data_type] ||= Attribute::SemanticDatatype.default().to_s
+      attr_hash[:data_type] ||= Attribute::SemanticDatatype.datatype(attr_hash[:semantic_data_type]).to_s
       #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
     end
-    CreateFields = [:display_name,:data_type,:dynamic,:required].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
-
+    CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
+  
     def self.update_field_def(component,field_def_update)
       #compute default 
       default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id]).first

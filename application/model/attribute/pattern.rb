@@ -27,6 +27,13 @@ module DTK; class Attribute
       attribute_rows = Array.new
       attr_properties = opts[:attribute_properties]||{}
       av_pairs.each do |av_pair|
+        if semantic_data_type = attr_properties[:semantic_data_type]
+          if value = av_pair[:value]
+            unless SemanticDatatype.is_valid?(semantic_data_type,value)
+              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
+            end
+          end
+        end
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
         attr_idhs = pattern.attribute_idhs

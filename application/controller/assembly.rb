@@ -322,6 +322,9 @@ module DTK
       opts = ret_params_hash(:format,:context,:create)
       create_options = ret_boolean_params_hash(:required,:dynamic)
       if semantic_data_type = ret_request_params(:datatype)
+        unless Attribute::SemanticDatatype.isa?(semantic_data_type)
+          raise ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
+        end
         create_options.merge!(:semantic_data_type => semantic_data_type)
       end
       unless create_options.empty? 

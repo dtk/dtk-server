@@ -43,11 +43,16 @@ module DTK; class ComponentDSL; class V3
 
       def add_attr_data_type_attrs!(attr_props,info)
         type = info.req(:type)
-        if AttributeSemanticType.isa?(type)
-          attr_props.merge!("data_type" => AttributeSemanticType.datatype(type).to_s,"semantic_data_type" => type)
-        elsif type =~ /^array\((.+)\)$/
-        #TODO: this wil be modified when clean up attribute properties for semantic dataype
-          nested_type = $1
+        if type =~ /^array/
+          nested_type = 'string'
+          if type == 'array'
+            type = 'array(string)'
+          elsif type =~ /^array\((.+)\)$/ 
+            nested_type = $1
+          else
+            raise ParsingError.new("Ill-formed attribute data type (?1)",type)
+          end
+          #TODO: this will be modified when clean up attribute properties for semantic dataype
           if AttributeSemanticType.isa?(nested_type)
             to_add = {
               "data_type" => AttributeSemanticType.datatype("array").to_s,
@@ -57,7 +62,10 @@ module DTK; class ComponentDSL; class V3
             }
             attr_props.merge!(to_add)
           end
+        elsif AttributeSemanticType.isa?(type)
+          attr_props.merge!("data_type" => AttributeSemanticType.datatype(type).to_s,"semantic_data_type" => type)
         end
+
         unless attr_props["data_type"]
           raise ParsingError.new("Ill-formed attribute data type (?1)",type)
         end

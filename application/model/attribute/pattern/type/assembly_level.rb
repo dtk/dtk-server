@@ -6,7 +6,7 @@ module DTK; class Attribute
       end
 
       def attribute_idhs()
-        @attributes_stack.map{|attr|attr[:attribute].id_handle()}
+        @attribute_stacks.map{|attr|attr[:attribute].id_handle()}
       end
       
       def component_instance()
@@ -43,7 +43,7 @@ module DTK; class Attribute
         end
         assembly = assembly_idh.create_object()
         assembly.update_object!(:display_name)
-        @attributes_stack = attributes.map do |attr| 
+        @attribute_stacks = attributes.map do |attr| 
           {
             :assembly => assembly,
             :attribute => attr

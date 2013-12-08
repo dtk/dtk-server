@@ -20,6 +20,20 @@ module DTK; class Attribute
         @attribute_properties = attr_properties
       end
 
+      def valid_value?(value,attribute_idh=nil)
+        attr = attribute_stack(attribute_idh)[:attribute]
+        if semantic_data_type = attr[:semantic_data_type]
+          SemanticDatatype.is_valid?(semantic_data_type,value)
+        else
+          #vacuously true
+          true
+        end
+      end
+
+      def semantic_data_type(attribute_idh=nil)
+        attribute_stack(attribute_idh)[:attribute][:semantic_data_type]
+      end
+
      private
       attr_reader :pattern, :id
 
@@ -46,13 +60,21 @@ module DTK; class Attribute
        r8_nested_require('type','node_level')
        r8_nested_require('type','component_level')
 
-      def attribute_stack()
-        unless @attribute_stacks.size == 1
-          raise Error.new("attribute_stack() should only be called when @attribute_stacks.size == 1")
+      def attribute_stack(attribute_idh=nil)
+        if attribute_idh
+          attr_id = attribute_idh.get_id()
+          unless match = @attribute_stacks.find{|as|as[:attribute].id == attr_id}
+            raise Error.new("Unexpceted that no match to attribute_id in attribute_stack")
+          end
+          match
+        else
+          unless @attribute_stacks.size == 1
+            raise Error.new("attribute_stack() should only be called when @attribute_stacks.size == 1")
+          end
+          @attribute_stacks.first
         end
-        @attribute_stacks.first
       end
-          
+
       #parent will be node_idh or assembly_idh
       def ret_matching_nodes(parent_idh)
         if parent_idh[:model_name] == :node
@@ -88,7 +110,7 @@ module DTK; class Attribute
           filter = [:and, filter, attr_filter]
         end
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:external_ref,TypeToIdField[type]],
+          :cols => [:id,:group_id,:display_name,:external_ref,:semantic_data_type,TypeToIdField[type]],
           :filter => filter
         }
         sample_idh = idhs.first

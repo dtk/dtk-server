@@ -27,8 +27,9 @@ module DTK; class Attribute
       attribute_rows = Array.new
       attr_properties = opts[:attribute_properties]||{}
       av_pairs.each do |av_pair|
+        value = av_pair[:value]
         if semantic_data_type = attr_properties[:semantic_data_type]
-          if value = av_pair[:value]
+          if value
             unless SemanticDatatype.is_valid?(semantic_data_type,value)
               raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
             end
@@ -37,8 +38,17 @@ module DTK; class Attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
         attr_idhs = pattern.attribute_idhs
+        #TODO: modify; rather than checking checking datatype; convert attribute avlue, which might be in string form to right ruby data type
+        #do not need to check value validity if opts[:create] (since checked already)
+        unless opts[:create]
+          attr_idhs.each do |attr_idh|
+            unless pattern.valid_value?(value,attr_idh)
+              raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
+            end
+          end
+        end
         unless attr_idhs.empty?
-          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => av_pair[:value]}.merge(attr_properties)}
+          attribute_rows += attr_idhs.map{|idh|{:id => idh.get_id(),:value_asserted => value}.merge(attr_properties)}
         end
       end
 

@@ -5,7 +5,8 @@ module XYZ
       return nil unless action
       if action.kind_of?(Task::Action::PowerOnNode)
         # TODO: Look into this see if neccessery
-        Log.warn ">>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
+        Log.warn "TODO: >>>>>>>> CREATING POWER ON NODE EVEN <<<<<<<<< IMPLEMENTATION NEEDED"
+        nil
       elsif action.kind_of?(Task::Action::CreateNode)
         case event_type
          when :start 

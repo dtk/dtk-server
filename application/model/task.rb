@@ -51,17 +51,17 @@ module DTK
     end
 
     def add_event(event_type,result=nil)
-      event = TaskEvent.create_event?(event_type,self,result)
-      return nil unless event
-      type = event.delete(:type)||event_type
-      row = {
-        :content => event.to_hash, 
-        :ref => "task_event", 
-        :type => type.to_s,
-        :task_id => id()
-      }
-      Model.create_from_rows(child_model_handle(:task_event),[row],{:convert => true})
-      event
+      if event = TaskEvent.create_event?(event_type,self,result)
+        type = event.delete(:type)||event_type
+        row = {
+          :content => event.to_hash, 
+          :ref => "task_event", 
+          :type => type.to_s,
+          :task_id => id()
+        }
+        Model.create_from_rows(child_model_handle(:task_event),[row],{:convert => true})
+        event
+      end
     end
     
     #returns [event,error-array]

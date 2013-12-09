@@ -174,6 +174,8 @@ cat << EOF >>/root/.ssh/known_hosts
 <%=fingerprint %>
 EOF
 
+/etc/init.d/mcollective* restart
+
 eos
 
         end

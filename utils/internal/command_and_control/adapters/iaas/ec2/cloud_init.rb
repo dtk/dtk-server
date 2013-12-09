@@ -27,7 +27,6 @@ module DTK; module CommandAndControlAdapter
 
 eos
       UserDataTemplateUbuntu = <<eos
-#cloud-boothook
 #!/bin/sh 
 eos
       UserDataTemplates = {

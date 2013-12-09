@@ -42,7 +42,7 @@ module DTK; class ComponentDSL; class V3
       end
 
       def add_attr_data_type_attrs!(attr_props,info)
-        type = info.req(:type)
+        type = info[:type]||DefaultDatatype
         if type =~ /^array/
           nested_type = 'string'
           if type == 'array'
@@ -72,16 +72,17 @@ module DTK; class ComponentDSL; class V3
         attr_props
       end
 
+      DefaultDatatype = "string"
+
       def dynamic_default_variable?(info)
         default_indicates_dynamic_default_variable?(info)
       end
       def value_asserted(info,attr_props) 
         unless default_indicates_dynamic_default_variable?(info)
-          if ret = info["default"] 
+          ret = nil
+          if info["default"] 
             if semantic_data_type = attr_props["semantic_data_type"]
-              unless AttributeSemanticType.is_valid?(semantic_data_type,ret)
-                raise ErrorUsage.new("Attribute (#{attr_props['display_name']}) has default (#{ret.inspect}) that does not match its type (#{semantic_data_type})")
-              end
+              ret = AttributeSemanticType.convert_and_raise_error_if_not_valid(semantic_datatype,value,:attribute_name => attr_props['display_name'])
             end
             ret
           else
@@ -101,8 +102,8 @@ module DTK; class ComponentDSL; class V3
         def self.datatype(semantic_type)
           apply(:datatype,semantic_type)
         end
-        def self.is_valid?(semantic_type,value)
-          apply('is_valid?'.to_sym,semantic_type,value)
+        def self.convert_and_raise_error_if_not_valid(semantic_type,value)
+          apply(:convert_and_raise_error_if_not_valid,semantic_type,value)
         end
 
        private

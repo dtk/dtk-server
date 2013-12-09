@@ -41,6 +41,11 @@ module DTK
               raise Error.new("Illegal validation argument (#{validation.inspect})")
             end
         end
+
+        def internal_form(internal_form_proc)
+          @internal_form_proc = internal_form_proc
+        end
+
         def build()
           unless @datatype
             raise Error.new("Datatype must be specified")

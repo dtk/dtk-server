@@ -21,6 +21,20 @@ module DTK
       end
       DefaultDatatype = :string
 
+      def self.convert_and_raise_error_if_not_valid(semantic_datatype,value,opts={})
+        if value.nil?
+          return nil
+        end
+        unless is_valid?(semantic_datatype,value)
+          if opts[:attribute_name]
+            raise ErrorUsage.new("Attribute (#{opts[:attribute_name]}) has default (#{value.inspect}) that does not match its type (#{semantic_data_type})")
+          else
+            raise ErrorUsage.new("Value (#{value.inspect}) that does not match its type (#{semantic_data_type})")
+          end
+        end
+        convert_to_internal_form(semantic_datatype,value)
+      end
+
       def self.is_valid?(semantic_datatype,value)
         value.nil? or lookup(semantic_datatype).is_valid?(value)
       end
@@ -43,6 +57,14 @@ module DTK
         end
         ret
       end
+
+      def self.convert_to_internal_form(semantic_datatype,value)
+        lookup(semantic_datatype).convert_to_internal_form(value)
+      end
+      def convert_to_internal_form(value)
+        @internal_form_proc ? @internal_form_proc.call(value) : value
+      end
+
     end
   end
 end

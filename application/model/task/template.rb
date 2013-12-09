@@ -70,6 +70,27 @@ module DTK; class Task
     end
 
     def self.create_or_update_from_serialized_content?(assembly_idh,serialized_content,task_action=nil)
+      if task_template = get_matching_task_template?(assembly_idh,task_action)
+        task_template.update(:content => serialized_content)
+        task_template.id_handle()
+      else
+        task_action ||= default_task_action()
+        ref,create_hash = ref_and_create_hash(serialized_content,task_action)
+        create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id()) 
+        task_template_mh = assembly_idh.create_childMH(:task_template)
+        create_from_row(task_template_mh,create_hash,:convert=>true)
+      end
+    end
+
+    def self.delete_task_template?(assembly_idh,task_action=nil)
+      if task_template = get_matching_task_template?(assembly_idh,task_action)
+        task_template_idh = task_template.id_handle()
+        delete_instance(task_template_idh)
+        task_template_idh
+      end
+    end
+
+    def self.get_matching_task_template?(assembly_idh,task_action=nil)
       task_action ||= default_task_action()
       sp_hash = {
         :cols => [:id],
@@ -77,15 +98,7 @@ module DTK; class Task
                     [:eq,:task_action,task_action]]
       }
       task_template_mh = assembly_idh.createMH(:model_name => :task_template,:parent_model_name => :assembly)
-      if task_template = get_obj(task_template_mh,sp_hash)
-        task_template.update(:content => serialized_content)
-        task_template.id_handle()
-      else
-        ref,create_hash = ref_and_create_hash(serialized_content,task_action)
-        create_hash.merge!(:ref => ref,:component_component_id => assembly_idh.get_id()) 
-        task_template_mh = assembly_idh.create_childMH(:task_template)
-        create_from_row(task_template_mh,create_hash,:convert=>true)
-      end
+      get_obj(task_template_mh,sp_hash)
     end
   end
 end; end

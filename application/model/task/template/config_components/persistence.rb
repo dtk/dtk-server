@@ -15,9 +15,14 @@ module DTK; class Task; class Template; class ConfigComponents
       end
       
       def self.persist(assembly,template_content,task_action=nil)
-        serialized_content = template_content.serialization_form(:filter => {:source => :assembly})
-        task_template_idh = Template.create_or_update_from_serialized_content?(assembly.id_handle(),serialized_content,task_action)
-        ReifiedObjectCache.add_or_update_item(task_template_idh,template_content)
+        if serialized_content = template_content.serialization_form(:allow_empty_task => true,:filter => {:source => :assembly})
+          task_template_idh = Template.create_or_update_from_serialized_content?(assembly.id_handle(),serialized_content,task_action)
+          ReifiedObjectCache.add_or_update_item(task_template_idh,template_content)
+        else
+          if task_template_idh = Template.delete_task_template?(assembly.id_handle(),task_action)
+            ReifiedObjectCache.remove_item(task_template_idh)
+          end
+        end
       end
     
       def self.remove_any_outdated_items(assembly_update)
@@ -41,6 +46,10 @@ module DTK; class Task; class Template; class ConfigComponents
         end
         def self.add_or_update_item(task_template_idh,content)
           #@@cache[key(task_template_idh)] = content
+        end
+
+        def self.remove_item(task_template_idh)
+          #@@cache.delete(key(task_template_idh))
         end
 ###TODO: end: these are in no op mode until implememnt
 

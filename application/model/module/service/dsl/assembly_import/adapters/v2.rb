@@ -98,7 +98,9 @@ module DTK; class ServiceModule
       def self.parse_service_links(assembly_hash)
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
-          (node_hash["components"]||[]).each do |input_cmp|
+          components = node_hash["components"]||[]
+          components = [components] unless components.kind_of?(Array)
+          components.each do |input_cmp|
             if input_cmp.kind_of?(Hash) 
               input_cmp_name = input_cmp.keys.first
               (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|

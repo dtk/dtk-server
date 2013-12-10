@@ -196,7 +196,7 @@ module DTK; class ServiceModule
       unless components_hash
         return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section",opts[:file_path])
       end
-
+      components_hash = [components_hash] unless components_hash.kind_of?(Array)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
         parse = cmp_ref = nil
         begin

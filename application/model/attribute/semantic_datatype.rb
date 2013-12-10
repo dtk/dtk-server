@@ -21,26 +21,26 @@ module DTK
       end
       DefaultDatatype = :string
 
-      def self.convert_and_raise_error_if_not_valid(semantic_datatype,value,opts={})
+      def self.convert_and_raise_error_if_not_valid(semantic_data_type,value,opts={})
         if value.nil?
           return nil
         end
-        unless is_valid?(semantic_datatype,value)
+        unless is_valid?(semantic_data_type,value)
           if opts[:attribute_name]
             raise ErrorUsage.new("Attribute (#{opts[:attribute_name]}) has default (#{value.inspect}) that does not match its type (#{semantic_data_type})")
           else
             raise ErrorUsage.new("Value (#{value.inspect}) that does not match its type (#{semantic_data_type})")
           end
         end
-        convert_to_internal_form(semantic_datatype,value)
+        convert_to_internal_form(semantic_data_type,value)
       end
 
-      def self.is_valid?(semantic_datatype,value)
-        value.nil? or lookup(semantic_datatype).is_valid?(value)
+      def self.is_valid?(semantic_data_type,value)
+        value.nil? or lookup(semantic_data_type).is_valid?(value)
       end
 
-      def self.datatype(semantic_datatype)
-        lookup(semantic_datatype).datatype()
+      def self.datatype(semantic_data_type)
+        lookup(semantic_data_type).datatype()
       end
       
       def is_valid?(value)
@@ -50,21 +50,21 @@ module DTK
       def self.isa?(term)
         all_types().has_key?(term.to_sym)
       end
-     private
-      def self.lookup(semantic_datatype)
-        unless ret = all_types()[semantic_datatype.to_sym]
-          raise ErrorUsage.new("Illegal datatype (#{semantic_datatype})")
-        end
-        ret
-      end
 
-      def self.convert_to_internal_form(semantic_datatype,value)
-        lookup(semantic_datatype).convert_to_internal_form(value)
-      end
       def convert_to_internal_form(value)
         @internal_form_proc ? @internal_form_proc.call(value) : value
       end
 
+     private
+      def self.lookup(semantic_data_type)
+        unless ret = all_types()[semantic_data_type.to_sym]
+          raise ErrorUsage.new("Illegal datatype (#{semantic_data_type})")
+        end
+        ret
+      end
+      def self.convert_to_internal_form(semantic_data_type,value)
+        lookup(semantic_data_type).convert_to_internal_form(value)
+      end
     end
   end
 end

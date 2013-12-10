@@ -149,7 +149,7 @@ module DTK
         end
 
         if @raw_attribute_value
-          return value
+          return SemanticDatatype.convert_to_internal_form(@aug_attr[:semantic_data_type],value)
         end
 
         if value.kind_of?(Array)

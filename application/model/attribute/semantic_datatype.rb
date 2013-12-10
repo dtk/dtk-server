@@ -27,9 +27,9 @@ module DTK
         end
         unless is_valid?(semantic_data_type,value)
           if opts[:attribute_name]
-            raise ErrorUsage.new("Attribute (#{opts[:attribute_name]}) has default (#{value.inspect}) that does not match its type (#{semantic_data_type})")
+            raise ErrorUsage.new("Attribute (#{opts[:attribute_name]}) has default value (#{value.inspect}) that does not match its type (#{semantic_data_type})")
           else
-            raise ErrorUsage.new("Value (#{value.inspect}) that does not match its type (#{semantic_data_type})")
+            raise ErrorUsage.new("The attribute value (#{value.inspect}) does not match its type (#{semantic_data_type})")
           end
         end
         convert_to_internal_form(semantic_data_type,value)
@@ -51,6 +51,13 @@ module DTK
         all_types().has_key?(term.to_sym)
       end
 
+      def self.convert_to_internal_form(semantic_data_type,value)
+        if semantic_data_type
+          lookup(semantic_data_type).convert_to_internal_form(value)
+        else
+          value
+        end
+      end
       def convert_to_internal_form(value)
         @internal_form_proc ? @internal_form_proc.call(value) : value
       end
@@ -61,9 +68,6 @@ module DTK
           raise ErrorUsage.new("Illegal datatype (#{semantic_data_type})")
         end
         ret
-      end
-      def self.convert_to_internal_form(semantic_data_type,value)
-        lookup(semantic_data_type).convert_to_internal_form(value)
       end
     end
   end

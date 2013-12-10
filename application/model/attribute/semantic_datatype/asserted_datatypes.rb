@@ -36,12 +36,12 @@ module DTK; class Attribute
       basetype :boolean
       validation /true|false/
       internal_form lambda{|v|
-        if value.kind_of?(TrueClass) or value == 'true'
+        if v.kind_of?(TrueClass) or v == 'true'
           true
-        elsif value.kind_of?(FalseClass) or value == 'false'
+        elsif v.kind_of?(FalseClass) or v == 'false'
           false
         else
-          raise Error.new("Bad boolean type (#{value.inspect})") #this shoudl not be reached since value is validated before this fn called
+          raise Error.new("Bad boolean type (#{v.inspect})") #this should not be reached since v is validated before this fn called
         end
       }
     end

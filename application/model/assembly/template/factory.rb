@@ -265,7 +265,10 @@ module DTK
         attrs.each do |attr|
           attr_ref =  attr[:ref]
           attr_hash =  AttrHash.new(attr,cmp)
-          attr_hash[:attribute_template_id] = ndx_attrs[attr[:display_name]][:id]
+          #attributes created in assembly/workspace wil not have corresponding elements in ndx_attrs
+          if attribute_template = ndx_attrs[attr[:display_name]] 
+            attr_hash[:attribute_template_id] = attribute_template[:id]
+          end
           attr_override[attr_ref] = attr_hash
         end
       end

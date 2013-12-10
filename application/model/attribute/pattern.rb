@@ -40,7 +40,7 @@ module DTK; class Attribute
         attr_idhs = pattern.attribute_idhs
         #TODO: modify; rather than checking checking datatype; convert attribute avlue, which might be in string form to right ruby data type
         #do not need to check value validity if opts[:create] (since checked already)
-        unless opts[:create]
+        unless (opts[:create] || pattern.is_a?(Type::ExplicitId))
           attr_idhs.each do |attr_idh|
             unless pattern.valid_value?(value,attr_idh)
               raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")

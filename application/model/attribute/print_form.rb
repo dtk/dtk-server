@@ -40,7 +40,8 @@ module DTK
           :datatype => datatype_print_form(),
           :description => @aug_attr[:description]||@aug_attr[:display_name]
         }
-        if value = value_print_form()
+        value = value_print_form()
+        unless value.nil?()
           if @truncate_attribute_value
             truncate_size = (@truncate_attribute_value.kind_of?(Fixnum) ? @truncate_attribute_value : DefaultTruncateSize)
             if value.kind_of?(String) and value.size > truncate_size

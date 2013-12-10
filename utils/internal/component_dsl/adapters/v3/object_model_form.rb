@@ -80,8 +80,10 @@ module DTK; class ComponentDSL; class V3
       def value_asserted(info,attr_props) 
         unless default_indicates_dynamic_default_variable?(info)
           ret = nil
-          if value = info["default"] 
+          value = info["default"] 
+          unless value.nil?
             if semantic_data_type = attr_props["semantic_data_type"]
+              #TODO: currently converting 'integer' -> integer and 'booelan' -> boolean; this may be unnecesary since the object model stores everything as strings
               ret = AttributeSemanticType.convert_and_raise_error_if_not_valid(semantic_data_type,value,:attribute_name => attr_props['display_name'])
             end
             ret

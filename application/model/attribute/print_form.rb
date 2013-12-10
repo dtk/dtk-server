@@ -176,7 +176,11 @@ module DTK
       PrintValueNil = 'nil'
 
       def datatype_print_form()
-        @aug_attr[:semantic_data_type]
+        #TODO: until will populate node/os_identifier attribute with the node_template_type datatype
+        if  @aug_attr[:display_name] == 'os_identifier' and @aug_attr[:node]
+          return 'node_template_type'
+        end
+        @aug_attr[:semantic_data_type]||@aug_attr[:data_type]
       end
 
       def node()

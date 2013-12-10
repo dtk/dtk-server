@@ -19,13 +19,18 @@ module DTK; class Attribute
     end
     Type :log_file do
       basetype :string
-      validation /.*/ #so checks taht it is scalar
+      validation /.*/ #so checks that it is scalar
+    end
+
+    Type :node_template_type do
+      basetype :string
+      validation /.*/ #TODO: put validation in here; may need a handle in appropriate place in object model to see what is valid
     end
 
     #base types
     Type :string do
       basetype :string
-      validation /.*/ #so checks taht it is scalar 
+      validation /.*/ #so checks that it is scalar 
     end
     Type :integer do
       basetype :integer

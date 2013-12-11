@@ -18,8 +18,7 @@ module DTK; class ServiceModule
     end
 
     def process(module_name,hash_content,opts={})
-      #TODO: initially determing from syntax what version it is; this wil be replaced by explicit versions at the service or assembly level
-      integer_version = determine_integer_version(hash_content)
+      integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
       version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
@@ -148,13 +147,15 @@ module DTK; class ServiceModule
     end
 
    private
-    def determine_integer_version(hash_content)
-      if hash_content["assemblies"]
+    def determine_integer_version(hash_content,opts={})
+      if version = hash_content["dsl_version"]
+        ServiceModule::VersionInfo.version_to_integer_version(version,opts)
+      elsif hash_content["assemblies"]
         1
       elsif hash_content["assembly"]
         2
       else
-        R8::Config[:dsl][:service][:integer_version][:default]
+        ServiceModule::VersionInfo.default_integer_version()
       end
     end
 

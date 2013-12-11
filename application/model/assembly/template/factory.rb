@@ -265,9 +265,12 @@ module DTK
         attrs.each do |attr|
           attr_ref =  attr[:ref]
           attr_hash =  AttrHash.new(attr,cmp)
-          #attributes created in assembly/workspace wil not have corresponding elements in ndx_attrs
           if attribute_template = ndx_attrs[attr[:display_name]] 
             attr_hash[:attribute_template_id] = attribute_template[:id]
+          else
+            component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
+            module_name = Component.module_name(cmp_ref_hash[:component_type])
+            raise ErrorUsage.new("Attribute (#{attr[:display_name]}) does not exist in base component (#{component_type}); you may need to invoke push-module-updates #{module_name}")
           end
           attr_override[attr_ref] = attr_hash
         end

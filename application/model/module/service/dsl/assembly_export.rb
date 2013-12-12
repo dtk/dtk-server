@@ -3,7 +3,7 @@ module DTK
     class AssemblyExport < Hash
       def self.create(container_idh,service_module_branch,integer_version=nil)
         klass = load_and_return_version_adapter_class(integer_version)
-        klass.new(container_idh,service_module_branch)
+        klass.new(container_idh,service_module_branch,integer_version)
       end
 
       def save_to_model()
@@ -33,10 +33,11 @@ module DTK
       end
       CachedAdapterClasses = Hash.new
       
-      def initialize(container_idh,service_module_branch)
+      def initialize(container_idh,service_module_branch,integer_version)
         super()
         @container_idh = container_idh
         @service_module_branch = service_module_branch
+        @integer_version = integer_version
       end
 
       def assembly_meta_filename_path()
@@ -45,6 +46,10 @@ module DTK
 
       def assembly_hash()
         self[:component].values.first
+      end
+
+      def dsl_version?()
+        ServiceModule::DSLVersionInfo.integer_version_to_version(@integer_version)
       end
 
       def component_output_form(component_hash)

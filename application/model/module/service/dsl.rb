@@ -4,12 +4,12 @@ module DTK
     r8_nested_require('dsl','assembly_export')
     r8_nested_require('dsl','parser')
 
-    module VersionInfo
+    module DSLVersionInfo
       def self.default_integer_version()
         R8::Config[:dsl][:service][:integer_version][:default]
       end
       def self.version_to_integer_version(version,opts={})
-        unless integer_version = VersionToVersionInteger[version.to_s]
+        unless integer_version = VersionToIntegerVersion[version.to_s]
           error_msg = "Illegal version (#{version}) found in assembly dsl file"
           if file_path = opts[:file_path]
             error_msg += " (#{file_path})"
@@ -18,8 +18,17 @@ module DTK
         end
         integer_version
       end
-      VersionToVersionInteger  = {
+
+      def self.integer_version_to_version(integer_version)
+        IntegerVersionToVersion[integer_version]
+      end
+      VersionToIntegerVersion  = {
         "0.9.1" => 3
+      }
+      IntegerVersionToVersion = {
+        1 => nil, #1 and 2 do not have a version stamped in file
+        2 => nil,
+        3 => "0.9.1"
       }
     end
 

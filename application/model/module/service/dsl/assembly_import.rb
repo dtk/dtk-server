@@ -149,13 +149,13 @@ module DTK; class ServiceModule
    private
     def determine_integer_version(hash_content,opts={})
       if version = hash_content["dsl_version"]
-        ServiceModule::VersionInfo.version_to_integer_version(version,opts)
+        ServiceModule::DSLVersionInfo.version_to_integer_version(version,opts)
       elsif hash_content["assemblies"]
         1
       elsif hash_content["assembly"]
         2
       else
-        ServiceModule::VersionInfo.default_integer_version()
+        ServiceModule::DSLVersionInfo.default_integer_version()
       end
     end
 

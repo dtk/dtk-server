@@ -370,6 +370,69 @@ module DTK
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+    def check_modulefile_dependencies(modules, external_ref, current_module)
+      all_matched, all_inconsistent, all_possibly_missing = [], [], []
+      dependencies = external_ref[:dependencies]
+      
+      unless dependencies.empty?
+        parsed_dependencies = parse_dependencies(dependencies)
+
+        parsed_dependencies.each do |parsed_dependency|
+          dep_name = parsed_dependency[:name]
+          version_constraints = parsed_dependency[:version_constraints]
+          match, inconsistent, possibly_missing = nil, nil, nil
+
+          modules.each do |cmp_module|
+            branches = cmp_module.get_module_branches()
+            next if(cmp_module[:id].eql?(current_module[:id]))
+
+            branches.each do |branch|
+              unless branch[:external_ref].nil?
+                branch_hash = eval(branch[:external_ref])
+                branch_name = branch_hash[:name].gsub('-','/').strip()
+                branch_version = branch_hash[:version]
+
+                if (branch_name && branch_version)
+                  matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
+                  branch_version = matched_branch_version[1]
+
+                  dep_name = parsed_dependency[:name].strip()
+                  version_constraints = parsed_dependency[:version_constraints]
+
+                  if dep_name.eql?(branch_name)
+                    evaluated = false
+                    version_constraints.each do |vconst|
+                      bv = branch_version.gsub('.','')
+                      c = vconst[:constraint]
+                      v = vconst[:version].gsub('.','')
+                      
+                      evaluated = eval("#{bv}#{c}#{v}")
+                      break if evaluated == false
+                    end
+
+                    if evaluated
+                      all_matched << dep_name 
+                    else
+                      all_inconsistent << dep_name
+                    end
+                  else
+                    all_possibly_missing << dep_name
+                  end   
+                end
+
+              end
+            end
+
+          end
+        end
+
+      end
+      all_inconsistent = (all_inconsistent - all_matched)
+      all_possibly_missing = (all_possibly_missing - all_inconsistent - all_matched)
+      
+      {:match => all_matched.uniq, :inconsistent => all_inconsistent.uniq, :possibly_missing => all_possibly_missing.uniq}
+    end
+
     module ListMethodHelpers
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
         diff       = opts[:diff]
@@ -655,6 +718,33 @@ module DTK
         h[repo[:id]] ||= repo
         h
       end.values
+    end
+
+    def parse_dependencies(dependencies)
+      parsed_deps = []
+      dependencies.each do |dep|
+        name, version = dep.split(',')
+        version_constraints = get_dependency_condition(version.strip!())
+        parsed_deps << {:name=>name,:version_constraints=>version_constraints}
+      end
+
+      return parsed_deps
+    end
+
+    def get_dependency_condition(versions)
+      conds, multiple_versions = [], []
+      # multiple_versions = versions.split(' ')
+      
+      matched_versions = versions.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
+      multiple_versions << matched_versions[1] if matched_versions[1]
+      multiple_versions << matched_versions[2] if matched_versions[2]
+      
+      multiple_versions.each do |version|
+        match = version.to_s.match(/(^>*=*<*)(.+)/)
+        conds << {:version=>match[2], :constraint=>match[1]}
+      end
+
+      return conds
     end
 
   end

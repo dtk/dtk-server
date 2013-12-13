@@ -5,7 +5,7 @@ module DTK
     extend BranchNamesClassMixin
 
     def self.common_columns()
-      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id]
+      [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref]
     end
 
     def get_type()
@@ -40,6 +40,11 @@ module DTK
       update(:current_sha => current_sha)
       self[:current_sha] = current_sha
       current_sha
+    end
+
+    def update_external_ref(ext_ref)
+      update(:external_ref => ext_ref.to_s)
+      self[:external_ref] = ext_ref
     end
 
     def merge_changes_and_update_model?(component_module,branch_name_to_merge_from,opts={})

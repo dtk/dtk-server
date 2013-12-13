@@ -91,6 +91,7 @@ R8::ReactorRoute.draw do
   post  'component_module/get_remote_module_info' => 'component_module#get_remote_module_info'
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
+  post  'component_module/update_from_git_modulefile' => 'component_module#update_from_git_modulefile'
   post  'component_module/list' => 'component_module#list'
   post  'component_module/add_user_direct_access' => 'component_module#add_user_direct_access'
 

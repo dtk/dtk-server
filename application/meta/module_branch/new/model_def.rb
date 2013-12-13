@@ -55,6 +55,7 @@ lambda__matching_library_branches =
     :is_workspace => {:type =>:boolean},
     :type => {:type=>:varchar, :size => 20}, #service_module or component_module
     :current_sha => {:type=>:varchar, :size => 50}, #indicates the sha of the branch that is currently synchronized with object model 
+    :external_ref => {:type => :text},
     :repo_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:repo,

@@ -30,6 +30,18 @@ module DTK
       rest_ok_response dsl_created_info
     end
 
+    def rest__update_from_git_modulefile()
+      version = ret_version()
+      project = get_default_project()
+      component_module = create_obj(:component_module_id)
+
+      external_ref = component_module.update_from_git_modulefile(version)
+      opts = Opts.new(:project_idh => project.id_handle())
+      modules = ComponentModule.list(opts)
+
+      rest_ok_response ComponentModule.check_modulefile_dependencies(modules, external_ref, component_module)
+    end
+
     def rest__update_model_from_clone()
       component_module = create_obj(:component_module_id)
       internal_trigger = ret_request_params(:internal_trigger)

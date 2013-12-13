@@ -22,6 +22,21 @@ module DTK; class ComponentModule
       create_needed_objects_and_dsl?(repo,version,opts)
     end
 
+    def update_from_git_modulefile(version)
+      module_branch = get_workspace_module_branch(version)
+      impl_obj = module_branch.get_implementation()
+      external_ref, dependencies = {}, {}
+
+       # if module contains Modulefile, parse information and store them to module_branch external_ref
+      if ComponentDSL.contains_modulefile?(impl_obj)
+        external_ref = ComponentDSL.get_modulefile_raw_content_and_info(impl_obj)
+
+        # update external_ref columng in module.branch table with data parsed from Modulefile
+        module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
+      end
+      external_ref
+    end
+
     def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")

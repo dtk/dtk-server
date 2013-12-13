@@ -29,7 +29,7 @@ module XYZ
       existing_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
-        return match,true if match
+        return match, true if match
 
         # get all public key files from gitolite_admin keydir
         # and raise exception if file with provided rsa_public_key exists already

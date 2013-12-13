@@ -395,25 +395,24 @@ module DTK
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
+                  dep_name = dep_name.strip()
 
-                  dep_name = parsed_dependency[:name].strip()
-                  version_constraints = parsed_dependency[:version_constraints]
-
+                  evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
-                    evaluated = false
                     version_constraints.each do |vconst|
-                      bv = branch_version.gsub('.','')
-                      c = vconst[:constraint]
-                      v = vconst[:version].gsub('.','')
-                      
-                      evaluated = eval("#{bv}#{c}#{v}")
+                      required_version = vconst[:version]
+                      br_version       = branch_version.gsub('.','')
+                      constraint_op    = vconst[:constraint]
+                      req_version      = required_version.gsub('.','')
+
+                      evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
                       break if evaluated == false
                     end
 
                     if evaluated
                       all_matched << dep_name 
                     else
-                      all_inconsistent << dep_name
+                      all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
                     end
                   else
                     all_possibly_missing << dep_name
@@ -534,8 +533,9 @@ module DTK
 
         repos.map{|repo|RepoUserAcl.update_model(repo,repo_user,DefaultAccessRights)}
       end
-      return match
+      return match, repo_user[:username]
     end
+
     DefaultAccessRights = "RW+"
 
     def remove_user_direct_access(model_handle,username)

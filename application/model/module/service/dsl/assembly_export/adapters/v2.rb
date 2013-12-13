@@ -141,10 +141,27 @@ module DTK
         return ret unless attr_overrides
         av_list = attr_overrides.values.map do |attr|
           unless attr.is_title_attribute()
-            {attr[:display_name] => attr[:attribute_value]}
+            {attr[:display_name] => attr_override_value_output_form(attr)}
           end
         end.compact.sort{|a,b|a.keys.first <=> b.keys.first}
         (!av_list.empty?)  && SimpleOrderedHash.new(:attributes => SimpleOrderedHash.new(av_list))
+      end
+
+      def attr_override_value_output_form(attr)
+        if raw_val = attr[:attribute_value]
+          converted_val = 
+            case attr[:data_type]
+              when 'boolean'
+                if raw_val == 'true'
+                  true
+                elsif raw_val == 'false'
+                  false
+                end
+              when 'integer'
+                raw_val.to_i
+            end
+          converted_val || raw_val
+        end
       end
 
     end

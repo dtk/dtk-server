@@ -45,7 +45,7 @@ module DTK
           i = 0; found = false
           while i < cmps.size
             if match_component?(cmps[i],in_parsed_port[:component_name])
-              cmps[i] = add_service_link_to_cmp(cmps[i],out_parsed_port)
+              cmps[i] = add_component_link_to_cmp(cmps[i],out_parsed_port)
               found = true
             end
             i = i+1
@@ -90,7 +90,7 @@ module DTK
         match_term == component_name
       end
 
-      def add_service_link_to_cmp(component_in_ret,out_parsed_port)
+      def add_component_link_to_cmp(component_in_ret,out_parsed_port)
         ret = Hash.new
         if component_in_ret.kind_of?(Hash)
           ret = component_in_ret

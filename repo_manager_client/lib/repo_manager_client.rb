@@ -47,12 +47,12 @@ module DTK
     #
 
     def list_component_modules
-      response = get_rest_request_data('/v1/component_modules/list', {}, :raise_error => true)
+      response = get_rest_request_data('/v1/component_modules/list_remote', user_params('dtk-instance'), :raise_error => true)
       response
     end
 
     def list_service_modules
-      response = get_rest_request_data('/v1/service_modules/list', {}, :raise_error => true)
+      response = get_rest_request_data('/v1/service_modules/list_remote', user_params('dtk-instance'), :raise_error => true)
       response
     end
 
@@ -219,10 +219,21 @@ module DTK
           {}
         end
       elsif opts[:raise_error] and not response.ok?
-        raise Error.new(error_msg(response))
+        msg = error_msg(response)
+        if is_internal_error?(response)
+          raise Error.new(msg)
+        else
+          raise ErrorUsage.new(msg)
+        end
       else
         return response.data
       end
+    end
+
+    def is_internal_error?(response)
+      # error:: is namespace for our custom message on repoman
+      result = response['errors'].find { |err| !err['code'].include?('error::')}
+      !result.nil?
     end
 
     def error_msg(response)
@@ -238,7 +249,7 @@ module DTK
             error_detail = err_msgs.join(', ')
           end
         end
-        "Repo Manager Error: #{error_detail||response.inspect}"
+        "#{error_detail||response.inspect}"
       end
     end
 

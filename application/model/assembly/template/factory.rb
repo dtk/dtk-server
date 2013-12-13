@@ -255,7 +255,7 @@ module DTK
         attrs = cmp[:non_default_attributes]
         return if attrs.nil? or attrs.empty?
         sp_hash = {
-          :cols => [:id,:display_name],
+          :cols => [:id,:display_name,:data_type,:semantic_data_type],
           :filter => [:and,[:eq,:component_component_id,cmp_template_id],[:oneof,:display_name,attrs.map{|a|a[:display_name]}]]
         }
         ndx_attrs = Model.get_objs(model_handle(:attribute),sp_hash).inject(Hash.new) do |h,r|
@@ -267,6 +267,7 @@ module DTK
           attr_hash =  AttrHash.new(attr,cmp)
           if attribute_template = ndx_attrs[attr[:display_name]] 
             attr_hash[:attribute_template_id] = attribute_template[:id]
+            attr_hash.merge!(Aux::hash_subset(attribute_template,[:data_type,:semantic_data_type]))
           else
             component_type = Component.display_name_print_form(cmp_ref_hash[:component_type])
             module_name = Component.module_name(cmp_ref_hash[:component_type])

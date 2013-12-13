@@ -6,12 +6,11 @@ module DTK
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
         temporal_ordering = temporal_ordering_hash()
-pp [:test,dsl_version?()]
-
+        dsl_version = dsl_version?()
         SimpleOrderedHash.new(
          [
           {:name => assembly_hash()[:display_name]},
-          {:dsl_version => dsl_version?()},
+          dsl_version && {:dsl_version => dsl_version},
           {:node_bindings => node_bindings_hash}, 
           {:assembly => assembly_hash},
           temporal_ordering && {:workflow => temporal_ordering}

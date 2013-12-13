@@ -6,7 +6,8 @@ module DTK
 
     module DSLVersionInfo
       def self.default_integer_version()
-        R8::Config[:dsl][:service][:integer_version][:default]
+        ret = R8::Config[:dsl][:service][:integer_version][:default]
+        ret && ret.to_i
       end
       def self.version_to_integer_version(version,opts={})
         unless integer_version = VersionToIntegerVersion[version.to_s]

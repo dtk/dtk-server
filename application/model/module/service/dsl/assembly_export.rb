@@ -2,6 +2,7 @@ module DTK
   class ServiceModule
     class AssemblyExport < Hash
       def self.create(container_idh,service_module_branch,integer_version=nil)
+        integer_version ||= ServiceModule::DSLVersionInfo.default_integer_version()
         klass = load_and_return_version_adapter_class(integer_version)
         klass.new(container_idh,service_module_branch,integer_version)
       end
@@ -20,8 +21,7 @@ module DTK
      private
       include AssemblyImportExportCommon
 
-      def self.load_and_return_version_adapter_class(integer_version=nil)
-        integer_version ||= R8::Config[:dsl][:service][:integer_version][:default]
+      def self.load_and_return_version_adapter_class(integer_version)
         return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]
         adapter_name = "v#{integer_version.to_s}"
         opts = {

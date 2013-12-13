@@ -23,6 +23,12 @@ module DTK; class Attribute
         @attribute_idhs = [parent_idh.createIDH(:model_name => :attribute, :id => id())]
         self
       end
+
+      def valid_value?(value,attribute_idh=nil)
+        #TODO: not testing yet valid_value? for explicit_id type
+        #vacuously true
+        true
+      end
       
       private
       def raise_error_if_not_node_attr_id(attr_id,node)

@@ -534,8 +534,9 @@ module DTK
 
         repos.map{|repo|RepoUserAcl.update_model(repo,repo_user,DefaultAccessRights)}
       end
-      return match
+      return match, repo_user[:username]
     end
+
     DefaultAccessRights = "RW+"
 
     def remove_user_direct_access(model_handle,username)

@@ -75,6 +75,10 @@ module DTK
 
       attr_reader :assembly_instance,:project_idh,:service_module_branch
 
+      def project_uri()
+        @project_uri ||= @project_idh.get_uri()
+      end
+
       def add_content_for_clone!()
         node_idhs = assembly_instance.get_nodes().map{|r|r.id_handle()}
         if node_idhs.empty?
@@ -150,6 +154,8 @@ module DTK
       def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
+        #Need to explicitly prune because the port link refs used when creating from import uses ids
+        prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 
@@ -194,9 +200,6 @@ module DTK
         out_port_ref = qualified_ref(out_port)
 
         assembly_ref = self[:ref]
-        #TODO: make port_link_ref and port_refs shorter
-        #TODO: they dont match the numeric ref that is put in in original popultaion; so od are deleted and new asserted
-        #TODO: may a prori look up port ids
         port_link_ref = "#{assembly_ref}--#{in_node_ref}-#{in_port_ref}--#{out_node_ref}-#{out_port_ref}"
         port_link_hash = {
           "*input_id" => "/node/#{in_node_ref}/port/#{in_port_ref}",
@@ -205,7 +208,31 @@ module DTK
         }
         {port_link_ref => port_link_hash}
       end
-      
+
+      def prune_duplicate_port_links!(port_links)
+        return port_links if port_links.empty?()
+        relative_port_refs = port_links.values.map{|pl|[pl["*input_id"],pl["*output_id"]]}.flatten(1)
+        matches = get_ndx_target_port_refs(relative_port_refs)
+        port_links.each_pair do |ref,pl_info|
+          if input_match = matches[pl_info["*input_id"]]
+            if output_match = matches[pl_info["*output_id"]]
+              Log.error("Write code to see if link exists from #{input_match} to #{output_match}")
+              #Since it wil eitehr match on long name and then be pruned by update code that doesmatches on refs or
+              #it will be in 'id-form' so doing this query here:
+              #TODO: query; might also be able to leverage parent_id when query IDInfoTable
+            end
+          end
+        end
+        port_links
+      end
+
+      def get_ndx_target_port_refs(relative_port_refs_x)
+        relative_port_refs = relative_port_refs_x.map{|pr|pr.gsub(/^\//,'')}
+        IDInfoTable.get_ndx_ids_matching_relative_uris(@project_idh,project_uri(),relative_port_refs).inject(Hash.new) do |h,(k,v)|
+          h.merge("/#{k}" => v)
+        end
+      end
+
       def create_task_template_content(task_template)
         ref,create_hash = Task::Template.ref_and_create_hash(task_template[:content],task_template[:task_action])
         {ref => create_hash}

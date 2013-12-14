@@ -721,14 +721,14 @@ module DTK
     end
 
     def parse_dependencies(dependencies)
-      parsed_deps = []
-      dependencies.each do |dep|
+      dependencies.map do |dep|
         name, version = dep.split(',')
-        version_constraints = get_dependency_condition(version.strip!())
-        parsed_deps << {:name=>name,:version_constraints=>version_constraints}
+        parsed_dep = {:name=>name}
+        if version_constraints = (version && get_dependency_condition(version.strip!()))
+          parsed_dep.merge!(:version_constraints=>version_constraints)
+        end
+        parsed_dep
       end
-
-      return parsed_deps
     end
 
     def get_dependency_condition(versions)

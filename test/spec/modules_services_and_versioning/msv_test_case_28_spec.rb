@@ -35,7 +35,6 @@ describe "(Modules, Services and Versioning) Test Case 28: Import new module fro
     puts "(Modules, Services and Versioning) Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata"
     puts "**************************************************************************************************************************************"
     puts ""
-    $metadata = get_metadata(module_name)
   end
 
   context "Import module from git repo" do
@@ -46,21 +45,28 @@ describe "(Modules, Services and Versioning) Test Case 28: Import new module fro
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
+  context "ModuleFile metadata - get content from database" do
+    it "gets metadata content from database" do
+      $metadata = get_metadata(module_name)
+      expect($metadata).not_to be_nil
+    end
+  end
+
   context "ModuleFile metadata - name with value puppetlabs-firewall" do
   	it "is correctly parsed and saved into the tenant database" do
   		expect($metadata).to include(":name=>\"puppetlabs-firewall\"")
   	end
   end
 
-  context "ModuleFile metadata - version with value 0.0.2" do
+  context "ModuleFile metadata - version with value 0.4.2" do
   	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":version=>\"0.0.2\"")
+  		expect($metadata).to include(":version=>\"0.4.2\"")
   	end
   end
 
-  context "ModuleFile metadata - source with value #{git_ssh_repo_url}" do
+  context "ModuleFile metadata - source with value git://github.com/puppetlabs/puppetlabs-firewall.git" do
   	it "is correctly parsed and saved into the tenant database" do
-  		expect($metadata).to include(":source=>\"#{git_ssh_repo_url}\"")
+  		expect($metadata).to include(":source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\"")
   	end
   end
 

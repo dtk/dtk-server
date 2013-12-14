@@ -8,5 +8,5 @@ dtkserverdbconnection:
   adapter: postgresql
   database: dtk17
   username: postgres
-  host: dev17.r8network.com
+  host: localhost
   port: 5432

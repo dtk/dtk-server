@@ -401,14 +401,17 @@ module DTK
 
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
-                    version_constraints.each do |vconst|
-                      required_version = vconst[:version]
-                      br_version       = branch_version.gsub('.','')
-                      constraint_op    = vconst[:constraint]
-                      req_version      = required_version.gsub('.','')
-
-                      evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
-                      break if evaluated == false
+                    #version_constraints.nil? means no version consttaint
+                    if version_constraints
+                      version_constraints.each do |vconst|
+                        required_version = vconst[:version]
+                        br_version       = branch_version.gsub('.','')
+                        constraint_op    = vconst[:constraint]
+                        req_version      = required_version.gsub('.','')
+                        
+                        evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
+                        break if evaluated == false
+                      end
                     end
 
                     if evaluated

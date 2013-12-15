@@ -155,7 +155,8 @@ module DTK
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
         #Need to explicitly prune because the port link refs used when creating from import uses ids
-        prune_duplicate_port_links!(port_links) 
+        #TODO: put back in 
+        #prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 

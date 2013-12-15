@@ -378,11 +378,12 @@ module DTK
         parsed_dependencies = parse_dependencies(dependencies)
 
         parsed_dependencies.each do |parsed_dependency|
-pp [:test_current_state,all_matched, all_inconsistent, all_possibly_missing]
-pp [:test_dep,parsed_dependency]
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil
+
+          # if there is no component_modules in database, mark all dependencies as possibly missing
+          all_possibly_missing << dep_name if modules.empty?
 
           modules.each do |cmp_module|
             branches = cmp_module.get_module_branches()
@@ -393,7 +394,7 @@ pp [:test_dep,parsed_dependency]
                 branch_hash = eval(branch[:external_ref])
                 branch_name = branch_hash[:name].gsub('-','/').strip()
                 branch_version = branch_hash[:version]
-
+                
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
@@ -419,7 +420,8 @@ pp [:test_dep,parsed_dependency]
                     all_possibly_missing << dep_name
                   end   
                 end
-
+              else
+                all_possibly_missing << dep_name
               end
             end
 

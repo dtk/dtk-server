@@ -380,7 +380,7 @@ module DTK
         parsed_dependencies.each do |parsed_dependency|
 pp [:test_current_state,all_matched, all_inconsistent, all_possibly_missing]
 pp [:test_dep,parsed_dependency]
-          dep_name = parsed_dependency[:name]
+          dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil
 
@@ -397,7 +397,6 @@ pp [:test_dep,parsed_dependency]
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
-                  dep_name = dep_name.strip()
 
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)

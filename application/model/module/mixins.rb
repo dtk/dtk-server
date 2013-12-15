@@ -402,7 +402,9 @@ module DTK
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
                     #version_constraints.nil? means no version consttaint
-                    if version_constraints
+                    if version_constraints.nil?
+                      evaluated = true
+                    else
                       version_constraints.each do |vconst|
                         required_version = vconst[:version]
                         br_version       = branch_version.gsub('.','')

@@ -378,6 +378,8 @@ module DTK
         parsed_dependencies = parse_dependencies(dependencies)
 
         parsed_dependencies.each do |parsed_dependency|
+pp [:test_current_state,all_matched, all_inconsistent, all_possibly_missing]
+pp [:test_dep,parsed_dependency]
           dep_name = parsed_dependency[:name]
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil

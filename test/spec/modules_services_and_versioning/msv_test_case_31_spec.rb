@@ -38,7 +38,6 @@ def change_module_metadata(module_name, new_module_metadata)
   module_id = ActiveRecord::Base.connection.execute(sql1)
   sql2 = "update module.branch set external_ref = '#{new_module_metadata}' where component_id = #{module_id.first['id']}"
   module_metadata = ActiveRecord::Base.connection.execute(sql2)
-  puts module_metadata.nil?
   return module_metadata
 end
 
@@ -69,7 +68,7 @@ describe "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A
   context "Change ModuleFile metadata - version" do
   	it "changes version from 0.4.2 to 0.0.2" do
       changed_metadata = change_module_metadata(module_name_1, new_module_metadata)
-  		expect($changed_metadata).not_to be_nil
+  		expect(changed_metadata).not_to be_nil
   	end
   end
 

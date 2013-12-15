@@ -18,7 +18,7 @@ git_ssh_repo_url_2 = "git@github.com:puppetlabs/puppetlabs-postgresql.git"
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 $metadata = ""
-new_module_metadata = "{:name=>\"bakir-firewall\", :version=>\"0.0.2\", :source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\", :author=>\"puppetlabs\", :license=>\"ASL 2.0\", :summary=>\"Firewall Module\", :description=>\"Manages Firewalls such as iptables\", :project_page=>\"http://forge.puppetlabs.com/puppetlabs/firewall\"}"
+new_module_metadata = "{:name=>\"puppetlabs-firewall\", :version=>\"0.0.2\", :source=>\"git://github.com/puppetlabs/puppetlabs-firewall.git\", :author=>\"puppetlabs\", :license=>\"ASL 2.0\", :summary=>\"Firewall Module\", :description=>\"Manages Firewalls such as iptables\", :project_page=>\"http://forge.puppetlabs.com/puppetlabs/firewall\"}"
 dtk_common = DtkCommon.new('', '')
 
 def get_metadata(module_name)
@@ -31,17 +31,16 @@ def get_metadata(module_name)
 	return module_metadata.first['external_ref']
 end
 
-def change_module_metadata(new_module_metadata)
+def change_module_metadata(module_name, new_module_metadata)
   db_config = YAML::load(File.open('./config/config.yml'))
   ActiveRecord::Base.establish_connection(db_config["dtkserverdbconnection"])
   sql1 = "select id from module.component where ref = '#{module_name}'"
   module_id = ActiveRecord::Base.connection.execute(sql1)
-  sql2 = "update module.branch set external_ref = '#{new_module_metadata}' where id = #{module_id.first['id']}"
+  sql2 = "update module.branch set external_ref = '#{new_module_metadata}' where component_id = #{module_id.first['id']}"
   module_metadata = ActiveRecord::Base.connection.execute(sql2)
+  puts module_metadata.nil?
   return module_metadata
 end
-
-change_module_metadata(new_module_metadata)
 
 describe "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version" do
 
@@ -62,14 +61,14 @@ describe "(Modules, Services and Versioning) Test Case 31: NEG - Import Module A
 
   context "ModuleFile metadata - get content from database" do
     it "gets metadata content from database" do
-      $metadata = get_metadata(module_name)
+      $metadata = get_metadata(module_name_1)
       expect($metadata).not_to be_nil
     end
   end
 
   context "Change ModuleFile metadata - version" do
   	it "changes version from 0.4.2 to 0.0.2" do
-      changed_metadata = change_module_metadata(new_module_metadata)
+      changed_metadata = change_module_metadata(module_name_1, new_module_metadata)
   		expect($changed_metadata).not_to be_nil
   	end
   end

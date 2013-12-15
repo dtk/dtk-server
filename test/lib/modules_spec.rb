@@ -90,8 +90,8 @@ shared_context "NEG - Import module with dependency from provided git repo" do |
 end
 
 shared_context "NEG - Import module with version dependency from provided git repo" do |module_name, git_ssh_repo_url|
-  it "imports #{module_name} module from #{git_ssh_repo_url} repo but with version dependency error on #{dependency_module}" do
-    puts "NEG - Import module with version dependency from git repo:", "--------------------------------------------------------"
+  it "imports #{module_name} module from #{git_ssh_repo_url} repo but with version dependency error" do
+    puts "NEG - Import module with version dependency from git repo:", "----------------------------------------------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
     pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))

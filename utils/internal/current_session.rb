@@ -37,4 +37,6 @@ module XYZ
 
   class SessionError < Error
   end
+  class SessionTimeout < Error
+  end
 end

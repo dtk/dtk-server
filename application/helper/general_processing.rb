@@ -16,6 +16,10 @@ module Ramaze::Helper
 
     def auth_unauthorized_response(message)
       rest_request? ? respond(message,401) : redirect(R8::Config[:login][:path])
+    end    
+
+    def auth_forbidden_response(message)
+      rest_request? ? respond(message,403) : redirect(R8::Config[:login][:path])
     end
 
     def get_user()

@@ -178,6 +178,8 @@ module XYZ
       result = nil
       begin
        result = call_action(action,parent_model_name)
+      rescue DTK::SessionTimeout => e
+        auth_forbidden_response(e.message)
       rescue DTK::SessionError => e
         auth_unauthorized_response(e.message)
         # TODO: Look into the code so we can return 401 HTTP status

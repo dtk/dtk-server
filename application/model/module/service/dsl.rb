@@ -3,6 +3,36 @@ module DTK
     r8_nested_require('dsl','assembly_import')
     r8_nested_require('dsl','assembly_export')
     r8_nested_require('dsl','parser')
+
+    module DSLVersionInfo
+      def self.default_integer_version()
+        ret = R8::Config[:dsl][:service][:integer_version][:default]
+        ret && ret.to_i
+      end
+      def self.version_to_integer_version(version,opts={})
+        unless integer_version = VersionToIntegerVersion[version.to_s]
+          error_msg = "Illegal version (#{version}) found in assembly dsl file"
+          if file_path = opts[:file_path]
+            error_msg += " (#{file_path})"
+          end
+          raise ErrorUsage.new(error_msg)
+        end
+        integer_version
+      end
+
+      def self.integer_version_to_version(integer_version)
+        IntegerVersionToVersion[integer_version]
+      end
+      VersionToIntegerVersion  = {
+        "0.9.1" => 3
+      }
+      IntegerVersionToVersion = {
+        1 => nil, #1 and 2 do not have a version stamped in file
+        2 => nil,
+        3 => "0.9.1"
+      }
+    end
+
     module DSLClassMixin
       def delete_assembly_dsl?(assembly_idh)
         sp_hash = {

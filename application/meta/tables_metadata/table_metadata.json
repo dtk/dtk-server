@@ -122,7 +122,6 @@
   "workspace_attribute": {
     "order": [
       "id",
-      "name",
       "path",
       "value",
       "type"
@@ -130,7 +129,6 @@
     "mapping": {
       "id": "dtk_id",
       "path": "display_name",
-      "name": "name",
       "value": "value",
       "type": "datatype"
     }
@@ -138,19 +136,17 @@
   "workspace_attribute_w_link": {
     "order": [
       "id",
-      "name",
       "path",
       "value",
-      "linked_to",
-      "type"
+      "type",
+      "linked_to"
     ],
     "mapping": {
       "id": "dtk_id",
       "path": "display_name",
-      "name": "name",
       "value": "value",
-      "linked_to": "linked_to_display_form",
-      "type": "datatype"
+      "type": "datatype",
+      "linked_to": "linked_to_display_form"
     }
   },
   "attribute_w_version": {

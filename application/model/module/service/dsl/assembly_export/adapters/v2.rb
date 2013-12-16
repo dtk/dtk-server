@@ -6,9 +6,11 @@ module DTK
         assembly_hash = assembly_output_hash()
         node_bindings_hash = node_bindings_output_hash()
         temporal_ordering = temporal_ordering_hash()
-        ret = SimpleOrderedHash.new(
+        dsl_version = dsl_version?()
+        SimpleOrderedHash.new(
          [
           {:name => assembly_hash()[:display_name]},
+          dsl_version && {:dsl_version => dsl_version},
           {:node_bindings => node_bindings_hash}, 
           {:assembly => assembly_hash},
           temporal_ordering && {:workflow => temporal_ordering}
@@ -43,7 +45,7 @@ module DTK
           i = 0; found = false
           while i < cmps.size
             if match_component?(cmps[i],in_parsed_port[:component_name])
-              cmps[i] = add_service_link_to_cmp(cmps[i],out_parsed_port)
+              cmps[i] = add_component_link_to_cmp(cmps[i],out_parsed_port)
               found = true
             end
             i = i+1
@@ -88,7 +90,7 @@ module DTK
         match_term == component_name
       end
 
-      def add_service_link_to_cmp(component_in_ret,out_parsed_port)
+      def add_component_link_to_cmp(component_in_ret,out_parsed_port)
         ret = Hash.new
         if component_in_ret.kind_of?(Hash)
           ret = component_in_ret
@@ -139,10 +141,27 @@ module DTK
         return ret unless attr_overrides
         av_list = attr_overrides.values.map do |attr|
           unless attr.is_title_attribute()
-            {attr[:display_name] => attr[:attribute_value]}
+            {attr[:display_name] => attr_override_value_output_form(attr)}
           end
         end.compact.sort{|a,b|a.keys.first <=> b.keys.first}
         (!av_list.empty?)  && SimpleOrderedHash.new(:attributes => SimpleOrderedHash.new(av_list))
+      end
+
+      def attr_override_value_output_form(attr)
+        if raw_val = attr[:attribute_value]
+          converted_val = 
+            case attr[:data_type]
+              when 'boolean'
+                if raw_val == 'true'
+                  true
+                elsif raw_val == 'false'
+                  false
+                end
+              when 'integer'
+                raw_val.to_i
+            end
+          converted_val || raw_val
+        end
       end
 
     end

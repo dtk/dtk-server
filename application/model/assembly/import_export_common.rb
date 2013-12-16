@@ -46,18 +46,18 @@ module DTK
           raise Error.new("ill-formed port ref (#{port_ref})")
         end     
       end
-      def self.parse_service_link(input_node,input_cmp_name,service_link_hash)
-        unless service_link_hash.size == 1
-          raise Error.new("ill-formed service link (#{service_link_hash.inject})")
+      def self.parse_component_link(input_node,input_cmp_name,component_link_hash)
+        unless component_link_hash.size == 1
+          raise Error.new("ill-formed component link (#{component_link_hash.inject})")
         end
-        link_def_ref = service_link_hash.keys.first
-        if service_link_hash.values.first =~ ServiceLinkTarget
+        link_def_ref = component_link_hash.keys.first
+        if component_link_hash.values.first =~ ServiceLinkTarget
           output_node = $1; output_cmp_name = $2
           input = parsed_endpoint(input_node,input_cmp_name,link_def_ref)
           output = parsed_endpoint(output_node,output_cmp_name,link_def_ref)
           {:input => input, :output => output}
         else
-          raise Error.new("ill-formed service link (#{service_link_hash.inject}")
+          raise Error.new("ill-formed component link (#{component_link_hash.inject}")
         end     
       end
       class << self

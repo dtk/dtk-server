@@ -4,3 +4,9 @@ r8server:
   username: dtk17-client
   password: r8server
   log: /home/dtk17/thin/log/thin.log
+dtkserverdbconnection:
+  adapter: postgresql
+  database: dtk17
+  username: postgres
+  host: localhost
+  port: 5432

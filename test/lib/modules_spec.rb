@@ -71,6 +71,42 @@ shared_context "NEG - Create module from provided git repo" do |module_name, git
   end
 end
 
+shared_context "NEG - Import module with dependency from provided git repo" do |module_name, git_ssh_repo_url, dependency_module|
+  it "imports #{module_name} module from #{git_ssh_repo_url} repo but with dependency warning on #{dependency_module}" do
+    puts "NEG - Import module with dependency from git repo:", "--------------------------------------------------"
+    pass = false
+    value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
+    if (value.include? "There are some missing dependencies: [\"#{dependency_module}\"]")
+      pass = true 
+    else
+      pass = false
+    end
+    puts "Module #{module_name} was created successfully from provided git repo but with dependency missing warning!" if pass == true
+    puts "Module #{module_name} was not created successfully from provided git repo or was created but without dependency warning!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "NEG - Import module with version dependency from provided git repo" do |module_name, git_ssh_repo_url|
+  it "imports #{module_name} module from #{git_ssh_repo_url} repo but with version dependency error" do
+    puts "NEG - Import module with version dependency from git repo:", "----------------------------------------------------------"
+    pass = false
+    value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
+    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
+    if (value.include? "There are some inconsistent dependencies")
+      pass = true 
+    else
+      pass = false
+    end
+    puts "Module #{module_name} was created successfully from provided git repo but with version dependency missing error!" if pass == true
+    puts "Module #{module_name} was not created successfully from provided git repo or was created but without dependency error!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
 shared_context "Create module" do |module_name|
   it "creates #{module_name} module from content on local machine" do
     puts "Create module:", "--------------"

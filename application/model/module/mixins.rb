@@ -371,16 +371,24 @@ module DTK
     end
 
     def check_modulefile_dependencies(modules, external_ref, current_module)
-      all_matched, all_inconsistent, all_possibly_missing = [], [], []
+      parsed_dependencies, all_matched, all_inconsistent, all_possibly_missing = [], [], [], []
       dependencies = external_ref[:dependencies]
       
       unless dependencies.empty?
-        parsed_dependencies = parse_dependencies(dependencies)
+        # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
+        begin
+          parsed_dependencies = parse_dependencies(dependencies)
+        rescue Exception => e
+          Log.error("#{e}")
+        end
 
         parsed_dependencies.each do |parsed_dependency|
-          dep_name = parsed_dependency[:name]
+          dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil
+
+          # if there is no component_modules in database, mark all dependencies as possibly missing
+          all_possibly_missing << dep_name if modules.empty?
 
           modules.each do |cmp_module|
             branches = cmp_module.get_module_branches()
@@ -391,35 +399,39 @@ module DTK
                 branch_hash = eval(branch[:external_ref])
                 branch_name = branch_hash[:name].gsub('-','/').strip()
                 branch_version = branch_hash[:version]
-
+                
                 if (branch_name && branch_version)
                   matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
                   branch_version = matched_branch_version[1]
 
-                  dep_name = parsed_dependency[:name].strip()
-                  version_constraints = parsed_dependency[:version_constraints]
-
+                  evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
-                    evaluated = false
-                    version_constraints.each do |vconst|
-                      bv = branch_version.gsub('.','')
-                      c = vconst[:constraint]
-                      v = vconst[:version].gsub('.','')
-                      
-                      evaluated = eval("#{bv}#{c}#{v}")
-                      break if evaluated == false
+                    #version_constraints.nil? means no version consttaint
+                    if version_constraints.nil?
+                      evaluated = true
+                    else
+                      version_constraints.each do |vconst|
+                        required_version = vconst[:version]
+                        br_version       = branch_version.gsub('.','')
+                        constraint_op    = vconst[:constraint]
+                        req_version      = required_version.gsub('.','')
+                        
+                        evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
+                        break if evaluated == false
+                      end
                     end
 
                     if evaluated
                       all_matched << dep_name 
                     else
-                      all_inconsistent << dep_name
+                      all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
                     end
                   else
                     all_possibly_missing << dep_name
                   end   
                 end
-
+              else
+                all_possibly_missing << dep_name
               end
             end
 
@@ -722,14 +734,14 @@ module DTK
     end
 
     def parse_dependencies(dependencies)
-      parsed_deps = []
-      dependencies.each do |dep|
+      dependencies.map do |dep|
         name, version = dep.split(',')
-        version_constraints = get_dependency_condition(version.strip!())
-        parsed_deps << {:name=>name,:version_constraints=>version_constraints}
+        parsed_dep = {:name=>name}
+        if version_constraints = (version && get_dependency_condition(version.strip!()))
+          parsed_dep.merge!(:version_constraints=>version_constraints)
+        end
+        parsed_dep
       end
-
-      return parsed_deps
     end
 
     def get_dependency_condition(versions)

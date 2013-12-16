@@ -371,11 +371,16 @@ module DTK
     end
 
     def check_modulefile_dependencies(modules, external_ref, current_module)
-      all_matched, all_inconsistent, all_possibly_missing = [], [], []
+      parsed_dependencies, all_matched, all_inconsistent, all_possibly_missing = [], [], [], []
       dependencies = external_ref[:dependencies]
       
       unless dependencies.empty?
-        parsed_dependencies = parse_dependencies(dependencies)
+        # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
+        begin
+          parsed_dependencies = parse_dependencies(dependencies)
+        rescue Exception => e
+          Log.error("#{e}")
+        end
 
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()

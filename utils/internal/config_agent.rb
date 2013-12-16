@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class ConfigAgent
     def self.parse_given_module_directory(type,dir)
       load(type).parse_given_module_directory(dir)
@@ -8,6 +8,13 @@ module XYZ
     end
     def self.parse_given_file_content(type,file_path,file_content)
       load(type).parse_given_file_content(file_path,file_content)
+    end
+
+    def self.parse_external_ref?(type,impl_obj)
+      processor = load(type)
+      if processor.respond_to?('parse_external_ref?'.to_sym)
+        processor.parse_external_ref?(impl_obj)
+      end
     end
 
     #TODO: make private and wrap as ConfigAgent method like do for parse

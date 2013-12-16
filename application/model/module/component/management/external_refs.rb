@@ -1,21 +1,18 @@
 module DTK; class ComponentModule
   module ManagementMixin
     module ExternalRefsMixin
-      def process_external_refs(module_branch,project,impl_obj)
+      def process_external_refs(module_branch,config_agent_type,project,impl_obj)
         ret = Hash.new
-        if external_ref = set_external_ref?(module_branch,impl_obj)
+        if external_ref = set_external_ref?(module_branch,config_agent_type,impl_obj)
           ret = check_and_ret_external_ref_dependencies?(external_ref,project)
         end
         ret
       end
 
      private
-      def set_external_ref?(impl_obj,module_branch)
-       # if module contains Modulefile, parse information and store them to module_branch external_ref
-        if ComponentDSL.contains_modulefile?(impl_obj)
-          external_ref = ComponentDSL.get_modulefile_raw_content_and_info(impl_obj)
-
-          # update external_ref columng in module.branch table with data parsed from Modulefile
+      def set_external_ref?(module_branch,config_agent_type,impl_obj)
+        if external_ref = ConfigAgent.parse_external_ref?(config_agent_type,impl_obj) 
+          # update external_ref column in module.branch table with data parsed from Modulefile
           module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
           external_ref
         end

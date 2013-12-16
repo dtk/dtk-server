@@ -70,14 +70,6 @@ module DTK
       end
     end
 
-    # used for parsing Modulefile when importing module from git (import-git)
-    def self.contains_modulefile?(impl_obj)
-      depth = 1
-      RepoManager.ls_r(depth,{:file_only => true},impl_obj).find do |f|
-        f.eql?("Modulefile")
-      end
-    end
-
     def self.default_integer_version()
       R8::Config[:dsl][:component][:integer_version][:default].to_i
     end
@@ -161,35 +153,6 @@ module DTK
         end
       info = get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version,format_type)
       {:hash_content => convert_to_hash(info[:content],info[:format_type])}.merge(Aux::hash_subset(info,[:format_type,:dsl_filename]))
-    end
-
-    def self.get_modulefile_raw_content_and_info(impl_obj)
-      content_hash, dependencies = {}, []
-      type = impl_obj[:type]
-      unless dsl_filename = contains_modulefile?(impl_obj)
-        raise Error.new("Cannot find DSL file")
-      end
-
-      content = RepoManager.get_file_content(dsl_filename,:implementation => impl_obj)
-      if content
-        content = content.split("\n")
-        content.each do |el|
-          next if(el.start_with?("#") || el.empty?)
-          el.gsub!(/\'/,'')
-
-          match = el.match(/(\S+)\s(.+)/)
-          key, value = match[1], match[2]
-          if key.to_s.eql?('dependency')
-            dependencies << value
-          else
-            content_hash.merge!(key.to_sym=>value.to_s)
-          end
-        end
-      end
-
-      content_hash.merge!(:type => type) if type
-      # content_hash.merge!(:dependencies => dependencies)
-      {:content => content_hash, :dsl_filename => dsl_filename, :dependencies => dependencies}
     end
 
     def self.get_dsl_file_raw_content_and_info(impl_obj,dsl_integer_version=nil,format_type=nil)

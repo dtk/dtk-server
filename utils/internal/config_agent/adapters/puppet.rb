@@ -1,12 +1,13 @@
 r8_nested_require('puppet','error_processing')
 r8_nested_require('puppet','parser')
 r8_nested_require('puppet','generate_node_manifest')
-module XYZ
+module DTK
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
       include PuppetParser
       include PuppetErrorProcessing
       include PuppetGenerateNodeManifest
+
       def ret_msg_content(config_node)
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)

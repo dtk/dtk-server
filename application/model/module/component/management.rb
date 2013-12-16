@@ -148,7 +148,7 @@ module DTK; class ComponentModule
       external_dependencies = Hash.new
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
-        external_dependencies = process_external_refs(module_branch,project,impl_obj)
+        external_dependencies = process_external_refs(module_branch,config_agent_type,project,impl_obj)
       end
 
 pp [:external_dependencies ,external_dependencies]

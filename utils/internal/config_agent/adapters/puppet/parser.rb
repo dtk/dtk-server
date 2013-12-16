@@ -7,6 +7,11 @@ require 'puppet/parser'
 
 module DTK
   module PuppetParser
+    r8_nested_require('parser','modulefile')
+    def parse_external_ref?(impl_obj)
+      Modulefile.parse?(impl_obj)
+    end
+
     def parse_given_module_directory(impl_obj)
       #TODO: only handling parsing of .pp now
       manifest_file_names = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}

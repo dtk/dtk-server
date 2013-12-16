@@ -665,32 +665,5 @@ module DTK
       end.values
     end
 
-    def parse_dependencies(dependencies)
-      dependencies.map do |dep|
-        name, version = dep.split(',')
-        parsed_dep = {:name=>name}
-        if version_constraints = (version && get_dependency_condition(version.strip!()))
-          parsed_dep.merge!(:version_constraints=>version_constraints)
-        end
-        parsed_dep
-      end
-    end
-
-    def get_dependency_condition(versions)
-      conds, multiple_versions = [], []
-      # multiple_versions = versions.split(' ')
-      
-      matched_versions = versions.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
-      multiple_versions << matched_versions[1] if matched_versions[1]
-      multiple_versions << matched_versions[2] if matched_versions[2]
-      
-      multiple_versions.each do |version|
-        match = version.to_s.match(/(^>*=*<*)(.+)/)
-        conds << {:version=>match[2], :constraint=>match[1]}
-      end
-
-      return conds
-    end
-
   end
 end

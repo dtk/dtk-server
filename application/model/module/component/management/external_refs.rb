@@ -17,6 +17,35 @@ module DTK; class ComponentModule
           external_ref
         end
       end
+
+      #TODO: move this to under config_agent/puppet
+      def parse_dependencies(dependencies)
+        dependencies.map do |dep|
+          name, version = dep.split(',')
+          parsed_dep = {:name=>name}
+          if version_constraints = (version && get_dependency_condition(version.strip!()))
+            parsed_dep.merge!(:version_constraints=>version_constraints)
+          end
+          parsed_dep
+        end
+      end
+      
+      #TODO: move this to under config_agent/puppet
+      def get_dependency_condition(versions)
+        conds, multiple_versions = [], []
+        # multiple_versions = versions.split(' ')
+        
+        matched_versions = versions.match(/(^[>=<]+\s*\d\.\d\.\d)\s*([>=<]+\s*\d\.\d\.\d)*/)
+        multiple_versions << matched_versions[1] if matched_versions[1]
+        multiple_versions << matched_versions[2] if matched_versions[2]
+        
+        multiple_versions.each do |version|
+          match = version.to_s.match(/(^>*=*<*)(.+)/)
+        conds << {:version=>match[2], :constraint=>match[1]}
+        end
+
+        conds
+      end
  
       def check_and_ret_external_ref_dependencies?(external_ref,project)
         ret = Hash
@@ -26,11 +55,11 @@ module DTK; class ComponentModule
         parsed_dependencies, all_matched, all_inconsistent, all_possibly_missing = [], [], [], []
           # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
         begin
-          parsed_dependencies = ComponentModule.parse_dependencies(dependencies)
+          parsed_dependencies = parse_dependencies(dependencies)
          rescue Exception => e
-          Log.error_pp([e,e.backtrace(0..20)])
+          Log.error_pp([e,e.backtrace[0..20]])
         end
-        all_modules = ComponentModule.get_all(project)
+        all_modules = ComponentModule.get_all(project.id_handle())
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]
@@ -41,7 +70,7 @@ module DTK; class ComponentModule
           
           all_modules.each do |cmp_module|
             branches = cmp_module.get_module_branches()
-            next if cmp_module[:id].eql?(is())
+            next if cmp_module[:id].eql?(id())
                     
             branches.each do |branch|
               unless branch[:external_ref].nil?

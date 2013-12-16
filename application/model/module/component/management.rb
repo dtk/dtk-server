@@ -1,6 +1,9 @@
 #Methods for creating, importing, importing, etc modules
 module DTK; class ComponentModule
   module ManagementMixin
+    r8_nested_require('management','external_refs')
+    extend ExternalRefsMixin
+
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
@@ -18,23 +21,13 @@ module DTK; class ComponentModule
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
 
-      repo = repo_idh.create_object()
-      create_needed_objects_and_dsl?(repo,version,opts)
-    end
-
-    def update_from_git_modulefile(version)
-      module_branch = get_workspace_module_branch(version)
-      impl_obj = module_branch.get_implementation()
-      external_ref, dependencies = {}, {}
-
-       # if module contains Modulefile, parse information and store them to module_branch external_ref
-      if ComponentDSL.contains_modulefile?(impl_obj)
-        external_ref = ComponentDSL.get_modulefile_raw_content_and_info(impl_obj)
-
-        # update external_ref columng in module.branch table with data parsed from Modulefile
-        module_branch.update_external_ref(external_ref[:content]) if external_ref[:content]
+      external_dependencies = Hash.new
+      if opts[:process_external_refs]
+        external_dependencies = process_external_refs(module_branch)
       end
-      external_ref
+      repo = repo_idh.create_object()
+      ret = create_needed_objects_and_dsl?(repo,version,opts)
+      external_dependencies.empty? ? ret : ret.merge(:external_dependencies => external_dependencies)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)

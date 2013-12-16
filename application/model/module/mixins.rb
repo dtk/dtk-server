@@ -356,93 +356,25 @@ module DTK
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
       include_versions   = opts.array(:detail_to_include).include?(:versions)
       include_any_detail = ((include_remotes or include_versions) ? true : nil)
-      sp_hash = {
-        :cols => [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact,
-        :filter => [:eq, :project_project_id, project_idh.get_id()]
-      }
-      mh = project_idh.createMH(model_type())
-      unsorted_ret = get_objs(mh,sp_hash)
+
+      cols = [:id, :display_name, :dsl_parsed, include_any_detail && :module_branches_with_repos].compact
+      unsorted_ret = get_all(project_idh,cols)
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
+        mh = project_idh.createMH(model_type())
         unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,Opts.new(:include_remotes => include_remotes,:include_versions => include_versions, :remote_rep => remote_rep, :diff => diff))
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def check_modulefile_dependencies(modules, external_ref, current_module)
-      parsed_dependencies, all_matched, all_inconsistent, all_possibly_missing = [], [], [], []
-      dependencies = external_ref[:dependencies]
-      
-      unless dependencies.empty?
-        # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
-        begin
-          parsed_dependencies = parse_dependencies(dependencies)
-        rescue Exception => e
-          Log.error("#{e}")
-        end
-
-        parsed_dependencies.each do |parsed_dependency|
-          dep_name = parsed_dependency[:name].strip()
-          version_constraints = parsed_dependency[:version_constraints]
-          match, inconsistent, possibly_missing = nil, nil, nil
-
-          # if there is no component_modules in database, mark all dependencies as possibly missing
-          all_possibly_missing << dep_name if modules.empty?
-
-          modules.each do |cmp_module|
-            branches = cmp_module.get_module_branches()
-            next if(cmp_module[:id].eql?(current_module[:id]))
-
-            branches.each do |branch|
-              unless branch[:external_ref].nil?
-                branch_hash = eval(branch[:external_ref])
-                branch_name = branch_hash[:name].gsub('-','/').strip()
-                branch_version = branch_hash[:version]
-                
-                if (branch_name && branch_version)
-                  matched_branch_version = branch_version.match(/(\d+\.\d+\.\d+)/)
-                  branch_version = matched_branch_version[1]
-
-                  evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
-                  if dep_name.eql?(branch_name)
-                    #version_constraints.nil? means no version consttaint
-                    if version_constraints.nil?
-                      evaluated = true
-                    else
-                      version_constraints.each do |vconst|
-                        required_version = vconst[:version]
-                        br_version       = branch_version.gsub('.','')
-                        constraint_op    = vconst[:constraint]
-                        req_version      = required_version.gsub('.','')
-                        
-                        evaluated = eval("#{br_version}#{constraint_op}#{req_version}")
-                        break if evaluated == false
-                      end
-                    end
-
-                    if evaluated
-                      all_matched << dep_name 
-                    else
-                      all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
-                    end
-                  else
-                    all_possibly_missing << dep_name
-                  end   
-                end
-              else
-                all_possibly_missing << dep_name
-              end
-            end
-
-          end
-        end
-
-      end
-      all_inconsistent = (all_inconsistent - all_matched)
-      all_possibly_missing = (all_possibly_missing - all_inconsistent - all_matched)
-      
-      {:match => all_matched.uniq, :inconsistent => all_inconsistent.uniq, :possibly_missing => all_possibly_missing.uniq}
+    def get_all(project_idh,cols=nil)
+      sp_hash = {
+        :cols => cols || [:id,:group_id,:isplay_name]
+        :filter => [:eq, :project_project_id, project_idh.get_id()]
+      }
+      mh = project_idh.createMH(model_type())
+      get_objs(mh,sp_hash)
     end
 
     module ListMethodHelpers

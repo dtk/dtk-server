@@ -25,21 +25,8 @@ module DTK
       repo_idh = id_handle(repo_id,:repo)
       version = ret_version()
       scaffold = ret_request_params(:scaffold_if_no_dsl)
-      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true}
-      dsl_created_info = component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
-      rest_ok_response dsl_created_info
-    end
-
-    def rest__update_from_git_modulefile()
-      version = ret_version()
-      project = get_default_project()
-      component_module = create_obj(:component_module_id)
-
-      external_ref = component_module.update_from_git_modulefile(version)
-      opts = Opts.new(:project_idh => project.id_handle())
-      modules = ComponentModule.list(opts)
-
-      rest_ok_response ComponentModule.check_modulefile_dependencies(modules, external_ref, component_module)
+      opts = {:scaffold_if_no_dsl => scaffold, :do_not_raise => true, :process_external_refs => true}
+      rest_ok_response component_module.update_from_initial_create(commit_sha,repo_idh,version,opts)
     end
 
     def rest__update_model_from_clone()

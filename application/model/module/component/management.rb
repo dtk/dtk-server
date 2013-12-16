@@ -8,9 +8,9 @@ module DTK; class ComponentModule
       info = module_and_branch_info #for succinctness
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
-      parsed = create_needed_objects_and_dsl?(repo,version, opts)
+      ret = create_needed_objects_and_dsl?(repo,version, opts)
       module_branch.set_sha(commit_sha)
-      parsed
+      ret
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
@@ -135,6 +135,7 @@ module DTK; class ComponentModule
     end
 
     def create_needed_objects_and_dsl?(repo,version,opts={})
+      ret = Hash.new
       project = get_project()
       config_agent_type = config_agent_type_default()
       module_name = module_name()
@@ -145,13 +146,14 @@ module DTK; class ComponentModule
 
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      external_dependencies = Hash.new
+      external_dependencies = nil
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
-        external_dependencies = process_external_refs(module_branch,config_agent_type,project,impl_obj)
+        if external_dependencies = process_external_refs(module_branch,config_agent_type,project,impl_obj)
+          ret.merge!(:external_dependencies => external_dependencies)
+        end
       end
 
-pp [:external_dependencies ,external_dependencies]
       dsl_created_info = Hash.new()
       dsl_parsed_info  = Hash.new()
 
@@ -160,10 +162,9 @@ pp [:external_dependencies ,external_dependencies]
       elsif opts[:scaffold_if_no_dsl] 
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-      dsl_info = {:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if (dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
-      
-      dsl_info
+      ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
+      ret.merge!(:dsl_parsed_info => dsl_parsed_info) if (dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
+      ret
     end
 
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})

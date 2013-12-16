@@ -370,7 +370,7 @@ module DTK
 
     def get_all(project_idh,cols=nil)
       sp_hash = {
-        :cols => cols || [:id,:group_id,:isplay_name]
+        :cols => cols || [:id,:group_id,:isplay_name],
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())

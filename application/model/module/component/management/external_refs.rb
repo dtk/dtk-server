@@ -1,17 +1,16 @@
 module DTK; class ComponentModule
   module ManagementMixin
     module ExternalRefsMixin
-      def process_external_refs(module_branch)
+      def process_external_refs(module_branch,project,impl_obj)
         ret = Hash.new
-        if external_ref = set_external_ref?(module_branch)
-          ret = check_and_ret_external_ref_dependencies?(external_ref)
+        if external_ref = set_external_ref?(module_branch,impl_obj)
+          ret = check_and_ret_external_ref_dependencies?(external_ref,project)
         end
         ret
       end
 
      private
-      def set_external_ref?(module_branch)
-        impl_obj = module_branch.get_implementation()
+      def set_external_ref?(impl_obj,module_branch)
        # if module contains Modulefile, parse information and store them to module_branch external_ref
         if ComponentDSL.contains_modulefile?(impl_obj)
           external_ref = ComponentDSL.get_modulefile_raw_content_and_info(impl_obj)
@@ -22,7 +21,7 @@ module DTK; class ComponentModule
         end
       end
  
-      def check_and_ret_external_ref_dependencies?(external_ref)
+      def check_and_ret_external_ref_dependencies?(external_ref,project)
         ret = Hash
         unless dependencies = external_ref[:dependencies]
           return ret
@@ -34,7 +33,7 @@ module DTK; class ComponentModule
          rescue Exception => e
           Log.error_pp([e,e.backtrace(0..20)])
         end
-        all_modules = ComponentModule.get_all(get_project().id_handle())
+        all_modules = ComponentModule.get_all(project)
         parsed_dependencies.each do |parsed_dependency|
           dep_name = parsed_dependency[:name].strip()
           version_constraints = parsed_dependency[:version_constraints]

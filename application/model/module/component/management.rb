@@ -2,7 +2,7 @@
 module DTK; class ComponentModule
   module ManagementMixin
     r8_nested_require('management','external_refs')
-    extend ExternalRefsMixin
+    include ExternalRefsMixin
 
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness
@@ -20,14 +20,8 @@ module DTK; class ComponentModule
 
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
-
-      external_dependencies = Hash.new
-      if opts[:process_external_refs]
-        external_dependencies = process_external_refs(module_branch)
-      end
       repo = repo_idh.create_object()
-      ret = create_needed_objects_and_dsl?(repo,version,opts)
-      external_dependencies.empty? ? ret : ret.merge(:external_dependencies => external_dependencies)
+      create_needed_objects_and_dsl?(repo,version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
@@ -151,7 +145,13 @@ module DTK; class ComponentModule
 
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
+      external_dependencies = Hash.new
+      if opts[:process_external_refs]
+        module_branch = module_branch_idh.create_object()
+        external_dependencies = process_external_refs(module_branch,project,impl_obj)
+      end
 
+pp [:external_dependencies ,external_dependencies]
       dsl_created_info = Hash.new()
       dsl_parsed_info  = Hash.new()
 

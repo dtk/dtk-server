@@ -14,7 +14,7 @@ module DTK; class ComponentModule
     def matching_module_branches?()
       if match_hashes = self[:match_hashes]
         ndx_ret = match_hashes.values.inject(Hash.new) do |h,r|
-          h.merge(r.get_id() => r)
+          h.merge(r.id() => r)
         end
         ndx_ret.values unless ndx_ret.empty?
       end
@@ -124,7 +124,7 @@ module DTK; class ComponentModule
                     end
                     
                     if evaluated
-                      all_match_hashes.merge!(dep_name  => branch.id_handle())
+                      all_match_hashes.merge!(dep_name  => branch)
                     else
                       all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
                     end

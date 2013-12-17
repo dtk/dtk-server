@@ -2,7 +2,7 @@ module DTK
   class ComponentModule
     module ParseToCreateDSLMixin
       #returns empty hash if no dsl field created or instead hash with keys: :path and :content  
-      def parse_impl_to_create_dsl(config_agent_type,impl_obj)
+      def parse_impl_to_create_dsl(config_agent_type,impl_obj,opts={})
         parsing_error = nil
         render_hash = nil
         begin
@@ -10,7 +10,7 @@ module DTK
           dsl_generator = ComponentDSL::GenerateFromImpl.create()
           #refinement_hash is version neutral form gotten from version specfic dsl_generator
           refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name(),impl_obj.id_handle())
-          render_hash = refinement_hash.render_hash_form()
+          render_hash = refinement_hash.render_hash_form(opts)
         rescue ErrorUsage => e
           #parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
           parsing_error = e

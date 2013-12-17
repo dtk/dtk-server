@@ -23,14 +23,19 @@ module DTK; class ComponentDSL
             hash_key = render_cmp_ref(cmp.hash_key)
             add_component!(ret,hash_key,cmp.render_hash_form(opts))
           end
+          set_include_modules!(ret,opts)
           ret
         end
 
         def render_to_file(file,format)
         end
+
        private
         def object_attributes()
           [:components]
+        end
+
+        def set_include_modules!(ret,opts={})
         end
       
         def process_imported_resources()

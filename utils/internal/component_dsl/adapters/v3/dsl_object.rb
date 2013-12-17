@@ -1,6 +1,23 @@
 module DTK; class ComponentDSL; class V3
   DSLObjectBase = ComponentDSL::V2::DSLObject
   class DSLObject < DSLObjectBase
+    class Module < DSLObjectBase::Module
+      def set_include_modules!(ret,opts={})
+        if module_branches = opts[:include_module_branches]
+          ret.set_unless_nil("includes",module_refs(module_branches))
+        end
+      end
+
+     private
+      def module_refs(module_branches)
+        #TODO: more efficient to bulk up query 
+        #TODO: checking verskion associated with module branch
+        unless module_branches.empty?()
+          module_branches.map{|mb|mb.get_module()[:display_name]}
+        end
+      end
+    end
+
     class Attribute < DSLObjectBase::Attribute
       def render_hash_form(opts={})
         ret = RenderHash.new

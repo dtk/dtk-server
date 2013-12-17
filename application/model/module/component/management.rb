@@ -163,8 +163,11 @@ module DTK; class ComponentModule
       if ComponentDSL.contains_dsl_file?(impl_obj)
         dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
       elsif opts[:scaffold_if_no_dsl] 
-pp [:matching_branches,matching_branches]
-        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
+        opts = Hash.new
+        if matching_branches
+          opts.merge!(:include_module_branches => matching_branches)
+        end
+        dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts)
       end
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
       ret.merge!(:dsl_parsed_info => dsl_parsed_info) if (dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))

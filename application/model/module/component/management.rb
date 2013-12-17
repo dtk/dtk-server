@@ -146,11 +146,14 @@ module DTK; class ComponentModule
 
       module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      external_dependencies = nil
+      external_dependencies = matching_branches = nil
       if opts[:process_external_refs]
         module_branch = module_branch_idh.create_object()
-        if external_dependencies = process_external_refs(module_branch,config_agent_type,project,impl_obj)
-          ret.merge!(:external_dependencies => external_dependencies)
+        if external_deps = process_external_refs(module_branch,config_agent_type,project,impl_obj)
+          if poss_problems = external_deps.possible_problems?()
+            ret.merge!(:external_dependencies => poss_problems)
+          end
+          matching_branches = external_deps.matching_module_branches?()
         end
       end
 
@@ -160,6 +163,7 @@ module DTK; class ComponentModule
       if ComponentDSL.contains_dsl_file?(impl_obj)
         dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
       elsif opts[:scaffold_if_no_dsl] 
+pp [:matching_branches,matching_branches]
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)

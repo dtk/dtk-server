@@ -1,4 +1,26 @@
 module DTK; class ComponentModule
+              
+  class ExternalDependencies < Hash
+    def initialize(match_hashes,inconsistent,possibly_missing)
+      super()
+      replace(:match_hashes => match_hashes, :inconsistent => inconsistent, :possibly_missing => possibly_missing)
+    end
+
+    def possible_problems?()
+      ret = Aux.hash_subset(self,[:inconsistent,:possibly_missing])
+      ret unless ret.empty? 
+    end
+
+    def matching_module_branches?()
+      if match_hashes = self[:match_hashes]
+        ndx_ret = match_hashes.values.inject(Hash.new) do |h,r|
+          h.merge(r.get_id() => r)
+        end
+        ndx_ret.values unless ndx_ret.empty?
+      end
+    end
+  end              
+
   module ManagementMixin
     module ExternalRefsMixin
       def process_external_refs(module_branch,config_agent_type,project,impl_obj)
@@ -47,13 +69,15 @@ module DTK; class ComponentModule
         conds
       end
  
+      #TODO: factor to seperate into puppet specfic parts and general parts
+      #move puppet specific to under config_agent/puppet
       def check_and_ret_external_ref_dependencies?(external_ref,project)
-        ret = Hash
+        ret = Hash.new
         unless dependencies = external_ref[:dependencies]
           return ret
         end
-        parsed_dependencies, all_matched, all_inconsistent, all_possibly_missing = [], [], [], []
-          # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
+        parsed_dependencies, all_match_hashes, all_inconsistent, all_possibly_missing = [], {}, [], []
+        # using begin rescue statement to avoid import failure if parsing errors or if using old Modulefile format
         begin
           parsed_dependencies = parse_dependencies(dependencies)
          rescue Exception => e
@@ -100,7 +124,7 @@ module DTK; class ComponentModule
                     end
                     
                     if evaluated
-                      all_matched << dep_name 
+                      all_match_hashes.merge!(dep_name  => branch.id_handle())
                     else
                       all_inconsistent << "#{dep_name} (current:#{branch_version}, required:#{constraint_op}#{required_version})"
                     end
@@ -115,10 +139,9 @@ module DTK; class ComponentModule
             
           end
         end
-        all_inconsistent = (all_inconsistent - all_matched)
-        all_possibly_missing = (all_possibly_missing - all_inconsistent - all_matched)
-        
-        {:match => all_matched.uniq, :inconsistent => all_inconsistent.uniq, :possibly_missing => all_possibly_missing.uniq}
+        all_inconsistent = (all_inconsistent - all_match_hashes.keys)
+        all_possibly_missing = (all_possibly_missing - all_inconsistent - all_match_hashes.keys)
+        ExternalDependencies.new(all_match_hashes,all_inconsistent.uniq,all_possibly_missing.uniq)
       end
 
     end # ExternalRefsMixi

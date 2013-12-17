@@ -58,10 +58,20 @@ module DTK
       self
     end
 
-    #TODO: think need to change to use logical rdns instead of ids to support a more efficient service/pull_from_remote so can determine diffs
+    #TODO: possibly change to using refs w/o ids to make increemntal updates easier
     def self.ref_from_ids(input_id,output_id)
       "port_link:#{input_id}-#{output_id}"
     end
+    def self.matches_ref_id_form(mh,input_output_rows)
+      ret = Array.new
+      return ret if input_output_rows.empty?
+      sp_hash =  {
+        :cols => [:id,:group_id,:input_id,:output_id],
+        :filter => [:oneof,:ref,input_output_rows.map{|r|ref_from_ids(r[:input_id],r[:output_id])}]
+      }
+      get_objs(mh,sp_hash)
+    end
+
 
    private
     def self.create_from_links_hash(parent_idh,links_to_create,opts={})

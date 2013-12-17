@@ -155,8 +155,7 @@ module DTK
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
         #Need to explicitly prune because the port link refs used when creating from import uses ids
-        #TODO: put back in 
-        #prune_duplicate_port_links!(port_links) 
+        prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 
@@ -213,18 +212,33 @@ module DTK
       def prune_duplicate_port_links!(port_links)
         return port_links if port_links.empty?()
         relative_port_refs = port_links.values.map{|pl|[pl["*input_id"],pl["*output_id"]]}.flatten(1)
-        matches = get_ndx_target_port_refs(relative_port_refs)
-        port_links.each_pair do |ref,pl_info|
-          if input_match = matches[pl_info["*input_id"]]
-            if output_match = matches[pl_info["*output_id"]]
-              Log.error("Write code to see if link exists from #{input_match} to #{output_match}")
-              #Since it wil eitehr match on long name and then be pruned by update code that doesmatches on refs or
-              #it will be in 'id-form' so doing this query here:
-              #TODO: query; might also be able to leverage parent_id when query IDInfoTable
-            end
+        port_matches = get_ndx_target_port_refs(relative_port_refs)
+        return port_links if port_matches.empty?
+
+        pl_to_match = Array.new
+        prune_duplicate_port_links_iter(port_matches,port_links) do |ref,input_match_id,output_match_id|
+          pl_to_match << {:input_id => input_match_id, :output_id => output_match_id}
+        end
+
+        pl_matches = PortLink.matches_ref_id_form(model_handle(:port_link),pl_to_match)
+        return port_links if pl_matches.empty?
+
+        prune_duplicate_port_links_iter(port_matches,port_links) do |ref,input_match_id,output_match_id|
+          if pl_matches.find{|pl_match| input_match_id == pl_match[:input_id] and output_match_id == pl_match[:output_id]}
+            port_links.delete(ref)
           end
         end
         port_links
+      end
+
+      def prune_duplicate_port_links_iter(port_matches,port_links,&block)
+        port_links.each_pair do |ref,pl_info|
+          if input_match_id = port_matches[pl_info["*input_id"]]
+            if output_match_id = port_matches[pl_info["*output_id"]]
+              block.call(ref,input_match_id,output_match_id)
+            end
+          end
+        end
       end
 
       def get_ndx_target_port_refs(relative_port_refs_x)

@@ -116,10 +116,9 @@ module DTK
               next unless r[:state] == "LISTEN" || r[:protocol] == "udp"
               if r[:local] =~ /(^.+):([0-9]+$)/
                 address = $1
-                address = "0.0.0.0" if address == "::"
                 port = $2.to_i
-                next unless address =~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/
-                ndx_ret[port] ||= {
+                next unless address =~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|::/
+                ndx_ret["#{address}_#{port}"] ||= {
                   :port => port,
                   :local_address => address,
                   :protocol => r[:protocol]

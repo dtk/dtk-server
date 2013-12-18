@@ -6,9 +6,12 @@ module DTK
     r8_nested_require('node','template')
     r8_nested_require('node','filter')
     r8_nested_require('node','clone')
+    r8_nested_require('node','attribute')
 
     include CloneMixin
     extend NodeMetaClassMixin 
+    extend AttributeClassMixin
+    include AttributeMixin
 
     def self.common_columns()
       [
@@ -112,21 +115,6 @@ module DTK
 
     def self.get_violations(id_handles)
       get_objs_in_set(id_handles,{:cols => [:violations]}).map{|r|r[:violation]}
-    end
-
-    def self.get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
-      ret = Array.new
-      return ret if node_idhs.empty?()
-      filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
-      if add_filter
-        filter = [:and,filter,add_filter]
-      end
-      sp_hash = {
-        :cols => cols||[:id,:group_id,:display_name,:required],
-        :filter => filter,
-      }
-      attr_mh = node_idhs.first.createMH(:attribute)
-      get_objs(attr_mh,sp_hash)
     end
 
     def get_project()
@@ -247,47 +235,6 @@ module DTK
       ret
     end
 
-    def get_attributes_print_form(opts={})
-      if filter = opts[:filter]
-        case filter
-          when :required_unset_attributes
-            get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
-          else 
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
-        end  
-      else
-        get_attributes_print_form_aux()
-      end
-    end
-
-    def get_node_attributes()
-      Array.new #TODO: stub
-    end
-
-    def get_node_and_component_attributes(opts={})
-      node_attrs = get_node_attributes()
-      component_attrs = get_objs(:cols => [:components_and_attrs]).map{|r|r[:attribute]}
-      component_attrs + node_attrs
-    end
-    def get_attributes_print_form_aux(filter_proc=nil)
-      node_attrs = get_node_attributes()
-      component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
-        attr = r[:attribute]
-       #TODO: more efficient to have sql query do filtering
-        if filter_proc.nil? or filter_proc.call(attr)
-          display_name_prefix = "#{r[:component].display_name_print_form()}/"
-          attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
-        end
-      end.compact
-      (component_attrs + node_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-    private :get_attributes_print_form_aux
-
-
-    def set_attributes(av_pairs)
-      Attribute::Pattern::Node.set_attributes(self,av_pairs)
-    end
-
     def add_component(component_template,component_title=nil)
       component_template.update_with_clone_info!()
       override_attrs = {:locked_sha => component_template.get_current_sha!()}
@@ -318,27 +265,6 @@ module DTK
       end
       Model.delete_instance(component_idh)
     end
-
-    def check_and_ret_title_attribute_name?(component_template,component_title)
-      title_attr_name = component_template.get_title_attribute_name?()
-      if component_title and title_attr_name.nil?
-        raise ErrorUsage.new("Component (#{component_template.component_type_print_form()}) given a title but should not have one")
-      elsif component_title.nil? and title_attr_name
-        cmp_name = component_template.component_type_print_form()
-        raise ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
-      end 
-
-      if title_attr_name #and component_title
-        component_type = component_template.get_field?(:component_type)
-        if existing_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
-          raise ErrorUsage.new("Component (#{existing_cmp.print_form()}) already exists")
-        end
-      end
-
-      title_attr_name
-    end
-    private :check_and_ret_title_attribute_name?
-
 
     def self.check_valid_id(model_handle,id,assembly_id=nil)
       filter = 
@@ -445,41 +371,6 @@ module DTK
       (self[:hostname_external_ref]||{})[:elastic_ip]
     end
     
-    def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
-      sp_hash = {
-        :model_name => :attribute,
-        :filter => [:eq, field_to_match, attribute_name],
-        :cols => cols
-      }
-      get_children_from_sp_hash(:attribute,sp_hash).first
-    end
-    #TODO: may write above in terms of below
-    def get_virtual_attributes(attribute_names,cols,field_to_match=:display_name)
-      sp_hash = {
-        :model_name => :attribute,
-        :filter => [:oneof, field_to_match, attribute_names],
-        :cols => Aux.array_add?(cols,field_to_match)
-      }
-      get_children_from_sp_hash(:attribute,sp_hash)
-    end
-
-    def self.get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)
-      ret = Hash.new
-      #TODO: may be able to avoid this loop
-      attrs_to_get.each do |node_id,hash_value|
-        attr_info = hash_value[:attribute_info]
-        node = hash_value[:node]
-        attr_names = attr_info.map{|a|a[:attribute_name].to_s}
-        rows = node.get_virtual_attributes(attr_names,cols,field_to_match)
-        rows.each do |attr|
-          attr_name = attr[field_to_match]
-          ret[node_id] ||= Hash.new
-          ret[node_id][attr_name] = attr
-        end
-      end
-      ret
-    end
-
     #### related to distinguishing bewteen nodes and node groups
 
     def self.get_node_or_ng_summary(node_mh,node_ids)
@@ -517,28 +408,6 @@ module DTK
     NodeGroupTypes = %w{node_group_instance}
 
     #### end: related to distinguishing bewteen nodes and node groups
-
-
-    #attribute on component on node
-    #assumption is that component cannot appear more than once on node
-    def get_virtual_component_attribute(cmp_assign,attr_assign,cols)
-      base_sp_hash = {
-        :model_name => :component,
-        :filter => [:and, [:eq, cmp_assign.keys.first,cmp_assign.values.first],[:eq, :node_node_id,self[:id]]],
-        :cols => [:id]
-        }
-      join_array = 
-        [{
-           :model_name => :attribute,
-           :convert => true,
-           :join_type => :inner,
-           :filter => [:eq, attr_assign.keys.first,attr_assign.values.first],
-           :join_cond => {:component_component_id => :component__id},
-           :cols => cols.include?(:component_component_id) ? cols : cols + [:component_component_id]
-         }]
-      row = Model.get_objects_from_join_array(model_handle.createMH(:component),base_sp_hash,join_array).first
-      row && row[:attribute]
-    end
 
     def destroy_and_delete(opts={})
       update_object!(:external_ref,:hostname_external_ref)
@@ -813,63 +682,12 @@ module DTK
       node.merge(:component => components)
     end
     #######################
-#TODO: may be aqble to deprecate most or all of below
-      ### helpers
-      def ds_attributes(attr_list)
-        [:ds_attributes]
-      end
-      #TODO: rename subobject to sub_object
-      def is_ds_subobject?(relation_type)
-        false
-      end
-
-
-      ##### Actions
-#TODO: need tp fix up below
-      def self.get_node_attribute_values(id_handle,opts={})
-	c = id_handle[:c]
-        node_obj = get_object(id_handle,opts)
-        raise Error.new("node associated with (#{id_handle}) not found") if node_obj.nil? 	
-	ret = node_obj.get_direct_attribute_values(:value) || {}
-
-	cmps = node_obj.get_objects_associated_components()
-	cmps.each{|cmp|
-	  ret[:component]||= {}
-	  cmp_ref = cmp.get_qualified_ref.to_sym
-	  ret[:component][cmp_ref] = 
-	    cmp[:external_ref] ? {:external_ref => cmp[:external_ref]} : {}
-	  values = cmp.get_direct_attribute_values(:value,{:attr_include => [:external_ref]})
-	  ret[:component][cmp_ref][:attribute] = values if values 
-        }
-        ret
-      end
-
-    #######
 
 #TODO: should this be more generic and centralized?
     def get_objects_associated_components()
       assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),:node_id => self[:id])
       return [] if assocs.nil?
       assocs.map{|assoc|Model.get_object(IDHandle[:c=>@c,:guid => assoc[:component_id]])}
-    end
-
-#TODO: should be centralized
-    def get_contained_attribute_ids(opts={})
-      get_directly_contained_object_ids(:attribute)||[]
-    end
-
-    def get_direct_attribute_values(type,opts={})
-      parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
-      attr_val_array = Model.get_objects(ModelHandle.new(@c,:attribute),nil,:parent_id => parent_id)
-      return nil if attr_val_array.nil?
-      return nil if attr_val_array.empty?
-      hash_values = {}
-      attr_type = {:asserted => :value_asserted, :derived => :value_derived, :value => :attribute_value}[type]
-      attr_val_array.each{|attr|
-        hash_values[attr.get_qualified_ref.to_sym] =
-          {:value => attr[attr_type],:id => attr[:id]}
-      }
-      {:attribute => hash_values}
     end
 
     def get_obj_with_common_cols()

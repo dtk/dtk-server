@@ -18,7 +18,7 @@ module DTK
 
     #### actions to interact with remote repos ###
     def rest__list_remote()
-      rest_ok_response ServiceModule.list_remotes(model_handle), :datatype => :module_remote
+      rest_ok_response ServiceModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
     end
 
     def rest__list_assemblies()
@@ -49,8 +49,9 @@ module DTK
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
       remote_comp_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       
-      service_module.export(remote_repo, nil, remote_comp_name)
+      service_module.export(remote_repo, nil, remote_comp_name, client_rsa_pub_key)
       rest_ok_response 
     end
 
@@ -152,7 +153,8 @@ module DTK
       remote_params = {
         :repo => remote_repo,
         :module_name => remote_service_name,
-        :module_namespace => remote_namespace
+        :module_namespace => remote_namespace,
+        :client_rsa_pub_key => ret_request_params(:rsa_pub_key)
       }
       remote_params.merge!(:version => version) if version
       project = get_default_project()

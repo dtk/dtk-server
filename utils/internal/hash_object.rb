@@ -256,6 +256,9 @@ module DTK
 
   class ConfigHash < HashObject::AutoViv
     #TODO: for putting in hooks to better report on config var access errors
+    def is_development_mode?
+      return self[:debug][:development_mode]
+    end
   end
 
   require 'tsort'

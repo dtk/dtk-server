@@ -1,13 +1,18 @@
 module DTK
-  class NodeAttribute
-    module Constant
-      def self.root_volume_size()
-        'root_volume_size'
+  class Node
+    class NodeAttribute
+      def initialize(node)
+        @node = node
+      end
+      def root_volume_size()
+        get_value?(:root_volume_size)
+      end
+     private
+      def get_value?(attribute_name)
+        @node.get_node_attribute?(attribute_name.to_s)
       end
     end
-  end
 
-  class Node
     module AttributeClassMixin
       def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
         ret = Array.new
@@ -62,27 +67,18 @@ module DTK
     end
 
     module AttributeMixin
-      def get_attributes_print_form(opts={})
-        if filter = opts[:filter]
-          case filter
-          when :required_unset_attributes
-            get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
-          else 
-            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
-          end  
-        else
-          get_attributes_print_form_aux()
-        end
+      def attribute()
+        NodeAttribute.new(self)
       end
-      
-      def get_node_attributes(opts={})
-        Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
-      end
+
       def get_node_attribute?(attribute_name)
         get_node_attributes(:filter => [:eq,:display_name,attribute_name]).first
       end
+      def get_node_attributes(opts={})
+        Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
+      end
 
-      #TODO: stub
+      #TODO: stub; see if can use get_node_attributes
       def get_node_attributes_stub()
         Array.new 
       end
@@ -97,6 +93,33 @@ module DTK
       def set_attributes(av_pairs)
         Attribute::Pattern::Node.set_attributes(self,av_pairs)
       end
+
+      def get_attributes_print_form(opts={})
+        if filter = opts[:filter]
+          case filter
+          when :required_unset_attributes
+            get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
+          else 
+            raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
+          end  
+        else
+          get_attributes_print_form_aux()
+        end
+      end
+
+      def get_attributes_print_form_aux(filter_proc=nil)
+        node_attrs = get_node_attributes_stub()
+        component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
+          attr = r[:attribute]
+          #TODO: more efficient to have sql query do filtering
+          if filter_proc.nil? or filter_proc.call(attr)
+            display_name_prefix = "#{r[:component].display_name_print_form()}/"
+            attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
+          end
+        end.compact
+        (component_attrs + node_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
+      end
+      private :get_attributes_print_form_aux
 
       def get_virtual_attribute(attribute_name,cols,field_to_match=:display_name)
         sp_hash = {
@@ -171,19 +194,6 @@ module DTK
       ##########
 
      private
-      def get_attributes_print_form_aux(filter_proc=nil)
-        node_attrs = get_node_attributes_stub()
-        component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
-          attr = r[:attribute]
-          #TODO: more efficient to have sql query do filtering
-          if filter_proc.nil? or filter_proc.call(attr)
-            display_name_prefix = "#{r[:component].display_name_print_form()}/"
-            attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
-          end
-      end.compact
-        (component_attrs + node_attrs).sort{|a,b|a[:display_name] <=> b[:display_name]}
-      end
-
       def check_and_ret_title_attribute_name?(component_template,component_title)
         title_attr_name = component_template.get_title_attribute_name?()
         if component_title and title_attr_name.nil?

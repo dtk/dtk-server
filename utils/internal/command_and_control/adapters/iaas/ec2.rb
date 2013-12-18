@@ -115,6 +115,11 @@ module XYZ
             user_data = CloudInit.user_data(node[:os_type])
             create_options[:user_data] = user_data if user_data
           end
+
+          if root_volume_size = node.attribute.root_volume_size()
+            pp [:root_volume_siz,root_volume_size]
+          end
+          raise Error.new
           response = nil
 
           # we check if assigned target has aws credentials assigned to it, if so we will use those

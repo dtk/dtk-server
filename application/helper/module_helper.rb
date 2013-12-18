@@ -48,6 +48,8 @@ module Ramaze::Helper
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       remote_repo = ret_remote_repo()
       project = get_default_project()
+      rsa_pub_key = ret_request_params(:rsa_pub_key)
+
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
@@ -56,7 +58,8 @@ module Ramaze::Helper
         :repo => remote_repo,
         :module_namespace => remote_namespace,
         :module_name => remote_module_name,
-        :version => version
+        :version => version,
+        :rsa_pub_key => rsa_pub_key
       }
       local_params = {
         :module_name => local_module_name

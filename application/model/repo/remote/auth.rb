@@ -13,11 +13,11 @@ module DTK; class Repo
         true
       end
 
-      def authorize_dtk_instance(module_name, module_namespace, type)
+      def authorize_dtk_instance(module_name, module_namespace, type, client_rsa_pub_key = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
-        access_rights = "RW+"
-        authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type)
+        access_rights = "R"
+        authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type,client_rsa_pub_key)
       end
 
       def authorize_end_user(mh,module_name,module_namespace,type,rsa_pub_key,access_rights)
@@ -26,8 +26,9 @@ module DTK; class Repo
       end
 
      private 
-      def authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type)
-        client.create_user(username,rsa_pub_key,:update_if_exists => true)
+      def authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type, client_rsa_pub_key = nil)
+        # TODO: [Haris] Fix this this is only to support 2 REPO clients
+        client.create_user(username,rsa_pub_key,{ :update_if_exists => true }, client_rsa_pub_key)
         grant_user_rights_params = {
           :name => module_name,
           :namespace => module_namespace || DefaultsNamespace,
@@ -35,7 +36,8 @@ module DTK; class Repo
           :username => username,
           :access_rights => access_rights
         }
-        client.grant_user_access_to_module(grant_user_rights_params)
+        # TODO: [Haris] We do want to keep API same until repo client since we need to support two clients
+        client.grant_user_access_to_module(grant_user_rights_params, client_rsa_pub_key)
         module_name
       end
 

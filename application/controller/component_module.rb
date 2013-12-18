@@ -138,7 +138,8 @@ module DTK
       remote_params = {
         :repo => remote_repo,
         :module_name => module_name,
-        :module_namespace => remote_namespace
+        :module_namespace => remote_namespace,
+        :client_rsa_pub_key => ret_request_params(:rsa_pub_key)
       }
       #remote_params.merge!(:version => version) if version
       project = get_default_project()
@@ -149,14 +150,15 @@ module DTK
     end
 
     def rest__list_remote()
-      rest_ok_response ComponentModule.list_remotes(model_handle), :datatype => :module_remote
+      rest_ok_response ComponentModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
     end
 
     def rest__export()
       component_module = create_obj(:component_module_id)
       remote_component_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       remote_repo = ret_remote_repo()
-      component_module.export(remote_repo, nil, remote_component_name)
+      component_module.export(remote_repo, nil, remote_component_name, client_rsa_pub_key)
       rest_ok_response 
     end
 

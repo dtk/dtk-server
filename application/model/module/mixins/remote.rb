@@ -60,7 +60,7 @@ module DTK
 
     # export to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def export(remote_repo,version=nil, remote_component_name = "")
+    def export(remote_repo,version=nil, remote_component_name = "", dtk_client_pub_key = nil)
       # TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()
@@ -90,8 +90,8 @@ module DTK
       module_obj = get_obj(project.model_handle(module_type()),sp_hash)
       export_preprocess(module_branch_obj, module_obj)
 
-      #create module on remote repo manager
-      module_info = Repo::Remote.new(remote_repo).create_module(module_name,module_type(), component_namespace)
+      # create module on remote repo manager
+      module_info = Repo::Remote.new(remote_repo).create_module(module_name, module_type(), component_namespace, dtk_client_pub_key)
 
       remote_repo_name = module_info[:git_repo_name]
 
@@ -154,6 +154,7 @@ module DTK
       #return 1
 
       repo, version, module_and_branch_info, commit_sha, module_obj, parsed = nil, nil, nil, nil, nil, nil
+      dtk_client_pub_key = remote_params[:rsa_pub_key]
 
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
@@ -185,7 +186,7 @@ module DTK
           repo = module_obj.get_repo!()
         else
           #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-          remote_repo.authorize_dtk_instance(remote_params[:module_name],remote_params[:module_namespace],module_type())
+          remote_repo.authorize_dtk_instance(remote_params[:module_name],remote_params[:module_namespace],module_type(), dtk_client_pub_key)
           
           #create empty repo on local repo manager; 
           #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -234,7 +235,7 @@ module DTK
 
       # delete module on remote repo manager
       unless error
-        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace])
+        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace], remote_params[:client_rsa_pub_key])
       end
         
       # unlink any local repos that were linked to this remote module
@@ -263,8 +264,8 @@ module DTK
       raise error if error
     end
 
-    def list_remotes(model_handle)
-      unsorted = Repo::Remote.new.list_module_info(module_type()).map do |r|
+    def list_remotes(model_handle, rsa_pub_key = nil)
+      unsorted = Repo::Remote.new.list_module_info(module_type(), rsa_pub_key).map do |r|
         el = {:display_name => r[:qualified_name],:type => component_type(), :last_updated => r[:last_updated]} #TODO: hard coded
         if versions = r[:versions]
           el.merge!(:versions => versions.join(", ")) 

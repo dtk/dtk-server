@@ -143,11 +143,11 @@ module DTK
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
-      def create_module(name, type, namespace = nil)
+      def create_module(name, type, namespace = nil, client_rsa_pub_key = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
 
-        client.create_user(username,rsa_pub_key,:update_if_exists => true)
+        client.create_user(username, rsa_pub_key, { :update_if_exists => true }, client_rsa_pub_key)
         #namespace = self.class.default_namespace()
         namespace ||= CurrentSession.new.get_user_object().get_namespace()
 
@@ -159,14 +159,14 @@ module DTK
           :namespace => namespace,
           :noop_if_exists => true
         } 
-        response_data = client.create_module(params)
+        response_data = client.create_module(params, client_rsa_pub_key)
 
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
       # TODO: [Haris] We should refactor this so that arguments are passed in more logical
       # order, (name, namespace, type) for now we can live with it
-      def delete_module(name,type, namespace=nil)
+      def delete_module(name, type, namespace=nil, client_rsa_pub_key = nil)
         # if namespace omitted we will use default one
         namespace ||= self.class.default_namespace()
         params = {
@@ -176,13 +176,14 @@ module DTK
           :type => type_for_remote_module(type)
         }
         
-        client.delete_module(params)
+        client.delete_module(params, client_rsa_pub_key)
       end
 
       def get_module_info(remote_params)
         client_params = {
           :name => remote_params[:module_name],
           :type => type_for_remote_module(remote_params[:module_type]),
+          :rsa_pub_key => remote_params[:rsa_pub_key],
           :namespace => remote_params[:module_namespace] || self.class.default_namespace()
         } 
 
@@ -209,10 +210,10 @@ module DTK
       end
       private :qualified_module_name
 
-      def list_module_info(type=nil)
+      def list_module_info(type=nil, rsa_pub_key = nil)
 
         filter = type && {:type => type_for_remote_module(type)}
-        remote_modules = client.list_modules(filter)
+        remote_modules = client.list_modules(filter, rsa_pub_key)
         
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 

@@ -1,6 +1,7 @@
 #TODO: need to better unify username passed adn tenant name
 r8_require_common_lib('auxiliary')
 r8_require_common_lib('response')
+
 module DTK
   #TODO: RepoType should be in common
   class RepoType < String
@@ -92,6 +93,10 @@ module DTK
     #required keys: [:username,:repo,:type]
     #optional keys: [::namespace,access_rights,:noop_if_exists]
     def create_module(params_hash, rsa_pub_key = nil)
+      
+      # hack
+      params_hash.merge!(:access_rights => 'RW+')
+
       route = "/rest/system/module/create"
       body = update_user_params(params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
@@ -131,7 +136,7 @@ module DTK
       post_rest_request_data(route,body,:raise_error => true)
     end
 
-    def create_user(username,rsa_pub_key,opts={}, rsa_pub_key = nil)
+    def create_user(username,rsa_pub_key,opts={}, client_rsa_pub_key = nil)
       route = "/rest/system/user/create"
       body = user_params(username,rsa_pub_key)
       [:update_if_exists].each do |opt_key|

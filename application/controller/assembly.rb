@@ -38,10 +38,18 @@ module DTK
     def rest__delete_component()
       # Retrieving node_id to validate if component belongs to node when delete-component invoked from component-level context
       node_id = ret_non_null_request_params(:node_id)
-      assembly = ret_assembly_instance_object()
-
       component_id = ret_non_null_request_params(:component_id)
-      assembly.delete_component(id_handle(component_id,:component), node_id)
+      assembly = ret_assembly_instance_object()
+      assembly_id = assembly.id()
+      cmp_full_name = ret_request_params(:cmp_full_name)
+      
+      if cmp_full_name
+        cmp_idh = ret_component_id_handle(:cmp_full_name,:assembly_id => assembly_id)
+      else
+        cmp_idh = id_handle(component_id,:component)
+      end
+
+      assembly.delete_component(cmp_idh, node_id)
       rest_ok_response
     end
 

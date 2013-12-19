@@ -11,7 +11,7 @@ module DTK; module CommandAndControlAdapter
         @ami = Ec2.conn().image_get(image_id)
       end
 
-      def self.exists?()
+      def exists?()
         !!@ami
       end
         

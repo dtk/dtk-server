@@ -126,7 +126,7 @@ module DTK
       end
 
       # Create Tenant
-      route = "/rest/system/user/create"
+      route = "/v1/users"
       body = user_params(username,rsa_pub_key)
       [:update_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]

@@ -94,6 +94,10 @@ module DTK
           opts.merge!(:truncate_attribute_values => true,:mark_unset_required => true)
         end
       end
+      if node_id
+        opts.merge!(:node_cmp_name => true)  unless node_id.empty?
+      end
+      
       data = assembly.info_about(about, opts)
       datatype = opts.return_value(:datatype)
       response_opts = Hash.new

@@ -4,12 +4,19 @@ module DTK
       def initialize(node)
         @node = node
       end
+
       def root_volume_size()
-        get_value?(:root_volume_size)
+        get_value?(:root_volume_size,:integer)
       end
+
      private
-      def get_value?(attribute_name)
-        @node.get_node_attribute?(attribute_name.to_s)
+      def get_value?(attribute_name,semantic_data_type=nil)
+        attr = @node.get_node_attribute?(attribute_name.to_s,:cols => [:id,:group_id,:attribute_value])
+        value = attr && attr[:attribute_value]
+        if value and semantic_data_type
+          value = Attribute::SemanticDatatype.convert_to_internal_form(semantic_data_type,value)
+        end
+        value
       end
     end
 
@@ -71,8 +78,8 @@ module DTK
         NodeAttribute.new(self)
       end
 
-      def get_node_attribute?(attribute_name)
-        get_node_attributes(:filter => [:eq,:display_name,attribute_name]).first
+      def get_node_attribute?(attribute_name,opts={})
+        get_node_attributes(opts.merge(:filter => [:eq,:display_name,attribute_name])).first
       end
       def get_node_attributes(opts={})
         Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])

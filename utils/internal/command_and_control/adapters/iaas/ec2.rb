@@ -117,9 +117,10 @@ module XYZ
           end
 
           if root_volume_size = node.attribute.root_volume_size()
-            pp [:root_volume_siz,root_volume_size]
+ 
+#            create_options[:block_device_mapping] = [{:DeviceName => '/dev/sda1', 'Ebs.VolumeSize' => root_volume_size}]
+            create_options[:block_device_mapping] = [{'Ebs.VolumeSize' => root_volume_size}]
           end
-          raise Error.new
           response = nil
 
           # we check if assigned target has aws credentials assigned to it, if so we will use those

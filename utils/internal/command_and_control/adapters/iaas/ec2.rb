@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
 
@@ -7,8 +7,10 @@ module XYZ
       r8_nested_require('ec2','cloud_init')
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
+      r8_nested_require('ec2','image')
       extend NodeStateClassMixin
       extend AddressManagementClassMixin
+      extend ImageClassMixin
 
       def self.find_matching_node_binding_rule(node_binding_rules,target)
         node_binding_rules.find do |r|
@@ -18,7 +20,7 @@ module XYZ
       end
 
       def self.existing_image?(image_id)
-        !!conn().image_get(image_id)
+        image(image_id).exists?()
       end
 
       def self.start_instances(nodes)
@@ -116,11 +118,14 @@ module XYZ
             create_options[:user_data] = user_data if user_data
           end
 
-          if root_volume_size = node.attribute.root_volume_size()
- 
-#            create_options[:block_device_mapping] = [{:DeviceName => '/dev/sda1', 'Ebs.VolumeSize' => root_volume_size}]
-            create_options[:block_device_mapping] = [{'Ebs.VolumeSize' => root_volume_size}]
+          if root_device_size = node.attribute.root_device_size()
+            if device_name = image(ami).block_device_mapping_device_name()
+              create_options[:block_device_mapping] = [{:DeviceName => device_name, 'Ebs.VolumeSize' => root_device_size}]
+            else
+              Log.error("Cannot determine device name for ami (#{ami})")
+            end
           end
+
           response = nil
 
           # we check if assigned target has aws credentials assigned to it, if so we will use those
@@ -192,8 +197,7 @@ module XYZ
         @conn ||= CloudConnect::EC2.new
       end
 
-      private
-
+     private
       def self.get_ec2_credentials(iaas_credentials)
         if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
           return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }

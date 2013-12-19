@@ -5,8 +5,8 @@ module DTK
         @node = node
       end
 
-      def root_volume_size()
-        get_value?(:root_volume_size,:integer)
+      def root_device_size()
+        get_value?(:root_device_size,:integer)
       end
 
      private

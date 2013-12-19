@@ -1,3 +1,4 @@
+#TODO: replace with common methods in attribute
 module DTK
   module ComponentModelDefProcessor
     def get_model_def(attr_filters={:hidden => true})

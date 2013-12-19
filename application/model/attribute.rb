@@ -92,6 +92,22 @@ module DTK
       end
     end
 
+
+    def self.create_or_modify_field_def(parent,field_def)
+      attr_mh = parent.model_handle.create_childMH(:attribute)
+      attr_hash = Aux::hash_subset(field_def,CreateFields)
+      unless attr_hash[:display_name]
+        raise Error.new("display_name required in field_def")
+      end
+      attr_hash[:ref] = attr_hash[:display_name]
+      attr_hash[:semantic_data_type] ||= SemanticDatatype.default().to_s
+      attr_hash[:data_type] ||= SemanticDatatype.datatype(attr_hash[:semantic_data_type]).to_s
+      #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
+      Model.modify_children_from_rows(attr_mh,parent.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
+    end
+    CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
+
+
     #TODO: collapse this and 4 fields used here
     def is_readonly?()
       (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change] 

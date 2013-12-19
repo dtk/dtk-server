@@ -23,8 +23,15 @@ module DTK; class Attribute
         return ret if ndx_nodes.empty?
         
         pattern =~ /^node[^\/]*\/(attribute.+$)/  
-          attr_fragment = attr_name_special_processing($1)
-        @attribute_stacks = ret_matching_attributes(:node,ndx_nodes.values.map{|r|r.id_handle()},attr_fragment).map do |attr|
+        attr_fragment = attr_name_special_processing($1)
+        attrs = ret_matching_attributes(:node,ndx_nodes.values.map{|r|r.id_handle()},attr_fragment)
+        if attrs.empty? and opts[:create]
+          @created = true
+          set_attribute_properties!(opts[:attribute_properties]||{})
+          attrs = create_attributes(ndx_nodes.values)
+        end
+
+        @attribute_stacks = attrs.map do |attr|
           {
             :attribute => attr,
             :node => ndx_nodes[attr[:node_node_id]]
@@ -47,6 +54,12 @@ module DTK; class Attribute
       attr_writer :local_or_remote
 
      private
+      def pattern_attribute_fragment()
+        pattern() =~ AttrRegexp
+        $1
+      end
+      AttrRegexp = /^node[^\/]*\/(attribute.+$)/ 
+
       def local_or_remote()
         unless @local_or_remote
           raise Error.new("local_or_remote() is caleld when @local_or_remote not set")

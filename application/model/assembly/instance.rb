@@ -467,8 +467,10 @@ module DTK; class  Assembly
 
     def list_components(opts=Opts.new)
       aug_cmps = get_augmented_components(opts)
+      node_cmp_name = opts[:node_cmp_name]
       ret = aug_cmps.map do |r|
-        display_name = "#{r[:node][:display_name]}/#{Component::Instance.print_form(r)}"
+        node_name = "#{r[:node][:display_name]}/"
+        display_name = "#{node_cmp_name.nil? ? node_name : ''}#{Component::Instance.print_form(r)}"
         version = Component::Instance.version_print_form(r)
         #TODO: dont think this is needed anymore
         # Remove version from display name

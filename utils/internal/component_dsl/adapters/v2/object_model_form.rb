@@ -188,6 +188,7 @@ module DTK; class ComponentDSL; class V2
 
       def add_attributes!(ret,cmp_type,input_hash,opts={})
         if in_attrs = input_hash["attributes"]
+          ParsingError.raise_error_if_not(in_attrs,Hash)
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
             dynamic_default_variable = dynamic_default_variable?(info)

@@ -46,6 +46,12 @@ module DTK; class ComponentDSL
         super("component dsl parsing error: #{msg_pp_form(msg,*args)}")
       end
 
+      def self.raise_error_if_not(obj,klass)
+        unless obj.kind_of?(klass)
+          raise new("Ill-formed fragment (?1); it should be a #{klass.to_s.downcase}",obj)
+        end
+      end
+
       def msg_pp_form(msg,*args)
         args.each_with_index do |arg, i|
           msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))

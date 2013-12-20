@@ -52,6 +52,12 @@ module DTK; class ComponentDSL
         end
       end
 
+      def self.raise_error_if_value_nil(k,v)
+        if v.nil?
+          raise new("Value of (?1) should not be nil",k)
+        end
+      end
+
       def msg_pp_form(msg,*args)
         args.each_with_index do |arg, i|
           msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))

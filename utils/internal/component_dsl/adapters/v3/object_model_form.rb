@@ -183,9 +183,10 @@ module DTK; class ComponentDSL; class V3
       def splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
         ret = Hash.new
         ndx_link_defs.each do |link_def_ndx,link_def_choices|
+          pruned_ndx_dep_choices = ndx_dep_choices
           dep_name_match = false
           if dep_choices = ndx_dep_choices[link_def_ndx]
-            ndx_dep_choices = {link_def_ndx => dep_choices}
+            pruned_ndx_dep_choices = {link_def_ndx => dep_choices}
             dep_name_match = true
           end
           link_def_choices.each do |link_def_choice|
@@ -194,7 +195,7 @@ module DTK; class ComponentDSL; class V3
                 raise ParsingError.new("The link def segment #{link_def_choice.print_form}) refernces a dependency name (#{dn}) which does not exist")
               end
             end
-            unless ndx = find_index(link_def_choice,ndx_dep_choices)
+            unless ndx = find_index(link_def_choice,pruned_ndx_dep_choices)
               raise ParsingError.new("Cannot find dependency match for (#{link_def_choice.print_form})")
             end
             (ret[ndx] ||= Array.new) << link_def_choice

@@ -119,19 +119,22 @@ module DTK
       # if there is rsa_pub_key we create two users
       # tenant and client
 
-      # Create Client
-      if client_rsa_pub_key
-        client_username = get_username_with_pub_key(client_rsa_pub_key)
-        create_user(client_username, client_rsa_pub_key, opts)
-      end
-
       # Create Tenant
       route = "/v1/users"
       body = user_params(username,rsa_pub_key)
       [:update_if_exists].each do |opt_key|
         body.merge!(opt_key => true) if opts[opt_key]
       end
-      post_rest_request_data(route,body,:raise_error => true)
+      tenant_response = post_rest_request_data(route,body,:raise_error => true)
+
+
+      # Create Client
+      if client_rsa_pub_key
+        client_username = get_username_with_pub_key(client_rsa_pub_key)
+        create_user(client_username, client_rsa_pub_key, opts)
+      end
+
+      return tenant_response
     end
 
     def list_users()
@@ -145,7 +148,6 @@ module DTK
     ##  Legacy methods (Admin)
     #
 
-    #admin access
     #NOTE: mark better tht these are at git level
     def list_repos()
       route = "/rest/admin/list_repos"

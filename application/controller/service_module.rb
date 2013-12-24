@@ -93,8 +93,9 @@ module DTK
     def rest__versions()
       service_module = create_obj(:service_module_id)
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
 
-      rest_ok_response service_module.versions(module_id)
+      rest_ok_response service_module.versions(module_id, client_rsa_pub_key)
     end
 
     def rest__info()
@@ -129,6 +130,7 @@ module DTK
     def rest__create_new_version()
       service_module = create_obj(:service_module_id)
       version = ret_version()
+      
       service_module.create_new_version(version)
       rest_ok_response
     end

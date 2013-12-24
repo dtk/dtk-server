@@ -98,8 +98,9 @@ module DTK
     def rest__versions()
       component_module = create_obj(:component_module_id)
       module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
 
-      rest_ok_response component_module.versions(module_id)
+      rest_ok_response component_module.versions(module_id, client_rsa_pub_key)
     end
 
     def rest__info_about()
@@ -180,6 +181,7 @@ module DTK
     def rest__create_new_version()
       component_module = create_obj(:component_module_id)
       version = ret_version()
+
       component_module.create_new_version(version)
       rest_ok_response
     end

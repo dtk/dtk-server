@@ -24,7 +24,7 @@ module DTK; class ComponentModule
   module ManagementMixin
     module ExternalRefsMixin
       def process_external_refs(module_branch,config_agent_type,project,impl_obj)
-        ret = Hash.new
+        ret = nil
         if external_ref = set_external_ref?(module_branch,config_agent_type,impl_obj)
           ret = check_and_ret_external_ref_dependencies?(external_ref,project)
         end

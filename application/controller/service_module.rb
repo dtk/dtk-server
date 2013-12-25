@@ -27,6 +27,12 @@ module DTK
       rest_ok_response service_module.get_assembly_templates()
     end
 
+    def rest__list_instances()
+      service_module_id = ret_request_param_id(:service_module_id)
+      service_module = create_obj(:service_module_id)
+      rest_ok_response service_module.get_assembly_instances()
+    end
+
     def rest__list_component_modules()
       service_module_id = ret_request_param_id(:service_module_id)
       service_module = create_obj(:service_module_id)

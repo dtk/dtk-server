@@ -164,6 +164,7 @@ R8::ReactorRoute.draw do
   post  'service_module/list_remote' => 'service_module#list_remote'
   post  'service_module/versions' => 'service_module#versions'
   post  'service_module/list_assemblies' => 'service_module#list_assemblies'
+  post  'service_module/list_instances' => 'service_module#list_instances'
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/import_version' => 'service_module#import_version'
   post  'service_module/export' => 'service_module#export'

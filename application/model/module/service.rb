@@ -107,6 +107,17 @@ module DTK
       ret
     end
 
+    def get_assembly_instances()
+      assembly_templates = get_assembly_templates()
+      assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
+      
+      assoc_assemblies.each do |assoc_assembly|
+        assembly_template = assembly_templates.select{|at| at[:id]==assoc_assembly[:ancestor_id]}  
+        nodes = assembly_template.first[:nodes]
+        assoc_assembly[:nodes] = nodes
+      end
+    end
+
     def get_assembly_templates()
       sp_hash = {
         :cols => [:module_branches]
@@ -251,7 +262,7 @@ module DTK
       ret = Array.new
       return ret if assembly_templates.empty?
       sp_hash = {
-        :cols => [:id,:display_name],
+        :cols => [:id, :display_name, :ancestor_id],
         :filter => [:oneof, :ancestor_id, assembly_templates.map{|r|r[:id]}]
       }
       mh = assembly_templates.first.model_handle(:component)

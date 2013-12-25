@@ -528,19 +528,20 @@ module DTK
     end
 
     MutexesForRepos = Hash.new
+
     def checkout(branch_name,&block)
       ret = nil
       #TODO: add garbage collection of these mutexs
       mutex = MutexesForRepos[@path] ||= Mutex.new
       ret = nil
       mutex.synchronize do
-        Dir.chdir(@path) do 
+        Dir.chdir(@path) do
           current_head = current_branch()
           git_command__checkout(branch_name) unless current_head == branch_name
           return ret unless block
           ret = yield
           unless current_head == branch_name
-            git_command__checkout(current_head)
+            git_command__checkout(branch_name)
           end
         end
       end

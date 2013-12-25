@@ -93,7 +93,7 @@ module DTK
       matches.first
     end
 
-    def create_new_version(new_version,opts={})
+    def create_new_version(new_version,opts={},client_rsa_pub_key=nil)
       opts_get_aug = Opts.new
       if base_version = opts[:base_version]
         opts_get_aug.merge(:filter => {:version => base_version})

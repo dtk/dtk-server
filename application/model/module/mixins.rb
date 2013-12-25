@@ -311,8 +311,8 @@ module DTK
     end
 
     def info(target_mh, id, opts={})
-      remote_repo_cols = [:id, :display_name, :version, :remote_repos]
-      components_cols = [:id, :display_name, :version]
+      remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
+      components_cols = [:id, :display_name, :version, :dsl_parsed]
       namespaces = []
 
       sp_hash = {

@@ -1,0 +1,39 @@
+---
+module: temp
+dsl_version: 0.9.1
+module_type: puppet_module
+components:
+  sink:
+    external_ref:
+      puppet_class: temp::sink
+    attributes:
+      members:
+        description: "Members gotten from connected sources"
+        type: string
+        required: true
+      members_test2:
+        description: "Members test2"
+        type: string
+      param1:
+        description: "Param1"
+        type: string
+  source:
+    external_ref:
+      puppet_class: temp::source
+    attributes:
+      param2:
+        description: "Param2"
+        type: string
+    dependencies:
+    - member:
+        choices:
+        - component: temp::sink
+          location: remote
+        - component: temp::sink
+          location: local
+    link_defs:
+    - temp::sink:
+      - dependency_name: member
+        attribute_mappings:
+        - $node.host_address -> members
+        - param1 -> param2

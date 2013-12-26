@@ -46,8 +46,8 @@ shared_context "NEG - Import module from puppet forge" do |puppet_forge_module_n
 end
 
 shared_context "Create module from provided git repo" do |module_name, git_ssh_repo_url|
-  it "creates #{module_name} module from #{git_ssh_repo_url} repo" do
-    puts "Create module from git repo:", "---------------------"
+  it "imports #{module_name} module from #{git_ssh_repo_url} repo" do
+    puts "Import module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
     pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
@@ -59,8 +59,8 @@ shared_context "Create module from provided git repo" do |module_name, git_ssh_r
 end
 
 shared_context "NEG - Create module from provided git repo" do |module_name, git_ssh_repo_url|
-  it "does not create #{module_name} module from #{git_ssh_repo_url} repo" do
-    puts "NEG - Create module from git repo:", "---------------------"
+  it "does not import #{module_name} module from #{git_ssh_repo_url} repo" do
+    puts "NEG - Import module from git repo:", "---------------------"
     pass = false
     value = `dtk module import-git #{module_name} #{git_ssh_repo_url}`
     pass = true if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
@@ -108,13 +108,13 @@ shared_context "NEG - Import module with version dependency from provided git re
 end
 
 shared_context "Create module" do |module_name|
-  it "creates #{module_name} module from content on local machine" do
-    puts "Create module:", "--------------"
+  it "imports #{module_name} module from content on local machine" do
+    puts "Import module:", "--------------"
     pass = false
     value = `dtk module import #{module_name}`
     pass = true if (!value.include? "ERROR")
-    puts "Module #{module_name} created successfully!" if pass == true
-    puts "Module #{module_name} was not created successfully!" if pass == false
+    puts "Module #{module_name} imported successfully!" if pass == true
+    puts "Module #{module_name} was not imported successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end
@@ -301,7 +301,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts "Push clone changes to server:", "-----------------------------"
     pass = false
-    value = `dtk module #{module_name} push-clone-changes`
+    value = `dtk module #{module_name} push`
     pass = value.include?("#{file_for_change}")
     puts "Clone changes pushed to server successfully!" if pass == true
     puts "Clone changes were not pushed to server successfully!" if pass == false

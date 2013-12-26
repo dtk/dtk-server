@@ -100,13 +100,18 @@ module DTK
       service_module = create_obj(:service_module_id)
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+      project = get_default_project()
+      opts = Opts.new(:project_idh => project.id_handle())
 
-      rest_ok_response service_module.versions(module_id, client_rsa_pub_key)
+      rest_ok_response service_module.versions(module_id, client_rsa_pub_key, opts)
     end
 
     def rest__info()
       module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
-      rest_ok_response ServiceModule.info(model_handle(), module_id)
+      project   = get_default_project()
+      opts      = Opts.new(:project_idh => project.id_handle())
+
+      rest_ok_response ServiceModule.info(model_handle(), module_id, opts)
     end
 
     def rest__info_about()

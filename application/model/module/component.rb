@@ -39,14 +39,14 @@ module DTK
     ##
     # Returnes versions for specified module
     #
-    def versions(module_id, client_rsa_pub_key = nil)
+    def versions(module_id, client_rsa_pub_key = nil, opts={})
       module_name, remote_versions = nil, []
 
       # get local versions list and remove master(nil) from list
       local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
       
       # get all remote modules versions, and take only versions for current component module name
-      info = ComponentModule.info(model_handle(), module_id)
+      info = ComponentModule.info(model_handle(), module_id, opts)
       module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
       remote_versions = ComponentModule.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
       

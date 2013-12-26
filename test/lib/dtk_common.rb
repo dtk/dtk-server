@@ -587,12 +587,12 @@ class DtkCommon
 
 	def netstats_check(assembly_id, port)
 		puts "Netstats check:", "---------------"
-		sleep 20 #Before initiating netstats check, wait for services to be up
+		sleep 10 #Before initiating netstats check, wait for services to be up
  		netstats_check = false
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 50
+		max_num_of_retries = 20
 
 		while (end_loop == false)
 			sleep 10
@@ -1393,7 +1393,7 @@ class DtkCommon
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 50
+		max_num_of_retries = 20
 
 		while (end_loop == false)
 			sleep 20

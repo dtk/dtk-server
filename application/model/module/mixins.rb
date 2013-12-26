@@ -312,7 +312,8 @@ module DTK
 
     def info(target_mh, id, opts={})
       remote_repo_cols = [:id, :display_name, :version, :remote_repos, :dsl_parsed]
-      components_cols = [:id, :display_name, :version, :dsl_parsed]
+      components_cols  = [:id, :display_name, :version, :dsl_parsed]
+      project_idh      = opts[:project_idh]
       namespaces = []
 
       sp_hash = {
@@ -338,8 +339,14 @@ module DTK
           namespaces << { :repo_name => "#{prefix} #{display_name}" }
         end
       end
-      
+
+      filter_list!(response) if respond_to?(:filter_list!)
+      response.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
+      mh = project_idh.createMH(model_type())
+      response = ListMethodHelpers.aggregate_detail(response,mh,Opts.new(:include_versions => true))
+
       ret = response.first || {}
+      ret[:versions] = "CURRENT" unless ret[:versions]
       ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
       # [Haris] Due to join condition with module.branch we can have situations where we have many versions 
       # of module with same remote branch, with 'uniq' we iron that out

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 2: Rename existing component from dtk.model.json file, push-clone-changes to server and list components to see the effect of rename
+#Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename
 
 require 'rubygems'
 require 'rest_client'
@@ -12,16 +12,16 @@ require './lib/modules_spec'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/dslv2_component_modules/resources/cmd_test_case_2_dtk.model.json"
-file_for_change = "dtk.model.json"
+file_for_change_location = "./spec/dslv3_component_modules/resources/cmd_test_case_2_dtk.model.yaml"
+file_for_change = "dtk.model.yaml"
 
 dtk_common = DtkCommon.new("", "")
 
-describe "(Component Module DSL) Test Case 2: Rename existing component from dtk.model.json file, push-clone-changes to server and list components to see the effect of rename" do
+describe "(Component Module DSL) Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename" do
 
   before(:all) do
     puts "********************************************************************************************************************************************************************"
-    puts "(Component Module DSL) Test Case 2: Rename existing component from dtk.model.json file, push-clone-changes to server and list components to see the effect of rename"
+    puts "(Component Module DSL) Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename"
     puts "********************************************************************************************************************************************************************"
     puts ""
   end
@@ -38,8 +38,8 @@ describe "(Component Module DSL) Test Case 2: Rename existing component from dtk
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Rename existing component in dtk.model.json file" do
-    include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "renames source component to source2"
+  context "Rename existing component in dtk.model.yaml file" do
+    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "renames source component to source2"
   end
 
   context "Push clone changes of module from local copy to server" do

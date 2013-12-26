@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.json file and push-clone-changes to server
+#Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'
@@ -12,15 +12,15 @@ require './lib/modules_spec'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/dslv2_component_modules/resources/cmd_test_case_11_dtk.model.json"
-file_for_change = "dtk.model.json"
+file_for_change_location = "./spec/dslv3_component_modules/resources/cmd_test_case_11_dtk.model.yaml"
+file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new('', '')
 
-describe "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.json file and push-clone-changes to server" do
+describe "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.yaml file and push-clone-changes to server" do
 
   before(:all) do
     puts "************************************************************************************************************************************************************"
-    puts "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.json file and push-clone-changes to server"
+    puts "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (component instead of components) in dtk.model.yaml file and push-clone-changes to server"
     puts "************************************************************************************************************************************************************"
     puts ""
   end
@@ -37,8 +37,8 @@ describe "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (co
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Replace components with component property in dtk.model.json file" do
-    include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "sets incorrect value - component instead of components in dtk.model.json"
+  context "Replace components with component property in dtk.model.yaml file" do
+    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "sets incorrect value - component instead of components in dtk.model.yaml"
   end
 
   context "Push clone changes of module from local copy to server" do

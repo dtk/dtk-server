@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.json file and push-clone-changes to server
+#Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'
@@ -12,15 +12,15 @@ require './lib/modules_spec'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/dslv2_component_modules/resources/cmd_test_case_8_dtk.model.json"
-file_for_change = "dtk.model.json"
+file_for_change_location = "./spec/dslv3_component_modules/resources/cmd_test_case_8_dtk.model.yaml"
+file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new('', '')
 
-describe "(Component Module DSL) Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.json file and push-clone-changes to server" do
+describe "(Component Module DSL) Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.yaml file and push-clone-changes to server" do
 
   before(:all) do
     puts "***************************************************************************************************************************************************"
-    puts "(Component Module DSL) Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.json file and push-clone-changes to server"
+    puts "(Component Module DSL) Test Case 8: Rename existing attribute mapping in depends_on section in dtk.model.yaml file and push-clone-changes to server"
     puts "***************************************************************************************************************************************************"
     puts ""
   end
@@ -37,8 +37,8 @@ describe "(Component Module DSL) Test Case 8: Rename existing attribute mapping 
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Rename existing attribute mapping in depends_on section in dtk.model.json file" do
-    include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "renames attribute mapping in depends_on section from members to members2 in source component in dtk.model.json"
+  context "Rename existing attribute mapping in depends_on section in dtk.model.yaml file" do
+    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "renames attribute mapping in depends_on section from members to members2 in source component in dtk.model.yaml"
   end
 
   context "Push clone changes of module from local copy to server" do

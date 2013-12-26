@@ -310,17 +310,17 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   end
 end
 
-shared_context "Replace dtk.model.json file with new one" do |module_name, file_for_change_location, file_for_change, module_filesystem_location, it_message|
+shared_context "Replace dtk.model.yaml file with new one" do |module_name, file_for_change_location, file_for_change, module_filesystem_location, it_message|
   it "#{it_message}" do
-    puts "Replace dtk.model.json file with new one", "----------------------------------------"
+    puts "Replace dtk.model.yaml file with new one", "----------------------------------------"
     pass = false
     current_path = `pwd`
       `cd #{module_filesystem_location}/#{module_name};git pull;cd #{current_path}`
       `cp #{file_for_change_location} #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     value = `ls #{module_filesystem_location}/#{module_name}/#{file_for_change}`
     pass = !value.include?("No such file or directory")
-    puts "Old dtk.model.json replaced with new one!" if pass == true
-    puts "Old dtk.model.json was not replaced with new one!" if pass == false
+    puts "Old dtk.model.yaml replaced with new one!" if pass == true
+    puts "Old dtk.model.yaml was not replaced with new one!" if pass == false
     puts ""
     pass.should eq(true)
   end

@@ -24,13 +24,13 @@ component_name3 = 'temp::source_test'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/dslv2_component_modules/resources/cmd_test_case_7_dtk.model.json"
-file_for_change = "dtk.model.json"
+file_for_change_location = "./spec/dslv3_component_modules/resources/cmd_test_case_7_dtk.model.yaml"
+file_for_change = "dtk.model.yaml"
 
-puppet_file_location = "./spec/dslv2_component_modules/resources/source_test.pp"
+puppet_file_location = "./spec/dslv3_component_modules/resources/source_test.pp"
 puppet_file_name = "source_test.pp"
 
-puppet_file_location2 = "./spec/dslv2_component_modules/resources/sink.pp"
+puppet_file_location2 = "./spec/dslv3_component_modules/resources/sink.pp"
 puppet_file_name2 = "sink.pp"
 
 $assembly_id = 0
@@ -54,8 +54,8 @@ describe "(Component Module DSL) Test Case 7: Converge assembly with modified mo
     include_context "Check module imported on local filesystem", module_filesystem_location, module_name
   end
 
-  context "Add new component and new attribute in dtk.model.json file" do
-    include_context "Replace dtk.model.json file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds new source_test component with new param_test attribute dtk.model.json"
+  context "Add new component and new attribute in dtk.model.yaml file" do
+    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds new source_test component with new param_test attribute dtk.model.yaml"
   end
 
   context "Add new puppet file for component #{component_name3}" do

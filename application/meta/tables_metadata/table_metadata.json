@@ -119,6 +119,18 @@
       "linked_to": "linked_to_display_form"
     }
   },
+  "attribute_without_link": {
+    "order": [
+      "id",
+      "path",
+      "value"
+    ],
+    "mapping": {
+      "path": "display_name",
+      "id": "dtk_id",
+      "value": "value"
+    }
+  },
   "workspace_attribute": {
     "order": [
       "id",
@@ -177,12 +189,14 @@
     "order": [
       "id",
       "name",
+      "version(s)",
       "linked_remote(s)",
       "dsl_parsed"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
+      "version(s)": "versions",
       "linked_remote(s)": "linked_remotes",
       "dsl_parsed": "dsl_parsed"
     }

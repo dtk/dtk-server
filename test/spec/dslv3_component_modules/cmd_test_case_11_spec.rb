@@ -44,7 +44,8 @@ describe "(Component Module DSL) Test Case 11: NEG - Ill-formed json content (co
   context "Push clone changes of module from local copy to server" do
     it "pushes module changes from local filesystem to server but fails because of missing components section" do
       fail = false
-      value = `dtk module #{module_name} push-clone-changes`
+      value = `dtk module #{module_name} push`
+      puts value
       fail = value.include?("error")
       fail.should eq(true)  
     end

@@ -18,6 +18,7 @@ shared_context "Import service" do |service_name|
     puts "Import service:", "---------------"
     pass = false
     value = `dtk service import #{service_name}`
+    puts value
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists already"))
     puts "Import of service #{service_name} completed successfully!" if pass == true
     puts "Import of service #{service_name} did not complete successfully!" if pass == false
@@ -31,6 +32,7 @@ shared_context "Import remote service" do |dtk_common, service_name|
     puts "Import remote service:", "---------------------"
     pass = false
     value = `dtk service import-dtkn #{service_name} -y`
+    puts value
     pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
     puts "Import of remote service #{service_name} completed successfully!" if pass == true
     puts "Import of remote service #{service_name} did not complete successfully!" if pass == false
@@ -44,6 +46,7 @@ shared_context "NEG - Import remote service" do |dtk_common, service_name|
     puts "NEG - Import remote service:", "----------------------------"
     pass = false
     value = `dtk service import-dtkn #{service_name}`
+    puts value
     pass = true if (value.include? "exists on client")
     puts "Import of remote service #{service_name} did not complete successfully because of the referenced module that exists on local filesystem!" if pass == true
     puts "Import of remote service #{service_name} completed successfully which is not expected!" if pass == false

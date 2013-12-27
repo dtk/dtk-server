@@ -595,7 +595,7 @@ class DtkCommon
 		max_num_of_retries = 20
 
 		while (end_loop == false)
-			sleep 10
+			sleep 20
 			count += 1
 
 			if (count > max_num_of_retries)
@@ -608,7 +608,8 @@ class DtkCommon
 
 			5.downto(1) do |i|
 				sleep 1
-				response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+				response = send_request('/rest/ass
+					embly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
 				puts "Netstats check:"
 				pretty_print_JSON(response)
 

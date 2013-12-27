@@ -17,7 +17,6 @@ assembly_name = 'dnt_test_case_7_instance'
 assembly_template = 'mongodb_test::mongo_master_slave'
 mongodb_instance_port = 27017
 mongodb_webconsole_port = 28017
-
 node_name_1 = 'master'
 node_name_2 = 'slave'
 puppet_log_location = '/var/log/puppet/last.log'

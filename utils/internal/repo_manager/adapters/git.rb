@@ -38,8 +38,6 @@ module DTK
       full_path = repo_full_path(path,opts)
       if Aux::platform_is_linux?()
         RepomanagerGitLinux.new(full_path,branch,opts)
-      elsif  Aux::platform_is_windows?()
-        RepoManagerGitWindows.new(full_path,branch,opts)
       else
         raise Error.new("platform #{Aux::platform} not treated")
       end
@@ -747,27 +745,6 @@ module DTK
     end
     def cmd_opts()
       {:raise => true, :timeout => 60}
-    end
-  end
-  class RepoManagerGitWindows  < RepoManagerGit
-   private
-    def initialize(full_path,branch,opts={})
-      raise Error.new("R8::EnvironmentConfig::GitExecutable not defined") unless defined? R8::EnvironmentConfig::GitExecutable
-      @git = R8::EnvironmentConfig::GitExecutable
-      super(full_path,branch,opts)
-    end
-    attr_reader :git
-    def git_command__checkout(branch_name)
-      `#{git} checkout #{branch_name}`
-    end
-    def git_command__add_branch(branch_name)
-      `#{git} branch #{branch_name}`
-    end
-    def git_command__add(file_path)
-      `#{git} add #{file_path} -f`
-    end
-    def git_command__push(branch_name)
-      `#{git} push origin #{branch}:refs/heads/#{branch_name}`
     end
   end
 end

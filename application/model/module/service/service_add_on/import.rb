@@ -2,7 +2,7 @@ module DTK
   class ServiceAddOn
    private
     class Import 
-      include AssemblyImportExportCommon
+      include ServiceDSLCommonMixin
       def initialize(container_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
         @container_idh = container_idh
         @module_name = module_name

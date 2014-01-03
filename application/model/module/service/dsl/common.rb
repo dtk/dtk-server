@@ -1,5 +1,5 @@
 module DTK
-  module AssemblyImportExportCommon
+  module ServiceDSLCommonMixin
     Seperators = {
       :module_component => "::", #TODO: if this changes need to change ModCompGsub
       :component_version => ":",

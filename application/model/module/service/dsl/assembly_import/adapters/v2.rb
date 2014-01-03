@@ -39,7 +39,7 @@ module DTK; class ServiceModule
       end
 
      private
-      include AssemblyImportExportCommon
+      include ServiceDSLCommonMixin
 
       def self.import_task_templates(assembly_hash)
         ret = DBUpdateHash.new()
@@ -80,7 +80,7 @@ module DTK; class ServiceModule
         ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
         display_name = ref
 
-        #TODO: move this also to import_export_common
+        #TODO: move this also to dsl/common
         component_title = nil
         if type =~ DSLComponentTitleRegex
           type = $1

@@ -19,7 +19,7 @@ module DTK
       end
 
      private
-      include AssemblyImportExportCommon
+      include ServiceDSLCommonMixin
 
       def self.load_and_return_version_adapter_class(integer_version)
         return CachedAdapterClasses[integer_version] if CachedAdapterClasses[integer_version]

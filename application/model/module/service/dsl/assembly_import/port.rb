@@ -5,7 +5,7 @@ module DTK; class ServiceModule
         @ndx_ports.values()
       end
      private
-      include AssemblyImportExportCommon
+      include ServiceDSLCommonMixin
       def add_port_and_port_links()
         #port links can only be imported in after ports created
         #add ports to assembly nodes

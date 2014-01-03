@@ -27,7 +27,7 @@ module DTK; class ServiceModule
       end
 
      private
-      include AssemblyImportExportCommon
+      include ServiceDSLCommonMixin
 
       def self.ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
         an_sep = Seperators[:assembly_node]

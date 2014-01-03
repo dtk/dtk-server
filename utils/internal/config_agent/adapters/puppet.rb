@@ -114,6 +114,9 @@ module DTK
               else
                 dyn_attr.merge!(:type => "dynamic")
               end
+              if is_connected_output_attribute?(attr)
+                dyn_attr.merge!(:is_connected => true)
+              end
               dynamic_attrs << dyn_attr
             elsif not val.nil?
               add_attribute!(ndx_attributes,array_form_path,val,ext_ref)
@@ -133,6 +136,11 @@ module DTK
         ret.merge!("attributes" => ndx_attributes.values) unless ndx_attributes.empty?
         ret.merge!("dynamic_attributes" => dynamic_attrs) unless dynamic_attrs.empty?
         ret
+      end
+
+      #TODO: check if this is the right test for connected output attributes
+      def is_connected_output_attribute?(attr)
+        attr[:port_type] == 'output'
       end
 
       def ret_value(attr,node_components=nil)

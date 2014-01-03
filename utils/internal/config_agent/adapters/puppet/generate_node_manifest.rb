@@ -210,9 +210,14 @@ module XYZ
         ret = Array.new
         cmps_with_attrs.each do |cmp_with_attrs|
           (cmp_with_attrs["dynamic_attributes"]||[]).each do |dyn_attr|
-            if dyn_attr[:type] == "default_variable"
-              qualified_var = "#{cmp_with_attrs["name"]}::#{dyn_attr[:name]}"
-              ret << "r8::export_variable{'#{qualified_var}' :}"
+            #only include if the dynamic attribute is connected
+            #TODO: this is mechanism used to avoid duplicate r8::export_variable declarations: making sure downstream that
+            #definitions cannot be connected
+            if dyn_attr[:is_connected]
+              if dyn_attr[:type] == "default_variable"
+                qualified_var = "#{cmp_with_attrs["name"]}::#{dyn_attr[:name]}"
+                ret << "r8::export_variable{'#{qualified_var}' :}"
+              end
             end
           end
         end

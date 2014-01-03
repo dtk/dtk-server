@@ -2,6 +2,7 @@ module DTK
   class ServiceAddOn
    private
     class Import 
+      include AssemblyImportExportCommon
       def initialize(container_idh,module_name,dsl_file,hash_content,ports,aug_assembly_nodes)
         @container_idh = container_idh
         @module_name = module_name
@@ -44,7 +45,6 @@ module DTK
       end
 
      private
-      include AssemblyImportExportCommon
       def import_add_on_port_links(ports,add_on_port_links,assembly,sub_assembly)
         ret = Hash.new
         return ret if (add_on_port_links||[]).empty?

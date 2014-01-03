@@ -1,27 +1,8 @@
 module DTK
-  #TODO: need to clanup; the following common from dtk-commin/lib/dsl/file_parser
+  #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
     class DSLParsing < self #comes from dtk-commin/lib/dsl/file_parser
-      #class JSONParsing < self comes from dtk-commin/lib/dsl/file_parser
-      #end
-
       class YAMLParsing < self
-      end
-
-      class BadNodeReference < self
-      end
-
-      class BadComponentReference < self
-      end
-
-      class BadServiceLink < self
-        def initialize(node_name,component_type,link_def_ref,opts={})
-          super(base_msg(node_name,component_type,link_def_ref),opts[:file_path])
-        end
-       private 
-        def base_msg(node_name,component_type,link_def_ref)
-          "Bad link (#{link_def_ref}) for component #{node_name}/#{Component.component_type_print_form(component_type)}"
-        end
       end
     end
 

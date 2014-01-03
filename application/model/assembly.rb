@@ -1,5 +1,4 @@
 #TODO: finish moving the fns and mixins that relate just to template or instance to these files
-r8_nested_require('assembly','import_export_common')
 module DTK
   class Assembly < Component
     r8_nested_require('assembly','template')

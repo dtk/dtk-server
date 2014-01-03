@@ -1,8 +1,10 @@
 module DTK
   class ServiceModule
+    r8_nested_require('dsl','import_export_common')
     r8_nested_require('dsl','assembly_import')
     r8_nested_require('dsl','assembly_export')
     r8_nested_require('dsl','parser')
+    r8_nested_require('dsl','error')
 
     module DSLVersionInfo
       def self.default_integer_version()

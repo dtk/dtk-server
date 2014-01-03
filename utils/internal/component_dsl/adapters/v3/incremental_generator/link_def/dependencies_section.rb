@@ -23,6 +23,9 @@ module DTK; class ComponentDSL; class V3
         return ret unless fragment
         component_fragment = component_fragment(full_hash,context[:component_template])
         if dependencies_fragment = component_fragment['dependencies']
+          unless dependencies_fragment.kind_of?(Array)
+            dependencies_fragment = component_fragment['dependencies'] = [dependencies_fragment]
+          end
           fragment.each do |key,content|
             update_fragment!(dependencies_fragment,key,content)
           end

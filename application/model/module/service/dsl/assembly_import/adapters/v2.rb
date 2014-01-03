@@ -27,7 +27,7 @@ module DTK; class ServiceModule
           input_id = input.matching_id(ports,opts_matching_id)
           return input_id if input_id.is_a?(ErrorUsage::DSLParsing)
           
-          output_id = output.matching_id(ports,opts_matching_id)
+          output_id = output.matching_id(ports,opts_matching_id.merge(:is_output => true))
           return output_id if output_id.is_a?(ErrorUsage::DSLParsing)
 
           pl_ref = PortLink.ref_from_ids(input_id,output_id)

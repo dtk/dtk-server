@@ -79,6 +79,7 @@ module DTK
 
       #ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
+raise Error.new("write code that checks if self has a title; and below make sure that provide title if need one")
         match = aug_ports.find do |port|
           p = port[:parsed_port_name]
           node = port[:node][:display_name]

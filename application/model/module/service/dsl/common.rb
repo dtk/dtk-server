@@ -79,7 +79,12 @@ module DTK
 
       #ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
-raise Error.new("write code that checks if self has a title; and below make sure that provide title if need one")
+        if opts[:is_output]
+          if self[:title]
+            err_class = ErrorUsage::DSLParsing::NotSupported::LinkFromComponentWithTitle
+            return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
+          end
+        end
         match = aug_ports.find do |port|
           p = port[:parsed_port_name]
           node = port[:node][:display_name]
@@ -98,6 +103,14 @@ raise Error.new("write code that checks if self has a title; and below make sure
           raise Error.new("Cannot find match to (#{self.inspect})")
         end
       end
+
+      def raise_or_ret_error(err_class,args,opts={})
+        opts_file_path = Aux::hash_subset(opts,[:file_path])
+        err = err_class.new(*args,opts_file_path)
+        opts[:do_not_throw_error] ? err : raise(err)
+      end
+      private :raise_or_ret_error
+
       class AddOn < self
         #returns assembly ref, port_ref
         def self.parse(add_on_port_ref,assembly_list)

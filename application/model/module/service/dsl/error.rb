@@ -2,9 +2,15 @@ module DTK
   class ErrorUsage
     class DSLParsing
       module Mixin
-        def component_print_form(component_type,node_name=nil)
-          cmp = Component.component_type_print_form(component_type)
-          node_name ? "#{node_name}/#{cmp}" : cmp
+        def component_print_form(component_type,context={})
+          ret = Component.component_type_print_form(component_type)
+          if title = context[:title]
+            ret = ComponentTitle.print_form_with_title(ret,title)
+          end
+          if node_name = context[:node_name]
+            ret = "#{node_name}/#{ret}"
+          end
+          ret
         end
       end
 
@@ -21,19 +27,21 @@ module DTK
         end
        private 
         def base_msg(node_name,component_type,link_def_ref)
-          "Bad link (#{link_def_ref}) for component #{component_print_form(component_type,node_name)}"
+          cmp = component_print_form(component_type, :node_name => node_name)
+          "Bad link (#{link_def_ref}) for component (#{cmp})"
         end
       end
 
       class NotSupported < self
         include Mixin
         class LinkFromComponentWithTitle < self
-          def initialize(node_name,component_type)
-            super(base_msg(node_name,component_type))
+          def initialize(node_name,component_type,title,opts={})
+            super(base_msg(node_name,component_type,title),opts[:file_path])
           end
          private
-          def base_msg(component_type)
-            "Link from component with title (#{component_print_form(component_type)} #{not_supported_msg()}"
+          def base_msg(node_name,component_type,title)
+            cmp = component_print_form(component_type, :node_name => node_name, :title => title)
+            "Link from a component with a title, '#{cmp}' in this case, #{not_supported_msg()}"
           end
         end
        private

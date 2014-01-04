@@ -13,6 +13,10 @@ module DTK
       "#{component_type}--#{title}"
     end
 
+    def self.ref_with_title?(component_type,title=nil)
+      title ? ref_with_title(component_type,title) : component_type
+    end
+
     ComponentTitleRegex = /(^.+)\[(.+)\]$/
     #returns [component_type,title]
     def self.parse_component_display_name(cmp_display_name)

@@ -20,11 +20,16 @@ module DTK; class Component
     def self.get_matching?(node_idh,component_type,component_title)
       sp_hash = {
         :cols => [:id,:display_name,:component_type,:ref],
-        :filter => [:and,[:eq,:node_node_id,node_idh.get_id()],
-                    [:eq,:ref,ComponentTitle.ref_with_title(component_type,component_title)]]
+        :filter => [:and,[:eq,:node_node_id,node_idh.get_id()], 
+                          filter(component_type,component_title)
+                   ]
       }
-      ret = Model.get_obj(node_idh.createMH(:component),sp_hash)
-      ret && component_template_from_component(ret)
+      cmp = Model.get_obj(node_idh.createMH(:component),sp_hash)
+      cmp && create_from_component(cmp)
+    end
+
+    def self.filter(component_type,component_title=nil)
+      [:eq,:ref,ComponentTitle.ref_with_title?(component_type,component_title)]
     end
 
     def self.set_title_attribute(cmp_idh,component_title,title_attr_name=nil)
@@ -108,10 +113,6 @@ module DTK; class Component
 
     def self.version_print_form(component)
       ModuleBranch.version_from_version_field(component.get_field?(:version))
-    end
-   private
-    def self.component_template_from_component(cmp)
-      cmp.id_handle().create_object(:model_name => :component_instance).merge(cmp)
     end
   end
 end; end

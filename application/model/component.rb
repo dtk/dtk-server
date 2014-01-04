@@ -63,27 +63,26 @@ module DTK
       check_valid_id_helper(model_handle,id,filter)
     end
 
+    #just used for component instances
     def self.name_to_id(model_handle,name,context={})
-      #TODO: put in check to make sure component instance and not a compoennt template and/or move to Component::Instance
       if context.empty?
         return name_to_id_default(model_handle,name)
       end
       if assembly_id = context[:assembly_id]
         #name should be of form node/component
-        #TODO: handling component names with titles
         unless name =~ /(^[^\/]+)\/([^\/]+$)/
           raise ErrorUsage.new("Ill-formed name for component (#{name})")
         end
         node_name = $1
-        cmp_name = $2
-        display_name = display_name_from_user_friendly_name(cmp_name)
+        cmp_user_friendly_name = $2
+        cmp_type,cmp_title = type_and_title_from_user_friendly_name(cmp_user_friendly_name)
         sp_hash = {
           :cols => [:id,:node],
-          :filter => [:and,[:eq,:display_name,display_name], [:eq,:assembly_id,assembly_id]]
+          :filter => [:and,Component::Instance.filter(cmp_type,cmp_title), [:eq,:assembly_id,assembly_id]]
         }
         name_to_id_helper(model_handle,name,sp_hash.merge(:post_filter => lambda{|r|r[:node][:display_name] == node_name}))
       else
-        raise Error.new("Unexepected context (#{contenxt.inspect})")
+        raise Error.new("Unexepected context (#{context.inspect})")
       end
     end
 
@@ -136,9 +135,13 @@ module DTK
       version_field_default()
     end
 
+    #returns component_type,title
+    def self.type_and_title_from_user_friendly_name(user_friendly_name)
+      display_name = display_name_from_user_friendly_name(user_friendly_name)
+      ComponentTitle.parse_component_display_name(display_name)
+    end
     def self.component_type_from_user_friendly_name(user_friendly_name)
-      component_type,title = ComponentTitle.parse_component_display_name(user_friendly_name.gsub(/::/,"__"))
-      component_type
+      type_and_title_from_user_friendly_name(user_friendly_name)[0]
     end
     def self.display_name_from_user_friendly_name(user_friendly_name)
       user_friendly_name.gsub(/::/,"__")

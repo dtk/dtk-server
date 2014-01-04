@@ -131,9 +131,10 @@ module DTK
       return ret unless match
 
       #get remote component
+      remote_cmp_display_name = remote_cmp_info[:display_name]
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:node_node_id,:component_type,:implementation_id,:extended_base],
-        :filter => [:and,[:eq,:component_type,remote_cmp_type],[:eq,:node_node_id,remote_cmp_info[:node_node_id]]]
+        :filter => [:and,[:eq,:display_name,remote_cmp_display_name],[:eq,:node_node_id,remote_cmp_info[:node_node_id]]]
       }
       cmp_mh = local_cmp_info[:component].model_handle()
       rows = Model.get_objs(cmp_mh,sp_hash)

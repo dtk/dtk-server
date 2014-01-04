@@ -100,11 +100,11 @@ module DTK; class ServiceModule
         ndx_ld_links_info.each_value do |ld_links_info|
           ld_links_info.each do |ld_link_info|
             remote_component_type = ld_link_info[:link][:remote_component_type]
-            #TODO: to handle remotes that have a title may need to update matching used below
             link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
               node = matching_node_cmp[:node]
               component = matching_node_cmp[:nested_component]
-              port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true)
+              cmp_ref = matching_node_cmp[:component_ref]
+              port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true,:component_ref => cmp_ref)
               if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
                 existing_port_info[:matched] = true
                 ret << existing_port_info[:port]

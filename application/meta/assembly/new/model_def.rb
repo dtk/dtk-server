@@ -300,7 +300,7 @@ lambda__instance_nodes_components_assembly_template =
            :alias => :nested_component,
            :join_type => :inner,
            :join_cond=>{:id => q(:component_ref,:component_template_id)},
-           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id]
+           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id,:only_one_per_node]
          },
          {
            :model_name => :link_def,

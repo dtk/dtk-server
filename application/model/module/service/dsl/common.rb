@@ -90,7 +90,13 @@ module DTK
           node = port[:node][:display_name]
           if self[:component_type] == p[:component_type] and self[:link_def_ref] == p[:link_def_ref] and node == self[:node] 
             if self[:assembly_id].nil? or (self[:assembly_id] == port[:assembly_id])
-              self[:title] == p[:title] #they both can be nil -> want a match
+              if self[:title] == p[:title] #they both can be nil -> want a match
+                true
+              elsif opts[:is_output] and p[:title] and self[:title].nil?
+                #TODO: once add support for LinkFromComponentWithTitl put in error that indicates missing title in component link
+                err_class = ErrorUsage::DSLParsing::NotSupported::LinkFromComponentWithTitle
+                return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
+              end
             end
           end
         end

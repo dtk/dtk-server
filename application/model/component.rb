@@ -64,7 +64,7 @@ module DTK
     end
 
     def self.name_to_id(model_handle,name,context={})
-      #TODO: put in check to make sure component instance and not a compoennt template
+      #TODO: put in check to make sure component instance and not a compoennt template and/or move to Component::Instance
       if context.empty?
         return name_to_id_default(model_handle,name)
       end
@@ -76,10 +76,10 @@ module DTK
         end
         node_name = $1
         cmp_name = $2
-        cmp_type = Component.component_type_from_user_friendly_name(cmp_name)
+        display_name = display_name_from_user_friendly_name(cmp_name)
         sp_hash = {
           :cols => [:id,:node],
-          :filter => [:and,[:eq,:component_type,cmp_type], [:eq,:assembly_id,assembly_id]]
+          :filter => [:and,[:eq,:display_name,display_name], [:eq,:assembly_id,assembly_id]]
         }
         name_to_id_helper(model_handle,name,sp_hash.merge(:post_filter => lambda{|r|r[:node][:display_name] == node_name}))
       else

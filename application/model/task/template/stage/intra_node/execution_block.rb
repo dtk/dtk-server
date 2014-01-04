@@ -50,28 +50,41 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
         return ret unless action_list
-        unless ordered_actions = serialized_eb[:ordered_components]
+        unless ordered_items = serialized_eb[:ordered_components]
           raise ErrorParsing.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end
-        ordered_actions.each do |serialized_action|
+        component_group_num = 1
+        ordered_items.each do |serialized_item|
           lvs = LegalValues.new()
-          if lvs.add_and_match?(serialized_action,String)
-            component_name_ref = serialized_action
-            if action = action_list.find_matching_action(node_name,component_name_ref)
-              ret << action
-            else
-              raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+          if lvs.add_and_match?(serialized_item,String)
+            find_and_add_action!(ret,serialized_item,node_name,action_list)
+          elsif lvs.add_and_match?(serialized_item){HashWithKey(Constant::ComponentGroup)}
+            component_group = serialized_item.values.first
+            ErrorParsing.raise_error_unless(component_group,[String,Array])
+            Array(component_group).each do |serialized_action|
+              find_and_add_action!(ret,serialized_action,node_name,action_list,:component_group_num => component_group_num)
             end
-          elsif lvs.add_and_match?(serialized_action){HashWithKey(Constant::ComponentGroup)}
-            raise Error.new('got here')
+            component_group_num += 1
           else
-            raise ErrorParsing::WrongType.new(serialized_action,lvs)
+            raise ErrorParsing::WrongType.new(serialized_item,lvs)
           end
         end
         ret
       end
 
      private
+      def self.find_and_add_action!(ret,serialized_item,node_name,action_list,opts={})
+        component_name_ref = serialized_item
+        if action = action_list.find_matching_action(node_name,component_name_ref)
+          if cgn = opts[:component_group_num]
+            Log.error("tag action with compnent grpup num (#{cgn.to_s})")
+          end
+          ret << action
+        else
+          raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+        end        
+      end
+
       def each_action_with_position(&block)
         each_with_index{|a,i|block.call(a,i+1)}
       end

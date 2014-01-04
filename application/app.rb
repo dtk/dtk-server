@@ -27,6 +27,7 @@ r8_require_common_lib('auxiliary')
 
 #TODO: make that log  dont need config values 
 r8_require('../utils/internal/log')
+r8_require('../utils/internal/dsl_parsing_aux')
 r8_require('../utils/internal/error')
 r8_require('../utils/internal/hash_object')
 

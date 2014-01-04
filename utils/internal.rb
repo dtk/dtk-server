@@ -1,6 +1,7 @@
 files = 
   [
    'dynamic_loader',
+   'dsl_parsing_aux',
    'error', 
    'auxiliary', 
    'sql', 

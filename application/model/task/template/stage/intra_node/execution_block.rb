@@ -2,6 +2,7 @@ module DTK; class Task; class Template
   class Stage; class IntraNode
     class ExecutionBlock < Array
       include Serialization
+      include DSLParsingAux
       def node()
         #all the elements have same node so can just pick first
         first && first[:node]
@@ -53,15 +54,18 @@ module DTK; class Task; class Template
           raise ErrorParsing.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end
         ordered_actions.each do |serialized_action|
-          if serialized_action.kind_of?(String)
+          lvs = LegalValues.new()
+          if lvs.add_and_match?(serialized_action,String)
             component_name_ref = serialized_action
             if action = action_list.find_matching_action(node_name,component_name_ref)
               ret << action
             else
               raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
             end
+          elsif lvs.add_and_match?(serialized_action){HashWithKey(Constant::ComponentGroup)}
+            raise Error.new('got here')
           else
-            raise ErrorParsing::WrongType.new(serialized_action,String){HashWithKey(Constant::ComponentGroup)}
+            raise ErrorParsing::WrongType.new(serialized_action,lvs)
           end
         end
         ret

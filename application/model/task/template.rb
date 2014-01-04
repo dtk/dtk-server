@@ -15,9 +15,6 @@ module DTK; class Task
         Concurrent = :concurrent
         Sequential = :sequential
       end
-      class ParseError < ErrorUsage::DSLParsing
-      end
-
       #TODO: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)
@@ -27,6 +24,7 @@ module DTK; class Task
       end
     end
 
+    r8_nested_require('template','error')
     r8_nested_require('template','temporal_constraint')
     r8_nested_require('template','temporal_constraints')
     r8_nested_require('template','action')

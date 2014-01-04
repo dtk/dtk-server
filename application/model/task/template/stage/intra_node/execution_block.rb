@@ -49,7 +49,7 @@ module DTK; class Task; class Template
         ret = new()
         return ret unless action_list
         unless ordered_actions = serialized_eb[:ordered_components]
-          raise ParseError.new("Ill-formed Execution block (#{serialized_eb.inspect})")
+          raise ErrorParsing.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end
         ordered_actions.each do |serialized_action|
           if serialized_action.kind_of?(String)
@@ -57,10 +57,10 @@ module DTK; class Task; class Template
             if action = action_list.find_matching_action(node_name,component_name_ref)
               ret << action
             else
-              raise ParseError.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+              raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
             end
           else
-            raise ParseError.new("Parse error for action of form (#{serialized_action.inspect})")
+            raise ErrorParsing::WrongType.new(serialized_action,String)
           end
         end
         ret

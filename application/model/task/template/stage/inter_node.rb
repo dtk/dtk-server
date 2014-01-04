@@ -111,12 +111,12 @@ module DTK; class Task; class Template
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           unless node_name = serialized_node_actions[:node]
-            raise ParseError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+            raise ErrorParsing.new("Missing node reference in (#{serialized_node_actions.inspect})")
           end
           node_id = 0 #dummy value when just used for parsing
           if action_list
             unless node_id = action_list.find_matching_node_id(node_name)
-              raise ParseError.new("Node ref (#{node_name}) cannot be resolved")
+              raise ErrorParsing.new("Node ref (#{node_name}) cannot be resolved")
             end
           end
           h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))

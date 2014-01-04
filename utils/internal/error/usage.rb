@@ -1,11 +1,7 @@
 module DTK
   #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
-    class DSLParsing < self #comes from dtk-commin/lib/dsl/file_parser
-      class YAMLParsing < self
-      end
-    end
-
+    r8_nested_require('usage','dsl_parsing')
 
     class ReferencedComponentTemplates < self
       def initialize(aug_cmp_templates)

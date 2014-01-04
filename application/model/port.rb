@@ -83,6 +83,9 @@ module DTK
     def component_name()
       parse_port_display_name()[:component_type]
     end
+    def component_type()
+      parse_port_display_name()[:component_type]
+    end
     def link_def_name()
       parse_port_display_name()[:link_def_ref]
     end

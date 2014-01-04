@@ -99,26 +99,24 @@ module DTK
         :cols => [:id,:group_id,:display_name,:component_type,:direction,:link_type,:link_def_info,:node_node_id],
         :filter => [:oneof, :id, [port_link_hash[:input_id],port_link_hash[:output_id]]]
       }
-      link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
-      #local_cmp_info will have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
-      local_cmp_info_and_links = link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == "local"}
-      return ret if local_cmp_info_and_links.empty?
-      local_cmp_info = local_cmp_info_and_links.first #all elements wil agree on the parts aside from link_def_link
+      ports_with_link_def_info = get_objs(parent_idh.createMH(:port),sp_hash)
+      local_port_cmp_rows = ports_with_link_def_info.select{|r|(r[:link_def]||{})[:local_or_remote] == "local"}
+      return ret if local_port_cmp_rows.empty?
+      local_port_cmp_info = local_port_cmp_rows.first #all elements wil agree on the parts aside from link_def_link
 
-      remote_cmp_info = link_def_info.select{|r|r[:id] != local_cmp_info[:id]}
-      if remote_cmp_info.empty?
-        raise Error.new("Unexpected result that a remote port cannot be not found")
+      remote_port_cmp_rows = ports_with_link_def_info.select{|r|r[:id] != local_port_cmp_info[:id]}
+      if remote_port_cmp_rows.empty?
+        raise Error.new("Unexpected result that a remote port cannot be found")
       end
-      #local_cmp_info will have a row per link_def_link associated with it (link_def_link under local link defs, not remote ones)
-      remote_cmp_info = remote_cmp_info.first
+      remote_port_cmp_info = remote_port_cmp_rows.first
 
-      return ret unless local_cmp_info[:link_type] == remote_cmp_info[:link_type]
+      return ret unless local_port_cmp_info[:link_type] == remote_port_cmp_info[:link_type]
       #find the matching link_def_link
-      remote_cmp_type = remote_cmp_info[:component_type]
+      remote_cmp_type = remote_port_cmp_info[:component_type]
 
       #look for matching link
-      components_coreside = (local_cmp_info[:node_node_id] == remote_cmp_info[:node_node_id])
-      match = local_cmp_info_and_links.find do |r|
+      components_coreside = (local_port_cmp_info[:node_node_id] == remote_port_cmp_info[:node_node_id])
+      match = local_port_cmp_rows.find do |r|
         possible_link = r[:link_def_link]||{}
         if possible_link[:remote_component_type] == remote_cmp_type 
           if components_coreside
@@ -131,21 +129,21 @@ module DTK
       return ret unless match
 
       #get remote component
-      remote_cmp_display_name = remote_cmp_info[:display_name]
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:node_node_id,:component_type,:implementation_id,:extended_base],
-        :filter => [:and,[:eq,:display_name,remote_cmp_display_name],[:eq,:node_node_id,remote_cmp_info[:node_node_id]]]
+        :filter => [:and,Component::Instance.filter(remote_port_cmp_info.component_type,remote_port_cmp_info.title?()),
+                        [:eq,:node_node_id,remote_port_cmp_info[:node_node_id]]
+                   ]
       }
-      cmp_mh = local_cmp_info[:component].model_handle()
+      cmp_mh = local_port_cmp_info[:component].model_handle()
       rows = Model.get_objs(cmp_mh,sp_hash)
       unless rows.size == 1
-      #TODO: refine if multiple of same component types
         raise Error.new("Unexpected that getting remote port link component does not return unique element")
       else
         remote_cmp = rows.first
       end
-      link_def_link = match[:link_def_link].merge!(:local_component_type => local_cmp_info[:component][:component_type])
-      relevant_components = [local_cmp_info[:component], remote_cmp]
+      link_def_link = match[:link_def_link].merge!(:local_component_type => local_port_cmp_info[:component][:component_type])
+      relevant_components = [local_port_cmp_info[:component], remote_cmp]
       [link_def_link,relevant_components]
     end
   end

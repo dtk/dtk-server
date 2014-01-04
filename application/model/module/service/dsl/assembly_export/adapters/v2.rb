@@ -44,7 +44,7 @@ module DTK
           cmps = matching_node[:components]
           i = 0; found = false
           while i < cmps.size
-            if match_component?(cmps[i],in_parsed_port[:component_name])
+            if match_component?(cmps[i],in_parsed_port)
               cmps[i] = add_component_link_to_cmp(cmps[i],out_parsed_port)
               found = true
             end
@@ -77,17 +77,26 @@ module DTK
         p = Port.parse_port_display_name(port_ref)
         node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)
         component_name = component_name_output_form(p[:component_type])
-        {:node_name => node_ref_to_name[node_ref], :component_name => component_name, :link_def_ref => p[:link_def_ref]}
+        ret = {:node_name => node_ref_to_name[node_ref], :component_name => component_name, :link_def_ref => p[:link_def_ref]}
+        if title = p[:title]
+          ret.merge!(:title => title)
+        end
+        ret
       end
 
-      def match_component?(component_in_ret,component_name)
+      def match_component?(component_in_ret,parsed_port)
         match_term = 
           if component_in_ret.kind_of?(Hash)
             component_in_ret.keys.first
           else # it will be a string
             component_in_ret
           end
-        match_term == component_name
+        parsed_port_match_term = parsed_port[:component_name]
+        if title = parsed_port[:title]
+          parsed_port_match_term = "#{parsed_port[:component_name]}[#{title}]"
+        else
+        end
+        match_term == parsed_port_match_term
       end
 
       def add_component_link_to_cmp(component_in_ret,out_parsed_port)

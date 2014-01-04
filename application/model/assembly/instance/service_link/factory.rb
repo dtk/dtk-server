@@ -16,7 +16,7 @@ module DTK
           input_port,output_port,new_port_created = add_or_ret_ports?()
           unless new_port_created
             #see if there is an existing port link
-            #TODO: may also add filter on service_type
+            #TODO: may also add filter on component_type
             filter = [:and,[:eq,:input_id,input_port.id()],[:eq,:output_id,output_port.id()]]
             pl_matches = @assembly_instance.get_port_links(:filter => filter)
             if pl_matches.size == 1

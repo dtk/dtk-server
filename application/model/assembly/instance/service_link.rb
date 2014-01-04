@@ -2,9 +2,20 @@ module DTK
   class Assembly::Instance
     module ServiceLinkMixin
       def add_service_link?(input_cmp_idh,output_cmp_idh,opts={})
+        raise_error_if_link_from_component_title(output_cmp_idh.create_object())
         dependency_name = find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts)
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
+      
+      def raise_error_if_link_from_component_title(cmp)
+        only_one_per_node = cmp.get_field?(:only_one_per_node)
+        if (!only_one_per_node.nil?) and not only_one_per_node
+          cmp_print_form = cmp.display_name_print_form(:node_prefix=>true)
+          raise ErrorUsage.new("Link from a component with a title, '#{cmp_print_form}' in this case, is not supported")
+        end
+      end
+      private :raise_error_if_link_from_component_title
+
 =begin
 #TODO: deprecated
       def add_ad_hoc_attribute_mapping(port_link,attribute_mapping)

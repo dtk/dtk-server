@@ -1,6 +1,7 @@
 module DTK; class Task; class Template
   class Stage; class IntraNode
     class ExecutionBlock < Array
+      include Serialization
       def node()
         #all the elements have same node so can just pick first
         first && first[:node]
@@ -60,7 +61,7 @@ module DTK; class Task; class Template
               raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
             end
           else
-            raise ErrorParsing::WrongType.new(serialized_action,String)
+            raise ErrorParsing::WrongType.new(serialized_action,String){HashWithKey(Constant::ComponentGroup)}
           end
         end
         ret

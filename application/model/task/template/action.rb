@@ -19,17 +19,17 @@ module DTK; class Task; class Template
     
    private
     attr_accessor :action
-    def initialize(action)
+    def initialize(action,index=nil)
       @action = action
-      @index = nil
+      @index = index
     end
 
     class ComponentAction < self
-      def initialize(component)
+      def initialize(component,index=nil)
         unless component[:node].kind_of?(Node)
           raise Error.new("ComponentAction.new must be given component argument with :node key")
         end
-        super(component)
+        super(component,index)
       end
 
       def in_component_group(component_group_num)
@@ -121,9 +121,8 @@ module DTK; class Task; class Template
 
       class InComponentGroup < self
         attr_reader :component_group_num
-        def initialize(action,index,component_group_num)
-          @action = action
-          @index = index
+        def initialize(component,index,component_group_num)
+          super(component,index)
           @component_group_num = component_group_num
         end
       end

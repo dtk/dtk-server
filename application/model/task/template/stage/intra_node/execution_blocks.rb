@@ -82,7 +82,7 @@ module DTK; class Task; class Template
         if find{|eb|!eb.kind_of?(ExecutionBlock::Ordered)}
           raise Error.new("The method ExecutionBlocks#intra_node_stages can only be called if all its elements are ordered")
         end
-        map{|eb|eb.components.map{|cmp|cmp[:id]}}
+        map{|eb|eb.intra_node_stages()}
       end
       
       def node()

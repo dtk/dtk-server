@@ -14,6 +14,11 @@ module DTK; class Task; class Template
       def components()
         map{|a|a.hash_subset(*Component::Instance.component_list_fields)}
       end
+      def components_with_group_nums()
+        map{|a|{:component => a.hash_subset(*Component::Instance.component_list_fields),:component_group_num => a.component_group_num}}
+      end
+      private :components_with_group_nums
+        
 
       def find_earliest_match?(action_match,action_indexes)
         each_action_with_position do |a,pos|
@@ -87,6 +92,30 @@ module DTK; class Task; class Template
             raise ErrorParsing::WrongType.new(serialized_item,lvs)
           end
         end
+        ret
+      end
+
+      def intra_node_stages()
+        ret = Array.new
+        component_group_num = 1
+        component_group = nil
+        components_with_group_nums().map do |cmp_with_group_num|
+          cmp = cmp_with_group_num[:component]
+          if cgn = cmp_with_group_num[:component_group_num]
+            unless cgn == component_group_num 
+              ret << component_group if component_group
+              component_group = nil
+              component_group_num = cgn
+            end
+            component_group ||= Array.new
+            component_group << cmp[:id]
+          else
+            ret << component_group if component_group
+            component_group = nil
+            ret << cmp[:id]
+          end
+        end
+        ret << component_group if component_group
         ret
       end
 

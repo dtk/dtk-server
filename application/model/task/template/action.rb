@@ -8,7 +8,7 @@ module DTK; class Task; class Template
       end
     end
 
-    attr_accessor :index, :component_group_num
+    attr_accessor :index
 
     def method_missing(name,*args,&block)
       @action.send(name,*args,&block)
@@ -18,10 +18,10 @@ module DTK; class Task; class Template
     end
     
    private
+    attr_accessor :action
     def initialize(action)
       @action = action
       @index = nil
-      @component_group_num = nil
     end
 
     class ComponentAction < self
@@ -30,6 +30,15 @@ module DTK; class Task; class Template
           raise Error.new("ComponentAction.new must be given component argument with :node key")
         end
         super(component)
+      end
+
+      def in_component_group(component_group_num)
+        InComponentGroup.new(action,index,component_group_num)
+      end
+
+      #overwritten by InComponentGroup
+      def component_group_num()
+        nil
       end
 
       def node()
@@ -108,6 +117,15 @@ module DTK; class Task; class Template
      private
       def component()
         @action
+      end
+
+      class InComponentGroup < self
+        attr_reader :component_group_num
+        def initialize(action,index,component_group_num)
+          @action = action
+          @index = index
+          @component_group_num = component_group_num
+        end
       end
       
     end

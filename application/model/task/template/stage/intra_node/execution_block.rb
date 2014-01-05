@@ -104,7 +104,7 @@ module DTK; class Task; class Template
         component_name_ref = serialized_item
         if action = action_list.find_matching_action(node_name,component_name_ref)
           if cgn = opts[:component_group_num]
-            action.component_group_num = cgn
+            action = action.in_component_group(cgn)
           end
           ret << action
         else

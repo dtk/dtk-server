@@ -55,6 +55,8 @@ module DTK; class Task; class Template
             component_group ||= Array.new
             serialization_form_add_action?(component_group,a,opts)
           else
+            serialization_form_add_component_group?(items,component_group)
+            component_group = nil
             serialization_form_add_action?(items,a,opts)
           end
         end

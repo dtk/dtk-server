@@ -42,8 +42,32 @@ module DTK; class Task; class Template
       end
         
       def serialization_form(opts={})
-        ordered_components = map{|a|a.serialization_form(opts)}.compact
-        {:ordered_components => ordered_components} unless ordered_components.empty?
+        items = Array.new
+        component_group_num = 0
+        component_group = nil
+        each do |a|
+          add_to_group = false
+          if cgn = a.component_group_num
+            Log.error('set add_to_group to true')
+            if cgn == component_group_num 
+              if item = a.serialization_form(opts)
+               Log.error('add to component_group')
+              end
+            else
+               Log.error('add component_group to items if not null; bump component_group_num; ..') 
+            end
+          end 
+
+          if add_to_group
+            if item = a.serialization_form(opts)
+              items << item
+            end
+          end
+        end
+        if component_group
+          items << component_group
+        end
+        {:ordered_components => items} unless items.empty?
       end
 
       #action list can be nil just for parsing
@@ -77,7 +101,7 @@ module DTK; class Task; class Template
         component_name_ref = serialized_item
         if action = action_list.find_matching_action(node_name,component_name_ref)
           if cgn = opts[:component_group_num]
-            Log.error("tag action with compnent grpup num (#{cgn.to_s})")
+            action.component_group_num = cgn
           end
           ret << action
         else

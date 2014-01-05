@@ -8,7 +8,7 @@ module DTK; class Task; class Template
       end
     end
 
-    attr_accessor :index
+    attr_accessor :index, :component_group_num
 
     def method_missing(name,*args,&block)
       @action.send(name,*args,&block)
@@ -16,11 +16,12 @@ module DTK; class Task; class Template
     def respond_to?(name)
       @action.respond_to?(name) || super
     end
-
+    
    private
     def initialize(action)
       @action = action
       @index = nil
+      @component_group_num = nil
     end
 
     class ComponentAction < self

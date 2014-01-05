@@ -4,6 +4,7 @@ module DTK
   module Stage
     class InterNode
       # Generating stages in case of inter node component dependencies 
+      #TODO: deprecate
       def self.generate_stages(state_change_list,assembly)
         
         # If 'GUARDS' temporal mode set, don't generate stages workflow

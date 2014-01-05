@@ -1,5 +1,4 @@
 r8_nested_require('stage','intra_node')
-r8_nested_require('stage','inter_node')
 r8_nested_require('stage','puppet_stage_generator')
 module DTK
   module CreateClassMixin
@@ -19,39 +18,15 @@ module DTK
       create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly)
       ret.add_subtask(create_node_tasks) if create_node_tasks
 
-      if R8::Config[:task][:template][:enabled]
-        opts = {:component_type_filter => component_type}
-        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
-        stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
-
-        pp "---encoding of task_template_content.serialization_form()"
-        serialization_hash = task_template_content.serialization_form()
-        STDOUT << Aux.serialize(serialization_hash,:yaml)
-        STDOUT << "\n\n"
-        pp "--- end: encodings of task_template_content.serialization_form()"
-
-#        raise ErrorUsage.new("stop here")
-      else
-#TODO: will deprecate this
-        #replacing this part with above
-        assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-        nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
-        node_mh = assembly.model_handle(:node)
-        node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
-        config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-        
-        # Amar: Adding puppet version on node hash so it can be sent in mcollective request on node side
-        config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
-
-        # Amar: Generating Stages for inter node dependencies
-        staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes,assembly)
-        stages_config_nodes_task = Array.new
-        staged_config_nodes_changes.each_index do |i| 
-          config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), i+1)
-          stages_config_nodes_task << config_nodes_task if config_nodes_task
-        end
-#TODO: end of deprecate section
-      end
+      opts = {:component_type_filter => component_type}
+      task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+      
+      pp "---encoding of task_template_content.serialization_form()"
+      serialization_hash = task_template_content.serialization_form()
+      STDOUT << Aux.serialize(serialization_hash,:yaml)
+      STDOUT << "\n\n"
+      pp "--- end: encodings of task_template_content.serialization_form()"
       
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
@@ -77,39 +52,16 @@ module DTK
           raise Error.new("Unexpected component_type (#{component_type})")
         end
 
-      if R8::Config[:task][:template][:enabled]
-        opts = {:component_type_filter => component_type}
-        task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
-        stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
+      opts = {:component_type_filter => component_type}
+      task_template_content = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],assembly,opts)
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
-        pp "---encoding of task_template_content.serialization_form()"
-        serialization_hash = task_template_content.serialization_form()
-        STDOUT << Aux.serialize(serialization_hash,:yaml)
-        STDOUT << "\n\n"
-        pp "--- end: encodings of task_template_content.serialization_form()"
+      pp "---encoding of task_template_content.serialization_form()"
+      serialization_hash = task_template_content.serialization_form()
+      STDOUT << Aux.serialize(serialization_hash,:yaml)
+      STDOUT << "\n\n"
+      pp "--- end: encodings of task_template_content.serialization_form()"
 
-#        raise ErrorUsage.new("stop here")
-      else
-#TODO: will deprecate this
-        #replacing this part with above
-        assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
-        nodes = assembly_config_changes.flatten(1).map{|r|r[:node]} 
-        node_mh = assembly.model_handle(:node)
-        node_centric_config_changes = StateChange::NodeCentric::AllMatching.component_state_changes(node_mh,:nodes => nodes)
-        config_nodes_changes = combine_same_node_state_changes([node_centric_config_changes,assembly_config_changes])
-        
-        # Amar: Adding puppet version on node hash so it can be sent in mcollective request on node side
-        config_nodes_changes.each { |cmps| cmps.each { |cmp| cmp[:node][:puppet_version] = puppet_version }} if puppet_version && !puppet_version.empty?
-
-        # Amar: Generating Stages for inter node dependencies
-        staged_config_nodes_changes = Stage::InterNode.generate_stages(config_nodes_changes,assembly)
-        stages_config_nodes_task = Array.new
-        staged_config_nodes_changes.each_index do |i| 
-          config_nodes_task = config_nodes_task(task_mh,staged_config_nodes_changes[i],assembly.id_handle(), i+1)
-          stages_config_nodes_task << config_nodes_task if config_nodes_task
-        end
-#TODO: end of deprecate section
-      end
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
@@ -276,20 +228,8 @@ module DTK
         ret
       end
     end
-   private
-    def combine_same_node_state_changes(sc_list_array)
-      #shortcut if one eleemnt is non-null
-      non_null = sc_list_array.reject{|sc_list|sc_list.empty?}
-      unless non_null.size > 1
-        return non_null.first||[]
-      end
-      ndx_ret = Hash.new
-      non_null.each do |sc_list|
-        sc_list.each{|list|list.each{|sc|(ndx_ret[sc[:node][:id]] ||= Array.new) << sc}}
-      end
-      ndx_ret.values
-    end
 
+   private
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element

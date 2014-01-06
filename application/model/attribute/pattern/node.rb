@@ -13,7 +13,7 @@ module DTK; class Attribute
           when 2 
             Type::ComponentLevel.new("node[#{node_name}]/component[#{split_term[0]}]/attribute[#{split_term[1]}]")
           else        
-            raise ErrorParse.new(pattern)
+            raise ErrorUsage::Parsing::Term.new(pattern,:node_attribute)
         end
       end
     end

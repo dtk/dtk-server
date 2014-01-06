@@ -160,7 +160,7 @@ module DTK; class Attribute
 
           if term == "*"
             nil
-          elsif term =~ /^[a-z0-9_\[\]-]+$/
+          elsif term =~ /^[a-zA-Z0-9_\[\]\.-]+$/
             case type
             when :attribute, :component, :node
               [:eq,:display_name,term]

@@ -23,7 +23,7 @@ module DTK; class Attribute
         def self.create(attr_term,opts={})
           tokens = attr_term.split("/")
           if tokens.size > 3 
-            raise ErrorParse.new(attr_term)
+            raise ErrorUsage::Parsing::Term.new(attr_term)
           end
           case tokens.size          
             when 1 
@@ -50,7 +50,7 @@ module DTK; class Attribute
           elsif attr_term  =~ /^node[^\/]*\/attribute/
             Type::NodeLevel.new(attr_term)
           else
-            raise ErrorParse.new(attr_term)
+            raise ErrorUsage::Parsing::Term.new(attr_term)
           end
         end
       end

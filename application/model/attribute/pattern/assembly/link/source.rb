@@ -6,7 +6,7 @@ module DTK; class Attribute::Pattern
         attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) || 
                        VarEmbeddedInText.parse(source_attr_term)
         unless attr_term
-          raise ErrorParse.new(source_attr_term)
+          raise ErrorUsage::Parsing::Term.new(source_attr_term,:source_attribute)
         end
         attr_pattern = super(base_object,attr_term)
         if node_cmp_type

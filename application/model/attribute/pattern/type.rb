@@ -153,6 +153,7 @@ module DTK; class Attribute
 
       def ret_filter(fragment,type)
         if term = Pattern::Term.extract_term?(fragment)
+          non_processed_term = term
           if type == :component
             term = Component.display_name_from_user_friendly_name(term)
           end
@@ -164,10 +165,10 @@ module DTK; class Attribute
             when :attribute, :component, :node
               [:eq,:display_name,term]
             else
-              raise ErrorNotImplementedYet.new("Component filter of type (#{type})")
+              raise ErrorUsage::NotSupported.new("Component filter of type (#{type})")
             end
           else
-            raise ErrorNotImplementedYet.new("Parsing of component filter (#{term})")
+            raise ErrorUsage::Parsing::Term.new(non_processed_term,:component_segment)
           end
         else
           nil #without qualification means all (no filter)

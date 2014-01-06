@@ -76,16 +76,6 @@ module DTK; class Attribute
       ret
     end
 
-    class ErrorParse < ErrorUsage
-      def initialize(pattern)
-        super("Cannot parse #{pattern}")
-      end
-    end
-    class ErrorNotImplementedYet < Error
-      def initialize(pattern)
-        super("not implemented yet: #{pattern}")
-      end
-    end
   end
 end; end
 

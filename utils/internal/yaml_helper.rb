@@ -16,7 +16,7 @@ module DTK
         begin 
           ::YAML.load(content)
          rescue Exception => e
-          ErrorUsage::DSLParsing::YAMLParsing.new("YAML #{e} in file",opts[:file_path])
+          ErrorUsage::Parsing::YAML.new("YAML #{e} in file",opts[:file_path])
         end
       end
     end

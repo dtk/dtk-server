@@ -1,7 +1,12 @@
 module DTK
   #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
-    r8_nested_require('usage','dsl_parsing')
+    r8_nested_require('usage','parsing')
+    class NotSupported < self
+      def initialize(feature_not_supported)
+        super("Not supported yet: #{feature_not_supported}")
+      end
+    end
 
     class ReferencedComponentTemplates < self
       def initialize(aug_cmp_templates)

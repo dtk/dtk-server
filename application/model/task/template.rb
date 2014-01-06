@@ -14,9 +14,11 @@ module DTK; class Task
       module Constant
         Concurrent = :concurrent
         Sequential = :sequential
+        OrderedComponents = :ordered_components
+        Components = :components
         ComponentGroup = :Component_group
       end
-      #TODO: if support ruby 1.8.7 need to make this fn of a hash that perserves order 
+      #TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)
           super()

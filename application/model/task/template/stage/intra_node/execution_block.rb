@@ -53,27 +53,34 @@ module DTK; class Task; class Template
         each do |a|
           if cgn = a.component_group_num
             unless cgn == component_group_num 
-              serialization_form_add_component_group?(items,component_group)
+              SerializedComponentGroup.add?(items,component_group)
               component_group = nil
               component_group_num = cgn
             end
             component_group ||= Array.new
             serialization_form_add_action?(component_group,a,opts)
           else
-            serialization_form_add_component_group?(items,component_group)
+            SerializedComponentGroup.add?(items,component_group)
             component_group = nil
             serialization_form_add_action?(items,a,opts)
           end
         end
-        serialization_form_add_component_group?(items,component_group)
-        {:ordered_components => items} unless items.empty?
+        SerializedComponentGroup.add?(items,component_group)
+        unless items.empty?
+          #look for special case where single component group
+          if items.size == 1 and items.first.kind_of?(SerializedComponentGroup)
+            {Constant::Components => items.first.components()}
+          else
+           {Constant::OrderedComponents => items} 
+          end
+        end
       end
 
       #action list can be nil just for parsing
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
         return ret unless action_list
-        unless ordered_items = serialized_eb[:ordered_components]
+        unless ordered_items = serialized_eb[Constant::OrderedComponents]
           raise ErrorParsing.new("Ill-formed Execution block (#{serialized_eb.inspect})")
         end
         component_group_num = 1
@@ -120,14 +127,22 @@ module DTK; class Task; class Template
       end
 
      private
+      #has form {Constant::ComponentGroup => [cmp1,cmp2,..]
+      class SerializedComponentGroup < Hash
+        include Serialization
+        def self.add?(ret,component_group)
+          if component_group
+            ret << new().merge(Constant::ComponentGroup => component_group)
+          end
+        end
+        def components()
+          values.first
+        end
+      end
+
       def serialization_form_add_action?(ret,action,opts={})
         if item = action.serialization_form(opts)
           ret << item
-        end
-      end
-      def serialization_form_add_component_group?(ret,component_group)
-        if component_group
-          ret << {Constant::ComponentGroup => component_group}
         end
       end
 

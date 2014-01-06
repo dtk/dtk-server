@@ -125,7 +125,7 @@ module DTK; class Task; class Template
 
       def add_new_execution_block_for_action!(action)
         #leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
-        node_actions = {:ordered_components => [action.component_type()]}
+        node_actions = {Constant::OrderedComponents => [action.component_type()]}
         node_name = action.node_name()
         action_list = ActionList.new([action])
         merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list))

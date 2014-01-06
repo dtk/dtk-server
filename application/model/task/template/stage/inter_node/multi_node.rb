@@ -3,14 +3,14 @@ module DTK; class Task; class Template; class Stage
     class MultiNode < self
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
-        @ordered_components = serialized_multinode_action[:ordered_components]
+        @ordered_components = serialized_multinode_action[Constant::OrderedComponents]
       end
 
       def serialization_form(opts={})
         if opts[:form] == :explicit_instances
           super
         else
-          serialized_form_with_name().merge(:nodes => serialized_multi_node_type(),:ordered_components => @ordered_components)
+          serialized_form_with_name().merge(:nodes => serialized_multi_node_type(),Constant::OrderedComponents => @ordered_components)
         end
       end
 
@@ -44,7 +44,7 @@ module DTK; class Task; class Template; class Stage
             end
           end
           info_per_node.each_value do |n|
-            merge!(InterNode.parse_and_reify_node_actions({:ordered_components => n[:actions]},n[:name],n[:id],action_list))
+            merge!(InterNode.parse_and_reify_node_actions({Constant::OrderedComponents => n[:actions]},n[:name],n[:id],action_list))
           end
           ret
         end

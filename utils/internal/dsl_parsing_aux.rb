@@ -55,8 +55,11 @@ module DTK
       end
 
       #methods that can be evalued in legal_values_block
-      def self.HashWithKey(keys)
+      def self.HashWithKey(*keys)
         HashWithKey.new(keys)
+      end
+      def self.HashWithSingleKey(*keys)
+        HashWithSingleKey.new(keys)
       end
 
       class Klass < self
@@ -70,8 +73,18 @@ module DTK
           @klass.to_s
         end
       end
-
       class HashWithKey
+        def initialize(keys)
+          @keys = Array(keys).map{|k|k.to_s}
+        end
+        def matches?(object)
+          object.kind_of?(Hash) and !!object.keys.find{|k|@keys.include?(k.to_s)}
+        end
+        def print_form()
+          "HashWithKey(#{@keys.join(',')})"
+        end
+      end
+      class HashWithSingleKey
         def initialize(keys)
           @keys = Array(keys).map{|k|k.to_s}
         end
@@ -79,7 +92,7 @@ module DTK
           object.kind_of?(Hash) and object.size == 1 and @keys.include?(object.keys.first.to_s)
         end
         def print_form()
-          "HashWithKey(#{@keys.join(',')})"
+          "HashWithSingleKey(#{@keys.join(',')})"
         end
       end
     end

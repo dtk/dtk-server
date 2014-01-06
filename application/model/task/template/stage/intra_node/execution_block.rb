@@ -80,15 +80,23 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
         return ret unless action_list
-        unless ordered_items = serialized_eb[Constant::OrderedComponents]
-          raise ErrorParsing.new("Ill-formed Execution block (#{serialized_eb.inspect})")
-        end
+        lvs = LegalValues.new()
+        ordered_items = 
+          if lvs.add_and_match?(serialized_eb){HashWithKey(Constant::OrderedComponents)}
+            serialized_eb[Constant::OrderedComponents]
+          elsif lvs.add_and_match?(serialized_eb){HashWithKey(Constant::Components)}
+            #normalize from component form
+            {Constant::ComponentGroup => serialized_eb[Constant::Components]}
+          else
+            raise ErrorParsing::WrongType.new(serialized_eb,lvs)
+          end
+
         component_group_num = 1
         ordered_items.each do |serialized_item|
           lvs = LegalValues.new()
           if lvs.add_and_match?(serialized_item,String)
             find_and_add_action!(ret,serialized_item,node_name,action_list)
-          elsif lvs.add_and_match?(serialized_item){HashWithKey(Constant::ComponentGroup)}
+          elsif lvs.add_and_match?(serialized_item){HashWithSingleKey(Constant::ComponentGroup)}
             component_group = serialized_item.values.first
             ErrorParsing.raise_error_unless(component_group,[String,Array])
             Array(component_group).each do |serialized_action|

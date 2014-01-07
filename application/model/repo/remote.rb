@@ -217,14 +217,14 @@ module DTK
       private :qualified_module_name
 
       def list_module_info(type=nil, rsa_pub_key = nil)
-
+        new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter, rsa_pub_key)
         
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
-          # namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/"
           namespace = r["namespace"] && "#{r["namespace"]}/"
+          namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/" if new_repo
           qualified_name = "#{namespace}#{r["name"]}"
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
           el.merge!(:qualified_name => qualified_name, :last_updated => last_updated)

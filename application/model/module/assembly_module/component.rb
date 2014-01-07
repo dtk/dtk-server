@@ -146,7 +146,7 @@ module DTK; class AssemblyModule
     class ErrorNoChangesToModule < ErrorComponentModule
      private
       def error_msg()
-        "There are no changes to component module (#{@module_name}) in assembly (#{@assembly_name}) to push"
+        "Changes to component module (#{@module_name}) have not been made in assembly (#{@assembly_name})"
       end
     end 
     class ErrorNoComponentsInModule < ErrorComponentModule

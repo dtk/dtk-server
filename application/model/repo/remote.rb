@@ -223,6 +223,7 @@ module DTK
         
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
+          # TODO: remove first way of getting namespace when transfer to new repo
           namespace = r["namespace"] && "#{r["namespace"]}/"
           namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/" if new_repo
           qualified_name = "#{namespace}#{r["name"]}"

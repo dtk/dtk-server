@@ -258,14 +258,6 @@ module DTK
     end
 
    private
-
-    def get_library_module_branch(version=nil)
-      update_object!(:display_name,:library_library_id)
-      library_idh = id_handle(:model_name => :library, :id => self[:library_library_id])
-      module_name = self[:display_name]
-      self.class.get_library_module_branch(library_idh,module_name,version)
-    end
-
     def library_branch_name(version=nil)
       library_id = update_object!(:library_library_id)[:library_library_id]
       library_idh = id_handle(:model_name => :library, :id => library_id)
@@ -574,18 +566,6 @@ module DTK
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end
-    #MOD_RESTRUCT: TODO: may deprecate below for above
-    def get_library_module_branch(library_idh,module_name,version=nil)
-      filter = [:and, [:eq, :display_name, module_name], [:eq, :library_library_id, library_idh.get_id()]]
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      post_filter = proc{|mb|mb[:branch] == branch}
-      matches = get_matching_module_branches(library_idh,filter,post_filter)
-      if matches.size == 1
-        matches.first
-      elsif matches.size > 2
-        raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
-      end
-    end
 
     def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
       sp_hash = {
@@ -630,25 +610,6 @@ module DTK
       module_branch = get_workspace_module_branch(project,module_name,version)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for above
-    def create_lib_module_and_branch_obj?(library_idh,repo_idh,module_name,input_version)
-      ref = module_name
-      mb_create_hash = ModuleBranch.ret_lib_create_hash(model_name,library_idh,repo_idh,input_version)
-      version = mb_create_hash.values.first[:version]
-      create_hash = {
-        model_name.to_s => {
-          ref => {
-            :display_name => module_name,
-            :module_branch => mb_create_hash
-          }
-        }
-      }
-      input_hash_content_into_model(library_idh,create_hash)
-
-      module_branch = get_library_module_branch(library_idh,module_name,version)
-      module_idh =  library_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
-      {:version => version, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
 
     def module_exists?(project_idh,module_name)

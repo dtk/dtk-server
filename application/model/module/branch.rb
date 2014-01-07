@@ -61,7 +61,7 @@ module DTK
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from,self)
           ret.merge!(:fast_forward_change => false)
         else
-          raise ErrorUsage.new("Cannot promote changes unless the --force option is used; THIS OPTION WILL WIPE OUT CHANGES IN COMPONENT MODULE")
+          raise ErrorUsage.new("Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE")
         end
       elsif result != :changed
         raise Error.new("Unexpected result from fast_foward_merge_from_branch")

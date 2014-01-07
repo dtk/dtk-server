@@ -427,7 +427,7 @@ class DtkCommon
 		if (response['status'] == 'ok')
 			end_loop = false
 			count = 0
-			max_num_of_retries = 20
+			max_num_of_retries = 30
 
 			while (end_loop == false)
 				sleep 10
@@ -466,7 +466,7 @@ class DtkCommon
 		if (response['status'] == 'ok')
 			end_loop = false
 			count = 0
-			max_num_of_retries = 20
+			max_num_of_retries = 30
 
 			while (end_loop == false)
 				sleep 10
@@ -608,8 +608,7 @@ class DtkCommon
 
 			5.downto(1) do |i|
 				sleep 1
-				response = send_request('/rest/ass
-					embly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+				response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id, :sort_key=>"port"})
 				puts "Netstats check:"
 				pretty_print_JSON(response)
 
@@ -1276,7 +1275,7 @@ class DtkCommon
 
 			task_status = 'executing'
 			while task_status.include? 'executing' || end_loop == false
-				sleep 20
+				sleep 30
 				count += 1
 				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})
 				status = response_task_status['data']['status']
@@ -1399,7 +1398,7 @@ class DtkCommon
 		while (end_loop == false)
 			sleep 20
 			count += 1
-			response = send_request('/rest/node/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id})
+			response = send_request('/rest/node/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id, :sort_key=>"port"})
 			puts "Netstats check:"
 			pretty_print_JSON(response)
 

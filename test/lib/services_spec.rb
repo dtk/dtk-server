@@ -19,7 +19,7 @@ shared_context "Import service" do |service_name|
     pass = false
     value = `dtk service import #{service_name}`
     puts value
-    pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists already"))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "exists already"))
     puts "Import of service #{service_name} completed successfully!" if pass == true
     puts "Import of service #{service_name} did not complete successfully!" if pass == false
     puts ""
@@ -33,7 +33,7 @@ shared_context "Import remote service" do |dtk_common, service_name|
     pass = false
     value = `dtk service import-dtkn #{service_name} -y`
     puts value
-    pass = true if ((!value.include? "[ERROR]") || (!value.include? "exists on client"))
+    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client"))
     puts "Import of remote service #{service_name} completed successfully!" if pass == true
     puts "Import of remote service #{service_name} did not complete successfully!" if pass == false
     puts ""
@@ -94,15 +94,42 @@ end
 
 shared_context "List all services on remote" do |dtk_common, service_name, namespace|
   it "verifies that #{service_name} service exists on remote" do
+    puts "List all services on remote:", "----------------------------"
+    pass = false
+    value = `dtk service list --remote`
+    pass = true if value.include? "#{namespace}/#{service_name}"
+    puts "List of services on remote contains service #{service_name} on namespace #{namespace}" if pass = true
+    puts "List of services on remote does not contain service #{service_name} on namespace #{namespace}" if pass = false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "OLD - List all services on remote" do |dtk_common, service_name, namespace|
+  it "verifies that #{service_name} service exists on remote" do
     service_exists = dtk_common.check_if_service_exists_on_remote(service_name, namespace)
     service_exists.should eq(true)
   end
 end
 
-shared_context "Export service" do |dtk_common, service_name, namespace|
+shared_context "OLD - Export service" do |dtk_common, service_name, namespace|
   it "exports #{service_name} service to #{namespace} namespace on remote repo" do
     service_exported = dtk_common.export_service_to_remote(service_name, namespace)
     service_exported.should eq(true)
+  end
+end
+
+shared_context "Export service" do |dtk_common, service_name, namespace|
+  it "exports #{service_name} service to #{namespace} namespace on remote repo" do
+    puts "Export service to remote:", "-------------------------"
+    pass = false
+    value = `dtk service #{service_name} create-on-dtkn #{namespace}/#{service_name}`
+    puts value
+    pass = true if (!value.include? "error")
+    puts "Export of #{service_name} service to #{namespace} namespace has been completed successfully!" if pass == true
+    puts "Export of #{service_name} service to #{namespace} namespace did not complete successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
   end
 end
 
@@ -134,6 +161,19 @@ shared_context "Delete service from local filesystem" do |service_filesystem_loc
 end
 
 shared_context "Delete service from remote repo" do |dtk_common, service_name, namespace|
+  it "deletes #{service_name} service with #{namespace} namespace from remote repo" do
+    puts "Delete service from remote (dtkn):", "-------------------------------------"
+    pass = false
+    value = `dtk service delete-from-dtkn #{namespace}/#{service_name} -y`
+    pass = true if (!value.include?("error") || !value.include?("cannot remove"))
+    puts "Service #{service_name} deleted from remote (dtkn) successfully!" if pass == true
+    puts "Service #{service_name} was not deleted from remote (dtkn) successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "OLD - Delete service from remote repo" do |dtk_common, service_name, namespace|
   it "deletes #{service_name} service with #{namespace} namespace from remote repo" do
     service_deleted = dtk_common.delete_service_from_remote(service_name, namespace)
     service_deleted.should eq(true)

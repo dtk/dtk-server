@@ -130,6 +130,20 @@ end
 
 shared_context "Export module" do |dtk_common, module_name, namespace|
   it "exports #{module_name} module to #{namespace} namespace on remote repo" do
+    puts "Export module:", "--------------"
+    pass = false
+    value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
+    puts value
+    pass = true if (!value.include? "ERROR")
+    puts "Module #{module_name} exported successfully!" if pass == true
+    puts "Module #{module_name} was not exported successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "OLD - Export module" do |dtk_common, module_name, namespace|
+  it "exports #{module_name} module to #{namespace} namespace on remote repo" do
     module_exported = dtk_common.export_module_to_remote(module_name, namespace)
     module_exported.should eq(true)
   end
@@ -279,6 +293,19 @@ shared_context "Delete versioned module from local filesystem" do |module_filesy
 end
 
 shared_context "Delete module from remote repo" do |dtk_common, module_name, namespace|
+  it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
+    puts "Delete module from remote:", "--------------------------"
+    pass = false
+    value = `dtk module delete-from-dtkn #{namespace}/#{module_name} -y`
+    pass = !value.include?("error")
+    puts "Module #{module_name} deleted from dtkn (remote) successfully!" if pass == true
+    puts "Module #{module_name} was not deleted from dtkn (remote) successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
+  end
+end
+
+shared_context "OLD - Delete module from remote repo" do |dtk_common, module_name, namespace|
   it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
     module_deleted = dtk_common.delete_module_from_remote(module_name, namespace)
     module_deleted.should eq(true)

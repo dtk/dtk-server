@@ -17,6 +17,7 @@ existing_service_name = "test_service"
 service_name = "bakir_test1"
 module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
+module_namespace = "dtk17"
 module_name = "test"
 $assembly_id = 0
 
@@ -29,6 +30,10 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service using 
     puts "(Modules, Services and Versioning) Test Case 12: Export service using full name #{service_name} to users default namespace and then delete it"
     puts "*********************************************************************************************************************************************"
     puts ""
+  end
+
+  context "Import module function" do
+    include_context "Import remote module", module_namespace + "/" + module_name
   end
 
   context "Import service function" do

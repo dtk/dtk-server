@@ -223,7 +223,8 @@ module DTK
         
         remote_modules.map do |r|
           el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
-          namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/"
+          # namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/"
+          namespace = r["namespace"] && "#{r["namespace"]}/"
           qualified_name = "#{namespace}#{r["name"]}"
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
           el.merge!(:qualified_name => qualified_name, :last_updated => last_updated)

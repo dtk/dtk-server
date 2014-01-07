@@ -18,7 +18,15 @@ module DTK; class AssemblyModule
 
     def self.promote_module_updates(assembly,component_module,opts={})
       module_version = ModuleVersion.ret(assembly)
-      branch = component_module.get_workspace_module_branch(module_version)
+      unless branch = component_module.get_workspace_module_branch(module_version)
+        component_module_name = 
+        component_module_id = component_module.id()
+        if assembly.get_component_modules().find{|r|r[:id] == component_module_id}
+          raise ErrorNoChangesToModule.new(assembly,component_module)
+        else
+          raise ErrorNoComponentsInModule.new(assembly,component_module)
+        end
+      end
       unless ancestor_branch = branch.get_ancestor_branch?()
         raise Error.new("Cannot find ancestor branch")
       end
@@ -123,10 +131,29 @@ module DTK; class AssemblyModule
         cmp[:assembly_id] == assembly_id
       end
       if opts[:raise_error_if_empty] and ret.empty?()
-        assembly_name = assembly.display_name_print_form()
-        raise ErrorUsage.new("Assembly (#{assembly_name}) does not have any components belonging to module (#{component_module.get_field?(:display_name)})")
+        raise ErrorNoComponentsInModule.new(assembly,component_module)
       end
       ret
+    end
+
+    class ErrorComponentModule < ErrorUsage
+      def initialize(assembly,component_module)
+        @assembly_name = assembly.display_name_print_form()
+        @module_name = component_module.get_field?(:display_name)
+        super(error_msg())
+      end
+    end
+    class ErrorNoChangesToModule < ErrorComponentModule
+     private
+      def error_msg()
+        "There are no changes to component module (#{@module_name}) in assembly (#{@assembly_name}) to push"
+      end
+    end 
+    class ErrorNoComponentsInModule < ErrorComponentModule
+      private
+      def error_msg()
+        "Assembly (#{@assembly_name}) does not have any components belonging to module (#{@module_name})"
+      end
     end
   end
 end; end

@@ -595,7 +595,7 @@ class DtkCommon
 		max_num_of_retries = 20
 
 		while (end_loop == false)
-			sleep 20
+			sleep 10
 			count += 1
 
 			if (count > max_num_of_retries)
@@ -1396,7 +1396,7 @@ class DtkCommon
 		max_num_of_retries = 20
 
 		while (end_loop == false)
-			sleep 20
+			sleep 10
 			count += 1
 			response = send_request('/rest/node/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id, :sort_key=>"port"})
 			puts "Netstats check:"
@@ -1791,7 +1791,7 @@ class DtkCommon
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 50
+		max_num_of_retries = 20
 
 		while (end_loop == false)
 			sleep 10

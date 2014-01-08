@@ -98,8 +98,8 @@ shared_context "List all services on remote" do |dtk_common, service_name, names
     pass = false
     value = `dtk service list --remote`
     pass = true if value.include? "#{namespace}/#{service_name}"
-    puts "List of services on remote contains service #{service_name} on namespace #{namespace}" if pass = true
-    puts "List of services on remote does not contain service #{service_name} on namespace #{namespace}" if pass = false
+    puts "List of services on remote contains service #{service_name} on namespace #{namespace}" if pass == true
+    puts "List of services on remote does not contain service #{service_name} on namespace #{namespace}" if pass == false
     puts ""
     pass.should eq(true)
   end

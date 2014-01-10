@@ -442,8 +442,10 @@ module DTK
 
         # filters only stopped nodes for this assembly
         nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-
-        nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
+        
+        assembly_name = Assembly::Instance.pretty_print_name(assembly)
+        nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
+        
         unless is_valid
           Log.info(error_msg)
           return rest_ok_response(:errors => [error_msg])
@@ -516,8 +518,9 @@ module DTK
 
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
+      
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
 
       unless is_valid
         Log.info(error_msg)
@@ -540,45 +543,14 @@ module DTK
       rest_ok_response :task_id => task.id
     end
 
-    # Will leave this commented for now to check if method above works properly
-    #TODO: cleanup and take logic out of controller
-    # def rest__start()
-    #   assembly = ret_assembly_instance_object()
-    #   assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
-    #   node_pattern = ret_request_params(:node_pattern)
-
-    #   # filters only stopped nodes for this assembly
-    #   nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-
-    #   nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :stopped)
-
-    #   unless is_valid
-    #     Log.info(error_msg)
-    #     return rest_ok_response(:errors => [error_msg])
-    #   end
-
-    #   queue = SimpleActionQueue.new
-
-    #   CreateThread.defer do
-    #     # invoking command to start the nodes
-    #     CommandAndControl.start_instances(nodes)
-
-    #     # following task will when nodes ready assign elastic IP
-    #     task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly)
-    #     task.save!()
-
-    #     queue.set_result(:task_id => task.id)
-    #   end
-
-    #   rest_ok_response :action_results_id => queue.id
-    # end
-
     def rest__stop()
       assembly = ret_assembly_instance_object()
       node_pattern = ret_request_params(:node_pattern)
       nodes =  assembly.get_nodes(:id,:display_name,:type, :external_ref,:admin_op_status)
-
-      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly[:id], nodes, node_pattern, :running)
+      assembly_idh = ret_request_param_id_handle(:assembly_id,Assembly::Instance)
+      
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :running)
 
       unless is_valid
         Log.info(error_msg)
@@ -603,26 +575,26 @@ module DTK
     #   - filtered nodes by pattern (if pattern not nil)
     #   - erorr message in case it is not valid
     #
-    def nodes_valid_for_aws?(assembly_id, nodes, node_pattern, status_pattern)
+    def nodes_valid_for_aws?(assembly_name, nodes, node_pattern, status_pattern)
       # check for pattern
       unless node_pattern.nil?
         regex = Regexp.new(node_pattern)
         nodes = nodes.select { |node| regex =~ node.id.to_s}
         if nodes.size == 0
-          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'"
+          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'."
         end
       end
       # check if staged
       nodes.each do |node|
         if node[:type] == "staged"
-          return nodes, false, "Nodes for assembly '#{assembly_id}' are 'staged' and as such cannot be started/stopped."
+          return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
         end
       end
 
       # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
       filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
       if filtered_nodes.size == 0
-        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_id}'"
+        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
       end
       
       return filtered_nodes, true, nil      

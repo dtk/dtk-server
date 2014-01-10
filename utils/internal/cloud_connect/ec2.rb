@@ -29,9 +29,8 @@ module DTK
         unless response.nil?
           status = response.body["reservationSet"].first["instancesSet"].first["instanceState"]["name"].to_sym
           launch_time = response.body["reservationSet"].first["instancesSet"].first["launchTime"]
-          return { :status => status, :launch_time => launch_time, :up_time_hours => ((Time.now - launch_time)/1.hour).round }
+          { :status => status, :launch_time => launch_time, :up_time_hours => ((Time.now - launch_time)/1.hour).round }
         end
-        return nil
       end
 
       def server_get(id)

@@ -133,6 +133,15 @@ module DTK
 
     ######### Model apis
 
+    def get_assembly?(cols=nil)
+      if assembly_id = get_field?(:assembly_id)
+        sp_hash = {
+        :cols => cols||[:id,:group_id,:display_name],
+          :filter => [:eq,:id,assembly_id]
+        }
+        Assembly::Instance.get_objs(model_handle(:assembly_instance),sp_hash).first
+      end
+    end
 
     def self.list(model_handle,opts={})
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])

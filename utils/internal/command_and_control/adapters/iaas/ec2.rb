@@ -76,7 +76,7 @@ module DTK
       def self.execute(task_idh,top_task_idh,task_action)
 
         node = task_action[:node]
-        node.update_object!(:os_type,:external_ref,:hostname_external_ref)
+        node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
 
         target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])
 
@@ -97,10 +97,7 @@ module DTK
           security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
           create_options.merge!(:groups => security_group )
 
-          # set the ec2 name tag
-
-          ec2_name = "#{task_action[:datacenter][:display_name][0...127]}:#{node[:display_name][0...255]}"
-          create_options.merge!(:tags => {"Name" => ec2_name})
+          create_options.merge!(:tags => {"Name" => ec2_name_tag(node)})
 
           # check priority of keypair
           keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
@@ -205,6 +202,23 @@ module DTK
         return nil
       end
 
+      def self.ec2_name_tag(node)
+        assembly = node.get_assembly?()
+        subs = {
+          :assembly_name => assembly && assembly.get_field?(:display_name),
+          :node_name => node.get_field?(:display_name)
+        }
+        ret = Ec2NameTag[:tag].dup
+        Ec2NameTag[:vars].each do |var|
+          val = subs[var]||var.to_s.upcase
+          ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
+        end
+        ret
+      end
+      Ec2NameTag = {
+        :vars => [:assembly_name,:node_name],
+        :tag => "DTK:${assembly_name}:${node_name}"
+      }
     end
   end
 end

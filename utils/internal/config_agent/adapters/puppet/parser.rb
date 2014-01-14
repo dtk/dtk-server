@@ -883,7 +883,7 @@ end
         end
       end
       def data_type()
-        "json" 
+        'array' 
       end
       def can_match?(ast_term)
         if ast_term.kind_of?(VariablePS) 
@@ -906,8 +906,8 @@ end
           key = 
             if k.respond_to?(:value)
               k.value
-#            elsif k.respond_to?(:to_s)
-#              k.to_s
+            elsif k.respond_to?(:to_s)
+              k.to_s
             else
               raise ConfigAgent::ParseError.new("unexpected hash key term (#{k.inspect})")
             end
@@ -927,7 +927,7 @@ end
         end
       end
       def data_type()
-        "json" 
+        'hash' 
       end
       def can_match?(ast_term)
         if ast_term.kind_of?(VariablePS) 

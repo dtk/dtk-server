@@ -1,4 +1,0 @@
---format Rspec2db
---options TEST
---options ./functional/rspec/config/rspec2db.yml
---options LOCAL

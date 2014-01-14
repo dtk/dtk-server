@@ -9,7 +9,7 @@ class TestRun < ActiveRecord::Base
   belongs_to :testsuite
 end
 
-dbconfig = YAML::load(File.open('./test/config/rspec2db.yml'))
+dbconfig = YAML::load(File.open('./config/rspec2db.yml'))
 ActiveRecord::Base.establish_connection(dbconfig["dbconnection"])
 
 build_id = ARGV[0]

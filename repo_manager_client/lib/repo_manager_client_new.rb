@@ -328,7 +328,7 @@ module DTK
     if R8::Config.is_development_mode?
       DefaultTimeoutOpts = {:timeout => 5000, :open_timeout => 0.5}
     else
-      DefaultTimeoutOpts = {:timeout => 5, :open_timeout => 0.5}
+      DefaultTimeoutOpts = {:timeout => 120, :open_timeout => 0.5}
     end
 
     def dtk_instance_repo_username()

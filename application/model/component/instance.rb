@@ -29,7 +29,7 @@ module DTK; class Component
     end
 
     def self.filter(component_type,component_title=nil)
-      [:eq,:ref,ComponentTitle.ref_with_title?(component_type,component_title)]
+      [:eq,:display_name,ComponentTitle.display_name_with_title?(component_type,component_title)]
     end
 
     def self.set_title_attribute(cmp_idh,component_title,title_attr_name=nil)

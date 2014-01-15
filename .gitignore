@@ -7,7 +7,7 @@ application/config/environment_config.rb
 application/public/js/cache/*.js
 metadata.json
 ruote_work/
-sftp-config.json
+sftp-config*.json
 application/config/newrelic.yml
 application/log/
 .gitattributes

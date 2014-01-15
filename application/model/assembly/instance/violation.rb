@@ -10,9 +10,7 @@ module DTK
         cmp_parsing_errors = find_violations__cmp_parsing_error(cmps)
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_incl_viols = find_violations__module_includes(cmps)
-        unless mod_incl_viols.empty?
-          raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
-        end
+
         unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_incl_viols + cmp_parsing_errors
       end
      private
@@ -77,7 +75,14 @@ module DTK
         return ret if cmps.empty?
         impls = get_implementations(cmps)
         cmp_idhs = cmps.map{|cmp|cmp.id_handle()}
-        Component::IncludeModule.find_violations_and_set_impl(cmp_idhs,impls)
+        
+        if included_modules = Component::IncludeModule.find_violations_and_set_impl(cmp_idhs,impls)
+          included_modules.each do |incl_mod|
+            ret << Violation::MissingIncludedModule.new(incl_mod[:module_name], incl_mod[:version])
+          end 
+        end
+
+        ret
       end
 
       def get_implementations(cmps)
@@ -164,6 +169,18 @@ module DTK
         end
         def description()
           "#{@type} '#{@component}' has syntax errors in DSL files."
+        end
+      end
+      class MissingIncludedModule < self
+        def initialize(included_module, version)
+          @included_module = included_module
+          @version = version
+        end
+        def type()
+          :missing_included_module
+        end
+        def description()
+          "Module '#{@included_module}#{@version.nil? ? '' : '-'+@version}' is included in dsl, but not imported."
         end
       end
     end

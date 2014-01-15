@@ -79,6 +79,22 @@
       "version": "version"
     }
   },
+  "component_w_path_and_dependencies": {
+    "order": [
+      "id",
+      "path",
+      "version",
+      "depends_on",
+      "satisfied_by"  
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "path": "display_name",
+      "version": "version",
+      "depends_on":  "depends_on",
+      "satisfied_by": "satisfied_by"  
+    }
+  },
   "component_remote": {
     "order": [
       "name",

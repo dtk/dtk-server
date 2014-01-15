@@ -118,7 +118,8 @@ module XYZ
         return {
           :data=> {:errors=>errors.error_list}
         }
-       rescue R8ParseError => e
+#TODO: deprecated this  rescue R8ParseError => e
+       rescue => e
         pp [:r8_parse_error, e.to_s]
         return {
           :data=> {:errors=>{:type=>"parse",:error=>e.to_s}}

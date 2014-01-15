@@ -8,13 +8,12 @@ module DTK
     def self.display_name_with_title(component_type,title)
       "#{component_type}[#{title}]"
     end
+    def self.display_name_with_title?(component_type,title=nil)
+      title ? display_name_with_title(component_type,title) : component_type
+    end
 
     def self.ref_with_title(component_type,title)
       "#{component_type}--#{title}"
-    end
-
-    def self.ref_with_title?(component_type,title=nil)
-      title ? ref_with_title(component_type,title) : component_type
     end
 
     ComponentTitleRegex = /(^.+)\[(.+)\]$/

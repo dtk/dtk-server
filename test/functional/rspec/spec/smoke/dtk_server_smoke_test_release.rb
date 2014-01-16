@@ -10,6 +10,7 @@ require './lib/dtk_common'
 require './lib/assembly_operations_spec'
 require './lib/parameters_setting_spec'
 require './lib/modules_spec'
+require './lib/services_spec'
 
 
 assembly_name = 'smoke_test_instance'
@@ -35,12 +36,12 @@ describe "DTK Server smoke test" do
     puts ""
   end
 
-  context "Create new service function" do
-    include_context "Create service", dtk_common, service_name
-  end
-
   context "Create new module function" do
     include_context "Create module", module_name
+  end
+
+  context "Create new service function" do
+    include_context "Create service", dtk_common, service_name
   end
 
   context "Get module components list" do

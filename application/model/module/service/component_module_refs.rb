@@ -102,18 +102,25 @@ module DTK
           ref = (ref ? "(#{ref})" : "")
           raise Error.new("Component ref #{ref} must either point to a component template or have component_type set")
         end
+        cmp_template_id = r[:component_template_id]
         if r[:has_override_version]
-          unless r[:component_template_id]
+          unless cmp_template_id
             unless r[:version]
               raise Error.new("Component ref has override-version flag set, but no version")
             end
             (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r, :version => r[:version]}
           end
         else
+          add_item = true
           if r[:template_id_synched] and not opts[:force_compute_template_id]
-            raise Error.new("Unexpected that r[:component_template_id] is null for (#{r.inspect})") if r[:component_template_id].nil?
-          else
-            (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r,:required => r[:component_template_id].nil?}
+            if cmp_template_id.nil?
+              Log.error("Unexpected that cmp_template_id is null for (#{r.inspect})")
+            else
+              add_item = false
+            end
+          end
+          if add_item
+            (cmp_types_to_check[cmp_type] ||= ComponentTypeToCheck.new) << {:pntr => r,:required => cmp_template_id.nil?}
           end
         end
         r[:template_id_synched] = true #marking each item synchronized

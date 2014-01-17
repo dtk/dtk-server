@@ -152,7 +152,8 @@ module XYZ
       index_map = link_hash[:index_map]
       return ret unless index_map 
       unless index_map.size == 1
-        raise Error.new("not treating update_for_delete_link when index_map size is unequal to 1")
+        Log.error("not treating update_for_delete_link when index_map size is unequal to 1; its value is #{index_map.inspect}")
+        return ret
       end   
       index_map.first && index_map.first[dir]
     end

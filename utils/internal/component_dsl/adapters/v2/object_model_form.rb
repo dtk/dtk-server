@@ -468,7 +468,7 @@ module DTK; class ComponentDSL; class V2
           const = sanitized_attr_ref
           datatype = :json
         end
-        unless constant_assign = Attribute::Constant.create?(const,dep_attr_ref,dep_cmp,datatype)
+        unless constant_assign = (const && Attribute::Constant.create?(const,dep_attr_ref,dep_cmp,datatype))
           raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
         (opts[:constants] ||= Array.new) << constant_assign

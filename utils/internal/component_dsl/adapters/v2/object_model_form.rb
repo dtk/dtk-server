@@ -194,7 +194,7 @@ module DTK; class ComponentDSL; class V2
             ParsingError.raise_error_if_value_nil(name,info)
             dynamic_default_variable = dynamic_default_variable?(info)
             external_ref = 
-              if opts[:constant_attribute]
+              if opts[:constant_attribute] or info["constant"]
                 Attribute::Constant.ret_external_ref()
               else
                 type = "puppet_attribute" #TODO: hard-wired

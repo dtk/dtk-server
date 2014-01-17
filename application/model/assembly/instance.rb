@@ -457,6 +457,11 @@ module DTK; class  Assembly
        when :nodes
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
+       when :modules
+        r=get_component_modules(:extra_cols=>[:module_branches])
+pp r
+r
+
        when :tasks
         get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
@@ -502,26 +507,24 @@ module DTK; class  Assembly
       end
     end
 
-
-
-    def get_augmented_component_modules()
+    def get_component_modules(opts={})
       ndx_ret = Hash.new
+      get_module_branches = (opts[:extra_cols]||[]).include?(:module_branches)
+
       get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
-        pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
-        pntr[:module_branches] << r[:module_branch]
+        if get_module_branches
+          pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
+          unless pntr[:module_branches].find{|mb|mb[:id] == r[:module_branch][:id]}
+            pntr[:module_branches] << r[:module_branch]
+          end
+        else
+          ndx_ret[component_module[:id]] ||= component_module
+        end
       end
       ndx_ret.values
     end
-    def get_component_modules()
-      ndx_ret = Hash.new
-      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
-        component_module = r[:component_module]
-        ndx_ret[component_module[:id]] ||= component_module
-      end
-      ndx_ret.values
-    end
-    #TODO: see if below can use above
+
     def get_components_module(component_id)
       component, version = nil, nil
       aug_cmps = get_augmented_components()

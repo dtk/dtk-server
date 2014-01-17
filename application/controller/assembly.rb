@@ -201,7 +201,7 @@ module DTK
     end
 
     AboutEnum = {
-      :instance => [:nodes,:components,:tasks,:attributes],
+      :instance => [:nodes,:components,:tasks,:attributes,:modules],
       :template => [:nodes,:components,:targets]
     }
     FilterProc = {

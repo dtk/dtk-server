@@ -455,21 +455,22 @@ module DTK; class ComponentDSL; class V2
         return nil if attr_ref =~ /^\$/
           
         datatype = :string
-        const = attr_ref
+        const = nil
         if attr_ref =~ /^'(.+)'$/
           const = $1
         elsif ['true','false'].include?(attr_ref)
+          const = attr_ref
           datatype = :boolean
         elsif attr_ref =~ /^[0-9]+$/
+          const = attr_ref
           datatype = :integer
         elsif sanitized_attr_ref = is_json_constant?(attr_ref)
           const = sanitized_attr_ref
           datatype = :json
-        else
-          ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
-        
-        constant_assign = Attribute::Constant.new(const,dep_attr_ref,dep_cmp,datatype)
+        unless constant_assign = Attribute::Constant.create?(const,dep_attr_ref,dep_cmp,datatype)
+          raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
+        end
         (opts[:constants] ||= Array.new) << constant_assign
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
       end

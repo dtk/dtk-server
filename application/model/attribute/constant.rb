@@ -21,6 +21,12 @@ module DTK
         end
       end
 
+      def self.create?(constant,dep_attr_ref,dep_cmp,datatype)
+        if is_valid_const?(constant)
+          new(constant,dep_attr_ref,dep_cmp,datatype)
+        end
+      end
+
       def initialize(constant,dep_attr_ref,dep_cmp,datatype)
         @dependent_attribute = dep_attr_ref
         @dependent_component = dep_cmp
@@ -30,16 +36,24 @@ module DTK
 
       ConstantDelim = "___"
       def attribute_name()
-        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{constant_val_for_attr_name()}"
+        constant_val_for_attr_name = self.class.constant_val_for_attr_name(@constant)
+        "#{ConstantDelim}constant#{ConstantDelim}#{@dependent_component}#{ConstantDelim}#{@dependent_attribute}#{ConstantDelim}#{constant_val_for_attr_name}"
       end
       def attribute_value()
         @constant
       end
 
-      def constant_val_for_attr_name()
-        @constant.gsub(/[ {}\[\]:*'"]/,"X") #TODO: this is just heuristic; possible naem clash but very unlikely
+     private
+      def self.constant_val_for_attr_name(constant)
+        constant.gsub(OtherChars,OtherCharsReplacement)
       end
-      
+      def self.is_valid_const?(constant)
+        !!(constant_val_for_attr_name(constant) =~ AttributeTermRE)
+      end
+      SimpleTokenPat = 'a-zA-Z0-9_-' #TODO: should encapuslate with def in model/link_def/parse_serialized_form.rb of  SimpleTokenPat
+      AttributeTermRE = Regexp.new("^[#{SimpleTokenPat}]+$")
+      OtherChars = Regexp.new("[^#{SimpleTokenPat}]")
+      OtherCharsReplacement = 'X' #TODO: this is just heuristic; possible naem clash but very unlikely
     end
   end
 end

@@ -399,9 +399,10 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
-    #argument can be array or single element
+    #argument can be array or single element (hash)
     def versions(modules_with_branches)
-      Array(modules_with_branches).collect{|r| ModuleBranch.version_from_version_field(r[:module_branch][:version])}
+      modules_with_branches = [modules_with_branches] unless modules_with_branches.kind_of?(Array)
+      modules_with_branches.collect{|r| ModuleBranch.version_from_version_field(r[:module_branch][:version])}
     end
 
     module ListMethodHelpers

@@ -42,7 +42,17 @@ module DTK
 
       assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
-        pntr = ndx_ret[component_module[:id]] ||= component_module
+        unless ndx_ret[component_module[:id]]
+          ndx_ret[component_module[:id]] = component_module
+          v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
+          pp [:version,v]
+        end
+      end
+      ret=ndx_ret.values
+
+pp [:get_component_module,ret]
+ret
+    end
 
 =begin
         if get_module_branches
@@ -55,15 +65,6 @@ module DTK
         end
 
 =end
-pp [:versions,ComponentModule.versions(r)]
-      end
-      ret=ndx_ret.values
-
-
-pp [:get_component_module,ret]
-
-ret
-    end
 
     def info_about(about, cmp_id=nil)
       case about.to_sym

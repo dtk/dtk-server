@@ -36,36 +36,6 @@ module DTK
      ndx_ret.values
     end
 
-    def self.get_for_assembly(assembly,opts={})
-      ndx_ret = Hash.new
-      get_module_branches = opts[:get_version_info]
-
-      assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
-        component_module = r[:component_module]
-        unless ndx_ret[component_module[:id]]
-          ndx_ret[component_module[:id]] = component_module
-          v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
-          pp [:version,v]
-        end
-      end
-      ret=ndx_ret.values
-
-pp [:get_component_module,ret]
-ret
-    end
-
-=begin
-        if get_module_branches
-          pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
-          unless pntr[:module_branches].find{|mb|mb[:id] == r[:module_branch][:id]}
-            pntr[:module_branches] << r[:module_branch]
-          end
-        else
-
-        end
-
-=end
-
     def info_about(about, cmp_id=nil)
       case about.to_sym
       when :components

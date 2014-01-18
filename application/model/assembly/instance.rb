@@ -505,7 +505,7 @@ module DTK; class  Assembly
     end
 
     def get_component_modules(opts={})
-      ComponentModule.get_for_assembly(self,opts)
+      AssemblyModule::Component.get_for_assembly(self,opts)
     end
 
     def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)

@@ -156,26 +156,6 @@ module DTK
       end
     end
 
-    def versions(module_id, client_rsa_pub_key = nil, opts={})
-      module_name, remote_versions = nil, []
-
-      # get local versions list and remove master(nil) from list
-      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
-      
-      # get all remote modules versions, and take only versions for current service module name
-      info = ServiceModule.info(model_handle(), module_id, opts)
-      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
-      remote_versions = ServiceModule.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
-      
-      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
-      remote_hash = {:namespace => "remote", :versions => remote_versions}
-
-      versions = [local_hash]
-      versions << remote_hash unless remote_versions.empty?
-
-      versions
-    end
-
     def self.get_project_trees(mh)
       sp_hash = {
         :cols => [:id,:display_name,:module_branches]

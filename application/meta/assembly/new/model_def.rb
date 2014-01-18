@@ -242,7 +242,7 @@ lambda__instance_nodes_components_assembly_template =
          :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id=>:nested_component__module_branch_id},
-         :cols => [:id,:display_name,:group_id,:version,:component_id]
+         :cols => [:id,:display_name,:group_id,:version,:current_sha,:component_id]
        },
        {
          :model_name=>:component_module,

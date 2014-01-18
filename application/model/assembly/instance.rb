@@ -458,10 +458,7 @@ module DTK; class  Assembly
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :modules
-        r=get_component_modules(:extra_cols=>[:module_branches])
-pp r
-r
-
+        get_component_modules(:get_version_info=>true)
        when :tasks
         get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
@@ -508,42 +505,7 @@ r
     end
 
     def get_component_modules(opts={})
-      ndx_ret = Hash.new
-      get_module_branches = (opts[:extra_cols]||[]).include?(:module_branches)
-
-      get_objs(:cols=> [:instance_component_module_branches]).each do |r|
-        component_module = r[:component_module]
-        if get_module_branches
-          pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
-          unless pntr[:module_branches].find{|mb|mb[:id] == r[:module_branch][:id]}
-            pntr[:module_branches] << r[:module_branch]
-          end
-        else
-          ndx_ret[component_module[:id]] ||= component_module
-        end
-      end
-      ndx_ret.values
-    end
-
-    def get_components_module(component_id)
-      component, version = nil, nil
-      aug_cmps = get_augmented_components()
-
-      ret = aug_cmps.map do |r|
-        component = r if r[:id]==component_id.to_i
-      end
-      
-      if branch_id = component[:module_branch_id]
-        sp_hash = {
-          :cols => [:id,:display_name,:version],
-          :filter => [:eq, :id, branch_id]
-        }
-        module_branch = Model.get_obj(model_handle(:module_branch),sp_hash)
-        component = module_branch.get_module()
-        version   = module_branch[:version]
-      end
-
-      {:component => component, :version => (version=="master" ? nil : version)}
+      ComponentModule.get_for_assembly(self,opts)
     end
 
     def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)

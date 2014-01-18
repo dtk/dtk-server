@@ -57,6 +57,29 @@ module DTK
       CloneUpdateInfo.new(self,version)
     end
 
+    ##
+    # Returns local and remote versions for module
+    #
+    def local_and_remote_versions(client_rsa_pub_key = nil, opts={})
+      module_name, remote_versions = nil, []
+
+      # get local versions list and remove master(nil) from list
+      local_versions = self.class.versions(get_objs(:cols => [:version_info])).map!{|v| v.nil? ? "CURRENT" : v}
+      
+      # get all remote modules versions, and take only versions for current component module name
+      info = self.class.info(model_handle(), id(), opts)
+      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
+      remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
+      
+      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
+      remote_hash = {:namespace => "remote", :versions => remote_versions}
+
+      versions = [local_hash]
+      versions << remote_hash unless remote_versions.empty?
+
+      versions
+    end
+
     def get_augmented_workspace_branch(opts={})
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
@@ -376,6 +399,11 @@ module DTK
       get_objs(mh,sp_hash)
     end
 
+    #argument can be array or single element
+    def versions(modules_with_branches)
+      Array(modules_with_branches).collect{|r| ModuleBranch.version_from_version_field(r[:module_branch][:version])}
+    end
+
     module ListMethodHelpers
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
         diff       = opts[:diff]
@@ -439,6 +467,7 @@ module DTK
       DefaultVersionString = "CURRENT"
 
      private 
+
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
         #index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}

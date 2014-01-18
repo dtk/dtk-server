@@ -98,12 +98,11 @@ module DTK
 
     def rest__versions()
       service_module = create_obj(:service_module_id)
-      module_id = ret_request_param_id_optional(:service_module_id, ::DTK::ServiceModule)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
       opts = Opts.new(:project_idh => project.id_handle())
 
-      rest_ok_response service_module.versions(module_id, client_rsa_pub_key, opts)
+      rest_ok_response service_module.local_and_remote_versions(client_rsa_pub_key, opts)
     end
 
     def rest__info()

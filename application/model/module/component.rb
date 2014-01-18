@@ -36,27 +36,33 @@ module DTK
      ndx_ret.values
     end
 
-    ##
-    # Returnes versions for specified module
-    #
-    def versions(module_id, client_rsa_pub_key = nil, opts={})
-      module_name, remote_versions = nil, []
+    def self.get_for_assembly(assembly,opts={})
+      ndx_ret = Hash.new
+      get_module_branches = opts[:get_version_info]
 
-      # get local versions list and remove master(nil) from list
-      local_versions = get_objs(:cols => [:version_info]).collect { |v_info| ModuleBranch.version_from_version_field(v_info[:module_branch][:version]) }.map!{|v| v.nil? ? "CURRENT" : v}
-      
-      # get all remote modules versions, and take only versions for current component module name
-      info = ComponentModule.info(model_handle(), module_id, opts)
-      module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
-      remote_versions = ComponentModule.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
-      
-      local_hash  = {:namespace => "local", :versions => local_versions.flatten}
-      remote_hash = {:namespace => "remote", :versions => remote_versions}
+      assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
+        component_module = r[:component_module]
+        pntr = ndx_ret[component_module[:id]] ||= component_module
 
-      versions = [local_hash]
-      versions << remote_hash unless remote_versions.empty?
+=begin
+        if get_module_branches
+          pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
+          unless pntr[:module_branches].find{|mb|mb[:id] == r[:module_branch][:id]}
+            pntr[:module_branches] << r[:module_branch]
+          end
+        else
 
-      versions
+        end
+
+=end
+pp [:versions,ComponentModule.versions(r)]
+      end
+      ret=ndx_ret.values
+
+
+pp [:get_component_module,ret]
+
+ret
     end
 
     def info_about(about, cmp_id=nil)

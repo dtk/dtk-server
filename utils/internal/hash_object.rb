@@ -58,6 +58,10 @@ module DTK
     def get_datatype()
       return_value(DatatypeKey)
     end
+    def add_return_datatype!()
+      add_value_to_return!(DatatypeKey)
+      self
+    end
     DatatypeKey = :datatype
 
    private

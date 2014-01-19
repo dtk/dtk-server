@@ -84,6 +84,7 @@ module DTK
         ret_val
       end 
       opts = Opts.new(:filter_proc => filter_proc, :detail_level => detail_level)
+      opts.add_return_datatype!()
       if detail_to_include
         opts.merge!(:detail_to_include => detail_to_include.map{|r|r.to_sym})
         opts.add_value_to_return!(:datatype)

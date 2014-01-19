@@ -70,27 +70,23 @@
   "component": {
     "order": [
       "id",
-      "name",
-      "version"
+      "name"
     ],
     "mapping": {
       "id": "dtk_id",
-      "name": "display_name",
-      "version": "version"
+      "name": "display_name"
     }
   },
-  "component_w_path_and_dependencies": {
+  "component_with_dependencies": {
     "order": [
       "id",
-      "path",
-      "version",
+      "name",
       "depends_on",
       "satisfied_by"  
     ],
     "mapping": {
       "id": "dtk_id",
-      "path": "display_name",
-      "version": "version",
+      "name": "display_name",
       "depends_on":  "depends_on",
       "satisfied_by": "satisfied_by"  
     }
@@ -103,22 +99,6 @@
     "mapping": {
       "name": "display_name",
       "version": "version"
-    }
-  },
-  "component_with_dependencies": {
-    "order": [
-      "id",
-      "name",
-      "version",
-      "depends_on",
-      "satisfied_by"	
-    ],
-    "mapping": {
-      "id": "dtk_id",
-      "name": "display_name",
-      "version": "version",
-      "depends_on":  "depends_on",
-      "satisfied_by": "satisfied_by"	
     }
   },
   "attribute": {

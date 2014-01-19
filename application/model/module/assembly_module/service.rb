@@ -11,17 +11,17 @@ module DTK; class AssemblyModule
     end
 
     def create_and_update_assembly_branch?()
-      module_branch = @service_module.get_module_branch_matching_version(@module_version) || create_assembly_branch()
+      module_branch = @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
       update_assembly_branch(module_branch)
-      @service_module.get_workspace_branch_info(@module_version).merge(:edit_file => meta_file_path())
+      @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
     end
 
    private
     def self.delete_module?(assembly,opts={})
       service_module = get_service_module(assembly,opts)
       return if service_module == false
-      module_version = ModuleVersion.ret(assembly)
-      service_module.delete_version?(module_version,:donot_delete_meta=>true)
+      am_version = assembly_module_version(assembly)
+      service_module.delete_version?(am_version,:donot_delete_meta=>true)
     end
 
     def self.create_modification_type_object(assembly,modification_type,opts={})
@@ -32,7 +32,7 @@ module DTK; class AssemblyModule
       @assembly = assembly
       @assembly_template_name = assembly_template_name(assembly)
       @service_module = opts[:service_module] || self.class.get_service_module(assembly)
-      @module_version = ModuleVersion.ret(assembly)
+      @am_version = assembly_module_version(assembly)
     end
 
     def assembly_template_name(assembly)
@@ -61,7 +61,7 @@ module DTK; class AssemblyModule
 
     def create_exact_copy_branch(opts={})
       opts = opts.merge(:donot_update_model_from_dsl=>true,:ret_module_branch=>true)
-      @service_module.create_new_version(@module_version,opts)
+      @service_module.create_new_version(@am_version,opts)
       opts[:ret_module_branch]
     end
 

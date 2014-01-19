@@ -17,9 +17,8 @@ module DTK; class AssemblyModule
     end
 
     def self.promote_module_updates(assembly,component_module,opts={})
-      module_version = ModuleVersion.ret(assembly)
-      unless branch = component_module.get_workspace_module_branch(module_version)
-        component_module_name = 
+      am_version = assembly_module_version(assembly)
+      unless branch = component_module.get_workspace_module_branch(am_version)
         component_module_id = component_module.id()
         if assembly.get_component_modules().find{|r|r[:id] == component_module_id}
           raise ErrorNoChangesToModule.new(assembly,component_module)
@@ -63,16 +62,13 @@ ret
         end
 
 =end
-
-
-
    private
     def self.create_assembly_branch?(assembly,component_module,opts={})
-      module_version = ModuleVersion.ret(assembly)
-      unless component_module.get_workspace_module_branch(module_version)
-        create_assembly_branch(component_module,module_version)
+      am_version = assembly_module_version(assembly)
+      unless component_module.get_workspace_module_branch(am_version)
+        create_assembly_branch(component_module,am_version)
       end
-      ret = component_module.get_workspace_branch_info(module_version)
+      ret = component_module.get_workspace_branch_info(am_version)
       if opts[:ret_module_branch]
         ret[:module_branch_idh].create_object()
       else
@@ -80,10 +76,10 @@ ret
       end
     end
 
-    def self.create_assembly_branch(component_module,module_version)
+    def self.create_assembly_branch(component_module,am_version)
       opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
       #TODO: very expensive call; will refine
-      component_module.create_new_version(module_version,opts)
+      component_module.create_new_version(am_version,opts)
     end
 
     def self.get_branch_template(module_branch,cmp_template)
@@ -98,11 +94,11 @@ ret
     end
     
     def self.delete_modules?(assembly)
-      module_version = ModuleVersion.ret(assembly)
+      am_version = assembly_module_version(assembly)
       #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:component_id],
-        :filter => [:eq,:version,module_version]
+        :filter => [:eq,:version,am_version]
       }
       component_module_mh = assembly.model_handle(:component_module)
       Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
@@ -112,7 +108,7 @@ ret
           next
         end
         component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
-        component_module.delete_version?(module_version)
+        component_module.delete_version?(am_version)
       end
     end
 

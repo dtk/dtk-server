@@ -7,5 +7,13 @@ module DTK
       Component.delete_modules?(assembly)
       Service.delete_module?(assembly,opts)
     end
+
+   private
+    def self.assembly_module_version(assembly)
+      ModuleVersion.ret(assembly)
+    end
+    def assembly_module_version(assembly)
+      self.class.assembly_module_version(assembly)
+    end
   end
 end

@@ -35,33 +35,20 @@ module DTK; class AssemblyModule
 
     def self.get_for_assembly(assembly,opts={})
       ndx_ret = Hash.new
-      get_module_branches = opts[:get_version_info]
-      
+      add_module_branches = opts[:get_version_info]
+      #there is a row for each component; assumption is that all rows belonging to same component with have same branch
       assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
-        unless ndx_ret[component_module[:id]]
-          ndx_ret[component_module[:id]] = component_module
-          v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
-          pp [:version,v]
-        end
+        ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
-      ret=ndx_ret.values
-      
-pp [:get_component_module,ret]
-ret
+      modules_with_branches = ndx_ret.values
+      if add_module_branches
+        add_version_info!(modules_with_branches)
+      end
+pp [:get_component_module,modules_with_branches]
+      modules_with_branches
     end
 
-=begin
-        if get_module_branches
-          pntr = ndx_ret[component_module[:id]] ||= component_module.merge(:module_branches=>Array.new)
-          unless pntr[:module_branches].find{|mb|mb[:id] == r[:module_branch][:id]}
-            pntr[:module_branches] << r[:module_branch]
-          end
-        else
-
-        end
-
-=end
    private
     def self.create_assembly_branch?(assembly,component_module,opts={})
       am_version = assembly_module_version(assembly)
@@ -92,7 +79,15 @@ ret
       }
       Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
     end
-    
+
+
+
+    def self.add_version_info!(modules_with_branches)
+      #  v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
+      #TODO: stub
+      modules_with_branches
+    end
+
     def self.delete_modules?(assembly)
       am_version = assembly_module_version(assembly)
       #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances

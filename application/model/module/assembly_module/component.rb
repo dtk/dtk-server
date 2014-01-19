@@ -83,6 +83,7 @@ pp [:get_component_module,modules_with_branches]
 
 
     def self.add_version_info!(modules_with_branches)
+pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
       #  v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
       #TODO: stub
       modules_with_branches

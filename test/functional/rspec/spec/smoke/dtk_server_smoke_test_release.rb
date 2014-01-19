@@ -41,7 +41,7 @@ describe "DTK Server smoke test" do
   end
 
   context "Create new service function" do
-    include_context "Create service", dtk_common, service_name
+    include_context "Import service", service_name
   end
 
   context "Get module components list" do

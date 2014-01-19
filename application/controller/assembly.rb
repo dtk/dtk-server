@@ -62,6 +62,7 @@ module DTK
       rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
     end
 
+    #TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
       assembly,subtype = ret_assembly_params_object_and_subtype()

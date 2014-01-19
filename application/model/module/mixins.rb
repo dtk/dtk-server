@@ -597,6 +597,19 @@ module DTK
       end
     end
 
+    def get_module_branches(module_idhs,filter=nil)
+      ret = Array.new
+      if module_idhs.empty?
+        return ret
+      end
+      mh = module_idhs.first.createMH()
+      complete_filter = [:oneof,:id,module_idhs.map{|idh|idh.get_id()}]
+      if filter
+        complete_filter = [:and,complete_filter,filter]
+      end
+      get_matching_module_branches(mh,filter)
+    end
+
     def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})
       sp_hash = {
         :cols => [:id,:display_name,:group_id,:module_branches],

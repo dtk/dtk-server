@@ -77,7 +77,6 @@ module DTK; class AssemblyModule
       if add_module_branches
         add_version_info!(modules_with_branches)
       end
-pp [:get_component_module,modules_with_branches]
       modules_with_branches
     end
 
@@ -113,9 +112,11 @@ pp [:get_component_module,modules_with_branches]
     end
 
     def add_version_info!(modules_with_branches)
-pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
-      #  v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
       #TODO: stub
+      #TODO: can filter so only need extra info if an am version
+      all_branches = ComponentModule.get_module_branches(modules_with_branches.map{|r|r.id_handle()})
+      pp [:all_branches,all_branches]
+pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
       modules_with_branches
     end
 

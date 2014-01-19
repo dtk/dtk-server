@@ -127,7 +127,7 @@ lambda__segment_impls =
     :module_branches=>{
       :type=>:json,
       :hidden=>true,
-      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:id,:display_name,:group_id,:branch,:version,:type,:repo_id,:is_workspace,:external_ref])]
+      :remote_dependencies=>[lambda__segment_module_branches.call(:cols => ModuleBranch.common_columns())]
     },
     :workspace_info=>{
       :type=>:json,

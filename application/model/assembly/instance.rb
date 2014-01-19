@@ -458,7 +458,11 @@ module DTK; class  Assembly
         get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
 
        when :modules
-        get_component_modules(:get_version_info=>true)
+        component_modules_opts = Hash.new
+        if opts.array(:detail_to_include).include?(:version_info)
+          component_modules_opts.merge!(:get_version_info=>true)
+        end
+        get_component_modules(component_modules_opts)
        when :tasks
         get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
 
@@ -509,7 +513,7 @@ module DTK; class  Assembly
     end
 
     def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
-      #has lookup taht includes each satisfied_by_component
+      #has lookup that includes each satisfied_by_component
       ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
 
       #see if theer is any components that are nreferenced but not in ret

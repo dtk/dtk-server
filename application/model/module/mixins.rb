@@ -598,6 +598,7 @@ module DTK
     end
 
     def get_module_branches(module_idhs,filter=nil)
+      Log.error("Problem is that this gets branches accross any assembly; for case we want; want just base (workspace) module to compare; so shoudl use variation of get_workspace_module_branch")
       ret = Array.new
       if module_idhs.empty?
         return ret
@@ -607,7 +608,7 @@ module DTK
       if filter
         complete_filter = [:and,complete_filter,filter]
       end
-      get_matching_module_branches(mh,filter)
+      get_matching_module_branches(mh,complete_filter)
     end
 
     def get_matching_module_branches(mh_or_idh,filter,post_filter=nil,opts={})

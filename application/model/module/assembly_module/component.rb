@@ -73,11 +73,13 @@ module DTK; class AssemblyModule
         component_module = r[:component_module]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
-      modules_with_branches = ndx_ret.values
+      ret = ndx_ret.values
       if add_module_branches
-        add_version_info!(modules_with_branches)
+        add_version_info!(ret)
+      else
+        ret.each{|r|r.delete(:module_branch)}
+        ret
       end
-      modules_with_branches
     end
 
    private

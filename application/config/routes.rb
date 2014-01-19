@@ -80,7 +80,6 @@ R8::ReactorRoute.draw do
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
   post  'component_module/list_remote' => 'component_module#list_remote'
   post  'component_module/versions' => 'component_module#versions'
-  get   'component_module/get_all_workspace_library_diffs' => 'component_module#get_all_workspace_library_diffs'
   post  'component_module/create' => 'component_module#create'
   post  'component_module/import' => 'component_module#import'
   post  'component_module/import_version' => 'component_module#import_version'

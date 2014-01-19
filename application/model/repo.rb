@@ -88,10 +88,6 @@ module XYZ
       Model.delete_instance(repo_idh)
     end
 
-    def diff_between_library_and_workspace(lib_branch,ws_branch)
-      RepoManager.diff(ws_branch[:branch],lib_branch)
-    end
-    
    private
     def self.private_user_repo_name(module_name,module_specific_type)
       username = CurrentSession.new.get_username()

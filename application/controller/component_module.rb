@@ -82,10 +82,6 @@ module DTK
       rest_ok_response component_module.get_workspace_branch_info(version)
     end
 
-    def rest__get_all_workspace_library_diffs()
-      rest_ok_response ComponentModule.get_all_workspace_library_diffs(model_handle)
-    end
-
     def rest__info()
       module_id = ret_request_param_id_optional(:component_module_id, ::DTK::ComponentModule)
       project   = get_default_project()

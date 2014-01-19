@@ -100,7 +100,7 @@ module DTK
       end
       
       data = assembly.info_about(about, opts)
-      datatype = opts.return_value(:datatype)
+      datatype = opts.get_datatype
       response_opts = Hash.new
       if format == :yaml
         response_opts.merge!(:encode_into => :yaml)

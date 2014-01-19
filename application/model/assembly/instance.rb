@@ -460,6 +460,7 @@ module DTK; class  Assembly
        when :modules
         component_modules_opts = Hash.new
         if opts.array(:detail_to_include).include?(:version_info)
+          opts.set_datatype!(:assembly_component_module)
           component_modules_opts.merge!(:get_version_info=>true)
         end
         get_component_modules(component_modules_opts)
@@ -486,7 +487,7 @@ module DTK; class  Assembly
       
       main_table_sort = proc{|a,b|a[:display_name] <=> b[:display_name]}
       if opts.array(:detail_to_include).include?(:component_dependencies)
-        opts.set_return_value!(:datatype,:component_with_dependencies)
+        opts.set_datatype!(:component_with_dependencies)
         ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,ret)
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
           if deps = aug_cmp[:dependencies]
@@ -503,7 +504,7 @@ module DTK; class  Assembly
         end
         OutputTable.join(ret,join_columns,&main_table_sort)
       else
-        opts.set_return_value!(:datatype,:component)
+        opts.set_datatype!(:component)
         ret.sort(&main_table_sort)
       end
     end

@@ -52,6 +52,14 @@ module DTK
       self
     end
 
+    def set_datatype!(val)
+      set_return_value!(DatatypeKey,val)
+    end
+    def get_datatype()
+      return_value(DatatypeKey)
+    end
+    DatatypeKey = :datatype
+
    private
 
     def remove_nested_nil(val)

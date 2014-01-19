@@ -217,6 +217,21 @@
       "dsl_parsed": "dsl_parsed"
     }
   },
+  "assembly_component_module": {
+    "order": [
+      "id",
+      "name",
+      "version",
+      "local copy",
+      "local copy diverged"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "display_name",
+      "local copy": "local_copy",
+      "local copy diverged": "local_copy_diff"
+    }
+  },
   "module_diff": {
     "order": [
       "id",

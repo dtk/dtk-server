@@ -76,10 +76,12 @@ module DTK; class AssemblyModule
       ret = ndx_ret.values
       if add_module_branches
         add_version_info!(ret)
-      else
-        ret.each{|r|r.delete(:module_branch)}
-        ret
       end
+      
+      #remove branches; they are no longer needed
+      ret.each{|r|r.delete(:module_branch)}
+    
+      ret
     end
 
    private
@@ -114,11 +116,43 @@ module DTK; class AssemblyModule
     end
 
     def add_version_info!(modules_with_branches)
-      #TODO: stub
-      #TODO: can filter so only need extra info if an am version
-      all_branches = ComponentModule.get_module_branches(modules_with_branches.map{|r|r.id_handle()})
-      pp [:all_branches,all_branches]
-      pp [:add_version_inf,modules_with_branches.map{|r|[r[:display_name],r[:module_branch].version,r[:module_branch].version.class]}]
+      modules_with_branches
+      local_copy_els = Array.new
+      modules_with_branches.each do |r|
+        if r[:module_branch].assembly_module_version?()
+          r[:local_copy] = true
+          local_copy_els << r
+        end
+      end
+
+      #for each item with local_copy, check for diff_from_base
+      if local_copy_els.empty?
+        return modules_with_branches
+      end
+      #TODO: check if we are missing anything; maybe when there is just a meta change we dont update what component pointing to
+      #but create a new branch, which we can check with ComponentModule.get_workspace_module_branches with idhs from all els in modules_with_branches
+      #this is related to DTK-1214
+
+      #get the associated master branch and see if there is any diff
+      mod_idhs = local_copy_els.map{|r|r.id_handle()}
+      ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject(Hash.new) do |h,r|
+        h.merge(r[:module_id] => r)
+      end 
+
+      local_copy_els.each do |r|
+        unless workspace_branch = ndx_workspace_branches[r[:id]]
+          Log.error("Unexpected that ndx_workspace_branchesr[r[:id]] is null")
+          next
+        end
+        unless assembly_mod_sha = r[:module_branch][:current_sha]
+          Log.error("Unexpected that assembly_mod_sh is nil")
+          next
+        end
+        unless workspace_mod_sha = workspace_branch[:current_sha]
+          Log.error("Unexpected that workspace_mod_sha is nil")
+        end
+        r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
+      end
       modules_with_branches
     end
 

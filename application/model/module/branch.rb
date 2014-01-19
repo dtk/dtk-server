@@ -108,6 +108,12 @@ module DTK
     def version()
       self.class.version_from_version_field(get_field?(:version))
     end
+    def assembly_module_version?()
+      version_obj = version()
+      if version_obj.kind_of?(ModuleVersion::AssemblyModule)
+        version_obj
+      end
+    end
 
     def version_print_form(opts=Opts.new)
       default_version_string = opts[:default_version_string] # can be null

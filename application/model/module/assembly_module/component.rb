@@ -4,26 +4,55 @@ module DTK; class AssemblyModule
     r8_nested_require('component','attribute')
 
     def self.prepare_for_edit(assembly,component_module)
-      get_applicable_component_instances(assembly,component_module,:raise_error_if_empty => true)
-      create_assembly_branch?(assembly,component_module)
+      new(assembly).prepare_for_edit(component_module)
+    end
+    def prepare_for_edit(component_module)
+      get_applicable_component_instances(component_module,:raise_error_if_empty => true)
+      create_assembly_branch?(component_module)
     end
 
     def self.finalize_edit(assembly,component_module,module_branch)
-      modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
+      new(assembly).finalize_edit(component_module,module_branch)
+    end
+    def finalize_edit(component_module,module_branch)
+      modify_cmp_instances_with_new_parents(component_module,module_branch)
     end
 
+    def delete_modules?()
+      am_version = assembly_module_version()
+      #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
+      sp_hash = {
+        :cols => [:id,:group_id,:display_name,:component_id],
+        :filter => [:eq,:version,am_version]
+      }
+      component_module_mh = @assembly.model_handle(:component_module)
+      Model.get_objs(@assembly.model_handle(:module_branch),sp_hash).each do |r|
+        unless r[:component_id]
+          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
+          Model.delete_instance(r.id_handle())
+          next
+        end
+        component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
+        component_module.delete_version?(am_version)
+      end
+    end
+
+
     def self.create_component_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts={})
-      AdHocLink.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,opts)
+      AdHocLink.new(assembly).create_dependency?(type,cmp_template,antecedent_cmp_template,opts)
     end
 
     def self.promote_module_updates(assembly,component_module,opts={})
-      am_version = assembly_module_version(assembly)
+      new(assembly).promote_module_updates(component_module,opts)
+    end
+    def promote_module_updates(component_module,opts={})
+      am_version = assembly_module_version()
       unless branch = component_module.get_workspace_module_branch(am_version)
         component_module_id = component_module.id()
-        if assembly.get_component_modules().find{|r|r[:id] == component_module_id}
-          raise ErrorNoChangesToModule.new(assembly,component_module)
+        if @assembly.get_component_modules().find{|r|r[:id] == component_module_id}
+          raise ErrorNoChangesToModule.new(@assembly,component_module)
         else
-          raise ErrorNoComponentsInModule.new(assembly,component_module)
+          raise ErrorNoComponentsInModule.new(@assembly,component_module)
         end
       end
       unless ancestor_branch = branch.get_ancestor_branch?()
@@ -34,10 +63,13 @@ module DTK; class AssemblyModule
     end
 
     def self.get_for_assembly(assembly,opts={})
+      new(assembly).get_for_assembly(opts)
+    end
+    def get_for_assembly(opts={})
       ndx_ret = Hash.new
       add_module_branches = opts[:get_version_info]
       #there is a row for each component; assumption is that all rows belonging to same component with have same branch
-      assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
+      @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
       end
@@ -50,8 +82,8 @@ pp [:get_component_module,modules_with_branches]
     end
 
    private
-    def self.create_assembly_branch?(assembly,component_module,opts={})
-      am_version = assembly_module_version(assembly)
+    def create_assembly_branch?(component_module,opts={})
+      am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
         create_assembly_branch(component_module,am_version)
       end
@@ -63,13 +95,13 @@ pp [:get_component_module,modules_with_branches]
       end
     end
 
-    def self.create_assembly_branch(component_module,am_version)
+    def create_assembly_branch(component_module,am_version)
       opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
       #TODO: very expensive call; will refine
       component_module.create_new_version(am_version,opts)
     end
 
-    def self.get_branch_template(module_branch,cmp_template)
+    def get_branch_template(module_branch,cmp_template)
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:component_type],
         :filter => [:and,[:eq,:module_branch_id,module_branch.id()],
@@ -80,40 +112,19 @@ pp [:get_component_module,modules_with_branches]
       Model.get_obj(cmp_template.model_handle(),sp_hash) || raise(Error.new("Unexpected that branch_cmp_template is nil"))
     end
 
-
-
-    def self.add_version_info!(modules_with_branches)
+    def add_version_info!(modules_with_branches)
 pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
       #  v = ComponentModule.versions(component_module.merge(Aux.hash_subset(r,[:module_branch])))
       #TODO: stub
       modules_with_branches
     end
 
-    def self.delete_modules?(assembly)
-      am_version = assembly_module_version(assembly)
-      #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
-      sp_hash = {
-        :cols => [:id,:group_id,:display_name,:component_id],
-        :filter => [:eq,:version,am_version]
-      }
-      component_module_mh = assembly.model_handle(:component_module)
-      Model.get_objs(assembly.model_handle(:module_branch),sp_hash).each do |r|
-        unless r[:component_id]
-          Log.error("Unexpected that #{r.inspect} has :component_id nil; workaround is to delete this module branch")
-          Model.delete_instance(r.id_handle())
-          next
-        end
-        component_module = component_module_mh.createIDH(:id => r[:component_id]).create_object()
-        component_module.delete_version?(am_version)
-      end
-    end
-
-    def self.modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
-      cmp_instances = get_applicable_component_instances(assembly,component_module)
+    def modify_cmp_instances_with_new_parents(component_module,module_branch)
+      cmp_instances = get_applicable_component_instances(component_module)
       update_impacted_component_instances(cmp_instances,module_branch,component_module.get_project().id_handle())
     end
 
-    def self.update_impacted_component_instances(cmp_instances,module_branch,project_idh)
+    def update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]
 
       #shortcut; do not need to update components that are set already to this module id; and for added protection making
@@ -149,13 +160,13 @@ pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
       end
     end
 
-    def self.get_applicable_component_instances(assembly,component_module,opts={})
-      assembly_id = assembly.id()
+    def get_applicable_component_instances(component_module,opts={})
+      assembly_id = @assembly.id()
       ret = component_module.get_associated_component_instances().select do |cmp|
         cmp[:assembly_id] == assembly_id
       end
       if opts[:raise_error_if_empty] and ret.empty?()
-        raise ErrorNoComponentsInModule.new(assembly,component_module)
+        raise ErrorNoComponentsInModule.new(@assembly,component_module)
       end
       ret
     end

@@ -16,22 +16,18 @@ module DTK; class AssemblyModule
       @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
     end
 
-   private
-    def self.delete_module?(assembly,opts={})
-      service_module = get_service_module(assembly,opts)
+    def delete_module?(opts={})
+      service_module = get_service_module(@assembly,opts)
       return if service_module == false
-      am_version = assembly_module_version(assembly)
+      am_version = assembly_module_version()
       service_module.delete_version?(am_version,:donot_delete_meta=>true)
     end
 
-    def self.create_modification_type_object(assembly,modification_type,opts={})
-      modification_type_class(modification_type).new(assembly,opts)
-    end
-
+   private
     def initialize(assembly,opts={})
-      @assembly = assembly
+      super(assembly)
       @assembly_template_name = assembly_template_name(assembly)
-      @service_module = opts[:service_module] || self.class.get_service_module(assembly)
+      @service_module = opts[:service_module] || get_service_module(assembly)
       @am_version = assembly_module_version(assembly)
     end
 
@@ -43,6 +39,10 @@ module DTK; class AssemblyModule
       assembly_template.get_field?(:display_name)
     end
 
+    def self.create_modification_type_object(assembly,modification_type,opts={})
+      modification_type_class(modification_type).new(assembly,opts)
+    end
+
     def self.modification_type_class(modification_type)
       case modification_type
         when :workflow then Workflow
@@ -50,7 +50,7 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.get_service_module(assembly,opts={})
+    def get_service_module(assembly,opts={})
       unless ret = assembly.get_service_module()
         assembly_name = assembly.display_name_print_form()
         return false if opts[:do_not_raise]

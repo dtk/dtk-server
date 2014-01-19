@@ -2,6 +2,9 @@ module DTK; class AssemblyModule
   class Component
     class AdHocLink < self
       def self.update(assembly,parsed_adhoc_link_info)
+        new(assembly).update(parsed_adhoc_link_info)
+      end
+      def update(parsed_adhoc_link_info)
         parsed_adhoc_links = parsed_adhoc_link_info.links
         unless  parsed_adhoc_links.size == 1
           raise Error.new("Only implemented #{self}.update when parsed_adhoc_links.size == 1")
@@ -12,21 +15,21 @@ module DTK; class AssemblyModule
         antec_cmp_template = parsed_adhoc_link_info.antec_component_template
 
         component_module = dep_cmp_template.get_component_module()
-        module_branch = create_assembly_branch?(assembly,component_module,:ret_module_branch=>true)
+        module_branch = create_assembly_branch?(component_module,:ret_module_branch=>true)
 
         opts_create_dep = {
           :source_attr_pattern => parsed_adhoc_link.attribute_pattern(:source),
           :target_attr_pattern => parsed_adhoc_link.attribute_pattern(:target),
           :update_dsl => true
         }
-        result = create_dependency?(:link,assembly,dep_cmp_template,antec_cmp_template,module_branch,opts_create_dep)
+        result = create_dependency?(:link,dep_cmp_template,antec_cmp_template,module_branch,opts_create_dep)
         if result[:component_module_updated]
-          modify_cmp_instances_with_new_parents(assembly,component_module,module_branch)
+          modify_cmp_instances_with_new_parents(component_module,module_branch)
         end
         result
       end
 
-      def self.create_dependency?(type,assembly,cmp_template,antecedent_cmp_template,module_branch,opts={})
+      def create_dependency?(type,cmp_template,antecedent_cmp_template,module_branch,opts={})
         result = Hash.new
         branch_cmp_template = get_branch_template(module_branch,cmp_template)
 
@@ -40,7 +43,7 @@ module DTK; class AssemblyModule
       end
 
      private
-      def self.dependency_class(type)
+      def dependency_class(type)
         case type 
           when :simple then DTK::Dependency::Simple 
           when :link then DTK::Dependency::Link

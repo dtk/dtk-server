@@ -1,7 +1,9 @@
 module DTK
   class ModuleVersion < String
     def self.ret(obj)
-      if obj.kind_of?(String)
+      if obj.nil?
+        nil
+      elsif obj.kind_of?(String)
         if Semantic.legal_format?(obj)
           Semantic.create_from_string(obj)
         elsif AssemblyModule.legal_format?(obj)

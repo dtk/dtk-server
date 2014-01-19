@@ -23,7 +23,9 @@ module DTK
     end
 
     def version_from_version_field(version_field)
-      (version_field == VersionFieldDefault) ? nil : version_field
+      unless version_field == VersionFieldDefault
+        ModuleVersion.ret(version_field)
+      end
     end
 
     #TODO: deprecate

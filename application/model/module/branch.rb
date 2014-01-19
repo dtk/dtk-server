@@ -105,6 +105,10 @@ module DTK
       commit_sha
     end
 
+    def version()
+      self.class.version_from_version_field(get_field?(:version))
+    end
+
     def version_print_form(opts=Opts.new)
       default_version_string = opts[:default_version_string] # can be null
       update_object!(:version)

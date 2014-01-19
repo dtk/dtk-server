@@ -118,7 +118,7 @@ module DTK; class AssemblyModule
       #TODO: can filter so only need extra info if an am version
       all_branches = ComponentModule.get_module_branches(modules_with_branches.map{|r|r.id_handle()})
       pp [:all_branches,all_branches]
-pp [:add_version_inf,ComponentModule.versions(modules_with_branches)]
+      pp [:add_version_inf,modules_with_branches.map{|r|[r[:display_name],r[:module_branch].version,r[:module_branch].version.class]}]
       modules_with_branches
     end
 

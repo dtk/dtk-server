@@ -63,9 +63,11 @@ module DTK
     def local_and_remote_versions(client_rsa_pub_key = nil, opts={})
       module_name, remote_versions = nil, []
 
-      # get local versions list and remove master(nil) from list
-      local_versions = self.class.versions(get_objs(:cols => [:version_info])).map!{|v| v.nil? ? "CURRENT" : v}
-      
+      # get local versions list 
+      local_versions = get_objs(:cols => [:version_info]).map do |r| 
+        v = r[:module_branch].version()
+        v.nil? ? "CURRENT" : v
+      end
       # get all remote modules versions, and take only versions for current component module name
       info = self.class.info(model_handle(), id(), opts)
       module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
@@ -397,12 +399,6 @@ module DTK
       }
       mh = project_idh.createMH(model_type())
       get_objs(mh,sp_hash)
-    end
-
-    #argument can be array or single element (hash)
-    def versions(modules_with_branches)
-      modules_with_branches = [modules_with_branches] unless modules_with_branches.kind_of?(Array)
-      modules_with_branches.collect{|r| ModuleBranch.version_from_version_field(r[:module_branch][:version])}
     end
 
     module ListMethodHelpers

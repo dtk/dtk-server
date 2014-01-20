@@ -591,7 +591,7 @@ class DtkCommon
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 20
+		max_num_of_retries = 10
 
 		while (end_loop == false)
 			sleep 10
@@ -1392,7 +1392,7 @@ class DtkCommon
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 20
+		max_num_of_retries = 10
 
 		while (end_loop == false)
 			sleep 10
@@ -1790,7 +1790,7 @@ class DtkCommon
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 20
+		max_num_of_retries = 10
 
 		while (end_loop == false)
 			sleep 10

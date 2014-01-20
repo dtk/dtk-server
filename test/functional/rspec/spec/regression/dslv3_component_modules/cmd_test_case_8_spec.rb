@@ -12,7 +12,7 @@ require './lib/modules_spec'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/dslv3_component_modules/resources/cmd_test_case_8_dtk.model.yaml"
+file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_8_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 dtk_common = DtkCommon.new('', '')
 

@@ -65,7 +65,7 @@ describe "DTK Server smoke test release" do
     end
 
     context "Converge function" do
-      include_context "Converge", dtk_common
+      include_context "Converge assembly", dtk_common, 30
     end
 
     context "Delete and destroy assembly function" do

@@ -34,6 +34,14 @@ shared_context "Converge" do |dtk_common|
   end
 end
 
+#converge with parametrized max retries
+shared_context "Converge assembly" do |dtk_common, max_retries|
+  it "converges #{dtk_common.assembly_name} assembly" do
+    converge = dtk_common.converge_assembly($assembly_id, max_retries)
+    converge.should eq(true)
+  end
+end
+
 shared_context "Check if port avaliable" do |dtk_common, port|
   it "is avaliable" do
     netstat_response = dtk_common.netstats_check($assembly_id, port)

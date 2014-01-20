@@ -97,7 +97,7 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 	end
 
 	context "Converge function" do
-		include_context "Converge", dtk_common
+		include_context "Converge assembly", dtk_common, 30
 	end
 
 	context "Grep command on puppet log on redis master instance" do

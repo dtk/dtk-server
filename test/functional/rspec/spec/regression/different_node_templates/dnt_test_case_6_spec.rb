@@ -95,7 +95,7 @@ describe "(Different Node Templates) Test Case 6: MongoDB - Single node scenario
 	end
 
 	context "Converge function" do
-		include_context "Converge", dtk_common
+		include_context "Converge assembly", dtk_common, 20
 	end
 
 	context "Grep command on puppet log" do

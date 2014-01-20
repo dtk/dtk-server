@@ -144,15 +144,18 @@ module DTK; class  Assembly
         ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,cmps_print_form)
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|
           if deps = aug_cmp[:dependencies]
-            deps.map do |dep|
-              el = {:depends_on => dep.depends_on_print_form?()}
-              sb_cmp_ids = dep.satisfied_by_component_ids
-              unless sb_cmp_ids.empty?
-                satisfied_by = sb_cmp_ids.map{|cmp_id|ndx_component_print_form[cmp_id]}.join(', ')
-                el.merge!(:satisfied_by => satisfied_by)
+            ndx_els = Hash.new
+            deps.each do |dep|
+              if depends_on = dep.depends_on_print_form?()
+                el = ndx_els[depends_on] ||= Array.new
+                sb_cmp_ids =  dep.satisfied_by_component_ids
+                ndx_els[depends_on] += (sb_cmp_ids - el)
               end
-              el
-            end.compact
+            end
+            ndx_els.map do |depends_on,sb_cmp_ids|
+              satisfied_by = (sb_cmp_ids.empty? ? nil : sb_cmp_ids.map{|cmp_id|ndx_component_print_form[cmp_id]}.join(', '))
+              {:depends_on => depends_on, :satisfied_by => satisfied_by}
+            end
           end
         end
         OutputTable.join(cmps_print_form,join_columns,&main_table_sort)

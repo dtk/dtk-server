@@ -227,5 +227,5 @@ if !set_attributes_array.include? false
     puts "[ERROR] Tenant assembly was not deployed successfully!"
   end
 else
-  puts "[ERROR] Some of the attributes is not set correctly. Will not proceed with converge process!"
+  puts "[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!"
 end

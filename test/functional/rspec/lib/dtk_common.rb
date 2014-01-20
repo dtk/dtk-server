@@ -336,7 +336,7 @@ class DtkCommon
 		return param_check
 	end
 
-	def converge_assembly(assembly_id)
+	def converge_assembly(assembly_id, max_num_of_retries=10)
 		puts "Converge assembly:", "------------------"
 		assembly_converged = false
 		puts "Converge process for assembly with id #{assembly_id} started!"
@@ -348,7 +348,6 @@ class DtkCommon
 			task_execute_response = send_request('/rest/task/execute', {'task_id' => task_id})
 			end_loop = false
 			count = 0
-			max_num_of_retries = 10
 
 			task_status = 'executing'
 			while task_status.include? 'executing' || end_loop == false

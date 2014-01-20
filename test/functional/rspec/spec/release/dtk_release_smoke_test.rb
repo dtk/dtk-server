@@ -12,8 +12,7 @@ require './lib/parameters_setting_spec'
 require './lib/modules_spec'
 require './lib/services_spec'
 
-
-assembly_name = 'smoke_test_instance'
+assembly_name = 'dtk_release_smoke_test'
 assembly_template = 'bootstrap::node_with_params'
 os_templates = ['precise','centos6.4']
 os_attribute = 'os_identifier'
@@ -27,7 +26,7 @@ $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
-describe "DTK Server smoke test" do
+describe "DTK Server smoke test release" do
 
   before(:all) do
     puts "*****************************"

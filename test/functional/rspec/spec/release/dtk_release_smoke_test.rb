@@ -21,6 +21,7 @@ memory_size_attribute = 'memory_size'
 node_name = 'node1'
 module_name = "test"
 service_name = "bootstrap"
+namespace = 'demo'
 module_filesystem_location = "~/dtk/component_modules"
 $assembly_id = 0
 
@@ -41,6 +42,14 @@ describe "DTK Server smoke test release" do
 
   context "Create new service function" do
     include_context "Import service", service_name
+  end
+
+  context "Export module to #{namespace} namespace" do
+    include_context "Export module", dtk_common, module_name, namespace
+  end
+
+  context "Export service to #{namespace} namespace" do
+    include_context "Export service", dtk_common, service_name, namespace
   end
 
   context "Get module components list" do
@@ -79,6 +88,14 @@ describe "DTK Server smoke test release" do
 
   context "Delete module" do
     include_context "Delete module", dtk_common, module_name
+  end
+
+  context "Delete module from remote" do
+    include_context "Delete module from remote repo", dtk_common, module_name, namespace
+  end
+
+  context "Delete #{service_name} service from remote" do
+    include_context "Delete service from remote repo", dtk_common, service_name, namespace
   end
 
   after(:all) do

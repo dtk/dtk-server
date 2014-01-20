@@ -134,6 +134,13 @@ shared_context "Export module" do |dtk_common, module_name, namespace|
     pass = false
     value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
     puts value
+    #temp solution for bug that happens when calling repo manager for the first time. try request again
+    num_of_tries = 0
+    if value.include? "Repo Manager refused the connection" && num_of_tries == 0
+      value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
+      puts value
+      num_of_tries = 1
+    end
     pass = true if (!value.include? "ERROR")
     puts "Module #{module_name} exported successfully!" if pass == true
     puts "Module #{module_name} was not exported successfully!" if pass == false

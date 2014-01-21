@@ -5,6 +5,10 @@ module DTK; class ComponentDSL
     def self.convert(input_hash)
       new.convert(input_hash)
     end
+   private
+    def component_print_form(cmp_internal_form)
+      ::DTK::Component.display_name_print_form(cmp_internal_form)
+    end
 
     class InputHash < Hash
       def initialize(hash={})

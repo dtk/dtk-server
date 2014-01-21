@@ -181,7 +181,7 @@ module DTK; class ComponentDSL; class V2
             end
           end
         unless no_error
-          raise ParsingError.new("The include_modules version key (?1)  is ill-formed",version)
+          raise ParsingError.new("The include_modules version key (?1) is ill-formed",version)
         end
         version
       end
@@ -191,7 +191,10 @@ module DTK; class ComponentDSL; class V2
           ParsingError.raise_error_if_not(in_attrs,Hash)
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
-            ParsingError.raise_error_if_not(info,Hash,:type => "attribute properties", :for => "attribute with name '#{name}'")
+            unless info.kind_of?(Hash)
+              cmp_name = component_print_form(cmp_type)
+              raise ParsingError.new("Ill-formed attributes section for component (?1): ?2", cmp_name,{"attributes" => in_attrs})
+            end
             dynamic_default_variable = dynamic_default_variable?(info)
             external_ref = 
               if opts[:constant_attribute] or info["constant"]

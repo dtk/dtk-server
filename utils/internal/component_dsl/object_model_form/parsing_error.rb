@@ -31,6 +31,10 @@ module DTK; class ComponentDSL
         if arg.kind_of?(Array) or arg.kind_of?(Hash)
           format_type = DefaultNonScalarFormatType
           "\n\n#{Aux.serialize(arg,format_type)}"
+        elsif arg.kind_of?(String)
+          arg
+        elsif arg.kind_of?(TrueClass) or arg.kind_of?(FalseClass) or arg.kind_of?(Fixnum) or arg.kind_of?(Symbol)
+          arg.to_s
         else      
           arg.inspect
         end

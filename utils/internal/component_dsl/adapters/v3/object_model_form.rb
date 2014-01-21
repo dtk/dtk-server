@@ -196,8 +196,8 @@ module DTK; class ComponentDSL; class V3
               end
             end
             unless ndx = find_index(link_def_choice,pruned_ndx_dep_choices)
-              dep_cmp_name = ::DTK::Component.display_name_print_form(link_def_choice.dep_cmp)
-              base_cmp_name = ::DTK::Component.display_name_print_form(link_def_choice.base_cmp)
+              dep_cmp_name = component_print_form(link_def_choice.dep_cmp)
+              base_cmp_name = component_print_form(link_def_choice.base_cmp)
               error_msg = "Cannot find dependency match for link_def for component '#{base_cmp_name}' to '#{dep_cmp_name}'; the link fragment is: ?1"
               raise ParsingError.new(error_msg,link_def_choice.print_form())
             end

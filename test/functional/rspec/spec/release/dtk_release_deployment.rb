@@ -7,13 +7,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require '../../lib/dtk_common'
+require './lib/dtk_common'
 
 assembly_name = 'dtk_release_deployment'
 assembly_template = 'dtk::release'
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
-config = YAML::load(File.open("../../config/release.yml"))
+config = YAML::load(File.open("./config/release.yml"))
 
 assembly_id = dtk_common.stage_assembly
 if dtk_common.check_if_assembly_exists(assembly_id)

@@ -337,7 +337,15 @@ module DTK; class ComponentDSL; class V2
         @possible_link = OutputHash.new()
       end
 
-      def self.convert_choices(conn_ref,conn_info,base_cmp,opts={})
+      def self.convert_choices(conn_ref,conn_info_x,base_cmp,opts={})
+        conn_info =
+          if conn_info_x.kind_of?(Hash)
+            conn_info_x
+          elsif conn_info_x.kind_of?(Array) and conn_info_x.size == 1 and conn_info_x.first.kind_of?(Hash)
+            conn_info_x.first
+          else
+            raise ParsingError.new("Dependency (?1) is ill-formed",conn_info_x)
+          end
         if choices = conn_info["choices"]
           opts_choices = opts.merge(:conn_ref => conn_ref)
           choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choices)}

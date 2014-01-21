@@ -131,7 +131,7 @@ module DTK; class ComponentModule
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
-      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version)
+      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts)
     end
 
     def create_needed_objects_and_dsl?(repo,version,opts={})
@@ -188,7 +188,7 @@ module DTK; class ComponentModule
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ComponentDSL.contains_dsl_file?(impl_obj)
-        if diffs_summary.meta_file_changed?()
+        if opts[:force_parse] or diffs_summary.meta_file_changed?()
           dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
         end
       else

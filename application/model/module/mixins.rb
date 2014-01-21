@@ -141,12 +141,10 @@ module DTK
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
       module_branch = get_workspace_module_branch(version)
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha)
-      parse_needed = !dsl_parsed?()
+      parse_needed = (opts[:force_parse] or !dsl_parsed?())
       return unless pull_was_needed or parse_needed
 
-      opts_update = Hash.new
-      opts_update.merge!(:do_not_raise => true) if opts[:internal_trigger]
-      opts_update.merge!(:modification_type => opts[:modification_type]) if opts[:modification_type] 
+      opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse])
       response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
       
       if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(ErrorUsage::DanglingComponentRefs))

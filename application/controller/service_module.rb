@@ -219,7 +219,7 @@ module DTK
       diffs_summary = ret_diffs_summary()
       opts = Hash.new
       if ret_request_param_boolean(:internal_trigger)
-        opts.merge!(:internal_trigger => true )
+        opts.merge!(:do_not_raise => true )
       end
       if mod_type = ret_request_params(:modification_type)
         opts.merge!(:modification_type =>  mod_type.to_sym)

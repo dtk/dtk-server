@@ -191,7 +191,7 @@ module DTK; class ComponentDSL; class V2
           ParsingError.raise_error_if_not(in_attrs,Hash)
           attrs = OutputHash.new
           in_attrs.each_pair do |name,info|
-            ParsingError.raise_error_if_value_nil(name,info)
+            ParsingError.raise_error_if_not(info,Hash,:type => "attribute properties", :for => "attribute with name '#{name}'")
             dynamic_default_variable = dynamic_default_variable?(info)
             external_ref = 
               if opts[:constant_attribute] or info["constant"]

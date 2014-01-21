@@ -1,5 +1,7 @@
 module DTK; class ComponentDSL
   class ObjectModelForm
+    r8_nested_require('object_model_form','parsing_error')
+
     def self.convert(input_hash)
       new.convert(input_hash)
     end
@@ -38,51 +40,6 @@ module DTK; class ComponentDSL
       end
       def set_if_not_nil(key,val)
         self[key] = val unless val.nil?
-      end
-    end
-
-    class ParsingError < ErrorUsage
-      def initialize(msg='',*args)
-        super("component dsl parsing error: #{msg_pp_form(msg,*args)}")
-      end
-
-      def self.raise_error_if_not(obj,klass)
-        unless obj.kind_of?(klass)
-          raise new("Ill-formed fragment (?1); it should be a #{klass.to_s.downcase}",obj)
-        end
-      end
-
-      def self.raise_error_if_value_nil(k,v)
-        if v.nil?
-          raise new("Value of (?1) should not be nil",k)
-        end
-      end
-
-      def msg_pp_form(msg,*args)
-        args.each_with_index do |arg, i|
-          msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))
-        end
-        msg
-      end
-      def pp_format_arg(arg)
-        #TODO: hard-coded format
-        format_type = :json
-        if format_type == :json 
-          if arg.kind_of?(Hash)
-            JSON.generate(arg)
-          else
-            arg.inspect
-          end
-        else
-          arg.inspect
-        end
-      end
-      private :msg_pp_form, :pp_format_arg
-
-      class MissingKey < self
-        def initialize(key)
-          super("missing key (#{key})")
-        end
       end
     end
 

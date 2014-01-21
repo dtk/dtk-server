@@ -196,7 +196,10 @@ module DTK; class ComponentDSL; class V3
               end
             end
             unless ndx = find_index(link_def_choice,pruned_ndx_dep_choices)
-              raise ParsingError.new("Cannot find dependency match for (#{link_def_choice.print_form})")
+              dep_cmp_name = ::DTK::Component.display_name_print_form(link_def_choice.dep_cmp)
+              base_cmp_name = ::DTK::Component.display_name_print_form(link_def_choice.base_cmp)
+              error_msg = "Cannot find dependency match for link_def for component '#{base_cmp_name}' to '#{dep_cmp_name}'; the link fragment is: ?1"
+              raise ParsingError.new(error_msg,link_def_choice.print_form())
             end
             (ret[ndx] ||= Array.new) << link_def_choice
           end
@@ -219,8 +222,9 @@ module DTK; class ComponentDSL; class V3
     end
 
     class Choice < OMFBase::Choice
+      attr_reader :dep_cmp,:base_cmp
       def print_form()
-        @possible_link.inject()
+        @raw || @possible_link.inject()
       end
 
       def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
@@ -230,13 +234,16 @@ module DTK; class ComponentDSL; class V3
       end
 
       def convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
+        @raw = link_def_link
+        @dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
+        @base_cmp  = base_cmp
+
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
           ret = [self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :external).first,
                  self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :internal).first]
           return ret
         end
         ret_info = {"type" => type.to_s}
-        dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
 
         #TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
@@ -247,9 +254,9 @@ module DTK; class ComponentDSL; class V3
         if (in_attr_mappings||[]).empty?
           raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
         end
-        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,dep_cmp,opts)}
+        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,@dep_cmp,opts)}
         
-        @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+        @possible_link.merge!(convert_to_internal_cmp_form(@dep_cmp) => ret_info)
         @dependency_name = link_def_link["dependency_name"]
         [self]
       end

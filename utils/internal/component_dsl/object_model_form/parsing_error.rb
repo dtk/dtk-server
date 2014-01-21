@@ -19,26 +19,23 @@ module DTK; class ComponentDSL
         end
       end
 
+     private 
       def msg_pp_form(msg,*args)
         args.each_with_index do |arg, i|
           msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))
         end
         msg
       end
+
       def pp_format_arg(arg)
-        #TODO: hard-coded format
-        format_type = :json
-        if format_type == :json 
-          if arg.kind_of?(Hash)
-            JSON.generate(arg)
-          else
-            arg.inspect
-          end
-        else
+        if arg.kind_of?(Array) or arg.kind_of?(Hash)
+          format_type = DefaultNonScalarFormatType
+          "\n\n#{Aux.serialize(arg,format_type)}"
+        else      
           arg.inspect
         end
       end
-      private :msg_pp_form, :pp_format_arg
+      DefaultNonScalarFormatType = :yaml
 
       class MissingKey < self
         def initialize(key)

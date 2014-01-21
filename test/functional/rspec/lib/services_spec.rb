@@ -124,6 +124,10 @@ shared_context "Export service" do |dtk_common, service_name, namespace|
     puts "Export service to remote:", "-------------------------"
     pass = false
     value = `dtk service #{service_name} create-on-dtkn #{namespace}/#{service_name}`
+    #temp solution for bug that happens when calling repo manager for the first time. try request again
+    if value.include? "Repo Manager refused the connection"
+      value = `dtk service #{service_name} create-on-dtkn #{namespace}/#{service_name}`
+    end
     puts value
     pass = true if (!value.include? "error")
     puts "Export of #{service_name} service to #{namespace} namespace has been completed successfully!" if pass == true

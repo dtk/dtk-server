@@ -138,7 +138,8 @@ module DTK
           :name => module_name,
           :version => version,
           :namespace => namespace,
-          :type => type
+          :type => type,
+          :do_not_raise => true
         }
         @client.get_components_info(params)
       end

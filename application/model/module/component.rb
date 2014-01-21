@@ -94,7 +94,8 @@ module DTK
     #
     def self.cross_reference_modules(opts, required_modules, service_namespace)
       project_idh = opts.required(:project_idh)
-
+      
+      required_modules ||= []
       req_names = required_modules.collect { |m| m['component_module']}
 
       sp_hash = {

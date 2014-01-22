@@ -9,6 +9,11 @@ module DTK; class ComponentDSL; class V3
 
       def self.convert_choices(dep_cmp_name,link_def_links,base_cmp,opts={})
         link_def_links.inject(Array.new) do |a,link|
+          unless link.kind_of?(Hash)
+            err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
+            raise ParsingError.new(err_msg,component_print_form(base_cmp),{dep_cmp_name => link_def_links})
+          end
+
           a + convert_link_def_link(link,dep_cmp_name,base_cmp,opts)
         end
       end
@@ -23,6 +28,12 @@ module DTK; class ComponentDSL; class V3
       end
 
       def convert_link_def_link_aux(link_def_link,opts={})
+        in_attr_mappings = link_def_link["attribute_mappings"]
+        if (in_attr_mappings||[]).empty?
+          err_msg = "The following link defs section on component '?1' is missing the attribute mappings section: ?2"
+          raise ParsingError.new(err_msg,base_cmp_print_form(),{dep_cmp_print_form() => link_def_link})
+        end
+
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
           ret = [dup().convert_link_def_link(link_def_link,:link_type => :external).first,
                  dup().convert_link_def_link(link_def_link,:link_type => :internal).first]
@@ -35,10 +46,6 @@ module DTK; class ComponentDSL; class V3
           ret_info["order"] = order 
         end
         
-        in_attr_mappings = link_def_link["attribute_mappings"]
-        if (in_attr_mappings||[]).empty?
-          raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
-        end
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
         
         @possible_link.merge!(dep_cmp() => ret_info)

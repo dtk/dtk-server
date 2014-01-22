@@ -138,11 +138,13 @@ module DTK; class ComponentDSL; class V3
       def link_defs(input_hash,base_cmp,ndx_dep_choices,opts={})
         ret = nil
         unless in_link_defs = input_hash["link_defs"]
-          #TODO: flag any dep_choices that are remote; saying thaey have no effect without link defs
+          raise_error_if_unmatched_remote_dep(ndx_dep_choices)
           return ret
         end
         ndx_link_defs = ndx_link_defs_choice_form(in_link_defs,base_cmp,opts)
         spliced_ndx_link_defs = splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
+        raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_defs)
+
         ret = Array.new
         spliced_ndx_link_defs.each do |link_def_type,choices|
           choices.each do |choice|
@@ -197,18 +199,21 @@ module DTK; class ComponentDSL; class V3
             (ret[ndx] ||= Array.new) << link_def_choice
           end
         end
+        ret
+      end
+
+      def raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_defs={})
         #see if there is any unmatched ndx_dep_choices that have a remote location
         ndx_dep_choices.each do |ndx,dep_choices|
-          unless ret[ndx]
+          unless spliced_ndx_link_defs[ndx]
             if remote_dep_choice = dep_choices.find{|ch|ch.remote_location?()}
               base_cmp_name = remote_dep_choice.base_cmp_print_form()
               dep_cmp_name = remote_dep_choice.dep_cmp_print_form()
-              error_msg = "The following dependency on component '?1' has a remote location, but theer is no matching link def: ?2"
+              error_msg = "The following dependency on component '?1' has a remote location, but there is no matching link def: ?2"
               raise ParsingError.new(error_msg,base_cmp_name,remote_dep_choice.print_form())
             end
           end
         end
-        ret
       end
 
       def find_index(link_def_choice,ndx_dep_choices)

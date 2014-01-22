@@ -2,6 +2,7 @@ module DTK; class ComponentDSL; class V3
   class ObjectModelForm; class Choice
     class Dependency < self
       def self.convert_choices(conn_ref,conn_info_x,base_cmp,opts={})
+        raw = {conn_ref =>conn_info_x}
         conn_info =
           if conn_info_x.kind_of?(Hash)
             conn_info_x
@@ -14,17 +15,18 @@ module DTK; class ComponentDSL; class V3
           end
         if choices = conn_info["choices"]
           opts_choices = opts.merge(:conn_ref => conn_ref)
-          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choices)}
+          choices.map{|choice|convert_choice(raw,choice,base_cmp,conn_info,opts_choices)}
         else
           dep_cmp_external_form = conn_info["component"]||conn_ref
           parent_info = Hash.new
-          [convert_choice(conn_info.merge("component" => dep_cmp_external_form),base_cmp,parent_info,opts)]
+          dep_cmp_info = conn_info.merge("component" => dep_cmp_external_form)
+          [convert_choice(raw,dep_cmp_info,base_cmp,parent_info,opts)]
         end
       end
 
      private
-      def self.convert_choice(dep_cmp_info,base_cmp,parent_info={},opts={})
-        new(dep_cmp_info,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts)
+      def self.convert_choice(raw,dep_cmp_info,base_cmp,parent_info={},opts={})
+        new(raw,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts)
       end
     end
   end; end

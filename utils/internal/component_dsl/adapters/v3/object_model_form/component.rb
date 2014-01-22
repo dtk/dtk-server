@@ -191,8 +191,8 @@ module DTK; class ComponentDSL; class V3
             unless ndx = find_index(link_def_choice,pruned_ndx_dep_choices)
               base_cmp_name = link_def_choice.base_cmp_print_form()
               dep_cmp_name = link_def_choice.dep_cmp_print_form()
-              error_msg = "Cannot find dependency match for link_def for component '#{base_cmp_name}' to '#{dep_cmp_name}'; the link fragment is: ?1"
-              raise ParsingError.new(error_msg,{dep_cmp_name => link_def_choice.print_form()})
+              error_msg = "Cannot find dependency match for link_def for component '?1' to '?2'; the link fragment is: ?3"
+              raise ParsingError.new(error_msg,base_cmp_name,dep_cmp_name,{dep_cmp_name => link_def_choice.print_form()})
             end
             (ret[ndx] ||= Array.new) << link_def_choice
           end
@@ -201,7 +201,10 @@ module DTK; class ComponentDSL; class V3
         ndx_dep_choices.each do |ndx,dep_choices|
           unless ret[ndx]
             if remote_dep_choice = dep_choices.find{|ch|ch.remote_location?()}
-              pp [:unmatced_remote_dep,remote_dep_choice]
+              base_cmp_name = remote_dep_choice.base_cmp_print_form()
+              dep_cmp_name = remote_dep_choice.dep_cmp_print_form()
+              error_msg = "The following dependency on component '?1' has a remote location, but theer is no matching link def: ?2"
+              raise ParsingError.new(error_msg,base_cmp_name,remote_dep_choice.print_form())
             end
           end
         end

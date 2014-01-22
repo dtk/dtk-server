@@ -169,11 +169,11 @@ module DTK; class ComponentDSL; class V3
 
       def ndx_link_defs_choice_form(in_link_defs,base_cmp,opts={})
         ret = Hash.new
-        convert_to_hash_form(in_link_defs) do |dep_cmp,link_def_links|
+        convert_to_hash_form(in_link_defs) do |dep_cmp_name,link_def_links|
           link_def_links = [link_def_links] unless link_def_links.kind_of?(Array)
-          choices = Choice.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts)
+          choices = Choice.convert_link_defs_to_choices(dep_cmp_name,link_def_links,base_cmp,opts)
           choices.each do |choice|
-            ndx = choice.dependency_name || dep_cmp
+            ndx = choice.dependency_name || dep_cmp_name
             (ret[ndx] ||= Array.new) << choice
           end
         end
@@ -232,10 +232,10 @@ module DTK; class ComponentDSL; class V3
 
     class Choice < OMFBase::Choice
       attr_reader :dependency_name
-      def initialize(raw,dep_cmp_raw,base_cmp)
+      def initialize(raw,dep_cmp_name,base_cmp)
         super()
         @raw = raw
-        @dep_cmp_raw = dep_cmp_raw
+        @dep_cmp_name = dep_cmp_name
         @base_cmp  = base_cmp
         @dependency_name = nil
       end
@@ -259,7 +259,6 @@ module DTK; class ComponentDSL; class V3
       def print_form()
         @raw || @possible_link.inject()
       end
-
       def base_cmp_print_form()
         component_print_form(base_cmp())
       end
@@ -267,9 +266,9 @@ module DTK; class ComponentDSL; class V3
         component_print_form(dep_cmp())
       end
       
-      def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
+      def self.convert_link_defs_to_choices(dep_cmp_name,link_def_links,base_cmp,opts={})
         link_def_links.inject(Array.new) do |a,link|
-          a + convert_link_def_link(link,dep_cmp,base_cmp,opts)
+          a + convert_link_def_link(link,dep_cmp_name,base_cmp,opts)
         end
       end
 
@@ -278,19 +277,18 @@ module DTK; class ComponentDSL; class V3
       end
 
     private
-      def self.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
-pp [dep_cmp_raw,base_cmp]
-        new(link_def_link,dep_cmp_raw,base_cmp).convert_link_def_link(link_def_link,opts)
+      def self.convert_link_def_link(link_def_link,dep_cmp_name,base_cmp,opts={})
+        new(link_def_link,dep_cmp_name,base_cmp).convert_link_def_link(link_def_link,opts)
       end
 
-      attr_reader :dep_cmp_raw,:base_cmp
+      attr_reader :dep_cmp_name,:base_cmp
       def dep_cmp()
-        convert_to_internal_cmp_form(@dep_cmp_raw)
+        convert_to_internal_cmp_form(@dep_cmp_name)
       end
       def convert_link_def_link_aux(link_def_link,opts={})
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
-          ret = [self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw(),base_cmp(),:link_type => :external).first,
-                 self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw(),base_cmp(),:link_type => :internal).first]
+          ret = [self.class.new(link_def_link,dep_cmp_name(),base_cmp()).convert_link_def_link(link_def_link,:link_type => :external).first,
+                 self.class.new(link_def_link,dep_cmp_name(),base_cmp()).convert_link_def_link(link_def_link,:link_type => :internal).first]
           return ret
         end
         ret_info = {"type" => type.to_s}

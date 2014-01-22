@@ -22,28 +22,50 @@ module DTK; class ComponentDSL
      private 
       def msg_pp_form(msg,*args)
         args.each_with_index do |arg, i|
-          msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))
+          if arg.kind_of?(Params)
+            #make sure that params is at end
+            unless i == (args.size-1)
+              raise Error.new("The params arg must be last paramter")
+            end
+            arg.substitute!(msg)
+          else
+            msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))
+          end
         end
         msg
       end
 
-      def pp_format_arg(arg)
-        if arg.kind_of?(Array) or arg.kind_of?(Hash)
-          format_type = DefaultNonScalarFormatType
-          "\n\n#{Aux.serialize(arg,format_type)}"
-        elsif arg.kind_of?(String)
-          arg
-        elsif arg.kind_of?(TrueClass) or arg.kind_of?(FalseClass) or arg.kind_of?(Fixnum) or arg.kind_of?(Symbol)
-          arg.to_s
-        else      
-          arg.inspect
+      module CommonMix
+        def pp_format_arg(arg)
+          if arg.kind_of?(Array) or arg.kind_of?(Hash)
+            format_type = DefaultNonScalarFormatType
+            "\n\n#{Aux.serialize(arg,format_type)}"
+          elsif arg.kind_of?(String)
+            arg
+          elsif arg.kind_of?(TrueClass) or arg.kind_of?(FalseClass) or arg.kind_of?(Fixnum) or arg.kind_of?(Symbol)
+            arg.to_s
+          else      
+            arg.inspect
+          end
         end
+        DefaultNonScalarFormatType = :yaml
       end
-      DefaultNonScalarFormatType = :yaml
+      include CommonMix
 
       class MissingKey < self
         def initialize(key)
           super("missing key (#{key})")
+        end
+      end
+
+      class Params < Hash
+      include CommonMix
+        def initialize(hash={})
+          super()
+          replace(hash)
+        end
+        def substitute!(msg)
+          raise Error.new("write param parsing")
         end
       end
     end

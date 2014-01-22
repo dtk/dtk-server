@@ -1,6 +1,7 @@
 module DTK; class ComponentDSL; class V3
   OMFBase = ComponentDSL::V2::ObjectModelForm                                  
   class ObjectModelForm < OMFBase
+    r8_nested_require('object_model_form','parsing_error')
     r8_nested_require('object_model_form','component')
     r8_nested_require('object_model_form','choice')
 

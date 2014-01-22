@@ -2,7 +2,8 @@ module DTK; class ComponentDSL
   class ObjectModelForm
     class ParsingError < ErrorUsage
       def initialize(msg='',*args)
-        super("component dsl parsing error: #{msg_pp_form(msg,*args)}",:caller_info => true)
+        parsing_error,@params = msg_pp_form_and_params(msg,*args)
+        super("component dsl parsing error: #{parsing_error}",:caller_info => true)
       end
 
       def self.raise_error_if_not(obj,klass,opts={})
@@ -20,19 +21,25 @@ module DTK; class ComponentDSL
       end
 
      private 
-      def msg_pp_form(msg,*args)
+      #returns [parsing_error,params]
+      def msg_pp_form_and_params(msg,*args)
+        params = nil
         args.each_with_index do |arg, i|
           if arg.kind_of?(Params)
             #make sure that params is at end
             unless i == (args.size-1)
               raise Error.new("The params arg must be last paramter")
             end
-            arg.substitute!(msg)
+            params = arg
+            params.substitute!(msg)
           else
-            msg.gsub!(Regexp.new("\\?#{(i+1).to_s}"),pp_format_arg(arg))
+            msg.gsub!(substitute_num_regexp(i+1),pp_format_arg(arg))
           end
         end
-        msg
+        if any_free_vars?(msg)
+          Log.error("The following error measgs has free variable(s): #{msg}")
+        end
+        [msg,params]
       end
 
       module CommonMix
@@ -49,7 +56,18 @@ module DTK; class ComponentDSL
           end
         end
         DefaultNonScalarFormatType = :yaml
+
+        def substitute_num_regexp(num)
+          Regexp.new("\\?#{num.to_s}")
+        end
+        def substitute_param_regexp(param)
+          Regexp.new("\\?#{param}")
+        end
+        def any_free_vars?(msg)
+          msg =~ /\?[0-9a-z]+/
+        end
       end
+
       include CommonMix
 
       class MissingKey < self
@@ -65,7 +83,8 @@ module DTK; class ComponentDSL
           replace(hash)
         end
         def substitute!(msg)
-          raise Error.new("write param parsing")
+          each_pair{|param,val|msg.gsub!(substitute_param_regexp(param),val)}
+          msg
         end
       end
     end

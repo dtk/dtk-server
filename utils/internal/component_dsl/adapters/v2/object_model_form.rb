@@ -347,7 +347,9 @@ module DTK; class ComponentDSL; class V2
           elsif conn_info_x.kind_of?(Array) and conn_info_x.size == 1 and conn_info_x.first.kind_of?(Hash)
             conn_info_x.first
           else
-            raise ParsingError.new("Dependency (?1) is ill-formed",conn_info_x)
+            base_cmp_name = component_print_form(base_cmp)
+            err_msg = 'The following dependency on component (?1) is ill-formed: ?2'
+            raise ParsingError.new(err_msg,base_cmp_name,{conn_ref => conn_info_x})
           end
         if choices = conn_info["choices"]
           opts_choices = opts.merge(:conn_ref => conn_ref)

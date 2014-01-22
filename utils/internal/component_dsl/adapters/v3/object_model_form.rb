@@ -202,7 +202,7 @@ module DTK; class ComponentDSL; class V3
               base_cmp_name = link_def_choice.base_cmp_print_form()
               dep_cmp_name = link_def_choice.dep_cmp_print_form()
               error_msg = "Cannot find dependency match for link_def for component '#{base_cmp_name}' to '#{dep_cmp_name}'; the link fragment is: ?1"
-              raise ParsingError.new(error_msg,link_def_choice.print_form())
+              raise ParsingError.new(error_msg,{dep_cmp_name => link_def_choice.print_form()})
             end
             (ret[ndx] ||= Array.new) << link_def_choice
           end
@@ -210,7 +210,9 @@ module DTK; class ComponentDSL; class V3
         #see if there is any unmatched ndx_dep_choices that have a remote location
         ndx_dep_choices.each do |ndx,dep_choices|
           unless ret[ndx]
-            pp [dep_choices,dep_choices.class]
+            if remote_dep_choice = dep_choices.find{|ch|ch.remote_location?()}
+              pp [:unmatced_remote_dep,remote_dep_choice]
+            end
           end
         end
         ret
@@ -274,6 +276,10 @@ module DTK; class ComponentDSL; class V3
 
       def convert_link_def_link(link_def_link,opts={})
         convert_link_def_link_aux(link_def_link,opts)
+      end
+
+      def remote_location?()
+        ((@possible_link||{}).values.first||{})["type"] == "external"
       end
 
     private

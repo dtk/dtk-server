@@ -207,6 +207,12 @@ module DTK; class ComponentDSL; class V3
             (ret[ndx] ||= Array.new) << link_def_choice
           end
         end
+        #see if there is any unmatched ndx_dep_choices that have a remote location
+        ndx_dep_choices.each do |ndx,dep_choices|
+          unless ret[ndx]
+            pp [dep_choices,dep_choices.class]
+          end
+        end
         ret
       end
 
@@ -225,52 +231,14 @@ module DTK; class ComponentDSL; class V3
     end
 
     class Choice < OMFBase::Choice
-      def print_form()
-        @raw || @possible_link.inject()
-      end
-
-      def base_cmp_print_form()
-        component_print_form(@base_cmp)
-      end
-      def dep_cmp_print_form()
-        component_print_form(@dep_cmp)
-      end
-      
-      def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
-        link_def_links.inject(Array.new) do |a,link|
-          a + convert_link_def_link(link,dep_cmp,base_cmp,opts)
-        end
-      end
-
-      def convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
-        @raw = link_def_link
-        @dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
+      attr_reader :dependency_name
+      def initialize(raw,dep_cmp_raw,base_cmp)
+        super()
+        @raw = raw
+        @dep_cmp_raw = dep_cmp_raw
         @base_cmp  = base_cmp
-
-        unless type = opts[:link_type] || link_def_link_type(link_def_link)
-          ret = [self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :external).first,
-                 self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,:link_type => :internal).first]
-          return ret
-        end
-        ret_info = {"type" => type.to_s}
-
-        #TODO: pass in order from what is on dependency
-        if order = opts[:order]||order(link_def_link)
-          ret_info["order"] = order 
-        end
-
-        in_attr_mappings = link_def_link["attribute_mappings"]
-        if (in_attr_mappings||[]).empty?
-          raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
-        end
-        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp,@dep_cmp,opts)}
-        
-        @possible_link.merge!(convert_to_internal_cmp_form(@dep_cmp) => ret_info)
-        @dependency_name = link_def_link["dependency_name"]
-        [self]
+        @dependency_name = nil
       end
-
-      attr_reader :dependency_name,:link_def_type
 
       def matches?(choice_with_single_pl)
         ret = nil
@@ -288,7 +256,65 @@ module DTK; class ComponentDSL; class V3
         possible_link[pl_single.keys.first]
       end
 
+      def print_form()
+        @raw || @possible_link.inject()
+      end
+
+      def base_cmp_print_form()
+        component_print_form(base_cmp())
+      end
+      def dep_cmp_print_form()
+        component_print_form(dep_cmp())
+      end
+      
+      def self.convert_link_defs_to_choices(dep_cmp,link_def_links,base_cmp,opts={})
+        link_def_links.inject(Array.new) do |a,link|
+          a + convert_link_def_link(link,dep_cmp,base_cmp,opts)
+        end
+      end
+
+      def convert_link_def_link(link_def_link,opts={})
+        convert_link_def_link_aux(link_def_link,opts)
+      end
+
     private
+      def self.convert_link_def_link(link_def_link,dep_cmp_raw,base_cmp,opts={})
+pp [dep_cmp_raw,base_cmp]
+        new(link_def_link,dep_cmp_raw,base_cmp).convert_link_def_link(link_def_link,opts)
+      end
+
+      attr_reader :dep_cmp_raw,:base_cmp
+      def dep_cmp()
+        convert_to_internal_cmp_form(@dep_cmp_raw)
+      end
+      def convert_link_def_link_aux(link_def_link,opts={})
+        unless type = opts[:link_type] || link_def_link_type(link_def_link)
+          ret = [self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw(),base_cmp(),:link_type => :external).first,
+                 self.class.new.convert_link_def_link(link_def_link,dep_cmp_raw(),base_cmp(),:link_type => :internal).first]
+          return ret
+        end
+        ret_info = {"type" => type.to_s}
+
+        #TODO: pass in order from what is on dependency
+        if order = opts[:order]||order(link_def_link)
+          ret_info["order"] = order 
+        end
+
+        in_attr_mappings = link_def_link["attribute_mappings"]
+        if (in_attr_mappings||[]).empty?
+          raise ParsingError.new("The link_defs element (#{link_def_link.inspect}) is missing the attribute mappings")
+        end
+        ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
+        
+        @possible_link.merge!(dep_cmp() => ret_info)
+        @dependency_name = link_def_link["dependency_name"]
+        [self]
+      end
+
+      def self.convert_choice(dep_cmp_info,base_cmp,parent_info={},opts={})
+        new(dep_cmp_info,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts)
+      end
+
      def link_def_link_type(link_info)
        if loc = link_info["location"]
          case loc
@@ -299,9 +325,6 @@ module DTK; class ComponentDSL; class V3
        end
      end
 
-      def self.convert_link_def_link(link_def_link,dep_cmp,base_cmp,opts={})
-        new().convert_link_def_link(link_def_link,dep_cmp,base_cmp,opts)
-      end
     end
   end
 end; end; end

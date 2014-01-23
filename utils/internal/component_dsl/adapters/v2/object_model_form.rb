@@ -13,20 +13,6 @@ module DTK; class ComponentDSL; class V2
       choice().new.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts)
     end
 
-    def convert_to_hash_form(hash_or_array,&block)
-      if hash_or_array.kind_of?(Hash)
-        hash_or_array.each_pair{|k,v|block.call(k,v)}
-      else #hash_or_array.kind_of?(Array)
-        hash_or_array.each do |el|
-          if el.kind_of?(Hash)
-            block.call(el.keys.first,el.values.first)
-          else #el.kind_of?(String)
-            block.call(el,Hash.new)
-          end
-        end
-      end
-    end
-
    private
     #can be overwritten
     def context(input_hash)
@@ -40,14 +26,6 @@ module DTK; class ComponentDSL; class V2
       self.class::Choice
     end
 
-    ModCmpDelim = "__"
-    CmpPPDelim = '::'
-    def convert_to_internal_cmp_form(cmp)
-      cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
-    end
-    def convert_to_pp_cmp_form(cmp)
-      cmp.gsub(Regexp.new(ModCmpDelim),CmpPPDelim)
-    end
     #returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
     # '*' means required
     #e.g., keys ["*module","version"]
@@ -312,11 +290,14 @@ module DTK; class ComponentDSL; class V2
       end
 
       def add_dependency!(ret,dep_cmp,base_cmp)
+        self.class.add_dependency!(ret,dep_cmp,base_cmp)
+      end
+      def self.add_dependency!(ret,dep_cmp,base_cmp)
         ret[dep_cmp] ||= { 
           "type"=>"component",
           "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
           "description"=>
-          "#{convert_to_pp_cmp_form(dep_cmp)} is required for #{convert_to_pp_cmp_form(base_cmp)}",
+          "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
           "display_name"=>dep_cmp,
           "severity"=>"warning"
         }

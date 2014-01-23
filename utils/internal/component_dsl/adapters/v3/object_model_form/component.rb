@@ -13,7 +13,7 @@ module DTK; class ComponentDSL; class V3
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
-        add_dependent_components!(ret,input_hash,cmp_type,opts)
+        Choice.add_dependent_components!(ret,input_hash,cmp_type,opts)
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash["includes"],context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)

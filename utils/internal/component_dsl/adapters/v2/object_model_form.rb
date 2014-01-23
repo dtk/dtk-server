@@ -43,7 +43,32 @@ module DTK; class ComponentDSL; class V2
       end
     end
 
+    module ComponentChoiceMixin
+      def add_dependency!(ret,dep_cmp,base_cmp)
+        ret[dep_cmp] ||= { 
+          "type"=>"component",
+          "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
+          "description"=>
+          "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
+          "display_name"=>dep_cmp,
+          "severity"=>"warning"
+        }
+      end
+
+      def component_order(input_hash)
+        if after_cmps = input_hash["after"]
+          after_cmps.inject(OutputHash.new) do |h,after_cmp|
+            after_cmp_internal_form = convert_to_internal_cmp_form(after_cmp)
+            el={after_cmp_internal_form =>
+              {"after"=>after_cmp_internal_form}}
+            h.merge(el)
+          end
+        end
+      end
+    end
+
     class Component < self
+      include ComponentChoiceMixin
       def initialize(module_name)
         @module_name = module_name
       end
@@ -289,34 +314,11 @@ module DTK; class ComponentDSL; class V2
         end
       end
 
-      def add_dependency!(ret,dep_cmp,base_cmp)
-        self.class.add_dependency!(ret,dep_cmp,base_cmp)
-      end
-      def self.add_dependency!(ret,dep_cmp,base_cmp)
-        ret[dep_cmp] ||= { 
-          "type"=>"component",
-          "search_pattern"=>{":filter"=>[":eq", ":component_type", dep_cmp]},
-          "description"=>
-          "#{component_print_form(dep_cmp)} is required for #{component_print_form(base_cmp)}",
-          "display_name"=>dep_cmp,
-          "severity"=>"warning"
-        }
-      end
-
-      def component_order(input_hash)
-        if after_cmps = input_hash["after"]
-          after_cmps.inject(OutputHash.new) do |h,after_cmp|
-            after_cmp_internal_form = convert_to_internal_cmp_form(after_cmp)
-            el={after_cmp_internal_form =>
-              {"after"=>after_cmp_internal_form}}
-            h.merge(el)
-          end
-        end
-      end
-
     end
 
     class Choice < self
+      extend ComponentChoiceMixin
+
       def initialize()
         @possible_link = OutputHash.new()
       end

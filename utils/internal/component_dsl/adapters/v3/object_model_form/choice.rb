@@ -19,11 +19,11 @@ module DTK; class ComponentDSL; class V3
             choices = Dependency.convert_choices(conn_ref,conn_info,base_cmp,opts)
             ndx_dep_choices.merge!(conn_ref => choices)
           end
-          internal_dependencies = internal_dependencies(ndx_dep_choices.values,base_cmp,opts)
+          internal_dependencies = Dependency.internal_dependencies(ndx_dep_choices.values,base_cmp,opts)
           cmp_ret.set_if_not_nil("dependency",internal_dependencies)
         end
 
-        link_defs = link_defs(input_hash,base_cmp,ndx_dep_choices,opts)
+        link_defs = LinkDef.link_defs(input_hash,base_cmp,ndx_dep_choices,opts)
         cmp_ret.set_if_not_nil("link_defs",link_defs)
         cmp_ret.set_if_not_nil("component_order",component_order(input_hash))
       end
@@ -64,20 +64,6 @@ module DTK; class ComponentDSL; class V3
       end
 
      private
-      def self.internal_dependencies(choices_array,base_cmp,opts={})
-        ret = nil
-        choices_array.each do |choices|
-          #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
-          unless choices.find{|choice|not choice.is_internal?()}
-            #TODO: make sure it is ok to just pick one of these
-            choice = choices.first
-            ret ||= OutputHash.new
-            add_dependency!(ret,choice.dependent_component(),base_cmp)
-          end
-        end
-        ret
-      end
-
       attr_reader :dep_cmp_name,:base_cmp
       def dep_cmp()
         convert_to_internal_cmp_form(@dep_cmp_name)

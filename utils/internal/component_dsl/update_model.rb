@@ -91,10 +91,15 @@ module DTK; class ComponentDSL
   module UpdateModelClassMixin
     def parse_and_update_model(impl_obj,module_branch_idh,version=nil, opts={})
       component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
+      #TODO: cleanup so dont have to haev disjunction
+      if component_dsl_obj.is_a?(ObjectModelForm::ParsingError) or 
+          component_dsl_obj.is_a?(ErrorUsage::DSLParsing) or 
+          component_dsl_obj.is_a?(ErrorUsage::Parsing)
+        return component_dsl_obj 
+      end
+
       update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
       update_opts.merge!(:version => version) if version
-      
-      return component_dsl_obj if (component_dsl_obj.is_a?(ErrorUsage::DSLParsing) || component_dsl_obj.is_a?(ObjectModelForm::ParsingError))
       component_dsl_obj.update_model(update_opts)
     end
 

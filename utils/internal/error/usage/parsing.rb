@@ -1,3 +1,4 @@
+#TODO: cleanup; complication is that DSLParsing intesrsects with dtk common classes
 module DTK
   class ErrorUsage 
     class Parsing < self

@@ -10,10 +10,11 @@ module DTK
 
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
+pp [:here,input_hash]
       config_agent_type = ret_config_agent_type(input_hash)
-      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) unless config_agent_type.is_a?(ErrorUsage::DSLParsing)
+      new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) 
     end
-    #TODO: should unify above and two below
+
     def self.create_dsl_object_from_impl(source_impl,opts={})
       target_impl = opts[:target_impl]||source_impl
       info = get_dsl_file_raw_content_and_info(source_impl)
@@ -27,14 +28,15 @@ module DTK
       module_branch_idh = target_impl.get_module_branch().id_handle()
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
-      config_agent_type = ret_config_agent_type(input_hash)
+      return input_hash if input_hash.is_a?(ErrorUsage::Parsing)
 
+      config_agent_type = ret_config_agent_type(input_hash)
       return config_agent_type if config_agent_type.is_a?(ErrorUsage::DSLParsing)
+
       begin
         new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
       rescue Exception => e
         return e if e.is_a?(ObjectModelForm::ParsingError)
-        # return ErrorUsage::DSLParsing::JSONParsing.new("#{e} in (dtk.model.json) file") if e.is_a?(ObjectModelForm::ParsingError)
         raise e
       end
     end
@@ -267,13 +269,18 @@ module DTK
         return input_hash if input_hash.is_a?(ErrorUsage::DSLParsing)
         if type = input_hash["module_type"]
           case type
-           when "puppet_module" then :puppet
-           else raise ErrorUsage.new("Unexpected module_type (#{type})")
+           when "puppet_module" then ConfigAgentTypes[:puppet]
+           else 
+             ErrorUsage::DSLParsing.new("Unexpected module_type (#{type})")
           end
         else
-          :puppet #this will just be version 1
+          DefaultConfigAgentType
         end
       end
+      ConfigAgentTypes = {
+        :puppet => :puppet
+      }
+      DefaultConfigAgentType = ConfigAgentTypes[:puppet]
 
       def convert_to_hash(content,format_type,opts={})
         begin

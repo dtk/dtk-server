@@ -203,14 +203,12 @@ module DTK; class ComponentDSL; class V3
       end
 
       def raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_defs={})
-        #see if there is any unmatched ndx_dep_choices that have a remote location
+        #see if there are any unmatched ndx_dep_choices that have a remote location
         ndx_dep_choices.each do |ndx,dep_choices|
           unless spliced_ndx_link_defs[ndx]
             if remote_dep_choice = dep_choices.find{|ch|ch.remote_location?()}
-              base_cmp_name = remote_dep_choice.base_cmp_print_form()
-              dep_cmp_name = remote_dep_choice.dep_cmp_print_form()
-              error_msg = "The following dependency on component '?1' has a remote location, but there is no matching link def: ?2"
-              raise ParsingError.new(error_msg,base_cmp_name,remote_dep_choice.print_form())
+              error_msg = "The following dependency on component '?base_cmp' has a remote location, but there is no matching link def: ?dep"
+              raise ParsingError::Dependency.create(error_msg,remote_dep_choice)
             end
           end
         end

@@ -19,6 +19,7 @@ module DTK; class ComponentDSL; class V3
 
         ret = Array.new
         spliced_ndx_link_defs.each do |link_def_type,choices|
+pp [:choice,link_def_type,choices,choices[0].class]
           choices.each do |choice|
             link_def = OutputHash.new(
               "type" => link_def_type,
@@ -31,9 +32,10 @@ module DTK; class ComponentDSL; class V3
         ret
       end
 
-      def convert_link_def_link(link_def_link,opts={})
-        convert_link_def_link_aux(link_def_link,opts)
-      end
+      class_calls_private_instance :convert_link_def_link
+      #def convert_link_def_link__public(link_def_link,opts={})
+      #  convert_link_def_link(link_def_link,opts)
+      #end
 
     private
       #------ begin: related to ndx_link_defs_choice_form
@@ -61,10 +63,10 @@ module DTK; class ComponentDSL; class V3
       end
 
       def self.convert_link_def_link(link_def_link,dep_cmp_name,base_cmp,opts={})
-        new(link_def_link,dep_cmp_name,base_cmp).convert_link_def_link(link_def_link,opts)
+        new(link_def_link,dep_cmp_name,base_cmp).convert_link_def_link__public(link_def_link,opts)
       end
 
-      def convert_link_def_link_aux(link_def_link,opts={})
+      def convert_link_def_link(link_def_link,opts={})
         in_attr_mappings = link_def_link["attribute_mappings"]
         if (in_attr_mappings||[]).empty?
           err_msg = "The following link defs section on component '?1' is missing the attribute mappings section: ?2"
@@ -72,8 +74,8 @@ module DTK; class ComponentDSL; class V3
         end
 
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
-          ret = [dup().convert_link_def_link(link_def_link,:link_type => :external).first,
-                 dup().convert_link_def_link(link_def_link,:link_type => :internal).first]
+          ret = [dup().convert_link_def_link__public(link_def_link,:link_type => :external).first,
+                 dup().convert_link_def_link__public(link_def_link,:link_type => :internal).first]
           return ret
         end
         ret_info = {"type" => type.to_s}

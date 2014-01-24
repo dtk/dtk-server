@@ -2,6 +2,8 @@ module DTK; class ComponentDSL
   class ObjectModelForm
     r8_nested_require('object_model_form','parsing_error')
 
+    extend Aux::CommonClassMixin
+
     def self.convert(input_hash)
       new.convert(input_hash)
     end

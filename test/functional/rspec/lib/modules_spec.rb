@@ -133,7 +133,6 @@ shared_context "Export module" do |dtk_common, module_name, namespace|
     puts "Export module:", "--------------"
     pass = false
     value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
-    puts value
     #temp solution for bug that happens when calling repo manager for the first time. try request again
     if value.include? "Repo Manager refused the connection"
       value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`

@@ -350,7 +350,7 @@ class DtkCommon
 			count = 0
 
 			task_status = 'executing'
-			while task_status.include? 'executing' || end_loop == false
+			while ((task_status.include? 'executing') && (end_loop == false))
 				sleep 20
 				count += 1
 				response_task_status = send_request('/rest/task/status', {'task_id'=> task_id})

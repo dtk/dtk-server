@@ -11,23 +11,6 @@ module DTK; class ComponentDSL; class V3
         @base_cmp  = base_cmp
       end
 
-      #processes "link_defs, "dependencies", and "component_order"
-      def self.add_dependent_components!(cmp_ret,input_hash,base_cmp,opts={})
-        ndx_dep_choices = Hash.new
-        if in_dep_cmps = input_hash["dependencies"]
-          convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
-            choices = Dependency.convert_choices(conn_ref,conn_info,base_cmp,opts)
-            ndx_dep_choices.merge!(conn_ref => choices)
-          end
-          internal_dependencies = Dependency.internal_dependencies(ndx_dep_choices.values,base_cmp,opts)
-          cmp_ret.set_if_not_nil("dependency",internal_dependencies)
-        end
-
-        link_defs = LinkDef.link_defs(input_hash,base_cmp,ndx_dep_choices,opts)
-        cmp_ret.set_if_not_nil("link_defs",link_defs)
-        cmp_ret.set_if_not_nil("component_order",component_order(input_hash))
-      end
-
       def dup()
         self.class.new(@raw,@dep_cmp_name,@base_cmp)
       end

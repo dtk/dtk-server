@@ -1,6 +1,32 @@
 module DTK; class ComponentDSL; class V3
   class ObjectModelForm; class Choice
     class Dependency < self
+      def self.ndx_dep_choices(in_dep_cmps,base_cmp,opts={})
+        ret = Hash.new
+        if in_dep_cmps
+          convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
+            choices = convert_choices(conn_ref,conn_info,base_cmp,opts)
+            ret.merge!(conn_ref => choices)
+          end
+        end
+        ret
+      end
+
+      def self.internal_dependencies(choices_array,base_cmp,opts={})
+        ret = nil
+        choices_array.each do |choices|
+          #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
+          unless choices.find{|choice|not choice.is_internal?()}
+            #TODO: make sure it is ok to just pick one of these
+            choice = choices.first
+            ret ||= OutputHash.new
+            add_dependency!(ret,choice.dependent_component(),base_cmp)
+          end
+        end
+        ret
+      end
+
+     private
       def self.convert_choices(conn_ref,conn_info_x,base_cmp,opts={})
         raw = {conn_ref =>conn_info_x}
         conn_info =
@@ -24,21 +50,6 @@ module DTK; class ComponentDSL; class V3
         end
       end
 
-      def self.internal_dependencies(choices_array,base_cmp,opts={})
-        ret = nil
-        choices_array.each do |choices|
-          #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
-          unless choices.find{|choice|not choice.is_internal?()}
-            #TODO: make sure it is ok to just pick one of these
-            choice = choices.first
-            ret ||= OutputHash.new
-            add_dependency!(ret,choice.dependent_component(),base_cmp)
-          end
-        end
-        ret
-      end
-
-     private
       def self.convert_choice(raw,dep_cmp_info,base_cmp,parent_info={},opts={})
         new(raw,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts)
       end

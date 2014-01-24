@@ -13,12 +13,25 @@ module DTK; class ComponentDSL; class V3
         ret.set_if_not_nil("only_one_per_node",only_one_per_node(external_ref))
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
-        Choice.add_dependent_components!(ret,input_hash,cmp_type,opts)
+        add_dependent_components!(ret,input_hash,cmp_type,opts)
         ret.set_if_not_nil("component_include_module",include_modules?(input_hash["includes"],context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
         ret
+      end
+      
+      #processes "link_defs, "dependencies", and "component_order"
+      def add_dependent_components!(cmp_ret,input_hash,base_cmp,opts={})
+        ndx_dep_choices = Choice::Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
+        unless ndx_dep_choices.empty?
+          dependencies = Choice::Dependency.internal_dependencies(ndx_dep_choices.values,base_cmp,opts)
+          cmp_ret.set_if_not_nil("dependency",dependencies)
+        end
+        
+        link_defs = LinkDef.link_defs(input_hash,base_cmp,ndx_dep_choices,opts)
+        cmp_ret.set_if_not_nil("link_defs",link_defs)
+        cmp_ret.set_if_not_nil("component_order",component_order(input_hash))
       end
 
       def include_modules?(incl_module_array,context={})

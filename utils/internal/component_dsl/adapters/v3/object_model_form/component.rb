@@ -22,19 +22,11 @@ module DTK; class ComponentDSL; class V3
       end
       
       #processes "link_defs, "dependencies", and "component_order"
-      def add_dependent_components!(cmp_ret,input_hash,base_cmp,opts={})
-        ndx_dep_choices = Choice::Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
-        spliced_ndx_link_def_links = LinkDef.spliced_ndx_link_def_links(input_hash["link_defs"],base_cmp,ndx_dep_choices,opts)
-
-#TOD: put in general function that checks for error below and prunes ndx_dep_choices
-#          raise_error_if_unmatched_remote_dep(ndx_dep_choices)
-#        raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_def_links)
-
-        dependencies = Choice::Dependency.dependencies?(ndx_dep_choices.values,base_cmp,opts)
-        cmp_ret.set_if_not_nil("dependency",dependencies)
-        link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
-        cmp_ret.set_if_not_nil("link_defs",link_defs)
-        cmp_ret.set_if_not_nil("component_order",component_order(input_hash))
+      def add_dependent_components!(ret,input_hash,base_cmp,opts={})
+        dependencies,link_defs = Choice.deps_and_link_defs(input_hash,base_cmp,opts)
+        ret.set_if_not_nil("dependency",dependencies)
+        ret.set_if_not_nil("link_defs",link_defs)
+        ret.set_if_not_nil("component_order",component_order(input_hash))
       end
 
       def include_modules?(incl_module_array,context={})

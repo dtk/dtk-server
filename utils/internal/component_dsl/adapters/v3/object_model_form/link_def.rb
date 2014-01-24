@@ -7,12 +7,12 @@ module DTK; class ComponentDSL; class V3
           raise_error_if_unmatched_remote_dep(ndx_dep_choices)
           return ret
         end
-        ndx_link_defs = ndx_link_defs_choice_form(in_link_defs,base_cmp,opts)
-        spliced_ndx_link_defs = splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
-        raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_defs)
+        ndx_link_def_links = ndx_link_def_links(in_link_defs,base_cmp,opts)
+        spliced_ndx_link_def_links = splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
+        raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_def_links)
 
-pp [:link_defs,spliced_ndx_link_defs]
-        spliced_ndx_link_defs.inject(Array.new) do |a,(link_def_type,link_def_links)|
+pp [:link_defs,spliced_ndx_link_def_links]
+        spliced_ndx_link_def_links.inject(Array.new) do |a,(link_def_type,link_def_links)|
           a + [link_def(link_def_type,link_def_links)]
         end
       end
@@ -26,21 +26,21 @@ pp [:link_defs,spliced_ndx_link_defs]
         )
       end
 
-      #------ begin: related to ndx_link_defs_choice_form
-      def self.ndx_link_defs_choice_form(in_link_defs,base_cmp,opts={})
+      #------ begin: related to ndx_link_def_links
+      def self.ndx_link_def_links(in_link_defs,base_cmp,opts={})
         ret = Hash.new
         convert_to_hash_form(in_link_defs) do |dep_cmp_name,link_def_links|
           link_def_links = [link_def_links] unless link_def_links.kind_of?(Array)
-          choices = convert_choices(dep_cmp_name,link_def_links,base_cmp,opts)
-          choices.each do |choice|
-            ndx = choice.dependency_name || dep_cmp_name
-            (ret[ndx] ||= Array.new) << choice
+          link_def_links = convert(dep_cmp_name,link_def_links,base_cmp,opts)
+          link_def_links.each do |ldl|
+            ndx = ldl.dependency_name || dep_cmp_name
+            (ret[ndx] ||= Array.new) << ldl
           end
         end
         ret
       end
 
-      def self.convert_choices(dep_cmp_name,link_def_links,base_cmp,opts={})
+      def self.convert(dep_cmp_name,link_def_links,base_cmp,opts={})
         link_def_links.inject(Array.new) do |a,link|
           unless link.kind_of?(Hash)
             err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
@@ -54,11 +54,11 @@ pp [:link_defs,spliced_ndx_link_defs]
         Choice::LinkDefLink.new(link_def_link,dep_cmp_name,base_cmp).convert(link_def_link,opts)
       end
 
-      #------ end: related to ndx_link_defs_choice_form
+      #------ end: related to ndx_link_def_links
 
-      def self.splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
+      def self.splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
         ret = Hash.new
-        ndx_link_defs.each do |link_def_ndx,link_def_choices|
+        ndx_link_def_links.each do |link_def_ndx,link_def_choices|
           pruned_ndx_dep_choices = ndx_dep_choices
           dep_name_match = false
           if dep_choices = ndx_dep_choices[link_def_ndx]
@@ -98,10 +98,10 @@ pp [:link_defs,spliced_ndx_link_defs]
         ret
       end
 
-      def self.raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_defs={})
+      def self.raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_def_links={})
         #see if there are any unmatched ndx_dep_choices that have a remote location
         ndx_dep_choices.each do |ndx,dep_choices|
-          unless spliced_ndx_link_defs[ndx]
+          unless spliced_ndx_link_def_links[ndx]
             if remote_dep_choice = dep_choices.find{|ch|ch.remote_location?()}
               error_msg = "The following dependency on component '?base_cmp' has a remote location, but there is no matching link def: ?dep"
               raise ParsingError::Dependency.create(error_msg,remote_dep_choice)

@@ -19,25 +19,27 @@ module DTK; class ComponentDSL; class V3
 
         ret = Array.new
         spliced_ndx_link_defs.each do |link_def_type,choices|
-pp [:choice,link_def_type,choices,choices[0].class]
-          choices.each do |choice|
-            link_def = OutputHash.new(
-              "type" => link_def_type,
-              "required" =>  true, #TODO: will enhance so that check if also dependency
-              "possible_links" => choices.map{|choice|choice.possible_link()}
-            )
-            ret << link_def
+          unless choices.size == 1
+            raise Error.new("Unexpected that choices size (#{choices.size.to_s}) is not equal to 1")
           end
+          choice = choices.first
+pp [:link_defs,link_def_type,choice]
+          ret << link_def(link_def_type,choice)
         end
         ret
       end
 
       class_calls_private_instance :convert_link_def_link
-      #def convert_link_def_link__public(link_def_link,opts={})
-      #  convert_link_def_link(link_def_link,opts)
-      #end
 
     private
+      def self.link_def(link_def_type,choice)
+        OutputHash.new(
+          "type" => link_def_type,
+          "required" =>  true, #TODO: will enhance so that check if also dependency
+          "possible_links" => [choice.possible_link()]
+        )
+      end
+
       #------ begin: related to ndx_link_defs_choice_form
       def self.ndx_link_defs_choice_form(in_link_defs,base_cmp,opts={})
         ret = Hash.new
@@ -103,6 +105,7 @@ pp [:choice,link_def_type,choices,choices[0].class]
       end
 
       #------ end: related to ndx_link_defs_choice_form
+
       def self.splice_link_def_and_dep_info(ndx_link_defs,ndx_dep_choices)
         ret = Hash.new
         ndx_link_defs.each do |link_def_ndx,link_def_choices|
@@ -126,6 +129,10 @@ pp [:choice,link_def_type,choices,choices[0].class]
               dep_cmp_name = link_def_choice.dep_cmp_print_form()
               error_msg = "Cannot find dependency match for link_def for component '?1' to '?2'; the link fragment is: ?3"
               raise ParsingError.new(error_msg,base_cmp_name,dep_cmp_name,{dep_cmp_name => link_def_choice.print_form()})
+            end
+            #TODO: monitoring this condition; if see valid than we can just use: ret[ndx] = link_def_choice
+            if ret[ndx].kind_of?(Array) and !ret[ndx].empty?
+              Log.error_pp(["Unexpected that multiple elements under ndx (#{ndx}):",ret[ndx]+[link_def_choice]])
             end
             (ret[ndx] ||= Array.new) << link_def_choice
           end

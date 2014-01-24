@@ -12,7 +12,7 @@ module DTK; class ComponentDSL; class V3
         ret
       end
 
-      def self.internal_dependencies(choices_array,base_cmp,opts={})
+      def self.dependencies?(choices_array,base_cmp,opts={})
         ret = nil
         choices_array.each do |choices|
           #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal

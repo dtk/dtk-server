@@ -1,17 +1,16 @@
 module DTK; class ComponentDSL; class V3
   class ObjectModelForm
     class LinkDef < OMFBase
-      def self.link_defs(input_hash,base_cmp,ndx_dep_choices,opts={})
-        ret = nil
-        unless in_link_defs = input_hash["link_defs"]
-          raise_error_if_unmatched_remote_dep(ndx_dep_choices)
-          return ret
-        end
+      def self.spliced_ndx_link_def_links(in_link_defs,base_cmp,ndx_dep_choices,opts={})
+        ret = Hash.new
+        return ret unless in_link_defs
         ndx_link_def_links = ndx_link_def_links(in_link_defs,base_cmp,opts)
-        spliced_ndx_link_def_links = splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
-        raise_error_if_unmatched_remote_dep(ndx_dep_choices,spliced_ndx_link_def_links)
+        splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
+      end
 
-pp [:link_defs,spliced_ndx_link_def_links]
+      def self.link_defs?(spliced_ndx_link_def_links)
+        ret = nil
+        return ret if spliced_ndx_link_def_links.empty?
         spliced_ndx_link_def_links.inject(Array.new) do |a,(link_def_type,link_def_links)|
           a + [link_def(link_def_type,link_def_links)]
         end
@@ -21,12 +20,12 @@ pp [:link_defs,spliced_ndx_link_def_links]
       def self.link_def(link_def_type,link_def_links)
         OutputHash.new(
           "type" => link_def_type,
-          "required" =>  link_def_required(link_def_links),
+          "required" =>  link_def_required?(link_def_links),
           "possible_links" => link_def_links.map{|link_def_link|link_def_link.possible_link()}
         )
       end
 
-      def self.link_def_required(link_def_links)
+      def self.link_def_required?(link_def_links)
         ret = nil
         link_def_links.each do |ldl|
           if ret.nil?

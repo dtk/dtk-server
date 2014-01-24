@@ -200,7 +200,8 @@ module DTK
         if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           el.merge(:link_def_id => link_def_match[:id])
         else
-          el.merge(:link_def_id => nil)
+          Log.info_pp(["check on what causes link_def_match to fail given cmp (#{cmp_match.inspect}) at:",caller[0..3]])
+          el.merge(:link_def_id => SQL::ColRef.null_id)
         end
       end
       update_from_rows(port_mh,update_rows)

@@ -21,9 +21,26 @@ pp [:link_defs,spliced_ndx_link_def_links]
       def self.link_def(link_def_type,link_def_links)
         OutputHash.new(
           "type" => link_def_type,
-          "required" =>  true, #TODO: will enhance so that check if also dependency
+          "required" =>  link_def_required(link_def_links),
           "possible_links" => link_def_links.map{|link_def_link|link_def_link.possible_link()}
         )
+      end
+
+      def self.link_def_required(link_def_links)
+        ret = nil
+        link_def_links.each do |ldl|
+          if ret.nil?
+            ret = ldl.required
+          else
+            if ret != ldl.required
+              base_cmp = ldl.base_cmp_print_form
+              dep_cmp = ldl.dep_cmp_print_form()
+              Log.info("Ambiguous whether link_def to '#{dep_cmp}' is required or not for component '#{base_cmp}'; so assuming required==true")
+              ret = true
+            end
+          end
+        end
+        ret
       end
 
       #------ begin: related to ndx_link_def_links
@@ -31,7 +48,7 @@ pp [:link_defs,spliced_ndx_link_def_links]
         ret = Hash.new
         convert_to_hash_form(in_link_defs) do |dep_cmp_name,link_def_links|
           link_def_links = [link_def_links] unless link_def_links.kind_of?(Array)
-          link_def_links = convert(dep_cmp_name,link_def_links,base_cmp,opts)
+          link_def_links = convert_link_def_links(dep_cmp_name,link_def_links,base_cmp,opts)
           link_def_links.each do |ldl|
             ndx = ldl.dependency_name || dep_cmp_name
             (ret[ndx] ||= Array.new) << ldl
@@ -40,7 +57,7 @@ pp [:link_defs,spliced_ndx_link_def_links]
         ret
       end
 
-      def self.convert(dep_cmp_name,link_def_links,base_cmp,opts={})
+      def self.convert_link_def_links(dep_cmp_name,link_def_links,base_cmp,opts={})
         link_def_links.inject(Array.new) do |a,link|
           unless link.kind_of?(Hash)
             err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
@@ -58,39 +75,37 @@ pp [:link_defs,spliced_ndx_link_def_links]
 
       def self.splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
         ret = Hash.new
-        ndx_link_def_links.each do |link_def_ndx,link_def_choices|
+        ndx_link_def_links.each do |link_def_ndx,link_def_link_choices|
           pruned_ndx_dep_choices = ndx_dep_choices
           dep_name_match = false
           if dep_choices = ndx_dep_choices[link_def_ndx]
             pruned_ndx_dep_choices = {link_def_ndx => dep_choices}
             dep_name_match = true
           end
-          link_def_choices.each do |link_def_choice|
-            if dn = link_def_choice.dependency_name
+          link_def_link_choices.each do |ldl_choice|
+            if dn = ldl_choice.dependency_name
               unless dep_name_match
-                base_cmp_name = link_def_choice.base_cmp_print_form()
-                dep_cmp_name = link_def_choice.dep_cmp_print_form()
+                base_cmp_name = ldl_choice.base_cmp_print_form()
+                dep_cmp_name = ldl_choice.dep_cmp_print_form()
                 error_msg = "The link def segment on ?1: ?2\nreferences a dependency name (?3) that does not exist.\n"
-                raise ParsingError.new(error_msg,base_cmp_name,{dep_cmp_name => link_def_choice.print_form},dn)
+                raise ParsingError.new(error_msg,base_cmp_name,{dep_cmp_name => ldl_choice.print_form},dn)
               end
             end
-            unless ndx = find_index(link_def_choice,pruned_ndx_dep_choices)
-              base_cmp_name = link_def_choice.base_cmp_print_form()
-              dep_cmp_name = link_def_choice.dep_cmp_print_form()
-              error_msg = "Cannot find dependency match for link_def for component '?1' to '?2'; the link fragment is: ?3"
-              raise ParsingError.new(error_msg,base_cmp_name,dep_cmp_name,{dep_cmp_name => link_def_choice.print_form()})
+            unless ndx = matching_dep_index?(ldl_choice,pruned_ndx_dep_choices)
+              ldl_choice.required = false
+              ndx = ldl_choice.dep_cmp_ndx()
             end
-            (ret[ndx] ||= Array.new) << link_def_choice
+            (ret[ndx] ||= Array.new) << ldl_choice
           end
         end
         ret
       end
 
-      def self.find_index(link_def_choice,ndx_dep_choices)
+      def self.matching_dep_index?(link_def_link_choice,ndx_dep_choices)
         ret = nil
         ndx_dep_choices.each do |dep_ndx,dep_choices|
           dep_choices.each do |dep_choice|
-            if dep_choice.matches?(link_def_choice)
+            if dep_choice.matches?(link_def_link_choice)
               return dep_ndx
             end
           end

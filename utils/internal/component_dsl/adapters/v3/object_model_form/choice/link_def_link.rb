@@ -2,9 +2,14 @@ module DTK; class ComponentDSL; class V3
   class ObjectModelForm; class Choice
     class LinkDefLink < self
       attr_reader :dependency_name
+      attr_accessor :required
+      def dep_cmp_ndx()
+        @dep_cmp_name
+      end
       def initialize(raw,dep_cmp_name,base_cmp)
         super(raw,dep_cmp_name,base_cmp)
         @dependency_name = nil
+        @required = true
       end
 
       def convert(link_def_link,opts={})

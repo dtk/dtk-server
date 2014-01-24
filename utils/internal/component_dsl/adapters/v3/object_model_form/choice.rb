@@ -2,7 +2,7 @@ module DTK; class ComponentDSL; class V3
   class ObjectModelForm
     class Choice < OMFBase::Choice
       r8_nested_require('choice','dependency')
-      r8_nested_require('choice','link_def')
+      r8_nested_require('choice','link_def_link')
 
       def initialize(raw,dep_cmp_name,base_cmp)
         super()

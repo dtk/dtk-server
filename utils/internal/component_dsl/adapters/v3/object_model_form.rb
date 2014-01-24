@@ -3,6 +3,7 @@ module DTK; class ComponentDSL; class V3
   class ObjectModelForm < OMFBase
     r8_nested_require('object_model_form','parsing_error')
     r8_nested_require('object_model_form','component')
+    r8_nested_require('object_model_form','link_def')
     r8_nested_require('object_model_form','choice')
 
    private

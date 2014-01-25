@@ -99,6 +99,21 @@ pp [:here,input_hash]
       VersionIntegerToVersion[integer_version]
     end
 
+
+    #returns parsing_error if parsing error
+    def self.trap_dsl_parsing_error(&block)
+      parsing_error = nil
+      begin
+        normal_return = yield
+       rescue ErrorUsage::DSLParsing,ComponentDSL::ObjectModelForm::ParsingError => e
+        parsing_error = e
+      end
+      parsing_error
+    end
+    def self.dsl_parsing_error?(obj)
+      obj.is_a?(ErrorUsage::DSLParsing) || obj.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
+    end
+
     #TODO: this might move to a more common area
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
       integer_version = 2 #TODO: fix this being hard coded

@@ -72,12 +72,10 @@ module DTK
 
       impl_obj = get_implementation()
       impl_obj.modify_file_assets(diffs_summary)
-      dsl_parsed_info  = Hash.new
       if diffs_summary.meta_file_changed?()
-        dsl_parsed_info = component_module.parse_dsl_and_update_model(impl_obj,id_handle())
-      end
-      if dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
-        ret.merge!(:dsl_parsing_errors => dsl_parsed_info)
+        if e = ComponentDSL.trap_dsl_parsing_error{component_module.parse_dsl_and_update_model(impl_obj,id_handle())}
+          ret.merge!(:dsl_parsing_errors => e) 
+        end
       end
       ret
     end

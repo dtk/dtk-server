@@ -62,11 +62,21 @@ module DTK; class ComponentModule
           raise_errors_if_dangling_cmp_refs(aug_component_templates)
         end
       end
-
-      return model_parsed if (model_parsed.is_a?(ErrorUsage::DSLParsing) || model_parsed.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
+      if ComponentDSL.dsl_parsing_error?(model_parsed)
+        raise model_parsed 
+      end
       set_dsl_parsed!(true)
     end
-private
+
+  private
+    def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
+      create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
+    end
+
+    def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
+      update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts)
+    end
+
     def create_needed_objects_and_dsl?(repo,version,opts={})
       ret = Hash.new
       project = get_project()
@@ -91,10 +101,11 @@ private
       end
 
       dsl_created_info = Hash.new()
-      dsl_parsed_info  = Hash.new()
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)
+        if e = ComponentDSL.trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+          ret.merge!(:dsl_parsed_info => e)
+        end
       elsif opts[:scaffold_if_no_dsl] 
         opts = Hash.new
         if matching_branches
@@ -103,16 +114,17 @@ private
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj,opts)
       end
       ret.merge!(:module_branch_idh => module_branch_idh, :dsl_created_info => dsl_created_info)
-      ret.merge!(:dsl_parsed_info => dsl_parsed_info) if (dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
       ret
     end
 
+    #returns dsl info
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
+      ret = Hash.new
+      dsl_created_info = Hash.new
       impl_obj = module_branch.get_implementation()
       #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
       dsl_created_info = Hash.new
-      dsl_parsed_info  = Hash.new
 
       if version.kind_of?(ModuleVersion::AssemblyModule)
         if diffs_summary.meta_file_changed?()
@@ -122,17 +134,16 @@ private
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ComponentDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?()
-          dsl_parsed_info = parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)
+          if e = ComponentDSL.trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
+            ret.merge!(:dsl_parsed_info => e)
+          end
         end
       else
         config_agent_type = config_agent_type_default()
         dsl_created_info = parse_impl_to_create_dsl(config_agent_type,impl_obj)
       end
-
-      dsl_info = {:dsl_created_info => dsl_created_info}
-      dsl_info.merge!( :dsl_parsed_info => dsl_parsed_info) if(dsl_parsed_info.is_a?(ErrorUsage::DSLParsing) || dsl_parsed_info.is_a?(ComponentDSL::ObjectModelForm::ParsingError))
-      
-      dsl_info
+      ret.merge!(:dsl_created_info => dsl_created_info)
+      ret
     end
 
     def raise_errors_if_dangling_cmp_refs(aug_component_templates)

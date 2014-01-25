@@ -6,9 +6,9 @@ module DTK
     r8_nested_require('component','component_dsl')
 
     r8_nested_require('component','version_context_info')
-    r8_nested_require('component','management')
+    r8_nested_require('component','delete_mixin')
 
-    include ManagementMixin
+    include DeleteMixin
     extend ModuleClassMixin
     include ModuleMixin
     include ParseToCreateDSLMixin

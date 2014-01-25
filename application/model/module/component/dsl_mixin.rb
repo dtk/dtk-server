@@ -1,6 +1,6 @@
 module DTK; class ComponentModule
   module DSLMixin
-    r8_nested_require('dsl','external_refs')
+    r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
 
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})

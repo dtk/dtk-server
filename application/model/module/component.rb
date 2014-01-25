@@ -1,10 +1,13 @@
 module DTK
   class ComponentModule < Model
-    r8_nested_require('component','management')
-    r8_nested_require('component','dsl')
-    #TODO: unify anbove and below
+    #TODO: better unify top level dsl processing files/dirs
+    r8_nested_require('component','dsl_mixin')
     r8_nested_require('component','parse_to_create_dsl')
+    r8_nested_require('component','component_dsl')
+
     r8_nested_require('component','version_context_info')
+    r8_nested_require('component','management')
+
     include ManagementMixin
     extend ModuleClassMixin
     include ModuleMixin

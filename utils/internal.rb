@@ -24,7 +24,6 @@ files =
    'create_thread', 
    'eventmachine_helper',
    'extract',
-   'component_dsl',
    'action_results_queue',
    'simple_action_queue',
    'async_response',

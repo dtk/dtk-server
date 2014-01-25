@@ -1,4 +1,3 @@
-#TODO: in process of converting 'meta' to 'dsl'
 module DTK
   class ComponentDSL
     r8_nested_require('component_dsl','update_model')

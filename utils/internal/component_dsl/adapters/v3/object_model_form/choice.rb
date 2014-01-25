@@ -44,12 +44,15 @@ pp [:after_integrate,:ndx_dep_choices,ndx_dep_choices]
 
       def matches?(choice_with_single_pl)
         ret = nil
-        if pl_match_props =  matches_on_keys?(choice_with_single_pl)
-          pl_single_props = choice_with_single_pl.possible_link.values.first
-          pl_match_props["type"] == pl_single_props["type"]
+        if pl_match_hash_value =  matches_on_key?(choice_with_single_pl)
+          pl_single_hash_value = choice_with_single_pl.possible_link.values.first
+          matches_on_type?(pl_match_hash_value,pl_single_hash_value)
         end
       end
 
+      def ret_single_possible_link_key()
+        ret_single_possible_link(1).keys.first
+      end
      private
       def set_single_possible_link!(ndx,hash_value)
         unless @possible_link.empty?
@@ -58,17 +61,15 @@ pp [:after_integrate,:ndx_dep_choices,ndx_dep_choices]
         @possible_link.merge!(ndx => hash_value)
       end
       def update_single_possible_link_value(hash_value)
-        unless @possible_link.size == 1
-          raise Error.new("Unexpected that @possible_link has size unequal to 1")
-        end
-        @possible_link.values.first.merge!(hash_value)
+        ret_single_possible_link(1).values.first.merge!(hash_value)
       end
       def ret_single_possible_link_value()
         ret_single_possible_link().values.first||{}
       end
-      def ret_single_possible_link()
-        unless [0,1].include?(@possible_link.size)
-          raise Error.new("Unexpected that @possible_link has size greater than 1")
+      def ret_single_possible_link(sizes=nil)
+        sizes = Array(sizes||[0,1])
+        unless sizes.include?(@possible_link.size)
+          raise Error.new("Unexpected that @possible_link does not have size in (#{sizes.join(',')})")
         end
         @possible_link
       end
@@ -81,13 +82,14 @@ pp [:after_integrate,:ndx_dep_choices,ndx_dep_choices]
         self.class.new(@raw,@dep_cmp_name,@base_cmp)
       end
 
-      def matches_on_keys?(choice_with_single_pl)
-        ret = nil
-        pl_single = choice_with_single_pl.possible_link
-        unless pl_single.size == 1
-          raise Error.new("Unexepected that (#{pl_single.print_form}) has size > 1")
-        end
-        possible_link[pl_single.keys.first]
+      def matches_on_key?(choice_with_single_pl)
+        @possible_link[choice_with_single_pl.ret_single_possible_link_key()]
+      end
+
+      def matches_on_type?(hash_val1,hash_val2)
+        type1 = hash_val1["type"]
+        type2 = hash_val2["type"]
+        type1.nil? or type2.nil? or type1 == type2        
       end
 
       #returns spliced_ndx_link_def_links

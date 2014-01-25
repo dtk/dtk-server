@@ -1,12 +1,15 @@
 module DTK
   class ComponentModule < Model
     r8_nested_require('component','management')
+    r8_nested_require('component','dsl')
+    #TODO: unify anbove and below
     r8_nested_require('component','parse_to_create_dsl')
     r8_nested_require('component','version_context_info')
     include ManagementMixin
     extend ModuleClassMixin
     include ModuleMixin
     include ParseToCreateDSLMixin
+    include DSLMixin
 
     def get_associated_assembly_templates()
       ndx_ret = Hash.new

@@ -21,7 +21,7 @@ module DTK; class ComponentModule
     end
   end              
 
-  module ManagementMixin
+  module DSLMixin
     module ExternalRefsMixin
       def process_external_refs(module_branch,config_agent_type,project,impl_obj)
         ret = nil

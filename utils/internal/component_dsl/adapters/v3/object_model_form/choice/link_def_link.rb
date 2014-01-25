@@ -33,7 +33,7 @@ module DTK; class ComponentDSL; class V3
         
         ret_info["attribute_mappings"] = in_attr_mappings.map{|in_am|convert_attribute_mapping(in_am,base_cmp(),dep_cmp(),opts)}
         
-        @possible_link.merge!(dep_cmp() => ret_info)
+        set_single_possible_link!(dep_cmp(),ret_info)
         @dependency_name = link_def_link["dependency_name"]
         [self]
       end

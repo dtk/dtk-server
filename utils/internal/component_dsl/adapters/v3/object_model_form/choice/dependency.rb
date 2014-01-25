@@ -51,7 +51,8 @@ module DTK; class ComponentDSL; class V3
       end
 
       def self.convert_choice(raw,dep_cmp_info,base_cmp,parent_info={},opts={})
-        new(raw,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts)
+        opts_convert = {:no_default_link_type => true}.merge(opts)
+        new(raw,dep_cmp_info["component"],base_cmp).convert(dep_cmp_info,base_cmp,parent_info,opts_convert)
       end
     end
   end; end

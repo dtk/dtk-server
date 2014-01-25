@@ -335,8 +335,8 @@ module DTK; class ComponentDSL; class V2
             raise ParsingError.new(err_msg,base_cmp_name,{conn_ref => conn_info_x})
           end
         if choices = conn_info["choices"]
-          opts_choices = opts.merge(:conn_ref => conn_ref)
-          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choices)}
+          opts_choice = opts.merge(:conn_ref => conn_ref)
+          choices.map{|choice|convert_choice(choice,base_cmp,conn_info,opts_choice)}
         else
           dep_cmp_external_form = conn_info["component"]||conn_ref
           parent_info = Hash.new
@@ -363,7 +363,7 @@ module DTK; class ComponentDSL; class V2
           raise ParsingError.new("Dependency possible connection (?1) is missing component key",dep_cmp_info)
         end
         dep_cmp = convert_to_internal_cmp_form(dep_cmp_raw)
-        ret_info = {"type" => link_type(dep_cmp_info,parent_info)}
+        ret_info = {"type" => link_type(dep_cmp_info,parent_info,opts)}
         if order = order(dep_cmp_info)
           ret_info["order"] = order 
         end
@@ -395,8 +395,13 @@ module DTK; class ComponentDSL; class V2
       end
 
       DefaultLinkType = "local"
-      def link_type(link_info,parent_link_info={})
-        loc = link_info["location"]||parent_link_info["location"]||DefaultLinkType
+      def link_type(link_info,parent_link_info={},opts={})
+        ret = nil
+        loc = link_info["location"]||parent_link_info["location"]
+        if opts[:no_default_link_type] and loc.nil?
+          return ret
+        end
+        loc ||=  DefaultLinkType
         case loc
          when "local" then "internal"
          when "remote" then "external"

@@ -24,7 +24,8 @@ module DTK; class ComponentDSL
 
       def referenced_cmp_templates(exclude_cmp_template_ids)
         pruned_ndx_cmp_refs = @ndx_cmp_refs.reject{|ct|exclude_cmp_template_ids.include?(ct[:id])}
-        #TODO: stub transform to new object RefComponentTemplates
+        pp [:ref_cmp_templates,ReferencedComponentTemplates.new(pruned_ndx_cmp_refs)]
+        #TODO: temp until pass ref_cmp_templates
         pruned_ndx_cmp_refs
       end
 
@@ -60,6 +61,31 @@ module DTK; class ComponentDSL
       def model_handle(model_name)
         @cmp_module_mh.createMH(model_name)
       end
+
+      class ReferencedComponentTemplates < Array
+        def initialize(ndx_cmp_refs)
+          super(ref_cmp_templates(ndx_cmp_refs))
+        end
+       private
+        def ref_cmp_templates(ndx_cmp_refs)
+          ndx_ret = Hash.new
+          ndx_cmp_refs.each do |cmp_tmpl|
+            ndx = cmp_tmpl[:id]
+            cmp_tmpl[:component_refs].map do |aug_cmp_ref|
+              pntr = ndx_ret[ndx] ||= {:component_ref => aug_cmp_ref.hash_subset(*CmpRefCols), :assembly_templates => Array.new}
+              existing_assembly_templates = pntr[:assembly_templates]
+              assembly_template = aug_cmp_ref[:assembly_template]
+              assembly_template_id = assembly_template[:id]
+              unless existing_assembly_templates.find{|assem|assem[:id] == assembly_template_id}
+                existing_assembly_templates<< assembly_template
+              end
+            end
+          end
+          ndx_ret.values
+        end
+        CmpRefCols = [:id,:display_name,:group_id,:component_type,:version=,:module_branch_id]
+      end
     end
   end
 end; end
+

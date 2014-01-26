@@ -5,6 +5,7 @@ module DTK
     r8_nested_require('component','parse_to_create_dsl')
     r8_nested_require('component','component_dsl')
 
+    r8_nested_require('component','ref_integrity')
     r8_nested_require('component','version_context_info')
     r8_nested_require('component','delete_mixin')
 

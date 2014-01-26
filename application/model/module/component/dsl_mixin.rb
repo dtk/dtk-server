@@ -46,21 +46,13 @@ module DTK; class ComponentModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
-      #get associated assembly templates before do any updates and use to see if any dangling references
-      #within transaction after do update
+      #get associated assembly templates before do any updates and use this to see if any referential integrity
+      #problems within transaction after do update; transaction is aborted if any errors found
       aug_component_templates = get_aug_associated_component_templates()
       model_parsed = nil
       Transaction do
-        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version, opts)
-        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
-        #below is the conservative thing to do if dont know if any deletes
-        any_deletes = true
-        if opts[:no_deletes_performed]
-          any_deletes = false
-        end
-        if any_deletes
-          raise_errors_if_dangling_cmp_refs(aug_component_templates)
-        end
+        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version,opts)
+        RefIintegrity.raise_error?(self,aug_component_templates,opts)
       end
       if ComponentDSL.dsl_parsing_error?(model_parsed)
         raise model_parsed 
@@ -145,20 +137,5 @@ module DTK; class ComponentModule
       ret.merge!(:dsl_created_info => dsl_created_info)
       ret
     end
-
-    def raise_errors_if_dangling_cmp_refs(aug_component_templates)
-      #this is called within transaction after any deletes are performed (if any)
-      return if aug_component_templates.empty?
-      sp_hash = {
-        :cols => [:id,:display_name,:group_id],
-        :filter => [:oneof, :id, aug_component_templates.map{|r|r[:id]}]
-      }
-      cmp_template_ids_still_present = Model.get_objs(model_handle(:component),sp_hash).map{|r|r[:id]}
-      referenced_cmp_templates = aug_component_templates.reject{|r|cmp_template_ids_still_present.include?(r[:id])}
-      unless referenced_cmp_templates.empty?
-        raise ErrorUsage::ReferencedComponentTemplates.new(referenced_cmp_templates)
-      end
-    end
-      
- end
+  end
 end; end

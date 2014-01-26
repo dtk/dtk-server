@@ -3,7 +3,7 @@ module DTK; class ComponentDSL
     class ParsingError < ErrorUsage
       def initialize(msg='',*args)
         parsing_error,@params = msg_pp_form_and_params(msg,*args)
-        super("component dsl parsing error: #{parsing_error}",:caller_info => true)
+        super("Component dsl parsing error: #{parsing_error}",:caller_info => true)
       end
 
       def self.raise_error_if_not(obj,klass,opts={})

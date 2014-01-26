@@ -4,6 +4,8 @@ module DTK
     r8_nested_require('component_dsl','generate_from_impl')
     r8_nested_require('component_dsl','object_model_form')
     r8_nested_require('component_dsl','incremental_generator')
+    #TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
+    r8_nested_require('component_dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 

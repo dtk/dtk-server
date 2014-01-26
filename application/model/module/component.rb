@@ -5,7 +5,6 @@ module DTK
     r8_nested_require('component','parse_to_create_dsl')
     r8_nested_require('component','component_dsl')
 
-    r8_nested_require('component','ref_integrity')
     r8_nested_require('component','version_context_info')
     r8_nested_require('component','delete_mixin')
 
@@ -24,7 +23,8 @@ module DTK
       ndx_ret.values
     end
 
-    def get_aug_associated_component_templates()
+    #each of the module's component_templates associated with zero or more assembly template component references
+    def get_associated_assembly_cmp_refs()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         component_template = r[:component_template]

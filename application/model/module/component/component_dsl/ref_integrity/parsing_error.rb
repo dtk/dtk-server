@@ -9,7 +9,6 @@ module DTK; class ComponentDSL
 
        private
         def err_msg(aug_cmp_templates)
-          assoc_cmp_assem_tmpls = assoc_component_assembly_templates(aug_cmp_templates)
           msgs_per_cmp_template = msgs_per_cmp_template(aug_cmp_templates)
           ident = "    "
           ref_errors = ident + msgs_per_cmp_template.join("\n#{ident}")

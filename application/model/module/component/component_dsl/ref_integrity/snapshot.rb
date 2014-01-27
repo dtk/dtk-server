@@ -1,8 +1,10 @@
 module DTK; class ComponentDSL
   class RefIntegrity
     class Snapshot
+#TODO: for testing
+attr_reader :ndx_cmp_refs,:ports,:port_links,:link_defs
       def initialize(cmp_module)
-        @cmp_module_mh = cmp_module.model_handle()
+        @cmp_module = cmp_module
         #ndx_cmp_refs is component refs indexed by component template; plus augmented info for cmp refs; it has form
         # Component::Template:
         #   component_refs:
@@ -12,10 +14,7 @@ module DTK; class ComponentDSL
         @ndx_cmp_refs = get_ndx_cmp_refs(cmp_module)
         @ports = get_ports(@ndx_cmp_refs)
         @port_links = get_port_links(@ports)
-
-        pp [:snapshot_ndx_cmp_refs,@ndx_cmp_refs]
-        pp [:snapshot_ports,@ports]
-        pp [:snapshot_port_links,@port_links]
+        @link_defs = get_link_defs(@ndx_cmp_refs)
       end
 
       def cmp_ref_ids()
@@ -28,12 +27,28 @@ module DTK; class ComponentDSL
       end
 
      private
-      def get_ndx_cmp_refs(cmp_module)
+      #writing the get function sso can be passed explicitly refernce object or can use the internal @ vars
+      def get_ndx_cmp_refs(cmp_module=nil)
+        cmp_module ||= @cmp_module
         cmp_module.get_associated_assembly_cmp_refs()
       end
-      def get_ports(ndx_cmp_refs)
+      def get_link_defs(ndx_cmp_refs=nil)
+        ndx_cmp_refs ||= @ndx_cmp_refs
         ret = Array.new
-        cmp_template_ids = ndx_cmp_refs.map{|ct|ct[:component_refs].map{|cr|cr[:component_template_id]}}.flatten.uniq
+        cmp_template_ids = cmp_template_ids(ndx_cmp_refs)
+        if cmp_template_ids.empty?
+          return ret
+        end
+        sp_hash = {
+          :cols => LinkDef.common_columns()+[:ref,:component_component_id],
+          :filter => [:oneof,:component_component_id,cmp_template_ids]
+        }
+        Model.get_objs(model_handle(:link_def),sp_hash,:keep_ref_cols => true)
+      end
+      def get_ports(ndx_cmp_refs=nil)
+        ndx_cmp_refs ||= @ndx_cmp_refs
+        ret = Array.new
+        cmp_template_ids = cmp_template_ids(ndx_cmp_refs)
         if cmp_template_ids.empty?
           return ret
         end
@@ -43,7 +58,8 @@ module DTK; class ComponentDSL
         }
         Model.get_objs(model_handle(:port),sp_hash,:keep_ref_cols => true)
       end
-      def get_port_links(ports)
+      def get_port_links(ports=nil)
+        ports ||= @ports
         ret = Array.new
         if ports.empty?
           return ret
@@ -56,8 +72,13 @@ module DTK; class ComponentDSL
         Model.get_objs(model_handle(:port_link),sp_hash)
       end
 
+      def cmp_template_ids(ndx_cmp_refs=nil)
+        ndx_cmp_refs ||= @ndx_cmp_refs
+        ndx_cmp_refs.map{|ct|ct[:component_refs].map{|cr|cr[:component_template_id]}}.flatten.uniq
+      end
+
       def model_handle(model_name)
-        @cmp_module_mh.createMH(model_name)
+        @cmp_module.model_handle(model_name)
       end
 
       class ReferencedComponentTemplates < Array

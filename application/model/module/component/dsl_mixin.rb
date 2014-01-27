@@ -2,6 +2,7 @@ module DTK; class ComponentModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
+    include ModuleHandleErrorsMixin
 
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness
@@ -46,9 +47,9 @@ module DTK; class ComponentModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
-      set_dsl_parsed!(true)
-      ComponentDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
       set_dsl_parsed!(false)
+      ComponentDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      set_dsl_parsed!(true)
     end
 
     #TODO: for testing
@@ -95,7 +96,7 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new()
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        if e = ComponentDSL.trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+        if e = trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
           ret.merge!(:dsl_parsed_info => e)
         end
       elsif opts[:scaffold_if_no_dsl] 
@@ -125,8 +126,8 @@ module DTK; class ComponentModule
         assembly = version.get_assembly(model_handle(:component))
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ComponentDSL.contains_dsl_file?(impl_obj)
-        if opts[:force_parse] or diffs_summary.meta_file_changed?()
-          if e = ComponentDSL.trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
+        if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
+          if e = trap_dsl_parsing_error{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
             ret.merge!(:dsl_parsed_info => e)
           end
         end

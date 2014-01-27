@@ -8,6 +8,7 @@ module DTK
     r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
+    extend ModuleHandleErrorsMixin
 
     def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
       #get associated assembly templates before do any updates and use this to see if any referential integrity
@@ -120,20 +121,7 @@ module DTK
 
 
     #returns parsing_error if parsing error
-    def self.trap_dsl_parsing_error(&block)
-      parsing_error = nil
-      begin
-        normal_return = yield
-       rescue ErrorUsage::DSLParsing,ComponentDSL::ObjectModelForm::ParsingError,ErrorUsage::Parsing => e
-        parsing_error = e
-      end
-      parsing_error
-    end
-    def self.dsl_parsing_error?(obj)
-      obj.is_a?(ErrorUsage::DSLParsing) || 
-        obj.is_a?(ComponentDSL::ObjectModelForm::ParsingError) ||
-        obj.is_a?(ErrorUsage::Parsing)
-    end
+
 
     #TODO: this might move to a more common area
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})

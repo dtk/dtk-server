@@ -10,7 +10,7 @@ module DTK
       def raise_error_if_any_violations(opts={})
         raise_error_if_dangling_cmp_ref(opts)
         raise_error_if_dangling_port_link()
-        #TODO: other violations
+        #raise_error_if_dangling_cmp_attr_ref()
       end
 
       def integrity_post_processing()

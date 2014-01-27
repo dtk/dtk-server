@@ -1,19 +1,18 @@
 module DTK
   class ComponentDSL
-    r8_nested_require('component_dsl','update_model')
-    r8_nested_require('component_dsl','generate_from_impl')
-    r8_nested_require('component_dsl','object_model_form')
-    r8_nested_require('component_dsl','incremental_generator')
+    r8_nested_require('dsl','update_model')
+    r8_nested_require('dsl','generate_from_impl')
+    r8_nested_require('dsl','object_model_form')
+    r8_nested_require('dsl','incremental_generator')
     #TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
-    r8_nested_require('component_dsl','ref_integrity')
+    r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
-
 
     def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
       #get associated assembly templates before do any updates and use this to see if any referential integrity
       #problems within transaction after do update; transaction is aborted if any errors found
-      snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
+      ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
       model_parsed = nil
       Transaction do
         component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
@@ -23,8 +22,8 @@ module DTK
         update_opts.merge!(:version => version) if version
         component_dsl_obj.update_model(update_opts)
 
-        snapshot.raise_error_if_any_violations(opts)
-        snapshot.integrity_post_processing()
+        ref_integrity_snapshot.raise_error_if_any_violations(opts)
+        ref_integrity_snapshot.integrity_post_processing()
       end
     end
 
@@ -276,7 +275,7 @@ module DTK
           :class_name => {:adapter_type => "ComponentDSL"},
           :subclass_adapter_name => true
         }
-        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("component_dsl",adapter_name,opts)
+        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class("dsl",adapter_name,opts)
       end
 
       def isa_dsl_filename?(filename,dsl_integer_version=nil)

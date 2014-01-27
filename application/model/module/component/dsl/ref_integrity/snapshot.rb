@@ -53,7 +53,7 @@ attr_reader :ndx_cmp_refs,:ports,:port_links,:link_defs
           return ret
         end
         sp_hash = {
-          :cols => [:id,:group_id,:ref,:display_name,:component_id],
+          :cols => [:id,:group_id,:ref,:display_name,:component_id,:node_node_id,:node],
           :filter => [:oneof,:component_id,cmp_template_ids]
         }
         Model.get_objs(model_handle(:port),sp_hash,:keep_ref_cols => true)

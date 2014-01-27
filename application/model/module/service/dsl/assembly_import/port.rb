@@ -37,21 +37,7 @@ module DTK; class ServiceModule
         #to determine if need to add internal links and for port processing
         assembly = assembly_idh.create_object()
         #compute augmented link def info
-        link_defs_info = assembly.get_objs(:cols => [:template_link_defs_info])
-        return ret if link_defs_info.empty?
-        sp_hash = {
-          :cols => [:id,:group_id,:link_def_id,:remote_component_type],
-          :filter => [:oneof, :link_def_id, link_defs_info.map{|r|(r[:link_def]||{})[:id]}.compact]
-        }
-        rows = Model.get_objs(assembly_idh.createMH(:link_def_link),sp_hash)
-        ndx_link_def_links = rows.inject(Hash.new){|h,r|h.merge(r[:link_def_id] => r)}
-        link_defs_info.each do |r|
-          if link_def = r[:link_def]
-            if link = ndx_link_def_links[link_def[:id]]
-              (link_def[:link_def_links] ||= Array.new) << link
-            end
-          end
-        end
+        link_defs_info = LinkDef::Info.get_link_def_info(assembly)
 
         create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
         create_assembly_template_ports?(assembly,link_defs_info,create_opts)
@@ -78,8 +64,7 @@ module DTK; class ServiceModule
         ndx_rows = Hash.new
         ndx_ld_links_info = Hash.new
         link_defs_info.each do |ld_info|
-          link_def = ld_info[:link_def]
-          if link_def 
+          if link_def = ld_info[:link_def]
             ndx = link_def[:id]
             ndx_ld_links_info[ndx] ||= (link_def[:link_def_links]||{}).map{|link|{:link => link, :link_def => link_def}}
 

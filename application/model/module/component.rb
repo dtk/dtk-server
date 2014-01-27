@@ -21,6 +21,12 @@ module DTK
     end
 
     #each of the module's component_templates associated with zero or more assembly template component references
+    # component refs indexed by component template; plus augmented info for cmp refs; it has form
+    # Component::Template:
+    #   component_refs:
+    #   - ComponentRef:
+    #      node: Node
+    #      assembly_template: Assembly::Template
     def get_associated_assembly_cmp_refs()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|

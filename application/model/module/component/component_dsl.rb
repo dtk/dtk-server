@@ -9,9 +9,27 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
+
+    def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
+      #get associated assembly templates before do any updates and use this to see if any referential integrity
+      #problems within transaction after do update; transaction is aborted if any errors found
+      snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
+      model_parsed = nil
+      Transaction do
+        component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
+        raise component_dsl_obj if dsl_parsing_error?(component_dsl_obj)
+
+        update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
+        update_opts.merge!(:version => version) if version
+        component_dsl_obj.update_model(update_opts)
+
+        snapshot.raise_error_if_any_violations(opts)
+        snapshot.integrity_post_processing()
+      end
+    end
+
     def self.create_dsl_object(module_branch,dsl_integer_version,format_type=nil)
       input_hash = get_dsl_file_hash_content_info(module_branch,dsl_integer_version,format_type)[:hash_content]
-pp [:here,input_hash]
       config_agent_type = ret_config_agent_type(input_hash)
       new(config_agent_type,impl.id_handle(),module_branch.id_handle(),input_hash) 
     end
@@ -107,13 +125,15 @@ pp [:here,input_hash]
       parsing_error = nil
       begin
         normal_return = yield
-       rescue ErrorUsage::DSLParsing,ComponentDSL::ObjectModelForm::ParsingError => e
+       rescue ErrorUsage::DSLParsing,ComponentDSL::ObjectModelForm::ParsingError,ErrorUsage::Parsing => e
         parsing_error = e
       end
       parsing_error
     end
     def self.dsl_parsing_error?(obj)
-      obj.is_a?(ErrorUsage::DSLParsing) || obj.is_a?(ComponentDSL::ObjectModelForm::ParsingError)
+      obj.is_a?(ErrorUsage::DSLParsing) || 
+        obj.is_a?(ComponentDSL::ObjectModelForm::ParsingError) ||
+        obj.is_a?(ErrorUsage::Parsing)
     end
 
     #TODO: this might move to a more common area
@@ -264,6 +284,10 @@ pp [:here,input_hash]
       end
 
      private
+      def Transaction(*args,&block)
+        Model.Transaction(*args,&block)
+      end
+
       def integer_version(pos_val=nil)
         pos_val ? pos_val.to_i : default_integer_version()
       end

@@ -89,20 +89,6 @@ module DTK; class ComponentDSL
   end
 
   module UpdateModelClassMixin
-    def parse_and_update_model(impl_obj,module_branch_idh,version=nil, opts={})
-      component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
-      #TODO: cleanup so dont have to haev disjunction
-      if component_dsl_obj.is_a?(ObjectModelForm::ParsingError) or 
-          component_dsl_obj.is_a?(ErrorUsage::DSLParsing) or 
-          component_dsl_obj.is_a?(ErrorUsage::Parsing)
-        return component_dsl_obj 
-      end
-
-      update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
-      update_opts.merge!(:version => version) if version
-      component_dsl_obj.update_model(update_opts)
-    end
-
     def add_components_from_dsl(container_idh,config_agent_type,impl_idh,dsl_hash,dsl_integer_version=nil)
       dsl_integer_version ||= integer_version(dsl_integer_version)
       module_branch_idh = impl_idh.create_object().get_module_branch().id_handle()

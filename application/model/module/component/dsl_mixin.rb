@@ -46,20 +46,9 @@ module DTK; class ComponentModule
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
-      #get associated assembly templates before do any updates and use this to see if any referential integrity
-      #problems within transaction after do update; transaction is aborted if any errors found
-      snapshot = ComponentDSL::RefIntegrity.snapshot_associated_assembly_templates(self)
-      model_parsed = nil
-      set_dsl_parsed!(false)
-      Transaction do
-        model_parsed = ComponentDSL.parse_and_update_model(impl_obj,module_branch_idh,version,opts)
-        snapshot.raise_error_if_any_violations(opts)
-        snapshot.integrity_post_processing()
-      end
-      if ComponentDSL.dsl_parsing_error?(model_parsed)
-        raise model_parsed 
-      end
       set_dsl_parsed!(true)
+      ComponentDSL.parse_and_update_model(self,impl_obj,module_branch_idh,version,opts)
+      set_dsl_parsed!(false)
     end
 
   private

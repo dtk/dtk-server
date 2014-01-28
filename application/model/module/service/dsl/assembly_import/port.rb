@@ -43,28 +43,14 @@ module DTK; class ServiceModule
       def create_assembly_template_ports?(assembly,link_defs_info,opts={})
         ret = Array.new
         return ret if link_defs_info.empty?
-
-        #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking fro existing ports
-        sp_hash = {
-          :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
-          :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
-        }
-
         port_mh = assembly.id_handle.create_childMH(:port)
-        ndx_existing_ports = Hash.new
-        Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
-          (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
-        end 
+        ndx_existing_ports = get_ndx_existing_ports(port_mh,link_defs_info,opts)
 
         #create create-hashes for both local side and remote side ports
         #Need to index by node because create_from_rows can only insert under one parent
         ndx_rows = Hash.new
-        ndx_ld_links_info = Hash.new
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
-            ndx = link_def[:id]
-            ndx_ld_links_info[ndx] ||= (link_def[:link_def_links]||{}).map{|link|{:link => link, :link_def => link_def}}
-
             node = ld_info[:node]
             cmp_ref = ld_info[:component_ref]
             port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component],:component_ref => cmp_ref)
@@ -79,29 +65,28 @@ module DTK; class ServiceModule
         end
 
         #add the remote ports
-        ndx_ld_links_info.each_value do |ld_links_info|
-          ld_links_info.each do |ld_link_info|
-            remote_component_type = ld_link_info[:link][:remote_component_type]
-            link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
-              node = matching_node_cmp[:node]
-              component = matching_node_cmp[:nested_component]
-              cmp_ref = matching_node_cmp[:component_ref]
-              port = Port.ret_port_create_hash(ld_link_info[:link_def],node,component,:remote_side=>true,:component_ref => cmp_ref)
-              if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
-                existing_port_info[:matched] = true
-                ret << existing_port_info[:port]
-              else
-                pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
-                pntr[:ndx_create_rows][port[:ref]] ||= port
-              end
+        link_defs_info.generate_link_def_link_pairs do |link_def,link|
+          remote_component_type = link[:remote_component_type]
+          link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
+            node = matching_node_cmp[:node]
+            component = matching_node_cmp[:nested_component]
+            cmp_ref = matching_node_cmp[:component_ref]
+            port = Port.ret_port_create_hash(link_def,node,component,:remote_side=>true,:component_ref => cmp_ref)
+            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+              existing_port_info[:matched] = true
+              ret << existing_port_info[:port]
+            else
+              pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
+              pntr[:ndx_create_rows][port[:ref]] ||= port
             end
           end
         end
 
         new_rows = Array.new
         ndx_rows.values.each do |r|
-          port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
-          new_rows += Model.create_from_rows(port_mh,r[:ndx_create_rows].values,opts)
+          #TODO: think we could just use the port_mh declared in the calling scope
+          port_mh_x = r[:node].model_handle_with_auth_info.create_childMH(:port)
+          new_rows += Model.create_from_rows(port_mh_x,r[:ndx_create_rows].values,opts)
         end
 
         #delete any existing ports that match what is being put in now
@@ -131,6 +116,24 @@ module DTK; class ServiceModule
         ret + new_rows
       end
 
+
+      #returns hash where each key value has form
+      #PortID:
+      #  port: PORT
+      #  matched: false 
+      def get_ndx_existing_ports(port_mh,link_defs_info,opts={})
+        ndx_existing_ports = Hash.new
+        #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking for existing ports
+        sp_hash = {
+          :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
+          :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
+        }
+
+        Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
+          (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
+        end 
+        ndx_existing_ports
+      end
     end
   end
 end;end

@@ -37,6 +37,20 @@ module DTK
         end
         link_defs_info
       end
+
+      #should be called as generate_link_def_link_pairs do |link_def,link|
+      def generate_link_def_link_pairs(&body)
+        ndx_ld_links_mark = Hash.new
+        each do |ld_info|
+          if link_def = ld_info[:link_def]
+            ndx = link_def[:id]
+            next if ndx_ld_links_mark[ndx]
+            ndx_ld_links_mark[ndx] = true
+            (link_def[:link_def_links]||{}).each{|link|body.call(link_def,link)} 
+          end
+        end
+      end
+
     end
   end
 end

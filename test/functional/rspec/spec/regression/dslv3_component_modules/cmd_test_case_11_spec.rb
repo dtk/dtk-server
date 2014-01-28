@@ -4,7 +4,6 @@
 require 'rubygems'
 require 'rest_client'
 require 'pp'
-require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
 require './lib/modules_spec'

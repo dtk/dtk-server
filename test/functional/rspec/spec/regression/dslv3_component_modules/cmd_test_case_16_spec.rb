@@ -4,7 +4,6 @@
 require 'rubygems'
 require 'rest_client'
 require 'pp'
-require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
 require './lib/modules_spec'
@@ -52,11 +51,11 @@ describe "(Component Module DSL) Test Case 16: dtk.model.yaml with hash type att
   end
 
   context "Check if expected attribute value for attribute #{attribute_name_1} exist" do
-    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name, attribute_value_1
+    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name_1, attribute_value_1
   end
 
   context "Check if expected attribute value for attribute #{attribute_name_2} exist" do
-    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name, attribute_value_2
+    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name_2, attribute_value_2
   end
 
   context "Delete module" do

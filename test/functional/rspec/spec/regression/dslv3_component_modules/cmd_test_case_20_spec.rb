@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value
+#Test Case 20: NEG - dtk.model.yaml with invalid port type attribute value (>65535)
 
 require 'rubygems'
 require 'rest_client'
@@ -11,18 +11,18 @@ require './lib/modules_spec'
 module_name = 'temp'
 module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
-file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_19_dtk.model.yaml"
+file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_20_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
-false_boolean_value = "falsee"
+false_port_value = "65536"
 
 dtk_common = DtkCommon.new("", "")
 
-describe "(Component Module DSL) Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value" do
+describe "(Component Module DSL) Test Case 20: NEG - dtk.model.yaml with invalid port type attribute value (>65535)" do
 
   before(:all) do
-    puts "***************************************************************************************************"
-    puts "(Component Module DSL) Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value"
-    puts "***************************************************************************************************"
+    puts "*********************************************************************************************************"
+    puts "(Component Module DSL) Test Case 20: NEG - dtk.model.yaml with invalid port type attribute value (>65535)"
+    puts "*********************************************************************************************************"
     puts ""
   end
 
@@ -39,15 +39,16 @@ describe "(Component Module DSL) Test Case 19: NEG - dtk.model.yaml with invalid
   end
 
   context "Remove existing component in dtk.model.yaml file" do
-    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds invalid boolean type attribute value to dtk.model.yaml"
+    include_context "Replace dtk.model.yaml file with new one", module_name, file_for_change_location, file_for_change, module_filesystem_location, "adds invalid port type attribute value (#{false_port_value}) to dtk.model.yaml"
   end
 
   context "Push clone changes of module from local copy to server" do
-    it "pushes module changes from local filesystem to server but fails because of incorrect value for boolean type attribute: #{false_boolean_value}" do
+    it "pushes module changes from local filesystem to server but fails because of incorrect value for boolean type attribute: #{false_port_value}" do
       fail = false
       value = `dtk module #{module_name} push`
       puts value
-      fail = value.include?("[ERROR] Attribute (boolean_attr) has default value (\"#{false_boolean_value}\") that does not match its type (boolean)")
+      #Better message to be added when this case is handled
+      fail = value.include?("ERROR")
       fail.should eq(true)  
     end
   end

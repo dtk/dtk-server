@@ -34,6 +34,9 @@ r8_require('../utils/internal/hash_object')
 r8_require('../utils/internal/configuration')
 DTK::Configuration.instance.set_configuration()
 
+LIB_DIR = File.expand_path('../lib', File.dirname(__FILE__))
+r8_require("#{LIB_DIR}/model")
+
 APPLICATION_DIR = "../#{R8::Config[:application_name]}"
 UTILS_DIR = '../utils'
 SYSTEM_DIR = '../system'

@@ -722,7 +722,7 @@ module DTK; class  Assembly
 
   end
 end 
-#TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get
+#TODO: hack to get around error in lib/model.rb:31:in `const_get
 AssemblyInstance = Assembly::Instance
 end
 

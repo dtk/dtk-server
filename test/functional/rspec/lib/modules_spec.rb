@@ -220,6 +220,13 @@ shared_context "Get module attributes list by component" do |dtk_common, module_
   end
 end
 
+shared_context "Check if expected attribute value exists for given attribute name" do |dtk_common, module_name, component_name, attribute_name, attribute_value|
+  it "gets attribute value for attribute #{attribute_name} from the module #{module_name} and verifies it equal to #{attribute_value}" do
+    attribute = dtk_common.get_attribute_value_from_module(module_name, component_name, attribute_name)
+    attribute.should eq(attribute_value)
+  end
+end
+
 shared_context "Check module imported on local filesystem" do |module_filesystem_location, module_name|
   it "checks that #{module_name} module is imported on local filesystem on location #{module_filesystem_location}" do
     puts "Check module imported on local filesystem:", "------------------------------------------"

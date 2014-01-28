@@ -773,8 +773,6 @@ class DtkCommon
 		puts ""
 	end
 
-
-
 	def get_module_attributes_list(module_name, filter_component)
 		#Filter component used on client side after retrieving all attributes from all components
 		puts "Get module attributes list:", "---------------------------"
@@ -830,6 +828,23 @@ class DtkCommon
 		end
 		puts ""
 		return attribute_list
+	end
+
+	def get_attribute_value_from_module(module_name, component_name, attribute_name)
+		puts "Get attribute value from module:", "--------------------------------"
+		modules_list = send_request('/rest/component_module/list', {})
+
+		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
+			puts "Module #{module_name} exists in the list. Get component module id..."
+			module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+			module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>module_id})
+			pretty_print_JSON(module_attribute_list)
+			attribute_value = module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{module_name}::#{component_name}]/#{attribute_name}" }.first['value']
+			puts attribute_value
+		end
+		
+		puts ""
+		return attribute_value
 	end
 
 	def check_if_component_exists_in_module(module_name, filter_version, component_name)

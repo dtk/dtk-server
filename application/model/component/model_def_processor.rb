@@ -19,7 +19,7 @@ module DTK
     end
 
   module ModelDefProcessorInternals
-   extend R8Tpl::Utility::I18n
+   #TODO: remove extend R8Tpl::Utility::I18n
 
     #returns the list of idhs that have been created or modified
     def self.create_or_modify_field_def(component,field_def)

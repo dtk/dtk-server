@@ -1,19 +1,19 @@
 #TODO: model_name and relation_type redundant
-require File.expand_path(UTILS_DIR+'/internal/model/field_set', File.dirname(__FILE__))
-require File.expand_path(UTILS_DIR+'/internal/model/input_into_model', File.dirname(__FILE__))
-require File.expand_path(UTILS_DIR+'/internal/model/clone', File.dirname(__FILE__))
-require File.expand_path(UTILS_DIR+'/internal/model/get_items', File.dirname(__FILE__))
+r8_nested_require('model','input_into_model')
+r8_nested_require('model','field_set')
+r8_nested_require('model','clone')
+r8_nested_require('model','get_items')
 
 #TODO: lose all of these, lose notion of schema and data
-require File.expand_path(UTILS_DIR+'/internal/model/schema', File.dirname(__FILE__))
-require File.expand_path(UTILS_DIR+'/internal/model/data', File.dirname(__FILE__))
+r8_nested_require('model','schema')
+r8_nested_require('model','data')
 
 module DTK
   #TODO: change to be under a simpler more efficient hash object; dont need autovivification and may eventually reserve virtual attrs
 
   class Model < HashObject 
-    include R8Tpl::Utility::I18n
-    extend R8Tpl::Utility::I18n
+#TODO: remove    include R8Tpl::Utility::I18n
+#remove    extend R8Tpl::Utility::I18n
     extend ImportObject
     extend ExportObject
 

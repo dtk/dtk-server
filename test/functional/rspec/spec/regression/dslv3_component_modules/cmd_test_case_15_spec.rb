@@ -16,6 +16,7 @@ component_name = 'source'
 attribute_name = 'hash_attr'
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_15_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
+attribute_value_hash = {"key1"=>nil}
 
 dtk_common = DtkCommon.new("", "")
 
@@ -49,10 +50,7 @@ describe "(Component Module DSL) Test Case 15: dtk.model.yaml with hash type att
   end
 
   context "Check if expected attribute value for attribute exist" do
-    it "gets attribute value and checks that it is hash type and contains key1 with value nil" do
-      attribute = dtk_common.get_attribute_value_from_module(module_name, component_name, attribute_name)
-      attribute.should include("{\"key1\"=>nil}")
-    end
+    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name, attribute_value_hash
   end
 
   context "Delete module" do

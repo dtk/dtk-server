@@ -15,8 +15,8 @@ module_filesystem_location = "~/dtk/component_modules"
 component_name = 'source'
 attribute_name_1 = 'hash_attr1'
 attribute_name_2 = 'hash_attr2'
-attribute_value_1 = "{\"key1\"=>[\"element1\", \"element2\"]}"
-attribute_value_2 = "{\"key1\"=>\"value1\", \"key2\"=>\"value2\"}"
+attribute_value_1 = {"key1"=>["element1", "element2"]}
+attribute_value_2 = {"key1"=>"value1", "key2"=>"value2"}
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_16_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 
@@ -52,17 +52,11 @@ describe "(Component Module DSL) Test Case 16: dtk.model.yaml with hash type att
   end
 
   context "Check if expected attribute value for attribute #{attribute_name_1} exist" do
-    it "gets attribute value and checks that it is hash type and contains key1=value1 and key2=value2" do
-      attribute = dtk_common.get_attribute_value_from_module(module_name, component_name, attribute_name_1)
-      attribute.should include(attribute_value_1)
-    end
+    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name, attribute_value_1
   end
 
   context "Check if expected attribute value for attribute #{attribute_name_2} exist" do
-    it "gets attribute value and checks that it is hash type and contains key1 with value [element1, element2]" do
-      attribute = dtk_common.get_attribute_value_from_module(module_name, component_name, attribute_name_2)
-      attribute.should include(attribute_value_2)
-    end
+    include_context "Check if expected attribute value exists for given attribute name", dtk_common, module_name, component_name, attribute_name, attribute_value_2
   end
 
   context "Delete module" do

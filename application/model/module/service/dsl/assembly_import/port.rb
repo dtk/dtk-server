@@ -13,7 +13,7 @@ module DTK; class ServiceModule
         @ndx_assembly_hashes.each do |ref,assembly|
           qualified_ref = self.class.internal_assembly_ref__add_version(ref,version_field)
           assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
-          ports = PortProcessing.add_needed_ports(assembly_idh)
+          ports = add_needed_ports(assembly_idh)
           version_proc_class = @ndx_version_proc_classes[ref]
           # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
           opts = Hash.new
@@ -30,25 +30,24 @@ module DTK; class ServiceModule
         Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
       end
     end
-  end
 
-  module PortProcessing
-    def self.add_needed_ports(assembly_idh)
+    def add_needed_ports(assembly_idh)
       ret = Array.new
       assembly = assembly_idh.create_object()
       link_defs_info = LinkDef::Info.get_link_def_info(assembly)
 
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-      create_assembly_template_ports?(assembly,link_defs_info,create_opts)
+pp [:create_assembly_template_ports,link_defs_info]
+      PortProcessing.create_assembly_template_ports?(link_defs_info,create_opts)
     end
+  end
 
-    private
-    def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
+  module PortProcessing
+    def self.create_assembly_template_ports?(link_defs_info,opts={})
       ret = Array.new
       return ret if link_defs_info.empty?
-      port_mh = assembly.id_handle.create_childMH(:port)
+      port_mh = link_defs_info.first.model_handle(:port) 
       ndx_existing_ports = get_ndx_existing_ports(port_mh,link_defs_info,opts)
-      
       #create create-hashes for both local side and remote side ports
       #Need to index by node because create_from_rows can only insert under one parent
       ndx_rows = Hash.new
@@ -87,9 +86,8 @@ module DTK; class ServiceModule
       
       new_rows = Array.new
       ndx_rows.values.each do |r|
-        #TODO: think we could just use the port_mh declared in the calling scope
-        port_mh_x = r[:node].model_handle_with_auth_info.create_childMH(:port)
-        new_rows += Model.create_from_rows(port_mh_x,r[:ndx_create_rows].values,opts)
+        create_port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
+        new_rows += Model.create_from_rows(create_port_mh,r[:ndx_create_rows].values,opts)
       end
       
         #delete any existing ports that match what is being put in now
@@ -119,17 +117,20 @@ module DTK; class ServiceModule
         ret + new_rows
     end
     
-    
+   private
     #returns hash where each key value has form
     #PortID:
     #  port: PORT
     #  matched: false 
     def self.get_ndx_existing_ports(port_mh,link_defs_info,opts={})
       ndx_existing_ports = Hash.new
+      nodes = link_defs_info.map{|ld|ld[:node]}
+      return ndx_existing_ports if nodes.empty?
+
       #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking for existing ports
       sp_hash = {
         :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
-        :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
+        :filter => [:oneof, :node_node_id, nodes.map{|n|n[:id]}]
       }
       
       Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|

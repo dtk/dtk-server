@@ -5,7 +5,6 @@ module DTK; class ServiceModule
         @ndx_ports.values()
       end
      private
-      include ServiceDSLCommonMixin
       def add_port_and_port_links()
         #port links can only be imported in after ports created
         #add ports to assembly nodes
@@ -14,7 +13,7 @@ module DTK; class ServiceModule
         @ndx_assembly_hashes.each do |ref,assembly|
           qualified_ref = self.class.internal_assembly_ref__add_version(ref,version_field)
           assembly_idh = @container_idh.get_child_id_handle(:component,qualified_ref)
-          ports = add_ports_during_import(assembly_idh)
+          ports = PortProcessing.add_needed_ports(assembly_idh)
           version_proc_class = @ndx_version_proc_classes[ref]
           # db_updates_port_links.merge!(version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports))
           opts = Hash.new
@@ -22,7 +21,7 @@ module DTK; class ServiceModule
             opts[:file_path] = file_path
           end
           port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports,opts)
-          return port_links if port_links.is_a?(ErrorUsage::DSLParsing)
+          return port_links if dsl_parsing_error?(port_links)
 
           db_updates_port_links.merge!(port_links)
           ports.each{|p|@ndx_ports[p[:id]] = p}
@@ -30,110 +29,113 @@ module DTK; class ServiceModule
         #Within import_port_links does the mark as complete for port links
         Model.input_hash_content_into_model(@container_idh,{"component" => db_updates_port_links})
       end
+    end
+  end
 
-      def add_ports_during_import(assembly_idh)
-        ret = Array.new
-        assembly = assembly_idh.create_object()
-        link_defs_info = LinkDef::Info.get_link_def_info(assembly)
+  module PortProcessing
+    def self.add_needed_ports(assembly_idh)
+      ret = Array.new
+      assembly = assembly_idh.create_object()
+      link_defs_info = LinkDef::Info.get_link_def_info(assembly)
 
-        create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-        create_assembly_template_ports?(assembly,link_defs_info,create_opts)
+      create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
+      create_assembly_template_ports?(assembly,link_defs_info,create_opts)
+    end
+
+    private
+    def self.create_assembly_template_ports?(assembly,link_defs_info,opts={})
+      ret = Array.new
+      return ret if link_defs_info.empty?
+      port_mh = assembly.id_handle.create_childMH(:port)
+      ndx_existing_ports = get_ndx_existing_ports(port_mh,link_defs_info,opts)
+      
+      #create create-hashes for both local side and remote side ports
+      #Need to index by node because create_from_rows can only insert under one parent
+      ndx_rows = Hash.new
+      link_defs_info.each do |ld_info|
+        if link_def = ld_info[:link_def]
+          node = ld_info[:node]
+          cmp_ref = ld_info[:component_ref]
+          port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component],:component_ref => cmp_ref)
+          if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+            existing_port_info[:matched] = true
+            ret << existing_port_info[:port]
+          else
+            pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
+            pntr[:ndx_create_rows][port[:ref]] ||= port
+          end
+        end
       end
 
-      def create_assembly_template_ports?(assembly,link_defs_info,opts={})
-        ret = Array.new
-        return ret if link_defs_info.empty?
-        port_mh = assembly.id_handle.create_childMH(:port)
-        ndx_existing_ports = get_ndx_existing_ports(port_mh,link_defs_info,opts)
-
-        #create create-hashes for both local side and remote side ports
-        #Need to index by node because create_from_rows can only insert under one parent
-        ndx_rows = Hash.new
-        link_defs_info.each do |ld_info|
-          if link_def = ld_info[:link_def]
-            node = ld_info[:node]
-            cmp_ref = ld_info[:component_ref]
-            port = Port.ret_port_create_hash(link_def,node,ld_info[:nested_component],:component_ref => cmp_ref)
-            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
-              existing_port_info[:matched] = true
-              ret << existing_port_info[:port]
-            else
-              pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
-              pntr[:ndx_create_rows][port[:ref]] ||= port
-            end
+      #add the remote ports
+      link_defs_info.generate_link_def_link_pairs do |link_def,link|
+        remote_component_type = link[:remote_component_type]
+        link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
+          node = matching_node_cmp[:node]
+          component = matching_node_cmp[:nested_component]
+          cmp_ref = matching_node_cmp[:component_ref]
+          port = Port.ret_port_create_hash(link_def,node,component,:remote_side=>true,:component_ref => cmp_ref)
+          if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
+            existing_port_info[:matched] = true
+            ret << existing_port_info[:port]
+          else
+            pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
+            pntr[:ndx_create_rows][port[:ref]] ||= port
           end
         end
-
-        #add the remote ports
-        link_defs_info.generate_link_def_link_pairs do |link_def,link|
-          remote_component_type = link[:remote_component_type]
-          link_defs_info.select{|r|r[:nested_component][:component_type] == remote_component_type}.each do |matching_node_cmp|
-            node = matching_node_cmp[:node]
-            component = matching_node_cmp[:nested_component]
-            cmp_ref = matching_node_cmp[:component_ref]
-            port = Port.ret_port_create_hash(link_def,node,component,:remote_side=>true,:component_ref => cmp_ref)
-            if existing_port_info = (ndx_existing_ports[node[:id]]||{})[port[:ref]]
-              existing_port_info[:matched] = true
-              ret << existing_port_info[:port]
-            else
-              pntr = ndx_rows[node[:id]] ||= {:node => node, :ndx_create_rows => Hash.new}
-              pntr[:ndx_create_rows][port[:ref]] ||= port
-            end
-          end
-        end
-
-        new_rows = Array.new
-        ndx_rows.values.each do |r|
-          #TODO: think we could just use the port_mh declared in the calling scope
-          port_mh_x = r[:node].model_handle_with_auth_info.create_childMH(:port)
-          new_rows += Model.create_from_rows(port_mh_x,r[:ndx_create_rows].values,opts)
-        end
-
+      end
+      
+      new_rows = Array.new
+      ndx_rows.values.each do |r|
+        #TODO: think we could just use the port_mh declared in the calling scope
+        port_mh_x = r[:node].model_handle_with_auth_info.create_childMH(:port)
+        new_rows += Model.create_from_rows(port_mh_x,r[:ndx_create_rows].values,opts)
+      end
+      
         #delete any existing ports that match what is being put in now
-        port_idhs_to_delete = Array.new
-        ndx_existing_ports.each_value do |inner_ndx_ports|
-          inner_ndx_ports.each_value do |port_info|
-            unless port_info[:matched]
-              port_idhs_to_delete << port_info[:port].id_handle()
-            end
+      port_idhs_to_delete = Array.new
+      ndx_existing_ports.each_value do |inner_ndx_ports|
+        inner_ndx_ports.each_value do |port_info|
+          unless port_info[:matched]
+            port_idhs_to_delete << port_info[:port].id_handle()
           end
         end
-        unless port_idhs_to_delete.empty?()
-          Model.delete_instances(port_idhs_to_delete)
-        end
-
-        #for new rows need to splice in node info
-        unless new_rows.empty?
-          sp_hash = {
-            :cols => [:id,:node],
-            :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:parent_id]}]
-          }
-          ndx_port_node = Model.get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
-            h.merge(r[:id] => r[:node])
-          end
-          new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
-        end
-        ret + new_rows
       end
-
-
-      #returns hash where each key value has form
-      #PortID:
-      #  port: PORT
-      #  matched: false 
-      def get_ndx_existing_ports(port_mh,link_defs_info,opts={})
-        ndx_existing_ports = Hash.new
-        #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking for existing ports
+      unless port_idhs_to_delete.empty?()
+        Model.delete_instances(port_idhs_to_delete)
+      end
+      
+      #for new rows need to splice in node info
+      unless new_rows.empty?
         sp_hash = {
-          :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
-          :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
+          :cols => [:id,:node],
+          :filter => [:oneof, :node_node_id, new_rows.map{|p|p[:parent_id]}]
         }
-
-        Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
-          (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
-        end 
-        ndx_existing_ports
+        ndx_port_node = Model.get_objs(port_mh,sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:id] => r[:node])
+        end
+        new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
       end
+        ret + new_rows
+    end
+    
+    
+    #returns hash where each key value has form
+    #PortID:
+    #  port: PORT
+    #  matched: false 
+    def self.get_ndx_existing_ports(port_mh,link_defs_info,opts={})
+      ndx_existing_ports = Hash.new
+      #make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking for existing ports
+      sp_hash = {
+        :cols => ([:node_node_id,:ref,:node] + (opts[:returning_sql_cols]||[])).uniq,
+        :filter => [:oneof, :node_node_id, link_defs_info.map{|ld|ld[:node][:id]}]
+      }
+      
+      Model.get_objs(port_mh,sp_hash,:keep_ref_cols => true).each do |r|
+        (ndx_existing_ports[r[:node_node_id]] ||= Hash.new)[r[:ref]] = {:port => r,:matched => false}
+      end 
+      ndx_existing_ports
     end
   end
 end;end

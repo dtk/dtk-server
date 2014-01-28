@@ -27,14 +27,8 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
         ReferencedComponentTemplates.new(pruned_ndx_cmp_refs)
       end
 
-      #array where each element is
-      # assembly_template_idh: IDH
-      # link_def_info: LinkDef::Info
-      # ports: 
-      #  - Port
-      #TODO: templ stub that just dumps LinkDef::Info w/o link_def_links
-      def create_link_def_info_per_assembly(new_links_defs)
-        ret = LinkDef::Info.new
+      def create_link_def_info(new_links_defs)
+        link_def_info = LinkDef::Info.new
         
         #link defs indexed by component template
         ndx_link_defs = new_links_defs.inject(Hash.new) do |h,ld|
@@ -52,11 +46,11 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
                 :nested_component => cmp_template.hash_subset(*LinkDef::Info.nested_component_cols()),
                 :link_def => link_def                                         
               )
-              ret << el
+              link_def_info << el
             end
           end
         end
-        ret
+        link_def_info.add_link_def_links!()
       end
 
      private

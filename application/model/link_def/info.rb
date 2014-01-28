@@ -20,21 +20,27 @@ module DTK
 
       def self.get_link_def_info(assembly_template)
         link_defs_info = new(assembly_template.get_objs(:cols => [:template_link_defs_info]))
-        return link_defs_info if link_defs_info.empty?
+        link_defs_info.add_link_def_links!()
+      end
 
-        link_defs = link_defs_info.link_defs()
+      def add_link_def_links!()
+        link_defs = link_defs()
+        return self if link_defs.empty?()
         sp_hash = {
           :cols => [:id,:group_id,:link_def_id,:remote_component_type],
           :filter => [:oneof, :link_def_id, link_defs.map{|ld|ld[:id]}]
         }
-        rows = Model.get_objs(assembly_template.model_handle(:link_def_link),sp_hash)
-        ndx_link_def_links = rows.inject(Hash.new){|h,r|h.merge(r[:link_def_id] => r)}
+        link_def_link_mh = link_defs.first.model_handle(:link_def_link)
+        ndx_link_def_links = Model.get_objs(link_def_link_mh,sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:link_def_id] => r)
+        end
+
         link_defs.each do |link_def|
           if link = ndx_link_def_links[link_def[:id]]
             (link_def[:link_def_links] ||= Array.new) << link
           end
         end
-        link_defs_info
+        self
       end
 
       #signature generate_link_def_link_pairs do |link_def,link|

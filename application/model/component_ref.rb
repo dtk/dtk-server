@@ -1,5 +1,9 @@
 module DTK 
   class ComponentRef < Model
+    def self.common_cols()
+      [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
+    end
+
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name,:ref_name]
       update_object!(*cols_to_get)

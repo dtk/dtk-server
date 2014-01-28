@@ -49,7 +49,16 @@ module DTK
       end
 
       def add_new_ports_on_component_templates()
-        #TODO: stub
+        #find all assembly templates that reference a component template that has a new link def added
+        #this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
+        new_snapshot = Snapshot.new(@cmp_module)
+        snapshot_link_def_ids = @snapshot.link_defs.map{|ld|ld[:id]}
+        new_links_defs = new_snapshot.link_defs.reject{|ld|snapshot_link_def_ids.include?(ld[:id])}
+        unless new_links_defs.empty?
+          link_def_info_array = new_snapshot.create_link_def_info_per_assembly(new_links_defs)
+          pp [:link_def_info_array,link_def_info_array]
+          raise ErrorUsage.new("got here; retract transaction for testing")
+        end
       end
 
       def model_handle(model_name)

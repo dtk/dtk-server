@@ -11,6 +11,13 @@ module DTK
     #     link_def_links:
     #     - LinkDefLink 
     class Info < Array
+      def self.component_ref_cols()
+        ComponentRef.common_cols()        
+      end
+      def self.nested_component_cols()
+        [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id,:only_one_per_node]
+      end
+
       def self.get_link_def_info(assembly_template)
         link_defs_info = new(assembly_template.get_objs(:cols => [:template_link_defs_info]))
         return link_defs_info if link_defs_info.empty?

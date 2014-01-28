@@ -2,7 +2,8 @@ module DTK; class ComponentDSL
   class RefIntegrity
     class Snapshot
 #TODO: for testing
-attr_reader :ndx_cmp_refs,:ports,:port_links,:link_defs
+attr_reader :ndx_cmp_refs,:ports,:port_links
+      attr_reader :link_defs
       def initialize(cmp_module)
         @cmp_module = cmp_module
         #ndx_cmp_refs is component refs indexed by component template; plus augmented info for cmp refs; it has form
@@ -24,6 +25,38 @@ attr_reader :ndx_cmp_refs,:ports,:port_links,:link_defs
       def referenced_cmp_templates(exclude_cmp_template_ids)
         pruned_ndx_cmp_refs = @ndx_cmp_refs.reject{|ct|exclude_cmp_template_ids.include?(ct[:id])}
         ReferencedComponentTemplates.new(pruned_ndx_cmp_refs)
+      end
+
+      #array where each element is
+      # assembly_template_idh: IDH
+      # link_def_info: LinkDef::Info
+      # ports: 
+      #  - Port
+      #TODO: templ stub that just dumps LinkDef::Info w/o link_def_links
+      def create_link_def_info_per_assembly(new_links_defs)
+        ret = LinkDef::Info.new
+        
+        #link defs indexed by component template
+        ndx_link_defs = new_links_defs.inject(Hash.new) do |h,ld|
+          h.merge(ld[:component_component_id] => ld)
+        end
+        
+        @ndx_cmp_refs.each do |cmp_template|
+          if link_def = ndx_link_defs[cmp_template[:id]]
+            cmp_template[:component_refs].each do |cmp_ref|
+              node = cmp_ref[:node]
+              assembly_template = cmp_ref[:assembly_template]
+              el = assembly_template.merge(
+                :node => node,
+                :component_ref => cmp_ref.hash_subset(*LinkDef::Info.component_ref_cols()),
+                :nested_component => cmp_template.hash_subset(*LinkDef::Info.nested_component_cols()),
+                :link_def => link_def                                         
+              )
+              ret << el
+            end
+          end
+        end
+        ret
       end
 
      private

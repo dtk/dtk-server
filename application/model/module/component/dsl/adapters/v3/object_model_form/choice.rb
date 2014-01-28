@@ -34,9 +34,7 @@ module DTK; class ComponentDSL; class V3
       def self.deps_and_link_defs(input_hash,base_cmp,opts={}) 
         ndx_dep_choices = Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
         ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash["link_defs"],base_cmp,opts)
-pp [:before_integrate,:ndx_dep_choices,ndx_dep_choices]
         spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices,ndx_link_def_links)
-pp [:after_integrate,:ndx_dep_choices,ndx_dep_choices]
         dependencies = Dependency.dependencies?(ndx_dep_choices.values,base_cmp,opts)
         link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
         [dependencies,link_defs]
@@ -96,7 +94,6 @@ pp [:after_integrate,:ndx_dep_choices,ndx_dep_choices]
       def self.integrate_deps_and_link_defs!(ndx_dep_choices,ndx_link_def_links)
         #first splice
         spliced_ndx_link_def_links = splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
-pp [:spliced_ndx_link_def_links,spliced_ndx_link_def_links]
         #throw error if there are any unmatched ndx_dep_choices that have a remote location
         #remove any simple dependencies that match a link def
         ndx_dep_choices.each do |ndx,dep_choices|

@@ -344,6 +344,7 @@ module DTK
       self[:agent_git_commit_id] = agent_git_commit_id      
     end
 
+#TODO: these may be depracted
     def update_ordered_component_ids(order)
       ordered_component_ids = "{ :order => [#{order.join(',')}] }"
       update(:ordered_component_ids => ordered_component_ids)
@@ -355,13 +356,14 @@ module DTK
       return Array.new unless ordered_component_ids
       eval(ordered_component_ids)[:order]
     end
+#end of these may be depracted
 
     def get_external_ref()
       get_field?(:external_ref)||{}
     end
 
     def self.pbuilderid(node)
-      get_external_ref()[:instance_id]
+      node.get_external_ref()[:instance_id]
     end
     def pbuilderid()
       Node.pbuilderid(self)

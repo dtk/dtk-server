@@ -11,7 +11,7 @@ r8_nested_require('model','data')
 module DTK
   #TODO: change to be under a simpler more efficient hash object; dont need autovivification and may eventually reserve virtual attrs
 
-  class Model < HashObject 
+  class Model < ModelHashObject 
 #TODO: remove    include R8Tpl::Utility::I18n
 #remove    extend R8Tpl::Utility::I18n
     extend ImportObject

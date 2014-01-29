@@ -140,14 +140,12 @@ module DTK
     end
   end
 
-  class HashObject < Hash
-    def initialize(initial_val=nil,convert_initial=false,&block)
-      block ? super(&block) : super()
-      if initial_val
-        replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
-      end
-    end
-
+#TODO: starting to take unneeded funcstions out of ModelHashObject ad put in HashObject; that is why non-standard class declarations below
+  
+  class ModelHashObject < Hash
+  end
+  class HashObject < ModelHashObject
+    #functions removing from ModelHashObject
     #protection if foo[x] called where foo is frozen and x does not exist
     def [](x)
       frozen? ? (super if has_key?(x)) : super
@@ -156,6 +154,14 @@ module DTK
     def recursive_freeze()
       each_value{|el| el.recursive_freeze if el.respond_to?(:recursive_freeze)}
       freeze
+    end
+  end
+  class ModelHashObject
+    def initialize(initial_val=nil,convert_initial=false,&block)
+      block ? super(&block) : super()
+      if initial_val
+        replace(convert_initial ? convert_nested_hashes(initial_val) : initial_val)
+      end
     end
 
     def slice(*slice_keys)
@@ -252,7 +258,8 @@ module DTK
       return hash.has_key?(f) if path.length == 0
       nested_value_private!(hash[f],path)
     end
-
+  end
+  class HashObject
     class AutoViv < self
       def ArrayClass()
         ArrayObject

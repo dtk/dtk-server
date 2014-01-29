@@ -237,6 +237,7 @@ lambda__segment_impls =
        },
        {
          :model_name=>:node,
+         :convert => true,
          :join_type=>:inner,
          :join_cond=>{:id =>:component_ref__node_node_id},
          :cols=>[:id,:display_name,:group_id,:assembly_id]

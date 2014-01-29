@@ -114,7 +114,8 @@ pp [:create_assembly_template_ports,link_defs_info]
         end
         new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
       end
-        ret + new_rows
+      pp [:add_ports,ret,new_rows]
+      ret + new_rows
     end
     
    private

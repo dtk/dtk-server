@@ -75,7 +75,7 @@ class FieldR8
   end
  private
   def self.load_field_file(file_name)
-    r8_require("#{UTILS_DIR}/internal/fields/#{file_name}")
+    r8_require("#{UTILS_DIR}/fields/#{file_name}")
   end 
   def load_field_file(file_name)
     self.class.load_field_file(file_name)

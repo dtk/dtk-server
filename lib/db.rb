@@ -1,10 +1,11 @@
 require 'sequel'
-#TODO: can probably get rid of internal dir, cleanup in next pass
-%w{schema_processing data_processing associations infra_tables authorization}.each do |filename|
-  require File.expand_path("#{UTILS_DIR}/internal/db/#{filename}", File.dirname(__FILE__))
-end
+r8_nested_require('db','schema_processing')
+r8_nested_require('db','data_processing')
+r8_nested_require('db','associations')
+r8_nested_require('db','infra_tables')
+r8_nested_require('db','authorization')
 
-module XYZ
+module DTK
   class DB
     attr_reader :c
     attr_reader :db #TBD: for testing
@@ -29,7 +30,6 @@ module XYZ
     def empty_dataset()
       @db.dataset()
     end
-
 
     include SchemaProcessing unless included_modules.include?(SchemaProcessing)
     include DataProcessing unless included_modules.include?(DataProcessing)
@@ -69,16 +69,16 @@ module XYZ
     end
 
     def self.create(db_params)
-      require File.expand_path(UTILS_DIR+'/internal/db/adapters/' + db_params[:type] , File.dirname(__FILE__))
-      db_class = XYZ.const_get db_params[:type].capitalize
+      r8_nested_require('db',"adapters/#{db_params[:type]}")
+      db_class = DTK.const_get db_params[:type].capitalize
       db_class.new(db_params)
     end
 
     def self.create_for_migrate()
       sequel_db = ::DB
       db_type = sequel_db.adapter_scheme 
-      require File.expand_path("#{UTILS_DIR}/internal/db/adapters/#{db_type}", File.dirname(__FILE__))
-      db_class = XYZ.const_get db_type.to_s.capitalize
+      r8_nested_require('db',"adapters/#{db_type}")
+      db_class = DTK.const_get db_type.to_s.capitalize
       db_class.new({},Opts.new(:sequel_db => sequel_db))
     end
 

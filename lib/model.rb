@@ -634,6 +634,7 @@ module DTK
       cols = (cols.include?(:display_name) ? cols : cols + [:display_name]) #always good to get display_name
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
+      debug_mode_possible_extra_db_calls(cols_to_get,:update_object)
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
       if vals = get_objs({:cols => cols_to_get},opts).first
         vals.each do |k,v|
@@ -650,6 +651,7 @@ module DTK
       cols_to_get =  cols.reject{|col|self.has_key?(col)}
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref,:ref_num]).empty? ? {} : {:keep_ref_cols => true}
+      debug_mode_possible_extra_db_calls(cols_to_get,:update_obj)
       if vals = get_objs({:cols => cols_to_get},opts).first
         vals.each do |k,v|
           if cols.include?(k)
@@ -661,6 +663,12 @@ module DTK
         @id_handle[:group_id] ||= group_id()
       end
       self
+    end
+
+    def debug_mode_possible_extra_db_calls(cols_to_get,tag)
+      if R8::Config[:debug][:view_update_object]
+        Log.info_pp([:debug_mode_possible_extra_db_calls,tag,self.class,self,cols_to_get,caller[0..7]])
+      end
     end
     
     #this returns field if exists, otherways gets it

@@ -8,6 +8,7 @@ files =
    'aes', 
    'dataset_from_search_pattern', 
    'hash_object', 
+   'opts',
    'array_object', 
    'rest_uri', 
    'serialize_to_json', 

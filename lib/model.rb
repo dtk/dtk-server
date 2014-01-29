@@ -1,3 +1,4 @@
+#TODO: needs cleanup and partitioning
 #TODO: model_name and relation_type redundant
 r8_nested_require('model','input_into_model')
 r8_nested_require('model','field_set')
@@ -9,11 +10,9 @@ r8_nested_require('model','schema')
 r8_nested_require('model','data')
 
 module DTK
-  #TODO: change to be under a simpler more efficient hash object; dont need autovivification and may eventually reserve virtual attrs
-
-  class Model < ModelHashObject 
-#TODO: remove    include R8Tpl::Utility::I18n
-#remove    extend R8Tpl::Utility::I18n
+  class Model < HashObject::Model 
+    #TODO: remove    include R8Tpl::Utility::I18n
+    #remove    extend R8Tpl::Utility::I18n
     extend ImportObject
     extend ExportObject
 
@@ -23,6 +22,44 @@ module DTK
       attr_reader :db
       expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
     end
+
+    #======hash index methods
+
+    def [](x)
+      return super(x) if has_key?(x)
+      vc_info = ret_info_if_is_virtual_column(x)
+      if vc_info
+        #first check if it has an explicit path or possible parents defined; otherwise look for fn
+        if vc_info[:path]
+          nested_value(*vc_info[:path])
+        elsif vc_info[:possible_parents] and x == :parent_name
+          ret_parent_name(vc_info[:possible_parents])
+        elsif respond_to?(x)
+          send(x)
+        end
+      end
+    end
+    
+    def ret_parent_name(possible_parents)
+      #one complication is if parent is same type as self then looking for "p2", rather than p; this is due
+      #to how we got around problem of having unique table names when joining table to itself
+      #TODO: is it better to see if can change the joining to not have teh "2" suffix
+      possible_parents.each do |p|
+        parent_obj = self[relation_type == p ? "#{p}2".to_sym : p]
+        return "#{p}/#{parent_obj[:display_name]}" if parent_obj and parent_obj[:display_name]
+      end
+      nil
+    end
+
+    def ret_info_if_is_virtual_column(col)
+      virtual_columns[col]
+    end
+    def virtual_columns()
+      self.class.db_rel[:virtual_columns]||{}
+    end
+    private :ret_parent_name,:virtual_columns,:ret_info_if_is_virtual_column
+
+    #======end: hash index methods
 
     #TODO: looking to use this as step to transform to simpler object model calls
     def get_objs_helper(virtual_attr,result_col=nil,opts={})
@@ -796,43 +833,12 @@ module DTK
       @db.get_instance_or_factory(id_handle,nil,opts.merge({:depth => :deep, :no_hrefs => true}))
     end
 
-    def [](x)
-      #TODO: make more efficient by calling Hash::[] rather than HashObject::[]
-      return super(x) if has_key?(x)
-      vc_info = ret_info_if_is_virtual_column(x)
-      if vc_info
-        #first check if it has an explicit path or possible parents defined; otherwise look for fn
-        return nested_value(*vc_info[:path]) if vc_info[:path]
-        return ret_parent_name(vc_info[:possible_parents]) if vc_info[:possible_parents] and x == :parent_name
-        send(x) if respond_to?(x)
-      else
-        nil
-      end
-    end
-
     def materialize!(cols)
       cols.each{|col|self[col] = self[col] unless self.has_key?(col)}
       self
     end
 
-    def ret_info_if_is_virtual_column(col)
-      virtual_columns[col]
-    end
-    def virtual_columns()
-      self.class.db_rel[:virtual_columns]||{}
-    end
-    private :virtual_columns
 
-    def ret_parent_name(possible_parents)
-      #one complication is if parent is same type as self then looking for "p2", rather than p; this is due
-      #to how we got around problem of having unique table names when joining table to itself
-      #TODO: is it better to see if can change the joining to not have teh "2" suffix
-      possible_parents.each do |p|
-        parent_obj = self[relation_type == p ? "#{p}2".to_sym : p]
-        return "#{p}/#{parent_obj[:display_name]}" if parent_obj and parent_obj[:display_name]
-      end
-      nil
-    end
    protected
 
 

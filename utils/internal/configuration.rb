@@ -2,6 +2,13 @@
 require 'singleton'
 require 'etc'
 module DTK
+  class ConfigHash < HashObject::AutoViv
+    #TODO: for putting in hooks to better report on config var access errors
+    def is_development_mode?
+      return self[:debug][:development_mode]
+    end
+  end
+
   #Methods to set configuration
   class Configuration
     include Singleton

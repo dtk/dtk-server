@@ -333,10 +333,10 @@ module DTK; class  Assembly
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       sp_hash = {
-        :cols => [:id, :display_name,:group_id,:component_type,:version,:created_at,col].compact,
+        :cols => [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact,
         :filter => filter
       }
-      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
+      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash,:keep_ref_cols=>true)
       return ret unless needs_empty_nodes
 
       #add in in assembly nodes without components on them

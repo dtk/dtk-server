@@ -1,6 +1,6 @@
 r8_nested_require('target','clone')
 
-module XYZ
+module DTK
   class Target < Model
     include TargetCloneMixin
     r8_nested_require('target','instance')
@@ -90,7 +90,7 @@ module XYZ
     end
       
     def update_ui_for_new_item(new_item_id)
-      update_object!(:ui)
+      update_obj!(:ui)
       target_ui = self[:ui]||{:items=>{}}
       target_ui[:items][new_item_id.to_s.to_sym] = {}
       update(:ui=>target_ui)
@@ -110,7 +110,7 @@ module XYZ
     end
 
     def get_project()
-      project_id = update_object!(:project_id)[:project_id]
+      project_id = get_field?(:project_id)
       id_handle(:id => project_id,:model_name => :project).create_object()
     end
 
@@ -121,28 +121,28 @@ module XYZ
     end
 
     def get_iaas_type()
-      update_object!(:iaas_type)[:iaas_type]
+      get_field?(:iaas_type)
     end
 
     def get_security_group()
-      update_object!(:iaas_properties)[:iaas_properties][:security_group]
+      get_field?(:iaas_properties)[:security_group]
     end
 
     def get_region()
-      update_object!(:iaas_properties)[:iaas_properties][:region]
+      get_field?(:iaas_properties)[:region]
     end
 
     def get_keypair_name()
-      update_object!(:iaas_properties)[:iaas_properties][:keypair]
+      get_field?(:iaas_properties)[:keypair]
     end
 
     def get_security_group()
-      update_object!(:iaas_properties)[:iaas_properties][:security_group]
+      get_field?(:iaas_properties)[:security_group]
     end
 
     # returns aws params if pressent in iaas properties
     def get_aws_compute_params()
-      iaas_props = update_object!(:iaas_properties)[:iaas_properties]
+      iaas_props = get_field?(:iaas_properties)
       if iaas_props && (aws_key = iaas_props[:key]) && (aws_secret = iaas_props[:secret])
         return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
       end

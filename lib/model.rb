@@ -673,7 +673,7 @@ module DTK
     
     #this returns field if exists, otherways gets it
     def get_field?(field)
-      self[field]||update_object!(field)[field]
+      self[field]||update_obj!(field)[field]
     end
 
     def update_and_materialize_object!(*cols)

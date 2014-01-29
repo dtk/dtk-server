@@ -1,5 +1,5 @@
-require File.expand_path('field.r8.rb', File.dirname(__FILE__))
-require File.expand_path('common_mixin.r8', File.dirname(__FILE__))
+require File.expand_path('field.r8', File.dirname(__FILE__))
+require File.expand_path('common_mixin', File.dirname(__FILE__))
 
 module R8Tpl
   class ViewR8
@@ -772,7 +772,7 @@ module R8Tpl
       #jsTpl should then be updated to reflect changes
 #TODO: switch this when functions moved to js compile class
 #      templateR8EditTime = File.mtime(getcwd()."/system/template.r8.php");
-      templateR8EditTime = File.mtime(Dir.pwd+"/template.r8.rb")
+      templateR8EditTime = File.mtime(Dir.pwd+"/template.rb")
       if(jsCacheEditTime < templateR8EditTime || jsCacheEditTime < tplCacheEditTime) then
         return false
       else

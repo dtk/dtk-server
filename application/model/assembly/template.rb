@@ -371,6 +371,6 @@ module DTK; class Assembly
 
   end
 end
-#TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get
+#TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get
 AssemblyTemplate = Assembly::Template
 end

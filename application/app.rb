@@ -25,8 +25,9 @@ DTK = XYZ
 require File.expand_path('require_first', File.dirname(__FILE__))
 r8_require_common_lib('auxiliary')
 
-LIB_DIR = File.expand_path('../lib', File.dirname(__FILE__))
-UTILS_BASE_DIR = File.expand_path('../utils', File.dirname(__FILE__))
+SYSTEM_ROOT_PATH = File.expand_path('../', File.dirname(__FILE__))
+LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"
+UTILS_BASE_DIR = "#{SYSTEM_ROOT_PATH}/utils"
 UTILS_DIR = "#{UTILS_BASE_DIR}/internal"
 
 #TODO: make that log  dont need config values 
@@ -41,7 +42,8 @@ DTK::Configuration.instance.set_configuration()
 APPLICATION_DIR = File.expand_path("../#{R8::Config[:application_name]}", File.dirname(__FILE__))
 SYSTEM_DIR = File.expand_path('../system', File.dirname(__FILE__))
 
-r8_require("#{SYSTEM_DIR}/utility.r8.rb")
+r8_require("#{SYSTEM_DIR}/utility")
+r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
 
 
@@ -49,8 +51,8 @@ r8_require("#{LIB_DIR}/model")
 
 r8_require('config/routes.rb')
 
-#r8_require("#{SYSTEM_DIR}/view.r8.rb")
-#r8_require("#{SYSTEM_DIR}/template.r8.rb")
+#r8_require("#{SYSTEM_DIR}/view")
+#r8_require("#{SYSTEM_DIR}/template")
 
 #TODO: should load application strings here
 #user_lang should be in user prefs, or pulled/set from app default in config

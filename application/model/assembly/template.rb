@@ -246,23 +246,7 @@ module DTK; class Assembly
       components.flatten
     end
 
-    #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
     def self.check_valid_id(model_handle,id)
-      begin
-        check_valid_id__library_parent(model_handle,id)
-       rescue ErrorIdInvalid 
-        check_valid_id__project_parent(model_handle,id)
-      end
-    end
-    def self.name_to_id(model_handle,name)
-      begin
-        name_to_id__library_parent(model_handle,name)
-       rescue ErrorNameDoesNotExist
-        name_to_id__project_parent(model_handle,name)
-      end
-    end
-
-    def self.check_valid_id__project_parent(model_handle,id)
       filter =
         [:and,
          [:eq, :id, id],
@@ -270,8 +254,7 @@ module DTK; class Assembly
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-
-    def self.name_to_id__project_parent(model_handle,name)
+    def self.name_to_id(model_handle,name)
       parts = name.split("/")
       augmented_sp_hash = 
         if parts.size == 1
@@ -280,38 +263,6 @@ module DTK; class Assembly
                       [:eq, :component_type, pp_name_to_component_type(parts[0])],
                       [:eq, :type, "composite"],
                       [:neq, :project_project_id, nil]]
-          }
-      else
-        raise ErrorNameInvalid.new(name,pp_object_type())
-      end
-      name_to_id_helper(model_handle,name,augmented_sp_hash)
-    end
-    #MOD_RESTRUCT: deprecate below for above
-    def self.check_valid_id__library_parent(model_handle,id)
-      filter =
-        [:and,
-         [:eq, :id, id],
-         [:eq, :type, "composite"],
-         [:neq, :library_library_id, nil]]
-      check_valid_id_helper(model_handle,id,filter)
-    end
-
-    def self.name_to_id__library_parent(model_handle,name)
-      parts = name.split("/")
-      augmented_sp_hash = 
-        if parts.size == 1
-          {:cols => [:id,:component_type],
-           :filter => [:and,
-                      [:eq, :component_type, pp_name_to_component_type(parts[0])],
-                      [:eq, :type, "composite"],
-                      [:neq, :library_library_id, nil]]
-          }
-        elsif parts.size == 2
-          {:cols => [:id,:component_type,:library],
-           :filter => [:and,
-                      [:eq, :component_type, pp_name_to_component_type(parts[1])],
-                      [:eq, :type, "composite"]],
-           :post_filter => lambda{|r|r[:library][:display_name] ==  parts[0]}
           }
       else
         raise ErrorNameInvalid.new(name,pp_object_type())

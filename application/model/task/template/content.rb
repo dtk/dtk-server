@@ -106,6 +106,20 @@ module DTK; class Task
           }
         end
       end
+
+      def self.reify(serialized_content)
+        NotParsed.new(serialized_content)
+      end
+
+      class NotParsed
+        def serialization_form(opts={})
+          @serialized_content
+        end
+        def initialize(serialized_content)
+          @serialized_content = serialized_content
+        end
+      end
+
       def self.parse_and_reify(serialized_content,actions)
         #normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]

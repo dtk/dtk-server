@@ -76,7 +76,7 @@ module DTK; class AssemblyModule
       end
 
       def update_assembly_branch(module_branch,task_action=nil)
-        opts = {:donot_raise_error => true}
+        opts = {:donot_parse => true}
         opts.merge!(:task_action => task_action) if task_action
         template_content =  Task::Template::ConfigComponents.get_or_generate_template_content(:assembly,@assembly,opts)
         splice_in_workflow(module_branch,template_content,task_action)

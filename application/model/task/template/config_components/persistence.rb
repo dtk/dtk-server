@@ -10,7 +10,11 @@ module DTK; class Task; class Template; class ConfigComponents
           return ret
         end
         if serialized_content = get_serialized_content_from_assembly(assembly,task_action)
-          Content.parse_and_reify(serialized_content,cmp_actions)
+          if opts[:donot_parse]
+            Content.reify(serialized_content)
+          else
+            Content.parse_and_reify(serialized_content,cmp_actions)
+          end
         end
       end
       

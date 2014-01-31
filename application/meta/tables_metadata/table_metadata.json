@@ -309,6 +309,7 @@
       "status",
       "nodes",
       "assembly_template",
+      "created_at",
       "op_status",
       "components"
     ],
@@ -317,6 +318,7 @@
       "nodes": "nodes.size",
       "status": "execution_status",
       "assembly_name": "display_name",
+      "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",
       "op_status": "op_status"

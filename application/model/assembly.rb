@@ -223,6 +223,7 @@ module DTK
             #just triggers for assembly instances; indicates the assembly templaet that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
           end
+          pntr.merge!(:created_at => created_at) if created_at = r[:created_at]
 
           if raw_node = r[:node]
             node_id = raw_node[:id]
@@ -268,7 +269,7 @@ module DTK
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
           op_status = (op_status(nodes) if respond_to?(:op_status))
-          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes)
+          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

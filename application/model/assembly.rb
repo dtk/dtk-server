@@ -223,7 +223,9 @@ module DTK
             #just triggers for assembly instances; indicates the assembly templaet that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
           end
-          pntr.merge!(:created_at => created_at) if created_at = r[:created_at]
+          if created_at = r[:created_at]
+            pntr.merge!(:created_at => created_at) 
+          end
 
           if raw_node = r[:node]
             node_id = raw_node[:id]

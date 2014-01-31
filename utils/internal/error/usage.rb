@@ -2,6 +2,12 @@ module DTK
   #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')
+
+    def  initialize(msg="",name_or_opts=nil)
+      #this is call to dtkcommon
+      super
+    end
+
     class NotSupported < self
       def initialize(feature_not_supported)
         super("Not supported yet: #{feature_not_supported}")

@@ -40,15 +40,14 @@ module DTK
       parsing_error = nil
       begin
         normal_return = yield
-      rescue ErrorUsage::DSLParsing,ComponentDSL::ObjectModelForm::ParsingError,ErrorUsage::Parsing => e
+      rescue ErrorUsage::DSLParsing,ErrorUsage::Parsing => e
         parsing_error = e
       end
       parsing_error
     end
     def dsl_parsing_error?(obj)
       obj.is_a?(ErrorUsage::DSLParsing) || 
-        obj.is_a?(ComponentDSL::ObjectModelForm::ParsingError) ||
-        obj.is_a?(ErrorUsage::Parsing)
+      obj.is_a?(ErrorUsage::Parsing)
     end
   end
 

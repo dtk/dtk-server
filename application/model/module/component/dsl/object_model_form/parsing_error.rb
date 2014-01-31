@@ -1,6 +1,6 @@
 module DTK; class ComponentDSL
   class ObjectModelForm
-    class ParsingError < ErrorUsage
+    class ParsingError < ErrorUsage::DSLParsing
       def initialize(msg='',*args)
         parsing_error,@params = msg_pp_form_and_params(msg,*args)
         super("Component dsl parsing error: #{parsing_error}",:caller_info => true)

@@ -2,12 +2,9 @@
 module DTK
   class ErrorUsage 
     class Parsing < self
-      def initialize(error_msg,file_path=nil)
-        super(error_msg,file_path)
-      end
-
       class YAML < self
       end
+
       class Term < self
         def initialize(term,type_as_symbol=nil)
           msg =

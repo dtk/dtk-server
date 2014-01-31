@@ -84,18 +84,17 @@ module DTK; class AssemblyModule
 
      private
       def finalize_edit(module_branch,diffs_summary,task_action=nil)
+        parse_errors = nil
         file_path = meta_file_path(task_action)
         if diffs_summary.file_changed?(file_path)
           file_content = RepoManager.get_file_content(file_path,module_branch)
           format_type = Aux.format_type(file_path)
           hash_content = Aux.convert_to_hash(file_content,format_type)
           return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
-          if parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content,@assembly)
-            return parse_errors
-          end
+          parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content,@assembly)
           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(),hash_content,task_action)
-          nil
         end
+        parse_errors
       end
 
       def splice_in_workflow(module_branch,template_content,task_action=nil)

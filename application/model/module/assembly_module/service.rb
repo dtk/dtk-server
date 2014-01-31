@@ -8,7 +8,7 @@ module DTK; class AssemblyModule
 
     def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
       modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
-      modification_type_obj.finalize_edit(module_branch,diffs_summary)
+      modification_type_obj.private__finalize_edit(module_branch,diffs_summary)
     end
 
     def delete_module?(opts={})
@@ -19,6 +19,7 @@ module DTK; class AssemblyModule
     end
 
     private_instance_method 'create_and_update_assembly_branch?'
+    private_instance_method :finalize_edit
    private
     # returns a ModuleRepoInfo object
     def create_and_update_assembly_branch?()
@@ -75,12 +76,13 @@ module DTK; class AssemblyModule
       end
 
       def update_assembly_branch(module_branch,task_action=nil)
-        opts = Hash.new
+        opts = {:donot_raise_error => true}
         opts.merge!(:task_action => task_action) if task_action
         template_content =  Task::Template::ConfigComponents.get_or_generate_template_content(:assembly,@assembly,opts)
         splice_in_workflow(module_branch,template_content,task_action)
       end
 
+     private
       def finalize_edit(module_branch,diffs_summary,task_action=nil)
         file_path = meta_file_path(task_action)
         if diffs_summary.file_changed?(file_path)
@@ -96,7 +98,6 @@ module DTK; class AssemblyModule
         end
       end
 
-     private
       def splice_in_workflow(module_branch,template_content,task_action=nil)
         hash_content = template_content.serialization_form()
         module_branch.serialize_and_save_to_repo(meta_file_path(task_action),hash_content)

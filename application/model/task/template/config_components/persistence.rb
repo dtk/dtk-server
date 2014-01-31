@@ -5,7 +5,7 @@
 module DTK; class Task; class Template; class ConfigComponents 
   class Persistence
     class AssemblyActions
-      def self.get_content_for(assembly,cmp_actions,task_action=nil)
+      def self.get_content_for(assembly,cmp_actions,task_action=nil,opts={})
         if ret = ReifiedObjectCache.get(assembly,task_action)
           return ret
         end

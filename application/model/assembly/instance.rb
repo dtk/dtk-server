@@ -64,15 +64,10 @@ module DTK; class  Assembly
       get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
     end
 
-    def get_task_template_serialized_content(task_action=nil,opts={})
-      format = opts[:format]||:hash
-      if format == :hash
-        opts_task_gen = {:task_action => task_action,:dont_persist_generated_template => true}
-        ret = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],self,opts_task_gen)
-        ret && ret.serialization_form()
-      else
-        raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
-      end
+    def get_task_template_serialized_content(task_action=nil)
+      opts_task_gen = {:task_action => task_action,:dont_persist_generated_template => true}
+      ret = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],self,opts_task_gen)
+      ret && ret.serialization_form()
     end
 
     def get_component_list(opts={})

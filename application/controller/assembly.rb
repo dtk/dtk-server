@@ -111,12 +111,11 @@ module DTK
       rest_ok_response data, response_opts
     end
     SupportedFormats = [:yaml]
-    #TODO: may unify with above
+
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)
-      format = :hash #TODO: hard coded because only format supported now
-      response = assembly.get_task_template_serialized_content(task_action,:format => format)
+      response = assembly.get_task_template_serialized_content(task_action)
       response_opts = Hash.new
       if response
         response_opts.merge!(:encode_into => :yaml)

@@ -162,7 +162,7 @@ module DTK; class Task; class Template
           end
           ret << action
         else
-          raise ErrorParsing.new("Component action ref (#{component_name_ref}) on node (#{node_name}) cannot be resolved")
+          raise ErrorParsing.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
         end        
       end
 

@@ -1,5 +1,6 @@
 module DTK
   class AssemblyModule
+    extend Aux::CommonClassMixin
     r8_nested_require('assembly_module','component')
     r8_nested_require('assembly_module','service')
 

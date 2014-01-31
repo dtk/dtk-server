@@ -1,19 +1,14 @@
 module DTK; class AssemblyModule
   class Service < self
+    # returns a ModuleRepoInfo object
     def self.prepare_for_edit(assembly,modification_type)
       modification_type_obj = create_modification_type_object(assembly,modification_type)
-      modification_type_obj.create_and_update_assembly_branch?()
+      modification_type_obj.private__create_and_update_assembly_branch?()
     end
 
     def self.finalize_edit(assembly,modification_type,service_module,module_branch,diffs_summary)
       modification_type_obj = create_modification_type_object(assembly,modification_type,:service_module => service_module)
       modification_type_obj.finalize_edit(module_branch,diffs_summary)
-    end
-
-    def create_and_update_assembly_branch?()
-      module_branch = @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
-      update_assembly_branch(module_branch)
-      @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
     end
 
     def delete_module?(opts={})
@@ -23,7 +18,15 @@ module DTK; class AssemblyModule
       service_module.delete_version?(am_version,:donot_delete_meta=>true)
     end
 
+    private_instance_method 'create_and_update_assembly_branch?'
    private
+    # returns a ModuleRepoInfo object
+    def create_and_update_assembly_branch?()
+      module_branch = @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
+      update_assembly_branch(module_branch)
+      @service_module.get_workspace_branch_info(@am_version).merge(:edit_file => meta_file_path())
+    end
+
     def initialize(assembly,opts={})
       super(assembly)
       @assembly_template_name = assembly_template_name(assembly)

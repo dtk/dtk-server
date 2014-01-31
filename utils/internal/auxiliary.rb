@@ -4,8 +4,8 @@ module DTK
     r8_require('yaml_helper')
 
     module CommonClassMixin
-      def class_calls_private_instance(class_name)
-        class_eval("def #{class_name}__public(*args,&block);#{class_name}(*args,&block);end")
+      def private_instance_method(class_name)
+        class_eval("def private__#{class_name}(*args,&block);#{class_name}(*args,&block);end")
       end
     end
 

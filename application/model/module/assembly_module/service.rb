@@ -30,17 +30,19 @@ module DTK; class AssemblyModule
 
     def initialize(assembly,opts={})
       super(assembly)
-      @assembly_template_name = assembly_template_name(assembly)
+      @assembly_template_name = assembly_template_name?(assembly)
       @service_module = opts[:service_module] || get_service_module(assembly)
       @am_version = assembly_module_version(assembly)
     end
 
-    def assembly_template_name(assembly)
-      unless assembly_template = assembly.get_parent()
+    def assembly_template_name?(assembly)
+      if assembly_template = assembly.get_parent()
+        assembly_template.get_field?(:display_name)
+      else
         assembly_name = assembly.display_name_print_form()
-        raise ErrorUsage.new("Assembly (#{assembly_name}) is not tied to an assembly template")
+        Log.info("Assembly (#{assembly_name}) is not tied to an assembly template")
+        nil
       end
-      assembly_template.get_field?(:display_name)
     end
 
     def self.create_modification_type_object(assembly,modification_type,opts={})

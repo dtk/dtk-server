@@ -680,10 +680,10 @@ module DTK
       update_object!(*cols).materialize!(cols)
     end
 
-    def get_obj(sp_hash_x,opts={})
-      rows = get_objs(sp_hash_x,opts)
+    def get_obj(sp_hash,opts={})
+      rows = get_objs(sp_hash,opts)
       if rows.size > 1
-        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash_x.inspect} returned more than one row")
+        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row:",rows,caller[0..5]])
       end
       rows.first
     end
@@ -736,7 +736,7 @@ module DTK
       get_objs(model_handle,sp_hash,opts)
     end
 
-    #TODO: deprecate below
+    #TODO: deprecate get_objects_in_set_from_sp_hash
     def self.get_objects_in_set_from_sp_hash(id_handles,sp_hash_x,opts={})
       return Array.new if id_handles.empty?
       sample_idh = id_handles.first
@@ -748,7 +748,7 @@ module DTK
     def self.get_obj(model_handle,sp_hash,opts={})
       rows = get_objs(model_handle,sp_hash,opts)
       if rows.size > 1
-        Log.error("call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row")
+        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row:",rows,caller[0..5]])
       end
       rows.first
     end

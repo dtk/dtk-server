@@ -130,16 +130,16 @@ module DTK
             format_type = meta_file_format_type(meta_file)
             opts[:file_path] = meta_file
             
-            hash_content = Aux.convert_to_hash(file_content,format_type,opts)
-            return hash_content if hash_content.is_a?(ErrorUsage::DSLParsing)
+            hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
+            return hash_content if dsl_parsing_error?(hash_content)
 
             # if assembly/node import returns error continue with module import
             imported = assembly_import_helper.process(module_name,hash_content,opts)
-            return imported if imported.is_a?(ErrorUsage::DSLParsing)
+            return imported if dsl_parsing_error?(imported)
           end
         end
         errors = dangling_errors.raise_error?(:do_not_raise => true)
-        return errors if errors.is_a?(XYZ::ErrorUsage::DanglingComponentRefs)
+        return errors if errors.is_a?(ErrorUsage::DanglingComponentRefs)
 
         assembly_import_helper.import()
       end
@@ -203,7 +203,7 @@ module DTK
         #TODO: this is wrong; 
         #ServiceModule.delete(id_handle())
         #determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed
-        Log.error("TODO: may need to  write error cleanup for service module update that does not parse for service module (#{update_object!(:display_name,:dsl_parsed).inspect})")
+        # TODO: may need to  write error cleanup for service module update that does not parse for service module (#{update_object!(:display_name,:dsl_parsed).inspect})")
       end
       
     end

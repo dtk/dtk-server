@@ -1,4 +1,5 @@
-module XYZ
+require 'erubis'
+module DTK
   class ManageGitServerGitolite < ManageGitServer
     class << self
       def create_server_repo(repo_obj,repo_user_acls,opts={})

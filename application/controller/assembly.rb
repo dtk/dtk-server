@@ -353,7 +353,10 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
-      assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
+      assembly_template_name,service_module_name = get_template_and_service_names_params(assembly)
+      if assembly_template_name.nil? or service_module_name.nil?
+        raise ErrorUsage.new("SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given")
+      end
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
       service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)

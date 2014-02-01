@@ -124,11 +124,11 @@ module DTK
         module_branch_idh = module_branch.id_handle()
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
         dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
-        assembly_meta_file_paths(module_branch).each do |meta_file|
+        assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
             format_type = meta_file_format_type(meta_file)
-            opts[:file_path] = meta_file
+            opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
             
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return hash_content if dsl_parsing_error?(hash_content)
@@ -144,13 +144,22 @@ module DTK
         assembly_import_helper.import()
       end
 
-      def assembly_meta_file_paths(module_branch)
-        assembly_dsl_path_info = assembly_dsl_filename_path_info()
+      #signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+      def assembly_meta_file_paths(module_branch,&block)
+        assembly_dsl_path_info = AssemblyFilenamePathInfo
         depth = assembly_dsl_path_info[:path_depth]
         ret = RepoManager.ls_r(depth,{:file_only => true},module_branch)
-        ret.reject!{|f|not (f =~ assembly_dsl_path_info[:regexp])}
-        ret_with_removed_variants(ret)
+        regexp = assembly_dsl_path_info[:regexp]
+        ret.reject!{|f|not (f =~ regexp)}
+        ret_with_removed_variants(ret).each do |meta_file|
+          default_assembly_name = (if meta_file =~ regexp then $1; end) 
+          block.call(meta_file,default_assembly_name)
+        end
       end
+      AssemblyFilenamePathInfo = {
+        :regexp => Regexp.new("^assemblies/([^/]+)/assembly\.(json|yaml)$"),
+        :path_depth => 3
+      }
 
       def ret_with_removed_variants(paths)
         #if multiple files that match where one is json and one yaml, fafavor the default one
@@ -192,20 +201,12 @@ module DTK
         Aux.format_type(path)
       end
 
-      def assembly_dsl_filename_path_info()
-        {
-          :regexp => Regexp.new("^assemblies/[^/]+/assembly\.(json|yaml)$"),
-          :path_depth => 3
-        }
-      end
-
       def error_cleanup()
         #TODO: this is wrong; 
         #ServiceModule.delete(id_handle())
         #determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed
         # TODO: may need to  write error cleanup for service module update that does not parse for service module (#{update_object!(:display_name,:dsl_parsed).inspect})")
       end
-      
     end
   end
 end

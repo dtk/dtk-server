@@ -3,9 +3,8 @@ module DTK
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')
 
-    def  initialize(msg="",name_or_opts=nil)
-      #this is call to dtkcommon
-      super
+    def  initialize(msg="",file_name_or_opts=nil)
+      super #this is call to dtkcommon
     end
 
     class NotSupported < self

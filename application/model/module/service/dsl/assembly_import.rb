@@ -64,7 +64,7 @@ module DTK; class ServiceModule
       add_port_and_port_links()
     end
 
-    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
+    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={},file_path=nil)
       if assembly_hash.empty?
         raise ErrorUsage::DSLParsing.new("Empty assembly dsl file",file_path)
       end

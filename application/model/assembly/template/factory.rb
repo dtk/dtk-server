@@ -323,8 +323,8 @@ module DTK
         attr_reader :is_title_attribute
         def initialize(attr,cmp)
           super()
-          #TODO: think just want value_asserted and not also value_derived
-          replace(Aux::hash_subset(attr,[:display_name,:description,:value_asserted]))
+          replace(Aux::hash_subset(attr,[:display_name,:description]))
+          self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
           @is_title_attribute = ((not cmp[:only_one_per_node]) and attr.is_title_attribute?())
         end
       end

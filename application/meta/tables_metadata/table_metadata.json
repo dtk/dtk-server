@@ -264,6 +264,8 @@
     "order": [
       "id",
       "status",
+      "task_type",
+      "node",
       "start",
       "end",
       "commit_msg"
@@ -273,6 +275,8 @@
       "end": "ended_at.get_date",
       "start": "started_at.get_date",
       "status": "status.upcase",
+      "task_type": "display_name",
+      "node": "executable_action.node.display_name",
       "created": "created_at.get_date",
       "commit_msg": "commit_message"
     }

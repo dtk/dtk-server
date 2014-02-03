@@ -178,11 +178,31 @@ module DTK; class  Assembly
     end
 
     def get_tasks(opts={})
+      tasks = []
       rows = get_objs(:cols => [:tasks])
+
+      rows.each do |row|
+        tasks << row
+        subs = Task.get_all_subtasks([row[:task].id_handle()])
+
+        subs.each do |sub|
+          exec_action_type = sub[:executable_action_type]
+          display_name = exec_action_type.gsub(/(.)([A-Z])/,'\1_\2').downcase if exec_action_type
+
+          if display_name
+            sub[:display_name] = display_name
+          end
+
+          tasks << {:id => row[:id], :task => sub}
+        end
+      end
+
       if opts[:filter_proc]
         rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-      rows.map{|r|r[:task]}
+
+      # rows.map{|r|r[:task]}
+      tasks.map{|r| r[:task]}
     end
 
     def clear_tasks(opts={})

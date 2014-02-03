@@ -21,7 +21,7 @@ class DtkCommon
 	}
 
 	def initialize(assembly_name, assembly_template)
-		config_yml = YAML::load(File.open("../config/config.yml"))		
+		config_yml = YAML::load(File.open("./config/config.yml"))		
 
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
@@ -176,9 +176,6 @@ class DtkCommon
 		puts ""
 		return assembly_renamed
 	end
-
-	dtk = DtkCommon.new('','')
-	dtk.rename_assembly(2147769114, 'test4')
 
 	def check_if_assembly_exists(assembly_id)
 		#Get list of existing assemblies and check if staged assembly exists

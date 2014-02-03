@@ -1,3 +1,4 @@
+#TODO: this is broken now
 #require 'bundler/setup'
 require 'json'
 require 'yaml'
@@ -21,13 +22,13 @@ APPLICATION_DIR = "../#{R8::Config[:application_name]}"
 UTILS_DIR = '../utils'
 SYSTEM_DIR = '../system'
 
-r8_require("#{SYSTEM_DIR}/utility.r8.rb")
+r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{UTILS_DIR}/utils")
 
 #r8_require('config/routes.rb')
 
-#r8_require("#{SYSTEM_DIR}/view.r8.rb")
-#r8_require("#{SYSTEM_DIR}/template.r8.rb")
+#r8_require("#{SYSTEM_DIR}/view")
+#r8_require("#{SYSTEM_DIR}/template")
 r8_require("#{UTILS_DIR}/internal/log.rb")
 
 #TODO: should load application strings here

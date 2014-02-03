@@ -246,23 +246,7 @@ module DTK; class Assembly
       components.flatten
     end
 
-    #MOD_RESTRUCT: TODO: when deprecate library parent forms replace this by project parent forms
     def self.check_valid_id(model_handle,id)
-      begin
-        check_valid_id__library_parent(model_handle,id)
-       rescue ErrorIdInvalid 
-        check_valid_id__project_parent(model_handle,id)
-      end
-    end
-    def self.name_to_id(model_handle,name)
-      begin
-        name_to_id__library_parent(model_handle,name)
-       rescue ErrorNameDoesNotExist
-        name_to_id__project_parent(model_handle,name)
-      end
-    end
-
-    def self.check_valid_id__project_parent(model_handle,id)
       filter =
         [:and,
          [:eq, :id, id],
@@ -270,8 +254,7 @@ module DTK; class Assembly
          [:neq, :project_project_id, nil]]
       check_valid_id_helper(model_handle,id,filter)
     end
-
-    def self.name_to_id__project_parent(model_handle,name)
+    def self.name_to_id(model_handle,name)
       parts = name.split("/")
       augmented_sp_hash = 
         if parts.size == 1
@@ -286,37 +269,24 @@ module DTK; class Assembly
       end
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
-    #MOD_RESTRUCT: deprecate below for above
-    def self.check_valid_id__library_parent(model_handle,id)
-      filter =
-        [:and,
-         [:eq, :id, id],
-         [:eq, :type, "composite"],
-         [:neq, :library_library_id, nil]]
-      check_valid_id_helper(model_handle,id,filter)
-    end
 
-    def self.name_to_id__library_parent(model_handle,name)
-      parts = name.split("/")
-      augmented_sp_hash = 
-        if parts.size == 1
-          {:cols => [:id,:component_type],
-           :filter => [:and,
-                      [:eq, :component_type, pp_name_to_component_type(parts[0])],
-                      [:eq, :type, "composite"],
-                      [:neq, :library_library_id, nil]]
-          }
-        elsif parts.size == 2
-          {:cols => [:id,:component_type,:library],
-           :filter => [:and,
-                      [:eq, :component_type, pp_name_to_component_type(parts[1])],
-                      [:eq, :type, "composite"]],
-           :post_filter => lambda{|r|r[:library][:display_name] ==  parts[0]}
-          }
-      else
-        raise ErrorNameInvalid.new(name,pp_object_type())
-      end
-      name_to_id_helper(model_handle,name,augmented_sp_hash)
+    def self.get_from(assembly_mh,prop_hash,opts={})
+      filter = 
+        if Aux.has_just_these_keys?(prop_hash,[:service_module_name,:template_name,:project_idh])
+          component_type = component_type(prop_hash[:service_module_name],prop_hash[:template_name])
+          [:and,
+           [:eq, :type, "composite"],
+           [:eq, :component_type, component_type],
+           [:eq, :project_project_id, prop_hash[:project_idh].get_id()]]
+        else
+          raise Error.new("Not supported with keys (#{attr_hash.keys}.join(',')})")
+        end
+
+      sp_hash = {
+        :cols => opts[:cols]||[:id,:display_name,:group_id],
+        :filter => filter
+      }
+      get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
     end
 
      #returns [service_module_name,assembly_name]
@@ -371,6 +341,6 @@ module DTK; class Assembly
 
   end
 end
-#TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get
+#TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get
 AssemblyTemplate = Assembly::Template
 end

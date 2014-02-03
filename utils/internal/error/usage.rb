@@ -2,33 +2,14 @@ module DTK
   #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')
+
+    def  initialize(msg="",file_name_or_opts=nil)
+      super #this is call to dtkcommon
+    end
+
     class NotSupported < self
       def initialize(feature_not_supported)
         super("Not supported yet: #{feature_not_supported}")
-      end
-    end
-
-    class ReferencedComponentTemplates < self
-      def initialize(aug_cmp_templates)
-        super(err_msg(aug_cmp_templates))
-        @aug_cmp_templates = aug_cmp_templates
-      end
-      private
-      def err_msg(aug_cmp_templates)
-        ident = "  "
-        ref_errors = ident + aug_cmp_templates.map{|cmp_tmpl|msg_per_cmp_template(cmp_tmpl)}.flatten.join("\n#{ident}")
-        size = aug_cmp_templates.size
-        what = (size==1 ? "component template" : "component templates")
-        is = (size==1 ? "is" : "are")
-        "The following #{what} would be deleted, but #{is} referenced by existing assembly templates:\n#{ref_errors}"
-      end
-      def msg_per_cmp_template(cmp_tmpl)
-        cmp_template = cmp_tmpl.display_name_print_form
-        cmp_tmpl[:component_refs].map do |aug_cmp_ref|
-          #TODO: aug_cmp_ref also has node and component ref fields that can be displayed
-          assembly_template = Assembly::Template.pretty_print_name(aug_cmp_ref[:assembly_template])
-          "Component Template (#{cmp_template}) is referenced by assembly template (#{assembly_template})"
-        end
       end
     end
 

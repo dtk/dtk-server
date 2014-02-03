@@ -4,6 +4,7 @@ module DTK
     class Parsing < self
       class YAML < self
       end
+
       class Term < self
         def initialize(term,type_as_symbol=nil)
           msg =
@@ -23,6 +24,7 @@ module DTK
 
     class DSLParsing < self
       include DSLParsingAux
+
       def self.raise_error_unless(object,legal_values_input_form=[],&legal_values_block)
         legal_values = LegalValues.reify(legal_values_input_form,&legal_values_block)
         unless legal_values.match?(object)

@@ -64,15 +64,10 @@ module DTK; class  Assembly
       get_objs_helper(:parents_task_templates,:task_template).select{|r|r[:task_action]==task_action}.first
     end
 
-    def get_task_template_serialized_content(task_action=nil,opts={})
-      format = opts[:format]||:hash
-      if format == :hash
-        opts_task_gen = {:task_action => task_action,:dont_persist_generated_template => true}
-        ret = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],self,opts_task_gen)
-        ret && ret.serialization_form()
-      else
-        raise ErrorUsage.new("Getting assembly task template with format (#{format}) not support")
-      end
+    def get_task_template_serialized_content(task_action=nil)
+      opts_task_gen = {:task_action => task_action,:dont_persist_generated_template => true}
+      ret = Task::Template::ConfigComponents.get_or_generate_template_content([:assembly,:node_centric],self,opts_task_gen)
+      ret && ret.serialization_form()
     end
 
     def rename(new_name)
@@ -337,10 +332,10 @@ module DTK; class  Assembly
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       sp_hash = {
-        :cols => [:id, :display_name,:group_id,:component_type,:version,:created_at,col].compact,
+        :cols => [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact,
         :filter => filter
       }
-      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
+      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash,:keep_ref_cols=>true)
       return ret unless needs_empty_nodes
 
       #add in in assembly nodes without components on them
@@ -726,7 +721,7 @@ module DTK; class  Assembly
 
   end
 end 
-#TODO: hack to get around error in /home/dtk/server/system/model.r8.rb:31:in `const_get
+#TODO: hack to get around error in lib/model.rb:31:in `const_get
 AssemblyInstance = Assembly::Instance
 end
 

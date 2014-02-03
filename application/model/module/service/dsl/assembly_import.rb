@@ -4,6 +4,7 @@ module DTK; class ServiceModule
     r8_nested_require('assembly_import','port')
     include PortMixin
     extend FactoryObjectClassMixin
+    include ModuleHandleErrorsMixin
     def initialize(container_idh,module_branch,module_name,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
@@ -27,7 +28,7 @@ module DTK; class ServiceModule
             @ndx_assembly_file_paths[ref] = file_path
           end
           dangling_errors.aggregate_errors! do
-            @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name))
+            @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
@@ -63,16 +64,23 @@ module DTK; class ServiceModule
       add_port_and_port_links()
     end
 
-    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
+    def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
+      file_path = opts[:file_path]
+      if assembly_hash.empty?
+        raise ErrorUsage::DSLParsing.new("Empty assembly dsl file",file_path)
+      end
+      unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
+        raise ErrorUsage::DSLParsing.new("No name associated with assembly dsl file",file_path)
+      end
       version_field = module_branch.get_field?(:version)
       assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
       {
         assembly_ref => {
-          "display_name" => assembly_hash["name"], 
+          "display_name" => assembly_name,
           "type" => "composite",
           "module_branch_id" => module_branch[:id],
           "version" => version_field,
-          "component_type" => Assembly.ret_component_type(module_name,assembly_hash["name"]),
+          "component_type" => Assembly.ret_component_type(module_name,assembly_name),
           "attribute" => import_assembly_attributes(assembly_hash["attributes"])
         }
       }

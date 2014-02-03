@@ -34,9 +34,26 @@ module DTK
   end
 
   r8_nested_require('mixins','remote')  
-  
+
+  module ModuleHandleErrorsMixin
+    def trap_dsl_parsing_error(&block)
+      parsing_error = nil
+      begin
+        normal_return = yield
+      rescue ErrorUsage::DSLParsing,ErrorUsage::Parsing => e
+        parsing_error = e
+      end
+      parsing_error
+    end
+    def dsl_parsing_error?(obj)
+      obj.is_a?(ErrorUsage::DSLParsing) || 
+      obj.is_a?(ErrorUsage::Parsing)
+    end
+  end
+
   module ModuleMixin
     include ModuleRemoteMixin
+    include ModuleHandleErrorsMixin
 
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)
@@ -146,8 +163,7 @@ module DTK
 
       opts_update = Aux.hash_subset(opts,[:do_not_raise,:modification_type,:force_parse])
       response = update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts_update)
-      
-      if (response.is_a?(ErrorUsage::DSLParsing) || response.is_a?(ErrorUsage::DanglingComponentRefs))
+      if dsl_parsing_error?(response)
         {:dsl_parsed_info => response}
       else
         response

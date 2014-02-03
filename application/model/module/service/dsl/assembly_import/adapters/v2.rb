@@ -9,8 +9,8 @@ module DTK; class ServiceModule
         block.call(assemblies_hash,node_bindings_hash)
       end
 
-      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name)
-        ret = super
+      def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
+        ret = super(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts)
         ret_assembly_hash = ret.values.first
         ret_assembly_hash.merge!("task_template" => import_task_templates(assembly_hash))
         ret

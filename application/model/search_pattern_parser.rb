@@ -1,5 +1,5 @@
-#TODO: should this be in model subdirectory?
-r8_require("../#{UTILS_DIR}/internal/generate_list_meta_view")
+#TODO: replace with relative dir
+r8_require("#{UTILS_DIR}/generate_list_meta_view")
 module XYZ
   class SearchPattern < HashObject
     def self.create(hash_search_pattern)

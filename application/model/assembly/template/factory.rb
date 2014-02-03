@@ -181,15 +181,16 @@ module DTK
       end
 
       def self.exists?(assembly_mh,project_idh,service_module_name,template_name)
-        component_type = component_type(service_module_name,template_name)
-        sp_hash = {
-          :cols => [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id],
-          :filter => [:and, [:eq, :component_type, component_type], [:eq, :project_project_id, project_idh.get_id()]]
+        props = {
+          :service_module_name => service_module_name,
+          :template_name => template_name,
+          :project_idh => project_idh
         }
-        if assembly_template = get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
+        if assembly_template = Template.get_from(assembly_mh,props,:cols => ExistsTemplateCols)
           subclass_model(assembly_template) #so that what is returned is object of type Assembly::Template::Factory
         end
       end
+      ExistsTemplateCols = [:id,:display_name,:group_id,:component_type,:project_project_id,:ref,:ui,:type,:module_branch_id]
 
       def create_port_link_content(port_link)
         in_port = @ndx_ports[port_link[:input_id]]
@@ -323,7 +324,7 @@ module DTK
         def initialize(attr,cmp)
           super()
           replace(Aux::hash_subset(attr,[:display_name,:description]))
-          self[:attribute_value] = attr[:attribute_value] #TODO: wasnt sure if Aux::hash_subset works for virtual attributes
+          self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
           @is_title_attribute = ((not cmp[:only_one_per_node]) and attr.is_title_attribute?())
         end
       end

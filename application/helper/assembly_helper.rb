@@ -88,5 +88,20 @@ module Ramaze::Helper
       end
     end
 
+    #returns [assembly_template_name,service_module_name]; if cannot find one or both or these nil is returned in the associated element
+    def get_template_and_service_names_params(assembly)
+      assembly_template_name,service_module_name = ret_request_params(:assembly_template_name,:service_module_name)
+      #either they both should be null or neither; however using 'or', rather than 'and' for robustness
+      if assembly_template_name.nil? or service_module_name.nil?
+        if parent_template = assembly.get_parent()
+          assembly_template_name = parent_template[:display_name]
+          if service_module = parent_template.get_service_module()
+            service_module_name = service_module[:display_name]
+          end
+        end
+      end
+      [assembly_template_name,service_module_name]
+    end
+
   end
 end

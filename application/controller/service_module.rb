@@ -224,6 +224,9 @@ module DTK
       if mod_type = ret_request_params(:modification_type)
         opts.merge!(:modification_type =>  mod_type.to_sym)
       end
+      if ret_request_param_boolean(:force_parse)
+        opts.merge!(:force_parse=> true)
+      end
       rest_ok_response service_module.update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts)
     end
 

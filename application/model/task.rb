@@ -213,10 +213,10 @@ module DTK
       if self.has_key?(:executable_action_type) 
         #will have an executable action so if have it already
         if self[:executable_action_type]
-          exec_actions << update_object!(:executable_action)[:executable_action]
+          exec_actions << get_field?(:executable_action)
         end
       else
-        if exec_action = update_object!(:executable_action)[:executable_action]
+        if exec_action = get_field?(:executable_action)
           exec_actions <<  exec_action.merge(:task_id => id())
         end
       end
@@ -261,10 +261,10 @@ module DTK
       if self.has_key?(:executable_action_type) 
         #will have an executable action so if have it already
         if self[:executable_action_type]
-          exec_actions << update_object!(:executable_action)[:executable_action]
+          exec_actions << get_field?(:executable_action)
         end
       else
-        if exec_action = update_object!(:executable_action)[:executable_action]
+        if exec_action = get_field?(:executable_action)
           exec_actions <<  exec_action.merge(:task_id => id())
         end
       end

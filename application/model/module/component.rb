@@ -1,12 +1,15 @@
 module DTK
   class ComponentModule < Model
-    r8_nested_require('component','management')
-    r8_nested_require('component','parse_to_create_dsl')
+    r8_nested_require('component','dsl_mixin')
+    r8_nested_require('component','dsl')
+
     r8_nested_require('component','version_context_info')
-    include ManagementMixin
+    r8_nested_require('component','delete_mixin')
+
+    include DeleteMixin
     extend ModuleClassMixin
     include ModuleMixin
-    include ParseToCreateDSLMixin
+    include DSLMixin
 
     def get_associated_assembly_templates()
       ndx_ret = Hash.new
@@ -17,7 +20,14 @@ module DTK
       ndx_ret.values
     end
 
-    def get_aug_associated_component_templates()
+    #each of the module's component_templates associated with zero or more assembly template component references
+    # component refs indexed by component template; plus augmented info for cmp refs; it has form
+    # Component::Template:
+    #   component_refs:
+    #   - ComponentRef:
+    #      node: Node
+    #      assembly_template: Assembly::Template
+    def get_associated_assembly_cmp_refs()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
         component_template = r[:component_template]

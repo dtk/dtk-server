@@ -75,8 +75,7 @@ module DTK
     #######################
     #TODO: write as sql fn for efficiency
     def has_pending_change()
-      update_object!(:action)
-      ((self[:action]||{})[:count]||0) > 0
+      ((get_field?(:action)||{})[:count]||0) > 0
     end
 
     def status()
@@ -85,11 +84,11 @@ module DTK
     end
 
     def target_id()
-      update_object!(:datacenter_datacenter_id)[:datacenter_datacenter_id]
+      get_field?(:datacenter_datacenter_id)
     end
 
     def name()
-      update_object!(:display_name)[:display_name]
+      get_field?(:display_name)
     end
 
     #######################
@@ -309,13 +308,13 @@ module DTK
       if has_key?(:is_deployed)
         return  "staged" if not self[:is_deployed]
       end
-      update_object!(:is_deployed,:external_ref,:operational_status)
+      update_obj!(:is_deployed,:external_ref,:operational_status)
       return  "staged" if not self[:is_deployed]
       get_and_update_operational_status!()
     end
 
     def get_and_update_operational_status!()
-      update_object!(:external_ref,:operational_status)
+      update_obj!(:external_ref,:operational_status)
       op_status = CommandAndControl.get_node_operational_status(self)
       if op_status
         unless self[:operational_status] == op_status
@@ -345,6 +344,7 @@ module DTK
       self[:agent_git_commit_id] = agent_git_commit_id      
     end
 
+#TODO: these may be depracted
     def update_ordered_component_ids(order)
       ordered_component_ids = "{ :order => [#{order.join(',')}] }"
       update(:ordered_component_ids => ordered_component_ids)
@@ -356,29 +356,36 @@ module DTK
       return Array.new unless ordered_component_ids
       eval(ordered_component_ids)[:order]
     end
+#end of these may be depracted
+
+    def get_external_ref()
+      get_field?(:external_ref)||{}
+    end
 
     def self.pbuilderid(node)
-      node.update_object!(:external_ref)
-      (node[:external_ref]||{})[:instance_id]
+      node.get_external_ref()[:instance_id]
     end
     def pbuilderid()
       Node.pbuilderid(self)
     end
 
     def instance_id()
-      update_object!(:external_ref)
-      (self[:external_ref]||{})[:instance_id]
+      get_external_ref()[:instance_id]
     end
 
     def persistent_dns()
-      update_object!(:hostname_external_ref)
-      (self[:hostname_external_ref]||{})[:persistent_dns]
+      get_hostname_external_ref()[:persistent_dns]
     end
 
     def elastic_ip()
-      update_object!(:hostname_external_ref)
-      (self[:hostname_external_ref]||{})[:elastic_ip]
+      get_hostname_external_ref()[:elastic_ip]
     end
+
+    def get_hostname_external_ref()
+      get_field?(:hostname_external_ref)||{}
+    end
+    private :get_hostname_external_ref
+
     
     #### related to distinguishing bewteen nodes and node groups
 
@@ -404,14 +411,12 @@ module DTK
     end
 
     def is_node?()
-      update_object!(:type)
-       NodeTypes.include?(self[:type])
+      NodeTypes.include?(get_field?(:type))
     end
     def is_node_group?()
       #short circuit
       return true if kind_of?(NodeGroup)
-      update_object!(:type)
-      NodeGroupTypes.include?(self[:type])
+      NodeGroupTypes.include?(get_field?(:type))
     end
     NodeTypes = %w{instance image staged}
     NodeGroupTypes = %w{node_group_instance}
@@ -419,7 +424,7 @@ module DTK
     #### end: related to distinguishing bewteen nodes and node groups
 
     def destroy_and_delete(opts={})
-      update_object!(:external_ref,:hostname_external_ref)
+      update_obj!(:external_ref,:hostname_external_ref)
       if suceeeded = CommandAndControl.destroy_node?(self)
         delete_object(opts)
       end
@@ -472,8 +477,8 @@ module DTK
           end
         end
       end
-      attr_mh = model_handle(:attribute)
-      #update attribles connected to dangling links on input side
+      attr_mh = model_handle_with_auth_info(:attribute)
+      #update attributes connected to dangling links on input side
       updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
       #add state changes for updated attributes and see if any connected attributes
       Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)

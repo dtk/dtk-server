@@ -75,7 +75,7 @@ module DTK; class Task
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
         #first see if there is a persistent serialized task template for assembly instance and that it should be used
-        if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action)
+        if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action,opts)
           return template_content
         end
 
@@ -105,8 +105,8 @@ module DTK; class Task
         true
       end
 
-      def self.get_template_content_aux?(action_types,assembly,cmp_actions,task_action=nil)
-        if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly,cmp_actions,task_action)
+      def self.get_template_content_aux?(action_types,assembly,cmp_actions,task_action=nil,opts={})
+        if assembly_action_content = Persistence::AssemblyActions.get_content_for(assembly,cmp_actions,task_action,opts)
           if action_types == [:assembly]
             assembly_action_content
           else #action_types has both and assembly and node_centric

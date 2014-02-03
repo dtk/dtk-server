@@ -54,7 +54,8 @@ module XYZ
       not(search_pattern.is_default_view?() or source == :action_set or source == :node_group)
     end
 
-    #TODO: better relate the three fns below; and refine them
+=begin
+Remove
     def save_list_view_in_cache?(user)
       return nil unless should_save?
       view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
@@ -77,6 +78,7 @@ module XYZ
       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(id),user,is_saved_search,view_meta_hash)
       view.update_cache_for_saved_search()
     end
+=end
 
     def save(model_handle)
       search_pattern_db =  search_pattern.ret_form_for_db()

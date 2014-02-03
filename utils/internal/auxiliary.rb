@@ -1,7 +1,14 @@
 require 'set'
-module XYZ
+module DTK
   class Aux
     r8_require('yaml_helper')
+
+    module CommonClassMixin
+      def private_instance_method(class_name)
+        class_eval("def private__#{class_name}(*args,&block);#{class_name}(*args,&block);end")
+      end
+    end
+
     class Cache < Hash
     end
 

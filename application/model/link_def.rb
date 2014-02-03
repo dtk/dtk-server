@@ -2,6 +2,7 @@ module DTK
   class LinkDef < Model
     r8_nested_require('link_def','auto_complete')
     r8_nested_require('link_def','parse_serialized_form')
+    r8_nested_require('link_def','info')
     extend ParseSerializedFormClassMixin
 
     def self.common_columns()

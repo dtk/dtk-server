@@ -200,7 +200,9 @@ module DTK
         if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           el.merge(:link_def_id => link_def_match[:id])
         else
-          el.merge(:link_def_id => nil)
+          #TODO: check why after refactor of link_def/deps this before casting nil started causing a postgres problem; looks like this clause always fired so
+          # may be before change link_def_id only mtached null; to diagnose can change back temporarily to el.merge(:link_def_id => nil)
+          el.merge(:link_def_id => SQL::ColRef.null_id)
         end
       end
       update_from_rows(port_mh,update_rows)

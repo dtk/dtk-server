@@ -32,7 +32,7 @@ segment_component_ref = {
   :convert => true,
   :join_type => :inner,
   :join_cond=>{:node_node_id => :node__id},
-  :cols => [:id,:group_id,:display_name,:component_template_id,:has_override_version,:version,:component_type,:template_id_synched]
+  :cols => ComponentRef.common_cols()
 }
 lambda__segment_component_template =
   lambda{|join_type|
@@ -300,7 +300,7 @@ lambda__instance_nodes_components_assembly_template =
            :alias => :nested_component,
            :join_type => :inner,
            :join_cond=>{:id => q(:component_ref,:component_template_id)},
-           :cols => [:id,:display_name,:component_type, :extended_base, :implementation_id, :node_node_id,:only_one_per_node]
+           :cols => LinkDef::Info.nested_component_cols()
          },
          {
            :model_name => :link_def,

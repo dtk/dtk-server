@@ -118,12 +118,11 @@ module DTK
       rest_ok_response data, response_opts
     end
     SupportedFormats = [:yaml]
-    #TODO: may unify with above
+
     def rest__info_about_task()
       assembly = ret_assembly_instance_object()
       task_action = ret_request_params(:task_action)
-      format = :hash #TODO: hard coded because only format supported now
-      response = assembly.get_task_template_serialized_content(task_action,:format => format)
+      response = assembly.get_task_template_serialized_content(task_action)
       response_opts = Hash.new
       if response
         response_opts.merge!(:encode_into => :yaml)
@@ -361,7 +360,10 @@ module DTK
     #### actions to update and create assembly templates
     def rest__promote_to_template()
       assembly = ret_assembly_instance_object()
-      assembly_template_name,service_module_name = ret_non_null_request_params(:assembly_template_name,:service_module_name)
+      assembly_template_name,service_module_name = get_template_and_service_names_params(assembly)
+      if assembly_template_name.nil? or service_module_name.nil?
+        raise ErrorUsage.new("SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given")
+      end
       project = get_default_project()
       opts = ret_symbol_params_hash(:mode)
       service_module = Assembly::Template.create_or_update_from_instance(project,assembly,service_module_name,assembly_template_name,opts)

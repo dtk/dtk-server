@@ -62,6 +62,13 @@ module DTK
       rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
     end
 
+    def rest__rename()
+      assembly = ret_assembly_object()
+      new_assembly_name = ret_non_null_request_params(:new_assembly_name)
+      
+      rest_ok_response assembly.rename(new_assembly_name)
+    end
+
     #TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)

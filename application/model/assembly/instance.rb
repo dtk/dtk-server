@@ -75,6 +75,10 @@ module DTK; class  Assembly
       end
     end
 
+    def rename(new_name)
+      update(:display_name => new_name)
+    end
+
     def get_component_list(opts={})
       get_field?(:display_name)
       assembly_source = {:type => "assembly", :object => hash_subset(:id,:display_name)}

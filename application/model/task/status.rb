@@ -146,9 +146,11 @@ module DTK
 
       el = hash_subset(:started_at,:ended_at)
       el[:status] = self[:status] unless self[:status] == 'created'
+      el[:id] = self[:id]
       type = (level == 1 ? self[:display_name] : self[:type]||self[:display_name])|| "top"
       # type = self[:display_name]|| "top"
       #putting idents in
+      
       el[:type] = "#{' '*(2*(level-1))}#{type}"
       ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
       if ndx_errors[self[:id]]

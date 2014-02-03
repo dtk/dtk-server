@@ -68,7 +68,8 @@ module DTK; class Task; class Template
               true
             else
               #strip off node_name prefix if it exists
-              component_name_ref_x = component_name_ref.split("/").last
+              #need to handle cases like apt::ppa[ppa:chris/node.js]
+              component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//,'')
               component_name_ref_x ==  serialization_form(:no_node_name_prefix => true)
             end
           end

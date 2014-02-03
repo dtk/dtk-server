@@ -201,7 +201,6 @@ module DTK
         display_name.gsub(/__/,"::")
       end
     end
-    #TODO: may deprecate two below for above
     def self.component_type_print_form(component_type,opts=Opts.new)
       if opts[:no_module_name]
         component_type.gsub(/^.+__/,"")

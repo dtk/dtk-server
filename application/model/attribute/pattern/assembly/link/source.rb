@@ -40,7 +40,7 @@ module DTK; class Attribute::Pattern
 
       module Simple
         def self.parse(source_term)
-          if source_term =~ /^\$([a-z\-_0-9:\[\]\/]+$)/
+          if source_term =~ /^\$([a-zA-Z\-_0-9:\.\[\]\/]+$)/
             attr_term_x = $1
             fn = nil
             attr_term,node_cmp_type = strip_special_symbols(attr_term_x)

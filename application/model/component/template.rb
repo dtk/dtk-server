@@ -164,6 +164,7 @@ module DTK; class Component
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
+                    [:eq, :type, 'template'],
                     [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
                     [:neq, :project_project_id, nil],
                     [:eq, :node_node_id, nil],

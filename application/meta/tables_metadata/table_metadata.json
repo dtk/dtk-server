@@ -272,13 +272,12 @@
     ],
     "mapping": {
       "id": "dtk_id",
-      "end": "ended_at.get_date",
+      "task_type": "dtk_type",
+      "status": "status",
+      "node": "node.name",
       "start": "started_at.get_date",
-      "status": "status.upcase",
-      "task_type": "display_name",
-      "node": "executable_action.node.display_name",
-      "created": "created_at.get_date",
-      "commit_msg": "commit_message"
+      "end": "ended_at.get_date",
+      "errors": "commit_message"
     }
   },
   "target": {

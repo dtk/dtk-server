@@ -103,8 +103,9 @@ module DTK; class  Assembly
           end
           get_component_modules(component_modules_opts).sort{|a,b| a[:display_name] <=> b[:display_name] }
         when :tasks
-          get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
-          
+          get_tasks(opts)
+          # commented for now because we don't need this type of sort anymore
+          # get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
         else
           raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
         end

@@ -35,7 +35,7 @@ shared_context "NEG - Rename assembly to existing name" do |dtk_common, assembly
 end
 
 shared_context "NEG - Rename assembly to workspace name" do |dtk_common, assembly_name|
-  it "does not rename #{dtk_common.assembly_name} assembly to #{new_assembly_name} since workspace is special type of assembly" do
+  it "does not rename #{assembly_name} assembly to workspace since workspace is special type of assembly" do
     puts "NEG - Rename assembly to workspace name:", "----------------------------------------"
     pass = false
     value = `dtk assembly rename #{assembly_name} workspace`

@@ -335,12 +335,6 @@ module DTK
     end
 
     def id_handle(hash_info=nil)
-      unless @id_handle[:guid] or @id_handle[:uri]
-        Log.error("unexpected that @id_handle (#{@id_handle.inspect}) does not have guid or uri set")
-        unless @id_handle[:guid] = get_field?(:id)
-          raise Error.new("Cannot get id from: #{inspect}")
-        end
-      end
       hash_info ? @id_handle.createIDH(hash_info) : @id_handle 
     end
 

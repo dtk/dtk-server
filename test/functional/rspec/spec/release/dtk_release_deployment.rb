@@ -31,8 +31,8 @@ begin
 		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
 
 		#Set tags that will be used to checkout correct versions of DTK artifacts for this release
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['release'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['release'])
+		set_attributes_array << dtk_common.set_attribute(assembly_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['server_release'])
+		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['repo_manager_release'])
 
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false

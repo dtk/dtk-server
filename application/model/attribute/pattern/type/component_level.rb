@@ -82,26 +82,18 @@ module DTK; class Attribute
         attr
       end
 
-
       def pattern_node_name()
-        pattern() =~ NodeComponentRegexp 
-        $1
+        Pattern.node_name(pattern())
       end
       def pattern_component_fragment()
-        pattern() =~ NodeComponentRegexp
-        $2
+        Pattern.component_fragment(pattern())
       end
       def pattern_attribute_fragment()
-        pattern() =~ AttrRegexp
-        $1
+        Pattern.attribute_fragment(pattern())
       end
-
       def pattern_component_name()
         first_name_in_fragment(pattern_component_fragment())
       end
-
-      NodeComponentRegexp = /^node<([^>]*)>\/(component.+$)/
-      AttrRegexp = /^node[^\/]*\/component[^\/]*\/(attribute.+$)/ 
     end
   end; end
 end; end

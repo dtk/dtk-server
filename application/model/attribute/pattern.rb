@@ -10,12 +10,36 @@ module DTK; class Attribute
         "#{type}#{LDelim}#{term}#{RDelim}"
       end
       def self.extract_term?(canonical_form)
-        $1 if canonical_form =~ FilterFragmentRegexp
+        if canonical_form =~ FilterFragmentRegexp
+          $1 
+        end
       end
       LDelim = '<'
       RDelim = '>'
-      FilterFragmentRegexp = Regexp.new("[a-z]\\#{LDelim}([^\\#{RDelim}]+)\\#{RDelim}")
+      EscpLDelim = "\\#{LDelim}"
+      EscpRDelim = "\\#{RDelim}"
+      FilterFragmentRegexp = Regexp.new("[a-z]#{EscpLDelim}([^#{EscpRDelim}]+)#{EscpRDelim}")
     end
+
+    def self.node_name()
+      (pattern =~ NodeComponentRegexp ? $1 : raise_unexpected_pattern(pattern))
+    end
+    def self.component_fragment(pattern)
+      (pattern =~ NodeComponentRegexp ? $2 : raise_unexpected_pattern(pattern))
+    end
+    def self.attribute_fragment(pattern)
+      (pattern =~ AttrRegexp ? $1 : raise_unexpected_pattern(pattern))
+    end
+    Delim = "#{Term::EscpLDelim}[^#{Term::EscpRDelim}]*#{Term::EscpRDelim}"
+    DelimWithSelect = "#{Term::EscpLDelim}([^#{Term::EscpRDelim}]*)#{Term::EscpRDelim}"
+
+    NodeComponentRegexp = Regexp.new("^node#{DelimWithSelect}\/(component.+$)")
+    AttrRegexp = Regexp.new("node[^\/]*\/component#{Delim}\/(attribute.+$)")
+
+    def self.raise_unexpected_pattern(pattern)
+      raise Error.new("Unexpected that pattern (#{pattern}) did not match")
+    end
+    private_class_method :raise_unexpected_pattern
 
     def self.create_attr_pattern(base_object,attr_term,opts={})
       create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)

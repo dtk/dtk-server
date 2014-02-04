@@ -171,27 +171,37 @@ module DTK
       end.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    class << self
-     private
-      def user_friendly_name(node_name,assembly_name=nil)
-        assembly_name ? "#{assembly_name}::#{node_name}" : node_name
-      end
-      #returns [node_name, assembly_name] later which could be null
-      def parse_user_friendly_name(name)
-        if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
-          [$2,$1]
-        else
-          name
-        end
-      end
-      AssemblyNodeNameSep = '::'
+    def self.legal_display_name?(display_name)
+      display_name =~ LegalDisplayName
     end
-    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
+    LegalDisplayName = /^[a-zA-Z0-9_\[\]\.-]+$/
 
+    def self.user_friendly_name(node_name,assembly_name=nil)
+      assembly_name ? "#{assembly_name}::#{node_name}" : node_name
+    end
+    private_class_method :user_friendly_name
+
+    #returns [node_name, assembly_name] later which could be nil
+    def self.parse_user_friendly_name(name)
+      node_name = assembly_name = nil
+      if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
+        node_name,assembly_name = [$2,$1]
+      else
+        node_name = name
+      end
+      unless legal_display_name?(node_name)
+        raise ErrorNameInvalid.new(node_name,:node)
+      end
+      [node_name,assembly_name]
+    end
+    private_class_method :parse_user_friendly_name
+    AssemblyNodeNameSep = '::'
+    
     def info(opts={})
       ret = get_obj(:cols => InfoCols).hash_subset(*InfoCols)
       opts[:print_form] ? info_print_form_processing!(ret) : ret
     end
+    InfoCols = [:id,:display_name,:os_type,:type,:description,:status,:external_ref,:assembly_id]
 
     def info_print_form_processing!(info_hash)
       if external_ref = info_hash[:external_ref]
@@ -287,6 +297,9 @@ module DTK
 
     def self.name_to_id(model_handle,name,assembly_id=nil)
       node_name, assembly_name = parse_user_friendly_name(name)
+      unless legal_display_name?(node_name)
+        raise ErrorNameInvalid.new(node_name,:node)
+      end
       assembly_id ||= assembly_name && Assembly::Instance.name_to_id(model_handle.createMH(:component),assembly_name)
       sp_hash =  {
         :cols => [:id,:assembly_id],

@@ -152,29 +152,22 @@ module DTK; class Attribute
       }
 
       def ret_filter(fragment,type)
-        if term = Pattern::Term.extract_term?(fragment)
-          non_processed_term = term
-          if type == :component
-            term = Component.display_name_from_user_friendly_name(term)
-          end
-
-          if term == "*"
-            nil
-          elsif type == :component and Component::Instance.legal_display_name?(term)
-            [:eq,:display_name,term]
-            #TODO: replace below with Node.legal_display_name? and Attribute.legal_display_name?
-          elsif term =~ /^[a-zA-Z0-9_\[\]\.-]+$/
-            case type
-            when :attribute, :node
-              [:eq,:display_name,term]
-            else
-              raise ErrorUsage::NotSupported.new("Component filter of type (#{type})")
-            end
-          else
-            raise ErrorUsage::Parsing::Term.new(non_processed_term,:component_segment)
-          end
+        unless term = Pattern::Term.extract_term?(fragment)
+          return nil #without qualification means all (no filter)
+        end
+        if term == "*"
+          return nil          
+        end
+        display_name = (type == :component ? ::DTK::Component::Instance.display_name_from_user_friendly_name(term) : term) 
+        if type == :node and  ::DTK::Node.legal_display_name?(display_name)
+          [:eq,:display_name,display_name]
+        elsif type == :component and ::DTK::Component::Instance.legal_display_name?(display_name)
+          [:eq,:display_name,display_name]
+        elsif type == :attribute and Attribute.legal_display_name?(display_name)
+          [:eq,:display_name,display_name]
         else
-          nil #without qualification means all (no filter)
+          #TODO: check why have :component_segment
+          raise ErrorUsage::Parsing::Term.new(term,:component_segment)
         end
       end
 

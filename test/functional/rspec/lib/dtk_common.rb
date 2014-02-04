@@ -97,7 +97,6 @@ class DtkCommon
 		#If response status notok, show error_message
 		if (response_JSON["status"] == "notok")
 			puts "", "Request failed!"
-			puts "CCCC"
 			puts @error_message
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"

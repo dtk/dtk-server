@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'optparse'
 require 'sshkey'
+require 'erubis'
 require File.expand_path('library_nodes', File.dirname(__FILE__))
 Root = File.expand_path('../', File.dirname(__FILE__))
 require Root + '/app'

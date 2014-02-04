@@ -2,3 +2,4 @@
 --options TEST
 --options ./config/rspec2db.yml
 --options LOCAL
+--color

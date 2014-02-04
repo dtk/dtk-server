@@ -86,6 +86,7 @@ class DtkCommon
 		resource = RestClient::Resource.new(@ENDPOINT + path, $opts)
 		response = resource.post(body)
 		response_JSON = JSON.parse(response)
+		pretty_print_JSON(response_JSON)
 
 		#If response contains errors, accumulate all errors to error_message
 		unless response_JSON["errors"].nil? 
@@ -96,6 +97,7 @@ class DtkCommon
 		#If response status notok, show error_message
 		if (response_JSON["status"] == "notok")
 			puts "", "Request failed!"
+			puts "CCCC"
 			puts @error_message
 			unless response_JSON["errors"].first["backtrace"].nil? 
 				puts "", "Backtrace:"
@@ -163,7 +165,7 @@ class DtkCommon
 		if assembly_name.any?
 			puts "Old assembly name is: #{assembly_name}. Proceed with renaming it to #{new_assembly_name}..."
 			rename_status = send_request('/rest/assembly/rename', {:assembly_id=>assembly_id, :assembly_name=>assembly_name, :new_assembly_name=>new_assembly_name})
-			pretty_print_JSON(rename_status)
+
 			if rename_status['status'] == 'ok'
 				puts "Assembly #{assembly_name} renamed to #{new_assembly_name} successfully!"
 				assembly_renamed = true

@@ -20,17 +20,31 @@ shared_context "Rename assembly" do |dtk_common, new_assembly_name|
   end
 end
 
-shared_context "NEG - Rename assembly to existing name" do |dtk_common, new_assembly_name|
-  it "does not rename #{dtk_common.assembly_name} assembly to #{new_assembly_name} since #{new_assembly_name} already exists" do
-    assembly_renamed = dtk_common.rename_assembly($assembly_id, new_assembly_name)
-    assembly_renamed.should eq(true)
+shared_context "NEG - Rename assembly to existing name" do |dtk_common, assembly_name, new_assembly_name|
+  it "does not rename #{assembly_name} assembly to #{new_assembly_name} since #{new_assembly_name} already exists" do
+    puts "NEG - Rename assembly to existing name:", "---------------------------------------"
+    pass = false
+    value = `dtk assembly rename #{assembly_name} #{new_assembly_name}`
+    puts value
+    pass = true if value.include? "[ERROR] Assembly with name '#{new_assembly_name}' exists already."
+    puts "Rename did not passed successfully which is expected!" if pass == true
+    puts "Rename passed successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
   end
 end
 
-shared_context "NEG - Rename assembly to workspace name" do |dtk_common, new_assembly_name|
+shared_context "NEG - Rename assembly to workspace name" do |dtk_common, assembly_name|
   it "does not rename #{dtk_common.assembly_name} assembly to #{new_assembly_name} since workspace is special type of assembly" do
-    assembly_renamed = dtk_common.rename_assembly($assembly_id, new_assembly_name)
-    assembly_renamed.should eq(true)
+    puts "NEG - Rename assembly to workspace name:", "----------------------------------------"
+    pass = false
+    value = `dtk assembly rename #{assembly_name} workspace`
+    puts value
+    pass = true if value.include? "[ERROR] You are not allowed to use keyword 'workspace' as assembly name."
+    puts "Rename did not passed successfully which is expected!" if pass == true
+    puts "Rename passed successfully!" if pass == false
+    puts ""
+    pass.should eq(true)
   end
 end
 

@@ -340,8 +340,8 @@ module DTK
 
     def id_handle_with_auth_info()
       #TODO: can be made more efficient by putting this info in @id_handle during initial create
-      return @id_handle if @id_handle[:group_id]
-      group_id = group_id() ||(update_object!(:group_id))[:group_id]
+      return id_handle() if id_handle()[:group_id]
+      group_id = group_id()||(update_object!(:group_id))[:group_id]
       @id_handle.merge!(:group_id => group_id) if group_id
       @id_handle
     end

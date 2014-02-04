@@ -32,7 +32,10 @@ module DTK; class Attribute::Pattern
         end
         source_is_antecdent = !target_attr_pattern.is_antecedent?()
         source_attr_pattern = Source.create_attr_pattern(assembly,source_attr_term,source_is_antecdent)
-        
+        if source_attr_pattern.component_instance[:component_type] == target_attr_pattern.component_instance[:component_type]
+          cmp_type_print_form = source_attr_pattern.component_instance.component_type_print_form()
+          raise ErrorUsage.new("Not supported: Attribute link involving same component type (#{cmp_type_print_form})")
+        end
         #TODO: need to do more checking and processing to include:
         #  if has a relation set already and scalar conditionally reject or replace
         # if has relation set already and array, ...

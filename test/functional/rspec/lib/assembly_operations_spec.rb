@@ -13,6 +13,27 @@ shared_context "Stage" do |dtk_common|
   end
 end
 
+shared_context "Rename assembly" do |dtk_common, new_assembly_name|
+  it "renames #{dtk_common.assembly_name} assembly to #{new_assembly_name}" do
+    assembly_renamed = dtk_common.rename_assembly($assembly_id, new_assembly_name)
+    assembly_renamed.should eq(true)
+  end
+end
+
+shared_context "NEG - Rename assembly to existing name" do |dtk_common, new_assembly_name|
+  it "does not rename #{dtk_common.assembly_name} assembly to #{new_assembly_name} since #{new_assembly_name} already exists" do
+    assembly_renamed = dtk_common.rename_assembly($assembly_id, new_assembly_name)
+    assembly_renamed.should eq(true)
+  end
+end
+
+shared_context "NEG - Rename assembly to workspace name" do |dtk_common, new_assembly_name|
+  it "does not rename #{dtk_common.assembly_name} assembly to #{new_assembly_name} since workspace is special type of assembly" do
+    assembly_renamed = dtk_common.rename_assembly($assembly_id, new_assembly_name)
+    assembly_renamed.should eq(true)
+  end
+end
+
 shared_context "List assemblies after stage" do |dtk_common|
   it "has staged #{dtk_common.assembly_name} assembly in assembly list" do
     assembly_exists = dtk_common.check_if_assembly_exists($assembly_id)

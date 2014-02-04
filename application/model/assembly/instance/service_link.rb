@@ -11,17 +11,10 @@ module DTK
         only_one_per_node = cmp.get_field?(:only_one_per_node)
         if (!only_one_per_node.nil?) and not only_one_per_node
           cmp_print_form = cmp.display_name_print_form(:node_prefix=>true)
-          raise ErrorUsage.new("Link from a component with a title, '#{cmp_print_form}' in this case, is not supported")
+          raise ErrorUsage.new("Not supported: Link from a component with a title, '#{cmp_print_form}' in this case, is not supported")
         end
       end
       private :raise_error_if_link_from_component_title
-
-=begin
-#TODO: deprecated
-      def add_ad_hoc_attribute_mapping(port_link,attribute_mapping)
-        ServiceLink::AttributeMapping.add(self,port_link,attribute_mapping)
-      end
-=end
 
       def list_service_links(opts={})
         get_opts = Aux.hash_subset(opts,[:filter])
@@ -77,7 +70,6 @@ module DTK
     
     class ServiceLink
       r8_nested_require('service_link','factory')    
-      r8_nested_require('service_link','attribute_mapping')
 
       def initialize(assembly_instance)
         @assembly_instance = assembly_instance

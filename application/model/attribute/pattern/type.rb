@@ -160,9 +160,12 @@ module DTK; class Attribute
 
           if term == "*"
             nil
+          elsif type == :component and Component::Instance.legal_display_name?(term)
+            [:eq,:display_name,term]
+            #TODO: replace below with Node.legal_display_name? and Attribute.legal_display_name?
           elsif term =~ /^[a-zA-Z0-9_\[\]\.-]+$/
             case type
-            when :attribute, :component, :node
+            when :attribute, :node
               [:eq,:display_name,term]
             else
               raise ErrorUsage::NotSupported.new("Component filter of type (#{type})")

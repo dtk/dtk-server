@@ -69,13 +69,10 @@ module DTK
         return name_to_id_default(model_handle,name)
       end
       if assembly_id = context[:assembly_id]
-        #name should be of form node/component
-        unless name =~ /(^[^\/]+)\/([^\/]+$)/
+        node_name,cmp_type,cmp_title = ComponentTitle.parse_component_user_friendly_name(name,:node_prefix => true)
+        unless node_name
           raise ErrorUsage.new("Ill-formed name for component (#{name})")
         end
-        node_name = $1
-        cmp_user_friendly_name = $2
-        cmp_type,cmp_title = type_and_title_from_user_friendly_name(cmp_user_friendly_name)
         sp_hash = {
           :cols => [:id,:node],
           :filter => [:and,Component::Instance.filter(cmp_type,cmp_title), [:eq,:assembly_id,assembly_id]]
@@ -130,24 +127,20 @@ module DTK
       ret
     end
 
-    #MOD_RESTRUCT: TODO: see if this is what is wanted; now returning what is used in implementaion and module branch fields
+    #MOD_RESTRUCT: TODO: see if this is what is wanted; now returning what is used in implementation and module branch fields
     def self.default_version()
       version_field_default()
     end
 
-    #returns component_type,title
-    def self.type_and_title_from_user_friendly_name(user_friendly_name)
-      display_name = display_name_from_user_friendly_name(user_friendly_name)
-      ComponentTitle.parse_component_display_name(display_name)
-    end
-    def self.component_type_from_user_friendly_name(user_friendly_name)
-      type_and_title_from_user_friendly_name(user_friendly_name)[0]
-    end
+    ### display name functions    
     def self.display_name_from_user_friendly_name(user_friendly_name)
       user_friendly_name.gsub(/::/,"__")
     end
 
-    ### display name functions
+    def self.component_type_from_user_friendly_name(user_friendly_name)
+      ComponentTitle.parse_component_user_friendly_name(user_friendly_name)[0]
+    end
+
     #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name]
@@ -201,7 +194,6 @@ module DTK
         display_name.gsub(/__/,"::")
       end
     end
-    #TODO: may deprecate two below for above
     def self.component_type_print_form(component_type,opts=Opts.new)
       if opts[:no_module_name]
         component_type.gsub(/^.+__/,"")

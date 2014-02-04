@@ -153,6 +153,30 @@ class DtkCommon
 		return assembly_id.to_i
 	end
 
+	def rename_assembly(assembly_id, new_assembly_name)
+		puts "Rename assembly:", "----------------"
+		assembly_renamed = false
+
+		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		assembly_name = assembly_list['data'].select { |x| x['id'] == assembly_id }
+		
+		if assembly_name.any?
+			puts "Old assembly name is: #{assembly_name}. Proceed with renaming it to #{new_assembly_name}..."
+			rename_status = send_request('/rest/assembly/rename', {:assembly_id=>assembly_id, :assembly_name=>assembly_name, :new_assembly_name=>new_assembly_name})
+			pretty_print_JSON(rename_status)
+			if rename_status['status'] == 'ok'
+				puts "Assembly #{assembly_name} renamed to #{new_assembly_name} successfully!"
+				assembly_renamed = true
+			else
+				puts "Assembly #{assembly_name} was not renamed to #{new_assembly_name} successfully!"
+			end
+		else
+			puts "Assembly with id #{assembly_id} does not exist!"
+		end
+		puts ""
+		return assembly_renamed
+	end
+
 	def check_if_assembly_exists(assembly_id)
 		#Get list of existing assemblies and check if staged assembly exists
 		puts "Check if assembly exists:", "-------------------------"

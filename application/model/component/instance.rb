@@ -111,6 +111,10 @@ module DTK; class Component
       component.get_field?(:display_name).gsub(/__/,"::")
     end
 
+    def self.legal_display_name?(display_name)
+      !ComponentTitle.parse_component_display_name(display_name).nil?
+    end
+
     def self.version_print_form(component)
       ModuleBranch.version_from_version_field(component.get_field?(:version))
     end

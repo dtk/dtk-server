@@ -40,12 +40,19 @@ module DTK
 
     #returns [component_type,title]; title could be nil if cmp_display_name has node prefix component_type will have this
     def self.parse_component_display_name(cmp_display_name)
+      component_type = title = nil
       if cmp_display_name =~ ComponentTitleRegex
-        [$1,$2]
+        component_type,title = [$1,$2]
       else
-        [cmp_display_name,nil]
+        component_type = cmp_display_name
+      end
+
+      if component_type =~ LegalComponentType
+        [component_type,title]
       end
     end
+    LegalComponentType = /^[^\/]+$/
+
     def self.parse_title?(cmp_display_name)
       if cmp_display_name =~ ComponentTitleRegex
         $2

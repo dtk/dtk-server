@@ -81,7 +81,7 @@ module DTK
       def matching_id(aug_ports,opts={})
         if opts[:is_output]
           if self[:title]
-            err_class = ErrorUsage::DSLParsing::NotSupported::LinkFromComponentWithTitle
+            err_class = DSLNotSupported::LinkFromComponentWithTitle
             return raise_or_ret_error(err_class,[self[:node],self[:component_type],self[:title]],opts)
           end
         end
@@ -93,8 +93,8 @@ module DTK
               if self[:title] == p[:title] #they both can be nil -> want a match
                 true
               elsif opts[:is_output] and p[:title] and self[:title].nil?
-                #TODO: once add support for LinkFromComponentWithTitl put in error that indicates missing title in component link
-                err_class = ErrorUsage::DSLParsing::NotSupported::LinkFromComponentWithTitle
+                #TODO: once add support for LinkFromComponentWithTitle put in error that indicates missing title in component link
+                err_class = DSLNotSupported::LinkFromComponentWithTitle
                 return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
               end
             end

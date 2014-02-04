@@ -51,6 +51,7 @@ module DTK
         [component_type,title]
       end
     end
+    #TODO: make more restricting
     LegalComponentType = /^[^\/]+$/
 
     def self.parse_title?(cmp_display_name)
@@ -60,10 +61,9 @@ module DTK
     end
     ComponentTitleRegex = /(^.+)\[(.+)\]$/
 
-
     #component can be a hash or object
     def self.title?(component)
-      return nil unless component #convience so dont have to check argument being passed is nil
+      return nil unless component #convienence so dont have to check argument being passed is nil
       display_name = component[:display_name] || (component.kind_of?(Component) && component.get_field?(:display_name))
       unless display_name
         raise Error.new("Parameter (component) should have :display_name field")

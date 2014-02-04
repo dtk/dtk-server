@@ -7,15 +7,6 @@ module DTK
         ServiceLink::Factory.new(self,input_cmp_idh,output_cmp_idh,dependency_name).add?()
       end
       
-      def raise_error_if_link_from_component_title(cmp)
-        only_one_per_node = cmp.get_field?(:only_one_per_node)
-        if (!only_one_per_node.nil?) and not only_one_per_node
-          cmp_print_form = cmp.display_name_print_form(:node_prefix=>true)
-          raise ErrorUsage.new("Not supported: Link from a component with a title, '#{cmp_print_form}' in this case, is not supported")
-        end
-      end
-      private :raise_error_if_link_from_component_title
-
       def list_service_links(opts={})
         get_opts = Aux.hash_subset(opts,[:filter])
         pp_opts = Aux.hash_subset(opts,[:context])
@@ -43,6 +34,13 @@ module DTK
       end
 
      private
+      def raise_error_if_link_from_component_title(cmp)
+        only_one_per_node = cmp.get_field?(:only_one_per_node)
+        if (!only_one_per_node.nil?) and not only_one_per_node
+          raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(cmp)
+        end
+      end
+
       def find_dep_name_raise_error_if_ambiguous(input_cmp_idh,output_cmp_idh,opts={})
         input_cmp = input_cmp_idh.create_object()
         output_cmp = output_cmp_idh.create_object()

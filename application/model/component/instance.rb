@@ -28,6 +28,10 @@ module DTK; class Component
       cmp && create_from_component(cmp)
     end
 
+    def has_title?()
+      ComponentTitle.title?(self)
+    end
+
     def self.filter(component_type,component_title=nil)
       [:eq,:display_name,ComponentTitle.display_name_with_title?(component_type,component_title)]
     end

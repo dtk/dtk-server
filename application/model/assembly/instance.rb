@@ -70,7 +70,14 @@ module DTK; class  Assembly
       ret && ret.serialization_form()
     end
 
-    def rename(new_name)
+    def rename(assembly_mh, name, new_name)
+      assembly_list = Assembly::Instance.list(assembly_mh)
+      raise ErrorUsage.new("You are not allowed to use keyword '#{new_name}' as assembly name") if new_name.to_s.eql?("workspace")
+
+      assembly_list.each do |assembly|
+        raise ErrorUsage.new("Assembly with name '#{new_name}' exists already") if assembly[:display_name].to_s.eql?(new_name)
+      end
+
       update(:display_name => new_name)
     end
 

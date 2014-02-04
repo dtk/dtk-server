@@ -64,9 +64,10 @@ module DTK
 
     def rest__rename()
       assembly = ret_assembly_object()
+      assembly_name = ret_non_null_request_params(:assembly_name)
       new_assembly_name = ret_non_null_request_params(:new_assembly_name)
       
-      rest_ok_response assembly.rename(new_assembly_name)
+      rest_ok_response assembly.rename(model_handle(), assembly_name, new_assembly_name)
     end
 
     #TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions

@@ -29,7 +29,7 @@ module DTK; class Attribute
               Type::NodeLevel.new("#{t(:node,tokens[0])}/#{t(:attribute,tokens[1])}")
             else
               #handling in a way that can correctly parse the case where have node/cmp_type[title]/attr and title can have '/'
-              #This needs to be coorinated with ComponentTitle.parse_component_user_friendly_name
+              #This needs to be coorinated with ComponentTitle.parse_component_display_name
               node_part = tokens.shift
               attr_part = tokens.pop
               cmp_part = tokens.join('/') 

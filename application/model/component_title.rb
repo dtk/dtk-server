@@ -17,42 +17,48 @@ module DTK
       "#{component_type}--#{sanitized_title}"
     end
 
+    def self.parse_component_user_friendly_name(user_friendly_name,opts={})
+      node_name = component_type = title = nil
+      cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
+      cmp_node_part,title = parse_component_display_name(cmp_display_name,opts)
+
+    end
+
+    # parse_component_display_name
     # if opts has :node_prefix, returns [node_name,component_type,title]
     # else returns [component_type,title]
     # if ilegal form, nil will be returned
     # in all cases title could be nil
-    def self.parse_component_user_friendly_name(user_friendly_name,opts={})
+    def self.parse_component_display_name(cmp_display_name,opts={})
       node_name = component_type = title = nil
-      cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
-      cmp_node_part,title = parse_component_display_name(cmp_display_name)
+      cmp_node_part = nil
+      if cmp_display_name =~ ComponentTitleRegex
+        cmp_node_part,title = [$1,$2]
+      else
+        cmp_node_part = cmp_display_name
+      end
 
-      if opts[:node_prefix]
+      ret = nil
+      unless opts[:node_prefix]
+        component_type = cmp_node_part
+        ret = [component_type,title]
+      else
         if cmp_node_part  =~ SplitNodeComponentType
           node_name,component_type = [$1,$2]
+        else
+          component_type = cmp_node_part
         end
-        [node_name,component_type,title]
-      else
-        component_type = cmp_node_part
-        [component_type,title]
-      end
-    end
-    SplitNodeComponentType = /(^[^\/]+)\/([^\/]+$)/
-
-    #returns [component_type,title]; title could be nil if cmp_display_name has node prefix component_type will have this
-    def self.parse_component_display_name(cmp_display_name)
-      component_type = title = nil
-      if cmp_display_name =~ ComponentTitleRegex
-        component_type,title = [$1,$2]
-      else
-        component_type = cmp_display_name
+        ret = [node_name,component_type,title]
       end
 
       if component_type =~ LegalComponentType
-        [component_type,title]
+        ret
       end
     end
-    #TODO: make more restricting
-    LegalComponentType = /^[^\/]+$/
+
+    
+    LegalComponentType = /^[^\/]+$/ #TODO: make more restricting
+    SplitNodeComponentType = /(^[^\/]+)\/([^\/]+$)/
 
     def self.parse_title?(cmp_display_name)
       if cmp_display_name =~ ComponentTitleRegex

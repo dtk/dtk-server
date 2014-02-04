@@ -63,13 +63,14 @@ module DTK
       check_valid_id_helper(model_handle,id,filter)
     end
 
-    #just used for component instances
+    #just used for component instances; assumes that there is a node prefix in name
     def self.name_to_id(model_handle,name,context={})
       if context.empty?
         return name_to_id_default(model_handle,name)
       end
       if assembly_id = context[:assembly_id]
-        node_name,cmp_type,cmp_title = ComponentTitle.parse_component_user_friendly_name(name,:node_prefix => true)
+        display_name = Component.display_name_from_user_friendly_name(name)
+        node_name,cmp_type,cmp_title = ComponentTitle.parse_component_display_name(display_name,:node_prefix => true)
         unless node_name
           raise ErrorUsage.new("Ill-formed name for component (#{name})")
         end
@@ -138,7 +139,8 @@ module DTK
     end
 
     def self.component_type_from_user_friendly_name(user_friendly_name)
-      ComponentTitle.parse_component_user_friendly_name(user_friendly_name)[0]
+      cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
+      ComponentTitle.parse_component_display_name(user_friendly_name)[0]
     end
 
     #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template

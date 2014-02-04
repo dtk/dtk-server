@@ -13,7 +13,8 @@ module DTK
     end
 
     def self.ref_with_title(component_type,title)
-      "#{component_type}--#{title}"
+      sanitized_title = title.gsub(/\//,'__')
+      "#{component_type}--#{sanitized_title}"
     end
 
     # if opts has :node_prefix, returns [node_name,component_type,title]

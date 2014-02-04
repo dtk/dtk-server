@@ -44,7 +44,7 @@ module DTK; class Component
         Log.error("Unexpected that cannot find the title attribute")
         return
       end
-      unless title_attr[:value_asserted]
+      if title_attr[:value_asserted]
         Log.error("Unexpected that title attribute has value_asserted when set_title_attribute called")
       end
       title_attr.update(:value_asserted=>component_title,:cannot_change=>true,:is_instance_value=>true)

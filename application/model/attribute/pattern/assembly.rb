@@ -22,16 +22,18 @@ module DTK; class Attribute
       class Simple
         def self.create(attr_term,opts={})
           tokens = attr_term.split("/")
-          if tokens.size > 3 
-            raise ErrorUsage::Parsing::Term.new(attr_term)
-          end
           case tokens.size          
             when 1 
               Type::AssemblyLevel.new(t(:attribute,tokens[0]))
             when 2 
               Type::NodeLevel.new("#{t(:node,tokens[0])}/#{t(:attribute,tokens[1])}")
-            when 3 
-              Type::ComponentLevel.new("#{t(:node,tokens[0])}/#{t(:component,tokens[1])}/#{t(:attribute,tokens[2])}")
+            else
+              #handling in a way that can correctly parse the case where have node/cmp_type[title]/attr and title can have '/'
+              #This needs to be coorinated with ComponentTitle.parse_component_user_friendly_name
+              node_part = tokens.shift
+              attr_part = tokens.pop
+              cmp_part = tokens.join('/') 
+              Type::ComponentLevel.new("#{t(:node,node_part)}/#{t(:component,cmp_part)}/#{t(:attribute,attr_part)}")
           end
         end
        private 

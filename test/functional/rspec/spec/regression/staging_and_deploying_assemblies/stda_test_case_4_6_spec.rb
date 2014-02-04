@@ -41,7 +41,7 @@ describe "(Staging And Deploying Assemblies) Test Case 4 6: Renaming assembly an
 	end
 
 	context "NEG - Rename assembly to workspace name" do
-		include_context "NEG - Rename assembly to workspace name", dtk_common, "workspace"
+		include_context "NEG - Rename assembly to workspace name", dtk_common, assembly_name_1_rename
 	end
 
 	context "Converge function" do

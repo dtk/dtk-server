@@ -1,5 +1,5 @@
 #TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent parser phase
-#TODO: doe snot check for extra attributes
+#TODO: does not check for extra attributes
 module DTK; class ComponentDSL; class V2
   class ObjectModelForm < ComponentDSL::ObjectModelForm
     def self.convert(input_hash)
@@ -57,7 +57,7 @@ module DTK; class ComponentDSL; class V2
 
       def component_order(input_hash)
         if after_cmps = input_hash["after"]
-          after_cmps.inject(OutputHash.new) do |h,after_cmp|
+          after_cmps.inject(ObjectModelForm::OutputHash.new) do |h,after_cmp|
             after_cmp_internal_form = convert_to_internal_cmp_form(after_cmp)
             el={after_cmp_internal_form =>
               {"after"=>after_cmp_internal_form}}

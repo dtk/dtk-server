@@ -16,8 +16,28 @@ module DTK
       "#{component_type}--#{title}"
     end
 
-    ComponentTitleRegex = /(^.+)\[(.+)\]$/
-    #returns [component_type,title]
+    # if opts has :node_prefix, returns [node_name,component_type,title]
+    # else returns [component_type,title]
+    # if ilegal form, nil will be returned
+    # in all cases title could be nil
+    def self.parse_component_user_friendly_name(user_friendly_name,opts={})
+      node_name = component_type = title = nil
+      cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
+      cmp_node_part,title = parse_component_display_name(cmp_display_name)
+
+      if opts[:node_prefix]
+        if cmp_node_part  =~ SplitNodeComponentType
+          node_name,component_type = [$1,$2]
+        end
+        [node_name,component_type,title]
+      else
+        component_type = cmp_node_part
+        [component_type,title]
+      end
+    end
+    SplitNodeComponentType = /(^[^\/]+)\/([^\/]+$)/
+
+    #returns [component_type,title]; title could be nil if cmp_display_name has node prefix component_type will have this
     def self.parse_component_display_name(cmp_display_name)
       if cmp_display_name =~ ComponentTitleRegex
         [$1,$2]
@@ -30,6 +50,8 @@ module DTK
         $2
       end
     end
+    ComponentTitleRegex = /(^.+)\[(.+)\]$/
+
 
     #component can be a hash or object
     def self.title?(component)

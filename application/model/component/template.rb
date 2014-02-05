@@ -146,6 +146,7 @@ module DTK; class Component
       check_valid_id_helper(model_handle,id,filter,opts)
     end
 
+    #if title is in the name, this strips it off
     def self.name_to_id(model_handle,name,version_or_versions=nil)
       if version_or_versions.kind_of?(Array)
         version_or_versions.each do |version|
@@ -160,22 +161,20 @@ module DTK; class Component
     end
 
    private 
+    #if title is in the name, this strips it off
     def self.name_to_id_aux(model_handle,name,version,opts={})
+      display_name = display_name_from_user_friendly_name(name)
+      component_type,title =  ComponentTitle.parse_component_display_name(display_name)
       sp_hash = {
         :cols => [:id],
         :filter => [:and,
                     [:eq, :type, 'template'],
-                    [:eq, :component_type, component_type_from_user_friendly_name(name)],
+                    [:eq, :component_type, component_type],
                     [:neq, :project_project_id, nil],
                     [:eq, :node_node_id, nil],
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
-    end
-
-    def self.component_type_from_user_friendly_name(user_friendly_name)
-      #for component tempaltes display name and component type are the same
-      display_name_from_user_friendly_name(user_friendly_name)
     end
   end
 

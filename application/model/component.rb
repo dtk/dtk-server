@@ -138,11 +138,6 @@ module DTK
       user_friendly_name.gsub(/::/,"__")
     end
 
-    def self.component_type_from_user_friendly_name(user_friendly_name)
-      cmp_display_name = Component.display_name_from_user_friendly_name(user_friendly_name)
-      ComponentTitle.parse_component_display_name(user_friendly_name)[0]
-    end
-
     #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name]

@@ -165,12 +165,17 @@ module DTK; class Component
         :cols => [:id],
         :filter => [:and,
                     [:eq, :type, 'template'],
-                    [:eq, :component_type, Component.component_type_from_user_friendly_name(name)],
+                    [:eq, :component_type, component_type_from_user_friendly_name(name)],
                     [:neq, :project_project_id, nil],
                     [:eq, :node_node_id, nil],
                     [:eq, :version, version_field(version)]]
       }
       name_to_id_helper(model_handle,Component.name_with_version(name,version),sp_hash,opts)
+    end
+
+    def self.component_type_from_user_friendly_name(user_friendly_name)
+      #for component tempaltes display name and component type are the same
+      display_name_from_user_friendly_name(user_friendly_name)
     end
   end
 

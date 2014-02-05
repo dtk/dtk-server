@@ -184,51 +184,12 @@ module DTK; class  Assembly
     end
 
     def get_tasks(opts={})
-      tasks = []
       rows = get_objs(:cols => [:tasks])
-
-      rows.each do |row|
-        task = row[:task]
-        task_obj_idh = task.id_handle()
-        task_mh = task_obj_idh.createMH(:task)
-        task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
-        status_opts = {}
-        tasks << task_structure.status_table_form(status_opts)
+      if opts[:filter_proc]
+        rows.reject!{|r|!opts[:filter_proc].call(r)}
       end
-
-      tasks.flatten
+      rows.map{|r|r[:task]}
     end
-
-
-    # this is the old list-tasks code, will leave it commented for now 
-    # until we make sure we are not experiencign any issues with new code
-    # def get_tasks(opts={})
-    #   tasks = []
-    #   rows = get_objs(:cols => [:tasks])
-
-    #   rows.each do |row|
-    #     tasks << row
-    #     subs = Task.get_all_subtasks([row[:task].id_handle()])
-
-    #     subs.each do |sub|
-    #       exec_action_type = sub[:executable_action_type]
-    #       display_name = exec_action_type.gsub(/(.)([A-Z])/,'\1_\2').downcase if exec_action_type
-
-    #       if display_name
-    #         sub[:display_name] = display_name
-    #       end
-
-    #       tasks << {:id => row[:id], :task => sub}
-    #     end
-    #   end
-
-    #   if opts[:filter_proc]
-    #     rows.reject!{|r|!opts[:filter_proc].call(r)}
-    #   end
-
-    #   # rows.map{|r|r[:task]}
-    #   tasks.map{|r| r[:task]}
-    # end
 
     def clear_tasks(opts={})
       opts_get_tasks = Hash.new

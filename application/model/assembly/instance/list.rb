@@ -103,9 +103,7 @@ module DTK; class  Assembly
           end
           get_component_modules(component_modules_opts).sort{|a,b| a[:display_name] <=> b[:display_name] }
         when :tasks
-          get_tasks(opts)
-          # commented for now because we don't need this type of sort anymore
-          # get_tasks(opts).sort{|a,b|(b[:started_at]||b[:created_at]) <=> (a[:started_at]||a[:created_at])} #TODO: might encapsulate in Task; ||foo[:created_at] used in case foo[:started_at] is null
+          list_tasks(opts)
         else
           raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
         end
@@ -141,6 +139,20 @@ module DTK; class  Assembly
       end
 
      private
+      def list_tasks(opts={})
+        tasks = []
+        rows = get_objs(:cols => [:tasks])
+        rows.each do |row|
+          task = row[:task]
+          task_obj_idh = task.id_handle()
+          task_mh = task_obj_idh.createMH(:task)
+          task_structure = Task.get_hierarchical_structure(task_mh.createIDH(:id => task[:id]))
+          status_opts = {}
+          tasks << task_structure.status_table_form(status_opts)
+        end
+        tasks.flatten
+      end
+
       def list_components__with_deps(cmps_print_form,aug_cmps,main_table_sort)
         ndx_component_print_form = ret_ndx_component_print_form(aug_cmps,cmps_print_form)
         join_columns = OutputTable::JoinColumns.new(aug_cmps) do |aug_cmp|

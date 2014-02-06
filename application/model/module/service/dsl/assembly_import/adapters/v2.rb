@@ -25,10 +25,10 @@ module DTK; class ServiceModule
           opts_matching_id = opts.merge(:do_not_throw_error => true)
 
           input_id = input.matching_id(ports,opts_matching_id)
-          return input_id if input_id.is_a?(ErrorUsage::DSLParsing)
+          return input_id if ParsingError.class_of?(input_id)
           
           output_id = output.matching_id(ports,opts_matching_id.merge(:is_output => true))
-          return output_id if output_id.is_a?(ErrorUsage::DSLParsing)
+          return output_id if ParsingError.class_of?(output_id)
 
           pl_ref = PortLink.ref_from_ids(input_id,output_id)
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}
@@ -133,7 +133,7 @@ module DTK; class ServiceModule
         ret =
           if cmp_input.kind_of?(Hash) 
             unless cmp_input.values.first.kind_of?(Hash)
-              raise ErrorUsage::DSLParsing.new("Parsing error after component term (#{cmp_input.keys.first})")
+              raise ParsingError.new("Parsing error after component term (#{cmp_input.keys.first})")
             end
             cmp_input.values.first["attributes"]||{}
           end

@@ -30,7 +30,7 @@ module DTK; class ServiceModule
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
-            return imported_nodes if ParsingError.is_a?(imported_nodes)
+            return imported_nodes if ParsingError.class_of?(imported_nodes)
 
             if workflow_hash = assem["workflow"]
               if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
@@ -66,10 +66,10 @@ module DTK; class ServiceModule
     def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
       file_path = opts[:file_path]
       if assembly_hash.empty?
-        raise ErrorUsage::DSLParsing.new("Empty assembly dsl file",file_path)
+        raise ParsingError.new("Empty assembly dsl file",file_path)
       end
       unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
-        raise ErrorUsage::DSLParsing.new("No name associated with assembly dsl file",file_path)
+        raise ParsingError.new("No name associated with assembly dsl file",file_path)
       end
       version_field = module_branch.get_field?(:version)
       assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
@@ -120,13 +120,13 @@ module DTK; class ServiceModule
               # We want to import module still even if there are bad node references
               # we stop importing nodes when run into bad node reference but still continue with module import
               
-              return ErrorUsage::DSLParsing::BadNodeReference.new("Bad node reference", nb_rs)
+              return ParsingError::BadNodeReference.new("Bad node reference", nb_rs)
             end
           else
             node_output["node_binding_rs_id"] = nil
           end
           cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
-          return cmps_output if cmps_output.is_a?(ErrorUsage::DSLParsing)
+          return cmps_output if ParsingError.class_of?(cmps_output)
           
             unless cmps_output.empty?
               node_output["component_ref"] = cmps_output
@@ -202,7 +202,7 @@ module DTK; class ServiceModule
       cmps_with_titles = Array.new
 
       unless components_hash
-        return ErrorUsage::DSLParsing::BadComponentReference.new("Missing components section",opts[:file_path])
+        return ParsingError::BadComponentReference.new("Missing components section",opts[:file_path])
       end
       components_hash = [components_hash] unless components_hash.kind_of?(Array)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
@@ -221,8 +221,9 @@ module DTK; class ServiceModule
             pntr = cmp_ref[:attribute_override] ||= Hash.new
             pntr.merge!(import_attribute_overrides(attr_name,attr_val))
           end
+         #TODO: after check carefully change to using ParsingError.trap(&block)
          rescue ErrorUsage::DSLParsing => e
-          return ErrorUsage::DSLParsing.new(e.to_s,opts[:file_path])
+          return ParsingError.new(e.to_s,opts[:file_path])
         end
         h.merge(parse[:ref] => cmp_ref)
       end

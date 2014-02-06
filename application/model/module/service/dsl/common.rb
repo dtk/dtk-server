@@ -104,7 +104,7 @@ module DTK
           match[:id]
         elsif opts[:do_not_throw_error]
           opts_file_path = Aux::hash_subset(opts,[:file_path])
-          return ErrorUsage::DSLParsing::BadComponentLink.new(self[:node],self[:component_type],self[:link_def_ref],opts_file_path)
+          return ParsingError::BadComponentLink.new(self[:node],self[:component_type],self[:link_def_ref],opts_file_path)
         else
           raise Error.new("Cannot find match to (#{self.inspect})")
         end

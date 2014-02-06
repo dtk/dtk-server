@@ -4,7 +4,6 @@ module DTK; class ServiceModule
     r8_nested_require('assembly_import','port')
     include PortMixin
     extend FactoryObjectClassMixin
-    include ModuleParsingErrorMixin
     def initialize(container_idh,module_branch,module_name,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)
@@ -31,7 +30,7 @@ module DTK; class ServiceModule
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
-            return imported_nodes if imported_nodes.is_a?(ErrorUsage::DSLParsing)
+            return imported_nodes if ParsingError.is_a?(imported_nodes)
 
             if workflow_hash = assem["workflow"]
               if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)

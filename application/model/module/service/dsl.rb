@@ -4,7 +4,7 @@ module DTK
     r8_nested_require('dsl','assembly_import')
     r8_nested_require('dsl','assembly_export')
     r8_nested_require('dsl','parser')
-    r8_nested_require('dsl','error')
+    r8_nested_require('dsl','parsing_error')
 
     module DSLVersionInfo
       def self.default_integer_version()
@@ -88,10 +88,10 @@ module DTK
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         component_module_refs = update_component_module_refs(module_branch,opts)
-        return component_module_refs if ParsingError.dsl_parsing_error?(component_module_refs)
+        return component_module_refs if ParsingError.is_a?(component_module_refs)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        set_dsl_parsed!(true) unless ParsingError.dsl_parsing_error?(parsed)
+        set_dsl_parsed!(true) unless ParsingError.is_a?(parsed)
         parsed
       end
 
@@ -103,7 +103,7 @@ module DTK
           else
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
-        return parsed_info if ParsingError.dsl_parsing_error?(parsed_info)
+        return parsed_info if ParsingError.is_a?(parsed_info)
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
@@ -130,11 +130,11 @@ module DTK
             opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
             
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
-            return hash_content if ParsingError.dsl_parsing_error?(hash_content)
+            return hash_content if ParsingError.is_a?(hash_content)
 
             # if assembly/node import returns error continue with module import
             imported = assembly_import_helper.process(module_name,hash_content,opts)
-            return imported if ParsingError.dsl_parsing_error?(imported)
+            return imported if ParsingError.is_a?(imported)
           end
         end
         errors = dangling_errors.raise_error?(:do_not_raise => true)

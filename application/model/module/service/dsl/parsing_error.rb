@@ -1,7 +1,13 @@
 module DTK
   class ParsingError < ErrorUsage::DSLParsing
-    extend ModuleParsingErrorMixin
+    def self.is_a?(obj)
+      Private.dsl_parsing_error?(obj)
+    end
+    module Private
+      extend ModuleParsingErrorMixin
+    end
   end
+
   class ErrorUsage
     class DSLParsing
       class BadNodeReference < self

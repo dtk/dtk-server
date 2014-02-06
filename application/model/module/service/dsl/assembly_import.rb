@@ -4,7 +4,7 @@ module DTK; class ServiceModule
     r8_nested_require('assembly_import','port')
     include PortMixin
     extend FactoryObjectClassMixin
-    include ModuleHandleErrorsMixin
+    include ModuleParsingErrorMixin
     def initialize(container_idh,module_branch,module_name,component_module_refs)
       @container_idh = container_idh
       @db_updates_assemblies = DBUpdateHash.new("component" => DBUpdateHash.new,"node" => DBUpdateHash.new)

@@ -88,11 +88,10 @@ module DTK
       def update_model_from_dsl(module_branch,opts={})
         set_dsl_parsed!(false)
         component_module_refs = update_component_module_refs(module_branch,opts)
-        return component_module_refs if component_module_refs.is_a?(ErrorUsage::DSLParsing::JSONParsing)
+        return component_module_refs if ParsingError.dsl_parsing_error?(component_module_refs)
 
         parsed = update_assemblies_from_dsl(module_branch,component_module_refs,opts)
-        set_dsl_parsed!(true) unless (parsed.is_a?(ErrorUsage::DSLParsing) || parsed.is_a?(XYZ::ErrorUsage::DanglingComponentRefs))
-        
+        set_dsl_parsed!(true) unless ParsingError.dsl_parsing_error?(parsed)
         parsed
       end
 
@@ -104,7 +103,7 @@ module DTK
           else
             DSLParser::Output.new(:component_module_refs,legacy_component_module_refs_parsed_info(module_branch,opts))
           end
-        return parsed_info if parsed_info.is_a?(ErrorUsage::DSLParsing::JSONParsing)
+        return parsed_info if ParsingError.dsl_parsing_error?(parsed_info)
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
@@ -131,11 +130,11 @@ module DTK
             opts.merge!(:file_path => meta_file,:default_assembly_name => default_assembly_name)
             
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
-            return hash_content if dsl_parsing_error?(hash_content)
+            return hash_content if ParsingError.dsl_parsing_error?(hash_content)
 
             # if assembly/node import returns error continue with module import
             imported = assembly_import_helper.process(module_name,hash_content,opts)
-            return imported if dsl_parsing_error?(imported)
+            return imported if ParsingError.dsl_parsing_error?(imported)
           end
         end
         errors = dangling_errors.raise_error?(:do_not_raise => true)

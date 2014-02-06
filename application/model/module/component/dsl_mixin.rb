@@ -2,7 +2,7 @@ module DTK; class ComponentModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
-    include ModuleHandleErrorsMixin
+    include ModuleParsingErrorMixin
 
     def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
       info = module_and_branch_info #for succinctness

@@ -1,4 +1,7 @@
 module DTK
+  class ParsingError < ErrorUsage::DSLParsing
+    extend ModuleParsingErrorMixin
+  end
   class ErrorUsage
     class DSLParsing
       class BadNodeReference < self

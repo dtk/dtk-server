@@ -1,4 +1,6 @@
 module DTK
+  r8_nested_require('mixins','parsing_error')
+
   class ModuleRepoInfo < Hash
     def initialize(repo,module_name,module_idh,branch_obj,version=nil)
       super()
@@ -35,25 +37,9 @@ module DTK
 
   r8_nested_require('mixins','remote')  
 
-  module ModuleHandleErrorsMixin
-    def trap_dsl_parsing_error(&block)
-      parsing_error = nil
-      begin
-        normal_return = yield
-      rescue ErrorUsage::DSLParsing,ErrorUsage::Parsing => e
-        parsing_error = e
-      end
-      parsing_error
-    end
-    def dsl_parsing_error?(obj)
-      obj.is_a?(ErrorUsage::DSLParsing) || 
-      obj.is_a?(ErrorUsage::Parsing)
-    end
-  end
-
   module ModuleMixin
     include ModuleRemoteMixin
-    include ModuleHandleErrorsMixin
+    include ModuleParsingErrorMixin
 
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)

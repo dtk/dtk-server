@@ -3,7 +3,7 @@ module DTK
   class ModuleBranch < Model
     include BranchNamesMixin
     extend BranchNamesClassMixin
-    include ModuleHandleErrorsMixin
+    include ModuleParsingErrorMixin
 
     def self.common_columns()
       [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref]

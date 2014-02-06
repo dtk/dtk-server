@@ -8,7 +8,7 @@ module DTK
     r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
-    extend ModuleHandleErrorsMixin
+    extend ModuleParsingErrorMixin
 
     def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
       #get associated assembly templates before do any updates and use this to see if any referential integrity

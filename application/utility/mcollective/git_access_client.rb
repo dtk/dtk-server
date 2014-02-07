@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require File.expand_path('../../require_first', File.dirname(__FILE__))
-r8_require_common_lib('auxiliary')
 require 'mcollective'
 require 'tempfile'
 require 'pp'

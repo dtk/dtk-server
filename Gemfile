@@ -14,6 +14,7 @@ gem 'rspec','2.11.0'
 gem 'sshkey','1.3.1'
 gem 'sshkeyauth', '0.0.11'
 gem 'thin'
+gem 'colorize','~> 0.5.8'
 # gem 'rack-contrib'
 gem 'awesome_print','1.1.0'
 

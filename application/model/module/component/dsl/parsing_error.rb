@@ -1,6 +1,6 @@
 module DTK
  class ComponentDSL
-    class ParsingError < Module::ParsingError
+    class ParsingError < ModuleDSL::ParsingError
       r8_nested_require('parsing_error','ref_component_templates')
       r8_nested_require('parsing_error','link_def')
       r8_nested_require('parsing_error','dependency')

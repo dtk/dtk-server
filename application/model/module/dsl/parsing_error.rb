@@ -1,6 +1,6 @@
 module DTK
-  module Module
-    class ParsingError
+  module ModuleDSL
+    class ParsingError < ErrorUsage::DSLParsing
       def self.trap(&block)
         parsing_error = nil
         begin

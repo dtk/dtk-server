@@ -1,6 +1,6 @@
 module DTK
   class ServiceModule 
-    class ParsingError < Module::ParsingError
+    class ParsingError < ModuleDSL::ParsingError
       class BadNodeReference < self
       end
       

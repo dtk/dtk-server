@@ -1,5 +1,6 @@
 module DTK
   class ServiceModule 
+    #TODO: cleanup so can make caller info a default; issue now is last arg can be file path or opts
     class ParsingError < ModuleDSL::ParsingError
       r8_nested_require('parsing_error','dangling_component_refs')
 

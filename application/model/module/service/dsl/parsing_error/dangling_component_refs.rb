@@ -1,8 +1,9 @@
 module DTK; class ServiceModule
   class ParsingError
     class ParsingError::DanglingComponentRefs < self
-      def initialize(cmp_ref_info_list)
-        super(err_msg(cmp_ref_info_list))
+      def initialize(cmp_ref_info_list,opts={})
+        nested_opts = (opts.empty? ? {:caller_info=>true} : opts) 
+        super(err_msg(cmp_ref_info_list),nested_opts)
         #each element can be a component ref object or a hash
         @cmp_ref_info_list = cmp_ref_info_list 
       end
@@ -50,8 +51,8 @@ module DTK; class ServiceModule
         def raise_error?(opts={})
           unless @cmp_ref_info_list.empty?()
             @error_cleanup.call() if @error_cleanup
-            return ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list) if opts[:do_not_raise]
-            raise ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list)
+            return ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,:log_error => false) if opts[:do_not_raise]
+            raise ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,:log_error => false)
           end
         end
         

@@ -8,14 +8,7 @@ module DTK
           if opts.empty? 
             {:caller_info=>true}
           elsif opts[:file_path]
-            if opts.size > 1
-              raise Error.new("Not supported yet, need to cleanup so parent takes opts, rather than opts file path")
-              #TODO: cleanup so parent takes opts, rather than opts file path
-            else
-              opts[:file_path]
-            end
-          else
-            opts
+
           end
         super(msg,opts_file_path)
       end

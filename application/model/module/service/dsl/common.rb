@@ -43,12 +43,12 @@ module DTK
           end
           new(hash)
         else
-          raise Error.new("ill-formed port ref (#{port_ref})")
+          raise ServiceModule::ParsingError.new("Ill-formed port ref (#{port_ref})")
         end     
       end
       def self.parse_component_link(input_node,input_cmp_name,component_link_hash)
         unless component_link_hash.size == 1
-          raise Error.new("ill-formed component link (#{component_link_hash.inject})")
+          raise ServiceModule::ParsingError.new("Ill-formed component link ?1",component_link_hash)
         end
         link_def_ref = component_link_hash.keys.first
         if component_link_hash.values.first =~ ServiceLinkTarget
@@ -57,25 +57,25 @@ module DTK
           output = parsed_endpoint(output_node,output_cmp_name,link_def_ref)
           {:input => input, :output => output}
         else
-          raise Error.new("ill-formed component link (#{component_link_hash.inject}")
+          raise ServiceModule::ParsingError.new("Ill-formed component link ?1\nIt should have form ?2",component_link_hash,ServiceLinkLegalForm)
         end     
       end
-      class << self
-       private
-        def parsed_endpoint(node,cmp_name,link_def_ref)
-          component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
-          ret_hash = {:node => node,:component_type => component_type_internal_form(component_type), :link_def_ref => link_def_ref}
-          ret_hash.merge!(:title => title) if title
-          new(ret_hash)
-        end
-
-        def component_type_internal_form(cmp_type_ext_form)
-          #TODO: this does not take into account that there could be a version on cmp_type_ext_form
-          InternalForm.component_ref(cmp_type_ext_form)
-        end
-      end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
-      ServiceLinkTarget= Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
+      ServiceLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
+      ServiceLinkLegalForm = "LinkType: Node/Component"
+
+      def self.parsed_endpoint(node,cmp_name,link_def_ref)
+        component_type,title = ComponentTitle.parse_component_display_name(cmp_name)
+        ret_hash = {:node => node,:component_type => component_type_internal_form(component_type), :link_def_ref => link_def_ref}
+        ret_hash.merge!(:title => title) if title
+        new(ret_hash)
+      end
+      private_class_method :parsed_endpoint
+      def self.component_type_internal_form(cmp_type_ext_form)
+        #TODO: this does not take into account that there could be a version on cmp_type_ext_form
+        InternalForm.component_ref(cmp_type_ext_form)
+      end
+      private_class_method :component_type_internal_form
 
       #ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
@@ -103,8 +103,8 @@ module DTK
         if match
           match[:id]
         elsif opts[:do_not_throw_error]
-          opts_file_path = Aux::hash_subset(opts,[:file_path])
-          return ParsingError::BadComponentLink.new(self[:node],self[:component_type],self[:link_def_ref],opts_file_path)
+          opts_file_path = Opts.new(opts).slice(:file_path)
+          return ServiceModule::ParsingError::BadComponentLink.new(self[:node],self[:component_type],self[:link_def_ref],opts_file_path)
         else
           raise Error.new("Cannot find match to (#{self.inspect})")
         end

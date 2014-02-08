@@ -10,7 +10,9 @@ module DTK; class ServiceModule
           components.each do |input_cmp|
             if input_cmp.kind_of?(Hash) 
               input_cmp_name = input_cmp.keys.first
-              (input_cmp.values.first["component_links"]||{}).each_pair do |link_def_type,targets|
+              component_links = input_cmp.values.first["component_links"]||{}
+              ParsingError.raise_error_if_not(component_links,Hash,:type => "component link",:context => input_cmp)
+              component_links.each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   component_link_hash = {link_def_type => target}
                   ret << AssemblyImportPortRef.parse_component_link(input_node_name,input_cmp_name,component_link_hash)

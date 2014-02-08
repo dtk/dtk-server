@@ -15,7 +15,9 @@ module DTK
 
        #TODO: cleanup so parent takes opts, rather than opts_or_file_path
         opts_or_file_path =
-          if opts[:file_path]
+          if opts.empty?
+            {:caller_info=>true}
+          elsif opts[:file_path]
             if opts.size > 1
               raise Error.new("Not supported yet, need to cleanup so parent takes opts, rather than opts file path")
             else
@@ -31,7 +33,13 @@ module DTK
         unless obj.kind_of?(klass)
           fragment_type = opts[:type]||'fragment'
           for_text = (opts[:for] ? " for #{opts[:for]}" : nil)
-          raise new("Ill-formed #{fragment_type} (?1)#{for_text}; it should be a #{klass}",obj)
+          err_msg = "Ill-formed #{fragment_type} (?obj)#{for_text}; it should be a #{klass}"
+          err_params = Params.new(:obj => obj)
+          if context = opts[:context]
+            err_msg << "; it appears in ?context"
+            err_params.merge!(:context => context)
+          end
+          raise new(err_msg,err_params)
         end
       end
 

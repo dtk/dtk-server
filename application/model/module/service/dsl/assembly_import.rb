@@ -64,12 +64,11 @@ module DTK; class ServiceModule
     end
 
     def self.import_assembly_top(serialized_assembly_ref,assembly_hash,module_branch,module_name,opts={})
-      file_path = opts[:file_path]
       if assembly_hash.empty?
-        raise ParsingError.new("Empty assembly dsl file",:file_path => file_path)
+        raise ParsingError.new("Empty assembly dsl file",opts_file_path(opts))
       end
       unless assembly_name = assembly_hash["name"]||opts[:default_assembly_name]
-        raise ParsingError.new("No name associated with assembly dsl file",:file_path => file_path)
+        raise ParsingError.new("No name associated with assembly dsl file",opts_file_path(opts))
       end
       version_field = module_branch.get_field?(:version)
       assembly_ref = internal_assembly_ref__with_version(serialized_assembly_ref,version_field)
@@ -202,7 +201,7 @@ module DTK; class ServiceModule
       cmps_with_titles = Array.new
 
       unless components_hash
-        return ParsingError::BadComponentReference.new("Missing components section",Aux.hash_subset(opts,[:file_path]))
+        return ParsingError::BadComponentReference.new("Missing components section",opts_file_path(opts))
       end
       components_hash = [components_hash] unless components_hash.kind_of?(Array)
       ret = components_hash.inject(Hash.new) do |h,cmp_input|
@@ -222,7 +221,7 @@ module DTK; class ServiceModule
             pntr.merge!(import_attribute_overrides(attr_name,attr_val))
           end
          rescue ParsingError => e
-          return ParsingError.new(e.to_s,Aux.hash_subset(opts,[:file_path]))
+          return ParsingError.new(e.to_s,opts_file_path(opts))
         end
         h.merge(parse[:ref] => cmp_ref)
       end
@@ -342,6 +341,10 @@ module DTK; class ServiceModule
           Log.error("Component module for #{cmp_name} missing the title field")
         end
       end
+    end
+
+    def self.opts_file_path(opts)
+      (opts.kind_of?(Opts) ? opts :Opts.new(opts)).slice(:file_path)
     end
   end
 end; end

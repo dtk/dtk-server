@@ -50,8 +50,9 @@ module DTK; class ServiceModule
         def raise_error?(opts={})
           unless @cmp_ref_info_list.empty?()
             @error_cleanup.call() if @error_cleanup
-            return ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,:log_error => false) if opts[:do_not_raise]
-            raise ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,:log_error => false)
+            opts_err = Opts.new(:log_error => false)
+            return ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,opts_err) if opts[:do_not_raise]
+            raise ParsingError::DanglingComponentRefs.new(@cmp_ref_info_list,opts_err)
           end
         end
         

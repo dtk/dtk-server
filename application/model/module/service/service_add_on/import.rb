@@ -51,8 +51,8 @@ module DTK
         assembly_list = [assembly,sub_assembly]
         add_on_port_links.each do |ao_pl_ref,ao_pl|
           link = ao_pl["link"]
-          input_assembly,input_port = AssemblyImportPortRef::AddOn.parse(link.values.first,assembly_list)
-          output_assembly,output_port = AssemblyImportPortRef::AddOn.parse(link.keys.first,assembly_list)
+          input_assembly,input_port = add_on_parse(link.values.first,assembly_list)
+          output_assembly,output_port = add_on_parse(link.keys.first,assembly_list)
           input_id = input_port.matching_id(ports)
           output_id = output_port.matching_id(ports)
           output_is_local = (output_assembly == assembly[:display_name]) 
@@ -60,6 +60,10 @@ module DTK
           ret.merge!(ao_pl_ref => pl_hash)
         end
         ret
+      end
+
+      def add_on_parse(add_on_port_ref,assembly_list)
+        ServiceModule::AssemblyImport::PortRef::AddOn.parse(add_on_port_ref,assembly_list)
       end
       
       def augment_with_assembly_ids!(ports)

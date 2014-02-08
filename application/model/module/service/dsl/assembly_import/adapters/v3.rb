@@ -15,7 +15,7 @@ module DTK; class ServiceModule
               component_links.each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   component_link_hash = {link_def_type => target}
-                  ret << AssemblyImportPortRef.parse_component_link(input_node_name,input_cmp_name,component_link_hash)
+                  ret << PortRef.parse_component_link(input_node_name,input_cmp_name,component_link_hash)
                 end
               end
             end

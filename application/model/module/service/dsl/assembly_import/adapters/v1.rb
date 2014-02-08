@@ -14,8 +14,8 @@ module DTK; class ServiceModule
         augment_with_parsed_port_names!(ports)
         
         port_links = (assembly_hash["port_links"]||[]).inject(DBUpdateHash.new) do |h,pl|
-          input = AssemblyImportPortRef.parse(pl.values.first)
-          output = AssemblyImportPortRef.parse(pl.keys.first)
+          input = PortRef.parse(pl.values.first)
+          output = PortRef.parse(pl.keys.first)
           input_id = input.matching_id(ports)
           output_id = output.matching_id(ports)
           pl_ref = PortLink.ref_from_ids(input_id,output_id)

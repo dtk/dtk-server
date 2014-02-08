@@ -37,7 +37,6 @@ module DTK; class ServiceModule
       link_defs_info = LinkDef::Info.get_link_def_info(assembly)
 
       create_opts = {:returning_sql_cols => [:link_def_id,:id,:display_name,:type,:connected]}
-pp [:create_assembly_template_ports,link_defs_info]
       PortProcessing.create_assembly_template_ports?(link_defs_info,create_opts)
     end
   end

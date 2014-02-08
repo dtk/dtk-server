@@ -122,7 +122,7 @@ module DTK
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
-        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
+        dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
           dangling_errors.aggregate_errors!()  do
             file_content = RepoManager.get_file_content(meta_file,module_branch)
@@ -138,7 +138,7 @@ module DTK
           end
         end
         errors = dangling_errors.raise_error?(:do_not_raise => true)
-        return errors if errors.is_a?(ErrorUsage::DanglingComponentRefs)
+        return errors if errors.is_a?(ParsingError::DanglingComponentRefs)
 
         assembly_import_helper.import()
       end

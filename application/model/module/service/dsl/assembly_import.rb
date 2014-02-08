@@ -21,7 +21,7 @@ module DTK; class ServiceModule
       integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
       version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
-        dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+        dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
@@ -97,7 +97,7 @@ module DTK; class ServiceModule
         end
       end
 
-      dangling_errors = ErrorUsage::DanglingComponentRefs::Aggregate.new()
+      dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
       version_field = module_branch.get_field?(:version)
       assembly_ref_with_version = internal_assembly_ref__add_version(assembly_ref,version_field)
 

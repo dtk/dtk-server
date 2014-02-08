@@ -157,7 +157,7 @@ module DTK
           end
         end
       end
-      raise ErrorUsage::DanglingComponentRefs.new(reference_errors) unless reference_errors.empty?
+      raise ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors) unless reference_errors.empty?
       ret
     end
 

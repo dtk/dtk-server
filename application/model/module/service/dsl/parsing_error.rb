@@ -1,6 +1,8 @@
 module DTK
   class ServiceModule 
     class ParsingError < ModuleDSL::ParsingError
+      r8_nested_require('parsing_error','dangling_component_refs')
+
       class BadNodeReference < self
       end
       

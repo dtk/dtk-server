@@ -2,8 +2,7 @@ module DTK; class ServiceModule
   class ParsingError
     class ParsingError::DanglingComponentRefs < self
       def initialize(cmp_ref_info_list,opts={})
-        nested_opts = (opts.empty? ? {:caller_info=>true} : opts) 
-        super(err_msg(cmp_ref_info_list),nested_opts)
+        super(err_msg(cmp_ref_info_list),opts)
         #each element can be a component ref object or a hash
         @cmp_ref_info_list = cmp_ref_info_list 
       end

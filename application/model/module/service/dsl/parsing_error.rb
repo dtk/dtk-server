@@ -1,8 +1,24 @@
 module DTK
   class ServiceModule 
-    #TODO: cleanup so can make caller info a default; issue now is last arg can be file path or opts
     class ParsingError < ModuleDSL::ParsingError
       r8_nested_require('parsing_error','dangling_component_refs')
+
+      def initialize(msg,opts={})
+        opts_file_path =  
+          if opts.empty? 
+            {:caller_info=>true}
+          elsif opts[:file_path]
+            if opts.size > 1
+              raise Error.new("Not supported yet, need to cleanup so parent takes opts, rather than opts file path")
+              #TODO: cleanup so parent takes opts, rather than opts file path
+            else
+              opts[:file_path]
+            end
+          else
+            opts
+          end
+        super(msg,opts_file_path)
+      end
 
       class BadNodeReference < self
       end

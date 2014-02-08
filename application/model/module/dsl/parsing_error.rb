@@ -2,13 +2,13 @@ module DTK
   module ModuleDSL
     class ParsingError < ErrorUsage::DSLParsing
       def self.trap(&block)
-        parsing_error = nil
+        ret = nil
         begin
-          normal_return = yield
+          ret = yield
         rescue ErrorUsage::DSLParsing,ErrorUsage::Parsing => e
-          parsing_error = e
+          ret = e
         end
-        parsing_error
+        ret
       end
 
       def self.is_error?(obj)

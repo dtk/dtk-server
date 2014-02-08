@@ -221,8 +221,7 @@ module DTK; class ServiceModule
             pntr = cmp_ref[:attribute_override] ||= Hash.new
             pntr.merge!(import_attribute_overrides(attr_name,attr_val))
           end
-         #TODO: after check carefully change to using ParsingError.trap(&block)
-         rescue ErrorUsage::DSLParsing => e
+         rescue ParsingError => e
           return ParsingError.new(e.to_s,opts[:file_path])
         end
         h.merge(parse[:ref] => cmp_ref)

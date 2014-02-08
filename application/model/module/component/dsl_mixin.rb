@@ -95,7 +95,7 @@ module DTK; class ComponentModule
       dsl_created_info = Hash.new()
 
       if ComponentDSL.contains_dsl_file?(impl_obj)
-        if e = ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
+        if e = ComponentDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch_idh,version,opts)}
           ret.merge!(:dsl_parsed_info => e)
         end
       elsif opts[:scaffold_if_no_dsl] 
@@ -126,7 +126,7 @@ module DTK; class ComponentModule
         AssemblyModule::Component.finalize_edit(assembly,self,module_branch)
       elsif ComponentDSL.contains_dsl_file?(impl_obj)
         if opts[:force_parse] or diffs_summary.meta_file_changed?() or (get_field?(:dsl_parsed) == false)
-          if e = ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
+          if e = ComponentDSL::ParsingError.trap{parse_dsl_and_update_model(impl_obj,module_branch.id_handle(),version,opts)}
             ret.merge!(:dsl_parsed_info => e)
           end
         end

@@ -17,7 +17,7 @@ module DTK
       model_parsed = nil
       Transaction do
         component_dsl_obj = create_dsl_object_from_impl(impl_obj, opts)
-        raise component_dsl_obj if dsl_parsing_error?(component_dsl_obj)
+        raise component_dsl_obj if ParsingError.is_error?(component_dsl_obj)
 
         update_opts = {:override_attrs => {"module_branch_id" => module_branch_idh.get_id()}}
         update_opts.merge!(:version => version) if version
@@ -47,16 +47,13 @@ module DTK
       module_branch_idh = target_impl.get_module_branch().id_handle()
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content,parsed_name[:format_type],opts)
-      return input_hash if input_hash.is_a?(ErrorUsage::Parsing)
+      return input_hash if ParsingError.is_error?(input_hash)
 
       config_agent_type = ret_config_agent_type(input_hash)
-      return config_agent_type if config_agent_type.is_a?(ErrorUsage::DSLParsing)
+      return config_agent_type if ParsingError.is_error?(config_agent_type)
 
-      begin
+      ParsingError.trap do
         new(config_agent_type,target_impl.id_handle(),module_branch_idh,input_hash,container_idh)
-      rescue Exception => e
-        return e if e.is_a?(ObjectModelForm::ParsingError)
-        raise e
       end
     end
 
@@ -196,14 +193,6 @@ module DTK
       #parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-# TODO: this mistakenly captures coding errors; we can move this to be more nested within normalize
-#      ret = nil
-#      begin 
-#        ret = klass.normalize(version_specific_input_hash)
-#        rescue => e
-#          Log.error_pp(['uninterpreted parsing error',e,e.backtrace[0..20]])
-#          raise ObjectModelForm::ParsingError.new()
-#        end
       #version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret
@@ -293,12 +282,12 @@ module DTK
       end
 
       def ret_config_agent_type(input_hash)
-        return input_hash if input_hash.is_a?(ErrorUsage::DSLParsing)
+        return input_hash if ParsingError.is_error?(input_hash)
         if type = input_hash["module_type"]
           case type
            when "puppet_module" then ConfigAgentTypes[:puppet]
            else 
-             ErrorUsage::DSLParsing.new("Unexpected module_type (#{type})")
+             ParsingError.new("Unexpected module_type (#{type})")
           end
         else
           DefaultConfigAgentType

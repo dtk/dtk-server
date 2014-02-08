@@ -30,7 +30,7 @@ module DTK; class ServiceModule
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
-            return imported_nodes if ParsingError.class_of?(imported_nodes)
+            return imported_nodes if ParsingError.is_error?(imported_nodes)
 
             if workflow_hash = assem["workflow"]
               if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
@@ -126,7 +126,7 @@ module DTK; class ServiceModule
             node_output["node_binding_rs_id"] = nil
           end
           cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
-          return cmps_output if ParsingError.class_of?(cmps_output)
+          return cmps_output if ParsingError.is_error?(cmps_output)
           
             unless cmps_output.empty?
               node_output["component_ref"] = cmps_output

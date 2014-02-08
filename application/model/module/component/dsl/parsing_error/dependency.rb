@@ -1,10 +1,6 @@
-module DTK; class ComponentDSL; class V3
-  class ObjectModelForm 
-    class ParsingError < ::DTK::ComponentDSL::ObjectModelForm::ParsingError
-     private
-      class LinkDef < self
-      end
-      
+module DTK
+  class ComponentDSL
+    class ParsingError
       class Dependency < self
         def self.create(msg,dep_choice,*args)
           dep = (dep_choice.respond_to?(:print_form) ? dep_choice.print_form() : dep_choice)
@@ -18,5 +14,4 @@ module DTK; class ComponentDSL; class V3
       end
     end
   end
-end; end; end
-
+end

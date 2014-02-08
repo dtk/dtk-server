@@ -1,6 +1,6 @@
-module DTK; class ComponentDSL
-  class RefIntegrity
-    class ParsingError < ObjectModelForm::ParsingError
+module DTK
+  class ComponentDSL
+    class ParsingError 
       class RefComponentTemplates < self
         def initialize(ref_cmp_templates)
           super(err_msg(ref_cmp_templates))
@@ -30,5 +30,6 @@ module DTK; class ComponentDSL
 
     end
   end
-end; end
+end
+
 

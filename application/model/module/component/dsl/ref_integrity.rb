@@ -2,7 +2,6 @@ module DTK
   class ComponentDSL
     class RefIntegrity
       r8_nested_require('ref_integrity','snapshot')
-      r8_nested_require('ref_integrity','parsing_error')
       def self.snapshot_associated_assembly_templates(cmp_module)
         new(cmp_module)
       end

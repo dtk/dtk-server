@@ -1,6 +1,4 @@
 module DTK
-  r8_nested_require('mixins','parsing_error')
-
   class ModuleRepoInfo < Hash
     def initialize(repo,module_name,module_idh,branch_obj,version=nil)
       super()
@@ -39,7 +37,6 @@ module DTK
 
   module ModuleMixin
     include ModuleRemoteMixin
-    include ModuleParsingErrorMixin
 
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)

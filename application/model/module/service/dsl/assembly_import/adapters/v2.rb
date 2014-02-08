@@ -25,10 +25,10 @@ module DTK; class ServiceModule
           opts_matching_id = opts.merge(:do_not_throw_error => true)
 
           input_id = input.matching_id(ports,opts_matching_id)
-          return input_id if ParsingError.class_of?(input_id)
+          return input_id if ParsingError.is_error?(input_id)
           
           output_id = output.matching_id(ports,opts_matching_id.merge(:is_output => true))
-          return output_id if ParsingError.class_of?(output_id)
+          return output_id if ParsingError.is_error?(output_id)
 
           pl_ref = PortLink.ref_from_ids(input_id,output_id)
           pl_hash = {"input_id" => input_id,"output_id" => output_id, "assembly_id" => assembly_idh.get_id()}

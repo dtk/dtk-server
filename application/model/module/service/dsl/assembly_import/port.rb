@@ -21,7 +21,7 @@ module DTK; class ServiceModule
             opts[:file_path] = file_path
           end
           port_links = version_proc_class.import_port_links(assembly_idh,qualified_ref,assembly,ports,opts)
-          return port_links if ParsingError.class_of?(port_links)
+          return port_links if ParsingError.is_error?(port_links)
 
           db_updates_port_links.merge!(port_links)
           ports.each{|p|@ndx_ports[p[:id]] = p}

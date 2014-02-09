@@ -19,10 +19,12 @@ module DTK; class ServiceModule
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,opts={})
         #augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
-        port_links = parse_component_links(assembly_hash).inject(DBUpdateHash.new) do |h,parsed_service_link|
-          input = parsed_service_link[:input]
-          output = parsed_service_link[:output]
-          opts_matching_id = opts.merge(:do_not_throw_error => true)
+        port_links = parse_component_links(assembly_hash,opts).inject(DBUpdateHash.new) do |h,component_link_info|
+          parsed_component_link = component_link_info[:parsed_component_link]
+          base_cmp_name = component_link_info[:base_cmp_name]
+          input = parsed_component_link[:input]
+          output = parsed_component_link[:output]
+          opts_matching_id = opts.merge(:do_not_throw_error => true,:base_cmp_name => base_cmp_name)
 
           input_id = input.matching_id(ports,opts_matching_id)
           return input_id if ParsingError.is_error?(input_id)
@@ -95,18 +97,20 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.parse_component_links(assembly_hash)
+      #returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
+      def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|
           components = node_hash["components"]||[]
           components = [components] unless components.kind_of?(Array)
-          components.each do |input_cmp|
-            if input_cmp.kind_of?(Hash) 
-              input_cmp_name = input_cmp.keys.first
-              (input_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
+          components.each do |base_cmp|
+            if base_cmp.kind_of?(Hash) 
+              base_cmp_name = base_cmp.keys.first
+              (base_cmp.values.first["service_links"]||{}).each_pair do |link_def_type,targets|
                 Array(targets).each do |target|
                   component_link_hash = {link_def_type => target}
-                  ret << PortRef.parse_component_link(input_node_name,input_cmp_name,component_link_hash)
+                  parsed_component_link = PortRef.parse_component_link(input_node_name,base_cmp_name,component_link_hash)
+                  ret << {:parsed_component_link => parsed_component_link, :base_cmp_name => base_cmp_name}
                 end
               end
             end

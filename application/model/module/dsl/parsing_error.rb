@@ -105,6 +105,15 @@ module DTK
             substitute_num!(msg,i+1,arg)
           end
         end
+
+        #if file_path is an option than see if teher is an explicit variable in msg for file_path; if so substitue and deleet 
+        #so parent does not add it to end
+        if file_path = opts[:file_path]
+          if substitute_file_path?(msg,file_path)
+            opts.delete(:file_path)
+          end
+        end
+
         if free_var = any_free_vars?(msg)
           Log.error("The following error message has free variable: #{free_var}")
         end
@@ -120,6 +129,13 @@ module DTK
         end
         msg
       end
+      def substitute_file_path?(msg,file_path)
+        ret = !!(msg =~ Regexp.new("\\?#{FilePathFreeVar}"))
+        file_path_msg = "(in file #{file_path})"
+        substitute_params!(msg,{FilePathFreeVar => file_path_msg})
+        ret
+      end
+      FilePathFreeVar = 'file_path'
 
       def substitute_num_regexp(num)
         Regexp.new("\\?#{num.to_s}")
@@ -127,12 +143,18 @@ module DTK
       def substitute_param_regexp(param)
         Regexp.new("\\?#{param}")
       end
+      
+      def file_path_free_var?(msg)
+        !!(msg =~ FilePathFreeVar)
+      end
+
       def any_free_vars?(msg)
         #only finds first free variable
-        if msg =~ Regexp.new("(\\?[0-9a-z]+)")
+        if msg =~ FreeVariable
           $1
         end
       end
+      FreeVariable = Regexp.new("(\\?[0-9a-z_]+)")
     end
   end
 end

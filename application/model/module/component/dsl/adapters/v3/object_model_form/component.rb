@@ -31,17 +31,17 @@ module DTK; class ComponentDSL; class V3
 
       def include_modules?(input_hash,cmp_type,context={})
         section_name = 'includes'
-        incl_module_array = input_hash[section_name]
+        cmp_level_includes = input_hash[section_name]
         module_level_includes = context[:module_level_includes]
-        if incl_module_array or module_level_includes
+        if cmp_level_includes or module_level_includes
           module_context = context.merge(:section_name => section_name)
           component_context = module_context.merge(:component_type => cmp_type)
           if module_level_includes
-            more_specific_incls = super(incl_module_array,module_context)
-            less_specific_incls = super(module_level_includes,component_context)
+            more_specific_incls = super(cmp_level_includes,component_context)
+            less_specific_incls = super(module_level_includes,module_context)
             combine_includes(more_specific_incls,less_specific_incls)
           else
-            super(incl_module_array,component_context)
+            super(cmp_level_includes,component_context)
           end
         end
       end

@@ -138,6 +138,7 @@ module DTK; class ComponentDSL; class V2
 
       def include_modules?(incl_module_array,context={})
         return nil if incl_module_array.nil?
+        incl_module_array = [incl_module_array] if incl_module_array.kind_of?(String)
         unless incl_module_array.kind_of?(Array)
           err_params = ParsingError::Params.new(:incl_module_array => incl_module_array,:section => context[:section_name]||'include_modules')
           err_msg = "The content in the '?section' section"

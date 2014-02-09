@@ -3,7 +3,6 @@ module DTK; class ComponentDSL; class V3
     class Component < OMFBase::Component
      private
       def body(input_hash,cmp,context={})
-        pp [:in,self.class]
         ret = OutputHash.new
         cmp_type = ret["display_name"] = ret["component_type"] = qualified_component(cmp)
         ret["basic_type"] = "service"
@@ -14,7 +13,8 @@ module DTK; class ComponentDSL; class V3
         add_attributes!(ret,cmp_type,input_hash)
         opts = Hash.new
         add_dependent_components!(ret,input_hash,cmp_type,opts)
-        ret.set_if_not_nil("component_include_module",include_modules?(input_hash["includes"],context))
+        section_name = "includes"
+        ret.set_if_not_nil("component_include_module",include_modules?(input_hash,cmp_type,context))
         if opts[:constants]
           add_attributes!(ret,cmp_type,ret_input_hash_with_constants(opts[:constants]),:constant_attribute => true)
         end
@@ -29,13 +29,19 @@ module DTK; class ComponentDSL; class V3
         ret.set_if_not_nil("component_order",component_order(input_hash))
       end
 
-      def include_modules?(incl_module_array,context={})
-        if module_level_includes = context[:module_level_includes]
-          more_specific_incls = super(incl_module_array)
-          less_specific_incls = super(module_level_includes)
-          combine_includes(more_specific_incls,less_specific_incls)
-        else
-          super(incl_module_array)
+      def include_modules?(input_hash,cmp_type,context={})
+        section_name = 'includes'
+        pp [:input_hash,input_hash]
+        if incl_module_array = input_hash[section_name]
+          module_context = context.merge(:section_name => section_name)
+          component_context = module_context.merge(:component_type => cmp_type)
+          if module_level_includes = context[:module_level_includes]
+            more_specific_incls = super(incl_module_array,module_context)
+            less_specific_incls = super(module_level_includes,component_context)
+            combine_includes(more_specific_incls,less_specific_incls)
+          else
+            super(incl_module_array,component_context)
+          end
         end
       end
 

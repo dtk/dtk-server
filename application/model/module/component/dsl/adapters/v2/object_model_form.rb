@@ -139,7 +139,14 @@ module DTK; class ComponentDSL; class V2
       def include_modules?(incl_module_array,context={})
         return nil if incl_module_array.nil?
         unless incl_module_array.kind_of?(Array)
-          raise ParsingError.new("The content in the 'include_modules' key (?1) is ill-formed",incl_module_array)
+          err_params = ParsingError::Params.new(:incl_module_array => incl_module_array,:section => context[:section_name]||'include_modules')
+          err_msg = "The content in the '?section' section"
+          if cmp_type = context[:component_type]
+            err_params.merge!(:component_type => cmp_type)
+            err_msg = err_msg + " under component (?component_type)"
+          end
+          err_msg = err_msg + " is ill-formed: ?incl_module_array"
+          raise ParsingError.new(err_msg,err_params)
         end
         ret = OutputHash.new
         incl_module_array.each do |incl_module|

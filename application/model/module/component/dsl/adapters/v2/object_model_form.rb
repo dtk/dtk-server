@@ -142,8 +142,9 @@ module DTK; class ComponentDSL; class V2
           err_params = ParsingError::Params.new(:incl_module_array => incl_module_array,:section => context[:section_name]||'include_modules')
           err_msg = "The content in the '?section' section"
           if cmp_type = context[:component_type]
-            err_params.merge!(:component_type => cmp_type)
-            err_msg = err_msg + " under component (?component_type)"
+            cmp_name = component_print_form(cmp_type)
+            err_params.merge!(:component_name => cmp_name)
+            err_msg = err_msg + " under component (?component_name)"
           end
           err_msg = err_msg + " is ill-formed: ?incl_module_array"
           raise ParsingError.new(err_msg,err_params)

@@ -92,7 +92,7 @@ module DTK; class AssemblyModule
           file_content = RepoManager.get_file_content(file_path,module_branch)
           format_type = Aux.format_type(file_path)
           hash_content = Aux.convert_to_hash(file_content,format_type)
-          return hash_content if ParsingError.is_error?(hash_content)
+          return hash_content if ServiceModule::ParsingError.is_error?(hash_content)
           parse_errors = Task::Template::ConfigComponents.find_parse_errors(hash_content,@assembly)
           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(),hash_content,task_action)
         end

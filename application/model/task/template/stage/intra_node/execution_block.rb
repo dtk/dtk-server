@@ -79,7 +79,7 @@ module DTK; class Task; class Template
       def self.parse_and_reify(serialized_eb,node_name,action_list)
         ret = new()
         return ret unless action_list
-        lvs = LegalValues.new()
+        lvs = ParsingError::LegalValues.new()
         ordered_items = 
           if lvs.add_and_match?(serialized_eb){HashWithKey(Constant::OrderedComponents)}
             serialized_eb[Constant::OrderedComponents]
@@ -92,7 +92,7 @@ module DTK; class Task; class Template
 
         component_group_num = 1
         ordered_items.each do |serialized_item|
-          lvs = LegalValues.new()
+          lvs = ParsingError::LegalValues.new()
           if lvs.add_and_match?(serialized_item,String)
             find_and_add_action!(ret,serialized_item,node_name,action_list)
           elsif lvs.add_and_match?(serialized_item){HashWithSingleKey(Constant::ComponentGroup)}

@@ -22,7 +22,7 @@ module DTK; class Task; class Template; class Stage
       def self.klass(multi_node_type)
         case multi_node_type
           when "All_applicable" then Applicable
-          else raise ErrorParsing.new("Illegal multi node type (#{multi_node_type})")
+          else raise ParsingError.new("Illegal multi node type (#{multi_node_type})")
         end
       end
 

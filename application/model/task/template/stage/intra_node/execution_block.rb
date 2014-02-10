@@ -2,7 +2,6 @@ module DTK; class Task; class Template
   class Stage; class IntraNode
     class ExecutionBlock < Array
       include Serialization
-      include DSLParsingAux
       def node()
         #all the elements have same node so can just pick first
         first && first[:node]
@@ -88,7 +87,7 @@ module DTK; class Task; class Template
             #normalize from component form into ordered_component_form
             [{Constant::ComponentGroup => serialized_eb[Constant::Components]}]
           else
-            raise ErrorParsing::WrongType.new(serialized_eb,lvs)
+            raise ParsingError::WrongType.new(serialized_eb,lvs)
           end
 
         component_group_num = 1
@@ -98,13 +97,13 @@ module DTK; class Task; class Template
             find_and_add_action!(ret,serialized_item,node_name,action_list)
           elsif lvs.add_and_match?(serialized_item){HashWithSingleKey(Constant::ComponentGroup)}
             component_group = serialized_item.values.first
-            ErrorParsing.raise_error_unless(component_group,[String,Array])
+            ParsingError.raise_error_unless(component_group,[String,Array])
             Array(component_group).each do |serialized_action|
               find_and_add_action!(ret,serialized_action,node_name,action_list,:component_group_num => component_group_num)
             end
             component_group_num += 1
           else
-            raise ErrorParsing::WrongType.new(serialized_item,lvs)
+            raise ParsingError::WrongType.new(serialized_item,lvs)
           end
         end
         ret
@@ -162,7 +161,7 @@ module DTK; class Task; class Template
           end
           ret << action
         else
-          raise ErrorParsing.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
+          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
         end        
       end
 

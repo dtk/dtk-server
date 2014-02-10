@@ -1,5 +1,5 @@
 module DTK; class ErrorUsage
-  class DSLParsing
+  class Parsing
     class LegalValues < Array
       def self.reify(input_form=nil,&legal_values_block)
         input_form.kind_of?(LegalValues) ? input_form : new(input_form,&legal_values_block) 

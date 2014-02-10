@@ -138,8 +138,8 @@ module DTK
         begin 
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",opts[:file_path]) if opts[:do_not_raise]
-          raise ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e} in file",opts[:file_path])
+          return ErrorUsage::Parsing.new("JSON parsing error #{e} in file",opts[:file_path]) if opts[:do_not_raise]
+          raise ErrorUsage::Parsing.new("JSON parsing error #{e} in file",opts[:file_path])
         end
       end
 

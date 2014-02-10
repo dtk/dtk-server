@@ -1,14 +1,8 @@
 module DTK
-  #TODO: need to cleanup; the following common from dtk-commin/lib/dsl/file_parser
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')
-    r8_nested_require('usage','dsl_parsing')
-    #dsl_not_supported must be after dsl_parsing
+    #dsl_not_supported must be after parsing
     r8_nested_require('usage','dsl_not_supported')
-
-    def  initialize(msg="",file_name_or_opts=nil)
-      super #this is call to dtkcommon
-    end
 
     #TODO: make second argument be polymorphic to handle things like wrong type, wrong name
     class BadParamValue < self

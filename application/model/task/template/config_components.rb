@@ -47,7 +47,6 @@ module DTK; class Task
         default_action_task_template = assembly_instance.get_task_template(task_action,:cols => [:id,:group_id,:task_action])
         default_action_task_template ||= create_stub(assembly_instance.model_handle(:task_template),:task_action => task_action)
         ret << default_action_task_template.merge(:content => serialized_content)
-
         ret
       end
 
@@ -57,7 +56,7 @@ module DTK; class Task
           cmp_actions = (assembly && ActionList::ConfigComponents.get(assembly))
           serialized_content = serialized_content_hash_form(Aux.convert_keys_to_symbols_recursive(hash_content))
           Content.parse_and_reify(serialized_content,cmp_actions)
-         rescue ErrorUsage::DSLParsing => parse_error
+         rescue ParsingError => parse_error
           return parse_error
         end
         nil

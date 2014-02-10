@@ -1,5 +1,5 @@
 module DTK
-  class DSLNotSupported < ErrorUsage::DSLParsing
+  class DSLNotSupported < ErrorUsage::Parsing
     class LinkBetweenSameComponentTypes < self
       def initialize(cmp_instance,opts={})
         super(base_msg(cmp_instance),opts[:file_path])

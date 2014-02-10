@@ -1,34 +1,9 @@
-r8_nested_require('error','rest_error')
+r8_require_common_lib('errors')
 module DTK
-  class Error < NameError
+  class Error ##TODO: cleanup; DTK::Error is coming from /home/dtk18/dtk-common/lib/errors/errors.rb  
+    r8_nested_require('error','rest_error')
     r8_nested_require('error','usage')
-
-    def self.top_error_in_hash()
-      {:error => :Error}
-    end
-    def initialize(msg="",name=nil)
-      super(msg,name)
-      Log.info(to_s)
-    end
-    def to_hash()
-      if to_s == "" 
-        Error.top_error_in_hash()
-      elsif name.nil?
-        {:error => {:Error => {:msg => to_s}}}
-      else
-        {:error => {name.to_sym => {:msg => to_s}}}
-      end
-    end
-
   end
-
-#TODO: deprecating
-#  class R8ParseError < Error
-#    def initialize(msg,calling_obj=nil)
-#      msg = (calling_obj ? "#{msg} in class #{calling_obj.class.to_s}" : msg)
-#      super(msg)
-#    end
-#  end
 
   class ErrorNotImplemented < Error
     def initialize(msg="NotImplemented error")

@@ -1,5 +1,5 @@
 module DTK; class ErrorUsage
-  class DSLParsing
+  class Parsing
     class LegalValue
       #either input_form or legal_values_block will be nil
       def self.reify(input_form,&legal_values_block)

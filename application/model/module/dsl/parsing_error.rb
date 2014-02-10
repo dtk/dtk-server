@@ -1,6 +1,6 @@
 module DTK
   module ModuleDSL
-    class ParsingError < ErrorUsage::DSLParsing
+    class ParsingError < ErrorUsage::Parsing
       r8_nested_require('parsing_error','params')
       #args as last arguments, can have
       # ...Params,Opts
@@ -53,14 +53,13 @@ module DTK
         ret = nil
         begin
           ret = yield
-        rescue ErrorUsage::DSLParsing,ErrorUsage::Parsing => e
+        rescue ErrorUsage::Parsing => e
           ret = e
         end
         ret
       end
 
       def self.is_error?(obj)
-        obj.is_a?(ErrorUsage::DSLParsing) || 
         obj.is_a?(ErrorUsage::Parsing)
       end
 

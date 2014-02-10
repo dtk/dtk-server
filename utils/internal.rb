@@ -1,7 +1,6 @@
 files = 
   [
    'dynamic_loader',
-   'error', 
    'auxiliary', 
    'sql', 
    'aes', 

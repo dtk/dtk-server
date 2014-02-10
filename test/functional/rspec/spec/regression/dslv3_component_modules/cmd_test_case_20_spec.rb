@@ -43,7 +43,7 @@ describe "(Component Module DSL) Test Case 20: NEG - dtk.model.yaml with invalid
   end
 
   context "Push clone changes of module from local copy to server" do
-    it "pushes module changes from local filesystem to server but fails because of incorrect value for boolean type attribute: #{false_port_value}" do
+    it "pushes module changes from local filesystem to server but fails because of incorrect value for port type attribute: #{false_port_value}" do
       fail = false
       value = `dtk module #{module_name} push`
       puts value

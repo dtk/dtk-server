@@ -62,7 +62,7 @@ Remove
       raise Error.new("cannot create list_view meta hash") unless view_meta_hash
       is_saved_search = true
 
-      raise ErrorNotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
+      raise Error::NotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
       #TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
       view.update_cache_for_saved_search()

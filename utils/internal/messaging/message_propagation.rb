@@ -4,10 +4,10 @@ require File.expand_path('processor_msg', File.dirname(__FILE__))
 module XYZ
   class MessageProcessor
     def process_message(hash_message)
-      raise ErrorNotImplemented.new("process_message for #{self.class.to_s}\n")
+      raise Error::NotImplemented.new("process_message for #{self.class.to_s}\n")
     end
     def object_id(msg)
-      raise ErrorNotImplemented.new("object_id for #{self.class.to_s}\n")
+      raise Error::NotImplemented.new("object_id for #{self.class.to_s}\n")
     end
   end
 

@@ -491,10 +491,10 @@ module XYZ
       def sap_ref_from_sap(sap)
         return nil if sap.nil?
         #TBD: stubbed to only handle limited cases
-        raise ErrorNotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
+        raise Error::NotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
         raise Error.new("network sap missing port number") unless sap[:network][:port]
         raise Error.new("network sap missing addresses") unless sap[:network][:addresses]
-        raise ErrorNotImplemented.new("saps with multiple IP addresses") unless sap[:network][:addresses].size == 1
+        raise Error::NotImplemented.new("saps with multiple IP addresses") unless sap[:network][:addresses].size == 1
         {:network => {
            :port => sap[:network][:port],
            :address => sap[:network][:addresses][0]

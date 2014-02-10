@@ -293,7 +293,7 @@ return :eq if term_in_json == ":"
         super("parsing item #{type} is not supported; it has form: #{object.inspect}")
       end
     end
-    class ErrorPatternNotImplemented < ErrorNotImplemented
+    class ErrorPatternNotImplemented < Error::NotImplemented
       def initialize(type,object)
         super("parsing item #{type} is not supported; it has form: #{object.inspect}")
       end

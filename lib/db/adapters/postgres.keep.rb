@@ -52,7 +52,7 @@ module XYZ
 
     def create_function_zzz_ret_id?() 
       o =  ID_TYPES[:id] # fn output
-      raise ErrorNotImplemented.new("create_function_zzz_ret_id?") if !(o == :bigint and ID_TYPES[:context_id] == :integer and ID_TYPES[:local_id] == :integer)
+      raise Error::NotImplemented.new("create_function_zzz_ret_id?") if !(o == :bigint and ID_TYPES[:context_id] == :integer and ID_TYPES[:local_id] == :integer)
       create_function?({:schema => :top,:fn => :zzz_ret_id},
         "SELECT CASE WHEN $1 = 1 THEN $2::bigint ELSE (2147483648::bigint * ($1 -1)::bigint) + $2::bigint end",
         :returns => :bigint, :behavior => :IMMUTABLE, :args => [{:_context_id => :integer}, {:_local_id => :integer}])
@@ -184,7 +184,7 @@ module XYZ
             9223372036854775807
       	end
 
-      raise ErrorNotImplemented.new("sequence for type #{type.to_s}") if max_value.nil?
+      raise Error::NotImplemented.new("sequence for type #{type.to_s}") if max_value.nil?
 
       seq_qualified_name = fully_qualified_fn_name(seq_name)
       db_run "CREATE SEQUENCE #{seq_qualified_name}

@@ -391,7 +391,7 @@ module XYZ
             if opts[:create_factory_if_needed] # should only be applied for factory uri
               return create_factory(uri,c,:raise_error => true) #not doing recursive create
             end
-	    raise ErrorNotFound.new(:uri,uri) if opts[:raise_error]
+	    raise Error::NotFound.new(:uri,uri) if opts[:raise_error]
 	    return nil
 	  end
 	  unformated_row = ds.first
@@ -415,7 +415,7 @@ module XYZ
           #NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
 	   if ds.empty?
-            raise ErrorNotFound.new(:guid,guid) if opts[:raise_error]
+            raise Error::NotFound.new(:guid,guid) if opts[:raise_error]
             return nil
           end
 	  return nil if ds.empty?

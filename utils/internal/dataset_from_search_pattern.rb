@@ -6,7 +6,7 @@ module XYZ
         def create_dataset_from_search_object(search_object)
           search_pattern = search_object.search_pattern
           raise Error.new("search pattern is nil") unless search_pattern
-          raise ErrorNotImplemented.new("processing of search pattern of type #{search_pattern.class.to_s}") unless search_pattern.kind_of?(SearchPatternSimple)
+          raise Error::NotImplemented.new("processing of search pattern of type #{search_pattern.class.to_s}") unless search_pattern.kind_of?(SearchPatternSimple)
           relation_in_search_pattern = search_pattern.find_key(:relation)
           mh_in_search_pattern = search_object.model_handle.createMH(:model_name => relation_in_search_pattern) 
 
@@ -275,7 +275,7 @@ module XYZ
             ret.empty? ? nil : ret
           end
 
-          class ErrorPatternNotImplemented < ErrorNotImplemented
+          class ErrorPatternNotImplemented < Error::NotImplemented
             def initialize(type,object)
               super("parsing item #{type} is not supported; it has form: #{object.inspect}")
             end

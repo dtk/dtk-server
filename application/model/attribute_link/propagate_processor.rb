@@ -35,7 +35,7 @@ module DTK; class AttributeLink
           propagate_when_function_specified(function[:function])
         end
       unless hash_ret
-        raise ErrorNotImplemented.new("propagate value not implemented yet for fn #{function}")
+        raise Error::NotImplemented.new("propagate value not implemented yet for fn #{function}")
       end
       hash_ret.kind_of?(Output) ? hash_ret : Output.new(hash_ret)
     end
@@ -52,10 +52,10 @@ module DTK; class AttributeLink
    private
     def propagate_when_function_specified(function_def)
       if output_semantic_type().is_array? 
-        raise ErrorNotImplemented.new("specified functions not implemented when output is an array")
+        raise Error::NotImplemented.new("specified functions not implemented when output is an array")
       end
       if input_semantic_type().is_array? 
-        raise ErrorNotImplemented.new("specified functions not implemented when input is an array")
+        raise Error::NotImplemented.new("specified functions not implemented when input is an array")
       end
 
       computed_value = SpecifiedFunction.ret_computed_value(function_def,output_value)
@@ -93,7 +93,7 @@ module DTK; class AttributeLink
     def propagate_when_sap_config__l4()
       output_v = 
         if output_semantic_type().is_array? 
-          raise ErrorNotImplemented.new("propagate_when_sap_config__l4 when output has empty list") if output_value.empty?
+          raise Error::NotImplemented.new("propagate_when_sap_config__l4 when output has empty list") if output_value.empty?
           output_value
         else
           [output_value]
@@ -119,7 +119,7 @@ module DTK; class AttributeLink
     def propagate_when_host_address_ipv4()
       output_v = 
         if output_semantic_type().is_array? 
-          raise ErrorNotImplemented.new("propagate_when_host_address_ipv4 when output has empty list") if output_value.empty?
+          raise Error::NotImplemented.new("propagate_when_host_address_ipv4 when output has empty list") if output_value.empty?
           output_value
         else
           [output_value]
@@ -145,7 +145,7 @@ module DTK; class AttributeLink
     end
 
     def propagate_when_select_one()
-      raise ErrorNotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() and output_value().size > 1
+      raise Error::NotImplemented.new("propagate_when_select_one when input has more than one elements") if output_value() and output_value().size > 1
       {:value_derived => output_value ? output_value().first : nil}
     end
 
@@ -180,7 +180,7 @@ module DTK; class AttributeLink
     def ret_cartesian_product()
       output_v = 
         if output_semantic_type().is_array? 
-          raise ErrorNotImplemented.new("cartesian_product when output has empty list") if output_value.empty?
+          raise Error::NotImplemented.new("cartesian_product when output has empty list") if output_value.empty?
           output_value
         else
           [output_value]

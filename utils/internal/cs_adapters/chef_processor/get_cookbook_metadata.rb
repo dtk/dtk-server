@@ -5,7 +5,7 @@ module XYZ
   class ChefProcessor
     class Metadata
       def get(cookbooks_uris,&block)
-        raise ErrorNotImplemented.new("get meta data for #{self.class.to_s}")
+        raise Error::NotImplemented.new("get meta data for #{self.class.to_s}")
       end
      protected
       def format_metadata(metadata)

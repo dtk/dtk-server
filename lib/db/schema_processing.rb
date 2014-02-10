@@ -16,10 +16,10 @@ module DTK
 
       # for creating schema
       def create_schema(schema_name)
-         raise ErrorNotImplemented.new("create_schema not implemented")
+         raise Error::NotImplemented.new("create_schema not implemented")
       end
       def schema_exists?(schema_name)
-        raise ErrorNotImplemented.new("schema_exists? not implemented")
+        raise Error::NotImplemented.new("schema_exists? not implemented")
       end
       def create_schema?(schema_name)
         create_schema(schema_name) if !schema_exists?(schema_name)

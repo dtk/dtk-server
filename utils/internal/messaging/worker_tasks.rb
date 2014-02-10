@@ -232,7 +232,7 @@ module XYZ
           @delegated_task = trans_info[:task]
           process_task_finished()
         end
-       rescue ErrorAMQPQueueDoesNotExist => e
+       rescue Error::AMQP::QueueDoesNotExist => e
         if @input_msg.kind_of?(ProcessorMsg) and @input_msg.msg_type == :execute_on_node
           @errors << WorkerTaskErrorNodeNotConnected.new(e.queue_name.to_i())
         else

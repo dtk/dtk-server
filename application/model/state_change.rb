@@ -90,7 +90,7 @@ module XYZ
           when :attribute then "setting"
           when :component then "install_component"
           when :node then "create_node"
-          else raise ErrorNotImplemented.new("when object type is #{object_model_name}")
+          else raise Error::NotImplemented.new("when object type is #{object_model_name}")
       end 
       
       ref_prefix = "state_change"

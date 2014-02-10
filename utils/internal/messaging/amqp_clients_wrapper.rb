@@ -171,10 +171,10 @@ module XYZ
           @native_exchange = @client.reset_client(:bunny).exchange(@name,@opts)
           @native_exchange.publish(*raw_body_and_publish_opts)
          rescue Exception => e
-          raise ErrorAMQP.new()
+          raise Error::AMQP.new()
         end
        rescue Exception => e
-        raise ErrorAMQP.new()
+        raise Error::AMQP.new()
       end
     end
   end
@@ -220,9 +220,9 @@ module XYZ
         @native_queue = client.native_client?(:bunny).queue(name,opts)
        rescue Bunny::ForcedChannelCloseError
         @client.reset_client(:bunny)
-        raise ErrorAMQPQueueDoesNotExist.new(name) if opts[:passive]
+        raise Error::AMQP::QueueDoesNotExist.new(name) if opts[:passive]
        rescue Exception
-        raise ErrorAMQP.new()
+        raise Error::AMQP.new()
       end
     end
 
@@ -240,10 +240,10 @@ module XYZ
           @native_queue = @client.reset_client(:bunny).queue(@name,@opts)
           @native_queue.publish(*raw_body_and_publish_opts)
          rescue Exception
-          raise ErrorAMQP.new()
+          raise Error::AMQP.new()
         end
        rescue Exception
-        raise ErrorAMQP.new()
+        raise Error::AMQP.new()
       end
     end
 

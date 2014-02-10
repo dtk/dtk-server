@@ -172,7 +172,7 @@ module XYZ
           raise Error.new("Unexpected term in post processing filter #{x.inspect}")
         end
       end
-      class ErrorPostProcFilterNotImpl < ErrorNotImplemented
+      class ErrorPostProcFilterNotImpl < Error::NotImplemented
         def initialize(type,obj)
           super("filter_post_processing with #{type} #{obj.inspect}")
         end

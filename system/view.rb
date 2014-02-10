@@ -176,7 +176,7 @@ module R8Tpl
       #TODO: figure out handling of overrides
       #      require $GLOBALS['ctrl']->getAppName().'/objects' . $this->objRef->getmodel_name() . '/meta/view.'.$this->profile.'.'.$this->viewName.'.php');
       # require 'some path to require'
-     raise XYZ::ErrorNotImplemented.new()
+     raise XYZ::Error::NotImplemented.new()
     end
   end
   

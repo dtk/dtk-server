@@ -1,9 +1,9 @@
-r8_nested_require('puppet','parser')
 module DTK
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
       r8_nested_require('puppet','node_manifest')
-      include PuppetParserMixin
+      r8_nested_require('puppet','parser')
+      include ParserMixin
 
       def ret_msg_content(config_node)
         cmps_with_attrs = components_with_attributes(config_node)

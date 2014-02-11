@@ -1,5 +1,5 @@
-module XYZ
-  module PuppetGenerateNodeManifest
+module DTK; module ConfigAgentAdapter
+  class Puppet
     class NodeManifest
       def initialize(import_statement_modules=nil)
         @import_statement_modules = import_statement_modules||Array.new
@@ -250,4 +250,5 @@ module XYZ
 
     end
   end
-end
+end; end
+

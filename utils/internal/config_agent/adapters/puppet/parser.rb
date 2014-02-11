@@ -6,7 +6,7 @@ require 'puppet/type'
 require 'puppet/parser'
 
 module DTK
-  module PuppetParser
+  module PuppetParserMixin
     r8_nested_require('parser','modulefile')
 
     def parse_external_ref?(impl_obj)
@@ -54,13 +54,13 @@ module DTK
     def parse_given_file_content__manifest(file_content,opts={})
       synchronize_and_handle_puppet_globals({:code => file_content, :ignoreimport => false},opts) do
         environment = "production"
-        node_env = Puppet::Node::Environment.new(environment)
-        known_resource_types = Puppet::Resource::TypeCollection.new(node_env)
-        #needed to make more complicared because cannot call krt = Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
-        #fragment from perform_initial_import call with Puppet[:ignoreimport] = true set in middle
-        parser = Puppet::Parser::Parser.new(node_env)
+        node_env = ::Puppet::Node::Environment.new(environment)
+        known_resource_types = ::Puppet::Resource::TypeCollection.new(node_env)
+        #needed to make more complicared because cannot call krt = ::Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
+        #fragment from perform_initial_import call with ::Puppet[:ignoreimport] = true set in middle
+        parser = ::Puppet::Parser::Parser.new(node_env)
         parser.string = file_content
-        Puppet[:ignoreimport] = true
+        ::Puppet[:ignoreimport] = true
         initial_import = parser.parse
 
         known_resource_types.import_ast(initial_import,"")
@@ -73,9 +73,9 @@ module DTK
       ret = nil
       PuppetParserLock.synchronize do
         begin
-          current_vals = global_assignments.keys.inject({}){|h,k|h.merge(k => Puppet[k])}
+          current_vals = global_assignments.keys.inject({}){|h,k|h.merge(k => ::Puppet[k])}
           curent_krt = Thread.current[:known_resource_types]
-          global_assignments.each{|k,v|Puppet[k]=v}
+          global_assignments.each{|k,v|::Puppet[k]=v}
           Thread.current[:known_resource_types] = nil
           ret = yield
          rescue ::Puppet::Error => e
@@ -83,7 +83,7 @@ module DTK
          rescue Exception => e
           raise e
          ensure
-          current_vals.each{|k,v|Puppet[k]=v}
+          current_vals.each{|k,v|::Puppet[k]=v}
           Thread.current[:known_resource_types] = curent_krt
         end
       end

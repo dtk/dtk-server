@@ -1,26 +1,42 @@
-r8_nested_require('puppet','error_processing')
 r8_nested_require('puppet','parser')
-r8_nested_require('puppet','generate_node_manifest')
 module DTK
   module ConfigAgentAdapter
     class Puppet < ConfigAgent
-      include PuppetParser
-      include PuppetErrorProcessing
-      include PuppetGenerateNodeManifest
+      r8_nested_require('puppet','node_manifest')
+      include PuppetParserMixin
 
       def ret_msg_content(config_node)
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)
         puppet_manifests = NodeManifest.new.generate(cmps_with_attrs,assembly_attrs,config_node.intra_node_stages())
-        msg_content = {
+        {
           :components_with_attributes => cmps_with_attrs, 
           :node_manifest => puppet_manifests, 
           :inter_node_stage => config_node.inter_node_stage()
         }
-        return msg_content
       end
+
       def type()
         :puppet
+      end
+
+      #tries to normalize error received from node
+      def interpret_error(error_in_result,components)
+        ret = error_in_result
+        source = error_in_result["source"]
+        #working under assumption that stage assignment same as order in components
+        if source =~ Regexp.new("^/Stage\\[([0-9]+)\\]")
+          index = ($1.to_i) -1
+          if cmp_with_error = components[index]
+            ret = error_in_result.inject({}) do |h,(k,v)|
+              ["source","tags","time"].include?(k) ? h : h.merge(k => v)
+            end
+            if cmp_name = cmp_with_error[:display_name]
+              ret.merge!("component" => cmp_name)
+            end
+          end
+        end
+        ret
       end
 
       def ret_attribute_name_and_type(attribute)

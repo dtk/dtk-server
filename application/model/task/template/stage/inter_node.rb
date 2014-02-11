@@ -111,7 +111,7 @@ module DTK; class Task; class Template
         normalized_content = serialized_content[Field::Subtasks]||[serialized_content]
         normalized_content.inject(new(serialized_content[:name])) do |h,serialized_node_actions|
           unless node_name = serialized_node_actions[:node]
-            raise ParsingError.new("Missing node reference in (#{serialized_node_actions.inspect})")
+            raise ParsingError.new("Missing node reference in: ?1",serialized_node_actions)
           end
           node_id = 0 #dummy value when just used for parsing
           if action_list

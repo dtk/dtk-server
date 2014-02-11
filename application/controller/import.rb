@@ -112,10 +112,9 @@ module XYZ
       begin
         raise Error.new("ConfigAgent.parse_given_module_directory(config_agent_type,module_dir) needs to be converted to form ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj")
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
-       rescue ConfigAgent::ParseErrors => errors
-        pp [:puppet_error,errors.error_list.map{|e|e.to_s}]
+       rescue ErrorUsage::Parsing => error
         return {
-          :data=> {:errors=>errors.error_list}
+          :data=> {:errors=>error} #TODO: must be changed
         }
 #TODO: deprecated this  rescue R8ParseError => e
        rescue => e

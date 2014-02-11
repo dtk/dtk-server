@@ -18,19 +18,19 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
       ret = TopPS.new()
       opts = {:just_krt_code => true}
-      all_errors = nil
+      errors_cache = nil
       manifest_file_paths.each do |file_path|
         Log.info("Calling #{type()} and dtk processor on file #{file_path}")
         begin
           krt_code = parse_given_file_path__manifest(file_path,impl_obj,opts)
-          ret.add_children(krt_code) unless all_errors #short-circuit once first error found
-         rescue ParseErrors => errors
-          all_errors = (all_errors ? all_errors.add(errors) : errors)
+          ret.add_children(krt_code) unless errors_cache #short-circuit once first error found
+         rescue ParseErrorsCache => errors
+          errors_cache = (errors_cache ? errors_cache.add(errors) : errors)
          rescue ParseError => error
-          all_errors = (all_errors ? all_errors : ParseErrors.new(type())).add(error)
+          errors_cache = (errors_cache ? errors_cache : ParseErrorsCache.new(type())).add(error,Opts.new(:file_path => file_path))
         end
       end
-      raise all_errors if all_errors
+      raise errors_cache.create_error() if errors_cache
       ret
     end
 
@@ -44,8 +44,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
       ret
     end
-   private
 
+   private
     PuppetParserLock = Mutex.new
 
     def parse_given_file_path__manifest(file_path,impl_obj,opts={})
@@ -97,9 +97,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       line = puppet_error.line || find_line(puppet_error.message)
       #TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)
-      single_error = ConfigAgent::ParseError.new(msg,file_path,line)
-      #TODO: change when handle multiple errors
-      ConfigAgent::ParseErrors.new(:puppet).add(single_error)
+      ParseError.new(msg,file_path,line)
     end
 
     def find_file_path(msg)
@@ -183,7 +181,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         types = Array(types)
         puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
         puppet_ast_classes.each do |type, klass|
-          raise ConfigAgent::ParseError.new("type #{type} not treated") if klass.nil?
+          raise ParseError.new("type #{type} not treated") if klass.nil?
           return type if ast_item.class == klass
         end
         nil
@@ -240,7 +238,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
               nil
               #TODO: should this be ignored?
             else
-              raise ConfigAgent::ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
+              raise ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
             end
           self[:children] << child if child
         end
@@ -265,7 +263,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           elsif puppet_type?(ast_item,:definition)
             "definition"
           else
-            raise ConfigAgent::ParseError.new("unexpected type for ast_item")
+            raise ParseError.new("unexpected type for ast_item")
           end
         self[:type] = type
         self[:name] = ast_item.name
@@ -330,7 +328,8 @@ end
           Log.error("check whether should ignore resource_defaults in class def")
           nil
         else
-          raise ConfigAgent::ParseError.new("unexpected ast type (#{ast_item.class.to_s})",self)
+          puppet_type = ast_item.class.to_s.split('::').last
+          raise ParseError.new("unexpected Puppet type (#{puppet_type})")
         end
       end
 
@@ -424,7 +423,7 @@ end
         ret = ast_resource.type
         if ret == "class"
           ast_title = ast_title(ast_resource)
-          raise ConfigAgent::ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
         end
         ret
@@ -536,18 +535,18 @@ end
         ret = ast_rsc_ref.type
         if ret == "Class"
           ast_title = ast_title(ast_rsc_ref)
-          raise ConfigAgent::ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
+          raise ParseError.new("unexpected title ast type (#{ast_title.class.to_s})") unless puppet_type?(ast_title,AstTerm)
           ret = ast_title.value
         end
         ret
       end
       def ast_title(ast_rsc_ref)
         unless ast_rsc_ref.title
-          raise ConfigAgent::ParseError.new("unexpected to not have title on resource reference")
+          raise ParseError.new("unexpected to not have title on resource reference")
         end
         children = ast_rsc_ref.title.children
         unless children.size == 1
-          raise ConfigAgent::ParseError.new("unexpected to have number of resource ref children neq to 1")
+          raise ParseError.new("unexpected to have number of resource ref children neq to 1")
         end
         children.first
       end
@@ -591,7 +590,7 @@ end
         self[:query] =  
           case type
            when :coll_expr then CollExprPS.create(query,opts)
-          else raise ConfigAgent::ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
+          else raise ParseError.new("Unexpected type (#{query.class.to_s}) in query argument of collection")
         end 
        super
       end
@@ -613,7 +612,7 @@ end
         case coll_expr_ast.oper
           when "==" then CollExprAttributeExpressionPS.new(coll_expr_ast,opts)
           when "and", "or" then CollExprLogicalConnectivePS.new(coll_expr_ast,opts)
-          else raise ConfigAgent::ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
+          else raise ParseError.new("unexpected operation (#{coll_expr_ast.oper}) for collection expression")
         end
       end
     end
@@ -631,7 +630,7 @@ end
           value_ast = coll_expr_ast.test1
         end
         unless name and value_ast
-          raise ConfigAgent::ParseError.new("unexpected type for collection expression")
+          raise ParseError.new("unexpected type for collection expression")
         end
         self[:op] = "=="
         self[:name] = name
@@ -755,7 +754,7 @@ end
          when :function then FunctionPS.new(ast_term,opts)
          when :ast_array then ArrayPS.new(ast_term,opts)
          when :ast_hash then HashPS.new(ast_term,opts)
-         else raise ConfigAgent::ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
+         else raise ParseError.new("type not treated as a term (#{ast_term.class.to_s})")
         end
       end
       def data_type()
@@ -911,7 +910,7 @@ end
             elsif k.respond_to?(:to_s)
               k.to_s
             else
-              raise ConfigAgent::ParseError.new("unexpected hash key term (#{k.inspect})")
+              raise ParseError.new("unexpected hash key term (#{k.inspect})")
             end
           h.merge(key => TermPS.create(term_ast,opts))
         end

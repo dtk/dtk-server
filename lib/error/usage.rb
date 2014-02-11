@@ -4,6 +4,18 @@ module DTK
     #dsl_not_supported must be after parsing
     r8_nested_require('usage','dsl_not_supported')
 
+
+   private
+    def add_line!(msg,line,ident=0)
+      msg << "#{' ' * ident}#{line}\n"
+    end
+    
+    def sentence_capitalize(line)
+      split = line.split
+      first = split.shift.capitalize
+      ([first]+split).join(' ')
+    end
+
     #TODO: make second argument be polymorphic to handle things like wrong type, wrong name
     class BadParamValue < self
       def initialize(param,enum_vals=nil)

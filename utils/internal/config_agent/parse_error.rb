@@ -1,19 +1,10 @@
 module DTK
   class ConfigAgent
-    class ParseError < ErrorUsage
-      attr_reader :msg, :filename, :file_asset_id, :line
-      def initialize(msg,file_path=nil,line=nil)
-        @msg = msg
-        @filename = filename
-        @line = line
+    class ParseError < ErrorUsage::Parsing
+      def initialize(msg,opts=Opts.new())
+        #TODO: stub to use opts, which can have line or file path
+        super(msg)
       end
-      
-      def to_s()
-        [:msg, :filename, :file_asset_id, :line].map do |k|
-          val = send(k)
-          "#{k}=#{val}" if val
-        end.compact.join("; ")
-      end
-    end
+    end      
   end
 end

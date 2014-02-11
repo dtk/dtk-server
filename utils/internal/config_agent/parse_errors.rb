@@ -14,9 +14,6 @@ module DTK
         end
         self
       end
-      def set_file_asset_ids!(model_handle)
-        @error_list.each{|e|e.set_file_asset_id!(model_handle)}
-      end
       def to_s()
         preamble = 
           if @config_agent_type == :puppet

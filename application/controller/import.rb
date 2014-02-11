@@ -113,7 +113,6 @@ module XYZ
         raise Error.new("ConfigAgent.parse_given_module_directory(config_agent_type,module_dir) needs to be converted to form ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj")
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
        rescue ConfigAgent::ParseErrors => errors
-        errors.set_file_asset_ids!(model_handle)
         pp [:puppet_error,errors.error_list.map{|e|e.to_s}]
         return {
           :data=> {:errors=>errors.error_list}

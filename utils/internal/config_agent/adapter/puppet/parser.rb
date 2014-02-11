@@ -14,18 +14,20 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     end
 
     def parse_given_module_directory(impl_obj)
-      #TODO: only handling parsing of .pp now
-      manifest_file_names = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
+      #only handling parsing of .pp now
+      manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
       ret = TopPS.new()
       opts = {:just_krt_code => true}
       all_errors = nil
-      manifest_file_names.each do |filename|
-        Log.info("calling puppet and dtk processor on file #{filename}")
+      manifest_file_paths.each do |file_path|
+        Log.info("Calling #{type()} and dtk processor on file #{file_path}")
         begin
-          krt_code = parse_given_file_path__manifest(filename,impl_obj,opts)
+          krt_code = parse_given_file_path__manifest(file_path,impl_obj,opts)
           ret.add_children(krt_code) unless all_errors #short-circuit once first error found
-        rescue ConfigAgent::ParseErrors => errors
+         rescue ParseErrors => errors
           all_errors = (all_errors ? all_errors.add(errors) : errors)
+         rescue ParseError => error
+          all_errors = (all_errors ? all_errors : ParseErrors.new(type())).add(error)
         end
       end
       raise all_errors if all_errors

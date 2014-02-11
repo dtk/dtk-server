@@ -1,5 +1,5 @@
 module DTK
-  module ConfigAgentAdapter
+  class ConfigAgent; module Adapter
     class Puppet < ConfigAgent
       r8_nested_require('puppet','node_manifest')
       r8_nested_require('puppet','parser')
@@ -247,5 +247,5 @@ module DTK
       end
     end
   end
-end
+end; end
 

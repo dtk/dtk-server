@@ -1,4 +1,4 @@
-module DTK; module ConfigAgentAdapter
+module DTK; class ConfigAgent; module Adapter
   class Puppet
     class NodeManifest
       def initialize(import_statement_modules=nil)
@@ -250,5 +250,6 @@ module DTK; module ConfigAgentAdapter
 
     end
   end
-end; end
+end; end; end
+
 

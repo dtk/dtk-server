@@ -5,7 +5,7 @@ require 'puppet/resource'
 require 'puppet/type'
 require 'puppet/parser'
 
-module DTK; module ConfigAgentAdapter; class Puppet
+module DTK; class ConfigAgent; module Adapter; class Puppet
   module ParserMixin
     r8_nested_require('parser','modulefile')
 
@@ -1023,7 +1023,7 @@ end
       end
     end
   end
-end; end; end
+end; end; end; end
 
 #monkey patches
 class Puppet::Parser::AST::Definition

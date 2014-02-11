@@ -1,36 +1,22 @@
 module DTK
   class ConfigAgent
+    r8_nested_require('config_agent','adapter')
+
     def self.parse_given_module_directory(type,dir)
-      load(type).parse_given_module_directory(dir)
+      Adapter.load(type).parse_given_module_directory(dir)
     end
     def self.parse_given_filename(type,filename)
-      load(type).parse_given_filename(filename)
+      Adapter.load(type).parse_given_filename(filename)
     end
     def self.parse_given_file_content(type,file_path,file_content)
-      load(type).parse_given_file_content(file_path,file_content)
+      Adapter.load(type).parse_given_file_content(file_path,file_content)
     end
 
     def self.parse_external_ref?(type,impl_obj)
-      processor = load(type)
+      processor = Adapter.load(type)
       if processor.respond_to?('parse_external_ref?'.to_sym)
         processor.parse_external_ref?(impl_obj)
       end
-    end
-
-    #TODO: make private and wrap as ConfigAgent method like do for parse
-    def self.load(type)
-      return nil unless type
-      return Agents[type] if Agents[type]
-      klass = self
-      begin
-        Lock.synchronize do
-          r8_nested_require("config_agent","adapters/#{type}")
-        end
-        klass = XYZ::ConfigAgentAdapter.const_get type.to_s.capitalize
-       rescue LoadError
-        Log.error("cannot find config agent adapter; loading null config agent class")
-      end
-      Agents[type] = klass.new()
     end
 
     #common functions accross config agents
@@ -38,9 +24,6 @@ module DTK
     def node_name(node)
       (node[:external_ref]||{})[:instance_id]
     end
-
-    Lock = Mutex.new
-    Agents = Hash.new
 
     class ParseError < ErrorUsage
       attr_reader :msg, :filename, :file_asset_id, :line
@@ -113,8 +96,6 @@ module DTK
         "#{preamble}  #{@error_list.map{|e|e.to_s}.join('\n  ')}"
       end
     end
-  end
 
-  module ConfigAgentAdapter
   end
 end

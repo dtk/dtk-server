@@ -4,7 +4,7 @@
 #TODO: can modify to make more efficient by having single db call
 #TODO: minimal conversion from form where just had change attributes; so room to simplify and make more efficient
 module XYZ
-  module ConfigAgentAdapter
+  class ConfigAgent; module Adapter
     class Chef < ConfigAgent
       def ret_msg_content(config_node)
         recipes_and_attrs = Processor.new(config_node)

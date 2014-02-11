@@ -1,4 +1,4 @@
-module DTK; module ConfigAgentAdapter; class Puppet
+module DTK; class ConfigAgent; module Adapter; class Puppet
   module ParserMixin
     module Modulefile
       # used for parsing Modulefile when importing module from git (import-git)
@@ -41,5 +41,6 @@ module DTK; module ConfigAgentAdapter; class Puppet
       end
     end
   end
-end; end; end
+end; end; end; end
+
 

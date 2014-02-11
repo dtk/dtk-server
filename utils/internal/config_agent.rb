@@ -1,6 +1,8 @@
 module DTK
   class ConfigAgent
     r8_nested_require('config_agent','adapter')
+    r8_nested_require('config_agent','parse_error')
+    r8_nested_require('config_agent','parse_errors')
 
     def self.parse_given_module_directory(type,dir)
       Adapter.load(type).parse_given_module_directory(dir)
@@ -19,83 +21,8 @@ module DTK
       end
     end
 
-    #common functions accross config agents
-
     def node_name(node)
       (node[:external_ref]||{})[:instance_id]
     end
-
-    class ParseError < ErrorUsage
-      attr_reader :msg, :filename, :file_asset_id, :line
-      def initialize(msg,file_path=nil,line=nil)
-        @msg = msg
-        if filename = get_filename(file_path)
-          @filename = filename
-          @repo = get_repo(file_path)
-          @line = line
-        end
-      end
-
-      def set_file_asset_id!(model_handle)
-        return unless @filename and @repo
-        sp_hash = {
-          :cols => [:id],
-          :filter => [:eq,:display_name,@repo]
-        }
-        return unless impl = Model.get_obj(model_handle.createMH(:implementation),sp_hash)
-        sp_hash = {
-          :cols => [:id],
-          :filter => [:eq,:path,@filename]
-        }        
-        file = impl.get_children_objs(:file_asset,sp_hash).first
-        @file_asset_id = file[:id] if file
-      end
-
-      def to_s()
-        [:msg, :filename, :file_asset_id, :line].map do |k|
-          val = send(k)
-          "#{k}=#{val}" if val
-        end.compact.join("; ")
-      end
-      private
-      def get_filename(file_path)
-        #TODO: stub
-        file_path
-      end
-      def get_repo(file_path)
-        #TODO: stub
-        file_path
-      end
-    end
-    class ParseErrors < ErrorUsage
-      attr_reader :error_list
-      def initialize(config_agent_type)
-        @config_agent_type = config_agent_type
-        @error_list = Array.new
-      end
-      def add(error_info)
-        if error_info.kind_of?(ParseError)
-          @error_list << error_info
-        elsif error_info.kind_of?(ParseErrors)
-          @error_list += error_info.error_list
-        end
-        self
-      end
-      def set_file_asset_ids!(model_handle)
-        @error_list.each{|e|e.set_file_asset_id!(model_handle)}
-      end
-      def to_s()
-        preamble = 
-          if @config_agent_type == :puppet
-            "Puppet manifest parse error"
-          else
-            "Parse error"
-          end
-        preamble << ((@error_list.size > 1) ? "s:\n" : ":\n")
-
-        "#{preamble}  #{@error_list.map{|e|e.to_s}.join('\n  ')}"
-      end
-    end
-
   end
 end

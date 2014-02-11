@@ -127,7 +127,7 @@ module DTK; class ComponentDSL
             prefix = $1
             unqual_name = $2
             unless prefix == module_name
-              raise Error.new("prefix (#{prefix}) not equal to module name (#{module_name})")
+              raise ErrorUsage::Parsing.new("Component (#{processed_name}) has a module name unequal to the base module name (#{module_name})")
             end 
             processed_name = "#{module_name}__#{unqual_name}"
           end

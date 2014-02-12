@@ -1,8 +1,13 @@
 module DTK
   class ConfigAgent
     class ParseError < ErrorUsage::Parsing
-      def initialize(msg,opts=Opts.new())
-        #TODO: stub to use opts, which can have line or file path
+      def initialize(msg_x,opts=Opts.new())
+        msg = 
+          if line_num = opts[:line_num]
+            "#{msg_x} (on line #{line_num.to_s})"
+          else
+            msg_x
+          end
         super(msg)
       end
     end      

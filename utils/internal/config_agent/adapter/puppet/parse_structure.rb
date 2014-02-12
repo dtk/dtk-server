@@ -1,101 +1,102 @@
 module DTK; class ConfigAgent; module Adapter; class Puppet
   class ParseStructure < SimpleHashObject
-      def initialize(ast_item=nil,opts={})
-        return super() if ast_item.nil? 
-      end
+    r8_nested_require('parse_structure','parse_error')
+    def initialize(ast_item=nil,opts={})
+      return super() if ast_item.nil? 
+    end
 
-      #### used in generate_meta
-      def config_agent_type()
-        :puppet
+    #### used in generate_meta
+    def config_agent_type()
+      :puppet
       end
-      #These all get ovewritten for matching class
-      def is_defined_resource?() 
-        nil
-      end
-      def is_exported_resource?()
-        nil
-      end
-      def is_imported_collection?()
-        nil
-      end
-      def is_attribute?()
-        nil
-      end
-      ######
-      ###hacks for pp
-      def pretty_print(q)      
-        #TODO: may return an ordered hash
-        pp_form().pretty_print(q)
-      end
-
-      def pp_form
-        ret =  SimpleOrderedHash.new()
-        #TODO: have each class optionally have klass.pp_key_order
-        ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
-        each do |k,v|
-          next if k == :r8class
-          ret[k] = 
-            if v.kind_of?(ParseStructure) then v.pp_form
-            elsif v.kind_of?(Array) 
-              v.map{|x|x.kind_of?(ParseStructure) ? x.pp_form : x}
-            else v
+    #These all get ovewritten for matching class
+    def is_defined_resource?() 
+      nil
+    end
+    def is_exported_resource?()
+      nil
+    end
+    def is_imported_collection?()
+      nil
+    end
+    def is_attribute?()
+      nil
+    end
+    ######
+    ###hacks for pp
+    def pretty_print(q)      
+      #TODO: may return an ordered hash
+      pp_form().pretty_print(q)
+    end
+    
+    def pp_form
+      ret =  SimpleOrderedHash.new()
+      #TODO: have each class optionally have klass.pp_key_order
+      ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
+      each do |k,v|
+        next if k == :r8class
+        ret[k] = 
+          if v.kind_of?(ParseStructure) then v.pp_form
+          elsif v.kind_of?(Array) 
+            v.map{|x|x.kind_of?(ParseStructure) ? x.pp_form : x}
+          else v
           end
-        end
-        ret
       end
-      ######
-
-      def self.create(ast_obj,opts={})
-        unless ignore?(ast_obj,opts)
-          new(ast_obj,opts)
-        end
+      ret
+    end
+    ######
+    
+    def self.create(ast_obj,opts={})
+      unless ignore?(ast_obj,opts)
+        new(ast_obj,opts)
       end
-
-      #this can be overwritten
-      def self.ignore?(ast_obj,opts={})
-        nil
+    end
+    
+    #this can be overwritten
+    def self.ignore?(ast_obj,opts={})
+      nil
+    end
+    
+    def self.puppet_type?(ast_item,types)
+      types = Array(types)
+      puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
+      puppet_ast_classes.each do |type, klass|
+        raise ParseError.new("type #{type} not treated") if klass.nil?
+        return type if ast_item.class == klass
       end
-
-      def self.puppet_type?(ast_item,types)
-        types = Array(types)
-        puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
-        puppet_ast_classes.each do |type, klass|
-          raise ParseError.new("type #{type} not treated") if klass.nil?
-          return type if ast_item.class == klass
-        end
-        nil
-      end
-      def puppet_type?(ast_item,types)
-        self.class.puppet_type?(ast_item,types)
-      end
-      TreatedPuppetTypes = {
-        :hostclass => ::Puppet::Parser::AST::Hostclass,
-        :definition => ::Puppet::Parser::AST::Definition,
-        :resource => ::Puppet::Parser::AST::Resource,
-        :resource_param => ::Puppet::Parser::AST::ResourceParam,
-        :collection => ::Puppet::Parser::AST::Collection,
-        :coll_expr => ::Puppet::Parser::AST::CollExpr,
-        :if_statement => ::Puppet::Parser::AST::IfStatement,
-        :case_statement => ::Puppet::Parser::AST::CaseStatement,
-        :relationship => ::Puppet::Parser::AST::Relationship,
-        :resource_reference => ::Puppet::Parser::AST::ResourceReference,
-        :string => ::Puppet::Parser::AST::String,
-        :name => ::Puppet::Parser::AST::Name,
-        :boolean => ::Puppet::Parser::AST::Boolean,
-        :variable => ::Puppet::Parser::AST::Variable,
-        :undef => ::Puppet::Parser::AST::Undef,
-        :concat => ::Puppet::Parser::AST::Concat,
-        :function => ::Puppet::Parser::AST::Function,
-        :var_def => ::Puppet::Parser::AST::VarDef,
-        :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
-        :ast_array => ::Puppet::Parser::AST::ASTArray,
-        :ast_hash => ::Puppet::Parser::AST::ASTHash,
-      }
-      AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array,:ast_hash]
-
-      def parse_just_signatures?()
-        @parse_just_signatures ||= R8::Config[:puppet][:parser][:parse_just_signatures] 
-      end
+      nil
+    end
+    def puppet_type?(ast_item,types)
+      self.class.puppet_type?(ast_item,types)
+    end
+    TreatedPuppetTypes = {
+      :hostclass => ::Puppet::Parser::AST::Hostclass,
+      :definition => ::Puppet::Parser::AST::Definition,
+      :resource => ::Puppet::Parser::AST::Resource,
+      :resource_param => ::Puppet::Parser::AST::ResourceParam,
+      :collection => ::Puppet::Parser::AST::Collection,
+      :coll_expr => ::Puppet::Parser::AST::CollExpr,
+      :if_statement => ::Puppet::Parser::AST::IfStatement,
+      :case_statement => ::Puppet::Parser::AST::CaseStatement,
+      :relationship => ::Puppet::Parser::AST::Relationship,
+      :resource_reference => ::Puppet::Parser::AST::ResourceReference,
+      :string => ::Puppet::Parser::AST::String,
+      :name => ::Puppet::Parser::AST::Name,
+      :boolean => ::Puppet::Parser::AST::Boolean,
+      :variable => ::Puppet::Parser::AST::Variable,
+      :undef => ::Puppet::Parser::AST::Undef,
+      :concat => ::Puppet::Parser::AST::Concat,
+      :function => ::Puppet::Parser::AST::Function,
+      :var_def => ::Puppet::Parser::AST::VarDef,
+      :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
+      :ast_array => ::Puppet::Parser::AST::ASTArray,
+      :ast_hash => ::Puppet::Parser::AST::ASTHash,
+    }
+    AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array,:ast_hash]
+    
+    def parse_just_signatures?()
+      @parse_just_signatures ||= R8::Config[:puppet][:parser][:parse_just_signatures] 
+    end
 
     #TODO: move these into seperate files
     #can be module or file
@@ -199,7 +200,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           nil
         else
           puppet_type = ast_item.class.to_s.split('::').last
-          raise ParseError.new("unexpected Puppet type (#{puppet_type})")
+          raise ParseError.new("unexpected Puppet type (#{puppet_type})",:ast_item => ast_item)
         end
       end
 

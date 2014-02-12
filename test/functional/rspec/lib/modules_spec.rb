@@ -350,7 +350,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
     pass = false
     value = `dtk module #{module_name} push`
     puts value
-    pass = value.include?("#{file_for_change}")
+    pass = value.include?("Status: OK")
     puts "Clone changes pushed to server successfully!" if pass == true
     puts "Clone changes were not pushed to server successfully!" if pass == false
     puts ""

@@ -2,7 +2,7 @@ require 'base64'
 
 r8_require('../../utils/performance_service')
 
-module XYZ
+module DTK
   class ActionsetController < Controller
     def process(*route)
       route_key = route[0..1].join("/")
@@ -187,7 +187,10 @@ module XYZ
       rescue Exception => e
         #TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)
-          Log.error_pp([e,e.backtrace[0]])
+          #TODO: respond_to? is probably not needed
+          unless e.respond_to?(:donot_log_error) and e.donot_log_error()
+            Log.error_pp([e,e.backtrace[0]])
+          end
         else
           Log.error_pp([e,e.backtrace[0..20]])
         end

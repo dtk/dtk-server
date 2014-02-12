@@ -35,7 +35,8 @@ module DTK
             add_line!(msg,sentence_capitalize(error.to_s),ident)
           end
         end
-        ErrorUsage::Parsing.new(msg,Opts.new(:error_prefix => error_prefix(num_errs)))
+        opts = Opts.new(:error_prefix => error_prefix(num_errs), :log_error => false)
+        ErrorUsage::Parsing.new(msg,opts)
       end
       IdentInitial = 2
       IdentIncrease = 2

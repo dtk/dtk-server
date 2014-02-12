@@ -4,6 +4,11 @@ module DTK
     #dsl_not_supported must be after parsing
     r8_nested_require('usage','dsl_not_supported')
 
+    attr_reader :donot_log_error
+    def initialize(msg='',*args)
+      @donot_log_error = (args.last.kind_of?(Opts) and args.last[:log_error] == false)
+      super(msg,*args)
+    end
 
    private
     def add_line!(msg,line,ident=0)

@@ -276,23 +276,15 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         attributes << AttributePS.create_name_attribute() if puppet_type?(ast_item,:definition)
         (ast_item.context[:arguments]||[]).each{|arg|attributes << AttributePS.create(arg,opts)}
         self[:attributes] = attributes
-begin
         children = parse_children(ast_item,opts)
         self[:children] = children if children and not children.empty?
-rescue => e
-
-pp [:error_child,ast_item.inspect]
-parse_children(ast_item,opts)
-  raise e
-end
-
         super
-
       end
+
      private
       def self.ignore?(ast_obj,opts={})
         #TODO: make this configurable 
-        #ignore components that have more than one qualification; tehy are mostly sub classes/defs
+        #ignore components that have more than one qualification; they are mostly sub classes/defs
         #ast_obj.name =~ /::.+::/
         nil
       end

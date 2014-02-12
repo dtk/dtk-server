@@ -2,7 +2,11 @@ module DTK
   class ConfigAgent; module Adapter
     class Puppet < ConfigAgent
       r8_nested_require('puppet','node_manifest')
+      #TODO: look at condionally loading parse related files
       r8_nested_require('puppet','parser')
+      #parse needs to be before parse_structure
+      r8_nested_require('puppet','parse_structure')
+
       include ParserMixin
 
       def ret_msg_content(config_node)

@@ -40,7 +40,9 @@ module DTK; class Attribute
 
       update_rows = changed_attrs_info.map do |r|
         row = Aux::hash_subset(r,[:id,val_field])
-        row.merge!(:is_instance_value => true) if (val_field == :value_asserted)
+        #TODO: this line is commented out because it caused failure of set complex attributes 
+        #need to check with Rich why this is happening
+        # row.merge!(:is_instance_value => true) if (val_field == :value_asserted)
         row
       end
 

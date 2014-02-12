@@ -7,8 +7,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           if line_num = ast_item.line
             opts_parent.merge!(:line_num => line_num)
           end
-          super(msg,opts_parent)
         end
+        super(msg,opts_parent)
       end
     end
   end

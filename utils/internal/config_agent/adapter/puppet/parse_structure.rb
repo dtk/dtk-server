@@ -61,7 +61,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       types = Array(types)
       puppet_ast_classes = Array(types).inject({}){|h,t|h.merge(t => TreatedPuppetTypes[t])}
       puppet_ast_classes.each do |type, klass|
-        raise ParseError.new("type #{type} not treated") if klass.nil?
+        raise Error.new("type #{type} not treated") if klass.nil?
         return type if ast_item.class == klass
       end
       nil
@@ -91,6 +91,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       :resource_defaults => ::Puppet::Parser::AST::ResourceDefaults,
       :ast_array => ::Puppet::Parser::AST::ASTArray,
       :ast_hash => ::Puppet::Parser::AST::ASTHash,
+      :resource_override => ::Puppet::Parser::AST::ResourceOverride,
     }
     AstTerm = [:string,:name,:variable,:concat,:function,:boolean,:undef,:ast_array,:ast_hash]
     
@@ -200,13 +201,14 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
           nil
         else
           puppet_type = ast_item.class.to_s.split('::').last
-          raise ParseError.new("unexpected Puppet type (#{puppet_type})",:ast_item => ast_item)
+          Log.error("Unexpected Puppet type (#{puppet_type}); skipping")
+          nil
         end
       end
 
       def types_to_ignore()
         if parse_just_signatures?()
-          [:var_def,:hostclass,:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference]
+          [:var_def,:hostclass,:collection,:resource,:if_statement,:case_statement,:function,:relationship,:resource_reference,:resource_override]
         else
           [:var_def,:hostclass]
         end

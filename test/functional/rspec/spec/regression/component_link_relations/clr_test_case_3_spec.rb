@@ -13,7 +13,7 @@ require './lib/parameters_setting_spec'
 STDOUT.sync = true
 
 assembly_name = 'clr_test_case_3_instance'
-assembly_template = 'unit_test::fan_out'
+assembly_template = 'unit_test::fan_in'
 node_name_1 = "source1"
 component_name_1 = "unit_test::source"
 node_name_2 = "source2"

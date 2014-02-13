@@ -494,7 +494,7 @@ module XYZ
            :alias => :attribute_r8_dns_enabled,
            :join_type => :inner,
            :join_cond=>{:component_component_id =>:assembly__id},
-           :filter=>[:eq,:display_name,"r8_dns_enabled"],
+           :filter=>[:oneof,:display_name,['r8_dns_enabled','dtk_dns_enabled']],
            :cols => [:id,:display_name,:group_id]
          }]
 

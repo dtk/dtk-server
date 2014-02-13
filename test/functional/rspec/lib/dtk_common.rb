@@ -272,6 +272,25 @@ class DtkCommon
 		return is_attributes_set
 	end
 
+	def get_attribute_value(assembly_id, node_name, component_name, attribute_name)
+		puts "Get attribute value by name:", "----------------------------"
+
+		puts "List of assembly attributes:"
+		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(assembly_attributes)
+
+		attributes = assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first
+
+		if (!attributes.nil?)
+			attribute_value = assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first['value']
+			puts "Attribute value is: #{attribute_value}"
+		else
+			puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Component name: #{component_name}, Attribute name: #{attribute_name}"
+		end
+		puts ""
+		return attribute_value
+	end
+
 	def check_attribute_presence_in_nodes(assembly_id, node_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in nodes:", "----------------------------------"		
 		attribute_check = false
@@ -359,6 +378,30 @@ class DtkCommon
 		end
 		puts ""
 		return param_check
+	end
+
+	def check_component_depedency(assembly_id, source_component, dependency_component, dependency_satisfied_by)
+		puts "Check component dependency:", "---------------------------"
+		dependency_found = false
+
+		puts "List assembly components with dependencies:"
+		components_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
+		component = components_list['data'].select { |x| x['display_name'] == source_component}.first
+
+		if (!component.nil?)
+			puts "Component #{source_component} exists. Check its dependencies..."
+			if ((component['depends_on'] == dependency_component) && (component['satisfied_by'] == dependency_satisfied_by))
+				puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
+				dependency_found = true
+			else
+				puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
+			end
+		else
+			puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
+		end
+
+		puts ""
+		return dependency_found
 	end
 
 	def converge_assembly(assembly_id, max_num_of_retries=10)

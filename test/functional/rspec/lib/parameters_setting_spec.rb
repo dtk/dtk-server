@@ -20,6 +20,13 @@ shared_context "Check attribute present in component" do |dtk_common, node_name,
   end
 end
 
+shared_context "Get attribute value from component" do |dtk_common, node_name, component_name, name, value_to_match|
+  it "gets value #{value} for attribute #{name} in #{component_name} component" do
+    attribute_value = dtk_common.get_attribute_value($assembly_id, node_name, component_name, name)
+    attribute_value.should match(/"#{value_to_match}"/)
+  end
+end
+
 shared_context "Check attribute not present in component" do |dtk_common, node_name, component_name, name, value|
   it "checks value #{value} for attribute #{name} is not present in #{component_name} component" do
     attribute_value_checked = dtk_common.check_attribute_presence_in_components($assembly_id, node_name, component_name, name, value)

@@ -20,6 +20,7 @@ dependency_component = 'unit_test::sink'
 dependency_satisfied_by = 'sink/unit_test::sink'
 value_to_match_1 = 'nil'
 value_to_match_2 = 'ec2'
+attribute_name = 'upstream'
 $assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
@@ -46,7 +47,7 @@ describe "(Component link relations) Test Case 1: Simple link scenario - $node.h
   end
 
   context "Get attribute value from component" do
-    include_context "Get attribute value from component", dtk_common, node_name, component_name, name, value_to_match_1
+    include_context "Get attribute value from component", dtk_common, node_name, component_name, attribute_name, value_to_match_1
   end
 
   context "Converge function" do
@@ -54,7 +55,7 @@ describe "(Component link relations) Test Case 1: Simple link scenario - $node.h
   end
 
   context "Get attribute value from component" do
-    include_context "Get attribute value from component", dtk_common, node_name, component_name, name, value_to_match_2
+    include_context "Get attribute value from component", dtk_common, node_name, component_name, attribute_name, value_to_match_2
   end
 
   context "Delete and destroy assembly function" do

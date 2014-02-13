@@ -114,7 +114,7 @@ module DTK
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
           op_status = (op_status(nodes) if respond_to?(:op_status))
-          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at)
+          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at,:target)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

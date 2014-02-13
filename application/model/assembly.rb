@@ -212,10 +212,14 @@ module DTK
         ndx_ret = Hash.new
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_rows.each do |r|
-          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
-          #get_objs do this (using possibly option flag for subtype processing)
-          pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => r.pretty_print_name(pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
-          pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
+          pntr = ndx_ret[r[:id]] ||= r.prune_with_values(:display_name => r.pretty_print_name(pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          if module_branch_id = r[:module_branch_id]
+            pntr[:module_branch_id] ||= module_branch_id 
+          end
+          if target = (r[:target]||{})[:display_name]
+            pntr[:target] ||= target
+          end
+                       
           if version = pretty_print_version(r)
             pntr.merge!(:version => version)
           end

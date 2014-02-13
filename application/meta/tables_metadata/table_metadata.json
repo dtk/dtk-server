@@ -314,7 +314,8 @@
       "assembly_template",
       "created_at",
       "op_status",
-      "components"
+      "components",
+      "target"
     ],
     "mapping": {
       "components": "nodes.map{|r|r['components']||[]}.flatten.size",
@@ -324,7 +325,8 @@
       "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",
-      "op_status": "op_status"
+      "op_status": "op_status",
+      "target": "target"
     }
   },
   "assembly_template": {

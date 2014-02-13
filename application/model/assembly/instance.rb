@@ -316,8 +316,6 @@ module DTK; class  Assembly
       ret + assembly_empty_nodes
     end
 
-
-
     def self.get_assemblies_with_nodes(mh,opts={})
       Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
       target_idh = opts[:target_idh]
@@ -340,24 +338,24 @@ module DTK; class  Assembly
     
     class << self
      private
-      #returns column plus whether need to pul in empty assembly nodes (assembly nodes w/o any components)
+      #returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
+      #[col,empty_assem_nodes]
       def list_virtual_column?(detail_level=nil)
         empty_assem_nodes = false
         col = 
-        if detail_level.nil?
-          nil
-        elsif detail_level == "nodes"
-          empty_assem_nodes = true
-          #TODO: use below for component detail and introduce a more succinct one for nodes
-          :instance_nodes_and_cmps_summary
-        elsif detail_level == "components"
-          empty_assem_nodes = true
-          :instance_nodes_and_cmps_summary
-        else
-          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
-        end
+          if detail_level.nil?
+            nil
+          elsif detail_level == "nodes"
+            empty_assem_nodes = true
+            #TODO: use below for component detail and introduce a more succinct one for nodes
+            :instance_nodes_and_cmps_summary
+          elsif detail_level == "components"
+            empty_assem_nodes = true
+            :instance_nodes_and_cmps_summary
+          else
+            raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+          end
         [col,empty_assem_nodes]
-
       end
     end
 

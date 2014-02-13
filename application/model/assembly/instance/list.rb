@@ -34,9 +34,7 @@ module DTK; class  Assembly
      private
       def list_aux__no_details(assembly_rows)
         assembly_rows.map do |r|
-          #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
-          #get_objs do this (using possibly option flag for subtype processing)
-          r.id_handle.create_object().merge(:display_name => pretty_print_name(r))
+          r.prune_with_values(:display_name => pretty_print_name(r))
         end
       end
 

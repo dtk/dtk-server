@@ -350,6 +350,12 @@ module DTK
       id_handle.get_parent_id_handle()
     end
 
+    #will have id and av_hash values
+    def prune_with_values(av_hash)
+      #note: using Model#hash_subset does not work because id_handle not set right
+      id_handle().create_object().merge(av_hash)
+    end
+
     def model_handle(mn=nil)
       group_id = group_id()
       user_info = (group_id ? {:group_id => group_id} : nil)

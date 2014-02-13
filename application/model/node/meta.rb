@@ -1,5 +1,16 @@
 #TODO: temp until move into meta directory
-module XYZ
+module DTK
+  class Node
+    module DNS
+      #arranged in precedence order
+      AttributeKeys = 
+        [
+         'dtk_dns_enabled',
+         'r8_dns_enabled'
+        ]
+    end
+  end
+
   module NodeMetaClassMixin 
     def up()
       ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
@@ -494,7 +505,7 @@ module XYZ
            :alias => :attribute_r8_dns_enabled,
            :join_type => :inner,
            :join_cond=>{:component_component_id =>:assembly__id},
-           :filter=>[:oneof,:display_name,['r8_dns_enabled','dtk_dns_enabled']],
+           :filter=>[:oneof,:display_name,Node::DNS::AttributeKeys],
            :cols => [:id,:display_name,:group_id]
          }]
 

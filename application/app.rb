@@ -47,6 +47,7 @@ r8_require("#{UTILS_BASE_DIR}/utils")
 
 
 r8_require("#{LIB_DIR}/model")
+r8_require("#{LIB_DIR}/response_info")
 
 r8_require('config/routes.rb')
 

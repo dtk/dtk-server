@@ -89,6 +89,21 @@ module DTK
       Model.get_obj(target_mh,sp_hash)
     end
       
+
+    def self.set_default_target(target)
+      current_default_target = get_default_target(target.model_handle(),[:display_name])
+      if current_default_target.id == target.id
+        raise ErrorUsage::Warning.new("Default target is already set to #{current_default_target[:display_name]}")
+      end
+      Transaction do
+        current_default_target.update(:is_default_targe => false)
+        target.update(:is_default_targe => true)
+      end
+      ResponseInfo.info("Default target changed from ?current_default_target to ?new_default_target",
+                        :current_default_target => current_default_target,
+                        :new_default_target => target)
+    end
+
     def update_ui_for_new_item(new_item_id)
       update_obj!(:ui)
       target_ui = self[:ui]||{:items=>{}}

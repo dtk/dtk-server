@@ -46,20 +46,14 @@ module Ramaze::Helper
       if target_id = ret_request_params(target_id_field)
         id_handle(target_id,:target)
       else
-        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id], :filter => [:eq, :is_default_target,'t'])
-        raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
-        targets.first
+        Target.get_default_target(model_handle(:target))
       end
     end
-    #TODO: below is old form; above new form
-    #looks for default if no target is given
     def target_idh_with_default(target_id=nil)
       if target_id
         id_handle(target_id,:target)
       else
-        targets = Model.get_objs(model_handle(:target),:cols => [:id,:group_id],:filter => [:eq, :is_default_target,'t'])
-        raise ErrorUsage.new("Cannot find a unique default target") unless targets.size == 1
-        targets.first.id_handle()
+        Target.get_default_target(model_handle(:target)).id_handle()
       end
     end
 

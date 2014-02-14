@@ -1,21 +1,16 @@
 module DTK
   class Target
     class Instance < self
-
       def self.list(target_mh,opts={})
+        filter = [:neq,:type,'template']
+        if opts[:filter]
+          filter = [:and,filter,opts[:filter]]
+        end
         sp_hash = {
-          :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider],
-          :filter => [:neq,:type,'template']
+          :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider, :is_default_target],
+          :filter => filter
         }
-        return get_objs(target_mh, sp_hash.merge(opts))
-      end
-
-      def self.full_list(target_mh,opts={})
-        sp_hash = {
-          :cols => [:id, :display_name, :type]
-        }
-
-        return get_objs(target_mh, sp_hash.merge(opts))
+        get_objs(target_mh, sp_hash)
       end
     end
   end

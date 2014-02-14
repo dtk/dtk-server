@@ -187,7 +187,6 @@ R8::ReactorRoute.draw do
 
    # TARGET
   post  'target/list' => 'target#list'
-  post  'target/full_list' => 'target#full_list'
   post  'target/create' => 'target#create'
   post  'target/info_about' => 'target#info_about'
   post  'target/delete' => 'target#delete'

@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class TargetController < AuthController
     helper :target_helper
 
@@ -6,39 +6,19 @@ module XYZ
     PROVIDER_DELIMITER = ':::'
 
     def rest__list()
-
       subtype   = ret_target_subtype()
       parent_id = ret_request_params(:parent_id)
 
-      if subtype.eql? :instance
-        if parent_id
-          response = Target::Instance.list(model_handle(), { :filter => [:eq, :parent_id, parent_id]})
+      response = 
+        if subtype.eql? :instance
+          opts = (parent_id ? { :filter => [:eq, :parent_id, parent_id]} : Hash.new)
+          Target::Instance.list(model_handle(), opts)
+        elsif subtype.eql? :template
+          Target::Template.list(model_handle())
         else
-          response = Target::Instance.list(model_handle())
+          raise ErrorUsage.new("Illegal subtype param (#{subtype})")
         end
-      else
-        response = Target::Template.list(model_handle())
-      end
-
       rest_ok_response response
-    end
-
-
-    def rest__full_list()
-      # templates and instances
-      targets = Target::Instance.full_list(model_handle())
-
-      # add provider prefix to results
-      results = targets.collect do |entry|
-        if (entry[:type] == 'template')
-          entry[:display_name] = "#{PROVIDER_PREFIX}#{PROVIDER_DELIMITER}#{entry[:display_name]}"
-          entry
-        else
-          entry
-        end
-      end
-
-      rest_ok_response results
     end
 
     def rest__create()

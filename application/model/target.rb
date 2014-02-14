@@ -24,21 +24,25 @@ module DTK
        :ui
       ]
     end
-    ### virtual column defs
+
     def name()
-      self[:display_name]
+      get_field?(:display_name)
     end
 
     def type()
-      self[:type]
+      get_field?(:type)
     end
 
     def is_template?()
-      (self[:type] == 'template')
+      (type() == 'template')
+    end
+    def is_builtin_target?()
+      update_obj!(:type,:parent_id)
+      (!is_template?()) and self[:parent_id].nil?
     end
 
     def is_default?()
-      self[:is_default_target]
+      get_field?(:is_default_target)
     end
 
     ######### Model apis
@@ -66,8 +70,12 @@ module DTK
     end
 
     def self.delete(id_handle, opts = {})
-      delete_instance(id_handle,opts) if exists? id_handle
+      if id_handle.create_object().is_builtin_target?()
+        raise ErrorUsage.new("Cannot delete teh builtin target")
+      end
+      delete_instance(id_handle,opts)
     end
+
 
     #takes values from default aside from ones specfically given in argument
     def self.create_from_default(project_idh,display_name,params_hash)

@@ -11,8 +11,8 @@
     :parent_id=> {
       :type=>:bigint,
       :foreign_key_rel_type=>:datacenter,
-      :on_delete=>:set_null,
-      :on_update=>:set_null
+      :on_delete=>:cascade,
+      :on_update=>:cascade
     },
     :ui=> {
       :type=>:json
@@ -88,7 +88,7 @@
       [{
          :model_name=>:datacenter,
          :alias=>:provider,
-         :join_type=>:inner,
+         :join_type=>:left_outer,
          :convert=>true,
          :join_cond=>{:id => :target__parent_id},
          :cols=>[:id,:display_name,:iaas_type]

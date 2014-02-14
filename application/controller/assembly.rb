@@ -422,7 +422,7 @@ module DTK
       assembly_name = ret_request_params(:name) 
       new_assembly_obj = assembly_template.stage(target,assembly_name)
       response = {
-        :new_assembly_instance => {
+        :new_service_instance => {
           :name => new_assembly_obj.display_name_print_form, 
           :id => new_assembly_obj.id()
         }

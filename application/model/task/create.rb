@@ -3,16 +3,13 @@ r8_nested_require('stage','puppet_stage_generator')
 module DTK
   module CreateClassMixin
     def create_and_start_from_assembly_instance(assembly,opts={})
-      assembly_idh = assembly.id_handle()
-      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
 
       component_type = opts[:component_type]||:service
       commit_msg = opts[:commit_msg]
       puppet_version = opts[:puppet_version]
 
-      target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
 
       create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly)
@@ -37,8 +34,9 @@ module DTK
       commit_msg = opts[:commit_msg]
       puppet_version = opts[:puppet_version]
 
-      target_idh = assembly.id_handle().get_parent_id_handle_with_auth_info()
+      target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
+
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
 
       create_nodes_task = 
@@ -69,7 +67,7 @@ module DTK
 
     def task_when_nodes_created_and_started_from_assembly(assembly, component_type)
       assembly_idh = assembly.id_handle()
-      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
 
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
@@ -116,7 +114,7 @@ module DTK
 
     def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
       assembly_idh = assembly.id_handle()
-      target_idh = assembly_idh.get_parent_id_handle_with_auth_info()
+      target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
       
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
@@ -230,6 +228,10 @@ module DTK
     end
 
    private
+    def target_idh_from_assembly(assembly)
+      assembly.get_target().id_handle()
+    end
+
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
       #each element will be list with single element

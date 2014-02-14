@@ -263,6 +263,11 @@ module DTK; class  Assembly
     end
     private :get_augmented_ports__mark_unconnected!
 
+    def op_status()
+      assembly_nodes = get_nodes(:admin_op_status)
+      self.class.op_status(assembly_nodes)
+    end
+
     def self.op_status(assembly_nodes)
       return "pending" if assembly_nodes.empty?
       pending_status = nil

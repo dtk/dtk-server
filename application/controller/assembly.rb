@@ -28,6 +28,13 @@ module DTK
       rest_ok_response
     end
 
+    def rest__set_target()
+      workspace = ret_workspace_object?()
+      target = create_obj(:target_id, ::DTK::Target)
+      workspace.set_target(target)
+      rest_ok_response
+    end
+
     def rest__delete_node()
       assembly = ret_assembly_instance_object()
       node_idh = ret_node_id_handle(:node_id,assembly)

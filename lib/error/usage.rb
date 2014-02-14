@@ -3,7 +3,7 @@ module DTK
     r8_nested_require('usage','parsing')
     #dsl_not_supported must be after parsing
     r8_nested_require('usage','dsl_not_supported')
-
+    r8_nested_require('usage','warning')
     attr_reader :donot_log_error
     def initialize(msg='',*args)
       @donot_log_error = (args.last.kind_of?(Opts) and args.last[:log_error] == false)

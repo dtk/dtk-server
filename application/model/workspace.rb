@@ -16,6 +16,13 @@ module DTK
       delete_tasks()
     end
 
+    def set_target(target)
+      current_target = get_target()
+      if current_target.id ==  target.id
+        raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+      end
+    end
+
     def self.is_workspace_service_module?(service_module)
       service_module.get_field?(:display_name) == ServiceModuleFields[:display_name]
     end

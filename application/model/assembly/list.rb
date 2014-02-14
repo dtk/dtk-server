@@ -36,7 +36,6 @@ module DTK
     end
 
     module ListClassMixin
-     private
       def list_aux(assembly_rows,attr_rows=[],opts={})
         ndx_attrs = Hash.new
 
@@ -120,6 +119,7 @@ module DTK
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
+     private
       def list_aux__component_template(r)
         r[:component_template]||r[:nested_component]||{}
       end

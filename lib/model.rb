@@ -1,5 +1,6 @@
 #TODO: needs cleanup and partitioning
 #TODO: model_name and relation_type redundant
+#TODO: move these down under class Model
 r8_nested_require('model','input_into_model')
 r8_nested_require('model','field_set')
 r8_nested_require('model','clone')
@@ -10,6 +11,8 @@ r8_nested_require('model','data')
 
 module DTK
   class Model < HashObject::Model 
+    r8_nested_require('model','subclass_processing')
+    extend SubclassProcessingClassMixin
     extend ImportObject
     extend ExportObject
 
@@ -156,22 +159,6 @@ module DTK
     end
 
     #####related to use of subclass models; these are models that indirectly inherit from Model
-    def self.subclass_model(subclass_model_name,parent_model_name)
-      class_eval("
-        def get_objs(sp_hash,opts={})
-          get_objs_subclass_model(sp_hash,:#{subclass_model_name},opts)
-        end"
-      )
-      class_eval("
-        def self.get_objs(mh,sp_hash,opts={})
-          if mh[:model_name] == :#{subclass_model_name}
-            get_objs_subclass_model(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
-          else
-            super(mh,sp_hash,opts)
-          end
-        end"
-     )
-    end    
 
     #TODO: update so this is datadriven from subclass_model statements; after replace all cases below to use subclass_model
     def self.models_to_add(model_name)

@@ -3,18 +3,18 @@ module DTK
   class Target
     class Template < self
 
-      def self.list(target_mh,opts={})
+      def self.list(target_mh)
         sp_hash = {
           :cols => common_columns(),
           :filter => [:eq,:type,'template']
         }
-        get_objs(target_mh, sp_hash.merge(opts))
+        get_objs(target_mh.createMH(:target_template), sp_hash)
       end
 
       def self.get(target_mh, id)
         target = super(target_mh, id)
         raise ErrorUsage.new("Target with ID '#{id}' is not a template") unless target.is_template?
-        target
+        target.create_subclass_obj(:target_template)
       end
 
       def self.create_provider?(project_idh, provider_name, params_hash, opts={})
@@ -49,7 +49,19 @@ module DTK
       def base_name()
         get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
       end
+
      private
+      def get_objs(sp_hash,opts={})
+        get_objs_subclass_model(sp_hash,:target_template,opts)
+      end
+      def self.get_objs(mh,sp_hash,opts={})
+        if mh[:model_name] == :target_template
+          get_objs_subclass_model(mh.createMH(:target),:target_template,sp_hash,opts)
+        else
+          super(mh,sp_hash,opts)
+        end
+      end
+
       def self.provider_display_name(provider_name)
         "#{provider_name}#{DisplayNameSufix}" 
       end
@@ -61,7 +73,7 @@ module DTK
           :filter => [:and,[:eq,:display_name,provider_display_name(provider_name)],
                       [:eq,:project_id,project_idh.get_id()]]
         }
-        get_obj(project_idh.createMH(:target),sp_hash)
+        get_obj(project_idh.createMH(:target_template),sp_hash)
       end
     end
   end

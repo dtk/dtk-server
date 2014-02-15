@@ -157,6 +157,8 @@ module DTK
       end
       ret
     end
+
+    #related to use of subclass models
     #TODO: See if can automatically pick up below rather than needing below; tehse are models that indirectly inherit from Model
     #add the datacenter <-> taregt equiv
     def self.models_to_add(model_name)
@@ -164,6 +166,8 @@ module DTK
         when :assembly then Assembly
         when :assembly_template then Assembly::Template
         when :assembly_instance then Assembly::Instance
+        when :target_instance then Target::Instance
+        when :target_template then Target::Template
         when :assembly_workspace then Workspace
         when :component_template then Component::Template
         when :component_instance then Component::Instance
@@ -171,6 +175,16 @@ module DTK
         when :node_group then NodeGroup
       end
     end
+
+    def self.get_objs_subclass_model(mh,subclass_model_name,sp_hash,opts={})
+      Model.get_objs(mh,sp_hash,opts.merge(:subclass_model_name => subclass_model_name))
+    end
+
+    def get_objs_subclass_model(sp_hash,subclass_model_name,opts={})
+      Model.get_objs(sp_hash,opts.merge(:model_handle => model_handle().createMH(subclass_model_name)))
+    end
+
+    ### end related to use of subclass models
 
     def self.inherited(child_class)
       return unless self == Model
@@ -759,11 +773,20 @@ module DTK
       rows.first
     end
 
+    def create_subclass_obj(subclass_model_name)
+      id_handle().create_object(:model_name => subclass_model_name).merge(self)
+    end
+
     def self.get_objs(model_handle,sp_hash,opts={})
       model_name = model_handle[:model_name]
       hash = sp_hash.merge(:relation => model_name)
       search_object = SearchObject.create_from_input_hash({"search_pattern" => hash},model_name,model_handle[:c])
-      get_objects_from_search_object(search_object,opts)
+      ret = get_objects_from_search_object(search_object,opts)
+      if subclass_model_name = opts[:subclass_model_name]
+        ret.map{|r|r.create_subclass_obj(subclass_model_name)}
+      else
+        ret
+      end
     end
     #TODO: remove below
     def self.get_objects_from_sp_hash(model_handle,sp_hash,opts={})

@@ -22,7 +22,7 @@ module DTK
           if opts[:raise_error_if_exists]
             raise ErrorUsage.new("Provider (#{provider_name}) exists already")
           else
-            existing_provider.id_handle()
+            return existing_provider.id_handle()
           end
         end
 
@@ -45,7 +45,16 @@ module DTK
         }.merge(params_hash)
         create_from_row(target_mh,row,:convert => true) 
       end
+
+      def base_name()
+        get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
+      end
      private
+      def self.provider_display_name(provider_name)
+        "#{provider_name}#{DisplayNameSufix}" 
+      end
+      DisplayNameSufix = '-template'
+
       def self.provider_exists?(project_idh,provider_name)
         sp_hash = {
           :cols => [:id],
@@ -53,10 +62,6 @@ module DTK
                       [:eq,:project_id,project_idh.get_id()]]
         }
         get_obj(project_idh.createMH(:target),sp_hash)
-      end
-
-      def provider_display_name(provider_name)
-        "#{provider_name}-template" 
       end
     end
   end

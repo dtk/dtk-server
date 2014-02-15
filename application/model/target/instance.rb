@@ -1,22 +1,23 @@
 module DTK
   class Target
+    #TODO: need to subclass on provider type
     class Instance < self
       #takes values from default aside from ones specfically given in argument
       #this wil only be called when there are no existing targets associated with provider
-      def self.create_targets(project_idh,provider,regions,params_hash)
+      def self.create_targets(project_idh,provider,regions,params_hash,opts={})
         target_mh = project_idh.createMH(:target) 
         unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
           raise ErrorUsage.new("Cannot find default target")
         end
-        provider_name = provider.get_field?(:display_name)
         provider_id = provider.id
         create_rows = regions.map do |region|
-          display_name = "#{provider_name}-#{region}"
+          display_name = display_name_from_provider_and_region(provider,region)
           ref = display_name.downcase.gsub(/ /,"-")
-          default.merge(:parent_id => provider_id, :region => region, :ref => ref, :display_name => display_name).merge(params_hash)
+          el = default.merge(:parent_id => provider_id,:ref => ref, :display_name => display_name).merge(params_hash)
+          el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(:region => region))
         end
         create_opts = {:convert => true, :returning_sql_cols => [:id,:display_name]}
-        create_from_row(target_mh,create_rows,:create_opts)
+        create_from_rows(target_mh,create_rows,create_opts)
       end
    
       def self.list(target_mh,opts={})
@@ -42,6 +43,10 @@ module DTK
 
       DefaultTargetMark = '*'      
      private
+      def self.display_name_from_provider_and_region(provider,region)
+        "#{provider.base_name()}-#{region}"
+      end
+
       def self.set_builtin_provider_display_fields!(target)
         target.merge!(:provider => BuiltinProviderDisplayHash)
       end

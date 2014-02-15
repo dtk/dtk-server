@@ -181,7 +181,8 @@ module DTK
     end
 
     def get_objs_subclass_model(sp_hash,subclass_model_name,opts={})
-      Model.get_objs(sp_hash,opts.merge(:model_handle => model_handle().createMH(subclass_model_name)))
+      mh = model_handle()
+      Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
     end
 
     ### end related to use of subclass models

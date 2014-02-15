@@ -4,7 +4,7 @@ module DTK
     class Instance < self
       #takes values from default aside from ones specfically given in argument
       #this wil only be called when there are no existing targets associated with provider
-      def self.create_targets(project_idh,provider,regions,params_hash,opts={})
+      def self.create_targets?(project_idh,provider,regions,params_hash,opts={})
         target_mh = project_idh.createMH(:target) 
         unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
           raise ErrorUsage.new("Cannot find default target")

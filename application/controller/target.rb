@@ -32,24 +32,24 @@ module DTK
       rest_ok_response
     end
 
+    #TODO: modify so no IAAS specfic params processed here (e.g., region)
     def rest__create_provider()
+      iaas_type = ret_iaas_type(:iaas_type)
       provider_name = ret_non_null_request_params(:provider_name)
       selected_region = ret_request_params(:region)
       no_bootstrap = ret_request_param_boolean(:no_bootstrap)
-      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties, :security_group)
+      params_hash  = ret_params_hash(:description,:iaas_properties, :security_group)
 
-      project_idh  = get_default_project().id_handle()
       # create provider (target template)
+      project_idh  = get_default_project().id_handle()
       #setting :error_if_exists only if no bootstrap
       opts = {:raise_error_if_exists => no_bootstrap}
-      provider_idh = Target::Template.create_provider?(project_idh, provider_name, params_hash,opts)
+      provider = Target::Template.create_provider?(project_idh, iaas_type, provider_name, params_hash,opts)
       # get object since we will need iaas data to copy
-      provider_id = provider_idh.get_id()
-
-      response = {:provider_id => provider_id}
+      response = {:provider_id => provider.id}
       unless no_bootstrap
         regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
-        created_targets_info = Target::Instance.create_targets(project_idh, provider_idh.create_object(),regions, params_hash)
+        created_targets_info = Target::Instance.create_targets?(project_idh, provider,regions,params_hash)
         pp [:created_targets_info,created_targets_info]
         response.merge!(:created_targets => created_targets_info)
       end

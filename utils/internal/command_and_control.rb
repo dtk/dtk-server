@@ -32,11 +32,12 @@ module XYZ
       klass.stop_instances(nodes)
     end
 
-    def self.prepare_account_for_target(iaas_adapter_name, iaas_credentials)
-      klass = load_for_aux(:iaas, iaas_adapter_name)
+    def self.check_and_process_iaas_properties(iaas_type, iaas_properties)
+      klass = load_for_aux(:iaas, iaas_type.to_s)
 
+      #TODO: make check_security_group_and_key_pair a more generic name; it is EC2 specfic now
       # method will add params and return iaas_credentials
-      return klass.check_security_group_and_key_pair(iaas_credentials)
+      klass.check_security_group_and_key_pair(iaas_properties)
     end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)

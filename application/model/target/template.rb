@@ -17,22 +17,16 @@ module DTK
         target.create_subclass_obj(:target_template)
       end
 
-      def self.create_provider?(project_idh, provider_name, params_hash, opts={})
+      def self.create_provider?(project_idh, iaas_type, provider_name, params_hash, opts={})
         if existing_provider = provider_exists?(project_idh, provider_name)
           if opts[:raise_error_if_exists]
             raise ErrorUsage.new("Provider (#{provider_name}) exists already")
           else
-            return existing_provider.id_handle()
+            return existing_provider
           end
         end
 
-        # check iaas type
-        supported_types = R8::Config[:ec2][:iaas_type][:supported]
-        unless supported_types.include?(params_hash[:iaas_type].downcase)
-          raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") 
-        end
-        # we first check if we are ok with aws credentials
-        params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
+        params_hash[:iaas_properties] = IAASProperties.check_and_process(iaas_type,params_hash[:iaas_properties])
         
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
@@ -43,7 +37,9 @@ module DTK
           :ref => ref, 
           :display_name => display_name
         }.merge(params_hash)
-        create_from_row(target_mh,row,:convert => true) 
+r =        create_from_row(target_mh,row,:convert => true) 
+pp [r,r.class]
+        r
       end
 
       def base_name()
@@ -75,6 +71,13 @@ module DTK
         }
         get_obj(project_idh.createMH(:target_template),sp_hash)
       end
+
+      module IAASProperties
+        def self.check_and_process(iaas_type,iaas_properties)
+          CommandAndControl.check_and_process_iaas_properties(iaas_type,iaas_properties)
+        end
+      end
+
     end
   end
 end

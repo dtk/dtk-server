@@ -5,14 +5,11 @@ r8_nested_require('model','field_set')
 r8_nested_require('model','clone')
 r8_nested_require('model','get_items')
 
-#TODO: lose all of these, lose notion of schema and data
 r8_nested_require('model','schema')
 r8_nested_require('model','data')
 
 module DTK
   class Model < HashObject::Model 
-    #TODO: remove    include R8Tpl::Utility::I18n
-    #remove    extend R8Tpl::Utility::I18n
     extend ImportObject
     extend ExportObject
 
@@ -185,7 +182,21 @@ module DTK
       Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
     end
 
-    ### end related to use of subclass models
+    def create_subclass_obj(subclass_model_name)
+      id_handle().create_object(:model_name => subclass_model_name).merge(self)
+    end
+
+    def self.create_obj_optional_subclass(model_handle,hash_row,subclass_model_name=nil)
+      unless id = hash_row[:id]
+        raise Error.new("Hash (#{hash.inspect})must have id key")
+      end
+      idh = model_handle.createIDH(:id => id)
+      opts_model_name = (subclass_model_name ? {:model_name => subclass_model_name} : {})
+      obj_with_just_id = idh.create_object(opts_model_name)
+      obj_with_just_id.merge(hash_row)
+    end
+    private_class_method :create_obj_optional_subclass
+    ######### end related to use of subclass models
 
     def self.inherited(child_class)
       return unless self == Model
@@ -427,9 +438,22 @@ module DTK
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,opts[:convert] ? {:convert_for_create => true} : {})
       override_attrs = {}
       create_opts = Aux::hash_subset(opts,[:returning_sql_cols,:duplicate_refs])
+      ret_obj = opts[:ret_obj]
+      if ret_obj
+        create_opts[:returning_sql_cols] ||= ret_obj[:cols]||DefaultRetSqlCols
+      end
       field_set = FieldSet.new(model_handle[:model_name],rows.first.keys)
-      create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
+      ret = create_from_select(model_handle,field_set,select_ds,override_attrs,create_opts)
+      if ret_obj
+        subclass_model_name = ret_obj[:model_name]
+        ret.map do |hash_row|
+          create_obj_optional_subclass(model_handle,hash_row,subclass_model_name)
+        end
+      else
+        ret
+      end
     end
+    DefaultRetSqlCols = [:id,:group_id,:display_name]
 
     def self.create_from_rows_for_migrate(model_handle,rows)
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,:convert_for_create => true)
@@ -772,10 +796,6 @@ module DTK
         Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row:",rows,caller[0..5]])
       end
       rows.first
-    end
-
-    def create_subclass_obj(subclass_model_name)
-      id_handle().create_object(:model_name => subclass_model_name).merge(self)
     end
 
     def self.get_objs(model_handle,sp_hash,opts={})

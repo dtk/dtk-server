@@ -31,15 +31,14 @@ module DTK
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /,"-")
-        row = {
+        create_row = {
           :project_id => project_idh.get_id(),
           :type => 'template', 
           :ref => ref, 
           :display_name => display_name
         }.merge(params_hash)
-r =        create_from_row(target_mh,row,:convert => true) 
-pp [r,r.class]
-        r
+        create_opts = {:convert => true, :ret_obj => {:model_name => :target_template}}
+        create_from_row(target_mh,create_row,create_opts)
       end
 
       def base_name()

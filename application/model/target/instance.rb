@@ -3,15 +3,16 @@ module DTK
     class Instance < self
       #takes values from default aside from ones specfically given in argument
       #this wil only be called when there are no existing targets associated with provider
-      def self.create_targets(project_idh,provider_idh,regions,params_hash)
+      def self.create_targets(project_idh,provider,regions,params_hash)
         target_mh = project_idh.createMH(:target) 
         unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
           raise ErrorUsage.new("Cannot find default target")
         end
         ref = display_name.downcase.gsub(/ /,"-")
-        provider_id = provider_idh.get_id()
+        provider_name = provider.get_field?(:display_name)
+        provider_id = provider.id
         create_rows = regions.map do |region|
-          display_name = "#{display_name}-#{region}"
+          display_name = "#{provider_name}-#{region}"
           ref = display_name.downcase.gsub(/ /,"-")
           default.merge(:parent_id => provider_id, :region => region, :ref => ref, :display_name => display_name).merge(params_hash)
         end

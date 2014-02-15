@@ -23,30 +23,33 @@ module DTK
 
     #create target instance
     def rest__create()
-      display_name,provider_id,region = ret_non_null_request_params(:target_name,:provider_id,:region)
+      target_name,provider_id,region = ret_non_null_request_params(:target_name,:provider_id,:region)
       provider = Target::Template.get(model_handle(),provider_id)
       # we extract needed values
       params_hash = extract_hash(provider,:description,:iaas_type,:iaas_properties)
-      r = Target::Instance.create_target(project_idh, provider.id_handle,region, params_hash)
+      r = Target::Instance.create_target(project_idh, provider, target_name, region, params_hash)
       pp r
       rest_ok_response
     end
 
     def rest__create_provider()
-      display_name = ret_non_null_request_params(:provider_name)
-      is_no_bootstrap,selected_region = ret_request_params(:no_bootstrap,:region)
+      provider_name = ret_non_null_request_params(:provider_name)
+      selected_region = ret_request_params(:region)
+      no_bootstrap = ret_request_param_boolean(:no_bootstrap)
       params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties, :security_group)
 
       project_idh  = get_default_project().id_handle()
       # create provider (target template)
-      provider_idh = Target::Template.create_provider(project_idh, display_name, params_hash)
+      #setting :error_if_exists only if no bootstrap
+      opts = {:raise_error_if_exists => no_bootstrap}
+      provider_idh = Target::Template.create_provider?(project_idh, provider_name, params_hash,opts)
       # get object since we will need iaas data to copy
       provider_id = provider_idh.get_id()
 
       response = {:provider_id => provider_id}
-      unless is_no_bootstrap
+      unless no_bootstrap
         regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
-        created_targets_info = Target::Instance.create_targets(project_idh, provider_idh,regions, params_hash)
+        created_targets_info = Target::Instance.create_targets(project_idh, provider_idh.create_object(),regions, params_hash)
         pp [:created_targets_info,created_targets_info]
         response.merge!(:created_targets => created_targets_info)
       end

@@ -17,7 +17,15 @@ module DTK
         target
       end
 
-      def self.create_provider(project_idh, display_name, params_hash)
+      def self.create_provider?(project_idh, provider_name, params_hash, opts={})
+        if existing_provider = provider_exists?(project_idh, provider_name)
+          if opts[:raise_error_if_exists]
+            raise ErrorUsage.new("Provider (#{provider_name}) exists already")
+          else
+            existing_provider.id_handle()
+          end
+        end
+
         # check iaas type
         supported_types = R8::Config[:ec2][:iaas_type][:supported]
         unless supported_types.include?(params_hash[:iaas_type].downcase)
@@ -27,10 +35,23 @@ module DTK
         params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
         
         target_mh = project_idh.createMH(:target)
-        display_name = "#{display_name}-template" 
+        display_name = "#{provider_name}-template" 
         ref = display_name.downcase.gsub(/ /,"-")
-        row = {:type => 'template', :ref => ref, :display_name => display_name}.merge(params_hash)
+        row = {
+          :project_id => project_idh.get_id(),
+          :type => 'template', 
+          :ref => ref, 
+          :display_name => display_name
+        }.merge(params_hash)
         create_from_row(target_mh,row,:convert => true) 
+      end
+     private
+      def self.provider_exists?(project_idh,provider_name)
+        sp_hash = {
+          :cols => [:id],
+          :filter => [:and,[:eq,:display_name,provider_name],[:eq,:project_id => project_idh.get_id()]]
+        }
+        get_obj(project_idh.createMH(:target),sp_hash)
       end
     end
   end

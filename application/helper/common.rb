@@ -42,9 +42,9 @@ module Ramaze::Helper
     end
 
     #looks for default if no target is given
-    def create_target_obj_with_default(target_id_field)
+    def create_target_obj_with_default(target_id_field=:target_id)
       if target_id = ret_request_params(target_id_field)
-        id_handle(target_id,:target)
+        create_object_from_id(target_id,:target)
       else
         Target.get_default_target(model_handle(:target))
       end

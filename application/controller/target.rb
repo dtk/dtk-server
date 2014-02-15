@@ -21,50 +21,36 @@ module DTK
       rest_ok_response response
     end
 
+    #create target instance
     def rest__create()
-      display_name = ret_non_null_request_params(:target_name)
-      template_id  = ret_request_params(:target_template_id)
-      selected_region  = ret_request_params(:region)
-      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties, :security_group)
-      is_no_bootstrap  = ret_request_param_boolean(:no_bootstrap)
+      display_name,provider_id,region = ret_non_null_request_params(:target_name,:provider_id,:region)
+      provider = Target::Template.get(model_handle(),provider_id)
+      # we extract needed values
+      params_hash = extract_hash(provider,:description,:iaas_type,:iaas_properties)
+      r = Target::Instance.create_target(project_idh, provider.id_handle,region, params_hash)
+      pp r
+      rest_ok_response
+    end
 
-      supported_types = R8::Config[:ec2][:iaas_type][:supported]
+    def rest__create_provider()
+      display_name = ret_non_null_request_params(:provider_name)
+      is_no_bootstrap,selected_region = ret_request_params(:no_bootstrap,:region)
+      params_hash  = ret_params_hash(:description,:iaas_type,:iaas_properties, :security_group)
 
       project_idh  = get_default_project().id_handle()
+      # create provider (target template)
+      provider_idh = Target::Template.create_provider(project_idh, display_name, params_hash)
+      # get object since we will need iaas data to copy
+      provider_id = provider_idh.get_id()
 
-
-      unless template_id
-        # check iaas type
-        raise ErrorUsage.new("Invalid iaas type '#{params_hash[:iaas_type]}', supported types (#{supported_types.join(', ')})") unless supported_types.include?(params_hash[:iaas_type].downcase)
-
-        # we first check if we are ok with aws credentials
-        params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
-
-        # create target template
-        target_idh = Target::Template.create_from_user_input(project_idh, display_name, params_hash, true)
-        # get object since we will need iaas data to copy
-        template_id = target_idh.get_id()
-      else
-        target_template = Target::Template.get(model_handle(),template_id)
-         # we extract needed values
-        params_hash = extract_hash(target_template,:description,:iaas_type,:iaas_properties)
+      response = {:provider_id => provider_id}
+      unless is_no_bootstrap
+        regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
+        created_targets_info = Target::Instance.create_targets(project_idh, provider_idh,regions, params_hash)
+        pp [:created_targets_info,created_targets_info]
+        response.merge!(:created_targets => created_targets_info)
       end
-
-      if is_no_bootstrap
-        # this is when is in bootstrap mode
-        return rest_ok_response(:target_template_id => template_id)
-      else
-        # we defer creation of targets for each region no need to wait for it to finish
-        CreateThread.defer do
-          regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
-          regions.each do |region|
-            params_hash[:iaas_properties].merge!(:region => region)
-            target_idh = Target.create_from_default(project_idh,"#{display_name}-#{region}", params_hash.merge(:parent_id => template_id.to_i))
-          end
-        end
-      end
-
-      rest_ok_response(:success => true )
+      rest_ok_response response
     end
 
     def rest__delete()

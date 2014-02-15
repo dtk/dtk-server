@@ -1,7 +1,7 @@
 module DTK
   class Target
-    #TODO: need to subclass on provider type
     class Instance < self
+      subclass_model :target_instance, :target
       #takes values from default aside from ones specfically given in argument
       #this wil only be called when there are no existing targets associated with provider
       def self.create_targets?(project_idh,provider,regions,params_hash,opts={})
@@ -16,7 +16,7 @@ module DTK
           el = default.merge(:parent_id => provider_id,:ref => ref, :display_name => display_name).merge(params_hash)
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(:region => region))
         end
-        create_opts = {:convert => true, :returning_sql_cols => [:id,:display_name]}
+        create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
    
@@ -29,7 +29,7 @@ module DTK
           :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider, :is_default_target],
           :filter => filter
         }
-        ret = get_objs(target_mh, sp_hash)
+        ret = get_objs(target_mh.createMH(:target_instance), sp_hash)
         ret.each do |t|
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)

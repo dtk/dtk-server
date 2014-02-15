@@ -2,6 +2,7 @@ module DTK
   #This is a provider
   class Target
     class Template < self
+      subclass_model :target_template, :target
 
       def self.list(target_mh)
         sp_hash = {
@@ -32,6 +33,7 @@ module DTK
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /,"-")
         create_row = {
+          :iaas_type => iaas_type.to_s,
           :project_id => project_idh.get_id(),
           :type => 'template', 
           :ref => ref, 
@@ -46,17 +48,6 @@ module DTK
       end
 
      private
-      def get_objs(sp_hash,opts={})
-        get_objs_subclass_model(sp_hash,:target_template,opts)
-      end
-      def self.get_objs(mh,sp_hash,opts={})
-        if mh[:model_name] == :target_template
-          get_objs_subclass_model(mh.createMH(:target),:target_template,sp_hash,opts)
-        else
-          super(mh,sp_hash,opts)
-        end
-      end
-
       def self.provider_display_name(provider_name)
         "#{provider_name}#{DisplayNameSufix}" 
       end

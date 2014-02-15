@@ -155,9 +155,25 @@ module DTK
       ret
     end
 
-    #related to use of subclass models
-    #TODO: See if can automatically pick up below rather than needing below; tehse are models that indirectly inherit from Model
-    #add the datacenter <-> taregt equiv
+    #####related to use of subclass models; these are models that indirectly inherit from Model
+    def self.subclass_model(subclass_model_name,parent_model_name)
+      class_eval("
+        def get_objs(sp_hash,opts={})
+          get_objs_subclass_model(sp_hash,:#{subclass_model_name},opts)
+        end"
+      )
+      class_eval("
+        def self.get_objs(mh,sp_hash,opts={})
+          if mh[:model_name] == :#{subclass_model_name}
+            get_objs_subclass_model(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
+          else
+            super(mh,sp_hash,opts)
+          end
+        end"
+     )
+    end    
+
+    #TODO: update so this is datadriven from subclass_model statements; after replace all cases below to use subclass_model
     def self.models_to_add(model_name)
       case model_name
         when :assembly then Assembly

@@ -8,7 +8,6 @@ module DTK
         unless default = get_default_target(target_mh,[:iaas_type,:iaas_properties,:type])
           raise ErrorUsage.new("Cannot find default target")
         end
-        ref = display_name.downcase.gsub(/ /,"-")
         provider_name = provider.get_field?(:display_name)
         provider_id = provider.id
         create_rows = regions.map do |region|

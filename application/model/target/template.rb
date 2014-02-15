@@ -35,7 +35,7 @@ module DTK
         params_hash[:iaas_properties] = CommandAndControl.prepare_account_for_target(params_hash[:iaas_type].to_s,params_hash[:iaas_properties])
         
         target_mh = project_idh.createMH(:target)
-        display_name = "#{provider_name}-template" 
+        display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /,"-")
         row = {
           :project_id => project_idh.get_id(),
@@ -49,9 +49,14 @@ module DTK
       def self.provider_exists?(project_idh,provider_name)
         sp_hash = {
           :cols => [:id],
-          :filter => [:and,[:eq,:display_name,provider_name],[:eq,:project_id => project_idh.get_id()]]
+          :filter => [:and,[:eq,:display_name,provider_display_name(provider_name)],
+                      [:eq,:project_id,project_idh.get_id()]]
         }
         get_obj(project_idh.createMH(:target),sp_hash)
+      end
+
+      def provider_display_name(provider_name)
+        "#{provider_name}-template" 
       end
     end
   end

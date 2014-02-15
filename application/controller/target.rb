@@ -27,9 +27,8 @@ module DTK
       provider = Target::Template.get(model_handle(),provider_id)
       # we extract needed values
       params_hash = extract_hash(provider,:description,:iaas_type,:iaas_properties)
-      r = Target::Instance.create_target(project_idh, provider, target_name, region, params_hash)
-      pp r
-      rest_ok_response
+      Target::Instance.create_target(project_idh, provider, target_name, region, params_hash)
+      rest_ok_response #TODO: may return info about objects created
     end
 
     #TODO: modify so no IAAS specfic params processed here (e.g., region)
@@ -50,10 +49,10 @@ module DTK
       unless no_bootstrap
         regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
         created_targets_info = Target::Instance.create_targets?(project_idh, provider,regions,params_hash)
-        pp [:created_targets_info,created_targets_info]
         response.merge!(:created_targets => created_targets_info)
       end
-      rest_ok_response response
+      Log.info_pp([:create_provider_info,response])
+      rest_ok_response #TODO: may return info, which now is put in response
     end
 
     def rest__delete()

@@ -4,6 +4,10 @@ module DTK
     class Template < self
       subclass_model :target_template, :target
 
+      def is_template?()
+        true
+      end
+
       def self.list(target_mh)
         sp_hash = {
           :cols => common_columns(),

@@ -10,7 +10,7 @@ shared_context "Import remote module" do |module_name|
   it "imports #{module_name} module from remote repo" do
     puts "Import remote module:", "---------------------"
     pass = false
-    value = `dtk module import-dtkn #{module_name}`
+    value = `dtk component-module import-dtkn #{module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client") || (!value.include? "denied"))
     puts "Import of remote module #{module_name} completed successfully!" if pass == true
@@ -24,7 +24,7 @@ shared_context "Import module from puppet forge" do |puppet_forge_module_name|
   it "imports #{puppet_forge_module_name} module from puppet forge" do
     puts "Import module from puppet forge:", "---------------------"
     pass = false
-    value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
+    value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
     puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
@@ -38,7 +38,7 @@ shared_context "NEG - Import module from puppet forge" do |puppet_forge_module_n
   it "does not import #{puppet_forge_module_name} module from puppet forge" do
     puts "NEG - Import module from puppet forge:", "---------------------"
     pass = false
-    value = `dtk module import-puppet-forge #{puppet_forge_module_name}`
+    value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}`
     puts value
     pass = true if ((value.include? "ERROR") || (value.include? "Puppet module '#{puppet_forge_module_name}' not found."))
     puts "Import of incorrect puppet forge module #{puppet_forge_module_name} was not completed successfully!" if pass == true
@@ -52,7 +52,7 @@ shared_context "Create module from provided git repo" do |module_name, git_ssh_r
   it "imports #{module_name} module from #{git_ssh_repo_url} repo" do
     puts "Import module from git repo:", "---------------------"
     pass = false
-    value = `dtk module import-git #{git_ssh_repo_url} #{module_name}`
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     puts "Module #{module_name} created successfully from provided git repo!" if pass == true
@@ -66,7 +66,7 @@ shared_context "NEG - Create module from provided git repo" do |module_name, git
   it "does not import #{module_name} module from #{git_ssh_repo_url} repo" do
     puts "NEG - Import module from git repo:", "---------------------"
     pass = false
-    value = `dtk module import-git #{git_ssh_repo_url} #{module_name}`
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{module_name}`
     puts value
     pass = true if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
     puts "Module #{module_name} was not created successfully from provided incorrect git repo!" if pass == true
@@ -80,7 +80,7 @@ shared_context "NEG - Import module with dependency from provided git repo" do |
   it "imports #{module_name} module from #{git_ssh_repo_url} repo but with dependency warning on #{dependency_module}" do
     puts "NEG - Import module with dependency from git repo:", "--------------------------------------------------"
     pass = false
-    value = `dtk module import-git #{git_ssh_repo_url} #{module_name}`
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     if (value.include? "There are some missing dependencies: [\"#{dependency_module}\"]")
@@ -99,7 +99,7 @@ shared_context "NEG - Import module with version dependency from provided git re
   it "imports #{module_name} module from #{git_ssh_repo_url} repo but with version dependency error" do
     puts "NEG - Import module with version dependency from git repo:", "----------------------------------------------------------"
     pass = false
-    value = `dtk module import-git #{git_ssh_repo_url} #{module_name}`
+    value = `dtk component-module import-git #{git_ssh_repo_url} #{module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     if (value.include? "There are some inconsistent dependencies")
@@ -118,7 +118,7 @@ shared_context "Create module" do |module_name|
   it "imports #{module_name} module from content on local machine" do
     puts "Import module:", "--------------"
     pass = false
-    value = `dtk module import #{module_name}`
+    value = `dtk component-module import #{module_name}`
     puts value
     pass = true if (!value.include? "ERROR")
     puts "Module #{module_name} imported successfully!" if pass == true
@@ -132,7 +132,7 @@ shared_context "Export module" do |dtk_common, module_name, namespace|
   it "exports #{module_name} module to #{namespace} namespace on remote repo" do
     puts "Export module:", "--------------"
     pass = false
-    value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
+    value = `dtk component-module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
     #temp solution for bug that happens when calling repo manager for the first time. try request again
     if value.include? "Repo Manager refused the connection"
       value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
@@ -307,7 +307,7 @@ shared_context "Delete module from remote repo" do |dtk_common, module_name, nam
   it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
     puts "Delete module from remote:", "--------------------------"
     pass = false
-    value = `dtk module delete-from-dtkn #{namespace}/#{module_name} -y`
+    value = `dtk component-module delete-from-dtkn #{namespace}/#{module_name} -y`
     pass = !value.include?("error")
     puts "Module #{module_name} deleted from dtkn (remote) successfully!" if pass == true
     puts "Module #{module_name} was not deleted from dtkn (remote) successfully!" if pass == false
@@ -334,7 +334,7 @@ shared_context "Clone versioned module" do |dtk_common, module_name, module_vers
   it "clones #{module_name} module with version #{module_version} from server to local filesystem" do
     puts "Clone versioned module:", "-----------------------"
     pass = false
-    value = `dtk module #{module_name} clone -v #{module_version} -n`
+    value = `dtk component-module #{module_name} clone -v #{module_version} -n`
     puts value
     pass = value.include?("module_directory:")
     puts "Versioned module #{module_name} cloned successfully!" if pass == true
@@ -348,7 +348,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts "Push clone changes to server:", "-----------------------------"
     pass = false
-    value = `dtk module #{module_name} push`
+    value = `dtk component-module #{module_name} push`
     puts value
     pass = value.include?("Status: OK")
     puts "Clone changes pushed to server successfully!" if pass == true

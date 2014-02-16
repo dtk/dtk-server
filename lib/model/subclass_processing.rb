@@ -16,7 +16,9 @@ module DTK
              end
            end"
          )
+        SubclassProcessing.add_subclass_mapping(subclass_model_name,self)
       end
+
      private    
       def models_to_add(model_name)
         SubclassProcessing.models_to_add(model_name)
@@ -52,9 +54,13 @@ module DTK
         Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
       end
 
+      def self.add_subclass_mapping(subclass_model_name,subclass_klass)
+        @subclass_mapping ||= Hash.new
+        @subclass_mapping[subclass_model_name] ||= subclass_klass
+      end
       def self.models_to_add(model_name)
         ret = nil
-        if ret = (@model_name_to_class||{})[model_name]
+        if ret = (@subclass_mapping||{})[model_name]
           return ret
         end
         #TODO: move over all models to use datadriven form       
@@ -62,8 +68,6 @@ module DTK
           when :assembly then Assembly
           when :assembly_template then Assembly::Template
           when :assembly_instance then Assembly::Instance
-          when :target_instance then Target::Instance
-          when :target_template then Target::Template
           when :assembly_workspace then Workspace
           when :component_template then Component::Template
           when :component_instance then Component::Instance

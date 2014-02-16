@@ -417,6 +417,17 @@ module DTK
       end
     end
     DefaultRetSqlCols = [:id,:group_id,:display_name]
+    def self.add_default_cols?(cols=nil)
+      default_cols = DefaultRetSqlCols
+      if cols
+        [cols + default_cols].uniq
+      else
+        default_cols
+      end
+    end
+    def default_cols?(cols=nil)
+      self.class.add_default_cols?(cols)
+    end
 
     def self.create_from_rows_for_migrate(model_handle,rows)
       select_ds = SQL::ArrayDataset.create(db,rows,model_handle,:convert_for_create => true)

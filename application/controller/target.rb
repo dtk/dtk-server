@@ -55,20 +55,16 @@ module DTK
       rest_ok_response #TODO: may return info, which now is put in response
     end
 
-    def rest__delete()
-      target_id  = ret_request_param_id_optional(:target_id, ::DTK::Target)
-
-      if Target.get(model_handle(),target_id).is_default?
-        raise ErrorUsage, "You cannot delete default target with ID '#{target_id}'"
-      else
-        Target.delete(id_handle(target_id))
-      end
-
+    def rest__delete_provider()
+      provider  = create_obj(:provider_id, ::DTK::Target::Template)
+      Target::Template.delete(provider)
       rest_ok_response
     end
 
-    def rest__create_assembly_template()
-      raise Error.new("target/create_assembly_template not implemented yet")
+    def rest__delete()
+      target_instance = create_obj(:target_id, ::DTK::Target::Instance) 
+      Target::Instance.delete(target_instance)
+      rest_ok_response
     end
 
     def rest__info_about()

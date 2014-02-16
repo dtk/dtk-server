@@ -19,6 +19,13 @@ module DTK
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
+
+      def self.delete(target)
+        if target.is_builtin_target?()
+          raise ErrorUsage.new("Cannot delete the builtin target")
+        end
+        delete_instance(target.id_handle())
+      end
    
       def self.list(target_mh,opts={})
         filter = [:neq,:type,'template']

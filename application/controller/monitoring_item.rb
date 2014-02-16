@@ -21,7 +21,8 @@ module XYZ
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
       # find running assemblies
-      assemblies = Assembly::Instance.get_assemblies_with_nodes(model_handle()).reject{|a|a[:is_staged]} 
+      raise Error.new("deprecated: Assembly::Instance.get_assemblies_with_nodes")
+#      assemblies = Assembly::Instance.get_assemblies_with_nodes(model_handle()).reject{|a|a[:is_staged]} 
 
       str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')
 

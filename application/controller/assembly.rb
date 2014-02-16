@@ -30,7 +30,7 @@ module DTK
 
     def rest__set_target()
       workspace = ret_workspace_object?()
-      target = create_obj(:target_id, ::DTK::Target)
+      target = create_obj(:target_id, Target)
       workspace.set_target(target)
       rest_ok_response
     end

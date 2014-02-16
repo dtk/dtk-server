@@ -47,6 +47,34 @@ module DTK
         create_from_row(target_mh,create_row,create_opts)
       end
 
+      def self.delete(provider)
+        assembly_instances = provider.get_assembly_instances()
+        unless assembly_instances.empty?
+          assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
+          provider_name = provider.get_filed?(:display_name)
+          raise ErrorUsage.new("Cannot delete provide #{provider_name} because service instance(s) (#{assembly_names}) are using one of its targets") 
+        end
+        pp ['delete_instance(provider.id_handle()']
+        #delete_instance(provider.id_handle())
+      end
+
+      def get_assembly_instances()
+        ret = Array.new
+        target_instances = id_handle.create_object().get_target_instances()
+        unless target_instances.empty?
+          ret = Assembly::Instance.get(model_handle(:assembly_instance),:target_idhs => target_instances.map{|t|t.id_handle})
+        end
+        ret
+      end
+
+      def get_target_instances(opts={})
+        sp_hash = {
+          :cols => add_default_cols?(opts[:cols]),
+          :filter => [:eq,:parent_id,id_handle()]
+        }
+        Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
+      end
+
       def base_name()
         get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
       end

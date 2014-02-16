@@ -190,8 +190,7 @@ R8::ReactorRoute.draw do
   post  'target/create' => 'target#create'
   post  'target/create_provider' => 'target#create_provider'
   post  'target/info_about' => 'target#info_about'
-  post  'target/delete' => 'target#delete'
-  post  'target/create_assembly_template' => 'target#create_assembly_template'
+  post  'target/delete_provider' => 'target#delete_provider'
   
    # TASK
   post  'task/cancel_task' => 'task#cancel_task'

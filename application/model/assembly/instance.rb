@@ -299,16 +299,25 @@ module DTK; class  Assembly
       get_objs(assembly_mh,sp_hash)
     end
 
+    #Simple get assembliy instances
+    def self.get(assembly_mh, opts={})
+      target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
+      target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map{|idh|idh.get_id()}] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      sp_hash = {
+        :cols => opts[:cols]||[:id,:group_id,:display_name],
+        :filter => filter
+      }
+      get_objs(assembly_mh.createMH(:assembly_instance),sp_hash,:keep_ref_cols=>true) #:keep_ref_cols=>true just in case ref col
+    end
+
     def self.get_info__flat_list(assembly_mh, opts={})
       target_idh = opts[:target_idh]
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      sp_hash = {
-        :cols => [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact,
-        :filter => filter
-      }
-      ret = get_objs(assembly_mh.createMH(:assembly_instance),sp_hash,:keep_ref_cols=>true)
+      cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact,
+      ret = get(assembly_mh,{:cols => cols}.merge(opts))
       return ret unless needs_empty_nodes
 
       #add in in assembly nodes without components on them
@@ -321,48 +330,26 @@ module DTK; class  Assembly
       ret + assembly_empty_nodes
     end
 
-    def self.get_assemblies_with_nodes(mh,opts={})
-      Log.error("TODO: remove or fix up top reflect nodes can be asseociated with multiple assemblies")
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      sp_hash = {
-        :cols => [:id, :display_name,:nested_nodes_summary],
-        :filter => [:and, [:eq, :type, "composite"], target_filter]
-      }
-      assembly_rows = get_objs(mh.createMH(:component),sp_hash)
-      
-      ndx_ret = Hash.new
-      assembly_rows.each do |r|
-        node = r.delete(:node)
-        next if node.nil?
-        ((ndx_ret[r[:id]] ||= r)[:nodes] ||= Array.new) << node
-      end
-      ndx_ret.each_value{|r|r[:is_staged] = !r[:nodes].find{|n|n[:type] != "staged"}}
-      ndx_ret.values
+    #returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
+    #[col,empty_assem_nodes]
+    def self.list_virtual_column?(detail_level=nil)
+      empty_assem_nodes = false
+      col = 
+        if detail_level.nil?
+          nil
+        elsif detail_level == "nodes"
+          empty_assem_nodes = true
+          #TODO: use below for component detail and introduce a more succinct one for nodes
+          :instance_nodes_and_cmps_summary
+        elsif detail_level == "components"
+          empty_assem_nodes = true
+          :instance_nodes_and_cmps_summary
+        else
+          raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
+        end
+      [col,empty_assem_nodes]
     end
-    
-    class << self
-     private
-      #returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
-      #[col,empty_assem_nodes]
-      def list_virtual_column?(detail_level=nil)
-        empty_assem_nodes = false
-        col = 
-          if detail_level.nil?
-            nil
-          elsif detail_level == "nodes"
-            empty_assem_nodes = true
-            #TODO: use below for component detail and introduce a more succinct one for nodes
-            :instance_nodes_and_cmps_summary
-          elsif detail_level == "components"
-            empty_assem_nodes = true
-            :instance_nodes_and_cmps_summary
-          else
-            raise Error.new("not implemented list_virtual_column at detail level (#{detail_level})")
-          end
-        [col,empty_assem_nodes]
-      end
-    end
+    private_class_method :list_virtual_column?
 
     def get_component_modules(opts={})
       AssemblyModule::Component.get_for_assembly(self,opts)

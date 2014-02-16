@@ -279,18 +279,12 @@ module Ramaze::Helper
 
     def ret_module_name_from_class(model_class=nil)
       if model_class
-        OverrideModelName[model_class]||Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym
+        ::DTK::Model::SubclassProcessing.parent_model_name(model_class) || Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym
       else
         model_name()
       end
     end
     private :ret_module_name_from_class
-    OverrideModelName = {
-      Component::Template => :component,
-      Assembly::Instance => :component,
-      Assembly::Template  => :component,
-      NodeGroup => :node
-    }
 
     def ret_request_params(*params)
       return nil unless request_method_is_post?()

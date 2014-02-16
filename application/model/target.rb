@@ -66,14 +66,7 @@ module DTK
         :cols => common_columns(),
         :filter => [:eq, :id, id]
       }
-      return get_objs(target_mh, sp_hash).first
-    end
-
-    def self.delete(id_handle, opts = {})
-      if id_handle.create_object().is_builtin_target?()
-        raise ErrorUsage.new("Cannot delete teh builtin target")
-      end
-      delete_instance(id_handle,opts)
+      get_obj(target_mh, sp_hash)
     end
 
     def self.get_default_target(target_mh,cols=[]) 
@@ -130,6 +123,7 @@ module DTK
       nodes.inject({}){|h,n|h.merge(n.id => ndx_changes[n.id]||StateChange.node_config_change__no_changes())}
     end
 
+    ### TODO these should be moved to IAAS-spefic location
     def get_iaas_type()
       get_field?(:iaas_type)
     end
@@ -159,6 +153,7 @@ module DTK
 
       return nil
     end
+    ### TODO end: these should be moved to IAAS-spefic location
 
     def get_and_update_nodes_status()
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}

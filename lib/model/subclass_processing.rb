@@ -17,6 +17,7 @@ module DTK
            end"
          )
         SubclassProcessing.add_subclass_mapping(subclass_model_name,self)
+        SubclassProcessing.add_parent_model_name_mapping(self,parent_model_name)
       end
 
      private    
@@ -73,6 +74,23 @@ module DTK
           when :component_instance then Component::Instance
           when :datacenter then Target
           when :node_group then NodeGroup
+        end
+      end
+
+      def self.add_parent_model_name_mapping(subclass_klass,parent_model_name)
+        @parent_model_name_mapping ||= Hash.new
+        @parent_model_name_mapping[subclass_klass] ||= parent_model_name
+      end
+      def self.parent_model_name(model_class)
+        if ret = (@parent_model_name_mapping||{})[model_class]
+          return ret
+        end
+        #TODO: move over all models to use datadriven form       
+        case model_class
+          when Component::Template then :component
+          when Assembly::Instance then :component
+          when Assembly::Template then :component
+          when NodeGroup then :node
         end
       end
     end

@@ -1,3 +1,4 @@
+#TODO: needs cleanup including around mechanism to get object associated with ids
 module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle and Model
@@ -249,6 +250,12 @@ module Ramaze::Helper
       id = ret_request_param_id(param,model_class,version)
       id_handle(id,ret_module_name_from_class(model_class))
     end
+    #TODO One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id
+    #  we can put in an option flag for this, but need to check we cover all instances of these
+    #  make this a speacte function called by create_obj and then have
+    #  ret_request_param_id_handle and ret_request_param_id call id and id_handle methods on it
+    #   which avoids needing to call create_object_from_id in create_obj
+
     #param refers to key that can have id or name value
     def ret_request_param_id(param,model_class=nil,extra_context=nil)
       model_name = ret_module_name_from_class(model_class)
@@ -271,10 +278,8 @@ module Ramaze::Helper
     # resolve name/id but in this case given request param is not required
     def ret_request_param_id_optional(param,model_class=nil,extra_context=nil)
       if ret_request_params(param)
-        return ret_request_param_id(param, model_class, extra_context)
+        ret_request_param_id(param, model_class, extra_context)
       end
-
-      return nil
     end
 
     def ret_module_name_from_class(model_class=nil)

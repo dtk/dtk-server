@@ -1,6 +1,6 @@
 module Ramaze::Helper
   module Common
-    include XYZ #TODO: included because of ModelHandle and Model; make sure not expensive to laod these defs in this module
+    include XYZ #TODO: included because of ModelHandle and Model
 
     def create_object_from_id(id,model_name_or_class=nil,opts={})
       model_name  =
@@ -279,7 +279,7 @@ module Ramaze::Helper
 
     def ret_module_name_from_class(model_class=nil)
       if model_class
-        ::DTK::Model::SubclassProcessing.parent_model_name(model_class) || Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym
+        ::DTK::Model::SubclassProcessing.model_name(model_class) || Aux.underscore(Aux.demodulize(model_class.to_s)).to_sym
       else
         model_name()
       end

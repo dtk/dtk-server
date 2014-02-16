@@ -4,7 +4,7 @@ module DTK
       def subclass_model(subclass_model_name,parent_model_name)
         class_eval("
           def get_objs(sp_hash,opts={})
-            SubclassProcessing.new(self).get_objs_subclass_model(sp_hash,:#{subclass_model_name},opts)
+            SubclassProcessing.new(self).get_objs(sp_hash,:#{subclass_model_name},opts)
           end"
          )
          class_eval("
@@ -17,7 +17,7 @@ module DTK
            end"
          )
         SubclassProcessing.add_subclass_mapping(subclass_model_name,self)
-        SubclassProcessing.add_parent_model_name_mapping(self,parent_model_name)
+        SubclassProcessing.add_model_name_mapping(self,subclass_model_name)
       end
 
      private    
@@ -77,6 +77,25 @@ module DTK
         end
       end
 
+
+      def self.add_model_name_mapping(subclass_klass,model_name)
+        @model_name_mapping ||= Hash.new
+        @model_name_mapping[subclass_klass] ||= model_name
+      end
+      def self.model_name(model_class)
+        if ret = (@model_name_mapping||{})[model_class]
+          return ret
+        end
+        #TODO: move over all models to use datadriven form       
+        case model_class
+          when Component::Template then :component_template
+          when Assembly::Instance then :assembly_instance
+          when Assembly::Template then :assembly_template
+          when NodeGroup then :node
+        end
+      end
+
+      ##TODO: deprecate
       def self.add_parent_model_name_mapping(subclass_klass,parent_model_name)
         @parent_model_name_mapping ||= Hash.new
         @parent_model_name_mapping[subclass_klass] ||= parent_model_name

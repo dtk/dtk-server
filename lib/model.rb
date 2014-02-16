@@ -13,6 +13,8 @@ module DTK
   class Model < HashObject::Model 
     r8_nested_require('model','subclass_processing')
     extend SubclassProcessingClassMixin
+    include SubclassProcessingMixin
+
     extend ImportObject
     extend ExportObject
 
@@ -22,6 +24,13 @@ module DTK
       attr_reader :db
       expose_methods_from_internal_object :db, %w{update_from_select update_from_hash_assignments update_instance execute_function get_instance_or_factory get_instance_scalar_values get_objects_just_dataset get_object_ids_wrt_parent get_parent_object exists? create_from_select create_from_select_for_migrate ret_id_handles_from_create_returning_ids create_from_hash create_simple_instance? delete_instance delete_instances delete_instances_wrt_parent process_raw_db_row!},:benchmark => :all #, :benchmark => %w{create_from_hash} # :all
     end
+
+    def self.inherited(child_class)
+      return unless self == Model
+      model_name = child_class.model_name
+      (@model_classes ||= Hash.new)[model_name] = child_class
+    end
+
 
     #======hash index methods
 
@@ -156,55 +165,6 @@ module DTK
         end
       end
       ret
-    end
-
-    #####related to use of subclass models; these are models that indirectly inherit from Model
-
-    #TODO: update so this is datadriven from subclass_model statements; after replace all cases below to use subclass_model
-    def self.models_to_add(model_name)
-      case model_name
-        when :assembly then Assembly
-        when :assembly_template then Assembly::Template
-        when :assembly_instance then Assembly::Instance
-        when :target_instance then Target::Instance
-        when :target_template then Target::Template
-        when :assembly_workspace then Workspace
-        when :component_template then Component::Template
-        when :component_instance then Component::Instance
-        when :datacenter then Target
-        when :node_group then NodeGroup
-      end
-    end
-
-    def self.get_objs_subclass_model(mh,subclass_model_name,sp_hash,opts={})
-      Model.get_objs(mh,sp_hash,opts.merge(:subclass_model_name => subclass_model_name))
-    end
-
-    def get_objs_subclass_model(sp_hash,subclass_model_name,opts={})
-      mh = model_handle()
-      Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
-    end
-
-    def create_subclass_obj(subclass_model_name)
-      id_handle().create_object(:model_name => subclass_model_name).merge(self)
-    end
-
-    def self.create_obj_optional_subclass(model_handle,hash_row,subclass_model_name=nil)
-      unless id = hash_row[:id]
-        raise Error.new("Hash (#{hash.inspect})must have id key")
-      end
-      idh = model_handle.createIDH(:id => id)
-      opts_model_name = (subclass_model_name ? {:model_name => subclass_model_name} : {})
-      obj_with_just_id = idh.create_object(opts_model_name)
-      obj_with_just_id.merge(hash_row)
-    end
-    private_class_method :create_obj_optional_subclass
-    ######### end related to use of subclass models
-
-    def self.inherited(child_class)
-      return unless self == Model
-      model_name = child_class.model_name
-      (@model_classes ||= Hash.new)[model_name] = child_class
     end
 
     #parent_id field name for child_model_name with parent this

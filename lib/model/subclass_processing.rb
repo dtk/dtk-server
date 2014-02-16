@@ -4,19 +4,73 @@ module DTK
       def subclass_model(subclass_model_name,parent_model_name)
         class_eval("
           def get_objs(sp_hash,opts={})
-            get_objs_subclass_model(sp_hash,:#{subclass_model_name},opts)
+            SubclassProcessing.new(self).get_objs_subclass_model(sp_hash,:#{subclass_model_name},opts)
           end"
          )
          class_eval("
            def self.get_objs(mh,sp_hash,opts={})
              if mh[:model_name] == :#{subclass_model_name}
-               get_objs_subclass_model(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
+               SubclassProcessing.get_objs(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
              else
                super(mh,sp_hash,opts)
              end
            end"
          )
-      end    
+      end
+     private    
+      def models_to_add(model_name)
+        SubclassProcessing.models_to_add(model_name)
+      end
+
+      def create_obj_optional_subclass(model_handle,hash_row,subclass_model_name=nil)
+        unless id = hash_row[:id]
+          raise Error.new("Hash (#{hash.inspect}) must have id key")
+        end
+        idh = model_handle.createIDH(:id => id)
+        opts_model_name = (subclass_model_name ? {:model_name => subclass_model_name} : {})
+        obj_with_just_id = idh.create_object(opts_model_name)
+        obj_with_just_id.merge(hash_row)
+      end
+    end
+    module SubclassProcessingMixin
+      def create_subclass_obj(subclass_model_name)
+        id_handle().create_object(:model_name => subclass_model_name).merge(self)
+      end
+    end
+
+    class SubclassProcessing
+      def initialize(model)
+        @model = model
+      end
+
+      def self.get_objs(mh,subclass_model_name,sp_hash,opts={})
+        Model.get_objs(mh,sp_hash,opts.merge(:subclass_model_name => subclass_model_name))
+      end
+
+      def get_objs(sp_hash,subclass_model_name,opts={})
+        mh = @model.model_handle()
+        Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
+      end
+
+      def self.models_to_add(model_name)
+        ret = nil
+        if ret = (@model_name_to_class||{})[model_name]
+          return ret
+        end
+        #TODO: move over all models to use datadriven form       
+        case model_name
+          when :assembly then Assembly
+          when :assembly_template then Assembly::Template
+          when :assembly_instance then Assembly::Instance
+          when :target_instance then Target::Instance
+          when :target_template then Target::Template
+          when :assembly_workspace then Workspace
+          when :component_template then Component::Template
+          when :component_instance then Component::Instance
+          when :datacenter then Target
+          when :node_group then NodeGroup
+        end
+      end
     end
   end
 end

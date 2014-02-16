@@ -287,18 +287,6 @@ module DTK; class  Assembly
       self.class.get_info__flat_list(model_handle(),{:filter => filter}.merge(opts))
     end
 
-    def self.get_workspace_object(assembly_mh, opts={})
-      target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
-      filter = [:and, [:eq, :type, "composite"],[:eq, :ref, '__workspace'], target_filter,opts[:filter]].compact
-      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      sp_hash = {
-        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
-        :filter => filter
-      }
-      get_objs(assembly_mh,sp_hash)
-    end
-
     #Simple get assembliy instances
     def self.get(assembly_mh, opts={})
       target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
@@ -316,7 +304,7 @@ module DTK; class  Assembly
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
       col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact,
+      cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact
       ret = get(assembly_mh,{:cols => cols}.merge(opts))
       return ret unless needs_empty_nodes
 
@@ -329,6 +317,19 @@ module DTK; class  Assembly
       assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
       ret + assembly_empty_nodes
     end
+
+    def self.get_workspace_object(assembly_mh, opts={})
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"],[:eq, :ref, '__workspace'], target_filter,opts[:filter]].compact
+      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
+      sp_hash = {
+        :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
+        :filter => filter
+      }
+      get_objs(assembly_mh.createMH(:assembly_instance),sp_hash)
+    end
+
 
     #returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]

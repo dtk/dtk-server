@@ -56,11 +56,10 @@ module DTK
         assembly_instances = provider.get_assembly_instances()
         unless assembly_instances.empty?
           assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
-          provider_name = provider.get_filed?(:display_name)
+          provider_name = provider.get_field?(:display_name)
           raise ErrorUsage.new("Cannot delete provide #{provider_name} because service instance(s) (#{assembly_names}) are using one of its targets") 
         end
-        pp ['delete_instance(provider.id_handle()']
-        #delete_instance(provider.id_handle())
+        delete_instance(provider.id_handle())
       end
 
       def get_assembly_instances()
@@ -75,7 +74,7 @@ module DTK
       def get_target_instances(opts={})
         sp_hash = {
           :cols => add_default_cols?(opts[:cols]),
-          :filter => [:eq,:parent_id,id_handle()]
+          :filter => [:eq,:parent_id,id()]
         }
         Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
       end

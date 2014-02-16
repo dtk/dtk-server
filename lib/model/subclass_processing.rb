@@ -87,29 +87,11 @@ module DTK
           return ret
         end
         #TODO: move over all models to use datadriven form       
-        case model_class
-          when Component::Template then :component_template
-          when Assembly::Instance then :assembly_instance
-          when Assembly::Template then :assembly_template
-          when NodeGroup then :node
-        end
-      end
-
-      ##TODO: deprecate
-      def self.add_parent_model_name_mapping(subclass_klass,parent_model_name)
-        @parent_model_name_mapping ||= Hash.new
-        @parent_model_name_mapping[subclass_klass] ||= parent_model_name
-      end
-      def self.parent_model_name(model_class)
-        if ret = (@parent_model_name_mapping||{})[model_class]
-          return ret
-        end
-        #TODO: move over all models to use datadriven form       
-        case model_class
-          when Component::Template then :component
-          when Assembly::Instance then :component
-          when Assembly::Template then :component
-          when NodeGroup then :node
+        if model_class == Component::Template then :component_template
+        elsif model_class == Component::Template then :component_template
+        elsif model_class == Assembly::Instance then :assembly_instance
+        elsif model_class == Assembly::Template then :assembly_template
+        elsif model_class == NodeGroup then :node
         end
       end
     end

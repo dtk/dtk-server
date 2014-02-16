@@ -425,7 +425,7 @@ module DTK
         default_cols
       end
     end
-    def default_cols?(cols=nil)
+    def add_default_cols?(cols=nil)
       self.class.add_default_cols?(cols)
     end
 

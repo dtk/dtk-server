@@ -7,12 +7,12 @@ module DTK; class Assembly
     end
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_template
-        super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
+        get_this_objs(mh,sp_hash,opts)
       else
         super
       end
     end
-    
+
     def self.create_from_id_handle(idh)
       idh.create_object(:model_name => :assembly_template)
     end
@@ -112,7 +112,7 @@ module DTK; class Assembly
                     opts[:filter]
                    ].compact
       }
-      ret = get_objs(mh.createMH(:assembly_template),sp_hash)
+      ret = get_this_objs(mh,sp_hash)
       #TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret

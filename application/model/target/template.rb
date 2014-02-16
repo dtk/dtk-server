@@ -4,6 +4,11 @@ module DTK
     class Template < self
       subclass_model :target_template, :target
 
+      def self.name_to_id(model_handle,name)
+        #TODO: stub need to make sure template; then can get rid of self.get( 
+        name_to_id_default(model_handle.createMH(:target_template),name)
+      end
+
       def is_template?()
         true
       end

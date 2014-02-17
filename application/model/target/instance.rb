@@ -20,8 +20,14 @@ module DTK
         create_rows = regions.map do |region|
           display_name = display_name_from_provider_and_region(provider,region)
           ref = display_name.downcase.gsub(/ /,"-")
+          specific_params = {
+            :parent_id => provider_id,
+            :ref => ref, 
+            :display_name => display_name,
+            :type => 'instance'
+          }
           default_base = Aux::hash_subset(default_provider.merge(provider),InheritedProperties)
-          el = default_base.merge(:parent_id => provider_id,:ref => ref, :display_name => display_name).merge(params_hash)
+          el = default_base.merge(specific_params).merge(params_hash)
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(:region => region))
         end
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}

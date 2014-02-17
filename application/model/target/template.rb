@@ -5,11 +5,12 @@ module DTK
       subclass_model :target_template, :target, :print_form => 'provider'
 
       def self.name_to_id(model_handle,name)
-        name_to_id_helper(model_handle,name,:filter => object_type_filter())
+        filter = [:and, [:eq, :display_name, name], object_type_filter()]
+        name_to_id_helper(model_handle,name,:filter => filter)
       end
 
       def self.check_valid_id(model_handle,id)
-        filter = [:and,[:eq, :id, id],object_type_filter()]
+        filter = [:and, [:eq, :id, id], object_type_filter()]
         check_valid_id_helper(model_handle,id,filter)
       end
 

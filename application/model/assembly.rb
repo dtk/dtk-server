@@ -7,7 +7,7 @@ module DTK
     include ListMixin
     extend ListClassMixin
 
-    def self.get_this_objs(mh,sp_hash,opts={})
+    def self.get_these_objs(mh,sp_hash,opts={})
       Model.get_objs(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
     end
     def self.create_from_component(cmp)

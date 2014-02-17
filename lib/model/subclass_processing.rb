@@ -17,7 +17,7 @@ module DTK
            end"
          )
          class_eval("
-           def self.get_this_objs(mh,sp_hash,opts={})
+           def self.get_these_objs(mh,sp_hash,opts={})
              SubclassProcessing.get_objs(mh.createMH(:#{parent_model_name}),:#{subclass_model_name},sp_hash,opts)
            end"
          )

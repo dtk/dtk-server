@@ -7,7 +7,7 @@ module DTK; class Assembly
     end
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_template
-        get_this_objs(mh,sp_hash,opts)
+        get_these_objs(mh,sp_hash,opts)
       else
         super
       end
@@ -112,7 +112,7 @@ module DTK; class Assembly
                     opts[:filter]
                    ].compact
       }
-      ret = get_this_objs(mh,sp_hash)
+      ret = get_these_objs(mh,sp_hash)
       #TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret

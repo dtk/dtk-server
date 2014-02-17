@@ -47,7 +47,7 @@ module DTK
           :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider, :is_default_target],
           :filter => filter
         }
-        ret = get_objs(target_mh.createMH(:target_instance), sp_hash)
+        ret = get_these_objs(target_mh, sp_hash)
         ret.each do |t|
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)

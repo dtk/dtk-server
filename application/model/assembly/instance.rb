@@ -16,7 +16,7 @@ module DTK; class  Assembly
     end
     def self.get_objs(mh,sp_hash,opts={})
       if mh[:model_name] == :assembly_instance
-        get_this_objs(mh,sp_hash,opts)
+        get_these_objs(mh,sp_hash,opts)
       else
         super
       end
@@ -296,7 +296,7 @@ module DTK; class  Assembly
         :cols => opts[:cols]||[:id,:group_id,:display_name],
         :filter => filter
       }
-      get_this_objs(assembly_mh,sp_hash,:keep_ref_cols=>true) #:keep_ref_cols=>true just in case ref col
+      get_these_objs(assembly_mh,sp_hash,:keep_ref_cols=>true) #:keep_ref_cols=>true just in case ref col
     end
 
     def self.get_info__flat_list(assembly_mh, opts={})
@@ -327,7 +327,7 @@ module DTK; class  Assembly
         :cols => [:id, :display_name,:group_id,:component_type,:version,col].compact,
         :filter => filter
       }
-      get_this_objs(assembly_mh,sp_hash)
+      get_these_objs(assembly_mh,sp_hash)
     end
 
 

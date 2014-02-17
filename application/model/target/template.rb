@@ -18,7 +18,7 @@ module DTK
           :cols => common_columns(),
           :filter => [:eq,:type,'template']
         }
-        get_objs(target_mh.createMH(:target_template), sp_hash)
+        get_these_objs(target_mh, sp_hash)
       end
 
       def self.get(target_mh, id)

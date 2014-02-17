@@ -1,4 +1,3 @@
-r8_require_common_lib('errors')
 module DTK
   class Error ##TODO: cleanup; DTK::Error is coming from /home/dtk18/dtk-common/lib/errors/errors.rb  
     r8_nested_require('error','rest_error')

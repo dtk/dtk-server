@@ -65,7 +65,7 @@ module DTK
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map{|a|a[:display_name]}
-        raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
+        raise ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
       end
       repos = get_repos()
       repos.each{|repo|RepoManager.delete_repo(repo)}
@@ -96,7 +96,7 @@ module DTK
         assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
         unless assoc_assemblies.empty?
           assembly_names = assoc_assemblies.map{|a|a[:display_name]}
-          raise ErrorUsage.new("Cannot delete a module if one or more of its assembly instances exist in a target (#{assembly_names.join(',')})")
+          raise ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
         end
         Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
       end

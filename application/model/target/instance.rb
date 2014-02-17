@@ -8,12 +8,8 @@ module DTK
         create_targets?(project_idh,provider,[region],params_hash,:raise_error_if_exists=>true).first
       end
 
-      #takes values from default aside from ones specfically given in argument
       def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
         target_mh = project_idh.createMH(:target) 
-        unless default_provider = get_default_target(target_mh,InheritedProperties)
-          raise ErrorUsage.new("Cannot find default target")
-        end
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
         create_rows = iaas_properties_list.map do |iaas_properties|
@@ -25,8 +21,7 @@ module DTK
             :display_name => display_name,
             :type => 'instance'
           }
-          default_base = Aux::hash_subset(default_provider.merge(provider),InheritedProperties)
-          el = default_base.merge(specific_params)
+          el = provider.hash_subset(*InheritedProperties).merge(specific_params)
           #need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end

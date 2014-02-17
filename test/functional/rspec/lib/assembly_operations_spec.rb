@@ -134,7 +134,7 @@ shared_context "Grep log command" do |dtk_common, node_name, log_location, grep_
 end
 
 shared_context "List component dependencies" do |dtk_common, source_component, dependency_component, dependency_satisfied_by|
-  it "checks that #{source_component} has dependency on #{dependency_component} and that dependency is satsified by #{dependency_satisfied_by}" do
+  it "checks that #{source_component} has dependency on #{dependency_component} and that dependency is satisfied by #{dependency_satisfied_by}" do
     dependency_found = dtk_common.check_component_depedency($assembly_id, source_component, dependency_component, dependency_satisfied_by)
     dependency_found.should eq(true)
   end

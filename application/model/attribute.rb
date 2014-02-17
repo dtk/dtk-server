@@ -59,6 +59,18 @@ module DTK
       attrs
     end
 
+    def self.get_attribute_from_identifier(identifier, mh)
+      if identifier.to_s =~ /^[0-9]+$/
+        sp_hash = {
+          :cols => Attribute.common_columns(),
+          :filter => [:eq,:id,identifier]
+        }
+
+        valid_attribute = Model.get_obj(mh,sp_hash)
+        raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
+      end
+    end
+
     def self.get_title_attributes(cmp_idhs)
       ret = Array.new
       return ret if cmp_idhs.empty?

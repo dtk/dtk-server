@@ -1,15 +1,15 @@
 module XYZ
   module CreateThread
 
-    def self.defer(&block)
-      Ramaze::defer(&wrap(&block))
-    end
-
     def self.defer_with_session(user_object, &block)
       Ramaze::defer(&wrap(user_object, &block))
     end
 
     private
+
+    def self.defer(&block)
+      Ramaze::defer(&wrap(&block))
+    end
 
     # wrap() - Added this part of code so if thread fails we will know imedietly. Helps with development,
     # in case there is some internal logic that expects some thread to fail error messages can be 

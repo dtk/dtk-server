@@ -37,7 +37,8 @@ module DTK
     @@Lock = Mutex.new
  
     def defer_execution()
-      CreateThread.defer do
+      user_object  = ::DTK::CurrentSession.new.user_object()
+      CreateThread.defer_with_session(user_object) do
       #  pp [:new_thread_from_defer, Thread.current, Thread.list]
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin

@@ -9,7 +9,9 @@ module Ramaze::Helper
         request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
       end
 
-      ::DTK::CreateThread.defer do
+
+      user_object  = ::DTK::CurrentSession.new.user_object()
+      ::DTK::CreateThread.defer_with_session(user_object) do
         yield(body)
         body.succeed
       end

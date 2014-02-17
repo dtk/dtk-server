@@ -43,7 +43,7 @@ describe "(Component Module DSL) Test Case 10: NEG - Have attribute with require
   context "Push clone changes of module from local copy to server" do
     it "pushes module changes from local filesystem to server but fails because of incorrect value for required field - falsee" do
       fail = false
-      value = `dtk module #{module_name} push`
+      value = `dtk component-module #{module_name} push`
       puts value
       fail = value.include?("ERROR") #To Do: Add full assertion when error handled correctly
       fail.should eq(true)  

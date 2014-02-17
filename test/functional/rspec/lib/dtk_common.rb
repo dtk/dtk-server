@@ -390,11 +390,25 @@ class DtkCommon
 
 		if (!component.nil?)
 			puts "Component #{source_component} exists. Check its dependencies..."
-			if ((component['depends_on'] == dependency_component) && (component['satisfied_by'] == dependency_satisfied_by))
-				puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-				dependency_found = true
+			if (component['depends_on'] == dependency_component)
+				#snippet
+				dependency_satisfied_by.each do |dep|
+					if component['satisfied_by'].include? dep
+						dependency_found = true
+					else
+						dependency_found = false
+						break
+					end
+				end
+				#end snippet
+
+				if dependency_found == true
+					puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
+				else
+					puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
+				end
 			else
-				puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
+				puts "Component #{source_component} does not have expected dependency component #{dependency_component}"
 			end
 		else
 			puts "Component #{source_component} does not exist and therefore it does not have any dependencies"

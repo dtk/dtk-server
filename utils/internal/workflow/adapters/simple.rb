@@ -42,8 +42,9 @@ module XYZ
         status = :succeeded
         lock = Mutex.new
         #TODO: not killing concurrent subtasks if one failes
+        user_object  = ::DTK::CurrentSession.new.user_object()
         threads = @task.subtasks.map do |subtask|
-          CreateThread.defer do 
+          CreateThread.defer_with_session(user_object) do 
             subtask_status = Simple.new(subtask).execute(top_task_idh)
             lock.synchronize do
               status = :failed if subtask_status == :failed 

@@ -43,7 +43,7 @@ describe "(Component Module DSL) Test Case 12: NEG - Ill-formed yaml content (ty
   context "Push clone changes of module from local copy to server" do
     it "pushes module changes from local filesystem to server but fails because of incorrect type value - integersss" do
       fail = false
-      value = `dtk module #{module_name} push`
+      value = `dtk component-module #{module_name} push`
       puts value
       fail = value.include?("error")
       fail.should eq(true)  

@@ -200,9 +200,10 @@ module XYZ
       ##last arg is opts
       params << {:task => task} unless opts_added
 
+      user_object  = ::DTK::CurrentSession.new.user_object()
       #dispatcher line
       if ACTION_HANDLER_IS_ASYNCHRONOUS[action]
-        CreateThread.defer{
+        CreateThread.defer_with_session(user_object) {
           begin
             obj.send(ACTION_HANDLER_METHOD_NAME[action] || action,*params)
             task.update_status(:complete) 

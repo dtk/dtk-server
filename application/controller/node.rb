@@ -70,7 +70,8 @@ module XYZ
 
       queue = SimpleActionQueue.new
 
-      CreateThread.defer do
+      user_object  = ::DTK::CurrentSession.new.user_object()
+      CreateThread.defer_with_session(user_object) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
 

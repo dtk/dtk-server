@@ -6,7 +6,9 @@ module DTK
       ::EventMachine::next_tick do #TODO: is next_tick necessary?
         async_callback.call [200, {'Content-Type' => content_type},deferred_body]
       end
-      CreateThread.defer do
+
+      user_object  = ::DTK::CurrentSession.new.user_object()
+      CreateThread.defer_with_session(user_object) do
         begin
           #TODO: to allow simpler form where blk does not have a handle parameter
           #can case on whether this is the case and if not call 

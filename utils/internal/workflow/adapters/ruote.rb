@@ -10,7 +10,9 @@ module DTK
         def run_in_thread
           Thread.abort_on_exception = true
           @running = true
-          @run_thread = CreateThread.defer{ run }
+
+          user_object  = ::DTK::CurrentSession.new.user_object()
+          @run_thread = CreateThread.defer_with_session(user_object) { run }
         end
       end
 

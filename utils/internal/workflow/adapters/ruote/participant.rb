@@ -110,8 +110,7 @@ module DTK
           end
         end
 
-        def create_thread_in_callback_context(task,workitem,&body)
-          user_object  = CurrentSession.new.user_object()
+        def create_thread_in_callback_context(task,workitem,user_object,&body)
           CreateThread.defer_with_session(user_object) do
             execution_context_block(task,workitem,&body)
           end
@@ -203,7 +202,7 @@ module DTK
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                create_thread_in_callback_context(task,workitem) do
+                create_thread_in_callback_context(task,workitem,user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
 
@@ -263,11 +262,12 @@ module DTK
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
 
           user_object  = ::DTK::CurrentSession.new.user_object()
-  
+
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-                create_thread_in_callback_context(task,workitem) do
+
+                create_thread_in_callback_context(task,workitem,user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
                   

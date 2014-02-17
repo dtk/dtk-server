@@ -14,6 +14,8 @@ module DTK
     r8_nested_require('model','subclass_processing')
     extend SubclassProcessingClassMixin
     include SubclassProcessingMixin
+    r8_nested_require('model','name_and_id_mixins')
+    extend NameAndIdClassMixin
 
     extend ImportObject
     extend ExportObject
@@ -142,20 +144,6 @@ module DTK
       model_name_helper(self,:no_subclass => true)
     end
 
-    class << self
-      private
-      def model_name_helper(klass,opts={})
-        ret = Aux.underscore(class_parts(klass).join('')).to_sym
-        opts[:no_subclass]  ? ret : ( SubClassRelations[ret] || ret)
-      end
-
-      def class_parts(klass)
-        ret = klass.to_s.split('::')
-        ret.shift
-        ret
-      end
-    end
-
     def self.model_class(model_name)
       unless ret = @model_classes[model_name]
         if ret = models_to_add(model_name)
@@ -177,11 +165,6 @@ module DTK
     end
     def self.matching_models?(mn1,mn2)
       normalize_model(mn1) == normalize_model(mn2)
-    end
-
-    def self.name_to_id(model_handle,name)
-      return name.to_i if name.match(/^[0-9]+$/)
-      name_to_id_default(model_handle,name)
     end
 
     def hash_subset(*cols)
@@ -533,65 +516,20 @@ module DTK
       not [:user,:user_group,:user_group_relation].include?(model_handle[:model_name])
     end
 
-    class << self
-     private
-      def match_found(el,el_list,cols)
-        el_list.find do |el_in_list|
-          not cols.find{|col| not (el[col] == el_in_list[col])}
-        end
-      end
-
-      #helpers for check_valid_id and name_to_id
-      def check_valid_id_default(model_handle,id)
-        filter = [:eq, :id, id]
-        check_valid_id_helper(model_handle,id,filter)
-      end
-
-      def check_valid_id_helper(model_handle,id,filter,opts={})
-        sp_hash = {
-          :cols => [:id],
-          :filter => filter
-        }
-        rows = get_objs(model_handle,sp_hash)
-        if rows.empty? and opts[:no_error_if_no_match]
-          return nil
-        end
-        raise ErrorIdInvalid.new(id,pp_object_type()) unless rows.size == 1
-        id
-      end
-
-      def name_to_id_default(model_handle,name)
-        sp_hash =  {
-          :cols => [:id],
-          :filter => [:eq, :display_name, name]
-        }
-        name_to_id_helper(model_handle,name,sp_hash)
-      end
-
-      def name_to_id_helper(model_handle,name,augmented_sp_hash,opts={})
-        post_filter = augmented_sp_hash.delete(:post_filter)
-        augmented_sp_hash[:cols] ||= [:id]
-
-        rows_raw = get_objs(model_handle,augmented_sp_hash)
-        rows = (post_filter ? rows_raw.select{|r|post_filter.call(r)} : rows_raw)
-        if rows.size == 0
-          unless opts[:no_error_if_no_match]
-            raise ErrorNameDoesNotExist.new(name,pp_object_type())
-          end
-        elsif rows.size > 1
-          raise ErrorNameAmbiguous.new(name,rows.map{|r|r[:id]},pp_object_type())
-        else
-          rows.first[:id]
-        end
-      end
-
-      def pp_object_type()
-        if self == Assembly::Instance then "assembly"
-        elsif self == Component::Template then "component template"
-        else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
-        end
+    def self.match_found(el,el_list,cols)
+      el_list.find do |el_in_list|
+        not cols.find{|col| not (el[col] == el_in_list[col])}
       end
     end
+    private_class_method :match_found
+
+    def pp_object_type()
+      if self == Assembly::Instance then "assembly"
+      elsif self == Component::Template then "component template"
+      else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+      end
+    end
+    private_class_method :pp_object_type 
 
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
       cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]

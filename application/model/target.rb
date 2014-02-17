@@ -33,19 +33,9 @@ module DTK
       get_field?(:type)
     end
 
-    def is_template?()
-      (type() == 'template')
-    end
-    def is_builtin_target?()
-      update_obj!(:type,:parent_id)
-      (!is_template?()) and self[:parent_id].nil?
-    end
-
     def is_default?()
       get_field?(:is_default_target)
     end
-
-
 
     def info_about(about)
       case about

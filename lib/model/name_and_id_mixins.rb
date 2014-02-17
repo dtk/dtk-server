@@ -65,6 +65,13 @@ module DTK
         ret
       end
 
+      def pp_object_type()
+        if print_form = SubclassProcessing.print_form(self)
+          print_form
+        else
+          to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
+        end
+      end
     end
   end
 end

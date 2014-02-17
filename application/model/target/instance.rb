@@ -1,7 +1,7 @@
 module DTK
   class Target
     class Instance < self
-      subclass_model :target_instance, :target
+      subclass_model :target_instance, :target, :print_form => 'template'
       
       def self.create_target(project_idh,provider,region,params_hash)
         create_targets?(project_idh,provider,[region],params_hash,:raise_error_if_exists=>true).first
@@ -60,6 +60,11 @@ module DTK
       end
 
       DefaultTargetMark = '*'      
+
+      def is_builtin_target?()
+        get_field?(:parent_id).nil?
+      end
+
      private
       def self.display_name_from_provider_and_region(provider,region)
         "#{provider.base_name()}-#{region}"

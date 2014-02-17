@@ -2,29 +2,23 @@ module DTK
   #This is a provider
   class Target
     class Template < self
-      subclass_model :target_template, :target
+      subclass_model :target_template, :target, :print_form => 'provider'
 
       def self.name_to_id(model_handle,name)
-        #TODO: stub need to make sure template; then can get rid of self.get( 
-        name_to_id_default(model_handle.createMH(:target_template),name)
+        name_to_id_helper(model_handle,name,:filter => object_type_filter())
       end
 
-      def is_template?()
-        true
+      def self.check_valid_id(model_handle,id)
+        filter = [:and,[:eq, :id, id],object_type_filter()]
+        check_valid_id_helper(model_handle,id,filter)
       end
 
       def self.list(target_mh)
         sp_hash = {
           :cols => common_columns(),
-          :filter => [:eq,:type,'template']
+          :filter => object_type_filter()
         }
         get_these_objs(target_mh, sp_hash)
-      end
-
-      def self.get(target_mh, id)
-        target = super(target_mh, id)
-        raise ErrorUsage.new("Target with ID '#{id}' is not a template") unless target.is_template?
-        target.create_subclass_obj(:target_template)
       end
 
       def self.create_provider?(project_idh, iaas_type, provider_name, params_hash, opts={})
@@ -84,6 +78,10 @@ module DTK
       end
 
      private
+      def self.object_type_filter()
+        [:eq,:type,'template']
+      end
+      
       def self.provider_display_name(provider_name)
         "#{provider_name}#{DisplayNameSufix}" 
       end

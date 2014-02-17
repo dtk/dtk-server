@@ -1,7 +1,7 @@
 module DTK
   class Model
     module SubclassProcessingClassMixin
-      def subclass_model(subclass_model_name,parent_model_name)
+      def subclass_model(subclass_model_name,parent_model_name,opts={})
         class_eval("
           def get_objs(sp_hash,opts={})
             SubclassProcessing.new(self).get_objs(sp_hash,:#{subclass_model_name},opts)
@@ -22,7 +22,7 @@ module DTK
            end"
          )
         SubclassProcessing.add_subclass_mapping(subclass_model_name,self)
-        SubclassProcessing.add_model_name_mapping(self,subclass_model_name)
+        SubclassProcessing.add_model_name_mapping(self,subclass_model_name,opts)
       end
 
      private    
@@ -69,7 +69,7 @@ module DTK
         if ret = (@subclass_mapping||{})[model_name]
           return ret
         end
-        #TODO: move over all models to use datadriven form       
+        #TODO: move over all models to use data-driven form       
         case model_name
           when :assembly then Assembly
           when :assembly_template then Assembly::Template
@@ -82,23 +82,45 @@ module DTK
         end
       end
 
-
-      def self.add_model_name_mapping(subclass_klass,model_name)
+      def self.add_model_name_mapping(subclass_klass,model_name,opts={})
         @model_name_mapping ||= Hash.new
-        @model_name_mapping[subclass_klass] ||= model_name
+        pntr = @model_name_mapping[subclass_klass] ||= {:model_name => model_name}
+        pntr[:print_form] ||= opts[:print_form] ||default_print_form(model_name)
       end
       def self.model_name(model_class)
-        if ret = (@model_name_mapping||{})[model_class]
+        if ret = model_class_info(model_class)[:model_name]
           return ret
         end
-        #TODO: move over all models to use datadriven form       
+        #TODO: move over all models to use data-driven form       
         if model_class == Component::Template then :component_template
-        elsif model_class == Component::Template then :component_template
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
         elsif model_class == NodeGroup then :node
         end
       end
+
+      def self.print_form(model_class)
+        if ret = model_class_info(model_class)[:print_form]
+          return ret
+        end
+        #TODO: move over all models to use data-driven form       
+        if model_class == NodeGroup then 'node group'
+        elsif model_class == Assembly::Instance then 'service'
+        elsif model_class == Assembly::Template then 'service module'
+        elsif model_class == Component::Template then 'component template'
+        end
+      end
+
+     private
+      def self.model_class_info(model_class)
+        (@model_name_mapping||{})[model_class]||{}
+      end
+
+      def self.default_print_form(model_name)
+        model_name.to_s.gsub(/_/,' ')
+      end
+
+
     end
   end
 end

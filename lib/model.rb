@@ -523,21 +523,11 @@ module DTK
     end
     private_class_method :match_found
 
-    def pp_object_type()
-      if self == Assembly::Instance then "assembly"
-      elsif self == Component::Template then "component template"
-      else to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
-      end
-    end
-    private_class_method :pp_object_type 
-
     def self.select_process_and_update(model_handle,cols_x,id_list,opts={},&block)
       cols = cols_x.include?(:id) ? cols_x : cols_x +[:id]
       fs = Model::FieldSet.opt(cols,model_handle[:model_name])
       wc = SQL.in(:id,id_list)
       existing_rows = get_objects_just_dataset(model_handle,wc,fs).for_update().all()
-#TODO: debug statement
-#pp ["**********************",existing_rows,"*********************"]
       modified_rows = block.call(existing_rows)
       #TODO: should check that every id in id_list appears in modified_rows
       update_from_rows(model_handle,modified_rows)

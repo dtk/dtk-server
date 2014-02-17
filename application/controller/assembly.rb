@@ -405,7 +405,7 @@ module DTK
 
     #### method(s) related to staging assembly template
     def rest__stage()
-      target_id = ret_request_param_id_optional(:target_id, ::DTK::Target)
+      target_id = ret_request_param_id_optional(:target_id, ::DTK::Target::Instance)
       target = target_idh_with_default(target_id).create_object()
       assembly_template = ret_assembly_template_object()
       assembly_name = ret_request_params(:name) 

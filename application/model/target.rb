@@ -1,8 +1,8 @@
-r8_nested_require('target','clone')
-
 module DTK
   class Target < Model
+    r8_nested_require('target','clone')
     include TargetCloneMixin
+    r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
 

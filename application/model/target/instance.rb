@@ -4,29 +4,20 @@ module DTK
       subclass_model :target_instance, :target, :print_form => 'template'
 
       def self.create_target(project_idh,provider,region,params_hash)
+        raise Error.new("Rewrite to use IAASProperties")
         create_targets?(project_idh,provider,[region],params_hash,:raise_error_if_exists=>true).first
       end
 
-      class IAASProperties
-        attr_reader :name,iaas_properties
-        def initialize(name,iaas_properties)
-          @name = name
-          @iaas_properties = iaas_properties
-        end
-      end
-
       #takes values from default aside from ones specfically given in argument
-      #this wil only be called when there are no existing targets associated with provider
-      #TODO: reqwrite so regions is target_names => iaas_properties (ndx_iaas_properties)
-      def self.create_targets?(project_idh,provider,regions,params_hash,opts={})
+      def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
         target_mh = project_idh.createMH(:target) 
         unless default_provider = get_default_target(target_mh,InheritedProperties)
           raise ErrorUsage.new("Cannot find default target")
         end
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
-        create_rows = regions.map do |region|
-          display_name = display_name_from_provider_and_region(provider,region)
+        create_rows = iaas_properties_list.map do |iaas_properties|
+          display_name = iaas_properties.name
           ref = display_name.downcase.gsub(/ /,"-")
           specific_params = {
             :parent_id => provider_id,
@@ -35,13 +26,13 @@ module DTK
             :type => 'instance'
           }
           default_base = Aux::hash_subset(default_provider.merge(provider),InheritedProperties)
-          el = default_base.merge(specific_params).merge(params_hash)
-          el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(:region => region))
+          el = default_base.merge(specific_params)
+          #need deep merge for iaas_properties
+          el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
-
       #These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
       InheritedProperties = [:iaas_type,:iaas_properties,:type,:description]
 

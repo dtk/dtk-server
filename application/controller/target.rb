@@ -43,13 +43,13 @@ module DTK
       project_idh  = get_default_project().id_handle()
       #setting :error_if_exists only if no bootstrap
       opts = {:raise_error_if_exists => no_bootstrap}
-      provider = Target::Template.create_provider?(project_idh, iaas_type, provider_name, params_hash,opts)
+      provider = Target::Template.create_provider?(project_idh,iaas_type,provider_name,params_hash,opts)
       # get object since we will need iaas data to copy
       response = {:provider_id => provider.id}
 
       unless no_bootstrap
-        regions = selected_region ? [selected_region] : R8::Config[:ec2][:regions]
-        created_targets_info = Target::Instance.create_targets?(project_idh, provider,regions,params_hash)
+        #select_region could be nil
+        created_targets_info = provider.create_bootstrap_targets?(project_idh,selected_region)
         response.merge!(:created_targets => created_targets_info)
       end
       Log.info_pp([:create_provider_info,response])

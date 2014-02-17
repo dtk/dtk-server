@@ -21,7 +21,7 @@ module DTK
           end
         end
 
-        params_hash[:iaas_properties] = IAASProperties.check_and_process(iaas_type,params_hash[:iaas_properties])
+        iaas_properties = IAASProperties.check_and_process(iaas_type,params_hash[:iaas_properties])
         
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
@@ -32,7 +32,7 @@ module DTK
           :type => 'template', 
           :ref => ref, 
           :display_name => display_name
-        }.merge(params_hash)
+        }.merge(params_hash).merge(:iaas_properties => iaas_properties)
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_template}}
         create_from_row(target_mh,create_row,create_opts)
       end
@@ -45,6 +45,24 @@ module DTK
           raise ErrorUsage.new("Cannot delete provide #{provider_name} because service instance(s) (#{assembly_names}) are using one of its targets") 
         end
         delete_instance(provider.id_handle())
+      end
+
+      def create_bootstrap_targets?(project_idh,region_or_regions=nil)
+        #for succinctness
+        r = region_or_regions
+        regions = 
+          if r.kind_of?(Array) then r
+          elsif r.kind_of?(String) then [r]
+          else R8::Config[:ec2][:regions]
+          end
+        
+        common_iaas_properties = get_field?(:iaas_properties)
+        iaas_properties_list = regions.map do |region|
+          name = "#{base_name()}-#{region}"
+          properties = common_iaas_properties.merge(:region => region)
+          IAASProperties.new(name,properties)
+        end
+        Instance.create_targets?(project_idh,self,iaas_properties_list)
       end
 
       def get_assembly_instances()
@@ -64,11 +82,11 @@ module DTK
         Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
       end
 
+     private
       def base_name()
         get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')
       end
 
-     private
       def self.object_type_filter()
         [:eq,:type,'template']
       end
@@ -85,12 +103,6 @@ module DTK
                       [:eq,:project_id,project_idh.get_id()]]
         }
         get_obj(project_idh.createMH(:target_template),sp_hash)
-      end
-
-      module IAASProperties
-        def self.check_and_process(iaas_type,iaas_properties)
-          CommandAndControl.check_and_process_iaas_properties(iaas_type,iaas_properties)
-        end
       end
 
     end

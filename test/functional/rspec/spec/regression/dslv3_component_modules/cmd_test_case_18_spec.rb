@@ -45,7 +45,7 @@ describe "(Component Module DSL) Test Case 18: NEG - dtk.model.yaml with invalid
   context "Push clone changes of module from local copy to server" do
     it "pushes module changes from local filesystem to server but fails because of incorrect value for integer type attribute: #{false_integer_value}" do
       fail = false
-      value = `dtk module #{module_name} push`
+      value = `dtk component-module #{module_name} push`
       puts value
       fail = value.include?("[ERROR] Attribute (integer_attr) has default value (\"#{false_integer_value}\") that does not match its type (integer)")
       fail.should eq(true)  

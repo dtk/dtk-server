@@ -45,7 +45,7 @@ describe "(Component Module DSL) Test Case 19: NEG - dtk.model.yaml with invalid
   context "Push clone changes of module from local copy to server" do
     it "pushes module changes from local filesystem to server but fails because of incorrect value for boolean type attribute: #{false_boolean_value}" do
       fail = false
-      value = `dtk module #{module_name} push`
+      value = `dtk component-module #{module_name} push`
       puts value
       fail = value.include?("[ERROR] Attribute (boolean_attr) has default value (\"#{false_boolean_value}\") that does not match its type (boolean)")
       fail.should eq(true)  

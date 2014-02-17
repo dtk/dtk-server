@@ -2,9 +2,17 @@ module DTK
   class Target
     class Instance < self
       subclass_model :target_instance, :target, :print_form => 'template'
-      
+
       def self.create_target(project_idh,provider,region,params_hash)
         create_targets?(project_idh,provider,[region],params_hash,:raise_error_if_exists=>true).first
+      end
+
+      class IAASProperties
+        attr_reader :name,iaas_properties
+        def initialize(name,iaas_properties)
+          @name = name
+          @iaas_properties = iaas_properties
+        end
       end
 
       #takes values from default aside from ones specfically given in argument
@@ -72,6 +80,10 @@ module DTK
       end
 
      private
+      def self.object_type_filter()
+        [:eq,:type,'instance']
+      end
+
       def self.display_name_from_provider_and_region(provider,region)
         "#{provider.base_name()}-#{region}"
       end

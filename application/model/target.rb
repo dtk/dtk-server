@@ -25,6 +25,16 @@ module DTK
       ]
     end
 
+    def self.name_to_id(model_handle,name)
+      filter = [:and, [:eq, :display_name, name], object_type_filter()]
+      name_to_id_helper(model_handle,name,:filter => filter)
+    end
+
+    def self.check_valid_id(model_handle,id)
+      filter = [:and, [:eq, :id, id], object_type_filter()]
+      check_valid_id_helper(model_handle,id,filter)
+    end
+
     def name()
       get_field?(:display_name)
     end

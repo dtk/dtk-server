@@ -23,7 +23,7 @@ end
 DTK = XYZ
 
 require File.expand_path('require_first', File.dirname(__FILE__))
-r8_require_common_lib('auxiliary')
+r8_require_common_lib('dtk_common')
 
 SYSTEM_ROOT_PATH = File.expand_path('../', File.dirname(__FILE__))
 LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"

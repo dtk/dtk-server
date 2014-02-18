@@ -406,7 +406,7 @@ module DTK
         if opts[:include_remotes]
           augment_with_remotes_info!(branch_module_rows,module_mh)
         end
-        # if there is an external_ref[:sorce], use that otherwise look for remote dtkn
+        # if there is an external_ref source, use that otherwise look for remote dtkn
         #there can be duplictes for a module when multiple repos; in which case will agree on all fields
         #except :repo, :module_branch, and :repo_remotes
         #index by module
@@ -424,7 +424,6 @@ module DTK
             is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch) if linked_remote
           end
                     
-          repo_remotes_added = false
           unless mdl = ndx_ret[ndx]
             r.delete(:repo)
             r.delete(:module_branch)
@@ -435,8 +434,10 @@ module DTK
           if opts[:include_versions]
             (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
           end
-
-          if ndx_repo_remotes and not repo_remotes_added
+          if external_ref_source = module_branch.external_ref_source()
+            mdl[:external_ref_source] = external_ref_source
+          end
+          if ndx_repo_remotes
             ndx_repo_remotes.each do |remote_repo_id,remote_repo|
               (mdl[:ndx_repo_remotes] ||= Hash.new)[remote_repo_id] ||= remote_repo
             end
@@ -450,15 +451,23 @@ module DTK
               mdl.merge!(:versions => version_array.join(", ")) 
             end
           end
+          external_ref_source = mdl.delete(:external_ref_source)
+          ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
-          if ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
-            mdl.merge!(:linked_remotes => ret_linked_remotes_print_form(ndx_repo_remotes.values))
+          linked_remote = 
+            if external_ref_source
+              external_ref_source
+            elsif ndx_repo_remotes
+              "#{DTKNPrefix}#{ret_linked_remotes_print_form(ndx_repo_remotes.values)}"
+            end
+          if linked_remote
+            mdl.merge!(:linked_remotes => linked_remote)
           end
         end
-
         ndx_ret.values
       end
-      DefaultVersionString = "CURRENT"
+      DTKNPrefix = 'dtkn://'
+      DefaultVersionString = 'CURRENT'
 
      private 
 

@@ -8,8 +8,22 @@ module DTK
       [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref]
     end
 
+    #TODO: should change type of self[:external_ref] to json
+    #but before check any side effect of change
+    def external_ref()
+      get_field?(:external_ref) && eval(self[:external_ref])
+    end
+
+    def external_ref_source()
+      if external_ref = external_ref()
+        if source = external_ref[:source]
+          source.gsub(/ /,'')
+        end
+      end
+    end
+
     def get_type()
-      update_object!(:type)[:type].to_sym
+      get_field?(:type).to_sym
     end
 
     def get_module_repo_info()

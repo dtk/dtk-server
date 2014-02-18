@@ -14,8 +14,13 @@ module DTK
     r8_nested_require('model','subclass_processing')
     extend SubclassProcessingClassMixin
     include SubclassProcessingMixin
+
     r8_nested_require('model','name_and_id_mixins')
     extend NameAndIdClassMixin
+
+    r8_nested_require('model','pp_object_type')
+    extend PPObjectTypeClassMixin
+    include PPObjectTypeMixin
 
     extend ImportObject
     extend ExportObject
@@ -154,29 +159,6 @@ module DTK
       end
       ret
     end
-
-    #format can be
-    # :s - singular (default)
-    # :p - plural
-    # :pos - plural or singular
-    def self.pp_object_type(format=nil)
-      format ||= :s
-      print_form = SubclassProcessing.print_form(self) || to_s.split("::").last.gsub(/([a-z])([A-Z])/,'\1 \2').downcase
-      case format
-        when :s then print_form
-        when :p then pp_object_type__make_plural(print_form)
-        when :pos then pp_object_type__make_plural(print_form,:plural_or_singular => true)
-        else raise Error.new("Unexpected format (#{format})")
-      end
-    end
-    def self.pp_object_type__make_plural(term,opts={})
-      if term =~ /y$/
-        opts[:plural_or_singular] ? "#{term[0...-1]}(ies)" : "#{term[0...-1]}ies"
-      else
-        opts[:plural_or_singular] ? "#{term}(s)" : "#{term}s"
-      end
-    end
-    private_class_method :pp_object_type__make_plural    
 
     #parent_id field name for child_model_name with parent this
     def parent_id_field_name(child_model_name)

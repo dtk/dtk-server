@@ -72,10 +72,10 @@ module DTK; class  Assembly
 
     def rename(assembly_mh, name, new_name)
       assembly_list = Assembly::Instance.list(assembly_mh)
-      raise ErrorUsage.new("You are not allowed to use keyword '#{new_name}' as assembly name") if new_name.to_s.eql?("workspace")
+      raise ErrorUsage.new("You are not allowed to use keyword '#{new_name}' as #{pp_object_type()} name") if new_name.to_s.eql?("workspace")
 
       assembly_list.each do |assembly|
-        raise ErrorUsage.new("Assembly with name '#{new_name}' exists already") if assembly[:display_name].to_s.eql?(new_name)
+        raise ErrorUsage.new("#{pp_object_type().cap} with name '#{new_name}' exists already") if assembly[:display_name].to_s.eql?(new_name)
       end
 
       update(:display_name => new_name)
@@ -430,7 +430,7 @@ module DTK; class  Assembly
     def add_node(node_name,node_binding_rs=nil)
       #check if node has been added already
       if get_node?([:eq,:display_name,node_name])
-        raise ErrorUsage.new("Node (#{node_name}) already belongs to assembly (#{get_field?(:display_name)})")
+        raise ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
       end
 
       target = get_target()

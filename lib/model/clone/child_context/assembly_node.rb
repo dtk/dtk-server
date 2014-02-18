@@ -58,6 +58,8 @@ module DTK
           node_info.reject!{|n|stubs_to_omit.include?(n[:id])}
         end
 
+        #TODO: see why this causes bug target = target_idh.create_object(:model_name => :target_instance)
+        # No rules in the node being match the target (/home/dtk18/server/application/model/node_binding_ruleset.rb:22
         target = target_idh.create_object()
         node_mh = target_idh.createMH(:node)
         #TODO: may be more efficient to get these all at once

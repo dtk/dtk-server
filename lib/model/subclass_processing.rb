@@ -45,6 +45,8 @@ module DTK
           when :node
            type = get_object_scalar_column(id_handle,:type)
            %w{node_group_instance}.include?(type) ? :node_group : model_name
+          when :target
+           :target
           else
             Log.error("not implemented: finding subclass of relation #{model_name}")
             model_name

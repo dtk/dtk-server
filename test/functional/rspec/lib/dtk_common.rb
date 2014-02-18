@@ -391,7 +391,6 @@ class DtkCommon
 		if (!component.nil?)
 			puts "Component #{source_component} exists. Check its dependencies..."
 			if (component['depends_on'] == dependency_component)
-				#snippet
 				dependency_satisfied_by.each do |dep|
 					if component['satisfied_by'].include? dep
 						dependency_found = true
@@ -400,7 +399,6 @@ class DtkCommon
 						break
 					end
 				end
-				#end snippet
 
 				if dependency_found == true
 					puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"

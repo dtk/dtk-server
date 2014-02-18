@@ -70,7 +70,7 @@ describe "(Modules, Services and Versioning) Test Case 5: Clone existing module 
 	context "Push clone changes of versioned module from local copy to server" do
 		it "pushes clone changes of #{module_name} module for version #{module_version}" do
 			pass = false
-			value = `dtk module #{module_name} push -v #{module_version}`
+			value = `dtk component-module #{module_name} push -v #{module_version}`
 			puts value
 			pass = value.include?("#{file_for_change}")
 			pass.should eq(true)

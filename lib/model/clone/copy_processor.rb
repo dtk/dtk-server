@@ -22,17 +22,18 @@ module DTK
 
       #copy part of clone
       #targets is a list of id_handles, each with same model_name 
-      def clone_copy_top_level(source_id_handle,targets,recursive_override_attrs={})
+      def clone_copy_top_level(source_id_handle_x,targets,recursive_override_attrs={})
         return @ret if targets.empty?
-        
-        source_model_name = source_id_handle[:model_name]
+        source_model_name = Model.concrete_model_name(source_id_handle_x[:model_name])
+        source_id_handle = source_id_handle_x.createIDH(:model_name => source_model_name)
+
         source_model_handle = source_id_handle.createMH()
         source_parent_id_col = source_model_handle.parent_id_field_name()
 
         #all targets will have same model handle
         sample_target =  targets.first
         target_parent_mh = sample_target.createMH()
-        target_mh = target_parent_mh.create_childMH(source_id_handle[:model_name])
+        target_mh = target_parent_mh.create_childMH(source_model_name)
         
         target_parent_id_col = target_mh.parent_id_field_name()
         targets_rows = targets.map{|id_handle|{target_parent_id_col => id_handle.get_id()}}

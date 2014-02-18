@@ -205,7 +205,7 @@ module DTK
       end
 
       def self.ret_fieldset(model_name_x,col_type,&block)
-        model_name = model_name_x.to_sym
+        model_name = Model.concrete_model_name(model_name_x.to_sym)
         db_rel = DB_REL_DEF[model_name]
         Fieldsets[col_type] ||= Hash.new
         col_info = Fieldsets[col_type]

@@ -469,7 +469,7 @@ module Ramaze::Helper
      @model_name =  ConvertFromSubtypeModelName[model_name_x]||model_name_x
    end
 
-   #TODO: unify with  SubClassRelations in system/model
+   #TODO: unify with  model/subclass_processing
    ConvertFromSubtypeModelName = {
      :assembly => :component,
      :node_group => :node

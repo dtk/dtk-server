@@ -1,5 +1,5 @@
 require File.expand_path('field_search_pattern', File.dirname(__FILE__))
-module XYZ
+module DTK
   module FieldSetInstanceMixin
     class FieldSet
       include FieldSearchPatternInstanceMixin

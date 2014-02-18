@@ -55,8 +55,8 @@ module DTK
       end
 
       def model_name_helper(klass,opts={})
-        ret = Aux.underscore(class_parts(klass).join('')).to_sym
-        opts[:no_subclass]  ? ret : ( SubClassRelations[ret] || ret)
+        model_name = Aux.underscore(class_parts(klass).join('')).to_sym
+        opts[:no_subclass]  ? model_name : concrete_model_name(model_name)
       end
 
       def class_parts(klass)

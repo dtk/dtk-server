@@ -223,7 +223,7 @@ module DTK
       return nil if hash_scalar_values.nil?
       super(hash_scalar_values)
       relation_type_x ||= model_name()
-      relation_type = SubClassRelations[relation_type_x]||relation_type_x
+      relation_type = self.class.concrete_model_name(relation_type_x)
       @c = c
       @relation_type = relation_type
       @id_handle = id_handle ||
@@ -245,43 +245,6 @@ module DTK
 
     def i18n_language()
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]
-    end
-
-    SubClassRelations = {
-      :assembly => :component,
-      :assembly_workspace => :component,
-      :component_template => :component,
-      :component_instance => :component,
-      :node_group => :node
-    }
-
-    SubClassTargets = SubClassRelations.values
-    #so can use calling cobntroller to shortcut needing datbase lookup
-    def self.subclass_controllers(model_name,opts)
-      if model_name == :node and opts[:controller_class] == Node_groupController 
-        :node_group 
-      elsif model_name == :component and opts[:controller_class] == AssemblyController
-        :assembly
-      end
-    end
-    
-    def self.find_subtype_model_name(id_handle,opts={})
-      model_name = id_handle[:model_name]
-      return model_name unless SubClassTargets.include?(model_name)
-      if shortcut = subclass_controllers(model_name,opts)
-        return shortcut
-      end
-      case model_name
-       when :component
-        type = get_object_scalar_column(id_handle,:type)
-        type == "composite" ? :assembly : model_name
-       when :node
-        type = get_object_scalar_column(id_handle,:type)
-        %w{node_group_instance}.include?(type) ? :node_group : model_name
-       else
-        Log.error("not implemented: finding subclass of relation #{model_name}")
-        model_name
-      end
     end
 
     def subset(*keys)
@@ -805,8 +768,6 @@ module DTK
 
 
    protected
-
-
     #inherited virtual coulmn defs
     def parent_id()
       return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit 

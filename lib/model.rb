@@ -371,7 +371,7 @@ module DTK
     def self.add_default_cols?(cols=nil)
       default_cols = DefaultRetSqlCols
       if cols
-        [cols + default_cols].uniq
+        (cols + default_cols).uniq
       else
         default_cols
       end

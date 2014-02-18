@@ -391,7 +391,7 @@ module DTK
 
     def get_all(project_idh,cols=nil)
       sp_hash = {
-        :cols => cols || [:id,:group_id,:isplay_name],
+        :cols => add_default_cols?(cols),
         :filter => [:eq, :project_project_id, project_idh.get_id()]
       }
       mh = project_idh.createMH(model_type())
@@ -406,8 +406,8 @@ module DTK
         if opts[:include_remotes]
           augment_with_remotes_info!(branch_module_rows,module_mh)
         end
-        
-        #there can be dupliactes for a module when multiple repos; in which case will agree on all fields
+        # if there is an external_ref[:sorce], use that otherwise look for remote dtkn
+        #there can be duplictes for a module when multiple repos; in which case will agree on all fields
         #except :repo, :module_branch, and :repo_remotes
         #index by module
         ndx_ret = Hash.new
@@ -476,7 +476,7 @@ module DTK
         branch_module_rows
       end
 
-      def self.ret_linked_remotes_print_form(repo_remotes)
+      def self.ret_linked_remotes_print_form(repo_remotes,opts={})
         if repo_remotes.size == 1
           repo_remotes.first.print_form()
         else

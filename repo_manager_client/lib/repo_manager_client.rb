@@ -10,12 +10,12 @@ module DTK
   end
   class RepoManagerClient
     def initialize(rest_base_url_or_host)
-      if rest_base_url_or_host =~ /^http:/
+      if rest_base_url_or_host =~ /^https?:/
         #input is rest_base_url
         @rest_base_url = rest_base_url_or_host
-        if @rest_base_url =~ Regexp.new("^http://(.+):[0-9]+$")
+        if @rest_base_url =~ Regexp.new("^https?://(.+):[0-9]+$")
           @host = $1
-        elsif @rest_base_url =~ Regexp.new("^http://(.+)$")
+        elsif @rest_base_url =~ Regexp.new("^https?://(.+)$")
           @host = $1
         end
       else

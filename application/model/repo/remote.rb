@@ -304,7 +304,9 @@ module DTK
         #TODO: change config so that it has ability to have multiple repos and use form like
         #remote = ::R8::Config[:repo][:remote][remote_repo]
         remote = ::R8::Config[:repo][:remote]
-        "http://#{remote[:host]}:#{remote[:rest_port].to_s}"
+        is_ssl = remote[:rest_port].to_i == 443
+
+        "http#{is_ssl ? 's' : ''}://#{remote[:host]}:#{remote[:rest_port].to_s}"
       end
 
      private

@@ -9,6 +9,7 @@ module DTK
       end
 
       def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
+        ret = Array.new
         target_mh = project_idh.createMH(:target) 
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
@@ -25,6 +26,26 @@ module DTK
           #need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end
+        #check if there are any of these that are created already
+        disjunct_array = create_rows.map do |r|
+          [:and [:eq, :parent_id, r[:parent_id]], 
+           [:eq, :display_name, r[:display_name]]]
+        end
+        sp_hash = {
+          :cols => [:id,:display_name,:parent_d],
+          :filter => [:or,disjunct_array]
+        }
+        existing_targets = get_these_objs(target_mh,sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:id] => r)
+        end
+        unless existing_targets.empty?
+          if[:raise_error_if_exists]
+          else
+            create_rows.reject!{|r|existing_targets.find()}
+          end
+        end
+
+        return ret if create_rows.empty?
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end

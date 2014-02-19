@@ -31,7 +31,7 @@ shared_context "Import remote service" do |dtk_common, service_name|
   it "imports #{service_name} service from remote repo" do
     puts "Import remote service:", "---------------------"
     pass = false
-    value = `dtk service-module import-dtkn #{service_name} -y`
+    value = `dtk service-module install #{service_name} -y`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client"))
     puts "Import of remote service #{service_name} completed successfully!" if pass == true
@@ -45,7 +45,7 @@ shared_context "NEG - Import remote service" do |dtk_common, service_name|
   it "will not import #{service_name} service from remote repo since there are referenced modules on local filesystem which are not deleted" do
     puts "NEG - Import remote service:", "----------------------------"
     pass = false
-    value = `dtk service-module import-dtkn #{service_name}`
+    value = `dtk service-module install #{service_name}`
     puts value
     pass = true if (value.include? "exists on client")
     puts "Import of remote service #{service_name} did not complete successfully because of the referenced module that exists on local filesystem!" if pass == true
@@ -123,7 +123,7 @@ shared_context "Export service" do |dtk_common, service_name, namespace|
   it "exports #{service_name} service to #{namespace} namespace on remote repo" do
     puts "Export service to remote:", "-------------------------"
     pass = false
-    value = `dtk service-module #{service_name} create-on-dtkn #{namespace}/#{service_name}`
+    value = `dtk service-module #{service_name} publish #{namespace}/#{service_name}`
     #temp solution for bug that happens when calling repo manager for the first time. try request again
     if value.include? "Repo Manager refused the connection"
       value = `dtk service #{service_name} create-on-dtkn #{namespace}/#{service_name}`
@@ -168,7 +168,7 @@ shared_context "Delete service from remote repo" do |dtk_common, service_name, n
   it "deletes #{service_name} service with #{namespace} namespace from remote repo" do
     puts "Delete service from remote (dtkn):", "-------------------------------------"
     pass = false
-    value = `dtk service-module delete-from-dtkn #{namespace}/#{service_name} -y`
+    value = `dtk service-module delete-from-catalog #{namespace}/#{service_name} -y`
     pass = true if (!value.include?("error") || !value.include?("cannot remove"))
     puts "Service #{service_name} deleted from remote (dtkn) successfully!" if pass == true
     puts "Service #{service_name} was not deleted from remote (dtkn) successfully!" if pass == false

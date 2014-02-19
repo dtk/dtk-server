@@ -286,7 +286,7 @@ module DTK
       # example: 
       #returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
-        raise ErrorUsage.new("Please provide module name to export") unless qualified_name
+        raise ErrorUsage.new("Please provide module name to publish") unless qualified_name
 
         split = qualified_name.split("/")
         case split.size

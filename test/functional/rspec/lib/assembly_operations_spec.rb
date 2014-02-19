@@ -26,7 +26,7 @@ shared_context "NEG - Rename assembly to existing name" do |dtk_common, assembly
     pass = false
     value = `dtk service rename #{assembly_name} #{new_assembly_name}`
     puts value
-    pass = true if value.include? "[ERROR] Assembly with name '#{new_assembly_name}' exists already."
+    pass = true if value.include? "[ERROR] Service with name '#{new_assembly_name}' exists already."
     puts "Rename did not passed successfully which is expected!" if pass == true
     puts "Rename passed successfully!" if pass == false
     puts ""
@@ -40,7 +40,7 @@ shared_context "NEG - Rename assembly to workspace name" do |dtk_common, assembl
     pass = false
     value = `dtk service rename #{assembly_name} workspace`
     puts value
-    pass = true if value.include? "[ERROR] You are not allowed to use keyword 'workspace' as assembly name."
+    pass = true if value.include? "[ERROR] You are not allowed to use keyword 'workspace' as service name."
     puts "Rename did not passed successfully which is expected!" if pass == true
     puts "Rename passed successfully!" if pass == false
     puts ""

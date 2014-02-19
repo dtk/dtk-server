@@ -214,14 +214,12 @@
     "order": [
       "id",
       "name",
-      "version(s)",
       "linked_remote(s)",
       "is_equal"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
-      "version(s)": "versions",
       "linked_remote(s)": "linked_remotes",
       "is_equal": "is_equal"
     }
@@ -229,7 +227,6 @@
   "module_remote": {
     "order": [
       "name",
-      "version(s)",
       "last_updated"
     ],
     "mapping": {

@@ -91,16 +91,6 @@
       "satisfied_by": "satisfied_by"  
     }
   },
-  "component_remote": {
-    "order": [
-      "name",
-      "version"
-    ],
-    "mapping": {
-      "name": "display_name",
-      "version": "version"
-    }
-  },
   "attribute": {
     "order": [
       "id",
@@ -157,20 +147,6 @@
       "linked_to": "linked_to_display_form"
     }
   },
-  "attribute_w_version": {
-    "order": [
-      "id",
-      "path",
-      "value",
-      "version"
-    ],
-    "mapping": {
-      "path": "display_name",
-      "id": "dtk_id",
-      "value": "value",
-      "version": "version"
-    }
-  },
   "account_ssh_keys": {
     "order": [
       "id",
@@ -199,7 +175,6 @@
     "order": [
       "id",
       "name",
-      "version",
       "local copy",
       "local copy diverged"
     ],
@@ -231,7 +206,6 @@
     ],
     "mapping": {
       "name": "display_name",
-      "version(s)": "versions",
       "last_updated": "last_updated"
     }
   },
@@ -243,16 +217,6 @@
     "mapping": {
       "library_name": "display_name",
       "id": "dtk_id"
-    }
-  },
-  "remote_module": {
-    "order": [
-      "name",
-      "version"
-    ],
-    "mapping": {
-      "name": "display_name",
-      "version": "version"
     }
   },
   "task": {

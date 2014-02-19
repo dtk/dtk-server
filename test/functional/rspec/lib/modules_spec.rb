@@ -10,7 +10,7 @@ shared_context "Import remote module" do |module_name|
   it "imports #{module_name} module from remote repo" do
     puts "Import remote module:", "---------------------"
     pass = false
-    value = `dtk component-module import-dtkn #{module_name}`
+    value = `dtk component-module install #{module_name}`
     puts value
     pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client") || (!value.include? "denied"))
     puts "Import of remote module #{module_name} completed successfully!" if pass == true
@@ -132,10 +132,10 @@ shared_context "Export module" do |dtk_common, module_name, namespace|
   it "exports #{module_name} module to #{namespace} namespace on remote repo" do
     puts "Export module:", "--------------"
     pass = false
-    value = `dtk component-module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
+    value = `dtk component-module #{module_name} publish #{namespace}/#{module_name}`
     #temp solution for bug that happens when calling repo manager for the first time. try request again
     if value.include? "Repo Manager refused the connection"
-      value = `dtk module #{module_name} create-on-dtkn #{namespace}/#{module_name}`
+      value = `dtk module #{module_name} publish #{namespace}/#{module_name}`
     end
     puts value
     pass = true if (!value.include? "ERROR")
@@ -307,7 +307,7 @@ shared_context "Delete module from remote repo" do |dtk_common, module_name, nam
   it "deletes #{module_name} module with #{namespace} namespace from remote repo" do
     puts "Delete module from remote:", "--------------------------"
     pass = false
-    value = `dtk component-module delete-from-dtkn #{namespace}/#{module_name} -y`
+    value = `dtk component-module delete-from-catalog #{namespace}/#{module_name} -y`
     pass = !value.include?("error")
     puts "Module #{module_name} deleted from dtkn (remote) successfully!" if pass == true
     puts "Module #{module_name} was not deleted from dtkn (remote) successfully!" if pass == false
@@ -348,7 +348,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts "Push clone changes to server:", "-----------------------------"
     pass = false
-    value = `dtk component-module #{module_name} push`
+    value = `dtk component-module #{module_name} push origin`
     puts value
     pass = value.include?("Status: OK")
     puts "Clone changes pushed to server successfully!" if pass == true

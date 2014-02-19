@@ -86,7 +86,6 @@ class DtkCommon
 		resource = RestClient::Resource.new(@ENDPOINT + path, $opts)
 		response = resource.post(body)
 		response_JSON = JSON.parse(response)
-		pretty_print_JSON(response_JSON)
 
 		#If response contains errors, accumulate all errors to error_message
 		unless response_JSON["errors"].nil? 

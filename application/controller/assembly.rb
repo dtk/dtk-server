@@ -375,7 +375,8 @@ module DTK
       assembly_node_name = ret_non_null_request_params(:assembly_node_name)
       node_binding_rs = node_binding_ruleset?(:node_template_identifier)
       node_instance_idh = assembly.add_node(assembly_node_name,node_binding_rs)
-      rest_ok_response :node_id => node_instance_idh.get_id()
+
+      rest_ok_response node_instance_idh
     end
 
     def rest__add_component()

@@ -170,7 +170,7 @@ module XYZ
         r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
         Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
        rescue LoadError => e
-        raise e
+        raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported!")
        rescue Exception => e
         raise e
       end

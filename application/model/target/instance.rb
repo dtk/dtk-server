@@ -26,7 +26,8 @@ module DTK
           #need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end
-        #check if there are any of these that are created already
+
+        #check if there are any matching target instances that are created already
         disjunct_array = create_rows.map do |r|
           [:and [:eq, :parent_id, r[:parent_id]], 
            [:eq, :display_name, r[:display_name]]]
@@ -40,8 +41,14 @@ module DTK
         end
         unless existing_targets.empty?
           if[:raise_error_if_exists]
+            existing_names = existing_targets.map{|et|et[:display_name]}.join(',')
+            raise ErrorUsage.new("The #{pp_object_type(:pos)} exist already (#{existing_names})")
           else
-            create_rows.reject!{|r|existing_targets.find()}
+            create_rows.reject! do |r|
+              parent_id = r[:parent_id]
+              name = r[:display_name]
+              existing_targets.find{|et|et[:parent_id] == parent_id and et[:display_name] == name}
+            end
           end
         end
 

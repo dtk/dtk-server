@@ -23,12 +23,11 @@ module DTK
 
     #create target instance
     def rest__create()
-      target_name,region = ret_non_null_request_params(:target_name,:region)
       provider  = create_obj(:provider_id, ::DTK::Target::Template)
-
-      # we extract needed values
-      params_hash = extract_hash(provider,:description,:iaas_type,:iaas_properties)
-      Target::Instance.create_target(project_idh, provider, target_name, region)
+      region = ret_non_null_request_params(:region)
+      opts = ret_params_hash(:target_name)
+      project_idh  = get_default_project().id_handle()
+      Target::Instance.create_target(project_idh, provider, region, opts)
       rest_ok_response #TODO: may return info about objects created
     end
 

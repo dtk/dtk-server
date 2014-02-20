@@ -58,7 +58,7 @@ module DTK
         
         common_iaas_properties = get_field?(:iaas_properties)
         iaas_properties_list = regions.map do |region|
-          name = "#{base_name()}-#{region}"
+          name = default_target_name(:region => region)
           properties = common_iaas_properties.merge(:region => region)
           IAASProperties.new(name,properties)
         end
@@ -82,6 +82,14 @@ module DTK
         Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
       end
 
+      #TODO: move to be processed by IAAS specfic
+      def default_target_name(hash_params)
+        if Aux.has_just_these_keys?(hash_params,[:region])
+          "#{base_name()}-#{hash_params[:region]}"
+        else
+          raise Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+        end
+      end
      private
       def base_name()
         get_field?(:display_name).gsub(Regexp.new("#{DisplayNameSufix}$"),'')

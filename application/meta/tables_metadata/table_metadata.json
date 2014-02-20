@@ -268,18 +268,16 @@
     "order": [
       "id",
       "assembly_name",
-      "status",
-      "nodes",
-      "assembly_template",
-      "created_at",
       "op_status",
-      "components",
-      "target"
+      "assembly_template",
+      "target",
+      "# nodes",
+      "# cmps",
+      "created_at"
     ],
     "mapping": {
-      "components": "nodes.map{|r|r['components']||[]}.flatten.size",
-      "nodes": "nodes.size",
-      "status": "execution_status",
+      "# cmps": "nodes.map{|r|r['components']||[]}.flatten.size",
+      "# nodes": "nodes.size",
       "assembly_name": "display_name",
       "created_at": "created_at.get_date",
       "id": "dtk_id",

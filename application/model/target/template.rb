@@ -42,8 +42,16 @@ module DTK
         unless assembly_instances.empty?
           assembly_names = assembly_instances.map{|a|a[:display_name]}.join(',')
           provider_name = provider.get_field?(:display_name)
-          raise ErrorUsage.new("Cannot delete provide #{provider_name} because service instance(s) (#{assembly_names}) are using one of its targets") 
+          raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because service instance(s) (#{assembly_names}) are using one of its targets") 
         end
+        
+        target_instances = provider.get_target_instances(:cols => [:display_name,:is_default_target])
+        if default_target = target_instances.find{|t|t[:is_default_target]}
+          provider_name = provider.get_field?(:display_name)
+          default_target_name = default_target[:display_name]
+          raise ErrorUsage.new("Cannot delete provider '#{provider_name}' because it contains the default target (#{default_target_name})")
+        end 
+
         delete_instance(provider.id_handle())
       end
 

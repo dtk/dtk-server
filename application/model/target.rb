@@ -161,11 +161,10 @@ module DTK
       if parent_id = self[:parent_id]
         parent_provider = id_handle(:id => parent_id).create_object(:model_name => :target_instance)
         if parent_iaas_properties = parent_provider.get_field?(:iaas_properties)
-          #specfic properties take precedence over the parent's
+          #specific properties take precedence over the parent's
           iaas_properties = parent_iaas_properties.merge(iaas_properties||{})
         end
       end
-      pp [:iaas_properties,{:target=> self,:provider => parent_provider}]
       iaas_properties
     end
 

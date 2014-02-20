@@ -14,12 +14,5 @@ module Ramaze::Helper
       end
       iaas_type
     end
-
-    def extract_hash(original_hash, *params)
-      params.inject(Hash.new) do |h,p|
-        val = original_hash[p.to_sym]
-        (val ? h.merge(p.to_sym => val) : h)
-      end
-    end
   end
 end

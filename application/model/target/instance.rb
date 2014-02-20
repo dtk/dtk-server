@@ -1,14 +1,17 @@
 module DTK
   class Target
     class Instance < self
-      subclass_model :target_instance, :target, :print_form => 'template'
+      subclass_model :target_instance, :target, :print_form => 'target'
 
-      def self.create_target(project_idh,provider,region,params_hash)
-        raise Error.new("Rewrite to use IAASProperties")
-        create_targets?(project_idh,provider,[region],params_hash,:raise_error_if_exists=>true).first
+      def self.create_target(project_idh,provider,region,opts={})
+        properties = provider.get_field?(:iaas_properties).merge(:region => region)
+        target_name = opts[:target_name]|| provider.default_target_name(:region => region)
+        iaas_properties = IAASProperties.new(target_name,properties)
+        create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
       end
 
       def self.create_targets?(project_idh,provider,iaas_properties_list,opts={})
+        ret = Array.new
         target_mh = project_idh.createMH(:target) 
         provider.update_obj!(*InheritedProperties)
         provider_id = provider.id
@@ -25,6 +28,32 @@ module DTK
           #need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end
+
+        #check if there are any matching target instances that are created already
+        disjunct_array = create_rows.map do |r|
+          [:and, [:eq, :parent_id, r[:parent_id]], 
+           [:eq, :display_name, r[:display_name]]]
+        end
+        sp_hash = {
+          :cols => [:id,:display_name,:parent_id],
+          :filter => [:or] + disjunct_array
+        }
+        existing_targets = get_these_objs(target_mh,sp_hash)
+        unless existing_targets.empty?
+          if opts[:raise_error_if_exists]
+            existing_names = existing_targets.map{|et|et[:display_name]}.join(',')
+            obj_type = pp_object_type(existing_targets.size)
+            raise ErrorUsage.new("The #{obj_type} (#{existing_names}) exist(s) already")
+          else
+            create_rows.reject! do |r|
+              parent_id = r[:parent_id]
+              name = r[:display_name]
+              existing_targets.find{|et|et[:parent_id] == parent_id and et[:display_name] == name}
+            end
+          end
+        end
+
+        return ret if create_rows.empty?
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
@@ -47,8 +76,8 @@ module DTK
           :cols => [:id, :display_name, :iaas_type, :type, :parent_id, :provider, :is_default_target],
           :filter => filter
         }
-        ret = get_these_objs(target_mh, sp_hash)
-        ret.each do |t|
+        unsorted_rows = get_these_objs(target_mh, sp_hash)
+        unsorted_rows.each do |t|
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
           end
@@ -56,7 +85,11 @@ module DTK
             t[:display_name] << DefaultTargetMark
           end
         end
-        ret
+        #sort by 1-whether default, 2-iaas_type, 3-display_name 
+        unsorted_rows.sort do |a,b|
+          [a[:is_default_target] ? 0 : 1, a[:iaas_type], a[:display_name]] <=>
+          [b[:is_default_target] ? 0 : 1, b[:iaas_type], b[:display_name]]
+        end
       end
 
       DefaultTargetMark = '*'      
@@ -66,8 +99,9 @@ module DTK
       end
 
      private
+      #TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'
       def self.object_type_filter()
-        [:eq,:type,'instance']
+        [:neq,:type,'template']
       end
 
       def self.display_name_from_provider_and_region(provider,region)

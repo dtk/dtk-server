@@ -348,7 +348,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts "Push clone changes to server:", "-----------------------------"
     pass = false
-    value = `dtk component-module #{module_name} push origin`
+    value = `dtk component-module #{module_name} push`
     puts value
     pass = value.include?("Status: OK")
     puts "Clone changes pushed to server successfully!" if pass == true

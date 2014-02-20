@@ -67,11 +67,18 @@ module DTK
       rest_ok_response
     end
 
+    def rest__set_default()
+      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      Target.set_default_target(target_instance)
+      rest_ok_response
+    end
+
     def rest__info_about()
       target = create_obj(:target_id)
       about = ret_non_null_request_params(:about).to_sym
       rest_ok_response target.info_about(about)
     end
+
 
     def get_ports(id)
       target = create_object_from_id(id)

@@ -99,8 +99,9 @@ module DTK
       end
 
      private
+      #TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'
       def self.object_type_filter()
-        [:eq,:type,'instance']
+        [:neq,:type,'template']
       end
 
       def self.display_name_from_provider_and_region(provider,region)

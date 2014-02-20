@@ -189,6 +189,7 @@ R8::ReactorRoute.draw do
   post  'target/list' => 'target#list'
   post  'target/create' => 'target#create'
   post  'target/create_provider' => 'target#create_provider'
+  post  'target/set_default' => 'target#set_default'
   post  'target/info_about' => 'target#info_about'
   post  'target/delete_provider' => 'target#delete_provider'
   

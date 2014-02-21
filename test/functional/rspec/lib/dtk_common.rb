@@ -1411,20 +1411,6 @@ class DtkCommon
 		return node_deleted
 	end
 
-	def create_node(assembly_id, node_name, node_template)
-		puts "Create node:","------------"
-		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>assembly_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
-		if create_node_response['status'].include? "ok"
-			puts "Node #{node_name} has been created successfully!"
-			puts ""
-			return create_node_response['data']['node_id']
-		else
-			puts "Node #{node_name} has not been created successfully!"
-			puts ""
-			return nil
-		end
-	end
-
 	def add_component_to_node(node_id, component_name)
 		puts "Add component to node:", "----------------------"
 		component_added = false
@@ -1710,7 +1696,7 @@ class DtkCommon
 		if create_node_response['status'].include? "ok"
 			puts "Node #{node_name} has been created successfully!"
 			puts ""
-			return create_node_response['data']['node_id']
+			return create_node_response['data']['guid']
 		else
 			puts "Node #{node_name} has not been created successfully!"
 			puts ""

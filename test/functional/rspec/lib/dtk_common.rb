@@ -13,7 +13,7 @@ class DtkCommon
 	$success == true
 	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
 	attr_accessor :assembly_name, :assembly_id, :assembly_template, :node_id, :success, :error_message, :server_log
-	attr_accessor :component_module_id_list, :component_module_name_list
+	attr_accessor :component_module_id_list
 
 	$opts = {
 		:timeout => 100,
@@ -22,7 +22,7 @@ class DtkCommon
 	}
 
 	def initialize(assembly_name, assembly_template)
-		config_yml = YAML::load(File.open("./config/config.yml"))		
+		config_yml = YAML::load(File.open("../config/config.yml"))		
 
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template
@@ -842,12 +842,10 @@ class DtkCommon
 
 			module_components_list['data'].each do |x|
 				if (filter_version != "")
-					#@component_module_id_list << x['id'] if x['version'] == filter_version
-					@component_module_name_list << x['display_name'] if x['version'] == filter_version
+					@component_module_id_list << x['id'] if x['version'] == filter_version
 					puts "module component: #{x['display_name']}"
 				else
-					#@component_module_id_list << x['id'] if x['version'] == nil
-					@component_module_name_list << x['display_name'] if x['version'] == nil
+					@component_module_id_list << x['id'] if x['version'] == nil
 					puts "module component: #{x['display_name']}"
 				end
 			end
@@ -1703,7 +1701,7 @@ class DtkCommon
 		return node_exists
 	end
 
-	def add_component_to_assembly_node(assembly_id, node_name, component_name)
+	def add_component_to_assembly_node(assembly_id, node_name, component_id)
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
@@ -1712,11 +1710,17 @@ class DtkCommon
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
-		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_name})
+		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_id})
 
 		if (component_add_response['status'] == 'ok')
-			puts "Component #{component_name} has been added to assembly node!"
-			component_added = true
+			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :about=>'components', :subtype=>'instance'})
+			component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}
+			if !component.empty?
+				puts "Component #{component.first['display_name']} has been added to assembly node!"
+				component_added = true
+			else
+				puts "Component has not been added to assembly node!"
+			end
 		end
 		puts ""
 		return component_added

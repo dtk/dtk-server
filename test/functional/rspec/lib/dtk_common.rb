@@ -22,7 +22,7 @@ class DtkCommon
 	}
 
 	def initialize(assembly_name, assembly_template)
-		config_yml = YAML::load(File.open("../config/config.yml"))		
+		config_yml = YAML::load(File.open("./config/config.yml"))		
 
 		@assembly_name = assembly_name
 		@assembly_template = assembly_template

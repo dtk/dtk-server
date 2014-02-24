@@ -52,8 +52,8 @@ shared_context "Add component to assembly node" do |dtk_common, node_name|
   it "adds a component/s to #{node_name} node" do
     component_added_array = Array.new()
     pass = false
-    dtk_common.component_module_id_list.each do |component_id|
-      component_added_array << dtk_common.add_component_to_assembly_node(dtk_common.assembly_id, node_name, component_id)
+    dtk_common.component_module_name_list.each do |component_name|
+      component_added_array << dtk_common.add_component_to_assembly_node(dtk_common.assembly_id, node_name, component_name)
     end
     #Check if component_added_array contains any element with false value. 
     #That would indicate that particular component was not added successfully to the assembly node.

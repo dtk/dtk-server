@@ -10,7 +10,6 @@ STDOUT.sync = true
 
 class DtkCommon
 
-	$success == true
 	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
 	attr_accessor :assembly_name, :assembly_id, :assembly_template, :node_id, :success, :error_message, :server_log
 	attr_accessor :component_module_id_list

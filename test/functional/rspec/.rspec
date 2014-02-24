@@ -1,5 +1,5 @@
-//--format Rspec2db
+--format Rspec2db
 --options TEST
-//--options ./config/rspec2db.yml
+--options ./config/rspec2db.yml
 --options LOCAL
 --color

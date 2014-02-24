@@ -21,7 +21,6 @@ dependency_satisfied_by = ['sink/unit_test::sink']
 value_to_match_1 = 'nil'
 value_to_match_2 = 'ec2'
 attribute_name = 'upstream'
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

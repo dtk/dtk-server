@@ -11,7 +11,8 @@ STDOUT.sync = true
 class DtkCommon
 
 	$success == true
-	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success, :error_message, :server_log
+	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
+	attr_accessor :assembly_name, :assembly_id, :assembly_template, :node_id, :success, :error_message, :server_log
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -141,8 +142,8 @@ class DtkCommon
 			if (stage_assembly_response['data'].include? "name: #{@assembly_name}")
 				puts "Stage of #{@assembly_template} assembly template completed successfully!"
 				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
-				assembly_id = assembly_id_match[1]
-				puts "Assembly id for a staged assembly: #{assembly_id}"
+				self.assembly_id = assembly_id_match[1].to_i
+				puts "Assembly id for a staged assembly: #{self.assembly_id}"
 			else
 				puts "Stage assembly didnt pass!"
 			end
@@ -150,7 +151,6 @@ class DtkCommon
 			puts "Assembly template #{@assembly_template} not found!"
 		end
 		puts ""
-		return assembly_id.to_i
 	end
 
 	def rename_assembly(assembly_id, new_assembly_name)
@@ -1315,8 +1315,8 @@ class DtkCommon
 
 			if (stage_node_response['data']['node_id'])
 				puts "Stage of #{node_name} node template completed successfully!"
-				node_id = stage_node_response['data']['node_id']
-				puts "Node id for a staged node template: #{node_id}"
+				self.node_id = stage_node_response['data']['node_id']
+				puts "Node id for a staged node template: #{self.node_id}"
 			else
 				puts "Stage node didnt pass!"
 			end
@@ -1324,7 +1324,6 @@ class DtkCommon
 			puts "Node template #{node_name} not found!"
 		end
 		puts ""
-		return node_id
 	end
 
 	def check_if_node_exists(node_id)

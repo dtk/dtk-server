@@ -15,7 +15,6 @@ assembly_name = 'dnt_test_case_2_instance'
 assembly_template = 'bakir_test::redhat_bigtop_namenode'
 namenode_port = 8020
 namenode_web_port = 50070
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

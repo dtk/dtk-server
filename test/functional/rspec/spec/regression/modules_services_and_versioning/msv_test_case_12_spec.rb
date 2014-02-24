@@ -19,7 +19,6 @@ module_filesystem_location = '~/dtk/component_modules'
 service_filesystem_location = '~/dtk/service_modules'
 module_namespace = "dtk17"
 module_name = "test"
-$assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
 

@@ -16,7 +16,6 @@ staged_node_name = 'dnt_test_case_5_instance'
 component_name = 'rsync'
 
 dtk_common = DtkCommon.new('', '')
-$node_id = 0
 
 describe "(Different Node Templates) Test Case 5: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats and list-task-info" do
 

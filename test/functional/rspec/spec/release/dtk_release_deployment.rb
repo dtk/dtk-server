@@ -15,28 +15,29 @@ assembly_template = 'dtk::release'
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 config = YAML::load(File.open("./config/release.yml"))
 
-assembly_id = dtk_common.stage_assembly
+#Stage assembly
+dtk_common.stage_assembly
 
 begin
-	if dtk_common.check_if_assembly_exists(assembly_id)
+	if dtk_common.check_if_assembly_exists(dtk_common.assembly_id)
 		#Set attributes for assembly template
 		set_attributes_array = []
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'repo_manager/common_user/user', "git")
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'repo_manager/gitolite/gitolite_user', "git")
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_addons::jenkins_swarm_client/password', config['properties']['jenkins_password'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
-	    set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/common_user/user', "git")
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/gitolite/gitolite_user', "git")
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::jenkins_swarm_client/password', config['properties']['jenkins_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
+	    set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
 
 		#Set tags that will be used to checkout correct versions of DTK artifacts for this release
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['repo_manager_release'])
-		set_attributes_array << dtk_common.set_attribute(assembly_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['server_release'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['repo_manager_release'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['server_release'])
 
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false
-	  		assembly_converged = dtk_common.converge_assembly(assembly_id, 70)
+	  		assembly_converged = dtk_common.converge_assembly(dtk_common.assembly_id, 70)
 	  		if assembly_converged == true
 	    		puts "#{assembly_template} assembly deployed!"
 	  		else

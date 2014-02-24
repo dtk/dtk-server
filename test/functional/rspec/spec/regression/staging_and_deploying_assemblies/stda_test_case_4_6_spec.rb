@@ -16,7 +16,6 @@ assembly_name_1 = 'stda_test_case_4_instance'
 assembly_name_1_rename = 'stda_test_case_4_instance_rename'
 assembly_template = 'bootstrap::test1'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name_1, assembly_template)
 
 describe "(Staging And Deploying Assemblies) Test Case 4 6: Renaming assembly and renaming it to workspace" do

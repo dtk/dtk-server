@@ -20,7 +20,6 @@ module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_6_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

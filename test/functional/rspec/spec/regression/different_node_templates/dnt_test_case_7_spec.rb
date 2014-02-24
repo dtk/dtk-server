@@ -12,7 +12,6 @@ require './lib/assembly_operations_spec'
 
 STDOUT.sync = true
 
-$assembly_id = 0
 assembly_name = 'dnt_test_case_7_instance'
 assembly_template = 'mongodb_test::mongo_master_slave'
 mongodb_instance_port = 27017
@@ -153,16 +152,20 @@ describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenari
 
 	context "Connect to MongoDB master instance and add new document to collection" do
 		it "connects to MongoDB master instance and adds document to #{collection_name} collection" do
+			puts "Connect to MongoDB master and add new document", "----------------------------------------------"
 			mongodb_host = get_node_ec2_public_dns(assembly_name, node_name_1)
 			document_added = add_document_to_collection(mongodb_host, mongodb_instance_port, database_name, collection_name, document)
+			puts ""
 			document_added.should eq(true)
 		end
 	end
 
 	context "Connect to MongoDB slave instance and check if collection is replicated" do
 		it "connects to MongoDB slave instance and verifies that #{collection_name} collection is replicated" do
+			puts "Connect to MongoDB slave and check replication", "----------------------------------------------"
 			mongodb_host = get_node_ec2_public_dns(assembly_name, node_name_2)
 			collection_replicated = get_collection(mongodb_host, mongodb_instance_port, database_name, collection_name)
+			puts ""
 			collection_replicated.should eq(true)
 		end
 	end

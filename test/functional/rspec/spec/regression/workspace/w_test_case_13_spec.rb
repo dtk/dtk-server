@@ -28,7 +28,7 @@ def converge_assembly_and_cancel_tasks(workspace_id)
 	puts "Task id: #{task_id}"
 	task_execute_response = dtk_common.send_request('/rest/task/execute', {:task_id => task_id})
 
-	sleep 10
+	sleep 20
 
 	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', {:task_id => task_id})
 	task_status_response = dtk_common.send_request('/rest/task/status', {:task_id=> task_id})
@@ -62,8 +62,10 @@ describe "(Workspace) Test Case 13: Create one node, add component in it, conver
 
 	context "Converge and cancel workspace" do
 		it "converges and then cancel workspace execution" do
+			puts "Converge and cancel task in workspace", "-------------------------------------"
 			workspace_id = dtk_common.get_workspace_id
 			task_cancel = converge_assembly_and_cancel_tasks(workspace_id)
+			puts ""
 			task_cancel.should eq(true)
 		end
 	end

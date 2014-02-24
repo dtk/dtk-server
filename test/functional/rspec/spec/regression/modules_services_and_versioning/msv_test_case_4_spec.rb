@@ -15,7 +15,6 @@ assembly_template = 'bootstrap::test1'
 new_assembly_template = 'msv_test_case_4_temp'
 service_filesystem_location = '~/dtk/service_modules'
 service_name = 'new_service'
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

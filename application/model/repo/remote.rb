@@ -149,6 +149,10 @@ module DTK
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
+      def create_client_user(client_rsa_pub_key)
+        client.create_client_user(client_rsa_pub_key)\
+      end
+
       def create_module(name, type, namespace = nil, client_rsa_pub_key = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
@@ -278,6 +282,7 @@ module DTK
       def self.default_namespace()
         self.default_user_namespace()
       end
+      
       DefaultsNamespace = "r8" #TODO: have this obtained from config file
 
       # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default

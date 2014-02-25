@@ -11,6 +11,7 @@ R8::ReactorRoute.draw do
   # ACCOUNT
   post  'account/set_password' => 'account#set_password'
   post  'account/list_ssh_keys' => 'account#list_ssh_keys'
+  post  'account/add_user_direct_access' => 'account#add_user_direct_access'
 
    # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'
@@ -92,8 +93,6 @@ R8::ReactorRoute.draw do
   post  'component_module/get_workspace_branch_info' => 'component_module#get_workspace_branch_info'
   post  'component_module/update_from_initial_create' => 'component_module#update_from_initial_create'
   post  'component_module/list' => 'component_module#list'
-  post  'component_module/add_user_direct_access' => 'component_module#add_user_direct_access'
-
 
    # DEPENDENCY
   post  'dependency/add_component_dependency' => 'dependency#add_component_dependency'
@@ -177,7 +176,6 @@ R8::ReactorRoute.draw do
   post  'service_module/get_remote_module_info' => 'service_module#get_remote_module_info'
   post  'service_module/get_workspace_branch_info' => 'service_module#get_workspace_branch_info'
   post  'service_module/info' => 'service_module#info'
-  post  'service_module/add_user_direct_access' => 'service_module#add_user_direct_access'
   post  'service_module/pull_from_remote' => 'service_module#pull_from_remote'
 
   # get   'service_module/workspace_branch_info/#{service_module_id.to_s}' => 'service_module#workspace_branch_info/#{service_module_id.to_s}'

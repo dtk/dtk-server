@@ -20,7 +20,6 @@ memory_size_attribute = 'memory_size'
 OS_Memory = Struct.new(:os, :memory)
 os_memory_array = [OS_Memory.new("precise","t1.micro"),OS_Memory.new("centos6.4","t1.micro")]
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Different Node Templates) Test Case 1: Stage existing assembly with OS and MEMORY_SIZE combination and then converge it" do

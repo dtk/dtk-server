@@ -16,7 +16,6 @@ module_namespace = "r8"
 namespace = "dtk17"
 module_name = "bakir_test1"
 module_filesystem_location = "~/dtk/component_modules"
-$assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
 
@@ -43,11 +42,13 @@ describe "(Modules, Services and Versioning) Test Case 10: Export module using f
 
   context "Create new directory called #{module_name} and copy the content of #{existing_module_name} in it" do
     it "creates new directory with existing module content in it" do
+      puts "Create new directory and copy the content of existing module", "------------------------------------------------------------"
       pass = false
       `mkdir #{module_filesystem_location}/#{module_name}`
       `cp -r #{module_filesystem_location}/#{existing_module_name}/* #{module_filesystem_location}/#{module_name}/`
       value = `ls #{module_filesystem_location}/#{module_name}/manifests`
       pass = !value.include?("No such file or directory")
+      puts ""
       pass.should eq(true)
     end
   end

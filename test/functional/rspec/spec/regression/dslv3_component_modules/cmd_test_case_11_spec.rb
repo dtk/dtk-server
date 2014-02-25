@@ -13,6 +13,8 @@ module_namespace = 'dtk17'
 module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_11_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
+fail_message = "missing components section"
+expected_error_message = "error"
 dtk_common = DtkCommon.new('', '')
 
 describe "(Component Module DSL) Test Case 11: NEG - Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server" do
@@ -41,13 +43,7 @@ describe "(Component Module DSL) Test Case 11: NEG - Ill-formed yaml content (co
   end
 
   context "Push clone changes of module from local copy to server" do
-    it "pushes module changes from local filesystem to server but fails because of missing components section" do
-      fail = false
-      value = `dtk component-module #{module_name} push`
-      puts value
-      fail = value.include?("error")
-      fail.should eq(true)  
-    end
+    include_context "NEG - Push clone changes to server", module_name, fail_message, expected_error_message
   end
 
   context "Delete module" do

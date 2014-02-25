@@ -16,7 +16,6 @@ module_namespace = 'r8'
 module_name = 'apache'
 service_filesystem_location = '~/dtk/service_modules'
 module_filesystem_location = '~/dtk/component_modules'
-$assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
 

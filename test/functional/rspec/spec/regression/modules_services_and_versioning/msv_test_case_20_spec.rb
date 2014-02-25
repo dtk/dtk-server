@@ -14,7 +14,6 @@ assembly_template1 = 'test_apache'
 service_name = 'bakir_test_apache'
 service_namespace = 'r8'
 service_filesystem_location = '~/dtk/service_modules'
-$assembly_id = 0
 
 dtk_common = DtkCommon.new('', '')
 

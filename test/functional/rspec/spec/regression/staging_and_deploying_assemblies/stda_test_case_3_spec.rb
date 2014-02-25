@@ -19,7 +19,6 @@ os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly template (stage and converge), stop the running instance (nodes) and then delete assembly" do

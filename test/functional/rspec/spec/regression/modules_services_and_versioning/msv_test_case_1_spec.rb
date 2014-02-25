@@ -19,7 +19,6 @@ node_name = 'node1'
 module_name = "test"
 module_namespace = "dtk17"
 module_filesystem_location = "~/dtk/component_modules"
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

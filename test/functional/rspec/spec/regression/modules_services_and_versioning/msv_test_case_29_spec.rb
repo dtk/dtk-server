@@ -16,7 +16,7 @@ git_ssh_repo_url_1 = "git@github.com:maestrodev/puppet-wget.git"
 module_name_2 = "maven"
 git_ssh_repo_url_2 = "git@github.com:maestrodev/puppet-maven.git"
 module_filesystem_location = "~/dtk/component_modules"
-$assembly_id = 0
+
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 29: Import module A and then module B when module B has dependency on module A" do

@@ -15,7 +15,7 @@ dependency_module = "maestrodev/wget"
 module_name = "maven"
 git_ssh_repo_url = "git@github.com:maestrodev/puppet-maven.git"
 module_filesystem_location = "~/dtk/component_modules"
-$assembly_id = 0
+
 dtk_common = DtkCommon.new('', '')
 
 describe "(Modules, Services and Versioning) Test Case 30: NEG - Import Module A from git which has dependency on Module B that does not exist on server yet" do

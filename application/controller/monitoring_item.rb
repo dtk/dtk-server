@@ -18,11 +18,11 @@ module XYZ
     #
     def rest__check_idle()
       prefix_log = "[CRON JOB]"
+ 
       Log.info "#{prefix_log} Monitoring idle assemblies: START"
 
-      # find running assemblies
-      raise Error.new("deprecated: Assembly::Instance.get_assemblies_with_nodes")
-#      assemblies = Assembly::Instance.get_assemblies_with_nodes(model_handle()).reject{|a|a[:is_staged]} 
+
+      assemblies = Assembly::Instance.list(model_handle(:assembly),{})
 
       str_identifer = (assemblies.map { |a| a[:display_name]}).join(', ')
 
@@ -31,7 +31,8 @@ module XYZ
 
       # check statuses
       assemblies.each do |assembly|
-        nodes = assembly[:nodes]
+        
+        nodes = Assembly::Instance.get_nodes([assembly.id_handle], :type)
         # flag to indicate if assembly nodes need to be stopped
         stop_this_assembly = false
 

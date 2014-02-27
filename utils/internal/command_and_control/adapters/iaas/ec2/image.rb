@@ -7,6 +7,7 @@ module DTK; module CommandAndControlAdapter
     end
 
     class Image
+
       def initialize(image_id)
         @ami = Ec2.conn().image_get(image_id)
       end
@@ -24,9 +25,34 @@ module DTK; module CommandAndControlAdapter
         end
       end
 
+      def block_device_mapping_with_delete_on_termination()
+        block_device_mapping = create_block_device_mapping(value(:block_device_mapping))
+        block_device_mapping.first["Ebs.DeleteOnTermination"] = "true"
+        block_device_mapping
+      end
+
       private
+
       def value(attr)
         (@ami||{})[attr]
+      end
+
+      def create_block_device_mapping(image_mappings)
+        block_device_mapping = []
+        name_mapping = {
+          'deviceName' => 'DeviceName',
+          'snapshotId' => 'Ebs.SnapshotId',
+          'volumeSize' => 'Ebs.VolumeSize',
+          'deleteOnTermination' => 'Ebs.DeleteOnTermination',
+        }
+        image_mappings.each do |image_mapping|
+          mapping = {}
+          name_mapping.each do |key, value|
+            mapping[value] = image_mapping[key]
+          end
+          block_device_mapping << mapping
+        end
+        block_device_mapping
       end
 
       def single_block_device_mapping?()

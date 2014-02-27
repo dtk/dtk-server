@@ -91,7 +91,7 @@ module DTK
           end
 
           flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
-          create_options = {:image_id => ami,:flavor_id => flavor_id}
+          create_options = {:image_id => ami,:flavor_id => flavor_id, :block_device_mapping => image(ami).block_device_mapping_with_delete_on_termination() }
 
           # check priority for security group
           security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
@@ -117,7 +117,7 @@ module DTK
 
           if root_device_size = node.attribute.root_device_size()
             if device_name = image(ami).block_device_mapping_device_name()
-              create_options[:block_device_mapping] = [{:DeviceName => device_name, 'Ebs.VolumeSize' => root_device_size}]
+              create_options[:block_device_mapping].first.merge!({'DevicName' => device_name, 'Ebs.VolumeSize' => root_device_size})
             else
               Log.error("Cannot determine device name for ami (#{ami})")
             end

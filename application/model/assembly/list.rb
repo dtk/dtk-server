@@ -8,11 +8,24 @@ module DTK
           :cols => [:id, :display_name,:component_type,nested_virtual_attr]
         }
         assembly_rows = get_objs(sp_hash)
+
+        if(node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
+          assembly_rows.first[:nodes] = get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
+        end
+
         # filter nodes by node_id if node_id is provided in request
         unless (node_id.nil? || node_id.empty?)
+          sp_hash = {
+            :cols => [:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:ordered_component_ids],
+            :filter => [:and, [:eq, :id, node_id]]
+          }
+          node = Model.get_obj(model_handle(:node),sp_hash)
+          assembly_rows.first[:node] = node
+
           assembly_rows = assembly_rows.select { |node| node[:node][:id] == node_id.to_i } 
           opts = {:component_info => true}
         end
+
         # filter nodes by component_id if component_id is provided in request
         unless (component_id.nil? || component_id.empty?)
           assembly_rows = assembly_rows.select { |node| node[:nested_component][:id] == component_id.to_i } 
@@ -73,6 +86,12 @@ module DTK
 
           if node = format_node!(pntr[:ndx_nodes],r[:node],opts)
             format_components_and_attributes(node,r,ndx_attrs,opts)
+          end
+
+          if(r[:nodes])
+            r[:nodes].each do |n|
+              format_node!(pntr[:ndx_nodes],n,opts)
+            end
           end
         end
         

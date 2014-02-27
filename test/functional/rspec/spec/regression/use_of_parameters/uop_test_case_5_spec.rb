@@ -18,7 +18,6 @@ node_name = 'node1'
 cent_os = "centos6.4"
 centos_memory_size = 'm1.small'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Use Of Parameters) Test Case 5: Change optional params on existing attributes in assembly nodes (values were previously defined)" do

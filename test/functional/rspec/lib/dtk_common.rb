@@ -10,8 +10,8 @@ STDOUT.sync = true
 
 class DtkCommon
 
-	$success == true
-	attr_accessor :assembly_name, :assembly_template, :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD, :success, :error_message, :server_log
+	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
+	attr_accessor :assembly_name, :assembly_id, :assembly_template, :node_id, :success, :error_message, :server_log
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -141,8 +141,8 @@ class DtkCommon
 			if (stage_assembly_response['data'].include? "name: #{@assembly_name}")
 				puts "Stage of #{@assembly_template} assembly template completed successfully!"
 				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
-				assembly_id = assembly_id_match[1]
-				puts "Assembly id for a staged assembly: #{assembly_id}"
+				self.assembly_id = assembly_id_match[1].to_i
+				puts "Assembly id for a staged assembly: #{self.assembly_id}"
 			else
 				puts "Stage assembly didnt pass!"
 			end
@@ -150,7 +150,6 @@ class DtkCommon
 			puts "Assembly template #{@assembly_template} not found!"
 		end
 		puts ""
-		return assembly_id.to_i
 	end
 
 	def rename_assembly(assembly_id, new_assembly_name)
@@ -182,6 +181,7 @@ class DtkCommon
 		puts "Check if assembly exists:", "-------------------------"
 		assembly_exists = false
 		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		puts "List of all assemblies and its content:"
 		pretty_print_JSON(assembly_list)
 		test_assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }
 
@@ -960,26 +960,6 @@ class DtkCommon
 		return component_exists_in_module
 	end
 
-	def add_component_to_assembly_node(assembly_id, node_name, component_id)
-		puts "Add component to assembly node:", "-------------------------------"
-		component_added = false
-		assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
-
-		if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
-			puts "Node #{node_name} exists in assembly. Get node id..."
-			node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
-			puts "node id: #{node_id}"
-			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_id, :assembly_id=>assembly_id})
-
-			if (component_add_response['status'] == 'ok')
-				puts "Component with id #{component_id} added to assembly!"
-				component_added = true
-			end
-		end
-		puts ""
-		return component_added
-	end
-
 	def add_component_by_name_to_assembly_node(assembly_id, node_name, component_name)
 		puts "Add component to assembly node:", "-------------------------------"
 		component_added = false
@@ -1315,8 +1295,8 @@ class DtkCommon
 
 			if (stage_node_response['data']['node_id'])
 				puts "Stage of #{node_name} node template completed successfully!"
-				node_id = stage_node_response['data']['node_id']
-				puts "Node id for a staged node template: #{node_id}"
+				self.node_id = stage_node_response['data']['node_id']
+				puts "Node id for a staged node template: #{self.node_id}"
 			else
 				puts "Stage node didnt pass!"
 			end
@@ -1324,7 +1304,6 @@ class DtkCommon
 			puts "Node template #{node_name} not found!"
 		end
 		puts ""
-		return node_id
 	end
 
 	def check_if_node_exists(node_id)
@@ -1409,20 +1388,6 @@ class DtkCommon
 		end
 		puts ""
 		return node_deleted
-	end
-
-	def create_node(assembly_id, node_name, node_template)
-		puts "Create node:","------------"
-		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>assembly_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
-		if create_node_response['status'].include? "ok"
-			puts "Node #{node_name} has been created successfully!"
-			puts ""
-			return create_node_response['data']['node_id']
-		else
-			puts "Node #{node_name} has not been created successfully!"
-			puts ""
-			return nil
-		end
 	end
 
 	def add_component_to_node(node_id, component_name)
@@ -1710,7 +1675,7 @@ class DtkCommon
 		if create_node_response['status'].include? "ok"
 			puts "Node #{node_name} has been created successfully!"
 			puts ""
-			return create_node_response['data']['node_id']
+			return create_node_response['data']['guid']
 		else
 			puts "Node #{node_name} has not been created successfully!"
 			puts ""
@@ -1735,19 +1700,26 @@ class DtkCommon
 		return node_exists
 	end
 
-	def add_component_to_assembly_node(assembly_id, node_name, component_name)
+	def add_component_to_assembly_node(assembly_id, node_name, component_id)
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
 		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		puts "Node list:"
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
-		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_name})
+		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_id})
 
 		if (component_add_response['status'] == 'ok')
-			puts "Component #{component_name} added to assembly node!"
-			component_added = true
+			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :about=>'components', :subtype=>'instance'})
+			component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}
+			if !component.empty?
+				puts "Component #{component.first['display_name']} has been added to assembly node!"
+				component_added = true
+			else
+				puts "Component has not been added to assembly node!"
+			end
 		end
 		puts ""
 		return component_added

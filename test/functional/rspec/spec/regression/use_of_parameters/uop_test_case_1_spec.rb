@@ -21,7 +21,6 @@ memory_size_attribute = 'memory_size'
 os = 'precise'
 memory_size = 't1.micro'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 dtk_common2 = DtkCommon.new(new_assembly_name, "#{service_name}::#{new_assembly_template}")
 

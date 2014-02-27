@@ -4,7 +4,8 @@ module DTK
       def subclass_model(subclass_model_name,parent_model_name,opts={})
         class_eval("
           def get_objs(sp_hash,opts={})
-            SubclassProcessing.new(self).get_objs(sp_hash,:#{subclass_model_name},opts)
+           subclass_model_handle = model_handle(:#{subclass_model_name})
+           super(sp_hash,opts.merge(:model_handle => subclass_model_handle))
           end"
          )
          class_eval("
@@ -29,7 +30,6 @@ module DTK
       def concrete_model_name(model_name)
         SubclassProcessing.concrete_model_name(model_name)||model_name
       end
-
 
       #TODO: cleanup
       def find_subtype_model_name(id_handle,opts={})
@@ -84,17 +84,8 @@ module DTK
     end
 
     class SubclassProcessing
-      def initialize(model)
-        @model = model
-      end
-
       def self.get_objs(mh,subclass_model_name,sp_hash,opts={})
         Model.get_objs(mh,sp_hash,opts.merge(:subclass_model_name => subclass_model_name))
-      end
-
-      def get_objs(sp_hash,subclass_model_name,opts={})
-        mh = @model.model_handle()
-        Model.get_objs(mh,sp_hash,opts.merge(:model_handle => mh.createMH(subclass_model_name)))
       end
 
       def self.add_model_name_mapping(subclass_model_name,concrete_model_name,subclass_klass)

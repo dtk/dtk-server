@@ -78,7 +78,7 @@ module DTK; class ServiceModule
         refs = cmp_ref_info_list.map{|cmp_ref_info|print_form(cmp_ref_info)}.compact.join(",")
         is = (cmp_ref_info_list.size==1 ? "is" : "are")
         does = (cmp_ref_info_list.size==1 ? "does" : "do")
-        "The following #{what} (#{refs}) that #{is} referenced by assemblies in the service module #{does} not exist; this can be rectified by invoking the 'push-clone-changes' command after manually loading appropriate component module(s) or by removing references in the service DSL file(s)"
+        "The following #{what} (#{refs}) that #{is} referenced by assemblies in the service module #{does} not exist; this can be rectified by invoking the 'push' command after manually loading appropriate component module(s) or by removing references in the service DSL file(s)"
       end
       
       def print_form(cmp_ref_info)

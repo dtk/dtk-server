@@ -110,6 +110,11 @@ module DTK
     ##  Legacy methods
     # 
 
+    def create_client_user(client_rsa_pub_key, opts={})
+      client_username = get_username_with_pub_key(client_rsa_pub_key)
+      create_user(client_username, client_rsa_pub_key, opts)
+    end
+
     def create_user(username,rsa_pub_key,opts={}, client_rsa_pub_key = nil)
       # TODO: [Haris] Fix this, only to support 2 Repo Client
       # if there is rsa_pub_key we create two users
@@ -123,13 +128,9 @@ module DTK
       end
       tenant_response = post_rest_request_data(route,body,:raise_error => true)
 
-
       # Create Client
-      if client_rsa_pub_key
-        client_username = get_username_with_pub_key(client_rsa_pub_key)
-        create_user(client_username, client_rsa_pub_key, opts)
-      end
-
+      create_client_user(client_rsa_pub_key) if client_rsa_pub_key
+    
       return tenant_response
     end
 

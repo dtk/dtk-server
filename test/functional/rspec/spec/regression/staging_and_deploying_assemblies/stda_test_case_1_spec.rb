@@ -13,7 +13,6 @@ STDOUT.sync = true
 
 assembly_name = 'stda_test_case_1_instance'
 assembly_template = 'bootstrap::node_with_params'
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Staging And Deploying Assemblies) Test Case 1: Stage existing assembly and then delete assembly" do

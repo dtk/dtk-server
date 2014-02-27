@@ -25,7 +25,6 @@ attr_param_list = Array.new
 attr_param_list << 'memory_size'
 attr_param_list << 'os_identifier'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new($assembly_name, $assembly_template)
 
 def check_param_existance_on_node(assembly_id, node_name, param_name_list)
@@ -107,7 +106,9 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 
 	context "Node params check function" do
 		it "checks if all node parameters (dns_name, ec2_public_address, private_dns_name) exist on node #{node_name}" do
+			puts "Check node params", "-----------------"
 			param_existance = check_param_existance_on_node($assembly_id, node_name, node_param_list)
+			puts ""
 			param_existance.should eq(true)
 		end
 	end
@@ -130,7 +131,9 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 
 	context "Attribute params check function" do
 		it "checks if all attribute parameters (memory_size, os_identifier) exist on node #{node_name}" do
+			puts "Check attribute params", "----------------------"
 			param_existance = check_param_existance_on_attribute($assembly_id, node_name, attr_param_list)
+			puts ""
 			param_existance.should eq(true)
 		end
 	end

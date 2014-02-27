@@ -14,6 +14,8 @@ module_filesystem_location = "~/dtk/component_modules"
 file_for_change_location = "./spec/regression/dslv3_component_modules/resources/cmd_test_case_20_dtk.model.yaml"
 file_for_change = "dtk.model.yaml"
 false_port_value = "65536"
+fail_message = "incorrect value for port type attribute: #{false_port_value}"
+expected_error_message = "ERROR"
 
 dtk_common = DtkCommon.new("", "")
 
@@ -43,14 +45,7 @@ describe "(Component Module DSL) Test Case 20: NEG - dtk.model.yaml with invalid
   end
 
   context "Push clone changes of module from local copy to server" do
-    it "pushes module changes from local filesystem to server but fails because of incorrect value for port type attribute: #{false_port_value}" do
-      fail = false
-      value = `dtk component-module #{module_name} push`
-      puts value
-      #Better message to be added when this case is handled
-      fail = value.include?("ERROR")
-      fail.should eq(true)  
-    end
+    include_context "NEG - Push clone changes to server", module_name, fail_message, expected_error_message
   end
 
   context "Delete module" do

@@ -24,12 +24,6 @@ module DTK
         respond(e, 403)
       end
 
-
-      # DEBUG SNIPPET >>>> REMOVE <<<<
-      #ramaze_user = User.get_user_by_id( { :model_name => :user, :c => 2 }, 2147483717)
-      #user_login(ramaze_user.merge(:access_time => Time.now))
-
-
       unless route.first == "user"
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]

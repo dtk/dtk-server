@@ -11,7 +11,6 @@ require './lib/assembly_operations_spec'
 
 STDOUT.sync = true
 
-$assembly_id = 0
 assembly_name = 'dnt_test_case_9_instance'
 assembly_template = 'redis_test::redis_master_slave'
 redis_port = 6379

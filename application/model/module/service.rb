@@ -310,7 +310,7 @@ module DTK
 
       is_parsed = module_obj[:dsl_parsed] if module_obj
       unless is_parsed
-        raise ErrorUsage.new("Unable to export module that has parsing errors. Please fix errors and try export again.")
+        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try export again.")
       end
     end
 

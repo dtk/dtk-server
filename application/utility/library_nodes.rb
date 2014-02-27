@@ -46,6 +46,7 @@ module XYZ
        end
        ret
      end
+=begin
      def self.ret_node_bindings_from_config_file()
        unless content = ret_nodes_info_content_from_config_file()
          return nil
@@ -72,6 +73,67 @@ module XYZ
        end
        ret 
      end
+=end
+     def self.ret_node_bindings_from_config_file()
+       unless content = ret_nodes_info_content_from_config_file()
+         return nil
+       end
+       ret = Hash.new
+       content.each do |ami,info|
+         info["sizes"].each do |ec2_size|
+           size = ec2_size.split(".").last
+           ref = "#{info["type"]}-#{size}"
+           pntr = ret[ref] ||= {
+             :type=>"clone",
+             :os_type=>info["os_type"],
+             :os_identifier=>info["type"]
+           }
+           pntr[:rules] = Rules.add(pntr[:rules],info,ami,ec2_size)
+         end
+       end
+       ret
+     end
+     class Rules
+       def self.add(rules,info,ami,ec2_size)
+         new_el = {:conditions=>Conditions.new(info), :node_template=>NodeTemplate.new(info,ami,ec2_size)}
+         if rules
+           add_element?(rules,new_el)
+         else
+           [new_el]
+         end
+       end
+
+      private
+       def self.add_element?(rules,new_el)
+         rules.each do |rule|
+           if rule[:conditions].equal?(new_el[:conditions])
+             Log.error("Unexpected that have matching conditions; skipping")
+             return rules
+           end
+         end
+         rules + [new_el]
+       end
+
+       class Conditions < Hash
+         def initialize(info)
+           replace(:type=>"ec2_image", :region=>info["region"])
+         end
+         def equal?(rc)
+           self[:type] == rc[:type] and self[:region] == rc[:region]
+         end
+       end
+       class NodeTemplate < Hash
+         def initialize(info,ami,ec2_size)
+           replace(
+                   :type=>"ec2_image",
+                   :image_id=>ami,
+                   :size=>ec2_size,
+                   :region=>info["region"]
+                   )
+         end
+       end
+     end
+
      def self.ret_nodes_info_content_from_config_file()
        return @content if @content
        config_base = Configuration.instance.default_config_base()

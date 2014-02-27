@@ -133,10 +133,6 @@ shared_context "Export module" do |dtk_common, module_name, namespace|
     puts "Export module:", "--------------"
     pass = false
     value = `dtk component-module #{module_name} publish #{namespace}/#{module_name}`
-    #temp solution for bug that happens when calling repo manager for the first time. try request again
-    if value.include? "Repo Manager refused the connection"
-      value = `dtk module #{module_name} publish #{namespace}/#{module_name}`
-    end
     puts value
     pass = true if (!value.include? "ERROR")
     puts "Module #{module_name} exported successfully!" if pass == true
@@ -348,7 +344,7 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
   it "pushes #{module_name} module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts "Push clone changes to server:", "-----------------------------"
     pass = false
-    value = `dtk component-module #{module_name} push origin`
+    value = `dtk component-module #{module_name} push`
     puts value
     pass = value.include?("Status: OK")
     puts "Clone changes pushed to server successfully!" if pass == true
@@ -356,6 +352,18 @@ shared_context "Push clone changes to server" do |module_name, file_for_change|
     puts ""
     pass.should eq(true)  
   end
+end
+
+shared_context "NEG - Push clone changes to server" do |module_name, fail_message, expected_error_message|
+  it "pushes #{module_name} module changes from local filesystem to server but fails - reason: #{fail_message}" do
+      puts "NEG - Push clone changes to server:", "-----------------------------------"
+      fail = false
+      value = `dtk component-module #{module_name} push`
+      puts value
+      fail = value.include?(expected_error_message)
+      puts ""
+      fail.should eq(true)  
+    end
 end
 
 shared_context "Replace dtk.model.yaml file with new one" do |module_name, file_for_change_location, file_for_change, module_filesystem_location, it_message|

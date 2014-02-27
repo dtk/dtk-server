@@ -23,7 +23,6 @@ module_name = "test"
 service_name = "bootstrap"
 namespace = 'demo'
 module_filesystem_location = "~/dtk/component_modules"
-$assembly_id = 0
 
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 

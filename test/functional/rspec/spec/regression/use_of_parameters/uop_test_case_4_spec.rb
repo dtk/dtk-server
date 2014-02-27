@@ -16,7 +16,6 @@ os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
 
-$assembly_id = 0
 dtk_common = DtkCommon.new(assembly_name, assembly_template)
 
 describe "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in assembly nodes (values were not defined)" do

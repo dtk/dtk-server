@@ -12,7 +12,6 @@ require './lib/assembly_operations_spec'
 
 STDOUT.sync = true
 
-$assembly_id = 0
 assembly_name = 'dnt_test_case_10_instance'
 assembly_template = 'elasticsearch_test::elasticsearch_simple'
 elasticsearch_http_port = 9200
@@ -114,8 +113,10 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 
 	context "Connect to Elasticsearch instance, index new document and get that document by query" do
 		it "connects to Elasticsearch instance and adds document and retrieves it by query" do
+			puts "Connect to Elasticsearch, index and get document", "------------------------------------------------"
 			elasticsearch_host = get_node_ec2_public_dns(assembly_name, node_name)
 			document_retrieved = index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
+			puts ""
 			document_retrieved.should eq(true)
 		end
 	end

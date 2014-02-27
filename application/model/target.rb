@@ -130,31 +130,47 @@ module DTK
     end
 
     def get_security_group()
-      get_field?(:iaas_properties)[:security_group]
+      get_iaas_properties()[:security_group]
     end
 
     def get_region()
-      get_field?(:iaas_properties)[:region]
+      get_iaas_properties()[:region]
     end
 
     def get_keypair_name()
-      get_field?(:iaas_properties)[:keypair]
+      get_iaas_properties()[:keypair]
     end
 
     def get_security_group()
-      get_field?(:iaas_properties)[:security_group]
+      get_iaas_properties()[:security_group]
     end
 
     # returns aws params if pressent in iaas properties
     def get_aws_compute_params()
-      iaas_props = get_field?(:iaas_properties)
+      iaas_props = get_iaas_properties()
       if iaas_props && (aws_key = iaas_props[:key]) && (aws_secret = iaas_props[:secret])
-        return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+        ret = { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+        if region = iaas_props[:region]
+          ret.merge!(:region => region)
+        end
+        ret
       end
-
-      return nil
     end
+
     ### TODO end: these should be moved to IAAS-spefic location
+
+    def get_iaas_properties()
+      update_object!(:iaas_properties,:parent_id)
+      iaas_properties = self[:iaas_properties]
+      if parent_id = self[:parent_id]
+        parent_provider = id_handle(:id => parent_id).create_object(:model_name => :target_instance)
+        if parent_iaas_properties = parent_provider.get_field?(:iaas_properties)
+          #specific properties take precedence over the parent's
+          iaas_properties = parent_iaas_properties.merge(iaas_properties||{})
+        end
+      end
+      iaas_properties
+    end
 
     def get_and_update_nodes_status()
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}

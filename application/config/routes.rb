@@ -70,6 +70,7 @@ R8::ReactorRoute.draw do
   post  'component/stage' => 'component#stage'
 
    # COMPONENT_MODULE
+  post  'component_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'component_module/remove_user_direct_access' => 'component_module#remove_user_direct_access'
   post  'component_module/info_about' => 'component_module#info_about'
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
@@ -152,6 +153,7 @@ R8::ReactorRoute.draw do
   post  'repo/synchronize_target_repo' => 'repo#synchronize_target_repo'
 
    # SERVICE_MODULE
+  post  'service_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
   post  'service_module/remove_user_direct_access' => 'service_module#remove_user_direct_access'
   post  'service_module/update_model_from_clone' => 'service_module#update_model_from_clone'

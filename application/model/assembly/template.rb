@@ -18,6 +18,10 @@ module DTK; class Assembly
     end
 
     def stage(target,assembly_name=nil)
+      service_module = get_service_module()
+      is_dsl_parsed = service_module.dsl_parsed?()
+      raise ErrorUsage.new("You are not allowed to stage service from service-module ('#{service_module}') that has dsl parsing errors") unless is_dsl_parsed
+
       # TODO: if name given and not unique either reject or generate a -n suffix
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name

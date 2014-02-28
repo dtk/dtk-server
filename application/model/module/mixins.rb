@@ -454,19 +454,12 @@ module DTK
           external_ref_source = mdl.delete(:external_ref_source)
           ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
-          linked_remote = 
-            if external_ref_source
-              external_ref_source
-            elsif ndx_repo_remotes
-              "#{DTKNPrefix}#{ret_linked_remotes_print_form(ndx_repo_remotes.values)}"
-            end
-          if linked_remote
+          if linked_remote = linked_remotes_print_form((ndx_repo_remotes||{}).values,external_ref_source,opts={}) 
             mdl.merge!(:linked_remotes => linked_remote)
           end
         end
         ndx_ret.values
       end
-      DTKNPrefix = 'dtkn://'
       DefaultVersionString = 'CURRENT'
 
      private 
@@ -485,16 +478,24 @@ module DTK
         branch_module_rows
       end
 
-      def self.ret_linked_remotes_print_form(repo_remotes,opts={})
-        if repo_remotes.size == 1
-          repo_remotes.first.print_form()
-        else
-          default = RepoRemote.ret_default_remote_repo(repo_remotes)
-          repo_remotes.reject!{|r|r[:id] == default[:id]}
-          sorted_array = [default.print_form(Opts.new(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form()}
-          sorted_array.join(", ")
-        end
+      def self.linked_remotes_print_form(repo_remotes,external_ref_source,opts={})
+        opts_pp = Opts.new(:dtkn_prefix => true)
+        array = 
+          if repo_remotes.empty?
+            Array.new
+          elsif repo_remotes.size == 1
+            [repo_remotes.first.print_form(opts_pp)]
+          else
+            default = RepoRemote.ret_default_remote_repo(repo_remotes)
+            repo_remotes.reject!{|r|r[:id] == default[:id]}
+            [default.print_form(opts_pp.merge(:is_default_namespace => true))] + repo_remotes.map{|r|r.print_form(opts_pp)}
+          end
+
+        array << external_ref_source if external_ref_source
+
+        array.join(JoinDelimiter)
       end
+      JoinDelimiter = ', '
     end
 
     def add_user_direct_access(model_handle,rsa_pub_key,username=nil)

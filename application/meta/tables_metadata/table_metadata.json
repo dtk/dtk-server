@@ -159,13 +159,13 @@
     "order": [
       "id",
       "name",
-      "remote_source",
+      "remote(s)",
       "dsl_parsed"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
-      "remote_source": "linked_remotes",
+      "remote(s)": "linked_remotes",
       "dsl_parsed": "dsl_parsed"
     }
   },

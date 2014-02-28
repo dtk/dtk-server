@@ -269,18 +269,39 @@ module DTK; class  Assembly
       self.class.op_status(assembly_nodes)
     end
 
+    def op_status_all_pending?()
+      assembly_nodes = get_nodes(:admin_op_status)
+      self.class.op_status_all_pending?(assembly_nodes)
+    end
+
+    #returns
+    #'running' - if at least one node is running
+    #'stopped' - if there is atleast one node stopped and no nodes running
+    #'pending' - if all nodes are pending or no nodes
+    #nil - if cant tell
     def self.op_status(assembly_nodes)
-      return "pending" if assembly_nodes.empty?
-      pending_status = nil
-      stop_status    = nil
+      return 'pending' if assembly_nodes.empty?
+      stop_found = false
       assembly_nodes.each do |node|
-        if (status = node[:admin_op_status]).eql? "stopped"
-          stop_status = "stopped"; break
-        elsif status.eql? "pending"
-          pending_status = "pending"
+        case node[:admin_op_status]
+          when 'running'
+            return 'running'
+          when 'stopped'
+            stop_found = true
+          when 'pending'
+            #no op
+          else
+            return nil
         end
       end
-      stop_status||pending_status||"running"    
+      stop_found ? 'stopped' : 'pending'
+    end
+
+    def self.op_status_all_pending?(assembly_nodes)
+      assembly_nodes.find do |node|
+        status = node[:admin_op_status]
+        status.nil? or status != 'pending'
+      end.nil?
     end
 
     def get_info__flat_list(opts={})

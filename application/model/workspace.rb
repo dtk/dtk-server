@@ -21,7 +21,7 @@ module DTK
       if current_target.id ==  target.id
         raise ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
       end
-      unless 'pending' == op_status()
+      unless op_status_all_pending?()
         raise ErrorUsage.new("The command 'set-target' can only be invoked before the workspace has been converged (i.e., is in 'pending' state)")
       end
       update(:datacenter_datacenter_id => target.id)

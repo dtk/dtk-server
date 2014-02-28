@@ -65,7 +65,15 @@ module DTK
         ndx_ret = Hash.new
         pp_opts = Aux.hash_subset(opts,[:no_module_prefix])
         assembly_rows.each do |r|
-          pntr = ndx_ret[r[:id]] ||= r.prune_with_values(:display_name => r.pretty_print_name(pp_opts), :execution_status => r[:execution_status],:ndx_nodes => Hash.new)
+          last_task_run_status = r[:last_task_run_status]
+          pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
+              :display_name => r.pretty_print_name(pp_opts), 
+              :last_task_run_status => last_task_run_status,                                                         
+              #TODO: will deprecate :execution_status after removing it from smoketests                                                         
+              :execution_status => last_task_run_status||'staged',
+              :ndx_nodes => Hash.new
+          )
+
           if module_branch_id = r[:module_branch_id]
             pntr[:module_branch_id] ||= module_branch_id 
           end
@@ -98,7 +106,7 @@ module DTK
         unsorted = ndx_ret.values.map do |r|
           nodes = r[:ndx_nodes].values
           op_status = (op_status(nodes) if respond_to?(:op_status))
-          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at,:target)
+          r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at,:target)
         end
         
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}

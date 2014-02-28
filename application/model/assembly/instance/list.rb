@@ -21,7 +21,7 @@ module DTK; class  Assembly
         else
           get_attrs = [opts[:detail_level]].flatten.include?("attributes")
           attr_rows = get_attrs ? get_default_component_attributes(assembly_mh,assembly_rows) : []
-          add_execution_status!(assembly_rows,assembly_mh)
+          add_last_task_run_status!(assembly_rows,assembly_mh)
         
           list_aux(assembly_rows,attr_rows,opts)
         end
@@ -38,7 +38,7 @@ module DTK; class  Assembly
         end
       end
 
-      def add_execution_status!(assembly_rows,assembly_mh)
+      def add_last_task_run_status!(assembly_rows,assembly_mh)
         sp_hash = {
           :cols => [:id,:started_at,:assembly_id,:status],
           :filter => [:oneof,:assembly_id,assembly_rows.map{|r|r[:id]}]
@@ -55,18 +55,11 @@ module DTK; class  Assembly
             ndx_task_rows[assembly_id] = task.slice(:status,:started_at)
           end
         end
-        #TODO: make sure this is right
         assembly_rows.each do |r|
           if node = r[:node]
-            unless execution_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
-              execution_status =
-                case node[:admin_op_status]
-                  when "stopped" then "stopped"
-                  when "running" then "running"
-                  when "pending" then "staged"
-                end
+            if last_task_run_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
+              r[:last_task_run_status] = last_task_run_status
             end
-            r[:execution_status] = execution_status
           end
         end
         assembly_rows

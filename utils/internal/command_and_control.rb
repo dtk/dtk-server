@@ -125,7 +125,7 @@ module XYZ
         case key
           when :node
             node = val
-            ext_ref_type = (node[:external_ref]||{})[:type]
+            ext_ref_type = (node.get_field?(:external_ref)||{})[:type]
             case ext_ref_type
               when "ec2_instance" then :ec2
               when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
@@ -133,7 +133,7 @@ module XYZ
             end
           when :target
             target =  val
-            case target[:iaas_type]
+            case target.get_field?(:iaas_type)
               when "ec2" then :ec2
               else raise Error.new("not treated")
             end

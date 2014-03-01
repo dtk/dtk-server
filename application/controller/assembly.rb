@@ -22,6 +22,12 @@ module DTK
       rest_ok_response
     end
 
+    def rest__destroy_and_reset_nodes()
+      assembly = ret_assembly_instance_object()
+      assembly.destroy_and_reset_nodes()
+      rest_ok_response
+    end
+
     def rest__remove_from_system()
       assembly = ret_assembly_instance_object()
       Assembly::Instance.delete(assembly.id_handle())

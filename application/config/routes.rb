@@ -32,6 +32,7 @@ R8::ReactorRoute.draw do
   post  'assembly/info' => 'assembly#info'
   post  'assembly/rename' => 'assembly#rename'
   post  'assembly/delete' => 'assembly#delete'
+  post  'assembly/destroy_and_reset_nodes' => 'assembly#destroy_and_reset_nodes'
   post  'assembly/purge' => 'assembly#purge' #workspace command
   post  'assembly/set_target' => 'assembly#set_target' #workspace command
   post  'assembly/set_attributes' => 'assembly#set_attributes'

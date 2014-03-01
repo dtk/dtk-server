@@ -468,11 +468,14 @@ module DTK
     #### end: related to distinguishing bewteen nodes and node groups
 
     def destroy_and_delete(opts={})
-      update_obj!(:external_ref,:hostname_external_ref)
       if suceeeded = CommandAndControl.destroy_node?(self)
         delete_object(opts)
       end
       suceeeded
+    end
+
+    def destroy_and_reset(opts={})
+      CommandAndControl.destroy_node?(self,:reset => true)
     end
 
     def delete_object(opts={})

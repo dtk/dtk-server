@@ -393,6 +393,12 @@ module DTK; class  Assembly
       delete_instances(assembly_idhs)
     end
 
+    def self.destroy_and_reset_nodes(node_mh,assembly_ids,opts={})
+      return if assembly_idhs.empty?
+      nodes = DeleteAndResetHelper.get_nodes_simple(node_mh,assembly_idhs.map{|idh|idh.get_id()})
+      nodes.map{|node||node.destroy_and_reset(opts)}
+    end
+
     def self.delete_contents(assembly_idhs,opts={})
       return if assembly_idhs.empty?
       delete(get_sub_assemblies(assembly_idhs).map{|r|r.id_handle()})
@@ -404,6 +410,14 @@ module DTK; class  Assembly
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
 
+    def delete_node(node_idh,opts={})
+      node =  node_idh.create_object()
+      #TODO: check if cleaning up dangling links when assembly node deleted
+      DeleteAndResetHelper.delete_node(node,opts.merge(:update_task_template=>true,:assembly=>self))
+    end
+
+
+    #### ===== delete and reset helpers
     class << self
      private
       def delete_task_templates(task_template_mh,assembly_ids)
@@ -421,33 +435,43 @@ module DTK; class  Assembly
         end
       end
 
+      #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
       def delete_assembly_nodes(node_mh,assembly_ids,opts={})
-        #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
+        DeleteAndResetHelper.delete_nodes(node_mh,assembly_ids,opts)
+      end
+    end
+
+    class DeleteAndResetHelper < self
+      def self.delete_nodes(node_mh,assembly_ids,opts={})
+        nodes = get_nodes_simple(node_mh,assembly_ids)
+        nodes.map{|node|delete_node(node,opts)}
+      end
+
+      #TODO: double check if Transactyion needed; if so look at whetehr for same reason put in destoy and reset
+      def self.delete_node(node,opts={})
+        ret = nil
+        Transaction do 
+          ret = 
+            if opts[:destroy_nodes]
+              node.destroy_and_delete(opts)
+            else
+              node.delete_object(opts)
+            end
+        end
+        ret
+      end
+
+      def self.get_nodes_simple(node_mh,assembly_ids)
         sp_hash = {
           :cols => [:id,:display_name],
           :filter => [:oneof,:assembly_id,assembly_ids]
         }
-        get_objs(node_mh,sp_hash).map{|node|delete_node_aux(node,opts)}
+        get_objs(node_mh,sp_hash)
       end
-    end
-    def self.delete_node_aux(node,opts={})
-      ret = nil
-      Transaction do 
-        ret = 
-          if opts[:destroy_nodes]
-            node.destroy_and_delete(opts)
-          else
-            node.delete_object(opts)
-          end
-      end
-      ret
     end
 
-    def delete_node(node_idh,opts={})
-      node =  node_idh.create_object()
-      #TODO: check if cleaning up dangling links when assembly node deleted
-      self.class.delete_node_aux(node,opts.merge(:update_task_template=>true,:assembly=>self))
-    end
+    #### end ===== delete and reset helpers
+
 
     def add_node(node_name,node_binding_rs=nil)
       #check if node has been added already

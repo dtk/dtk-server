@@ -168,7 +168,11 @@ module DTK
 
 #TODO: when put apt-get update in thing delying time it taks for the os to say it is ready /usr/bin/apt-get update
       #destroys the node if it exists
-      def self.destroy_node?(node)
+      def self.destroy_node?(node,opts={})
+        node.update_obj!(:external_ref,:hostname_external_ref) 
+if opts[:reset]
+  pp [:trap,node]
+end
         instance_id = (node[:external_ref]||{})[:instance_id]
         return true unless instance_id #return if instance does not exist
 
@@ -177,8 +181,17 @@ module DTK
         response = conn(target_aws_creds).server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response.to_s}")
         process_addresses__terminate?(node)
+
+        if opts[:reset]
+          reset_node(node)
+        end
         response
       end
+
+      def self.reset_node(node)
+      end
+      private_class_method :reset_node
+
 
       def self.node_print_form(node)
         "#{node[:display_name]} (#{node[:id]}"

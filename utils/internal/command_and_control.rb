@@ -51,9 +51,9 @@ module XYZ
       klass.server_host()
     end
 
-    def self.destroy_node?(node)
+    def self.destroy_node?(node,opts={})
       klass = load_iaas_for(:node => node)
-      klass.destroy_node?(node)
+      klass.destroy_node?(node,opts)
     end
 
     def self.associate_persistent_dns?(node)

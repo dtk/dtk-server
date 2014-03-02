@@ -48,8 +48,8 @@ describe "(Workspace) Test Case 9: Create two nodes, add components in both of t
 		include_context "Add component to the node in workspace", dtk_common, node_name_2, component_name
 	end	
 
-	context "NEG - List all services" do
-		include_context "NEG - List all services", dtk_common, service_module_name
+	context "NEG - List all service modules" do
+		include_context "NEG - List all service modules", dtk_common, service_module_name
 	end
 
 	context "Create assembly from workspace content" do

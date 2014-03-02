@@ -51,7 +51,7 @@ describe "DTK Server smoke test release" do
     include_context "Export service module", dtk_common, service_module_name, namespace
   end
 
-  context "Get componetn module components list" do
+  context "Get component module components list" do
     include_context "Get component module components list", dtk_common, component_module_name
   end
 

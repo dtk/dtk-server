@@ -38,8 +38,8 @@ describe "DTK Server smoke test" do
     include_context "Import remote component module", component_module_namespace + "/" + component_module_name
   end
 
-  context "Get module components list" do
-    include_context "Get module components list", dtk_common, component_module_name
+  context "Get component module components list" do
+    include_context "Get component module components list", dtk_common, component_module_name
   end
 
   context "Check if component module imported on local filesystem" do

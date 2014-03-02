@@ -9,44 +9,44 @@ require 'awesome_print'
 require 'yaml'
 require './lib/dtk_common'
 
-assembly_name = 'dtk_release_deployment'
-assembly_template = 'dtk::release'
+service_name = 'dtk_release_deployment'
+assembly_name = 'dtk::release'
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 config = YAML::load(File.open("./config/release.yml"))
 
-#Stage assembly
-dtk_common.stage_assembly
+#Stage service
+dtk_common.stage_service
 
 begin
-	if dtk_common.check_if_assembly_exists(dtk_common.assembly_id)
-		#Set attributes for assembly template
+	if dtk_common.check_if_service_exists(dtk_common.service_id)
+		#Set attributes for service
 		set_attributes_array = []
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/common_user/user', "git")
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/gitolite/gitolite_user', "git")
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::jenkins_swarm_client/password', config['properties']['jenkins_password'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
-	    set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/common_user/user', "git")
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/gitolite/gitolite_user', "git")
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::jenkins_swarm_client/password', config['properties']['jenkins_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
+	    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
 
 		#Set tags that will be used to checkout correct versions of DTK artifacts for this release
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['repo_manager_release'])
-		set_attributes_array << dtk_common.set_attribute(dtk_common.assembly_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['server_release'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['repo_manager_release'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_git_branch', config['properties']['server_release'])
 
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false
-	  		assembly_converged = dtk_common.converge_assembly(dtk_common.assembly_id, 70)
-	  		if assembly_converged == true
-	    		puts "#{assembly_template} assembly deployed!"
+	  		service_converged = dtk_common.converge_service(dtk_common.service_id, 70)
+	  		if service_converged == true
+	    		puts "#{service_name} service deployed!"
 	  		else
-	    		raise "[ERROR] #{assembly_template} assembly was not deployed successfully!"
+	    		raise "[ERROR] #{service_name} service was not deployed successfully!"
 	  		end
 		else
 	  		raise "[ERROR] Some of the attributes are not set correctly. Will not proceed with converge process!"
 		end
 	else
-		raise "[ERROR] #{assembly_template} assembly is not staged and therefore deployment of DTK artifacts will not continue!"
+		raise "[ERROR] #{service_name} service is not staged and therefore deployment of DTK artifacts will not continue!"
 	end
 end

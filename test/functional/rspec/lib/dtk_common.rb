@@ -11,7 +11,7 @@ STDOUT.sync = true
 class DtkCommon
 
 	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
-	attr_accessor :assembly_name, :assembly_id, :assembly_template, :node_id, :success, :error_message, :server_log
+	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -20,11 +20,11 @@ class DtkCommon
 		:cookies => {}
 	}
 
-	def initialize(assembly_name, assembly_template)
+	def initialize(service_name, assembly_name)
 		config_yml = YAML::load(File.open("./config/config.yml"))		
 
-		@assembly_name = assembly_name
-		@assembly_template = assembly_template
+		@service_name = service_name
+		@assembly = assembly_name
 		@SERVER = config_yml['r8server']['server']
 		@PORT = config_yml['r8server']['port']
 		@ENDPOINT = "#{@SERVER}:#{@PORT}"
@@ -117,96 +117,96 @@ class DtkCommon
 		return ap json_content
 	end
 
-	def stage_assembly
-		#Get list of assembly templates, extract selected template, stage assembly and return its assembly id
-		puts "Stage assembly:", "---------------"
-		assembly_id = nil
+	def stage_service
+		#Get list of assemblies, extract selected assembly, stage service and return its id
+		puts "Stage service:", "--------------"
+		service_id = nil
 		extract_id_regex = /id: (\d+)/
-		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
+		assembly_list = send_request('/rest/assembly/list', {:subtype=>'template'})
  
-		puts "List of avaliable assembly templates: "
-		pretty_print_JSON(assembly_template_list)
+		puts "List of avaliable assemblies: "
+		pretty_print_JSON(assembly_list)
 
-		test_template = assembly_template_list['data'].select { |x| x['display_name'] == @assembly_template }.first
+		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly }.first
 
 		if (!test_template.nil?)
-			puts "Assembly template #{@assembly_template} found!"
-			template_assembly_id = test_template['id']
-			puts "Assembly template id: #{template_assembly_id}"
+			puts "Assembly #{@assembly} found!"
+			assembly_id = test_template['id']
+			puts "Assembly id: #{assembly_id}"
 
-			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name})	
+			stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})	
 
-			pretty_print_JSON(stage_assembly_response)
+			pretty_print_JSON(stage_service_response)
 
-			if (stage_assembly_response['data'].include? "name: #{@assembly_name}")
-				puts "Stage of #{@assembly_template} assembly template completed successfully!"
-				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
-				self.assembly_id = assembly_id_match[1].to_i
-				puts "Assembly id for a staged assembly: #{self.assembly_id}"
+			if (stage_service_response['data'].include? "name: #{@assembly}")
+				puts "Stage of #{@service_name} assembly completed successfully!"
+				service_id_match = stage_service_response['data'].match(extract_id_regex)
+				self.service_id = service_id_match[1].to_i
+				puts "Service id for a staged service: #{self.service_id}"
 			else
-				puts "Stage assembly didnt pass!"
+				puts "Stage service didnt pass!"
 			end
 		else
-			puts "Assembly template #{@assembly_template} not found!"
+			puts "Assembly #{@service_name} not found!"
 		end
 		puts ""
 	end
 
-	def rename_assembly(assembly_id, new_assembly_name)
-		puts "Rename assembly:", "----------------"
-		assembly_renamed = false
+	def rename_service(service_id, new_service_name)
+		puts "Rename service:", "---------------"
+		service_renamed = false
 
-		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
-		assembly_name = assembly_list['data'].select { |x| x['id'] == assembly_id }
+		service_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		service_name = service_list['data'].select { |x| x['id'] == service_id }
 		
-		if assembly_name.any?
-			puts "Old assembly name is: #{assembly_name}. Proceed with renaming it to #{new_assembly_name}..."
-			rename_status = send_request('/rest/assembly/rename', {:assembly_id=>assembly_id, :assembly_name=>assembly_name, :new_assembly_name=>new_assembly_name})
+		if service_name.any?
+			puts "Old service name is: #{service_name}. Proceed with renaming it to #{new_service_name}..."
+			rename_status = send_request('/rest/assembly/rename', {:assembly_id=>service_id, :assembly_name=>service_name, :new_assembly_name=>new_service_name})
 
 			if rename_status['status'] == 'ok'
-				puts "Assembly #{assembly_name} renamed to #{new_assembly_name} successfully!"
-				assembly_renamed = true
+				puts "Service #{service_name} renamed to #{new_service_name} successfully!"
+				service_renamed = true
 			else
-				puts "Assembly #{assembly_name} was not renamed to #{new_assembly_name} successfully!"
+				puts "Service #{service_name} was not renamed to #{new_service_name} successfully!"
 			end
 		else
-			puts "Assembly with id #{assembly_id} does not exist!"
+			puts "Service with id #{service_id} does not exist!"
 		end
 		puts ""
-		return assembly_renamed
+		return service_renamed
 	end
 
-	def check_if_assembly_exists(assembly_id)
-		#Get list of existing assemblies and check if staged assembly exists
-		puts "Check if assembly exists:", "-------------------------"
-		assembly_exists = false
-		assembly_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
-		puts "List of all assemblies and its content:"
-		pretty_print_JSON(assembly_list)
-		test_assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }
+	def check_if_service_exists(service_id)
+		#Get list of existing services and check if staged service exists
+		puts "Check if service exists:", "------------------------"
+		service_exists = false
+		service_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		puts "List of all services and its content:"
+		pretty_print_JSON(service_list)
+		test_service = service_list['data'].select { |x| x['id'] == service_id }
 
-		puts "Assembly with id #{assembly_id}: "
-		pretty_print_JSON(test_assembly)
+		puts "Service with id #{service_id}: "
+		pretty_print_JSON(test_service)
 
-		if (test_assembly.any?)	
-			extract_assembly_id = test_assembly.first['id']
-			execution_status = test_assembly.first['execution_status']
+		if (test_service.any?)	
+			extract_service_id = test_service.first['id']
+			execution_status = test_service.first['execution_status']
 
-			if ((extract_assembly_id == assembly_id) && (execution_status == 'staged'))
-				puts "Assembly with id #{assembly_id} exists!"
-				assembly_exists = true
+			if ((extract_service_id == service_id) && (execution_status == 'staged'))
+				puts "Service with id #{service_id} exists!"
+				service_exists = true
 			end
 		else
-			puts "Assembly with id #{assembly_id} does not exist!"
+			puts "Service with id #{service_id} does not exist!"
 		end
 		puts ""
-		return assembly_exists
+		return service_exists
 	end
 
-	def check_assembly_status(assembly_id, status_to_check)
-		#Get list of assemblies and check if assembly exists and its status
-		puts "Check assembly status:", "----------------------"
-		assembly_exists = false
+	def check_service_status(service_id, status_to_check)
+		#Get list of services and check if service exists and its status
+		puts "Check service status:", "---------------------"
+		service_exists = false
 		end_loop = false
 		count = 0
 		max_num_of_retries = 50
@@ -215,23 +215,23 @@ class DtkCommon
 			sleep 5
 			count += 1
 
-			assembly_list = send_request('/rest/assembly/list', {:subtype=>'instance'})
-			assembly = assembly_list['data'].select { |x| x['id'] == assembly_id }.first
+			service_list = send_request('/rest/assembly/list', {:subtype=>'instance'})
+			service = service_list['data'].select { |x| x['id'] == service_id }.first
 
-			if (!assembly.nil?)
-				test_assembly = send_request('/rest/assembly/info', {:assembly_id=>assembly_id,:subtype=>:instance})
-				op_status = test_assembly['data']['op_status']
-				extract_assembly_id = assembly['id']
+			if (!service.nil?)
+				test_service = send_request('/rest/assembly/info', {:assembly_id=>service_id,:subtype=>:instance})
+				op_status = test_service['data']['op_status']
+				extract_service_id = service['id']
 
-				if ((extract_assembly_id == assembly_id) && (op_status == status_to_check))
-					puts "Assembly with id #{extract_assembly_id} has current op status: #{status_to_check}"
-					assembly_exists = true
+				if ((extract_service_id == service_id) && (op_status == status_to_check))
+					puts "Service with id #{extract_service_id} has current op status: #{status_to_check}"
+					service_exists = true
 					end_loop = true
 				else
-					puts "Assembly with id #{extract_assembly_id} still does not have current op status: #{status_to_check}"
+					puts "Service with id #{extract_service_id} still does not have current op status: #{status_to_check}"
 				end		
 			else
-				puts "Assembly with id #{assembly_id} not found in list"
+				puts "Service with id #{service_id} not found in list"
 				end_loop = true		
 			end
 			
@@ -241,27 +241,27 @@ class DtkCommon
 			end				
 		end
 		puts ""
-		return assembly_exists
+		return service_exists
 	end
 
-	def set_attribute(assembly_id, attribute_name, attribute_value)
-		#Set attribute on particular assembly
+	def set_attribute(service_id, attribute_name, attribute_value)
+		#Set attribute on particular service
 		puts "Set attribute:", "--------------"
 		is_attributes_set = false
 
 		#Get attribute id for which value will be set
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
-		pretty_print_JSON(assembly_attributes)
-		attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		pretty_print_JSON(service_attributes)
+		attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
 
 		#Set attribute value for given attribute id
-		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :value=>attribute_value, :pattern=>attribute_id})
+		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id})
 
-		puts "List of assembly attributes after adding #{attribute_value} value for #{attribute_name} attribute name:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
-		pretty_print_JSON(assembly_attributes)
-		extract_attribute_value = attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
+		puts "List of service attributes after adding #{attribute_value} value for #{attribute_name} attribute name:"
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		pretty_print_JSON(service_attributes)
+		extract_attribute_value = attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
 
 		if (extract_attribute_value == attribute_value)
 			puts "Setting of #{attribute_name} attribute completed successfully!"
@@ -271,17 +271,16 @@ class DtkCommon
 		return is_attributes_set
 	end
 
-	def get_attribute_value(assembly_id, node_name, component_name, attribute_name)
+	def get_attribute_value(service_id, node_name, component_name, attribute_name)
 		puts "Get attribute value by name:", "----------------------------"
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(service_attributes)
 
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
-		pretty_print_JSON(assembly_attributes)
-
-		attributes = assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first
+		attributes = service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first
 
 		if (!attributes.nil?)
-			attribute_value = assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first['value']
+			attribute_value = service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first['value']
 			puts "Attribute value is: #{attribute_value}"
 		else
 			puts "Some of the input parameters is incorrect or missing. Node name: #{node_name}, Component name: #{component_name}, Attribute name: #{attribute_name}"
@@ -290,17 +289,17 @@ class DtkCommon
 		return attribute_value
 	end
 
-	def check_attribute_presence_in_nodes(assembly_id, node_name, attribute_name_to_check, attribute_value_to_check)
+	def check_attribute_presence_in_nodes(service_id, node_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in nodes:", "----------------------------------"		
 		attribute_check = false
 		#Get attribute and check if attribute name and attribute value exists
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
-		pretty_print_JSON(assembly_attributes)
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(service_attributes)
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" }.first)		
+		if (service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
-			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
+			attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
 			if (!attribute_value.nil?)
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
@@ -320,19 +319,19 @@ class DtkCommon
 		return attribute_check
 	end
 
-	def check_attribute_presence_in_components(assembly_id, node_name, component_name, attribute_name_to_check, attribute_value_to_check)
+	def check_attribute_presence_in_components(service_id, node_name, component_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in components:", "---------------------------------------"
 		attribute_check = false
 		#Get attribute and check if attribute name and attribute value exists
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
-		pretty_print_JSON(assembly_attributes)
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(service_attributes)
 
 		puts "#{node_name}/#{component_name}/#{attribute_name_to_check}" 
 
-		if (assembly_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" }.first)		
+		if (service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name_to_check}" }.first)		
 			attribute_name = attribute_name_to_check
-			attribute_value = assembly_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
+			attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value_to_check }.first
 
 			if (!attribute_value.nil?)
 				puts "Attribute #{attribute_name_to_check} with value #{attribute_value_to_check} exists!" 
@@ -353,13 +352,13 @@ class DtkCommon
 		return attribute_check
 	end
 
-	def check_params_presence_in_nodes(assembly_id, node_name, param_name_to_check, param_value_to_check)
+	def check_params_presence_in_nodes(service_id, node_name, param_name_to_check, param_value_to_check)
 		puts "Check params presence in nodes:", "-------------------------------"
 		param_check = false
-		puts "List of assembly nodes:"
-		assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
-		pretty_print_JSON(assembly_nodes)
-		node_content = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first
+		puts "List of service nodes:"
+		service_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+		pretty_print_JSON(service_nodes)
+		node_content = service_nodes['data'].select { |x| x['display_name'] == node_name }.first
 
  		if (!node_content.nil?)
 			parameter = node_content[param_name_to_check]
@@ -379,12 +378,12 @@ class DtkCommon
 		return param_check
 	end
 
-	def check_component_depedency(assembly_id, source_component, dependency_component, dependency_satisfied_by)
+	def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
 		puts "Check component dependency:", "---------------------------"
 		dependency_found = false
 
-		puts "List assembly components with dependencies:"
-		components_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
+		puts "List service components with dependencies:"
+		components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
 		component = components_list['data'].select { |x| x['display_name'] == source_component}.first
 
 		if (!component.nil?)
@@ -415,11 +414,11 @@ class DtkCommon
 		return dependency_found
 	end
 
-	def converge_assembly(assembly_id, max_num_of_retries=10)
-		puts "Converge assembly:", "------------------"
-		assembly_converged = false
-		puts "Converge process for assembly with id #{assembly_id} started!"
-		create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => assembly_id})
+	def converge_service(service_id, max_num_of_retries=10)
+		puts "Converge service:", "-----------------"
+		service_converged = false
+		puts "Converge process for service with id #{service_id} started!"
+		create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => service_id})
 
 		if (@error_message == "")
 			task_id = create_task_response['data']['task_id']
@@ -436,7 +435,7 @@ class DtkCommon
 				status = response_task_status['data']['status']
 				if (status.include? 'succeeded')
 					task_status = status
-					assembly_converged = true
+					service_converged = true
 					puts "Task execution status: #{task_status}"
 					puts "Converge process finished successfully!"
 				elsif (status.include? 'failed')
@@ -454,35 +453,35 @@ class DtkCommon
 				end
 			end
 		else
-			puts "Assembly was not converged successfully!"
+			puts "Service was not converged successfully!"
 		end
 
 		puts ""
-		return assembly_converged
+		return service_converged
 	end
 
-	def stop_running_assembly(assembly_id)
-		puts "Stop running assembly:", "----------------------"
-		assembly_stopped = false
-		stop_assembly_response = send_request('/rest/assembly/stop', {:assembly_id => assembly_id})
+	def stop_running_service(service_id)
+		puts "Stop running service:", "---------------------"
+		service_stopped = false
+		stop_service_response = send_request('/rest/assembly/stop', {:assembly_id => service_id})
 
-		if (stop_assembly_response['data']['status'] == "ok")
-			puts "Assembly stopped successfully!"
-			assembly_stopped = true
+		if (stop_service_response['data']['status'] == "ok")
+			puts "Service stopped successfully!"
+			service_stopped = true
 		else
-			puts "Assembly was not stopped successfully!"
+			puts "Service was not stopped successfully!"
 		end
 		puts ""
-		return assembly_stopped
+		return service_stopped
 	end
 
-	def stop_running_node(assembly_id, node_name)
+	def stop_running_node(service_id, node_name)
 		puts "Stop running node:", "------------------"
 		node_stopped = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		stop_node_response = send_request('/rest/assembly/stop', {:assembly_id => assembly_id, :node_pattern => node_id})
+		stop_node_response = send_request('/rest/assembly/stop', {:assembly_id => service_id, :node_pattern => node_id})
 
 		if (stop_node_response['data']['status'] == "ok")
 			puts "Node #{node_name} stopped successfully!"
@@ -494,10 +493,10 @@ class DtkCommon
 		return node_stopped
 	end
 
-	def start_running_assembly(assembly_id)
-		puts "Start assembly:", "---------------"
-		assembly_started = false
-		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>nil})
+	def start_running_service(service_id)
+		puts "Start service:", "--------------"
+		service_started = false
+		response = send_request('/rest/assembly/start', {:assembly_id => service_id, :node_pattern=>nil})
 		pretty_print_JSON(response)
 		task_id = response['data']['task_id']
 		response = send_request('/rest/task/execute', {:task_id=>task_id})
@@ -510,7 +509,7 @@ class DtkCommon
 			while (end_loop == false)
 				sleep 10
 		    	count += 1
-				response = send_request('/rest/assembly/info_about', {:assembly_id => assembly_id, :subtype => 'instance', :about => 'tasks'})
+				response = send_request('/rest/assembly/info_about', {:assembly_id => service_id, :subtype => 'instance', :about => 'tasks'})
 				puts "Start instance check:"
 				status = response['data'].select { |x| x['status'] == 'executing'}.first
 				pretty_print_JSON(status)
@@ -520,7 +519,7 @@ class DtkCommon
 					end_loop = true
 				elsif (status.nil?)
 					puts "Instance started!"
-					assembly_started = true
+					service_started = true
 					end_loop = true
 				end				
 			end
@@ -528,16 +527,16 @@ class DtkCommon
 			puts "Start instance is not completed successfully!"
 		end
 		puts ""
-		return assembly_started
+		return service_started
 	end
 
-	def start_running_node(assembly_id, node_name)
+	def start_running_node(service_id, node_name)
 		puts "Start running node:", "-------------------"
 		node_started = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		response = send_request('/rest/assembly/start', {:assembly_id => assembly_id, :node_pattern=>node_id})
+		response = send_request('/rest/assembly/start', {:assembly_id => service_id, :node_pattern=>node_id})
 		task_id = response['data']['task_id']
 		response = send_request('/rest/task/execute', {:task_id=>task_id})
 
@@ -549,7 +548,7 @@ class DtkCommon
 			while (end_loop == false)
 				sleep 10
 		    	count += 1
-				response = send_request('/rest/assembly/info_about', {:assembly_id => assembly_id, :subtype => 'instance', :about => 'tasks'})
+				response = send_request('/rest/assembly/info_about', {:assembly_id => service_id, :subtype => 'instance', :about => 'tasks'})
 				puts "Start instance check:"
 				status = response['data'].select { |x| x['status'] == 'executing'}.first
 				pretty_print_JSON(status)
@@ -570,7 +569,7 @@ class DtkCommon
 		return node_started
 	end
 
-	def grep_node(assembly_id, node_name, log_location, grep_pattern)
+	def grep_node(service_id, node_name, log_location, grep_pattern)
 		puts "Grep node:","----------"
 		grep_pattern_found = false
 
@@ -582,7 +581,7 @@ class DtkCommon
 			sleep 10
 		    count += 1
 
-		    response = send_request('/rest/assembly/initiate_grep', {:assembly_id => assembly_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
+		    response = send_request('/rest/assembly/initiate_grep', {:assembly_id => service_id, :subtype=>'instance', :log_path=>log_location, :node_pattern=>node_name, :grep_pattern=>grep_pattern, :stop_on_first_match =>false})
 			action_results_id = response['data']['action_results_id']
 
 			if (count > max_num_of_retries)
@@ -611,66 +610,65 @@ class DtkCommon
 		return grep_pattern_found
 	end
 
-	def delete_and_destroy_assembly(assembly_id)
-		#Cleanup step - Delete and destroy assembly
-		puts "Delete and destroy assembly:", "----------------------------"
-		assembly_deleted = false
-		delete_assembly_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_id})
+	def delete_and_destroy_service(service_id)
+		#Cleanup step - Delete and destroy service
+		puts "Delete and destroy service:", "---------------------------"
+		service_deleted = false
+		delete_service_response = send_request('/rest/assembly/delete', {:assembly_id=>service_id})
 
-		if (delete_assembly_response['status'] == "ok")
-			puts "Assembly deleted successfully!"
-			assembly_deleted = true
+		if (delete_service_response['status'] == "ok")
+			puts "Service deleted successfully!"
+			service_deleted = true
 		else
-			puts "Assembly was not deleted successfully!"
+			puts "Service was not deleted successfully!"
+		end
+		puts ""
+		return service_deleted
+	end
+
+	def delete_assembly(assembly_name)
+		#Cleanup step - Delete assembly
+		puts "Delete assembly:", "----------------"
+		assembly_deleted = false
+		assembly_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
+		if (assembly_list['data'].select { |x| x['display_name'] == assembly_name }.first)
+			puts "Assembly exists in assembly list. Proceed with deleting assembly..."
+			delete_assembly_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_name, :subtype=>:template})
+
+			if (delete_assembly_response['status'] == "ok")
+				puts "Assembly #{assembly_name} deleted successfully!"
+				assembly_deleted = true
+			else
+				puts "Assembly #{assembly_name} was not deleted successfully!"
+			end
+		else
+			puts "Assembly does not exist in assembly template list."
 		end
 		puts ""
 		return assembly_deleted
 	end
 
-	def delete_assembly_template(assembly_template_name)
-		#Cleanup step - Delete assembly template
-		puts "Delete assembly template:", "-------------------------"
-		assembly_templated_deleted = false
-		assembly_template_list = send_request('/rest/assembly/list', {:detail_level=>"nodes", :subtype=>"template"})
-		if (assembly_template_list['data'].select { |x| x['display_name'] == assembly_template_name }.first)
-			puts "Assembly template exists in assembly template list. Proceed with deleting assembly template..."
-			delete_assembly_template_response = send_request('/rest/assembly/delete', {:assembly_id=>assembly_template_name, :subtype=>:template})
-
-			if (delete_assembly_template_response['status'] == "ok")
-				puts "Assembly template #{assembly_template_name} deleted successfully!"
-				assembly_templated_deleted = true
-			else
-				puts "Assembly template #{assembly_template_name} was not deleted successfully!"
-			end
+	def create_assembly_from_service(service_id, service_module_name, assembly_name)
+		puts "Create assembly from service:", "-----------------------------"
+		assembly_created = false	
+		create_assembly_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_module_name, :assembly_id=>service_id, :assembly_template_name=>assembly_name})
+		if (create_assembly_response['status'] == 'ok')
+			puts "Assembly #{assembly_name} created in service module #{service_module_name}"
+			assembly_created = true
 		else
-			puts "Assembly template does not exist in assembly template list."
+			puts "Assembly #{assembly_name} was not created in service module #{service_module_name}" 
 		end
 		puts ""
-		return assembly_templated_deleted
+		return assembly_created
 	end
 
-	def create_assembly_template_from_assembly(assembly_id, service_name, assembly_template_name)
-		puts "Create assembly template from assembly:", "---------------------------------------"
-		template_created = false	
-		create_assembly_template_response = send_request('/rest/assembly/promote_to_template', {:service_module_name=>service_name, :assembly_id=>assembly_id, :assembly_template_name=>assembly_template_name})
-		if (create_assembly_template_response['status'] == 'ok')
-			puts "Assembly template #{assembly_template_name} created in service #{service_name}"
-			template_created = true
-		else
-			puts "Assembly template #{assembly_template_name} was not created in service #{service_name}" 
-		end
-		puts ""
-		return template_created
-	end
-
-	def netstats_check(assembly_id, port)
+	def netstats_check(service_id, port)
 		puts "Netstats check:", "---------------"
-		sleep 10 #Before initiating netstats check, wait for services to be up
  		netstats_check = false
 
 		end_loop = false
 		count = 0
-		max_num_of_retries = 10
+		max_num_of_retries = 15
 
 		while (end_loop == false)
 			sleep 10
@@ -681,7 +679,7 @@ class DtkCommon
 				end_loop = true
 			end
 
-			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>assembly_id})
+			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>nil, :assembly_id=>service_id})
 			action_results_id = response['data']['action_results_id']
 
 			5.downto(1) do |i|
@@ -710,168 +708,168 @@ class DtkCommon
 		return netstats_check
 	end
 
-	def import_remote_module(module_to_import)
-		puts "Import remote module:", "---------------------"
-		module_imported = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def import_remote_component_module(component_module_to_import)
+		puts "Import remote component module:", "-------------------------------"
+		component_module_imported = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 		
-		if (modules_list['data'].select { |x| x['display_name'] == module_to_import }.first)
-			puts "Module #{module_to_import} already exists in module list."
-			module_imported = false
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_to_import }.first)
+			puts "Component module #{component_module_to_import} already exists in component module list."
+			component_module_imported = false
 		else
-			puts "Module not found in module list. Checking if module exist on remote repo..."
-			remote_modules_list = send_request('/rest/component_module/list_remote', {})
+			puts "Component module not found in component module list. Checking if component module exist on remote repo..."
+			remote_component_modules_list = send_request('/rest/component_module/list_remote', {})
 
-			if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_import}.first)
-				puts "Module specified found in list of remote modules. Try to import module..."
-				import_response = send_request('/rest/component_module/import', {:remote_module_name=>module_to_import, :local_module_name=>module_to_import})
-				puts "Module import response:"
+			if (remote_component_modules_list['data'].select { |x| x['display_name'].include? component_module_to_import}.first)
+				puts "Component module specified found in list of remote component modules. Try to import component module..."
+				import_response = send_request('/rest/component_module/import', {:remote_module_name=>component_module_to_import, :local_module_name=>component_module_to_import})
+				puts "Component module import response:"
 				pretty_print_JSON(import_response)
-				modules_list = send_request('/rest/component_module/list', {})
-				puts "List of avaliable modules:"
-				pretty_print_JSON(modules_list)
+				component_modules_list = send_request('/rest/component_module/list', {})
+				puts "List of avaliable component modules:"
+				pretty_print_JSON(component_modules_list)
 
-				if (import_response['status'] == 'ok' && modules_list['data'].select { |x| x['display_name'] == module_to_import }.first)
-					puts "Module imported successfully from remote repo."
-					module_imported = true
+				if (import_response['status'] == 'ok' && component_modules_list['data'].select { |x| x['display_name'] == component_module_to_import }.first)
+					puts "Component module imported successfully from remote repo."
+					component_module_imported = true
 				else
-					puts "Module was not imported from remote repo successfully."
-					module_imported = false
+					puts "Component module was not imported from remote repo successfully."
+					component_module_imported = false
 				end
 			else
-				puts "Module specified was not found in list of remote modules."				
-				module_imported = false
+				puts "Componetn module specified was not found in list of remote component modules."				
+				component_module_imported = false
 			end
 		end
 		puts ""
-		return module_imported
+		return component_module_imported
 	end
 
-	def check_if_module_exists(module_name)
-		puts "Check if module exists:", "-----------------------"
-		module_exists = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def check_if_component_module_exists(component_module_name)
+		puts "Check if component module exists:", "---------------------------------"
+		component_module_exists = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name }.first)
-			puts "Module #{module_name} exists in module list."
-			module_exists = true
+		if (modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+			puts "Component module #{component_module_name} exists in module list."
+			component_module_exists = true
 		else
-			puts "Module #{module_name} does not exist in module list"
+			puts "Component module #{component_module_name} does not exist in module list"
 		end
 		puts ""
-		return module_exists
+		return component_module_exists
 	end
 
-	def export_module_to_remote(module_to_export, namespace)
-		puts "Export module to remote:", "------------------------"
-		module_exported = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def export_component_module_to_remote(component_module_to_export, namespace)
+		puts "Export component module to remote:", "----------------------------------"
+		component_module_exported = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_to_export }.first)
-			puts "Module #{module_to_export} exists in module list. Check if module exists on remote repo already..."
-			remote_modules_list = send_request('/rest/component_module/list_remote', {})
-			pretty_print_JSON(remote_modules_list)
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_to_export }.first)
+			puts "Component module #{component_module_to_export} exists in component module list. Check if component module exists on remote repo already..."
+			remote_component_modules_list = send_request('/rest/component_module/list_remote', {})
+			pretty_print_JSON(remote_component_modules_list)
 
-			if (remote_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{module_to_export}"}.first)
-   			puts "Module #{module_to_export} was found in list of remote modules."
-   			module_exported = false
+			if (remote_component_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{component_module_to_export}"}.first)
+   			puts "Component module #{component_module_to_export} was found in list of remote component modules."
+   			component_module_exported = false
 			else
-				puts "Module #{module_to_export} was not found in list of remote modules. Proceed with export of module..."
-				component_module_id = modules_list['data'].select { |x| x['display_name'] == module_to_export}.first['id']
+				puts "Component module #{component_module_to_export} was not found in list of remote component modules. Proceed with export of component module..."
+				component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_to_export}.first['id']
 
-				export_response = send_request('/rest/component_module/export', {:remote_component_name=>"#{namespace}/#{module_to_export}", :component_module_id=>component_module_id})
+				export_response = send_request('/rest/component_module/export', {:remote_component_name=>"#{namespace}/#{component_module_to_export}", :component_module_id=>component_module_id})
 
-				puts "Module export response:"
+				puts "Componetn module export response:"
 				pretty_print_JSON(export_response)
-				remote_modules_list = send_request('/rest/component_module/list_remote', {})
+				remote_component_modules_list = send_request('/rest/component_module/list_remote', {})
 
-				if (remote_modules_list['data'].select { |x| x['display_name'].include? module_to_export}.first)
-					puts "Module #{module_to_export} exported successfully in namespace #{namespace}"
-					module_exported = true
+				if (remote_component_modules_list['data'].select { |x| x['display_name'].include? component_module_to_export}.first)
+					puts "Component module #{component_module_to_export} exported successfully in namespace #{namespace}"
+					component_module_exported = true
 				else
-					puts "Module #{module_to_export} was not exported successfully in namespace #{namespace}"
-					module_exported = false
+					puts "Component module #{component_module_to_export} was not exported successfully in namespace #{namespace}"
+					component_module_exported = false
 				end			
 			end
 		else
-			puts "Module #{module_to_export} not found in module list and therefore cannot be exported"
-			module_exported = false
+			puts "Component module #{componet_module_to_export} not found in component module list and therefore cannot be exported"
+			component_module_exported = false
 		end
 		puts ""
-		return module_exported
+		return component_module_exported
 	end
 
-	def delete_module_from_remote(module_name, namespace)
-		puts "Delete module from remote:", "--------------------------"
-		module_deleted = false
+	def delete_component_module_from_remote(component_module_name, namespace)
+		puts "Delete component module from remote:", "------------------------------------"
+		component_module_deleted = false
 
-		remote_modules_list = send_request('/rest/component_module/list_remote', {})
-		puts "List of remote modules:"
-		pretty_print_JSON(remote_modules_list)
+		remote_component_modules_list = send_request('/rest/component_module/list_remote', {})
+		puts "List of remote component modules:"
+		pretty_print_JSON(remote_component_modules_list)
 
-		if (remote_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{module_name}" }.first)
-			puts "Module #{module_name} in #{namespace} namespace exists. Proceed with deleting this module..."
-			delete_remote_module = send_request('/rest/component_module/delete_remote', {:remote_module_name=>module_name, :remote_module_namespace=>namespace})
+		if (remote_component_modules_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{component_module_name}" }.first)
+			puts "Component module #{component_module_name} in #{namespace} namespace exists. Proceed with deleting this component module..."
+			delete_remote_module = send_request('/rest/component_module/delete_remote', {:remote_module_name=>component_module_name, :remote_module_namespace=>namespace})
 			if (delete_remote_module['status'] == 'ok')
-				puts "Module #{module_name} in #{namespace} deleted from remote!"
-				module_deleted = true
+				puts "Component module #{component_module_name} in #{namespace} deleted from remote!"
+				component_module_deleted = true
 			else
-				puts "Module #{module_name} in #{namespace} was not deleted from remote!"
-				module_deleted = false				
+				puts "Component module #{component_module_name} in #{namespace} was not deleted from remote!"
+				component_module_deleted = false				
 			end
 		else
-			puts "Module #{module_name} in #{namespace} namespace does not exist!"
-			module_deleted = false
+			puts "Component module #{component_module_name} in #{namespace} namespace does not exist!"
+			component_module_deleted = false
 		end
 		puts ""
-		return module_deleted
+		return component_module_deleted
 	end
 
-	def get_module_components_list(module_name, filter_version)
-		puts "Get module components list:", "---------------------------"
+	def get_component_module_components_list(component_module_name, filter_version)
+		puts "Get component module components list:", "-------------------------------------"
 		component_ids_list = Array.new()
-		modules_list = send_request('/rest/component_module/list', {})
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
-			puts "Module #{module_name} exists in the list. Get component module id..."
-			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+			puts "Component module #{component_module_name} exists in the list. Get component module id..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
 			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
-			puts "List of module components:"
+			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
 			module_components_list['data'].each do |x|
 				if (filter_version != "")
 					@component_module_id_list << x['id'] if x['version'] == filter_version
-					puts "module component: #{x['display_name']}"
+					puts "Component module component: #{x['display_name']}"
 				else
 					@component_module_id_list << x['id'] if x['version'] == nil
-					puts "module component: #{x['display_name']}"
+					puts "Component module component: #{x['display_name']}"
 				end
 			end
 		end
 		puts ""
 	end
 
-	def get_module_attributes_list(module_name, filter_component)
+	def get_component_module_attributes_list(component_module_name, filter_component)
 		#Filter component used on client side after retrieving all attributes from all components
 		puts "Get module attributes list:", "---------------------------"
 		attribute_list = Array.new()
-		modules_list = send_request('/rest/component_module/list', {})
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
-			puts "Module #{module_name} exists in the list. Get component module id..."
-			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
-			module_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
-			puts "List of module attributes:"
-			pretty_print_JSON(module_attributes_list)
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+			puts "Component module #{component_module_name} exists in the list. Get component module id..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
+			component_module_attributes_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			puts "List of component module attributes:"
+			pretty_print_JSON(component_module_attributes_list)
 
-			module_attributes_list['data'].each do |x|
+			component_module_attributes_list['data'].each do |x|
 				if (filter_component != "")
 					attribute_list << x['display_name'] if x['display_name'].include? filter_component
-					puts "module attribute: #{x['display_name']}"
+					puts "Component module attribute: #{x['display_name']}"
 				else
 					attribute_list << x['display_name']
-					puts "module attribute: #{x['display_name']}"
+					puts "Component module attribute: #{x['display_name']}"
 				end
 			end
 		end
@@ -879,17 +877,17 @@ class DtkCommon
 		return attribute_list
 	end
 
-	def get_module_attributes_list_by_component(module_name, component_name)
-		#Filter by component name used on server side to retrieve only attributes for specific component in module
-		puts "Get module attributes list by component:", "----------------------------------------"
+	def get_component_module_attributes_list_by_component(component_module_name, component_name)
+		#Filter by component name used on server side to retrieve only attributes for specific component in component module
+		puts "Get component module attributes list by component:", "--------------------------------------------------"
 		attribute_list = Array.new()
-		modules_list = send_request('/rest/component_module/list', {})
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
-			puts "Module #{module_name} exists in the list. Get component module id..."
-			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+			puts "Component module #{component_module_name} exists in the list. Get component module id..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
 			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
-			puts "List of module components:"
+			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
 			if (module_components_list['data'].select { |x| x['display_name'] == component_name}.first)
@@ -909,16 +907,16 @@ class DtkCommon
 		return attribute_list
 	end
 
-	def get_attribute_value_from_module(module_name, component_name, attribute_name)
-		puts "Get attribute value from module:", "--------------------------------"
-		modules_list = send_request('/rest/component_module/list', {})
+	def get_attribute_value_from_component_module(component_module_name, component_name, attribute_name)
+		puts "Get attribute value from component module:", "------------------------------------------"
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
-			puts "Module #{module_name} exists in the list. Get component module id..."
-			module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
-			module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>module_id})
-			pretty_print_JSON(module_attribute_list)
-			attribute_value = module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{module_name}::#{component_name}]/#{attribute_name}" }.first['value']
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+			puts "Component module #{component_module_name} exists in the list. Get component module id..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
+			component_module_attribute_list = send_request('/rest/component_module/info_about', {:about=>"attributes", :component_module_id=>component_module_id})
+			pretty_print_JSON(component_module_attribute_list)
+			attribute_value = component_module_attribute_list['data'].select { |x| x['display_name'] == "cmp[#{component_module_name}::#{component_name}]/#{attribute_name}" }.first['value']
 			puts attribute_value
 		end
 		
@@ -926,17 +924,17 @@ class DtkCommon
 		return attribute_value
 	end
 
-	def check_if_component_exists_in_module(module_name, filter_version, component_name)
-		puts "Check if component exists in module:", "------------------------------------"
-		component_exists_in_module = false
+	def check_if_component_exists_in_component_module(component_module_name, filter_version, component_name)
+		puts "Check if component exists in component module:", "----------------------------------------------"
+		component_exists_in_component_module = false
 		component_names_list = Array.new()
-		modules_list = send_request('/rest/component_module/list', {})
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name}.first)
-			puts "Module #{module_name} exists in the list. Get component module id..."
-			component_module_id = modules_list['data'].select { |x| x['display_name'] == module_name}.first['id']
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first)
+			puts "Component module #{component_module_name} exists in the list. Get component module id..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name}.first['id']
 			module_components_list = send_request('/rest/component_module/info_about', {:about=>"components", :component_module_id=>component_module_id})
-			puts "List of module components:"
+			puts "List of component module components:"
 			pretty_print_JSON(module_components_list)
 
 			module_components_list['data'].each do |x|
@@ -952,26 +950,26 @@ class DtkCommon
 
 		if component_names_list.include? component_name
 			puts "Component names list includes #{component_name}"
-			component_exists_in_module = true
+			component_exists_in_component_module = true
 		else
 			puts "Component names list does not include #{component_name}"
 		end
 		puts ""
-		return component_exists_in_module
+		return component_exists_in_component_module
 	end
 
-	def add_component_by_name_to_assembly_node(assembly_id, node_name, component_name)
-		puts "Add component to assembly node:", "-------------------------------"
+	def add_component_by_name_to_service_node(service_id, node_name, component_name)
+		puts "Add component to service node:", "------------------------------"
 		component_added = false
-		assembly_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+		service_nodes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
 
-		if (assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first)
-			puts "Node #{node_name} exists in assembly. Get node id..."
-			node_id = assembly_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
-			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>assembly_id})
+		if (service_nodes['data'].select { |x| x['display_name'] == node_name }.first)
+			puts "Node #{node_name} exists in service. Get node id..."
+			node_id = service_nodes['data'].select { |x| x['display_name'] == node_name }.first['id']
+			component_add_response = send_request('/rest/assembly/add_component', {:node_id=>node_id, :component_template_id=>component_name, :assembly_id=>service_id})
 
 			if (component_add_response['status'] == 'ok')
-				puts "Component #{component_name} added to assembly!"
+				puts "Component #{component_name} added to service!"
 				component_added = true
 			end
 		end
@@ -979,283 +977,282 @@ class DtkCommon
 		return component_added
 	end
 
-	def delete_module(module_to_delete)
-		puts "Delete module:", "--------------"
-		module_deleted = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def delete_component_module(component_module_to_delete)
+		puts "Delete component module:", "------------------------"
+		component_module_deleted = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_to_delete }.first)
-			puts "Module #{module_to_delete} exists in module list. Try to delete module..."
-			delete_response = send_request('/rest/component_module/delete', {:component_module_id=>module_to_delete})
-			puts "Module delete response:"
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_to_delete }.first)
+			puts "Component module #{component_module_to_delete} exists in component module list. Try to delete component module..."
+			delete_response = send_request('/rest/component_module/delete', {:component_module_id=>component_module_to_delete})
+			puts "Component module delete response:"
 			pretty_print_JSON(delete_response)
 
-			if (delete_response['status'] == 'ok' && modules_list['data'].select { |x| x['module_name'] == nil })
-				puts "Module #{module_to_delete} deleted successfully"
-				module_deleted = true
+			if (delete_response['status'] == 'ok' && component_modules_list['data'].select { |x| x['module_name'] == nil })
+				puts "Component module #{component_module_to_delete} deleted successfully"
+				component_module_deleted = true
 			else
-				puts "Module #{module_to_delete} was not deleted successfully"
-				module_deleted = false
+				puts "Component module #{component_module_to_delete} was not deleted successfully"
+				component_module_deleted = false
 			end
 		else
-			puts "Module #{module_to_delete} does not exist in module list and therefore cannot be deleted."
-			module_deleted = false
+			puts "Component module #{component_module_to_delete} does not exist in component module list and therefore cannot be deleted."
+			component_module_deleted = false
 		end
 		puts ""
-		return module_deleted
+		return component_module_deleted
 	end
 
-	def create_new_module_version(module_name, version)
-		puts "Create new module version:", "--------------------------"
-		module_versioned = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def create_new_component_module_version(component_module_name, version)
+		puts "Create new component module version:", "------------------------------------"
+		component_module_versioned = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name }.first)
-			puts "Module #{module_name} exists in module list. Try to version module..."
-			module_id = modules_list['data'].select { |x| x['display_name'] == module_name }.first['id']
-			versioning_response = send_request('/rest/component_module/create_new_version', {:version=>version, :component_module_id=>module_id})
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+			puts "Component module #{component_module_name} exists in component module list. Try to version component module..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first['id']
+			versioning_response = send_request('/rest/component_module/create_new_version', {:version=>version, :component_module_id=>component_module_id})
 			puts "Versioning response:"
 			pretty_print_JSON(versioning_response)
-			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
-			pretty_print_JSON(modules_list)
+			puts "Component module list response:"
+			component_modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
+			pretty_print_JSON(component_modules_list)
 
-			if (versioning_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
-				puts "Module #{module_name} versioned successfully."
-				module_versioned = true
+			if (versioning_response['status'] == 'ok' && component_modules_list['data'].select { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) }.first)
+				puts "Component module #{component_module_name} versioned successfully."
+				component_module_versioned = true
 			else
-				puts "Module #{module_name} was not versioned successfully."
-				module_versioned = false
+				puts "Component module #{component_module_name} was not versioned successfully."
+				component_module_versioned = false
 			end
 		else
-			puts "Module #{module_name} does not exist in module list and therefore cannot be versioned."
-			module_versioned = false
+			puts "Component module #{component_module_name} does not exist in component module list and therefore cannot be versioned."
+			component_module_versioned = false
 		end
 		puts ""
-		return module_versioned
+		return component_module_versioned
 	end
 
-	def import_versioned_module_from_remote(module_name, version)
-		puts "Import versioned module from remote:", "------------------------------------"
-		module_imported = false
-		modules_list = send_request('/rest/component_module/list', {})
+	def import_versioned_component_module_from_remote(component_module_name, version)
+		puts "Import versioned component module from remote:", "----------------------------------------------"
+		component_module_imported = false
+		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == module_name }.first)
-			puts "Module #{module_name} exists in module list. Try to import versioned module..."
-			module_id = modules_list['data'].select { |x| x['display_name'] == module_name }.first['id']
-			import_response = send_request('/rest/component_module/import_version', {:version=>version, :component_module_id=>module_id})
-			puts "Import versioned module response:"
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+			puts "Component module #{component_module_name} exists in component module list. Try to import versioned component module..."
+			component_module_id = component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first['id']
+			import_response = send_request('/rest/component_module/import_version', {:version=>version, :component_module_id=>component_module_id})
+			puts "Import versioned component module response:"
 			pretty_print_JSON(import_response)
-			puts "Module list response:"
-			modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
-			pretty_print_JSON(modules_list)
+			puts "Component module list response:"
+			component_modules_list = send_request('/rest/component_module/list', {:detail_to_include=>["versions"]})
+			pretty_print_JSON(component_modules_list)
 
-			if (import_response['status'] == 'ok' && modules_list['data'].select { |x| (x['display_name'] == module_name) && (x['versions'].include? version) }.first)
-				puts "Versioned module imported successfully."
-				module_imported = true
+			if (import_response['status'] == 'ok' && component_modules_list['data'].select { |x| (x['display_name'] == component_module_name) && (x['versions'].include? version) }.first)
+				puts "Versioned component module imported successfully."
+				component_module_imported = true
 			else
-				puts "Versioned module was not imported successfully."
-				module_imported = false
+				puts "Versioned component module was not imported successfully."
+				component_module_imported = false
 			end
 		else
-			puts "Module #{module_name} does not exist in module list and therefore versioned module cannot be imported."
-			module_imported = false
+			puts "Component module #{component_module_name} does not exist in component module list and therefore versioned component module cannot be imported."
+			component_module_imported = false
 		end
 		puts ""
-		return module_imported
+		return component_module_imported
 	end
 
-	def create_new_service(service_name)
-		puts "Create new service:", "-------------------"
-		service_created = false
-		service_list = send_request('/rest/service_module/list', {})
+	def import_new_service_module(service_module_name)
+		puts "Import new service module:", "--------------------------"
+		service_module_created = false
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service already exists with name #{service_name}."
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service module already exists with name #{service_module_name}."
 		else
-			puts "Service does not exist. Try to create service with name #{service_name}..."
-			create_service_response = send_request('/rest/service_module/create', {:module_name=>service_name})
-			puts "Service create response:"
-			pretty_print_JSON(create_service_response)
+			puts "Service module does not exist. Try to create service module with name #{service_module_name}..."
+			import_service_module_response = send_request('/rest/service_module/create', {:module_name=>service_module_name})
+			puts "Service module import response:"
+			pretty_print_JSON(import_service_module_response)
 
-			service_module = create_service_response['data']['service_module_id']
-			service_list = send_request('/rest/service_module/list', {})
+			service_module_list = send_request('/rest/service_module/list', {})
 			puts "Service list response:"
-			pretty_print_JSON(service_list)
+			pretty_print_JSON(service_module_list)
 
-			if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-				puts "New service #{service_name} added successfully."
-				service_created = true
+			if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+				puts "New service module #{service_module_name} has been added successfully."
+				service_module_created = true
 			else
-				puts "New service #{service_name} was not added successfully."
+				puts "New service module #{service_module_name} was not added successfully."
 			end
 		end
 		puts ""
-		return service_created
+		return service_module_created
 	end
 
-	def check_if_service_exists(service_name)
-		puts "Check if service exists:", "------------------------"
-		service_exists = false
-		service_list = send_request('/rest/service_module/list', {})
+	def check_if_service_module_exists(service_module_name)
+		puts "Check if service module exists:", "-------------------------------"
+		service_module_exists = false
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service #{service_name} exists."
-			service_exists = true
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service #{service_module_name} exists."
+			service_module_exists = true
 		else
-			puts "Service #{service_name} does not exist!"
+			puts "Service #{service_module_name} does not exist!"
 		end
 		puts ""
-		return service_exists
+		return service_module_exists
 	end
 
-	def check_if_service_exists_on_remote(service_name, namespace)
-		puts "Check if service exists on remote:", "----------------------------------"
-		service_exists = false
+	def check_if_service_module_exists_on_remote(service_module_name, namespace)
+		puts "Check if service module exists on remote:", "-----------------------------------------"
+		service_module_exists = false
 		service_remote_list = send_request('/rest/service_module/list_remote', {})
-		puts "Service list on remote:"
+		puts "Service module list on remote:"
 		pretty_print_JSON(service_remote_list)
 
-		if (service_remote_list['data'].select { |x| x['display_name'] == "#{namespace}/#{service_name}" }.first)
-			puts "Service #{service_name} with namespace #{namespace} exists on remote repo!"
-			service_exists = true
+		if (service_remote_list['data'].select { |x| x['display_name'] == "#{namespace}/#{service_module_name}" }.first)
+			puts "Service module #{service_module_name} with namespace #{namespace} exists on remote repo!"
+			service_module_exists = true
 		else
-			puts "Service #{service_name} with namespace #{namespace} does not exist on remote repo!"
+			puts "Service module #{service_module_name} with namespace #{namespace} does not exist on remote repo!"
 		end
 		puts ""
-		return service_exists
+		return service_module_exists
 	end
 
-	def export_service_to_remote(service_name, namespace)
-		puts "Export service to remote:", "-------------------------"
-		service_exported = false
-		service_list = send_request('/rest/service_module/list', {})
+	def export_service_module_to_remote(service_module_name, namespace)
+		puts "Export service module to remote:", "--------------------------------"
+		service_module_exported = false
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service #{service_name} exists in service list. Check if service exists on remote repo already..."
-			service_remote_list = send_request('/rest/service_module/list_remote', {})
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service module #{service_module_name} exists in service module list. Check if service module exists on remote repo already..."
+			service_remote_list = send_request('/rest/service_module_name_name/list_remote', {})
 
-			if (service_remote_list['data'].select { |x| x['display_name'].include? service_name}.first)
-   			puts "Service #{service_name} was found in list of remote services."
-   			service_exported = false
+			if (service_remote_list['data'].select { |x| x['display_name'].include? service_module_name }.first)
+   			puts "Service module #{service_module_name} was found in list of remote service modules."
+   			service_module_name_name_exported = false
 			else
-				puts "Service #{service_name} was not found in list of remote services. Proceed with export of service..."
-				service_module_id = service_list['data'].select { |x| x['display_name'] == service_name}.first['id']				
-				export_response = send_request('/rest/service_module/export', {:remote_component_name=>"#{namespace}/#{service_name}", :service_module_id=>service_module_id})
+				puts "Service module #{service_module_name} was not found in list of remote service modules. Proceed with export of service module..."
+				service_module_id = service_module_list['data'].select { |x| x['display_name'] == service_module_name}.first['id']				
+				export_response = send_request('/rest/service_module/export', {:remote_component_name=>"#{namespace}/#{service_module_name}", :service_module_id=>service_module_id})
 
-				puts "Service export response:"
+				puts "Service module export response:"
 				pretty_print_JSON(export_response)
-				service_remote_list = send_request('/rest/service_module/list_remote', {})
+				service_module_remote_list = send_request('/rest/service_module/list_remote', {})
 
-				if (service_remote_list['data'].select { |x| x['display_name'].include? service_name}.first)
-					puts "Service #{service_name} exported successfully in namespace #{namespace}"
-					service_exported = true
+				if (service_module_remote_list['data'].select { |x| x['display_name'].include? service_module_name}.first)
+					puts "Service module #{service_module_name} exported successfully in namespace #{namespace}"
+					service_module_exported = true
 				else
-					puts "Service #{service_name} was not exported successfully in namespace #{namespace}"
-					service_exported = false
+					puts "Service module #{service_module_name} was not exported successfully in namespace #{namespace}"
+					service_module_exported = false
 				end			
 			end
 		else
-			puts "Service #{service_name} not found in service list and therefore cannot be exported"
-			service_exported = false
+			puts "Service module #{service_module_name} not found in service list and therefore cannot be exported"
+			service_module_exported = false
 		end
 		puts ""
-		return service_exported
+		return service_module_exported
 	end
 
-	def delete_service(service_name)
-		puts "Delete service:", "---------------"
-		service_deleted = false
-		service_list = send_request('/rest/service_module/list', {})
+	def delete_service_module(service_module_name)
+		puts "Delete service module:", "----------------------"
+		service_module_deleted = false
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service exists in service list. Try to delete service #{service_name}..."
-			delete_service_response = send_request('/rest/service_module/delete', {:service_module_id=>service_name})
-			puts "Service delete response:"
-			pretty_print_JSON(delete_service_response)
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service module exists in service module list. Try to delete service module #{service_module_name}..."
+			delete_service_module_response = send_request('/rest/service_module/delete', {:service_module_id=>service_module_name})
+			puts "Service module delete response:"
+			pretty_print_JSON(delete_service_module_response)
 
-			service_list = send_request('/rest/service_module/list', {})
-			puts "Service list response:"
-			pretty_print_JSON(service_list)
+			service_module_list = send_request('/rest/service_module/list', {})
+			puts "Service module list response:"
+			pretty_print_JSON(service_module_list)
 
-			if (delete_service_response['status'] == 'ok' && !service_list['data'].select { |x| x['display_name'] == service_name }.first)
-				puts "Service #{service_name} deleted successfully."
-				service_deleted = true
+			if (delete_service_module_response['status'] == 'ok' && !service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+				puts "Service module #{service_name} deleted successfully."
+				service_module_deleted = true
 			else
-				puts "Service #{service_name} not deleted successfully."
-				service_deleted = false
+				puts "Service module #{service_name} was not deleted successfully."
+				service_module_deleted = false
 			end			
 		else
-			puts "Service #{service_name} does not exist in service list and therefore cannot be deleted."
-			service_deleted = false
+			puts "Service module #{service_name} does not exist in service module list and therefore cannot be deleted."
+			service_module_deleted = false
 		end
 		puts ""
-		return service_deleted
+		return service_module_deleted
 	end
 
-	def delete_service_from_remote(service_name, namespace)
-		puts "Delete service from remote:", "---------------------------"
-		service_deleted = false
+	def delete_service_module_from_remote(service_module_name, namespace)
+		puts "Delete service module from remote:", "----------------------------------"
+		service_module_deleted = false
 
-		service_remote_list = send_request('/rest/service_module/list_remote', {})
-		puts "List of remote services:"
-		pretty_print_JSON(service_remote_list)
+		service_module_remote_list = send_request('/rest/service_module/list_remote', {})
+		puts "List of remote service module:"
+		pretty_print_JSON(service_module_remote_list)
 
-		if (service_remote_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{service_name}" }.first)
-			puts "Service #{service_name} in #{namespace} namespace exists. Proceed with deleting this service..."
-			delete_remote_service = send_request('/rest/service_module/delete_remote', {:remote_service_name=>"#{namespace}/#{service_name}"})
-			if (delete_remote_service['status'] == 'ok')
-				puts "Service #{service_name} in #{namespace} deleted from remote!"
-				service_deleted = true
+		if (service_module_remote_list['data'].select { |x| x['display_name'].include? "#{namespace}/#{service_module_name}" }.first)
+			puts "Service module #{service_module_name} in #{namespace} namespace exists. Proceed with deleting this service module..."
+			delete_remote_service_module = send_request('/rest/service_module/delete_remote', {:remote_service_name=>"#{namespace}/#{service_module_name}"})
+			if (delete_remote_service_module['status'] == 'ok')
+				puts "Service module #{service_module_name} in #{namespace} deleted from remote!"
+				service_module_deleted = true
 			else
-				puts "Service #{service_name} in #{namespace} was not deleted from remote!"
-				service_deleted = false				
+				puts "Service module #{service_module_name} in #{namespace} was not deleted from remote!"
+				service_module_deleted = false				
 			end
 		else
-			puts "Service #{service_name} in #{namespace} namespace does not exist on remote!"
-			service_deleted = false
+			puts "Service module #{service_module_name} in #{namespace} namespace does not exist on remote!"
+			service_module_deleted = false
 		end
 		puts ""
-		return service_deleted
+		return service_module_deleted
 	end
 
-	def check_if_service_contains_assembly_template(service_name, assembly_template_name)
-		puts "Check if service contains assembly template:", "---------------"
-		service_contains_template = false
-		service_list = send_request('/rest/service_module/list', {})
+	def check_if_service_module_contains_assembly(service_module_name, assembly_name)
+		puts "Check if service module contains assembly:", "------------------------------------------"
+		service_module_contains_assembly = false
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service exists in service list. Try to find if #{assembly_template_name} belongs to #{service_name} service..."
-			service_id = service_list['data'].select { |x| x['display_name'] == service_name }.first['id']
-			service_templates_list = send_request('/rest/service_module/list_assemblies', {:service_module_id=>service_id})
-			puts "List of assembly templates that belong to service #{service_name}:"
-			pretty_print_JSON(service_templates_list)
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service module exists in service module list. Try to find if #{assembly_name} assembly belongs to #{service_module_name} service module..."
+			service_module_id = service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first['id']
+			service_module_assembly_list = send_request('/rest/service_module/list_assemblies', {:service_module_id=>service_module_id})
+			puts "List of assemblies that belong to service #{service_module_name}:"
+			pretty_print_JSON(service_module_assembly_list)
 
-			if (service_templates_list['data'].select { |x| x['display_name'] == assembly_template_name }.first)
-				puts "Assembly template #{assembly_template_name} belongs to #{service_name} service."
-				service_contains_template = true
+			if (service_module_assembly_list['data'].select { |x| x['display_name'] == assembly_name }.first)
+				puts "Assembly #{assembly_name} belongs to #{service_module_name} service."
+				service_module_contains_assembly = true
 			else
-				puts "Assembly template #{assembly_template_name} does not belong to #{service_name} service."
-				service_contains_template = false
+				puts "Assembly #{assembly_name} does not belong to #{service_module_name} service."
+				service_module_contains_assembly = false
 			end
 		else
-			puts "Service #{service_name} does not exist in service list."
-			service_contains_template = false
+			puts "Service module #{service_module_name} does not exist in service module list."
+			service_module_contains_assembly = false
 		end
 		puts ""
-		return service_contains_template
+		return service_module_contains_assembly
 	end
 
-	def check_component_modules_in_service(service_name, components_list_to_check)
-		puts "Check component modules in service:", "-----------------------------------"
-		all_components_exist_in_service = false
+	def check_component_modules_in_service_module(service_module_name, components_list_to_check)
+		puts "Check component modules in service module:", "------------------------------------------"
+		all_components_exist_in_service_module = false
 		components_exist = Array.new()
-		service_list = send_request('/rest/service_module/list', {})
+		service_module_list = send_request('/rest/service_module/list', {})
 
-		if (service_list['data'].select { |x| x['display_name'] == service_name }.first)
-			puts "Service exists in service list. Try to find all component modules that belong to #{service_name} service..."
-			service_id = service_list['data'].select { |x| x['display_name'] == service_name }.first['id']
-			component_modules_list = send_request('/rest/service_module/list_component_modules', {:service_module_id => service_id})
+		if (service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first)
+			puts "Service module exists in service module list. Try to find all component modules that belong to #{service_module_name} service module..."
+			service_module_id = service_module_list['data'].select { |x| x['display_name'] == service_module_name }.first['id']
+			component_modules_list = send_request('/rest/service_module/list_component_modules', {:service_module_id => service_module_id})
 			pretty_print_JSON(component_modules_list)
 
 			components_list_to_check.each do |component|
@@ -1267,13 +1264,13 @@ class DtkCommon
 			end
 
 			if (!components_exist.include? false)
-				all_components_exist_in_service = true
-				puts "All components #{components_list_to_check.inspect} exist in #{service_name} service"
+				all_components_exist_in_service_module = true
+				puts "All components #{components_list_to_check.inspect} exist in #{service_module_name} service module"
 			end
 		else
-			puts "Service #{service_name} does not exist in service list."
+			puts "Service module #{service_module_name} does not exist in service module list."
 		end
-		return all_components_exist_in_service
+		return all_components_exist_in_service_module
 	end
 
 	def stage_node_template(node_name, staged_node_name)
@@ -1595,37 +1592,36 @@ class DtkCommon
 		return node_exists
 	end	
 
-	def stage_assembly_in_specific_target(target_name)
-		#Get list of assembly templates, extract selected template, stage assembly to defined target and return its assembly id
-		puts "Stage assembly in specific target:", "----------------------------------"
-		assembly_id = nil
+	def stage_service_in_specific_target(target_name)
+		#Get list of assemblies, extract selected assembly, stage service to defined target and return its service id
+		puts "Stage service in specific target:", "---------------------------------"
+		service_id = nil
 		extract_id_regex = /id: (\d+)/
-		assembly_template_list = send_request('/rest/assembly/list', {:subtype=>'template'})
+		assembly_list = send_request('/rest/assembly/list', {:subtype=>'template'})
  
-		puts "List of avaliable assembly templates: "
-		pretty_print_JSON(assembly_template_list)
+		puts "List of avaliable assemblies: "
+		pretty_print_JSON(assembly_list)
 
-		test_template = assembly_template_list['data'].select { |x| x['display_name'] == @assembly_template }.first
+		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly }.first
 
 		if (!test_template.nil?)
-			puts "Assembly template #{@assembly_template} found!"
-			template_assembly_id = test_template['id']
-			puts "Assembly template id: #{template_assembly_id}"
+			puts "Assembly #{@assembly} found!"
+			assembly_id = test_template['id']
+			puts "Assembly id: #{assembly_id}"
 
-			stage_assembly_response = send_request('/rest/assembly/stage', {:assembly_id=>template_assembly_id, :name=>@assembly_name, :target_id => target_name})
-			if (stage_assembly_response['data'].include? "name: #{@assembly_name}")
-				puts "Stage of #{@assembly_template} assembly template completed successfully!"
-				assembly_id_match = stage_assembly_response['data'].match(extract_id_regex)
-				assembly_id = assembly_id_match[1]
-				puts "Assembly id for a staged assembly: #{assembly_id}"
+			stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :target_id => target_name})
+			if (stage_service_response['data'].include? "name: #{@service_name}")
+				puts "Stage of #{@assembly} assembly completed successfully!"
+				service_id_match = stage_service_response['data'].match(extract_id_regex)
+				self.service_id = service_id_match[1].to_i
+				puts "Service id for a staged service: #{self.service_id}"
 			else
-				puts "Stage assembly didnt pass!"
+				puts "Stage service didnt pass!"
 			end
 		else
-			puts "Assembly template #{@assembly_template} not found!"
+			puts "Assembly #{@assembly} not found!"
 		end
 		puts ""
-		return assembly_id.to_i
 	end
 
 #Following list of methods is used for interaction with workspace context
@@ -1638,11 +1634,11 @@ class DtkCommon
 	end
 
 	#Method used to purge content of assembly or workspace
-	def purge_content(assembly_id)
+	def purge_content(service_id)
 		puts "Purge content:", "--------------"
 		content_purged = false
 
-		response = send_request('/rest/assembly/purge', {:assembly_id=>assembly_id})
+		response = send_request('/rest/assembly/purge', {:assembly_id=>service_id})
 		if response['status'].include? "ok"
 			puts "Content has been purged successfully!"
 			content_purged = true
@@ -1653,11 +1649,11 @@ class DtkCommon
 		return content_purged
 	end
 
-	def delete_node(assembly_id, node_name)
+	def delete_node(service_id, node_name)
 		puts "Delete node:", "------------"
 		node_deleted = false
 
-		delete_node_response = send_request('/rest/assembly/delete_node', {:assembly_id=>assembly_id, :node_id=>node_name})
+		delete_node_response = send_request('/rest/assembly/delete_node', {:assembly_id=>service_id, :node_id=>node_name})
 
 		if (delete_node_response['status'] == "ok")
 			puts "Node deleted successfully!"
@@ -1669,9 +1665,9 @@ class DtkCommon
 		return node_deleted
 	end
 
-	def create_node(assembly_id, node_name, node_template)
+	def create_node(service_id, node_name, node_template)
 		puts "Create node:","------------"
-		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>assembly_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
+		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>service_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
 		if create_node_response['status'].include? "ok"
 			puts "Node #{node_name} has been created successfully!"
 			puts ""
@@ -1683,10 +1679,10 @@ class DtkCommon
 		end
 	end
 
-	def check_if_node_exists_by_node_name(assembly_id, node_name)
+	def check_if_node_exists_by_node_name(service_id, node_name)
 		puts "Check if node exists by name:", "-----------------------------"
 		node_exists = false
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 		pretty_print_JSON(node_list)
 		node = node_list['data'].select { |x| x['display_name'] == node_name }.first	
 		
@@ -1700,19 +1696,19 @@ class DtkCommon
 		return node_exists
 	end
 
-	def add_component_to_assembly_node(assembly_id, node_name, component_id)
+	def add_component_to_service_node(service_id, node_name, component_id)
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 		puts "Node list:"
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
-		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_template_name=>component_id})
+		component_add_response = send_request('/rest/node/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_name=>component_id})
 
 		if (component_add_response['status'] == 'ok')
-			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :about=>'components', :subtype=>'instance'})
+			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :about=>'components', :subtype=>'instance'})
 			component = component_list_response['data'].select {|x| x['id'] == component_add_response['data']['component_id']}
 			if !component.empty?
 				puts "Component #{component.first['display_name']} has been added to assembly node!"
@@ -1725,12 +1721,12 @@ class DtkCommon
 		return component_added
 	end
 
-	def check_assembly_info(assembly_id, info_to_check)
-		puts "Show assembly info:", "-------------------"
+	def check_service_info(service_id, info_to_check)
+		puts "Show service info:", "------------------"
 		info_exist = false
-		assembly_info_response = send_request('/rest/assembly/info', {:assembly_id=>assembly_id, :subtype=>:instance})
-		pretty_print_JSON(assembly_info_response)
-		if assembly_info_response['data'].include? info_to_check
+		service_info_response = send_request('/rest/assembly/info', {:assembly_id=>service_id, :subtype=>:instance})
+		pretty_print_JSON(service_info_response)
+		if service_info_response['data'].include? info_to_check
 			puts "#{info_to_check} exists in info output!"
 			info_exist = true
 		else
@@ -1740,13 +1736,13 @@ class DtkCommon
 		return info_exist
 	end
 
-	def check_components_presence_in_nodes(assembly_id, node_name, component_name_to_check)
+	def check_components_presence_in_nodes(service_id, node_name, component_name_to_check)
 		puts "Check components presence in nodes:", "-----------------------------------"
 		component_check = false
 		puts "List of assembly components:"
-		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
-		pretty_print_JSON(assembly_components)
-		component_name = assembly_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }.first
+		service_components = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		pretty_print_JSON(service_components)
+		component_name = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name_to_check}" }.first
 
 		if (!component_name.nil?)
 			component_check = true
@@ -1759,21 +1755,21 @@ class DtkCommon
 		return component_check
 	end
 
-	def delete_component_from_assembly_node(assembly_id, node_name, component_to_delete)
-		puts "Delete component from assembly node:", "------------------------------------"
+	def delete_component_from_service_node(service_id, node_name, component_to_delete)
+		puts "Delete component from service node:", "-----------------------------------"
 		component_deleted = false
-		puts "List of assembly components:"
-		assembly_components = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
-		pretty_print_JSON(assembly_components)
+		puts "List of service components:"
+		service_components = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance'})
+		pretty_print_JSON(service_components)
 
-		component = assembly_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
+		component = service_components['data'].select { |x| x['display_name'] == "#{node_name}/#{component_to_delete}" }.first
 
 		if !component.nil?
-			node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+			node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 			node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
 			puts "Deleting component #{component_to_delete} from node #{node_name}..."
-			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>assembly_id, :node_id=>node_id, :component_id=>component['id']})
+			component_delete_response = send_request('/rest/assembly/delete_component', {:assembly_id=>service_id, :node_id=>node_id, :component_id=>component['id']})
 			pretty_print_JSON(component_delete_response)
 			if component_delete_response['status'].include? 'ok'
 				puts "Component #{component_to_delete} has been deleted successfully!"
@@ -1788,17 +1784,17 @@ class DtkCommon
 		return component_deleted
 	end
 
-	def create_attribute(assembly_id, attribute_name)
+	def create_attribute(service_id, attribute_name)
 		#Create attribute
 		puts "Create attribute:", "-----------------"
 		attributes_created = false
 
-		create_attribute_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :create=>true, :pattern=>attribute_name})
+		create_attribute_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :create=>true, :pattern=>attribute_name})
 
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
-		pretty_print_JSON(assembly_attributes)
-		extract_attribute = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		pretty_print_JSON(service_attributes)
+		extract_attribute = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
 
 		if (extract_attribute == attribute_name)
 			puts "Creating #{attribute_name} attribute completed successfully!"
@@ -1808,14 +1804,14 @@ class DtkCommon
 		return attributes_created
 	end
 
-	def check_if_attribute_exists(assembly_id, attribute_name)
+	def check_if_attribute_exists(service_id, attribute_name)
 		puts "Check if attribute exists:", "--------------------------"
 		attribute_exists = false
 
-		puts "List of assembly attributes:"
-		assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
-		pretty_print_JSON(assembly_attributes)
-		extract_attribute = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		pretty_print_JSON(service_attributes)
+		extract_attribute = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['display_name']
 
 		if (extract_attribute == attribute_name)
 			puts "#{attribute_name} attribute exists!"
@@ -1827,11 +1823,11 @@ class DtkCommon
 		return attribute_exists
 	end
 
-	def link_attributes(assembly_id, source_attribute, target_attribute)
+	def link_attributes(service_id, source_attribute, target_attribute)
 		puts "Link attributes:", "----------------"
 		attributes_linked = false
 
-		link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {:assembly_id=>assembly_id, :target_attribute_term=>target_attribute, :source_attribute_term=>"$#{source_attribute}"})
+		link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {:assembly_id=>service_id, :target_attribute_term=>target_attribute, :source_attribute_term=>"$#{source_attribute}"})
 		pretty_print_JSON(link_attributes_response)
 
 		if link_attributes_response['status'] == 'ok'
@@ -1840,23 +1836,20 @@ class DtkCommon
 		else
 			puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is not established!"
 		end
-
 		puts ""
 		return attributes_linked
 	end
 
-	def netstats_check_for_specific_node(assembly_id, node_name, port)
+	def netstats_check_for_specific_node(service_id, node_name, port)
 		puts "Netstats check:", "---------------"
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :subtype=>'instance', :about=>'nodes'})
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-
-		sleep 20 #Before initiating netstats check, wait for services to be up
+ 		
  		netstats_check = false
-
 		end_loop = false
 		count = 0
-		max_num_of_retries = 10
+		max_num_of_retries = 15
 
 		while (end_loop == false)
 			sleep 10
@@ -1867,7 +1860,7 @@ class DtkCommon
 				end_loop = true
 			end
 
-			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>assembly_id})
+			response = send_request('/rest/assembly/initiate_get_netstats', {:node_id=>node_id, :assembly_id=>service_id})
 			action_results_id = response['data']['action_results_id']
 
 			5.downto(1) do |i|

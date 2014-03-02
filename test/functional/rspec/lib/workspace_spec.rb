@@ -4,8 +4,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 
-STDOUT.sync = true
-
 shared_context "Create node in workspace" do |dtk_common, node_name, node_template|
   it "creates #{node_name} node from #{node_template} node template in workspace context" do
     workspace_id = dtk_common.get_workspace_id
@@ -49,7 +47,7 @@ end
 shared_context "Add component to the node in workspace" do |dtk_common, node_name, component_name|
   it "adds #{component_name} component to #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
-    component_added = dtk_common.add_component_to_assembly_node(workspace_id, node_name, component_name)
+    component_added = dtk_common.add_component_to_service_node(workspace_id, node_name, component_name)
     component_added.should eq(true)
   end
 end
@@ -57,7 +55,7 @@ end
 shared_context "Workspace info" do |dtk_common, info_to_check|
   it "contains #{info_to_check}" do
     workspace_id = dtk_common.get_workspace_id
-    info_checked = dtk_common.check_assembly_info(workspace_id, info_to_check)
+    info_checked = dtk_common.check_service_info(workspace_id, info_to_check)
     info_checked.should eq(true)
   end
 end
@@ -81,7 +79,7 @@ end
 shared_context "Delete component from workspace node" do |dtk_common, node_name, component_name|
   it "deletes #{component_name} component in #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
-    component_deleted = dtk_common.delete_component_from_assembly_node(workspace_id, node_name, component_name)
+    component_deleted = dtk_common.delete_component_from_service_node(workspace_id, node_name, component_name)
     component_deleted.should eq(true)
   end
 end
@@ -129,7 +127,7 @@ end
 shared_context "Converge workspace" do |dtk_common|
   it "converges content of workspace" do
     workspace_id = dtk_common.get_workspace_id
-    workspace_converged = dtk_common.converge_assembly(workspace_id)
+    workspace_converged = dtk_common.converge_service(workspace_id)
     workspace_converged.should eq(true)
   end
 end
@@ -137,7 +135,7 @@ end
 shared_context "Start workspace" do |dtk_common|
   it "starts workspace that was stopped already" do
     workspace_id = dtk_common.get_workspace_id
-    workspace_started = dtk_common.start_running_assembly(workspace_id)
+    workspace_started = dtk_common.start_running_service(workspace_id)
     workspace_started.should eq(true)
   end
 end
@@ -153,7 +151,7 @@ end
 shared_context "Stop workspace" do |dtk_common|
   it "stops converged workspace" do
     workspace_id = dtk_common.get_workspace_id
-    workspace_stopped = dtk_common.stop_running_assembly(workspace_id)
+    workspace_stopped = dtk_common.stop_running_service(workspace_id)
     workspace_stopped.should eq(true)
   end
 end
@@ -190,10 +188,10 @@ shared_context "Check if port avaliable on specific node" do |dtk_common, node_n
   end
 end
 
-shared_context "Create assembly template from workspace content" do |dtk_common, service_name, assembly_template_name|
-  it "creates assembly template #{assembly_template_name} in #{service_name} service" do
+shared_context "Create assembly from workspace content" do |dtk_common, service_module_name, assembly_name|
+  it "creates assembly #{assembly_name} in #{service_module_name} service module" do
   	workspace_id = dtk_common.get_workspace_id
-    assembly_template_created = dtk_common.create_assembly_template_from_assembly(workspace_id, service_name, assembly_template_name)
-    assembly_template_created.should eq(true)
+    assembly_created = dtk_common.create_assembly_from_service(workspace_id, service_module_name, assembly_name)
+    assembly_created.should eq(true)
   end
 end

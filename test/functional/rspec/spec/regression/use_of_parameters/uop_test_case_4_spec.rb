@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 4: Add optional params on existing attributes in assembly nodes (values were not defined)
+#Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)
 
 require 'rubygems'
 require 'rest_client'
@@ -7,32 +7,32 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
-require './lib/parameters_setting_spec.rb'
+require './lib/assembly_and_service_operations_spec'
+require './lib/parameters_setting_spec'
 
-assembly_name = 'uop_test_case_4_instance'
-assembly_template = 'bootstrap::node_with_params'
+service_name = 'uop_test_case_4_instance'
+assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
-describe "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in assembly nodes (values were not defined)" do
+describe "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)" do
 
 	before(:all) do
-		puts "***********************************************************************************************************************"
-		puts "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in assembly nodes (values were not defined)"
-		puts "***********************************************************************************************************************"
+		puts "**********************************************************************************************************************"
+		puts "(Use Of Parameters) Test Case 4: Add optional params on existing attributes in service nodes (values were not defined)"
+		puts "**********************************************************************************************************************"
     puts ""
 	end
 
-	context "Stage assembly function on #{assembly_template} assembly template" do
+	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
-		include_context "List assemblies after stage", dtk_common
+	context "List services after stage" do		
+		include_context "List services after stage", dtk_common
 	end
 
 	context "Set os attribute function" do
@@ -55,8 +55,8 @@ describe "(Use Of Parameters) Test Case 4: Add optional params on existing attri
 		include_context "Check attribute", dtk_common, node_name, 'memory_size', memory_size
 	end
 
-	context "Delete and destroy assembly function" do
-		include_context "Delete assemblies", dtk_common
+	context "Delete and destroy service function" do
+		include_context "Delete services", dtk_common
 	end
 
 	after(:all) do

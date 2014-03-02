@@ -8,12 +8,12 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
+require './lib/assembly_and_service_operations_spec'
 
 STDOUT.sync = true
 
-assembly_name = 'dnt_test_case_7_instance'
-assembly_template = 'mongodb_test::mongo_master_slave'
+service_name = 'dnt_test_case_7_instance'
+assembly_name = 'mongodb_test::mongo_master_slave'
 mongodb_instance_port = 27017
 mongodb_webconsole_port = 28017
 node_name_1 = 'master'
@@ -28,15 +28,15 @@ database_name = 'test'
 collection_name = 'test_collection'
 document = {"first_name" => "Bakir", "last_name" => "Jusufbegovic"}
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
 
-def get_node_ec2_public_dns(assembly_name, node_name)
+def get_node_ec2_public_dns(service_name, node_name)
 	puts "Get node ec2 public dns:", "------------------------"
 	node_ec2_public_dns = ""
 	dtk_common = DtkCommon.new('','')
 
-	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => assembly_name, :subtype => :instance, :about => "nodes"})
+	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
 	ap info_response
 
 	node_info = info_response['data'].select { |x| x['display_name'] == node_name}.first
@@ -106,16 +106,16 @@ describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenari
 		puts ""
   	end
 
-	context "Stage assembly function on #{assembly_template} assembly template" do
+	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
-		include_context "List assemblies after stage", dtk_common
+	context "List services after stage" do		
+		include_context "List services after stage", dtk_common
 	end
 
 	context "Converge function" do
-		include_context "Converge assembly", dtk_common, 30
+		include_context "Converge service", dtk_common, 30
 	end
 
 	context "Grep command on puppet log on master instance" do
@@ -170,8 +170,8 @@ describe "(Different Node Templates) Test Case 7: MongoDB - Master/Slave scenari
 		end
 	end
 
-	context "Delete and destroy assembly function" do
-		include_context "Delete assemblies", dtk_common
+	context "Delete and destroy service function" do
+		include_context "Delete services", dtk_common
 	end
 
 	after(:all) do

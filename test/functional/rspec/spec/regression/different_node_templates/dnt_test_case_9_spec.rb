@@ -7,20 +7,19 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
+require './lib/assembly_and_service_operations_spec'
 
 STDOUT.sync = true
 
-assembly_name = 'dnt_test_case_9_instance'
-assembly_template = 'redis_test::redis_master_slave'
+service_name = 'dnt_test_case_9_instance'
+assembly_name = 'redis_test::redis_master_slave'
 redis_port = 6379
-
 node_name_1 = 'master'
 node_name_2 = 'slave'
 puppet_log_location = '/var/log/puppet/last.log'
 puppet_grep_pattern = 'transaction'
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario" do
 
@@ -31,16 +30,16 @@ describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario"
 		puts ""
   	end
 
-	context "Stage assembly function on #{assembly_template} assembly template" do
+	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
-		include_context "List assemblies after stage", dtk_common
+	context "List services after stage" do		
+		include_context "List services after stage", dtk_common
 	end
 
 	context "Converge function" do
-		include_context "Converge assembly", dtk_common, 20
+		include_context "Converge service", dtk_common, 20
 	end
 
 	context "Grep command on puppet log on redis master instance" do
@@ -59,8 +58,8 @@ describe "(Different Node Templates) Test Case 9: Redis - Master/Slave scenario"
 		include_context "Check if port avaliable on specific node", dtk_common, node_name_2, redis_port
 	end
 
-	context "Delete and destroy assembly function" do
-		include_context "Delete assemblies", dtk_common
+	context "Delete and destroy service function" do
+		include_context "Delete services", dtk_common
 	end
 
 	after(:all) do

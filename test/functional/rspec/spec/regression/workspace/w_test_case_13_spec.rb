@@ -17,12 +17,12 @@ component_name = 'stdlib'
 
 dtk_common = DtkCommon.new('', '')
 
-def converge_assembly_and_cancel_tasks(workspace_id)
-	puts "Converge assembly and cancel tasks:", "-----------------------------------"
+def converge_service_and_cancel_tasks(workspace_id)
+	puts "Converge service and cancel tasks:", "----------------------------------"
 	dtk_common = DtkCommon.new('', '')
 	tasks_cancelled = false
 
-	puts "Converge process for assembly with id #{workspace_id} started!"
+	puts "Converge process for service with id #{workspace_id} started!"
 	create_task_response = dtk_common.send_request('/rest/assembly/create_task', {:assembly_id => workspace_id})
 	task_id = create_task_response['data']['task_id']
 	puts "Task id: #{task_id}"

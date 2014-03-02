@@ -8,12 +8,12 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
+require './lib/assembly_and_service_operations_spec'
 
 STDOUT.sync = true
 
-assembly_name = 'dnt_test_case_10_instance'
-assembly_template = 'elasticsearch_test::elasticsearch_simple'
+service_name = 'dnt_test_case_10_instance'
+assembly_name = 'elasticsearch_test::elasticsearch_simple'
 elasticsearch_http_port = 9200
 elasticsearch_tcp_port = 9300
 
@@ -21,16 +21,15 @@ node_name = 'test1'
 puppet_log_location = '/var/log/puppet/last.log'
 puppet_grep_pattern = 'transaction'
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
-def get_node_ec2_public_dns(assembly_name, node_name)
+def get_node_ec2_public_dns(service_name, node_name)
 	puts "Get node ec2 public dns:", "------------------------"
 	node_ec2_public_dns = ""
 	dtk_common = DtkCommon.new('','')
 
-	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => assembly_name, :subtype => :instance, :about => "nodes"})
+	info_response = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id => service_name, :subtype => :instance, :about => "nodes"})
 	ap info_response
-
 	node_info = info_response['data'].select { |x| x['display_name'] == node_name}.first
 
 	if !node_info.nil?
@@ -87,16 +86,16 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 		puts ""
   	end
 
-	context "Stage assembly function on #{assembly_template} assembly template" do
+	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
-		include_context "List assemblies after stage", dtk_common
+	context "List services after stage" do		
+		include_context "List services after stage", dtk_common
 	end
 
 	context "Converge function" do
-		include_context "Converge assembly", dtk_common, 30
+		include_context "Converge service", dtk_common, 30
 	end
 
 	context "Grep command on puppet log on redis master instance" do
@@ -121,8 +120,8 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 		end
 	end
 
-	context "Delete and destroy assembly function" do
-		include_context "Delete assemblies", dtk_common
+	context "Delete and destroy service function" do
+		include_context "Delete services", dtk_common
 	end
 
 	after(:all) do

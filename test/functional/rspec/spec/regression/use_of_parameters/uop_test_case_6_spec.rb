@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 6: Check possibility to query list of nodes/components/attributes of particular assembly
+#Test Case 6: Check possibility to query list of nodes/components/attributes of particular service
 
 require 'rubygems'
 require 'rest_client'
@@ -7,11 +7,11 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
-require './lib/parameters_setting_spec.rb'
+require './lib/assembly_and_service_operations_spec'
+require './lib/parameters_setting_spec'
 
-$assembly_name = 'uop_test_case_6_instance'
-$assembly_template = 'bootstrap::node_with_params'
+service_name = 'uop_test_case_6_instance'
+assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
 memory_size = 't1.micro'
 node_name = 'node1'
@@ -25,15 +25,15 @@ attr_param_list = Array.new
 attr_param_list << 'memory_size'
 attr_param_list << 'os_identifier'
 
-dtk_common = DtkCommon.new($assembly_name, $assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
-def check_param_existance_on_node(assembly_id, node_name, param_name_list)
-	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
+def check_param_existance_on_node(dtk_common, node_name, param_name_list)
 	param_check = true
-	assembly_nodes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
+	service_id = dtk_common.service_id
+	service_nodes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'nodes', :subtype=>'instance'})
 
-	content = assembly_nodes['data'].select { |x| x['display_name'] == node_name }
-	dtk_common.pretty_print_JSON(content)
+	content = service_nodes['data'].select { |x| x['display_name'] == node_name }
+	ap content
 
 	if (!content.empty?)
 		param_name_list.each do |param_name_to_check|
@@ -54,13 +54,13 @@ def check_param_existance_on_node(assembly_id, node_name, param_name_list)
 	return param_check
 end
 
-def check_param_existance_on_attribute(assembly_id, node_name, param_name_list)
-	dtk_common = DtkCommon.new($assembly_name, $assembly_template)
+def check_param_existance_on_attribute(dtk_common, node_name, param_name_list)
 	param_check = true
-	assembly_attributes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>assembly_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+	service_id = dtk_common.service_id
+	service_attributes = dtk_common.send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
 
 	param_name_list.each do |param_name_to_check|
-		content = assembly_attributes['data'].select { |x| x['display_name'].include? "#{node_name}/#{param_name_to_check}" }
+		content = service_attributes['data'].select { |x| x['display_name'].include? "#{node_name}/#{param_name_to_check}" }
 		dtk_common.pretty_print_JSON(content)
  		if (!content.empty?)
 			puts "Parameter with name #{param_name_to_check} exists"
@@ -75,21 +75,21 @@ def check_param_existance_on_attribute(assembly_id, node_name, param_name_list)
 	return param_check
 end
 
-describe "(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular assembly" do
+describe "(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular service" do
 
 	before(:all) do
-		puts "**********************************************************************************************************************"
-		puts "(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular assembly"
-		puts "**********************************************************************************************************************"
+		puts "*********************************************************************************************************************"
+		puts "(Use Of Parameters) Test Case 6: Check possibility to query list of nodes/components/attributes of particular service"
+		puts "*********************************************************************************************************************"
     puts ""
 	end
 
-	context "Stage assembly function on #{$assembly_template} assembly template" do
+	context "Stage service function on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 
-	context "List assemblies after stage" do		
-		include_context "List assemblies after stage", dtk_common
+	context "List services after stage" do		
+		include_context "List services after stage", dtk_common
 	end
 
 	context "Set os attribute function" do
@@ -107,7 +107,7 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 	context "Node params check function" do
 		it "checks if all node parameters (dns_name, ec2_public_address, private_dns_name) exist on node #{node_name}" do
 			puts "Check node params", "-----------------"
-			param_existance = check_param_existance_on_node($assembly_id, node_name, node_param_list)
+			param_existance = check_param_existance_on_node(dtk_common, node_name, node_param_list)
 			puts ""
 			param_existance.should eq(true)
 		end
@@ -132,7 +132,7 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 	context "Attribute params check function" do
 		it "checks if all attribute parameters (memory_size, os_identifier) exist on node #{node_name}" do
 			puts "Check attribute params", "----------------------"
-			param_existance = check_param_existance_on_attribute($assembly_id, node_name, attr_param_list)
+			param_existance = check_param_existance_on_attribute(dtk_common, node_name, attr_param_list)
 			puts ""
 			param_existance.should eq(true)
 		end
@@ -146,8 +146,8 @@ describe "(Use Of Parameters) Test Case 6: Check possibility to query list of no
 		include_context "Check attribute", dtk_common, node_name, 'memory_size', memory_size
 	end
 
-	context "Delete and destroy assembly function" do
-		include_context "Delete assemblies", dtk_common
+	context "Delete and destroy service function" do
+		include_context "Delete services", dtk_common
 	end
 
 	after(:all) do

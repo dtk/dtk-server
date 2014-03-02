@@ -4,8 +4,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 
-STDOUT.sync = true
-
 shared_context "Create target" do |dtk_common, provider_name, region|
 	it "creates new target #{provider_name}-#{region}" do
 		target_created = dtk_common.create_target(provider_name, region)
@@ -48,9 +46,9 @@ shared_context "Check if node exists in target" do |dtk_common, node_name, targe
 	end
 end
 
-shared_context "Stage assembly in specific target" do |dtk_common, target_name|
-	it "stages #{dtk_common.assembly_name} assembly from assembly template #{dtk_common.assembly_template} in target #{target_name}" do
-		$assembly_id = dtk_common.stage_assembly_in_specific_target(target_name)
-		$assembly_id.should_not eq(nil)
+shared_context "Stage service in specific target" do |dtk_common, target_name|
+	it "stages #{dtk_common.service_name} service from assembly #{dtk_common.assembly} in target #{target_name}" do
+		dtk_common.stage_service_in_specific_target(target_name)
+		dtk_common.service_id.should_not eq(nil)
 	end
 end

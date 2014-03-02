@@ -7,23 +7,23 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
+require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
-require './lib/modules_spec'
+require './lib/component_modules_spec'
 
 
-assembly_name = 'smoke_test_instance'
-assembly_template = 'bootstrap::node_with_params'
+service_name = 'smoke_test_instance'
+assembly_name = 'bootstrap::node_with_params'
 os_templates = ['precise','centos6.4']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'
 node_name = 'node1'
-module_name = "test"
-module_namespace = "dtk17"
-module_filesystem_location = "~/dtk/component_modules"
+component_module_name = "test"
+component_module_namespace = "dtk17"
+component_module_filesystem_location = "~/dtk/component_modules"
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "DTK Server smoke test" do
 
@@ -34,25 +34,25 @@ describe "DTK Server smoke test" do
     puts ""
   end
 
-  context "Import module function" do
-    include_context "Import remote module", module_namespace + "/" + module_name
+  context "Import component module function" do
+    include_context "Import remote component module", component_module_namespace + "/" + component_module_name
   end
 
   context "Get module components list" do
-    include_context "Get module components list", dtk_common, module_name
+    include_context "Get module components list", dtk_common, component_module_name
   end
 
-  context "Check if module imported on local filesystem" do
-    include_context "Check module imported on local filesystem", module_filesystem_location, module_name
+  context "Check if component module imported on local filesystem" do
+    include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
   end
 
   os_templates.each do |os|
-    context "Stage assembly function on #{assembly_template} assembly template" do
+    context "Stage service function on #{assembly_name} assembly" do
       include_context "Stage", dtk_common
     end
 
-    context "List assemblies after stage" do    
-      include_context "List assemblies after stage", dtk_common
+    context "List services after stage" do    
+      include_context "List services after stage", dtk_common
     end
 
     context "Set os attribute function" do
@@ -71,17 +71,17 @@ describe "DTK Server smoke test" do
       include_context "Converge", dtk_common
     end
 
-    context "Delete and destroy assembly function" do
-      include_context "Delete assemblies", dtk_common
+    context "Delete and destroy service function" do
+      include_context "Delete services", dtk_common
     end
   end
 
-  context "Delete module" do
-    include_context "Delete module", dtk_common, module_name
+  context "Delete component module function" do
+    include_context "Delete component module", dtk_common, component_module_name
   end
 
-  context "Delete module from local filesystem" do
-    include_context "Delete module from local filesystem", module_filesystem_location, module_name
+  context "Delete component module from local filesystem" do
+    include_context "Delete component module from local filesystem", component_module_filesystem_location, component_module_name
   end
 
   after(:all) do

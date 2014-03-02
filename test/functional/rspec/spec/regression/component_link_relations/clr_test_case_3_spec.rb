@@ -7,13 +7,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
-require './lib/assembly_operations_spec'
+require './lib/assembly_and_service_operations_spec'
 require './lib/parameters_setting_spec'
 
 STDOUT.sync = true
 
-assembly_name = 'clr_test_case_3_instance'
-assembly_template = 'unit_test::fan_in'
+service_name = 'clr_test_case_3_instance'
+assembly_name = 'unit_test::fan_in'
 node_name_1 = "source1"
 component_name_1 = "unit_test::source"
 node_name_2 = "source2"
@@ -26,7 +26,7 @@ value_to_match_2_1 = 'ec2'
 value_to_match_2_2 = 'ec2'
 attribute_name = 'upstream'
 
-dtk_common = DtkCommon.new(assembly_name, assembly_template)
+dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "(Component link relations) Test Case 3: Fan-in scenario - $node.host_address from sink component are linked to upstream attributes of source components that exist on different nodes (source1, source2)" do
 
@@ -37,12 +37,12 @@ describe "(Component link relations) Test Case 3: Fan-in scenario - $node.host_a
     puts ""
   end
 
-  context "Stage assembly function on #{assembly_template} assembly template" do
+  context "Stage service function on #{assembly_name} assembly" do
     include_context "Stage", dtk_common
   end
 
-  context "List assemblies after stage" do    
-    include_context "List assemblies after stage", dtk_common
+  context "List services after stage" do    
+    include_context "List services after stage", dtk_common
   end
 
   context "List component dependencies" do
@@ -73,8 +73,8 @@ describe "(Component link relations) Test Case 3: Fan-in scenario - $node.host_a
     include_context "Get attribute value from component", dtk_common, node_name_2, component_name_2, attribute_name, value_to_match_2_2
   end
 
-  context "Delete and destroy assembly function" do
-    include_context "Delete assemblies", dtk_common
+  context "Delete and destroy service function" do
+    include_context "Delete services", dtk_common
   end
 
   after(:all) do

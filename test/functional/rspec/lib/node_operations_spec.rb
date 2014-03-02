@@ -4,8 +4,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 
-STDOUT.sync = true
-
 shared_context "Stage node template" do |dtk_common, node_name, staged_node_name|
   it "stages #{node_name} node template to #{staged_node_name} node" do
     dtk_common.stage_node_template(node_name, staged_node_name)    

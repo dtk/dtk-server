@@ -474,8 +474,10 @@ module DTK
       suceeeded
     end
 
-    def destroy_and_reset(opts={})
-      CommandAndControl.destroy_node?(self,:reset => true)
+    def destroy_and_reset(target_idh)
+      if CommandAndControl.destroy_node?(self,:reset => true)
+        StateChange.create_pending_change_item(:new_item => id_handle(), :parent => target_idh)
+      end
     end
 
     def delete_object(opts={})

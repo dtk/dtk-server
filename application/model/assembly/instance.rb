@@ -395,7 +395,8 @@ module DTK; class  Assembly
 
     def destroy_and_reset_nodes()
       nodes = DeleteAndResetHelper.get_nodes_simple(model_handle(:node),[id()])
-      nodes.map{|node|node.destroy_and_reset()}
+      target_idh = get_target.id_handle()
+      nodes.map{|node|node.destroy_and_reset(target_idh)}
     end
 
     def self.delete_contents(assembly_idhs,opts={})

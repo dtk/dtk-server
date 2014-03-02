@@ -107,30 +107,39 @@ R8::ReactorRoute.draw do
   get 'metadata/get_metadata' => 'metadata#get_metadata'
 
    # MONITORING_ITEM
-  post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
+  #post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
 
-   # NODE
+  #NODE TEMPLATE
   post  'node/list' => 'node#list'
-  post  'node/info' => 'node#info'
-  post  'node/info_about' => 'node#info_about'
+  post  'node/image_upgrade' => 'node#image_upgrade'
+
+  #NODE INSTANCE
+  post  'node/start' => 'node#start'
+  post  'node/stop' => 'node#stop'
+  #these commands right now should only be called wrt to assembly context
+=begin
   post  'node/find_violations' => 'node#find_violations'
   post  'node/get_attributes' => 'node#get_attributes'
   post  'node/set_attributes' => 'node#set_attributes'
   post  'node/add_component' => 'node#add_component'
   post  'node/delete_component' => 'node#delete_component'
   post  'node/create_task' => 'node#create_task'
+
+  post  'node/info' => 'node#info'
+  post  'node/info_about' => 'node#info_about'
   post  'node/destroy_and_delete' => 'node#destroy_and_delete'
   post  'node/get_op_status' => 'node#get_op_status'
-  post  'node/start' => 'node#start'
-  post  'node/stop' => 'node#stop'
+
   post  'node/task_status' => 'node#task_status'
-  post  'node/image_upgrade' => 'node#image_upgrade'
   post  'node/stage' => 'node#stage'
   post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
   post  'node/get_action_results' => 'node#get_action_results'
   post  'node/initiate_get_ps' => 'node#initiate_get_ps'
+=end
+
 
    # NODE_GROUP
+=begin
   post  'node_group/list' => 'node_group#list'
   post  'node_group/get_attributes' => 'node_group#get_attributes '
   post  'node_group/set_attributes' => 'node_group#set_attributes'
@@ -144,6 +153,7 @@ R8::ReactorRoute.draw do
   post  'node_group/create_task' => 'node_group#create_task'
   post  'node_group/set_default_template_node' => 'node_group#set_default_template_node'
   post  'node_group/clone_and_add_template_node' => 'node_group#clone_and_add_template_node'
+=end
 
    # PROJECT
   post  'project/list' => 'project#list'

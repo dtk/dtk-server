@@ -43,7 +43,7 @@ describe "(Modules, Services and Versioning) Test Case 1: Import component modul
 		include_context "Check component module imported on local filesystem", component_module_filesystem_location, component_module_name
 	end
 
-	context "Stage service on #{assembly_template} assembly" do
+	context "Stage service on #{assembly_name} assembly" do
 		include_context "Stage", dtk_common
 	end
 

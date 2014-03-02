@@ -188,13 +188,14 @@ module DTK
       def self.reset_node(node)
         update_hash = {
           :external_ref => Aux.hash_subset(external_ref(node),ExternalRefPendingCols),
+          :type => 'staged',
           :admin_op_status => 'pending',
           :hostname_external_ref => nil
         }
         update_node!(node,update_hash)
       end
       private_class_method :reset_node
-      ExternalRefPendingCols = [:image_id,:type,:size]
+      ExternalRefPendingCols = [:image_id,:type,:size,:region]
 
       def self.node_print_form(node)
         "#{node[:display_name]} (#{node[:id]}"

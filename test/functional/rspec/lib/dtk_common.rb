@@ -138,7 +138,7 @@ class DtkCommon
 
 			pretty_print_JSON(stage_service_response)
 
-			if (stage_service_response['data'].include? "name: #{@assembly}")
+			if (stage_service_response['data'].include? "name: #{@service_name}")
 				puts "Stage of #{@service_name} assembly completed successfully!"
 				service_id_match = stage_service_response['data'].match(extract_id_regex)
 				self.service_id = service_id_match[1].to_i

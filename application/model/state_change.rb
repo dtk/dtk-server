@@ -81,7 +81,10 @@ module XYZ
         new_item_hashes.each{|r|r[:parent] = parent_idh}
       end
 
-      model_handle = new_item_hashes.first[:new_item].createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
+      new_item_obj = new_item_hashes.first[:new_item]
+      new_item_obj.get_field?(:group_id)  #to make sure model handle has group_id
+      model_handle = new_item_obj.createMH({:model_name => :state_change, :parent_model_name => parent_model_name})
+
       object_model_name = new_item_hashes.first[:new_item][:model_name]
       object_id_col = "#{object_model_name}_id".to_sym
       parent_id_col = model_handle.parent_id_field_name()

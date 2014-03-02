@@ -63,8 +63,8 @@ describe "DTK Server smoke test" do
       include_context "Set attribute", dtk_common, memory_size_attribute, memory_size
     end
 
-    context "Add components from test module to assembly node" do
-      include_context "Add component to assembly node", dtk_common, node_name
+    context "Add components from test module to service node" do
+      include_context "Add component to service node", dtk_common, node_name
     end
 
     context "Converge function" do

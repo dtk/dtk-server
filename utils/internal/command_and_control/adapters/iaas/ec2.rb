@@ -151,8 +151,7 @@ module DTK
             :operational_status => "starting",
             :admin_op_status => "pending"
           }
-          node.merge!(node_update_hash) 
-          node.update(node_update_hash)
+          update_node!(node,node_update_hash)
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end
@@ -166,14 +165,10 @@ module DTK
         }
       end
 
-#TODO: when put apt-get update in thing delying time it taks for the os to say it is ready /usr/bin/apt-get update
       #destroys the node if it exists
       def self.destroy_node?(node,opts={})
         node.update_obj!(:external_ref,:hostname_external_ref) 
-if opts[:reset]
-  pp [:trap,node]
-end
-        instance_id = (node[:external_ref]||{})[:instance_id]
+        instance_id = external_ref(node)[:instance_id]
         return true unless instance_id #return if instance does not exist
 
         target_aws_creds = node.get_target_iaas_credentials()
@@ -183,15 +178,23 @@ end
         process_addresses__terminate?(node)
 
         if opts[:reset]
-          reset_node(node)
+          if response
+            reset_node(node)
+          end
         end
         response
       end
 
       def self.reset_node(node)
+        update_hash = {
+          :external_ref => Aux.hash_subset(external_ref(node),ExternalRefPendingCols),
+          :admin_op_status => 'pending',
+          :hostname_external_ref => nil
+        }
+        update_node!(node,update_hash)
       end
       private_class_method :reset_node
-
+      ExternalRefPendingCols = [:image_id,:type,:size]
 
       def self.node_print_form(node)
         "#{node[:display_name]} (#{node[:id]}"
@@ -212,7 +215,16 @@ end
         if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
           return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
         end
-        return nil
+      end
+
+      def self.update_node!(node,update_hash)
+        node.merge!(update_hash) 
+        node.update(update_hash)
+        node
+      end
+
+      def self.external_ref(node)
+        node.get_field?(:external_ref)||{}
       end
 
       def self.ec2_name_tag(node)

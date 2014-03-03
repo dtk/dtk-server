@@ -1705,7 +1705,7 @@ class DtkCommon
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
 
-		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_name=>component_id})
+		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id})
 
 		if (component_add_response['status'] == 'ok')
 			component_list_response = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :about=>'components', :subtype=>'instance'})

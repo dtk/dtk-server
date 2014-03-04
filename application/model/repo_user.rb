@@ -1,10 +1,65 @@
 module XYZ
   class RepoUser < Model
 
+    ### Attributes ###
+
     def self.common_columns()
-      [:id,:group_id,:username,:type,:index,:ssh_rsa_pub_key,:component_module_direct_access,:service_module_direct_access]
+      [:id,
+       :group_id,
+       :username,
+       :type,
+       :index,
+       :ssh_rsa_pub_key,
+       :component_module_direct_access,
+       :service_module_direct_access,
+       :repo_manager_direct_access
+      ]
     end
 
+    ### Instance methods ###
+
+
+    # Returns flag which indicates if this user has been created on Repoman
+    #
+    def has_repoman_direct_access?
+      self[:repo_manager_direct_access]
+    end
+
+    # Returns flag which indicates if this user has access to component_modules or service_modules
+    #
+    def has_direct_access?(module_model_name,opts={})
+      direct_access_col = direct_access_col(module_model_name)
+      update_object!(direct_access_col) unless opts[:donot_update]
+      self[direct_access_col]
+    end
+
+
+    # Returns flag which indicates if there is direct access in exception to provided in param
+    #
+    def any_direct_access_except?(module_model_name)
+       case module_model_name
+        when :component_module then has_direct_access?(:service_module)
+        when :service_module then has_direct_access?(:component_module)
+        else raise Error.new("Illegal module model name (#{module_model_name})")
+      end
+    end
+
+    # Updates flag for direct access
+    # Params:
+    #   module_model_name (sym)
+    #   val (boolean)
+    #
+    def update_direct_access(module_model_name,val)
+      direct_access_col = direct_access_col(module_model_name)
+      update(direct_access_col => val)
+      self[direct_access_col] = val
+      self
+    end
+
+     ### Class methods ###
+
+     # Find user by SSH PUB key
+     #
     def self.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)
       sp_hash = {
         :cols => common_columns(),
@@ -85,28 +140,11 @@ module XYZ
       get_obj(model_handle,sp_hash)
     end
 
-    def has_direct_access?(module_model_name,opts={})
-      direct_access_col = direct_access_col(module_model_name)
-      update_object!(direct_access_col) unless opts[:donot_update]
-      self[direct_access_col]
-    end
-
-    def any_direct_access_except?(module_model_name)
-       case module_model_name
-        when :component_module then has_direct_access?(:service_module)
-        when :service_module then has_direct_access?(:component_module)
-        else raise Error.new("Illegal module model name (#{module_model_name})")
-      end
-    end
-
-    def update_direct_access(module_model_name,val)
-      direct_access_col = direct_access_col(module_model_name)
-      update(direct_access_col => val)
-      self[direct_access_col] = val
-      self
-    end
-
    private
+
+
+    ### Private instance methods ###
+
     def direct_access_col(module_model_name)
       case module_model_name
        when :component_module then :component_module_direct_access
@@ -114,6 +152,8 @@ module XYZ
        else raise Error.new("Illegal module model name (#{module_model_name})")
       end
     end
+
+    ### Private class methods ###
 
     def self.get_existing_repo_users(repo_user_mh,filter_keys={},cols=nil)
       sp_hash = {
@@ -127,7 +167,6 @@ module XYZ
     end
 
 
-    #returns [new_repo_username,new_index]
     def self.ret_new_repo_username_and_index(type,existing_matches,username)
       if type == :admin
         #TODO: r8sserver will eb deprecated
@@ -151,7 +190,6 @@ module XYZ
       [new_repo_username,new_index]
     end
 
-   private
     def self.create_instance(model_handle,type,repo_username,index,ssh_rsa_keys={})
       create_row = {
         :ref => repo_username,

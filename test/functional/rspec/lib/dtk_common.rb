@@ -21,7 +21,7 @@ class DtkCommon
 	}
 
 	def initialize(service_name, assembly_name)
-		config_yml = YAML::load(File.open("../config/config.yml"))		
+		config_yml = YAML::load(File.open("./config/config.yml"))		
 
 		@service_name = service_name
 		@assembly = assembly_name
@@ -691,8 +691,8 @@ class DtkCommon
       	end
 	end
 
-	dtk = DtkCommon.new('','')
-	dtk.execute_tests(2147860632)
+	#dtk = DtkCommon.new('','')
+	#dtk.execute_tests(2147860632)
 
 	def netstats_check(service_id, port)
 		puts "Netstats check:", "---------------"

@@ -43,6 +43,7 @@ R8::ReactorRoute.draw do
   post  'assembly/initiate_get_log' => 'assembly#initiate_get_log'
   post  'assembly/initiate_grep' => 'assembly#initiate_grep'
   post  'assembly/initiate_get_ps' => 'assembly#initiate_get_ps'
+  post  'assembly/initiate_execute_tests' => 'assembly#initiate_execute_tests'
   post  'assembly/start' => 'assembly#start'
   post  'assembly/stop' => 'assembly#stop'
   post  'assembly/list' => 'assembly#list'
@@ -135,6 +136,7 @@ R8::ReactorRoute.draw do
   post  'node/initiate_get_netstats' => 'node#initiate_get_netstats'
   post  'node/get_action_results' => 'node#get_action_results'
   post  'node/initiate_get_ps' => 'node#initiate_get_ps'
+  post  'node/initiate_execute_tests' => 'node#initiate_execute_tests'
 =end
 
 

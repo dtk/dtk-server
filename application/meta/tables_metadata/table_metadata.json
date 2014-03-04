@@ -480,6 +480,22 @@
       "command": "command.strip"
     }
   },
+  "execute_tests_data": {
+    "order": [
+      "node_name",
+      "node_id",
+      "module_name",
+      "test_result",
+      "status"
+    ],
+    "mapping": {
+      "node_name": "display_name",
+      "node_id": "dtk_id",
+      "module_name": "module_name",
+      "test_result": "test_result",
+      "status": "status"
+    }
+  },
   "module_version": {
     "order": [
       "namespace",

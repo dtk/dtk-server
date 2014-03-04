@@ -26,6 +26,12 @@ module DTK
         Action::GetPs.initiate(nodes,action_results_queue, :assembly)
       end
 
+      def initiate_execute_tests(action_results_queue, node_id=nil)
+        nodes = get_nodes(:id,:display_name,:external_ref)
+        nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
+        Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly)
+      end
+
       module Action
         class GetLog < ActionResultsQueue::Result
           def self.initiate(nodes, action_results_queue, params)
@@ -147,6 +153,27 @@ module DTK
               end
             }
             CommandAndControl.request__execute_action(:ps,:get_ps,nodes,callbacks)
+          end
+        end
+        class ExecuteTests < ActionResultsQueue::Result
+          def self.initiate(nodes,action_results_queue, type)
+            indexes = nodes.map{|r|r[:id]}
+            action_results_queue.set_indexes!(indexes)
+            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+              h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]}) 
+            end
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                response = CommandAndControl.parse_response__execute_action(nodes,msg)
+                if response and response[:pbuilderid] and response[:status] == :ok
+                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+                  raw_data = response[:data].map{|r|node_info.merge(r)}
+                  packaged_data = new(node_info[:display_name],raw_data)
+                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                end
+              end
+            }
+            CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks)
           end
         end
       end

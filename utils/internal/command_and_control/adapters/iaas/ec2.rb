@@ -132,6 +132,10 @@ module DTK
           begin
             response = Ec2.conn(target_aws_creds).server_create(create_options)
           rescue => e
+            # append region to error message
+            region = target.get_region() if target
+            e.message << ". Region: '#{region}'." if region
+
             Log.error_pp([e,e.backtrace[0..10]])
             return {:status => "failed", :error_object => e}
           end

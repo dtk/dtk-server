@@ -37,7 +37,7 @@ begin
 
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false
-	  		service_converged = dtk_common.converge_service(dtk_common.service_id, 70)
+	  		service_converged = dtk_common.converge_service(dtk_common.service_id, 100)
 	  		if service_converged == true
 	    		puts "#{service_name} service deployed!"
 	  		else

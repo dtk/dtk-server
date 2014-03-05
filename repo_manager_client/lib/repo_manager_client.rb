@@ -111,8 +111,12 @@ module DTK
     # 
 
     def create_client_user(client_rsa_pub_key, opts={})
-      client_username = get_username_with_pub_key(client_rsa_pub_key)
-      create_user(client_username, client_rsa_pub_key, opts)
+      client_repo_user = get_repo_user(client_rsa_pub_key)
+      
+      unless client_repo_user.has_repoman_direct_access?
+        response = create_user(client_repo_user[:username], client_rsa_pub_key, opts)
+        client_repo_user.update(:repo_manager_direct_access => true) if response
+      end
     end
 
     def create_user(username,rsa_pub_key,opts={}, client_rsa_pub_key = nil)
@@ -129,11 +133,6 @@ module DTK
       end
 
       tenant_response = post_rest_request_data(route,body,:raise_error => true)
-
-      if tenant_response
-        repo_user = get_repo_user(rsa_pub_key)
-        repo_user.update(:repo_manager_direct_access => true)
-      end
 
       # Create Client
       create_client_user(client_rsa_pub_key) if client_rsa_pub_key

@@ -24,12 +24,15 @@ begin
 		set_attributes_array = []
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/common_user/user', "git")
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/gitolite/gitolite_user', "git")
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::jenkins_swarm_client/name', config['properties']['jenkins_node'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::jenkins_swarm_client/password', config['properties']['jenkins_password'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
 	    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/local_repo_host', config['properties']['server_dns'])
+		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_public_dns', config['properties']['server_dns'])
 
 		#Set tags that will be used to checkout correct versions of DTK artifacts for this release
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'repo_manager/dtk_repo_manager/release_tag', config['properties']['repo_manager_release'])

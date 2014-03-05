@@ -105,8 +105,10 @@ module DTK; class ConfigAgent; module Adapter
             attr_str = attr_str_array.join(", ")
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when "definition"
-            defn = cmp_with_attrs["name"]
-            raise Error.new("No definition name") unless defn
+            unless defn_cmp = cmp_with_attrs["name"]
+              raise ErrorUsage.new("No definition name") 
+            end
+
             name_attr = nil
             attr_str_array = attrs.map do |k,v|
               if k == "name"
@@ -116,16 +118,19 @@ module DTK; class ConfigAgent; module Adapter
                 "#{k} => #{process_val(v)}"
               end
             end.compact
+            unless name_attr
+              raise ErrorUsage.new("No name attribute for definition component (#{defn_cmp})") 
+            end
+
             if use_anchors_for_class_wrappers?()
               attr_str_array << "require => #{anchor_ref(:begin)}"
               attr_str_array << "before => #{anchor_ref(:end)}"
             end
             attr_str = attr_str_array.join(", ")
-            raise Error.new("No name attribute for definition") unless name_attr
-            if imp_stmt = needs_import_statement?(defn,module_name)
+            if imp_stmt = needs_import_statement?(defn_cmp,module_name)
               @def_lines << imp_stmt
             end
-            @def_lines << "#{defn} {#{name_attr}: #{attr_str}}"
+            @def_lines << "#{defn_cmp} {#{name_attr}: #{attr_str}}"
           end
           self
         end

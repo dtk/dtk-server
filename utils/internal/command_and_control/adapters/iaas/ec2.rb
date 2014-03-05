@@ -90,9 +90,11 @@ module DTK
             raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
           end
 
-          flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size] 
-          create_options = {:image_id => ami,:flavor_id => flavor_id, :block_device_mapping => image(ami).block_device_mapping_with_delete_on_termination() }
-
+          flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+          block_device_mapping_from_image = image(ami).block_device_mapping_with_delete_on_termination()
+          create_options = {:image_id => ami,:flavor_id => flavor_id }
+          # only add block_device_mapping if it was fully generated
+          create_options.merge!({ :block_device_mapping => block_device_mapping_from_image }) if block_device_mapping_from_image
           # check priority for security group
           security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
           create_options.merge!(:groups => security_group )

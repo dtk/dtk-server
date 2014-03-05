@@ -26,6 +26,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def block_device_mapping_with_delete_on_termination()
+        return nil unless value(:block_device_mapping)
         block_device_mapping = create_block_device_mapping(value(:block_device_mapping))
         block_device_mapping.first["Ebs.DeleteOnTermination"] = "true"
         block_device_mapping

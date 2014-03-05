@@ -591,9 +591,14 @@ module DTK
       # check for pattern
       unless node_pattern.nil?
         regex = Regexp.new(node_pattern)
+
+        #temp nodes_list
+        nodes_list = nodes
+
         nodes = nodes.select { |node| regex =~ node.id.to_s}
         if nodes.size == 0
-          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'."
+          nodes = nodes_list.select { |node| node_pattern.to_s.eql?(node.display_name.to_s)}
+          return nodes, false, "No nodes have been matched via ID ~ '#{node_pattern}'." if nodes.size == 0
         end
       end
       # check if staged

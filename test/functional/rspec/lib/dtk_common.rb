@@ -782,7 +782,7 @@ class DtkCommon
 		component_module_exists = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
 			puts "Component module #{component_module_name} exists in module list."
 			component_module_exists = true
 		else

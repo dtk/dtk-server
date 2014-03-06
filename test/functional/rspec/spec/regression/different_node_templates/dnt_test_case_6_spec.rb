@@ -115,7 +115,7 @@ describe "(Different Node Templates) Test Case 6: MongoDB - Single node scenario
 	context "Connect to MongoDB instance and add new document to collection" do
 		it "connects to MongoDB instance and adds document to #{collection_name} collection" do
 			puts "Connect to MongoDB and add new document", "---------------------------------------"
-			mongodb_host = get_node_ec2_public_dns(assembly_name, node_name)
+			mongodb_host = get_node_ec2_public_dns(service_name, node_name)
 			document_added = add_document_to_collection(mongodb_host, mongodb_instance_port, database_name, collection_name, document)
 			puts ""
 			document_added.should eq(true)

@@ -64,7 +64,7 @@ describe "(Workspace) Test Case 13: Create one node, add component in it, conver
 		it "converges and then cancel workspace execution" do
 			puts "Converge and cancel task in workspace", "-------------------------------------"
 			workspace_id = dtk_common.get_workspace_id
-			task_cancel = converge_assembly_and_cancel_tasks(workspace_id)
+			task_cancel = converge_service_and_cancel_tasks(workspace_id)
 			puts ""
 			task_cancel.should eq(true)
 		end

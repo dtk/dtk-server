@@ -665,7 +665,7 @@ class DtkCommon
 	def execute_tests(service_id)
 		puts "Execute tests:", "---------------"
 
- 		get_ps_tries = 6
+ 		get_ps_tries = 20
       	get_ps_sleep = 0.5
       	count = 0
 
@@ -692,7 +692,7 @@ class DtkCommon
 	end
 
 	#dtk = DtkCommon.new('','')
-	#dtk.execute_tests(2147860632)
+	#dtk.get_pss(2147878042)
 
 	def netstats_check(service_id, port)
 		puts "Netstats check:", "---------------"

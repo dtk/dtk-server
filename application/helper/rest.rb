@@ -4,6 +4,7 @@ module Ramaze::Helper
       unless @ctrl_results.kind_of?(BundleAndReturnHelper::ControllerResultsRest)
         raise Error.new("controller results are in wrong form; it should have 'rest' form")
       end
+      
       JSON.generate(@ctrl_results)
     end
 

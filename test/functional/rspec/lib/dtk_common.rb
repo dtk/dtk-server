@@ -24,6 +24,7 @@ class DtkCommon
 		config_yml = YAML::load(File.open("./config/config.yml"))		
 
 		@service_name = service_name
+
 		@assembly = assembly_name
 		@SERVER = config_yml['r8server']['server']
 		@PORT = config_yml['r8server']['port']
@@ -662,38 +663,6 @@ class DtkCommon
 		return assembly_created
 	end
 
-	def execute_tests(service_id)
-		puts "Execute tests:", "---------------"
-
- 		get_ps_tries = 6
-      	get_ps_sleep = 0.5
-      	count = 0
-
-		end_loop = false
-
-		response = send_request('/rest/assembly/initiate_execute_tests', {:node_id=>nil, :assembly_id=>service_id})
-		action_results_id = response['data']['action_results_id']
-
-		until end_loop do
-	        response = send_request('/rest/assembly/get_action_results', {:disable_post_processing=>false, :return_only_if_complete=>true, :action_results_id=>action_results_id, :sort_key=>"module_name"})
-	        count += 1
-	        ap response
-
-	        if count > get_ps_tries or response['data']['is_complete']
-	          end_loop = true
-	        else
-	          #last time in loop return whetever is teher
-	          if count == get_ps_tries
-	            ret_only_if_complete = false
-	          end
-	          sleep get_ps_sleep
-	        end
-      	end
-	end
-
-	#dtk = DtkCommon.new('','')
-	#dtk.execute_tests(2147860632)
-
 	def netstats_check(service_id, port)
 		puts "Netstats check:", "---------------"
  		netstats_check = false
@@ -782,7 +751,7 @@ class DtkCommon
 		component_module_exists = false
 		component_modules_list = send_request('/rest/component_module/list', {})
 
-		if (modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
+		if (component_modules_list['data'].select { |x| x['display_name'] == component_module_name }.first)
 			puts "Component module #{component_module_name} exists in module list."
 			component_module_exists = true
 		else

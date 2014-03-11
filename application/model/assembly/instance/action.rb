@@ -1,4 +1,5 @@
-#TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
+# TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
+
 module DTK
   class Assembly::Instance
     module ActionMixin
@@ -26,10 +27,10 @@ module DTK
         Action::GetPs.initiate(nodes,action_results_queue, :assembly)
       end
 
-      def initiate_execute_tests(action_results_queue, node_id=nil)
+      def initiate_execute_tests(action_results_queue, node_id=nil, components=nil)
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-        Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly)
+        Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly, components)
       end
 
       module Action
@@ -53,6 +54,8 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
+
+                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
 
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
@@ -84,6 +87,9 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
+
+                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
+
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   action_results_queue.push(node_info[:id],response[:data])
@@ -156,7 +162,7 @@ module DTK
           end
         end
         class ExecuteTests < ActionResultsQueue::Result
-          def self.initiate(nodes,action_results_queue, type)
+          def self.initiate(nodes,action_results_queue, type, components)
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -173,7 +179,7 @@ module DTK
                 end
               end
             }
-            CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks)
+            CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components})
           end
         end
       end

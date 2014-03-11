@@ -83,7 +83,7 @@ describe "(Different Node Templates) Test Case 8: Wordpress - Single node scenar
 	context "Check if wordpress page is up" do
 		it "checks that wordpress page is up and running" do
 			puts "Check wordpress page is up and running", "--------------------------------------"
-			node_ec2_public_dns = get_node_ec2_public_dns(assembly_name, node_name)
+			node_ec2_public_dns = get_node_ec2_public_dns(service_name, node_name)
 			wordpress_html_output = Net::HTTP.get(node_ec2_public_dns, '/wp-admin/install.php')
 			wordpress_regex = /Welcome to the famous five minute WordPress installation process!/
 			match = wordpress_html_output.match(wordpress_regex)

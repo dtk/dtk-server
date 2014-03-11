@@ -113,7 +113,7 @@ describe "(Different Node Templates) Test Case 10: Elasticsearch - Simple scenar
 	context "Connect to Elasticsearch instance, index new document and get that document by query" do
 		it "connects to Elasticsearch instance and adds document and retrieves it by query" do
 			puts "Connect to Elasticsearch, index and get document", "------------------------------------------------"
-			elasticsearch_host = get_node_ec2_public_dns(assembly_name, node_name)
+			elasticsearch_host = get_node_ec2_public_dns(service_name, node_name)
 			document_retrieved = index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
 			puts ""
 			document_retrieved.should eq(true)

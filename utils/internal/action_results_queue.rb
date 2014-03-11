@@ -1,3 +1,5 @@
+require 'iconv'
+
 module DTK
   #cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
@@ -70,7 +72,9 @@ module DTK
         @data = data
         @node_name = node_name
       end
+
       attr_reader :data, :node_name
+
       def self.post_process(results, sort_key = :port)
         unless results.kind_of?(Hash) #and results.values.first.kind_of?(self)
           return results
@@ -92,6 +96,24 @@ module DTK
           end
         end
         ret
+      end
+
+      #
+      # Takes possible invalid UTF-8 output and ignores invalid bytes
+      #
+      # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
+      def self.normalize_to_utf8_output(response)
+
+        if response[:data]
+          ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+          output = response[:data][:output]||''
+          valid_output = ic.iconv(output + ' ')[0..-2]
+          response[:data][:output] = valid_output
+        else
+          Log.warn "Skipping UTF-8 normalization since provided output does not have :data element. Response #{response}"
+        end
+
+        response
       end
     end
   end

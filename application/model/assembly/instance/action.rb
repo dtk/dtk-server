@@ -1,4 +1,5 @@
-#TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
+# TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
+
 module DTK
   class Assembly::Instance
     module ActionMixin
@@ -54,6 +55,8 @@ module DTK
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
 
+                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
+
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   action_results_queue.push(node_info[:id],response[:data])
@@ -84,6 +87,9 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
+
+                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
+
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   action_results_queue.push(node_info[:id],response[:data])

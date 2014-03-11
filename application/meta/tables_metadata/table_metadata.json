@@ -485,6 +485,7 @@
       "node_name",
       "node_id",
       "module_name",
+      "component_name",
       "test_result",
       "status"
     ],
@@ -492,6 +493,7 @@
       "node_name": "display_name",
       "node_id": "dtk_id",
       "module_name": "module_name",
+      "component_name": "component_name",
       "test_result": "test_result",
       "status": "status"
     }

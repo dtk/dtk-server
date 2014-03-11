@@ -191,12 +191,6 @@ module DTK
       rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
     end
 
-    def rest__remove_user_direct_access()
-      username = ret_non_null_request_params(:username)
-      ServiceModule.remove_user_direct_access(model_handle_with_private_group(),username)
-      rest_ok_response
-    end
-
     def rest__update_model_from_clone()
       service_module = create_obj(:service_module_id)
       commit_sha = ret_non_null_request_params(:commit_sha)

@@ -137,7 +137,7 @@ module XYZ
 
     def self.get_by_repo_username(model_handle,repo_username)
       sp_hash = {
-        :cols => [:id,:username],
+        :cols => [:id,:username,:repo_manager_direct_access],
         :filter => [:eq,:username,repo_username]
       }
       get_obj(model_handle,sp_hash)

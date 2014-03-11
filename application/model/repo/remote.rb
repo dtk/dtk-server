@@ -146,7 +146,11 @@ module DTK
       end
 
       def create_client_user(client_rsa_pub_key)
-        client.create_client_user(client_rsa_pub_key)\
+        client.create_client_user(client_rsa_pub_key)
+      end
+
+      def remove_client_user(username)
+        client.remove_client_user(username)
       end
 
       def create_module(name, type, namespace = nil, client_rsa_pub_key = nil)

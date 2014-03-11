@@ -203,12 +203,5 @@ module DTK
       mirror_host = ret_non_null_request_params(:mirror_host)
       component_module.push_to_mirror(mirror_host)
     end
-
-    def rest__remove_user_direct_access()
-      username = ret_non_null_request_params(:username)
-      ComponentModule.remove_user_direct_access(model_handle_with_private_group(),username)
-
-      rest_ok_response
-    end
   end
 end

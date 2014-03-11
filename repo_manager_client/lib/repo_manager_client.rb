@@ -106,17 +106,34 @@ module DTK
       get_rest_request_data(route, params_hash)
     end
 
+    def remove_client_user(username)
+      client_repo_user = get_repo_user_by_username(username)
+
+      if client_repo_user.has_repoman_direct_access?
+        response = delete_user(username)
+        client_repo_user.update(:repo_manager_direct_access => false) if response
+      end
+
+      nil
+    end
+
     ###
     ##  Legacy methods
     # 
 
     def create_client_user(client_rsa_pub_key, opts={})
       client_repo_user = get_repo_user(client_rsa_pub_key)
-      
+
       unless client_repo_user.has_repoman_direct_access?
         response = create_user(client_repo_user[:username], client_rsa_pub_key, opts)
         client_repo_user.update(:repo_manager_direct_access => true) if response
       end
+    end
+
+    def delete_user(username)
+      route = "/v1/users/destroy_with_username"
+      body = user_params(username)
+      delete_rest_request_data(route,body,:raise_error => true)
     end
 
     def create_user(username,rsa_pub_key,opts={}, client_rsa_pub_key = nil)
@@ -286,6 +303,12 @@ module DTK
       raise ErrorUsage.new("Provided RSA pub key missing") if ssh_rsa_pub_key.nil?
       mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(),:repo_user)
       RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)
+    end
+
+    def get_repo_user_by_username(username)
+      raise ErrorUsage.new("Provided repo client username is missing") if username.empty?
+      mh = ModelHandle.create_from_user(CurrentSession.new.get_user_object(),:repo_user)
+      RepoUser.get_by_repo_username(mh,username)
     end
 
     def is_internal_error?(response)

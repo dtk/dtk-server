@@ -517,7 +517,8 @@ module DTK
 
     def remove_user_direct_access(model_handle,username)
       repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:username => username)
-      return unless repo_user
+      raise ErrorUsage.new("User '#{username}' does not exist") unless repo_user
+      # return unless repo_user
 
       model_name = model_handle[:model_name]
       return unless repo_user.has_direct_access?(model_name)

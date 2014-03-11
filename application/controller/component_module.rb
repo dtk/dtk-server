@@ -203,5 +203,6 @@ module DTK
       mirror_host = ret_non_null_request_params(:mirror_host)
       component_module.push_to_mirror(mirror_host)
     end
+
   end
 end

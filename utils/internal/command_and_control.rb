@@ -83,6 +83,7 @@ module XYZ
       klass = load_for(task)
       klass.request__get_logs(task,nodes,callbacks,context)
     end
+
     def self.parse_response__get_logs(task,msg)
       klass = load_for(task)
       klass.parse_response__get_logs(msg)
@@ -93,6 +94,7 @@ module XYZ
       klass = load_for_aux(:node_config,adapter_name)
       klass.request__execute_action(agent,action,nodes,callbacks,params)
     end
+    
     def self.parse_response__execute_action(nodes,msg)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)

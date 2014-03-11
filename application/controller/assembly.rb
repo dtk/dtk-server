@@ -658,10 +658,10 @@ module DTK
     end
 
     def rest__initiate_execute_tests()
-      node_id = ret_non_null_request_params(:node_id)
+      node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
       queue = ActionResultsQueue.new
-      assembly.initiate_execute_tests(queue, node_id)
+      assembly.initiate_execute_tests(queue, node_id, components)
       rest_ok_response :action_results_id => queue.id
     end
     

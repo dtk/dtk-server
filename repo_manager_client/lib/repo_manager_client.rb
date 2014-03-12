@@ -109,7 +109,7 @@ module DTK
     def remove_client_user(username)
       client_repo_user = get_repo_user_by_username(username)
 
-      if client_repo_user.has_repoman_direct_access?
+      if client_repo_user && client_repo_user.has_repoman_direct_access?
         response = delete_user(username)
         client_repo_user.update(:repo_manager_direct_access => false) if response
       end

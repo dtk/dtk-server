@@ -51,5 +51,18 @@ module DTK
         :matched_username => match && matched_repo_user ? matched_repo_user[:username] : nil
       )
     end
+
+    def rest__remove_user_direct_access()
+      username = ret_non_null_request_params(:username)
+
+      response = Repo::Remote.new.remove_client_user(username)
+
+      ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module),username)
+
+      ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module),username)
+
+      rest_ok_response
+    end
+
   end
 end

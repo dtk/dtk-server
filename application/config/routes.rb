@@ -12,6 +12,7 @@ R8::ReactorRoute.draw do
   post  'account/set_password' => 'account#set_password'
   post  'account/list_ssh_keys' => 'account#list_ssh_keys'
   post  'account/add_user_direct_access' => 'account#add_user_direct_access'
+  post  'account/remove_user_direct_access' => 'account#remove_user_direct_access'
 
    # ASSEMBLY
   post  'assembly/promote_to_template' => 'assembly#promote_to_template'
@@ -73,7 +74,6 @@ R8::ReactorRoute.draw do
 
    # COMPONENT_MODULE
   post  'component_module/add_user_direct_access' => 'account#add_user_direct_access'
-  post  'component_module/remove_user_direct_access' => 'component_module#remove_user_direct_access'
   post  'component_module/info_about' => 'component_module#info_about'
   post  'component_module/pull_from_remote' => 'component_module#pull_from_remote'
   post  'component_module/update_model_from_clone' => 'component_module#update_model_from_clone'
@@ -108,7 +108,7 @@ R8::ReactorRoute.draw do
   get 'metadata/get_metadata' => 'metadata#get_metadata'
 
    # MONITORING_ITEM
-  #post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
+  post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
 
   #NODE TEMPLATE
   post  'node/list' => 'node#list'
@@ -168,7 +168,6 @@ R8::ReactorRoute.draw do
    # SERVICE_MODULE
   post  'service_module/add_user_direct_access' => 'account#add_user_direct_access'
   post  'service_module/list_component_modules' => 'service_module#list_component_modules'
-  post  'service_module/remove_user_direct_access' => 'service_module#remove_user_direct_access'
   post  'service_module/update_model_from_clone' => 'service_module#update_model_from_clone'
   post  'service_module/import' => 'service_module#import'
   post  'service_module/create' => 'service_module#create'

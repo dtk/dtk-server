@@ -94,6 +94,12 @@ module XYZ
       klass = load_for_aux(:node_config,adapter_name)
       klass.request__execute_action(agent,action,nodes,callbacks,params)
     end
+
+    def self.request__execute_action_per_node(agent,action,nodes_hash,callbacks)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.request_execute_action_per_node(agent,action,nodes_hash,callbacks)
+    end
     
     def self.parse_response__execute_action(nodes,msg)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]

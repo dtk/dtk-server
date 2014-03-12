@@ -10,6 +10,24 @@ module DTK
         #TODO: want this to be blocking call
         async_agent_call(agent.to_s,action.to_s,params,filter,callbacks,async_context)
       end
+
+      def request_execute_action_per_node(agent, action, node_hash, callbacks)
+        node_hash.each do |node, param|
+          request__execute_action_on_node(agent, action, [node], callbacks, param)
+        end
+      end
+
+      def request__execute_action_on_node(agent,action,node,callbacks,params={})
+        ret = node.inject({}){|h,n|h.merge(n => nil)}
+        pbuilderids = []
+        pbuilderids << params[:instance_id]
+        value_pattern = /^(#{pbuilderids.join('|')})$/
+        filter = filter_single_fact("pbuilderid",value_pattern)
+        async_context = {:expected_count => pbuilderids.size, :timeout => DefaultTimeout}
+        #TODO: want this to be blocking call
+        async_agent_call(agent.to_s,action.to_s,{:components=>params[:components]},filter,callbacks,async_context)
+      end
+
       DefaultTimeout = 10
       def parse_response__execute_action(nodes,msg)
         ret = Hash.new

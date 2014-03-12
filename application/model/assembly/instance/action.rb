@@ -1,5 +1,4 @@
 # TODO: right now these are for mcollecetive actions; hard coding get_netstat based on get_logs, wil then making general so can add custom actions
-
 module DTK
   class Assembly::Instance
     module ActionMixin
@@ -179,7 +178,28 @@ module DTK
                 end
               end
             }
-            CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components})
+
+            #part of the code used to decide which components belong to which nodes. 
+            #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
+            node_hash = {}
+            components_including_node_name = []
+            nodes.each do |node|
+              components_array = []
+              components.each do |comp|
+                if comp.include? "#{node[:display_name]}/"
+                   components_array << comp
+                   components_including_node_name << comp
+                end
+              end
+              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id]}
+            end
+
+            #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
+            if components_including_node_name.empty?
+              CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components})
+            else
+              CommandAndControl.request__execute_action_per_node(:execute_tests,:execute_tests,node_hash,callbacks)
+            end
           end
         end
       end

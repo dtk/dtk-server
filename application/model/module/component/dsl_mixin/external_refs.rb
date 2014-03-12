@@ -89,15 +89,16 @@ module DTK; class ComponentModule
           version_constraints = parsed_dependency[:version_constraints]
           match, inconsistent, possibly_missing = nil, nil, nil
           
-          # if there is no component_modules in database, mark all dependencies as possibly missing
-          all_possibly_missing << dep_name if all_modules.empty?
+          # if there is no component_modules or just this one in database, mark all dependencies as possibly missing
+          all_modules_except_this = all_modules.reject{|r|r[:id] == id()}
+          all_possibly_missing << dep_name if all_modules_except_this.empty?
           
-          all_modules.each do |cmp_module|
+          all_modules_except_this.each do |cmp_module|
             branches = cmp_module.get_module_branches()
-            next if cmp_module[:id].eql?(id())
                     
             branches.each do |branch|
               unless branch[:external_ref].nil?
+                #TODO: get rid of use of eval
                 branch_hash = eval(branch[:external_ref])
                 branch_name = branch_hash[:name].gsub('-','/').strip()
                 branch_version = branch_hash[:version]

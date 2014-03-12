@@ -148,11 +148,11 @@
   "account_ssh_keys": {
     "order": [
       "id",
-      "name"
+      "keypair_name"
     ],
     "mapping": {
       "id": "dtk_id",
-      "name": "username"
+      "keypair_name": "username"
     }
   },
   "module": {

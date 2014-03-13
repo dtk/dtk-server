@@ -87,6 +87,12 @@ module DTK; class ComponentDSL
         @context = context
         create_in_object_form(opts[:def]) if opts[:reify]
       end
+      #TODO: make as part of context
+      ScaffoldingStrategy = {
+        :no_dynamic_attributes => true,
+        :no_defaults => true,
+        :ignore_components => ['params']
+      }
 
       def create(type,parse_struct,opts={})
         DSLStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))

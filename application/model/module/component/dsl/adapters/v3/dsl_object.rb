@@ -19,6 +19,12 @@ module DTK; class ComponentDSL; class V3
     end
 
     class Attribute < DSLObjectBase::Attribute
+      ScaffoldingStrategy = {
+        :no_dynamic_attributes => true,
+        #TODO: have code contingent on this; right now it is hard coded w/o defaults
+        :no_defaults => true
+      }
+
       def render_hash_form(opts={})
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))
@@ -32,15 +38,19 @@ module DTK; class ComponentDSL; class V3
 
      private
       def converted_dynamic()
-        ret = value(:dynamic)
-        if ret.nil? then (has_default_variable?() ? true : nil)
-        else ret
+        unless ScaffoldingStrategy[:no_dynamic_attributes]
+          ret = value(:dynamic)
+          if ret.nil? then (has_default_variable?() ? true : nil)
+          else ret
+          end
         end
       end
 
       def converted_default()
         if has_default_variable?() 
-          ExtRefPuppetHeader
+          unless ScaffoldingStrategy[:no_dynamic_attributes]
+            ExtRefPuppetHeader
+          end
         end
       end
       ExtRefPuppetHeader = 'external_ref(puppet_header)'

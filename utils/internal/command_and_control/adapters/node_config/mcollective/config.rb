@@ -131,7 +131,8 @@ eos
               :mcollective_ssh_local_public_key => ssh_local_public_key,
               :mcollective_username => R8::Config[:mcollective][:username],
               :mcollective_password => R8::Config[:mcollective][:password],
-              :mcollective_collective => R8::Config[:mcollective][:collective]
+              :mcollective_collective => R8::Config[:mcollective][:collective],
+              :puppet_version => R8::Config[:puppet][:version]
             )
           end
 
@@ -173,6 +174,11 @@ ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
 cat << EOF >>/root/.ssh/known_hosts
 <%=fingerprint %>
 EOF
+
+<% unless puppet_version.empty? %>
+/opt/puppet-omnibus/embedded/bin/gem uninstall -aIx puppet
+/opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
+<% end %>
 
 /etc/init.d/mcollective* restart
 

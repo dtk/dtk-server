@@ -71,8 +71,13 @@ module DTK
     #### list and info actions ###
     def rest__info()
       assembly = ret_assembly_object()
-      node_id, component_id, attribute_id = ret_request_params(:node_id, :component_id, :attribute_id)
-      rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
+      node_id, component_id, attribute_id, return_json = ret_request_params(:node_id, :component_id, :attribute_id, :json_return)
+
+      if return_json
+        rest_ok_response assembly.info(node_id, component_id, attribute_id)
+      else
+        rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
+      end
     end
 
     def rest__rename()

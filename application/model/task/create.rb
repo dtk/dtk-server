@@ -8,6 +8,7 @@ module DTK
 
       component_type = opts[:component_type]||:service
       commit_msg = opts[:commit_msg]
+      #TODO: not doing at this point puppet version per run; it just can be set when node is created
       puppet_version = opts[:puppet_version]
 
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
@@ -32,6 +33,7 @@ module DTK
     def create_from_assembly_instance(assembly,opts={})
       component_type = opts[:component_type]||:service
       commit_msg = opts[:commit_msg]
+      #TODO: not doing at this point puppet version per run; it just can be set when node is created
       puppet_version = opts[:puppet_version]
 
       target_idh = target_idh_from_assembly(assembly)

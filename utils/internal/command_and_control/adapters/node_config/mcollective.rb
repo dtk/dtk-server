@@ -11,8 +11,8 @@ module DTK
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
 
-      def self.ret_cloud_init_user_data(bindings)
-        Config.ret_cloud_init_user_data(bindings)
+      def self.ret_cloud_init_user_data(node,bindings)
+        Config.ret_cloud_init_user_data(node,bindings)
       end
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
@@ -25,6 +25,7 @@ module DTK
                             :top_task_id => top_task_idh.get_id(), 
                             :version_context => version_context, 
                             :agent_git_details => agent_git_details,
+                            #TODO: not doing at this point puppet version per run; it just can be set when node is created
                             :puppet_version => config_node[:node][:puppet_version]
                           )
         pbuilderid = Node.pbuilderid(config_node[:node])

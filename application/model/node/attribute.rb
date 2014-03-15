@@ -8,6 +8,10 @@ module DTK
       def root_device_size()
         get_value?(:root_device_size,:integer)
       end
+      
+      def puppet_version()
+        get_value?(:puppet_version)||R8::Config[:puppet][:version]
+      end
 
      private
       def get_value?(attribute_name,semantic_data_type=nil)

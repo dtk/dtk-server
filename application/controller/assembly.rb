@@ -472,11 +472,12 @@ module DTK
           CommandAndControl.start_instances(nodes)
         end
 
+        #TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
       else
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
-
+        #TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         task = Task.create_from_assembly_instance(assembly,opts)
       end

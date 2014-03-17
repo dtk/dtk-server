@@ -14,7 +14,7 @@ require './lib/service_modules_spec'
 
 service_name = 'dtk_release_smoke_test'
 assembly_name = 'bootstrap::node_with_params'
-os_templates = ['precise','centos6.4']
+os_templates = ['precise','centos6']
 os_attribute = 'os_identifier'
 memory_size = 't1.micro'
 memory_size_attribute = 'memory_size'

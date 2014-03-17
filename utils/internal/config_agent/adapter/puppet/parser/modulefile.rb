@@ -12,19 +12,17 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         type = impl_obj[:type]
         
         content = RepoManager.get_file_content(modulefile_name,:implementation => impl_obj)
-        if content
-          content = content.split("\n")
-          content.each do |el|
-            next if(el.start_with?("#") || el.empty?)
-            el.gsub!(/\'/,'')
-            
-            match = el.match(/(\S+)\s(.+)/)
-            key, value = match[1], match[2]
-            if key.to_s.eql?('dependency')
+        content.split("\n").each do |el|
+          el.chomp!()
+          next if (el.start_with?("#") || el.empty?)
+          el.gsub!(/\'/,'')
+          
+          next unless match = el.match(/(\S+)\s(.+)/)
+          key, value = match[1], match[2]
+          if key.to_s.eql?('dependency')
               dependencies << value
-            else
-              content_hash.merge!(key.to_sym=>value.to_s)
-            end
+          else
+            content_hash.merge!(key.to_sym=>value.to_s)
           end
         end
         

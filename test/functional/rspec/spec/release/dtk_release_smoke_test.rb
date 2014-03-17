@@ -24,7 +24,6 @@ service_module_name = "bootstrap"
 namespace = 'demo'
 component_module_filesystem_location = "~/dtk/component_modules"
 
-
 dtk_common = DtkCommon.new(service_name, assembly_name)
 
 describe "DTK Server smoke test release" do

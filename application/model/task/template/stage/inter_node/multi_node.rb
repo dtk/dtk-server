@@ -3,7 +3,14 @@ module DTK; class Task; class Template; class Stage
     class MultiNode < self
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
-        @ordered_components = serialized_multinode_action[Constant::OrderedComponents]
+        unless @ordered_components = (serialized_multinode_action[Constant::OrderedComponents]||
+                                      serialized_multinode_action[Constant::Components])
+          msg = "Missing Component field (#{Constant::OrderedComponents} or #{Constant::Components})"
+          if name = serialized_multinode_action[:name]
+            msg << " in stage '#{name}'"
+          end
+          raise ParsingError.new(msg)
+        end
       end
 
       def serialization_form(opts={})

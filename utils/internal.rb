@@ -26,7 +26,8 @@ files =
    'action_results_queue',
    'simple_action_queue',
    'async_response',
-   'output_table'
+   'output_table',
+   'rubygems_checker'
   ]
 r8_nested_require('internal',files)
 

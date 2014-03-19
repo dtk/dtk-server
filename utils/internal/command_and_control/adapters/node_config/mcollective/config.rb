@@ -134,8 +134,17 @@ eos
               :mcollective_password => R8::Config[:mcollective][:password],
               :mcollective_collective => R8::Config[:mcollective][:collective],
               #TODO: will generalize so not just puppet                           
-              :puppet_version => node.attribute().puppet_version()||''
+              :puppet_version => get_puppet_version(node)
             )
+          end
+
+          def get_puppet_version(node)
+            puppet_version = node.attribute().puppet_version()
+            if puppet_version != '' && RubyGemsChecker.gem_exists?('puppet', puppet_version)
+               puppet_version
+            else
+               ''
+            end
           end
 
           def cloud_init_user_data_erb()

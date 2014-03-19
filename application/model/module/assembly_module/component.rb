@@ -116,7 +116,6 @@ module DTK; class AssemblyModule
     end
 
     def add_version_info!(modules_with_branches)
-      modules_with_branches
       local_copy_els = Array.new
       modules_with_branches.each do |r|
         if r[:module_branch].assembly_module_version?()
@@ -144,7 +143,8 @@ module DTK; class AssemblyModule
           Log.error("Unexpected that ndx_workspace_branchesr[r[:id]] is null")
           next
         end
-        unless assembly_mod_sha = r[:module_branch][:current_sha]
+        assembly_mod_branch = r[:module_branch]
+        unless assembly_mod_sha = assembly_mod_branch[:current_sha]
           Log.error("Unexpected that assembly_mod_sh is nil")
           next
         end
@@ -152,6 +152,23 @@ module DTK; class AssemblyModule
           Log.error("Unexpected that workspace_mod_sha is nil")
         end
         r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
+=begin
+TODO: code to put in when 
+want to check case when :local_behind and :branchpoint
+In order to do this must ireate all branches, not just changed ones and
+need to do a refresh on workspace branch sha in case this was updated in another branch 
+        if r[:local_copy_diff]
+          sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha,workspace_mod_sha,assembly_mod_branch)
+          case sha_relationship
+            when :local_behind,:local_ahead,:branchpoint
+              r[:branch_relationship] = sha_relationship
+            when :equal
+              #unequal shas but equal content
+              #TODO: is it possible to reach this
+              r[:local_copy_diff]  = false
+          end
+        end
+=end
       end
       modules_with_branches
     end

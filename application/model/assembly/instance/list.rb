@@ -88,11 +88,19 @@ module DTK; class  Assembly
           
         when :modules
           component_modules_opts = Hash.new
-          if opts.array(:detail_to_include).include?(:version_info)
+          if get_version_info = opts.array(:detail_to_include).include?(:version_info)
             opts.set_datatype!(:assembly_component_module)
             component_modules_opts.merge!(:get_version_info=>true)
           end
-          get_component_modules(component_modules_opts).sort{|a,b| a[:display_name] <=> b[:display_name] }
+          unsorted_ret = get_component_modules(component_modules_opts)
+          if get_version_info
+            unsorted_ret.each do |r|
+              if r[:local_copy]
+                r[:update_saved] = !r[:local_copy_diff]
+              end
+            end
+          end
+          unsorted_ret.sort{|a,b| a[:display_name] <=> b[:display_name] }
         when :tasks
           list_tasks(opts)
         else

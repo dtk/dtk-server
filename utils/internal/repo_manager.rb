@@ -94,6 +94,13 @@ module DTK
         adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{opts[:remote_branch]||branch}",opts)
       end
 
+      #returns :equal, :local_behind, :local_ahead, or :branchpoint 
+      #branch object can be for either sha; result does not matter based on this
+      def ret_sha_relationship(local_sha,other_sha,branch_obj)
+        adapter_repo = get_adapter_repo(branch_obj)
+        adapter_repo.ret_sha_relationship(local_sha,other_sha)
+      end
+
       def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_n, remote_b)
         adapter_repo = get_adapter_repo(context(repo_name,module_branch))
         adapter_repo.is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)

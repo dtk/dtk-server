@@ -113,8 +113,9 @@ module DTK
           #end fix up
 
           unless create_options.has_key?(:user_data)
-            user_data = CloudInit.user_data(node[:os_type])
-            create_options[:user_data] = user_data if user_data
+            if user_data = CloudInit.user_data(node)
+              create_options[:user_data] = user_data
+            end
           end
 
           if root_device_size = node.attribute.root_device_size()

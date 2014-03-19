@@ -374,7 +374,11 @@ module DTK
       
       other_sha = other_grit_ref.commit.id
       local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
-      
+      ret_sha_relationship(local_sha,other_sha)
+    end
+
+    #returns :equal, :local_behind, :local_ahead, or :branchpoint
+    def ret_sha_relationship(local_sha,other_sha)
       if other_sha == local_sha 
         :equal
       else

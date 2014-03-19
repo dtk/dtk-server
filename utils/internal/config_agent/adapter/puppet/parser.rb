@@ -93,16 +93,27 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
     def normalize_puppet_error(puppet_error,file_path)
       file_path ||= puppet_error.file || find_file_path(puppet_error.message)
-      line = puppet_error.line || find_line(puppet_error.message)
       #TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)
-      ParseError.new(msg,file_path,line)
+      opts = {:file_path => file_path}
+      unless msg_has_line_num?(msg)
+        if line = (puppet_error.line || find_line(puppet_error.message))
+          opts.merge!(:line_num => line)
+        end
+      end
+      ParseError.new(msg,opts)
     end
 
     def find_file_path(msg)
       if msg =~ /at ([^ ]+):[0-9]+$/ 
         $1
       end
+    end
+
+    def msg_has_line_num?(msg)
+      #just heursitic
+      (!!find_line(msg)) or
+        (msg =~ /[0-9]+/ and msg =~ /at line/) 
     end
 
     def  find_line(msg)

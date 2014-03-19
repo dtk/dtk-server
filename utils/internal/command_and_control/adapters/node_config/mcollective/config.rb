@@ -11,12 +11,12 @@ module DTK
           end
         end
 
-        def self.ret_cloud_init_user_data(bindings)
-          create().cloud_init_user_data(bindings)
+        def self.ret_cloud_init_user_data(node,bindings)
+          create().cloud_init_user_data(node,bindings)
         end
 
-        def cloud_init_user_data(bindings)
-          all_bindings = cloud_init_user_data_bindings(bindings)
+        def cloud_init_user_data(node,bindings)
+          all_bindings = cloud_init_user_data_bindings(node,bindings)
           erubis_object(cloud_init_user_data_erb()).result(all_bindings)
         end
 
@@ -81,7 +81,7 @@ module DTK
             USER_DATA_SH_ERB
           end
           
-          def cloud_init_user_data_bindings(bindings)
+          def cloud_init_user_data_bindings(node,bindings)
             bindings
           end
 
@@ -120,18 +120,21 @@ eos
           end
          private
 
-          def cloud_init_user_data_bindings(bindings)
+          def cloud_init_user_data_bindings(node,bindings)
             #TODO: clean up to have error checking
             ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
             ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
             ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            #order of merge does not matter; keys wont conflict
             bindings.merge(
               :mcollective_ssh_remote_public_key => ssh_remote_public_key,
               :mcollective_ssh_remote_private_key => ssh_remote_private_key,
               :mcollective_ssh_local_public_key => ssh_local_public_key,
               :mcollective_username => R8::Config[:mcollective][:username],
               :mcollective_password => R8::Config[:mcollective][:password],
-              :mcollective_collective => R8::Config[:mcollective][:collective]
+              :mcollective_collective => R8::Config[:mcollective][:collective],
+              #TODO: will generalize so not just puppet                           
+              :puppet_version => node.attribute().puppet_version()||''
             )
           end
 
@@ -173,6 +176,11 @@ ssh-keygen -f "/root/.ssh/known_hosts" -R <%=git_server_dns %>
 cat << EOF >>/root/.ssh/known_hosts
 <%=fingerprint %>
 EOF
+
+<% unless puppet_version.empty? %>
+/opt/puppet-omnibus/embedded/bin/gem uninstall -aIx puppet
+/opt/puppet-omnibus/embedded/bin/gem install puppet -v <%= puppet_version %> --no-rdoc --no-ri
+<% end %>
 
 /etc/init.d/mcollective* restart
 

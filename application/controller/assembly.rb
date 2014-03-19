@@ -73,7 +73,7 @@ module DTK
       assembly = ret_assembly_object()
       node_id, component_id, attribute_id, return_json = ret_request_params(:node_id, :component_id, :attribute_id, :json_return)
 
-      if return_json
+      if return_json.eql?('true')
         rest_ok_response assembly.info(node_id, component_id, attribute_id)
       else
         rest_ok_response assembly.info(node_id, component_id, attribute_id), :encode_into => :yaml
@@ -472,11 +472,12 @@ module DTK
           CommandAndControl.start_instances(nodes)
         end
 
+        #TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
       else
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
-
+        #TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         task = Task.create_from_assembly_instance(assembly,opts)
       end

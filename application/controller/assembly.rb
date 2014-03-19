@@ -630,6 +630,18 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
+    def rest__initiate_ssh_pub_access()
+      assembly = ret_assembly_instance_object()
+      params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
+      agent_action = ret_non_null_request_params(:agent_action)
+
+      queue    = ActionResultsQueue.new
+
+      assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params)
+
+      rest_ok_response :action_results_id => queue.id
+    end
+
     def rest__initiate_grep()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)

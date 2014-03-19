@@ -20,6 +20,11 @@ module DTK
         Action::Grep.initiate(nodes,action_results_queue,params)
       end
 
+      def initiate_ssh_agent_action(agent_action, queue, params)
+        nodes = get_nodes(:id,:display_name,:external_ref)
+        Action::SSHAccess.initiate(nodes, queue, params, agent_action)
+      end
+
       def initiate_get_ps(action_results_queue, node_id=nil)
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
@@ -66,6 +71,32 @@ module DTK
             CommandAndControl.request__execute_action(:tail,:get_log,nodes,callbacks,params)
           end
         end
+
+        class SSHAccess < ActionResultsQueue::Result
+
+          def self.initiate(nodes, action_results_queue, params, agent_action)
+            indexes = nodes.map{|r|r[:id]}
+            action_results_queue.set_indexes!(indexes)
+            ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+              h.merge(n.pbuilderid => {:id => n[:id], :display_name => n[:display_name]}) 
+            end
+
+            callbacks = {
+              :on_msg_received => proc do |msg|
+                response = CommandAndControl.parse_response__execute_action(nodes,msg)
+                response = ActionResultsQueue::Result.normalize_to_utf8_output(response)
+
+                if response and response[:pbuilderid] and response[:status] == :ok
+                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
+                  action_results_queue.push(node_info[:id],response[:data])
+                end
+              end
+            }
+
+            CommandAndControl.request__execute_action(:ssh_agent,agent_action,nodes,callbacks,params)
+          end
+        end
+
         class Grep < ActionResultsQueue::Result
           def self.initiate(nodes, action_results_queue, params)
             # filters nodes based on requested node identifier

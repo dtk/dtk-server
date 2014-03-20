@@ -1,0 +1,44 @@
+{
+  "nodes_info": {
+    "ami-24be214d":  {
+      "region" : "us-east-1",
+      "type": "squeeze",
+      "os_type": "debian",
+      "display_name": "Squeeze",
+      "png": "debian.png",
+      "sizes": ["t1.micro","m1.small","m1.medium"]
+    },
+    "ami-59c4c230": {
+      "region" : "us-east-1",
+      "type": "precise",
+      "os_type": "ubuntu",
+      "display_name": "Precise",
+      "png": "ubuntu.png",
+      "sizes": ["t1.micro","m1.small","m1.medium","c3.large","c3.xlarge","c3.2xlarge"]
+    },
+    "ami-51828c38": {
+      "region" : "us-east-1",
+      "type": "serverspec-precise",
+      "os_type": "ubuntu",
+      "display_name": "ServerSpec Precise",
+      "png": "ubuntu.png",
+      "sizes": ["t1.micro","m1.small"]
+    },
+    "ami-1b0c4572" : {
+      "region" : "us-east-1",
+      "type": "rh6.4-64",
+      "os_type": "redhat",
+      "display_name": "RH6.4 64",
+      "png": "redhat.png",
+      "sizes": ["t1.micro","m1.small","m1.medium"]
+    },
+    "ami-c9c8cea0" : {
+      "region" : "us-east-1",
+      "type": "centos6.4",
+      "os_type": "centos",
+      "display_name": "CentOS 6.4",
+      "png": "redhat.png",
+      "sizes": ["t1.micro","m1.small","m1.medium"]
+    }
+  }
+}

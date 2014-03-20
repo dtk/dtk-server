@@ -643,6 +643,12 @@ module DTK
       rest_ok_response :action_results_id => queue.id
     end
 
+    def rest__list_ssh_access()
+      assembly = ret_assembly_instance_object()
+
+      rest_ok_response Component::Instance::Interpreted.list_ssh_access(assembly)
+    end
+
     def rest__initiate_grep()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:node_pattern, :log_path, :grep_pattern, :stop_on_first_match)

@@ -507,5 +507,17 @@
       "namespace": "namespace",
       "version(s)": "versions"
     }
+  },
+  "ssh_access": {
+    "order": [
+      "node_name",
+      "unix_user",
+      "key_name"
+    ],
+    "mapping": {
+      "node_name":"node_name",
+      "unix_user":"attributes.linux_user",
+      "key_name":"attributes.key_name"
+    }
   }
 }

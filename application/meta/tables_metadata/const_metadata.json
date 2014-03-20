@@ -106,5 +106,10 @@
    ],
    "module_version":[
       "version"
+   ],
+   "ssh_access":[
+      "node_name",
+      "unix_user",
+      "key_name"
    ]
 }

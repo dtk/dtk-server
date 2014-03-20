@@ -1,5 +1,10 @@
+
+
 module DTK; class Component
   class Instance < self
+
+    r8_nested_require('instance','interpreted')
+
     def self.get_objs(mh,sp_hash,opts={})
       #TODO: might want to change to just :model_name == component_instance
       if [:component,:component_instance].include?(mh[:model_name])

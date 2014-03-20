@@ -64,6 +64,7 @@ R8::ReactorRoute.draw do
   post  'assembly/clear_tasks' => 'assembly#clear_tasks'
   post  'assembly/cancel_task' => 'assembly#cancel_task'
   post  'assembly/initiate_ssh_pub_access' => 'assembly#initiate_ssh_pub_access'
+  post  'assembly/list_ssh_access' => 'assembly#list_ssh_access'
 
    # ATTRIBUTE
   post  'attribute/set' => 'attribute#set'

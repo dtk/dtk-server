@@ -119,8 +119,7 @@ module DTK; class ServiceModule
               #TODO: extend dangling_errors.aggregate_errors to handle this
               # We want to import module still even if there are bad node references
               # we stop importing nodes when run into bad node reference but still continue with module import
-              
-              return ParsingError::BadNodeReference.new("Bad node reference", nb_rs)
+              return ParsingError::BadNodeReference.new(:node_template => nb_rs,:assembly => assembly_hash["name"])
             end
           else
             node_output["node_binding_rs_id"] = nil

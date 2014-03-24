@@ -270,7 +270,7 @@ module DTK
         self.class.default_remote_repo()
       end
       def self.default_remote_repo()
-        :r8_network #TODO: have this obtained from config file
+        :dtknet #TODO: have this obtained from config file
       end
 
       def self.default_user_namespace()

@@ -19,21 +19,11 @@ module Ramaze::Helper
       throw :async
     end
 
-    #
-    # Method will return list missing and required for given service (via request.params) dependencies
-    #
-    def check_service_dependencies(module_class)
-      # simple check for proper use of this method
-      raise ::DTK::Error.new("This functionality is only available for service modules") unless is_service_module?(module_class)
-      remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      return get_service_dependencies(remote_module_name, remote_namespace, version)
-    end
-
     def get_service_dependencies(remote_module_name, remote_namespace, version)
       remote_repo, project = ret_remote_repo(), get_default_project()
       missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
 
-      return { :missing_modules => missing_modules, :required_modules => required_modules }
+      { :missing_modules => missing_modules, :required_modules => required_modules }
     end
 
 

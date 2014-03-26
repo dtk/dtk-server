@@ -28,7 +28,7 @@ def converge_service_and_cancel_tasks(workspace_id)
 	puts "Task id: #{task_id}"
 	task_execute_response = dtk_common.send_request('/rest/task/execute', {:task_id => task_id})
 
-	sleep 20
+	sleep 10
 
 	cancel_task_response = dtk_common.send_request('/rest/task/cancel_task', {:task_id => task_id})
 	task_status_response = dtk_common.send_request('/rest/task/status', {:task_id=> task_id})

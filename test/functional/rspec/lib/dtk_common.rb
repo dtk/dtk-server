@@ -441,6 +441,8 @@ class DtkCommon
 					puts "Converge process finished successfully!"
 				elsif (status.include? 'failed')
 					task_status = status
+					puts "Error details on subtasks:"
+					ap response_task_status['data']['subtasks']
 					puts "Task execution status: #{task_status}"
 					puts "Converge process was not finished successfully! Some tasks failed!"
 					end_loop = true
@@ -1354,6 +1356,8 @@ class DtkCommon
 					node_converged = true
 					puts "Converge process finished successfully!"
 				elsif (status.include? 'failed')
+					puts "Error details on subtasks:"
+					ap response_task_status['data']['subtasks']
 					task_status = status
 					puts "Converge process was not finished successfully! Some tasks failed!"
 				end

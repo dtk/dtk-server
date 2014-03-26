@@ -99,7 +99,7 @@ module DTK
           security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
           create_options.merge!(:groups => security_group )
 
-          create_options.merge!(:tags => {"Name" => ec2_name_tag(node)})
+          create_options.merge!(:tags => {"Name" => ec2_name_tag(node, target)})
 
           # check priority of keypair
           keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
@@ -235,11 +235,16 @@ module DTK
         node.get_field?(:external_ref)||{}
       end
 
-      def self.ec2_name_tag(node)
+      def self.ec2_name_tag(node, target)
         assembly = node.get_assembly?()
+        # TO-DO: move the tenant name definition to server configuration
+        tenant = ::DtkCommon::Aux::running_process_user()
         subs = {
-          :assembly_name => assembly && assembly.get_field?(:display_name),
-          :node_name => node.get_field?(:display_name)
+          :assembly => assembly && assembly.get_field?(:display_name),
+          :node     => node.get_field?(:display_name),
+          :tenant   => tenant,
+          :target   => target[:display_name],
+          :user     => CurrentSession.get_username()
         }
         ret = Ec2NameTag[:tag].dup
         Ec2NameTag[:vars].each do |var|
@@ -249,8 +254,8 @@ module DTK
         ret
       end
       Ec2NameTag = {
-        :vars => [:assembly_name,:node_name],
-        :tag => "DTK:${assembly_name}:${node_name}"
+        :vars => [:assembly, :node, :tenant, :target, :user],
+        :tag => R8::Config[:ec2][:name_tag][:format]
       }
     end
   end

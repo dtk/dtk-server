@@ -636,6 +636,18 @@ module DTK
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
       agent_action = ret_non_null_request_params(:agent_action)
 
+      system_user, key_name = params[:system_user], params[:rsa_pub_name]
+
+      data_exists, data_exists_on_every_node = Component::Instance::Interpreted.check_existance?(assembly, system_user, key_name)
+      
+      if agent_action.to_sym == :revoke_access && !data_exists
+        raise ErrorUsage.new("Access is not granted to system user '#{system_user}' with name '#{key_name}'")
+      end
+
+      if agent_action.to_sym == :grant_access && data_exists_on_every_node
+        raise ErrorUsage.new("All nodes already have access to system user '#{system_user}' with name '#{key_name}'")
+      end
+
       queue    = ActionResultsQueue.new
 
       assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params)

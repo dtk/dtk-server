@@ -105,9 +105,12 @@ module DTK
                       DTK::Component::Instance::Interpreted.delete(node, component_type, attr_hash)
                     end
                   end
-   
-                  action_results_queue.push(node_info[:id],response[:data])
+                  
+                  action_results_queue.push(node_info[:display_name],response[:data])
+                else
+                  Log.error("Agent '#{msg[:senderagent]}' error, Code: #{msg[:body][:statuscode]} - #{msg[:body][:statusmsg]}")
                 end
+
               end
             }
 

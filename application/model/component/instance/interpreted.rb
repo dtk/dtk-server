@@ -20,7 +20,7 @@ module DTK; class Component
         raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
         cmp = get_component(node,attr_hash[:key_name], component_type.to_s)
 
-        Model.delete_instance(cmp.id_handle())
+        Model.delete_instance(cmp.id_handle()) if cmp
       end
 
       def self.get_attribute_hash(node, component_id)
@@ -31,6 +31,25 @@ module DTK; class Component
         get_objs(node.model_handle(:attribute),sp_hash).inject(AttributeHash.new) do |h,r|
           h.merge(r[:display_name] => r[:value_asserted])
         end
+      end
+
+      def self.check_existance?(assembly, system_user, pub_name)
+        results = list_ssh_access(assembly)
+
+        data_exists       = false
+        # this way we avoid true response
+        data_on_each_node = results.empty? ? -1 : 0
+
+        results.each do |r|
+          next unless r[:attributes]
+          if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name)
+            data_exists = true
+            data_on_each_node += 1
+          end
+        end
+
+        # exist on either node and exists on every node
+        return data_exists, (data_on_each_node == results.size)
       end
 
       def self.list_ssh_access(assembly, component_type = :authorized_ssh_public_key)

@@ -3,8 +3,6 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 module DTK
   class Repo
     module RemoteMixin
-
-      
       def linked_remote?(remote_repo=nil) 
         unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
           raise Error.new("Not implemented yet for remote's other than default")
@@ -14,7 +12,7 @@ module DTK
 
       def initial_sync_with_remote_repo(remote_repo,local_branch,version=nil)
         unless R8::Config[:repo][:workspace][:use_local_clones]
-          raise Error.new("Not implemented yet: synchronize_with_remote_repo w/o local clones")
+          raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
         update_object!(:repo_name,:remote_repo_name)
         unless self[:remote_repo_name]
@@ -28,21 +26,6 @@ module DTK
         commit_sha
       end
 
-      #MOD_RESTRUCT: TODO: may deprecate
-      def synchronize_with_remote_repo(remote_repo,local_branch,version=nil)
-        unless R8::Config[:repo][:workspace][:use_local_clones]
-          raise Error.new("Not implemented yet: synchronize_with_remote_repo w/o local clones")
-        end
-        update_object!(:repo_name,:remote_repo_name)
-        unless self[:remote_repo_name]
-          raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
-        end
-        remote_url = Remote.new(remote_repo).repo_url_ssh_access(self[:remote_repo_name])
-        remote_name = remote_name_for_push_pull(remote_repo)
-        remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.synchronize_with_remote_repo(self[:repo_name],local_branch,remote_name,remote_url,:remote_branch => remote_branch)
-      end
-      
       def ret_remote_merge_relationship(remote_repo,local_branch,version,opts={})
         update_object!(:repo_name)
         remote_name = remote_name_for_push_pull(remote_repo)

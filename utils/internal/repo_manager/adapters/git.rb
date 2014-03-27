@@ -301,18 +301,6 @@ module DTK
       pull_changes(remote_name,remote_branch)
     end
 
-    #MOD_RESTRUCT: TODO: may deprecate
-    def synchronize_with_remote_repo(remote_name,remote_url,opts={})
-      if remote_exists?(remote_name)
-        git_command__fetch(remote_name)
-      else
-        add_remote(remote_name,remote_url)
-      end
-      pull_changes(remote_name,opts[:remote_branch])
-      push_changes()
-      remote_name
-    end
-
     def add_remote?(remote_name,remote_url)
       unless remote_exists?(remote_name)
         add_remote(remote_name,remote_url)

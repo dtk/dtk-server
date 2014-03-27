@@ -3,14 +3,17 @@ module DTK
     module ListMixin
       def info(node_id=nil, component_id=nil, attribute_id=nil)
         opts = {}
-        nested_virtual_attr = (kind_of?(Template) ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
+        is_template = kind_of?(Template)
+
+        nested_virtual_attr = (is_template ? :template_nodes_and_cmps_summary : :instance_nodes_and_cmps_summary)
         sp_hash = {
           :cols => [:id, :display_name,:component_type,nested_virtual_attr]
         }
         assembly_rows = get_objs(sp_hash)
 
         if(node_id.to_s.empty? && component_id.to_s.empty? && attribute_id.to_s.empty?)
-          assembly_rows.first[:nodes] = get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
+          nodes_info = (is_template ? get_nodes() : get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type))          
+          assembly_rows.first[:nodes] = nodes_info.sort{|a,b| a[:display_name] <=> b[:display_name] }
         end
 
         # filter nodes by node_id if node_id is provided in request

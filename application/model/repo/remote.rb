@@ -68,28 +68,28 @@ module DTK
         
         update(:remote_repo_name => nil, :remote_repo_namespace => nil)
       end
-      
+
+      #TODO: cleanup use of remote_name_for_push_pull methods
+      def get_remote_name_for_push_pull(opts={})
+        remote_repo_base = opts[:remote_repo_base]||Remote.default_remote_repo_base()
+        if remote_repo_namespace = get_field?(:remote_repo_namespace)
+          "#{remote_repo_base}--#{remote_repo_namespace}"
+        else
+          Log.error("Not expecting :remote_repo_namespace to be nil")
+          remote_repo_base
+        end
+      end
      private    
       def remote_name_for_push_pull(remote_name=nil)
-pp [:remote_name_for_push_pull,self,remote_name]
         remote_name|| get_remote_name_for_push_pull()
-      end
-      def get_remote_name_for_push_pull()
-        raise Error.new('here')
       end
     end
 
     class Remote
 
-      r8_nested_require('remote','info')
-
       CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
       r8_nested_require('remote','auth')
       include AuthMixin
-
-      def get_remote_module_info(branch_obj,remote_params)
-        Info.new(self,branch_obj,remote_params)
-      end
 
       def get_remote_module_components(module_name, type, version, namespace)
         params = {
@@ -103,8 +103,8 @@ pp [:remote_name_for_push_pull,self,remote_name]
       end
 
       def initialize(remote_repo_base=nil)
-        remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
-        @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo_base))
+        @remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
+        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo_base))
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
@@ -152,6 +152,25 @@ pp [:remote_name_for_push_pull,self,remote_name]
         client.delete_module(params, client_rsa_pub_key)
       end
 
+      class Info < Hash
+      end 
+      def get_remote_module_info(branch_obj,remote_params)
+        unless repo = branch_obj[:repo]
+          raise Error.new("Expected the :repo field to be non null")
+        end
+        #this is the the clone's name of remote
+        remote_repo = repo.get_remote_name_for_push_pull(:remote_repo_base => @remote_repo_base) 
+        ret = Info.new().merge(
+          :module_name => remote_params[:module_name],
+          :remote_repo => remote_repo,
+          :remote_repo_url => repo_url_ssh_access(remote_params[:remote_repo_name]),
+          :remote_branch => version_to_branch_name(remote_params[:version]),
+          :workspace_branch => branch_obj.get_field?(:branch)
+        )
+        ret.merge!(:version => remote_params[:version]) if remote_params[:version]        
+        ret
+      end
+      #TODO: unify these two or chose better names to show how different
       def get_module_info(remote_params)
         client_params = {
           :name => remote_params[:module_name],

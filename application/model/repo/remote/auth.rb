@@ -7,7 +7,7 @@ module DTK; class Repo
         type = type_for_remote_module(remote_params[:module_type])
         
         if opts[:rsa_pub_key]
-          namespace = extract_namespace(remote_params[:remote_repo_name])
+          namespace = remote_params[:remote_namespace]||get_namespace(remote_params[:remote_repo_name])
           authorize_end_user(mh, module_name, namespace, type, opts[:rsa_pub_key], access_rights)
         end
         true
@@ -42,8 +42,11 @@ module DTK; class Repo
       end
 
       # matches namespace from the name remote_repo e.g. "dtk"
-      def extract_namespace(remote_repo_name)
-        remote_repo_name.nil? ? nil : remote_repo_name.scan(/\A.*?(?=--)/).first
+      def get_namespace(remote_repo_name)
+pp self
+        if remote_repo_name
+          remote_repo_name.scan(/\A.*?(?=--)/).first
+        end
       end
 
     end

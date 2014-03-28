@@ -1,7 +1,7 @@
 module DTK
   module ModuleRemoteMixin
     #raises an access rights usage eerror if user does not have access to the remote module
-    def get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
+    def get_remote_module_info(action,remote_repo_base,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
       unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
@@ -19,7 +19,8 @@ module DTK
         :remote_repo_name => remote_repo_name
       }
       remote_params.merge!(:version => version) if version
-      remote_repo = Repo::Remote.new(remote_repo)
+      remote_params.merge!(:remote_namespace => remote_namespace) if remote_namespace
+      remote_repo = Repo::Remote.new(remote_repo_base)
       remote_repo.raise_error_if_no_access(model_handle(),remote_params,access_rights,:rsa_pub_key => rsa_pub_key)
       remote_repo.get_remote_module_info(aug_ws_branch,remote_params)
     end

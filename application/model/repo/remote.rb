@@ -1,9 +1,10 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 #TODO: cleanup confusing variables names to distinguis between
-# the actual remote repo name and the term used in a local git repo to represent the remote
+# - the actual remote's repo name
+# - the remote base (e.g., dtkn)
+# - the local clone's remote 
 #
-#
-# strating to rename what should be remote repo base but is called in some instances remote_repo 
+# started some of this renaming
 module DTK
   class Repo
     module RemoteMixin
@@ -16,66 +17,65 @@ module DTK
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
         update_object!(:repo_name,:remote_repo_name)
-        unless self[:remote_repo_name]
+        unless get_field?(:remote_repo_name)
           raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
         end
-        remote_url = repo_url_ssh_access(self[:remote_repo_name])
+        remote_url = repo_url_ssh_access()
         remote_name = remote_name_for_push_pull(remote_repo)
         remote_branch = Remote.version_to_branch_name(version)
-        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,self[:repo_name],remote_name,remote_url,remote_branch)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,get_field?(:repo_name),remote_name,remote_url,remote_branch)
         
         commit_sha
       end
 
       def ret_remote_merge_relationship(remote_repo,local_branch,version,opts={})
-        update_object!(:repo_name)
         remote_name = remote_name_for_push_pull(remote_repo)
         remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.ret_remote_merge_relationship(self[:repo_name],local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
+        RepoManager.ret_remote_merge_relationship(get_field?(:repo_name),local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
       end
 
       def ret_loaded_and_remote_diffs(remote_r, module_branch, version=nil)
-        remote_url = repo_url_ssh_access(self[:remote_repo_name])
+        remote_url = repo_url_ssh_access()
         remote_name = remote_name_for_push_pull(remote_r)
         remote_branch = Remote.version_to_branch_name(version)
-        return RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch, remote_url, remote_name, remote_branch)
+        return RepoManager.get_loaded_and_remote_diffs(remote_r, get_field?(:repo_name), module_branch, remote_url, remote_name, remote_branch)
       end
       
       def push_to_remote(branch,remote_repo_name,version=nil)
         unless remote_repo_name
           raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
         end
-        update_object!(:repo_name)
         remote_name = remote_name_for_push_pull()
         remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.push_to_remote_repo(self[:repo_name],branch,remote_name,remote_branch)
+        RepoManager.push_to_remote_repo(get_field?(:repo_name),branch,remote_name,remote_branch)
       end
 
-      def remote_exists?(branch,remote_repo_name)
-        update_object!(:repo_name)
+      def remote_exists?(remote_repo_name)
         remote_url = repo_url_ssh_access(remote_repo_name)
         RepoManager.git_remote_exists?(remote_url)
       end
 
       def link_to_remote(branch,remote_repo_name)
-        update_object!(:repo_name)
         remote_url = repo_url_ssh_access(remote_repo_name)
         remote_name = remote_name_for_push_pull()
-        RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
+        RepoManager.link_to_remote_repo(get_field?(:repo_name),branch,remote_name,remote_url)
         remote_repo_name
       end
       
       def unlink_remote(remote_repo)
-        update_object!(:repo_name)
         remote_name = remote_name_for_push_pull(remote_repo)
-        RepoManager.unlink_remote(self[:repo_name],remote_name)
+        RepoManager.unlink_remote(get_field?(:repo_name),remote_name)
         
         update(:remote_repo_name => nil, :remote_repo_namespace => nil)
       end
       
      private    
       def remote_name_for_push_pull(remote_name=nil)
-        remote_name||"remote"
+pp [:remote_name_for_push_pull,self,remote_name]
+        remote_name|| get_remote_name_for_push_pull()
+      end
+      def get_remote_name_for_push_pull()
+        raise Error.new('here')
       end
     end
 
@@ -103,8 +103,8 @@ module DTK
       end
 
       def initialize(remote_repo_base=nil)
-        @remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
-        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo_base))
+        remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
+        @client = RepoManagerClient.new(repo_url = rest_base_url(remote_repo_base))
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
@@ -225,10 +225,10 @@ module DTK
       end
       HeadBranchName = "master"
       
-      def repo_url_ssh_access(remote_repo_name)
+      def repo_url_ssh_access(remote_repo_name=nil)
+        remote_repo_name ||= get_field?(:remote_repo_name)
         RepoManagerClient.repo_url_ssh_access(remote_repo_name)
       end
-
 
       def default_remote_repo_base()
         self.class.default_remote_repo_base()

@@ -96,7 +96,7 @@ module DTK
       remote_repo_name = module_info[:git_repo_name]
 
       # check if remote exists
-      if repo.remote_exists?(local_branch, remote_repo_name)
+      if repo.remote_exists?(remote_repo_name)
         raise ErrorUsage.new("Remote repo already exists with given name and namespace")
       end
 

@@ -1,13 +1,14 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
-
+#TODO: cleanup confusing variables names to distinguis between
+# the actual remote repo name and the term used in a local git repo to represent the remote
+#
+#
+# strating to rename what should be remote repo base but is called in some instances remote_repo 
 module DTK
   class Repo
     module RemoteMixin
-      def linked_remote?(remote_repo=nil) 
-        unless remote_repo.nil? or remote_repo == Repo::Remote.default_remote_repo()
-          raise Error.new("Not implemented yet for remote's other than default")
-        end
-        update_object!(:remote_repo_name)[:remote_repo_name]
+      def linked_remote?()
+        get_field?(:remote_repo_name)
       end
 
       def initial_sync_with_remote_repo(remote_repo,local_branch,version=nil)
@@ -18,7 +19,7 @@ module DTK
         unless self[:remote_repo_name]
           raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
         end
-        remote_url = Remote.new(remote_repo).repo_url_ssh_access(self[:remote_repo_name])
+        remote_url = repo_url_ssh_access(self[:remote_repo_name])
         remote_name = remote_name_for_push_pull(remote_repo)
         remote_branch = Remote.version_to_branch_name(version)
         commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,self[:repo_name],remote_name,remote_url,remote_branch)
@@ -34,7 +35,7 @@ module DTK
       end
 
       def ret_loaded_and_remote_diffs(remote_r, module_branch, version=nil)
-        remote_url = Remote.new(remote_r).repo_url_ssh_access(self[:remote_repo_name])
+        remote_url = repo_url_ssh_access(self[:remote_repo_name])
         remote_name = remote_name_for_push_pull(remote_r)
         remote_branch = Remote.version_to_branch_name(version)
         return RepoManager.get_loaded_and_remote_diffs(remote_r, self[:repo_name], module_branch, remote_url, remote_name, remote_branch)
@@ -52,13 +53,13 @@ module DTK
 
       def remote_exists?(branch,remote_repo_name)
         update_object!(:repo_name)
-        remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
+        remote_url = repo_url_ssh_access(remote_repo_name)
         RepoManager.git_remote_exists?(remote_url)
       end
 
       def link_to_remote(branch,remote_repo_name)
         update_object!(:repo_name)
-        remote_url = Remote.new.repo_url_ssh_access(remote_repo_name)
+        remote_url = repo_url_ssh_access(remote_repo_name)
         remote_name = remote_name_for_push_pull()
         RepoManager.link_to_remote_repo(self[:repo_name],branch,remote_name,remote_url)
         remote_repo_name
@@ -80,14 +81,14 @@ module DTK
 
     class Remote
 
-      r8_nested_require('remote','with_namespace')
+      r8_nested_require('remote','info')
 
       CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
       r8_nested_require('remote','auth')
       include AuthMixin
 
       def get_remote_module_info(branch_obj,remote_params)
-        WithNamespace.new(self,branch_obj,remote_params)
+        Info.new(self,branch_obj,remote_params)
       end
 
       def get_remote_module_components(module_name, type, version, namespace)
@@ -101,9 +102,9 @@ module DTK
         @client.get_components_info(params)
       end
 
-      def initialize(remote_repo=nil)
-        @remote_repo = remote_repo ? remote_repo.to_sym : remote_repo
-        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo))
+      def initialize(remote_repo_base=nil)
+        @remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
+        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo_base))
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
@@ -225,14 +226,23 @@ module DTK
       HeadBranchName = "master"
       
       def repo_url_ssh_access(remote_repo_name)
-        client.repo_url_ssh_access(remote_repo_name,::R8::Config[:repo][:remote][:git_user])
+        RepoManagerClient.repo_url_ssh_access(remote_repo_name)
       end
 
+
+      def default_remote_repo_base()
+        self.class.default_remote_repo_base()
+      end
+      def self.default_remote_repo_base()
+        :dtknet #TODO: have this obtained from config file
+      end
+
+      #TODO: deprecate when remove all references to these
       def default_remote_repo()
-        self.class.default_remote_repo()
+        self.class.default_remote_repo_base()
       end
       def self.default_remote_repo()
-        :dtknet #TODO: have this obtained from config file
+        default_remote_repo_base()
       end
 
       def self.default_user_namespace()
@@ -241,6 +251,7 @@ module DTK
         ::DTK::Common::Aux.running_process_user()
       end
 
+      #TODO: this needs to be cleaned up
       def self.default_namespace()
         self.default_user_namespace()
       end

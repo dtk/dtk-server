@@ -1,6 +1,6 @@
 module DTK; class Repo
   class Remote
-    class WithNamespace < Hash
+    class Info < Hash
       #has keys
       #  :remote_repo_url
       #  :remote_repo 

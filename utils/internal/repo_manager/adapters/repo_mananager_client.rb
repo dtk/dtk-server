@@ -10,7 +10,7 @@ module DTK
     end
    private
     def self.adapter()
-      @adapter ||= DTK::RepoManagerClient.new(::R8::Config[:repo][:repo_manager_client][:server_rest_base_url])
+      @adapter ||= DTK::RepoManagerClient.new()
     end
   end
 end

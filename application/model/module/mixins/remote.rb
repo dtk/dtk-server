@@ -5,7 +5,7 @@ module DTK
       unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
         raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
       end
-      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?(remote_repo)
+      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?()
         if action == :push
           raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to a remote module")
         else #action == :pull
@@ -31,7 +31,7 @@ module DTK
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
-      unless repo and repo.linked_remote?(remote_repo)
+      unless repo and repo.linked_remote?()
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
       end
       if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
@@ -73,7 +73,7 @@ module DTK
         raise ErrorUsage.new("We do not support custom module names (via export) at this time.")
       end
 
-      # if repo.linked_remote?(remote_repo)
+      # if repo.linked_remote?()
       #   raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
       # end
 

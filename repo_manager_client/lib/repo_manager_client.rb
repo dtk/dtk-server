@@ -9,7 +9,8 @@ module DTK
     end
   end
   class RepoManagerClient
-    def initialize(rest_base_url_or_host)
+    def initialize(rest_base_url_or_host=nil)
+      rest_base_url_or_host ||= R8::Config[:repo][:remote][:host]
       if rest_base_url_or_host =~ /^https?:/
         #input is rest_base_url
         @rest_base_url = rest_base_url_or_host
@@ -26,11 +27,14 @@ module DTK
       end
     end
 
+    def self.repo_url_ssh_access(remote_repo_name,git_user=nil)
+      new.repo_url_ssh_access(remote_repo_name,git_user)
+    end
     def repo_url_ssh_access(remote_repo_name,git_user=nil)
-      "#{git_user||GitUser}@#{@host}:#{remote_repo_name}"
+      git_user ||= R8::Config[:repo][:remote][:git_user]
+      "#{git_user}@#{@host}:#{remote_repo_name}"
     end
 
-    DefaultGitUser = 'git'
     DefaultRestServicePort = 7000
 
     def create_branch_instance(repo,branch,opts={})

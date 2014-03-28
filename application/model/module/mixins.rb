@@ -420,8 +420,9 @@ module DTK
           
           if diff
             repo = r[:repo]
-            linked_remote = repo.linked_remote?(remote_rep)
-            is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch) if linked_remote
+            if linked_remote = repo.linked_remote?()
+              is_equal = repo.ret_loaded_and_remote_diffs(remote_rep, module_branch)
+            end
           end
                     
           unless mdl = ndx_ret[ndx]

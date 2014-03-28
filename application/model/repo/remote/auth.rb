@@ -43,7 +43,6 @@ module DTK; class Repo
 
       # matches namespace from the name remote_repo e.g. "dtk"
       def get_namespace(remote_repo_name)
-pp self
         if remote_repo_name
           remote_repo_name.scan(/\A.*?(?=--)/).first
         end

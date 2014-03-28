@@ -179,9 +179,9 @@ module DTK
     # Response will return list of modules for given component.
     #
     def rest__resolve_pull_from_remote()
-      module_id = ret_non_null_request_params(:service_module_id)
-
-      name, namespace, version = ServiceModule.get_basic_info(model_handle(), module_id)
+      service_module = create_obj(:service_module_id)
+      opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
+      name, namespace, version = service_module.get_basic_info(opts)
       rest_ok_response get_service_dependencies(name, namespace, version)
     end
 

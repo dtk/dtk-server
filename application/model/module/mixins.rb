@@ -56,11 +56,65 @@ module DTK
     def ret_clone_update_info(version=nil)
       CloneUpdateInfo.new(self,version)
     end
+    #
+    # returns Array with: name, namespace, version
+    #
+    def get_basic_info(opts=Opts.new)
+      sp_hash = {
+        :cols => [:id, :display_name, :version, :remote_repos],
+        :filter => [:eq,:id, id()]
+      }
+
+      rows = get_objs(sp_hash)
+      unless match = GetBasicInfo.find_match(rows,opts)
+        raise Error.new("Unexpected that there is no info associated with module")
+      end
+      match
+    end
+
+    module GetBasicInfo
+      #
+      # returns Array with: name, namespace, version
+      #
+      def self.find_match(rows,opts)
+        remote_namespace = opts[:remote_namespace]
+        match = 
+          if rows.size == 1
+            rows.first
+          elsif rows.size > 1
+            rows.find{|r| remote_namespace_match?(r,remote_namespace)}
+          end
+        if match
+          name_namespace_version(match)
+        end
+      end
+
+     private
+      def self.name_namespace_version(row)
+        [row[:display_name], remote_namespace(row), (row[:module_branch]||{})[:version]]
+      end
+
+      def self.remote_namespace_match?(row,remote_namespace=nil)
+        if remote_namespace
+          remote_namespace(row) == remote_namespace
+        else
+          repo_remote(row)[:is_default]
+        end
+      end
+
+      def self.repo_remote(row)
+        row[:repo_remote]||{}
+      end
+      def self.remote_namespace(row)
+        repo_remote(row)[:repo_namespace]
+      end
+    end
 
     ##
     # Returns local and remote versions for module
     #
     def local_and_remote_versions(client_rsa_pub_key = nil, opts={})
+      Log.error("TODO: see if namespace treatment must be updated")
       module_name, remote_versions = nil, []
 
       # get local versions list 
@@ -307,21 +361,6 @@ module DTK
     end
     def name_to_id(model_handle,name)
       name_to_id_default(model_handle,name)
-    end
-
-    #
-    # returns Array with: name, namespace, version
-    #
-    def get_basic_info(target_mh, id, opts={})
-      sp_hash = {
-        :cols => [:id, :display_name, :version, :remote_repos],
-        :filter => [:eq,:id, id.to_i]
-      }
-
-      response = get_obj(target_mh, sp_hash.merge(opts))
-
-      # return name, namespace and version
-      return response[:display_name], (response[:repo_remote]||{})[:repo_namespace], response[:module_branch][:version] 
     end
 
     def info(target_mh, id, opts={})

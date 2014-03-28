@@ -1,5 +1,9 @@
 module DTK
   class Opts < Hash
+    #if ?foo means include if not null
+    def self.create?(initial_val)
+      new(convert_for_create?(initial_val))
+    end
     def initialize(initial_val=nil)
       super()
       if initial_val
@@ -62,6 +66,20 @@ module DTK
     DatatypeKey = :datatype
 
    private
+    def self.convert_for_create?(raw)
+      raw.inject(Hash.new) do |h,(k,v)|
+        if non_null_var = is_only_non_null_var?(k)
+          v.nil? ? h : h.merge(non_null_var => v)
+        else
+          h.merge(k => v)
+        end
+      end
+    end
+    def self.is_only_non_null_var?(k)
+      if k.to_s =~ /\?$/
+        k.to_s.gsub(/\?$/,'').to_sym
+      end
+    end
 
     def remove_nested_nil(val)
       unless val.class == Hash #using this test rather than val.kind_od?(Hash) because only want to match on Hash and not its children classes 

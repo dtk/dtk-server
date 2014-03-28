@@ -7,9 +7,9 @@ module DTK
       end
       unless remote_repo_name = aug_ws_branch[:repo].linked_remote?()
         if action == :push
-          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo}) because it is currently not linked to a remote module")
+          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo_base}) because it is currently not linked to a remote module")
         else #action == :pull
-          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo}) because it is currently not linked to a remote module")
+          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo_base}) because it is currently not linked to a remote module")
         end
       end
 

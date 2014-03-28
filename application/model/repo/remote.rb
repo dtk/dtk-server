@@ -69,6 +69,11 @@ module DTK
         update(:remote_repo_name => nil, :remote_repo_namespace => nil)
       end
 
+      def repo_url_ssh_access(remote_repo_name=nil)
+        remote_repo_name ||= get_field?(:remote_repo_name)
+        RepoManagerClient.repo_url_ssh_access(remote_repo_name)
+      end
+
       #TODO: cleanup use of remote_name_for_push_pull methods
       def get_remote_name_for_push_pull(opts={})
         remote_repo_base = opts[:remote_repo_base]||Remote.default_remote_repo_base()
@@ -163,7 +168,7 @@ module DTK
         ret = Info.new().merge(
           :module_name => remote_params[:module_name],
           :remote_repo => remote_repo,
-          :remote_repo_url => repo_url_ssh_access(remote_params[:remote_repo_name]),
+          :remote_repo_url => repo.repo_url_ssh_access(remote_params[:remote_repo_name]),
           :remote_branch => version_to_branch_name(remote_params[:version]),
           :workspace_branch => branch_obj.get_field?(:branch)
         )
@@ -244,11 +249,6 @@ module DTK
       end
       HeadBranchName = "master"
       
-      def repo_url_ssh_access(remote_repo_name=nil)
-        remote_repo_name ||= get_field?(:remote_repo_name)
-        RepoManagerClient.repo_url_ssh_access(remote_repo_name)
-      end
-
       def default_remote_repo_base()
         self.class.default_remote_repo_base()
       end

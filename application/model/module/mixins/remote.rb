@@ -1,5 +1,7 @@
-module DTK
-  module ModuleRemoteMixin
+module DTK; module ModuleMixins
+  module Remote
+  end
+  module Remote::Instance
     #raises an access rights usage eerror if user does not have access to the remote module
     def get_remote_module_info(action,remote_repo_base,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
       unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
@@ -115,8 +117,7 @@ module DTK
 
   end
 
-  module ModuleRemoteClassMixin
-
+  module Remote::Class
     def pull_from_remote(project, local_module_name, remote_repo, version = nil)
       local_branch = ModuleBranch.workspace_branch_name(project, version)
       module_obj = module_exists?(project.id_handle(), local_module_name)
@@ -269,4 +270,5 @@ module DTK
     end
 
   end
-end
+end; end
+

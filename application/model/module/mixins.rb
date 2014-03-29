@@ -33,10 +33,14 @@ module DTK
     end
   end
 
-  r8_nested_require('mixins','remote')  
-
+  #includes for both class and instance mixins
+  module ModuleMixins
+    r8_nested_require('mixins','remote')  
+  end
+    
+ #instance mixins
   module ModuleMixin
-    include ModuleRemoteMixin
+    include ModuleMixins::Remote::Instance
 
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)
@@ -341,10 +345,11 @@ module DTK
     end
   end
 
+  #class mixins
   module ModuleClassMixin
     r8_nested_require('mixins','list_method_helpers')
 
-    include ModuleRemoteClassMixin
+    include ModuleMixins::Remote::Class
     def component_type()
       case module_type()
        when :service_module

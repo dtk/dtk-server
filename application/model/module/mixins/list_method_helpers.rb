@@ -1,6 +1,6 @@
 module DTK
   module ModuleClassMixin
-    module ListMethodHelpers
+    class ListMethodHelpers
       def self.aggregate_detail(branch_module_rows,module_mh,opts)
         diff       = opts[:diff]
         remote_repo_base = opts[:remote_repo_base]

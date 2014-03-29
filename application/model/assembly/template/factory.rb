@@ -16,11 +16,12 @@ module DTK
           if opts[:mode] == :update
             raise ErrorUsage.new("Service module (#{service_module_name}) does not exist")
           end
-          config_agent_type = :puppet #TODO: stub
-          module_and_branch_info = ServiceModule.create_module(project,service_module_name,config_agent_type)
+          opts_create = {:config_agent_type => ConfigAgentType}
+          module_and_branch_info = ServiceModule.create_module(project,service_module_name,opts_create)
           module_and_branch_info[:module_idh].create_object()
         end
       end
+      ConfigAgentType = :puppet #TODO: stub
 
       #creates a new assembly template if it does not exist
       def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})

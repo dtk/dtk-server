@@ -91,13 +91,14 @@ module DTK
         if service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version,:no_error_if_does_not_exist=>true)
           service_module_branch.id_handle()
         else
-          config_agent_type = :puppet #TODO: stub
-          module_and_branch_info = ServiceModule.create_module(project,service_module_name,config_agent_type)
+          opts_create = {:config_agent_type => ConfigAgentType}
+          module_and_branch_info = ServiceModule.create_module(project,service_module_name,opts_create)
           service_module = module_and_branch_info[:module_idh].create_object()
           service_module.update(:dsl_parsed => true)
           module_and_branch_info[:module_branch_idh]
         end
       end
+      ConfigAgentType = :puppet #TODO: stub
     end
   end
 end

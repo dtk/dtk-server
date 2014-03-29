@@ -133,7 +133,12 @@ module DTK
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
-      init_hash_response = ServiceModule.create_module(project,module_name,config_agent_type)
+      version = nil #TODO: stub
+      opts = Opts.create?(
+        :config_agent_type => config_agent_type,
+        :version? => version
+      )
+      init_hash_response = ServiceModule.create_module(project,module_name,opts)
       rest_ok_response(:service_module_id => init_hash_response[:module_branch_idh].get_id(), :repo_info => init_hash_response[:module_repo_info])
     end
 

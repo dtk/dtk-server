@@ -237,11 +237,15 @@ module DTK
 
       private :branch_names_to_versions
 
-      def version_to_branch_name(version)
+      def version_to_branch_name(version=nil)
         self.class.version_to_branch_name(version)
       end
-      def self.version_to_branch_name(version)
-        version ? "v#{version}" : HeadBranchName
+      def self.version_to_branch_name(version=nil)
+        if version.nil? or version == HeadBranchName
+          HeadBranchName
+        else
+          "v#{version}" 
+        end
       end
       HeadBranchName = "master"
       

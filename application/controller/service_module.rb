@@ -39,8 +39,9 @@ module DTK
       rest_ok_response service_module.get_referenced_component_modules(Opts.new(:detail_to_include=>[:versions]))
     end
 
+    #TODO: rename; this is just called by install; import ops call create route
     def rest__import()
-      rest_ok_response import_method_helper(ServiceModule)
+      rest_ok_response install_from_dtkn(ServiceModule)
     end
     
     #this should be called when the module is linked, but the specfic version is not

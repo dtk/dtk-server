@@ -37,7 +37,7 @@ module Ramaze::Helper
       module_class.pull_from_remote(project, local_module_name, remote_repo, version)
     end
 
-    def import_method_helper(module_class)
+    def install_from_dtkn(module_class)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       remote_repo = ret_remote_repo()
@@ -66,7 +66,7 @@ module Ramaze::Helper
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
-      response = module_class.import(project,remote_params,local_params,opts)
+      response = module_class.install_from_dtkn(project,remote_params,local_params,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

@@ -1,3 +1,4 @@
+#TODO: in process of renaming things that have import to distingusih whether it is install from dtkn not
 module DTK; module ModuleMixins
   module Remote
   end
@@ -146,7 +147,7 @@ module DTK; module ModuleMixins
     #  local_params = {
     #    :module_name
     #  }
-    def import(project,remote_params,local_params,opts={})
+    def install_from_dtkn(project,remote_params,local_params,opts={})
       repo, version, module_and_branch_info, commit_sha, module_obj, parsed = nil, nil, nil, nil, nil, nil
       dtk_client_pub_key = remote_params[:rsa_pub_key]
 

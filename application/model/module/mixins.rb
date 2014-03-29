@@ -36,11 +36,13 @@ module DTK
   #includes for both class and instance mixins
   module ModuleMixins
     r8_nested_require('mixins','remote')  
+    r8_nested_require('mixins','create')  
   end
     
  #instance mixins
   module ModuleMixin
     include ModuleMixins::Remote::Instance
+    include ModuleMixins::Create::Instance
 
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)
@@ -174,26 +176,6 @@ module DTK
         Error.new("Unexpected that there is more than one matching #{type} branches")
       end
       matches.first
-    end
-
-    def create_new_version(new_version,opts={},client_rsa_pub_key=nil)
-      opts_get_aug = Opts.new
-      if base_version = opts[:base_version]
-        opts_get_aug.merge(:filter => {:version => base_version})
-      end
-      unless aug_ws_branch = get_augmented_workspace_branch(opts_get_aug)
-        raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
-      end
-
-      #make sure there is a not an existing branch that matches the new one
-      if get_module_branch_matching_version(new_version)
-        raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
-      end
-      repo_for_new_version = aug_ws_branch.create_new_branch_from_this_branch?(get_project(),aug_ws_branch[:repo],new_version)
-      opts_type_spec = opts.merge(:ancestor_branch_idh => aug_ws_branch.id_handle())
-      ret = create_new_version__type_specific(repo_for_new_version,new_version,opts_type_spec)
-      opts[:ret_module_branch] = opts_type_spec[:ret_module_branch] if  opts_type_spec[:ret_module_branch]
-      ret
     end
 
     def update_model_from_clone_changes?(commit_sha,diffs_summary,version,opts={})
@@ -350,6 +332,7 @@ module DTK
     r8_nested_require('mixins','list_method_helpers')
 
     include ModuleMixins::Remote::Class
+    include ModuleMixins::Create::Class
     def component_type()
       case module_type()
        when :service_module
@@ -490,30 +473,6 @@ module DTK
       end
     end
 
-    #returns hash with keys :module_idh :module_branch_idh
-    def create_module(project,module_name,config_agent_type,version=nil,opts={})
-      is_parsed   = false
-      project_idh = project.id_handle()
-      module_exists = module_exists?(project_idh,module_name)
-      if module_exists
-        is_parsed = module_exists[:dsl_parsed] 
-      end
-
-      if is_parsed and not opts[:no_error_if_exists]
-        raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
-      end
-      ws_branch = ModuleBranch.workspace_branch_name(project,version)
-      create_opts = {
-        :create_branch => ws_branch,
-        :push_created_branch => true,
-        :donot_create_master_branch => true,
-        :delete_if_exists => true
-      }
-      repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
-      module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info,version))
-    end
-
     def module_repo_info(repo,module_and_branch_info,version)
       info = module_and_branch_info #for succinctness
       branch_obj = info[:module_branch_idh].create_object()
@@ -525,18 +484,6 @@ module DTK
       module_type()
     end
     private :module_specific_type
-
-    def create_empty_workspace_repo(project_idh,module_name,module_specific_type,opts={})
-      auth_repo_users = RepoUser.authorized_users(project_idh.createMH(:repo_user))
-      repo_user_acls = auth_repo_users.map do |repo_username|
-        {
-          :repo_username => repo_username,
-          :access_rights => "RW+"
-        }
-      end
-
-      Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
-    end
 
     def get_workspace_module_branch(project,module_name,version=nil,opts={})
       project_idh = project.id_handle()
@@ -580,32 +527,6 @@ module DTK
 
     def pp_module_name(module_name,version=nil)
       version ? "#{module_name} (#{version})" : module_name
-    end
-
-    def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)
-      project_idh = project.id_handle()
-      ref = module_name
-      module_type = model_name.to_s
-      opts = {:version => input_version}
-      opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
-      mb_create_hash = ModuleBranch.ret_workspace_create_hash(project,module_type,repo_idh,opts)
-      version = mb_create_hash.values.first[:version]
-
-      fields = {
-        :display_name => module_name,
-        :module_branch => mb_create_hash
-      }
-
-      create_hash = {
-        model_name.to_s => {
-          ref => fields
-        }
-      }
-      input_hash_content_into_model(project_idh,create_hash)
-
-      module_branch = get_workspace_module_branch(project,module_name,version)
-      module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
-      {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
 
     def module_exists?(project_idh,module_name)

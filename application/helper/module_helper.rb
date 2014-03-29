@@ -79,6 +79,10 @@ module Ramaze::Helper
       ::DTK::Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))
     end
 
+    def ret_remote_repo_base()
+      (ret_request_params(:remote_repo_base)||::DTK::Repo::Remote.default_remote_repo_base()).to_sym
+    end
+    #TODO: deprecate below when all usess remove; 
     def ret_remote_repo()
       (ret_request_params(:remote_repo)||::DTK::Repo::Remote.default_remote_repo()).to_sym
     end

@@ -62,17 +62,17 @@ module DTK
 
     #### list and info actions ###
     def rest__list()
-      diff        = ret_request_params(:diff)
-      project     = get_default_project()
-      datatype    = :module
-      remote_repo = ret_remote_repo()
+      diff             = ret_request_params(:diff)
+      project          = get_default_project()
+      datatype         = :module
+      remote_repo_base = ret_remote_repo_base()
 
       opts = Opts.new(:project_idh => project.id_handle())
       if detail = ret_request_params(:detail_to_include)
         opts.merge!(:detail_to_include => detail.map{|r|r.to_sym})
       end
 
-      opts.merge!(:remote_rep => remote_repo, :diff => diff)
+      opts.merge!(:remote_repo_base => remote_repo_base, :diff => diff)
       datatype = :module_diff if diff
 
       rest_ok_response ComponentModule.list(opts), :datatype => datatype

@@ -12,7 +12,7 @@ module DTK
         get_field?(:remote_repo_name)
       end
 
-      def initial_sync_with_remote_repo(remote_repo,local_branch,version=nil)
+      def initial_sync_with_remote_repo(remote_ref,local_branch,version=nil)
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
@@ -21,33 +21,34 @@ module DTK
           raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
         end
         remote_url = repo_url_ssh_access()
-        remote_name = remote_name_for_push_pull(remote_repo)
+        remote_ref ||= get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
-        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,get_field?(:repo_name),remote_name,remote_url,remote_branch)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
         
         commit_sha
       end
 
-      def ret_remote_merge_relationship(remote_repo,local_branch,version,opts={})
-        remote_name = remote_name_for_push_pull(remote_repo)
+      def ret_remote_merge_relationship(remote_ref,local_branch,version,opts={})
+        remote_ref ||= get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.ret_remote_merge_relationship(get_field?(:repo_name),local_branch,remote_name,opts.merge(:remote_branch => remote_branch))
+        RepoManager.ret_remote_merge_relationship(get_field?(:repo_name),local_branch,remote_ref,opts.merge(:remote_branch => remote_branch))
       end
 
-      def ret_loaded_and_remote_diffs(remote_r, module_branch, version=nil)
+      def ret_loaded_and_remote_diffs(module_branch,opts={})
+        version = opts[:version]
         remote_url = repo_url_ssh_access()
-        remote_name = remote_name_for_push_pull(remote_r)
+        remote_ref = opts[:remote_name]||get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
-        return RepoManager.get_loaded_and_remote_diffs(remote_r, get_field?(:repo_name), module_branch, remote_url, remote_name, remote_branch)
+        RepoManager.get_loaded_and_remote_diffs(remote_ref, get_field?(:repo_name), module_branch, remote_url, remote_branch)
       end
       
       def push_to_remote(branch,remote_repo_name,version=nil)
         unless remote_repo_name
           raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
         end
-        remote_name = remote_name_for_push_pull()
+        remote_ref = get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.push_to_remote_repo(get_field?(:repo_name),branch,remote_name,remote_branch)
+        RepoManager.push_to_remote_repo(get_field?(:repo_name),branch,remote_ref,remote_branch)
       end
 
       def remote_exists?(remote_repo_name)
@@ -57,14 +58,14 @@ module DTK
 
       def link_to_remote(branch,remote_repo_name)
         remote_url = repo_url_ssh_access(remote_repo_name)
-        remote_name = remote_name_for_push_pull()
-        RepoManager.link_to_remote_repo(get_field?(:repo_name),branch,remote_name,remote_url)
+        remote_ref = get_remote_ref()
+        RepoManager.link_to_remote_repo(get_field?(:repo_name),branch,remote_ref,remote_url)
         remote_repo_name
       end
       
-      def unlink_remote(remote_repo)
-        remote_name = remote_name_for_push_pull(remote_repo)
-        RepoManager.unlink_remote(get_field?(:repo_name),remote_name)
+      def unlink_remote(remote_ref)
+        remote_ref ||= get_remote_ref()
+        RepoManager.unlink_remote(get_field?(:repo_name),remote_ref)
         
         update(:remote_repo_name => nil, :remote_repo_namespace => nil)
       end
@@ -74,8 +75,7 @@ module DTK
         RepoManagerClient.repo_url_ssh_access(remote_repo_name)
       end
 
-      #TODO: cleanup use of remote_name_for_push_pull methods
-      def get_remote_name_for_push_pull(opts={})
+      def get_remote_ref(opts={})
         remote_repo_base = opts[:remote_repo_base]||Remote.default_remote_repo_base()
         if remote_repo_namespace = get_field?(:remote_repo_namespace)
           "#{remote_repo_base}--#{remote_repo_namespace}"
@@ -83,10 +83,6 @@ module DTK
           Log.error("Not expecting :remote_repo_namespace to be nil")
           remote_repo_base
         end
-      end
-     private    
-      def remote_name_for_push_pull(remote_name=nil)
-        remote_name|| get_remote_name_for_push_pull()
       end
     end
 
@@ -163,11 +159,11 @@ module DTK
         unless repo = branch_obj[:repo]
           raise Error.new("Expected the :repo field to be non null")
         end
-        #this is the the clone's name of remote
-        remote_repo = repo.get_remote_name_for_push_pull(:remote_repo_base => @remote_repo_base) 
+        remote_ref = repo.get_remote_ref(:remote_repo_base => @remote_repo_base) 
         ret = Info.new().merge(
           :module_name => remote_params[:module_name],
-          :remote_repo => remote_repo,
+          #TODO: will change this to :remote_ref when upstream uses this                               
+          :remote_repo => remote_ref,
           :remote_repo_url => repo.repo_url_ssh_access(remote_params[:remote_repo_name]),
           :remote_branch => version_to_branch_name(remote_params[:version]),
           :workspace_branch => branch_obj.get_field?(:branch)

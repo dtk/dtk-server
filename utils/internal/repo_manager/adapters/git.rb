@@ -382,12 +382,15 @@ module DTK
       end
     end
 
-    def is_different_than_remote?(remote_r, remote_u, remote_n, remote_b)
+    #remote_r - remote_ref
+    #remote_u - remote_url
+    #remote_b - remote_branch
+    def is_different_than_remote?(remote_r, remote_u, remote_b)
       # If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
       begin
         git_command__fetch(remote_r)
       rescue Exception => e
-        initial_sync_with_remote_repo(remote_n,remote_u,remote_b)
+        initial_sync_with_remote_repo(remote_r,remote_u,remote_b)
         git_command__fetch(remote_r)
       end
       

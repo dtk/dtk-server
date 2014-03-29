@@ -26,14 +26,14 @@ module DTK
     end
 
     #this should be called when the module is linked, but the specfic version is not
-    def import_version(remote_repo,version)
+    def import_version(remote_repo_base,version)
       parsed = nil
       module_name = module_name()
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
       unless repo and repo.linked_remote?()
-        raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo}) because it is currently not linked to the remote module")
+        raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo_base}) because it is currently not linked to the remote module")
       end
       if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
         raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
@@ -42,7 +42,7 @@ module DTK
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
       Transaction do
         #TODO: may have commit_sha returned in this fn so client can do a reliable pull
-        commit_sha = repo.initial_sync_with_remote_repo(remote_repo,local_branch_name,version)
+        commit_sha = repo.initial_sync_with_remote_repo(remote_repo_base,local_branch_name,version)
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
 
         opts = {:do_not_raise => true}
@@ -110,9 +110,6 @@ module DTK
       #update last for idempotency (i.e., this is idempotent check)
       repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
       
-      # NOT SURE WHEN WE NEED THIS (Haris)
-      #repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-      
       remote_repo_name
     end
 
@@ -148,12 +145,7 @@ module DTK
     #  local_params = {
     #    :module_name
     #  }
-
     def import(project,remote_params,local_params,opts={})
-      #repo_client = Repo::Remote.new(remote_params[:repo])
-      #repo_client.get_remote_module_components(remote_params[:module_name], component_type(), remote_params[:module_version], remote_params[:module_namespace])
-      #return 1
-
       repo, version, module_and_branch_info, commit_sha, module_obj, parsed = nil, nil, nil, nil, nil, nil
       dtk_client_pub_key = remote_params[:rsa_pub_key]
 

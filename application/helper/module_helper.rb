@@ -28,6 +28,8 @@ module Ramaze::Helper
 
 
     def pull_from_remote_helper(module_class)
+      #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
+      Log.error("Not expecting to call pull_from_remote_helper")
       local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
       version = ret_request_params(:version)
       project = get_default_project()
@@ -82,7 +84,7 @@ module Ramaze::Helper
     def ret_remote_repo_base()
       (ret_request_params(:remote_repo_base)||::DTK::Repo::Remote.default_remote_repo_base()).to_sym
     end
-    #TODO: deprecate below when all usess remove; 
+    #TODO: deprecate below when all uses removed; 
     def ret_remote_repo()
       (ret_request_params(:remote_repo)||::DTK::Repo::Remote.default_remote_repo()).to_sym
     end

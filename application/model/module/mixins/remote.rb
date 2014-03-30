@@ -135,7 +135,7 @@ module DTK; module ModuleMixins
       module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
     end
 
-    #import from remote repo; directly in this method handles the module/branc and repo level items
+    #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
 
     #  remote_params = {

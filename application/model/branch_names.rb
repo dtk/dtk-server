@@ -1,3 +1,4 @@
+#TODO: deprecate when get all this logic in ModuleLocation::Target
 #TODO: putting version defaults in now; may move to seperate file or rename to branch_names_and_versions
 module DTK
   VersionFieldDefault = 'master'

@@ -41,7 +41,7 @@ module DTK
 
     #TODO: rename; this is just called by install; import ops call create route
     def rest__import()
-      rest_ok_response install_from_dtkn(ServiceModule)
+      rest_ok_response install_from_dtkn_helper(ServiceModule)
     end
     
     #this should be called when the module is linked, but the specfic version is not

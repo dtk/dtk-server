@@ -143,18 +143,26 @@ module DTK; module ModuleMixins
     #    :module_namespace
     #    :module_name
     #    :version
+    #    :rsa_pub_key
     #  }
     #  local_params = {
     #    :module_name
     #  }
     def install_from_dtkn(project,remote_params,local_params,opts={})
-      repo, version, module_and_branch_info, commit_sha, module_obj, parsed = nil, nil, nil, nil, nil, nil
+      #version and namespace are same for local and remote
+      version = remote_params[:version]
+      namespace = remote_params[:module_namespace]
+      #local specific
+      local_module_name = local_params[:module_name]
+      #remote specfic
+      remote_module_name = remote_params[:module_name]
+      remote_repo = remote_params[:repo]
       dtk_client_pub_key = remote_params[:rsa_pub_key]
 
+      module_and_branch_info = commit_sha = module_obj = parsed = nil
+
       Transaction do
-        local_branch = ModuleBranch.workspace_branch_name(project,remote_params[:version])
-        local_module_name = local_params[:module_name]
-        version = remote_params[:version]
+        local_branch = ModuleBranch.workspace_branch_name(project,version)
         
         if module_obj = module_exists?(project.id_handle(),local_module_name)
           if module_obj.get_module_branch(local_branch)
@@ -169,40 +177,41 @@ module DTK; module ModuleMixins
           end
         end
       
-        remote_repo = Repo::Remote.new(remote_params[:repo])
+        remote_repo_obj = Repo::Remote.new(remote_repo)
         begin
-          remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
+          remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
         rescue Exception => e
           return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
         end
         
         #case on whether the module is created already
-        if module_obj
-          repo = module_obj.get_repo!()
-        else
-          #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-          remote_repo.authorize_dtk_instance(remote_params[:module_name],remote_params[:module_namespace],module_type(), dtk_client_pub_key)
-          
-          #create empty repo on local repo manager; 
-          #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-          create_opts = {
-            :remote_repo_name => remote_module_info[:git_repo_name],
-            :remote_repo_namespace => remote_params[:module_namespace],
-            :donot_create_master_branch => true,
-            :delete_if_exists => true
-          }
-          repo = create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
-        end
+        local_repo_obj = 
+          if module_obj
+            module_obj.get_repo!()
+          else
+            #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
+            remote_repo.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
+            
+            #create empty repo on local repo manager; 
+            #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+            create_opts = {
+              :remote_repo_name => remote_module_info[:git_repo_name],
+              :remote_repo_namespace => namespace,
+              :donot_create_master_branch => true,
+              :delete_if_exists => true
+            }
+            create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
+          end
         
-        commit_sha = repo.initial_sync_with_remote_repo(remote_params[:repo],local_branch,version)
-        module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+        module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
         opts = {:do_not_raise => true}
-        parsed = module_obj.import__dsl(commit_sha,repo,module_and_branch_info,version, opts)
+        parsed = module_obj.import__dsl(commit_sha,local_repo_obj,module_and_branch_info,version, opts)
       end
       
-      response = module_repo_info(repo,module_and_branch_info,version)
+      response = module_repo_info(local_repo_obj,module_and_branch_info,version)
       
       if ErrorUsage::Parsing.is_error?(parsed)
         response[:dsl_parsed_info] = parsed

@@ -159,8 +159,8 @@ module DTK; module ModuleMixins
       remote_repo = remote_params[:repo]
       dtk_client_pub_key = remote_params[:rsa_pub_key]
 
-      module_and_branch_info = commit_sha = module_obj = parsed = nil
-
+      #so tehy are defined outside Transaction scope
+      module_and_branch_info = commit_sha = module_obj = parsed = local_repo_obj = nil
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,version)
         
@@ -190,7 +190,7 @@ module DTK; module ModuleMixins
             module_obj.get_repo!()
           else
             #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-            remote_repo.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
+            remote_repo_obj.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
             
             #create empty repo on local repo manager; 
             #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -212,13 +212,11 @@ module DTK; module ModuleMixins
       end
       
       response = module_repo_info(local_repo_obj,module_and_branch_info,version)
-      
       if ErrorUsage::Parsing.is_error?(parsed)
         response[:dsl_parsed_info] = parsed
-      else  
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
+      elsif parsed && !parsed.empty?
+        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] 
       end
-
       response
     end
 

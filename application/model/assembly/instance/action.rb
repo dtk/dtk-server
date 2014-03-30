@@ -235,15 +235,18 @@ module DTK
             #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
             node_hash = {}
             components_including_node_name = []
-            nodes.each do |node|
-              components_array = []
-              components.each do |comp|
-                if comp.include? "#{node[:display_name]}/"
-                   components_array << comp
-                   components_including_node_name << comp
+            unless components.empty?
+              nodes.each do |node|
+                puts "Components: #{components}"
+                components_array = []
+                components.each do |comp|
+                  if comp.include? "#{node[:display_name]}/"
+                    components_array << comp
+                    components_including_node_name << comp
+                  end
                 end
+                node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id]}
               end
-              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id]}
             end
 
             #components_including_node_name array will be empty if execute-test agent is triggered from specific node context

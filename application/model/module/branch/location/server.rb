@@ -1,14 +1,15 @@
 module DTK; class ModuleBranch
   class Location
     class Server < self
-      def initialize(local_params=nil,remote_params=nil)
+      def initialize(project,local_params=nil,remote_params=nil)
         super
       end
       class Local < Location::Local
        private
-        def self.ret_local_branch(local_params)
+        def self.ret_branch_name(project,local_params)
+          
         end
-        def self.ret_repo_directory(local_params)
+        def self.ret_repo_directory(project,local_params)
         end
       end
       class Remote < Location::Remote

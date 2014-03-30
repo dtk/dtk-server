@@ -13,15 +13,14 @@ module DTK
 
       attr_reader :local,:remote
      private
-      def initialize(local_params=nil,remote_params=nil)
+      def initialize(project,local_params=nil,remote_params=nil)
         if local_params
-          @local = self.class::Local.new(local_params)
+          @local = self.class::Local.new(project,local_params)
         end
         if remote_params
-          @remote = self.class::Remote.new(remote_params)
+          @remote = self.class::Remote.new(project,remote_params)
         end
       end
-
     end
   end
 end

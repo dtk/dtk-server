@@ -8,35 +8,6 @@ module XYZ
       {:content => {}}
     end
 
-    #TODO: may convert to get from git repo or process when git receive hooks
-    def test_copy(module_name)
-      #a library should be passed as input; here we are just using the public library
-      library_idh = Library.get_public_library(model_handle(:library)).id_handle()
-      config_agent_type = :puppet
-      repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
-      module_dir = repo_obj[:local_dir]
-
-      #copy files
-      source_dir = "#{R8::EnvironmentConfig::SourceExternalRepoDir}/puppet/#{module_name}" 
-      require 'fileutils'
-      #TODO: more efficient to use copy pattern that does not include .git in first place
-      FileUtils.cp_r "#{source_dir}/.", module_dir
-      source_git = "#{source_dir}/.git"
-      FileUtils.rm_rf source_git if File.directory?(source_git)
-
-      #add file_assets
-      impl_obj.create_file_assets_from_dir_els()
-
-      r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
-      require 'yaml'
-      r8meta_hash = YAML.load_file(r8meta_path)
-
-      ComponentDSL.add_components_from_r8meta(library_idh,config_agent_type,impl_obj.id_handle,r8meta_hash)
-
-      impl_obj.add_contained_files_and_push_to_repo()
-      {:content => {}}
-    end
-
 ###################
     def replace_library_implementation(proj_impl_id)
       create_object_from_id(proj_impl_id).replace_library_impl_with_proj_impl()

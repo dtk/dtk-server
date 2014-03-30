@@ -1,6 +1,7 @@
 r8_require('../branch_names')
 module DTK
   class ModuleBranch < Model
+    r8_nested_require('branch','location')
     include BranchNamesMixin
     extend BranchNamesClassMixin
 

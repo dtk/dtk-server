@@ -1,7 +1,7 @@
-module DTK
-  class ModuleLocation
-    class Local < self
-      attr_reader :lcoal_branch,:repo_directory
+module DTK; class ModuleBranch
+  class Location
+    class Local 
+      attr_reader :local_branch,:repo_directory
       #  local_params = {
       #    :module_name
       #    :version (optional)
@@ -14,4 +14,4 @@ module DTK
       end
     end
   end
-end
+end; end

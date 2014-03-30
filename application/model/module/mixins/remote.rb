@@ -159,7 +159,18 @@ module DTK; module ModuleMixins
       remote_repo = remote_params[:repo]
       dtk_client_pub_key = remote_params[:rsa_pub_key]
 
-      #so tehy are defined outside Transaction scope
+      loc_local_params = {
+        :module_name => local_module_name,
+        :version => version,
+        :namespace => namespace
+      }
+      loc_remote_params = nil
+      server_mod_loc = ModuleBranch::Location::Server.new(loc_local_params,loc_remote_params)
+      just_local = ModuleBranch::Location::Server::Local.new(loc_local_params)
+      pp [:server_mod_loc,server_mod_loc]
+      pp [:just_local,just_local]
+
+      #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = module_obj = parsed = local_repo_obj = nil
       Transaction do
         local_branch = ModuleBranch.workspace_branch_name(project,version)

@@ -38,42 +38,6 @@ module XYZ
       get_objs(impl_mh,sp_hash)
     end
 
-    #TODO: deprecate for methods on ComponentModule
-    #return [repo_obj,impl_obj]
-    def self.create_library_repo_and_implementation(library_idh,module_name,config_agent_type,opts={})
-      repo_obj = nil
-      impl_obj = nil
-      ret = [nil,nil]
-
-      #create repo if it does not exist
-      repo_mh = library_idh.createMH(:repo)
-      auth_repo_users = RepoUser.authorized_users(library_idh.createMH(:repo_user))
-      repo_user_acls = auth_repo_users.map do |repo_username|
-        {
-          :repo_username => repo_username,
-          :access_rights => "RW+"
-        }
-      end
-      module_specific_type = config_agent_type
-      repo_obj = Repo.create_empty_repo_and_local_clone(library_idh,module_name,module_specific_type,repo_user_acls,:component_module,opts)
-
-      impl_hash = {
-        :display_name => module_name,
-        :type => ImplementationType[config_agent_type],
-        :repo => repo_obj[:repo_name],
-        :repo_id => repo_obj[:id],
-        :module_name => module_name,
-        :library_library_id => library_idh.get_id()
-      }
-      #TODO: hard wired version = nil
-      branch = ModuleBranch.library_branch_name(library_idh,version)
-      impl_ref = ref(config_agent_type,module_name,branch)
-      impl_mh = library_idh.create_childMH(:implementation)
-      impl_idh = create_from_row?(impl_mh,impl_ref,{:ref => impl_ref},impl_hash)
-      impl_obj = impl_idh.create_object().merge(impl_hash)
-      [repo_obj, impl_obj]
-    end
-
     def self.create_workspace_impl?(project_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
       repo_obj.update_object!(:repo_name)
       impl_ref = ref(config_agent_type,module_name,branch)
@@ -86,22 +50,6 @@ module XYZ
         :version => version_field(version)
       }
       impl_mh = project_idh.create_childMH(:implementation)
-      impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
-      impl_idh.create_object().merge(impl_hash)
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for create_workspace_impl?
-    def self.create_library_impl?(library_idh,repo_obj,module_name,config_agent_type,branch,version=nil)
-      repo_obj.update_object!(:repo_name)
-      impl_ref = ref(config_agent_type,module_name,branch)
-      impl_hash = {
-        :display_name => version ? "#{module_name}(#{version})" : module_name,
-        :type => ImplementationType[config_agent_type],
-        :repo => repo_obj[:repo_name],
-        :repo_id => repo_obj[:id],
-        :library_library_id => library_idh.get_id(),
-        :version => branch
-      }
-      impl_mh = library_idh.create_childMH(:implementation)
       impl_idh = create_from_row?(impl_mh,impl_ref,{:module_name => module_name, :branch => branch},impl_hash)
       impl_idh.create_object().merge(impl_hash)
     end

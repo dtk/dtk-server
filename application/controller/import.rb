@@ -75,6 +75,7 @@ module XYZ
 
       config_agent_type = :puppet
       library_idh = Library.get_users_private_library(model_handle(:library)).id_handle()
+      raise Error.new("TODO: fix up: Implementation.create_library_repo_and_implementation has been removed")
       repo_obj,impl_obj = Implementation.create_library_repo_and_implementation(library_idh,module_name,config_agent_type, :delete_if_exists => true)
 
       repo_name = repo_obj[:repo_name]

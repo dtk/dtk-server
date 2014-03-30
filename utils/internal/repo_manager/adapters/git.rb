@@ -279,11 +279,8 @@ module DTK
       end
     end
 
-    #TODO: prime exampe where much better if we can just push to bare repo
     def initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts={})
-      unless remote_exists?(remote_name)
-        add_remote(remote_name,remote_url)
-      end
+      add_remote?(remote_name,remote_url)
 
       #create branch with history from remote and not merge
       git_command__create_empty_branch(@branch)
@@ -294,10 +291,7 @@ module DTK
     end
 
     def pull_from_remote_repo(remote_name,remote_url,remote_branch)
-      unless remote_exists?(remote_name)
-        add_remote(remote_name,remote_url)
-      end
-
+      add_remote?(remote_name,remote_url)
       pull_changes(remote_name,remote_branch)
     end
 
@@ -382,31 +376,29 @@ module DTK
       end
     end
 
-    #remote_r - remote_ref
-    #remote_u - remote_url
-    #remote_b - remote_branch
-    def is_different_than_remote?(remote_r, remote_u, remote_b)
-      # If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
+    def is_different_than_remote?(remote_name, remote_url, remote_branch)
+      add_remote?(remote_name,remote_url)
+      # TODO: dont think this is rescue needed any more because of the c
+      #If fails to fetch remote, do initial sync to load remote repo name and try to fetch remote again
       begin
-        git_command__fetch(remote_r)
+        git_command__fetch(remote_name)
       rescue Exception => e
-        initial_sync_with_remote_repo(remote_r,remote_u,remote_b)
-        git_command__fetch(remote_r)
+        initial_sync_with_remote_repo(remote_name,remote_url,remote_branch)
+        git_command__fetch(remote_name)
       end
       
-      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_r.to_s)}
+      remote = @grit_repo.remotes.find{|r|r.name.include?(remote_name.to_s)}
       local  = @grit_repo.heads.first
 
-      raise Error.new("Cannot find remote repo (#{remote_r})") unless remote
+      raise Error.new("Cannot find remote repo (#{remote_name})") unless remote
 
       remote_sha = remote.commit.id
       local_sha = local.commit.id
 
       if remote_sha == local_sha 
-        return true
+        true
       else
-        return true unless any_diffs?(local_sha,remote_sha)
-        return false
+        !any_diffs?(local_sha,remote_sha)
       end
     end
 

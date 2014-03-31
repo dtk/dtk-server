@@ -27,7 +27,8 @@ module DTK; module ModuleMixins
       remote_repo.raise_error_if_no_access(model_handle(),remote_params,access_rights,:rsa_pub_key => rsa_pub_key)
       remote_repo.get_remote_module_info(aug_ws_branch,remote_params)
     end
-
+=begin
+TODO: needs to be redone taking into account versions are at same level as base
     #this should be called when the module is linked, but the specfic version is not
     def import_version(remote_repo_base,version)
       parsed = nil
@@ -61,7 +62,7 @@ module DTK; module ModuleMixins
 
       return response
     end
-
+=end
     # export to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
     def export(remote_repo,version=nil, remote_component_name = "", dtk_client_pub_key = nil)
@@ -128,6 +129,7 @@ module DTK; module ModuleMixins
       # validate presence of brach
       raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
       
+      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
       repo = module_obj.get_repo!
       repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
 
@@ -137,11 +139,10 @@ module DTK; module ModuleMixins
 
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install_from_dtkn(project,remote_params,local_params,opts={})
+    def install(project,remote_params,local_params,opts={})
       #version and namespace are same for local and remote
       version = remote_params[:version]
       namespace = remote_params[:module_namespace]
-      #remote specfic
 
       #Find information about module and see if it exists
       local = ModuleBranch::Location::Server::Local.new(project,local_params)
@@ -178,6 +179,7 @@ module DTK; module ModuleMixins
         #case on whether the module is created already
         local_repo_obj = 
           if module_obj
+            #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
             #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori

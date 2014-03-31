@@ -49,6 +49,7 @@ module Ramaze::Helper
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
 
+      #TODO: ModuleBranch::Location: will make belew in terms of ::DTK::ModuleBranch::Location::RemoteParams
       remote_params = {
         :repo => remote_repo,
         :module_namespace => remote_namespace,
@@ -69,7 +70,7 @@ module Ramaze::Helper
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
-      response = module_class.install_from_dtkn(project,remote_params,local_params,opts)
+      response = module_class.install(project,remote_params,local_params,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

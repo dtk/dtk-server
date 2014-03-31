@@ -7,7 +7,8 @@ module DTK; class ModuleBranch
       class Local < Location::Local
        private
         def self.ret_branch_name(project,local_params)
-          
+          #TODO: stub
+          ModuleBranch.workspace_branch_name(project,local_params.version)
         end
         def self.ret_repo_directory(project,local_params)
         end

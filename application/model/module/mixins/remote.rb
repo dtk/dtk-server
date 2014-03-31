@@ -182,8 +182,9 @@ TODO: needs to be redone taking into account versions are at same level as base
             #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
-            #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
             remote_repo_obj.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
+
+            #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
             
             #create empty repo on local repo manager; 
             #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -193,7 +194,8 @@ TODO: needs to be redone taking into account versions are at same level as base
               :donot_create_master_branch => true,
               :delete_if_exists => true
             }
-            create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
+            repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
+            Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
           end
         
         commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)

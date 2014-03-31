@@ -101,7 +101,7 @@ module DTK
         RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], ret.id())
       end
 
-      return ret
+      ret
     end
 
   end

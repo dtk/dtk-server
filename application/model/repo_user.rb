@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class RepoUser < Model
 
     ### Attributes ###
@@ -71,10 +71,19 @@ module XYZ
       ret
     end
 
-    #TODO: stub that gets all repo users that are visbile; may restrict by filter on owner
-    def self.authorized_users(model_handle)
-      get_objs(model_handle, :cols => [:id,:username]).map{|r|r[:username]}
+    def self.authorized_users_acls(model_handle)
+      authorized_users(model_handle).map do |repo_username|
+        {
+          :repo_username => repo_username,
+          :access_rights => AuthorizedUserDefaultRights
+        }
+      end
     end
+    AuthorizedUserDefaultRights = 'RW+'
+    def self.authorized_users(model_handle)
+      get_objs(model_handle.createMH(:repo_user), :cols => [:id,:username]).map{|r|r[:username]}
+    end
+    private_class_method :authorized_users
 
     #returns an object or calls block (with new or existing object) 
     def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={},username=nil)

@@ -23,7 +23,9 @@ module DTK; module ModuleMixins
         :donot_create_master_branch => true,
         :delete_if_exists => true
       }
-      repo = create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),create_opts)
+      repo_user_acls = RepoUser.authorized_users_acls(project_idh)
+      repo = Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),repo_user_acls,create_opts)
+
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version)
       module_and_branch_info.merge(:module_repo_info => module_repo_info(repo,module_and_branch_info,version))
     end
@@ -52,20 +54,6 @@ module DTK; module ModuleMixins
       module_branch = get_workspace_module_branch(project,module_name,version)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
       {:version => version, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
-    end
-
-
-   private
-    def create_empty_workspace_repo(project_idh,module_name,module_specific_type,opts={})
-      auth_repo_users = RepoUser.authorized_users(project_idh.createMH(:repo_user))
-      repo_user_acls = auth_repo_users.map do |repo_username|
-        {
-          :repo_username => repo_username,
-          :access_rights => "RW+"
-        }
-      end
-
-      Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts)
     end
   end
 

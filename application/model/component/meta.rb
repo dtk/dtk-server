@@ -244,7 +244,7 @@ module XYZ
            :convert => true,
            :join_type => :inner,
            :join_cond=>{:id => q(:component,:ancestor_id)},
-           :cols => [:id,:group_id,:display_name,:component_type]
+           :cols => [:id,:group_id,:display_name,:component_type,:implementation_id]
          }]
 
         virtual_column :dependencies, :type => :json, :hidden => true, 

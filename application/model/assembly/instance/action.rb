@@ -214,6 +214,19 @@ module DTK
         end
         class ExecuteTests < ActionResultsQueue::Result
           def self.initiate(nodes,action_results_queue, type, components)
+
+            #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
+            cmp_templates = get_component_templates(nodes,components)
+pp [:debug_cmp_templates,cmp_templates]
+            version_context = 
+              unless cmp_templates.empty?
+                ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
+              else
+                Log.error("Unexpected that cmp_instances is empty")
+                nil
+              end
+pp [:debug_version_context,version_context]
+
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
             ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -256,6 +269,45 @@ module DTK
               CommandAndControl.request__execute_action_per_node(:execute_tests,:execute_tests,node_hash,callbacks)
             end
           end
+         private
+          #TODO: some of this logic can be leveraged by code below node_hash
+          #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing 
+          #strings in components
+          def self.get_component_templates(nodes,components)
+            ret = Array.new
+            if nodes.empty?
+              return ret
+            end
+            sp_hash = {
+              :cols => [:id,:group_id,:instance_component_template_parent,:node_node_id],
+              :filter => [:oneof,:node_node_id,nodes.map{|n|n.id()}]
+            }
+            ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
+              r[:component_template].merge(:node_node_id => r[:node_node_id])
+            end
+            if components.nil? or components.empty?
+              return ret
+            end
+            
+            cmp_node_names = components.map do |name_pairs|
+              split = name_pairs.split('/')
+              if split.size == 2
+                {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
+              else
+                Log.error("unexpected component form: #{name_pairs}; skipping")
+                nil
+              end
+            end.compact
+            ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
+            
+            #only keep matching ones
+            ret.select do |cmp_template|
+              cmp_node_names.find do |r|
+                r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]
+              end
+            end
+          end
+
         end
       end
     end

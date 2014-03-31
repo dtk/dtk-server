@@ -1,3 +1,4 @@
+#TODO: ModuleBranch::Location:  see if should remove fields remote_repo_name, remote_repo_namespace
 module DTK
   class Repo < Model
     r8_nested_require('repo','remote')
@@ -32,10 +33,13 @@ module DTK
     #
     # From remote repo, this is to minimize changes to existing code base, this should change as we go on forward
     #
+    #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; used by get_augmented_workspace_branch; dont change until see ramification
     def consume_remote_repo!(remote_repo)
       merge!(:remote_repo_name => remote_repo[:repo_name],:remote_repo_namespace => remote_repo[:repo_namespace])
     end
 
+    #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; this conditionally creates a remote repo object; may seperate this out; and put logic wrt to remote
+    #in initial_sync_with_remote_repo
     def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
       #find repo name
       repo_name = private_user_repo_name(module_name,module_specific_type)
@@ -87,6 +91,7 @@ module DTK
           :repo_name => repo_name,
           :local_dir =>  "#{R8::Config[:repo][:base_directory]}/#{repo_name}" #TODO: should this be set by RepoManager instead
         }
+        #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; see if should remove
         repo_hash.merge!(extra_attrs)
 
         repo_idh = create_from_row(model_handle,repo_hash)

@@ -137,138 +137,44 @@ module DTK; module ModuleMixins
 
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-
-    #  remote_params = {
-    #    :repo
-    #    :module_namespace
-    #    :module_name
-    #    :version
-    #    :rsa_pub_key
-    #  }
-    #  local_params = {
-    #    :module_name
-    #  }
     def install_from_dtkn(project,remote_params,local_params,opts={})
       #version and namespace are same for local and remote
       version = remote_params[:version]
       namespace = remote_params[:module_namespace]
-      #local specific
-      local_module_name = local_params[:module_name]
       #remote specfic
-      remote_module_name = remote_params[:module_name]
-      remote_repo = remote_params[:repo]
-      dtk_client_pub_key = remote_params[:rsa_pub_key]
 
-      loc_local_params = {
-        :module_name => local_module_name,
-        :version => version,
-        :namespace => namespace
-      }
-      loc_remote_params = nil
-      server_mod_loc = ModuleBranch::Location::Server.new(loc_local_params,loc_remote_params)
-      just_local = ModuleBranch::Location::Server::Local.new(loc_local_params)
-      pp [:server_mod_loc,server_mod_loc]
-      pp [:just_local,just_local]
+      #Find information about module and see if it exists
+      local = ModuleBranch::Location::Server::Local.new(project,local_params)
+      local_branch = local.branch_name
+      local_module_name = local.module_name
 
-      #so they are defined outside Transaction scope
-      module_and_branch_info = commit_sha = module_obj = parsed = local_repo_obj = nil
-      Transaction do
-        local_branch = ModuleBranch.workspace_branch_name(project,version)
-        
-        if module_obj = module_exists?(project.id_handle(),local_module_name)
-          if module_obj.get_module_branch(local_branch)
-            # do not raise exception if user wants to ignore component import
-            if opts[:ignore_component_error]
-              return module_obj
-            else
-              message = "Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})"
-              message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
-              raise ErrorUsage.new(message)
-            end
-          end
-        end
-      
-        remote_repo_obj = Repo::Remote.new(remote_repo)
-        begin
-          remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
-        rescue Exception => e
-          return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
-        end
-        
-        #case on whether the module is created already
-        local_repo_obj = 
-          if module_obj
-            module_obj.get_repo!()
+      if module_obj = module_exists?(project.id_handle(),local_module_name)
+        if module_obj.get_module_branch(local_branch)
+          # do not raise exception if user wants to ignore component import
+          if opts[:ignore_component_error]
+            return module_obj
           else
-            #MOD_RESTRUCT: TODO: what entity gets authorized; also this should be done a priori
-            remote_repo_obj.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
-            
-            #create empty repo on local repo manager; 
-            #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-            create_opts = {
-              :remote_repo_name => remote_module_info[:git_repo_name],
-              :remote_repo_namespace => namespace,
-              :donot_create_master_branch => true,
-              :delete_if_exists => true
-            }
-            create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,create_opts)
+            message = "Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})"
+            message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
+            raise ErrorUsage.new(message)
           end
-        
-        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-        module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
-        module_obj ||= module_and_branch_info[:module_idh].create_object()
-        
-        opts = {:do_not_raise => true}
-        parsed = module_obj.import__dsl(commit_sha,local_repo_obj,module_and_branch_info,version, opts)
+        end
       end
-      
-      response = module_repo_info(local_repo_obj,module_and_branch_info,version)
-      if ErrorUsage::Parsing.is_error?(parsed)
-        response[:dsl_parsed_info] = parsed
-      elsif parsed && !parsed.empty?
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] 
-      end
-      response
-    end
 
-    #install from a dtkn repo; directly in this method handles the module/branc and repo level items
-    #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install_from_dtkn(project,remote_params,local_params,opts={})
-      #version and namespace are same for local and remote
-      version = remote_params[:version]
-      namespace = remote_params[:module_namespace]
-      #remote specfic
       remote_module_name = remote_params[:module_name]
       remote_repo = remote_params[:repo]
       dtk_client_pub_key = remote_params[:rsa_pub_key]
-
-      server_module_loc = ModuleBranch::Location::Server.new(project,local_params,nil)
-      local_branch = server_module_loc.local.branch_name
-      local_module_name = server_module_loc.local.module_name
-      #so they are defined outside Transaction scope
-      module_and_branch_info = commit_sha = module_obj = parsed = local_repo_obj = nil
-      Transaction do
-        
-        if module_obj = module_exists?(project.id_handle(),local_module_name)
-          if module_obj.get_module_branch(local_branch)
-            # do not raise exception if user wants to ignore component import
-            if opts[:ignore_component_error]
-              return module_obj
-            else
-              message = "Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})"
-              message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
-              raise ErrorUsage.new(message)
-            end
-          end
-        end
       
-        remote_repo_obj = Repo::Remote.new(remote_repo)
-        begin
-          remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
-        rescue Exception => e
-          return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
-        end
-        
+      remote_repo_obj = Repo::Remote.new(remote_repo)
+      begin
+        remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
+      rescue Exception => e
+        return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
+      end
+
+      #so they are defined outside Transaction scope
+      module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
+      Transaction do
         #case on whether the module is created already
         local_repo_obj = 
           if module_obj

@@ -178,7 +178,6 @@ module DTK
         client_params = {
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
-          :rsa_pub_key => remote.rsa_pub_key,
           :namespace => remote.namespace || self.class.default_namespace()
         } 
 

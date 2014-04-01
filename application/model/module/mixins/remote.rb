@@ -5,7 +5,7 @@ module DTK; module ModuleMixins
   module Remote::Class
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install(project,local_params,remote_params,opts={})
+    def install(project,local_params,remote_params,dtk_client_pub_key,opts={})
       #TODO: ModuleBranch::Location: have lower level fns call
       version = remote_params.version
 
@@ -29,7 +29,6 @@ module DTK; module ModuleMixins
       remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
       remote_module_name = remote.module_name
       remote_repo_base = remote.remote_repo_base
-      dtk_client_pub_key = remote.rsa_pub_key
       
       remote_repo_obj = Repo::Remote.new(remote_repo_base)
       begin

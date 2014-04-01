@@ -43,7 +43,7 @@ module Ramaze::Helper
       local_namespace = remote_namespace
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       project = get_default_project()
-      rsa_pub_key = ret_request_params(:rsa_pub_key)
+      dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
@@ -59,8 +59,7 @@ module Ramaze::Helper
         :module_name => remote_module_name,
         :version => version,
         :namespace => remote_namespace,
-        :remote_repo_base => remote_repo_base,
-        :rsa_pub_key => rsa_pub_key
+        :remote_repo_base => remote_repo_base
       )
 
       module_class = 
@@ -79,7 +78,7 @@ module Ramaze::Helper
       end
 
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
-      response = module_class.install(project,local_params,remote_params,opts)
+      response = module_class.install(project,local_params,remote_params,dtk_client_pub_key,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

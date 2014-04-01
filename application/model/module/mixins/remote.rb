@@ -41,7 +41,8 @@ module DTK; module ModuleMixins
             #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
-            remote_repo_obj.authorize_pub_key(dtk_client_pub_key)
+            #TODO: ModuleBranch::Location: see if this is necssary
+            remote_repo_obj.authorize_dtk_instance(dtk_client_pub_key)
 
             #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
             

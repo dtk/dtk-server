@@ -12,12 +12,12 @@ module DTK; class Repo
         end
         true
       end
-
-      def authorize_pub_key(rsa_pub_key)
+      #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
+      def authorize_dtk_instance(client_rsa_pub_key = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "R"
-        authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type,client_rsa_pub_key)
+        authorize_user(username,rsa_pub_key,access_rights,remote.module_name,remote.namespace,remote.module_type,client_rsa_pub_key)
       end
 
       def authorize_end_user(mh,module_name,module_namespace,type,rsa_pub_key,access_rights)

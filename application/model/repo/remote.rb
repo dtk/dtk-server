@@ -145,18 +145,15 @@ module DTK
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
-      # TODO: [Haris] We should refactor this so that arguments are passed in more logical
-      # order, (name, namespace, type) for now we can live with it
-      def delete_module(name, type, namespace=nil, client_rsa_pub_key = nil)
+      def delete_module(client_rsa_pub_key = nil)
         # if namespace omitted we will use default one
-        namespace ||= self.class.default_namespace()
+        namespace = remote.namespace||self.class.default_namespace() 
         params = {
           :username => dtk_instance_remote_repo_username(),
-          :name => name,
+          :name => remote.module_name,
           :namespace => namespace,
-          :type => type_for_remote_module(type)
+          :type => type_for_remote_module(remote.module_type)
         }
-        
         client.delete_module(params, client_rsa_pub_key)
       end
 
@@ -180,7 +177,7 @@ module DTK
       end
       # unify these two or chose better names to show how different
       #returns  module info it exists
-      def raise_error_if_not_accessible(client_rsa_pub_key)
+      def get_module_info?(client_rsa_pub_key,opts={})
         client_params = {
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
@@ -192,7 +189,11 @@ module DTK
           response_data = client.get_module_info(client_params)
           ret = Aux.convert_keys_to_symbols(response_data)
         rescue 
-          raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
+          if opts[:raise_error]
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
+          else
+            return nil
+          end
         end
 
         if remote.version

@@ -27,10 +27,9 @@ module DTK; module ModuleMixins
         end
       end
       remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
-      remote_repo_base = remote.remote_repo_base
       
-      remote_repo_obj = Repo::Remote.new(remote)
-      remote_repo_obj.raise_error_if_not_accessible(dtk_client_pub_key)
+      remote_repo_handler = Repo::Remote.new(remote)
+      remote_repo_info = remote_repo_handler.get_module_info?(dtk_client_pub_key,:raise_error=>true)
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
@@ -41,15 +40,15 @@ module DTK; module ModuleMixins
             #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
-            #TODO: ModuleBranch::Location: see if this is necssary
-            remote_repo_obj.authorize_dtk_instance(dtk_client_pub_key)
+            #TODO: ModuleBranch::Location: see if this is necessary
+            remote_repo_handler.authorize_dtk_instance(dtk_client_pub_key)
 
             #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
             
             #create empty repo on local repo manager; 
             #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
             create_opts = {
-              :remote_repo_name => remote.git_repo_name,
+              :remote_repo_name => remote_repo_info[:git_repo_name],
               :remote_repo_namespace => remote.namespace,
               :donot_create_master_branch => true,
               :delete_if_exists => true
@@ -57,8 +56,8 @@ module DTK; module ModuleMixins
             repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
             Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
           end
-        Log.error("below should take the remote_ref, not remote_repo_base")
-        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo_base,local_branch,version)
+        Log.error("below should take the remote_ref, not remote.remote_repo_base")
+        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote.remote_repo_base,local_branch,version)
         module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
@@ -77,18 +76,14 @@ module DTK; module ModuleMixins
 
     def delete_remote(project,remote_params,client_rsa_pub_key)
       remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
-      remote_repo_base = remote.remote_repo_base
-      remote_repo_obj = Repo::Remote.new(remote)
-      error = nil
+      remote_repo_handler = Repo::Remote.new(remote)
+      error = nil 
       begin
-        remote_repo_obj.raise_error_if_not_accessible(remote,client_rsa_pub_key)
-      rescue => e
+        remote_repo_handler.get_module_info?(client_rsa_pub_key,:raise_error=>true)
+        # delete module on remote repo manager
+        remote_repo_handler.delete_module(client_rsa_pub_key)
+       rescue => e
         error = e
-      end
-
-      # delete module on remote repo manager
-      unless error
-        remote_repo.delete_module(remote.module_name,module_type(),remote.namespace,client_rsa_pub_key)
       end
       
       # unlink any local repos that were linked to this remote module
@@ -97,7 +92,6 @@ module DTK; module ModuleMixins
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
       } 
-
   
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         repos = module_obj.get_repos().uniq()
@@ -110,7 +104,7 @@ module DTK; module ModuleMixins
           end
 
           #TODO: ModuleBranch::Location: below is wrong; unlinking specific remote
-          repo.unlink_remote(remote_repo_base)
+          repo.unlink_remote(remote.remote_repo_base)
           
           ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end

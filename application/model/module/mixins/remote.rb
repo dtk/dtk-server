@@ -121,6 +121,7 @@ TODO: needs to be redone taking into account versions are at same level as base
 
   module Remote::Class
     def pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      Log.error("Need to cleanup like did for install")
       local_branch = ModuleBranch.workspace_branch_name(project, version)
       module_obj = module_exists?(project.id_handle(), local_module_name)
 
@@ -139,10 +140,9 @@ TODO: needs to be redone taking into account versions are at same level as base
 
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install(project,remote_params,local_params,opts={})
-      #version and namespace are same for local and remote
-      version = remote_params[:version]
-      namespace = remote_params[:module_namespace]
+    def install(project,local_params,remote_params,opts={})
+      #TODO: ModuleBranch::Location: have lower level fns call
+      version = remote_params.version
 
       #Find information about module and see if it exists
       local = ModuleBranch::Location::Server::Local.new(project,local_params)
@@ -155,18 +155,18 @@ TODO: needs to be redone taking into account versions are at same level as base
           if opts[:ignore_component_error]
             return module_obj
           else
-            message = "Conflicts with existing server local module (#{pp_module_name(local_module_name,version)})"
+            message = "Conflicts with existing server local module (#{local_params.pp_module_name()})"
             message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
             raise ErrorUsage.new(message)
           end
         end
       end
 
-      remote_module_name = remote_params[:module_name]
-      remote_repo = remote_params[:repo]
-      dtk_client_pub_key = remote_params[:rsa_pub_key]
+      remote_module_name = remote_params.module_name
+      remote_repo_base = remote_params.remote_repo_base
+      dtk_client_pub_key = remote_params.rsa_pub_key
       
-      remote_repo_obj = Repo::Remote.new(remote_repo)
+      remote_repo_obj = Repo::Remote.new(remote_repo_base)
       begin
         remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
       rescue Exception => e

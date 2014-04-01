@@ -41,7 +41,6 @@ module Ramaze::Helper
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       local_namespace = remote_namespace
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
-      remote_repo = ret_remote_repo()
       project = get_default_project()
       rsa_pub_key = ret_request_params(:rsa_pub_key)
 
@@ -49,18 +48,17 @@ module Ramaze::Helper
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
 
-      #TODO: ModuleBranch::Location: will make belew in terms of ::DTK::ModuleBranch::Location::RemoteParams
-      remote_params = {
-        :repo => remote_repo,
-        :module_namespace => remote_namespace,
-        :module_name => remote_module_name,
-        :version => version,
-        :rsa_pub_key => rsa_pub_key
-      }
       local_params = ::DTK::ModuleBranch::Location::LocalParams.new(
         :module_name => local_module_name,
         :version => version,
         :namespace => local_namespace
+      )
+      remote_params = ::DTK::ModuleBranch::Location::RemoteParams.new(
+        :remote_repo_base => ret_remote_repo_base(),
+        :namespace => remote_namespace,
+        :module_name => remote_module_name,
+        :version => version,
+        :rsa_pub_key => rsa_pub_key
       )
 
       # check for missing module dependencies
@@ -70,7 +68,7 @@ module Ramaze::Helper
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
-      response = module_class.install(project,remote_params,local_params,opts)
+      response = module_class.install(project,local_params,remote_params,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )

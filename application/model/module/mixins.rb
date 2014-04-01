@@ -526,6 +526,7 @@ module DTK
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
     end
 
+    
     def pp_module_name(module_name,version=nil)
       version ? "#{module_name} (#{version})" : module_name
     end

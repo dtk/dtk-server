@@ -4,7 +4,8 @@
 module DTK
   class ModuleBranch
     class Location
-      #thsse classes correspond to where remotes and local clones are
+      r8_nested_require('location','params')
+      #above needed before below
       r8_nested_require('location','local')
       r8_nested_require('location','remote')
       #above needed before below

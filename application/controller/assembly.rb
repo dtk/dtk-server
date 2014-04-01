@@ -535,7 +535,6 @@ module DTK
 
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-      
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
       nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
 
@@ -623,6 +622,23 @@ module DTK
       return filtered_nodes, true, nil      
     end
 
+    def nodes_are_up?(assembly_name, nodes, status_pattern)
+      # check if staged
+      nodes.each do |node|
+        if node[:type] == "staged"
+          return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
+        end
+      end
+
+      # check for status -> this will translate to /running|pending/ and /stopped|pending/ checks
+      filtered_nodes = nodes.select { |node| node[:admin_op_status] =~ Regexp.new("#{status_pattern.to_s}|pending") }
+      if filtered_nodes.size == 0
+        return nodes, false, "There are no #{status_pattern} nodes for assembly '#{assembly_name}'."
+      end
+      
+      return filtered_nodes, true, nil      
+    end
+
     def rest__initiate_get_log()
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:node_identifier,:log_path, :start_line)
@@ -696,6 +712,21 @@ module DTK
     def rest__initiate_execute_tests()
       node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
+
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
+
+      #Logic for validation
+      # filters only stopped nodes for this assembly
+      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :stopped)
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => [error_msg])
+      end
+
       queue = ActionResultsQueue.new
       assembly.initiate_execute_tests(queue, node_id, components)
       rest_ok_response :action_results_id => queue.id

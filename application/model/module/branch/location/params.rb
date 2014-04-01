@@ -5,6 +5,9 @@ module DTK; class ModuleBranch
       def module_name()
         self[:module_name]
       end
+      def module_type()
+        self[:module_type]
+      end
       def version()
         self[:version]
       end

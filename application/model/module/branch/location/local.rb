@@ -8,7 +8,7 @@ module DTK; class ModuleBranch
     class LocalParams < Params
      private
       def legal_keys()
-        [:module_name,:version?,:namespace?]
+        [:module_type,:module_name,:version?,:namespace?]
       end
     end    
 

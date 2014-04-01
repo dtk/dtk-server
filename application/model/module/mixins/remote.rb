@@ -2,6 +2,162 @@
 module DTK; module ModuleMixins
   module Remote
   end
+  module Remote::Class
+    #install from a dtkn repo; directly in this method handles the module/branc and repo level items
+    #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
+    def install(project,local_params,remote_params,opts={})
+      #TODO: ModuleBranch::Location: have lower level fns call
+      version = remote_params.version
+
+      #Find information about module and see if it exists
+      local = ModuleBranch::Location::Server::Local.new(project,local_params)
+      local_branch = local.branch_name
+      local_module_name = local.module_name
+
+      if module_obj = module_exists?(project.id_handle(),local_module_name)
+        if module_obj.get_module_branch(local_branch)
+          # do not raise exception if user wants to ignore component import
+          if opts[:ignore_component_error]
+            return module_obj
+          else
+            message = "Conflicts with existing server local module (#{local_params.pp_module_name()})"
+            message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
+            raise ErrorUsage.new(message)
+          end
+        end
+      end
+      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
+      remote_module_name = remote.module_name
+      remote_repo_base = remote.remote_repo_base
+      dtk_client_pub_key = remote.rsa_pub_key
+      
+      remote_repo_obj = Repo::Remote.new(remote_repo_base)
+      begin
+        remote_module_info = remote_repo_obj.exists?(remote)
+      rescue Exception => e
+         raise e unless opts[:do_not_raise]
+      end
+
+      #so they are defined outside Transaction scope
+      module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
+      Transaction do
+        #case on whether the module is created already
+        local_repo_obj = 
+          if module_obj
+            #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
+            module_obj.get_repo!()
+          else
+            remote_repo_obj.authorize_dtk_instance(remote_module_name,remote_params.namespace,module_type(), dtk_client_pub_key)
+
+            #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
+            
+            #create empty repo on local repo manager; 
+            #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+            create_opts = {
+              :remote_repo_name => remote_module_info[:git_repo_name],
+              :remote_repo_namespace => remote.namespace,
+              :donot_create_master_branch => true,
+              :delete_if_exists => true
+            }
+            repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
+            Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
+          end
+        Log.error("below should take the remote_ref, not remote_repo_base")
+        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo_base,local_branch,version)
+        module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
+        module_obj ||= module_and_branch_info[:module_idh].create_object()
+        
+        opts = {:do_not_raise => true}
+        parsed = module_obj.import__dsl(commit_sha,local_repo_obj,module_and_branch_info,version, opts)
+      end
+      
+      response = module_repo_info(local_repo_obj,module_and_branch_info,version)
+      if ErrorUsage::Parsing.is_error?(parsed)
+        response[:dsl_parsed_info] = parsed
+      elsif parsed && !parsed.empty?
+        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] 
+      end
+      response
+    end
+
+    def delete_remote(project,remote_params)
+      #TODO: put in version specific logic
+      if remote_params[:version]
+        raise Error.new("TODO: delete_remote when version given")
+      end
+      remote_repo = Repo::Remote.new(remote_params[:repo])
+      error = nil
+      begin
+        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
+       rescue  ErrorUsage => e
+        error = e
+       rescue Exception 
+        error = ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
+      end
+
+      # delete module on remote repo manager
+      unless error
+        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace], remote_params[:client_rsa_pub_key])
+      end
+        
+      # unlink any local repos that were linked to this remote module
+      local_module_name = remote_params[:module_name]
+      sp_hash = {
+        :cols => [:id,:display_name],
+        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
+      } 
+
+      if module_obj = get_obj(project.model_handle(model_type),sp_hash)
+        repos = module_obj.get_repos().uniq()
+        
+        # module_obj.get_repos().each do |repo|
+        repos.each do |repo|
+          # we remove remote repos
+          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
+            raise ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist") 
+          end
+
+          repo.unlink_remote(remote_params[:repo])
+
+          ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
+        end
+      end
+     
+      raise error if error
+    end
+
+    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      Log.error("Need to cleanup like did for install")
+      local_branch = ModuleBranch.workspace_branch_name(project, version)
+      module_obj = module_exists?(project.id_handle(), local_module_name)
+
+      # validate presence of module (this should never happen)
+      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
+      # validate presence of brach
+      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
+      
+      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
+      repo = module_obj.get_repo!
+      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
+    end
+
+
+    def list_remotes(model_handle, rsa_pub_key = nil)
+      unsorted = Repo::Remote.new.list_module_info(module_type(), rsa_pub_key).map do |r|
+        el = {:display_name => r[:qualified_name],:type => component_type(), :last_updated => r[:last_updated]} #TODO: hard coded
+        if versions = r[:versions]
+          el.merge!(:versions => versions.join(", ")) 
+        end
+        el
+      end
+      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
+    end
+
+  end
+
   module Remote::Instance
     #raises an access rights usage eerror if user does not have access to the remote module
     def get_remote_module_info(action,remote_repo_base,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
@@ -119,159 +275,5 @@ TODO: needs to be redone taking into account versions are at same level as base
 
   end
 
-  module Remote::Class
-    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
-      Log.error("Need to cleanup like did for install")
-      local_branch = ModuleBranch.workspace_branch_name(project, version)
-      module_obj = module_exists?(project.id_handle(), local_module_name)
-
-      # validate presence of module (this should never happen)
-      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
-      # validate presence of brach
-      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
-      
-      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
-      repo = module_obj.get_repo!
-      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
-    end
-
-    #install from a dtkn repo; directly in this method handles the module/branc and repo level items
-    #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install(project,local_params,remote_params,opts={})
-      #TODO: ModuleBranch::Location: have lower level fns call
-      version = remote_params.version
-
-      #Find information about module and see if it exists
-      local = ModuleBranch::Location::Server::Local.new(project,local_params)
-      local_branch = local.branch_name
-      local_module_name = local.module_name
-
-      if module_obj = module_exists?(project.id_handle(),local_module_name)
-        if module_obj.get_module_branch(local_branch)
-          # do not raise exception if user wants to ignore component import
-          if opts[:ignore_component_error]
-            return module_obj
-          else
-            message = "Conflicts with existing server local module (#{local_params.pp_module_name()})"
-            message += ". To ignore this conflict and use existing module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i)." if opts[:additional_message]
-            raise ErrorUsage.new(message)
-          end
-        end
-      end
-      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
-      remote_module_name = remote.module_name
-      remote_repo_base = remote.remote_repo_base
-      dtk_client_pub_key = remote.rsa_pub_key
-      
-      remote_repo_obj = Repo::Remote.new(remote_repo_base)
-      begin
-        remote_module_info = remote_repo_obj.get_module_info(remote_params.merge(:module_type => module_type()))
-      rescue Exception => e
-        return {:does_not_exist => "component '#{local_module_name}#{version && "-#{version}"}' does not exist."} if opts[:do_not_raise]
-      end
-
-      #so they are defined outside Transaction scope
-      module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
-      Transaction do
-        #case on whether the module is created already
-        local_repo_obj = 
-          if module_obj
-            #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-            module_obj.get_repo!()
-          else
-            remote_repo_obj.authorize_dtk_instance(remote_module_name,remote_params.namespace,module_type(), dtk_client_pub_key)
-
-            #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
-            
-            #create empty repo on local repo manager; 
-            #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-            create_opts = {
-              :remote_repo_name => remote_module_info[:git_repo_name],
-              :remote_repo_namespace => namespace,
-              :donot_create_master_branch => true,
-              :delete_if_exists => true
-            }
-            repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-            Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
-          end
-        
-        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-        module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
-        module_obj ||= module_and_branch_info[:module_idh].create_object()
-        
-        opts = {:do_not_raise => true}
-        parsed = module_obj.import__dsl(commit_sha,local_repo_obj,module_and_branch_info,version, opts)
-      end
-      
-      response = module_repo_info(local_repo_obj,module_and_branch_info,version)
-      if ErrorUsage::Parsing.is_error?(parsed)
-        response[:dsl_parsed_info] = parsed
-      elsif parsed && !parsed.empty?
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] 
-      end
-      response
-    end
-
-    def delete_remote(project,remote_params)
-      #TODO: put in version specific logic
-      if remote_params[:version]
-        raise Error.new("TODO: delete_remote when version given")
-      end
-      remote_repo = Repo::Remote.new(remote_params[:repo])
-      error = nil
-      begin
-        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
-       rescue  ErrorUsage => e
-        error = e
-       rescue Exception 
-        error = ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
-      end
-
-      # delete module on remote repo manager
-      unless error
-        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace], remote_params[:client_rsa_pub_key])
-      end
-        
-      # unlink any local repos that were linked to this remote module
-      local_module_name = remote_params[:module_name]
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
-      } 
-
-      if module_obj = get_obj(project.model_handle(model_type),sp_hash)
-        repos = module_obj.get_repos().uniq()
-        
-        # module_obj.get_repos().each do |repo|
-        repos.each do |repo|
-          # we remove remote repos
-          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
-            raise ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist") 
-          end
-
-          repo.unlink_remote(remote_params[:repo])
-
-          ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
-        end
-      end
-     
-      raise error if error
-    end
-
-    def list_remotes(model_handle, rsa_pub_key = nil)
-      unsorted = Repo::Remote.new.list_module_info(module_type(), rsa_pub_key).map do |r|
-        el = {:display_name => r[:qualified_name],:type => component_type(), :last_updated => r[:last_updated]} #TODO: hard coded
-        if versions = r[:versions]
-          el.merge!(:versions => versions.join(", ")) 
-        end
-        el
-      end
-      unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
-    end
-
-  end
 end; end
 

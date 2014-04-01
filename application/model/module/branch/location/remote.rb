@@ -16,7 +16,7 @@ module DTK; class ModuleBranch
       end
      private
       def legal_keys()
-        [:module_name,:remote_repo_base,:version?,:namespace?,:rsa_pub_key?]
+        [:module_type,:module_name,:remote_repo_base,:version?,:namespace?,:rsa_pub_key?]
       end
     end
     class Remote < RemoteParams 

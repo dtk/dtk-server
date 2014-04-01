@@ -37,8 +37,9 @@ module Ramaze::Helper
       module_class.pull_from_remote(project, local_module_name, remote_repo, version)
     end
 
-    def install_from_dtkn_helper(module_class)
+    def install_from_dtkn_helper(module_type)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_repo_base = ret_remote_repo_base()
       local_namespace = remote_namespace
       local_module_name = ret_request_params(:local_module_name)||remote_module_name 
       project = get_default_project()
@@ -47,26 +48,36 @@ module Ramaze::Helper
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
-
       local_params = ::DTK::ModuleBranch::Location::LocalParams.new(
+        :module_type => module_type,
         :module_name => local_module_name,
         :version => version,
         :namespace => local_namespace
       )
       remote_params = ::DTK::ModuleBranch::Location::RemoteParams.new(
-        :remote_repo_base => ret_remote_repo_base(),
-        :namespace => remote_namespace,
+        :module_type => module_type,
         :module_name => remote_module_name,
         :version => version,
+        :namespace => remote_namespace,
+        :remote_repo_base => remote_repo_base,
         :rsa_pub_key => rsa_pub_key
       )
 
+      module_class = 
+        case module_type
+          when :component_module then ::DTK::ComponentModule 
+          when :service_module then ::DTK::ServiceModule
+           else raise ::DTK::Error.new("Unexpected module_type (#{module_type})")
+        end
+
       # check for missing module dependencies
       if (is_service_module?(module_class) && !do_not_raise)
-        missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
+        #TODO: ModuleBranch::Location:  write get_required_and_missing_modules using remote params
+        missing_modules, required_modules = get_required_and_missing_modules(remote_repo_base, project, remote_module_name, remote_namespace, version)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
+
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
       response = module_class.install(project,local_params,remote_params,opts)
       return response if response[:does_not_exist]

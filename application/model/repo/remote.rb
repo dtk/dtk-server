@@ -173,7 +173,36 @@ module DTK
         ret.merge!(:version => remote_params[:version]) if remote_params[:version]        
         ret
       end
-      #TODO: unify these two or chose better names to show how different
+      # unify these two or chose better names to show how different
+      def exists?(remote)
+        client_params = {
+          :name => remote.module_name,
+          :type => type_for_remote_module(remote.module_type),
+          :rsa_pub_key => remote.rsa_pub_key,
+          :namespace => remote.namespace || self.class.default_namespace()
+        } 
+
+        ret = nil
+        begin
+          response_data = client.get_module_info(client_params)
+          ret = Aux.convert_keys_to_symbols(response_data)
+        rescue ErrorUsage => e
+          # Amar: To handle DTK-819: Returning friendly error message to CLI below if 'ret' is nil
+        end
+        unless ret 
+          raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exist")
+        end
+        if remote.version
+          raise Error.new("Not implementing versions")
+          versions = branch_names_to_versions_stripped(ret[:branches])
+          unless versions and versions.include?(remote.version)
+            raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}}) does not have version (#{remote.version||"CURRENT"})")
+          end
+        end
+        ret
+      end
+
+      #TODO: ModuleBranch::Location: remove once put this in place for module/mixin/delete
       def get_module_info(remote_params)
         client_params = {
           :name => remote_params[:module_name],

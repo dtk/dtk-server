@@ -1,6 +1,5 @@
 module Ramaze::Helper
   module ModuleHelper
-
     def rest_async_response
       body = DeferrableBody.new
 
@@ -39,9 +38,10 @@ module Ramaze::Helper
 
     def install_from_dtkn_helper(module_type)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      remote_repo_base = ret_remote_repo_base()
-      local_namespace = remote_namespace
-      local_module_name = ret_request_params(:local_module_name)||remote_module_name 
+      remote_params = create_remote_params(module_type,remote_namespace,remote_module_name,version)
+
+      local_namespace = remote_params.namespace
+      local_module_name = ret_request_params(:local_module_name)||remote_params.module_name 
       project = get_default_project()
       dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 
@@ -54,34 +54,30 @@ module Ramaze::Helper
         :version => version,
         :namespace => local_namespace
       )
-      remote_params = ::DTK::ModuleBranch::Location::RemoteParams.new(
-        :module_type => module_type,
-        :module_name => remote_module_name,
-        :version => version,
-        :namespace => remote_namespace,
-        :remote_repo_base => remote_repo_base
-      )
-
-      module_class = 
-        case module_type
-          when :component_module then ::DTK::ComponentModule 
-          when :service_module then ::DTK::ServiceModule
-           else raise ::DTK::Error.new("Unexpected module_type (#{module_type})")
-        end
 
       # check for missing module dependencies
-      if (is_service_module?(module_class) && !do_not_raise)
-        #TODO: ModuleBranch::Location:  write get_required_and_missing_modules using remote params
-        missing_modules, required_modules = get_required_and_missing_modules(remote_repo_base, project, remote_module_name, remote_namespace, version)
+      if module_type == :service_module and !do_not_raise
+        #TODO: ModuleBranch::Location:  write get_required_and_missing_modules using tow params  project,remote_params
+        missing_modules, required_modules = get_required_and_missing_modules(remote_params.remote_repo_base, project, remote_params._module_name, remote_params.namespace, remote_params.version)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
 
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
-      response = module_class.install(project,local_params,remote_params,dtk_client_pub_key,opts)
+      response = module_class(module_type).install(project,local_params,remote_params,dtk_client_pub_key,opts)
       return response if response[:does_not_exist]
       
       response.merge( { :namespace => remote_namespace} )
+    end
+
+    def create_remote_params(module_type,namespace,module_name,version=nil)
+      ::DTK::ModuleBranch::Location::RemoteParams.new(
+        :module_type => module_type,
+        :module_name => module_name,
+        :version => version,
+        :namespace => namespace,
+        :remote_repo_base => ret_remote_repo_base()
+      )
     end
 
     def ret_config_agent_type()
@@ -119,8 +115,12 @@ module Ramaze::Helper
 
     private
 
-    def is_service_module?(module_clazz)
-      (module_clazz == DTK::ServiceModule)
+    def module_class(module_type)
+      case module_type
+        when :component_module then ::DTK::ComponentModule 
+        when :service_module then ::DTK::ServiceModule
+        else raise ::DTK::Error.new("Unexpected module_type (#{module_type})")
+      end
     end
 
     def get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)

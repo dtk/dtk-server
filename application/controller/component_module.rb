@@ -136,22 +136,13 @@ module DTK
       rest_ok_response component_module.import_version(remote_repo,version)
     end
 
+    #TODO: ModuleBranch::Location: harmonize this signature with one for service module
     def rest__delete_remote()
-      module_name      = ret_non_null_request_params(:remote_module_name)
+      remote_module_name = ret_non_null_request_params(:remote_module_name)
       remote_namespace = (ret_request_params(:remote_module_namespace).empty? ? default_namespace() : ret_request_params(:remote_module_namespace))
-
-      remote_repo = ret_remote_repo()
-      remote_params = {
-        :repo => remote_repo,
-        :module_name => module_name,
-        :module_namespace => remote_namespace,
-        :client_rsa_pub_key => ret_request_params(:rsa_pub_key)
-      }
-      #remote_params.merge!(:version => version) if version
+      remote_params = create_remote_params(:component_module,remote_namespace,remote_module_name)
       project = get_default_project()
-
-      ComponentModule.delete_remote(project,remote_params)
-
+      ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
       rest_ok_response 
     end
 

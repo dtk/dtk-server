@@ -174,6 +174,7 @@ module DTK
         ret
       end
       # unify these two or chose better names to show how different
+      #returns  module info it exists
       def exists?(remote)
         client_params = {
           :name => remote.module_name,

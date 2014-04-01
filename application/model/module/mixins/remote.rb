@@ -31,11 +31,7 @@ module DTK; module ModuleMixins
       remote_repo_base = remote.remote_repo_base
       
       remote_repo_obj = Repo::Remote.new(remote_repo_base)
-      begin
-        remote_module_info = remote_repo_obj.exists?(remote)
-      rescue Exception => e
-         raise e unless opts[:do_not_raise]
-      end
+      remote_repo_obj.raise_error_if_does_not_exists(remote)
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
@@ -53,7 +49,7 @@ module DTK; module ModuleMixins
             #create empty repo on local repo manager; 
             #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
             create_opts = {
-              :remote_repo_name => remote_module_info[:git_repo_name],
+              :remote_repo_name => remote.git_repo_name,
               :remote_repo_namespace => remote.namespace,
               :donot_create_master_branch => true,
               :delete_if_exists => true
@@ -79,45 +75,42 @@ module DTK; module ModuleMixins
       response
     end
 
-    def delete_remote(project,remote_params)
-      #TODO: put in version specific logic
-      if remote_params[:version]
-        raise Error.new("TODO: delete_remote when version given")
-      end
-      remote_repo = Repo::Remote.new(remote_params[:repo])
+    def delete_remote(project,remote_params,client_rsa_pub_key)
+      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
+      remote_repo_base = remote.remote_repo_base
+      remote_repo_obj = Repo::Remote.new(remote_repo_base)
       error = nil
       begin
-        remote_module_info = remote_repo.get_module_info(remote_params.merge(:module_type => module_type()))
-       rescue  ErrorUsage => e
+        remote_repo.raise_error_if_does_not_exists(remote)
+      rescue => e
         error = e
-       rescue Exception 
-        error = ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist")
       end
 
       # delete module on remote repo manager
       unless error
-        remote_repo.delete_module(remote_params[:module_name],module_type(),remote_params[:module_namespace], remote_params[:client_rsa_pub_key])
+        remote_repo.delete_module(remote.module_name,module_type(),remote.namespace,client_rsa_pub_key)
       end
-        
+      
       # unlink any local repos that were linked to this remote module
-      local_module_name = remote_params[:module_name]
+      local_module_name = remote.module_name
       sp_hash = {
         :cols => [:id,:display_name],
         :filter => [:and, [:eq, :display_name, local_module_name], [:eq, :project_project_id,project[:id]]]
       } 
 
+  
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         repos = module_obj.get_repos().uniq()
-        
+        #TODO: ModuleBranch::Location: below looks broken
         # module_obj.get_repos().each do |repo|
         repos.each do |repo|
           # we remove remote repos
-          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote_params[:module_name], remote_params[:module_namespace])
-            raise ErrorUsage.new("Remote component/service (#{remote_params[:module_namespace]}/#{remote_params[:module_name]}) does not exist") 
+          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote.module_name, remote.namespace)
+            raise ErrorUsage.new("Remote component/service (#{remote.pp_module_name(:include_namespace=>true)}) does not exist") 
           end
 
-          repo.unlink_remote(remote_params[:repo])
-
+          repo.unlink_remote(remote_repo_base)
+          
           ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end
       end

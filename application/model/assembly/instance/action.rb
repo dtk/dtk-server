@@ -217,7 +217,7 @@ module DTK
 
             #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
             cmp_templates = get_component_templates(nodes,components)
-pp [:debug_cmp_templates,cmp_templates]
+            pp [:debug_cmp_templates,cmp_templates]
             version_context = 
               unless cmp_templates.empty?
                 ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
@@ -225,7 +225,7 @@ pp [:debug_cmp_templates,cmp_templates]
                 Log.error("Unexpected that cmp_instances is empty")
                 nil
               end
-pp [:debug_version_context,version_context]
+            pp [:debug_version_context,version_context]
 
             indexes = nodes.map{|r|r[:id]}
             action_results_queue.set_indexes!(indexes)
@@ -258,13 +258,13 @@ pp [:debug_version_context,version_context]
                     components_including_node_name << comp
                   end
                 end
-                node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id]}
+                node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_context}
               end
             end
 
             #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
             if components_including_node_name.empty?
-              CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components})
+              CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components, :version_context => version_context})
             else
               CommandAndControl.request__execute_action_per_node(:execute_tests,:execute_tests,node_hash,callbacks)
             end
@@ -285,17 +285,21 @@ pp [:debug_version_context,version_context]
             ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
               r[:component_template].merge(:node_node_id => r[:node_node_id])
             end
-            if components.nil? or components.empty?
+            if components.nil? or components.empty? or !components.include? "/"
               return ret
             end
-            
+          
             cmp_node_names = components.map do |name_pairs|
-              split = name_pairs.split('/')
-              if split.size == 2
-                {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
+              if name_pairs.include? "/"
+                split = name_pairs.split('/') 
+                if split.size == 2
+                  {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
+                else
+                  Log.error("unexpected component form: #{name_pairs}; skipping")
+                  nil
+                end
               else
-                Log.error("unexpected component form: #{name_pairs}; skipping")
-                nil
+                {:component_name => Component.display_name_from_user_friendly_name(name_pairs)}
               end
             end.compact
             ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
@@ -307,7 +311,6 @@ pp [:debug_version_context,version_context]
               end
             end
           end
-
         end
       end
     end

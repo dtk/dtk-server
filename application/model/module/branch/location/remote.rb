@@ -21,6 +21,9 @@ module DTK; class ModuleBranch
     end
     class Remote < RemoteParams 
       attr_reader :remote_branch,:remote_ref,:remote_url
+      def initialize(project,remote_params)
+        super(remote_params)
+      end
     end
   end
 end; end

@@ -161,10 +161,10 @@ TODO: needs to be redone taking into account versions are at same level as base
           end
         end
       end
-
-      remote_module_name = remote_params.module_name
-      remote_repo_base = remote_params.remote_repo_base
-      dtk_client_pub_key = remote_params.rsa_pub_key
+      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
+      remote_module_name = remote.module_name
+      remote_repo_base = remote.remote_repo_base
+      dtk_client_pub_key = remote.rsa_pub_key
       
       remote_repo_obj = Repo::Remote.new(remote_repo_base)
       begin
@@ -182,7 +182,7 @@ TODO: needs to be redone taking into account versions are at same level as base
             #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
-            remote_repo_obj.authorize_dtk_instance(remote_module_name,namespace,module_type(), dtk_client_pub_key)
+            remote_repo_obj.authorize_dtk_instance(remote_module_name,remote_params.namespace,module_type(), dtk_client_pub_key)
 
             #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
             

@@ -27,11 +27,10 @@ module DTK; module ModuleMixins
         end
       end
       remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
-      remote_module_name = remote.module_name
       remote_repo_base = remote.remote_repo_base
       
-      remote_repo_obj = Repo::Remote.new(remote_repo_base)
-      remote_repo_obj.raise_error_if_does_not_exists(remote)
+      remote_repo_obj = Repo::Remote.new(remote)
+      remote_repo_obj.raise_error_if_not_accessible(dtk_client_pub_key)
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
@@ -42,7 +41,7 @@ module DTK; module ModuleMixins
             #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
             module_obj.get_repo!()
           else
-            remote_repo_obj.authorize_dtk_instance(remote_module_name,remote_params.namespace,module_type(), dtk_client_pub_key)
+            remote_repo_obj.authorize_pub_key(dtk_client_pub_key)
 
             #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
             
@@ -78,10 +77,10 @@ module DTK; module ModuleMixins
     def delete_remote(project,remote_params,client_rsa_pub_key)
       remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
       remote_repo_base = remote.remote_repo_base
-      remote_repo_obj = Repo::Remote.new(remote_repo_base)
+      remote_repo_obj = Repo::Remote.new(remote)
       error = nil
       begin
-        remote_repo.raise_error_if_does_not_exists(remote)
+        remote_repo_obj.raise_error_if_not_accessible(remote,client_rsa_pub_key)
       rescue => e
         error = e
       end
@@ -109,6 +108,7 @@ module DTK; module ModuleMixins
             raise ErrorUsage.new("Remote component/service (#{remote.pp_module_name(:include_namespace=>true)}) does not exist") 
           end
 
+          #TODO: ModuleBranch::Location: below is wrong; unlinking specific remote
           repo.unlink_remote(remote_repo_base)
           
           ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])

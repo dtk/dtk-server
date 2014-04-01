@@ -13,7 +13,7 @@ module DTK; class Repo
         true
       end
 
-      def authorize_dtk_instance(module_name, module_namespace, type, client_rsa_pub_key = nil)
+      def authorize_pub_key(rsa_pub_key)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
         access_rights = "R"

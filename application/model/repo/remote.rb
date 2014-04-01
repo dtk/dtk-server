@@ -105,8 +105,13 @@ module DTK
         @client.get_components_info(params)
       end
 
-      def initialize(remote_repo_base=nil)
-        @remote_repo_base = remote_repo_base && remote_repo_base.to_sym 
+      def initialize(remote_or_repo_base=nil)
+        if remote_or_repo_base.kind_of?(ModuleBranch::Location::Server::Remote)
+          @remote = remote_or_repo_base
+          @remote_repo_base = @remote.remote_repo_base
+        elsif remote_or_repo_base
+          @remote_repo_base = remote_or_repo_base.to_sym
+        end
         @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo_base))
         Log.debug "Using repo manager: '#{repo_url}'"
       end
@@ -175,25 +180,24 @@ module DTK
       end
       # unify these two or chose better names to show how different
       #returns  module info it exists
-      def exists?(remote)
+      def raise_error_if_not_accessible(client_rsa_pub_key)
         client_params = {
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
-          :namespace => remote.namespace || self.class.default_namespace()
+          :namespace => remote.namespace || self.class.default_namespace(),
+          :rsa_pub_key => client_rsa_pub_key
         } 
-
         ret = nil
         begin
           response_data = client.get_module_info(client_params)
           ret = Aux.convert_keys_to_symbols(response_data)
-        rescue ErrorUsage => e
-          # Amar: To handle DTK-819: Returning friendly error message to CLI below if 'ret' is nil
+        rescue 
+          raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
         end
-        unless ret 
-          raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exist")
-        end
+
         if remote.version
-          raise Error.new("Not implementing versions")
+          #TODO: ModuleBranch::Location: 
+          raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote.version)
             raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}}) does not have version (#{remote.version||"CURRENT"})")
@@ -202,37 +206,13 @@ module DTK
         ret
       end
 
-      #TODO: ModuleBranch::Location: remove once put this in place for module/mixin/delete
-      def get_module_info(remote_params)
-        client_params = {
-          :name => remote_params[:module_name],
-          :type => type_for_remote_module(remote_params[:module_type]),
-          :rsa_pub_key => remote_params[:rsa_pub_key],
-          :namespace => remote_params[:module_namespace] || self.class.default_namespace()
-        } 
-
-        ret = nil
-        begin
-          response_data = client.get_module_info(client_params)
-          ret = Aux.convert_keys_to_symbols(response_data)
-        rescue ErrorUsage => e
-          # Amar: To handle DTK-819: Returning friendly error message to CLI below if 'ret' is nil
+      def remote()
+        unless @remote
+          raise Error.new("SHould n ot be called if @remote is nill")
         end
-        unless ret 
-          raise ErrorUsage.new("Remote component/service (#{qualified_module_name(remote_params)}) does not exist")
-        end
-        if remote_params[:version]
-          versions = branch_names_to_versions_stripped(ret[:branches])
-          unless versions and versions.include?(remote_params[:version])
-            raise ErrorUsage.new("Remote module (#{qualified_module_name(remote_params)}) does not have version (#{remote_params[:version]||"CURRENT"})")
-          end
-        end
-        ret
+        @remote
       end
-      def qualified_module_name(remote_params)
-        "#{remote_params[:module_namespace]}/#{remote_params[:module_name]}"
-      end
-      private :qualified_module_name
+      private :remote
 
       def list_module_info(type=nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]

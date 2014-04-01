@@ -20,8 +20,7 @@ module DTK
           raise Error.new("trying to create a repo (#{repo_name}) that exists already on r8 server")
         end
       end
-      #create() does not actually create the branch passed to oit
-      local_repo = create(local_repo_dir,CreateMethodBranch,:absolute_path => true, :repo_does_not_exist => true)
+      local_repo = create_without_branch(local_repo_dir,:absolute_path => true, :repo_does_not_exist => true)
       local_repo.create_local_repo(repo_name,opts)
       if create_branch = opts[:create_branch]
         if opts[:push_created_branch]
@@ -31,7 +30,6 @@ module DTK
         end
       end
     end
-    CreateMethodBranch = "master" #TODO: may make this so it could be changed
 
     #for binding to existing local repo
     def self.create(path,branch,opts={})
@@ -42,6 +40,11 @@ module DTK
         raise Error.new("platform #{Aux::platform} not treated")
       end
     end
+    def self.create_without_branch(path,opts={})
+      branch = nil
+      create(path,branch,opts)
+    end
+    private_class_method :create_without_branch
 
     def self.repo_full_path(path,opts={})
       if opts[:absolute_path] 

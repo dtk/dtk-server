@@ -6,7 +6,6 @@ module DTK; module ModuleMixins
     #returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
       #TODO: pass local_params in
-      config_agent_type = opts[:config_agent_type]
       local_params = ModuleBranch::Location::LocalParams.new(
         :module_type => module_type(),
         :module_name => module_name,
@@ -34,7 +33,7 @@ module DTK; module ModuleMixins
       }
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
       #TODO: remove most these args
-      local_repo_obj = Repo.create_empty_workspace_repo(project_idh,local,module_specific_type(config_agent_type),repo_user_acls,create_opts)
+      local_repo_obj = Repo.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local.module_name,local.version)
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,local.version))

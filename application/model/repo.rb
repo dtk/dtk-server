@@ -28,10 +28,10 @@ module DTK
     end
 
     #TODO: ModuleBranch::Location: pass local and pull some of these params out of it
-    def self.create_empty_workspace_repo(project_idh,local,module_specific_type,repo_user_acls,opts={})
+    def self.create_empty_workspace_repo(project_idh,local,repo_user_acls,opts={})
       #find repo name
-      pp [:debug,local.module_name,module_specific_type]
-      repo_name = private_user_repo_name(local,module_specific_type)
+      repo_name = local.private_user_repo_name()
+      pp [:debug,local,repo_name]
 
       repo_mh = project_idh.createMH(:repo)
       repo_obj = create_repo_obj?(repo_mh,repo_name)
@@ -48,15 +48,6 @@ module DTK
     end
 
    private
-    def self.private_user_repo_name(local,module_specific_type)
-      username = CurrentSession.new.get_username()
-      incorporate_module_type(module_specific_type,"#{username}-#{local.module_name}")
-    end
-
-    def self.incorporate_module_type(module_specific_type,repo_name)
-      #module_specfic_type can be :service_module, :puppet or :chef
-      module_specific_type == :service_module ? "sm-#{repo_name}" : repo_name
-    end
 
     def self.create_repo_obj?(model_handle,repo_name)
       sp_hash = {

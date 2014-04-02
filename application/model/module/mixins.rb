@@ -335,6 +335,7 @@ module DTK
     include ModuleMixins::Remote::Class
     include ModuleMixins::Create::Class
     def component_type()
+      Log.error("#TODO: ModuleBranch::Location: depreate for this being in ModuleBranch::Location local params")
       case module_type()
        when :service_module
         :service_module

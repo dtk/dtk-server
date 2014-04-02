@@ -53,7 +53,7 @@ module DTK; module ModuleMixins
             :delete_if_exists => true
             }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-          local_repo_obj = Repo.create_empty_workspace_repo(project.id_handle(),local,component_type,repo_user_acls,create_opts)
+          local_repo_obj = Repo.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
           Log.error("Do we need equiv to: RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], local_repo_obj.id())")
         end
         commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote.remote_repo_base,local_branch,version)

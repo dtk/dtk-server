@@ -38,16 +38,9 @@ module DTK
       version_field(version)
     end
 
-    #MOD_RESTRUCT: TODO: this hard codes in assumption that different users have different repos
     def workspace_branch_name(project,version=nil)
-      user_prefix = "workspace-#{project.get_field?(:ref)}"
-      if version.kind_of?(ModuleVersion::AssemblyModule)
-        assembly_suffix = "--assembly-#{version.assembly_name}"
-        "#{user_prefix}#{assembly_suffix}"
-      else
-        version_suffix = ((version and version != VersionFieldDefault)?  "-v#{version}" : "")
-        "#{user_prefix}#{version_suffix}"
-      end
+      Log.error("#TODO: ModuleBranch::Location: deprecate workspace_branch_name direct call")
+      ModuleBranch::Location::Server::Local::workspace_branch_name(project,version)
     end
   end
 end

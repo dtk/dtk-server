@@ -8,7 +8,6 @@ module Ramaze::Helper
         request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
       end
 
-
       user_object  = ::DTK::CurrentSession.new.user_object()
       ::DTK::CreateThread.defer_with_session(user_object) do
         yield(body)
@@ -18,13 +17,11 @@ module Ramaze::Helper
       throw :async
     end
 
-    def get_service_dependencies(remote_module_name, remote_namespace, version)
-      remote_repo, project = ret_remote_repo(), get_default_project()
-      missing_modules, required_modules = get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
-
+    def get_service_dependencies(remote_params)
+      project = get_default_project()
+      missing_modules, required_modules = get_required_and_missing_modules(project,remote_params)
       { :missing_modules => missing_modules, :required_modules => required_modules }
     end
-
 
     def pull_from_remote_helper(module_class)
       #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo

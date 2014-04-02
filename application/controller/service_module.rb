@@ -180,8 +180,9 @@ module DTK
     def rest__resolve_pull_from_remote()
       service_module = create_obj(:service_module_id)
       opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
-      name, namespace, version = service_module.get_basic_info(opts)
-      rest_ok_response get_service_dependencies(name, namespace, version)
+      module_name, namespace, version = service_module.get_basic_info(opts)
+      remote_params = create_remote_params(:service_module,namespace,module_name,version)
+      rest_ok_response get_service_dependencies(remote_params)
     end
 
     def rest__delete_assembly_template()

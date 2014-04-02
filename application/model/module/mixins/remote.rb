@@ -47,8 +47,11 @@ module DTK; module ModuleMixins
           #create empty repo on local repo manager; 
           #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
           create_opts = {
+=begin
+#TODO: ModuleBranch::Location: not needed
             :remote_repo_name => remote_repo_info[:git_repo_name],
             :remote_repo_namespace => remote.namespace,
+=end
             :donot_create_master_branch => true,
             :delete_if_exists => true
             }

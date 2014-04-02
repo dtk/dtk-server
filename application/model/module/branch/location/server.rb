@@ -15,7 +15,7 @@ module DTK; class ModuleBranch
           #TODO: stub
         end
         def ret_branch_name()
-          #TODO: ModuleBranch::Location: thi is wheer can make branch a function of namespace
+          #TODO: ModuleBranch::Location: this is where can make branch a function of namespace
           self.class.ret_branch_name(@project,version())
         end
 

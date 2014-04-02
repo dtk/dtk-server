@@ -24,15 +24,13 @@ module DTK; module ModuleMixins
       if is_parsed and not opts[:no_error_if_exists]
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
-      ws_branch = ModuleBranch.workspace_branch_name(project,local.version)
       create_opts = {
-        :create_branch => ws_branch,
+        :create_branch => local.branch_name(),
         :push_created_branch => true,
         :donot_create_master_branch => true,
         :delete_if_exists => true
       }
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      #TODO: remove most these args
       local_repo_obj = Repo.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local.module_name,local.version)

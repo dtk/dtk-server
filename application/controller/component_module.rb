@@ -9,7 +9,7 @@ module DTK
       rest_ok_response
     end
 
-      #### create and delete actions ###
+    #### create and delete actions ###
     def rest__create()
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()

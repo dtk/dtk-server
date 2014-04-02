@@ -6,7 +6,6 @@ module DTK; module ModuleMixins
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
     def install(project,local_params,remote_params,dtk_client_pub_key,opts={})
-      #TODO: ModuleBranch::Location: have lower level fns call
       version = remote_params.version
 
       #Find information about module and see if it exists
@@ -35,28 +34,27 @@ module DTK; module ModuleMixins
       module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
       Transaction do
         #case on whether the module is created already
-        local_repo_obj = 
-          if module_obj
-            #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-            module_obj.get_repo!()
-          else
-            #TODO: ModuleBranch::Location: see if this is necessary
-            remote_repo_handler.authorize_dtk_instance(dtk_client_pub_key)
-
-            #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
-            
-            #create empty repo on local repo manager; 
-            #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
-            create_opts = {
-              :remote_repo_name => remote_repo_info[:git_repo_name],
-              :remote_repo_namespace => remote.namespace,
-              :donot_create_master_branch => true,
-              :delete_if_exists => true
+        if module_obj
+          #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
+          raise Error.new("TODO: ModuleBranch::Location")
+          local_repo_obj = module_obj.get_repo!()
+        else
+          #TODO: ModuleBranch::Location: see if this is necessary
+          remote_repo_handler.authorize_dtk_instance(dtk_client_pub_key)
+          
+          #TODO: ModuleBranch::Location: better unify create_empty_workspace_repo and create_module in  DTK::ModuleMixins::Create::Class 
+          
+          #create empty repo on local repo manager; 
+          #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+          create_opts = {
+            :remote_repo_name => remote_repo_info[:git_repo_name],
+            :remote_repo_namespace => remote.namespace,
+            :donot_create_master_branch => true,
+            :delete_if_exists => true
             }
-            repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-            Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
-          end
-        Log.error("below should take the remote_ref, not remote.remote_repo_base")
+          repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
+          local_repo_obj = Repo.create_empty_workspace_repo(project.id_handle(),local_module_name,component_type,repo_user_acls,create_opts)
+        end
         commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote.remote_repo_base,local_branch,version)
         module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
@@ -113,25 +111,6 @@ module DTK; module ModuleMixins
       raise error if error
     end
 
-    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
-      Log.error("Need to cleanup like did for install")
-      local_branch = ModuleBranch.workspace_branch_name(project, version)
-      module_obj = module_exists?(project.id_handle(), local_module_name)
-
-      # validate presence of module (this should never happen)
-      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
-      # validate presence of brach
-      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
-      
-      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
-      repo = module_obj.get_repo!
-      repo.initial_sync_with_remote_repo(remote_repo,local_branch,version)
-
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj.pull_from_remote__update_from_dsl(repo, module_and_branch_info, version)
-    end
-
-
     def list_remotes(model_handle, rsa_pub_key = nil)
       unsorted = Repo::Remote.new.list_module_info(module_type(), rsa_pub_key).map do |r|
         el = {:display_name => r[:qualified_name],:type => component_type(), :last_updated => r[:last_updated]} #TODO: hard coded
@@ -143,6 +122,26 @@ module DTK; module ModuleMixins
       unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
+=begin
+TODO: ModuleBranch::Location: currently cannot be called because this wil be done on client side
+    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      Log.error("Need to cleanup like did for install")
+      local_branch = ModuleBranch.workspace_branch_name(project, version)
+      module_obj = module_exists?(project.id_handle(), local_module_name)
+
+      # validate presence of module (this should never happen)
+      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
+      # validate presence of brach
+      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
+      
+      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
+      local_repo_obj = module_obj.get_repo!
+      local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+      module_obj.pull_from_remote__update_from_dsl(local_repo_obj, module_and_branch_info, version)
+    end
+=end
   end
 
   module Remote::Instance

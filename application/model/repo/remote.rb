@@ -15,6 +15,7 @@ module DTK
       #TODO: ModuleBranch::Location: signature should be
       #initial_sync_with_remote_repo(remote_location) maybe with local_branch if not in self
       def initial_sync_with_remote_repo(remote_ref,local_branch,version=nil)
+        Log.error("Need to fix remote_ref (#{remote_ref})")
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end

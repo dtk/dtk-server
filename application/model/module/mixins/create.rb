@@ -5,19 +5,27 @@ module DTK; module ModuleMixins
     #TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class isnatll
     #returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
-      version = opts[:version]
+      #TODO: pass local_params in
       config_agent_type = opts[:config_agent_type]
-      is_parsed   = false
+      local_params = ModuleBranch::Location::LocalParams.new(
+        :module_type => module_type(),
+        :module_name => module_name,
+        :version => opts[:version]
+      )
+
+      local = ModuleBranch::Location::Server::Local.new(project,local_params)
+
       project_idh = project.id_handle()
-      module_exists = module_exists?(project_idh,module_name)
-      if module_exists
+
+      is_parsed   = false
+      if module_exists = module_exists?(project_idh,module_name)
         is_parsed = module_exists[:dsl_parsed] 
       end
 
       if is_parsed and not opts[:no_error_if_exists]
         raise ErrorUsage.new("Module (#{module_name}) cannot be created since it exists already")
       end
-      ws_branch = ModuleBranch.workspace_branch_name(project,version)
+      ws_branch = ModuleBranch.workspace_branch_name(project,local.version)
       create_opts = {
         :create_branch => ws_branch,
         :push_created_branch => true,
@@ -25,10 +33,11 @@ module DTK; module ModuleMixins
         :delete_if_exists => true
       }
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      local_repo_obj = Repo.create_empty_workspace_repo(project_idh,module_name,module_specific_type(config_agent_type),repo_user_acls,create_opts)
+      #TODO: remove most these args
+      local_repo_obj = Repo.create_empty_workspace_repo(project_idh,local,module_specific_type(config_agent_type),repo_user_acls,create_opts)
 
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),module_name,version)
-      module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,version))
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local.module_name,local.version)
+      module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,local.version))
     end
 
     def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)

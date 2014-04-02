@@ -27,29 +27,14 @@ module DTK
       Model.get_obj(model_handle(:repo_user_acl),sp_hash)
     end
 
-    # Method will set self attributes
-    # 
-    # :remote_repo_name, :remote_repo_namespace
-    #
-    # From remote repo, this is to minimize changes to existing code base, this should change as we go on forward
-    #
-    #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; used by get_augmented_workspace_branch; dont change until see ramification
-    def consume_remote_repo!(remote_repo)
-      merge!(:remote_repo_name => remote_repo[:repo_name],:remote_repo_namespace => remote_repo[:repo_namespace])
-    end
-
-    #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; this conditionally creates a remote repo object; may seperate this out; and put logic wrt to remote
-    #in initial_sync_with_remote_repo
-    def self.create_empty_workspace_repo(project_idh,module_name,module_specific_type,repo_user_acls,opts={})
+    #TODO: ModuleBranch::Location: pass local and pull some of these params out of it
+    def self.create_empty_workspace_repo(project_idh,local,module_specific_type,repo_user_acls,opts={})
       #find repo name
-      repo_name = private_user_repo_name(module_name,module_specific_type)
-
-      extra_attrs = [:remote_repo_name,:remote_repo_namespace].inject(Hash.new) do |h,k|
-        opts[k] ? h.merge(k => opts[k]) : h
-      end
+      pp [:debug,local.module_name,module_specific_type]
+      repo_name = private_user_repo_name(local,module_specific_type)
 
       repo_mh = project_idh.createMH(:repo)
-      repo_obj = create_repo_obj?(repo_mh,repo_name,extra_attrs)
+      repo_obj = create_repo_obj?(repo_mh,repo_name)
       repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
       RepoUserAcl.modify_model(repo_idh,repo_user_acls)
       RepoManager.create_empty_workspace_repo(repo_obj,repo_user_acls,opts) 
@@ -63,13 +48,9 @@ module DTK
     end
 
    private
-    def self.private_user_repo_name(module_name,module_specific_type)
+    def self.private_user_repo_name(local,module_specific_type)
       username = CurrentSession.new.get_username()
-      incorporate_module_type(module_specific_type,"#{username}-#{module_name}")
-
-    end
-    def self.public_repo_name(module_name,module_specific_type)
-      incorporate_module_type(module_specific_type,"public-#{module_name}")
+      incorporate_module_type(module_specific_type,"#{username}-#{local.module_name}")
     end
 
     def self.incorporate_module_type(module_specific_type,repo_name)
@@ -77,37 +58,22 @@ module DTK
       module_specific_type == :service_module ? "sm-#{repo_name}" : repo_name
     end
 
-    def self.create_repo_obj?(model_handle,repo_name,extra_attrs={})
+    def self.create_repo_obj?(model_handle,repo_name)
       sp_hash = {
         :cols => common_columns(),
         :filter => [:eq,:repo_name,repo_name]
       }
-      ret = get_obj(model_handle,sp_hash)
-
-      unless ret
+      unless ret = get_obj(model_handle,sp_hash)
         repo_hash = {
           :ref => repo_name,
           :display_name => repo_name,
           :repo_name => repo_name,
           :local_dir =>  "#{R8::Config[:repo][:base_directory]}/#{repo_name}" #TODO: should this be set by RepoManager instead
         }
-        #TODO: ModuleBranch::Location: remote_repo_name, remote_repo_namespace; see if should remove
-        repo_hash.merge!(extra_attrs)
-
         repo_idh = create_from_row(model_handle,repo_hash)
         ret = repo_idh.create_object().merge(repo_hash)
       end
-
-      # this is only in cases when we import from r8_network 
-      if extra_attrs[:remote_repo_name]
-        # we extract module name
-        module_name = RepoRemote.extract_module_name(extra_attrs[:remote_repo_name])
-        # we create repo remote
-        RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], ret.id())
-      end
-
       ret
     end
-
   end
 end

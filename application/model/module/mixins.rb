@@ -315,7 +315,7 @@ module DTK
       ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
       repo = ret[:repo]
       if default = RepoRemote.ret_default_remote_repo(ret[:repo_remotes])
-        repo.consume_remote_repo!(default)
+        raise Error.new("removed repo.consume_remote_repo!(default)")
       end
       ret
     end

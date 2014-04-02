@@ -89,30 +89,21 @@ module DTK
     end
 
     class Remote
-
       CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
       r8_nested_require('remote','auth')
       include AuthMixin
 
-      def get_remote_module_components(module_name, type, version, namespace)
-        params = {
-          :name => module_name,
-          :version => version,
-          :namespace => namespace,
-          :type => type,
-          :do_not_raise => true
-        }
-        @client.get_components_info(params)
-      end
-
-      def initialize(remote_or_repo_base=nil)
-        if remote_or_repo_base.kind_of?(ModuleBranch::Location::Server::Remote)
-          @remote = remote_or_repo_base
+      def initialize(remote_params_or_repo_base=nil)
+        arg = remote_params_or_repo_base #for succinctness
+        if arg.kind_of?(ModuleBranch::Location::RemoteParams)
+          @remote = arg
           @remote_repo_base = @remote.remote_repo_base
-        elsif remote_or_repo_base
-          @remote_repo_base = remote_or_repo_base.to_sym
+        elsif arg
+          @remote_repo_base = arg.to_sym
         end
-        @client = RepoManagerClient.new(repo_url = rest_base_url(@remote_repo_base))
+
+        repo_url = rest_base_url(@remote_repo_base)
+        @client = RepoManagerClient.new(repo_url)
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
@@ -159,20 +150,20 @@ module DTK
 
       class Info < Hash
       end 
-      def get_remote_module_info(branch_obj,remote_params)
+      def get_remote_module_info(branch_obj,remote)
         unless repo = branch_obj[:repo]
           raise Error.new("Expected the :repo field to be non null")
         end
         remote_ref = repo.get_remote_ref(:remote_repo_base => @remote_repo_base) 
         ret = Info.new().merge(
-          :module_name => remote_params[:module_name],
+          :module_name => remote[:module_name],
           #TODO: will change this to :remote_ref when upstream uses this                               
           :remote_repo => remote_ref,
-          :remote_repo_url => repo.repo_url_ssh_access(remote_params[:remote_repo_name]),
-          :remote_branch => version_to_branch_name(remote_params[:version]),
+          :remote_repo_url => repo.repo_url_ssh_access(remote[:remote_repo_name]),
+          :remote_branch => version_to_branch_name(remote[:version]),
           :workspace_branch => branch_obj.get_field?(:branch)
         )
-        ret.merge!(:version => remote_params[:version]) if remote_params[:version]        
+        ret.merge!(:version => remote[:version]) if remote[:version]        
         ret
       end
       # unify these two or chose better names to show how different
@@ -207,9 +198,21 @@ module DTK
         ret
       end
 
+      def get_remote_module_components()
+        params = {
+          :name => remote.module_name,
+          :version => remote.version,
+          :namespace => remote.namespace,
+          :type => remote.module_type,
+          :do_not_raise => true
+        }
+        @client.get_components_info(params)
+      end
+
+
       def remote()
         unless @remote
-          raise Error.new("SHould n ot be called if @remote is nill")
+          raise Error.new("Should not be called if @remote is nill")
         end
         @remote
       end

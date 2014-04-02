@@ -57,8 +57,7 @@ module Ramaze::Helper
 
       # check for missing module dependencies
       if module_type == :service_module and !do_not_raise
-        #TODO: ModuleBranch::Location:  write get_required_and_missing_modules using tow params  project,remote_params
-        missing_modules, required_modules = get_required_and_missing_modules(remote_params.remote_repo_base, project, remote_params._module_name, remote_params.namespace, remote_params.version)
+        missing_modules, required_modules = get_required_and_missing_modules(project,remote_params)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
@@ -123,11 +122,11 @@ module Ramaze::Helper
       end
     end
 
-    def get_required_and_missing_modules(remote_repo, project, remote_module_name, remote_namespace, version)
-      repo_client = ::DTK::Repo::Remote.new(remote_repo)
-      response = repo_client.get_remote_module_components(remote_module_name, :service_module, version, remote_namespace)
+    def get_required_and_missing_modules(project,remote)
+      remote_repo_client = ::DTK::Repo::Remote.new(remote)
+      response = remote_repo_client.get_remote_module_components()
       opts = ::DTK::Opts.new(:project_idh => project.id_handle()) 
-      DTK::ComponentModule.cross_reference_modules(opts, response, remote_namespace)
+      DTK::ComponentModule.cross_reference_modules(opts, response, remote.namespace)
     end
 
   end

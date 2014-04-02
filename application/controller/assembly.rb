@@ -713,9 +713,6 @@ module DTK
       node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
 
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
-
       #Logic for validation
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)

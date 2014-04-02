@@ -717,7 +717,7 @@ module DTK
       # filters only stopped nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
-      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :stopped)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
 
       unless is_valid
         Log.info(error_msg)

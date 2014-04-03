@@ -28,7 +28,7 @@ module DTK; module ModuleMixins
       remote = remote_params.create_remote(project)
       
       remote_repo_handler = Repo::Remote.new(remote)
-      remote_repo_info = remote_repo_handler.get_module_info?(client_rsa_pub_key,:raise_error=>true)
+      remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
@@ -77,7 +77,8 @@ module DTK; module ModuleMixins
       remote_repo_handler = Repo::Remote.new(remote)
       error = nil 
       begin
-        remote_repo_handler.get_module_info?(client_rsa_pub_key,:raise_error=>true)
+Log.error("TODO: remove following which was used for whetehr legal to delete tests:
+remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)")
         # delete module on remote repo manager
         remote_repo_handler.delete_module(client_rsa_pub_key)
        rescue => e
@@ -153,12 +154,45 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
   end
 
   module Remote::Instance
+    class Info < Hash
+    end 
+=begin
+TODO: thnk not needed: took out ofd call below
+      def raise_error_if_no_access(access_rights,opts={})
+        Log.error("# TODO: ModuleBranch::Location: fix: stub tht gives all users complete access")
+        module_name = remote.module_name
+        type = remote.module_type
+        namespace = remote.namespace
+        if client_rsa_pub_key = opts[:client_rsa_pub_key]
+          authorize_end_user(@project.model_handle(), module_name, namespace, type, client_rsa_pub_key, access_rights)
+        end
+        true
+      end
+=end
+
     #raises an access rights usage error if user does not have access to the remote module
-    def get_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
+    def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
       remote = remote_params.create_remote(project)
-      remote_repo_handler = Repo::Remote.new(remote)
-      remote_repo_handler.get_remote_module_info(access_rights,client_rsa_pub_key)
+      Log.error("do we need call to raise_error_if_no_access")
+      remote_module_info =  Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+      workspace_branch = nil #TODO: stub
+      ret = Info.new().merge(
+          :module_name => remote.module_name,
+          #TODO: will change this key to :remote_ref when upstream uses this                               
+          :remote_repo => remote.remote_ref,
+          :remote_repo_url => remote_module_info[:remote_repo_url],
+          :remote_branch => remote.branch_name,
+          :workspace_branch => workspace_branch
+      )
+      if version = remote.version
+        ret.merge!(:version => version)
+      end
+      ret
+pp ret
+raise Error.new("Got here")
+ret
     end
+    
 
 =begin
 TODO: needs to be redone taking into account versions are at same level as base

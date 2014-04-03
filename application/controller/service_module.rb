@@ -70,7 +70,7 @@ module DTK
       access_rights = ret_access_rights()
       remote_repo = ret_remote_repo()
       version = ret_version()
-      rest_ok_response service_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
+      rest_ok_response service_module.get_linked_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
     end
 
 

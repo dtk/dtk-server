@@ -171,7 +171,7 @@ module DTK
       access_rights = ret_access_rights()
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       project = get_default_project()
-      rest_ok_response component_module.get_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
+      rest_ok_response component_module.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
     end
 
     #### end: actions to interact with remote repo ###

@@ -131,31 +131,7 @@ module DTK
         client.delete_module(params, client_rsa_pub_key)
       end
 
-      class Info < Hash
-      end 
-      def get_remote_module_info(access_rights,client_rsa_pub_key)
-        raise_error_if_no_access(access_rights,:client_rsa_pub_key => client_rsa_pub_key)
-        workspace_branch = nil #TODO: stub
-        remote_repo_info = get_module_info?(client_rsa_pub_key,:raise_error=>true)
-        remote_repo_url = RepoManagerClient.repo_url_ssh_access(remote_repo_info[:git_repo_name])
-        ret = Info.new().merge(
-          :module_name => remote[:module_name],
-          #TODO: will change this key to :remote_ref when upstream uses this                               
-          :remote_repo => remote.remote_ref,
-          :remote_repo_url => remote_repo_url,
-          :remote_branch => remote.branch_name,
-          :workspace_branch => workspace_branch
-        )
-        if version = remote.version
-          ret.merge!(:version => version)
-        end
-        ret
-pp ret
-raise Error.new
-      end
-      # unify these two or chose better names to show how different
-      #returns  module info it exists
-      def get_module_info?(client_rsa_pub_key,opts={})
+      def get_remote_module_info?(client_rsa_pub_key,opts={})
         client_params = {
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
@@ -173,6 +149,7 @@ raise Error.new
             return nil
           end
         end
+        ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version
           #TODO: ModuleBranch::Location: 

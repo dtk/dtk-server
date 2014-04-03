@@ -1,16 +1,6 @@
 module DTK; class Repo 
   class Remote
     module AuthMixin
-      def raise_error_if_no_access(access_rights,opts={})
-        Log.error("# TODO: ModuleBranch::Location: fix: stub tht gives all users complete access")
-        module_name = remote.module_name
-        type = remote.module_type
-        namespace = remote.namespace
-        if client_rsa_pub_key = opts[:client_rsa_pub_key]
-          authorize_end_user(@project.model_handle(), module_name, namespace, type, client_rsa_pub_key, access_rights)
-        end
-        true
-      end
       #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
       def authorize_dtk_instance(client_rsa_pub_key = nil)
         username = dtk_instance_remote_repo_username()

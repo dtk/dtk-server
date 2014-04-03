@@ -119,17 +119,21 @@ module DTK
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
-      def delete_module(client_rsa_pub_key = nil)
-        # if namespace omitted we will use default one
-        namespace = remote.namespace||self.class.default_namespace() 
+      def delete_remote_module(client_rsa_pub_key)
+        raise_error_if_module_is_not_accessible(client_rsa_pub_key)
         params = {
           :username => dtk_instance_remote_repo_username(),
           :name => remote.module_name,
-          :namespace => namespace,
+          :namespace => remote.namespace,
           :type => type_for_remote_module(remote.module_type)
         }
         client.delete_module(params, client_rsa_pub_key)
       end
+
+      def raise_error_if_module_is_not_accessible(client_rsa_pub_key)
+        get_remote_module_info?(client_rsa_pub_key,:raise_error => true)
+      end
+      private :raise_error_if_module_is_not_accessible
 
       def get_remote_module_info?(client_rsa_pub_key,opts={})
         client_params = {

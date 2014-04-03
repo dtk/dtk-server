@@ -77,10 +77,8 @@ module DTK; module ModuleMixins
       remote_repo_handler = Repo::Remote.new(remote)
       error = nil 
       begin
-Log.error("TODO: remove following which was used for whetehr legal to delete tests:
-remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)")
         # delete module on remote repo manager
-        remote_repo_handler.delete_module(client_rsa_pub_key)
+        remote_repo_handler.delete_remote_module(client_rsa_pub_key)
        rescue => e
         error = e
       end

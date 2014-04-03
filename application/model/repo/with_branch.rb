@@ -43,7 +43,8 @@ module DTK
         repo_obj.merge(:branch_name => branch_name)
       end
       
-      def self.get_objs(model_handle,sp_hash,opts={})
+      def self.get_objs(mh,sp_hash,opts={})
+        model_handle = (mh[:model_name] == :repo_with_branch ? mh.createMH(:repo) : mh)
         super(model_handle,sp_hash,{:subclass_model_name => :repo_with_branch}.merge(opts))
       end
     end

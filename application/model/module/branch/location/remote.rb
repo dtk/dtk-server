@@ -6,9 +6,9 @@ module DTK; class ModuleBranch
         self[:remote_repo_base]
       end
 
-      class DTKN < self
+      class DTKNCatalog < self
         def create_remote(project)
-          Remote::DTKN.new(project,self)
+          Remote::DTKNCatalog.new(project,self)
         end
        private
         def legal_keys()
@@ -16,9 +16,9 @@ module DTK; class ModuleBranch
         end
       end
 
-      class TenantRepo < self
+      class TenantCatalog < self
         def create_remote(project)
-          Remote::TenantRepo.new(project,self)
+          Remote::TenantCatalog.new(project,self)
         end
        private
         def legal_keys()
@@ -29,7 +29,7 @@ module DTK; class ModuleBranch
 
     class Remote
       def self.includes?(obj)
-        obj.kind_of?(DTKN) or obj.kind_of?(TenantRepo)
+        obj.kind_of?(DTKNCatalog) or obj.kind_of?(TenantCatalog)
       end
 
       module RemoteMixin
@@ -45,7 +45,8 @@ module DTK; class ModuleBranch
           @remote_ref ||= ret_remote_ref()
         end
       end
-      r8_nested_require('remote','dtkn')
+      r8_nested_require('remote','dtkn_catalog')
+      r8_nested_require('remote','tenant_catalog')
     end
   end
 end; end

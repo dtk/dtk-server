@@ -1,6 +1,6 @@
 module DTK; class ModuleBranch; class Location
   class Remote
-    class DTKN < RemoteParams::DTKN
+    class DTKNCatalog < RemoteParams::DTKNCatalog
       include RemoteMixin
      private
       def ret_remote_ref()

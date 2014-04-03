@@ -2,11 +2,11 @@ module DTK
   class RepoRemote < Model
     def print_form(opts=Opts.new)
       ret = self[:display_name]||'' #'' just to be safe
-      ret = "#{DTKNPrefix}#{ret}" if opts[:dtkn_prefix]
+      ret = "#{DTKNCatalogPrefix}#{ret}" if opts[:dtkn_prefix]
       ret = "#{DefaultMarker}#{ret}" if opts[:is_default_namespace]
       ret
     end
-    DTKNPrefix = 'dtkn://'
+    DTKNCatalogPrefix = 'dtkn://'
     DefaultMarker = '*'
 
     def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id,opts=Opts.new)

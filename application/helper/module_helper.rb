@@ -67,7 +67,7 @@ module Ramaze::Helper
     end
 
     def remote_params_dtkn(module_type,namespace,module_name,version=nil)
-      ::DTK::ModuleBranch::Location::RemoteParams::DTKN.new(
+      ::DTK::ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         :module_type => module_type,
         :module_name => module_name,
         :version => version,

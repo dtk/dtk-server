@@ -1,7 +1,8 @@
 module DTK; class ModuleBranch; class Location
   class Remote
-    class TenantRepo < RemoteParams::TenantRepo
+    class TenantCatalog < RemoteParams::TenantCatalog
       include RemoteMixin
     end
   end
-end
+end; end; end
+

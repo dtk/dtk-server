@@ -167,7 +167,7 @@ module DTK
     def rest__delete_remote()
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_service_name))
-      remote_params = create_remote_params(:service_module,remote_namespace,remote_module_name,version)
+      remote_params = create_remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
       project = get_default_project()
       ServiceModule.delete_remote(project,remote_params,client_rsa_pub_key)
       rest_ok_response 
@@ -181,7 +181,7 @@ module DTK
       service_module = create_obj(:service_module_id)
       opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
       module_name, namespace, version = service_module.get_basic_info(opts)
-      remote_params = create_remote_params(:service_module,namespace,module_name,version)
+      remote_params = create_remote_params_dtkn(:service_module,namespace,module_name,version)
       rest_ok_response get_service_dependencies(remote_params)
     end
 

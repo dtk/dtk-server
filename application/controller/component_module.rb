@@ -140,7 +140,7 @@ module DTK
     def rest__delete_remote()
       remote_module_name = ret_non_null_request_params(:remote_module_name)
       remote_namespace = ret_request_params(:remote_module_namespace)
-      remote_params = remote_params(:component_module,remote_namespace,remote_module_name)
+      remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
       ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
@@ -166,7 +166,7 @@ module DTK
       remote_module_name = component_module.get_field?(:display_name)
       remote_namespace = ret_request_params(:remote_namespace)
       version = ret_version()
-      remote_params = remote_params(:component_module,remote_namespace,remote_module_name,version)
+      remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name,version)
 
       access_rights = ret_access_rights()
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)

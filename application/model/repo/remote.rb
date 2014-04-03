@@ -77,7 +77,7 @@ module DTK
 
       def initialize(remote_or_repo_base=nil)
         arg = remote_or_repo_base #for succinctness
-        if arg.kind_of?(ModuleBranch::Location::Remote)
+        if ModuleBranch::Location::Remote.includes?(arg)
           @remote = arg
           @project = @remote.project
           @remote_repo_base = @remote.remote_repo_base

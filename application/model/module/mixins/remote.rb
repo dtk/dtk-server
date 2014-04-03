@@ -25,7 +25,7 @@ module DTK; module ModuleMixins
           end
         end
       end
-      remote = ModuleBranch::Location::Remote.new(project,remote_params)
+      remote = remote_params.create_remote(project)
       
       remote_repo_handler = Repo::Remote.new(remote)
       remote_repo_info = remote_repo_handler.get_module_info?(client_rsa_pub_key,:raise_error=>true)
@@ -73,7 +73,7 @@ module DTK; module ModuleMixins
     end
 
     def delete_remote(project,remote_params,client_rsa_pub_key)
-      remote = ModuleBranch::Location::Remote.new(project,remote_params)
+      remote = remote_params.create_remote(project)
       remote_repo_handler = Repo::Remote.new(remote)
       error = nil 
       begin
@@ -155,7 +155,7 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
   module Remote::Instance
     #raises an access rights usage error if user does not have access to the remote module
     def get_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
-      remote = ModuleBranch::Location::Remote.new(project,remote_params)
+      remote = remote_params.create_remote(project)
       remote_repo_handler = Repo::Remote.new(remote)
       remote_repo_handler.get_remote_module_info(access_rights,client_rsa_pub_key)
     end

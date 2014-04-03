@@ -139,8 +139,8 @@ module DTK
     #TODO: ModuleBranch::Location: harmonize this signature with one for service module
     def rest__delete_remote()
       remote_module_name = ret_non_null_request_params(:remote_module_name)
-      remote_namespace = (ret_request_params(:remote_module_namespace).empty? ? default_namespace() : ret_request_params(:remote_module_namespace))
-      remote_params = create_remote_params(:component_module,remote_namespace,remote_module_name)
+      remote_namespace = ret_request_params(:remote_module_namespace)
+      remote_params = remote_params(:component_module,remote_namespace,remote_module_name)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
       ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
@@ -163,13 +163,15 @@ module DTK
     # get remote_module_info; throws an access rights usage error if user does not have access
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
-      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
+      remote_module_name = component_module.get_field?(:display_name)
       remote_namespace = ret_request_params(:remote_namespace)
+      version = ret_version()
+      remote_params = remote_params(:component_module,remote_namespace,remote_module_name,version)
 
       access_rights = ret_access_rights()
-      remote_repo = ret_remote_repo()
-      version = ret_version()
-      rest_ok_response component_module.get_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
+      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
+      project = get_default_project()
+      rest_ok_response component_module.get_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
     end
 
     #### end: actions to interact with remote repo ###

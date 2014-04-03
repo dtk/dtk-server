@@ -1,11 +1,6 @@
 module DTK; class ModuleBranch
   class Location
-    #  local_params = {
-    #    :module_name
-    #    :version (optional)
-    #    :namespace (optional)
-    #    :component_type (optioonally put in as input, but filled in from default if needed
-    #  }
+    #keys: :module_type,:component_type?,:module_name,:version?,:namespace?
     class LocalParams < Params
       def component_type()
         self[:component_type]

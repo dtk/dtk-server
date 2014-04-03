@@ -35,7 +35,7 @@ module Ramaze::Helper
 
     def install_from_dtkn_helper(module_type)
       remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
-      remote_params = create_remote_params(module_type,remote_namespace,remote_module_name,version)
+      remote_params = remote_params(module_type,remote_namespace,remote_module_name,version)
 
       local_namespace = remote_params.namespace
       local_module_name = ret_request_params(:local_module_name)||remote_params.module_name 
@@ -66,12 +66,12 @@ module Ramaze::Helper
       response.merge( { :namespace => remote_namespace} )
     end
 
-    def create_remote_params(module_type,namespace,module_name,version=nil)
+    def remote_params(module_type,namespace,module_name,version=nil)
       ::DTK::ModuleBranch::Location::RemoteParams.new(
         :module_type => module_type,
         :module_name => module_name,
         :version => version,
-        :namespace => namespace,
+        :namespace => namespace||default_namespace(),
         :remote_repo_base => ret_remote_repo_base()
       )
     end

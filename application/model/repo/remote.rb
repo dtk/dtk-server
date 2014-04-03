@@ -75,10 +75,11 @@ module DTK
       r8_nested_require('remote','auth')
       include AuthMixin
 
-      def initialize(remote_params_or_repo_base=nil)
-        arg = remote_params_or_repo_base #for succinctness
-        if arg.kind_of?(ModuleBranch::Location::RemoteParams)
+      def initialize(remote_or_repo_base=nil)
+        arg = remote_or_repo_base #for succinctness
+        if arg.kind_of?(ModuleBranch::Location::Remote)
           @remote = arg
+          @project = @remote.project
           @remote_repo_base = @remote.remote_repo_base
         elsif arg
           @remote_repo_base = arg.to_sym
@@ -132,21 +133,25 @@ module DTK
 
       class Info < Hash
       end 
-      def get_remote_module_info(branch_obj,remote)
-        unless repo = branch_obj[:repo]
-          raise Error.new("Expected the :repo field to be non null")
-        end
-        remote_ref = repo.get_remote_ref(:remote_repo_base => @remote_repo_base) 
+      def get_remote_module_info(access_rights,client_rsa_pub_key)
+        raise_error_if_no_access(access_rights,:client_rsa_pub_key => client_rsa_pub_key)
+        workspace_branch = nil #TODO: stub
+        remote_repo_info = get_module_info?(client_rsa_pub_key,:raise_error=>true)
+        remote_repo_url = RepoManagerClient.repo_url_ssh_access(remote_repo_info[:git_repo_name])
         ret = Info.new().merge(
           :module_name => remote[:module_name],
-          #TODO: will change this to :remote_ref when upstream uses this                               
-          :remote_repo => remote_ref,
-          :remote_repo_url => repo.repo_url_ssh_access(remote[:remote_repo_name]),
-          :remote_branch => version_to_branch_name(remote[:version]),
-          :workspace_branch => branch_obj.get_field?(:branch)
+          #TODO: will change this key to :remote_ref when upstream uses this                               
+          :remote_repo => remote.remote_ref,
+          :remote_repo_url => remote_repo_url,
+          :remote_branch => remote.branch_name,
+          :workspace_branch => workspace_branch
         )
-        ret.merge!(:version => remote[:version]) if remote[:version]        
+        if version = remote.version
+          ret.merge!(:version => version)
+        end
         ret
+pp ret
+raise Error.new
       end
       # unify these two or chose better names to show how different
       #returns  module info it exists
@@ -154,7 +159,7 @@ module DTK
         client_params = {
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
-          :namespace => remote.namespace || self.class.default_namespace(),
+          :namespace => remote.namespace,
           :rsa_pub_key => client_rsa_pub_key
         } 
         ret = nil

@@ -1,21 +1,17 @@
 module DTK; class ModuleBranch
   class Location
-    #  remote_params = {
-    #    :remote_repo_base
-    #    :namespace
-    #    :module_name
-    #    :version 
-    #  }
     class RemoteParams < Params
+      #keys: :module_type,:module_name,:remote_repo_base,:namespace,:version?
       def remote_repo_base()
         self[:remote_repo_base]
       end
      private
       def legal_keys()
-        [:module_type,:module_name,:remote_repo_base,:version?,:namespace?]
+        [:module_type,:module_name,:remote_repo_base,:namespace,:version?]
       end
     end
     class Remote < RemoteParams 
+      attr_reader :project
       def initialize(project,remote_params)
         super(remote_params)
         @project = project
@@ -37,7 +33,7 @@ module DTK; class ModuleBranch
           "v#{version}"
         end
       end
-      HeadBranchName = "master"
+      HeadBranchName = 'master'
     end
   end
 end; end

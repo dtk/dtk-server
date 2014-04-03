@@ -5,7 +5,7 @@ module DTK; module ModuleMixins
   module Remote::Class
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
     #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
-    def install(project,local_params,remote_params,dtk_client_pub_key,opts={})
+    def install(project,local_params,remote_params,client_rsa_pub_key,opts={})
       version = remote_params.version
 
       #Find information about module and see if it exists
@@ -28,7 +28,7 @@ module DTK; module ModuleMixins
       remote = ModuleBranch::Location::Remote.new(project,remote_params)
       
       remote_repo_handler = Repo::Remote.new(remote)
-      remote_repo_info = remote_repo_handler.get_module_info?(dtk_client_pub_key,:raise_error=>true)
+      remote_repo_info = remote_repo_handler.get_module_info?(client_rsa_pub_key,:raise_error=>true)
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
@@ -41,7 +41,7 @@ module DTK; module ModuleMixins
           repo_with_branch = module_obj.get_repo!()
         else
           #TODO: ModuleBranch::Location: see if this is necessary
-          remote_repo_handler.authorize_dtk_instance(dtk_client_pub_key)
+          remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
           
           #create empty repo on local repo manager; 
           #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
@@ -153,30 +153,13 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
   end
 
   module Remote::Instance
-    #raises an access rights usage eerror if user does not have access to the remote module
-    def get_remote_module_info(action,remote_repo_base,rsa_pub_key,access_rights,version=nil, remote_namespace=nil)
-      unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
-      end
-      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?()
-        if action == :push
-          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo_base}) because it is currently not linked to a remote module")
-        else #action == :pull
-          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo_base}) because it is currently not linked to a remote module")
-        end
-      end
-
-      remote_params = {
-        :module_name => module_name(),
-        :module_type => module_type(),
-        :remote_repo_name => remote_repo_name
-      }
-      remote_params.merge!(:version => version) if version
-      remote_params.merge!(:remote_namespace => remote_namespace) if remote_namespace
-      remote_repo = Repo::Remote.new(remote_repo_base)
-      remote_repo.raise_error_if_no_access(model_handle(),remote_params,access_rights,:rsa_pub_key => rsa_pub_key)
-      remote_repo.get_remote_module_info(aug_ws_branch,remote_params)
+    #raises an access rights usage error if user does not have access to the remote module
+    def get_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
+      remote = ModuleBranch::Location::Remote.new(project,remote_params)
+      remote_repo_handler = Repo::Remote.new(remote)
+      remote_repo_handler.get_remote_module_info(access_rights,client_rsa_pub_key)
     end
+
 =begin
 TODO: needs to be redone taking into account versions are at same level as base
     #this should be called when the module is linked, but the specfic version is not
@@ -215,7 +198,7 @@ TODO: needs to be redone taking into account versions are at same level as base
 =end
     # export to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def export(remote_repo,version=nil, remote_component_name = "", dtk_client_pub_key = nil)
+    def export(remote_repo,version=nil, remote_component_name = "", client_rsa_pub_key = nil)
       # TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()
@@ -246,7 +229,7 @@ TODO: needs to be redone taking into account versions are at same level as base
       export_preprocess(module_branch_obj, module_obj)
 
       # create module on remote repo manager
-      module_info = Repo::Remote.new(remote_repo).create_module(module_name, module_type(), component_namespace, dtk_client_pub_key)
+      module_info = Repo::Remote.new(remote_repo).create_module(module_name, module_type(), component_namespace, client_rsa_pub_key)
 
       remote_repo_name = module_info[:git_repo_name]
 
@@ -266,6 +249,23 @@ TODO: needs to be redone taking into account versions are at same level as base
       
       remote_repo_name
     end
+
+   private
+    def raise_error_if_not_properly_linked(project,action,remote)
+      Log.error("write: raise_error_if_not_properly_linked")
+    end
+=begin
+      unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
+        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
+      end
+      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?()
+        if action == :push
+          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo_base}) because it is currently not linked to a remote module")
+        else #action == :pull
+          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo_base}) because it is currently not linked to a remote module")
+        end
+      end
+=end
 
   end
 

@@ -39,8 +39,6 @@ module DTK; class ModuleBranch
           end
         end
       end
-      class Remote < Location::Remote
-      end
     end
   end
 end; end

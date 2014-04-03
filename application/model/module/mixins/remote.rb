@@ -25,7 +25,7 @@ module DTK; module ModuleMixins
           end
         end
       end
-      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
+      remote = ModuleBranch::Location::Remote.new(project,remote_params)
       
       remote_repo_handler = Repo::Remote.new(remote)
       remote_repo_info = remote_repo_handler.get_module_info?(dtk_client_pub_key,:raise_error=>true)
@@ -73,7 +73,7 @@ module DTK; module ModuleMixins
     end
 
     def delete_remote(project,remote_params,client_rsa_pub_key)
-      remote = ModuleBranch::Location::Server::Remote.new(project,remote_params)
+      remote = ModuleBranch::Location::Remote.new(project,remote_params)
       remote_repo_handler = Repo::Remote.new(remote)
       error = nil 
       begin

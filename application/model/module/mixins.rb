@@ -2,8 +2,7 @@ module DTK
   class ModuleRepoInfo < Hash
     def initialize(repo,module_name,module_idh,branch_obj,version=nil)
       super()
-      repo.update_object!(:repo_name,:id)
-      repo_name = repo[:repo_name]
+      repo_name = repo.get_field?(:repo_name)
       hash = {
         :repo_id => repo[:id],
         :repo_name => repo_name,

@@ -31,13 +31,13 @@ module DTK; module ModuleMixins
       remote_repo_info = remote_repo_handler.get_module_info?(dtk_client_pub_key,:raise_error=>true)
 
       #so they are defined outside Transaction scope
-      module_and_branch_info = commit_sha = parsed = local_repo_obj = nil
+      module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
       Transaction do
         #case on whether the module is created already
         if module_obj
           #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
           raise Error.new("TODO: ModuleBranch::Location; need to right this")
-          local_repo_obj = module_obj.get_repo!()
+          repo_with_branch = module_obj.get_repo!()
         else
           #TODO: ModuleBranch::Location: see if this is necessary
           remote_repo_handler.authorize_dtk_instance(dtk_client_pub_key)
@@ -47,28 +47,23 @@ module DTK; module ModuleMixins
           #create empty repo on local repo manager; 
           #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
           create_opts = {
-=begin
-#TODO: ModuleBranch::Location: not needed
-            :remote_repo_name => remote_repo_info[:git_repo_name],
-            :remote_repo_namespace => remote.namespace,
-=end
             :donot_create_master_branch => true,
             :delete_if_exists => true
             }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-          local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
-          Log.error("Do we need equiv to: RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], local_repo_obj.id())")
+          repo_with_branch = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
+          Log.error("Do we need equiv to: RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], repo_with_branch.id())")
         end
         #remote.remote_repo_base,local_branch,version
-        commit_sha = Repo.initial_sync_with_remote_repo(remote,local)
-        module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
+        commit_sha = repo_with_branch.initial_sync_with_remote(remote)
+        module_and_branch_info = create_ws_module_and_branch_obj?(project,repo_with_branch.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         
         opts = {:do_not_raise => true}
-        parsed = module_obj.import__dsl(commit_sha,local_repo_obj,module_and_branch_info,version, opts)
+        parsed = module_obj.import__dsl(commit_sha,repo_with_branch,module_and_branch_info,version, opts)
       end
       
-      response = module_repo_info(local_repo_obj,module_and_branch_info,version)
+      response = module_repo_info(repo_with_branch,module_and_branch_info,version)
       if ErrorUsage::Parsing.is_error?(parsed)
         response[:dsl_parsed_info] = parsed
       elsif parsed && !parsed.empty?
@@ -140,11 +135,11 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
       raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
       
       #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
-      local_repo_obj = module_obj.get_repo!
-      local_repo_obj.initial_sync_with_remote_repo(remote_repo,local_branch,version)
+      repo_with_branch = module_obj.get_repo!
+      repo_with_branch.initial_sync_with_remote(remote)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj.pull_from_remote__update_from_dsl(local_repo_obj, module_and_branch_info, version)
+      module_obj.pull_from_remote__update_from_dsl(repo_with_branch, module_and_branch_info, version)
     end
 =end
   end
@@ -193,7 +188,7 @@ TODO: needs to be redone taking into account versions are at same level as base
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
       Transaction do
         #TODO: may have commit_sha returned in this fn so client can do a reliable pull
-        commit_sha = repo.initial_sync_with_remote_repo(remote_repo_base,local_branch_name,version)
+        commit_sha = repo.initial_sync_with_remote(remote)
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
 
         opts = {:do_not_raise => true}

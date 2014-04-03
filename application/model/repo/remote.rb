@@ -1,27 +1,6 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
-#TODO: cleanup confusing variables names to distinguis between
-# - the actual remote's repo name
-# - the remote base (e.g., dtkn)
-# - the local clone's remote 
-#
-# started some of this renaming
-
 module DTK
   class Repo
-    module RemoteClassMixin
-      def initial_sync_with_remote_repo(remote,local)
-        unless R8::Config[:repo][:workspace][:use_local_clones]
-          raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
-        end
-        remote_url = repo_url_ssh_access()
-        remote_ref ||= get_remote_ref()
-        remote_branch = Remote.version_to_branch_name(version)
-        commit_sha = RepoManager.initial_sync_with_remote_repo(local.branch_name,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
-        
-        commit_sha
-      end
-    end
-
     module RemoteMixin
       def linked_remote?()
         Log.error("deprecate linked_remote?()")

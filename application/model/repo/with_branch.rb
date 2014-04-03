@@ -9,6 +9,18 @@ module DTK
         RepoManager.create_empty_workspace_repo(ret,repo_user_acls,opts) 
         ret
       end
+
+      def initial_sync_with_remote(remote)
+        unless R8::Config[:repo][:workspace][:use_local_clones]
+          raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
+        end
+        remote_url = repo_url_ssh_access()
+        remote_ref ||= get_remote_ref()
+        remote_branch = Remote.version_to_branch_name(version)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(local.branch_name,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
+        
+        commit_sha
+      end
       
      private
       def self.create_obj?(model_handle,local)

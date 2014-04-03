@@ -5,7 +5,6 @@ module DTK
     r8_nested_require('repo','diff')
     r8_nested_require('repo','diffs')
     include RemoteMixin
-    extend RemoteClassMixin
 
     def self.common_columns()
       [:id,:display_name,:repo_name,:local_dir]

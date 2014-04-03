@@ -4,7 +4,7 @@ module DTK
       def self.create_empty_workspace_repo(project_idh,local,repo_user_acls,opts={})
         repo_mh = project_idh.createMH(:repo)
         ret = create_obj?(repo_mh,local)
-        repo_idh = repo_mh.createIDH(:id => repo_obj[:id])
+        repo_idh = repo_mh.createIDH(:id => ret.id)
         RepoUserAcl.modify_model(repo_idh,repo_user_acls)
         RepoManager.create_empty_workspace_repo(ret,repo_user_acls,opts) 
         ret
@@ -12,7 +12,7 @@ module DTK
       
      private
       def self.create_obj?(model_handle,local)
-        repo_name = local.repo_name
+        repo_name = local.private_user_repo_name()
         branch_name = local.branch_name
         sp_hash = {
           :cols => common_columns(),

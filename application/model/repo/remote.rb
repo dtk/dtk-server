@@ -50,11 +50,15 @@ module DTK
       end
 
       def repo_url_ssh_access(remote_repo_name=nil)
+        if remote_repo_name.nil?
+          Log.error("#TODO: ModuleBranch::Location: deprecating: repo_url_ssh_access")
+        end
         remote_repo_name ||= get_field?(:remote_repo_name)
         RepoManagerClient.repo_url_ssh_access(remote_repo_name)
       end
 
       def get_remote_ref(opts={})
+        Log.error("#TODO: ModuleBranch::Location: deprecating: get_remote_ref")
         remote_repo_base = opts[:remote_repo_base]||Remote.default_remote_repo_base()
         if remote_repo_namespace = get_field?(:remote_repo_namespace)
           "#{remote_repo_base}--#{remote_repo_namespace}"
@@ -234,6 +238,7 @@ module DTK
         self.class.version_to_branch_name(version)
       end
       def self.version_to_branch_name(version=nil)
+        Log.error("#TODO: ModuleBranch::Location: deprecating: version_to_branch_name")
         if version.nil? or version == HeadBranchName
           HeadBranchName
         else

@@ -10,21 +10,27 @@ module DTK
         ret
       end
 
-      def initial_sync_with_remote(remote)
+      def initial_sync_with_remote(remote,remote_repo_info)
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
-        remote_url = repo_url_ssh_access()
-        remote_ref ||= get_remote_ref()
-        remote_branch = Remote.version_to_branch_name(version)
-        commit_sha = RepoManager.initial_sync_with_remote_repo(local.branch_name,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
-        
+        remote_repo_name = remote_repo_info[:git_repo_name]
+        remote_url = RepoManagerClient.repo_url_ssh_access(remote_repo_name)
+        remote_ref = remote.remote_ref()
+        remote_branch =  remote.branch_name()
+
+        if remote_branches = remote_repo_info[:branches]
+          unless remote_branches.include?(remote_branch)
+            raise ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name]||''}")
+          end
+        end
+        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(),remote_repo_name,remote_ref,remote_url,remote_branch)
         commit_sha
       end
       
      private
       def self.create_obj?(model_handle,local)
-        repo_name = local.private_user_repo_name()
+        repo_name = repo_name(local)
         branch_name = local.branch_name
         sp_hash = {
           :cols => common_columns(),
@@ -40,7 +46,21 @@ module DTK
           repo_idh = create_from_row(model_handle,repo_hash)
           repo_obj = repo_idh.create_object(:model_name => :repo_with_branch).merge(repo_hash)
         end
-        repo_obj.merge(:branch_name => branch_name)
+        set_branch_name!(repo_obj,branch_name)
+      end
+
+      def self.set_branch_name!(repo_obj,branch_name)
+        repo_obj.merge!(:branch_name => branch_name)
+      end
+      def branch_name()
+        unless ret = self[:branch_name]
+          raise Error.new("Unexpected that self[:branch_name] is null for: #{inspect()}")
+        end
+        ret
+      end
+
+      def self.repo_name(local)
+        local.private_user_repo_name()
       end
       
       def self.get_objs(mh,sp_hash,opts={})

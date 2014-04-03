@@ -16,10 +16,28 @@ module DTK; class ModuleBranch
       end
     end
     class Remote < RemoteParams 
-      attr_reader :remote_branch,:remote_ref,:remote_url
       def initialize(project,remote_params)
         super(remote_params)
+        @project = project
       end
+      def branch_name()
+        @branch_name ||= ret_branch_name()
+      end
+      def remote_ref()
+        @remote_ref ||= ret_remote_ref()
+      end
+     private
+      def ret_remote_ref()
+        "#{remote_repo_base}--#{namespace}"
+      end
+      def ret_branch_name()
+        if version.nil? or version == HeadBranchName
+          HeadBranchName
+        else
+          "v#{version}"
+        end
+      end
+      HeadBranchName = "master"
     end
   end
 end; end

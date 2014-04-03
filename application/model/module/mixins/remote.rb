@@ -54,8 +54,7 @@ module DTK; module ModuleMixins
         end
         commit_sha = repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
         #create object in object model taht corresponds to remote repo
-        repo_remote_obj = RepoRemote.create_repo_remote?(repo_with_branch,remote_repo_info)
-
+        create_repo_remote_object(repo_with_branch,remote,remote_repo_info)
 
         module_and_branch_info = create_ws_module_and_branch_obj?(project,repo_with_branch.id_handle(),local_module_name,version)
 
@@ -122,6 +121,14 @@ module DTK; module ModuleMixins
       end
       unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
+
+    def create_repo_remote_object(repo,remote,remote_repo_info)
+      repo_remote_mh = repo.model_handle(:repo_remote)
+      remote_repo_name = remote_repo_info[:git_repo_name]
+      opts = Opts.new(:set_as_default_if_first => true)
+      RepoRemote.create_repo_remote(repo_remote_mh, remote.module_name, remote_repo_name, remote.namespace, repo.id,opts)
+    end
+    private :create_repo_remote_object
 
 =begin
 TODO: ModuleBranch::Location: currently cannot be called because this wil be done on client side

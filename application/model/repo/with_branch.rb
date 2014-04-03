@@ -14,8 +14,8 @@ module DTK
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
-        remote_repo_name = remote_repo_info[:git_repo_name]
-        remote_url = RepoManagerClient.repo_url_ssh_access(remote_repo_name)
+        
+        remote_url = RepoManagerClient.repo_url_ssh_access(remote_repo_info[:git_repo_name])
         remote_ref = remote.remote_ref()
         remote_branch =  remote.branch_name()
 
@@ -24,7 +24,7 @@ module DTK
             raise ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name]||''}")
           end
         end
-        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(),remote_repo_name,remote_ref,remote_url,remote_branch)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(),get_field?(:repo_name),remote_ref,remote_url,remote_branch)
         commit_sha
       end
       

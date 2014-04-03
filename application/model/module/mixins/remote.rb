@@ -36,7 +36,7 @@ module DTK; module ModuleMixins
         #case on whether the module is created already
         if module_obj
           #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-          raise Error.new("TODO: ModuleBranch::Location")
+          raise Error.new("TODO: ModuleBranch::Location; need to right this")
           local_repo_obj = module_obj.get_repo!()
         else
           #TODO: ModuleBranch::Location: see if this is necessary
@@ -56,10 +56,11 @@ module DTK; module ModuleMixins
             :delete_if_exists => true
             }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-          local_repo_obj = Repo.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
+          local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
           Log.error("Do we need equiv to: RepoRemote.create_repo_remote?(ret.model_handle(:repo_remote), module_name, extra_attrs[:remote_repo_name], extra_attrs[:remote_repo_namespace], local_repo_obj.id())")
         end
-        commit_sha = local_repo_obj.initial_sync_with_remote_repo(remote.remote_repo_base,local_branch,version)
+        #remote.remote_repo_base,local_branch,version
+        commit_sha = Repo.initial_sync_with_remote_repo(remote,local)
         module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local_module_name,version)
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         

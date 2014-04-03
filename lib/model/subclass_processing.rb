@@ -107,6 +107,7 @@ module DTK
           when :component_instance then Component::Instance
           when :datacenter then Target
           when :node_group then NodeGroup
+          when :repo_with_branch then Repo::WithBranch
         end
       end
 

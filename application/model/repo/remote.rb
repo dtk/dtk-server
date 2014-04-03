@@ -5,30 +5,27 @@ r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager
 # - the local clone's remote 
 #
 # started some of this renaming
+
 module DTK
   class Repo
-    module RemoteMixin
-      def linked_remote?()
-        get_field?(:remote_repo_name)
-      end
-
-      #TODO: ModuleBranch::Location: signature should be
-      #initial_sync_with_remote_repo(remote_location) maybe with local_branch if not in self
-      def initial_sync_with_remote_repo(remote_ref,local_branch,version=nil)
-        Log.error("Need to fix remote_ref (#{remote_ref})")
+    module RemoteClassMixin
+      def initial_sync_with_remote_repo(remote,local)
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
-        end
-        update_object!(:repo_name,:remote_repo_name)
-        unless get_field?(:remote_repo_name)
-          raise ErrorUsage.new("Cannot synchronize with remote repo if local repo not linked")
         end
         remote_url = repo_url_ssh_access()
         remote_ref ||= get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
-        commit_sha = RepoManager.initial_sync_with_remote_repo(local_branch,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(local.branch_name,get_field?(:repo_name),remote_ref,remote_url,remote_branch)
         
         commit_sha
+      end
+    end
+
+    module RemoteMixin
+      def linked_remote?()
+        Log.error("deprecate linked_remote?()")
+        get_field?(:remote_repo_name)
       end
 
       def ret_remote_merge_relationship(remote_ref,local_branch,version,opts={})
@@ -89,6 +86,7 @@ module DTK
       end
     end
 
+    #TODO: may have better class name; this is really a remote repo server handler
     class Remote
       CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
       r8_nested_require('remote','auth')

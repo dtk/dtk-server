@@ -31,7 +31,7 @@ module DTK; module ModuleMixins
         :delete_if_exists => true
       }
       repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      local_repo_obj = Repo.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
+      local_repo_obj = Repo::WithBranch.create_empty_workspace_repo(project_idh,local,repo_user_acls,create_opts)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,local_repo_obj.id_handle(),local.module_name,local.version)
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,local.version))

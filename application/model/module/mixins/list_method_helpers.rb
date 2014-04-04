@@ -21,9 +21,8 @@ module DTK
           is_equal = nil
           
           if diff
-            repo = r[:repo]
-            if linked_remote = repo.linked_remote?()
-              is_equal = repo.ret_loaded_and_remote_diffs(remote_repo_base, module_branch)
+            if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
+              is_equal = r[:repo].ret_local_remote_diff(module_branch,default_remote_repo)
             end
           end
                     
@@ -71,7 +70,7 @@ module DTK
         #index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
         sp_hash = {
-          :cols => [:id,:group_id,:display_name,:repo_id,:created_at,:is_default],
+          :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],
           :filter => [:oneof, :repo_id, ndx_branch_module_rows.keys]
         }
         Model.get_objs(module_mh.createMH(:repo_remote),sp_hash).each do |r|

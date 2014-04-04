@@ -170,10 +170,6 @@ module DTK; module ModuleMixins
         raise ErrorUsage.new("We do not support custom module names (via export) at this time.")
       end
 
-      # if repo.linked_remote?()
-      #   raise ErrorUsage.new("Cannot export module (#{module_name}) because it is currently linked to a remote module")
-      # end
-
       local_branch = ModuleBranch.workspace_branch_name(project,version)
 
       unless module_branch_obj = get_module_branch(local_branch)

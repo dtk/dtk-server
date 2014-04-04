@@ -1,6 +1,12 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class Repo
+    module RemoteClassMixin
+      def remote_ref(remote_repo_base,remote_repo_namespace)
+        "#{remote_repo_base}--#{remote_repo_namespace}"
+      end
+    end
+
     module RemoteMixin
       def linked_remote?()
         Log.error("deprecate linked_remote?()")
@@ -13,10 +19,10 @@ module DTK
         RepoManager.ret_remote_merge_relationship(get_field?(:repo_name),local_branch,remote_ref,opts.merge(:remote_branch => remote_branch))
       end
 
-      def ret_loaded_and_remote_diffs(module_branch,opts={})
+      def ret_local_remote_diff(module_branch,remote_repo,opts={})
         version = opts[:version]
-        remote_url = repo_url_ssh_access()
-        remote_ref = opts[:remote_name]||get_remote_ref()
+        remote_url = remote_repo.url_ssh_access()
+        remote_ref = remote_repo.get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)
         RepoManager.get_loaded_and_remote_diffs(remote_ref, get_field?(:repo_name), module_branch, remote_url, remote_branch)
       end
@@ -61,7 +67,7 @@ module DTK
         Log.error("#TODO: ModuleBranch::Location: deprecating: get_remote_ref")
         remote_repo_base = opts[:remote_repo_base]||Remote.default_remote_repo_base()
         if remote_repo_namespace = get_field?(:remote_repo_namespace)
-          "#{remote_repo_base}--#{remote_repo_namespace}"
+          Repo.remote_ref(remote_repo_base,remote_repo_namespace)
         else
           Log.error("Not expecting :remote_repo_namespace to be nil")
           remote_repo_base
@@ -237,7 +243,7 @@ module DTK
         self.class.default_remote_repo_base()
       end
       def self.default_remote_repo_base()
-        :dtknet #TODO: have this obtained from config file
+        RepoRemote.repo_base()
       end
 
       #TODO: deprecate when remove all references to these

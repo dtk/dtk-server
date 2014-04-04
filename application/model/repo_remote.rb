@@ -7,7 +7,20 @@ module DTK
       ret
     end
     DTKNCatalogPrefix = 'dtkn://'
+    RemoteRepoBase = :dtknet
     DefaultMarker = '*'
+
+    def self.repo_base()
+      RemoteRepoBase
+    end
+    
+    def url_ssh_access()
+      RepoManagerClient.repo_url_ssh_access(get_field?(:repo_name))
+    end
+
+    def get_remote_ref()
+      Repo.remote_ref(RemoteRepoBase,get_field?(:repo_namespace))
+    end
 
     def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id,opts=Opts.new)
       is_default = 

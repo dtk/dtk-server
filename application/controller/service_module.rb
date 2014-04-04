@@ -65,14 +65,8 @@ module DTK
     #get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
-      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
-      remote_namespace = ret_request_params(:remote_namespace)
-      access_rights = ret_access_rights()
-      remote_repo = ret_remote_repo()
-      version = ret_version()
-      rest_ok_response service_module.get_linked_remote_module_info(action,remote_repo,rsa_pub_key,access_rights,version,remote_namespace)
+      rest_ok_response get_remote_module_info_helper(service_module)
     end
-
 
     def rest__pull_from_remote()
       rest_ok_response pull_from_remote_helper(ServiceModule)

@@ -17,9 +17,21 @@ module Ramaze::Helper
       throw :async
     end
 
+    def get_remote_module_info_helper(module_obj)
+      remote_module_name = module_obj.get_field?(:display_name)
+      version = ret_version()
+      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(module_obj,version)
+      remote_params = remote_params_dtkn(module_obj.module_type(),remote_namespace,remote_module_name,version)
+
+      access_rights = ret_access_rights()
+      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
+      project = get_default_project()
+      module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
+    end
+
     def get_service_dependencies(remote_params)
       project = get_default_project()
-      missing_modules, required_modules = get_required_and_missing_modules(project,remote_params)
+      missing_modules, required_modules = ::DTK::ServiceModule.get_required_and_missing_modules(project,remote_params)
       { :missing_modules => missing_modules, :required_modules => required_modules }
     end
 
@@ -54,7 +66,7 @@ module Ramaze::Helper
 
       # check for missing module dependencies
       if module_type == :service_module and !do_not_raise
-        missing_modules, required_modules = get_required_and_missing_modules(project,remote_params)
+        missing_modules, required_modules = ::DTK::ServiceModule.get_required_and_missing_modules(project,remote_params)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
@@ -129,14 +141,6 @@ module Ramaze::Helper
         else raise ::DTK::Error.new("Unexpected module_type (#{module_type})")
       end
     end
-
-    def get_required_and_missing_modules(project,remote)
-      remote_repo_client = ::DTK::Repo::Remote.new(remote)
-      response = remote_repo_client.get_remote_module_components()
-      opts = ::DTK::Opts.new(:project_idh => project.id_handle()) 
-      DTK::ComponentModule.cross_reference_modules(opts, response, remote.namespace)
-    end
-
   end
 end
 

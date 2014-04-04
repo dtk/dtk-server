@@ -29,6 +29,13 @@ module DTK
       ndx_ret.values
     end
 
+    def self.get_required_and_missing_modules(project,remote_params)
+      remote = remote_params.create_remote(project)
+      response = Repo::Remote.new(remote).get_remote_module_components()
+      opts = Opts.new(:project_idh => project.id_handle())
+      ComponentModule.cross_reference_modules(opts, response, remote.namespace)
+    end
+
     def get_referenced_component_modules(opts=Opts.new)
       ret = Array.new
       cmp_refs = get_referenced_component_refs()

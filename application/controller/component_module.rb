@@ -163,15 +163,7 @@ module DTK
     # get remote_module_info; throws an access rights usage error if user does not have access
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
-      remote_module_name = component_module.get_field?(:display_name)
-      version = ret_version()
-      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(component_module,version)
-      remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name,version)
-
-      access_rights = ret_access_rights()
-      rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
-      project = get_default_project()
-      rest_ok_response component_module.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
+      rest_ok_response get_remote_module_info_helper(component_module)
     end
 
     #### end: actions to interact with remote repo ###

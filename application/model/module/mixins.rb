@@ -141,6 +141,10 @@ module DTK
       versions
     end
 
+    def get_linked_remote_repos(opts={})
+      (get_augmented_workspace_branch(opts.merge(:include_repo_remotes => true))||{})[:repo_remotes]||[]
+    end
+
     def get_augmented_workspace_branch(opts={})
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
@@ -161,7 +165,11 @@ module DTK
       unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
         raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) with namespace '#{opts[:filter][:remote_namespace]}'")
       end
-      module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+      ret = module_obj[:module_branch].merge(:repo => module_obj[:repo],:module_name => module_obj[:display_name])
+      if opts[:include_repo_remotes]
+        ret.merge!(:repo_remotes => module_obj[:repo_remotes])
+      end
+      ret
     end
 
     #type is :library or :workspace

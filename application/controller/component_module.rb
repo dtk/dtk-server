@@ -164,8 +164,8 @@ module DTK
     def rest__get_remote_module_info()
       component_module = create_obj(:component_module_id)
       remote_module_name = component_module.get_field?(:display_name)
-      remote_namespace = ret_request_params(:remote_namespace)
       version = ret_version()
+      remote_namespace = ret_request_params(:remote_namespace)||get_existing_default_namespace?(component_module,version)
       remote_params = remote_params_dtkn(:component_module,remote_namespace,remote_module_name,version)
 
       access_rights = ret_access_rights()

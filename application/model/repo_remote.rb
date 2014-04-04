@@ -67,7 +67,16 @@ module DTK
     end
 
     def self.ret_default_remote_repo(repo_remotes)
-      repo_remotes.find{|r|r.get_field?(:is_default)} || compute_default_remote_repo(repo_remotes)
+      #Making robust in case multiple ones marked default
+      pruned = repo_remotes.select{|r|r.get_field?(:is_default)}
+      if pruned.empty?
+        compute_default_remote_repo(repo_remotes)
+      elsif pruned.size == 1
+        pruned.first
+      else
+        Log.error("Multiple default remotes found (#{pruned.map{|r|r[:display_name]}.join('')})")
+        compute_default_remote_repo(pruned)
+      end
     end
 
    private

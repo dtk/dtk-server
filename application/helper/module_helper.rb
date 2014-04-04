@@ -25,7 +25,7 @@ module Ramaze::Helper
 
     def pull_from_remote_helper(module_class)
       #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
-      Log.error("Not expecting to call pull_from_remote_helper")
+      ::DTK::Log.error("Not expecting to call pull_from_remote_helper")
       local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
       version = ret_request_params(:version)
       project = get_default_project()
@@ -74,6 +74,17 @@ module Ramaze::Helper
         :namespace => namespace||default_namespace(),
         :remote_repo_base => ret_remote_repo_base()
       )
+    end
+
+    #this looks at connected remote repos to make an assessment; default_namespace() above is static
+    #if this is used; it is inserted by controller method
+    def get_existing_default_namespace?(module_obj,version=nil)
+      linked_remote_repos = module_obj.get_linked_remote_repos(:filter => {:version => version})
+      default_remote_repo = ::DTK::RepoRemote.ret_default_remote_repo(linked_remote_repos)
+      if default_remote_repo 
+        ::DTK::Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
+        default_remote_repo[:repo_namespace]
+      end
     end
 
     def ret_config_agent_type()

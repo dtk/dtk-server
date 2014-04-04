@@ -485,11 +485,27 @@ module DTK
     end
 
     #can be overwritten
+    #TODO: ModuleBranch::Location: deprecate 
     def module_specific_type(config_agent_type)
       module_type()
     end
     private :module_specific_type
 
+    def get_module_branch_from_local(project,local,opts={})
+      project_idh = project.id_handle()
+      filter = [:and, [:eq, :display_name, local.module_name], [:eq, :project_project_id, project_idh.get_id()]]
+      branch = local.branch_name()
+      post_filter = proc{|mb|mb[:branch] == branch}
+      matches = get_matching_module_branches(project_idh,filter,post_filter,opts)
+      if matches.size == 0
+        nil
+      elsif matches.size == 1
+        matches.first
+      elsif matches.size > 2
+        raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
+      end
+    end
+    #TODO: ModuleBranch::Location: deprecate below for above
     def get_workspace_module_branch(project,module_name,version=nil,opts={})
       project_idh = project.id_handle()
       filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]

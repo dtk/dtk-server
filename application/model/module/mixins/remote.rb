@@ -1,4 +1,3 @@
-#TODO: in process of renaming things that have import to distingusih whether it is install from dtkn not
 module DTK; module ModuleMixins
   module Remote
   end
@@ -56,7 +55,7 @@ module DTK; module ModuleMixins
         #create object in object model taht corresponds to remote repo
         create_repo_remote_object(repo_with_branch,remote,remote_repo_info)
 
-        module_and_branch_info = create_ws_module_and_branch_obj?(project,repo_with_branch.id_handle(),local_module_name,version)
+        module_and_branch_info = create_module_and_branch_obj?(project,repo_with_branch.id_handle(),local)
 
         module_obj ||= module_and_branch_info[:module_idh].create_object()
         opts = {:do_not_raise => true}

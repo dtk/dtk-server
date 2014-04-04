@@ -5,17 +5,12 @@ module DTK; class ModuleBranch
         super
       end
       class Local < Location::Local
-        #TODO: ModuleBranch::Location: deprecate workspace_branch_name direct call
         def self.workspace_branch_name(project,version=nil)
           ret_branch_name(project,version)
         end
 
        private
-        def ret_repo_directory()
-          #TODO: stub
-        end
         def ret_branch_name()
-          #TODO: ModuleBranch::Location: this is where can make branch a function of namespace
           self.class.ret_branch_name(@project,version())
         end
 

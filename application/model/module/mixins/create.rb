@@ -37,6 +37,32 @@ module DTK; module ModuleMixins
       module_and_branch_info.merge(:module_repo_info => module_repo_info(local_repo_obj,module_and_branch_info,local.version))
     end
 
+    def create_module_and_branch_obj?(project,repo_idh,local,ancestor_branch_idh=nil)
+      project_idh = project.id_handle()
+      ref = module_name = local.module_name
+      opts = Hash.new
+      opts.merge!(:ancestor_branch_idh => ancestor_branch_idh) if ancestor_branch_idh
+      mb_create_hash = ModuleBranch.ret_create_hash(repo_idh,local,opts)
+      version_field = mb_create_hash.values.first[:version]
+
+      fields = {
+        :display_name => module_name,
+        :module_branch => mb_create_hash
+      }
+
+      create_hash = {
+        model_name.to_s() => {
+          ref => fields
+        }
+      }
+      input_hash_content_into_model(project_idh,create_hash)
+      #TODO: ModuleBranch::Location: see if after refactor version field needed
+      module_branch = get_workspace_module_branch(project,module_name,version_field)
+      module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
+      #TODO: ModuleBranch::Location: ones that come from local can be omitted
+      {:version => version_field, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
+    end
+    #TODO: ModuleBranch::Location: deprecate below for aboce
     def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)
       project_idh = project.id_handle()
       ref = module_name

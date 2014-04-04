@@ -362,6 +362,22 @@ module DTK
       Model.get_obj(model_handle(),sp_hash)
     end
 
+    def self.ret_create_hash(repo_idh,local,opts={})
+      ancestor_branch_idh = opts[:ancestor_branch_idh]
+      branch =  local.branch_name
+      assigns = {
+        :display_name => branch,
+        :branch => branch,
+        :repo_id => repo_idh.get_id(),
+        :is_workspace => true,
+        :type => local.module_type.to_s,
+        :version => version_field(local.version)
+      }
+      assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      ref = branch
+      {ref => assigns}
+    end
+    #TODO: ModuleBranch::Location: deprecate below for above
     def self.ret_workspace_create_hash(project,type,repo_idh,opts={})
       version = opts[:version]
       ancestor_branch_idh = opts[:ancestor_branch_idh]
@@ -375,20 +391,6 @@ module DTK
         :version => version_field(version)
       }
       assigns.merge!(:ancestor_id => ancestor_branch_idh.get_id()) if ancestor_branch_idh
-      ref = branch
-      {ref => assigns}
-    end
-    #MOD_RESTRUCT: TODO: deprecate below for above
-    def self.ret_lib_create_hash(parent_model_name,library_idh,repo_idh,version=nil)
-      branch =  library_branch_name(library_idh,version)
-      assigns = {
-        :display_name => branch,
-        :branch => branch,
-        :repo_id => repo_idh.get_id(),
-        :is_workspace => false,
-        :type => parent_model_name.to_s,
-        :version =>version_field(version)
-      }
       ref = branch
       {ref => assigns}
     end

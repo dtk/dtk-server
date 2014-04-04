@@ -31,9 +31,6 @@ module DTK; class ModuleBranch
       def branch_name()
         @branch_name ||= ret_branch_name()
       end
-      def repo_directory()
-        @repo_directory ||= ret_repo_directory()
-      end
       def private_user_repo_name()
         @private_user_repo_name ||= ret_private_user_repo_name()
       end

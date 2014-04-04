@@ -144,11 +144,12 @@ module DTK
     def get_augmented_workspace_branch(opts={})
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
-
       sp_hash = {
         :cols => [:display_name,:workspace_info_full]
       }
-      module_rows = get_objs(sp_hash).select{|r|r[:module_branch][:version] == version_field}
+      module_rows = get_objs(sp_hash).select do |r|
+        r[:module_branch][:version] == version_field
+      end
       if module_rows.size == 0
         unless opts[:donot_raise_error]
           raise ErrorUsage.new("Module #{pp_module_name(version)} does not exist")
@@ -311,12 +312,7 @@ module DTK
         return ret
       end
 
-      ret = raw_module_rows.first.merge(:repo_remotes => repo_remotes)
-      repo = ret[:repo]
-      if default = RepoRemote.ret_default_remote_repo(ret[:repo_remotes])
-        raise Error.new("removed repo.consume_remote_repo!(default)")
-      end
-      ret
+      raw_module_rows.first.merge(:repo_remotes => repo_remotes)
     end
 
    private

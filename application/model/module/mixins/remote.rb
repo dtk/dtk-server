@@ -129,105 +129,32 @@ module DTK; module ModuleMixins
     end
     private :create_repo_remote_object
 
-=begin
-TODO: ModuleBranch::Location: currently cannot be called because this wil be done on client side
-    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
-      Log.error("Need to cleanup like did for install")
-      local_branch = ModuleBranch.workspace_branch_name(project, version)
-      module_obj = module_exists?(project.id_handle(), local_module_name)
-
-      # validate presence of module (this should never happen)
-      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
-      # validate presence of brach
-      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
-      
-      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
-      repo_with_branch = module_obj.get_repo!
-      repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
-
-      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
-      module_obj.pull_from_remote__update_from_dsl(repo_with_branch, module_and_branch_info, version)
-    end
-=end
   end
 
   module Remote::Instance
     class Info < Hash
     end 
-=begin
-TODO: thnk not needed: took out ofd call below
-      def raise_error_if_no_access(access_rights,opts={})
-        Log.error("# TODO: ModuleBranch::Location: fix: stub tht gives all users complete access")
-        module_name = remote.module_name
-        type = remote.module_type
-        namespace = remote.namespace
-        if client_rsa_pub_key = opts[:client_rsa_pub_key]
-          authorize_end_user(@project.model_handle(), module_name, namespace, type, client_rsa_pub_key, access_rights)
-        end
-        true
-      end
-=end
-
     #raises an access rights usage error if user does not have access to the remote module
     def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
       remote = remote_params.create_remote(project)
-      Log.error("do we need call to raise_error_if_no_access")
       remote_module_info =  Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
-      workspace_branch = nil #TODO: stub
+      unless workspace_branch_obj = remote.get_linked_workspace_branch_obj?(self) 
+        raise_error_when_not_properly_linked(action,remote)
+      end
       ret = Info.new().merge(
           :module_name => remote.module_name,
           #TODO: will change this key to :remote_ref when upstream uses this                               
           :remote_repo => remote.remote_ref,
           :remote_repo_url => remote_module_info[:remote_repo_url],
           :remote_branch => remote.branch_name,
-          :workspace_branch => workspace_branch
+          :workspace_branch => workspace_branch_obj[:branch]
       )
       if version = remote.version
         ret.merge!(:version => version)
       end
       ret
-pp ret
-raise Error.new("Got here")
-ret
     end
     
-
-=begin
-TODO: needs to be redone taking into account versions are at same level as base
-    #this should be called when the module is linked, but the specfic version is not
-    def import_version(remote_repo_base,version)
-      parsed = nil
-      module_name = module_name()
-      project = get_project()
-      aug_head_branch = get_augmented_workspace_branch()
-      repo = aug_head_branch && aug_head_branch[:repo] 
-      unless repo and repo.linked_remote?()
-        raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo_base}) because it is currently not linked to the remote module")
-      end
-      if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
-        raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
-      end
-
-      local_branch_name = ModuleBranch.workspace_branch_name(project,version)
-      Transaction do
-        #TODO: may have commit_sha returned in this fn so client can do a reliable pull
-        commit_sha = repo.initial_sync_with_remote(remote,remote_repo_info)
-        local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
-
-        opts = {:do_not_raise => true}
-        parsed = create_new_version__type_specific(local_repo_for_imported_version,version,opts)
-      end
-      response = get_workspace_branch_info(version)
-
-      if ErrorUsage::Parsing.is_error?( parsed)
-        response[:dsl_parsed_info] = parsed
-      else  
-        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
-      end
-
-      return response
-    end
-=end
     # export to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
     def export(remote_repo,version=nil, remote_component_name = "", client_rsa_pub_key = nil)
@@ -283,23 +210,73 @@ TODO: needs to be redone taking into account versions are at same level as base
     end
 
    private
-    def raise_error_if_not_properly_linked(project,action,remote)
-      Log.error("write: raise_error_if_not_properly_linked")
+    def raise_error_when_not_properly_linked(action,remote)
+      if action == :push
+        raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote namespace (#{remote.namespace}) because it is currently not linked to it")
+      else #action == :pull
+        raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote namespace (#{remote.namespace}) because it is currently not linked to it")
+      end
     end
-=begin
-      unless aug_ws_branch = get_augmented_workspace_branch(Opts.new(:filter => {:version => version, :remote_namespace => remote_namespace}))
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name()})")
-      end
-      unless remote_repo_name = aug_ws_branch[:repo].linked_remote?()
-        if action == :push
-          raise ErrorUsage.new("Cannot push module (#{module_name()}) to remote (#{remote_repo_base}) because it is currently not linked to a remote module")
-        else #action == :pull
-          raise ErrorUsage.new("Cannot pull module (#{module_name()}) from remote (#{remote_repo_base}) because it is currently not linked to a remote module")
-        end
-      end
-=end
-
   end
 
 end; end
+
+=begin
+temporary removed class method
+TODO: ModuleBranch::Location: currently cannot be called because this wil be done on client side
+    def pull_from_remote(project, local_module_name, remote_repo, version = nil)
+      Log.error("Need to cleanup like did for install")
+      local_branch = ModuleBranch.workspace_branch_name(project, version)
+      module_obj = module_exists?(project.id_handle(), local_module_name)
+
+      # validate presence of module (this should never happen)
+      raise ErrorUsage.new("Not able to find local module '#{local_module_name}'") unless module_obj
+      # validate presence of brach
+      raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
+      
+      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
+      repo_with_branch = module_obj.get_repo!
+      repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
+
+      module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
+      module_obj.pull_from_remote__update_from_dsl(repo_with_branch, module_and_branch_info, version)
+    end
+=end
+=begin
+temporarily removed insatnce methods
+TODO: needs to be redone taking into account versions are at same level as base
+    #this should be called when the module is linked, but the specfic version is not
+    def import_version(remote_repo_base,version)
+      parsed = nil
+      module_name = module_name()
+      project = get_project()
+      aug_head_branch = get_augmented_workspace_branch()
+      repo = aug_head_branch && aug_head_branch[:repo] 
+      unless repo and repo.linked_remote?()
+        raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo_base}) because it is currently not linked to the remote module")
+      end
+      if get_augmented_workspace_branch(Opts.new(:filter => {:version => version},:donot_raise_error=>true))
+        raise ErrorUsage.new("Version (#{version}) for module (#{module_name}) has already been imported")
+      end
+
+      local_branch_name = ModuleBranch.workspace_branch_name(project,version)
+      Transaction do
+        #TODO: may have commit_sha returned in this fn so client can do a reliable pull
+        commit_sha = repo.initial_sync_with_remote(remote,remote_repo_info)
+        local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
+
+        opts = {:do_not_raise => true}
+        parsed = create_new_version__type_specific(local_repo_for_imported_version,version,opts)
+      end
+      response = get_workspace_branch_info(version)
+
+      if ErrorUsage::Parsing.is_error?( parsed)
+        response[:dsl_parsed_info] = parsed
+      else  
+        response[:dsl_parsed_info] = parsed[:dsl_parsed_info] if (parsed && !parsed.empty?)
+      end
+
+      return response
+    end
+=end
 

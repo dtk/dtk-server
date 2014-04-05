@@ -164,9 +164,9 @@ module DTK; module ModuleMixins
       ret
     end
     
-    # export to a remote repo
+    # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def export(remote_repo,version=nil, remote_component_name = "", client_rsa_pub_key = nil)
+    def publish(remote_repo,version=nil, remote_component_name = "", client_rsa_pub_key)
       # TODO: put in version-specfic logic or only deal with versions using push-to-remote
       project = get_project()
       repo = get_workspace_repo()

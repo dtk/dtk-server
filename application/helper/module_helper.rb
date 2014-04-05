@@ -78,6 +78,13 @@ module Ramaze::Helper
       response.merge( { :namespace => remote_namespace} )
     end
 
+    def publish_to_dtkn_helper(module_obj)
+      remote_component_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+      remote_repo = ret_remote_repo()
+      module_obj.publish(remote_repo, nil, remote_component_name, client_rsa_pub_key)
+    end
+
     def remote_params_dtkn(module_type,namespace,module_name,version=nil)
       ::DTK::ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         :module_type => module_type,

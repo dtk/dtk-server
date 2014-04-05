@@ -43,6 +43,13 @@ module DTK
     def rest__import()
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
+
+    #TODO: rename; this is just called by publish
+    def rest__export()
+      service_module = create_obj(:service_module_id)
+      publish_to_dtkn_helper(service_module)
+      rest_ok_response 
+    end
     
     #this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
@@ -52,15 +59,6 @@ module DTK
       rest_ok_response service_module.import_version(remote_repo,version)
     end
 
-    def rest__export()
-      service_module = create_obj(:service_module_id)
-      remote_repo = ret_remote_repo()
-      remote_comp_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
-      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
-      
-      service_module.export(remote_repo, nil, remote_comp_name, client_rsa_pub_key)
-      rest_ok_response 
-    end
 
     #get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
@@ -161,7 +159,7 @@ module DTK
     def rest__delete_remote()
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_service_name))
-      remote_params = create_remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
+      remote_params = remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
       project = get_default_project()
       ServiceModule.delete_remote(project,remote_params,client_rsa_pub_key)
       rest_ok_response 
@@ -175,7 +173,7 @@ module DTK
       service_module = create_obj(:service_module_id)
       opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
       module_name, namespace, version = service_module.get_basic_info(opts)
-      remote_params = create_remote_params_dtkn(:service_module,namespace,module_name,version)
+      remote_params = remote_params_dtkn(:service_module,namespace,module_name,version)
       rest_ok_response get_service_dependencies(remote_params)
     end
 

@@ -128,6 +128,14 @@ module DTK
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 
+    #TODO: rename; this is just called by publish
+    def rest__export()
+      component_module = create_obj(:component_module_id)
+      publish_to_dtkn_helper(component_module)
+      rest_ok_response 
+    end
+
+
     #this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
       component_module = create_obj(:component_module_id)
@@ -149,15 +157,6 @@ module DTK
 
     def rest__list_remote()
       rest_ok_response ComponentModule.list_remotes(model_handle, ret_request_params(:rsa_pub_key)), :datatype => :module_remote
-    end
-
-    def rest__export()
-      component_module = create_obj(:component_module_id)
-      remote_component_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
-      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
-      remote_repo = ret_remote_repo()
-      component_module.export(remote_repo, nil, remote_component_name, client_rsa_pub_key)
-      rest_ok_response 
     end
 
     # get remote_module_info; throws an access rights usage error if user does not have access

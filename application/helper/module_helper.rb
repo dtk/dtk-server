@@ -57,7 +57,7 @@ module Ramaze::Helper
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
-      local_params = ::DTK::ModuleBranch::Location::LocalParams.new(
+      local_params = ::DTK::ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type,
         :module_name => local_module_name,
         :version => version,

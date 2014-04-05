@@ -3,12 +3,12 @@ module DTK; module ModuleMixins
   end
   module Remote::Class
     #install from a dtkn repo; directly in this method handles the module/branc and repo level items
-    #and then calls import__dsl to handle model and implementaion/files parts depending on what type of module it is
+    #and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
     def install(project,local_params,remote_params,client_rsa_pub_key,opts={})
       version = remote_params.version
 
       #Find information about module and see if it exists
-      local = ModuleBranch::Location::Server::Local.new(project,local_params)
+      local = local_params.create_local(project)
       local_branch = local.branch_name
       local_module_name = local.module_name
 
@@ -58,8 +58,9 @@ module DTK; module ModuleMixins
         module_and_branch_info = create_module_and_branch_obj?(project,repo_with_branch.id_handle(),local)
 
         module_obj ||= module_and_branch_info[:module_idh].create_object()
-        opts = {:do_not_raise => true}
-        parsed = module_obj.import__dsl(commit_sha,repo_with_branch,module_and_branch_info,version, opts)
+        module_branch = module_and_branch_info[:module_branch_idh].create_object()
+        parsed = module_obj.install__process_dsl(repo_with_branch,module_branch,local,:do_not_raise => true)
+        module_branch.set_sha(commit_sha)
       end
       
       response = module_repo_info(repo_with_branch,module_and_branch_info,version)

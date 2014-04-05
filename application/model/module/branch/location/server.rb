@@ -8,7 +8,7 @@ module DTK; class ModuleBranch
         def self.workspace_branch_name(project,version=nil)
           ret_branch_name(project,version)
         end
-
+        
        private
         def ret_branch_name()
           self.class.ret_branch_name(@project,version())

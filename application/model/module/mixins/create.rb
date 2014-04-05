@@ -6,13 +6,13 @@ module DTK; module ModuleMixins
     #returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
       #TODO: pass local_params in
-      local_params = ModuleBranch::Location::LocalParams.new(
+      local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name,
         :version => opts[:version]
       )
 
-      local = ModuleBranch::Location::Server::Local.new(project,local_params)
+      local = local_params.create_local(project)
 
       project_idh = project.id_handle()
 

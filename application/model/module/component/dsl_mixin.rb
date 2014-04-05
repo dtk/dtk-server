@@ -3,13 +3,9 @@ module DTK; class ComponentModule
     r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
 
-    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts={})
-      info = module_and_branch_info #for succinctness
-      module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object()
-      ret = create_needed_objects_and_dsl?(repo,version, opts)
-      module_branch.set_sha(commit_sha)
-      ret
+    def install__process_dsl(repo,module_branch,local,opts={})
+      parsed = create_needed_objects_and_dsl?(repo,local,opts)
+      parsed
     end
 
     def update_from_initial_create(commit_sha,repo_idh,version,opts={})
@@ -20,7 +16,7 @@ module DTK; class ComponentModule
       parse_needed = !dsl_parsed?()
       return ret unless pull_was_needed or parse_needed
       repo = repo_idh.create_object()
-      create_needed_objects_and_dsl?(repo,version,opts)
+      deprecate_create_needed_objects_and_dsl?(repo,version,opts)
     end
 
     def create_new_dsl_version(new_dsl_integer_version,format_type,module_version)
@@ -42,7 +38,7 @@ module DTK; class ComponentModule
       module_branch_idh = info[:module_branch_idh]
       module_branch = module_branch_idh.create_object().merge(:repo => repo)
 
-      create_needed_objects_and_dsl?(repo,version)
+      deprecate_create_needed_objects_and_dsl?(repo,version)
     end
 
     def parse_dsl_and_update_model(impl_obj,module_branch_idh,version=nil,opts={})
@@ -62,20 +58,34 @@ module DTK; class ComponentModule
 
   private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
+      deprecate_create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
       update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts)
     end
 
-    def create_needed_objects_and_dsl?(repo,version,opts={})
+    def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
+      #TODO: used temporarily until get all callers to use local object
+      local = deprecate_ret_local(version)
+Log.error_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local])
+      create_needed_objects_and_dsl?(repo,local,opts)
+    end
+    def deprecate_ret_local(version)
+      local_params = ModuleBranch::Location::LocalParams::Server.new(
+        :module_type => module_type(),
+        :module_name => module_name(),
+        :version => version
+      )
+      local_params.create_local(get_project())
+    end
+    def create_needed_objects_and_dsl?(repo,local,opts={})
       ret = Hash.new
-      project = get_project()
+      module_name = local.module_name
+      branch_name = local.branch_name
+      version = local.version
+      project = local.project
       config_agent_type = config_agent_type_default()
-      module_name = module_name()
-      branch_name = ModuleBranch.workspace_branch_name(project,version)
-
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
       impl_obj.create_file_assets_from_dir_els()
 

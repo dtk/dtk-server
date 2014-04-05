@@ -263,15 +263,11 @@ module DTK
       update_model_from_dsl(module_branch)
     end
 
-    def import__dsl(commit_sha,repo,module_and_branch_info,version, opts = {})
-      unless version.nil?
+    def install__process_dsl(repo,module_branch,local,opts = {})
+      unless local.version.nil?
         raise Error.new("Not implemented yet ServiceModule#import__dsl with version not equal to nil")
       end
-      info = module_and_branch_info #for succinctness
-      module_branch_idh = info[:module_branch_idh]
-      module_branch = module_branch_idh.create_object().merge(:repo => repo) #repo added to avoid lookup in update_model_from_dsl
-      parsed = update_model_from_dsl(module_branch, opts)
-      module_branch.set_sha(commit_sha)
+      parsed = update_model_from_dsl(module_branch.merge(:repo => repo), opts) #repo added to avoid lookup in update_model_from_dsl
       parsed
     end
 

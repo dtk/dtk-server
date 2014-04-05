@@ -89,7 +89,7 @@ Log.error_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local])
       impl_obj = Implementation.create_workspace_impl?(project.id_handle(),repo,module_name,config_agent_type,branch_name,version)
       impl_obj.create_file_assets_from_dir_els()
 
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project,repo.id_handle(),module_name,version,opts[:ancestor_branch_idh])
+      module_and_branch_info = self.class.create_module_and_branch_obj?(project,repo.id_handle(),local,opts[:ancestor_branch_idh])
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       external_dependencies = matching_branches = nil
       if opts[:process_external_refs]

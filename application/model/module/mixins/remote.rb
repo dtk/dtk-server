@@ -137,7 +137,16 @@ module DTK; module ModuleMixins
     #raises an access rights usage error if user does not have access to the remote module
     def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
       remote = remote_params.create_remote(project)
-      remote_module_info =  Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+      repo_remote_handler = Repo::Remote.new(remote)
+      remote_module_info = repo_remote_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+
+      # we also check if user has required permissions
+      # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk
+      # to allow permission to be sent from client
+      if client_rsa_pub_key && action == 'push'
+        repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_WRITE)
+      end
+
       unless workspace_branch_obj = remote.get_linked_workspace_branch_obj?(self) 
         raise_error_when_not_properly_linked(action,remote)
       end

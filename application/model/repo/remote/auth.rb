@@ -1,11 +1,15 @@
 module DTK; class Repo 
   class Remote
     module AuthMixin
+
+      ACCESS_READ  = 'R'
+      ACCESS_WRITE = 'W'
+
       #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
-      def authorize_dtk_instance(client_rsa_pub_key = nil)
+      def authorize_dtk_instance(client_rsa_pub_key = nil, access_rights = nil)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
-        access_rights = "R"
+        access_rights ||= ACCESS_READ
         authorize_user(username,rsa_pub_key,access_rights,remote.module_name,remote.namespace,remote.module_type,client_rsa_pub_key)
       end
 

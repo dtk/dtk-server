@@ -178,16 +178,9 @@ module DTK; module ModuleMixins
       export_preprocess(module_branch_obj, self)
 
       # create module on remote repo manager
+      #this wil raise error if it exists already or dont have accsss
       module_info = Repo::Remote.new(remote).create_remote_module(client_rsa_pub_key)
-
       remote_repo_name = module_info[:git_repo_name]
-
-      # check if remote exists
-      #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches 
-      repo = get_workspace_repo()
-      if repo.remote_exists?(remote_repo_name)
-        raise ErrorUsage.new("Remote repo already exists with given name and namespace")
-      end
 
       #link and push to remote repo
       local_branch = local.branch_name
@@ -195,6 +188,7 @@ module DTK; module ModuleMixins
       repo.push_to_remote(local_branch,remote_repo_name)
 
       #create remote repo object
+      repo = get_workspace_repo() #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches
       self.class.create_repo_remote_object(repo,remote,module_info)
       remote_repo_name
     end

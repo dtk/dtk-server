@@ -1,11 +1,12 @@
 module DTK
   class Repo < Model
     r8_nested_require('repo','with_branch')
-    r8_nested_require('repo','remote')
     r8_nested_require('repo','diff')
     r8_nested_require('repo','diffs')
-    extend RemoteClassMixin
-    include RemoteMixin
+    r8_nested_require('repo','remote')
+    r8_nested_require('repo','connection_to_remote')
+    extend ConnectionToRemoteClassMixin
+    include ConnectionToRemoteMixin
 
     def self.common_columns()
       [:id,:display_name,:repo_name,:local_dir]

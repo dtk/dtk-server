@@ -184,11 +184,11 @@ module DTK; module ModuleMixins
 
       #link and push to remote repo
       local_branch = local.branch_name
+      #create remote repo object
+      repo = get_workspace_repo() #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches
       repo.link_to_remote(local_branch,remote_repo_name)
       repo.push_to_remote(local_branch,remote_repo_name)
 
-      #create remote repo object
-      repo = get_workspace_repo() #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches
       self.class.create_repo_remote_object(repo,remote,module_info)
       remote_repo_name
     end

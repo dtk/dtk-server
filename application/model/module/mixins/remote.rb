@@ -172,9 +172,7 @@ module DTK; module ModuleMixins
         raise Error.new("Cannot find module_branch_obj from local")
       end
 
-      #TODO: see if all are needed and also better to put in export_preprocess
-      update_object!(:dsl_parsed,:ancestor_id,:created_at,:updated_at)
-      export_preprocess(module_branch_obj, self)
+      publish_preprocess_raise_error?(module_branch_obj)
 
       # create module on remote repo manager
       #this wil raise error if it exists already or dont have accsss
@@ -235,6 +233,7 @@ TODO: needs to be redone taking into account versions are at same level as base
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
+      #TODO:repo.linked_remote? is deprecated
       unless repo and repo.linked_remote?()
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo_base}) because it is currently not linked to the remote module")
       end

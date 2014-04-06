@@ -173,12 +173,9 @@ module DTK
       :puppet
     end
 
-    def export_preprocess(branch, module_obj)
-      is_parsed   = false
-      
-      is_parsed = module_obj[:dsl_parsed] if module_obj
-      unless is_parsed
-        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try export again.")
+    def publish_preprocess_raise_error?(module_branch_obj)
+      unless get_field?(:dsl_parsed)
+        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
       end
     end
     

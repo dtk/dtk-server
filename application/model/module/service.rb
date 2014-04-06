@@ -300,21 +300,22 @@ module DTK
       end
     end
 
-    def export_preprocess(module_branch, module_obj)
-      #get module info for every component in an assembly in the service module
-      is_parsed   = false
-      module_info = get_component_modules_info(module_branch)
+    def publish_preprocess_raise_error?(module_branch_obj)
+      unless get_field?(:dsl_parsed)
+        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
+      end
 
+      #get module info for every component in an assembly in the service module
+      module_info = get_component_modules_info(module_branch_obj)
+pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
       #check that all component modules are linked to a remote component module
+=begin
+      #TODO: ModuleBranch::Location: removed linked_remote; taking out this check until have replacement
       unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?()}
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       end
-
-      is_parsed = module_obj[:dsl_parsed] if module_obj
-      unless is_parsed
-        raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try export again.")
-      end
+=end
     end
 
     #returns [module_branch,component_modules]

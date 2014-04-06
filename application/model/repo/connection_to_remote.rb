@@ -1,3 +1,4 @@
+#TODO: ModuleBranch::Location: in midst of changing the methods to take local and/or remote as args
 module DTK
   class Repo
     module ConnectionToRemoteClassMixin
@@ -16,11 +17,6 @@ module DTK
         RepoManager.push_to_remote_repo(get_field?(:repo_name),local.branch_name,remote.remote_ref,remote.branch_name)
       end
       
-      def linked_remote?()
-        Log.error("deprecate linked_remote?()")
-        get_field?(:remote_repo_name)
-      end
-
       def ret_remote_merge_relationship(remote_ref,local_branch,version,opts={})
         remote_ref ||= get_remote_ref()
         remote_branch = Remote.version_to_branch_name(version)

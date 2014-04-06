@@ -52,8 +52,8 @@ module DTK; module ModuleMixins
           repo_with_branch = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
         end
         commit_sha = repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
-        #create object in object model taht corresponds to remote repo
-        create_repo_remote_object(repo_with_branch,remote,remote_repo_info)
+        #create object in object model that corresponds to remote repo
+        create_repo_remote_object(repo_with_branch,remote,remote_repo_info[:git_repo_name])
 
         module_and_branch_info = create_module_and_branch_obj?(project,repo_with_branch.id_handle(),local)
 
@@ -121,9 +121,8 @@ module DTK; module ModuleMixins
       unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
 
-    def create_repo_remote_object(repo,remote,remote_repo_info)
+    def create_repo_remote_object(repo,remote,remote_repo_name)
       repo_remote_mh = repo.model_handle(:repo_remote)
-      remote_repo_name = remote_repo_info[:git_repo_name]
       opts = Opts.new(:set_as_default_if_first => true)
       RepoRemote.create_repo_remote(repo_remote_mh, remote.module_name, remote_repo_name, remote.namespace, repo.id,opts)
     end
@@ -181,15 +180,15 @@ module DTK; module ModuleMixins
       #this wil raise error if it exists already or dont have accsss
       module_info = Repo::Remote.new(remote).create_remote_module(client_rsa_pub_key)
       remote_repo_name = module_info[:git_repo_name]
+      remote.set_repo_name!(remote_repo_name)
 
       #link and push to remote repo
-      local_branch = local.branch_name
       #create remote repo object
       repo = get_workspace_repo() #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches
-      repo.link_to_remote(local_branch,remote_repo_name)
-      repo.push_to_remote(local_branch,remote_repo_name)
+      repo.link_to_remote(local,remote)
+      repo.push_to_remote(local,remote)
 
-      self.class.create_repo_remote_object(repo,remote,module_info)
+      self.class.create_repo_remote_object(repo,remote,remote_repo_name)
       remote_repo_name
     end
 

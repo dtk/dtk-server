@@ -10,8 +10,10 @@ module DTK; class ModuleBranch; class Location
         }
         module_obj.get_augmented_workspace_branch(:filter => filter)
       end
-
      private
+      def ret_repo_url()
+        RepoManagerClient.repo_url_ssh_access(repo_name())
+      end
       def ret_remote_ref()
         "#{remote_repo_base}--#{namespace}"
       end

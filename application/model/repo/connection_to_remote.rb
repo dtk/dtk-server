@@ -1,12 +1,21 @@
 module DTK
   class Repo
     module ConnectionToRemoteClassMixin
+
       def remote_ref(remote_repo_base,remote_repo_namespace)
         "#{remote_repo_base}--#{remote_repo_namespace}"
       end
     end
 
     module ConnectionToRemoteMixin
+      def link_to_remote(local,remote)
+        RepoManager.link_to_remote_repo(get_field?(:repo_name),local.branch_name,remote.remote_ref(),remote.repo_url())
+      end
+
+      def push_to_remote(local,remote)
+        RepoManager.push_to_remote_repo(get_field?(:repo_name),local.branch_name,remote.remote_ref,remote.branch_name)
+      end
+      
       def linked_remote?()
         Log.error("deprecate linked_remote?()")
         get_field?(:remote_repo_name)
@@ -26,27 +35,11 @@ module DTK
         RepoManager.get_loaded_and_remote_diffs(remote_ref, get_field?(:repo_name), module_branch, remote_url, remote_branch)
       end
       
-      def push_to_remote(branch,remote_repo_name,version=nil)
-        unless remote_repo_name
-          raise ErrorUsage.new("Cannot push to remote repo if local repo not linked")
-        end
-        remote_ref = get_remote_ref()
-        remote_branch = Remote.version_to_branch_name(version)
-        RepoManager.push_to_remote_repo(get_field?(:repo_name),branch,remote_ref,remote_branch)
-      end
-
       def remote_exists?(remote_repo_name)
         remote_url = repo_url_ssh_access(remote_repo_name)
         RepoManager.git_remote_exists?(remote_url)
       end
 
-      def link_to_remote(branch,remote_repo_name)
-        remote_url = repo_url_ssh_access(remote_repo_name)
-        remote_ref = get_remote_ref()
-        RepoManager.link_to_remote_repo(get_field?(:repo_name),branch,remote_ref,remote_url)
-        remote_repo_name
-      end
-      
       def unlink_remote(remote_ref)
         remote_ref ||= get_remote_ref()
         RepoManager.unlink_remote(get_field?(:repo_name),remote_ref)

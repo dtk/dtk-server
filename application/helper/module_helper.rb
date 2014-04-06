@@ -1,5 +1,6 @@
 module Ramaze::Helper
   module ModuleHelper
+    include ::DTK
     def rest_async_response
       body = DeferrableBody.new
 
@@ -8,8 +9,8 @@ module Ramaze::Helper
         request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, body]
       end
 
-      user_object  = ::DTK::CurrentSession.new.user_object()
-      ::DTK::CreateThread.defer_with_session(user_object) do
+      user_object  = CurrentSession.new.user_object()
+      CreateThread.defer_with_session(user_object) do
         yield(body)
         body.succeed
       end
@@ -31,13 +32,13 @@ module Ramaze::Helper
 
     def get_service_dependencies(remote_params)
       project = get_default_project()
-      missing_modules, required_modules = ::DTK::ServiceModule.get_required_and_missing_modules(project,remote_params)
+      missing_modules, required_modules = ServiceModule.get_required_and_missing_modules(project,remote_params)
       { :missing_modules => missing_modules, :required_modules => required_modules }
     end
 
     def pull_from_remote_helper(module_class)
       #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
-      ::DTK::Log.error("Not expecting to call pull_from_remote_helper")
+      Log.error("Not expecting to call pull_from_remote_helper")
       local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
       version = ret_request_params(:version)
       project = get_default_project()
@@ -46,7 +47,7 @@ module Ramaze::Helper
     end
 
     def install_from_dtkn_helper(module_type)
-      remote_namespace,remote_module_name,version = ::DTK::Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
+      remote_namespace,remote_module_name,version = Repo::Remote::split_qualified_name(ret_non_null_request_params(:remote_module_name))
       remote_params = remote_params_dtkn(module_type,remote_namespace,remote_module_name,version)
 
       local_namespace = remote_params.namespace
@@ -57,16 +58,11 @@ module Ramaze::Helper
       do_not_raise = (ret_request_params(:do_not_raise) ? ret_request_params(:do_not_raise) : false)
       ignore_component_error = (ret_request_params(:ignore_component_error) ? ret_request_params(:ignore_component_error) : false)
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
-      local_params = ::DTK::ModuleBranch::Location::LocalParams::Server.new(
-        :module_type => module_type,
-        :module_name => local_module_name,
-        :version => version,
-        :namespace => local_namespace
-      )
+      local_params = local_params_dtkn(module_type,local_namespace,local_module_name,version)
 
       # check for missing module dependencies
       if module_type == :service_module and !do_not_raise
-        missing_modules, required_modules = ::DTK::ServiceModule.get_required_and_missing_modules(project,remote_params)
+        missing_modules, required_modules = ServiceModule.get_required_and_missing_modules(project,remote_params)
         # return missing modules if any
         return { :missing_module_components => missing_modules } unless missing_modules.empty?
       end
@@ -79,14 +75,31 @@ module Ramaze::Helper
     end
 
     def publish_to_dtkn_helper(module_obj)
-      remote_component_name = ret_params_hash_with_nil(:remote_component_name)[:remote_component_name]
-      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
-      remote_repo = ret_remote_repo()
-      module_obj.publish(remote_repo, nil, remote_component_name, client_rsa_pub_key)
+      client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+      qualified_remote_name = ret_request_params(:remote_component_name)
+      namespace, remote_module_name,version = Repo::Remote.split_qualified_name(qualified_remote_name)
+      local_module_name = module_obj.module_name()
+      # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
+      if local_module_name != remote_module_name
+        raise ErrorUsage.new("Export with remote module name (#{remote_module_name}) unequal to local module name (#{local_module_name}) is currently not supported.")
+      end
+      module_type = module_obj.module_type
+      remote_params = remote_params_dtkn(module_type,namespace,remote_module_name,version)
+      local_params = local_params_dtkn(module_type,namespace,local_module_name,version)
+      module_obj.publish(local_params,remote_params,client_rsa_pub_key)
+    end
+
+    def local_params_dtkn(module_type,namespace,module_name,version=nil)
+      ModuleBranch::Location::LocalParams::Server.new(
+        :module_type => module_type,
+        :module_name => module_name,
+        :version => version,
+        :namespace => namespace
+      )
     end
 
     def remote_params_dtkn(module_type,namespace,module_name,version=nil)
-      ::DTK::ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
+      ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
         :module_type => module_type,
         :module_name => module_name,
         :version => version,
@@ -99,9 +112,9 @@ module Ramaze::Helper
     #if this is used; it is inserted by controller method
     def get_existing_default_namespace?(module_obj,version=nil)
       linked_remote_repos = module_obj.get_linked_remote_repos(:filter => {:version => version})
-      default_remote_repo = ::DTK::RepoRemote.ret_default_remote_repo(linked_remote_repos)
+      default_remote_repo = RepoRemote.ret_default_remote_repo(linked_remote_repos)
       if default_remote_repo 
-        ::DTK::Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
+        Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
         default_remote_repo[:repo_namespace]
       end
     end
@@ -112,30 +125,30 @@ module Ramaze::Helper
 
     def ret_diffs_summary()
       json_diffs = ret_request_params(:json_diffs)
-      ::DTK::Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))
+      Repo::Diffs::Summary.new(json_diffs &&  (!json_diffs.empty?) && JSON.parse(json_diffs))
     end
 
     def ret_remote_repo_base()
-      (ret_request_params(:remote_repo_base)||::DTK::Repo::Remote.default_remote_repo_base()).to_sym
+      (ret_request_params(:remote_repo_base)||Repo::Remote.default_remote_repo_base()).to_sym
     end
     #TODO: deprecate below when all uses removed; 
     def ret_remote_repo()
-      (ret_request_params(:remote_repo)||::DTK::Repo::Remote.default_remote_repo()).to_sym
+      (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
     end
 
     def ret_access_rights()
       if rights = ret_request_params(:access_rights)
-        ::DTK::Repo::Remote::AccessRights.convert_from_string_form(rights)
+        Repo::Remote::AccessRights.convert_from_string_form(rights)
       else
-        ::DTK::Repo::Remote::AccessRights::RW
+        Repo::Remote::AccessRights::RW
       end
     end
 
     def ret_library_idh_or_default()
       if ret_request_params(:library_id)
-        ret_request_param_id_handle(:library_id,::DTK::Library)
+        ret_request_param_id_handle(:library_id,Library)
       else
-        ::DTK::Library.get_public_library(model_handle(:library)).id_handle()
+        Library.get_public_library(model_handle(:library)).id_handle()
       end
     end
 
@@ -143,9 +156,9 @@ module Ramaze::Helper
 
     def module_class(module_type)
       case module_type
-        when :component_module then ::DTK::ComponentModule 
-        when :service_module then ::DTK::ServiceModule
-        else raise ::DTK::Error.new("Unexpected module_type (#{module_type})")
+        when :component_module then ComponentModule 
+        when :service_module then ServiceModule
+        else raise Error.new("Unexpected module_type (#{module_type})")
       end
     end
   end

@@ -104,19 +104,20 @@ module DTK
         client.remove_client_user(username)
       end
 
-      def create_module(name, type, namespace = nil, client_rsa_pub_key = nil)
+      def create_remote_module(client_rsa_pub_key)
         username = dtk_instance_remote_repo_username()
         rsa_pub_key = dtk_instance_rsa_pub_key()
-
         client.create_user(username, rsa_pub_key, { :update_if_exists => true }, client_rsa_pub_key)
-        #namespace = self.class.default_namespace()
-        namespace ||= CurrentSession.new.get_user_object().get_namespace()
-
+        
+        unless namespace = remote.namespace 
+          namespace = CurrentSession.new.get_user_object().get_namespace()
+          Log.error("Unexpected that naemspace was null and used CurrentSession.new.get_user_object().get_namespace(): #{namespace}}")
+        end
         params = {
           :username => username,
-          :name => name,
+          :name => remote.module_name(),
           :permission_hash => CREATE_MODULE_PERMISSIONS,
-          :type => type_for_remote_module(type),
+          :type => type_for_remote_module(remote.module_type),
           :namespace => namespace,
           :noop_if_exists => true
         } 

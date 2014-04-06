@@ -127,8 +127,6 @@ module DTK; module ModuleMixins
       opts = Opts.new(:set_as_default_if_first => true)
       RepoRemote.create_repo_remote(repo_remote_mh, remote.module_name, remote_repo_name, remote.namespace, repo.id,opts)
     end
-    private :create_repo_remote_object
-
   end
 
   module Remote::Instance
@@ -166,51 +164,38 @@ module DTK; module ModuleMixins
     
     # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
-    def publish(remote_repo,version=nil, remote_component_name = "", client_rsa_pub_key)
-      # TODO: put in version-specfic logic or only deal with versions using push-to-remote
+    def publish(local_params,remote_params,client_rsa_pub_key)
       project = get_project()
-      repo = get_workspace_repo()
+      remote = remote_params.create_remote(project)
+      local = local_params.create_local(project)
 
-      component_namespace, component_name, component_version = Repo::Remote::split_qualified_name(remote_component_name)
-      version ||= component_version
-
-      # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
-      if module_name() != component_name
-        raise ErrorUsage.new("We do not support custom module names (via export) at this time.")
+      unless module_branch_obj = self.class.get_module_branch_from_local(local)
+        raise Error.new("Cannot find module_branch_obj from local")
       end
 
-      local_branch = ModuleBranch.workspace_branch_name(project,version)
-
-      unless module_branch_obj = get_module_branch(local_branch)
-        raise ErrorUsage.new("Cannot find version (#{version}) associated with module (#{module_name})")
-      end
-
-      sp_hash = {
-        :cols => [:id,:display_name],
-        :filter => [:and, [:eq, :display_name, module_name()], [:eq, :project_project_id,project[:id]]]
-      } 
-      module_obj = get_obj(project.model_handle(module_type()),sp_hash)
-      export_preprocess(module_branch_obj, module_obj)
+      #TODO: see if all are needed and also better to put in export_preprocess
+      update_object!(:dsl_parsed,:ancestor_id,:created_at,:updated_at)
+      export_preprocess(module_branch_obj, self)
 
       # create module on remote repo manager
-      module_info = Repo::Remote.new(remote_repo).create_module(module_name, module_type(), component_namespace, client_rsa_pub_key)
+      module_info = Repo::Remote.new(remote).create_remote_module(client_rsa_pub_key)
 
       remote_repo_name = module_info[:git_repo_name]
 
       # check if remote exists
+      #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches 
+      repo = get_workspace_repo()
       if repo.remote_exists?(remote_repo_name)
         raise ErrorUsage.new("Remote repo already exists with given name and namespace")
       end
 
       #link and push to remote repo
+      local_branch = local.branch_name
       repo.link_to_remote(local_branch,remote_repo_name)
       repo.push_to_remote(local_branch,remote_repo_name)
 
-      RepoRemote.create_repo_remote(model_handle(:repo_remote), module_name, remote_repo_name, component_namespace, repo.id,Opts.new(:set_as_default_if_first => true))
-
-      #update last for idempotency (i.e., this is idempotent check)
-      repo.update(:remote_repo_name => remote_repo_name, :remote_repo_namespace => module_info[:remote_repo_namespace])
-      
+      #create remote repo object
+      self.class.create_repo_remote_object(repo,remote,module_info)
       remote_repo_name
     end
 

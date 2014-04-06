@@ -491,7 +491,8 @@ module DTK
     end
     private :module_specific_type
 
-    def get_module_branch_from_local(project,local,opts={})
+    def get_module_branch_from_local(local,opts={})
+      project = local.project()
       project_idh = project.id_handle()
       filter = [:and, [:eq, :display_name, local.module_name], [:eq, :project_project_id, project_idh.get_id()]]
       branch = local.branch_name()

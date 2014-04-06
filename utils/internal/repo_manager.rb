@@ -83,12 +83,6 @@ module DTK
       end
 
       #returns :equal, :local_behind, :local_ahead, or :branchpoint 
-      def ret_remote_merge_relationship(repo_name,branch,remote_name,opts={})
-        adapter_repo = get_adapter_repo(context(repo_name,branch))      
-        adapter_repo.ret_merge_relationship(:remote_branch,"#{remote_name}/#{opts[:remote_branch]||branch}",opts)
-      end
-
-      #returns :equal, :local_behind, :local_ahead, or :branchpoint 
       #branch object can be for either sha; result does not matter based on this
       def ret_sha_relationship(local_sha,other_sha,branch_obj)
         adapter_repo = get_adapter_repo(branch_obj)

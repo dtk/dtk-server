@@ -28,6 +28,7 @@ module DTK; module ModuleMixins
       
       remote_repo_handler = Repo::Remote.new(remote)
       remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+      remote.set_repo_name!(remote_repo_info[:git_repo_name])
 
       #so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
@@ -100,8 +101,7 @@ module DTK; module ModuleMixins
             raise ErrorUsage.new("Remote component/service (#{remote.pp_module_name(:include_namespace=>true)}) does not exist") 
           end
 
-          #TODO: ModuleBranch::Location: below is wrong; unlinking specific remote
-          repo.unlink_remote(remote.remote_repo_base)
+          repo.unlink_remote(remote)
           
           ::DTK::RepoRemote.delete_repos([repo_remote_db.id_handle()])
         end
@@ -217,7 +217,7 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
       
       #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
       repo_with_branch = module_obj.get_repo!
-      repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
+      repo_with_branch.initial_sync_with_remote(remote)
 
       module_and_branch_info = create_ws_module_and_branch_obj?(project,repo.id_handle(),local_module_name,version)
       module_obj.pull_from_remote__update_from_dsl(repo_with_branch, module_and_branch_info, version)
@@ -244,7 +244,7 @@ TODO: needs to be redone taking into account versions are at same level as base
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
       Transaction do
         #TODO: may have commit_sha returned in this fn so client can do a reliable pull
-        commit_sha = repo.initial_sync_with_remote(remote,remote_repo_info)
+        commit_sha = repo.initial_sync_with_remote(remote)
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
 
         opts = {:do_not_raise => true}

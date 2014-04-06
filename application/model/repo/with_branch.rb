@@ -15,7 +15,7 @@ module DTK
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
         
-        remote_url = RepoManagerClient.repo_url_ssh_access(remote_repo_info[:git_repo_name])
+        remote_url = remote.repo_url()
         remote_ref = remote.remote_ref()
         remote_branch =  remote.branch_name()
 

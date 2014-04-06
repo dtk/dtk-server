@@ -50,13 +50,15 @@ module DTK
 
           # keypair
           keypair_to_use = iaas_credentials['keypair_name'] || R8::Config[:ec2][:keypair]
-          connection.check_for_key_pair(keypair_to_use)
+          #TODO: WORKAROUND: DTK-1426; commented out
+          #connection.check_for_key_pair(keypair_to_use)
           
           Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_credentials['keypair_name'].nil?})"
 
           # security group
           security_group_to_use = iaas_credentials['security_group'] || R8::Config[:ec2][:security_group]
-          connection.check_for_security_group(security_group_to_use)
+          #TODO: WORKAROUND: DTK-1426; commented out
+          #connection.check_for_security_group(security_group_to_use)
 
           Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_credentials['security_group'].nil?})"
 

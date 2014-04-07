@@ -37,9 +37,12 @@ module DTK
         
         #Special case filtering of nodes that are not running and executing agent only on those that are running
         component_nodes = Array.new
-        components.each do |cmp|
-          if cmp.include? "/"
-            component_nodes << cmp.split("/").first
+        
+        unless components.empty? || components.nil?
+          components.each do |cmp|
+            if cmp.include? "/"
+              component_nodes << cmp.split("/").first
+            end
           end
         end
         nodes = nodes.select { |node| component_nodes.include? node[:display_name] } if (node_id.nil? || node_id.empty?)

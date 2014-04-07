@@ -737,9 +737,12 @@ module DTK
       nodes.each do |x|
         node_names << x[:display_name]
       end
-      components.reject! do |c|
-        if c.include? "/"
-          !node_names.include? c.split("/").first
+      
+      unless components.empty?
+        components.reject! do |c|
+          if c.include? "/"
+            !node_names.include? c.split("/").first
+          end
         end
       end
 

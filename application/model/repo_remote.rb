@@ -79,6 +79,17 @@ module DTK
       repo_remote
     end
 
+
+    def remote_dtkn_location(project,module_type,module_name)
+      remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new( 
+        :module_type => module_type,
+        :module_name => module_name,
+        :namespace => get_field?(:repo_namespace),
+        :remote_repo_base => self.class.repo_base()
+      )
+      remote_params.create_remote(project).set_repo_name!(get_field?(:repo_name))
+    
+    end
     def self.ret_default_remote_repo(repo_remotes)
       #Making robust in case multiple ones marked default
       pruned = repo_remotes.select{|r|r.get_field?(:is_default)}

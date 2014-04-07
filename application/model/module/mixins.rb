@@ -390,8 +390,7 @@ module DTK
 
       filter_list!(response) if respond_to?(:filter_list!)
       response.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
-      mh = project_idh.createMH(model_type())
-      response = ListMethodHelpers.aggregate_detail(response,mh,Opts.new(:include_versions => true))
+      response = ListMethodHelpers.aggregate_detail(response,project_idh,model_type(),Opts.new(:include_versions => true))
 
       ret = response.first || {}
       ret[:versions] = "CURRENT" unless ret[:versions]
@@ -417,14 +416,13 @@ module DTK
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
       if include_any_detail
-        mh = project_idh.createMH(model_type())
         opts_aggr = Opts.new(
           :include_remotes => include_remotes,
           :include_versions => include_versions, 
           :remote_repo_base => remote_repo_base,
           :diff => diff
         )
-        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,mh,opts_aggr)
+        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,project_idh,model_type(),opts_aggr)
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end

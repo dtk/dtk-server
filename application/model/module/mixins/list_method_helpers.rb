@@ -1,10 +1,11 @@
 module DTK
   module ModuleClassMixin
     class ListMethodHelpers
-      def self.aggregate_detail(branch_module_rows,module_mh,opts)
+      def self.aggregate_detail(branch_module_rows,project_idh,model_type,opts)
+        project = project_idh.create_object()
+        module_mh = project_idh.createMH(model_type)
         diff       = opts[:diff]
         remote_repo_base = opts[:remote_repo_base]
-
         if opts[:include_remotes]
           augment_with_remotes_info!(branch_module_rows,module_mh)
         end
@@ -16,13 +17,15 @@ module DTK
         #aggregate
         branch_module_rows.each do |r|
           module_branch = r[:module_branch]
+          module_name = r.module_name()
           ndx_repo_remotes = r[:ndx_repo_remotes]
           ndx = r[:id]
           is_equal = nil
           
           if diff
             if default_remote_repo = RepoRemote.ret_default_remote_repo((ndx_repo_remotes||{}).values)
-              is_equal = r[:repo].ret_local_remote_diff(module_branch,default_remote_repo)
+              remote = default_remote_repo.remote_dtkn_location(project,model_type,module_name)
+              is_equal = r[:repo].ret_local_remote_diff(module_branch,remote)
             end
           end
                     

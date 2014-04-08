@@ -157,7 +157,7 @@ module DTK
         self.class.version_to_branch_name(version)
       end
       def self.version_to_branch_name(version=nil)
-        Log.error("#TODO: ModuleBranch::Location: deprecating: version_to_branch_name")
+        Log.info_pp(["#TODO: ModuleBranch::Location: deprecating: version_to_branch_name",caller[0..4]])
         if version.nil? or version == HeadBranchName
           HeadBranchName
         else

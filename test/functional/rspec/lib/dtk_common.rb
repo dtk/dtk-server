@@ -251,21 +251,16 @@ class DtkCommon
 		is_attributes_set = false
 
 		#Get attribute id for which value will be set
-		puts "List of service attributes:"
 		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
-		pretty_print_JSON(service_attributes)
 		attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
 
 		#Set attribute value for given attribute id
 		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id})
-
-		puts "List of service attributes after adding #{attribute_value} value for #{attribute_name} attribute name:"
 		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
-		pretty_print_JSON(service_attributes)
 		extract_attribute_value = attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
 
 		if (extract_attribute_value == attribute_value)
-			puts "Setting of #{attribute_name} attribute completed successfully!"
+			puts "Setting of attribute #{attribute_name} completed successfully!"
 			is_attributes_set = true
 		end
 		puts ""

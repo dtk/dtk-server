@@ -104,12 +104,12 @@ module DTK
     #
     def self.cross_reference_modules(opts, required_modules, service_namespace)
       project_idh = opts.required(:project_idh)
-      
+
       required_modules ||= []
       req_names = required_modules.collect { |m| m['component_module']}
 
       sp_hash = {
-        :cols => [:id, :display_name, :module_branches_with_repos].compact,
+        :cols => [:id, :display_name, :remote_repos].compact,
         :filter => [:and,[:oneof, :display_name, req_names],[:eq, :project_project_id, project_idh.get_id()]]
       }
       mh = project_idh.createMH(model_type())
@@ -128,7 +128,7 @@ module DTK
           if (
               name.eql?(i_module[:display_name]) && 
               ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
-              namespace.eql?(i_module.fetch(:repo,{})[:remote_repo_namespace])
+              namespace.eql?(i_module.fetch(:repo_remote,{})[:repo_namespace])
              )
 
             is_found = true

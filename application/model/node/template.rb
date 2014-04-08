@@ -109,9 +109,10 @@ module DTK
         end
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym
-        unless CommandAndControl.existing_image?(new_image_id,image_type)
-          raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
-        end
+        #TODO: commented out below until fix DTK-434
+        #unless CommandAndControl.existing_image?(new_image_id,image_type)
+        #  raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
+        #end
 
         #update daatstructute than model
         matching_node_bindings.each do |nb|

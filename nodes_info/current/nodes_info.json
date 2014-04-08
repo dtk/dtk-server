@@ -1,366 +1,6 @@
 {
     "nodes_info": {
-        "ami-047c1434": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "us-west-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-05e2f46c": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "us-east-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-07f36b3d": {
-            "display_name": "Lucid",
-            "os_type": "ubuntu",
-            "png": "lucid.png",
-            "region": "ap-southeast-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "lucid"
-        },
-        "ami-0cb08e49": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "us-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-0d700c0c": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "ap-northeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-147c1424": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "us-west-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-1d8e776a": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "eu-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-2c7c141c": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "us-west-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-2e7c141e": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "us-west-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-2fe2f446": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "us-east-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-3b8e774c": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "eu-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-3e7c140e": {
-            "display_name": "Lucid",
-            "os_type": "ubuntu",
-            "png": "lucid.png",
-            "region": "us-west-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "lucid"
-        },
-        "ami-458e7732": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "eu-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-478e7730": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "eu-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-578e7720": {
-            "display_name": "Lucid",
-            "os_type": "ubuntu",
-            "png": "lucid.png",
-            "region": "eu-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "lucid"
-        },
-        "ami-67e2f40e": {
-            "display_name": "Lucid",
-            "os_type": "ubuntu",
-            "png": "lucid.png",
-            "region": "us-east-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "lucid"
-        },
-        "ami-6eb08e2b": {
-            "display_name": "Lucid",
-            "os_type": "ubuntu",
-            "png": "lucid.png",
-            "region": "us-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "lucid"
-        },
-        "ami-70b08e35": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "us-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-71f36b4b": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "ap-southeast-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-73e2f41a": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "us-east-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-76b08e33": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "us-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-77e2f41e": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "us-east-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-78b08e3d": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "us-west-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-79f36b43": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "ap-southeast-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-7df36b47": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "ap-southeast-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-7ff36b45": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "ap-southeast-2",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-8680d0d4": {
-            "display_name": "Centos6",
-            "os_type": "centos",
-            "png": "centos6.png",
-            "region": "ap-southeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "centos6"
-        },
-        "ami-9080d0c2": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "ap-southeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "saucy"
-        },
-        "ami-9280d0c0": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "ap-southeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-9880d0ca": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "ap-southeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "wheezy"
-        },
-        "ami-cd770bcc": {
+        "ami-11b3cd10": {
             "display_name": "Lucid",
             "os_type": "ubuntu",
             "png": "lucid.png",
@@ -372,11 +12,23 @@
             ],
             "type": "lucid"
         },
-        "ami-e1b517fc": {
+        "ami-12bbd022": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "us-west-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-134ab264": {
             "display_name": "Centos6",
             "os_type": "centos",
             "png": "centos6.png",
-            "region": "sa-east-1",
+            "region": "eu-west-1",
             "sizes": [
                 "t1.micro",
                 "m1.small",
@@ -384,7 +36,343 @@
             ],
             "type": "centos6"
         },
-        "ami-e280d0b0": {
+        "ami-15b3cd14": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "ap-northeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-1abbd02a": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "us-west-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-1bb3cd1a": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "ap-northeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-1f4b5676": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "us-east-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-20033a65": {
+            "display_name": "Lucid",
+            "os_type": "ubuntu",
+            "png": "lucid.png",
+            "region": "us-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "lucid"
+        },
+        "ami-20bbd010": {
+            "display_name": "Lucid",
+            "os_type": "ubuntu",
+            "png": "lucid.png",
+            "region": "us-west-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "lucid"
+        },
+        "ami-22033a67": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "us-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-22bbd012": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "us-west-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-234ab254": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "eu-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-24bbd014": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "us-west-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-2baa3211": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "ap-southeast-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-2bb3cd2a": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "ap-northeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-2c033a69": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "us-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-2daa3217": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "ap-southeast-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-2faa3215": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "ap-southeast-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-2fb3cd2e": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "ap-northeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-32033a77": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "us-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-334ab244": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "eu-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-34033a71": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "us-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-35aa320f": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "ap-southeast-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-374ab240": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "eu-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-37aa320d": {
+            "display_name": "Lucid",
+            "os_type": "ubuntu",
+            "png": "lucid.png",
+            "region": "ap-southeast-2",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "lucid"
+        },
+        "ami-394b5650": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "us-east-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-434b562a": {
+            "display_name": "Precise",
+            "os_type": "ubuntu",
+            "png": "precise.png",
+            "region": "us-east-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "precise"
+        },
+        "ami-494b5620": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "us-east-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-4b4ab23c": {
+            "display_name": "Lucid",
+            "os_type": "ubuntu",
+            "png": "lucid.png",
+            "region": "eu-west-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "lucid"
+        },
+        "ami-734b561a": {
+            "display_name": "Lucid",
+            "os_type": "ubuntu",
+            "png": "lucid.png",
+            "region": "us-east-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "lucid"
+        },
+        "ami-80e5b5d2": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "ap-southeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "saucy"
+        },
+        "ami-82e5b5d0": {
             "display_name": "Lucid",
             "os_type": "ubuntu",
             "png": "lucid.png",
@@ -396,19 +384,43 @@
             ],
             "type": "lucid"
         },
-        "ami-e5b517f8": {
-            "display_name": "Saucy",
+        "ami-86e5b5d4": {
+            "display_name": "Precise",
             "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "sa-east-1",
+            "png": "precise.png",
+            "region": "ap-southeast-1",
             "sizes": [
                 "t1.micro",
                 "m1.small",
                 "m1.medium"
             ],
-            "type": "saucy"
+            "type": "precise"
         },
-        "ami-e7b517fa": {
+        "ami-8ce5b5de": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "ap-southeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "centos6"
+        },
+        "ami-8ee5b5dc": {
+            "display_name": "Wheezy",
+            "os_type": "debian",
+            "png": "wheezy.png",
+            "region": "ap-southeast-1",
+            "sizes": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium"
+            ],
+            "type": "wheezy"
+        },
+        "ami-c942e0d4": {
             "display_name": "Wheezy",
             "os_type": "debian",
             "png": "wheezy.png",
@@ -420,19 +432,19 @@
             ],
             "type": "wheezy"
         },
-        "ami-eb770bea": {
-            "display_name": "Saucy",
-            "os_type": "ubuntu",
-            "png": "saucy.png",
-            "region": "ap-northeast-1",
+        "ami-cb42e0d6": {
+            "display_name": "Centos6",
+            "os_type": "centos",
+            "png": "centos6.png",
+            "region": "sa-east-1",
             "sizes": [
                 "t1.micro",
                 "m1.small",
                 "m1.medium"
             ],
-            "type": "saucy"
+            "type": "centos6"
         },
-        "ami-ebb517f6": {
+        "ami-cf42e0d2": {
             "display_name": "Precise",
             "os_type": "ubuntu",
             "png": "precise.png",
@@ -444,19 +456,7 @@
             ],
             "type": "precise"
         },
-        "ami-ed770bec": {
-            "display_name": "Precise",
-            "os_type": "ubuntu",
-            "png": "precise.png",
-            "region": "ap-northeast-1",
-            "sizes": [
-                "t1.micro",
-                "m1.small",
-                "m1.medium"
-            ],
-            "type": "precise"
-        },
-        "ami-efb517f2": {
+        "ami-d142e0cc": {
             "display_name": "Lucid",
             "os_type": "ubuntu",
             "png": "lucid.png",
@@ -468,17 +468,17 @@
             ],
             "type": "lucid"
         },
-        "ami-fd770bfc": {
-            "display_name": "Wheezy",
-            "os_type": "debian",
-            "png": "wheezy.png",
-            "region": "ap-northeast-1",
+        "ami-d342e0ce": {
+            "display_name": "Saucy",
+            "os_type": "ubuntu",
+            "png": "saucy.png",
+            "region": "sa-east-1",
             "sizes": [
                 "t1.micro",
                 "m1.small",
                 "m1.medium"
             ],
-            "type": "wheezy"
+            "type": "saucy"
         }
     }
 }

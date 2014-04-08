@@ -6,6 +6,9 @@ module DTK
     module RuoteParticipant
       class Top
         include ::Ruote::LocalParticipant
+
+        DEBUG_AGENT_RESPONSE = false
+
         def initialize(opts=nil)
           @opts = opts
         end
@@ -74,6 +77,14 @@ module DTK
         end
 
        protected
+
+        def inspect_agent_response(msg)
+          if DEBUG_AGENT_RESPONSE
+            Log.info "START: Debugging response from Mcollective"
+            Log.info_pp msg
+            Log.info "END: Debugging response from Mcollective"
+          end
+        end
 
         def poll_to_detect_node_ready(workflow, node, callbacks)
           # num_poll_cycles => number of times we are going to poll given node
@@ -202,6 +213,7 @@ module DTK
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+                inspect_agent_response(msg)
                 create_thread_in_callback_context(task,workitem,user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
@@ -266,7 +278,7 @@ module DTK
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
-
+                inspect_agent_response(msg)
                 create_thread_in_callback_context(task,workitem,user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
@@ -348,6 +360,7 @@ module DTK
           execution_context(task,workitem,task_start) do
             callbacks = {
               :on_msg_received => proc do |msg|
+                inspect_agent_response(msg)
                 DTK::CreateThread.defer_with_session(user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
@@ -446,6 +459,7 @@ module DTK
 
             callbacks = {
               :on_msg_received => proc do |msg|
+                inspect_agent_response(msg)
                 DTK::CreateThread.defer_with_session(user_object) do
                   # Amar: PERFORMANCE
                   PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
@@ -551,6 +565,7 @@ module DTK
 
               callbacks = {
                 :on_msg_received => proc do |msg|
+                  inspect_agent_response(msg)
                   DTK::CreateThread.defer_with_session(user_object) do
                     # Amar: PERFORMANCE
                     PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
@@ -615,6 +630,7 @@ module DTK
             pp ["Canceling task #{action.class.to_s}: #{task_id}"]
             callbacks = {
                 :on_msg_received => proc do |msg|
+                  inspect_agent_response(msg)
                   #set_result_canceled(wi, task)
                   #delete_task_info(wi)
                   #reply_to_engine(wi)

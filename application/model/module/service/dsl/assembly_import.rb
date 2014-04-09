@@ -80,7 +80,7 @@ module DTK; class ServiceModule
           "module_branch_id" => module_branch[:id],
           "version" => version_field,
           "component_type" => Assembly.ret_component_type(module_name,assembly_name),
-          "attribute" => import_assembly_attributes(assembly_hash["attributes"])
+          "attribute" => import_assembly_attributes(assembly_hash["attributes"],opts)
         }
       }
     end
@@ -242,9 +242,13 @@ module DTK; class ServiceModule
     end
 
     #These are attributes at the assembly level, as opposed to being at the component or node level
-    def self.import_assembly_attributes(assembly_attrs_hash)
+    def self.import_assembly_attributes(assembly_attrs_hash,opts={})
       ret = DBUpdateHash.new()
-      (assembly_attrs_hash||{}).each_pair do |attr_name,attr_val|
+      assembly_attrs_hash ||= Hash.new
+      unless assembly_attrs_hash.kind_of?(Hash)
+        raise ParsingError.new("Assembly attribute(s) are ill-formed",opts_file_path(opts))
+      end
+      assembly_attrs_hash.each_pair do |attr_name,attr_val|
         ref = dispaly_name = attr_name
         data_type =
           if attr_val.kind_of?(TrueClass) or attr_val.kind_of?(FalseClass)

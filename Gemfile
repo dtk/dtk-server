@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 # dtk gems
-gem 'dtk-common', :git => 'git@github.com:rich-reactor8/dtk-common.git'
+gem 'dtk-common'
 
 # required to start a server
 gem 'bundler','>= 1.1.5'

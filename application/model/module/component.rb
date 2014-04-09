@@ -101,7 +101,7 @@ module DTK
     end
 
     # Method will check if given component modules are present on the system
-    #
+    # returns [missing_modules, found_modules]
     def self.cross_reference_modules(opts, required_modules, service_namespace)
       project_idh = opts.required(:project_idh)
 
@@ -119,30 +119,24 @@ module DTK
       found_modules = []
 
       required_modules.each do |r_module|
-        is_found   = false
         name      = r_module["component_module"]
         version   = r_module["version_info"]
-        namespace = r_module["remote_namespace"] || service_namespace
+        namespace = r_module["remote_namespace"]
 
-        installed_modules.each do |i_module|
-          if (
-              name.eql?(i_module[:display_name]) && 
-              ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) && 
-              namespace.eql?(i_module.fetch(:repo_remote,{})[:repo_namespace])
-             )
-
-            is_found = true
-            break
-          end
+        is_found = installed_modules.find do |i_module|
+          name.eql?(i_module[:display_name]) and 
+          ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) and
+          (namespace.nil? or namespace.eql?(i_module.fetch(:repo_remote,{})[:repo_namespace]))
         end
-
-        data = { :name => name, :version => version, :namespace => namespace }
-
-        is_found ? found_modules << data : missing_modules << data
+        data = { :name => name, :version => version, :namespace => namespace||service_namespace}
+        if is_found
+        found_modules << data 
+        else
+          missing_modules << data
+        end
       end
 
-      # return both missing and required modules
-      return missing_modules, found_modules
+      [missing_modules, found_modules]
     end
 
     def module_branches()

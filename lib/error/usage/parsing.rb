@@ -1,4 +1,3 @@
-r8_require_common_lib('dsl')
 module DTK; class ErrorUsage 
   class Parsing <  ErrorUsage::DSLParsing #TODO: cleanup this is coming from dtk_common
     r8_nested_require('parsing','yaml')

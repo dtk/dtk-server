@@ -1,4 +1,3 @@
-dtk_require_common_lib('dsl')
 module DTK
   class ServiceModule
     class DSLParser

@@ -8,7 +8,7 @@ module XYZ
 end
 DTK = XYZ
 require File.expand_path('require_first', File.dirname(__FILE__))
-r8_require_common_lib('dtk_common')
+dtk_require_common_library()
 
 #TODO: make that log  dont need config values
 r8_require('../utils/internal/log')

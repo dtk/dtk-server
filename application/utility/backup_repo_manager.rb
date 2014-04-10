@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))
-r8_require_common_lib("dtk_common")
+dtk_require_common_library()
 r8_require("../../repo_manager_client/lib/repo_manager_client.rb")
 
 remote_repo_base_url = "http://ec2-174-129-28-204.compute-1.amazonaws.com:7000"

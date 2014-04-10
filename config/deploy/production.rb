@@ -14,8 +14,8 @@
 # definition into the server list. The second argument
 # something that quacks like a hash can be used to set
 # extended properties on the server.
-server 'ec2-23-23-28-151.compute-1.amazonaws.com', user: 'dtk1', roles: %w{web app db}
-#server 'ubuntu@ec2-23-23-28-151.compute-1.amazonaws.com', user: 'dtk2', roles: %w{web app db}
+server 'ec2-50-16-172-98.compute-1.amazonaws.com', user: 'dtk1', roles: %w{web app db}
+server 'ec2-50-16-172-98.compute-1.amazonaws.com', user: 'dtk2', roles: %w{web app db}
 
 # you can set custom ssh options
 # it's possible to pass any option but you need to keep in mind that net/ssh understand limited list of options

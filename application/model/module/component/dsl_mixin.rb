@@ -58,7 +58,14 @@ module DTK; class ComponentModule
 
   private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      deprecate_create_needed_objects_and_dsl?(repo_for_new_branch,new_version,opts)
+      #TODO: push use of local from calling fn
+      local_params = ModuleBranch::Location::LocalParams::Server.new(
+        :module_type => module_type(),
+        :module_name => module_name(),
+        :version => new_version
+      )
+      local = local_params.create_local(get_project())
+      create_needed_objects_and_dsl?(repo_for_new_branch,local,opts)
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})

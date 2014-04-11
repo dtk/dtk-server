@@ -10,6 +10,8 @@ ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
 # Default deploy_to directory is /var/www/my_app
 set :deploy_to, '~/server'
 
+# set :tmp_dir, "/tmp"
+
 # Default value for :scm is :git
 # set :scm, :git
 
@@ -26,13 +28,26 @@ set :deploy_to, '~/server'
 # set :linked_files, %w{config/database.yml}
 
 # Default value for linked_dirs is []
-# set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+# set :linked_dirs, %w{bin log tmp/pids}
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
+
+## Override the default git wrapper task
+namespace :git do
+  desc 'Upload the git wrapper script, this script guarantees that we can script git without getting an interactive prompt'
+  task :wrapper do
+    Rake::Task['git:wrapper'].clear
+    on release_roles :all do
+      execute :mkdir, "-p", "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
+      upload! StringIO.new("#!/bin/sh -e\nexec /usr/bin/ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no \"$@\"\n"), "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
+      execute :sudo, "chmod -R 777", "#{fetch(:tmp_dir)}/#{fetch(:application)}"
+    end
+  end
+end
 
 namespace :deploy do
 

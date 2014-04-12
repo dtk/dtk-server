@@ -8,7 +8,14 @@ module DTK
     end
 
     class Constant
-      attr_reader :datatype
+      attr_reader :datatype,:dependent_attribute,:dependent_component
+
+      def same_constant?(c2)
+        dependent_attribute == c2.dependent_attribute and dependent_component ==  c2.dependent_component
+      end
+      def is_in?(constant_array)
+        !!constant_array.find{|c2|same_constant?(c2)}
+      end
 
       ExternalRefType = "constant"
       def self.ret_external_ref()

@@ -481,7 +481,10 @@ module DTK; class ComponentDSL; class V2
         unless constant_assign = (const && Attribute::Constant.create?(const,dep_attr_ref,dep_cmp,datatype))
           raise ParsingError.new("Attribute reference (?1) is ill-formed",attr_ref)
         end
-        (opts[:constants] ||= Array.new) << constant_assign
+        constants = opts[:constants] ||= Array.new 
+        unless constant_assign.is_in?(constants)
+          constants << constant_assign
+        end
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
       end
 

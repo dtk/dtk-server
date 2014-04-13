@@ -20,8 +20,12 @@ module DTK; class ComponentDSL; class V3
         end
 
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
-          ret = [dup().convert(link_def_link,:link_type => :external).first,
-                 dup().convert(link_def_link,:link_type => :internal).first]
+          opts_collect_constants = Hash.new
+          ret = [dup().convert(link_def_link,opts_collect_constants.merge!(:link_type => :external)).first,
+                 dup().convert(link_def_link,opts_collect_constants.merge!(:link_type => :internal)).first]
+          if constants = opts_collect_constants[:constants]
+            opts.merge!(:constants => constants)
+          end
           return ret
         end
         ret_info = {"type" => type.to_s}

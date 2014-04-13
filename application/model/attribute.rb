@@ -59,7 +59,8 @@ module DTK
       attrs
     end
 
-    def self.get_attribute_from_identifier(identifier, mh)
+    def self.get_attribute_from_identifier(identifier, mh, cmp_id)
+      valid_attribute = nil
       if identifier.to_s =~ /^[0-9]+$/
         sp_hash = {
           :cols => Attribute.common_columns(),
@@ -68,7 +69,44 @@ module DTK
 
         valid_attribute = Model.get_obj(mh,sp_hash)
         raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
+      else
+        # extracting component and attribute name from identifier
+        # e.g. cmp[dtk_addons::rspec2db]/user => component_name = dtk_addons::rspec2db, attribute_name = user
+        match_from_identifier = identifier.match(/.+\[(.*)\]\/(.*)/)
+
+        if match_from_identifier
+          param_cmp_name  = match_from_identifier[1].gsub(/::/,'__')
+          param_attr_name = match_from_identifier[2].gsub(/::/,'__')
+        end
+
+        raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless param_attr_name && param_cmp_name
+
+        sp_hash = {
+          # component_module_parent will return more info about attribute (component it belongs to and module branch which we can get component_module_id from)
+          :cols => common_columns + [:component_module_parent],
+          :filter => [:eq, :display_name, param_attr_name]
+        }
+        matching_attributes = Model.get_objs(mh,sp_hash)
+
+        # every component attribute has external_ref field with info ({"type":"puppet_attribute","path":"node[logrotate__rule][copytruncate]"})
+        # using external_ref[:path] to extract component_name (logrotate__rule) and attribute_name (copytruncate)
+        # and compare to data that user have sent as params
+        matching_attributes.each do |m_attr|
+          if (external_ref = m_attr[:external_ref]) && (path = m_attr[:external_ref][:path])
+            match = path.match(/.+\[(.*)\]\[(.*)\]/)
+            cmp_name, attr_name = match[1], match[2] if match
+
+            if module_branch = m_attr[:module_branch]
+              valid_attribute = m_attr if param_cmp_name.eql?(cmp_name) && param_attr_name.eql?(attr_name) && module_branch[:component_id].to_s.eql?(cmp_id)
+            end
+            break if valid_attribute
+          end
+        end
+
+        raise ErrorUsage.new("Illegal identifier '#{identifier}' for component-module attribute") unless valid_attribute
       end
+
+      valid_attribute
     end
 
     def self.get_title_attributes(cmp_idhs)
@@ -189,6 +227,9 @@ module DTK
     end
 
     def set_attribute_value(attribute_value)
+      # unless SemanticDatatype.is_valid?(self[:semantic_data_type],attribute_value)
+      #   raise ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
+      # end
       update(:value_asserted => attribute_value)
       self[:value_asserted] = attribute_value
     end

@@ -192,7 +192,7 @@ module DTK
     #creates if necessary a new branch from this (so new branch and this branch share history)
     #returns repo for new branch; this just creates repo branch and does not update object model
     def create_new_branch_from_this_branch?(project,base_repo,new_version)
-      branch_name = self.class.workspace_branch_name(project,new_version)
+      branch_name = Location::Server::Local::workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
       repo_for_version(base_repo,new_version)
     end

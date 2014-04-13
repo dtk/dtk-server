@@ -438,10 +438,12 @@ module DTK
     def rest__find_violations()
       assembly = ret_assembly_instance_object()
       violation_objects = assembly.find_violations()
+
       violation_table = violation_objects.map do |v|
         {:type => v.type(),:description => v.description()}
       end.sort{|a,b|a[:type].to_s <=> b[:type].to_s}
-      rest_ok_response violation_table
+
+      rest_ok_response violation_table.uniq
     end
 
     def rest__create_task()

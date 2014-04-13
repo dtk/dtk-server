@@ -72,6 +72,23 @@ module XYZ
            :cols => [:id,:display_name,:component_type,:most_specific_type,:connectivity_profile_external,:ancestor_id,:node_node_id,:extended_base_id]
          }]
 
+        virtual_column :component_module_parent, :type => :json, :hidden => true,
+          :remote_dependencies =>
+          [
+           {
+             :model_name => :component,
+             :join_type => :inner,
+             :join_cond=>{:id=> :attribute__component_component_id},
+             :cols=>[:id,:display_name,:module_branch_id]
+           },
+           {
+             :model_name => :module_branch,
+             :join_type => :inner,
+             :join_cond=>{:id=> :component__module_branch_id},
+             :cols=>[:id, :component_id]
+           }
+          ]
+
       #finds both component parents with node and dircet node parent
       virtual_column :node_component_info, :type => :json, :hidden => true,
         :remote_dependencies =>

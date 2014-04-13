@@ -12,12 +12,12 @@ module XYZ
 
     # Haris & Amar: Sets attribute value by attribute ID - Currently used for setting module component attribute default value
     def rest__set()
-      attribute_id, attribute_value = ret_non_null_request_params(:attribute_id, :attribute_value)
-      Attribute.get_attribute_from_identifier(attribute_id,model_handle())
-      attribute_instance = id_handle(attribute_id,:attribute).create_object(:model_name => :attribute)
+      attribute_id, attribute_value, component_module_id = ret_non_null_request_params(:attribute_id, :attribute_value, :component_module_id)
+      attribute_instance = Attribute.get_attribute_from_identifier(attribute_id, model_handle(), component_module_id)
+      # attribute_instance = id_handle(attribute_id, :attribute).create_object(:model_name => :attribute)
       attribute_instance.set_attribute_value(attribute_value)
       
-      rest_ok_response( :attribute_id => attribute_id )
+      rest_ok_response(:attribute_id => attribute_id)
     end
 
     #TODO: cleanup so dont have as much duplication with what is on init; wrote here becse not all cols for attribute save/update are actual columns

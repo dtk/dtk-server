@@ -13,7 +13,7 @@ module DTK; class Task; class Template; class ConfigComponents
           if opts[:donot_parse]
             Content.reify(serialized_content)
           else
-            Content.parse_and_reify(serialized_content,cmp_actions)
+            Content.parse_and_reify(serialized_content,cmp_actions,opts)
           end
         end
       end

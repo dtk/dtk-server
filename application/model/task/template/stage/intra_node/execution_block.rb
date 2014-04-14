@@ -76,7 +76,7 @@ module DTK; class Task; class Template
       end
 
       #action list can be nil just for parsing
-      def self.parse_and_reify(serialized_eb,node_name,action_list)
+      def self.parse_and_reify(serialized_eb,node_name,action_list,opts={})
         ret = new()
         return ret unless action_list
         lvs = ParsingError::LegalValues.new()
@@ -94,12 +94,13 @@ module DTK; class Task; class Template
         ordered_items.each do |serialized_item|
           lvs = ParsingError::LegalValues.new()
           if lvs.add_and_match?(serialized_item,String)
-            find_and_add_action!(ret,serialized_item,node_name,action_list)
+            find_and_add_action!(ret,serialized_item,node_name,action_list,opts)
           elsif lvs.add_and_match?(serialized_item){HashWithSingleKey(Constant::ComponentGroup)}
             component_group = serialized_item.values.first
             ParsingError.raise_error_unless(component_group,[String,Array])
+            opts.merge!(:component_group_num => component_group_num)
             Array(component_group).each do |serialized_action|
-              find_and_add_action!(ret,serialized_action,node_name,action_list,:component_group_num => component_group_num)
+              find_and_add_action!(ret,serialized_action,node_name,action_list,opts)
             end
             component_group_num += 1
           else
@@ -161,7 +162,7 @@ module DTK; class Task; class Template
           end
           ret << action
         else
-          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow")
+          raise ParsingError.new("The component reference ('#{component_name_ref}' on node '#{node_name}') in the workflow is not in the assembly; either add it to the assembly or delete it from the workflow") unless opts[:skip_if_not_found]
         end        
       end
 

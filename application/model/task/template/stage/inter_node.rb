@@ -98,7 +98,7 @@ module DTK; class Task; class Template
         end
       end
       #action_list nil can be passed if just concerned with parsing
-      def self.parse_and_reify(serialized_content,action_list)
+      def self.parse_and_reify(serialized_content,action_list,opts={})
         #content could be either 
         # 1) a concurrent block with multiple nodes, 
         # 2) a single node,
@@ -119,7 +119,7 @@ module DTK; class Task; class Template
               raise ParsingError.new("Node ref (#{node_name}) cannot be resolved")
             end
           end
-          h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list))
+          h.merge(parse_and_reify_node_actions(serialized_node_actions,node_name,node_id,action_list,opts))
         end
       end
 
@@ -143,8 +143,8 @@ module DTK; class Task; class Template
         @name ? OrderedHash.new(:name => @name) : OrderedHash.new
       end
 
-      def self.parse_and_reify_node_actions(node_actions,node_name,node_id,action_list)
-        {node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list)}
+      def self.parse_and_reify_node_actions(node_actions,node_name,node_id,action_list,opts={})
+        {node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list,opts)}
       end
 
       def each_node_actions(&block)

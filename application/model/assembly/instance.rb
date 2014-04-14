@@ -507,10 +507,12 @@ module DTK; class  Assembly
         raise ErrorIdInvalid.new(node_idh.get_id(),:node)
       end
 
+      opts = {:skip_if_not_found => true}
       cmp_instance_idh = nil
+
       Transaction do
         cmp_instance_idh = node.add_component(component_template,component_title)
-        Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title)
+        Task::Template::ConfigComponents.update_when_added_component?(self,node,cmp_instance_idh.create_object(),component_title,opts)
       end
       cmp_instance_idh
     end

@@ -3,10 +3,10 @@ module DTK; class Task
     class ConfigComponents < self
       r8_nested_require('config_components','persistence')
 
-      def self.update_when_added_component?(assembly,node,new_component,component_title)
+      def self.update_when_added_component?(assembly,node,new_component,component_title,opts={})
         #only updating the create action task template and only if it is persisted
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
-        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
+        if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions,nil,opts)
           new_action = Action.create(new_component.merge(:node => node,:title => component_title))
           gen_constraints_proc = proc{TemporalConstraints::ConfigComponents.get(assembly,assembly_cmp_actions)}
           if updated_template_content = task_template_content.insert_action?(new_action,assembly_cmp_actions,gen_constraints_proc)

@@ -120,7 +120,7 @@ module DTK; class Task
         end
       end
 
-      def self.parse_and_reify(serialized_content,actions)
+      def self.parse_and_reify(serialized_content,actions,opts={})
         #normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
         has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
@@ -131,7 +131,7 @@ module DTK; class Task
           else
             [serialized_content]
           end
-        new(SerializedContentArray.new(normalized_subtasks),actions)
+        new(SerializedContentArray.new(normalized_subtasks),actions,opts)
       end
 
       class SerializedContentArray < Array
@@ -199,7 +199,7 @@ module DTK; class Task
       end
 
       def create_stages_from_serialized_content!(serialized_content_array,actions,opts={})
-        serialized_content_array.each{|a| self <<  Stage::InterNode.parse_and_reify(a,actions)}
+        serialized_content_array.each{|a| self << Stage::InterNode.parse_and_reify(a,actions,opts)}
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints,actions,opts={})

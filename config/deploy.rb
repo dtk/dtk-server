@@ -51,12 +51,28 @@ end
 
 namespace :deploy do
 
-  desc 'Restart application'
+  desc 'Restart thin'
   task :restart do
-    on roles(:app), in: :sequence, wait: 5 do |role|
-      # Your restart mechanism here, for example:
-      sudo "/etc/init.d/thin-#{role.user} restart"
-      #execute "echo $(whoami) restart", :env => { 'user' => fetch(:user) }
+    on roles(:app), in: :groups do |role|
+      # Restart the thin service:
+      sudo "/etc/init.d/thin-#{role.user} stop"
+      sudo "/etc/init.d/thin-#{role.user} start"
+    end
+  end
+
+  desc 'Start thin'
+  task :start do
+    on roles(:app), in: :groups do |role|
+      # Start the thin service:
+      sudo "/etc/init.d/thin-#{role.user} start"
+    end
+  end
+
+  desc 'Stop thin'
+  task :stop do
+    on roles(:app), in: :groups do |role|
+      # Stop the thin service:
+      sudo "/etc/init.d/thin-#{role.user} stop"
     end
   end
 

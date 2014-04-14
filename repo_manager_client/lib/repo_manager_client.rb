@@ -401,7 +401,7 @@ module DTK
 
     def user_params_delegated_client(client_rsa_pub_key, params_hash)
       raise ErrorUsage.new("Missing client RSA pub key!") unless client_rsa_pub_key
-      
+
       params_hash[:username] = get_username_with_pub_key(client_rsa_pub_key)
       params_hash[:dtk_instance_name] = dtk_instance_repo_username()
       params_hash[:user_fingerprint] = SSHKey.fingerprint(client_rsa_pub_key)

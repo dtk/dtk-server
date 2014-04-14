@@ -3,7 +3,6 @@ module DTK
   class Repo
     #TODO: may have better class name; this is really a remote repo server handler
     class Remote
-      CREATE_MODULE_PERMISSIONS = { :user => 'RWDP', :user_group => 'RWDP', :other => 'R'}
       r8_nested_require('remote','auth')
       include AuthMixin
 
@@ -42,10 +41,8 @@ module DTK
         params = {
           :username => username,
           :name => remote.module_name(),
-          :permission_hash => CREATE_MODULE_PERMISSIONS,
           :type => type_for_remote_module(remote.module_type),
-          :namespace => namespace,
-          :noop_if_exists => true
+          :namespace => namespace
         } 
         response_data = client.create_module(params, client_rsa_pub_key)
 

@@ -41,10 +41,10 @@ namespace :git do
   desc 'Upload the git wrapper script, this script guarantees that we can script git without getting an interactive prompt'
   task :wrapper do
     Rake::Task['git:wrapper'].clear
-    on release_roles :all do
+    on release_roles(:all), in: :sequence do
       execute :mkdir, "-p", "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
-      upload! StringIO.new("#!/bin/sh -e\nexec /usr/bin/ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no \"$@\"\n"), "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
       execute :sudo, "chmod -R 777", "#{fetch(:tmp_dir)}/#{fetch(:application)}"
+      upload! StringIO.new("#!/bin/sh -e\nexec /usr/bin/ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no \"$@\"\n"), "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
     end
   end
 end

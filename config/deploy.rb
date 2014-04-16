@@ -97,7 +97,7 @@ namespace :deploy do
   desc 'Run database migrations'
   task :migration do
     on roles(:app, :db), in: :groups, limit: 3 do
-      execute "cd #{release_path}/application; ./utility/initialize.rb"
+      execute "cd #{release_path}/application; ./utility/dbrebuild.rb"
     end
   end
 

@@ -32,6 +32,7 @@ module DTK
     def self.repo_url_ssh_access(remote_repo_name,git_user=nil)
       new.repo_url_ssh_access(remote_repo_name,git_user)
     end
+
     def repo_url_ssh_access(remote_repo_name,git_user=nil)
       git_user ||= R8::Config[:repo][:remote][:git_user]
       "#{git_user}@#{@host}:#{remote_repo_name}"
@@ -42,8 +43,6 @@ module DTK
     def create_branch_instance(repo,branch,opts={})
       BranchInstance.new(@rest_base_url,repo,branch,opts)
     end
-
-
 
     ###
     ##  V1 namespace methods
@@ -63,17 +62,15 @@ module DTK
       repo_user = get_approved_repouser(rsa_pub_key)
 
       if filter[:type].eql? "component"
-        response = list_component_modules(repo_user[:username])
+        response = list_component_modules(repo_user.owner_username)
       else
-        response = list_service_modules(repo_user[:username])
+        response = list_service_modules(repo_user.owner_username)
       end
       response
     end
 
     def create_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash)
-      # body = update_user_params(params_hash)
-      # TODO: Fix this once only one REPO Client
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
     end
@@ -86,12 +83,7 @@ module DTK
 
     def grant_user_access_to_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash) + '/grant_user_access'
-      # body = update_user_params(params_hash)
-      # TODO: Fix this once only one REPO Client
-      #
-      # pull from remote already uses pub key from client so in that case no need
-      # for double create.
-      #
+
       if client_rsa_pub_key
         body = user_params_delegated_client(client_rsa_pub_key, params_hash)
       else
@@ -116,7 +108,7 @@ module DTK
       client_repo_user = get_repo_user_by_username(username)
 
       if client_repo_user && client_repo_user.has_repoman_direct_access?
-        response = delete_user(username)
+        response = delete_user(client_repo_user.owner_username, client_repo_user.rsa_pub_key)
         client_repo_user.update(:repo_manager_direct_access => false) if response
       end
 
@@ -127,33 +119,27 @@ module DTK
     ##  Legacy methods
     # 
 
-    def create_client_user(client_rsa_pub_key, opts={})
+    def create_client_user(client_rsa_pub_key)
       client_repo_user = get_repo_user(client_rsa_pub_key)
 
       unless client_repo_user.has_repoman_direct_access?
-        response = create_user(client_repo_user[:username], client_rsa_pub_key, opts)
+        # we are using real user name not repo user
+        response = create_user(client_repo_user.owner_username, client_rsa_pub_key, client_repo_user.rsa_key_name)
         client_repo_user.update(:repo_manager_direct_access => true) if response
       end
     end
 
-    def delete_user(username)
-      route = "/v1/users/destroy_with_username"
-      body = user_params(username)
+    # This is more revokew access
+    def delete_user(username, rsa_pub_key)
+      route = "/v1/users/remove_access"
+      body = user_params(username, rsa_pub_key)
       delete_rest_request_data(route,body,:raise_error => true)
     end
 
-    def create_user(username,rsa_pub_key,opts={}, client_rsa_pub_key = nil)
-      # TODO: [Haris] Fix this, only to support 2 Repo Client
-      # if there is rsa_pub_key we create two users
-      # tenant and client
-
+    def create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key = nil)
       # Create Tenant
       route = "/v1/users"
-      body = user_params(username,rsa_pub_key)
-
-      [:update_if_exists].each do |opt_key|
-        body.merge!(opt_key => true) if opts[opt_key]
-      end
+      body = user_params(username, rsa_pub_key, rsa_key_name)
 
       tenant_response = post_rest_request_data(route,body,:raise_error => true)
 
@@ -163,69 +149,14 @@ module DTK
       return tenant_response
     end
 
-    def list_users()
-      route = "/rest/system/user/list"
-      body = {}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-
     ###
     ##  Legacy methods (Admin)
     #
-
-    #NOTE: mark better tht these are at git level
-    def list_repos()
-      route = "/rest/admin/list_repos"
-      response_data = get_rest_request_data(route,:raise_error => true)
-      repos = response_data["repos"]
-      repos.each{|repo|repo["type"] = RepoType.new(repo["type"]) if repo["type"]}
-      repos
-    end
-
-    def create_repo(username,repo_name,access_rights="R")
-      route = "/rest/admin/create_repo"
-      body = user_params(username).merge(:repo_name => repo_name, :access_rights => access_rights)
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
-    end
-
-    def add_git_user(username,rsa_pub_key,opts={})
-      route = "/rest/admin/add_user"
-      body =  user_params(username,rsa_pub_key)
-      [:noop_if_exists,:delete_if_exists].each do |opt_key|
-        body.merge!(opt_key => true) if opts[opt_key]
-      end
-      post_rest_request_data(route,body,:raise_error => true)
-    end
 
     def set_user_rights_in_repo(username,repo_name,access_rights="R")
       route = "/rest/admin/set_user_rights_in_repo"
       body = user_params(username).merge(:repo_name => repo_name,:access_rights => access_rights)
       post_rest_request_data(route,body,:raise_error => true)
-    end
-
-    ### for utility/backup_repo_manager.rb
-    def get_server_dtk_username()
-      route = "/rest/admin/server_dtk_username"
-      get_rest_request_data(route,:raise_error => true)["dtk_username"]
-    end
-
-    def get_ssh_rsa_pub_key()
-      route = "/rest/admin/server_ssh_rsa_pub_key"
-      get_rest_request_data(route,:raise_error => true)["rsa_pub_key"]
-    end
-
-    def update_ssh_known_hosts(remote_host)
-      route = "/rest/admin/update_ssh_known_hosts"
-      body = {:remote_host => remote_host}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-
-
-    # TODO: Temp solution since we need to support both clients
-
-    def get_username_with_pub_key(ssh_rsa_pub_key)
-      return get_repo_user(ssh_rsa_pub_key)[:username]
     end
 
     # Method will check if repouser exists, if so it will check if it has direct_access_for_repoman
@@ -234,35 +165,11 @@ module DTK
       repo_user = get_repo_user(ssh_rsa_pub_key)
 
       unless repo_user[:repo_manager_direct_access]
-         create_user(repo_user[:username],ssh_rsa_pub_key)
+         create_user(repo_user.owner.username, repo_user.rsa_key_name, ssh_rsa_pub_key)
       end
 
       repo_user
     end
-
-
-=begin
-#TODO: this needs fixing up
-    #TODO: does not work if user has access right; so shoudl fix on repo manager and allow names
-    def delete_user(user_id_or_name) 
-      #TODO: this is temporary until enable repo manager to take name or id or we cache id
-      if user_id_or_name.kind_of?(Fixnum)
-        delete_user_given_id(user_id_or_name)
-      else
-        user_info = list_users()
-        unless matching_user = user_info.find{|r|r["username"] == user_id_or_name}
-          raise ErrorUsage.new("User (#{user_id_or_name} does not exist")
-        end
-        delete_user_given_id(matching_user["id"])
-      end
-    end
-
-    def delete_user_given_id(user_id)
-      route = "/rest/system/user/delete"
-      body = {:id => user_id}
-      post_rest_request_data(route,body,:raise_error => true)
-    end
-=end
 
    private
 
@@ -383,9 +290,13 @@ module DTK
       ::DtkCommon::Aux::dtk_instance_repo_username()
     end
 
-    def user_params(username,rsa_pub_key=nil)
+    def user_params(username, rsa_pub_key=nil, rsa_key_name=nil)
       ret = {:username => username,:dtk_instance_name => dtk_instance_repo_username()}
-      rsa_pub_key ? ret.merge(:rsa_pub_key => rsa_pub_key) : ret
+
+      rsa_pub_key  ? ret.merge!(:rsa_pub_key  => rsa_pub_key) : ret
+      rsa_key_name ? ret.merge!(:rsa_key_name => rsa_key_name) : ret
+
+      ret
     end
 
     def update_user_params(params_hash)
@@ -402,7 +313,9 @@ module DTK
     def user_params_delegated_client(client_rsa_pub_key, params_hash)
       raise ErrorUsage.new("Missing client RSA pub key!") unless client_rsa_pub_key
 
-      params_hash[:username] = get_username_with_pub_key(client_rsa_pub_key)
+      repo_user = get_repo_user(client_rsa_pub_key)
+
+      params_hash[:username] = repo_user.owner_username
       params_hash[:dtk_instance_name] = dtk_instance_repo_username()
       params_hash[:user_fingerprint] = SSHKey.fingerprint(client_rsa_pub_key)
 

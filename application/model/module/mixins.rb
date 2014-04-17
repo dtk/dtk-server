@@ -453,7 +453,7 @@ module DTK
 
     DefaultAccessRights = "RW+"
 
-    def remove_user_direct_access(model_handle,username)
+    def remove_user_direct_access(model_handle, username)
       repo_user = RepoUser.get_matching_repo_user(model_handle.createMH(:repo_user),:username => username)
       raise ErrorUsage.new("User '#{username}' does not exist") unless repo_user
       # return unless repo_user
@@ -461,7 +461,9 @@ module DTK
       model_name = model_handle[:model_name]
       return unless repo_user.has_direct_access?(model_name)
 
+      # confusing since it is going to gitolite
       RepoManager.delete_user(username)
+
       repos = get_all_repos(model_handle)
       unless repos.empty?
         repo_names = repos.map{|r|r[:repo_name]}

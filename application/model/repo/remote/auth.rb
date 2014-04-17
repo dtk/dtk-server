@@ -7,10 +7,12 @@ module DTK; class Repo
 
       #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
       def authorize_dtk_instance(client_rsa_pub_key = nil, access_rights = nil)
-        username = dtk_instance_remote_repo_username()
-        rsa_pub_key = dtk_instance_rsa_pub_key()
+        username     = dtk_instance_remote_repo_username()
+        rsa_pub_key  = dtk_instance_rsa_pub_key()
+        rsa_key_name = dtk_instance_remote_repo_key_name()
         access_rights ||= ACCESS_READ
-        authorize_user(username,rsa_pub_key,access_rights,remote.module_name,remote.namespace,remote.module_type,client_rsa_pub_key)
+
+        authorize_user(username, rsa_pub_key, rsa_key_name, access_rights,remote.module_name,remote.namespace,remote.module_type,client_rsa_pub_key)
       end
 
       def authorize_end_user(mh,module_name,module_namespace,type,rsa_pub_key,access_rights)
@@ -19,9 +21,8 @@ module DTK; class Repo
       end
 
      private 
-      def authorize_user(username,rsa_pub_key,access_rights,module_name,module_namespace,type, client_rsa_pub_key = nil)
-        # TODO: [Haris] Fix this this is only to support 2 REPO clients
-        client.create_user(username,rsa_pub_key,{ :update_if_exists => true }, client_rsa_pub_key)
+      def authorize_user(username, rsa_pub_key, rsa_key_name, access_rights, module_name, module_namespace, type, client_rsa_pub_key = nil)
+        client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
         grant_user_rights_params = {
           :name => module_name,
           :namespace => module_namespace || DefaultsNamespace,

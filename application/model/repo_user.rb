@@ -25,6 +25,25 @@ module DTK
       self[:repo_manager_direct_access]
     end
 
+    def owner
+      self.update_object!(:owner_id)
+      User.get_user_by_id(self.model_handle(:user), self[:owner_id])
+    end
+
+    def rsa_key_name
+      self.update_object!(:display_name) unless self[:display_name]
+      self[:display_name]
+    end
+
+    def rsa_pub_key
+      self.update_object!(:ssh_rsa_pub_key) unless self[:ssh_rsa_pub_key]
+      self[:ssh_rsa_pub_key]
+    end
+
+    def owner_username
+      owner.username
+    end
+
     # Returns flag which indicates if this user has access to component_modules or service_modules
     #
     def has_direct_access?(module_model_name,opts={})

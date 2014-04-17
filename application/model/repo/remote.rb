@@ -30,9 +30,11 @@ module DTK
       end
 
       def create_remote_module(client_rsa_pub_key)
-        username = dtk_instance_remote_repo_username()
-        rsa_pub_key = dtk_instance_rsa_pub_key()
-        client.create_user(username, rsa_pub_key, { :update_if_exists => true }, client_rsa_pub_key)
+        username        = dtk_instance_remote_repo_username()
+        rsa_pub_key     = dtk_instance_rsa_pub_key()
+        rsa_key_name    = dtk_instance_remote_repo_key_name()
+
+        client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
         
         unless namespace = remote.namespace 
           namespace = CurrentSession.new.get_user_object().get_namespace()
@@ -233,8 +235,11 @@ module DTK
       def dtk_instance_remote_repo_username()
         "dtk-instance"
       end
+      def dtk_instance_remote_repo_key_name()
+        "dtk-instance-key"
+      end
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
-        RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key)[:username]
+        RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key).owner.username
       end
  
     end

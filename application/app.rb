@@ -22,8 +22,11 @@ module XYZ
 end
 DTK = XYZ
 
+require 'bundler/setup'
 require File.expand_path('require_first', File.dirname(__FILE__))
-r8_require_common_lib('dtk_common')
+
+# load common gem or use local dir if available
+dtk_require_common_library()
 
 SYSTEM_ROOT_PATH = File.expand_path('../', File.dirname(__FILE__))
 LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"

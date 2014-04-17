@@ -1,5 +1,8 @@
 source 'http://rubygems.org'
 
+# dtk gems
+gem 'dtk-common'
+
 # required to start a server
 gem 'bundler','>= 1.1.5'
 gem 'fog','1.8.0'

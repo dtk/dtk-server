@@ -122,7 +122,7 @@ module DTK
 
           if root_device_size = node.attribute.root_device_size()
             if device_name = image(ami).block_device_mapping_device_name()
-              create_options[:block_device_mapping].first.merge!({'DevicName' => device_name, 'Ebs.VolumeSize' => root_device_size})
+              create_options[:block_device_mapping].first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
             else
               Log.error("Cannot determine device name for ami (#{ami})")
             end

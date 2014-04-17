@@ -22,6 +22,12 @@ module DTK
           is_complete = false
         end
       end
+
+      unless results.nil?
+        results.each do |k,v|
+          disable_post_processing = true if v.is_a?(Hash)
+        end
+      end
       ret = {:is_complete => is_complete, :results => (disable_post_processing ? results : Result.post_process(results, sort_key))}
       return ret
     end
@@ -86,6 +92,7 @@ module DTK
           result = results[node_id]
           node_name = result.node_name
           first = true
+
           result.data.sort{|a,b|a[sort_key] <=> b[sort_key]}.each do |r|
             if first
               ret << r.merge(:node_id => node_id,:node_name => node_name)

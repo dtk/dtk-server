@@ -11,6 +11,12 @@ module DTK
       ret
     end
 
+    class LinkToNonComponent < self
+      def initialize(opts={})
+        raise ErrorUsage.new("Only supported: Attribute linked to a component attribute",Opts.new(opts).slice(:file_path))
+      end
+    end
+
     class LinkBetweenSameComponentTypes < self
       def initialize(cmp_instance,opts={})
         super(base_msg(cmp_instance),Opts.new(opts).slice(:file_path))

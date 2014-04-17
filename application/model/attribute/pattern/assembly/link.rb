@@ -32,6 +32,9 @@ module DTK; class Attribute::Pattern
         end
         source_is_antecdent = !target_attr_pattern.is_antecedent?()
         source_attr_pattern = Source.create_attr_pattern(assembly,source_attr_term,source_is_antecdent)
+        unless source_component_instance = source_attr_pattern.component_instance
+          raise DSLNotSupported::LinkToNonComponent.new()
+        end
         source_component_instance = source_attr_pattern.component_instance
         if source_component_instance[:component_type] == target_attr_pattern.component_instance[:component_type]
           raise DSLNotSupported::LinkBetweenSameComponentTypes.new(source_component_instance)

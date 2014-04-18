@@ -85,7 +85,7 @@ module DTK
         :filter => [:eq,:ssh_rsa_pub_key,ssh_rsa_pub_key]
       }
       unless ret = get_obj(mh.createMH(:repo_user),sp_hash)
-        raise ErrorUsage.new("The RSA Public key for the client machine has not been registered")
+        raise ErrorUsage.new("The RSA Public key for the client machine has not been registered, have you added SSH key for this client?")
       end
       ret
     end

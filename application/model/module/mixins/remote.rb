@@ -133,13 +133,19 @@ module DTK; module ModuleMixins
       # we also check if user has required permissions
       # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk
       # to allow permission to be sent from client
-      if client_rsa_pub_key && action == 'push'
-        repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_WRITE)
+      if client_rsa_pub_key
+        case action
+        when 'push'
+          repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_WRITE)
+        when 'pull'
+          repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_READ)
+        end
       end
 
       unless workspace_branch_obj = remote.get_linked_workspace_branch_obj?(self) 
         raise_error_when_not_properly_linked(action,remote)
       end
+
       ret = Info.new().merge(
           :module_name => remote.module_name,
           #TODO: will change this key to :remote_ref when upstream uses this                               

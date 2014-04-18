@@ -27,6 +27,9 @@ module Ramaze::Helper
       access_rights = ret_access_rights()
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       project = get_default_project()
+
+
+
       module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
     end
 

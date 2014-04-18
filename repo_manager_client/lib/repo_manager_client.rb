@@ -48,23 +48,23 @@ module DTK
     ##  V1 namespace methods
     #
 
-    def list_component_modules(username)
-      response = get_rest_request_data('/v1/component_modules/list_remote', user_params(username), :raise_error => true)
+    def list_component_modules(username, client_rsa_pub_key)
+      response = get_rest_request_data('/v1/component_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
       response
     end
 
-    def list_service_modules(username)
-      response = get_rest_request_data('/v1/service_modules/list_remote', user_params(username), :raise_error => true)
+    def list_service_modules(username, client_rsa_pub_key)
+      response = get_rest_request_data('/v1/service_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
       response
     end
 
-    def list_modules(filter=nil, rsa_pub_key = nil)
-      repo_user = get_approved_repouser(rsa_pub_key)
+    def list_modules(filter=nil, client_rsa_pub_key = nil)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
 
       if filter[:type].eql? "component"
-        response = list_component_modules(repo_user.owner_username)
+        response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
       else
-        response = list_service_modules(repo_user.owner_username)
+        response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
       end
       response
     end
@@ -296,6 +296,12 @@ module DTK
       rsa_pub_key  ? ret.merge!(:rsa_pub_key  => rsa_pub_key) : ret
       rsa_key_name ? ret.merge!(:rsa_key_name => rsa_key_name) : ret
 
+      ret
+    end
+
+    def user_params_with_fingerprint(username, client_rsa_pub_key)
+      ret = user_params(username)
+      ret[:user_fingerprint] = SSHKey.fingerprint(client_rsa_pub_key)
       ret
     end
 

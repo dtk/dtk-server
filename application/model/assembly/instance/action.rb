@@ -117,7 +117,7 @@ module DTK
                       DTK::Component::Instance::Interpreted.delete(node, component_type, attr_hash)
                     end
                   end
-                  
+
                   action_results_queue.push(node_info[:display_name],response[:data])
                 else
                   Log.error("Agent '#{msg[:senderagent]}' error, Code: #{msg[:body][:statuscode]} - #{msg[:body][:statusmsg]}")
@@ -252,6 +252,9 @@ module DTK
                   raw_data = response[:data].map{|r|node_info.merge(r)}
                   packaged_data = new(node_info[:display_name],raw_data)
                   action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                elsif response[:status] != :ok  
+                  node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]       
+                  action_results_queue.push(node_info[:id],response[:data])
                 end
               end
             }

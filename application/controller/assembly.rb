@@ -653,22 +653,26 @@ module DTK
       assembly = ret_assembly_instance_object()
       params   = ret_params_hash(:rsa_pub_name, :rsa_pub_key, :system_user)
       agent_action = ret_non_null_request_params(:agent_action)
+      target_nodes = ret_node_id_handles(:target_nodes, assembly)
 
+      # get models from idhs
+      target_nodes = target_nodes.collect { |t_node| t_node.create_object().update_object!(:id, :display_name, :external_ref) }
+
+      # check existance of key and system user in database
       system_user, key_name = params[:system_user], params[:rsa_pub_name]
-
-      data_exists, data_exists_on_every_node = Component::Instance::Interpreted.check_existance?(assembly, system_user, key_name)
+      data_exists, data_exists_on_every_node = Component::Instance::Interpreted.check_existance?(assembly, system_user, key_name, target_nodes)
       
       if agent_action.to_sym == :revoke_access && !data_exists
-        raise ErrorUsage.new("Access is not granted to system user '#{system_user}' with name '#{key_name}'")
+        raise ErrorUsage.new("Access #{target_nodes.empty? ? '' : 'on given nodes'} is not granted to system user '#{system_user}' with name '#{key_name}'")
       end
 
       if agent_action.to_sym == :grant_access && data_exists_on_every_node
-        raise ErrorUsage.new("All nodes already have access to system user '#{system_user}' with name '#{key_name}'")
+        raise ErrorUsage.new("Nodes already have access to system user '#{system_user}' with name '#{key_name}'")
       end
 
       queue    = ActionResultsQueue.new
 
-      assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params)
+      assembly.initiate_ssh_agent_action(agent_action.to_sym, queue, params, target_nodes)
 
       rest_ok_response :action_results_id => queue.id
     end

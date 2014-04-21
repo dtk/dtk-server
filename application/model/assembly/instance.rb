@@ -140,6 +140,7 @@ module DTK; class  Assembly
     def get_nodes(*alt_cols)
       self.class.get_nodes([id_handle],*alt_cols)
     end
+
     def self.get_nodes(assembly_idhs,*alt_cols)
       ret = Array.new
       return ret if assembly_idhs.empty?

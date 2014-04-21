@@ -239,30 +239,39 @@ module Ramaze::Helper
       request.env["QUERY_STRING"]
     end
 
-    #TODO: these three methods below need some cleanup
-    #param refers to key that can have id or name value
+    # TODO: these three methods below need some cleanup
+    # param refers to key that can have id or name value
     def create_obj(param,model_class=nil,extra_context=nil)
       create_object_from_id(ret_request_param_id(param,model_class,extra_context),model_class)
     end
 
-    #param refers to key that can have id or name value
-    def ret_request_param_id_handle(param,model_class=nil,version=nil)
+    # param refers to key that can have id or name value
+    def ret_request_param_id_handle(param, model_class=nil, version=nil)
       id = ret_request_param_id(param,model_class,version)
       id_handle(id,ret_module_name_from_class(model_class))
     end
-    #TODO One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id
-    #  we can put in an option flag for this, but need to check we cover all instances of these
-    #  make this a speacte function called by create_obj and then have
-    #  ret_request_param_id_handle and ret_request_param_id call id and id_handle methods on it
-    #   which avoids needing to call create_object_from_id in create_obj
 
-    #param refers to key that can have id or name value
-    def ret_request_param_id(param,model_class=nil,extra_context=nil)
+    def ret_id_handle_from_value(id_or_name_value, model_class=nil, version=nil)
+      id = resolve_id_from_name_or_id(id_or_name_value, model_class, version)
+      id_handle(id,ret_module_name_from_class(model_class))
+    end
+    # TODO One part of cleanup is to have name_to_id and check_valid return the object with keys :id and :group id
+    # we can put in an option flag for this, but need to check we cover all instances of these
+    # make this a speacte function called by create_obj and then have
+    # ret_request_param_id_handle and ret_request_param_id call id and id_handle methods on it
+    # which avoids needing to call create_object_from_id in create_obj
+
+    # param refers to key that can have id or name value
+    def ret_request_param_id(param, model_class=nil, extra_context=nil)
+      id_or_name = ret_non_null_request_params(param)
+      resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
+    end
+
+    def resolve_id_from_name_or_id(id_or_name, model_class=nil, extra_context=nil)
       model_name = ret_module_name_from_class(model_class)
       model_class ||= model_class(model_name)
       model_handle = model_handle(model_name)
 
-      id_or_name = ret_non_null_request_params(param)
       if id_or_name.kind_of?(Fixnum) or id_or_name =~ /^[0-9]+$/
         id = id_or_name.to_i
         params = [model_handle,id]

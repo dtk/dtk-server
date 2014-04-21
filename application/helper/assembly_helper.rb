@@ -68,6 +68,24 @@ module Ramaze::Helper
       ret_request_param_id_handle(node_name_param,::DTK::Node,assembly.id())
     end
 
+    #
+    # Pass param name containing with comma seperated names or ids. Param name should
+    # resolve to command seperated node id/names (String)
+    #
+    # Returns: Returns array of node id handles
+    #
+    def ret_node_id_handles(node_name_param, assembly)
+      # get nodes list (command seperated) from request
+      target_nodes_str = ret_request_params(node_name_param)
+      return [] unless target_nodes_str
+      # if node names exist, split them and remove extra spaces
+      target_nodes = target_nodes_str.split(',').collect do |node_name| 
+        ret_id_handle_from_value(node_name.strip, ::DTK::Node, assembly.id())
+      end
+
+      target_nodes
+    end
+
     #assuming that service link is identified by either
     #:service_link_id or
     #:service_type and :input_component_id or

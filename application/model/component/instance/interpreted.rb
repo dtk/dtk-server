@@ -33,16 +33,24 @@ module DTK; class Component
         end
       end
 
-      def self.check_existance?(assembly, system_user, pub_name)
+      def self.check_existance?(assembly, system_user, pub_name, target_nodes = [])
         results = list_ssh_access(assembly)
-
+        
         data_exists       = false
         # this way we avoid true response
         data_on_each_node = results.empty? ? -1 : 0
 
         results.each do |r|
           next unless r[:attributes]
-          if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name)
+          
+          # flag to indicate that we are searching target nodes
+          matched_node_name = true
+          unless  target_nodes.empty?
+            found_node = target_nodes.find { |t_node| r[:node_name].eql?(t_node[:display_name]) }
+            matched_node_name = !found_node.nil?
+          end
+
+          if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name) && matched_node_name
             data_exists = true
             data_on_each_node += 1
           end

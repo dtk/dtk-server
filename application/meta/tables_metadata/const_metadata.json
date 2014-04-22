@@ -109,7 +109,7 @@
    ],
    "ssh_access":[
       "node_name",
-      "unix_user",
+      "system_user",
       "key_name"
    ]
 }

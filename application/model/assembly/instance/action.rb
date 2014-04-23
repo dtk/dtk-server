@@ -20,8 +20,7 @@ module DTK
         Action::Grep.initiate(nodes,action_results_queue,params)
       end
 
-      def initiate_ssh_agent_action(agent_action, queue, params, target_nodes=[])
-        nodes = target_nodes.empty? ? get_nodes(:id,:display_name,:external_ref) : target_nodes
+      def initiate_ssh_agent_action(agent_action, queue, params, nodes)
         Action::SSHAccess.initiate(nodes, queue, params, agent_action)
       end
 

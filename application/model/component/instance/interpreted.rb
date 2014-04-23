@@ -33,32 +33,33 @@ module DTK; class Component
         end
       end
 
-      def self.check_existance?(assembly, system_user, pub_name, target_nodes = [])
+      def self.find_candidates(assembly, system_user, pub_name, agent_action, target_nodes = [])
         results = list_ssh_access(assembly)
-        
-        data_exists       = false
-        # this way we avoid true response
-        data_on_each_node = results.empty? ? -1 : 0
 
-        results.each do |r|
-          next unless r[:attributes]
-          
-          # flag to indicate that we are searching target nodes
-          matched_node_name = true
-          unless  target_nodes.empty?
-            found_node = target_nodes.find { |t_node| r[:node_name].eql?(t_node[:display_name]) }
-            matched_node_name = !found_node.nil?
-          end
+        nodes = target_nodes.empty? ? assembly.get_nodes(:id,:display_name,:external_ref) : target_nodes
 
-          if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name) && matched_node_name
-            data_exists = true
-            data_on_each_node += 1
+        #
+        # if :grant_access  than rejected_bool ==> false (keep if not matched)
+        # if :revoke_access than rejected_bool ==> true  (keep only if matched)
+        #
+        rejected_bool = (agent_action.to_sym == :revoke_access)
+
+        nodes.reject! do |node|
+          is_rejected = rejected_bool
+          results.each do |r|
+            if node[:display_name] == r[:node_name]
+              if r[:attributes]["linux_user"].eql?(system_user) && r[:attributes]["key_name"].eql?(pub_name)
+                is_rejected = !rejected_bool
+              end
+            end
           end
+          is_rejected
         end
-
-        # exist on either node and exists on every node
-        return data_exists, (data_on_each_node == results.size)
+        
+        nodes
       end
+
+
 
       def self.list_ssh_access(assembly, component_type = :authorized_ssh_public_key)
         nodes = assembly.get_nodes()

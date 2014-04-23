@@ -11,7 +11,7 @@ module DTK
 
       response = 
         if subtype.eql? :instance
-          opts = (parent_id ? { :filter => [:eq, :parent_id, parent_id]} : Hash.new)
+          opts = ((parent_id && !parent_id.empty?) ? { :filter => [:eq, :parent_id, parent_id]} : Hash.new)
           Target::Instance.list(model_handle(), opts)
         elsif subtype.eql? :template
           Target::Template.list(model_handle())

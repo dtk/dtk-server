@@ -730,6 +730,15 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
+      #Logic for validation
+      # restrict execution of execute-test if tasks are still executing
+      #Commenting out to check if we have other way to get to the bottom of DTK-1477 issue
+      #node_names = nodes.map { |node| node[:display_name] }
+      #tasks_status = Task::Status::Assembly.get_status(id_handle(assembly[:id]),:format => :table)
+      #tasks_status.each do |task_status|
+      #  return rest_ok_response(:errors => ["Tasks are still executing. Please wait until tasks are completed to use execute-test functionality"]) if task_status[:status] == "executing"
+      #end
+
       #Special case for preventing execution of agent on specific node that is not running
       matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
       if (!node_id.empty? && matching_nodes.empty?)

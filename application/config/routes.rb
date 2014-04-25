@@ -206,6 +206,7 @@ R8::ReactorRoute.draw do
   post  'target/set_default' => 'target#set_default'
   post  'target/info_about' => 'target#info_about'
   post  'target/delete_provider' => 'target#delete_provider'
+  post  'target/import_nodes' => 'target#import_nodes'
   
    # TASK
   post  'task/cancel_task' => 'task#cancel_task'

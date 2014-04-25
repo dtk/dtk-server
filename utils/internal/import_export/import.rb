@@ -74,9 +74,14 @@ module DTK
 
     def input_hash_content_into_model(container_id_handle,hash_content,opts={})
       global_fks = Hash.new
+      return_info = nil
       unless container_id_handle.is_top?
         #TODO: do we need to factor in opts[:username] here?
-        global_fks = input_into_model(container_id_handle,hash_content,opts) 
+        if opts[:return_info]
+          global_fks, return_info = input_into_model(container_id_handle,hash_content,opts) 
+        else
+          global_fks = input_into_model(container_id_handle,hash_content,opts) 
+        end
       else
         hash_content.each do |relation_type,info|
           info.each do |ref,child_hash_content|
@@ -84,11 +89,17 @@ module DTK
             child_container_id_handle = container_id_handle.createIDH(:uri => child_uri)
             create_prefix_object_if_needed(child_container_id_handle,opts)
             input_opts = {:ret_global_fks => true}.merge(opts.reject{|k,v| not [:username,:preserve_input_hash].include?(k)})
-            r = input_into_model(child_container_id_handle,child_hash_content,input_opts)
+            if opts[:return_info]
+              r, return_info = input_into_model(child_container_id_handle,child_hash_content,input_opts)
+            else
+              r = input_into_model(child_container_id_handle,child_hash_content,input_opts)
+            end
             global_fks.merge!(r) if r
           end
         end
       end
+      
+      return return_info if return_info
       process_global_keys(global_fks,container_id_handle[:c]) unless global_fks.nil? or global_fks.empty?
     end
 

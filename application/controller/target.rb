@@ -21,6 +21,11 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__import_nodes()
+      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      rest_ok_response Target::Instance.import_nodes(target_instance)
+    end
+
     #create target instance
     def rest__create()
       provider  = create_obj(:provider_id, ::DTK::Target::Template)

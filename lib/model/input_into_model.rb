@@ -13,7 +13,12 @@ module XYZ
       if opts[:preserve_input_hash]
         insert_fks_back_in_hash!(hash_with_assocs,fks)
       end
-      ret_global_fks
+
+      if opts[:return_info]
+        return ret_global_fks, prefixes
+      else
+        return ret_global_fks
+      end
     end
 
     #TODO: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import

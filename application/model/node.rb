@@ -27,6 +27,7 @@ module DTK
        :target_id,
        :ui,
        :external_ref,
+       :managed,
        :admin_op_status
       ]
     end

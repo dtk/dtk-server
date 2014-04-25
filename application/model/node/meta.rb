@@ -32,6 +32,7 @@ module DTK
 
       column :admin_op_status, :varchar, :size => 20, :default => 'pending'
       column :operational_status, :varchar, :size => 20
+      column :managed, :boolean, :default => true
 
       column :hostname_external_ref, :json
       column :ordered_component_ids, :text

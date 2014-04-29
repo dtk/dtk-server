@@ -143,7 +143,7 @@ R8::ReactorRoute.draw do
 
 
    # NODE_GROUP
-=begin
+
   post  'node_group/list' => 'node_group#list'
   post  'node_group/get_attributes' => 'node_group#get_attributes '
   post  'node_group/set_attributes' => 'node_group#set_attributes'
@@ -157,7 +157,7 @@ R8::ReactorRoute.draw do
   post  'node_group/create_task' => 'node_group#create_task'
   post  'node_group/set_default_template_node' => 'node_group#set_default_template_node'
   post  'node_group/clone_and_add_template_node' => 'node_group#clone_and_add_template_node'
-=end
+
 
    # PROJECT
   post  'project/list' => 'project#list'

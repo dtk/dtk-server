@@ -1,6 +1,7 @@
 module DTK
   class ChildContext < SimpleHashObject
     r8_nested_require('child_context','assembly_node')
+    r8_nested_require('child_context','assembly_node_attribute')
     r8_nested_require('child_context','port_link')
     r8_nested_require('child_context','assembly_component_ref')
     r8_nested_require('child_context','assembly_component_attribute')
@@ -88,14 +89,22 @@ module DTK
     end
     #index are clone_direction, parent, child
     SpecialContext = {
-        :library_to_target => {
-          :target => {:node => AssemblyNode, :port_link => PortLink},
-          :node => {:component_ref => AssemblyComponentRef},
-#TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
-#          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
-          :component => {:attribute => AssemblyComponentAttribute}
+      :library_to_target => {
+        :target => {
+          :node => AssemblyNode, 
+          :port_link => PortLink
+        },
+        :node => {
+          :attribute => AssemblyNodeAttribute, 
+          :component_ref => AssemblyComponentRef
+        },
+        #TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
+        #          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
+        :component => {
+          :attribute => AssemblyComponentAttribute
+        }
       },
-      #TODO: remove; since using different mechanism to sabve an assembly instance in the library
+      #TODO: remove; since using different mechanism to save an assembly instance in the library
       :target_to_library => {
         #:library => {:node => AssemblyTemplateNode},
         #:node => {:component => AssemblyTemplateComponent}
@@ -161,7 +170,7 @@ module DTK
       self[:model_handle]
     end
 
-    #can diffeer such as for component_ref
+    #can differ such as for component_ref
     #can be over written
     def clone_model_handle()
       model_handle()

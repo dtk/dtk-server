@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class ChildContext 
     class AssemblyComponentAttribute < self
      private

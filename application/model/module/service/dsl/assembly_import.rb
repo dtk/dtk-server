@@ -124,6 +124,9 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
+
+          node_output["attribute"] = import_node_attributes(node_hash["attributes"],opts)
+
           cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
           return cmps_output if ParsingError.is_error?(cmps_output)
           
@@ -243,12 +246,26 @@ module DTK; class ServiceModule
 
     #These are attributes at the assembly level, as opposed to being at the component or node level
     def self.import_assembly_attributes(assembly_attrs_hash,opts={})
-      ret = DBUpdateHash.new()
       assembly_attrs_hash ||= Hash.new
       unless assembly_attrs_hash.kind_of?(Hash)
         raise ParsingError.new("Assembly attribute(s) are ill-formed",opts_file_path(opts))
       end
-      assembly_attrs_hash.each_pair do |attr_name,attr_val|
+      import_attributes_helper(assembly_attrs_hash)
+    end
+
+    #These are attributes at the node level
+    def self.import_node_attributes(node_attrs_hash,opts={})
+      node_attrs_hash ||= Hash.new
+      unless node_attrs_hash.kind_of?(Hash)
+        raise ParsingError.new("Node attribute(s) are ill-formed",opts_file_path(opts))
+      end
+      #TODO: make sure that each node attribute is legal
+      import_attributes_helper(node_attrs_hash)
+    end
+
+    def self.import_attributes_helper(attr_val_hash)
+      ret = DBUpdateHash.new()
+      attr_val_hash.each_pair do |attr_name,attr_val|
         ref = dispaly_name = attr_name
         data_type =
           if attr_val.kind_of?(TrueClass) or attr_val.kind_of?(FalseClass)
@@ -265,6 +282,7 @@ module DTK; class ServiceModule
       end
       ret.mark_as_complete()
     end
+
 
     def self.import_attribute_overrides(attr_name,attr_val,opts={})
       attr_info = {:display_name => attr_name, :attribute_value => attr_val}

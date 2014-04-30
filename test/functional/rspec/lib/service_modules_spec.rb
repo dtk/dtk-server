@@ -16,10 +16,10 @@ STDOUT.sync = true
 shared_context "Import service module" do |service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
     puts "Import service module:", "----------------------"
-    pass = false
+    pass = true
     value = `dtk service-module import #{service_module_name}`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "exists already"))
+    pass = false if ((value.include? "ERROR") || (value.include? "exists already"))
     puts "Import of service module #{service_module_name} completed successfully!" if pass == true
     puts "Import of service module #{service_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -30,10 +30,10 @@ end
 shared_context "Import remote service module" do |dtk_common, service_module_name|
   it "imports #{service_module_name} service module from remote repo" do
     puts "Import remote service module:", "-----------------------------"
-    pass = false
+    pass = true
     value = `dtk service-module install #{service_module_name} -y`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client"))
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client"))
     puts "Import of remote service module #{service_module_name} completed successfully!" if pass == true
     puts "Import of remote service module #{service_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -126,8 +126,8 @@ shared_context "Export service module" do |dtk_common, service_module_name, name
     value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module_name}`
     puts value
     pass = true if (!value.include? "error")
-    puts "Export of #{service_module_name} service module to #{namespace} namespace has been completed successfully!" if pass == true
-    puts "Export of #{service_module_name} service module to #{namespace} namespace did not complete successfully!" if pass == false
+    puts "Publish of #{service_module_name} service module to #{namespace} namespace has been completed successfully!" if pass == true
+    puts "Publish of #{service_module_name} service module to #{namespace} namespace did not complete successfully!" if pass == false
     puts ""
     pass.should eq(true)
   end

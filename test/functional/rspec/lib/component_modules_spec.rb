@@ -7,10 +7,10 @@ require 'awesome_print'
 shared_context "Import remote component module" do |component_module_name|
   it "imports #{component_module_name} component module from remote repo" do
     puts "Import remote component module:", "-------------------------------"
-    pass = false
+    pass = true
     value = `dtk component-module install #{component_module_name}`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "exists on client") || (!value.include? "denied"))
+    pass = false if ((value.include? "ERROR") || (value.include? "exists on client") || (value.include? "denied") || (value.include? "Conflicts with existing server local module")) 
     puts "Import of remote component module #{component_module_name} completed successfully!" if pass == true
     puts "Import of remote component module #{component_module_name} did not complete successfully!" if pass == false
     puts ""
@@ -21,10 +21,10 @@ end
 shared_context "Import component module from provided git repo" do |component_module_name, git_ssh_repo_url|
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo" do
     puts "Import component module from git repo:", "--------------------------------------"
-    pass = false
+    pass = true
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
+    pass = false if ((value.include? "ERROR") || (value.include? "Repository not found") || (value.include? "denied"))
     puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo!" if pass == false
     puts ""
@@ -52,11 +52,8 @@ shared_context "NEG - Import component module with dependency from provided git 
     pass = false
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     if (value.include? "There are some missing dependencies: [\"#{dependency_component_module}\"]")
-      pass = true 
-    else
-      pass = false
+      pass = true
     end
     puts "Component module #{component_module_name} was created successfully from provided git repo but with dependency missing warning!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo or was created but without dependency warning!" if pass == false
@@ -71,11 +68,8 @@ shared_context "NEG - Import component module with version dependency from provi
     pass = false
     value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
-    pass = true if ((!value.include? "ERROR") || (!value.include? "Repository not found") || (!value.include? "denied"))
     if (value.include? "There are some inconsistent dependencies")
       pass = true 
-    else
-      pass = false
     end
     puts "Component module #{component_module_name} was created successfully from provided git repo but with version dependency missing error!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo or was created but without dependency error!" if pass == false
@@ -90,7 +84,7 @@ shared_context "Import component module" do |component_module_name|
     pass = false
     value = `dtk component-module import #{component_module_name}`
     puts value
-    pass = true if (!value.include? "ERROR")
+    pass = true unless value.include? "ERROR"
     puts "Component module #{component_module_name} imported successfully!" if pass == true
     puts "Component module #{component_module_name} was not imported successfully!" if pass == false
     puts ""
@@ -104,7 +98,7 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
     pass = false
     value = `dtk component-module #{component_module_name} publish #{namespace}/#{component_module_name}`
     puts value
-    pass = true if (!value.include? "ERROR")
+    pass = true unless value.include? "ERROR"
     puts "Component module #{component_module_name} exported successfully!" if pass == true
     puts "Component module #{component_module_name} was not exported successfully!" if pass == false
     puts ""

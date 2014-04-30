@@ -33,8 +33,8 @@ class RepomanRestApi
 		end
 	end
 
-	def get_repos_by_user_id(user_id)
-		return self.send_request("/users/#{user_id}/repos", "GET")
+	def get_repos_by_user(user)
+		return self.send_request("/users/#{user}/repos", "GET")
 	end
 
 	def check_if_user_exists(username, email)
@@ -44,11 +44,13 @@ class RepomanRestApi
 	end
 
 	def create_user(username, email, first_name, last_name)
-		return self.send_request("/users", "POST", {:username=>username, :email=>email, :first_name=>first_name, :last_name=>last_name})
+		return self.send_request("/users", "POST", {:username=>username, :email=>email, :first_name=>first_name, :last_name=>last_name}) unless (username==nil || email==nil)
+		return self.send_request("/users", "POST", {:username=>username, :first_name=>first_name, :last_name=>last_name}) if email==nil
+		return self.send_request("/users", "POST", {:email=>email, :first_name=>first_name, :last_name=>last_name}) if username==nil
 	end
 
-	def get_modules_by_namespace_id(namespace_id)
-		return self.send_request("/namespaces/#{namespace_id}/modules", "GET")
+	def get_modules_by_namespace(namespace)
+		return self.send_request("/namespaces/#{namespace}/modules", "GET")
 	end
 
 	def check_if_namespace_exists(namespace)

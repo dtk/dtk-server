@@ -2,7 +2,7 @@ module DTK; module ModuleMixins
   module Create
   end
   module Create::Class
-    #TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class isnatll
+    #TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
     #returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
       #TODO: pass local_params in

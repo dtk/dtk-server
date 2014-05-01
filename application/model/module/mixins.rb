@@ -43,6 +43,10 @@ module DTK
     include ModuleMixins::Remote::Instance
     include ModuleMixins::Create::Instance
 
+    def get_module_branch_from_local_params(local_params,opts={})
+      self.class.get_module_branch_from_local(local_params.create_local(get_project()),opts)
+    end
+
     def get_module_branches()
       get_objs_helper(:module_branches,:module_branch)
     end

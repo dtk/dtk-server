@@ -25,7 +25,7 @@ module DTK
 
       #creates a new assembly template if it does not exist
       def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})
-        assembly_factory = assembly_factory(assembly_instance,service_module,assembly_name,opts)
+        assembly_factory = create_assembly_factory(assembly_instance,service_module,assembly_name,opts)
         assembly_factory.create_assembly_template()
       end
 
@@ -42,12 +42,15 @@ module DTK
       end
 
      private
-      def self.assembly_factory(assembly_instance,service_module,assembly_name,opts={})
-        version = opts[:version]
-        project = service_module.get_project()
-        project_idh = project.id_handle()
-        service_module_name = service_module.get_field?(:display_name)        
-        service_module_branch = ServiceModule.get_workspace_module_branch(project,service_module_name,version)
+      def self.create_assembly_factory(assembly_instance,service_module,assembly_name,opts={})
+        service_module_name = service_module.get_field?(:display_name)
+        local_params = ModuleBranch::Location::LocalParams::Server.new(
+          :module_type => :service_module,
+          :module_name => service_module_name,
+          :version => opts[:version]
+        )
+        service_module_branch = service_module.get_module_branch_from_local_params(local_params)
+        project_idh = service_module.get_project().id_handle()
 
         assembly_mh = project_idh.create_childMH(:component)
         if ret = exists?(assembly_mh,project_idh,service_module_name,assembly_name)

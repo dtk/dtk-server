@@ -97,15 +97,20 @@ module DTK
         task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(:assembly,assembly_instance)
 
         node_scalar_cols = FactoryObject::CommonCols + [:node_binding_rs_id]
-        sample_node_idh = node_idhs.first
-        node_mh = sample_node_idh.createMH()
+        node_mh = node_idhs.first.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
 
         #get assembly-level attributes
         assembly_level_attrs = assembly_instance.get_assembly_level_attributes().reject do |a|
           a[:attribute_value].nil?
         end
-        
+
+        #get node-level attributes
+        ndx_node_level_attrs = Hash.new
+        Node.get_node_level_assembly_attributes(node_idhs).each do |r|
+          (ndx_node_level_attrs[r[:node_node_id]] ||= Array.new) << r
+        end
+
         #get contained ports
         sp_hash = {
           :cols => [:id,:display_name,:ports_for_clone],
@@ -131,9 +136,14 @@ module DTK
         end
         cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attribute]
         @ndx_nodes = Hash.new
-        node_cmp_attr_rows.each do | r|
+        node_cmp_attr_rows.each do |r|
           node_id = r[:id]
-          @ndx_nodes[node_id] ||= r.hash_subset(*node_scalar_cols).merge(:components => Array.new,:ports => node_port_mapping[node_id])
+          @ndx_nodes[node_id] ||= 
+            r.hash_subset(*node_scalar_cols).merge(
+              :components => Array.new,
+              :ports => node_port_mapping[node_id],
+              :attributes=>ndx_node_level_attrs[node_id]
+            )
           cmps = @ndx_nodes[node_id][:components]
           cmp_id = r[:component][:id]
           unless matching_cmp = cmps.find{|cmp|cmp[:id] == cmp_id}

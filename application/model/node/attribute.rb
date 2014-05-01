@@ -13,6 +13,12 @@ module DTK
         get_value?(:puppet_version)||R8::Config[:puppet][:version]
       end
 
+      def self.assembly_attribute_filter()
+        AssemblyAttributeFilter
+      end
+      NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
+      AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
+
      private
       def get_value?(attribute_name,semantic_data_type=nil)
         attr = @node.get_node_attribute?(attribute_name.to_s,:cols => [:id,:group_id,:attribute_value])
@@ -25,7 +31,14 @@ module DTK
     end
 
     module AttributeClassMixin
-      def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      #node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
+     def get_node_level_assembly_attributes(node_idhs,cols=nil)
+       cols ||= [:id,:display_name,:node_node_id,:attribute_value]
+       add_filter = NodeAttribute.assembly_attribute_filter()
+       get_node_level_attributes(node_idhs,cols,add_filter)
+     end
+
+     def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
         ret = Array.new
         return ret if node_idhs.empty?()
         filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]

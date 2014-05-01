@@ -67,7 +67,6 @@ module DTK
             :project_project_id => project_idh.get_id(),
             :ref => Assembly.internal_assembly_ref(service_module_name,assembly_name),
             :display_name => assembly_name,
-            #TODO: was used in GUI  :ui => icon_info,
             :type => "composite",
             :module_branch_id => service_module_branch[:id],
             :component_type => Assembly.ret_component_type(service_module_name,assembly_name)
@@ -151,7 +150,9 @@ module DTK
             cmps << matching_cmp
           end
           if attr = r[:non_default_attribute]
-            matching_cmp[:non_default_attributes] << attr
+            unless attr[:attribute_value].nil?
+              matching_cmp[:non_default_attributes] << attr
+            end
           end
         end
         update_hash = {

@@ -282,9 +282,15 @@ module DTK
         node_ref = node_ref(node)
         cmp_refs = node[:components].inject(Hash.new){|h,cmp|h.merge(create_component_ref_content(cmp))}
         ports = (node[:ports]||[]).inject(Hash.new){|h,p|h.merge(create_port_content(p))}
+        node_attrs = (node[:attributes]||[]).inject(Hash.new){|h,a|h.merge(create_node_attribute_content(a))}
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
-        node_hash.merge!("*assembly_id" => "/component/#{self[:ref]}",:component_ref => cmp_refs, :port => ports)
-        node_hash.merge!(:type => "stub")
+        node_hash.merge!(
+          "*assembly_id" => "/component/#{self[:ref]}",
+          :type => "stub",
+          :component_ref => cmp_refs, 
+          :port => ports,
+          :attribute => node_attrs
+        )
         {node_ref => node_hash}
       end
 
@@ -293,6 +299,12 @@ module DTK
         port_hash = Aux::hash_subset(port,[:display_name,:description,:type,:direction,:link_type,:component_type])
         port_hash.merge!(:link_def_id => port[:link_def][:ancestor_id]) if port[:link_def]
         {port_ref => port_hash}
+      end
+
+      def create_node_attribute_content(attr)
+        attr_ref = attr[:display_name]
+        attr_hash = Aux::hash_subset(attr,[:display_name,:value_asserted,:value_derived])
+        {attr_ref => attr_hash}
       end
 
       def create_component_ref_content(cmp)

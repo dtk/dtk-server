@@ -30,7 +30,12 @@ module DTK
           node_name = node_hash[:display_name]
           node_ref_to_name[node_ref] = node_name
           cmp_info = node_hash[:component_ref].values.map{|cmp|component_output_form(cmp)}
-          h.merge(node_name => {:components => cmp_info})
+          node_hash_output = SimpleOrderedHash.new()
+          if node_attrs_output = node_attributes_output_form?(node_hash[:attribute])
+            node_hash_output.merge!(:attributes => node_attrs_output)
+          end
+          node_hash_output.merge!(:components => cmp_info)
+          h.merge(node_name => node_hash_output)
         end
 
         #add in port links
@@ -64,6 +69,14 @@ module DTK
           end
           ret unless ret.empty?
         end
+      end
+
+      def node_attributes_output_form?(attrs)
+        ret = (attrs||Hash.new).values.inject(Hash.new) do |h,attr|
+          val = attr[:value_asserted]
+          val.nil? ? h : h.merge(attr[:display_name] => val)
+        end
+        ret unless ret.empty?
       end
 
       def temporal_ordering_hash()

@@ -2,7 +2,6 @@ module DTK
   class DB
     module DataProcessingUpdate
       r8_nested_require('update','recursive_delete')
-      include RecursiveDelete
       def update_from_select(model_handle,field_set,select_ds,opts={})
         columns = field_set.cols
         #TODO: right now need to hardwire to t1 for this to work; although alias set with this var; adding where clause puts t1 in
@@ -53,8 +52,8 @@ module DTK
       #TODO Enable short circuit that conditionally avoids IDInfoTable
       #returns list of created uris
       def update_from_hash_assignments(id_handle,hash_assigns,opts={})
-	      id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
-	      return update_from_hash_from_factory_id(id_info,id_handle,hash_assigns,opts) if id_info[:is_factory]
+        id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => true 
+        return update_from_hash_from_factory_id(id_info,id_handle,hash_assigns,opts) if id_info[:is_factory]
         update_from_hash_from_instance_id(id_info,id_handle,hash_assigns,opts)
       end
 
@@ -74,7 +73,6 @@ module DTK
       end
 
      private
-
       def update_given_sequel_dataset(id_info,update_ds,update_set_clause,opts={})
         unless opts[:returning_cols] 
           update_ds.update(update_set_clause)
@@ -112,6 +110,10 @@ module DTK
 
 	c = factory_id_info[:c]
         child_id_list = Array.new
+        if create_stack_array and assigns.empty?()
+          #this means that need to update create_stack_array to indicate that there is a child that should have no elements
+          create_stack_array.add_empty!(factory_id_info[:relation_type])
+        end
 	#each assigns key should be qualified ref wrt factory_id
         assigns.each_pair do |qualified_ref,child_assigns|
 	  child_uri = RestURI.ret_child_uri_from_qualified_ref(factory_id_info[:uri],qualified_ref)
@@ -121,7 +123,7 @@ module DTK
           if child_id_info
             child_opts = opts
             if create_stack_array
-              child_create_stack = create_stack_array.add_child!(child_id_info[:relation_type],child_id_info[:id])
+              child_create_stack = create_stack_array.add!(child_id_info[:relation_type],child_id_info[:id])
               child_opts = opts.merge(:create_stack_array => child_create_stack.children()) 
             end
 	    update_from_hash_from_instance_id(child_id_info,child_idh,child_assigns,child_opts)
@@ -150,6 +152,20 @@ module DTK
           delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts) 
         end
         new_uris
+      end
+
+      #TODO: more efficient way to delete recursive; for one theer are whole trees taht once get deleted at base level do not need to be deleted above
+      def delete_not_matching_children(child_id_list,factory_id_info,assigns,create_stack_array,opts={})
+        parent_id_handle = IDHandle[:c => factory_id_info[:c], :guid => factory_id_info[:parent_id]]
+        relation_type = factory_id_info[:relation_type]
+        where_clause = child_id_list.empty? ? nil : SQL.not(SQL.or(*child_id_list.map{|id|{:id=>id}}))
+        where_clause = SQL.and(where_clause,assigns.constraints) unless assigns.constraints.empty?
+        delete_instances_wrt_parent(relation_type,parent_id_handle,where_clause,opts)
+        if assigns.apply_recursively?
+          create_stack_array.indexed_form().each_parent_child_pair do |parent_type,child_type,id_rels|
+            delete_instances_wrt_parents(parent_id_handle,parent_type,child_type,id_rels)
+          end
+        end
       end
 
 

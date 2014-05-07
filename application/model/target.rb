@@ -47,12 +47,13 @@ module DTK
       get_field?(:is_default_target)
     end
 
-    def info_about(about)
+    def info_about(about, opts={})
       case about
        when :assemblies
-         Assembly::Instance.list(model_handle(:component),:target_idh => id_handle())
+         opts.merge!(:target_idh => id_handle())
+         Assembly::Instance.list(model_handle(:component), opts)
        when :nodes
-         Node.list(model_handle(:node),:target_idh => id_handle())
+         Node.list(model_handle(:node), :target_idh => id_handle())
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end

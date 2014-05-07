@@ -8,7 +8,8 @@
       "size",
       "os",
       "op_status",
-      "dns_name"
+      "dns_name",
+      "managed"
     ],
     "mapping": {
       "name": "display_name",
@@ -20,7 +21,8 @@
       "zone": "external_ref.availability_zone",
       "os": "os_type",
       "op_status": "admin_op_status",
-      "id": "dtk_id"
+      "id": "dtk_id",
+      "managed": "managed"
     }
   },
   "node_group": {

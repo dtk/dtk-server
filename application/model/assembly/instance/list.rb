@@ -15,7 +15,8 @@ module DTK; class  Assembly
 
       def list(assembly_mh,opts={})
         assembly_rows = get_info__flat_list(assembly_mh,opts)
-        assembly_rows.reject!{|r|Workspace.is_workspace?(r)}
+        assembly_rows.reject!{|r|Workspace.is_workspace?(r)} unless opts[:include_workspace]
+
         if opts[:detail_level].nil?
           list_aux__no_details(assembly_rows)
         else
@@ -84,7 +85,7 @@ module DTK; class  Assembly
           list_components(opts)
           
         when :nodes
-          get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type).sort{|a,b| a[:display_name] <=> b[:display_name] }
+          get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:managed).sort{|a,b| a[:display_name] <=> b[:display_name] }
           
         when :modules
           component_modules_opts = Hash.new

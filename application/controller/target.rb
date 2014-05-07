@@ -81,7 +81,8 @@ module DTK
     def rest__info_about()
       target = create_obj(:target_id)
       about = ret_non_null_request_params(:about).to_sym
-      rest_ok_response target.info_about(about)
+      opts = ret_params_hash(:detail_level, :include_workspace)
+      rest_ok_response target.info_about(about, opts)
     end
 
 

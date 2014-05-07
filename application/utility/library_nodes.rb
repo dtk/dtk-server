@@ -1,9 +1,6 @@
 module XYZ
   class LibraryNodes
     def self.get_hash(opts={})
-      require 'debugger'
-      Debugger.start
-      debugger
       ret = {"node"=> node_templates(opts), "node_binding_ruleset" => node_binding_rulesets()}
       if opts[:in_library]
         {"library"=> {opts[:in_library] => ret}}

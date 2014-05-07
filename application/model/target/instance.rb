@@ -81,9 +81,9 @@ module DTK
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
           end
-          if t.is_default?()
-            t[:display_name] << DefaultTargetMark
-          end
+          # if t.is_default?()
+          #   t[:display_name] << DefaultTargetMark
+          # end
         end
         #sort by 1-whether default, 2-iaas_type, 3-display_name 
         unsorted_rows.sort do |a,b|

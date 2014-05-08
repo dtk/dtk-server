@@ -23,7 +23,8 @@ module DTK
 
     def rest__import_nodes()
       target_instance = create_obj(:target_id, ::DTK::Target::Instance)
-      rest_ok_response Target::Instance.import_nodes(target_instance)
+      inventory_data = ret_non_null_request_params(:inventory_data)
+      rest_ok_response Target::Instance.import_nodes(target_instance, inventory_data)
     end
 
     #create target instance

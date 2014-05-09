@@ -149,6 +149,10 @@ module DTK
       (get_augmented_workspace_branch(opts.merge(:include_repo_remotes => true))||{})[:repo_remotes]||[]
     end
 
+    def default_linked_remote_repo()
+      get_linked_remote_repos(:is_default => true).first
+    end
+
     def get_augmented_workspace_branch(opts={})
       version = (opts[:filter]||{})[:version]
       version_field = ModuleBranch.version_field(version) #version can be nil
@@ -158,6 +162,7 @@ module DTK
       module_rows = get_objs(sp_hash).select do |r|
         r[:module_branch][:version] == version_field
       end
+
       if module_rows.size == 0
         unless opts[:donot_raise_error]
           raise ErrorUsage.new("Module #{pp_module_name(version)} does not exist")

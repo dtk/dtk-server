@@ -267,7 +267,7 @@ module DTK
     end
 
     def display_name()
-      self[:display_name]
+      self[:display_name]||(update_object!(:display_name))[:display_name]
     end
 
     def set_id_handle(hash_or_idh)

@@ -39,6 +39,36 @@ module Ramaze::Helper
       { :missing_modules => missing_modules, :required_modules => required_modules }
     end
 
+    def chmod_from_remote_helper()
+      component_module = create_obj(:module_id)
+      permission_selector, remote_namespace = ret_request_params(:permission_selector, :remote_module_namespace)
+      client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+
+      remote_namespace = check_remote_namespace(remote_namespace, component_module)
+      repoman_client = Repo::Remote.new().repoman_client()
+      repoman_client.chmod(module_type(component_module), component_module.display_name, remote_namespace, permission_selector, client_rsa_pub_key)
+    end 
+
+    def chown_from_remote_helper()
+      component_module = create_obj(:module_id)
+      remote_namespace = ret_request_params(:remote_module_namespace)
+      client_rsa_pub_key, remote_user = ret_non_null_request_params(:rsa_pub_key, :remote_user)
+
+      remote_namespace = check_remote_namespace(remote_namespace, component_module)
+      repoman_client = Repo::Remote.new().repoman_client()
+      repoman_client.chown(module_type(component_module), component_module.display_name, remote_namespace, remote_user, client_rsa_pub_key)
+    end 
+
+    def collaboration_from_remote_helper
+      component_module = create_obj(:module_id)
+      users, groups,remote_namespace = ret_request_params(:users, :groups, :remote_module_namespace)
+      action, client_rsa_pub_key = ret_non_null_request_params(:action, :rsa_pub_key)
+
+      remote_namespace = check_remote_namespace(remote_namespace, component_module)
+      repoman_client = Repo::Remote.new().repoman_client()
+      repoman_client.collaboration(module_type(component_module), action, component_module.display_name, remote_namespace, users, groups, client_rsa_pub_key)
+    end
+
     def pull_from_remote_helper(module_class)
       #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
       Log.error("Not expecting to call pull_from_remote_helper")
@@ -164,6 +194,21 @@ module Ramaze::Helper
         else raise Error.new("Unexpected module_type (#{module_type})")
       end
     end
+
+    def module_type(component_module)
+      component_module.is_a?(ComponentModule) ? :component_module : :service_module
+    end
+
+    def check_remote_namespace(remote_namespace, component_module)
+      if remote_namespace.empty?
+        linked_remote_repo = component_module.default_linked_remote_repo()
+        remote_namespace   = linked_remote_repo ? linked_remote_repo[:repo_namespace] : nil
+        raise ErrorUsage.new("Not able to find linked remote namespace, please provide one") unless remote_namespace
+      end
+      remote_namespace
+    end
+
+
   end
 end
 

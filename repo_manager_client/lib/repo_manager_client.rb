@@ -69,6 +69,59 @@ module DTK
       response
     end
 
+    def chmod(type, module_name, module_namespace, permission_selector, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+      request_params = {
+        :name => module_name,
+        :namespace   => module_namespace,
+        :permission_selector => permission_selector
+      }
+
+      url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
+
+      post_rest_request_data(
+        url,
+        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        :raise_error => true
+        )
+    end
+
+    def chown(type, module_name, module_namespace, remote_user, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+      request_params = {
+        :name => module_name,
+        :namespace   => module_namespace,
+        :remote_user => remote_user
+      }
+
+      url = type == :component_module ? '/v1/component_modules/chown' : '/v1/service_modules/chown'
+
+      post_rest_request_data(
+        url,
+        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        :raise_error => true
+        )
+    end
+
+    def collaboration(type, action, module_name, module_namespace, users, groups, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+      request_params = {
+        :name => module_name,
+        :namespace   => module_namespace,
+        :collaboration_action => action,
+        :collaboration_users => users,
+        :collaboration_groups => groups
+      }
+
+      url = type == :component_module ? '/v1/component_modules/collaboration' : '/v1/service_modules/collaboration'
+
+      post_rest_request_data(
+        url,
+        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        :raise_error => true
+        )
+    end
+
     def create_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
@@ -226,8 +279,8 @@ module DTK
 
     def is_internal_error?(response)
       # error:: is namespace for our custom message on repoman
-      result = response['errors'].find { |err| !err['code'].include?('error::')}
-      !result.nil?
+      result = response['errors'].find { |err| err['code'].is_a?(Fixnum) || err['code'].to_s.include?('error::')}
+      result.nil?
     end
 
     def error_msg(response)

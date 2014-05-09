@@ -21,6 +21,10 @@ module DTK
         Log.debug "Using repo manager: '#{repo_url}'"
       end
 
+      def repoman_client
+        return client
+      end
+
       def create_client_user(client_rsa_pub_key)
         client.create_client_user(client_rsa_pub_key)
       end
@@ -117,7 +121,7 @@ module DTK
         @remote
       end
       private :remote
-
+      
       def list_module_info(type=nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && {:type => type_for_remote_module(type)}

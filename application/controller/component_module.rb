@@ -99,6 +99,21 @@ module DTK
       rest_ok_response pull_from_remote_helper(ComponentModule)
     end
 
+    def rest__remote_chmod()
+      chmod_from_remote_helper()
+      rest_ok_response
+    end
+
+    def rest__remote_chown()
+      chown_from_remote_helper()
+      rest_ok_response
+    end
+
+    def rest__remote_collaboration()
+      collaboration_from_remote_helper()
+      rest_ok_response
+    end
+
     def rest__versions()
       component_module = create_obj(:component_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)

@@ -1,16 +1,17 @@
 module DTK
   class Node
     class NodeAttribute
+      require('attribute','canonical_name')
       def initialize(node)
         @node = node
       end
 
       def root_device_size()
-        get_value?(:root_device_size,:integer)
+        get_value?(CanonicalName::RootDeviceSize,:integer)
       end
       
       def puppet_version()
-        get_value?(:puppet_version)||R8::Config[:puppet][:version]
+        get_value?(CanonicalName::PuppetVersion)||R8::Config[:puppet][:version]
       end
 
       def self.assembly_attribute_filter()
@@ -20,8 +21,11 @@ module DTK
       AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
      private
-      def get_value?(attribute_name,semantic_data_type=nil)
-        attr = @node.get_node_attribute?(attribute_name.to_s,:cols => [:id,:group_id,:attribute_value])
+      def get_value?(canonical_attr_name,semantic_data_type=nil)
+        aliases = canonical_attr_name.aliases
+        attribute_names = (aliases ? [canonical_attr_name] + aliases : canonical_attr_name)
+          if aliases = 
+        attr = @node.get_node_attribute?(attribute_names,:cols => [:id,:group_id,:attribute_value])
         value = attr && attr[:attribute_value]
         if value and semantic_data_type
           value = Attribute::SemanticDatatype.convert_to_internal_form(semantic_data_type,value)
@@ -95,8 +99,14 @@ module DTK
         NodeAttribute.new(self)
       end
 
-      def get_node_attribute?(attribute_name,opts={})
-        get_node_attributes(opts.merge(:filter => [:eq,:display_name,attribute_name])).first
+      def get_node_attribute?(attribute_name_or_names,opts={})
+       name_filter = 
+          if attribute_name_or_names.kind_of?(Array)
+            [:or] + attribute_name_or_names.map{|attr|[:eq,:display_name,attr]}
+          else
+            [:eq,:display_name,attribute_name_or_name]
+          end
+        get_node_attributes(opts.merge(:filter => name_filter)).first
       end
       def get_node_attributes(opts={})
         Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])

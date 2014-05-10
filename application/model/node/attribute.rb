@@ -1,7 +1,7 @@
 module DTK
   class Node
     class NodeAttribute
-      require('attribute','canonical_name')
+      require('attribute','def')
       def initialize(node)
         @node = node
       end

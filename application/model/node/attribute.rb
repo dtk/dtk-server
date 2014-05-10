@@ -1,7 +1,7 @@
 module DTK
   class Node
     class NodeAttribute
-      require('attribute','def')
+      r8_nested_require('attribute','def')
       def initialize(node)
         @node = node
       end
@@ -24,7 +24,6 @@ module DTK
       def get_value?(canonical_attr_name,semantic_data_type=nil)
         aliases = canonical_attr_name.aliases
         attribute_names = (aliases ? [canonical_attr_name] + aliases : canonical_attr_name)
-          if aliases = 
         attr = @node.get_node_attribute?(attribute_names,:cols => [:id,:group_id,:attribute_value])
         value = attr && attr[:attribute_value]
         if value and semantic_data_type

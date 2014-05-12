@@ -21,6 +21,7 @@ module DTK
        :iaas_properties,
        :project_id,
        :is_default_target,
+       :provider,
        :ui
       ]
     end
@@ -57,6 +58,12 @@ module DTK
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+    end
+
+    def self.info(target_mh, id)
+      target_info = Target.get(target_mh, id)
+      target_info[:provider_name] = target_info[:provider][:display_name] if target_info[:provider]
+      target_info
     end
 
     def self.check_valid_id(model_handle,id)

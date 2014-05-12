@@ -21,6 +21,11 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__info()
+      target_id = ret_non_null_request_params(:target_id)
+      rest_ok_response Target.info(model_handle(), target_id)
+    end
+
     def rest__import_nodes()
       target_instance = create_obj(:target_id, ::DTK::Target::Instance)
       inventory_data = ret_non_null_request_params(:inventory_data)

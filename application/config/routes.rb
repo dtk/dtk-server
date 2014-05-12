@@ -218,7 +218,6 @@ R8::ReactorRoute.draw do
   post  'target/delete' => 'target#delete'
   post  'target/info' => 'target#info'
   post  'target/install_agents' => 'target#install_agents'
-
   
    # TASK
   post  'task/cancel_task' => 'task#cancel_task'

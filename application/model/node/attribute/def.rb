@@ -1,24 +1,16 @@
 module DTK; class Node
   class NodeAttribute
-    class Def
-      def self.Type(type,&block)
-        @types ||= Hash.new 
-        @types[type] = Type.new(type,&block)
+    class << self
+      def Attribute(attr,&block)
+        @attributes_hash ||= Hash.new
+        Def::Attribute.new(@attributes_hash,attr,&block)
       end
-      def self.hash(type)
-        @types[type]
+      def attributes_hash()
+        @attributes_hash
       end
-      class Type < Hash
-        def initialize(type,&block)
-          @type = type
-          instance_eval(&block)
-        end
-        def attribute(attr,&block)
-          attrs = self[:attributes] ||= Hash.new
-          Attribute.new(attrs,attr,&block)
-        end
-      end
+    end
 
+    class Def
       class Attribute < Hash
         def initialize(attrs,attr,&block)
           @attr = attr

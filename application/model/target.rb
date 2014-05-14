@@ -153,6 +153,11 @@ module DTK
       get_iaas_properties()[:security_group]
     end
 
+    def install_agents()
+        unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
+        raise Error.new("TODO: implement async calls to install node agent on discovered physical nodes.")
+    end
+
     # returns aws params if pressent in iaas properties
     def get_aws_compute_params()
       iaas_props = get_iaas_properties()

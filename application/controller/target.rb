@@ -32,6 +32,14 @@ module DTK
       rest_ok_response Target::Instance.import_nodes(target_instance, inventory_data)
     end
 
+    def rest__install_agents()
+      # target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      target = create_obj(:target_id)
+      target.install_agents()
+
+      rest_ok_response
+    end
+
     #create target instance
     def rest__create()
       provider  = create_obj(:provider_id, ::DTK::Target::Template)

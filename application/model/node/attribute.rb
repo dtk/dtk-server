@@ -2,8 +2,11 @@ module DTK
   class Node
     class NodeAttribute
       r8_nested_require('attribute','def')
-      #declarations must be before def
+      #must be oredred this way
       r8_nested_require('attribute','declarations')
+
+
+
       def initialize(node)
         @node = node
       end

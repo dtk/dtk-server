@@ -8,13 +8,14 @@ module DTK
       def initialize(node)
         @node = node
       end
-
+=begin
+convert
       def root_device_size()
         get_value?(CanonicalName::RootDeviceSize,:integer)
       end
-      
+=end      
       def puppet_version()
-        get_value?(CanonicalName::PuppetVersion)||R8::Config[:puppet][:version]
+        get_value?(Def::PuppetVersion)||R8::Config[:puppet][:version]
       end
 
       def self.assembly_attribute_filter()
@@ -24,9 +25,8 @@ module DTK
       AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
      private
-      def get_value?(canonical_attr_name,semantic_data_type=nil)
-        aliases = canonical_attr_name.aliases
-        attribute_names = (aliases ? [canonical_attr_name] + aliases : canonical_attr_name)
+      def get_value?(attr_def_class,semantic_data_type=nil)
+        attribute_names = [attr_def_class.canonical_name] + attr_def_class.aliases
         attr = @node.get_node_attribute?(attribute_names,:cols => [:id,:group_id,:attribute_value])
         value = attr && attr[:attribute_value]
         if value and semantic_data_type

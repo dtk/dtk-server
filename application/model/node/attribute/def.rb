@@ -24,13 +24,11 @@ module DTK; class Node
         @@index_by_canonical_name.keys()
       end
 
-      #index can be a canonical name or an interpretd object
-
-      def self.names(canonical_name=nil)
-        object(canonical_name).names()
+      def self.canonical_name()
+        object()[:canonical_name]
       end
-      def names()
-        [self[:canonical_name]] + (self[:aliases]||[])
+      def self.aliases(canonical_name=nil)
+        object(canonical_name)[:aliases]||[]
       end
 
      private    

@@ -2,10 +2,8 @@ module DTK
   class Node
     class NodeAttribute
       r8_nested_require('attribute','def')
-      #must be oredred this way
+      #must be ordered this way
       r8_nested_require('attribute','declarations')
-
-
 
       def initialize(node)
         @node = node

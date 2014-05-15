@@ -1,10 +1,15 @@
 module DTK; class Node
-  class NodeAttribute
-    Attribute 'node_agent.puppet.version' do
-#      aliases ['puppet_version']
+  class NodeAttribute::Def
+    class PuppetVersion < self
+    end
+    Attribute 'node_agent.puppet.version', PuppetVersion do
+      aliases ['puppet_version']
       data_type :string
-      types lambda{|x|ConfigAgent.treated_version?(:puppet,x)}
+      types lambda{|v|ConfigAgent.treated_version?(:puppet,v)}
       #TODO: put in meta attribute cannot_change_after_converge
+    end
+    Attribute 'foo' do
+      data_type :string
     end
   end
 end; end

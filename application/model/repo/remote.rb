@@ -236,9 +236,11 @@ module DTK
       def dtk_instance_rsa_pub_key()
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
+
       def dtk_instance_remote_repo_username()
-        "dtk-instance"
+        "#{::DTK::Common::Aux.running_process_user()}-dtk-instance"
       end
+
       def dtk_instance_remote_repo_key_name()
         "dtk-instance-key"
       end

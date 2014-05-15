@@ -113,7 +113,6 @@ module DTK; class ServiceModule
         end
         new_rows.each{|r|r.merge!(:node => ndx_port_node[r[:id]])}
       end
-      pp [:add_ports,ret,new_rows]
       ret + new_rows
     end
     

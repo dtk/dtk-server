@@ -7,24 +7,41 @@ module DTK; class Node
     end
 
     class Def < Hash
-      def initialize()
+      def initialize(canonical_name)
         super()
-        merge!(:klass => self.class)
+        merge!(:canonical_name => canonical_name)
       end
-      def self.Attribute(attr_canonical_name,klass=nil,&block)
-        @index_by_canonical_name ||= Hash.new
-        Add.new(@index_by_canonical_name,attr_canonical_name,klass,&block)
+      def self.Attribute(canonical_attr_name,klass=nil,&block)
+        @@index_by_canonical_name ||= Hash.new
+        Add.new(@@index_by_canonical_name,canonical_attr_name,klass,&block)
         if klass
           #Interprted def is a node attribute that has additional methods defined on it
-          (@interpreted_def ||= Hash.new)[klass] = @index_by_canonical_name[attr_canonical_name]
+          (@@interpreted_def ||= Hash.new)[klass] = @@index_by_canonical_name[canonical_attr_name]
         end
       end
 
-      def self.debug()
-        {:index_by_canonical_name => @index_by_canonical_name,
-          :interpreted_def => @interpreted_def}
+      def self.all_canonical_names()
+        @@index_by_canonical_name.keys()
       end
-    
+
+      #index can be a canonical name or an interpretd object
+
+      def self.names(canonical_name=nil)
+        object(canonical_name).names()
+      end
+      def names()
+        [self[:canonical_name]] + (self[:aliases]||[])
+      end
+
+     private    
+      def self.object(canonical_name=nil)
+        unless ret = (canonical_name ? @@index_by_canonical_name[canonical_name] : @@interpreted_def[self])
+          index = canonical_name||self
+          raise Error.new("Bad index given (#{index.inspect}")
+        end
+        ret
+      end
+
       class Add < Hash
         def initialize(attrs,attr,klass=nil,&block)
           @attr = attr
@@ -90,7 +107,7 @@ module DTK; class Node
         
         private
         def set_meta_property!(prop,val)
-          (@attrs[@attr] ||= @klass.new)[prop] = val
+          (@attrs[@attr] ||= @klass.new(@attr))[prop] = val
         end
       end
     end

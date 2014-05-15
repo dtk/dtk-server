@@ -1,21 +1,37 @@
 module DTK; class Node
   class NodeAttribute
     class << self
-      def Attribute(attr,&block)
-        @attributes_hash ||= Hash.new
-        Def::Attribute.new(@attributes_hash,attr,&block)
-      end
       def attributes_hash()
-        @attributes_hash
+        Def.ret_hash()
       end
     end
 
-    class Def
-      class Attribute < Hash
-        def initialize(attrs,attr,&block)
+    class Def < Hash
+      def initialize()
+        super()
+        merge!(:klass => self.class)
+      end
+      def self.Attribute(attr_canonical_name,klass=nil,&block)
+        @index_by_canonical_name ||= Hash.new
+        Add.new(@index_by_canonical_name,attr_canonical_name,klass,&block)
+        if klass
+          #Interprted def is a node attribute that has additional methods defined on it
+          (@interpreted_def ||= Hash.new)[klass] = @index_by_canonical_name[attr_canonical_name]
+        end
+      end
+
+      def self.debug()
+        {:index_by_canonical_name => @index_by_canonical_name,
+          :interpreted_def => @interpreted_def}
+      end
+    
+      class Add < Hash
+        def initialize(attrs,attr,klass=nil,&block)
           @attr = attr
           @attrs = attrs
+          @klass = klass||Def
           instance_eval(&block)
+          attrs[attr]
         end
         def types(type_description)
           #for types has a lambda function that if true means the value is legal; if in dsl user gives array we convert this to lambda function
@@ -67,10 +83,14 @@ module DTK; class Node
         def semantic_type(semantic_type_val)
           set_meta_property!(:semantic_type, semantic_type_val)
         end
+
+        def aliases(aliases)
+          set_meta_property!(:aliases, aliases)
+        end
         
         private
         def set_meta_property!(prop,val)
-          (@attrs[@attr] ||= Hash.new)[prop] = val
+          (@attrs[@attr] ||= @klass.new)[prop] = val
         end
       end
     end
@@ -96,28 +116,4 @@ end; end
       end
     end
   end
-#TODO: move this to seperate file under ec2.rb that gets included by ec2
-#Example declaration
-# DTK::IAAS.Type :ec2 do
-#   attribute :a1 do
-#     types [:a,:b,:c]
-#     description 'just a test'
-#   end
-#   attribute :b1 do
-#     types lambda{|x|x.kind_of?(Fixnum) and x > 10}
-#   end
-# end
-# require 'pp'
-#this returns the full hash capturing the meta properties that we wil use to describe ec2 node attributes
-# hash = DTK::IAAS.hash(:ec2)
-# pp hash
-
-#showing example of using the generated :is_type? content to check different attribute values
-# a_check = hash[:attributes][:a1][:is_type?]
-# pp [:a,:b,:d,:c].map{|y|{y => a_check.call(y)}}
-# b_check = hash[:attributes][:b1][:is_type?]
-# pp [:a,1,20,4].map{|y|{y => b_check.call(y)}}
-
 =end
-
-

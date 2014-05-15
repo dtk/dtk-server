@@ -5,6 +5,10 @@ module DTK
     r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
+    require 'thread'
+    require 'timeout'
+    require 'net/ssh'
+    require 'net/scp'
 
     def model_name() #TODO: remove temp datacenter->target
       :datacenter
@@ -153,9 +157,136 @@ module DTK
       get_iaas_properties()[:security_group]
     end
 
+    # we use this module to handle multithreading, and if some node is not reachable or some error happens on the node
+    # we just ignore it
+    module Work
+      @queue     = Queue.new
+      @n_threads = R8::Config[:workflow][:install_agents][:threads]
+      @workers   = []
+      @running   = true
+
+      Job = Struct.new(:worker, :params)
+
+      module_function
+      def enqueue(worker, *params)
+          @queue << Job.new(worker, params)
+      end
+
+      def start
+        @workers = @n_threads.times.map { Thread.new {process_jobs} }
+      end
+
+      def process_jobs
+          while @running
+            job = nil
+            Timeout.timeout(10) do
+              job = @queue.pop
+            end
+            job.worker.new.call(*job.params)
+          end
+      end
+
+      def drain
+        Timeout.timeout(R8::Config[:workflow][:install_agents][:timeout]) do
+          loop do
+            break unless @workers.any?{|w| w.alive?}
+            sleep 1
+          end
+        end
+      end
+
+      def stop
+        @running = false
+        @workers.each do |t|
+          t.exit() if t.status.eql?('sleep')
+        end
+      end
+    end
+
+    # this is the job that will upload node agent to physical nodes using Net::SCP.upload! command
+    # and after that we execute some commands on the node itself using execute_ssh_command() method
+    class SshJob
+      def call(message)
+        puts message
+
+        params = {
+          :hostname => message["hostname"],
+          :user => message["user"],
+          :password => message["password"],
+          :port => message["port"],
+          :id => message["id"]
+        }
+
+        begin
+          execute_ssh_command("ls /", params)
+        rescue Exception => e
+          puts "#{e.message}. Params: #{params}"
+          return
+        end
+
+        execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+        # upload the dtk-node-agent code
+        Net::SCP.upload!(message["hostname"], message["user"],
+          message["dtk_node_agent_location"], "/tmp",
+          :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
+
+        # perform installation
+        execute_ssh_command("sudo bash /tmp/dtk-node-agent/install_agent.sh", params)
+        execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+      end
+
+      def execute_ssh_command(command, params={})
+        Net::SSH.start(params[:hostname], params[:user], :password => params[:password], :port => params[:port]) do |ssh|
+          # capture all stderr and stdout output from a remote process
+          ssh.exec!(command) do |channel, stream, line|
+            puts "#{params[:hostname]} > #{line}"
+          end
+        end
+      end
+    end
+
     def install_agents()
-        unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-        raise Error.new("TODO: implement async calls to install node agent on discovered physical nodes.")
+      require 'debugger'
+      Debugger.start
+      debugger
+      # For Rich:
+      # this is the part of the code that should install node agent to existing nodes
+
+      # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
+      unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
+      servers = []
+
+      # here we set information we need to connect to nodes via ssh
+      unmanaged_nodes.each do |node|
+          external_ref = node[:external_ref]
+          servers << {
+            "id" => node[:id],
+            "hostname"    => external_ref[:routable_host_address],
+            "user"        => external_ref[:ssh_credentials][:ssh_user],
+            "port"        => "22",
+            "password"    => external_ref[:ssh_credentials][:ssh_password],
+            "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent"
+          }
+      end
+
+      # location where we will upload node agent
+      $dtk_node_agent_location = "#{R8.app_user_home()}/dtk-node-agent"
+
+      # add jobs to the queue
+      # Work is module defined above this method (line: 160)
+      servers.each do |server|
+        Work.enqueue(SshJob, server)
+      end
+
+      # start the workers
+      Work.start
+      # wait for all jobs to finnish
+      begin
+        Work.drain
+      rescue Timeout::Error => e
+        # stop the workers
+        Work.stop
+      end
     end
 
     # returns aws params if pressent in iaas properties

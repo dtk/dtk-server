@@ -29,7 +29,7 @@ begin
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::remote/destination_password', config['properties']['server_password'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_addons::test_scripts_setup/server_password', config['properties']['server_password'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_client/dtk_client_password', config['properties']['server_password'])
-	    set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
+	  set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_access_key_id', config['properties']['aws_access_key_id'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/aws_secret_access_key', config['properties']['aws_secret_access_key'])
 
 		#Set tags that will be used to checkout correct versions of DTK artifacts for this release
@@ -40,7 +40,7 @@ begin
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/server_branch', config['properties']['server_release'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/common_branch', config['properties']['common_release'])
 		set_attributes_array << dtk_common.set_attribute(dtk_common.service_id, 'tenant/dtk_server::tenant/common_core_branch', config['properties']['common_core_release'])
-
+		
 		#If all attribures have been set, proceed with dtk::release converge
 		if !set_attributes_array.include? false
 	  		service_converged = dtk_common.converge_service(dtk_common.service_id, 100)

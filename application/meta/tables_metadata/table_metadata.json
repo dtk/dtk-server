@@ -200,10 +200,16 @@
   "module_remote": {
     "order": [
       "name",
+      "owner",
+      "group owner(s)",
+      "permissions",
       "last_updated"
     ],
     "mapping": {
       "name": "display_name",
+      "owner": "owner",
+      "group owner(s)": "group_owners",
+      "permissions": "permissions",
       "last_updated": "last_updated"
     }
   },
@@ -518,6 +524,18 @@
       "node_name":"node_name",
       "system_user":"attributes.linux_user",
       "key_name":"attributes.key_name"
+    }
+  },
+  "module_collaborators": {
+    "order": [
+      "owner_name",
+      "owner_email",
+      "owner_type"
+    ],
+    "mapping": {
+      "owner_name":"owner_name",
+      "owner_email":"owner_email",
+      "owner_type":"owner_type"
     }
   }
 }

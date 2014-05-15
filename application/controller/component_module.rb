@@ -114,6 +114,11 @@ module DTK
       rest_ok_response
     end
 
+    def rest__list_remote_collaboration()
+      response = list_collaboration_from_remote_helper()
+      rest_ok_response response
+    end
+
     def rest__versions()
       component_module = create_obj(:component_module_id)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)

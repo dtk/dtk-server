@@ -66,6 +66,7 @@ module DTK
       else
         response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
       end
+
       response
     end
 
@@ -120,6 +121,23 @@ module DTK
         request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
         :raise_error => true
         )
+    end
+
+    def list_collaboration(type, module_name, module_namespace, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+      request_params = {
+        :name => module_name,
+        :namespace   => module_namespace
+      }
+
+      url = type == :component_module ? '/v1/component_modules/list_collaboration' : '/v1/service_modules/list_collaboration'
+
+      response = post_rest_request_data(
+        url,
+        request_params.merge(user_params_with_fingerprint(repo_user.owner_username, client_rsa_pub_key)),
+        :raise_error => true
+        )
+      response['collaborators']
     end
 
     def create_module(params_hash, client_rsa_pub_key = nil)

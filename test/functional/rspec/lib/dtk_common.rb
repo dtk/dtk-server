@@ -30,8 +30,8 @@ class DtkCommon
 		@PORT = config_yml['r8server']['port']
 		@ENDPOINT = "#{@SERVER}:#{@PORT}"
 		@USERNAME = config_yml['r8server']['username']
-	  	@PASSWORD = config_yml['r8server']['password']
-	  	@server_log = config_yml['r8server']['log']
+	  @PASSWORD = config_yml['r8server']['password']
+	  @server_log = config_yml['r8server']['log']
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
@@ -73,13 +73,13 @@ class DtkCommon
 		end
 
 		log_part.reverse!
-            log_part.each do |line|
-                if line.include? search_string
-                    break
-                else
-                    final_log << line
-                end
-            end
+    log_part.each do |line|
+      if line.include? search_string
+        break
+      else
+        final_log << line
+      end
+    end
 		return final_log
 	end
 

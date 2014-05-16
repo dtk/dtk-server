@@ -32,7 +32,7 @@ module DTK
         # @message = "#{err.to_s} (#{err.backtrace.first})"
         # Do not see value of exposing single line to client, we will still need logs to trace the error
         @message = err.to_s 
-        if R8::Config[:debug][:show_stacktrace] == 'true'
+        if R8::Config[:debug][:show_backtrace] == 'true'
           @backtrace = err.backtrace
         end
       end

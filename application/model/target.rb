@@ -164,6 +164,7 @@ module DTK
       @n_threads = R8::Config[:workflow][:install_agents][:threads]
       @workers   = []
       @running   = true
+      @servers_per_thread = 0
 
       Job = Struct.new(:worker, :params)
 
@@ -173,17 +174,24 @@ module DTK
       end
 
       def start
-        @workers = @n_threads.times.map { Thread.new {process_jobs} }
+        @servers_per_thread = (@queue.size/@n_threads) + 1
+        @n_threads.times do
+          @workers << Thread.new do
+            begin
+              @servers_per_thread.times.map {process_jobs}
+            ensure
+              Thread.current.exit
+            end
+          end
+        end
       end
 
       def process_jobs
-          while @running
-            job = nil
-            Timeout.timeout(10) do
-              job = @queue.pop
-            end
-            job.worker.new.call(*job.params)
-          end
+        while !@queue.empty?
+          job = nil
+          job = @queue.pop
+          job.worker.new.call(*job.params)
+        end
       end
 
       def drain
@@ -225,6 +233,7 @@ module DTK
         end
 
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+
         # upload the dtk-node-agent code
         Net::SCP.upload!(message["hostname"], message["user"],
           message["dtk_node_agent_location"], "/tmp",
@@ -246,12 +255,6 @@ module DTK
     end
 
     def install_agents()
-      require 'debugger'
-      Debugger.start
-      debugger
-      # For Rich:
-      # this is the part of the code that should install node agent to existing nodes
-
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
       servers = []
@@ -273,7 +276,6 @@ module DTK
       $dtk_node_agent_location = "#{R8.app_user_home()}/dtk-node-agent"
 
       # add jobs to the queue
-      # Work is module defined above this method (line: 160)
       servers.each do |server|
         Work.enqueue(SshJob, server)
       end

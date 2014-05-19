@@ -113,6 +113,7 @@ module DTK
       msg
     end
   end
+  
 
   class ErrorConstraintViolations < ErrorUsage
     def initialize(violations)

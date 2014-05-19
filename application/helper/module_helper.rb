@@ -69,6 +69,16 @@ module Ramaze::Helper
       repoman_client.collaboration(module_type(component_module), action, component_module.display_name, remote_namespace, users, groups, client_rsa_pub_key)
     end
 
+    def list_collaboration_from_remote_helper
+      component_module = create_obj(:module_id)
+      remote_namespace = ret_request_params(:remote_module_namespace)
+      client_rsa_pub_key = ret_non_null_request_params(:rsa_pub_key)
+
+      remote_namespace = check_remote_namespace(remote_namespace, component_module)
+      repoman_client = Repo::Remote.new().repoman_client()
+      repoman_client.list_collaboration(module_type(component_module), component_module.display_name, remote_namespace, client_rsa_pub_key)
+    end
+
     def pull_from_remote_helper(module_class)
       #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
       Log.error("Not expecting to call pull_from_remote_helper")

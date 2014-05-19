@@ -188,6 +188,7 @@ module DTK
         else
           Log.error_pp([e,e.backtrace[0..20]])
         end
+
         result = rest_notok_response(RestError.create(e).hash_form())
       end
       @ctrl_results = ControllerResultsRest.new(result)

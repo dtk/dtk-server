@@ -85,6 +85,11 @@ module DTK
       rest_ok_response
     end
 
+    def rest__list_remote_collaboration()
+      response = list_collaboration_from_remote_helper()
+      rest_ok_response response
+    end
+
     #### end actions to interact with remote repos ###
 
     def rest__list()

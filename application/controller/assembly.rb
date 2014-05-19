@@ -67,7 +67,6 @@ module DTK
     end
 
     #### end: create and delete actions ###
-
     #### list and info actions ###
     def rest__info()
       assembly = ret_assembly_object()

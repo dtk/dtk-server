@@ -126,20 +126,19 @@ module DTK
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && {:type => type_for_remote_module(type)}
         remote_modules = client.list_modules(filter, rsa_pub_key)
-        
-        remote_modules.map do |r|
-          el = ((type.nil? and r["type"]) ? {:type => r[:type]} : {}) 
-          # TODO: remove first way of getting namespace when transfer to new repo
-          namespace = r["namespace"] && "#{r["namespace"]}/"
-          namespace = r["namespace"]["name"] && "#{r["namespace"]["name"]}/" if new_repo
-          qualified_name = "#{namespace}#{r["name"]}"
+
+        unsorted = remote_modules.map do |r|
+          el = {}
           last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime("%Y/%m/%d %H:%M:%S")
-          el.merge!(:qualified_name => qualified_name, :last_updated => last_updated)
+          permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
+          el.merge!(:display_name => r['full_name'], :owner => r['owner_name'], :group_owners => r['user_group_names'], :permissions => permission_string, :last_updated => last_updated)
           if versions = branch_names_to_versions(r["branches"])
             el.merge!(:versions => versions)
           end
           el
         end
+
+        unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
       def branch_names_to_versions(branch_names)

@@ -20,8 +20,20 @@ module DTK
         node_template_wc = nil
         node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
 
+        target_id = parent_rels.first[:datacenter_datacenter_id]
+        sp_hash = {
+          :cols => [:id, :display_name, :type, :iaas_type],
+          :filter => [:eq, :id, target_id]
+        }
+        target = Model.get_obj(model_handle.createMH(:target),sp_hash)
+
         #mapping from node stub to node template and overriding appropriate node template columns
-        unless matches.empty?
+        require 'debugger'
+        Debugger.start
+        debugger
+        if target[:iaas_type].eql?("physical")
+          ret = find_physical_nodes(ret, matches, target, create_override_attrs[:assembly_id])  
+        elsif !matches.empty?
           mapping_rows = matches.map do |m|
             {:type => "staged",
               :ancestor_id => m[:node_stub_idh].get_id(),
@@ -34,8 +46,9 @@ module DTK
           
           select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
           ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
+
+          ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
         end
-        ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
 
         #add to ret rows for each service add node binding
         service_add_additions = @clone_proc.get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
@@ -77,6 +90,35 @@ module DTK
 
       def cleanup_after_error()
         Model.delete_instance(model_handle.createIDH(:model_name => :component,:id => override_attrs[:assembly_id]))
+      end
+
+      def find_physical_nodes(ret, matches, target, assembly_id)
+        sp_hash = {
+          :cols => [:id, :display_name, :type, :assembly_id, :datacenter_datacenter_id, :managed],
+          :filter => [:and, [:eq, :datacenter_datacenter_id, target[:id]], [:eq, :managed, true], [:eq, :assembly_id, nil]]
+        }
+        physical_nodes = Model.get_objs(model_handle.createMH(:node), sp_hash)
+
+        matches.each do |match|
+          node = physical_nodes.select{|node| node[:display_name] == match[:node_stub_display_name]}
+
+          unless node.empty?
+            node = node.first
+
+            ret << {
+              :id => node[:id],
+              :display_name => node[:display_name],
+              :parent_id => target[:id],
+              :ancestor_id => match[:node_stub_idh].get_id,
+              :assembly_id => assembly_id,
+              # TODO: Rich, in wiki page you did not specify :node_template_id but it will fail later in child_context.generate
+              # if I don't set this here
+              :node_template_id => match[:node_template_idh].get_id
+            }
+          end
+        end
+
+        ret
       end
     end
   end

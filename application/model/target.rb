@@ -196,7 +196,8 @@ module DTK
       end
 
       def drain
-        Timeout.timeout(R8::Config[:workflow][:install_agents][:timeout]) do
+        t_out = R8::Config[:workflow][:install_agents][:timeout]||300
+        Timeout.timeout(t_out) do
           loop do
             break unless @workers.any?{|w| w.alive?}
             sleep 1

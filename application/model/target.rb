@@ -5,6 +5,7 @@ module DTK
     r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
+    r8_require("../../utils/internal/command_and_control/adapters/iaas/ec2")
     require 'thread'
     require 'timeout'
     require 'net/ssh'
@@ -234,6 +235,10 @@ module DTK
 
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
+        Net::SCP.upload!(message["hostname"], message["user"],
+          message["user_data_file_path"], "/tmp",
+          :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
+
         # upload the dtk-node-agent code
         Net::SCP.upload!(message["hostname"], message["user"],
           message["dtk_node_agent_location"], "/tmp",
@@ -242,6 +247,9 @@ module DTK
         # perform installation
         execute_ssh_command("sudo bash /tmp/dtk-node-agent/install_agent.sh", params)
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
+
+        execute_ssh_command("sudo bash /tmp/user_data", params)
+        execute_ssh_command("rm -rf /tmp/user_data", params)
       end
 
       def execute_ssh_command(command, params={})
@@ -257,23 +265,28 @@ module DTK
     def install_agents()
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-      servers = []
+      user_data_file_path = "#{R8.app_user_home()}/user_data"
+      servers, user_data = [], nil
 
       # here we set information we need to connect to nodes via ssh
       unmanaged_nodes.each do |node|
-          external_ref = node[:external_ref]
-          servers << {
-            "id" => node[:id],
-            "hostname"    => external_ref[:routable_host_address],
-            "user"        => external_ref[:ssh_credentials][:ssh_user],
-            "port"        => "22",
-            "password"    => external_ref[:ssh_credentials][:ssh_password],
-            "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent"
-          }
+        external_ref = node[:external_ref]
+        user_data = CommandAndControlAdapter::Ec2::CloudInit.user_data(node) unless user_data
+
+        servers << {
+          "id" => node[:id],
+          "hostname"    => external_ref[:routable_host_address],
+          "user"        => external_ref[:ssh_credentials][:ssh_user],
+          "port"        => "22",
+          "password"    => external_ref[:ssh_credentials][:ssh_password],
+          "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
+          "user_data_file_path" => user_data_file_path
+        }
       end
 
-      # location where we will upload node agent
-      $dtk_node_agent_location = "#{R8.app_user_home()}/dtk-node-agent"
+      File.open(user_data_file_path, 'w') do |f|
+        f.puts(user_data)
+      end
 
       # add jobs to the queue
       servers.each do |server|
@@ -288,6 +301,8 @@ module DTK
       rescue Timeout::Error => e
         # stop the workers
         Work.stop
+      ensure
+        FileUtils.rm(user_data_file_path)
       end
     end
 

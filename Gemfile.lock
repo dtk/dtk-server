@@ -71,7 +71,7 @@ GEM
     ipaddress (0.8.0)
     json (1.5.2)
     json_pure (1.8.1)
-    mcollective (2.2.3)
+    mcollective-client (2.2.3)
       json
       stomp
       systemu
@@ -194,7 +194,7 @@ DEPENDENCIES
   iconv
   innate (= 2012.03)
   json (= 1.5.2)
-  mcollective (= 2.2.3)
+  mcollective-client (= 2.2.3)
   pg (= 0.14.1)
   puppet (= 3.1.0)
   ramaze (= 2012.04.14)

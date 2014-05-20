@@ -53,13 +53,8 @@ module DTK
         assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
         
         node_idhs = clone_copy_output.children_id_handles(level,:node)
-        node_new_items = node_idhs.map{|idh|{:new_item => idh, :parent => target.id_handle()}}
-        return if node_new_items.empty?
-        node_sc_idhs = StateChange.create_pending_change_items(node_new_items)
-        
-        indexed_node_info = Hash.new #TODO: may have state create this as output
-        node_sc_idhs.each_with_index{|sc_idh,i|indexed_node_info[node_idhs[i].get_id()] = sc_idh}
-
+        return if node_idhs.empty?
+        create_state_changes_for_create_node?(target,node_idhs)
 
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
@@ -74,6 +69,25 @@ module DTK
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      def self.create_state_changes_for_create_node?(target,node_idhs)
+        #Do not create stages for node that are physical
+        sp_hash = {
+          :cols => [:id,:display_name,:external_ref],
+          :filter => [:oneof, :id,node_idhs.map{|idh|idh.get_id()}]
+        }
+        ndx_node_info = Model.get_objs(target.model_handle(:node),sp_hash).inject(Hash.new) do |h,r|
+          h.merge(r[:id] => r)
+        end
+        pruned_node_idhs = node_idhs.reject do |node_idh|
+          (ndx_node_info[node_idh.get_id()][:external_ref]||{})[:type] == 'physical'
+        end
+        return if pruned_node_idhs.empty?
+        target_idh = target.id_handle()
+
+        node_new_items = pruned_node_idhs.map{|idh|{:new_item => idh, :parent => target_idh}}
+        StateChange.create_pending_change_items(node_new_items)
       end
 
       def self.create_add_on_port_and_attr_links?(target,clone_copy_output,opts)

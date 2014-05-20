@@ -470,7 +470,11 @@ module DTK
 
     def destroy_and_delete(opts={})
       if suceeeded = CommandAndControl.destroy_node?(self)
-        delete_object(opts)
+        if (get_field?(:external_ref)||{})[:type] == 'physical'
+          raise Error.new("write code that rather than deleting self deletes all the objects contained in the node")
+        else
+          delete_object(opts)
+        end
       end
       suceeeded
     end

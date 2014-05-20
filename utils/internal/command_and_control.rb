@@ -137,6 +137,7 @@ module XYZ
             case ext_ref_type
               when "ec2_instance" then :ec2
               when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
+              when "physical" then :physical
               else raise Error.new("not treated")
             end
           when :target

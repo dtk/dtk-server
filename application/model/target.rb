@@ -162,7 +162,7 @@ module DTK
     # we just ignore it
     module Work
       @queue     = Queue.new
-      @n_threads = R8::Config[:workflow][:install_agents][:threads]||10
+      @n_threads = R8::Config[:workflow][:install_agents][:threads].to_i||10
       @workers   = []
       @running   = true
       @servers_per_thread = 0
@@ -196,7 +196,7 @@ module DTK
       end
 
       def drain
-        t_out = R8::Config[:workflow][:install_agents][:timeout]||600
+        t_out = R8::Config[:workflow][:install_agents][:timeout].to_i||600
         Timeout.timeout(t_out) do
           loop do
             break unless @workers.any?{|w| w.alive?}

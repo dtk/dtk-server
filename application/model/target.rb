@@ -196,7 +196,7 @@ module DTK
       end
 
       def drain
-        t_out = R8::Config[:workflow][:install_agents][:timeout]||300
+        t_out = R8::Config[:workflow][:install_agents][:timeout]||600
         Timeout.timeout(t_out) do
           loop do
             break unless @workers.any?{|w| w.alive?}
@@ -246,7 +246,6 @@ module DTK
           :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
 
         # perform installation
-        puts ">>>>>>>>>>>>>>>>>>>> #{message['user']}"
         install_command = message["user"].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
         execute_ssh_command(install_command, params)
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)

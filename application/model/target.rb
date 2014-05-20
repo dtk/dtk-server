@@ -162,7 +162,7 @@ module DTK
     # we just ignore it
     module Work
       @queue     = Queue.new
-      @n_threads = R8::Config[:workflow][:install_agents][:threads]
+      @n_threads = R8::Config[:workflow][:install_agents][:threads]||10
       @workers   = []
       @running   = true
       @servers_per_thread = 0

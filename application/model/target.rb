@@ -246,10 +246,13 @@ module DTK
           :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
 
         # perform installation
-        execute_ssh_command("sudo bash /tmp/dtk-node-agent/install_agent.sh", params)
+        puts ">>>>>>>>>>>>>>>>>>>> #{message['user']}"
+        install_command = message["user"].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
+        execute_ssh_command(install_command, params)
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
-        execute_ssh_command("sudo bash /tmp/user_data", params)
+        user_data_command = message["user"].eql?('root') ? "bash /tmp/user_data" : "sudo bash /tmp/user_data"
+        execute_ssh_command(user_data_command, params)
         execute_ssh_command("rm -rf /tmp/user_data", params)
       end
 

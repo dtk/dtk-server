@@ -95,27 +95,37 @@ module DTK
       def find_physical_nodes(ret, matches, target, assembly_id)
         sp_hash = {
           :cols => [:id, :display_name, :type, :assembly_id, :datacenter_datacenter_id, :managed],
-          :filter => [:and, [:eq, :datacenter_datacenter_id, target[:id]], [:eq, :managed, true], [:eq, :assembly_id, nil]]
+          :filter => [:and, 
+                        [:eq, :type, 'instance'],
+                        [:eq, :datacenter_datacenter_id, target[:id]], 
+                        [:eq, :managed, true], 
+                        [:eq, :assembly_id, nil]] #TODO: we can use this for time being, but needs to be changed to handle
+                        #nodes taht have multiple assemblies on them; real test should be that no components point to node 
         }
-        physical_nodes = Model.get_objs(model_handle.createMH(:node), sp_hash)
+        free_physical_nodes = Model.get_objs(model_handle.createMH(:node), sp_hash)
 
-        matches.each do |match|
-          node = physical_nodes.select{|node| node[:display_name] == match[:node_stub_display_name]}
+        #assuming the free nodes are interchangable; pick one for each match
+        num_free = free_physical_nodes.size
+        num_needed = matches.size
+        if num_free < num_needed
+          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
+          free = (num_free == 1 ? '1 is' : "#{num_free} are")
+          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
+        end
 
-          unless node.empty?
-            node = node.first
-
-            ret << {
-              :id => node[:id],
-              :display_name => node[:display_name],
-              :parent_id => target[:id],
-              :ancestor_id => match[:node_stub_idh].get_id,
-              :assembly_id => assembly_id,
-              # TODO: Rich, in wiki page you did not specify :node_template_id but it will fail later in child_context.generate
-              # if I don't set this here
-              :node_template_id => match[:node_template_idh].get_id
-            }
-          end
+        matches.each_with_index do |match,i|
+          node = free_physical_nodes[i]
+          ancestor_id = match[:node_stub_idh].get_id
+          #TODO: change when we handle nodes with multiple assemblies: update node to capture that assembly aassociated with it
+          node.update(:assembly_id => assembly_id, :ancestor_id => ancestor_id)
+          ret << {
+            :id => node[:id],
+            :display_name => node[:display_name],
+            :parent_id => target[:id],
+            :ancestor_id => match[:node_stub_idh].get_id,
+            :assembly_id => assembly_id,
+            :node_template_id => match[:node_template_idh].get_id
+          }
         end
 
         ret

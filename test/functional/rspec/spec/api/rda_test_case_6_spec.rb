@@ -1,15 +1,12 @@
 require './spec/spec_helper'
 
-repoman_url = "https://repoman1.internal.r8network.com"
-
 namespace_info = {
-	:name=>'dtk17',
-	:id=>'2'
+	:name=>'dtk17'
 }
 
-describe "Namespace endpoint tests" do
+describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules that belong to this namespace by namespace name/id" do
 
-	let(:repoman) { RepomanRestApi.new(repoman_url) }
+	let(:repoman) { RepomanRestApi.new }
 
 	context "Check if namespace exists by namespace name" do
 		it "gets existing namespace by name #{namespace_info[:name]}" do
@@ -18,16 +15,6 @@ describe "Namespace endpoint tests" do
 			ap response
 			namespace_exists = true if response['data']['exists'] == true
 			expect(namespace_exists).to eq(true)
-		end
-	end
-
-	context "NEG - Check if namespace exists by incorrect namespace name: fake_namespace" do
-		it "verifies that namespace does not exist" do
-			namespace_exists = true
-			response = repoman.check_if_namespace_exists('fake_namespace')
-			ap response
-			namespace_exists = false if response['data']['exists'] == false
-			expect(namespace_exists).to eq(false)
 		end
 	end
 
@@ -53,10 +40,12 @@ describe "Namespace endpoint tests" do
 		end
 	end
 
-	context "Get all modules that belong to namespace by namespace id #{namespace_info[:id]}" do
+	context "Get all modules that belong to namespace by namespace id" do
 		it "gets all modules" do
 			modules_retrieved_correctly = true
-			response = repoman.get_modules_by_namespace(namespace_info[:id])
+			all_namespaces = repoman.get_namespaces
+			namespace_id = all_namespaces['data'].select { |namespace| namespace['name'] == namespace_info[:name] }.first['id']
+			response = repoman.get_modules_by_namespace(namespace_id)
 			ap response
 			if response['status'] == 'ok'
 				response['data'].each do |module_data|
@@ -72,30 +61,6 @@ describe "Namespace endpoint tests" do
 				end
 			end
 			expect(modules_retrieved_correctly).to eq(true)
-		end
-	end
-
-	context "NEG - Get all modules that belong to namespace by incorrect namespace name: fake_namespace" do
-		it "verifies that namespace does not exist" do
-			error_message = ""
-			response = repoman.get_modules_by_namespace('fake_namespace')
-			ap response
-			if response['status'] == 'notok'
-				error_message = response['errors'].first['message']
-			end
-			expect(error_message).to eq("Namespace ('fake_namespace') was not found")
-		end
-	end
-
-	context "NEG - Get all modules that belong to namespace by incorrect namespace id: 123456" do
-		it "verifies that namespace does not exist" do
-			error_message = ""
-			response = repoman.get_modules_by_namespace('123456')
-			ap response
-			if response['status'] == 'notok'
-				error_message = response['errors'].first['message']
-			end
-			expect(error_message).to eq("Namespace ('123456') was not found")
 		end
 	end
 end

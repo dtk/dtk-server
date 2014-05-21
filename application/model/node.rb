@@ -18,7 +18,6 @@ module DTK
       [
        :id,
        :group_id,
-       :ref,
        :display_name,
        :name,
        :os_type,

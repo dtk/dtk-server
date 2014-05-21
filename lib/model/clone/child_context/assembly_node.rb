@@ -28,9 +28,6 @@ module DTK
         target = Model.get_obj(model_handle.createMH(:target),sp_hash)
 
         #mapping from node stub to node template and overriding appropriate node template columns
-        require 'debugger'
-        Debugger.start
-        debugger
         if target[:iaas_type].eql?("physical")
           ret = find_physical_nodes(ret, matches, target, create_override_attrs[:assembly_id])  
         elsif !matches.empty?

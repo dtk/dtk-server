@@ -125,6 +125,7 @@ eos
             ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
             ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
             ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            pbuilderid = node[:id] if node[:external_ref][:type].eql?('physical')
             #order of merge does not matter; keys wont conflict
             bindings.merge(
               :mcollective_ssh_remote_public_key => ssh_remote_public_key,
@@ -134,7 +135,8 @@ eos
               :mcollective_password => R8::Config[:mcollective][:password],
               :mcollective_collective => R8::Config[:mcollective][:collective],
               #TODO: will generalize so not just puppet                           
-              :puppet_version => get_puppet_version(node)
+              :puppet_version => get_puppet_version(node),
+              :pbuilderid => pbuilderid
             )
           end
 
@@ -165,6 +167,9 @@ EOF
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
+<% if pbuilderid %>
+pbuilderid: <%= pbuilderid %>
+<% end %>
 EOF
 
 mkdir -p /etc/mcollective/ssh

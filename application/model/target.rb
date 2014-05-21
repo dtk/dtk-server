@@ -273,7 +273,6 @@ module DTK
 
       # here we set information we need to connect to nodes via ssh
       unmanaged_nodes.each do |node|
-        if node[:display_name].eql?('imported_node_1')
         node.update_object!(:ref)
         external_ref = node[:external_ref]
 
@@ -287,7 +286,6 @@ module DTK
           "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
           "user_data_file_path" => user_data_file_path
         }
-        end
       end
 
       File.open(user_data_file_path, 'w') do |f|

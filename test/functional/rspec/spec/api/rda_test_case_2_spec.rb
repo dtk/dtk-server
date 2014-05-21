@@ -74,7 +74,7 @@ describe "(Repoman Drupal API) Test Case 2: Create user with only required param
 			response = repoman.delete_namespace(namespace_id)
 			ap response
 			if response['status'] == 'ok'
-				namespace_deleted = true if response['data']['sucess'] == true
+				namespace_deleted = true if response['data']['success'] == true
 			end
 			expect(namespace_deleted).to eq(true)
 		end

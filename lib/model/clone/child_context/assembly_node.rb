@@ -74,13 +74,8 @@ module DTK
         node_mh = target_idh.createMH(:node)
         #TODO: may be more efficient to get these all at once
         matches = node_info.map do |r|
-          node_template_idh = 
-            if r[:node_binding_ruleset]
-              r[:node_binding_ruleset].find_matching_node_template(target).id_handle()
-            else
-              Node::Template.null_node_template_idh(node_mh)
-            end
-          {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template_idh}
+          node_template = Node::Template.find_matching_node_template(target,r[:node_binding_ruleset])
+          {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template.id_handle()}
         end
         merge!(:matches => matches)
       end

@@ -85,6 +85,11 @@ module DTK
         end.compact.uniq
       end
 
+      def self.find_matching_node_template(target,node_binding_rs=nil)
+        ret = node_binding_rs && node_binding_rs.find_matching_node_template(target)
+        ret || null_node_template(target.model_handle(:node))
+      end
+
       def self.null_node_template(model_handle)
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
@@ -93,11 +98,7 @@ module DTK
         node_mh = model_handle.createMH(:node)
         get_obj(node_mh,sp_hash)
       end
-
-      def self.null_node_template_idh(model_handle)
-        null_node_template = null_node_template(model_handle)
-        null_node_template && null_node_template.id_handle()
-      end
+      private_class_method :null_node_template
 
       def self.image_upgrade(model_handle,old_image_id,new_image_id)
         nb_mh = model_handle.createMH(:node_binding_ruleset)

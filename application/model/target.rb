@@ -218,13 +218,15 @@ module DTK
     class SshJob
       def call(message)
         puts message
+        node = message["node"]
+        external_ref = node[:external_ref]
 
         params = {
-          :hostname => message["hostname"],
-          :user => message["user"],
-          :password => message["password"],
-          :port => message["port"],
-          :id => message["id"]
+          :hostname => external_ref[:routable_host_address],
+          :user => external_ref[:ssh_credentials][:ssh_user],
+          :password => external_ref[:ssh_credentials][:ssh_password],
+          :port => external_ref[:ssh_credentials][:port]||"22",
+          :id => node[:id]
         }
 
         begin
@@ -236,23 +238,24 @@ module DTK
 
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
-        Net::SCP.upload!(message["hostname"], message["user"],
-          message["user_data_file_path"], "/tmp",
-          :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
+        Net::SCP.upload!(params[:hostname], params[:user],
+          "#{message["user_data_file_path"]}/#{message["user_data_file_name"]}", "/tmp",
+          :ssh => { :password => params[:password], :port => params[:port] }, :recursive => true)
 
-        # upload the dtk-node-agent code
-        Net::SCP.upload!(message["hostname"], message["user"],
+        Net::SCP.upload!(params[:hostname], params[:user],
           message["dtk_node_agent_location"], "/tmp",
-          :ssh => { :password => message["password"], :port => message["port"] }, :recursive => true)
+          :ssh => { :password => params[:password], :port => params[:port] }, :recursive => true)
 
         # perform installation
-        install_command = message["user"].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
+        install_command = params[:user].eql?('root') ? "bash /tmp/dtk-node-agent/install_agent.sh" : "sudo bash /tmp/dtk-node-agent/install_agent.sh"
         execute_ssh_command(install_command, params)
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
-        user_data_command = message["user"].eql?('root') ? "bash /tmp/user_data" : "sudo bash /tmp/user_data"
+        user_data_command = params[:user].eql?('root') ? "bash /tmp/#{message['user_data_file_name']}" : "sudo bash /tmp/#{message['user_data_file_name']}"
         execute_ssh_command(user_data_command, params)
-        execute_ssh_command("rm -rf /tmp/user_data", params)
+        execute_ssh_command("rm -rf /tmp/#{message['user_data_file_name']}", params)
+
+        node.update(:managed => true)
       end
 
       def execute_ssh_command(command, params={})
@@ -268,28 +271,27 @@ module DTK
     def install_agents()
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-      user_data_file_path = "#{R8.app_user_home()}/user_data"
       servers, user_data = [], nil
 
+      user_data_file_path = "#{R8.app_user_home()}/user_data"
+      FileUtils.mkdir(user_data_file_path) unless File.directory?(user_data_file_path)
       # here we set information we need to connect to nodes via ssh
       unmanaged_nodes.each do |node|
         node.update_object!(:ref)
-        external_ref = node[:external_ref]
 
         user_data = CommandAndControlAdapter::Ec2::CloudInit.user_data(node)
-        servers << {
-          "id" => node[:id],
-          "hostname"    => external_ref[:routable_host_address],
-          "user"        => external_ref[:ssh_credentials][:ssh_user],
-          "port"        => "22",
-          "password"    => external_ref[:ssh_credentials][:ssh_password],
-          "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
-          "user_data_file_path" => user_data_file_path
-        }
-      end
+        user_data_file_name = "user_data_#{node[:id]}"
 
-      File.open(user_data_file_path, 'w') do |f|
-        f.puts(user_data)
+        servers << {
+          "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
+          "user_data_file_path" => user_data_file_path,
+          "user_data_file_name" => user_data_file_name,
+          "node" => node
+        }
+
+        File.open("#{user_data_file_path}/#{user_data_file_name}", 'w') do |f|
+          f.puts(user_data)
+        end
       end
 
       # add jobs to the queue
@@ -306,7 +308,7 @@ module DTK
         # stop the workers
         Work.stop
       ensure
-        FileUtils.rm(user_data_file_path)
+        FileUtils.rm_rf(user_data_file_path)
       end
     end
 

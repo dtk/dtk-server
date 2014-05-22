@@ -1,5 +1,6 @@
 r8server:
   server: dev17.r8network.com
+  repoman: https://repoman1.internal.r8network.com
   port: 7000
   username: dtk17-client
   password: r8server

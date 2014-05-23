@@ -5,7 +5,7 @@ module DTK
         def consume(workitem)
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
-          PerformanceService.start(action_name(),object_id)
+          PerformanceService.start(name(),object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
 
@@ -17,17 +17,17 @@ module DTK
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object) do
                   # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
+                  PerformanceService.end_measurement(name(),object_id)
                   
                   result = msg[:body].merge("task_id" => task_id)
                   if errors = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
                     if event
-                      LogAction.end(:complete_failed,action,:task_id=>task_id,:event => event, :errors => errors)
+                      log_participant.end(:complete_failed,:task_id=>task_id,:event => event, :errors => errors)
                     end
                     set_result_failed(workitem,result,task)
                   else
-                    LogAction.end(:complete_succeeded,action,:task_id=>task_id)
+                    log_participant.end(:complete_succeeded,:task_id=>task_id)
                     #task[:executable_action][:node].set_authorized()
                     set_result_succeeded(workitem,result,task,action) if task_end 
                   end
@@ -41,7 +41,7 @@ module DTK
                   cancel_upstream_subtasks(workitem)
                   set_result_failed(workitem,result,task)
                   delete_task_info(workitem)
-                  LogAction.end(:timeout,action,:task_id=>task[:id])
+                  log_participant.end(:timeout,:task_id=>task[:id])
                   reply_to_engine(workitem)
                 end
               end,
@@ -49,7 +49,7 @@ module DTK
                 CreateThread.defer_with_session(user_object) do
                   cancel_upstream_subtasks(workitem)
                   delete_task_info(workitem)
-                  LogAction.end(:error,action,:error_obj=>error_obj,:backtrace=>error_obj.backtrace[0..7],:task_id=>task[:id])
+                  log_participant.end(:error,:error_obj=>error_obj,:backtrace=>error_obj.backtrace[0..7],:task_id=>task[:id])
                 end
               end 
             }
@@ -66,7 +66,7 @@ module DTK
           params = get_params(wi) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
+          log_participant.canceling(task_id)
           set_result_canceled(wi, task)
           delete_task_info(wi)
           reply_to_engine(wi)

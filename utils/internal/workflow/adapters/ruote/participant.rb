@@ -7,6 +7,8 @@ module DTK
       class Top
         include ::Ruote::LocalParticipant
 
+        r8_nested_require('participant','create_node')
+
         DEBUG_AGENT_RESPONSE = false
 
         def initialize(opts=nil)
@@ -37,28 +39,33 @@ module DTK
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
 
-        def action_name()
-          self.class.action_name(self)
+        def name()
+          self.class.to_s.split('::').last
         end
-        def self.action_name(action)
-          action.class.to_s.split('::').last
+
+        def log_participant()
+          LogParticipant.new(self)
         end
-        module LogAction
-          def self.start(action,*args)
-            log(['start_action:',action_name(action)] + args)
+        class LogParticipant
+          def initialize(participant)
+            @name = participant.name()
           end
-          def self.end(result_type,action,*args)
-            log(['end_action:',action_name(action),result_type] + args)
+          def start(*args)
+            log(['start_action:',name] + args)
           end
-          def self.event(action,event,*args)
-            log(['event',action_name(action),:event=>event] + args)
+          def end(result_type,*args)
+            log(['end_action:',name,result_type] + args)
+          end
+          def event(event,*args)
+            log(['event',name,:event=>event] + args)
+          end
+          def canceling(task_id)
+            log(['canceling',name,:task_id=>task_id])
           end
          private
-          def self.log(*args)
+          attr_reader :name
+          def log(*args)
             Log.info_pp(*args)
-          end
-          def self.action_name(action)
-            Top.action_name(action)
           end
         end
 
@@ -125,9 +132,9 @@ module DTK
           if task_start
             set_task_to_executing(task)
           end
-          LogAction.start(self,:task_id => task[:id])
+          log_participant.start(:task_id => task[:id])
           if event = add_start_task_event?(task)
-            LogAction.event(self,event,:task_id => task[:id])
+            log_participant.event(event,:task_id => task[:id])
           end
           execution_context_block(task,workitem,&body)
         end
@@ -176,53 +183,6 @@ module DTK
           rescue Exception => e   
           end
         end
-      end
-
-      class CreateNode < Top
-        #LockforDebug = Mutex.new
-        def consume(workitem)
-          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-          params = get_params(workitem) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          execution_context(task,workitem,task_start) do
-            result = workflow.process_executable_action(task)
-            if errors_in_result = errors_in_result?(result)
-              event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
-              pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-              cancel_upstream_subtasks(workitem)
-              set_result_failed(workitem,result,task)
-            else
-              node = task[:executable_action][:node]
-              node.update_operational_status!(:running)
-              node.update_admin_op_status!(:running)
-              set_result_succeeded(workitem,result,task,action) if task_end 
-            end
-            reply_to_engine(workitem)
-          end
-        end
-
-        def cancel(fei, flavour)
-          
-          # Don't execute cancel if ruote process is killed
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
-        end
-
-       private
-        def errors_in_result?(result)
-          if result[:status] == "failed"
-            result[:error_object] ? [{:message => result[:error_object].to_s}] : []
-          end
-        end    
       end
 
       class PowerOnNode < Top

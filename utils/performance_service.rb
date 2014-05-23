@@ -46,10 +46,14 @@ module DTK
 		# If called from multithreaded part, i.e. ruote, unique key must be provided to measure multiple measurements
 		# I've used self.object_id successfully for unique_key
 		def self.end_measurement(measure, unique_key=nil)
-			return unless @@perf_enabled
-			duration = 0
-			@@measure_lock.synchronize { duration = (Time.now - (@@timer_hash.delete("#{measure}#{unique_key}") || 0)) * 1000 }
-			log("MEASUREMENT=#{measure},#{duration}")
+                  return unless @@perf_enabled
+                  duration = nil
+                  @@measure_lock.synchronize do 
+                    if beg = @@timer_hash.delete("#{measure}#{unique_key}")
+                      duration = (Time.now - beg) * 1000 
+                    end
+                  end
+                  log("MEASUREMENT=#{measure},#{duration}") if duration
 		end
 
 	end

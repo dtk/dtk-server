@@ -5,7 +5,7 @@ module DTK
         def consume(workitem)
           #TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
+          PerformanceService.start(action_name(),object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           task.update_input_attributes!() if task_start
 
@@ -23,11 +23,11 @@ module DTK
                   if errors = errors_in_result?(result)
                     event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
                     if event
-                      Results.log(:complete_failed,action,:task_id=>task_id,:event => event, :errors => errors)
+                      LogAction.end(:complete_failed,action,:task_id=>task_id,:event => event, :errors => errors)
                     end
                     set_result_failed(workitem,result,task)
                   else
-                    Results.log(:complete_succeeded,action,:task_id=>task_id)
+                    LogAction.end(:complete_succeeded,action,:task_id=>task_id)
                     #task[:executable_action][:node].set_authorized()
                     set_result_succeeded(workitem,result,task,action) if task_end 
                   end
@@ -41,7 +41,7 @@ module DTK
                   cancel_upstream_subtasks(workitem)
                   set_result_failed(workitem,result,task)
                   delete_task_info(workitem)
-                  Results.log(:timeout,action,:task_id=>task[:id])
+                  LogAction.end(:timeout,action,:task_id=>task[:id])
                   reply_to_engine(workitem)
                 end
               end,
@@ -49,7 +49,7 @@ module DTK
                 CreateThread.defer_with_session(user_object) do
                   cancel_upstream_subtasks(workitem)
                   delete_task_info(workitem)
-                  Results.log(:error,action,:error_obj=>error_obj,:backtrace=>error_obj.backtrace[0..7],:task_id=>task[:id])
+                  LogAction.end(:error,action,:error_obj=>error_obj,:backtrace=>error_obj.backtrace[0..7],:task_id=>task[:id])
                 end
               end 
             }

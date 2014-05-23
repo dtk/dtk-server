@@ -37,9 +37,28 @@ module DTK
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
 
-        module Results
-          def self.log(result_type,action,*args)
-            Log.info_pp(['result:',action.class.to_s.split('::').last,result_type] + args)
+        def action_name()
+          self.class.action_name(self)
+        end
+        def self.action_name(action)
+          action.class.to_s.split('::').last
+        end
+        module LogAction
+          def self.start(action,*args)
+            log(['start_action:',action_name(action)] + args)
+          end
+          def self.end(result_type,action,*args)
+            log(['end_action:',action_name(action),result_type] + args)
+          end
+          def self.event(action,event,*args)
+            log(['event',action_name(action),:event=>event] + args)
+          end
+         private
+          def self.log(*args)
+            Log.info_pp(*args)
+          end
+          def self.action_name(action)
+            Top.action_name(action)
           end
         end
 
@@ -106,9 +125,9 @@ module DTK
           if task_start
             set_task_to_executing(task)
           end
-          Log.info_pp ["executing #{self.class.to_s}",task[:id]]
+          LogAction.start(self,:task_id => task[:id])
           if event = add_start_task_event?(task)
-            Log.info_pp [:start_task_event, event]
+            LogAction.event(self,event,:task_id => task[:id])
           end
           execution_context_block(task,workitem,&body)
         end

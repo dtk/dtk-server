@@ -37,6 +37,12 @@ module DTK
           task.update_when_failed_preconditions(failed_antecedent_tasks)
         end
 
+        module Results
+          def self.log(result_type,action,*args)
+            Log.info_pp(['result:',action.class.to_s.split('::').last,result_type] + args)
+          end
+        end
+
         def set_result_succeeded(workitem,new_result,task,action)
           task.update_at_task_completion("succeeded",Task::Action::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle,:completed)  #this updates pending state
@@ -333,6 +339,7 @@ module DTK
       end
 
       class NodeParticipants < Top
+        r8_nested_require('participant','authorize_node')
         private
         def errors_in_result?(result)
           #result[:statuscode] is for transport errors and data is for errors for agent
@@ -344,76 +351,6 @@ module DTK
               data[:error] ? [data[:error]] : (data[:errors]||[])
             end
           end
-        end
-      end
-
-      class AuthorizeNode < NodeParticipants
-        def consume(workitem)
-          #TODO succeed without sending node request if authorized already
-          params = get_params(workitem) 
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.update_input_attributes!() if task_start
-
-          user_object  = ::DTK::CurrentSession.new.user_object()
-
-          execution_context(task,workitem,task_start) do
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                inspect_agent_response(msg)
-                DTK::CreateThread.defer_with_session(user_object) do
-                  # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                  
-                  result = msg[:body].merge("task_id" => task_id)
-                  if errors = errors_in_result?(result)
-                    event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    set_result_failed(workitem,result,task)
-                  else
-                    pp ["task_complete_succeeded #{action.class.to_s}"]
-                    #task[:executable_action][:node].set_authorized()
-                    set_result_succeeded(workitem,result,task,action) if task_end 
-                  end
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_timeout => proc do
-                DTK::CreateThread.defer_with_session(user_object) do
-                  result = {:type => :timeout_authorize_node, :task_id => task_id}
-                  cancel_upstream_subtasks(workitem)
-                  set_result_failed(workitem,result,task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_error => proc do |error_obj|
-                DTK::CreateThread.defer_with_session(user_object) do
-                  cancel_upstream_subtasks(workitem)
-                  delete_task_info(workitem)
-                  pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
-                end
-              end 
-            }
-            context = {:expected_count => 1}
-            workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
-          end
-        end
-
-        def cancel(fei, flavour)
-          
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
         end
       end
 

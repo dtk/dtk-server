@@ -5,6 +5,12 @@ module DTK
 
       def self.create_target(project_idh,provider,region,opts={})
         properties = provider.get_field?(:iaas_properties).merge(:region => region)
+        provider_type = provider.get_field?(:iaas_type)
+
+        unless region
+          raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
+        end
+
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
         iaas_properties = IAASProperties.new(target_name,properties)
         create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first

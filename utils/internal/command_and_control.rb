@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
@@ -138,13 +138,15 @@ module XYZ
               when "ec2_instance" then :ec2
               when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
               when "physical" then :physical
-              else raise Error.new("not treated")
+            else raise Error.new("iaas type (#{ext_ref_type}) not treated")
             end
           when :target
             target =  val
-            case target.get_field?(:iaas_type)
+            iaas_type = target.get_field?(:iaas_type)
+            case iaas_type
               when "ec2" then :ec2
-              else raise Error.new("not treated")
+              when "physical" then :physical
+            else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :image_type
             image_type = val
@@ -177,7 +179,8 @@ module XYZ
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
-        Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
+        klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
+        Adapters[adapter_type][adapter_name] =  (instance_style_adapter?(adapter_type,adapter_name) ? klass.new : klass)
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported!")
        rescue Exception => e
@@ -186,8 +189,14 @@ module XYZ
     end
     Adapters = Hash.new
     Lock = Mutex.new
+    #TODO: want to convert to new style to avoid etting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
+    def self.instance_style_adapter?(adapter_type,adapter_name)
+      (InstanceStyleAdapters[adapter_type]||[]).include?(adapter_name)
+    end
+    InstanceStyleAdapters = {
+      :iaas => [:physical]
+    }
 
-   public
     #### Error classes
     class Error < XYZ::Error
       def to_hash()

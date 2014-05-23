@@ -189,7 +189,7 @@ module DTK
     end
     Adapters = Hash.new
     Lock = Mutex.new
-    #TODO: want to convert to new style to avoid etting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
+    #TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type,adapter_name)
       (InstanceStyleAdapters[adapter_type]||[]).include?(adapter_name)
     end

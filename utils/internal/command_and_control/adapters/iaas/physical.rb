@@ -1,10 +1,13 @@
 module DTK
   module CommandAndControlAdapter
     class Physical < CommandAndControlIAAS
-      def self.destroy_node?(node,opts={})
+      def find_matching_node_binding_rule(node_binding_rules,target)
+        nil
+      end
+      def destroy_node?(node,opts={})
         true #vacuously succeeds
       end
-      def self.check_security_group_and_key_pair(iaas_credentials)
+      def check_security_group_and_key_pair(iaas_credentials)
         {}
       end
     end

@@ -6,7 +6,7 @@ module DTK
         ClonePostCopyHook.component(self,clone_copy_output,opts)
        when :node
         ClonePostCopyHook.node(self,clone_copy_output,opts)        
-       else #TODO: catchall taht will be expanded
+       else #TODO: catchall that will be expanded
         new_id_handle = clone_copy_output.id_handles.first
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
       end

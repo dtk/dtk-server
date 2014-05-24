@@ -389,22 +389,13 @@ module DTK
       self[:agent_git_commit_id] = agent_git_commit_id      
     end
 
-#TODO: these may be depracted
-    def update_ordered_component_ids(order)
-      ordered_component_ids = "{ :order => [#{order.join(',')}] }"
-      update(:ordered_component_ids => ordered_component_ids)
-      self[:ordered_component_ids] = ordered_component_ids      
-    end
-
-    def get_ordered_component_ids()
-      ordered_component_ids = self[:ordered_component_ids]
-      return Array.new unless ordered_component_ids
-      eval(ordered_component_ids)[:order]
-    end
-#end of these may be depracted
-
     def get_external_ref()
       get_field?(:external_ref)||{}
+    end
+
+    def get_iaas_type()
+      ret = get_external_ref()[:type]
+      ret && ret.to_sym
     end
 
     def instance_id()
@@ -434,6 +425,21 @@ module DTK
       get_field?(:hostname_external_ref)||{}
     end
     private :get_hostname_external_ref
+
+
+#TODO: these may be depracted
+    def update_ordered_component_ids(order)
+      ordered_component_ids = "{ :order => [#{order.join(',')}] }"
+      update(:ordered_component_ids => ordered_component_ids)
+      self[:ordered_component_ids] = ordered_component_ids      
+    end
+
+    def get_ordered_component_ids()
+      ordered_component_ids = self[:ordered_component_ids]
+      return Array.new unless ordered_component_ids
+      eval(ordered_component_ids)[:order]
+    end
+#end of these may be depracted
 
     
     #### related to distinguishing bewteen nodes and node groups
@@ -474,7 +480,7 @@ module DTK
 
     def destroy_and_delete(opts={})
       if suceeeded = CommandAndControl.destroy_node?(self)
-        if (get_field?(:external_ref)||{})[:type] == 'physical'
+        if get_iaas_type() == :physical
           raise Error.new("write code that rather than deleting self deletes all the objects contained in the node")
         else
           delete_object(opts)

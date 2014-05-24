@@ -138,12 +138,11 @@ module DTK
         case key
           when :node
             node = val
-            ext_ref_type = (node.get_field?(:external_ref)||{})[:type]
-            case ext_ref_type
-              when "ec2_instance" then :ec2
-              when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
-              when "physical" then :physical
-            else raise Error.new("iaas type (#{ext_ref_type}) not treated")
+            case iaas_type = node.get_iaas_type()
+              when :ec2_instance then :ec2
+              when :ec2_image then :ec2 #TODO: kept in because staged node has this type, which should be changed
+              when :physical then :physical
+            else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :target
             target =  val

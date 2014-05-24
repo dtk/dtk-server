@@ -58,9 +58,8 @@ module DTK
                     set_result_failed(workitem,result,task)
                   else
                     node.update_agent_git_commit_id(head_git_commit_id)
-                    if event = task.add_event(:complete_succeeded,result)
-                       log_participant.end(:complete_succeeded,:task_id=>task_id,:event => event)
-                    end
+                    task.add_event(:complete_succeeded,result)
+                    log_participant.end(:complete_succeeded,:task_id=>task_id)
                     set_result_succeeded(workitem,result,task,action) if task_end 
                     action.get_and_propagate_dynamic_attributes(result)
                   end

@@ -16,7 +16,6 @@ module DTK
               :on_msg_received => proc do |msg|
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object) do
-                  # Amar: PERFORMANCE
                   PerformanceService.end_measurement(name(),object_id)
                   
                   result = msg[:body].merge("task_id" => task_id)

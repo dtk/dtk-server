@@ -23,6 +23,10 @@ module DTK
         image(image_id).exists?()
       end
 
+      def self.pbuilderid(node)
+        node.get_external_ref()[:instance_id]
+      end
+
       def self.start_instances(nodes)
         nodes.each do |node|
           conn(node.get_target_iaas_credentials()).server_start(node.instance_id())

@@ -18,6 +18,11 @@ module DTK
       end
     end
 
+    def self.pbuilderid(node)
+      klass = load_iaas_for(:node => node)
+      klass.pbuilderid(node)
+    end
+
     def self.existing_image?(image_id,image_type)
       klass = load_iaas_for(:image_type => image_type)
       klass.existing_image?(image_id)

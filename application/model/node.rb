@@ -407,16 +407,20 @@ module DTK
       get_field?(:external_ref)||{}
     end
 
-    def self.pbuilderid(node)
-      node.get_external_ref()[:instance_id]
-    end
-    def pbuilderid()
-      Node.pbuilderid(self)
-    end
-
     def instance_id()
       get_external_ref()[:instance_id]
     end
+
+    def pbuilderid()
+      self.class.pbuilderid(self)
+    end
+    def self.pbuilderid(node)
+      unless ret = CommandAndControl.pbuilderid(node)
+        raise Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id.to_s}) does not have an #{PBuilderIDPrintName}")
+      end
+      ret
+    end
+    PBuilderIDPrintName = 'internal communication ID'
 
     def persistent_dns()
       get_hostname_external_ref()[:persistent_dns]

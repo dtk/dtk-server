@@ -33,9 +33,8 @@ module DTK
               end
 
               delete_task_info(workitem)
-              # Amar: PERFORMANCE
               PerformanceService.end_measurement(name(),object_id)
-              reply_to_engine(workitem)
+              return reply_to_engine(workitem)
             end
 
             user_object  = CurrentSession.new.user_object()

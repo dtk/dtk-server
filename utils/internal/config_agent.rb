@@ -14,6 +14,10 @@ module DTK
       load(type).parse_given_file_content(file_path,file_content)
     end
 
+    def self.treated_version?(type,semantic_version)
+      load(type).treated_version?(semantic_version)
+    end
+
     def self.parse_external_ref?(type,impl_obj)
       processor = load(type)
       if processor.respond_to?('parse_external_ref?'.to_sym)
@@ -28,5 +32,6 @@ module DTK
     def node_name(node)
       (node[:external_ref]||{})[:instance_id]
     end
+
   end
 end

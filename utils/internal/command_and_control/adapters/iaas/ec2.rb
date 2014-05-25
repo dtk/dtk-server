@@ -4,7 +4,6 @@ module DTK
 
       R8_KEY_PAIR = 'admin'
 
-      r8_nested_require('ec2','cloud_init')
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
       r8_nested_require('ec2','image')
@@ -21,6 +20,10 @@ module DTK
 
       def self.existing_image?(image_id)
         image(image_id).exists?()
+      end
+
+      def self.pbuilderid(node)
+        node.get_external_ref()[:instance_id]
       end
 
       def self.start_instances(nodes)
@@ -115,7 +118,7 @@ module DTK
           #end fix up
 
           unless create_options.has_key?(:user_data)
-            if user_data = CloudInit.user_data(node)
+            if user_data = CommandAndControl.install_script(node)
               create_options[:user_data] = user_data
             end
           end

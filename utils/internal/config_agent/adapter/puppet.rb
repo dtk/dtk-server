@@ -9,6 +9,25 @@ module DTK
 
       include ParserMixin
 
+
+      def treated_version?(semantic_version)
+        parts = x.split('.')
+        return nil unless parts.size == 2 or parts.size == 3
+        return nil if parts.find{|p| not (p =~ /^[0-9]$/)}
+        first_parts = "#{parts[0]}.#{parts[1]}"
+        if match = TreatedVersions[first_parts]
+          parts[2].nil? or match.include?(parts[2])
+        end
+      end
+      TreatedVersions = {
+        '2.7' => (14..25).map{|x|x.to_s},
+        '3.0' => (0..2).map{|x|x.to_s},
+        '3.1' => (0..1).map{|x|x.to_s},
+        '3.2' => (0..4).map{|x|x.to_s},
+        '3.3' => (0..2).map{|x|x.to_s},
+        '3.4' => (0..3).map{|x|x.to_s},
+      }
+
       def ret_msg_content(config_node)
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)

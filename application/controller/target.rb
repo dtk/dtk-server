@@ -21,17 +21,32 @@ module DTK
       rest_ok_response response
     end
 
+    def rest__info()
+      target_id = ret_non_null_request_params(:target_id)
+      rest_ok_response Target.info(model_handle(), target_id)
+    end
+
     def rest__import_nodes()
       target_instance = create_obj(:target_id, ::DTK::Target::Instance)
-      rest_ok_response Target::Instance.import_nodes(target_instance)
+      inventory_data = ret_non_null_request_params(:inventory_data)
+      rest_ok_response Target::Instance.import_nodes(target_instance, inventory_data)
+    end
+
+    def rest__install_agents()
+      # target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      target = create_obj(:target_id)
+      target.install_agents()
+
+      rest_ok_response
     end
 
     #create target instance
     def rest__create()
-      provider  = create_obj(:provider_id, ::DTK::Target::Template)
-      region = ret_non_null_request_params(:region)
-      opts = ret_params_hash(:target_name)
+      provider     = create_obj(:provider_id, ::DTK::Target::Template)
+      region       = ret_request_params(:region)
+      opts         = ret_params_hash(:target_name)
       project_idh  = get_default_project().id_handle()
+
       Target::Instance.create_target(project_idh, provider, region, opts)
       rest_ok_response #TODO: may return info about objects created
     end
@@ -81,7 +96,8 @@ module DTK
     def rest__info_about()
       target = create_obj(:target_id)
       about = ret_non_null_request_params(:about).to_sym
-      rest_ok_response target.info_about(about)
+      opts = ret_params_hash(:detail_level, :include_workspace)
+      rest_ok_response target.info_about(about, opts)
     end
 
 

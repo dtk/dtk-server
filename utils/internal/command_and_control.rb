@@ -1,7 +1,9 @@
-module XYZ
+module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    r8_nested_require('command_and_control','install_script')
+
     def self.execute_task_action(task,top_task_idh,opts={})
       task_action = task[:executable_action]
       klass = load_for(task_action)
@@ -18,6 +20,22 @@ module XYZ
       end
     end
 
+    def self.install_script(node)
+      InstallScript.install_script(node)
+    end
+
+    #This takes into account what is needed for the node_config_adapter
+    def self.node_config_adapter_install_script(node,bindings)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.install_script(node,bindings)
+    end
+
+    def self.pbuilderid(node)
+      klass = load_iaas_for(:node => node)
+      klass.pbuilderid(node)
+    end
+
     def self.existing_image?(image_id,image_type)
       klass = load_iaas_for(:image_type => image_type)
       klass.existing_image?(image_id)
@@ -27,6 +45,7 @@ module XYZ
       klass = load_iaas_for(:node => nodes.first)
       klass.start_instances(nodes)
     end
+
     def self.stop_instances(nodes)
       klass = load_iaas_for(:node => nodes.first)
       klass.stop_instances(nodes)
@@ -34,7 +53,6 @@ module XYZ
 
     def self.check_and_process_iaas_properties(iaas_type, iaas_properties)
       klass = load_for_aux(:iaas, iaas_type.to_s)
-
       #TODO: make check_security_group_and_key_pair a more generic name; it is EC2 specfic now
       # method will add params and return iaas_credentials
       klass.check_security_group_and_key_pair(iaas_properties)
@@ -119,12 +137,6 @@ module XYZ
       klass.poll_to_detect_node_ready(node,opts)
     end
 
-    def self.cloud_init_user_data(node,bindings)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
-      klass.ret_cloud_init_user_data(node,bindings)
-    end
-
    private
     def self.load_iaas_for(key_val)
       key = key_val.keys.first
@@ -133,17 +145,19 @@ module XYZ
         case key
           when :node
             node = val
-            ext_ref_type = (node.get_field?(:external_ref)||{})[:type]
-            case ext_ref_type
-              when "ec2_instance" then :ec2
-              when "ec2_image" then :ec2 #TODO: kept in because staged node has this type, which should be changed
-              else raise Error.new("not treated")
+            case iaas_type = node.get_iaas_type()
+              when :ec2_instance then :ec2
+              when :ec2_image then :ec2 #TODO: kept in because staged node has this type, which should be changed
+              when :physical then :physical
+            else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :target
             target =  val
-            case target.get_field?(:iaas_type)
+            iaas_type = target.get_field?(:iaas_type)
+            case iaas_type
               when "ec2" then :ec2
-              else raise Error.new("not treated")
+              when "physical" then :physical
+            else raise Error.new("iaas type (#{iaas_type}) not treated")
             end
           when :image_type
             image_type = val
@@ -176,7 +190,8 @@ module XYZ
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         r8_nested_require("command_and_control","adapters/#{adapter_type}/#{adapter_name}")
-        Adapters[adapter_type][adapter_name] = XYZ::CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
+        klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
+        Adapters[adapter_type][adapter_name] =  (instance_style_adapter?(adapter_type,adapter_name) ? klass.new : klass)
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported!")
        rescue Exception => e
@@ -185,8 +200,14 @@ module XYZ
     end
     Adapters = Hash.new
     Lock = Mutex.new
+    #TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
+    def self.instance_style_adapter?(adapter_type,adapter_name)
+      (InstanceStyleAdapters[adapter_type]||[]).include?(adapter_name)
+    end
+    InstanceStyleAdapters = {
+      :iaas => [:physical]
+    }
 
-   public
     #### Error classes
     class Error < XYZ::Error
       def to_hash()

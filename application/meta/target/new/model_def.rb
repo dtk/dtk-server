@@ -67,6 +67,18 @@
          :cols=>Node.common_columns
        }]
     },
+    :unmanaged_nodes=>{
+      :type=>:json,
+      :hidden=>true,
+      :remote_dependencies=>
+      [{
+         :model_name=>:node,
+         :convert => true,
+         :join_type=>:inner,
+         :join_cond=>{:datacenter_datacenter_id=>:datacenter__id, :managed=>false},
+         :cols=>Node.common_columns
+       }]
+    },
     :node_members=>{
       :type=>:json,
       :hidden=>true,

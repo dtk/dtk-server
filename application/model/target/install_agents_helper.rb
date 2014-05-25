@@ -16,6 +16,7 @@ module DTK; class Target
       unmanaged_nodes = @target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
       servers, install_script = [], nil
 
+      #TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
       install_script_file_path = "#{R8.app_user_home()}/install_script"
       FileUtils.mkdir(install_script_file_path) unless File.directory?(install_script_file_path)
       # here we set information we need to connect to nodes via ssh
@@ -114,25 +115,39 @@ module DTK; class Target
     # and after that we execute some commands on the node itself using execute_ssh_command() method
     class SshJob
       def call(message)
-        puts message
+        Log.info_pp(['SshJob#call',:message,message])
         node = message["node"]
-        external_ref = node[:external_ref]
+        external_ref = node.get_external_ref()
+
+        unless hostname = external_ref[:routable_host_address]
+          raise ErrorUsage.new("#{name_and_id(node)} is missing routable_host_address")
+        end
+        unless ssh_credentials = external_ref[:ssh_credentials]
+          raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials")
+        end
+        [:ssh_user,:ssh_password].each do |ssh_attr|
+          unless ssh_credentials[ssh_attr]
+            raise ErrorUsage.new("#{name_and_id(node)} is missing ssh_credentials field #{ssh_attr}")
+          end
+        end
 
         params = {
           :hostname => external_ref[:routable_host_address],
-          :user => external_ref[:ssh_credentials][:ssh_user],
-          :password => external_ref[:ssh_credentials][:ssh_password],
-          :port => external_ref[:ssh_credentials][:port]||"22",
-          :id => node[:id]
+          :user => ssh_credentials[:ssh_user],
+          :password => ssh_credentials[:ssh_password],
+          :port => ssh_credentials[:port]||"22",
+          :id => node.id()
         }
 
+
+        #just to test taht can connect
         begin
           execute_ssh_command("ls /", params)
         rescue Exception => e
-          puts "#{e.message}. Params: #{params}"
+          Log.info_pp(['SshJob#call',:error,e, :params, params])
           return
         end
-
+        
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
         Net::SCP.upload!(params[:hostname], params[:user],
@@ -153,6 +168,11 @@ module DTK; class Target
         execute_ssh_command("rm -rf /tmp/#{message['install_script_file_name']}", params)
 
         node.update(:managed => true)
+      end
+
+     private
+      def name_and_id(node)
+        node.pp_name_and_id(:capitalize=>true)
       end
 
       def execute_ssh_command(command, params={})

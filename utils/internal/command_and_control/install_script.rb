@@ -26,17 +26,17 @@ module DTK
      private
       def os_type()
         unless os_type = @node.get_field?(:os_type)
-          raise Error.new("Node #{node_info()} does not have an OS type specified")
+          raise Error.new("#{node_name_and_id()} does not have an OS type specified")
         end
         os_type = os_type.to_sym
         unless SupportedOSList.include?(os_type)
           supported_list = SupportedOSList.join(',')
-          raise ErrorUsage.new("Node #{node_info()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list} ")
+          raise ErrorUsage.new("#{node_name_and_id()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list} ")
         end
         os_type
       end
-      def node_info()
-        "(#{@node.get_field?(:display_name)}) with id (#{@node.id.to_s})"
+      def node_name_and_id()
+        @node.pp_name_and_id(:capitalize => true)
       end
 
       def embed_in_os_specific_wrapper(install_script)

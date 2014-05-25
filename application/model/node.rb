@@ -42,33 +42,33 @@ module DTK
        [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
      end
 
-      def self.get(mh,opts={})
-        sp_hash = {
-          :cols => ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
-          :filter => [:neq,:datacenter_datacenter_id,nil]
-        }
-        get_objs(mh,sp_hash)
-      end
-
-      def self.get_unique_instance_name(mh,display_name)
-        display_name_regexp = Regexp.new("^#{display_name}")
-        matches = get(mh,:cols=>[:display_name]).select{|r|r[:display_name] =~ display_name_regexp}
-        if matches.empty?
-          return display_name
-        end
-        index = 2
-        matches.each do |r|
-          instance_name = r[:display_name]
-          if instance_name =~ /-([0-9]+$)/
-            instance_index = $1.to_i
+     def self.get(mh,opts={})
+       sp_hash = {
+         :cols => ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
+         :filter => [:neq,:datacenter_datacenter_id,nil]
+       }
+       get_objs(mh,sp_hash)
+     end
+     
+     def self.get_unique_instance_name(mh,display_name)
+       display_name_regexp = Regexp.new("^#{display_name}")
+       matches = get(mh,:cols=>[:display_name]).select{|r|r[:display_name] =~ display_name_regexp}
+       if matches.empty?
+         return display_name
+       end
+       index = 2
+       matches.each do |r|
+         instance_name = r[:display_name]
+         if instance_name =~ /-([0-9]+$)/
+           instance_index = $1.to_i
             if instance_index >= index
               index += 1
             end
-          end
-        end
-        "#{display_name}-#{index.to_s}"
-      end
-    end
+         end
+       end
+       "#{display_name}-#{index.to_s}"
+     end
+   end
 
 
 #TODO: end stub for feature_node_admin_state
@@ -91,6 +91,11 @@ module DTK
 
     def name()
       get_field?(:display_name)
+    end
+
+    def pp_name_and_id(opts={})
+      first_word = (opts[:capitalize] ? 'Node' : 'node')
+      "#{first_word} (#{name()}) with id (#{id.to_s})"
     end
 
     #######################

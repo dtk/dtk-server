@@ -16,6 +16,19 @@ module DTK
       def check_security_group_and_key_pair(iaas_credentials)
         {}
       end
+
+      def start_instances(nodes)
+        raise_not_applicable_error(:start)
+      end
+
+      def stop_instances(nodes)
+        raise_not_applicable_error(:stop)
+      end
+
+     private
+      def raise_not_applicable_error(command)
+        raise ErrorUsage.new("#{command.to_s.capitalize} is not applicable operation for physical nodes")
+      end
     end
   end
 end

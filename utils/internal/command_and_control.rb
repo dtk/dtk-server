@@ -2,6 +2,8 @@ module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    r8_nested_require('command_and_control','install_script')
+
     def self.execute_task_action(task,top_task_idh,opts={})
       task_action = task[:executable_action]
       klass = load_for(task_action)
@@ -19,8 +21,14 @@ module DTK
     end
 
     def self.install_script(node)
-      Log.info("change CloudInit.user_data to install script")
-      Ec2::CloudInit.user_data(node)
+      InstallScript.install_script(node)
+    end
+
+    #This takes into account what is needed for the node_config_adapter
+    def self.node_config_adapter_install_script(node,bindings)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.install_script(node,bindings)
     end
 
     def self.pbuilderid(node)
@@ -37,6 +45,7 @@ module DTK
       klass = load_iaas_for(:node => nodes.first)
       klass.start_instances(nodes)
     end
+
     def self.stop_instances(nodes)
       klass = load_iaas_for(:node => nodes.first)
       klass.stop_instances(nodes)
@@ -44,7 +53,6 @@ module DTK
 
     def self.check_and_process_iaas_properties(iaas_type, iaas_properties)
       klass = load_for_aux(:iaas, iaas_type.to_s)
-
       #TODO: make check_security_group_and_key_pair a more generic name; it is EC2 specfic now
       # method will add params and return iaas_credentials
       klass.check_security_group_and_key_pair(iaas_properties)
@@ -127,12 +135,6 @@ module DTK
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
       klass.poll_to_detect_node_ready(node,opts)
-    end
-
-    def self.cloud_init_user_data(node,bindings)
-      adapter_name = R8::Config[:command_and_control][:node_config][:type]
-      klass = load_for_aux(:node_config,adapter_name)
-      klass.ret_cloud_init_user_data(node,bindings)
     end
 
    private

@@ -14,26 +14,26 @@ module DTK; class Target
     def install()
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = @target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-      servers, user_data = [], nil
+      servers, install_script = [], nil
 
-      user_data_file_path = "#{R8.app_user_home()}/user_data"
-      FileUtils.mkdir(user_data_file_path) unless File.directory?(user_data_file_path)
+      install_script_file_path = "#{R8.app_user_home()}/install_script"
+      FileUtils.mkdir(install_script_file_path) unless File.directory?(install_script_file_path)
       # here we set information we need to connect to nodes via ssh
       unmanaged_nodes.each do |node|
         node.update_object!(:ref)
 
-        user_data = CommandAndControl.install_script(node)
-        user_data_file_name = "user_data_#{node[:id]}"
+        install_script = CommandAndControl.install_script(node)
+        install_script_file_name = "install_script_#{node[:id]}"
 
         servers << {
           "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
-          "user_data_file_path" => user_data_file_path,
-          "user_data_file_name" => user_data_file_name,
+          "install_script_file_path" => install_script_file_path,
+          "install_script_file_name" => install_script_file_name,
           "node" => node
         }
 
-        File.open("#{user_data_file_path}/#{user_data_file_name}", 'w') do |f|
-          f.puts(user_data)
+        File.open("#{install_script_file_path}/#{install_script_file_name}", 'w') do |f|
+          f.puts(install_script)
         end
       end
 
@@ -51,7 +51,7 @@ module DTK; class Target
         # stop the workers
         Work.stop
       ensure
-        FileUtils.rm_rf(user_data_file_path)
+        FileUtils.rm_rf(install_script_file_path)
       end
     end
 
@@ -136,7 +136,7 @@ module DTK; class Target
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
         Net::SCP.upload!(params[:hostname], params[:user],
-          "#{message["user_data_file_path"]}/#{message["user_data_file_name"]}", "/tmp",
+          "#{message["install_script_file_path"]}/#{message["install_script_file_name"]}", "/tmp",
           :ssh => { :password => params[:password], :port => params[:port] }, :recursive => true)
 
         Net::SCP.upload!(params[:hostname], params[:user],
@@ -148,9 +148,9 @@ module DTK; class Target
         execute_ssh_command(install_command, params)
         execute_ssh_command("rm -rf /tmp/dtk-node-agent", params)
 
-        user_data_command = params[:user].eql?('root') ? "bash /tmp/#{message['user_data_file_name']}" : "sudo bash /tmp/#{message['user_data_file_name']}"
-        execute_ssh_command(user_data_command, params)
-        execute_ssh_command("rm -rf /tmp/#{message['user_data_file_name']}", params)
+        install_script_command = params[:user].eql?('root') ? "bash /tmp/#{message['install_script_file_name']}" : "sudo bash /tmp/#{message['install_script_file_name']}"
+        execute_ssh_command(install_script_command, params)
+        execute_ssh_command("rm -rf /tmp/#{message['install_script_file_name']}", params)
 
         node.update(:managed => true)
       end

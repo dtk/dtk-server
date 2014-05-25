@@ -30,12 +30,13 @@ module DTK
         end
         os_type = os_type.to_sym
         unless SupportedOSList.include?(os_type)
-          raise Error.new("Node #{node_info()} has an unsupported OS type: #{os_type}")
+          supported_list = SupportedOSList.join(',')
+          raise ErrorUsage.new("Node #{node_info()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list} ")
         end
         os_type
       end
       def node_info()
-        "(#{@node.get_field?(display_name)}) with id (#{@node.id.to_s})"
+        "(#{@node.get_field?(:display_name)}) with id (#{@node.id.to_s})"
       end
 
       def embed_in_os_specific_wrapper(install_script)

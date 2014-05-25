@@ -18,6 +18,11 @@ module DTK
       end
     end
 
+    def self.install_script(node)
+      Log.info("change CloudInit.user_data to install script")
+      Ec2::CloudInit.user_data(node)
+    end
+
     def self.pbuilderid(node)
       klass = load_iaas_for(:node => node)
       klass.pbuilderid(node)

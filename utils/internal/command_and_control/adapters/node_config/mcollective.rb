@@ -11,8 +11,8 @@ module DTK
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
 
-      def self.ret_cloud_init_user_data(node,bindings)
-        Config.ret_cloud_init_user_data(node,bindings)
+      def self.install_script(node,bindings)
+        Config.install_script(node,bindings)
       end
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)

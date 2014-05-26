@@ -2,6 +2,7 @@ module DTK
   class Target < Model
     r8_nested_require('target','clone')
     include TargetCloneMixin
+    r8_nested_require('target','install_agents_helper')
     r8_nested_require('target','iaas_properties')
     r8_nested_require('target','instance')
     r8_nested_require('target','template')
@@ -21,6 +22,7 @@ module DTK
        :iaas_properties,
        :project_id,
        :is_default_target,
+       :provider,
        :ui
       ]
     end
@@ -47,15 +49,22 @@ module DTK
       get_field?(:is_default_target)
     end
 
-    def info_about(about)
+    def info_about(about, opts={})
       case about
        when :assemblies
-         Assembly::Instance.list(model_handle(:component),:target_idh => id_handle())
+         opts.merge!(:target_idh => id_handle())
+         Assembly::Instance.list(model_handle(:component), opts)
        when :nodes
-         Node.list(model_handle(:node),:target_idh => id_handle())
+         Node.list(model_handle(:node), :target_idh => id_handle())
       else
         raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
       end
+    end
+
+    def self.info(target_mh, id)
+      target_info = Target.get(target_mh, id)
+      target_info[:provider_name] = target_info[:provider][:display_name] if target_info[:provider]
+      target_info
     end
 
     def self.check_valid_id(model_handle,id)
@@ -122,6 +131,10 @@ module DTK
       nodes = get_objs(:cols => [:nodes]).map{|r|r[:node]}
       ndx_changes = StateChange.get_ndx_node_config_changes(id_handle)
       nodes.inject({}){|h,n|h.merge(n.id => ndx_changes[n.id]||StateChange.node_config_change__no_changes())}
+    end
+
+    def install_agents()
+      InstallAgentsHelper.install(self)
     end
 
     ### TODO these should be moved to IAAS-spefic location

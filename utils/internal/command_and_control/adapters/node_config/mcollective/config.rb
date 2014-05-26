@@ -11,13 +11,12 @@ module DTK
           end
         end
 
-        def self.ret_cloud_init_user_data(node,bindings)
-          create().cloud_init_user_data(node,bindings)
+        def self.install_script(node,bindings)
+          create().install_script(node,bindings)
         end
-
-        def cloud_init_user_data(node,bindings)
-          all_bindings = cloud_init_user_data_bindings(node,bindings)
-          erubis_object(cloud_init_user_data_erb()).result(all_bindings)
+        def install_script(node,bindings)
+          all_bindings = install_script_bindings(node,bindings)
+          erubis_object(install_script_erb()).result(all_bindings)
         end
 
        private
@@ -77,11 +76,11 @@ module DTK
               :mcollective_collective => R8::Config[:mcollective][:collective])
           end
          private
-          def cloud_init_user_data_erb()
+          def install_script_erb()
             USER_DATA_SH_ERB
           end
           
-          def cloud_init_user_data_bindings(node,bindings)
+          def install_script_bindings(node,bindings)
             bindings
           end
 
@@ -120,11 +119,12 @@ eos
           end
          private
 
-          def cloud_init_user_data_bindings(node,bindings)
+          def install_script_bindings(node,bindings)
             #TODO: clean up to have error checking
             ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
             ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
             ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
+            pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
             #order of merge does not matter; keys wont conflict
             bindings.merge(
               :mcollective_ssh_remote_public_key => ssh_remote_public_key,
@@ -134,7 +134,8 @@ eos
               :mcollective_password => R8::Config[:mcollective][:password],
               :mcollective_collective => R8::Config[:mcollective][:collective],
               #TODO: will generalize so not just puppet                           
-              :puppet_version => get_puppet_version(node)
+              :puppet_version => get_puppet_version(node),
+              :pbuilderid => pbuilderid
             )
           end
 
@@ -147,7 +148,7 @@ eos
             end
           end
 
-          def cloud_init_user_data_erb()
+          def install_script_erb()
             USER_DATA_SH_ERB
           end
 
@@ -165,6 +166,9 @@ EOF
 cat << EOF > /etc/mcollective/facts.yaml
 ---
 git-server: "<%=git_server_url %>"
+<% if pbuilderid %>
+pbuilderid: <%= pbuilderid %>
+<% end %>
 EOF
 
 mkdir -p /etc/mcollective/ssh

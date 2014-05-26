@@ -5,6 +5,12 @@ module DTK
 
       def self.create_target(project_idh,provider,region,opts={})
         properties = provider.get_field?(:iaas_properties).merge(:region => region)
+        provider_type = provider.get_field?(:iaas_type)
+
+        unless region
+          raise ErrorUsage.new("Region is required for target created in '#{provider_type}' provider type!") unless provider_type.eql?('physical')
+        end
+
         target_name = opts[:target_name]|| provider.default_target_name(:region => region)
         iaas_properties = IAASProperties.new(target_name,properties)
         create_targets?(project_idh,provider,[iaas_properties],:raise_error_if_exists=>true).first
@@ -81,9 +87,9 @@ module DTK
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
           end
-          if t.is_default?()
-            t[:display_name] << DefaultTargetMark
-          end
+          # if t.is_default?()
+          #   t[:display_name] << DefaultTargetMark
+          # end
         end
         #sort by 1-whether default, 2-iaas_type, 3-display_name 
         unsorted_rows.sort do |a,b|
@@ -98,35 +104,35 @@ module DTK
         get_field?(:parent_id).nil?
       end
 
-      def self.import_nodes(target)
-        inventory_data_hash = parse_inventory_file(target.id())
+      def self.import_nodes(target, inventory_data_hash)
+        # inventory_data_hash = parse_inventory_file(target.id())
         target_idh = target.id_handle()
         
         opts = {:return_info => true}
         Model.import_objects_from_hash(target_idh, {"node" => inventory_data_hash}, opts)
       end
 
-      def self.parse_inventory_file(target_id)
-        config_base = Configuration.instance.default_config_base()
-        inventory_file = "#{config_base}/inventory.yaml"
+      # def self.parse_inventory_file(target_id)
+      #   config_base = Configuration.instance.default_config_base()
+      #   inventory_file = "#{config_base}/inventory.yaml"
 
-        hash = YAML.load_file(inventory_file)
-        ret = Hash.new
+      #   hash = YAML.load_file(inventory_file)
+      #   ret = Hash.new
 
-        hash["nodes"].each do |node_name, data|
-          display_name = data["name"]||node_name
-          ref = "physical--#{display_name}"
-          ret[ref] = {
-            :os_identifier => data["type"],
-            :display_name => display_name,
-            :os_type => data["os_type"],
-            :managed => false,
-            :external_ref => {:type => "physical", :routable_host_address => node_name, :ssh_credentials => data["ssh_credentials"]}
-          }
-        end
+      #   hash["nodes"].each do |node_name, data|
+      #     display_name = data["name"]||node_name
+      #     ref = "physical--#{display_name}"
+      #     ret[ref] = {
+      #       :os_identifier => data["type"],
+      #       :display_name => display_name,
+      #       :os_type => data["os_type"],
+      #       :managed => false,
+      #       :external_ref => {:type => "physical", :routable_host_address => node_name, :ssh_credentials => data["ssh_credentials"]}
+      #     }
+      #   end
 
-        ret
-      end
+      #   ret
+      # end
 
      private
       #TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'

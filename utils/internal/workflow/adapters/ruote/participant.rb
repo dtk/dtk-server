@@ -7,6 +7,9 @@ module DTK
       class Top
         include ::Ruote::LocalParticipant
 
+        r8_nested_require('participant','create_node')
+        r8_nested_require('participant','detect_created_node_is_ready')
+
         DEBUG_AGENT_RESPONSE = false
 
         def initialize(opts=nil)
@@ -35,6 +38,39 @@ module DTK
 
         def set_task_to_failed_preconditions(task,failed_antecedent_tasks)
           task.update_when_failed_preconditions(failed_antecedent_tasks)
+        end
+
+        def name()
+          self.class.to_s.split('::').last
+        end
+
+        def log_participant()
+          LogParticipant.new(self)
+        end
+        class LogParticipant
+          def initialize(participant)
+            @name = participant.name()
+          end
+          def start(*args)
+            log(['start_action:',name] + args)
+          end
+          def end(result_type,*args)
+            log(['end_action:',name,result_type] + args)
+          end
+          def event(event,*args)
+            log(['event',name,:event=>event] + args)
+          end
+          def canceling(task_id)
+            log(['canceling',name,:task_id=>task_id])
+          end
+          def canceled(task_id)
+            log(['canceled',name,:task_id=>task_id])
+          end
+         private
+          attr_reader :name
+          def log(*args)
+            Log.info_pp(*args)
+          end
         end
 
         def set_result_succeeded(workitem,new_result,task,action)
@@ -100,9 +136,9 @@ module DTK
           if task_start
             set_task_to_executing(task)
           end
-          Log.info_pp ["executing #{self.class.to_s}",task[:id]]
+          log_participant.start(:task_id => task[:id])
           if event = add_start_task_event?(task)
-            Log.info_pp [:start_task_event, event]
+            log_participant.event(event,:task_id => task[:id])
           end
           execution_context_block(task,workitem,&body)
         end
@@ -153,51 +189,21 @@ module DTK
         end
       end
 
-      class CreateNode < Top
-        #LockforDebug = Mutex.new
-        def consume(workitem)
-          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
-          params = get_params(workitem) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          execution_context(task,workitem,task_start) do
-            result = workflow.process_executable_action(task)
-            if errors_in_result = errors_in_result?(result)
-              event,errors = task.add_event_and_errors(:complete_failed,:create_node,errors_in_result)
-              pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-              cancel_upstream_subtasks(workitem)
-              set_result_failed(workitem,result,task)
-            else
-              node = task[:executable_action][:node]
-              node.update_operational_status!(:running)
-              node.update_admin_op_status!(:running)
-              set_result_succeeded(workitem,result,task,action) if task_end 
-            end
-            reply_to_engine(workitem)
-          end
-        end
-
-        def cancel(fei, flavour)
-          
-          # Don't execute cancel if ruote process is killed
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
-        end
-
-       private
+      class NodeParticipants < Top
+        r8_nested_require('participant','authorize_node')
+        r8_nested_require('participant','sync_agent_code')
+        private
         def errors_in_result?(result)
-          if result[:status] == "failed"
-            result[:error_object] ? [{:message => result[:error_object].to_s}] : []
+          #result[:statuscode] is for transport errors and data is for errors for agent
+          if result[:statuscode] != 0
+            ["transport_error"]
+          else
+            data = result[:data]||{}
+            unless data[:status] == :succeeded
+              data[:error] ? [data[:error]] : (data[:errors]||[])
+            end
           end
-        end    
+        end
       end
 
       class PowerOnNode < Top
@@ -265,276 +271,6 @@ module DTK
           delete_task_info(wi)
           reply_to_engine(wi)
         end
-      end
-
-      class DetectCreatedNodeIsReady < Top
-        def consume(workitem)
-          params = get_params(workitem) 
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-
-          user_object  = ::DTK::CurrentSession.new.user_object()
-
-          execution_context(task,workitem,task_start) do
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                inspect_agent_response(msg)
-                create_thread_in_callback_context(task,workitem,user_object) do
-                  # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                  
-                  result = {:type => :completed_create_node, :task_id => task_id}
-                  
-                  
-                  Log.info_pp [:found,msg[:senderid]]
-                  node = task[:executable_action][:node]
-                  node.update_operational_status!(:running)
-                  
-                    #these must be called before get_and_propagate_dynamic_attributes
-                  node.associate_elastic_ip?()
-                  node.associate_persistent_dns?()
-                  
-                    action.get_and_propagate_dynamic_attributes(result,:non_null_attributes => ["host_addresses_ipv4"])
-                  set_result_succeeded(workitem,result,task,action)
-                  delete_task_info(workitem)
-                  
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_timeout => proc do
-                DTK::CreateThread.defer_with_session(user_object) do
-                  Log.error("Timeout detecting if node is ready")
-                  result = {:type => :timeout_create_node, :task_id => task_id}
-                  set_result_failed(workitem,result,task)
-                  cancel_upstream_subtasks(workitem)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end
-            }
-            poll_to_detect_node_ready(workflow, action[:node], callbacks)
-          end
-        end
-
-        def cancel(fei, flavour)
-          
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
-        end
-      end
-
-      class NodeParticipants < Top
-        private
-        def errors_in_result?(result)
-          #result[:statuscode] is for transport errors and data is for errors for agent
-          if result[:statuscode] != 0
-            ["transport_error"]
-          else
-            data = result[:data]||{}
-            unless data[:status] == :succeeded
-              data[:error] ? [data[:error]] : (data[:errors]||[])
-            end
-          end
-        end
-      end
-
-      class AuthorizeNode < NodeParticipants
-        def consume(workitem)
-          #TODO succeed without sending node request if authorized already
-          params = get_params(workitem) 
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.update_input_attributes!() if task_start
-
-          user_object  = ::DTK::CurrentSession.new.user_object()
-
-          execution_context(task,workitem,task_start) do
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                inspect_agent_response(msg)
-                DTK::CreateThread.defer_with_session(user_object) do
-                  # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                  
-                  result = msg[:body].merge("task_id" => task_id)
-                  if errors = errors_in_result?(result)
-                    event,errors = task.add_event_and_errors(:complete_failed,:agent_authorize_node,errors)
-                    pp ["task_complete_failed #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                    set_result_failed(workitem,result,task)
-                  else
-                    pp ["task_complete_succeeded #{action.class.to_s}"]
-                    #task[:executable_action][:node].set_authorized()
-                    set_result_succeeded(workitem,result,task,action) if task_end 
-                  end
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_timeout => proc do
-                DTK::CreateThread.defer_with_session(user_object) do
-                  result = {:type => :timeout_authorize_node, :task_id => task_id}
-                  cancel_upstream_subtasks(workitem)
-                  set_result_failed(workitem,result,task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_error => proc do |error_obj|
-                DTK::CreateThread.defer_with_session(user_object) do
-                  cancel_upstream_subtasks(workitem)
-                  delete_task_info(workitem)
-                  pp [:on_error,error_obj,error_obj.backtrace[0..7],task[:id]]
-                end
-              end 
-            }
-            context = {:expected_count => 1}
-            workflow.initiate_node_action(:authorize_node,action[:node],callbacks,context)
-          end
-        end
-
-        def cancel(fei, flavour)
-          
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
-        end
-      end
-
-      class SyncAgentCode < NodeParticipants
-
-        def consume(workitem)
-          params = get_params(workitem) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          
-          PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
-
-          head_git_commit_id = nil
-          # TODO Amar: test to remove dyn attrs and errors_in_result part
-          execution_context(task,workitem,task_start) do
-
-            node = task[:executable_action][:node]
-            installed_agent_git_commit_id = node.get_field?(:agent_git_commit_id)
-            head_git_commit_id = nil
-            begin
-              head_git_commit_id = AgentGritAdapter.get_head_git_commit_id()
-              if R8::Config[:node_agent_git_clone][:mode] == 'debug'
-                installed_agent_git_commit_id=node[:agent_git_commit_id]=nil
-              end
-             rescue => e
-              Log.error("Error trying to get most recent sync agent code (#{e.to_s}); skipping the sync")
-              head_git_commit_id = -1
-            end
-            if (head_git_commit_id == installed_agent_git_commit_id) or head_git_commit_id == -1
-              set_result_succeeded(workitem,nil,task,action) if task_end
-              if head_git_commit_id == -1
-                Log.info("task_complete_skipped_because_of_error #{self.class.to_s}")
-              else
-                Log.info("task_complete_skipped_already_synced #{self.class.to_s}")
-              end
-
-              delete_task_info(workitem)
-              # Amar: PERFORMANCE
-              PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-              return reply_to_engine(workitem)
-            end
-
-            user_object  = ::DTK::CurrentSession.new.user_object()
-
-            callbacks = {
-              :on_msg_received => proc do |msg|
-                inspect_agent_response(msg)
-                DTK::CreateThread.defer_with_session(user_object) do
-                  # Amar: PERFORMANCE
-                  PerformanceService.end_measurement("#{self.class.to_s.split("::").last}", self.object_id)
-                  
-                  result = msg[:body].merge("task_id" => task_id)
-                  if result[:statuscode] != 0
-                    event,errors = task.add_event_and_errors(:complete_failed,:config_agent,errors_in_result)
-                    pp ["task_complete_failed SyncAgentCode", task_id,event,{:errors => errors}] if event
-                    # Amar: SyncAgentCode will be skipped 99% of times, 
-                    #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
-                    #cancel_upstream_subtasks(workitem)
-                    set_result_failed(workitem,result,task)
-                  else
-                    node.update_agent_git_commit_id(head_git_commit_id)
-                    event = task.add_event(:complete_succeeded,result)
-                    pp ["task_complete_succeeded SyncAgentCode", task_id,event] if event
-                    set_result_succeeded(workitem,result,task,action) if task_end 
-                    action.get_and_propagate_dynamic_attributes(result)
-                  end
-                  # If there was a change on agents, wait for node's mcollective process to restart
-                  unless R8::Config[:node_agent_git_clone][:no_delay_needed_on_server]
-                    sleep(R8::Config[:node_agent_git_clone][:delay]||NodeAgentGitCloneDefaultDelay)
-                  end
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_timeout => proc do
-                DTK::CreateThread.defer_with_session(user_object) do
-                  result = {
-                    :status => "timeout" 
-                  }
-                  event,errors = task.add_event_and_errors(:complete_timeout,:server,["timeout"])
-                  pp ["task_complete_timeout #{action.class.to_s}", task_id,event,{:errors => errors}] if event
-                  #cancel_upstream_subtasks(workitem)
-                  set_result_timeout(workitem,result,task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end,
-              :on_cancel => proc do
-                DTK::CreateThread.defer_with_session(user_object) do
-                  pp ["task_complete_canceled #{action.class.to_s}", task_id]
-                  set_result_canceled(workitem, task)
-                  delete_task_info(workitem)
-                  reply_to_engine(workitem)
-                end
-              end
-            }
-            receiver_context = {:callbacks => callbacks, :head_git_commit_id => head_git_commit_id, :expected_count => 1}
-            begin
-              workflow.initiate_sync_agent_action(task,receiver_context)
-             rescue Exception => e
-              e.backtrace
-            end
-          end
-        end
-        NodeAgentGitCloneDefaultDelay = 10
-
-        # Ruote dispatch call to this method in case of user's cancel task request
-        def cancel(fei, flavour)
-
-          # flavour will have 'kill' value if kill_process is invoked instead of cancel_process
-          return if flavour
-          
-          wi = workitem
-          params = get_params(wi) 
-          task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
-          task.add_internal_guards!(workflow.guards[:internal])
-          pp ["Canceling task #{action.class.to_s}: #{task_id}"]
-          set_result_canceled(wi, task)
-          delete_task_info(wi)
-          reply_to_engine(wi)
-        end
-
       end
 
       class ExecuteOnNode < NodeParticipants

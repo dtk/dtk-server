@@ -595,7 +595,7 @@ module DTK
     #
     def nodes_valid_for_aws?(assembly_name, nodes, node_pattern, status_pattern)
       # check for pattern
-      unless node_pattern.nil?
+      unless node_pattern.nil? || node_pattern.empty?
         regex = Regexp.new(node_pattern)
 
         #temp nodes_list

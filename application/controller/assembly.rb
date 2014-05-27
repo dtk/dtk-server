@@ -764,6 +764,48 @@ module DTK
       assembly.initiate_execute_tests(queue, node_id, components)
       rest_ok_response :action_results_id => queue.id
     end
+
+    def rest__initiate_execute_tests_v2()
+      node_id, components = ret_non_null_request_params(:node_id, :components)
+      assembly = ret_assembly_instance_object()
+
+      #Logic for validation
+      # filters only running nodes for this assembly
+      nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
+      assembly_name = Assembly::Instance.pretty_print_name(assembly)
+      nodes, is_valid, error_msg = nodes_are_up?(assembly_name, nodes, :running)
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(:errors => [error_msg])
+      end
+
+      #Special case for preventing execution of agent on specific node that is not running
+      matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
+      if (!node_id.empty? && matching_nodes.empty?)
+        error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
+        Log.info(error_msg)
+        return rest_ok_response(:errors => [error_msg])
+      end
+
+      #Special case filtering of components from nodes that are not running and passing only those components for the execution
+      node_names = Array.new
+      nodes.each do |x|
+        node_names << x[:display_name]
+      end
+      
+      unless components.empty?
+        components.reject! do |c|
+          if c.include? "/"
+            !node_names.include? c.split("/").first
+          end
+        end
+      end
+
+      queue = ActionResultsQueue.new
+      assembly.initiate_execute_tests_v2(queue, node_id, components)
+      rest_ok_response :action_results_id => queue.id
+    end
     
     def rest__get_action_results()
       #TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything

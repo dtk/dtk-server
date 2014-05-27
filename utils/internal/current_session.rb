@@ -1,9 +1,14 @@
 module XYZ
   class CurrentSession
     extend Innate::StateAccessor
-    state_accessor :user_object, :auth_filters,:access_time
+    state_accessor :user_object, :auth_filters, :access_time, :repoman_session_id
+
     def get_user_object()
       user_object
+    end
+
+    def set_repoman_session_id(session_id)
+      self.repoman_session_id = session_id
     end
 
     def set_access_time(a_time)

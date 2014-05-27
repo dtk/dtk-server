@@ -261,8 +261,20 @@ module DTK
       params_hash[:type].eql?("component") ? '/v1/component_module' : '/v1/service_module'
     end
 
+    UNAUTHORIZED_ERROR_CODE = 1001
+
     def handle_error(opts={},&rest_call_block)
       response = rest_call_block.call
+
+      # token might be invalid or expired
+      if error_code(response) == UNAUTHORIZED_ERROR_CODE
+        Log.info("Auth failed (#{error_msg(response)}), creating new session ...")
+        # remove repoman session_id from session obj 
+        session = CurrentSession.new
+        session.set_repoman_session_id(nil)
+        # repeat request
+        response = rest_call_block.call
+      end
 
       if opts[:log_error]
         if response.ok?
@@ -318,6 +330,11 @@ module DTK
       end
     end
 
+    def error_code(response)
+      errors = response["errors"]
+      (errors.is_a?(Array) && errors.first) ? errors.first['code'] : 0
+    end
+
     def include_error_code?(errors,code)
       !!errors.find do |el|
         el.kind_of?(Hash) and el["code"] == code
@@ -356,7 +373,7 @@ module DTK
       to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
         opts[k] ? h.merge(k => opts[k]) : h
       end
-      
+
       if R8::Config[:remote_repo][:authentication]
         to_merge = enrich_with_auth(to_merge)
       end

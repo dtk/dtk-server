@@ -22,7 +22,7 @@ module DTK
         ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
       
         #all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id,:display_name,:type,:ref] + parent_rels.first.keys
+        remove_cols = [:ancestor_id,:display_name,:type,:ref,:canonical_template_node_id] + parent_rels.first.keys
         node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :node_template_id)
         node_template_wc = nil
         node_template_ds = Model.get_objects_just_dataset(model_handle,node_template_wc,Model::FieldSet.opt(node_template_fs))
@@ -37,11 +37,15 @@ module DTK
         #mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
           mapping_rows = matches.map do |m|
-            {:type => "staged",
+            name = m[:node_stub_display_name]
+            node_template_id = m[:node_template_idh].get_id()
+            {
+              :type => m[:instance_type],
               :ancestor_id => m[:node_stub_idh].get_id(),
-              :node_template_id => m[:node_template_idh].get_id(), 
-              :display_name => m[:node_stub_display_name],
-              :ref => m[:node_stub_display_name]
+              :canonical_template_node_id => node_template_id,
+              :node_template_id => node_template_id,
+              :display_name => name,
+              :ref => name
             }
           end
           mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
@@ -80,7 +84,12 @@ module DTK
         #TODO: may be more efficient to get these all at once
         node_info.map do |r|
           node_template = Node::Template.find_matching_node_template(target,r[:node_binding_ruleset])
-          {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template.id_handle()}
+          {
+            :instance_type => 'staged',
+            :node_stub_idh => r.id_handle, 
+            :node_stub_display_name => r[:display_name],
+            :node_template_idh => node_template.id_handle()
+          }
         end
       end
 
@@ -103,7 +112,12 @@ module DTK
         ret = Array.new
         stub_nodes.each_with_index do |stub_node,i|
           node_target_ref = free_nodes[i]
-          ret << {:node_stub_idh => stub_node.id_handle, :node_stub_display_name => stub_node[:display_name], :node_template_idh => node_target_ref.id_handle()}
+          ret << {
+            :instance_type => 'instance',
+            :node_stub_idh => stub_node.id_handle, 
+            :node_stub_display_name => stub_node[:display_name], 
+            :node_template_idh => node_target_ref.id_handle()
+          }
         end
         ret
       end

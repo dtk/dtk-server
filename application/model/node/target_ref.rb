@@ -20,22 +20,31 @@ module DTK
         node_mh = target.model_handle(:node)
         ret_unpruned = get_objs(node_mh,sp_hash)
 
-        if ret_unpruned.empty?
+        ndx_matched_target_refs = ndx_target_refs_matching_instances(ret_unpruned.map{|r|r.id_handle})
+        if ndx_matched_target_refs.empty?
           return ret_unpruned
         end
-
-        Log.error("This is wrong test; ancestor is in teh node template; may use the field :canonical_template_node_id, rather than put in a new column")
-        sp_hash = {
-          :cols => [:id, :display_name,:ancestor_id],
-          :filter => [:oneof,:ancestor_id,ret_unpruned.map{|r|r.id}]
-        }
-        ndx_match_on_ancestor_id = get_objs(node_mh,sp_hash).inject(Hash.new) do |h,r|
-          h.merge(r[:ancestor_id] => true)
-        end
-        ret_unpruned.reject{|r|ndx_match_on_ancestor_id[r[:id]]}
+        ret_unpruned.reject{|r|ndx_matched_target_refs[r[:id]]}
       end
 
      private
+      #returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
+      def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
+        ret = Hash.new
+        return ret if node_target_ref_idhs.empty?
+        
+      # object model structure that relates instance to target refs is where instance's :canonical_template_node_id field point to target_ref
+        sp_hash = {
+          :cols => [:id, :display_name,:canonical_template_node_id],
+          :filter => [:oneof,:canonical_template_node_id,node_target_ref_idhs.map{|idh|idh.get_id()}]
+        }
+        node_mh = node_target_ref_idhs.first.createMH()
+        get_objs(node_mh,sp_hash).each do |r|
+          (ret[r[:canonical_template_node_id]] ||= Array.new) << r
+        end
+        ret
+      end
+
       def self.type()
         TypeField
       end

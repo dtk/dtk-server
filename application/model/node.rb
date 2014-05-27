@@ -486,11 +486,7 @@ module DTK
 
     def destroy_and_delete(opts={})
       if suceeeded = CommandAndControl.destroy_node?(self)
-        if get_iaas_type() == :physical
-          delete_contained_assembly_objects(opts)
-        else
-          delete_object(opts)
-        end
+        delete_object(opts)
       end
       suceeeded
     end
@@ -512,45 +508,6 @@ module DTK
       Model.delete_instance(id_handle())
       true
     end
-
-    def delete_contained_assembly_objects(opts={})
-      #TODO: determine exeactly when this is called so can remove check below
-      unless opts.empty? or (opts.size == 1 and opts[:destroy_nodes] == true)
-        raise Error.new("Unexpected opts value: #{opts.inspect}")
-      end
-      ContainedAssemblyObjs.each_pair do |child_mn,child_model_info|
-        child_mh = model_handle(child_mn)
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:eq,child_model_info[:field_node_id],id()]
-        }
-        children = Model.get_objs(child_mh,sp_hash)
-        unless children.empty?
-          Model.delete_instances(children.map{|r|r.id_handle()})
-        end
-      end
-    end
-    private :delete_contained_assembly_objects
-    ContainedAssemblyObjs = {
-      :component => {
-        :field_node_id => :node_node_id
-      },
-      :port => {
-        :field_node_id => :node_node_id
-      },
-      :attribute => {
-        :field_node_id => :node_node_id
-      },
-      :node_interface => {
-        :field_node_id => :node_id
-      }
-    }
-=begin
-   #TODO: need to determine if any other conatining componts need to be deleted
-   address_access_point
-   component_ref
-   monitoring_item
-=end
 
     def update_task_templates_when_deleted_node?(assembly)
       #TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk

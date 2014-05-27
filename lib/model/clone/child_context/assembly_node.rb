@@ -6,7 +6,14 @@ module DTK
         super
         assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])
         sao_node_bindings = clone_proc.service_add_on_node_bindings()
-        find_node_templates_in_assembly!(hash[:target_idh],assembly_template_idh,sao_node_bindings)
+        target = hash[:target_idh].create_object()
+        matches = 
+          if target.get_field?(:iaas_type) == 'physical'
+            find_node_target_ref_matches(target,assembly_template_idh)
+          else
+            find_node_template_matches(target,assembly_template_idh,sao_node_bindings)
+          end
+        merge!(:matches => matches) if matches
       end
 
       #for processing node stubs in an assembly
@@ -28,9 +35,7 @@ module DTK
         target = Model.get_obj(model_handle.createMH(:target),sp_hash)
 
         #mapping from node stub to node template and overriding appropriate node template columns
-        if target[:iaas_type].eql?("physical")
-          ret = find_physical_nodes(ret, matches, target, create_override_attrs[:assembly_id])  
-        elsif !matches.empty?
+        unless matches.empty?
           mapping_rows = matches.map do |m|
             {:type => "staged",
               :ancestor_id => m[:node_stub_idh].get_id(),
@@ -55,7 +60,7 @@ module DTK
         ret
       end
     
-      def find_node_templates_in_assembly!(target_idh,assembly_template_idh,service_add_on_node_bindings)
+      def find_node_template_matches(target,assembly_template_idh,sao_node_bindings=nil)
         #find the assembly's stub nodes and then use the node binding to find the node templates
         #as will as using, if non-empty, ervice_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
@@ -63,65 +68,50 @@ module DTK
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
-        stubs_to_omit = service_add_on_node_bindings.map{|r|r[:sub_assembly_node_id]}
-        unless stubs_to_omit.empty?
-          node_info.reject!{|n|stubs_to_omit.include?(n[:id])}
+        if sao_node_bindings
+          stubs_to_omit = sao_node_bindings.map{|r|r[:sub_assembly_node_id]}
+          unless stubs_to_omit.empty?
+            node_info.reject!{|n|stubs_to_omit.include?(n[:id])}
+          end
         end
 
-        #TODO: see why this causes bug target = target_idh.create_object(:model_name => :target_instance)
         # No rules in the node being match the target (/home/dtk18/server/application/model/node_binding_ruleset.rb:22
-        target = target_idh.create_object()
-        node_mh = target_idh.createMH(:node)
+        node_mh = target.model_handle(:node)
         #TODO: may be more efficient to get these all at once
-        matches = node_info.map do |r|
+        node_info.map do |r|
           node_template = Node::Template.find_matching_node_template(target,r[:node_binding_ruleset])
           {:node_stub_idh => r.id_handle, :node_stub_display_name => r[:display_name], :node_template_idh => node_template.id_handle()}
         end
-        merge!(:matches => matches)
+      end
+
+      def find_node_target_ref_matches(target,assembly_template_idh)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id],
+          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
+        }
+        stub_nodes = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
+
+        free_nodes = Node::TargetRef.get_free_nodes(target)
+        #assuming the free nodes are interchangable; pick one for each match
+        num_free = free_nodes.size
+        num_needed = stub_nodes.size
+        if num_free < num_needed
+          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
+          free = (num_free == 1 ? '1 is' : "#{num_free} are")
+          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
+        end
+        ret = Array.new
+        stub_nodes.each_with_index do |stub_node,i|
+          node_target_ref = free_nodes[i]
+          ret << {:node_stub_idh => stub_node.id_handle, :node_stub_display_name => stub_node[:display_name], :node_template_idh => node_target_ref.id_handle()}
+        end
+        ret
       end
 
       def cleanup_after_error()
         Model.delete_instance(model_handle.createIDH(:model_name => :component,:id => override_attrs[:assembly_id]))
       end
 
-      def find_physical_nodes(ret, matches, target, assembly_id)
-        sp_hash = {
-          :cols => [:id, :display_name, :type, :assembly_id, :datacenter_datacenter_id, :managed],
-          :filter => [:and, 
-                        [:eq, :type, 'instance'],
-                        [:eq, :datacenter_datacenter_id, target[:id]], 
-                        [:eq, :managed, true], 
-                        [:eq, :assembly_id, nil]] #TODO: we can use this for time being, but needs to be changed to handle
-                        #nodes taht have multiple assemblies on them; real test should be that no components point to node 
-        }
-        free_physical_nodes = Model.get_objs(model_handle.createMH(:node), sp_hash)
-
-        #assuming the free nodes are interchangable; pick one for each match
-        num_free = free_physical_nodes.size
-        num_needed = matches.size
-        if num_free < num_needed
-          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
-          free = (num_free == 1 ? '1 is' : "#{num_free} are")
-          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
-        end
-
-        matches.each_with_index do |match,i|
-          node = free_physical_nodes[i]
-          ancestor_id = match[:node_stub_idh].get_id
-          #TODO: change when we handle nodes with multiple assemblies: update node to capture that assembly aassociated with it
-          node.update(:assembly_id => assembly_id, :ancestor_id => ancestor_id)
-          ret << {
-            :id => node[:id],
-            :display_name => node[:display_name],
-            :parent_id => target[:id],
-            :ancestor_id => match[:node_stub_idh].get_id,
-            :assembly_id => assembly_id,
-            :node_template_id => match[:node_template_idh].get_id
-          }
-        end
-
-        ret
-      end
     end
   end
 end

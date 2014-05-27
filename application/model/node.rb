@@ -5,6 +5,7 @@ module DTK
     set_relation_name(:node,:node)
 
     r8_nested_require('node','template')
+    r8_nested_require('node','target_ref')
     r8_nested_require('node','filter')
     r8_nested_require('node','clone')
     r8_nested_require('node','attribute')

@@ -105,34 +105,10 @@ module DTK
       end
 
       def self.import_nodes(target, inventory_data_hash)
-        # inventory_data_hash = parse_inventory_file(target.id())
         target_idh = target.id_handle()
-        
-        opts = {:return_info => true}
-        Model.import_objects_from_hash(target_idh, {"node" => inventory_data_hash}, opts)
+        Node::TargetRef.process_import_nodes_input!(inventory_data_hash)
+        Model.import_objects_from_hash(target_idh, {:node => inventory_data_hash}, :return_info => true)
       end
-
-      # def self.parse_inventory_file(target_id)
-      #   config_base = Configuration.instance.default_config_base()
-      #   inventory_file = "#{config_base}/inventory.yaml"
-
-      #   hash = YAML.load_file(inventory_file)
-      #   ret = Hash.new
-
-      #   hash["nodes"].each do |node_name, data|
-      #     display_name = data["name"]||node_name
-      #     ref = "physical--#{display_name}"
-      #     ret[ref] = {
-      #       :os_identifier => data["type"],
-      #       :display_name => display_name,
-      #       :os_type => data["os_type"],
-      #       :managed => false,
-      #       :external_ref => {:type => "physical", :routable_host_address => node_name, :ssh_credentials => data["ssh_credentials"]}
-      #     }
-      #   end
-
-      #   ret
-      # end
 
      private
       #TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'

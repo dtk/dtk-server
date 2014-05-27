@@ -46,31 +46,31 @@ module DTK
         end
       end
 
-      def self.check_security_group_and_key_pair(iaas_credentials)
+      def self.check_iaas_properties(iaas_properties)
         begin
-          ec2_creds = get_ec2_credentials(iaas_credentials)
+          ec2_creds = get_ec2_credentials(iaas_properties)
           connection = conn(ec2_creds)
 
           # keypair
-          keypair_to_use = iaas_credentials['keypair_name'] || R8::Config[:ec2][:keypair]
+          keypair_to_use = iaas_properties['keypair_name'] || R8::Config[:ec2][:keypair]
           #TODO: WORKAROUND: DTK-1426; commented out
           #connection.check_for_key_pair(keypair_to_use)
           
-          Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_credentials['keypair_name'].nil?})"
+          Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_properties['keypair_name'].nil?})"
 
           # security group
-          security_group_to_use = iaas_credentials['security_group'] || R8::Config[:ec2][:security_group]
+          security_group_to_use = iaas_properties['security_group'] || R8::Config[:ec2][:security_group]
           #TODO: WORKAROUND: DTK-1426; commented out
           #connection.check_for_security_group(security_group_to_use)
 
-          Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_credentials['security_group'].nil?})"
+          Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_properties['security_group'].nil?})"
 
           return {
-            :key            => iaas_credentials['key'],
-            :secret         => iaas_credentials['secret'],
+            :key            => iaas_properties['key'],
+            :secret         => iaas_properties['secret'],
             :keypair        => keypair_to_use,
             :security_group => security_group_to_use,
-            :region         => iaas_credentials['region']
+            :region         => iaas_properties['region']
           }
         rescue Fog::Compute::AWS::Error => e
           # probabably this will handle credentials failure

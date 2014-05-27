@@ -13,8 +13,8 @@ module DTK
         true #vacuously succeeds
       end
 
-      def check_security_group_and_key_pair(iaas_credentials)
-        {}
+      def check_iaas_properties(iaas_properties)
+        Hash.new
       end
 
       def start_instances(nodes)

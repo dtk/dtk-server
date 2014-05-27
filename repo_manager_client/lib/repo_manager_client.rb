@@ -344,10 +344,28 @@ module DTK
       end
     end
 
+    def login_to_repoman()
+      response = handle_error(:raise_error => true) do
+        RestClientWrapper.post("#{@rest_base_url}/v1/auth/login", :username => R8::Config[:remote_repo][:username], :password => R8::Config[:remote_repo][:password])
+      end
+      response['token']
+    end
+
     def ret_opts(opts)
+      session_obj = CurrentSession.new
+
+      unless session_obj.repoman_session_id
+        token_id = login_to_repoman()
+        session_obj.set_repoman_session_id(token_id)
+      end
+
       to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
         opts[k] ? h.merge(k => opts[k]) : h
       end
+
+      # adding auth information
+      to_merge.merge!(:headers => {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
+
       DefaultTimeoutOpts.merge(to_merge)
     end
 

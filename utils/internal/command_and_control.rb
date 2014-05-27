@@ -53,9 +53,7 @@ module DTK
 
     def self.check_and_process_iaas_properties(iaas_type, iaas_properties)
       klass = load_for_aux(:iaas, iaas_type.to_s)
-      #TODO: make check_security_group_and_key_pair a more generic name; it is EC2 specfic now
-      # method will add params and return iaas_credentials
-      klass.check_security_group_and_key_pair(iaas_properties)
+      klass.check_iaas_properties(iaas_properties)
     end
 
     def self.find_matching_node_binding_rule(node_binding_rules,target)
@@ -202,7 +200,7 @@ module DTK
     Lock = Mutex.new
     #TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type,adapter_name)
-      (InstanceStyleAdapters[adapter_type]||[]).include?(adapter_name)
+      (InstanceStyleAdapters[adapter_type.to_sym]||[]).include?(adapter_name.to_sym)
     end
     InstanceStyleAdapters = {
       :iaas => [:physical]

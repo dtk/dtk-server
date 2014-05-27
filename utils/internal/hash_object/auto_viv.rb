@@ -2,7 +2,8 @@ module DTK
   class HashObject
     class AutoViv < self
       def [](x)
-        frozen? ? (super if has_key?(x)) : super
+        result = frozen? ? (super if has_key?(x)) : super
+        convert_type(result)
       end
       
       def recursive_freeze()
@@ -12,6 +13,17 @@ module DTK
       
       def ArrayClass()
         ArrayObject
+      end
+
+      def convert_type(string_literal)
+        case string_literal
+        when /^true$/i
+          true
+        when /^false$/i
+          false
+        else
+          string_literal
+        end
       end
 
       class << self

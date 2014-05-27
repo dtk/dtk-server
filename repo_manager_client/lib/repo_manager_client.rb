@@ -352,21 +352,27 @@ module DTK
     end
 
     def ret_opts(opts)
+
+      to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
+        opts[k] ? h.merge(k => opts[k]) : h
+      end
+      
+      if R8::Config[:remote_repo][:authentication]
+        to_merge = enrich_with_auth(to_merge)
+      end
+
+      DefaultTimeoutOpts.merge(to_merge)
+    end
+
+    def enrich_with_auth(opts)
       session_obj = CurrentSession.new
 
       unless session_obj.repoman_session_id
         token_id = login_to_repoman()
         session_obj.set_repoman_session_id(token_id)
       end
-
-      to_merge = DefaultTimeoutOpts.keys.inject(Hash.new) do |h,k|
-        opts[k] ? h.merge(k => opts[k]) : h
-      end
-
       # adding auth information
-      to_merge.merge!(:headers => {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
-
-      DefaultTimeoutOpts.merge(to_merge)
+      opts.merge(:headers => {"Authorization"=>"Token token=\"#{session_obj.repoman_session_id}\""})
     end
 
     if R8::Config.is_development_mode?

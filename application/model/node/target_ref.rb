@@ -11,14 +11,14 @@ module DTK
       #these are nodes without any assembly on them
       def self.get_free_nodes(target)
         sp_hash = {
-          :cols => [:id, :display_name, :type, :assembly_id, :datacenter_datacenter_id, :managed],
+          :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
           :filter => [:and, 
                         [:eq, :type, type()],
                         [:eq, :datacenter_datacenter_id, target[:id]], 
                         [:eq, :managed, true]]
         }
         node_mh = target.model_handle(:node)
-        ret_unpruned = get_objs(node_mh,sp_hash)
+        ret_unpruned = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
 
         ndx_matched_target_refs = ndx_target_refs_matching_instances(ret_unpruned.map{|r|r.id_handle})
         if ndx_matched_target_refs.empty?

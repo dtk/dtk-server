@@ -44,7 +44,7 @@ module DTK
         end
 
         # reconfigure response fields that will be returned to the client
-        self.class.list_aux(assembly_rows,attr_rows, {:print_form=>true}.merge(opts)).first      
+        self.class.list_aux(assembly_rows,attr_rows, {:print_form=>true,:sanitize=>true}.merge(opts)).first      
       end
 
       def pretty_print_name(opts={})
@@ -112,10 +112,22 @@ module DTK
           r.merge(:op_status => op_status,:nodes => nodes).slice(:id,:display_name,:op_status,:last_task_run_status,:execution_status,:module_branch_id,:version,:assembly_template,:nodes,:created_at,:target)
         end
         
+        sanitize!(unsorted) if opts[:sanitize]
+
         unsorted.sort{|a,b|a[:display_name] <=> b[:display_name]}
       end
 
      private
+      def sanitize!(output)
+        output.each do |assembly|
+          (assembly[:nodes]||[]).each do |node|
+            if external_ref = node[:external_ref]
+              external_ref.delete(:ssh_credentials)
+            end
+          end
+        end
+      end
+
       def list_aux__component_template(r)
         r[:component_template]||r[:nested_component]||{}
       end

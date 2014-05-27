@@ -37,15 +37,14 @@ module DTK
         #mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
           mapping_rows = matches.map do |m|
-            name = m[:node_stub_display_name]
             node_template_id = m[:node_template_idh].get_id()
             {
               :type => m[:instance_type],
               :ancestor_id => m[:node_stub_idh].get_id(),
               :canonical_template_node_id => node_template_id,
               :node_template_id => node_template_id,
-              :display_name => name,
-              :ref => name
+              :display_name => m[:instance_display_name],
+              :ref => m[:instance_ref]
             }
           end
           mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
@@ -87,7 +86,8 @@ module DTK
           {
             :instance_type => 'staged',
             :node_stub_idh => r.id_handle, 
-            :node_stub_display_name => r[:display_name],
+            :instance_display_name => r[:display_name],
+            :instance_ref => r[:display_name],
             :node_template_idh => node_template.id_handle()
           }
         end
@@ -115,7 +115,8 @@ module DTK
           ret << {
             :instance_type => 'instance',
             :node_stub_idh => stub_node.id_handle, 
-            :node_stub_display_name => stub_node[:display_name], 
+            :instance_display_name => stub_node[:display_name],
+            :instance_ref => node_target_ref.get_field?(:ref),
             :node_template_idh => node_target_ref.id_handle()
           }
         end

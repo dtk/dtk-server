@@ -54,7 +54,11 @@ module Ramaze::Helper
       if target_id
         id_handle(target_id,:target)
       else
-        Target.get_default_target(model_handle(:target)).id_handle()
+        if default_target = Target.get_default_target(model_handle(:target))
+          default_target.id_handle()
+        else
+          raise DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
+        end
       end
     end
 

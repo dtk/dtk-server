@@ -252,6 +252,14 @@ module DTK
       info_hash
     end
 
+    def self.sanitize!(node)
+      if external_ref = node[:external_ref]
+        external_ref.delete(:ssh_credentials)
+      end
+    end
+    def sanitize!()
+      self.class.sanitize!(self)
+    end
     
     def info_about(about,opts={})
       case about

@@ -120,11 +120,7 @@ module DTK
      private
       def sanitize!(output)
         output.each do |assembly|
-          (assembly[:nodes]||[]).each do |node|
-            if external_ref = node[:external_ref]
-              external_ref.delete(:ssh_credentials)
-            end
-          end
+          (assembly[:nodes]||[]).each{|node_hash|Node.sanitize!(node_hash)}
         end
       end
 

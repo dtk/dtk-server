@@ -85,8 +85,15 @@ module DTK; class  Assembly
           list_components(opts)
           
         when :nodes
-          get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:managed).sort{|a,b| a[:display_name] <=> b[:display_name] }
-          
+          nodes = get_nodes(:id,:display_name,:admin_op_status,:os_type,:external_ref,:type,:managed).sort{|a,b| a[:display_name] <=> b[:display_name] }
+          nodes.each do |node|
+            if external_ref = node[:external_ref]
+              external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
+            end
+            node.sanitize!()
+          end
+          nodes
+
         when :modules
           component_modules_opts = Hash.new
           if get_version_info = opts.array(:detail_to_include).include?(:version_info)

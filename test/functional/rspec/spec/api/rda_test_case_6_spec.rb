@@ -1,12 +1,24 @@
 require './spec/spec_helper'
 
+login = {
+	:username=>'dtk-admin',
+	:password=>'r8server'
+}
+
 namespace_info = {
 	:name=>'dtk17'
 }
 
 describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules that belong to this namespace by namespace name/id" do
 
-	let(:repoman) { RepomanRestApi.new }
+	let(:repoman) { @repoman }
+
+	context "Login" do
+		it "passed successfully" do
+			repoman.login(login[:username],login[:password])
+			expect(repoman.authorization_token).not_to be_empty
+		end
+	end
 
 	context "Check if namespace exists by namespace name" do
 		it "gets existing namespace by name #{namespace_info[:name]}" do
@@ -61,6 +73,13 @@ describe "(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
 				end
 			end
 			expect(modules_retrieved_correctly).to eq(true)
+		end
+	end
+
+	context "Logout" do
+		it "passed successfully" do
+			response = repoman.logout
+			expect(response['data']['success']).to eq(true)
 		end
 	end
 end

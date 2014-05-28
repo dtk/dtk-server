@@ -1,5 +1,10 @@
 require './spec/spec_helper'
 
+login = {
+	:username=>'dtk-admin',
+	:password=>'r8server'
+}
+
 user_info = { 
 	:username=>'test', 
 	:email=>'test@r8network.com', 
@@ -11,7 +16,14 @@ user_info = {
 
 describe "(Repoman Drupal API) Test Case 1: Create user with all correct params (username, email, firstname, lastname)" do
 
-	let(:repoman) { RepomanRestApi.new }
+	let(:repoman) { @repoman }
+
+	context "Login" do
+		it "passed successfully" do
+			repoman.login(login[:username],login[:password])
+			expect(repoman.authorization_token).not_to be_empty
+		end
+	end
 
 	context "Create user with all correct params (username, email, firstname, lastname)" do
 		it "creates user" do
@@ -26,7 +38,7 @@ describe "(Repoman Drupal API) Test Case 1: Create user with all correct params 
 				user_group = response['data']['user_group_names']
 				namespace = response['data']['namespaces'].first['name']
 				user_created = true if (username == user_info[:username] && email == user_info[:email] && first_name == user_info[:first_name] && last_name == user_info[:last_name] &&
-					user_group == user_info[:user_group] && namespace == user_info[:namespace])
+				user_group == user_info[:user_group] && namespace == user_info[:namespace])
 			end
 			expect(user_created).to eq(true)
 		end
@@ -81,6 +93,13 @@ describe "(Repoman Drupal API) Test Case 1: Create user with all correct params 
 				namespace_deleted = true if response['data']['success'] == true
 			end
 			expect(namespace_deleted).to eq(true)
+		end
+	end
+
+	context "Logout" do
+		it "passed successfully" do
+			response = repoman.logout
+			expect(response['data']['success']).to eq(true)
 		end
 	end
 end

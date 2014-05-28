@@ -1,5 +1,10 @@
 require './spec/spec_helper'
 
+login = {
+	:username=>'dtk-admin',
+	:password=>'r8server'
+}
+
 user_info = { 
 	:username=>'test', 
 	:email=>'test@r8network.com', 
@@ -11,7 +16,14 @@ user_info = {
 
 describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possible to get user by providing valid username/email combinations" do
 
-	let(:repoman) { RepomanRestApi.new }
+	let(:repoman) { @repoman }
+
+	context "Login" do
+		it "passed successfully" do
+			repoman.login(login[:username],login[:password])
+			expect(repoman.authorization_token).not_to be_empty
+		end
+	end
 
 	context "Create user with all correct params (username, email, firstname, lastname)" do
 		it "creates user" do
@@ -107,6 +119,13 @@ describe "(Repoman Drupal API) Test Case 4: Create user and check if it is possi
 				namespace_deleted = true if response['data']['success'] == true
 			end
 			expect(namespace_deleted).to eq(true)
+		end
+	end
+
+	context "Logout" do
+		it "passed successfully" do
+			response = repoman.logout
+			expect(response['data']['success']).to eq(true)
 		end
 	end
 end

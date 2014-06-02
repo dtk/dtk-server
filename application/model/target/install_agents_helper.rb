@@ -2,6 +2,7 @@ require 'thread'
 require 'timeout'
 require 'net/ssh'
 require 'net/scp'
+require 'mcollective'
 
 module DTK; class Target
   class InstallAgentsHelper
@@ -14,11 +15,17 @@ module DTK; class Target
     def install()
       # we get all the nodes that are 'unmanaged', meaning they are physical nodes that does not have node agent installed
       unmanaged_nodes = @target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-      servers, install_script = [], nil
+      servers, install_script, mcollective_client = [], nil, nil
 
       #TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
       install_script_file_path = "#{R8.app_user_home()}/install_script"
       FileUtils.mkdir(install_script_file_path) unless File.directory?(install_script_file_path)
+
+      # create mcollective-client instance
+      # not using our custom mcollective client because discover is not working properly with it
+      mcollective_client = ::MCollective::Client.new('/etc/mcollective/client.cfg')
+      mcollective_client.options = {}
+
       # here we set information we need to connect to nodes via ssh
       unmanaged_nodes.each do |node|
         node.update_object!(:ref)
@@ -30,7 +37,8 @@ module DTK; class Target
           "dtk_node_agent_location" => "#{R8.app_user_home()}/dtk-node-agent",
           "install_script_file_path" => install_script_file_path,
           "install_script_file_name" => install_script_file_name,
-          "node" => node
+          "node" => node,
+          "mcollective_client" => mcollective_client
         }
 
         File.open("#{install_script_file_path}/#{install_script_file_name}", 'w') do |f|
@@ -115,8 +123,9 @@ module DTK; class Target
     # and after that we execute some commands on the node itself using execute_ssh_command() method
     class SshJob
       def call(message)
-        Log.info_pp(['SshJob#call',:message,message])
+        Log.info_pp(['SshJob#call',:message,message[:node]])
         node = message["node"]
+        mcollective_client = message["mcollective_client"]
         external_ref = node.get_external_ref()
 
         unless hostname = external_ref[:routable_host_address]
@@ -167,7 +176,20 @@ module DTK; class Target
         execute_ssh_command(install_script_command, params)
         execute_ssh_command("rm -rf /tmp/#{message['install_script_file_name']}", params)
 
-        node.update(:managed => true)
+        # sleep set to 2 seconds to be sure that mcollective on node is ready to listen for discovery
+        sleep(2)
+
+        # send discover call filtered by 'pbuilderid'(node[:ref] == pbuilderid)
+        # if empty array is returned, agent on node is not working as expected
+        filter = {"fact"=>[{:fact=>"pbuilderid",:value=>node[:ref],:operator=>"=="}], "cf_class"=>[], "agent"=>[], "identity"=>[], "compound"=>[]}
+        discovered_data = CommandAndControl.discover(filter, 3, 1, mcollective_client)
+
+        # set managed = true only if mcollective from node returns valid response
+        if discovered_data.is_a?(Array)
+          node.update(:managed => true) unless discovered_data.empty?
+        else
+          node.update(:managed => true) unless (discovered_data.nil? && discovered_data.payload.nil?)
+        end
       end
 
      private

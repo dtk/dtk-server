@@ -11,8 +11,16 @@ module DTK
         R8::Config[:command_and_control][:node_config][:mcollective][:host]
       end
 
+      def self.discover(filter, timeout, limit, client)
+        Config.discover(filter, timeout, limit, client)
+      end
+
       def self.install_script(node,bindings)
         Config.install_script(node,bindings)
+      end
+
+      def self.get_mcollective_client()
+        Config.mcollective_client()
       end
 
       #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)

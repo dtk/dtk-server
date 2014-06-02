@@ -24,6 +24,18 @@ module DTK
       InstallScript.install_script(node)
     end
 
+    def self.discover(filter, timeout, limit, client)
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.discover(filter, timeout, limit, client)
+    end
+
+    def self.get_mcollective_client()
+      adapter_name = R8::Config[:command_and_control][:node_config][:type]
+      klass = load_for_aux(:node_config,adapter_name)
+      klass.get_mcollective_client()
+    end
+
     #This takes into account what is needed for the node_config_adapter
     def self.node_config_adapter_install_script(node,bindings)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]

@@ -19,6 +19,10 @@ module DTK
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
+        def self.discover(filter, timeout, limit, client)
+          ::MCollective::Discovery::Mc.discover(filter, timeout, limit, client)
+        end
+
        private
         def self.create_mcollective_client()
           config_file_content = mcollective_config_file()

@@ -27,6 +27,7 @@ module DTK; class Task
           when "CreateNode"  then CreateNode.new(:hash,hash,task_idh)
           when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
           when "PowerOnNode" then PowerOnNode.new(:hash,hash,task_idh)
+          when "InstallAgent" then InstallAgent.new(:hash,hash,task_idh)
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
@@ -122,9 +123,41 @@ module DTK; class Task
     class NodeLevel < OnNode
     end
 
+    class PhysicalNode < self
+      def initialize(type,hash,task_idh=nil)
+        unless hash[:node].kind_of?(Node)
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node))
+        end
+        super(hash)
+      end
+
+      def self.create_from_physical_nodes(target, nodes)
+        hash = {
+          :node => nodes.first,
+          :datacenter => target,
+          :user_object => CurrentSession.new.get_user_object()
+        }
+
+        InstallAgent.new(:hash,hash)
+      end
+
+      # virtual gets overwritten
+      # updates object and the tasks in the model
+      def get_and_update_attributes!(task)
+        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
+      end
+
+      # virtual gets overwritten
+      def add_internal_guards!(guards)
+        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
+      end
+    end
+
+
     r8_nested_require('action','create_node')
     r8_nested_require('action','config_node')
     r8_nested_require('action','on_component')
+    r8_nested_require('action','install_agent')
 
     class Result < HashObject
       def initialize(hash={})

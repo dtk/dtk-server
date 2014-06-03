@@ -25,6 +25,18 @@ module DTK
         raise_not_applicable_error(:stop)
       end
 
+      def execute(task_idh,top_task_idh,task_action)
+        # Aldin: just for testing
+        node = task_action[:node]
+        external_ref = node[:external_ref]||{}
+
+        {:status => "succeeded",
+          :node => {
+            :external_ref => external_ref
+          }
+        }
+      end
+
      private
       def raise_not_applicable_error(command)
         raise ErrorUsage.new("#{command.to_s.capitalize} is not applicable operation for physical nodes")

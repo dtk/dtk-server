@@ -232,6 +232,45 @@ module DTK
       end
     end
 
+    def create_install_agents_task(target, nodes)
+      target_idh = target.id_handle()
+      task_mh = target_idh.create_childMH(:task)
+
+      executable_action = {:node=>
+        {
+          :id=>2147626569,
+          :display_name=>"imported_node_1",
+          :group_id=>2147483732,
+          :datacenter => target,
+          :external_ref=>{
+            "type"=>"physical",
+            "routable_host_address"=>"ec2-54-227-229-14.compute-1.amazonaws.com",
+            "ssh_credentials"=>{
+              "ssh_user"=>"ubuntu",
+              "ssh_password"=>"1ubuntu",
+              "ssh_rsa_private_key"=>"PRIVATE_KEY",
+              "sudo_password"=>"PASSWD"
+            }
+          }
+        }#,
+        # :state_change_types=>["install_agent"]
+      }
+      # require 'debugger'
+      # Debugger.start
+      # debugger
+      # executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, nodes)
+
+      ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
+      subtask_1 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_1")#, :temporal_order => "sequential")
+      subtask_2 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_2")#, :temporal_order => "sequential")
+      subtask_3 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_3")#, :temporal_order => "sequential")
+
+      ret.add_subtask(subtask_1)
+      ret.add_subtask(subtask_2)
+      ret.add_subtask(subtask_3)
+      ret
+    end
+
    private
     def target_idh_from_assembly(assembly)
       assembly.get_target().id_handle()

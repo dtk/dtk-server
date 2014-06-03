@@ -40,6 +40,33 @@ module DTK
       rest_ok_response
     end
 
+    def rest__create_install_agents_task()
+      # target_instance = create_obj(:target_id, ::DTK::Target::Instance)
+      target = create_obj(:target_id)
+      target_idh = target.id_handle()
+
+      unmanaged_nodes = target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
+      node_1 = nil
+
+      unmanaged_nodes.each do |node|
+        node_1 = node if node[:display_name].eql?('import_node_1')
+      end
+
+      task = Task.create_install_agents_task(target, unmanaged_nodes)
+      task.save!()
+
+      rest_ok_response :task_id => task.id
+    end
+
+    def rest__task_status()
+      target = create_obj(:target_id)
+      target_idh = target.id_handle()
+
+      format = (ret_request_params(:format)||:hash).to_sym
+      response = Task::Status::Target.get_status(target_idh,:format => format)
+      rest_ok_response response
+    end
+
     #create target instance
     def rest__create()
       provider     = create_obj(:provider_id, ::DTK::Target::Template)

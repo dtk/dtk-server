@@ -128,4 +128,8 @@ class Action
       end
     end
   end
+<<<<<<< HEAD
 end; end
+=======
+end; end
+>>>>>>> Created basic workflow for install-agent

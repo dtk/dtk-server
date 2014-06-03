@@ -129,7 +129,11 @@ class Action
     end
   end
 <<<<<<< HEAD
+<<<<<<< HEAD
 end; end
+=======
+end; end
+>>>>>>> Created basic workflow for install-agent
 =======
 end; end
 >>>>>>> Created basic workflow for install-agent

@@ -375,7 +375,8 @@ module DTK
        :executable_action_type,
        :executable_action,
        :commit_message,
-       :assembly_id
+       :assembly_id,
+       :target_id
       ]
     end
 
@@ -399,9 +400,9 @@ module DTK
           :executable_action_type => executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
           :executable_action => executable_action
         }
-        cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message] 
+        cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :executable_action_type] 
         cols.each{|col|row.merge!(col => hash_row[col])}
-        [:assembly_id,:node_id].each do |col|
+        [:assembly_id,:node_id,:target_id].each do |col|
           row[col] = hash_row[col]||SQL::ColRef.null_id
         end
         row

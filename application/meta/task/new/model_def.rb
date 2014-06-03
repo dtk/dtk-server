@@ -24,6 +24,12 @@
       :on_delete=>:set_null,
       :on_update=>:set_null
     },
+    :target_id=>{ #points to target when target task
+      :type=>:bigint,
+      :foreign_key_rel_type=>:datacenter,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    },
     :children_status => {:type => :json}, #caching children status; hash of form {child1_id => status1, ..}
     #TODO: the value of this in relation to attributes in executable action is confusing; these have the updated attribute values
     :bound_input_attrs => {:type => :json},

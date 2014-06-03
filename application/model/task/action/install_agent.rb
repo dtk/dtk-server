@@ -77,7 +77,6 @@ class Action
 
       def ret_command_and_control_adapter_info()
         [:node_config,:ssh]
-        # [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 
       def update_state_change_status(task_mh,status)

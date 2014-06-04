@@ -45,6 +45,7 @@ module DTK
       target = create_obj(:target_id)
       target_idh = target.id_handle()
 
+      #RICH-WF: assuming node_1 is just for testing; didnt see how it is being used after being set
       unmanaged_nodes = target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
       node_1 = nil
 

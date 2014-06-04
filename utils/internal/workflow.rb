@@ -43,6 +43,7 @@ module DTK
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
           pp "starting top_task_id = #{@top_task.id.to_s}"          
+          #RICH-WF: for both Ruote and Simple think we dont need to pass in @top_task.id.to_s
           execute(@top_task.id.to_s)
          rescue Exception => e
           Log.error("error in commit background job: #{e.inspect}")
@@ -87,7 +88,7 @@ module DTK
     end
 
     def self.create(top_task)
-      ret = Adapter.klass.new(top_task)
+      ret = Adapter.klass(top_task).new(top_task)
       @@Lock.synchronize{ @@active_workflows[top_task[:id].to_s] = ret }
       ret
     end
@@ -104,15 +105,26 @@ module DTK
     end
 
     class Adapter
-      def self.klass()
-        return @klass if  @klass
+      def self.klass(top_task=nil)
+        #RICH-WF: not necssary to cache (ie., use @klass)
+        #return @klass if  @klass
         begin
-          type = R8::Config[:workflow][:type]
+          type = type(top_task)
           r8_nested_require("workflow","adapters/#{type}")
-          @klass = XYZ::WorkflowAdapter.const_get type.capitalize
+          # @klass = ::XYZ::WorkflowAdapter.const_get type.to_s.capitalize
+          WorkflowAdapter.const_get type.to_s.capitalize
         rescue LoadError => e
           pp [e,e.backtrace[0..5]]
           raise.Error.new("cannot find workflow adapter")
+        end
+      end
+      private
+      #RICH-WF: stub function to call Simple when top_task is install_agents
+      def self.type(top_task=nil)
+        if (top_task||{})[:display_name] == "install_agents"
+          :simple
+        else
+          R8::Config[:workflow][:type].to_sym
         end
       end
     end

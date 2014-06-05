@@ -12,12 +12,15 @@ module DTK
     def initialize(err)
       @code = nil
       @message = nil
+      @backtrace = nil
     end
     def hash_form()
-      {:code => code||:error, :message => message||''}
+      ret = {:code => code||:error, :message => message||''}
+      ret.merge!(:backtrace => backtrace) if @backtrace
+      ret
     end 
     private
-     attr_reader :code, :message
+     attr_reader :code, :message, :backtrace
     public
     #its either its a usage or and internal (application error) bug
     class Internal < RestError
@@ -32,7 +35,7 @@ module DTK
         # @message = "#{err.to_s} (#{err.backtrace.first})"
         # Do not see value of exposing single line to client, we will still need logs to trace the error
         @message = err.to_s 
-        if R8::Config[:debug][:show_backtrace] == 'true'
+        if R8::Config[:debug][:show_backtrace] == true
           @backtrace = err.backtrace
         end
       end
@@ -54,6 +57,9 @@ module DTK
         super
         @code = :not_found
         @message = "'#{err.name}' was not found"
+        if R8::Config[:debug][:show_backtrace] == true
+          @backtrace = err.backtrace
+        end
       end
      private
       def self.is_controller_method(err)

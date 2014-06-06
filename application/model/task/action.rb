@@ -28,10 +28,7 @@ module DTK; class Task
           when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
           when "PowerOnNode" then PowerOnNode.new(:hash,hash,task_idh)
           when "InstallAgent" then InstallAgent.new(:hash,hash,task_idh)
-<<<<<<< HEAD
           when "Hash" then InstallAgent.new(:hash,hash,task_idh) #RICH-WF; Aldin compensating form bug in task creation
-=======
->>>>>>> Created basic workflow for install-agent
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end

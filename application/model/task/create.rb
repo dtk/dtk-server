@@ -13,7 +13,7 @@ module DTK
 
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
 
-      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly)
+      create_node_tasks = task_when_nodes_created_and_started_from_assembly(assembly, :assembly, opts)
       ret.add_subtask(create_node_tasks) if create_node_tasks
 
       opts = {:component_type_filter => component_type}
@@ -57,7 +57,8 @@ module DTK
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh,assembly.id_handle())
 
       pp "---encoding of task_template_content.serialization_form()"
-      serialization_hash = task_template_content.serialization_form()
+      opts.merge!(:allow_empty_task => true) unless create_nodes_task.nil? && task_template_content.empty?
+      serialization_hash = task_template_content.serialization_form(opts)
       STDOUT << Aux.serialize(serialization_hash,:yaml)
       STDOUT << "\n\n"
       pp "--- end: encodings of task_template_content.serialization_form()"
@@ -67,7 +68,7 @@ module DTK
       ret
     end
 
-    def task_when_nodes_created_and_started_from_assembly(assembly, component_type)
+    def task_when_nodes_created_and_started_from_assembly(assembly, component_type, opts={})
       assembly_idh = assembly.id_handle()
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
@@ -77,7 +78,7 @@ module DTK
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
 
       ret = nil
-      opts = {}
+      # opts = {}
       #for powering on node with no components
       unless assembly_config_changes and not assembly_config_changes.empty?
         unless node = opts[:node]

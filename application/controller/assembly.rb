@@ -467,15 +467,16 @@ module DTK
           return rest_ok_response(:errors => [error_msg])
         end
 
+        #TODO: not doing at this point puppet version per run; it just can be set when node is created
+        opts = ret_params_hash(:commit_msg,:puppet_version)
+        opts.merge!(:node => nodes.first) if (nodes.size == 1)
+        task = Task.create_and_start_from_assembly_instance(assembly,opts)
+
         user_object = user_object  = ::DTK::CurrentSession.new.user_object()
         CreateThread.defer_with_session(user_object) do
           # invoking command to start the nodes
           CommandAndControl.start_instances(nodes)
         end
-
-        #TODO: not doing at this point puppet version per run; it just can be set when node is created
-        opts = ret_params_hash(:commit_msg,:puppet_version)
-        task = Task.create_and_start_from_assembly_instance(assembly,opts)
       else
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
         #TODO: not doing at this point puppet version per run; it just can be set when node is created

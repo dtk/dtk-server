@@ -120,14 +120,16 @@ module DTK
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
       
+      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
+      opts.merge!(:main_task => main_task)
+
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
       running_node_task = create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
 
-      main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => nil)
-      main_task.add_subtask(running_node_task)
+      # main_task.add_subtask(running_node_task)
 
-      main_task
+      running_node_task
     end
 
     def create_from_node_group(node_group_idh,commit_msg=nil)
@@ -258,6 +260,10 @@ module DTK
     end
 
     def create_running_node_task_from_assembly(task_mh,state_change_list,opts={})
+      main_task = opts[:main_task]
+      nodes = opts[:nodes]
+      nodes_wo_components = []
+
       #for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
@@ -266,31 +272,52 @@ module DTK
         executable_action = Task::Action::PowerOnNode.create_from_node(node)
         attr_mh = task_mh.createMH(:attribute)
         Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        return create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+        ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+        main_task.add_subtask(ret)
+        return main_task
       end
-      
-      # if assembly start called from node/node_id context,
-      # do not start all nodes but one that command is executed from
-      state_change_list = state_change_list.select{|s| s.first[:node][:id]==opts[:node][:id]} if opts[:node]
-      
-      #each element will be list with single element
+
+      if nodes
+        nodes_wo_components = nodes.dup
+        state_change_list.each do |sc|
+          if node = sc.first[:node]
+            nodes_wo_components.delete_if{|n| n[:id] == node[:id]}
+          end
+        end
+      end
+
       ret = nil
       all_actions = Array.new
-      if state_change_list.size == 1
-        executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
-        all_actions << executable_action
-        ret = create_new_task(task_mh,:executable_action => executable_action,:display_name => "power_on_node") 
-      else
-        ret = create_new_task(task_mh,:display_name => "power_on_nodes", :temporal_order => "concurrent")
-        state_change_list.each do |sc|
-          executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
+      if nodes_wo_components.empty?
+        # if assembly start called from node/node_id context,
+        # do not start all nodes but one that command is executed from
+        state_change_list = state_change_list.select{|s| s.first[:node][:id]==opts[:node][:id]} if opts[:node]
+
+        #each element will be list with single element
+        if state_change_list.size == 1
+          executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
           all_actions << executable_action
-          ret.add_subtask_from_hash(:executable_action => executable_action,:display_name => "power_on_node")
+          ret = create_new_task(task_mh,:executable_action => executable_action,:display_name => "power_on_node")
+          main_task.add_subtask(ret)
+        else
+          # ret = create_new_task(task_mh,:display_name => "power_on_nodes", :temporal_order => "concurrent")
+          state_change_list.each do |sc|
+            executable_action = Task::Action::PowerOnNode.create_from_state_change(sc.first)
+            all_actions << executable_action
+            main_task.add_subtask_from_hash(:executable_action => executable_action,:display_name => "power_on_node")
           end
+        end
+      else
+        nodes.each do |node|
+          executable_action = Task::Action::PowerOnNode.create_from_node(node)
+          all_actions << executable_action
+          ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+          main_task.add_subtask(ret)
+        end
       end
       attr_mh = task_mh.createMH(:attribute)
       Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
-      ret
+      main_task
     end
 
     def create_running_node_task(task_mh,state_change_list,opts={})

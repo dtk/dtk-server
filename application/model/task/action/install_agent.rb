@@ -128,8 +128,4 @@ class Action
       end
     end
   end
-<<<<<<< HEAD
 end; end
-=======
-end; end
->>>>>>> 327d16c9ea9d03fe69281adab8a47e77e1cc81d9

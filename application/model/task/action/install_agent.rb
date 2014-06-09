@@ -128,16 +128,4 @@ class Action
       end
     end
   end
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 end; end
-=======
-end; end
->>>>>>> Created basic workflow for install-agent
-=======
-end; end
->>>>>>> Created basic workflow for install-agent
-=======
-end; end
->>>>>>> install-agent-workflow-task: moved processing of install agent to node_config,ssh

@@ -215,7 +215,7 @@ lambda__instance_nodes_components_assembly_template =
       :type=>:json,
       :hidden=>true,
       :remote_dependencies=> 
-      [lambda__segment_node.call([:id,:display_name,:os_type,:external_ref]),
+      [lambda__segment_node.call([:id,:display_name,:os_type,:external_ref, :admin_op_status]),
        segment_assembly_template
       ]
     },

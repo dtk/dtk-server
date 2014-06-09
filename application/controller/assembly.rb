@@ -447,7 +447,7 @@ module DTK
 
     def rest__create_task()
       assembly = ret_assembly_instance_object()
-      task     = nil
+      task = nil
 
       if assembly.is_stopped?
         start_assembly = ret_request_params(:start_assembly)
@@ -458,7 +458,7 @@ module DTK
 
         # filters only stopped nodes for this assembly
         nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
-        
+
         assembly_name = Assembly::Instance.pretty_print_name(assembly)
         nodes, is_valid, error_msg = nodes_valid_for_aws?(assembly_name, nodes, node_pattern, :stopped)
         
@@ -467,15 +467,18 @@ module DTK
           return rest_ok_response(:errors => [error_msg])
         end
 
-        user_object = user_object  = ::DTK::CurrentSession.new.user_object()
-        CreateThread.defer_with_session(user_object) do
-          # invoking command to start the nodes
-          CommandAndControl.start_instances(nodes)
-        end
+        nodes_w_components = assembly.remove_empty_nodes(nodes, {:detail_level => 'nodes'})
 
         #TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
+        opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
+
+        user_object = user_object  = ::DTK::CurrentSession.new.user_object()
+        CreateThread.defer_with_session(user_object) do
+          # invoking command to start the nodes
+          CommandAndControl.start_instances(nodes_w_components) unless nodes_w_components.empty?
+        end
       else
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
         #TODO: not doing at this point puppet version per run; it just can be set when node is created
@@ -544,20 +547,25 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      queue = SimpleActionQueue.new
+      opts ={}
+      if (nodes.size == 1)
+        opts.merge!(:node => nodes.first)
+      else
+        opts.merge!(:nodes => nodes)
+      end
+
+      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly, opts)
+      task.save!()
+
+      # queue = SimpleActionQueue.new
 
       user_object  = ::DTK::CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object) do
         # invoking command to start the nodes
         CommandAndControl.start_instances(nodes)
       end
-      opts ={}
-      opts.merge!(:node => nodes.first) if (nodes.size == 1)
-      
-      task = Task.task_when_nodes_ready_from_assembly(assembly_idh.create_object(),:assembly, opts)
-      task.save!()
 
-      queue.set_result(:task_id => task.id)
+      # queue.set_result(:task_id => task.id)
       rest_ok_response :task_id => task.id
     end
 

@@ -310,6 +310,36 @@ module DTK; class  Assembly
       self.class.get_info__flat_list(model_handle(),{:filter => filter}.merge(opts))
     end
 
+    def remove_empty_nodes(nodes, opts={})
+      filter = [:eq,:id,id()]
+      self.class.remove_empty_nodes(model_handle(), nodes, {:filter => filter}.merge(opts))
+    end
+
+    def self.remove_empty_nodes(assembly_mh, nodes, opts={})
+      assembly_empty_nodes = {}
+      target_idh = opts[:target_idh]
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      filter = [:and, [:eq, :type, "composite"], target_filter,opts[:filter]].compact
+      col,needs_empty_nodes = list_virtual_column?(opts[:detail_level])
+      cols = [:id,:ref,:display_name,:group_id,:component_type,:version,:created_at,col].compact
+      ret = get(assembly_mh,{:cols => cols}.merge(opts))
+
+      nodes_ids = ret.map{|r|(r[:node]||{})[:id]}.compact
+      sp_hash = {
+        :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
+        :filter => filter
+      }
+      assembly_empty_nodes = get_objs(assembly_mh,sp_hash).reject{|r|nodes_ids.include?((r[:node]||{})[:id])}
+
+      assembly_empty_nodes.each do |en|
+        if node = en[:node]
+          nodes.delete_if{|n| n[:id] == node[:id]}
+        end
+      end
+
+      nodes
+    end
+
     #Simple get assembliy instances
     def self.get(assembly_mh, opts={})
       target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])

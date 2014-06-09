@@ -54,7 +54,10 @@ module DTK
         unless host_address = input_node_hash["external_ref"]["routable_host_address"]
           raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
         end
-        input_node_hash.merge!("type" => type())
+
+        # for type use type from external_ref ('physical'), if not then use default type()
+        type = input_node_hash["external_ref"]["type"] if input_node_hash["external_ref"]
+        input_node_hash.merge!("type" => type||type())
         params = {"host_address" => host_address}
         input_node_hash.merge!(child_objects(params))
       end

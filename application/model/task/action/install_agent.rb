@@ -76,7 +76,7 @@ class Action
       end
 
       def ret_command_and_control_adapter_info()
-        [:iaas,:physical]
+        [:node_config,:ssh]
         # [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 
@@ -128,4 +128,8 @@ class Action
       end
     end
   end
+<<<<<<< HEAD
 end; end
+=======
+end; end
+>>>>>>> 327d16c9ea9d03fe69281adab8a47e77e1cc81d9

@@ -182,7 +182,7 @@ module DTK
 
     def self.list(model_handle,opts={})
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
-      filter = [:and, [:oneof, :type, ["instance","staged"]], target_filter]
+      filter = [:and, [:oneof, :type, ["instance","staged","physical"]], target_filter]
       sp_hash = {
         :cols => common_columns() + [:assemblies],
         :filter => filter

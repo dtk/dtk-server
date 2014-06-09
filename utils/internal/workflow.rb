@@ -122,7 +122,8 @@ module DTK
       #RICH-WF: stub function to call Simple when top_task is install_agents
       def self.type(top_task=nil)
         if (top_task||{})[:display_name] == "install_agents"
-          :simple
+        #  :simple
+          :ruote
         else
           R8::Config[:workflow][:type].to_sym
         end

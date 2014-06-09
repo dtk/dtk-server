@@ -49,25 +49,26 @@ module DTK
           end
         end
         nodes = nodes.select { |node| component_nodes.include? node[:display_name] } if (node_id.nil? || node_id.empty?)
-        Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly, components)
+        Assembly::Instance::Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly, components)
       end
 
       def initiate_execute_tests_v2(action_results_queue, node_id=nil, components=nil)
+        
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
-        
+        opts = {} 
+
         #Special case filtering of nodes that are not running and executing agent only on those that are running
         component_nodes = Array.new
-        
         unless components.empty? || components.nil?
           components.each do |cmp|
             if cmp.include? "/"
               component_nodes << cmp.split("/").first
             end
           end
+          opts.merge!(:filter => {:components => components})
         end
-        nodes = nodes.select { |node| component_nodes.include? node[:display_name] } if (node_id.nil? || node_id.empty?)
-        Assembly::Instance::Action::ExecuteTestsV2.initiate(nodes,action_results_queue, :assembly, components)
+        Assembly::Instance::Action::ExecuteTestsV2.initiate(self,nodes,action_results_queue, :assembly, opts)
       end
 
       module Action

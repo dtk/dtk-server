@@ -2,23 +2,20 @@ module DTK
   class Assembly::Instance
     module Action
       class ExecuteTestsV2 < ActionResultsQueue::Result
-        def self.initiate(nodes,action_results_queue, type, components)
-          
-          #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
-          cmp_templates = get_component_templates(nodes,components)
-            pp [:debug_cmp_templates,cmp_templates]
-          version_context = 
-            unless cmp_templates.empty?
-              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
-            else
-                Log.error("Unexpected that cmp_instances is empty")
-              nil
-            end
-          pp [:debug_version_context,version_context]
+        def self.initiate(assembly_instance,nodes,action_results_queue, type, opts={})
+          new(assembly_instance,nodes,action_results_queue, type, opts).initiate()
+        end
+        
+        def initialize(assembly_instance,nodes,action_results_queue, type, opts={})
+          @assembly_instance = assembly_instance
+          @nodes = nodes
+          @action_results_queue = action_results_queue 
+          @type = type
+          @filter = opts[:filter]
+        end
 
-          #Bakir: Added stub method to retrieve list of all test components and their params based on regular components
-          #This hash structure is then passed to the mcollective agent
-          test_components = get_test_components(components)
+        def initiate()
+          test_components = get_test_components_with_stub()
 =begin
              pp test_components
 {:test_instances=>
@@ -27,7 +24,24 @@ module DTK
     :test_component=>"network_port_check",
     :test_name=>"network_port_check_spec.rb",
     :params=>{:mongo_port=>"27017", :mongo_web_port=>"28017"}}]}
-=end
+=end          
+          
+
+          #Rich: version context should be not for the components but be for the module containing the tests; so need to look at test_components to determine this
+          version_context = Array.new
+=begin
+          version_context = 
+            unless cmp_templates.empty?
+              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
+            else
+              Log.error("Unexpected that cmp_instances is empty")
+              nil
+            end
+          pp [:debug_version_context,version_context]
+=end          
+          #Bakir: Added stub method to retrieve list of all test components and their params based on regular components
+          #This hash structure is then passed to the mcollective agent
+          
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -68,26 +82,80 @@ module DTK
           
           #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
+            components = filter[:components] #TODO: temp
             CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_context})
-            else
+          else
             CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
           end
         end
-        private
-        #TODO: some of this logic can be leveraged by code below node_hash
-          #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing 
-        #strings in components
-        def self.get_component_templates(nodes,components)
+       private
+
+        attr_reader :assembly_instance, :nodes, :action_results_queue, :type, :filter
+        def get_test_components_with_stub()
+          if ret = get_test_components()
+            return ret
+          end
+
+          #stub part
+          ret = {
+            :test_instances => []
+          }
+          components = filter[:components]
+          (components||[]).each do |component|
+            if component.include? "mongo"
+              ret[:test_instances] << { 
+                :module_name => "mongodb", 
+                :component => component, 
+                :test_component => "network_port_check",
+                :test_name => "network_port_check_spec.rb",
+                :params => {:mongo_port => '27017',:mongo_web_port => '28017'}
+              }
+            end
+          end
+          ret
+        end
+
+        def get_test_components()
+          opts = Opts.new(
+            :detail_to_include=>[:component_dependencies]
+          )
+          aug_cmps = assembly_instance.get_augmented_components(opts)
+pp aug_cmps
+          #Rich: will continue working on this; give example of what each eleemnt of aug_cmps looks like; of significance if there is a link def it will have something like
+=begin
+  #<XYZ::Dependency::Link:0x00000005849798
+     @link_def=
+      {:id=>2147533931,
+       :group_id=>2147484431,
+       :display_name=>"local_namenode_conn",
+       :description=>nil,
+       :local_or_remote=>"local",
+       :link_type=>"namenode_conn",
+       :required=>true,
+       :dangling=>false,
+       :has_external_link=>true,
+       :has_internal_link=>true,
+       :component_component_id=>2147533877},
+=end
+     #which then can be used to see if it is linked to any test component; if so will then have method that hgets what the linked values would be
+     #nil causes the calling method to use teh stub values     
+          nil
+        end
+
+        #TODO: deprecate
+        #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing 
+        def get_augmented_component_templates(nodes,components)
           ret = Array.new
           if nodes.empty?
             return ret
           end
+
           sp_hash = {
             :cols => [:id,:group_id,:instance_component_template_parent,:node_node_id],
             :filter => [:oneof,:node_node_id,nodes.map{|n|n.id()}]
           }
-            ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
-            r[:component_template].merge(:node_node_id => r[:node_node_id])
+          ret = Model.get_objs(nodes.first.model_handle(:component),sp_hash).map do |r|
+            r[:component_template].merge(:node_node_id => r[:node_node_id], :component_instance_id => r[:id])
           end
           if components.nil? or components.empty? or !components.include? "/"
             return ret
@@ -116,27 +184,6 @@ module DTK
           end
         end
         
-        def self.get_test_components(components)
-          test_components = {
-            :test_instances => []
-          }
-          
-          components.each do |component|
-            test_component = get_linked_component_info(component)
-            unless test_component.nil?
-              test_components[:test_instances] << { :module_name => "mongodb", :component => component, :test_component => test_component[:name], :test_name => test_component[:test_name], :params => test_component[:params] }
-            end
-            end
-          
-          return test_components
-        end
-        
-        def self.get_linked_component_info(component)
-          #Bakir: To be added call to retrieve related test component info. This will be stored in hash
-          #For now, I'm mocking output of this method
-          test_component = { :name => "network_port_check", :test_name => "network_port_check_spec.rb", :params => {:mongo_port => '27017', :mongo_web_port => '28017'} } if component.include? "mongo"
-          return test_component
-        end
       end
 
       class ExecuteTests < ActionResultsQueue::Result
@@ -244,3 +291,68 @@ module DTK
     end
   end   
 end
+
+
+=begin
+Example of dependency info per component
+ :version=>"master",
+  :module_branch_id=>2147484469,
+  :node_node_id=>2147533845,
+  :assembly_id=>2147533842,
+  :node=>
+   {:id=>2147533845,
+    :display_name=>"slave1",
+    :os_type=>"centos",
+    :admin_op_status=>"running",
+    :external_ref=>
+     {:image_id=>"ami-96e20efe",
+      :type=>"ec2_instance",
+      :size=>"m3.medium",
+      :instance_id=>"i-0db6fa5d",
+      :ec2_public_address=>"ec2-54-211-226-83.compute-1.amazonaws.com",
+      :dns_name=>"slave1.hive13.rich.tenant101.r8network.com",
+      :private_dns_name=>
+       {:"slave1.hive13.rich.tenant101.r8network.com"=>
+         "ip-10-178-162-72.ec2.internal"}}},
+  :dependencies=>
+   [#<XYZ::Dependency::Simple:0x000000056bf788
+     @dependency_obj=
+      {:id=>2147533927,
+       :group_id=>2147484431,
+       :component_component_id=>2147533877,
+       :search_pattern=>
+        {:":filter"=>[":eq", ":component_type", "bigtop_base"]},
+       :type=>"component",
+       :description=>"bigtop_base is required for hadoop::datanode",
+       :severity=>"warning"},
+     @node=
+      {:id=>2147533845,
+       :display_name=>"slave1",
+       :os_type=>"centos",
+       :admin_op_status=>"running",
+       :external_ref=>
+        {:image_id=>"ami-96e20efe",
+         :type=>"ec2_instance",
+         :size=>"m3.medium",
+         :instance_id=>"i-0db6fa5d",
+         :ec2_public_address=>"ec2-54-211-226-83.compute-1.amazonaws.com",
+         :dns_name=>"slave1.hive13.rich.tenant101.r8network.com",
+         :private_dns_name=>
+          {:"slave1.hive13.rich.tenant101.r8network.com"=>
+            "ip-10-178-162-72.ec2.internal"}}},
+     @satisfied_by_component_ids=[2147533880]>,
+    #<XYZ::Dependency::Link:0x00000005849798
+     @link_def=
+      {:id=>2147533931,
+       :group_id=>2147484431,
+       :display_name=>"local_namenode_conn",
+       :description=>nil,
+       :local_or_remote=>"local",
+       :link_type=>"namenode_conn",
+       :required=>true,
+       :dangling=>false,
+       :has_external_link=>true,
+       :has_internal_link=>true,
+       :component_component_id=>2147533877},
+     @satisfied_by_component_ids=[2147533868]>]},
+=end

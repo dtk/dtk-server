@@ -64,6 +64,10 @@ module DTK; class Dependency
       @satisfied_by_component_ids = matches.map{|match|match[:output_port][:component_id]}
     end
 
+    def satisfied_by_component_ids
+      @satisfied_by_component_ids
+    end
+
    private
     def self.attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern)
       {source_attr_pattern.am_serialized_form() => target_attr_pattern.am_serialized_form()}

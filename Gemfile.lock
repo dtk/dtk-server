@@ -41,6 +41,9 @@ GEM
       rugged (~> 0.17.0.b7)
     dtk-common-core (0.5.11)
       rest-client (~> 1.6.7)
+    em-ssh (0.6.5)
+      eventmachine
+      net-ssh
     erubis (2.7.0)
     eventmachine (1.0.0)
     excon (0.16.10)
@@ -187,6 +190,7 @@ DEPENDENCIES
   debugger
   docile
   dtk-common
+  em-ssh (= 0.6.5)
   eventmachine (= 1.0.0)
   excon (= 0.16.10)
   fog (= 1.8.0)

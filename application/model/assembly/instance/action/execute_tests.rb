@@ -12,6 +12,7 @@ module DTK
           @action_results_queue = action_results_queue 
           @type = type
           @filter = opts[:filter]
+
         end
 
         def initiate()
@@ -53,7 +54,7 @@ module DTK
               if response and response[:pbuilderid] and response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 raw_data = response[:data].map{|r|node_info.merge(r)}
-                packaged_data = new(node_info[:display_name],raw_data)
+                packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
                 action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
               elsif response[:status] != :ok  
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]       
@@ -68,7 +69,7 @@ module DTK
           components_including_node_name = []
           unless test_components.empty?
             nodes.each do |node|
-              puts "Components: #{test_components}"
+              pp "Components: #{test_components}"
               components_array = []
               test_components[:test_instances].each do |comp|
                 if comp[:component].include? "#{node[:display_name]}/"

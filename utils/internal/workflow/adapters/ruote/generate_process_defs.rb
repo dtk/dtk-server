@@ -9,13 +9,10 @@ module XYZ
         top_task_idh = task.id_handle()
         name = "process-#{count.to_s}"
         context = Context.new(guards,top_task_idh)
-        tasks = sequence(compute_process_body(task,context), participant(:end_of_task))
-        #for testing
-        #tasks = concurrence(tasks,participant(:debug_task))
-        ["define", {"name" => name}, [tasks]]
+        ["define", {"name" => name}, [compute_process_body(task,context)]]
       end
-      private
 
+     private
       ####semantic processing
       #TODO: may make decomposition data driven
       def decomposition(task,context)
@@ -127,9 +124,9 @@ module XYZ
 
       def concurrence(*subtask_array_x)
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x
-        ["concurrence", {"merge_type"=>ConcurrenceType}, subtask_array]
+        ["concurrence", {"merge_type"=>ConcurrenceMergeType}, subtask_array]
       end
-      ConcurrenceType = "stack" # "union" || "isolate" || "stack"
+      ConcurrenceMergeType = "ignore" # "stack" || "union" || "isolate" || "stack"
 
       def to_str_form(hash)
         hash.inject({}) do |h,(k,v)|

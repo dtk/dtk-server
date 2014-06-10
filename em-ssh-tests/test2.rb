@@ -21,6 +21,17 @@ EM.run do
     connection.callback do |ssh|
       install_script_file_path = nil
 
+      # ********************************************
+      # NOTE for Rich :
+      #
+      # if using ssh.exec (without '!') e.g. ssh.exec('ping -c 1 www.google.com')
+      # then commands will execute in parallel
+      #
+      # if using ssh.exec! (with '!') e.g. ssh.exec!("rm -rf /tmp/dtk-node-agent")
+      # commands will execute in sequential order and I think this is what we need here,
+      # because we need e.g 'rm -rf /tmp/dtk-node-agent' to finish before we can upload new one, etc.
+      # ********************************************
+
       # making sure dtk-node-agent directory is deleted from node before uploading
       ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
         puts data #if stream == :stdout

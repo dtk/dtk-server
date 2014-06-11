@@ -53,7 +53,7 @@ module DTK
             Log.error "-------- intercepted errors ------"
             errors.each  do |e|
               Log.error_pp e.message
-              Log.error_pp e.trace
+              Log.error_pp e.trace.split("\n")
             end
             Log.error "-------- end: intercepted errors ------"
 

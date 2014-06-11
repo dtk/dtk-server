@@ -149,10 +149,7 @@ module DTK
             yield
           rescue Exception => e
             event,errors = task.add_event_and_errors(:complete_failed,:server,[{:message => e.to_s}])
-            if event and errors
-              Log.info_pp ["task_complete_failed #{self.class.to_s}", task[:id],event,{:errors => errors}]
-              Log.info_pp e.backtrace
-            end
+            log_participant.end(:execution_context_trap,:event => event, :errors => errors, :backtrace => e.backtrace)
             task.update_at_task_completion("failed",{:errors => errors})
             reply_to_engine(workitem)
           end

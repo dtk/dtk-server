@@ -121,7 +121,40 @@ module DTK
             :detail_to_include=>[:component_dependencies]
           )
           aug_cmps = assembly_instance.get_augmented_components(opts)
-pp aug_cmps
+          pp aug_cmps
+
+#Bakir:
+#First, I need to filter components that has link def. That components will have dependencies part
+          components_with_link_def = aug_cmps.select { |c| c[:dependencies] }
+          pp components_with_link_def
+
+#Next, I need to get all dependency components for filtered components in first step
+          unless components_with_link_def.empty?
+            dependency_components = Array.new
+            components_with_link_def.each do |c|
+              ids = Array.new
+              c[:dependencies].each do |dep|
+                ids << dep.satisfied_by_component_ids
+              end
+
+              sp_hash = {
+                :cols => Component.common_columns(),
+                :filter => [:oneof, :id, ids]
+              }
+              dependency_components << Model.get_objs(components_with_link_def.first.model_handle(), sp_hash)
+            end
+          end
+          pp dependency_components
+
+#Finally, I need mechanism to filter only components that are actually test components
+#Since we currently don't have a way to differentiate test components, I will probably stub some part of the code here
+
+#For all test components, I need to get their corresponding attributes
+          dependency_components.each do |dep|
+            #To Do....
+          end
+#When I get corresponding attributes, I will merge them to their dependency component hash and then construct test component output with needed info as in the stub hash: ret[:test_instances]
+
           #Rich: will continue working on this; give example of what each eleemnt of aug_cmps looks like; of significance if there is a link def it will have something like
 =begin
   #<XYZ::Dependency::Link:0x00000005849798

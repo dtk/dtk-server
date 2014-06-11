@@ -286,6 +286,8 @@ module DTK
         if type = input_hash["module_type"]
           case type
            when "puppet_module" then ConfigAgentTypes[:puppet]
+           #Part of code to handle new serverspec type of module
+           when "serverspec" then ConfigAgentTypes[:serverspec]
            else 
              ParsingError.new("Unexpected module_type (#{type})")
           end
@@ -294,7 +296,8 @@ module DTK
         end
       end
       ConfigAgentTypes = {
-        :puppet => :puppet
+        :puppet => :puppet,
+        :serverspec => :serverspec
       }
       DefaultConfigAgentType = ConfigAgentTypes[:puppet]
 

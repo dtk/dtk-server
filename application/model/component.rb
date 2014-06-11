@@ -12,6 +12,7 @@ module DTK
   class Component < Model
     r8_nested_require('component','template')
     r8_nested_require('component','instance')
+    r8_nested_require('component','test')
     r8_nested_require('component','resource_matching')
     r8_nested_require('component','include_module')
     include TemplateMixin

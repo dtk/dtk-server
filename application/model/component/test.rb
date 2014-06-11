@@ -2,14 +2,21 @@ module DTK
   class Component
     class Test < self
 
-      class ComponentLinkedTests
+      class LinkedTest
+        attr_reader :test_component, :attribute_mappings
+        def initialize(test_component,ams)
+          @test_component = test_component
+          @attribute_mappings = ams
+        end
+      end
+      class LinkedTests
         attr_reader :component,:test_array
         def initialize(cmp,test_array=[])
-          @component = cmp
+          @component = cmp.hash_subset(:id,:group_id,:display_name)
           @test_array = test_array
         end
-        def add_test(test)
-          @test_array << test
+        def add_test!(test_component,ams)
+          @test_array << LinkedTest.new(test_component,ams)
         end
       end
       #returns array of ComponentLinkedTests
@@ -20,38 +27,45 @@ module DTK
           )
         aug_cmps = assembly_instance.get_augmented_components(opts)
         #Find all dependencies (link defs) that point to a test
-        #first find all components with a link def; get the component id and then get info about these to see if test
-        linked_cmp_ids = Array.new
-        cmp_with_linked_tests = Array.new
+        #first find all link_defs and select ones that are associated with component tests
+        link_defs = Array.new
         each_link(aug_cmps) do |cmp,link|
-          #TODO: wrong; does not return other side of link def
-          linked_cmp_ids << link[:component_component_id]
+          link_defs << link
         end
-        return ret if linked_cmp_ids.empty?
+        return ret if link_defs.empty?
 
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:external_ref,:type],
-          :filter => [:oneof,:id,linked_cmp_ids]
-        }
-        cmp_mh = assembly_instance.model_handle(:component)
-        linked_cmp_tests = get_objs(cmp_mh,sp_hash).select{|r|isa_component_test?(r)}
-pp linked_cmp_tests
-raise Error.new('got here')
-        return ret if linked_cmp_tests.empty?
-        
-        ndx_linked_cmp_tests = linked_cmp_tests.inject(Hash.new){|h,r|h.merge(r[:id] => r)}
-        each_link(aug_cmps) do |cmp,link|
+        #get the link def links
+        cols = [:id,:group_id,:display_name,:remote_component_type,:position,:content,:type,:link_def_id]
+        link_def_links = LinkDef.get_link_def_links(link_defs.map{|ld|ld.id_handle()},:cols => cols)
+        link_def_links.reject!{|ld_link|!isa_component_test_link?(ld_link)}
+        return ret if link_def_links.empty?
+
+        ndx_attribute_mappings = Hash.new
+        link_def_links.each do |ld_link|
+          am_list = ld_link.attribute_mappings()
+          unless am_list.size == 1
+            Log.error("Unexpected that test link has attribute_mappings wiith size <> 1")
+            next
+          end
+          am = am_list.first
+          pntr = ndx_attribute_mappings[ld_link[:link_def_id]] ||= {:test_component => ld_link[:remote_component_type], :ams => Array.new}
+          pntr[:ams] << am
         end
-        ret
+
+        ndx_ret = Hash.new
+        each_link(aug_cmps) do |cmp,link|
+          cmp_id = cmp.id
+          test_info = ndx_attribute_mappings[link[:id]]
+          linked_tests = ndx_ret[cmp_id] ||= LinkedTests.new(cmp)
+          linked_tests.add_test!(test_info[:test_component],test_info[:ams])
+        end
+        ndx_ret.values
       end
 
       private
-      def self.isa_component_test?(obj)
-        return true if obj.kind_of?(Component::Test)
-        if obj.kind_of?(Component)
-          pp self
-          true
-        end
+      #TODO: stub
+      def self.isa_component_test_link?(ld_link)
+        ld_link.get_field?(:remote_component_type) =~ /^mongodb_test/
       end
       def self.each_link(aug_cmps,&block)
         aug_cmps.each do |cmp|

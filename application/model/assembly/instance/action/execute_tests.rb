@@ -18,15 +18,35 @@ module DTK
         def initiate()
           test_components = get_test_components_with_stub()
 =begin
-             pp test_components
-{:test_instances=>
-  [{:module_name=>"mongodb",
-    :component=>"node1/mongodb",
-    :test_component=>"network_port_check",
-    :test_name=>"network_port_check_spec.rb",
-    :params=>{:mongo_port=>"27017", :mongo_web_port=>"28017"}}]}
-=end          
-          
+[#<XYZ::Component::Test::LinkedTests:0x0000000609dc78
+  @component={:id=>2147536484, :display_name=>"mongodb"},
+  @test_array=
+   [#<XYZ::Component::Test::LinkedTest:0x0000000609d9f8
+     @attribute_mappings=
+      [{:output=>
+         {:term_index=>"mongodb.port",
+          :type=>"component_attribute",
+          :component_type=>"mongodb",
+          :attribute_name=>"port"},
+        :input=>
+         {:term_index=>"mongodb_test__network_port_check.mongo_port",
+          :type=>"component_attribute",
+          :component_type=>"mongodb_test__network_port_check",
+          :attribute_name=>"mongo_port"}},
+       {:output=>
+         {:term_index=>"mongodb.port",
+          :type=>"component_attribute",
+          :component_type=>"mongodb",
+          :attribute_name=>"port"},
+        :input=>
+         {:term_index=>"mongodb_test__network_port_check.mongo_port",
+          :type=>"component_attribute",
+          :component_type=>"mongodb_test__network_port_check",
+          :attribute_name=>"mongo_port"}}],
+     @test_component="mongodb_test__network_port_check">]>]
+=end
+          #Bakir new format for test; results;; it has theer attribute mapping
+          #next need to get current values of components and run it through teh attribute mapping
 
           #Rich: version context should be not for the components but be for the module containing the tests; so need to look at test_components to determine this
           version_context = Array.new
@@ -94,7 +114,9 @@ module DTK
         attr_reader :assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
           if ret = get_test_components()
-            return ret
+#Rich temp just print out            return ret
+pp [:new_test_component_info,ret]
+nil
           end
 
           #stub part

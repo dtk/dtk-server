@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'eventmachine'
 require "em-ssh"
-<<<<<<< HEAD
 require 'net/scp'
 require 'tempfile'
 require 'pp'

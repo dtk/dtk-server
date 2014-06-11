@@ -1,5 +1,6 @@
 module DTK; class Dependency
   class Link < All
+    attr_reader :link_def
     def initialize(link_def)
       super()
       @link_def = link_def

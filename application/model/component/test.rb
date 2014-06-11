@@ -12,7 +12,7 @@ module DTK
       class LinkedTests
         attr_reader :component,:test_array
         def initialize(cmp,test_array=[])
-          @component = cmp.hash_subset(:id,:group_id,:display_name)
+          @component = cmp.hash_subset(:id,:display_name)
           @test_array = test_array
         end
         def add_test!(test_component,ams)

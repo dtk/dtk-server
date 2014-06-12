@@ -16,6 +16,8 @@ module DTK
         end
 
         def initiate()
+          # DEBUG SNIPPET >>> REMOVE <<<
+require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
           test_components = get_test_components_with_stub()
 
           #Bakir new format for test; results;; it has theer attribute mapping
@@ -90,8 +92,31 @@ module DTK
             #Bakir; havent determined exact flow put here calling stub functioon that processes
             # each linked test; intent is to get the attributes for the test components; right now just calling 
             #/wo returning anything back and instead printing out partial results
-            linked_tests_array.each{|linked_tests|linked_tests.find_test_parameters}
-            nil
+            test_components = []
+            linked_tests_array.each do |linked_tests|
+              test_params = linked_tests.find_test_parameters
+              #Bakir: output we get looks like this: [:mappings, {"mongodb.port"=>"mongodb_test__network_port_check.mongo_port”}]
+              #For Rich: One missing peace of data that I need is component name/id for test component. 
+              #I could parse test component name (mongodb_test__network_port_check) but not sure if there is a better way?
+              #Assuming I'm parsing test component name from test component attributes I would have following:
+              test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
+              test_params.each do |params|
+                k, v = params.first
+                component_name = v.split(".").first
+                test_components << component_name
+              end
+            end
+
+            #Bakir: test_components array should now have list of all test components that are related. Add them to service instance
+            test_components.uniq!
+            test_components.each { |test_comp| add_component_to_assembly_instance(test_comp) }
+
+            #For Rich: Now we need mechanism to copy test component modules to the node so their serverspec tests could be executed
+            #Also we need logic to check that only when tests are run for the first time, execute-test will copy these modules and not to do that every time
+            #If user adds new component which has tests related to it and subsequently needs loading and copying of tests to the node, we can trigger this again
+
+            #For Rich: Finally, when test component modules have been copied to the node, we will get attribute data for test components and form 
+            #similar hash return value which we have below with all needed data for execute-test agent
           end
 
           #stub part
@@ -115,6 +140,10 @@ module DTK
 
         def get_test_components()
           Component::Test.get_linked_tests(assembly_instance)
+        end
+
+        def add_component_to_assembly_instance(test_component_name)
+          #For Rich: This method should add test component to service instance
         end
 
         #TODO: deprecate

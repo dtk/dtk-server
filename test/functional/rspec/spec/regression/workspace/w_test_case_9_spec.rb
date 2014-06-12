@@ -19,7 +19,7 @@ node_template = 'precise-micro'
 component_name = 'stdlib'
 service_module_name = 'new_bootstrap'
 service_module_filesystem_location = '~/dtk/service_modules'
-assembly_name = 'workspace_assembly_template'
+assembly_name = 'workspace_assembly'
 
 dtk_common = DtkCommon.new('', '')
 

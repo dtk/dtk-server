@@ -107,6 +107,7 @@ module DTK
           when :component_instance then Component::Instance
           when :datacenter then Target
           when :node_group then NodeGroup
+          when :assembly_node_group then AssemblyNodeGroup
           when :repo_with_branch then Repo::WithBranch
         end
       end
@@ -127,7 +128,8 @@ module DTK
         :assembly_workspace => :component,
         :component_template => :component,
         :component_instance => :component,
-        :node_group => :node
+        :node_group => :node,
+        :assembly_node_group => :node
       }
 
       def self.add_subclass_klass_mapping(subclass_klass,model_name,opts={})
@@ -144,6 +146,7 @@ module DTK
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
         elsif model_class == NodeGroup then :node
+        elsif model_class == AssemblyNodeGroup then :node
         end
       end
 

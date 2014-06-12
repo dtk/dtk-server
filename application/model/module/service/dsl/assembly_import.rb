@@ -107,9 +107,11 @@ module DTK; class ServiceModule
       ret = assembly_hash["nodes"].inject(Hash.new) do |h,(node_hash_ref,node_hash)|
         dangling_errors.aggregate_errors!(h) do
           node_ref = assembly_template_node_ref(assembly_ref_with_version,node_hash_ref)
+          type,attributes = import_type_and_node_attributes(node_hash,opts)
           node_output = {
             "display_name" => node_hash_ref, 
-            "type" => "stub",
+            "type" => type,
+            "attribute" => attributes,
             "*assembly_id" => "/component/#{assembly_ref_with_version}" 
           }
           if nb_rs = node_to_nb_rs[node_hash_ref]
@@ -124,9 +126,7 @@ module DTK; class ServiceModule
           else
             node_output["node_binding_rs_id"] = nil
           end
-
-          node_output["attribute"] = import_node_attributes(node_hash["attributes"],opts)
-
+ 
           cmps_output = import_component_refs(container_idh,assembly_hash["name"],node_hash["components"],component_module_refs,opts)
           return cmps_output if ParsingError.is_error?(cmps_output)
           
@@ -254,6 +254,16 @@ module DTK; class ServiceModule
     end
 
     #These are attributes at the node level
+    #returns [type,attributes]
+    def self.import_type_and_node_attributes(node_hash,opts={})
+      type = "stub"
+      attributes = import_node_attributes(node_hash["attributes"],opts)
+      if attr_type = attributes["type"]
+        attributes.delete("type")
+        type = "node_group_stub"
+      end
+      [type,attributes]
+    end
     def self.import_node_attributes(node_attrs_hash,opts={})
       node_attrs_hash ||= Hash.new
       unless node_attrs_hash.kind_of?(Hash)
@@ -262,7 +272,6 @@ module DTK; class ServiceModule
       #TODO: make sure that each node attribute is legal
       import_attributes_helper(node_attrs_hash)
     end
-
     def self.import_attributes_helper(attr_val_hash)
       ret = DBUpdateHash.new()
       attr_val_hash.each_pair do |attr_name,attr_val|

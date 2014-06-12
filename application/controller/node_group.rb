@@ -1,4 +1,4 @@
-#TODO: NODE-GROUP: these are target node groups; should probably rename
+#TODO: NODE-GROUP: these are target node groups; may rename
 module DTK
   class Node_groupController < AuthController
     helper :node_group_helper

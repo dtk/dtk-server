@@ -1,15 +1,5 @@
 module DTK
-  class AssemblyNodeGroup < Node
-    # create_hash has form:
-    # display_name:
-    # cardinality: INTEGER
-    # cardinality_max: INTEGER (optional)
-    # element_name: "example: slave.${index} (optional)"
-    def self.create(parent_idh,create_hash)
-      
-    end
-
-
+  class ServiceNodeGroup < Node
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)
     end
@@ -22,30 +12,34 @@ module DTK
    private
     module IdNameHelper
       def self.check_valid_id(model_handle,id)
-        check_valid_id_helper(model_handle,id,Filter)
+        check_valid_id_helper(model_handle,id,filter(:id => id))
       end
       def self.name_to_id(model_handle,name)
         sp_hash =  {
         :cols => [:id],
-        :filter => Filter
+        :filter => filter(:display_name => name)
         }
         name_to_id_helper(model_handle,name,sp_hash)
       end
       def self.id_to_name(model_handle, id)
         sp_hash =  {
           :cols => [:display_name],
-          :filter => Filter
+          :filter => filter(:id => id)
         }
         rows = get_objs(model_handle,sp_hash)
         rows && rows.first[:display_name]
       end
 
-      NodeType = 'assembly_node_group'
-      Filter = 
+     private
+      def self.filter(added_condition_hash)
+        FilterBase + [[:eq, added_condition_hash.keys.first,added_condition_hash.values.first]]
+      end
+
+      NodeType = 'service_node_group'
+      FilterBase = 
         [:and,
-         [:eq, :id, id],
          [:eq, :type, NodeType],
-         [:eq, :datacenter_datacenter_id, nil]
+         [:neq, :datacenter_datacenter_id, nil]
         ]
     end
   end

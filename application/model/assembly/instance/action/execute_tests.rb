@@ -16,8 +16,6 @@ module DTK
         end
 
         def initiate()
-          # DEBUG SNIPPET >>> REMOVE <<<
-require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
           test_components = get_test_components_with_stub()
 
           #Bakir new format for test; results;; it has theer attribute mapping

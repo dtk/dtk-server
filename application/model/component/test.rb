@@ -3,14 +3,57 @@ module DTK
     class Test < self
 
       class LinkedTest
-        attr_reader :test_component, :attribute_mappings
+        #attr_reader :test_component, :attribute_mappings
         def initialize(test_component,ams)
           @test_component = test_component
           @attribute_mappings = ams
+          @var_mappings_hash = nil
+        end
+        def get_component_attributes()
+          @attribute_mappings.map{|am|am_component_attr(am)}
+        end
+        def find_mapped_component_test_attributes(cmp_attrs)
+          ret = nil
+          #This function flows the cmp_attrribute values through component_To_test_attribute_mappings
+          mappings = component_to_test_attribute_mappings()
+          pp [:debug,:mappings,mappings]
+          #code should go here that finds assignments to the test components
+          ret
+        end
+
+       private
+        def component_to_test_attribute_mappings()
+          return @var_mappings_hash if @var_mappings_hash
+          @var_mappings_hash = Hash.new
+          @attribute_mappings.each do |am|
+            index = am_component_attr(am)
+            test_attr = am_test_attr(am)
+
+            if existing_var = @var_mappings_hash[index]
+              #TODO: just putting this in temporarily to check assumptions are right
+              unless existing_var == test_attr
+                Log.error("Unexpected that #{index} has multiple mappings")
+                next
+              end
+            end
+
+            @var_mappings_hash[index] = am_test_attr(am)
+          end
+          @var_mappings_hash
+        end
+
+        #'output' is the attribute that is used to propagate value to the input
+        #For LinkedTest objects output corresponds to component and input to component test
+        def am_component_attr(am)
+          am[:output][:term_index]
+        end
+        def am_test_attr(am)
+          am[:input][:term_index]
         end
       end
+
       class LinkedTests
-        attr_reader :component,:test_array
+        #attr_reader :component,:test_array
         def initialize(cmp,test_array=[])
           @component = cmp.hash_subset(:id,:display_name)
           @test_array = test_array
@@ -18,7 +61,27 @@ module DTK
         def add_test!(test_component,ams)
           @test_array << LinkedTest.new(test_component,ams)
         end
+
+        def find_test_parameters()
+          #find the relevant parameters on @test_component by looking at attribute mappings
+          pp "debug: finding needed params for #{@component[:display_name]}"
+          cmp_attribute_names = Array.new
+          @test_array.each do |test|
+            cmp_attribute_names += test.get_component_attributes()
+          end
+          cmp_attribute_names.uniq!
+          pp "debug: cmp_attribute_names: #{cmp_attribute_names.inspect}"
+          #Compute the component attribute vars that correspond to cmp_attribute_names
+          cmp_attr_vals = nil
+          find_mapped_component_test_attributes(cmp_attr_vals)
+          nil
+        end
+       private
+        def find_mapped_component_test_attributes(cmp_attr_vals)        
+          @test_array.find{|test|test.find_mapped_component_test_attributes(cmp_attr_vals)}
+        end
       end
+
       #returns array of ComponentLinkedTests
       def self.get_linked_tests(assembly_instance)
         ret = Array.new
@@ -95,45 +158,32 @@ end
 end
 =end
 =begin
-Example of dependency info per component
- {:id=>2147536484,
-  :display_name=>"mongodb",
-  :component_type=>"mongodb",
-  :basic_type=>"service",
-  :extended_base=>nil,
-  :description=>nil,
-  :version=>"master",
-  :module_branch_id=>2147494462,
-  :node_node_id=>2147536478,
-  :assembly_id=>2147536477,
-  :node=>
-   {:id=>2147536478,
-    :display_name=>"node1",
-    :os_type=>"ubuntu",
-    :admin_op_status=>"running",
-    :external_ref=>
-     {:image_id=>"ami-fce20e94",
-      :type=>"ec2_instance",
-      :size=>"m1.small",
-      :instance_id=>"i-ecc2e7bc",
-      :ec2_public_address=>"ec2-54-221-142-70.compute-1.amazonaws.com",
-      :dns_name=>"ec2-54-221-142-70.compute-1.amazonaws.com",
-      :private_dns_name=>
-       {:"ec2-54-221-142-70.compute-1.amazonaws.com"=>
-         "ip-10-167-151-11.ec2.internal"}}},
-  :dependencies=>
-   [#<XYZ::Dependency::Link:0x00000008b0d2d8
-     @link_def=
-      {:id=>2147536491,
-       :group_id=>2147484431,
-       :display_name=>"local_mongodb_test::network_port_check",
-       :description=>nil,
-       :local_or_remote=>"local",
-       :link_type=>"mongodb_test::network_port_check",
-       :required=>false,
-       :dangling=>false,
-       :has_external_link=>true,
-       :has_internal_link=>true,
-       :component_component_id=>2147536484},
-     @satisfied_by_component_ids=[]>]}]
+example of what LinkedTests looks like
+[#<XYZ::Component::Test::LinkedTests:0x00000005efada8
+   @component={:id=>2147536484, :display_name=>"mongodb"},
+   @test_array=
+    [#<XYZ::Component::Test::LinkedTest:0x00000005efa880
+      @attribute_mappings=
+       [{:output=>
+          {:term_index=>"mongodb.port",
+           :type=>"component_attribute",
+           :component_type=>"mongodb",
+           :attribute_name=>"port"},
+         :input=>
+          {:term_index=>"mongodb_test__network_port_check.mongo_port",
+           :type=>"component_attribute",
+           :component_type=>"mongodb_test__network_port_check",
+           :attribute_name=>"mongo_port"}},
+        {:output=>
+          {:term_index=>"mongodb.port",
+           :type=>"component_attribute",
+           :component_type=>"mongodb",
+           :attribute_name=>"port"},
+         :input=>
+          {:term_index=>"mongodb_test__network_port_check.mongo_port",
+           :type=>"component_attribute",
+           :component_type=>"mongodb_test__network_port_check",
+           :attribute_name=>"mongo_port"}}],
+      @test_component="mongodb_test__network_port_check">]>]]
+"Components: {:test_instances=>[{:module_name=>\"mongodb\", :component
 =end

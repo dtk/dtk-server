@@ -17,34 +17,7 @@ module DTK
 
         def initiate()
           test_components = get_test_components_with_stub()
-=begin
-[#<XYZ::Component::Test::LinkedTests:0x0000000609dc78
-  @component={:id=>2147536484, :display_name=>"mongodb"},
-  @test_array=
-   [#<XYZ::Component::Test::LinkedTest:0x0000000609d9f8
-     @attribute_mappings=
-      [{:output=>
-         {:term_index=>"mongodb.port",
-          :type=>"component_attribute",
-          :component_type=>"mongodb",
-          :attribute_name=>"port"},
-        :input=>
-         {:term_index=>"mongodb_test__network_port_check.mongo_port",
-          :type=>"component_attribute",
-          :component_type=>"mongodb_test__network_port_check",
-          :attribute_name=>"mongo_port"}},
-       {:output=>
-         {:term_index=>"mongodb.port",
-          :type=>"component_attribute",
-          :component_type=>"mongodb",
-          :attribute_name=>"port"},
-        :input=>
-         {:term_index=>"mongodb_test__network_port_check.mongo_port",
-          :type=>"component_attribute",
-          :component_type=>"mongodb_test__network_port_check",
-          :attribute_name=>"mongo_port"}}],
-     @test_component="mongodb_test__network_port_check">]>]
-=end
+
           #Bakir new format for test; results;; it has theer attribute mapping
           #next need to get current values of components and run it through teh attribute mapping
 
@@ -113,10 +86,12 @@ module DTK
 
         attr_reader :assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
-          if ret = get_test_components()
-#Rich temp just print out            return ret
-pp [:new_test_component_info,ret]
-nil
+          if linked_tests_array = get_test_components()
+            #Bakir; havent determined exact flow put here calling stub functioon that processes
+            # each linked test; intent is to get the attributes for the test components; right now just calling 
+            #/wo returning anything back and instead printing out partial results
+            linked_tests_array.each{|linked_tests|linked_tests.find_test_parameters}
+            nil
           end
 
           #stub part

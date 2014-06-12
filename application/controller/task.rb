@@ -68,6 +68,7 @@ module XYZ
     def rest__cancel_task()
       top_task_id = ret_non_null_request_params(:task_id)
       cancel_task(top_task_id)
+pp [top_task_id]
       rest_ok_response :task_id => top_task_id
     end
 

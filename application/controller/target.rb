@@ -52,8 +52,11 @@ module DTK
       unmanaged_nodes.each do |node|
         node_1 = node if node[:display_name].eql?('import_node_1')
       end
-
-      task = Task.create_install_agents_task(target, unmanaged_nodes)
+      opts = Hash.new
+      if num_nodes = ret_request_params(:num_nodes)
+        opts.merge!(:debug_num_nodes => num_nodes)
+      end
+      task = Task.create_install_agents_task(target,unmanaged_nodes,opts)
       task.save!()
 
       rest_ok_response :task_id => task.id

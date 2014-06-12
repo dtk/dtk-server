@@ -232,10 +232,13 @@ module DTK
       end
     end
 
-    def create_install_agents_task(target, nodes)
+    def create_install_agents_task(target, nodes,opts={})
+      stub_create_install_agents_task(target,nodes,opts)
+    end
+
+    def stub_create_install_agents_task(target, nodes,opts={})
       target_idh = target.id_handle()
       task_mh = target_idh.create_childMH(:task)
-
       executable_action = {:node=>
         {
           :id=>2147626569,
@@ -259,15 +262,12 @@ module DTK
       # Debugger.start
       # debugger
       # executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, nodes)
-
       ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
-      subtask_1 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_1")#, :temporal_order => "sequential")
-      subtask_2 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_2")#, :temporal_order => "sequential")
-      subtask_3 = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_3")#, :temporal_order => "sequential")
-
-      ret.add_subtask(subtask_1)
-      ret.add_subtask(subtask_2)
-      ret.add_subtask(subtask_3)
+      num_nodes = (opts[:debug_num_nodes]||3).to_i
+      (1..num_nodes).each do |num|
+        subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
+        ret.add_subtask(subtask)
+      end
       ret
     end
 

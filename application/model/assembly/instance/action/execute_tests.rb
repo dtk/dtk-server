@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module DTK
   class Assembly::Instance
     module Action
@@ -94,7 +95,7 @@ module DTK
             linked_tests_array.each do |linked_tests|
               test_params = linked_tests.find_test_parameters
               #Bakir: output we get looks like this: [:mappings, {"mongodb.port"=>"mongodb_test__network_port_check.mongo_port”}]
-              #For Rich: One missing peace of data that I need is component name/id for test component. 
+              #For Rich: One missing piece of data that I need is component name/id for test component. 
               #I could parse test component name (mongodb_test__network_port_check) but not sure if there is a better way?
               #Assuming I'm parsing test component name from test component attributes I would have following:
               test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]

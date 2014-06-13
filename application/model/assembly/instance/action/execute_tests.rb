@@ -151,7 +151,6 @@ module DTK
 
         def add_component_to_assembly_instance(node_id, test_component_id)
           node_idh = assembly_instance.model_handle().createIDH(:model_name => :node, :id => node_id)
-          node_idh[:parent_model_name] = :datacenter
           cmp_id = assembly_instance.model_handle().createIDH(:model_name => :component_template, :id => test_component_id).create_object()
           assembly_instance.add_component(node_idh, cmp_id, nil)
         end

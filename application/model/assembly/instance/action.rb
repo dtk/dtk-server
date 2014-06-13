@@ -52,7 +52,7 @@ module DTK
         Assembly::Instance::Action::ExecuteTests.initiate(nodes,action_results_queue, :assembly, components)
       end
 
-      def initiate_execute_tests_v2(action_results_queue, node_id=nil, components=nil)
+      def initiate_execute_tests_v2(project,action_results_queue, node_id=nil, components=nil)
         
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
@@ -68,7 +68,7 @@ module DTK
           end
           opts.merge!(:filter => {:components => components})
         end
-        Assembly::Instance::Action::ExecuteTestsV2.initiate(self,nodes,action_results_queue, :assembly, opts)
+        Assembly::Instance::Action::ExecuteTestsV2.initiate(project,self,nodes,action_results_queue, :assembly, opts)
       end
 
       module Action

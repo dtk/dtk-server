@@ -3,11 +3,12 @@ module DTK
   class Assembly::Instance
     module Action
       class ExecuteTestsV2 < ActionResultsQueue::Result
-        def self.initiate(assembly_instance,nodes,action_results_queue, type, opts={})
-          new(assembly_instance,nodes,action_results_queue, type, opts).initiate()
+        def self.initiate(project,assembly_instance,nodes,action_results_queue, type, opts={})
+          new(project,assembly_instance,nodes,action_results_queue, type, opts).initiate()
         end
         
-        def initialize(assembly_instance,nodes,action_results_queue, type, opts={})
+        def initialize(project,assembly_instance,nodes,action_results_queue, type, opts={})
+          @project = project
           @assembly_instance = assembly_instance
           @nodes = nodes
           @action_results_queue = action_results_queue 
@@ -84,8 +85,7 @@ module DTK
           end
         end
        private
-
-        attr_reader :assembly_instance, :nodes, :action_results_queue, :type, :filter
+        attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
           if linked_tests_array = get_test_components()
             #Bakir; havent determined exact flow put here calling stub functioon that processes
@@ -98,6 +98,10 @@ module DTK
               #For Rich: One missing piece of data that I need is component name/id for test component. 
               #I could parse test component name (mongodb_test__network_port_check) but not sure if there is a better way?
               #Assuming I'm parsing test component name from test component attributes I would have following:
+
+              #Rich: need handle on project, which now is passed in
+              pp [:debug_project,project]
+
               test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
               test_params.each do |params|
                 k, v = params.first

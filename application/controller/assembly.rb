@@ -776,7 +776,7 @@ module DTK
     def rest__initiate_execute_tests_v2()
       node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
-
+      project = get_default_project()
       #Logic for validation
       # filters only running nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
@@ -811,7 +811,7 @@ module DTK
       end
 
       queue = ActionResultsQueue.new
-      assembly.initiate_execute_tests_v2(queue, node_id, components)
+      assembly.initiate_execute_tests_v2(project,queue, node_id, components)
       rest_ok_response :action_results_id => queue.id
     end
     

@@ -115,6 +115,8 @@ module DTK
             test_components.each { |test_comp| add_component_to_assembly_instance(test_comp) }
 
             #For Rich: Now we need mechanism to copy test component modules to the node so their serverspec tests could be executed
+#rich: the tests should be copied over by the same mechanism that copies ove component modules; 
+#by setting version context above to test modules this will be achieved
             #Also we need logic to check that only when tests are run for the first time, execute-test will copy these modules and not to do that every time
             #If user adds new component which has tests related to it and subsequently needs loading and copying of tests to the node, we can trigger this again
 

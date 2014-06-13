@@ -94,25 +94,27 @@ module DTK
             test_components = []
             linked_tests_array.each do |linked_tests|
               test_params = linked_tests.find_test_parameters
-              #Bakir: output we get looks like this: [:mappings, {"mongodb.port"=>"mongodb_test__network_port_check.mongo_port”}]
-              #For Rich: One missing piece of data that I need is component name/id for test component. 
-              #I could parse test component name (mongodb_test__network_port_check) but not sure if there is a better way?
-              #Assuming I'm parsing test component name from test component attributes I would have following:
-
-              #Rich: need handle on project, which now is passed in
-              pp [:debug_project,project]
-
+              #Bakir: test_params is currently mocked, need to fix find_test_parameters method to retrieve actual test params
               test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
               test_params.each do |params|
                 k, v = params.first
                 component_name = v.split(".").first
-                test_components << component_name
+                test_components << { :test_component_name => component_name, :destination_node_id => linked_tests.node[:id] }
               end
             end
 
             #Bakir: test_components array should now have list of all test components that are related. Add them to service instance
             test_components.uniq!
-            test_components.each { |test_comp| add_component_to_assembly_instance(test_comp) }
+            test_components.each do |test_comp| 
+              sp_hash = {
+                :cols => Component.common_columns,
+                :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
+              }
+              test_comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
+              #Select test component that belongs to this same assembly id or if it is nil, but filter out same test components that belong to other assemblies
+              test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
+              add_component_to_assembly_instance(test_comp[:destination_node_id], test_comp_list.first[:id])
+            end
 
             #For Rich: Now we need mechanism to copy test component modules to the node so their serverspec tests could be executed
 #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
@@ -147,8 +149,11 @@ module DTK
           Component::Test.get_linked_tests(assembly_instance)
         end
 
-        def add_component_to_assembly_instance(test_component_name)
-          #For Rich: This method should add test component to service instance
+        def add_component_to_assembly_instance(node_id, test_component_id)
+          node_idh = assembly_instance.model_handle().createIDH(:model_name => :node, :id => node_id)
+          node_idh[:parent_model_name] = :datacenter
+          cmp_id = assembly_instance.model_handle().createIDH(:model_name => :component_template, :id => test_component_id).create_object()
+          assembly_instance.add_component(node_idh, cmp_id, nil)
         end
 
         #TODO: deprecate

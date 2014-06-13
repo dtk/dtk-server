@@ -53,8 +53,9 @@ module DTK
       end
 
       class LinkedTests
-        #attr_reader :component,:test_array
+        attr_reader :component,:test_array,:node
         def initialize(cmp,test_array=[])
+          @node = {:id => cmp[:node][:id]}
           @component = cmp.hash_subset(:id,:display_name)
           @test_array = test_array
         end
@@ -74,7 +75,6 @@ module DTK
           #Compute the component attribute vars that correspond to cmp_attribute_names
           cmp_attr_vals = nil
           find_mapped_component_test_attributes(cmp_attr_vals)
-          nil
         end
        private
         def find_mapped_component_test_attributes(cmp_attr_vals)        
@@ -92,6 +92,7 @@ module DTK
         #Find all dependencies (link defs) that point to a test
         #first find all link_defs and select ones that are associated with component tests
         link_defs = Array.new
+
         each_link(aug_cmps) do |cmp,link|
           link_defs << link
         end
@@ -118,6 +119,7 @@ module DTK
         ndx_ret = Hash.new
         each_link(aug_cmps) do |cmp,link|
           cmp_id = cmp.id
+          node_id = cmp[:node][:id]
           test_info = ndx_attribute_mappings[link[:id]]
           linked_tests = ndx_ret[cmp_id] ||= LinkedTests.new(cmp)
           linked_tests.add_test!(test_info[:test_component],test_info[:ams])

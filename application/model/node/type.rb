@@ -7,7 +7,7 @@ module DTK
       def is_node_group?()
         #short circuit
         return true if (kind_of?(NodeGroup) or kind_of?(ServiceNodeGroup))
-        Type::NodeGroupisa?(get_field?(:type))
+        Type::NodeGroup.isa?(get_field?(:type))
       end
     end
 
@@ -28,12 +28,16 @@ module DTK
         end
       end
       class NodeGroup < self
-        Types = [:stub,:instance,:staged]
-        Types.each do |type|
-          class_eval("def self.#{type}(); 'node_group_#{type}'; end")
-        end
         def self.types()
-          Types
+          @types ||= TypeNames.map{|r|type_from_name(r)}
+        end
+       private
+        def self.type_from_name(type_name)
+          "node_group_#{type_name}".to_sym
+        end
+        TypeNames = [:stub,:instance,:staged]
+        TypeNames.each do |type_name|
+          class_eval("def self.#{type_name}(); '#{type_from_name(type_name)}'; end")
         end
       end
     end

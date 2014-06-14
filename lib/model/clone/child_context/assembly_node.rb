@@ -67,7 +67,7 @@ module DTK
         #find the assembly's stub nodes and then use the node binding to find the node templates
         #as will as using, if non-empty, ervice_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
-          :cols => [:id,:display_name,:node_binding_ruleset],
+          :cols => [:id,:display_name,:type,:node_binding_ruleset],
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
@@ -81,13 +81,14 @@ module DTK
         # No rules in the node being match the target (/home/dtk18/server/application/model/node_binding_ruleset.rb:22
         node_mh = target.model_handle(:node)
         #TODO: may be more efficient to get these all at once
-        node_info.map do |r|
-          node_template = Node::Template.find_matching_node_template(target,r[:node_binding_ruleset])
+        node_info.map do |node|
+          node_template = Node::Template.find_matching_node_template(target,node[:node_binding_ruleset])
+          instance_type =  (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
           {
-            :instance_type => 'staged',
-            :node_stub_idh => r.id_handle, 
-            :instance_display_name => r[:display_name],
-            :instance_ref => r[:display_name],
+            :instance_type => instance_type,
+            :node_stub_idh => node.id_handle, 
+            :instance_display_name => node[:display_name],
+            :instance_ref => node[:display_name],
             :node_template_idh => node_template.id_handle()
           }
         end

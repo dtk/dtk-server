@@ -354,9 +354,6 @@ module DTK
       op_status || self[:operational_status]
     end
 
-    def is_node_group?()
-      ["node_group_instance"].include?(self[:type])
-    end
 
     #attribute on node
     def update_operational_status!(op_status)

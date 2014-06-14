@@ -116,7 +116,7 @@ module XYZ
 
     def node_valid_for_aws?(nodes, status_pattern)
       # check if staged
-      if nodes.first[:type] == "staged"
+      if nodes.first[:type] == Node::Type::Node.staged
         return nodes, false, "Node with id '#{nodes.first[:id]}' is 'staged' and as such cannot be started/stopped."
       end
 

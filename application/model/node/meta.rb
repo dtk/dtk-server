@@ -18,7 +18,7 @@ module DTK
       virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
       column :tag, :varchar
       #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
-      column :type, :varchar, :size => 25, :default => "instance" # | "image" || "staged" || "stub"
+      column :type, :varchar, :size => 25, :default => Type::Node.instance # Possible values are Node::Type.types
       column :role, :varchar, :size => 50
       column :os_type, :varchar, :size => 25
       column :os_identifier, :varchar, :size => 50 #augments os_type to identify specifics about os. From os_identier given region one can find unique ami

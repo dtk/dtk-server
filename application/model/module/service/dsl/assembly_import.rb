@@ -256,11 +256,11 @@ module DTK; class ServiceModule
     #These are attributes at the node level
     #returns [type,attributes]
     def self.import_type_and_node_attributes(node_hash,opts={})
-      type = "stub"
+      type = Node::Type::Node.stub
       attributes = import_node_attributes(node_hash["attributes"],opts)
       if attr_type = attributes["type"]
         attributes.delete("type")
-        type = "node_group_stub"
+        type = Node::Type::NodeGroup.stub
       end
       [type,attributes]
     end

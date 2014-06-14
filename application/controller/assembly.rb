@@ -617,7 +617,7 @@ module DTK
       end
       # check if staged
       nodes.each do |node|
-        if node[:type] == "staged"
+        if node[:type] == Node::Type::Node.staged
           return nodes, false, "Nodes for assembly '#{assembly_name}' are 'staged' and as such cannot be started/stopped."
         end
       end
@@ -634,7 +634,7 @@ module DTK
     def nodes_are_up?(assembly_name, nodes, status_pattern)
       # check if staged
       nodes.each do |node|
-        if node[:type] == "staged"
+        if node[:type] == Node::Type::Node.staged
           return nodes, false, "Serverspec tests cannot be executed on nodes that are 'staged'."
         end
       end

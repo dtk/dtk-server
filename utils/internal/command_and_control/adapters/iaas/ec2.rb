@@ -157,7 +157,7 @@ module DTK
           Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
           node_update_hash = {
             :external_ref => external_ref,
-            :type => "instance",
+            :type => Node::Type::Node.instance,
             :is_deployed => true,
             #TODO: better unify these below
             :operational_status => "starting",

@@ -4,12 +4,15 @@ module DTK
 
     set_relation_name(:node,:node)
 
+    r8_nested_require('node','type')
     r8_nested_require('node','template')
+    r8_nested_require('node','instance')
     r8_nested_require('node','target_ref')
     r8_nested_require('node','filter')
     r8_nested_require('node','clone')
     r8_nested_require('node','attribute')
 
+    include TypeMixin
     include CloneMixin
     extend NodeMetaClassMixin 
     extend AttributeClassMixin
@@ -32,44 +35,12 @@ module DTK
        :admin_op_status
       ]
     end
+
 #TODO: stub for feature_node_admin_state
     def persistent_hostname?()
 #      true
       false
     end
-
-    class Instance < self
-     def self.component_list_fields()
-       [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
-     end
-
-     def self.get(mh,opts={})
-       sp_hash = {
-         :cols => ([:id,:group_id,:display_name]+(opts[:cols]||[])).uniq,
-         :filter => [:neq,:datacenter_datacenter_id,nil]
-       }
-       get_objs(mh,sp_hash)
-     end
-     
-     def self.get_unique_instance_name(mh,display_name)
-       display_name_regexp = Regexp.new("^#{display_name}")
-       matches = get(mh,:cols=>[:display_name]).select{|r|r[:display_name] =~ display_name_regexp}
-       if matches.empty?
-         return display_name
-       end
-       index = 2
-       matches.each do |r|
-         instance_name = r[:display_name]
-         if instance_name =~ /-([0-9]+$)/
-           instance_index = $1.to_i
-            if instance_index >= index
-              index += 1
-            end
-         end
-       end
-       "#{display_name}-#{index.to_s}"
-     end
-   end
 
 
 #TODO: end stub for feature_node_admin_state
@@ -83,7 +54,7 @@ module DTK
 
     def status()
       #assumes :is_deployed and :operational_status are set
-      (not self[:is_deployed]) ? "staged" : self[:operational_status]
+      (not self[:is_deployed]) ? Type::Node.staged : self[:operational_status]
     end
 
     def target_id()
@@ -182,7 +153,7 @@ module DTK
 
     def self.list(model_handle,opts={})
       target_filter = (opts[:target_idh] ? [:eq,:datacenter_datacenter_id,opts[:target_idh].get_id()] : [:neq,:datacenter_datacenter_id,nil])
-      filter = [:and, [:oneof, :type, ["instance","staged","physical"]], target_filter]
+      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged,"physical"]], target_filter]
       sp_hash = {
         :cols => common_columns() + [:assemblies],
         :filter => filter
@@ -196,7 +167,7 @@ module DTK
     end
 
     def self.list_wo_assembly_nodes(model_handle)
-      filter = [:and, [:oneof, :type, ["instance","staged"]], [:eq, :assembly_id, nil]]
+      filter = [:and, [:oneof, :type, [Type::Node.instance,Type::Node.staged]], [:eq, :assembly_id, nil]]
       sp_hash = {
         :cols => common_columns() + [:assemblies],
         :filter => filter
@@ -334,7 +305,7 @@ module DTK
       filter = 
         [:and,
          [:eq, :id, id],
-         [:oneof, :type, ["instance","staged"]],
+         [:oneof, :type, [Type::Node.instance,Type::Node.staged]],
          [:neq, :datacenter_datacenter_id, nil],
          assembly_id && [:eq, :assembly_id, assembly_id]
         ].compact
@@ -351,7 +322,7 @@ module DTK
         :cols => [:id,:assembly_id],
         :filter => [:and,
                     [:eq, :display_name, node_name],
-                    [:oneof, :type, ["instance","staged"]],
+                    [:oneof, :type, [Type::Node.instance,Type::Node.staged]],
                     [:neq, :datacenter_datacenter_id, nil],
                     [:eq, :assembly_id, assembly_id]]
       }
@@ -365,10 +336,10 @@ module DTK
     def get_and_update_status!()
       #shortcut
       if has_key?(:is_deployed)
-        return  "staged" if not self[:is_deployed]
+        return  Type::Node.staged if not self[:is_deployed]
       end
       update_obj!(:is_deployed,:external_ref,:operational_status)
-      return  "staged" if not self[:is_deployed]
+      return  Type::Node.staged if not self[:is_deployed]
       get_and_update_operational_status!()
     end
 
@@ -479,16 +450,6 @@ module DTK
       end
     end
 
-    def is_node?()
-      NodeTypes.include?(get_field?(:type))
-    end
-    def is_node_group?()
-      #short circuit
-      return true if kind_of?(NodeGroup)
-      NodeGroupTypes.include?(get_field?(:type))
-    end
-    NodeTypes = %w{instance image staged}
-    NodeGroupTypes = %w{node_group_instance}
 
     #### end: related to distinguishing bewteen nodes and node groups
 

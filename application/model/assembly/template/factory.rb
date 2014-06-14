@@ -287,7 +287,7 @@ module DTK
         node_hash = Aux::hash_subset(node,[:display_name,:node_binding_rs_id])
         node_hash.merge!(
           "*assembly_id" => "/component/#{self[:ref]}",
-          :type => "stub",
+          :type => Node::Type::Node.stub,
           :component_ref => cmp_refs, 
           :port => ports,
           :attribute => node_attrs

@@ -236,38 +236,39 @@ module DTK
       stub_create_install_agents_task(target,nodes,opts)
     end
 
-    def stub_create_install_agents_task(target, nodes,opts={})
+    def stub_create_install_agents_task(target, nodes, opts={})
       target_idh = target.id_handle()
       task_mh = target_idh.create_childMH(:task)
-      executable_action = {:node=>
-        {
-          :id=>2147626569,
-          :display_name=>"imported_node_1",
-          :group_id=>2147483732,
-          :datacenter => target,
-          :external_ref=>{
-            "type"=>"physical",
-            "routable_host_address"=>"ec2-54-227-229-14.compute-1.amazonaws.com",
-            "ssh_credentials"=>{
-              "ssh_user"=>"ubuntu",
-              "ssh_password"=>"1ubuntu",
-              "ssh_rsa_private_key"=>"PRIVATE_KEY",
-              "sudo_password"=>"PASSWD"
-            }
-          }
-        }#,
-        # :state_change_types=>["install_agent"]
-      }
-      # require 'debugger'
-      # Debugger.start
-      # debugger
-      # executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, nodes)
+      # executable_action = {:node=>
+      #   {
+      #     :id=>2147626569,
+      #     :display_name=>"imported_node_1",
+      #     :group_id=>2147483732,
+      #     :datacenter => target,
+      #     :external_ref=>{
+      #       "type"=>"physical",
+      #       "routable_host_address"=>"ec2-54-227-229-14.compute-1.amazonaws.com",
+      #       "ssh_credentials"=>{
+      #         "ssh_user"=>"ubuntu",
+      #         "ssh_password"=>"1ubuntu",
+      #         "ssh_rsa_private_key"=>"PRIVATE_KEY",
+      #         "sudo_password"=>"PASSWD"
+      #       }
+      #     }
+      #   }#,
+      #   # :state_change_types=>["install_agent"]
+      # }
+
       ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
       num_nodes = (opts[:debug_num_nodes]||3).to_i
+
       (1..num_nodes).each do |num|
+        node = nodes.pop
+        executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, node)
         subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
         ret.add_subtask(subtask)
       end
+
       ret
     end
 

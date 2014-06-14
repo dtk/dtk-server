@@ -136,9 +136,10 @@ module DTK; class Task
         super(hash)
       end
 
-      def self.create_from_physical_nodes(target, nodes)
+      def self.create_from_physical_nodes(target, node)
+        node[:datacenter] = target
         hash = {
-          :node => nodes.first,
+          :node => node,
           :datacenter => target,
           :user_object => CurrentSession.new.get_user_object()
         }

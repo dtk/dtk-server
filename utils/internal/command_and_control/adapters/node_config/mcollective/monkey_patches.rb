@@ -4,6 +4,7 @@ module MCollective
   class Discovery
     class Mc
       def self.discover(filter, timeout, limit, client)
+        count = 1
         begin
           hosts = []
           Timeout.timeout(timeout) do
@@ -11,6 +12,7 @@ module MCollective
             Log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
 
             loop do
+              count += 1
               reply = client.receive(reqid)
               Log.debug("Got discovery reply from #{reply.payload[:senderid]}")
               hosts << reply.payload[:senderid]
@@ -20,6 +22,9 @@ module MCollective
             end
           end
         rescue Timeout::Error => e
+          # for some reason when calling client.receive(reqid) for the first time it times out
+          # so calling 3 times just in case it does not return response after first time
+          retry if count < 3
         rescue Exception => e
           raise
         ensure

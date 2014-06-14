@@ -45,13 +45,8 @@ module DTK
       target = create_obj(:target_id)
       target_idh = target.id_handle()
 
-      #RICH-WF: assuming node_1 is just for testing; didnt see how it is being used after being set
       unmanaged_nodes = target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
-      node_1 = nil
 
-      unmanaged_nodes.each do |node|
-        node_1 = node if node[:display_name].eql?('import_node_1')
-      end
       opts = Hash.new
       if num_nodes = ret_request_params(:num_nodes)
         opts.merge!(:debug_num_nodes => num_nodes)

@@ -180,6 +180,10 @@ module DTK
           if ea = self[:executable_action]
             el.merge!(Action::CreateNode.status(ea,opts))
           end
+         when "InstallAgent"
+          if ea = self[:executable_action]
+            el.merge!(Action::InstallAgent.status(ea,opts))
+          end
         end
       end
       ret << el

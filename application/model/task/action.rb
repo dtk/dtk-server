@@ -34,7 +34,7 @@ module DTK; class Task
       end
       def initialize(type,hash,task_idh=nil)
         unless hash[:node].kind_of?(Node)
-          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node))
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),:subclass=>true)
         end
         super(hash)
       end
@@ -131,7 +131,7 @@ module DTK; class Task
     class PhysicalNode < self
       def initialize(type,hash,task_idh=nil)
         unless hash[:node].kind_of?(Node)
-          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node))
+          hash[:node] &&= Node.create_from_model_handle(hash[:node],task_idh.createMH(:node),:subclass=>true)
         end
         super(hash)
       end

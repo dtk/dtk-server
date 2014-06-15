@@ -145,7 +145,7 @@ module DTK; class  Assembly
       ret = Array.new
       return ret if assembly_idhs.empty?
       sp_hash = {
-        :cols => [:id,:group_id,:node_node_id],
+        :cols => [:id,:group_id,:node_node_id,:type],
         :filter => [:oneof, :assembly_id, assembly_idhs.map{|idh|idh.get_id()}]
       }
       ndx_nodes = Hash.new

@@ -36,6 +36,10 @@ module DTK
       ]
     end
 
+    def create_obj_optional_subclass()
+      is_node_group?() ? create_subclass_obj(node_group_model_name()) : self
+    end
+
 #TODO: stub for feature_node_admin_state
     def persistent_hostname?()
 #      true

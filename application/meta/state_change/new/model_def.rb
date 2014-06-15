@@ -88,7 +88,7 @@
          :convert=>true,
          :join_type=>:inner,
          :join_cond=>{:id=>:state_change__node_id},
-         :cols=>[:id,:display_name,:external_ref,:datacenter_datacenter_id,:ancestor_id]
+         :cols=>[:id,:display_name,:type,:external_ref,:datacenter_datacenter_id,:ancestor_id]
        },
        {
          :model_name=>:datacenter,

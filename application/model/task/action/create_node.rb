@@ -9,7 +9,7 @@ module DTK; class Task
               :state_change_id => object[:id],
               :state_change_types => [object[:type]],
               :attributes => Array.new,
-              :node => object[:node],
+              :node => node_create_obj_optional_subclass(object[:node]),
               :datacenter => object[:datacenter],
               :user_object => CurrentSession.new.get_user_object()
             }

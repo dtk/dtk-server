@@ -9,6 +9,12 @@ module DTK
         return true if (kind_of?(NodeGroup) or kind_of?(ServiceNodeGroup))
         Type::NodeGroup.isa?(get_field?(:type))
       end
+      def node_group_model_name()
+        unless is_node_group?()
+          raise Error.new("Should not be called if not a node group")
+        end
+        Type::NodeGroup.model_name(get_field?(:type))
+      end
     end
 
     class Type
@@ -31,6 +37,15 @@ module DTK
         def self.types()
           @types ||= TypeNames.map{|r|type_from_name(r)}
         end
+
+        def self.model_name(type)
+          case type.to_sym
+            when :node_group_stub,:node_group_staged then :service_node_group
+            when :node_group_instance then :node_group
+            else raise Error.new("Unexpected node group type (#{type})")
+          end
+        end
+
        private
         def self.type_from_name(type_name)
           "node_group_#{type_name}".to_sym

@@ -72,6 +72,10 @@ module DTK; class Task
       end
 
      private
+      def node_create_obj_optional_subclass(node)
+        node && node.create_obj_optional_subclass()
+      end
+
       def get_dynamic_attributes_with_retry(result,opts={})
         ret = get_dynamic_attributes(result)
         if non_null_attrs = opts[:non_null_attributes]

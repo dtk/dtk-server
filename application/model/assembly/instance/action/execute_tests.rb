@@ -112,10 +112,16 @@ module DTK
               }
               test_comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
               #Select test component that belongs to this same assembly id or if it is nil, but filter out same test components that belong to other assemblies
+              #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
               test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
+              #RICH-SMOKETEST shouldnt be adding test components to teh assembly; instead after finding test components
+              # need to just find their paramterization
+              #also right now if you run this twice you get:
+              #an error like
+              #constraint violation: Only one component of type mongodb_test__network_port_check can be on a node
               add_component_to_assembly_instance(test_comp[:destination_node_id], test_comp_list.first[:id])
             end
-
+            #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
             #For Rich: Now we need mechanism to copy test component modules to the node so their serverspec tests could be executed
 #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
 #by setting version context above to test modules this will be achieved

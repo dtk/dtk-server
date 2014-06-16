@@ -3,7 +3,7 @@ module DTK
     class Test < self
 
       class LinkedTest
-        #attr_reader :test_component, :attribute_mappings
+        attr_reader :var_mappings_hash
         def initialize(test_component,ams)
           @test_component = test_component
           @attribute_mappings = ams
@@ -13,12 +13,11 @@ module DTK
           @attribute_mappings.map{|am|am_component_attr(am)}
         end
         def find_mapped_component_test_attributes(cmp_attrs)
-          ret = nil
-          #This function flows the cmp_attrribute values through component_To_test_attribute_mappings
+          #This function flows the cmp_attribute values through component_To_test_attribute_mappings
           mappings = component_to_test_attribute_mappings()
           pp [:debug,:mappings,mappings]
           #code should go here that finds assignments to the test components
-          ret
+          return mappings
         end
 
        private

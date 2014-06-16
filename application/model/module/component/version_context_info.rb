@@ -5,6 +5,7 @@ module DTK
         impls = Component::IncludeModule.get_version_context_info(component_idhs,impl_idhs)
         sha_info = get_sha_indexed_by_impl(component_idhs)
         impls.map{|impl|convert_to_hash_form(impl,sha_info[impl[:id]])}
+        pp impls
       end
       def self.get_in_hash_form_from_templates(component_templates)
         impl_idhs = get_implementation_idhs(component_templates)
@@ -23,14 +24,14 @@ module DTK
           if impl_id =  cmp_template.get_field?(:implementation_id)
             impl_mh.createIDH(:id => impl_id)
           else
-            Log.error("Unexpcetd that implementation_id is nil")
+            Log.error("Unexpected that implementation_id is nil")
             nil
           end
         end.compact
       end
 
       def self.convert_to_hash_form(impl,sha=nil)
-        hash = impl.hash_form_subset(:repo,:branch,{:module_name=>:implementation})
+        hash = impl.hash_form_subset(:id,:repo,:branch,{:module_name=>:implementation})
         sha ? hash.merge(:sha => sha) : hash
       end
 
@@ -41,13 +42,12 @@ module DTK
           :cols => [:id,:group_id,:display_name,:locked_sha,:implementation_id],
           :filter => [:oneof,:id,component_idhs.map{|idh|idh.get_id()}]
         }
-        Model.get_objs(component_idhs.first.createMH(),sp_hash).each do |r|
-          if sha = r[:locked_sha]
-            ret.merge!(r[:implementation_id] => sha)
+        Model.get_objs(component_idhs.first.createMH(),sp_hash).each do |rt|
+          if sha = rt[:locked_sha]
+            ret.merge!(rt[:implementation_id] => sha)
           end
         end
         ret
-        
       end
     end
   end

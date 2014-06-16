@@ -14,30 +14,51 @@ module DTK
           @action_results_queue = action_results_queue 
           @type = type
           @filter = opts[:filter]
-
         end
 
         def initiate()
           test_components = get_test_components_with_stub()
+          version_contexts = get_version_contexts(test_components)
+          test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] = 
+            version_contexts.select { |vc| cmp[:implementation_id] == vc[:id] }.first}
 
-          #Bakir new format for test; results;; it has theer attribute mapping
-          #next need to get current values of components and run it through teh attribute mapping
+          output_hash = {
+            :test_instances => []
+          }
 
-          #Rich: version context should be not for the components but be for the module containing the tests; so need to look at test_components to determine this
-          version_context = Array.new
+          test_cmps_with_version_contexts.each do |hash|
+            attrib_array = Array.new
+            hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
+            output_hash[:test_instances] << { 
+              :module_name => hash[:version_context][:display_name], 
+              :component => "node1/mongodb", #Currently hardcoded but will make logic to retrieve this data since it is needed to know on which node particular related test component will be executed
+              :test_component => hash[:display_name],
+              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+              :params => attrib_array
+            }
+          end
 =begin
-          version_context = 
-            unless cmp_templates.empty?
-              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
-            else
-              Log.error("Unexpected that cmp_instances is empty")
-              nil
-            end
-          pp [:debug_version_context,version_context]
-=end          
-          #Bakir: Added stub method to retrieve list of all test components and their params based on regular components
-          #This hash structure is then passed to the mcollective agent
-          
+  BAKIR: output hash looks like this:
+  {
+    :test_instances => [
+        [0] {
+               :module_name => "mongodb_test",
+            :test_component => "mongodb_test__network_port_check",
+                 :test_name => "network_port_check_spec.rb",
+                    :params => [
+                [0] {
+                    :display_name => "mongo_port",
+                           :value => nil
+                },
+                [1] {
+                    :display_name => "mongo_web_port",
+                           :value => "28017"
+                }
+            ]
+        }
+    ]
+}
+=end  
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -62,24 +83,23 @@ module DTK
           #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
-          unless test_components.empty?
+          unless output_hash.empty?
             nodes.each do |node|
-              pp "Components: #{test_components}"
               components_array = []
-              test_components[:test_instances].each do |comp|
+              output_hash[:test_instances].each do |comp|
                 if comp[:component].include? "#{node[:display_name]}/"
                   components_array << comp
                   components_including_node_name << comp
                 end
               end
-              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_context}
+              node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
             end
           end
           
           #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
             components = filter[:components] #TODO: temp
-            CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_context})
+            CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_contexts})
           else
             CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
           end
@@ -93,18 +113,20 @@ module DTK
             #/wo returning anything back and instead printing out partial results
             test_components = []
             linked_tests_array.each do |linked_tests|
-              test_params = linked_tests.find_test_parameters
+              test_params = []
+              test_params << linked_tests.find_test_parameters.var_mappings_hash
               #Bakir: test_params is currently mocked, need to fix find_test_parameters method to retrieve actual test params
-              test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
+              #test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
               test_params.each do |params|
                 k, v = params.first
                 component_name = v.split(".").first
-                test_components << { :test_component_name => component_name, :destination_node_id => linked_tests.node[:id] }
+                test_components << { :test_component_name => component_name }
               end
             end
 
             #Bakir: test_components array should now have list of all test components that are related. Add them to service instance
             test_components.uniq!
+            test_comp_list = []
             test_components.each do |test_comp| 
               sp_hash = {
                 :cols => Component.common_columns,
@@ -114,51 +136,40 @@ module DTK
               #Select test component that belongs to this same assembly id or if it is nil, but filter out same test components that belong to other assemblies
               #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
               test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
-              #RICH-SMOKETEST shouldnt be adding test components to teh assembly; instead after finding test components
-              # need to just find their paramterization
-              #also right now if you run this twice you get:
-              #an error like
-              #constraint violation: Only one component of type mongodb_test__network_port_check can be on a node
-              add_component_to_assembly_instance(test_comp[:destination_node_id], test_comp_list.first[:id])
             end
             #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
-            #For Rich: Now we need mechanism to copy test component modules to the node so their serverspec tests could be executed
-#rich: the tests should be copied over by the same mechanism that copies ove component modules; 
-#by setting version context above to test modules this will be achieved
-            #Also we need logic to check that only when tests are run for the first time, execute-test will copy these modules and not to do that every time
-            #If user adds new component which has tests related to it and subsequently needs loading and copying of tests to the node, we can trigger this again
+            #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
+            #by setting version context above to test modules this will be achieved
+          end 
 
-            #For Rich: Finally, when test component modules have been copied to the node, we will get attribute data for test components and form 
-            #similar hash return value which we have below with all needed data for execute-test agent
+          cmps = []
+          test_comp_list.each do |cmp|
+            sp_hash = {
+              :cols => Attribute.common_columns,
+              :filter => [:eq,:component_component_id,cmp[:id]]
+            }
+            attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
+            cmp[:attributes] = attributes
+            cmps << cmp
           end
 
-          #stub part
-          ret = {
-            :test_instances => []
-          }
-          components = filter[:components]
-          (components||[]).each do |component|
-            if component.include? "mongo"
-              ret[:test_instances] << { 
-                :module_name => "mongodb", 
-                :component => component, 
-                :test_component => "network_port_check",
-                :test_name => "network_port_check_spec.rb",
-                :params => {:mongo_port => '27017',:mongo_web_port => '28017'}
-              }
-            end
-          end
-          ret
+          return cmps
         end
 
         def get_test_components()
           Component::Test.get_linked_tests(assembly_instance)
         end
 
-        def add_component_to_assembly_instance(node_id, test_component_id)
-          node_idh = assembly_instance.model_handle().createIDH(:model_name => :node, :id => node_id)
-          cmp_id = assembly_instance.model_handle().createIDH(:model_name => :component_template, :id => test_component_id).create_object()
-          assembly_instance.add_component(node_idh, cmp_id, nil)
+        def get_version_contexts(test_components)
+          version_contexts = 
+            unless test_components.empty?
+              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(test_components)
+            else
+              Log.error("Unexpected that test_components is empty")
+              nil
+            end
+          pp [:debug_version_context,version_contexts]
+          return version_contexts
         end
 
         #TODO: deprecate

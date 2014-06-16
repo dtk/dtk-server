@@ -28,6 +28,7 @@ module DTK
 
           test_cmps_with_version_contexts.each do |hash|
             attrib_array = Array.new
+            #BAKIR: This will be handled better. Need to get real values for test attributes
             hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
             output_hash[:test_instances] << { 
               :module_name => hash[:version_context][:display_name], 

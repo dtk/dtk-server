@@ -31,33 +31,25 @@ module DTK
             hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
             output_hash[:test_instances] << { 
               :module_name => hash[:version_context][:display_name], 
-              :component => "node1/mongodb", #Currently hardcoded but will make logic to retrieve this data since it is needed to know on which node particular related test component will be executed
+              :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
               :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
               :params => attrib_array
             }
           end
+
+          pp [:debug_output_hash, output_hash]
 =begin
-  BAKIR: output hash looks like this:
-  {
-    :test_instances => [
-        [0] {
-               :module_name => "mongodb_test",
-            :test_component => "mongodb_test__network_port_check",
-                 :test_name => "network_port_check_spec.rb",
-                    :params => [
-                [0] {
-                    :display_name => "mongo_port",
-                           :value => nil
-                },
-                [1] {
-                    :display_name => "mongo_web_port",
-                           :value => "28017"
-                }
-            ]
-        }
-    ]
-}
+BAKIR: Output hash has this form
+[:debug_output_hash,
+ {:test_instances=>
+   [{:module_name=>"mongodb_test",
+     :component=>"mongodb/node1",
+     :test_component=>"mongodb_test__network_port_check",
+     :test_name=>"network_port_check_spec.rb",
+     :params=>
+      [{:display_name=>"mongo_port", :value=>nil},
+       {:display_name=>"mongo_web_port", :value=>"28017"}]}]}]
 =end  
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
@@ -108,19 +100,17 @@ module DTK
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
           if linked_tests_array = get_test_components()
-            #Bakir; havent determined exact flow put here calling stub functioon that processes
-            # each linked test; intent is to get the attributes for the test components; right now just calling 
-            #/wo returning anything back and instead printing out partial results
             test_components = []
+            test_params = []
             linked_tests_array.each do |linked_tests|
-              test_params = []
-              test_params << linked_tests.find_test_parameters.var_mappings_hash
-              #Bakir: test_params is currently mocked, need to fix find_test_parameters method to retrieve actual test params
-              #test_params = [{'mongodb.port'=>'mongodb_test__network_port_check.mongo_port'}]
+              linked_test_data = linked_tests.find_test_parameters.var_mappings_hash
+              linked_test_data[:node_data] = linked_tests.node
+              linked_test_data[:component_data] = linked_tests.component
+              test_params << linked_test_data
               test_params.each do |params|
                 k, v = params.first
                 component_name = v.split(".").first
-                test_components << { :test_component_name => component_name }
+                test_components << { :test_component_name => component_name, :component_name => params[:node_data][:display_name], :node_name => params[:component_data][:display_name] }
               end
             end
 
@@ -133,8 +123,13 @@ module DTK
                 :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
               }
               test_comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
-              #Select test component that belongs to this same assembly id or if it is nil, but filter out same test components that belong to other assemblies
+              test_comp_list.each do |tst|
+                tst[:component_name] = test_comp[:component_name]
+                tst[:node_name] = test_comp[:node_name]
+              end
+
               #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
+              #BAKIR: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is either part of existing assembly or it is never added to the assembly and assembly_id is nil
               test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
             end
             #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to

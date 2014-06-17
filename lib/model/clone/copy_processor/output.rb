@@ -23,9 +23,13 @@ module DTK
           ((@children[level]||{})[model_name]||[]).map{|x|x[:obj_info]}
         end
 
-        def children_objects(level,model_name)
+        def children_objects(level,model_name,opts={})
           if hash_form = children_hash_form(level,SubClassRels[model_name]||model_name)
-            hash_form.map{|r|r[:id_handle].create_object(:model_name => model_name).merge(r[:obj_info])}
+            ret = hash_form.map{|r|r[:id_handle].create_object(:model_name => model_name).merge(r[:obj_info])}
+            if opts[:cols]
+              Model.add_fields!(ret,opts[:cols])
+            end
+            ret
           end
         end
         SubClassRels = {

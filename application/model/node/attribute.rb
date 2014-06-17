@@ -5,12 +5,30 @@ module DTK
         @node = node
       end
 
+      FieldInfo = {
+        :cardinality => {:name => :cardinality, :semantic_type => :integer}
+        :root_device_size => {:name => :root_device_size, :semantic_type => :integer}
+        :puppet_version => {:name => :puppet_version}
+      }
+
+      def self.field_name(name)
+        unless ret = (FieldInfo[:cardinality]||{})[:name]
+          raise Error.new("No node attribute with name (#{name})")
+        end
+        ret
+      end
+
       def root_device_size()
-        get_value?(:root_device_size,:integer)
+        field_info = Field[:root_device_size] 
+        get_value?(FieldInfo[:root_device_size])
+      end
+
+      def cardinality?()
+        get_value?(FieldInfo[:cardinality])
       end
       
       def puppet_version()
-        get_value?(:puppet_version)||R8::Config[:puppet][:version]
+        get_value?(FieldInfo[:puppet_version])||R8::Config[:puppet][:version]
       end
 
       def self.assembly_attribute_filter()
@@ -19,8 +37,14 @@ module DTK
       NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
       AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
+      def self.cardinality_field()
+        CardinalityField
+      end
+
      private
-      def get_value?(attribute_name,semantic_data_type=nil)
+      def get_value?(field_info)
+        attribute_name = field_info[:name]
+        semantic_data_type = field_info[:semantic_type]
         attr = @node.get_node_attribute?(attribute_name.to_s,:cols => [:id,:group_id,:attribute_value])
         value = attr && attr[:attribute_value]
         if value and semantic_data_type
@@ -31,6 +55,24 @@ module DTK
     end
 
     module AttributeClassMixin
+      def self.add_attribute_value!(name,nodes)
+        nodes_to_query = nodes.reject{node.cardinality_is_set?()}
+        return nodes if nodes_to_query.empty?
+        cols = [:id,:node_node_id,:attribute_value]
+        field_name = field_name(name)
+        filter =  [:eq,:display_name,NodeAttribute.field_name]
+        node_idhs = nodes_to_query.map{|n|n.id_handle()}
+        ndx_attrs =  get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
+          h.merge(a[:node_node_id] => a[:attribute_value])
+        end
+        nodes_to_query.each do |n|
+          if val = ndx_attrs[n[:id]]
+            n.send("#{field_name}=".to_sym,val)
+          end
+        end
+      end
+
+
       #node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
      def get_node_level_assembly_attributes(node_idhs,cols=nil)
        cols ||= [:id,:display_name,:node_node_id,:attribute_value]
@@ -91,6 +133,16 @@ module DTK
     end
 
     module AttributeMixin
+      attr_accessor :cardinality
+      def cardinality_is_set?()
+        if @cardinality
+          true
+        elsif not is_node_group?()
+          @cardinality ||=  1
+          true
+        end
+      end
+
       def attribute()
         NodeAttribute.new(self)
       end

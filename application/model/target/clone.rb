@@ -53,6 +53,11 @@ module DTK
         assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
         
         node_idhs = clone_copy_output.children_id_handles(level,:node)
+x = clone_copy_output.children_objects(level,:node, :cols=>[:external_ref])        
+pp [:children_objects, x]
+pp [Node.add_attribute_value!(:cardinatility,x)]
+raise ErrorUsage.new('got here')
+
         return if node_idhs.empty?
         create_state_changes_for_create_node?(target,node_idhs)
 

@@ -44,6 +44,7 @@ module DTK
       opts[:subclass] ? ret.create_obj_optional_subclass() : ret
     end
 
+
 #TODO: stub for feature_node_admin_state
     def persistent_hostname?()
 #      true

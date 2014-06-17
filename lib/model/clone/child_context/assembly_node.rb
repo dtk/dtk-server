@@ -83,13 +83,13 @@ module DTK
         #TODO: may be more efficient to get these all at once
         node_info.map do |node|
           node_template = Node::Template.find_matching_node_template(target,node[:node_binding_ruleset])
-          instance_type =  (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
+          instance_type = (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
           {
-            :instance_type => instance_type,
-            :node_stub_idh => node.id_handle, 
+            :instance_type         => instance_type,
+            :node_stub_idh         => node.id_handle, 
             :instance_display_name => node[:display_name],
-            :instance_ref => node[:display_name],
-            :node_template_idh => node_template.id_handle()
+            :instance_ref          => node[:display_name],
+            :node_template_idh     => node_template.id_handle()
           }
         end
       end
@@ -114,11 +114,11 @@ module DTK
         stub_nodes.each_with_index do |stub_node,i|
           node_target_ref = free_nodes[i]
           ret << {
-            :instance_type => 'instance',
-            :node_stub_idh => stub_node.id_handle, 
+            :instance_type         => Node::Type::Node.instance,
+            :node_stub_idh         => stub_node.id_handle, 
             :instance_display_name => stub_node[:display_name],
-            :instance_ref => node_target_ref.get_field?(:ref),
-            :node_template_idh => node_target_ref.id_handle()
+            :instance_ref          => node_target_ref.get_field?(:ref),
+            :node_template_idh     => node_target_ref.id_handle()
           }
         end
         ret

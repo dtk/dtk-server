@@ -591,6 +591,26 @@ module DTK
       self[field]||update_obj!(field)[field]
     end
 
+    def self.add_fields!(objects,cols)
+      return objects if objects.empty?
+      #short cicuit if all objects have all cols
+      unless objects.find{|obj|not (cols - obj.keys).empty?}
+        return objects
+      end
+      mh = objects.first.mh
+      sp_hash = {
+        :cols => cols.include?(:id) ? cols : cols + [:id],
+        :filter => [:oneof,:id,objects.map{|obj|obj.id()}]
+      }
+      ndx_rows = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
+        h.merge(r[:id] => r)
+      end
+      objects.each do |obj|
+        obj.merge!(ndx_rows[obj.id()])
+      end
+      objects
+    end
+
     def update_and_materialize_object!(*cols)
       update_object!(*cols).materialize!(cols)
     end

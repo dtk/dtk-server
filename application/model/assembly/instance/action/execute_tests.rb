@@ -28,10 +28,9 @@ module DTK
 
           test_cmps_with_version_contexts.each do |hash|
             attrib_array = Array.new
-            #BAKIR: This will be handled better. Need to get real values for test attributes
             hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
             output_hash[:test_instances] << { 
-              :module_name => hash[:version_context][:display_name], 
+              :module_name => hash[:version_context][:implementation], 
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
               :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
@@ -42,15 +41,14 @@ module DTK
           pp [:debug_output_hash, output_hash]
 =begin
 BAKIR: Output hash has this form
-[:debug_output_hash,
- {:test_instances=>
-   [{:module_name=>"mongodb_test",
-     :component=>"mongodb/node1",
-     :test_component=>"mongodb_test__network_port_check",
-     :test_name=>"network_port_check_spec.rb",
-     :params=>
-      [{:display_name=>"mongo_port", :value=>nil},
-       {:display_name=>"mongo_web_port", :value=>"28017"}]}]}]
+{:test_instances=>
+  [{:module_name=>nil,
+    :component=>"node1/mongodb",
+    :test_component=>"mongodb_test__network_port_check",
+    :test_name=>"network_port_check_spec.rb",
+    :params=>
+     [{:display_name=>"mongo_port", :value=>"27017"},
+      {:display_name=>"mongo_web_port", :value=>"28017"}]}]}
 =end  
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
@@ -108,10 +106,26 @@ BAKIR: Output hash has this form
               linked_test_data[:node_data] = linked_tests.node
               linked_test_data[:component_data] = linked_tests.component
               test_params << linked_test_data
+
               test_params.each do |params|
                 k, v = params.first
-                component_name = v.split(".").first
-                test_components << { :test_component_name => component_name, :component_name => params[:node_data][:display_name], :node_name => params[:component_data][:display_name] }
+                test_component_name = v.map { |x| x.split(".").first }.first
+                attribute_names = k.map { |x| x.split(".").last }
+                related_test_attribute = v.map { |x| x.split(".").last }
+                component_id = params[:component_data][:id]
+
+                attributes = []
+                attribute_names.each_with_index do |attribute_name, idx|
+                  sp_hash = {
+                    :cols => [:display_name, :value_asserted],
+                    :filter => [:and,[:eq, :component_component_id,component_id],[:eq, :display_name, attribute_name]]
+                  }
+
+                  attribute_content = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash).first
+                  attribute = { :component_attribute_name => attribute_content[:display_name], :component_attribute_value => attribute_content[:value_asserted], :related_test_attribute => related_test_attribute[idx] }
+                  attributes << attribute
+                end
+                test_components << { :test_component_name => test_component_name, :attributes => attributes, :component_name => params[:component_data][:display_name], :node_name => params[:node_data][:display_name] }
               end
             end
 
@@ -127,6 +141,7 @@ BAKIR: Output hash has this form
               test_comp_list.each do |tst|
                 tst[:component_name] = test_comp[:component_name]
                 tst[:node_name] = test_comp[:node_name]
+                tst[:attributes] = test_comp[:attributes]
               end
 
               #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
@@ -136,7 +151,7 @@ BAKIR: Output hash has this form
             #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
             #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
             #by setting version context above to test modules this will be achieved
-          end 
+          end
 
           cmps = []
           test_comp_list.each do |cmp|
@@ -145,6 +160,13 @@ BAKIR: Output hash has this form
               :filter => [:eq,:component_component_id,cmp[:id]]
             }
             attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
+
+            attributes.each do |a|
+              name = cmp[:attributes].select do |x| 
+                x[:related_test_attribute] == a[:display_name]
+              end
+              a[:value_asserted] = name.first[:component_attribute_value] unless name.empty?
+            end
             cmp[:attributes] = attributes
             cmps << cmp
           end

@@ -44,10 +44,18 @@ module DTK
         #'output' is the attribute that is used to propagate value to the input
         #For LinkedTest objects output corresponds to component and input to component test
         def am_component_attr(am)
-          am[:output][:term_index]
+          output = []
+          am.each do |a|
+            output << a[:output][:term_index]
+          end
+          return output
         end
         def am_test_attr(am)
-          am[:input][:term_index]
+          output = []
+          am.each do |a|
+            output << a[:input][:term_index]
+          end
+          return output
         end
       end
 
@@ -85,8 +93,9 @@ module DTK
       def self.get_linked_tests(assembly_instance)
         ret = Array.new
         opts = Opts.new(
-            :detail_to_include=>[:component_dependencies]
-          )
+          :detail_to_include=>[:component_dependencies]
+        )
+
         aug_cmps = assembly_instance.get_augmented_components(opts)
         #Find all dependencies (link defs) that point to a test
         #first find all link_defs and select ones that are associated with component tests
@@ -106,13 +115,13 @@ module DTK
         ndx_attribute_mappings = Hash.new
         link_def_links.each do |ld_link|
           am_list = ld_link.attribute_mappings()
-          unless am_list.size == 1
-            Log.error("Unexpected that test link has attribute_mappings wiith size <> 1")
-            next
-          end
-          am = am_list.first
+          #unless am_list.size == 1
+          #  Log.error("Unexpected that test link has attribute_mappings wiith size <> 1")
+          #  next
+          #end
+          #am = am_list.first
           pntr = ndx_attribute_mappings[ld_link[:link_def_id]] ||= {:test_component => ld_link[:remote_component_type], :ams => Array.new}
-          pntr[:ams] << am
+          pntr[:ams] << am_list
         end
 
         ndx_ret = Hash.new

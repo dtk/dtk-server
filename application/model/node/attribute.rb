@@ -6,8 +6,8 @@ module DTK
       end
 
       FieldInfo = {
-        :cardinality => {:name => :cardinality, :semantic_type => :integer}
-        :root_device_size => {:name => :root_device_size, :semantic_type => :integer}
+        :cardinality => {:name => :cardinality, :semantic_type => :integer},
+        :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
         :puppet_version => {:name => :puppet_version}
       }
 
@@ -15,11 +15,10 @@ module DTK
         unless ret = (FieldInfo[:cardinality]||{})[:name]
           raise Error.new("No node attribute with name (#{name})")
         end
-        ret
+        ret.to_s
       end
 
       def root_device_size()
-        field_info = Field[:root_device_size] 
         get_value?(FieldInfo[:root_device_size])
       end
 
@@ -41,6 +40,19 @@ module DTK
         CardinalityField
       end
 
+      module Cache
+        def self.val_is_set?(node,name)
+          (node[CacheKeyOnNode]||{}).has_key?(name.to_sym)
+        end
+        def self.get(node,name)
+          (node[CacheKeyOnNode]||{})[name.to_sym]
+        end
+        def self.set!(node,name,val)
+          (node[CacheKeyOnNode] ||= Hash.new)[name.to_sym] = val
+        end
+        CacheKeyOnNode = :attribute_value_cache
+      end
+
      private
       def get_value?(field_info)
         attribute_name = field_info[:name]
@@ -55,19 +67,19 @@ module DTK
     end
 
     module AttributeClassMixin
-      def self.add_attribute_value!(name,nodes)
-        nodes_to_query = nodes.reject{node.cardinality_is_set?()}
+      def cache_attribute_values!(nodes,name)
+        nodes_to_query = nodes.reject{|n|n.attribute_value_is_set?(name)}
         return nodes if nodes_to_query.empty?
         cols = [:id,:node_node_id,:attribute_value]
-        field_name = field_name(name)
-        filter =  [:eq,:display_name,NodeAttribute.field_name]
+        field_name = NodeAttribute.field_name(name)
+        filter =  [:eq,:display_name,field_name]
         node_idhs = nodes_to_query.map{|n|n.id_handle()}
         ndx_attrs =  get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
           h.merge(a[:node_node_id] => a[:attribute_value])
         end
         nodes_to_query.each do |n|
           if val = ndx_attrs[n[:id]]
-            n.send("#{field_name}=".to_sym,val)
+            n.cache_attribute_value!(name,val)
           end
         end
       end
@@ -133,16 +145,6 @@ module DTK
     end
 
     module AttributeMixin
-      attr_accessor :cardinality
-      def cardinality_is_set?()
-        if @cardinality
-          true
-        elsif not is_node_group?()
-          @cardinality ||=  1
-          true
-        end
-      end
-
       def attribute()
         NodeAttribute.new(self)
       end
@@ -235,6 +237,20 @@ module DTK
         row = Model.get_objects_from_join_array(model_handle.createMH(:component),base_sp_hash,join_array).first
         row && row[:attribute]
       end
+
+      def cache_attribute_value!(name,val)
+        unless NodeAttribute::Cache.val_is_set?(self,name)
+          NodeAttribute::Cache.set!(self,name,val)
+        end
+        val
+      end
+      def attribute_value(name)
+        NodeAttribute::Cache.get(self,name)
+      end
+      def attribute_value_is_set?(name)
+        NodeAttribute::Cache.val_is_set?(self,name)
+      end
+
 
       ####Things below heer shoudl be cleaned up or deprecated
       #####

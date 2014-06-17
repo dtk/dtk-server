@@ -597,11 +597,11 @@ module DTK
       unless objects.find{|obj|not (cols - obj.keys).empty?}
         return objects
       end
-      mh = objects.first.mh
       sp_hash = {
         :cols => cols.include?(:id) ? cols : cols + [:id],
         :filter => [:oneof,:id,objects.map{|obj|obj.id()}]
       }
+      mh = objects.first.model_handle
       ndx_rows = get_objs(mh,sp_hash).inject(Hash.new) do |h,r|
         h.merge(r[:id] => r)
       end

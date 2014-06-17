@@ -52,14 +52,11 @@ module DTK
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
         assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
         
-        node_idhs = clone_copy_output.children_id_handles(level,:node)
-x = clone_copy_output.children_objects(level,:node, :cols=>[:external_ref])        
-pp [:children_objects, x]
-pp [Node.add_attribute_value!(:cardinatility,x)]
-raise ErrorUsage.new('got here')
-
-        return if node_idhs.empty?
-        create_state_changes_for_create_node?(target,node_idhs)
+        nodes = clone_copy_output.children_objects(level,:node, :cols=>[:display_name,:external_ref,:type])        
+        return if nodes.empty?
+        Node.cache_attribute_values!(nodes,:cardinality)
+        create_state_changes_for_create_node?(target,nodes)
+pp [:debug_aftercache_attribute_values,nodes]
 
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
@@ -76,22 +73,15 @@ raise ErrorUsage.new('got here')
         StateChange.create_pending_change_items(component_new_items)
       end
 
-      def self.create_state_changes_for_create_node?(target,node_idhs)
+      def self.create_state_changes_for_create_node?(target,nodes)
         #Do not create stages for node that are physical
-        sp_hash = {
-          :cols => [:id,:display_name,:external_ref],
-          :filter => [:oneof, :id,node_idhs.map{|idh|idh.get_id()}]
-        }
-        ndx_node_info = Model.get_objs(target.model_handle(:node),sp_hash).inject(Hash.new) do |h,r|
-          h.merge(r[:id] => r)
+        pruned_nodes = nodes.reject do |node|
+          (node.get_field?(:external_ref)||{})[:type] == 'physical'
         end
-        pruned_node_idhs = node_idhs.reject do |node_idh|
-          (ndx_node_info[node_idh.get_id()][:external_ref]||{})[:type] == 'physical'
-        end
-        return if pruned_node_idhs.empty?
-        target_idh = target.id_handle()
+        return if pruned_nodes.empty?
 
-        node_new_items = pruned_node_idhs.map{|idh|{:new_item => idh, :parent => target_idh}}
+        target_idh = target.id_handle()
+        node_new_items = pruned_nodes.map{|node|{:new_item => node.id_handle(), :parent => target_idh}}
         StateChange.create_pending_change_items(node_new_items)
       end
 

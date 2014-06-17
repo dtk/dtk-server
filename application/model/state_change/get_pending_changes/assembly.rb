@@ -41,13 +41,13 @@ module DTK; class StateChange
           sorted_ndx_ret << sorted_component_list.compact
         end
       rescue Exception => e
-        #pp "Sorting components failed. Returning random component order"
+        # pp "Sorting components failed. Returning random component order"
         return ndx_ret.values
       end
       return sorted_ndx_ret
     end
 
-    #no generate option needed for node state changes
+    # no generate option needed for node state changes
     def self.node_state_changes(assembly,target_idh)
       changes = Array.new
       assembly_nodes = assembly.get_nodes()

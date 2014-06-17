@@ -1,6 +1,6 @@
 module DTK; class Attribute
   module PropagateChangesClassMixin
-    #assume attribute_rows  all have :value_asserted or all have :value_derived
+    # assume attribute_rows  all have :value_asserted or all have :value_derived
     def update_and_propagate_attributes(attr_mh,attribute_rows,opts={})
       ret = Array.new
       return ret if attribute_rows.empty?
@@ -13,7 +13,7 @@ module DTK; class Attribute
         h.merge(r[:id] => r)
       end
 
-      #prune attributes change paths for attrribues taht have not changed
+      # prune attributes change paths for attrribues taht have not changed
       ndx_ch_attr_info = Hash.new
       attribute_rows.each do |r|
         id = r[:id]
@@ -40,13 +40,13 @@ module DTK; class Attribute
 
       update_rows = changed_attrs_info.map do |r|
         row = Aux::hash_subset(r,[:id,val_field])
-        #TODO: this line is commented out because it caused failure of set complex attributes 
-        #need to check with Rich why this is happening
+        # TODO: this line is commented out because it caused failure of set complex attributes 
+        # need to check with Rich why this is happening
         row.merge!(:is_instance_value => true) if (val_field == :value_asserted)
         row
       end
 
-      #make actual changes in database
+      # make actual changes in database
       update_from_rows(attr_mh,update_rows,:partial_value => true)
 
       propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts)
@@ -59,7 +59,7 @@ module DTK; class Attribute
 
     def propagate_and_optionally_add_state_changes(attr_mh,changed_attrs_info,opts={})
       return Array.new if changed_attrs_info.empty?
-      #default is to add state changes
+      # default is to add state changes
       add_state_changes = ((not opts.has_key?(:add_state_changes)) or opts[:add_state_changes])
 
       change_hashes_to_propagate = create_change_hashes(attr_mh,changed_attrs_info,opts)
@@ -76,11 +76,11 @@ module DTK; class Attribute
       scalar_attrs = [:id,:value_asserted,:value_derived,:semantic_type]
       attr_link_rows = get_objs_in_set(output_attr_idhs,:columns => scalar_attrs + [:linked_attributes])
 
-      #dont propagate to attributes with asserted values TODO: push this restriction into search pattern
+      # dont propagate to attributes with asserted values TODO: push this restriction into search pattern
       attr_link_rows.reject!{|r|(r[:input_attribute]||{})[:value_asserted]}
       return ret if attr_link_rows.empty?
 
-      #output_id__parent_idhs used to splice in parent_id (if it exists
+      # output_id__parent_idhs used to splice in parent_id (if it exists
       output_id__parent_idhs =  change_hashes.inject({}) do |h,ch|
         h.merge(ch[:new_item].get_id() => ch[:parent])
       end
@@ -114,20 +114,20 @@ module DTK; class Attribute
 
     def create_change_hashes(attr_mh,changed_attrs_info,opts={})
       ret = Array.new
-      #use sample attribute to find containing datacenter
+      # use sample attribute to find containing datacenter
       sample_attr_idh = attr_mh.createIDH(:id => changed_attrs_info.first[:id])
 
       add_state_changes = ((not opts.has_key?(:add_state_changes)) or opts[:add_state_changes])
-      #TODO: anymore efficieny way do do this; can pass datacenter in fn
-      #TODO: when in nested call want to use passed in parent
+      # TODO: anymore efficieny way do do this; can pass datacenter in fn
+      # TODO: when in nested call want to use passed in parent
       parent_idh = (add_state_changes ? sample_attr_idh.get_top_container_id_handle(:datacenter) : nil)
       changed_attrs_info.map do |r|
         hash = {
           :new_item => attr_mh.createIDH(:id => r[:id]),
           :parent => parent_idh,
           :change => {
-            #TODO: check why before it had a json encode on values
-            #think can then just remove below
+            # TODO: check why before it had a json encode on values
+            # think can then just remove below
 #            :old => json_form(r[old_val_index]),
 #            :new => json_form(r[val_index])
             :old => r[:old_value_asserted] || r[:old_value_derived],

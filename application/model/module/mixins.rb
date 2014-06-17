@@ -144,7 +144,7 @@ module DTK
         return nil
       end
 
-      #aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
+      # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
       unless module_obj = aggregate_by_remote_namespace(module_rows,opts)
         raise ErrorUsage.new("There is no module (#{pp_module_name(version)}) with namespace '#{opts[:filter][:remote_namespace]}' registered on server")
       end
@@ -155,7 +155,7 @@ module DTK
       ret
     end
 
-    #type is :library or :workspace
+    # type is :library or :workspace
     def find_branch(type,branches)
       matches =
         case type
@@ -185,7 +185,7 @@ module DTK
     end
 
     def get_project()
-      #caching
+      # caching
       return self[:project] if self[:project]
       update_object!(:project_project_id,:display_name) #including :display_name is opportunistic
       if project_id = self[:project_project_id]
@@ -193,7 +193,7 @@ module DTK
       end
     end
 
-    #TODO: ModuleBranch::Location : need to paramterize this on branch
+    # TODO: ModuleBranch::Location : need to paramterize this on branch
      # raises exception if more repos found
     def get_repo!()
       repos = get_repos()
@@ -214,18 +214,18 @@ module DTK
         :cols => [:id,:display_name,:workspace_info,:project_project_id]
       }
       row = get_obj(sp_hash)
-      #opportunistically set display name and project_project_id on module
+      # opportunistically set display name and project_project_id on module
       self[:display_name] ||= row[:display_name]
       self[:project_project_id] ||= row[:project_project_id]
       row[:repo]
     end
-    #MOD_RESTRUCT: deprecate below for above
+    # MOD_RESTRUCT: deprecate below for above
     def get_library_repo()
       sp_hash = {
         :cols => [:id,:display_name,:library_repo,:library_library_id]
       }
       row = get_obj(sp_hash)
-      #opportunistically set display name and library_library_id on module
+      # opportunistically set display name and library_library_id on module
       self[:display_name] ||= row[:display_name]
       self[:library_library_id] ||= row[:library_library_id]
       row[:repo]
@@ -255,7 +255,7 @@ module DTK
       Model.get_obj(mb_mh,sp_hash)
     end
 
-    #MOD_RESTRUCT: may replace below with above
+    # MOD_RESTRUCT: may replace below with above
     def get_module_branch(branch)
       sp_hash = {
         :cols => [:module_branches]
@@ -286,10 +286,10 @@ module DTK
       get_field?(:dsl_parsed)
     end
 
-    #assumed that all raw_module_rows agree on all except repo_remote
+    # assumed that all raw_module_rows agree on all except repo_remote
     def aggregate_by_remote_namespace(raw_module_rows,opts={})
       ret = nil
-      #raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
+      # raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
       if raw_module_rows.empty?()
         raise Error.new("Unexepected that raw_module_rows is empty")
       end
@@ -301,7 +301,7 @@ module DTK
           repo_remote
         end
       end.compact
-      #if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
+      # if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
       if namespace and repo_remotes.empty?
         return ret
       end
@@ -366,7 +366,7 @@ module DTK
         response = get_objs(target_mh, sp_hash.merge(opts))
       else
         # we sort in ascending order, last remote is default one
-        #TODO: need to make more sophisticated so we dont end up comparing a '' to a date
+        # TODO: need to make more sophisticated so we dont end up comparing a '' to a date
         response.sort { |a,b| ((b[:repo_remote]||{})[:created_at]||'') <=> ((a[:repo_remote]||{})[:created_at]||'')}
 
         # we switch to ascending order
@@ -457,7 +457,7 @@ module DTK
       unless repos.empty?
         repo_names = repos.map{|r|r[:repo_name]}
         RepoManager.remove_user_rights_in_repos(username,repo_names)
-        #repo user acls deleted by foriegn key cascade
+        # repo user acls deleted by foriegn key cascade
       end
 
       if repo_user.any_direct_access_except?(model_name)
@@ -473,8 +473,8 @@ module DTK
       ModuleRepoInfo.new(repo,info[:module_name],info[:module_idh],branch_obj,version)
     end
 
-    #can be overwritten
-    #TODO: ModuleBranch::Location: deprecate 
+    # can be overwritten
+    # TODO: ModuleBranch::Location: deprecate 
     def module_specific_type(config_agent_type)
       module_type()
     end
@@ -495,7 +495,7 @@ module DTK
         raise Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
       end
     end
-    #TODO: ModuleBranch::Location: deprecate below for above
+    # TODO: ModuleBranch::Location: deprecate below for above
     def get_workspace_module_branch(project,module_name,version=nil,opts={})
       project_idh = project.id_handle()
       filter = [:and, [:eq, :display_name, module_name], [:eq, :project_project_id, project_idh.get_id()]]

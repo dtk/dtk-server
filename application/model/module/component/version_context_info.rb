@@ -18,7 +18,7 @@ module DTK
           return ret
         end
         impl_mh = component_templates.first.model_handle(:implementation)
-        #not efficient way to get implementation_id, but this is only needed if calling fn does not fill in this field
+        # not efficient way to get implementation_id, but this is only needed if calling fn does not fill in this field
         component_templates.map do |cmp_template|
           if impl_id =  cmp_template.get_field?(:implementation_id)
             impl_mh.createIDH(:id => impl_id)

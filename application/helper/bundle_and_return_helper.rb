@@ -24,7 +24,7 @@ module Ramaze::Helper
       @css_includes << R8::Config[:base_css_uri] + '/' + css_name + '.css'
     end
 
-#TODO: augment with priority param when necessary
+# TODO: augment with priority param when necessary
     def include_js(js_name)
       @js_includes << R8::Config[:base_js_uri] + '/' + js_name + '.js'
     end

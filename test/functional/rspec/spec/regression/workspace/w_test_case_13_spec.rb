@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution
+# Test Case 13: Create one node, add component in it, converge workspace and cancel tasks while converge is in execution
 
 require 'rubygems'
 require 'rest_client'

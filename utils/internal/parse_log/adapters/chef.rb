@@ -17,7 +17,7 @@ module XYZ
       end
       
       def self.log_complete?(lines)
-        #TODO: if need more specific strings to look for
+        # TODO: if need more specific strings to look for
         # /ERROR: Exception handlers complete/ or /INFO: Report handlers complete/ 
         lines.reverse_each do |l|
           return true if l =~ /handlers complete/
@@ -25,7 +25,7 @@ module XYZ
         nil
       end
      private
-      #order is important because of subsumption
+      # order is important because of subsumption
       Pattern =  Aux::ordered_hash(
         [{:debug => /DEBUG:/},
          {:error => /ERROR:/},
@@ -36,7 +36,7 @@ module XYZ
      public
       class LogSegments < ::XYZ::LogSegments
 
-        #TODO: may use just for testing; if so deprecate
+        # TODO: may use just for testing; if so deprecate
         def pp_form_summary()
           if @complete
             if has_error?()
@@ -62,7 +62,7 @@ module XYZ
           return self unless error_pos
           segments_from_error = self[error_pos,1+size-error_pos]
           prev_segment =  self[error_pos-1]
-          #try to find specific error
+          # try to find specific error
           specific_error = nil
           PossibleErrors.each do |err|
             if err.isa?(segments_from_error)
@@ -71,7 +71,7 @@ module XYZ
             end
           end
 
-          #cut off everything after error and replace last item with specfic error
+          # cut off everything after error and replace last item with specfic error
           slice!(error_pos+1,size-error_pos)
           self[error_pos] = specific_error if specific_error
           self
@@ -89,7 +89,7 @@ module XYZ
 
         def has_error?()
           if @complete
-            #short circuit when complete
+            # short circuit when complete
             last.type == :error
           else
             find{|s|s.type == :error}
@@ -97,7 +97,7 @@ module XYZ
         end
 
        private
-        #TODO: need to unify with self.log_complete?(lines)
+        # TODO: need to unify with self.log_complete?(lines)
         def complete?()
           return false if empty?
           return true if last.line =~ /handlers complete/
@@ -137,8 +137,8 @@ module XYZ
         end
       end
 
-      #error in exec call can be from indirect call (like to load a package)
-      #TODO: see if this is signature for direct exec call
+      # error in exec call can be from indirect call (like to load a package)
+      # TODO: see if this is signature for direct exec call
       class ErrorExec < ErrorChefLog 
         def self.isa?(segments_from_error)
           line = segments_from_error.last.line
@@ -234,7 +234,7 @@ module XYZ
         end
       end
 
-      #TODO: this is runtime vs syntactic error
+      # TODO: this is runtime vs syntactic error
       class ErrorRecipe < ErrorChefLog 
         def self.isa?(segments_from_error)
           line = segments_from_error.first.line
@@ -263,7 +263,7 @@ module XYZ
         end
 
         def self.lines_to_check(segs_from_err)
-          #TODO: can make more efficient and omit some of these and focus on last line
+          # TODO: can make more efficient and omit some of these and focus on last line
           [segs_from_err[0].line, 
            (segs_from_err.last.aux_data||[]).find{|l|l =~ FromFilePat},
            segs_from_err[1] && (segs_from_err[1].aux_data||[])[0],
@@ -326,7 +326,7 @@ module XYZ
       end
 
 
-      #complication is that may not have uniq handle on file
+      # complication is that may not have uniq handle on file
       class ChefFileRef < HashObject
         def self.find_chef_template(segment)
           if segment.line =~ /looking for template (.+) in cookbook :(.+$)/
@@ -361,7 +361,7 @@ module XYZ
           return nil unless self[:file_name]
           case self[:type]
            when :template
-            #TODO: stub; since does not handle case where multiple versions
+            # TODO: stub; since does not handle case where multiple versions
             "templates/default/#{self[:file_name]}"
            when :recipe
             "recipes/#{self[:file_name]}"
@@ -369,7 +369,7 @@ module XYZ
         end
       end
 
-      #order makes a difference for parsing
+      # order makes a difference for parsing
       PossibleErrors = [ErrorTemplate,ErrorExec,ErrorRecipe,ErrorMissingRecipe,ErrorMissingCookbook,ErrorService,ErrorGeneric]
     end
   end

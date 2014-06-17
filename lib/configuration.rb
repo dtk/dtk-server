@@ -1,8 +1,8 @@
-#TODO: this is in midst of converting from old form to new form
+# TODO: this is in midst of converting from old form to new form
 require 'singleton'
 require 'etc'
 module DTK
-  #Methods to set configuration
+  # Methods to set configuration
   class Configuration
     include Singleton
     def set_configuration(config_file_location=nil)
@@ -72,11 +72,11 @@ module DTK
 
     RequiredNonDefaultKeys = Mappings.values #TODO: stub setting
     def validate
-      #TODO: need to check for legal values
-      #STUB use RequiredNonDefaultKeys
+      # TODO: need to check for legal values
+      # STUB use RequiredNonDefaultKeys
     end
     def finalize()
-      #freeze
+      # freeze
       R8::Config.recursive_freeze
     end
 

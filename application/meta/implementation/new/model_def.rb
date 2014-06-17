@@ -55,7 +55,7 @@
          :cols=>[:id,:type,:group_id,:display_name,:datacenter_datacenter_id]
        }]
     },
-    #getting just templates with this implementation
+    # getting just templates with this implementation
     :component_template =>{
       :type=>:json,
       :hidden=>true,

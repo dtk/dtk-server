@@ -20,8 +20,8 @@ module XYZ
       rest_ok_response(:attribute_id => attribute_id)
     end
 
-    #TODO: cleanup so dont have as much duplication with what is on init; wrote here becse not all cols for attribute save/update are actual columns
-    #update or create depending on whether id is in post content
+    # TODO: cleanup so dont have as much duplication with what is on init; wrote here becse not all cols for attribute save/update are actual columns
+    # update or create depending on whether id is in post content
     def save(explicit_hash=nil,opts={})
       hash = explicit_hash || request.params.dup
       ### special fields
@@ -33,16 +33,16 @@ module XYZ
       name = hash.delete("name") || hash["display_name"]
       redirect = (not (hash.delete("redirect").to_s == "false"))
 
-      #TODO: revisit during cleanup, return_model used for creating links
+      # TODO: revisit during cleanup, return_model used for creating links
       rm_val = hash.delete("return_model")
       return_model = rm_val && rm_val == "true"
       
       if id 
-        #update
+        # update
         update_from_hash(id.to_i,hash)
       else
-        #create
-        #TODO: cleanup confusion over hash and string leys
+        # create
+        # TODO: cleanup confusion over hash and string leys
         hash.merge!({:display_name => name}) unless (hash.has_key?(:display_name) or hash.has_key?("display_name"))
         parent_id_handle = nil
         create_hash = nil
@@ -79,8 +79,8 @@ module XYZ
       field_set = Model::FieldSet.new(model_name,cols)
       ds = SearchObject.create_from_field_set(field_set,ret_session_context_id(),filter).create_dataset()
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
-      #TODO: also filter out when component is not feature
-#pp ds.all
+      # TODO: also filter out when component is not feature
+# pp ds.all
       
 
       action_name = "list_qualified_attribute_name_under_node"
@@ -115,12 +115,12 @@ module XYZ
 
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
-      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      # add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
       attribute_list.each do |el|
         el[:attr_id] = el[:qualified_attribute_id_under_node]
         el[:name] = el[:qualified_attribute_name_under_node]
       end
-      #order attribute list :qualified_attribute_name_under_node 
+      # order attribute list :qualified_attribute_name_under_node 
       ordered_attr_list = attribute_list.sort{|a,b|a[:name] <=> b[:name]}
 
       action_name = "test_node_level_edit"
@@ -148,14 +148,14 @@ module XYZ
       return {:content => tpl.render()}
     end
    
-    #TODO deprecate
+    # TODO deprecate
     def list_for_component_display()
       search_object =  ret_search_object_in_request()
       raise Error.new("no search object in request") unless search_object
 
       model_list = Model.get_objects_from_search_object(search_object)
 
-      #TODO: should we be using default action name
+      # TODO: should we be using default action name
       action_name = :list
       tpl = R8Tpl::TemplateR8.new("#{model_name()}/#{action_name}",user_context())
       _model_var = {}
@@ -181,7 +181,7 @@ pp ')))))))))))))))))))))))))))))'
       ds = ds.where(:param_node_id => node_id.to_i) if node_id
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
-      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      # add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
 
       attribute_list.each do |el|
         name = el[:qualified_attribute_name_under_node].gsub('][',' ')
@@ -191,7 +191,7 @@ pp ')))))))))))))))))))))))))))))'
         el[:display_name] = name_parts[(name_parts.length-1)]
         el[:value] = el[:attribute_value]
       end
-      #order attribute list :qualified_attribute_name_under_node 
+      # order attribute list :qualified_attribute_name_under_node 
       ordered_attr_list = attribute_list.sort{|a,b|a[:display_name] <=> b[:display_name]}
 
 #      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_display",user_context())
@@ -215,7 +215,7 @@ pp ')))))))))))))))))))))))))))))'
 
       raw_attribute_list = ds.all
       attribute_list = AttributeComplexType.flatten_attribute_list(raw_attribute_list)
-      #add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
+      # add name and attr_id from :qualified_attribute_name_under_node and :qualified_attribute_id_under_node
 
       attribute_list.each do |el|
         name = el[:qualified_attribute_name_under_node].gsub('][',' ')
@@ -225,7 +225,7 @@ pp ')))))))))))))))))))))))))))))'
         el[:display_name] = name_parts[(name_parts.length-1)]
         el[:value] = el[:attribute_value]
       end
-      #order attribute list :qualified_attribute_name_under_node 
+      # order attribute list :qualified_attribute_name_under_node 
       ordered_attr_list = attribute_list.sort{|a,b|a[:display_name] <=> b[:display_name]}
 
 #      tpl = R8Tpl::TemplateR8.new("#{model_name}/wspace_node_edit",user_context())

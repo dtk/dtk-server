@@ -1,4 +1,4 @@
-#TODO: needs cleanup including around mechanism to get object associated with ids
+# TODO: needs cleanup including around mechanism to get object associated with ids
 module Ramaze::Helper
   module Common
     include XYZ #TODO: included because of ModelHandle and Model
@@ -42,7 +42,7 @@ module Ramaze::Helper
       ret.merge(:group_id => group_obj[:id])
     end
 
-    #looks for default if no target is given
+    # looks for default if no target is given
     def create_target_obj_with_default(target_id_field=:target_id)
       if target_id = ret_request_params(target_id_field)
         create_object_from_id(target_id,:target)
@@ -73,7 +73,7 @@ module Ramaze::Helper
     end
    private
 
-    #helpers that interact with model
+    # helpers that interact with model
     def get_objects(model_name,where_clause={},opts={})
       model_name = :datacenter if model_name == :target  #TODO: remove temp datacenter->target
       model_class(model_name).get_objects(model_handle(model_name),where_clause,opts)
@@ -151,10 +151,10 @@ module Ramaze::Helper
     LimitDefault = 20
     NumModelItemsDefault = 10000
     def ret_paging_info()
-      #TODO: case on request_method_is_post?()
-      #TODO: might be taht query is optimzied by not having start being 0 included
+      # TODO: case on request_method_is_post?()
+      # TODO: might be taht query is optimzied by not having start being 0 included
       saved_search = ret_saved_search_in_request()
-      #TODO: just for testing
+      # TODO: just for testing
       if TestOveride and (saved_search||{})["start"].nil?
         return {:start => 0, :limit => TestOveride, :num_model_items => NumModelItemsDefault}
       end
@@ -216,12 +216,12 @@ module Ramaze::Helper
     end
 
 
-    #TODO needs refinement
+    # TODO needs refinement
     def ret_parsed_query_string_from_uri()
       ret = Hash.new
       query_string = ret_query_string()
       return ret unless query_string
-      #TBD: not yet looking for errors in the query string
+      # TBD: not yet looking for errors in the query string
       query_string.scan(%r{([/A-Za-z0-9_]+)=([/A-Za-z0-9_]+)}) do
         key = $1.to_sym
         value = $2
@@ -233,7 +233,7 @@ module Ramaze::Helper
           ret[key] = value #should be converted into an integer
         else
           ret[key] = value
-       #TODO find where value shoudl be sym   ret[key] = value.to_sym
+       # TODO find where value shoudl be sym   ret[key] = value.to_sym
         end #TBD: not complete; for example not for decimals
       end
       ret
@@ -389,7 +389,7 @@ module Ramaze::Helper
       end
       component_template
     end
-    #returns [component_template, component_title] where component_title could be nil
+    # returns [component_template, component_title] where component_title could be nil
     def ret_component_template_and_title(param,opts={})
       version = opts[:versions]||opts[:version]
       component_template_idh = ret_request_param_id_handle(param,::DTK::Component::Template,version)
@@ -417,7 +417,7 @@ module Ramaze::Helper
       request.env["REQUEST_METHOD"] == "POST"
     end
 
-    #R8 functions
+    # R8 functions
     def set_template_defaults_for_list!(tpl)
       tpl.assign(:list_start_prev, 0)
       tpl.assign(:list_start_next, 0)
@@ -441,7 +441,7 @@ module Ramaze::Helper
     end
 
     def set_template_order_columns!(tpl,order_by_list=nil,field_set=Model::FieldSet.default(model_name()))
-      #TODO: should default field set by default or all real
+      # TODO: should default field set by default or all real
       order_by_hash = (order_by_list||[]).inject({}){|h,o|h.merge(o[:field] => o[:order])}
       field_set.cols.each do |field|
         sort_order = 'ASC'
@@ -467,7 +467,7 @@ module Ramaze::Helper
       }
     end
 
-    #aux fns 
+    # aux fns 
     def model_class(model_name_x=model_name())
       Model.model_class(model_name_x)
     end
@@ -482,7 +482,7 @@ module Ramaze::Helper
      @model_name =  ConvertFromSubtypeModelName[model_name_x]||model_name_x
    end
 
-   #TODO: unify with  model/subclass_processing
+   # TODO: unify with  model/subclass_processing
    ConvertFromSubtypeModelName = {
      :assembly => :component,
      :node_group => :node

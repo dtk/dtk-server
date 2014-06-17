@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 29: Import component module A and then component module B when component module B has dependency on component module A
+# Test Case 29: Import component module A and then component module B when component module B has dependency on component module A
 
 require 'rubygems'
 require 'active_record'

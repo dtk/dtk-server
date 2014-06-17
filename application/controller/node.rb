@@ -37,7 +37,7 @@ module XYZ
     end
 
     def rest__get_action_results()
-      #TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
+      # TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
@@ -61,7 +61,7 @@ module XYZ
 
     def rest__delete_component()
       node = create_node_obj(:node_id)
-      #not checking here if component_id points to valid object; check is in delete_component
+      # not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
       node.delete_component(id_handle(component_id,:component))
       rest_ok_response
@@ -168,12 +168,12 @@ module XYZ
       rest_ok_response node.get_attributes_print_form(opts)
     end
 
-    #the body has an array each element of form
+    # the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
-    #pat can be one of three forms
-    #1 - an id
-    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
-    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
+    # pat can be one of three forms
+    # 1 - an id
+    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    # 3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
     def rest__set_attributes()
       node = create_node_obj(:node_id)
@@ -259,7 +259,7 @@ module XYZ
       return {:data=>node.get_obj_with_common_cols()}
     end
 
-    #TODO: this should be a post; so transitioning over
+    # TODO: this should be a post; so transitioning over
     def destroy_and_delete(id=nil)
       id ||= request.params["id"]
       create_object_from_id(id).destroy_and_delete()
@@ -375,7 +375,7 @@ pp results_array
  #     node.delete(:image_size)
       node = Node.get_wspace_display(IDHandle[:c => c, :guid => id])
 
-#TODO: temp hack to stub things out
+# TODO: temp hack to stub things out
 node[:operational_status] = 'good'
 node[:model_name] = 'node'
 
@@ -397,8 +397,8 @@ node[:model_name] = 'node'
     end
 
     def wspace_display_2(id)
-#TODO: decide if toolbar is needed/used at node level
-      #need to augment for nodes that are in datacenter directly and not node groups
+# TODO: decide if toolbar is needed/used at node level
+      # need to augment for nodes that are in datacenter directly and not node groups
       tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
       tpl.set_js_tpl_name("node_wspace_display")
       tpl_info = tpl.render()
@@ -406,7 +406,7 @@ node[:model_name] = 'node'
 
       field_set = Model::FieldSet.default(:node)
       node = get_object_by_id(id,:node)
-#pp node_list
+# pp node_list
       items = Array.new
       item = {
           :type => 'node',
@@ -415,7 +415,7 @@ node[:model_name] = 'node'
           :tpl_callback => tpl_info[:template_callback],
           :ui => node[:ui]
       }
-#DEBUG
+# DEBUG
 =begin
         item = {
           :type => model_name.to_s,
@@ -436,8 +436,8 @@ node[:model_name] = 'node'
     end
 
     def wspace_display_ide(id)
-#TODO: decide if toolbar is needed/used at node level
-      #need to augment for nodes that are in datacenter directly and not node groups
+# TODO: decide if toolbar is needed/used at node level
+      # need to augment for nodes that are in datacenter directly and not node groups
       tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
       tpl.set_js_tpl_name("node_wspace_display_ide")
       tpl_info = tpl.render()
@@ -445,7 +445,7 @@ node[:model_name] = 'node'
 
       field_set = Model::FieldSet.default(:node)
       node = get_object_by_id(id,:node)
-#pp node_list
+# pp node_list
       items = Array.new
       item = {
           :type => 'node',
@@ -454,7 +454,7 @@ node[:model_name] = 'node'
           :tpl_callback => tpl_info[:template_callback],
           :ui => node[:ui]
       }
-#DEBUG
+# DEBUG
 =begin
         item = {
           :type => model_name.to_s,
@@ -501,7 +501,7 @@ node[:model_name] = 'node'
  #     node.delete(:image_size)
       node = Node.get_wspace_display(IDHandle[:c => c, :guid => id])
 
-#TODO: temp hack to stub things out
+# TODO: temp hack to stub things out
 node[:operational_status] = 'good'
 node[:model_name] = 'node'
 
@@ -536,7 +536,7 @@ component_list = node.get_components()
 get_components should probably take a param to return sub list of type(s) of components
 ie: get_components(['language'])
 =end
-#pp model_list
+# pp model_list
       component_i18n = get_model_i18n('component',user_context())
 
       component_list.each do |component|
@@ -572,7 +572,7 @@ ie: get_components(['language'])
         :item_list=>component_list,
       }
       panel_cfg = JSON.generate(panel_cfg_hash)
-#TODO: temp pass of
+# TODO: temp pass of
       run_javascript("R8.Workspace.Dock.pushDockPanel2('0',#{panel_cfg},'#{js_tpl_name}');")
 
       return {}
@@ -616,7 +616,7 @@ ie: get_components(['language'])
     end
 
     def search
-      #TODO: harmonize with rest__list
+      # TODO: harmonize with rest__list
       search_cols = [:display_name]
 
       filter_conjuncts = request.params.map do |name,value|

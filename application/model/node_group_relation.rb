@@ -19,7 +19,7 @@ module XYZ
 
       ngr_mh = node_group_idh.create_peerMH(:node_group_relation)
       
-      #check if not created already
+      # check if not created already
       unless opts[:donot_check_if_exists]
         sp_hash = {
           :cols => [:id,:node_id],

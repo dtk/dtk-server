@@ -93,7 +93,7 @@ module DTK
         end
       end
 
-      #returns [assembly,assembly_ref]
+      # returns [assembly,assembly_ref]
       def ret_assembly_info(field)
         unless name = hash_content[field.to_s]
           raise ErrorUsage("Field (#{field}) not given in the service add-on file #{dsl_file}")

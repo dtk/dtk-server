@@ -54,12 +54,12 @@ module DTK
           new_assembly_assign = {:assembly_id => assembly_obj_info[:id]}
           new_par_assign = {DB.parent_field(target_parent_mn,model_name) => assembly_obj_info[:parent_id]}
           Global::AssemblyChildren.each do |nested_model_name|
-            #TODO: push this into ChildContext.create_from_hash
+            # TODO: push this into ChildContext.create_from_hash
             nested_mh = model_handle.createMH(:model_name => nested_model_name, :parent_model_name => target_parent_mn)
             override_attrs = new_assembly_assign.merge(ret_child_override_attrs(nested_mh,recursive_override_attrs))
             create_opts = {:duplicate_refs => :allow, :returning_sql_cols => [:ancestor_id,:assembly_id]}
 
-            #putting in nulls to null-out; more efficient to omit this columns in create
+            # putting in nulls to null-out; more efficient to omit this columns in create
             parent_rel = (DB_REL_DEF[nested_model_name][:many_to_one]||[]).inject({:old_par_id => ancestor_id}) do |hash,pos_par|
               hash.merge(Model.matching_models?(pos_par,target_parent_mn) ? new_par_assign : {DB.parent_field(pos_par,model_name) => SQL::ColRef.null_id})
             end

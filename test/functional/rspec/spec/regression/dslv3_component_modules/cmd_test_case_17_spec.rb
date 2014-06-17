@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 17: NEG - dtk.model.yaml with invalid port type attribute value
+# Test Case 17: NEG - dtk.model.yaml with invalid port type attribute value
 
 require 'rubygems'
 require 'rest_client'

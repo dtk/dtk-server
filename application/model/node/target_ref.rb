@@ -8,7 +8,7 @@ module DTK
         end
       end
 
-      #these are nodes without any assembly on them
+      # these are nodes without any assembly on them
       def self.get_free_nodes(target)
         sp_hash = {
           :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
@@ -28,7 +28,7 @@ module DTK
       end
 
      private
-      #returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
+      # returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
       def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
         ret = Hash.new
         return ret if node_target_ref_idhs.empty?
@@ -62,7 +62,7 @@ module DTK
         input_node_hash.merge!(child_objects(params))
       end
 
-      #TODO: collapse with application/utility/library_nodes - node_info
+      # TODO: collapse with application/utility/library_nodes - node_info
       def self.child_objects(params={})
         {
           "attribute"=> {

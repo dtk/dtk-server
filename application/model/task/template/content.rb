@@ -30,15 +30,15 @@ module DTK; class Task
         ret
       end
 
-      #if action is not included in task template than insert the action in this object and return updated object
-      #else return  nil
+      # if action is not included in task template than insert the action in this object and return updated object
+      # else return  nil
       def insert_action?(new_action,action_list,gen_constraints_proc)
         insert_action_helper = InsertActionHelper.create(new_action,action_list,gen_constraints_proc)
         insert_action_helper.insert_action?(self)
       end
 
-      #if action is explicitly included in task template then delete the action from this object and return updated object
-      #else return nil
+      # if action is explicitly included in task template then delete the action from this object and return updated object
+      # else return nil
       def delete_explicit_action?(action,action_list)
         if indexed_action = action_list.find{|a|a.match_action?(action)}
           if action_match = includes_action?(indexed_action)
@@ -72,7 +72,7 @@ module DTK; class Task
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      #TODO: have above subsume below  
+      # TODO: have above subsume below  
       def splice_in_at_beginning!(template_content,opts={})
         if opts[:node_centric_first_stage]
           insert(0,*template_content)
@@ -95,7 +95,7 @@ module DTK; class Task
             raise ErrorUsage.new("The task has no actions")
           end
         end
-        #Dont put in sequential block if just single stage
+        # Dont put in sequential block if just single stage
         if subtasks.size == 1
           subtasks.first.delete(:name)
           subtasks.first
@@ -121,7 +121,7 @@ module DTK; class Task
       end
 
       def self.parse_and_reify(serialized_content,actions,opts={})
-        #normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
+        # normalize to handle case where single stage; test for single stage is whethet serialized_content[Field::TemporalOrder] == Constant::Sequential
         temporal_order = serialized_content[Field::TemporalOrder]
         has_multi_internode_stages = (temporal_order and (temporal_order.to_sym == Constant::Sequential))
         subtasks = serialized_content[Field::Subtasks]
@@ -206,7 +206,7 @@ module DTK; class Task
         default_stage_name_proc = {:internode_stage_name_proc => DefaultNameProc}
         if opts[:node_centric_first_stage]
           node_centric_actions = actions.select{|a|a.source_type() == :node_group}
-          #TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
+          # TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
           opts_x = {:internode_stage_name_proc => DefaultNodeGroupNameProc}.merge(opts)
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions,opts_x)
 
@@ -226,14 +226,14 @@ module DTK; class Task
         done = false
         existing_num_stages = size()
         new_stages = Array.new
-        #before_index_hash gets destroyed in while loop
+        # before_index_hash gets destroyed in while loop
         while not done do
           if before_index_hash.empty?
             done = true
           else
             stage_action_indexes = before_index_hash.ret_and_remove_actions_not_after_any!()
             if stage_action_indexes.empty?()
-              #TODO: see if any other way there can be loops
+              # TODO: see if any other way there can be loops
               raise ErrorUsage.new("Loop detected in temporal orders")
             end
             internode_stage = stage_factory.create(stage_action_indexes)

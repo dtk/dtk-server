@@ -5,7 +5,7 @@ module DTK; class AssemblyModule
         new(assembly).update(cmp_level_attr_patterns)
       end
       def update(cmp_level_attr_patterns)
-        #TODO: more efficient to bulk up cmp_level_attr_patterns
+        # TODO: more efficient to bulk up cmp_level_attr_patterns
         cmp_level_attr_patterns.map{|ap|update_aux(ap)}
       end
 

@@ -9,7 +9,7 @@ class DTKMigration
   class DTKModelHelper
     include Singleton
 
-    #from http://www.dan-manges.com/blog/ruby-dsls-instance-eval-with-delegation
+    # from http://www.dan-manges.com/blog/ruby-dsls-instance-eval-with-delegation
     def evaluate(&block)
       @self_before_instance_eval = eval "self", block.binding
       instance_eval &block
@@ -39,7 +39,7 @@ class DTKMigration
         el = nil
         if ndx = r[:old_id]
           if user_date_ref_info = ndx_user_date_ref_info[ndx]
-            #info in create_columns can over write info in user_date_ref_info
+            # info in create_columns can over write info in user_date_ref_info
           el = user_date_ref_info.merge(Aux.hash_subset(r,create_columns))
           end
         end
@@ -51,7 +51,7 @@ class DTKMigration
     
    private
     def dtk_db()
-      #TODO: this gets set now in ../app_migratin; can clean this up
+      # TODO: this gets set now in ../app_migratin; can clean this up
       DBinstance
     end
 

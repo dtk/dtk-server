@@ -18,13 +18,13 @@ module DTK; class StateChange
 
     def self.component_state_changes(mh,opts)
       ret = Array.new
-      #find nodes and node_to_ng mapping
+      # find nodes and node_to_ng mapping
       nodes,node_to_ng = get_nodes_and_node_to_ng_index(mh,opts)
       if nodes.empty?
         return ret
       end
 
-      #find components associated with each node or node group      
+      # find components associated with each node or node group      
       ndx_cmps = Hash.new
    
       sp_hash = {
@@ -40,7 +40,7 @@ module DTK; class StateChange
         (ndx_cmps[row[:id]] ||= Array.new) << row[:component]
       end
 
-      #compute state changes
+      # compute state changes
       state_change_mh = mh.createMH(:state_change)
       nodes.each do |node|
         node_cmps = Array.new
@@ -70,11 +70,11 @@ module DTK; class StateChange
       end
     end
 
-    #for components finds all components associated with a given nodes or a node group it belongs to
+    # for components finds all components associated with a given nodes or a node group it belongs to
     class AllMatching < self
      private
-      #returns [nodes, node_to_ng]
-      #can be overrwitten
+      # returns [nodes, node_to_ng]
+      # can be overrwitten
       def self.get_nodes_and_node_to_ng_index(mh,opts)
         unless nodes = opts[:nodes]
           raise Error.new("Expecting opts[:nodes]")
@@ -89,8 +89,8 @@ module DTK; class StateChange
 
     class SingleNode < AllMatching
      private
-      #returns [nodes, node_to_ng]
-      #can be overrwitten
+      # returns [nodes, node_to_ng]
+      # can be overrwitten
       def self.get_nodes_and_node_to_ng_index(mh,opts)
         unless node = opts[:node]
           raise Error.new("Expecting opts[:nodes]")
@@ -116,8 +116,8 @@ module DTK; class StateChange
         (!nodes.empty?) && [:oneof, :node_id, nodes.map{|r|r[:id]}]
       end
 
-      #returns [nodes, node_to_ng]
-      #this is for finding node - ng relation given a specific ng
+      # returns [nodes, node_to_ng]
+      # this is for finding node - ng relation given a specific ng
       def self.get_nodes_and_node_to_ng_index(mh,opts)
         unless node_group = opts[:node_group]
           raise Error.new("Expecting opts[:node_group]")

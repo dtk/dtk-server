@@ -61,7 +61,7 @@ module MCollective
         class Stomp<Base
           attr_reader :connection
 
-          #modifications so connect at initialization and there is not multiple connections per thread
+          # modifications so connect at initialization and there is not multiple connections per thread
           def initialize
             @config = Config.instance
             @subscriptions = []

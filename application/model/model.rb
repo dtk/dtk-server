@@ -1,9 +1,9 @@
 
 #################
-#TBD: will seperate into seperate files
-#TBD: looks like much shared on relationship between Library, Project, and Deployment (they are all containers; so might refactor as one object that has type)
+# TBD: will seperate into seperate files
+# TBD: looks like much shared on relationship between Library, Project, and Deployment (they are all containers; so might refactor as one object that has type)
 
-#TODO: whatever is going on here, very unclear why ClassMixinDataSourceExtensions is def inside of Model.rb 
+# TODO: whatever is going on here, very unclear why ClassMixinDataSourceExtensions is def inside of Model.rb 
 
 module XYZ
   module ClassMixinDataSourceExtensions
@@ -19,22 +19,22 @@ module XYZ
     end
   end
 
-#TODO: why is this called object?
-  #TBD: re-examine whether current scheme is best way to implement relationship between model top, specfic model classes and the XYZ::model utility class
+# TODO: why is this called object?
+  # TBD: re-examine whether current scheme is best way to implement relationship between model top, specfic model classes and the XYZ::model utility class
   class Object < Model
     set_relation_as_top()
     class << self
       #### Actions
-      #idempotent
+      # idempotent
       def delete(id_handle,opts={})
         delete_instance(id_handle,opts) if exists? id_handle
       end
-      #idempotent
+      # idempotent
       def create_simple(new_uri,c,opts={})
         create_simple_instance?(IDHandle[:uri => new_uri,:c => c],opts)
       end
 
-      #TODO: rewrite using join querey
+      # TODO: rewrite using join querey
 
       def get_contained_attribute_ids(id_handle,opts={})
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
@@ -44,8 +44,8 @@ module XYZ
         (nodes||[]).map{|node|node.get_contained_attribute_ids(opts)}.flatten()
       end
 
-#TODO: this seems like generic function but specifically works with nodes?
-      #type can be :asserted, :derived or :value
+# TODO: this seems like generic function but specifically works with nodes?
+      # type can be :asserted, :derived or :value
       def get_contained_attributes(type,id_handle,opts={})
         ret = {}
 
@@ -72,7 +72,7 @@ module XYZ
         ret
       end
 
-      #TBD: temp
+      # TBD: temp
       def get_guid(id_handle)
         id_info = IDInfoTable.get_row_from_id_handle(id_handle) 
         {:guid => IDInfoTable.ret_guid_from_id_info(id_info)}

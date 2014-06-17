@@ -2,7 +2,7 @@ module XYZ
   module AttrDepAnalaysisClassMixin
     # block params are attr_in,link,attr_out
     def dependency_analysis(aug_attr_list,&block)
-      #find attributes that are required
+      # find attributes that are required
       return if aug_attr_list.empty?
       attr_ids = aug_attr_list.map{|a|a[:id]}.uniq
       sp_hash = {
@@ -15,10 +15,10 @@ module XYZ
       
       matches = Array.new
       aug_attr_list.each do |attr|
-        #ignore any node attribute
+        # ignore any node attribute
         next unless attr[:component]
         find_matching_links(attr,links_to_trace).each do |link|
-          #attr is input attribute
+          # attr is input attribute
           matches << {:link => link, :attr => attr} 
         end
       end
@@ -31,7 +31,7 @@ module XYZ
       end
     end
 
-    #block params is guard_rel which is hash with keys guard_attr,link,guarded_attr
+    # block params is guard_rel which is hash with keys guard_attr,link,guarded_attr
     def guarded_attribute_rels(aug_attr_list,&block)
       Attribute.dependency_analysis(aug_attr_list) do |in_attr,link,out_attr|
         guard_rel = {
@@ -45,7 +45,7 @@ module XYZ
 
    private
     def find_matching_output_attr(aug_attr_list,attr_in,link)
-      #TODO: to make more efficient have other find_matching_output_attr__[link_fn]
+      # TODO: to make more efficient have other find_matching_output_attr__[link_fn]
       return find_matching_output_attr__eq_indexed(aug_attr_list,attr_in,link) if link[:function] == "eq_indexed"
       output_id =  link[:output_id] 
       aug_attr_list.find do |attr|
@@ -114,24 +114,24 @@ module XYZ
     module GuardRel
       def self.needs_guard?(guard_rel)
         guard_attr,guarded_attr,link = guard_rel[:guard_attr],guard_rel[:guarded_attr],guard_rel[:link]
-        #guard_attr can be null if guard refers to node level attr
-        #TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
-        #TODO: below works if guard is node level attr
+        # guard_attr can be null if guard refers to node level attr
+        # TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
+        # TODO: below works if guard is node level attr
         return nil unless guard_attr 
 
-        #guarding attributes that are unset and are feed by dynamic attribute 
-        #TODO: should we assume that what gets here are only requierd attributes
-        #TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
+        # guarding attributes that are unset and are feed by dynamic attribute 
+        # TODO: should we assume that what gets here are only requierd attributes
+        # TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
         return nil unless guard_attr[:dynamic] and unset_guarded_attr?(guarded_attr,link)
         
-        #TODO: clean up; not sure if still needed
+        # TODO: clean up; not sure if still needed
         guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
-        #right now only using config node to config node guards
+        # right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
         true
       end
      private
-      #if dont know for certain better to err as being a guard
+      # if dont know for certain better to err as being a guard
       def self.unset_guarded_attr?(guarded_attr,link)
         val = guarded_attr[:attribute_value]
         if val.nil?

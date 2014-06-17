@@ -6,7 +6,7 @@ module MCollective
       @connection.set_context(:decode_context => self,:multiplexer => multiplexer)
     end
 
-    #changed to specficall take an agent argument
+    # changed to specficall take an agent argument
     def r8_new_request(agent,action, data)
       callerid = @security.callerid
       {:agent  => agent,

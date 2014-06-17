@@ -1,4 +1,4 @@
-#TODO: either add schema or advance schema
+# TODO: either add schema or advance schema
 
 =begin
 Sequel.migration do
@@ -22,7 +22,7 @@ Sequel.migration do
       column :type, "varchar", :size => 25
       foreign_key :sub_assembly_id, :component,  {:on_delete => :set_null, :on_update => :set_null}
 
-      #many_to_one => [:component]
+      # many_to_one => [:component]
       foreign_key :component_component_id, :component,  {:on_delete => :set_null, :on_update => :set_null}
     end
 

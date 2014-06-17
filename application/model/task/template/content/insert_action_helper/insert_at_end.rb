@@ -5,12 +5,12 @@ module DTK; class Task; class Template
         def insert_action!(template_content)
           template_content.each_internode_stage do |internode_stage,stage_index|
             if action_match = find_earliest_match?(internode_stage,stage_index,:internode,:after)
-              #if match here then need to put in stage earlier than matched one
+              # if match here then need to put in stage earlier than matched one
               template_content.splice_in_action!(action_match,:before_internode_stage)
               return template_content
             end
             if action_match = find_earliest_match?(internode_stage,stage_index,:samenode,:after)
-              #if match here then need to put in this stage earlier than matched one
+              # if match here then need to put in this stage earlier than matched one
               template_content.splice_in_action!(action_match,:before_action_pos)
               return template_content
             end

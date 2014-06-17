@@ -15,7 +15,7 @@ worker.add_ability('import_chef_recipes') do |payload,job|
     hash_payload = JSON.parse(payload)
     object = eval hash_payload["object"]
     params_x = hash_payload["params"]
-    #TBD: hack; not right
+    # TBD: hack; not right
     params = params_x.map{|p|
       if p["class"] == "Hash"
         h = {}
@@ -32,7 +32,7 @@ worker.add_ability('import_chef_recipes') do |payload,job|
     method = hash_payload["method"].to_sym
     task = XYZ::Task.new(hash_payload["task"]["c"],hash_payload["task"]["uri"]) 
     print "object = #{object.inspect}; method = #{method}; params = #{params.inspect}; task={task.inspect}\n" 
-    #TBD: need to handle case where opts already in params
+    # TBD: need to handle case where opts already in params
     params << {:task => task}
     object.send(method,*params)
     task.update_status(:complete) 

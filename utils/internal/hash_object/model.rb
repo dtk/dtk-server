@@ -21,7 +21,7 @@ module DTK
 
         def set_nested_value!(hash,path,val)
           if path.size == 0
-            #TODO this should be error
+            # TODO this should be error
           elsif path.size == 1
             hash[path.first] = val
           else

@@ -37,7 +37,7 @@ module DTK; class Task; class Template
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      #TODO: have above subsume below  
+      # TODO: have above subsume below  
       def splice_in_at_beginning!(execution_blocks)
         insert(0,*execution_blocks)
         self
@@ -53,14 +53,14 @@ module DTK; class Task; class Template
           ret[:node] = node_name
         end
         if execution_blocks.size == 1
-          #if single execution block then we remove this level of nesting
+          # if single execution block then we remove this level of nesting
           ret.merge(execution_blocks.first)
         else          
           ret.merge(Field::ExecutionBlocks =>  execution_blocks)
         end
       end
       def self.parse_and_reify(serialized_node_actions,node_name,action_list,opts={})
-        #normalize to take into account it may be single execution block
+        # normalize to take into account it may be single execution block
         normalized_content = serialized_node_actions.kind_of?(Hash) && serialized_node_actions[Field::ExecutionBlocks]
         normalized_content ||= [serialized_node_actions]
         ret = new()
@@ -86,7 +86,7 @@ module DTK; class Task; class Template
       end
       
       def node()
-        #all the elements have same node so can just pick first
+        # all the elements have same node so can just pick first
         first && first.node()
       end
       
@@ -95,7 +95,7 @@ module DTK; class Task; class Template
       end
       
       def config_agent_type()
-        #TODO: for now all  elements have same config_agent_type, so can just pick first
+        # TODO: for now all  elements have same config_agent_type, so can just pick first
         first && first.config_agent_type()
       end
       def components()

@@ -241,7 +241,7 @@ module XYZ
 
    def self.add_monitoring_info!(info)
 =begin
-#TODO: not used yet
+# TODO: not used yet
      (info["attribute"] ||= Hash.new)["monitoring_item"] =
        {"check_ping"=>
        {"enabled"=>true,
@@ -276,7 +276,7 @@ module XYZ
    end
 
 
-#TODO: deprecate below
+# TODO: deprecate below
      NodesInfoDefault = {
        ## for EU west
        "ami-b7d4eec3-small"=> {

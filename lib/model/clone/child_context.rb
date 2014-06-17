@@ -17,7 +17,7 @@ module DTK
       new_id_handles = clone_proc.add_new_children_objects(new_objs_info,clone_model_handle,clone_par_col,level)
       fk_info.add_id_mappings(clone_model_handle,new_objs_info)
       fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
-      #iterate all nested children
+      # iterate all nested children
       self.class.generate(clone_proc,clone_model_handle,new_objs_info,override_attrs) do |child_context|
         child_context.clone_copy_child_objects(clone_proc,level+1)
       end
@@ -87,7 +87,7 @@ module DTK
         end
       end
     end
-    #index are clone_direction, parent, child
+    # index are clone_direction, parent, child
     SpecialContext = {
       :library_to_target => {
         :target => {
@@ -98,13 +98,13 @@ module DTK
           :attribute => AssemblyNodeAttribute, 
           :component_ref => AssemblyComponentRef
         },
-        #TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
+        # TODO: will put below back in after sort out issues on https://reactor8.atlassian.net/wiki/display/DTK/Component+Resource+matching
         #          :node => {:component_ref => lambda{|proc| proc.service_add_on_proc?() ? AssemblyComponentRef::AddOn : AssemblyComponentRef}},
         :component => {
           :attribute => AssemblyComponentAttribute
         }
       },
-      #TODO: remove; since using different mechanism to save an assembly instance in the library
+      # TODO: remove; since using different mechanism to save an assembly instance in the library
       :target_to_library => {
         #:library => {:node => AssemblyTemplateNode},
         #:node => {:component => AssemblyTemplateComponent}
@@ -137,7 +137,7 @@ module DTK
     def ret_new_objs_info(field_set_to_copy,create_override_attrs)
       ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
 
-      #all parent_rels will have same cols so taking a sample
+      # all parent_rels will have same cols so taking a sample
       remove_cols = [:ancestor_id] + parent_rels.first.keys.reject{|col|col == :old_par_id}
       field_set_from_ancestor = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :ancestor_id},{clone_par_col => :old_par_id})
 
@@ -170,8 +170,8 @@ module DTK
       self[:model_handle]
     end
 
-    #can differ such as for component_ref
-    #can be over written
+    # can differ such as for component_ref
+    # can be over written
     def clone_model_handle()
       model_handle()
     end

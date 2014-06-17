@@ -1,5 +1,5 @@
-#TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent parser phase
-#TODO: does not check for extra attributes
+# TODO: this does some conversion of form; should determine what shoudl be done here versus subsequent parser phase
+# TODO: does not check for extra attributes
 module DTK; class ComponentDSL; class V2
   class ObjectModelForm < ComponentDSL::ObjectModelForm
     def self.convert(input_hash)
@@ -14,7 +14,7 @@ module DTK; class ComponentDSL; class V2
     end
 
    private
-    #can be overwritten
+    # can be overwritten
     def context(input_hash)
       Hash.new()
     end
@@ -26,9 +26,9 @@ module DTK; class ComponentDSL; class V2
       self.class::Choice
     end
 
-    #returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
+    # returns a subset or hash for all keys listed; if an extyra keys then null signifying error condition is returned 
     # '*' means required
-    #e.g., keys ["*module","version"]
+    # e.g., keys ["*module","version"]
     def hash_contains?(hash,keys)
       req_keys = keys.inject(Hash.new){|h,r|h.merge(r.gsub(/^\*/,"") => (r =~ /^\*/) ? 1 : 0)}
       ret = Hash.new
@@ -37,7 +37,7 @@ module DTK; class ComponentDSL; class V2
         req_keys[k] = 0
         ret.merge!(k => v)
       end
-      #return nil if there is a required key not found
+      # return nil if there is a required key not found
       unless req_keys.values.find{|x|x == 1} 
         ret
       end
@@ -221,7 +221,7 @@ module DTK; class ComponentDSL; class V2
               end
             attr_props = OutputHash.new("display_name" => name,"external_ref" => external_ref)
             add_attr_data_type_attrs!(attr_props,info)
-            #setting even when value_asserted() is nil so this can handle case where remove a default
+            # setting even when value_asserted() is nil so this can handle case where remove a default
             attr_props["value_asserted"] = value_asserted(info,attr_props)
             %w{description dynamic required hidden}.each{|field|attr_props.set_if_not_nil(field,info[field])}
             if dynamic_default_variable
@@ -265,7 +265,7 @@ module DTK; class ComponentDSL; class V2
       ScalarTypes = %w{integer string boolean}
       AutomicTypes = ScalarTypes + %w{json}
 
-      #partitions into link_defs, "dependency", and "component_order"
+      # partitions into link_defs, "dependency", and "component_order"
       def add_dependent_components!(ret,input_hash,base_cmp,opts={})
         dep_config = get_dependent_config(input_hash,base_cmp,opts)
         ret.set_if_not_nil("dependency",dep_config[:dependencies])
@@ -280,9 +280,9 @@ module DTK; class ComponentDSL; class V2
           convert_to_hash_form(in_dep_cmps) do |conn_ref,conn_info|
             choices = choice().convert_choices(conn_ref,conn_info,base_cmp,opts)
 
-            #determine if create a link def and/or a dependency
-            #creaet a dependency if just single choice and base adn depnedncy on same node
-            #TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
+            # determine if create a link def and/or a dependency
+            # creaet a dependency if just single choice and base adn depnedncy on same node
+            # TODO: only handling addition of dependencies if single choice; consider adding just temporal if multiple choices
             if choices.size == 1 
               choice = choices.first
               if choice.is_internal?()
@@ -291,7 +291,7 @@ module DTK; class ComponentDSL; class V2
               end
             end
 
-            #create link defs if there are multiple choices or theer are attribute mappings
+            # create link defs if there are multiple choices or theer are attribute mappings
             if choices.size > 1 or (choices.size == 1 and choices.first.has_attribute_mappings?())
               link_def = OutputHash.new(
                 "type" => get_connection_label(conn_ref,conn_info),
@@ -304,7 +304,7 @@ module DTK; class ComponentDSL; class V2
           end
         end
         ret[:link_defs] = link_defs unless link_defs.empty?
-        #TODO: is this redundant with 'order', which just added
+        # TODO: is this redundant with 'order', which just added
         if component_order = component_order(input_hash)
           ret[:component_order] = component_order
         end
@@ -312,9 +312,9 @@ module DTK; class ComponentDSL; class V2
       end
 
       def get_connection_label(conn_ref,conn_info)
-        #if component key given then conn_ref will be connection label
-        #if there are choices then conn_ref will be connection label
-        #otherwise conn_ref will be component ref and we use the component part for the conenction label
+        # if component key given then conn_ref will be connection label
+        # if there are choices then conn_ref will be connection label
+        # otherwise conn_ref will be component ref and we use the component part for the conenction label
         if conn_info["component"] or conn_info["choices"]
           conn_ref
         else
@@ -419,7 +419,7 @@ module DTK; class ComponentDSL; class V2
       end
 
       def convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
-        #TODO: right now only treating constant on right hand side meaning only for <- case
+        # TODO: right now only treating constant on right hand side meaning only for <- case
         if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ].*$)/
           dep_attr,base_attr = [$1,$2]
           left = convert_attr_ref_simple(dep_attr,:dep,dep_cmp,:output)
@@ -488,9 +488,9 @@ module DTK; class ComponentDSL; class V2
         "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name()}"
       end
 
-      #returns sanitized_attr_ref
+      # returns sanitized_attr_ref
       def is_json_constant?(attr_ref)
-        #TODO: this is just temp hack in how whether it is detected; providing fro using ' rather than " in constant
+        # TODO: this is just temp hack in how whether it is detected; providing fro using ' rather than " in constant
         if attr_ref =~ /[{]/
           attr_ref.gsub(/'/,"\"")
         end

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 12: NEG - Ill-formed yaml content (type: integersss instead of integer) in dtk.model.yaml file and push-clone-changes to server
+# Test Case 12: NEG - Ill-formed yaml content (type: integersss instead of integer) in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'

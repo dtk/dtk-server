@@ -29,9 +29,9 @@ engine.register_participant 'bad', ErrorParticipant
 engine.register_participant 'alpha', DefaultParticipant 
 engine.register_participant 'beta', DefaultParticipant 
 engine.register_participant 'gamma', DefaultParticipant 
-#engine.register do
+# engine.register do
 #  catchall DefaultParticipant
-#end
+# end
 
 
 pdef = Ruote.process_definition do
@@ -62,5 +62,5 @@ engine.wait_for(wfid)
 =end
   # blocks until the process terminates or gets into an error
  
-#err = engine.process(wfid).errors.first
-#puts "intercepted an error: #{err.message}..."
+# err = engine.process(wfid).errors.first
+# puts "intercepted an error: #{err.message}..."

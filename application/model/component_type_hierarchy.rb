@@ -48,15 +48,15 @@ module XYZ
 
       :user => {}
     }
-    #TODO: stub implementation
-    #given basic type give lsits of link_def_types
+    # TODO: stub implementation
+    # given basic type give lsits of link_def_types
     TypeHierarchyPossLinkDefs = {
       :application => [
         :database
       ]
     }
-    #TODO: stub implementation
-    #given link_def_type returns the basic type that can the endpoint
+    # TODO: stub implementation
+    # given link_def_type returns the basic type that can the endpoint
     TypeHierarchyPossRemoteComponentTypes = {
       :database => :database
     }
@@ -64,7 +64,7 @@ module XYZ
   class ComponentTypeHierarchy
     include TypeHierarchyDefMixin
 
-    #TODO: stub; only uses one level; not hirerarchical structure
+    # TODO: stub; only uses one level; not hirerarchical structure
     def self.possible_link_defs(component)
       ret = Array.new
       basic_type = component.update_object!(:basic_type)[:basic_type]
@@ -72,9 +72,9 @@ module XYZ
       TypeHierarchyPossLinkDefs[basic_type.to_sym]||Array.new
     end
 
-    #cmps_parent_idh can be a library or project
-    #returns an array (possibley empty of components
-    #TODO: stub; only uses one level; not hirerarchical structure
+    # cmps_parent_idh can be a library or project
+    # returns an array (possibley empty of components
+    # TODO: stub; only uses one level; not hirerarchical structure
     def self.possible_link_def_remote_components(link_def_type,cmps_parent_idh)
       ret = Array.new
       basic_type = TypeHierarchyPossRemoteComponentTypes[link_def_type.to_sym]
@@ -98,7 +98,7 @@ module XYZ
     end
 
    private
-    #adapted from  http://www.ruby-forum.com/topic/163430
+    # adapted from  http://www.ruby-forum.com/topic/163430
     def self.inherited(sub)
       return if sub.to_s =~ /^#<Class/ #hack to get rid of anonymous classes
       add_to_subclass(sub)
@@ -157,13 +157,13 @@ module XYZ
       const_get(klass_name)
     end
 
-    #TODO: intent is to be able to add custom classes
+    # TODO: intent is to be able to add custom classes
     class DbServer < ComponentTypeHierarchy
     end
     class Application < ComponentTypeHierarchy
     end
 
-    #dynamically create all other classes not explicitly defined
+    # dynamically create all other classes not explicitly defined
     def self.all_keys(x)
       return Array.new unless x.kind_of?(Hash)
       x.keys + x.values.map{|el|all_keys(el)}.flatten

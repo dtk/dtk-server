@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#general initial
+# general initial
 require 'rubygems'
 require 'optparse'
 require 'sshkey'
@@ -47,7 +47,7 @@ class R8Server
   end
 
   def create_public_library?(opts={})
-    #TODO: hack; must unify; right now based on assumption on name that appears in import file
+    # TODO: hack; must unify; right now based on assumption on name that appears in import file
     if opts[:include_default_nodes]
       create_public_library_nodes?()
     else
@@ -81,7 +81,7 @@ class R8Server
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
 
-    #create workspace
+    # create workspace
     unless project_idh = ret[:project_idhs].first
       Log.error("No project found so not creating a workspace")
       return ret
@@ -94,7 +94,7 @@ class R8Server
     ret
   end
 
-  #TODO: this is hack that should be fixed up; no need to use josn here
+  # TODO: this is hack that should be fixed up; no need to use josn here
   PrivateTargetTemplate = Erubis::Eruby.new <<eos
 {
   "project": {
@@ -121,7 +121,7 @@ class R8Server
 eos
 
   def create_new_target?(target_name,ec2_region=nil)
-    #TODO: this is hack that should be fixed up
+    # TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
     template_path ||= "#{Root}/spec/test_data/new_target.erb" 
     template = File.open(template_path){|f|f.read}
@@ -140,7 +140,7 @@ eos
   def migrate_metafile(module_name)
     raise Error.new("Function has been deprecated")
 =begin
-#TODO: probably deprecate: it is also out of date so wil not work
+# TODO: probably deprecate: it is also out of date so wil not work
     component_module_mh = pre_execute(:component_module)
     sp_hash = {
       :cols => [:id,:dispaly_name],

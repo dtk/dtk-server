@@ -1,4 +1,4 @@
-#TODO: better sepearte parts that are where creating refinement has and parts for rendering in dtk  dsl vrsion specfic form
+# TODO: better sepearte parts that are where creating refinement has and parts for rendering in dtk  dsl vrsion specfic form
 module DTK; class ComponentDSL
   class GenerateFromImpl
     class DSLObject
@@ -41,8 +41,8 @@ module DTK; class ComponentDSL
         end
       
         def process_imported_resources()
-          #first get all the exported resources and imported resources
-          #TODO: more efficient to store these in first phase
+          # first get all the exported resources and imported resources
+          # TODO: more efficient to store these in first phase
           attr_exp_rscs = Array.new
           attr_imp_colls = Array.new
           self[:components].each_element do |cmp|
@@ -58,7 +58,7 @@ module DTK; class ComponentDSL
             end
           end
           return if attr_exp_rscs.empty? or attr_imp_colls.empty?
-          #get all teh matches
+          # get all teh matches
           matches = Array.new
           matches = attr_imp_colls.map do |attr_imp_coll|
             if match = matching_storeconfig_vars?(attr_imp_coll,attr_exp_rscs)
@@ -73,7 +73,7 @@ module DTK; class ComponentDSL
           return if matches.empty?
           set_user_friendly_names_for_storeconfig_vars!(matches)
 
-          #create link defs
+          # create link defs
           matches.each do |match|
             if link_def = create(:link_def,match)
               (match[:attr_imp_coll].parent[:link_defs] ||= DSLArray.new) << link_def
@@ -105,7 +105,7 @@ module DTK; class ComponentDSL
           end
         end
 
-        #for render_hash
+        # for render_hash
         def module_name?()
           nil
         end
@@ -124,7 +124,7 @@ module DTK; class ComponentDSL
           super(context,opts)
           return if opts[:reify]
           processed_name = component_ps[:name]
-          #if qualified name make sure matches module name
+          # if qualified name make sure matches module name
          if processed_name =~ /(^[^:]+)::(.+$)/
             prefix = $1
             unqual_name = $2
@@ -160,7 +160,7 @@ module DTK; class ComponentDSL
           ret += find_foreign_resource_names(component_ps).map do |name|
             create(:dependency,{:type => :foreign_dependency, :name => name})
           end
-          #TODO: may be more  dependency types
+          # TODO: may be more  dependency types
           ret
         end
 
@@ -194,7 +194,7 @@ module DTK; class ComponentDSL
           ret
         end
 
-        #for render_hash
+        # for render_hash
         def display_name?()
         end 
         def label?()
@@ -242,7 +242,7 @@ module DTK; class ComponentDSL
         end
       end
 
-      #TODO: see if makes sense to handle the exported resource link defs heere while using store confif helper file to deal with attributes
+      # TODO: see if makes sense to handle the exported resource link defs heere while using store confif helper file to deal with attributes
       module LinkDefDSLMixin
         def initialize(data,context,opts={})
           super(context,opts)
@@ -390,7 +390,7 @@ module DTK; class ComponentDSL
           ((parent||{})[:attributes]||[]).map{|a|a.hash_key}.compact
         end
 
-        #render hash methods
+        # render hash methods
         def display_name?()
         end
       end

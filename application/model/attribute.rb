@@ -119,7 +119,7 @@ module DTK
       get_objs(cmp_idhs.first.createMH(:attribute),sp_hash).select{|r|r.is_title_attribute?()}
     end
 
-    #TODO: may make this a real field in attribute
+    # TODO: may make this a real field in attribute
     def title()
       self[:attribute_value] if is_title_attribute?()
     end
@@ -157,13 +157,13 @@ module DTK
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= SemanticDatatype.default().to_s
       attr_hash[:data_type] ||= SemanticDatatype.datatype(attr_hash[:semantic_data_type]).to_s
-      #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
+      # TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh,parent.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
     end
     CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
 
 
-    #TODO: collapse this and 4 fields used here
+    # TODO: collapse this and 4 fields used here
     def is_readonly?()
       (self[:port_type] == "input") or self[:read_only] or self[:dynamic] or self[:cannot_change] 
     end
@@ -176,14 +176,14 @@ module DTK
       SemanticType.create_from_attribute(self)
     end
 
-    #TODO: modify these so dont look up AttributeSemantic
+    # TODO: modify these so dont look up AttributeSemantic
     def port_is_external()
       return self[:is_external] unless self[:is_external].nil?
       return nil unless self[:is_port]
       return nil unless self[:semantic_type_summary]
       (AttributeSemantic::Info[self[:semantic_type_summary]]||{})[:external]
     end
-    #TODO: modify these so dont look up AttributeSemantic
+    # TODO: modify these so dont look up AttributeSemantic
     def port_type()
       return self[:port_type_asserted] unless self[:port_type_asserted].nil?
       return nil unless self[:is_port]
@@ -193,7 +193,7 @@ module DTK
     end
 
     def is_unset()
-      #care must be takedn so this is three-valued
+      # care must be takedn so this is three-valued
       return true if attribute_value().nil?
       return false unless self[:data_type] == "json"
       return nil unless self[:semantic_type]
@@ -202,10 +202,10 @@ module DTK
       has_req_fields ? false : true
     end
 
-    #FOR_AMAR
+    # FOR_AMAR
     def self.aug_attr_list_from_state_change_list(state_change_list)
       ret = Array.new
-      #get all relevant attributes by first finding component ids
+      # get all relevant attributes by first finding component ids
       ndx_scs = Hash.new
       state_change_list.each do |node_change_list|
         node_change_list.each do |sc|
@@ -248,8 +248,8 @@ module DTK
         end
       end
       if opts[:include_node_attributes]
-        #TODO: none need flattening now
-        #adding any nodes that are only node_level
+        # TODO: none need flattening now
+        # adding any nodes that are only node_level
         task.node_level_actions().each do |action|
           node = action[:node]
           ndx_nodes[node[:id]] ||= node
@@ -268,7 +268,7 @@ module DTK
       qualified_attribute_id_aux()
     end
 
-    #TODO: may deprecate below
+    # TODO: may deprecate below
     def qualified_attribute_name_under_node()
       qualified_attribute_name_aux()
     end
@@ -303,9 +303,9 @@ module DTK
       [:id,:required,:dyanmic].each{|k|ret[k] = self[k] if self[k]}
       ret[:field_name] = self[:display_name]
       
-      #put in optional key that inidcates implementation attribute
+      # put in optional key that inidcates implementation attribute
       impl_attr = ret_implementation_attribute_name_and_type()
-      #default is that implementation attribute name same as r8 attribute name; so omit if default
+      # default is that implementation attribute name same as r8 attribute name; so omit if default
       unless self[:display_name] == impl_attr[:name]
         case impl_attr[:type].to_sym
           when :puppet then ret.merge!(:puppet_attribute_name => impl_attr[:name])
@@ -328,7 +328,7 @@ module DTK
     def self.update_port_info(attr_mh,attr_link_rows_created)
       attr_port_info = Array.new
       attr_link_rows_created.each do |row|
-        #TODO: row[:type].nil? test need sto be changed if attribute link type default is no longer "external"
+        # TODO: row[:type].nil? test need sto be changed if attribute link type default is no longer "external"
         if row[:type].nil? or row[:type] == "external"
           [["input",row[:input_id]],["output",row[:output_id]]].each do |(dir,id)|
             attr_port_info << {:id => id, :port_type_asserted => dir, :is_port => true, :is_external => true}
@@ -339,7 +339,7 @@ module DTK
     end
 
     def required_unset_attribute?()
-      #port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic
+      # port_type depends on :port_type_asserted,:is_port,:semantic_type_summary and :dynamic
       update_object!(:required,:value_derived,:value_asserted,:port_type_asserted,:is_port,:semantic_type_summary,:dynamic)
       if self[:required] and self[:attribute_value].nil? and not self[:dynamic]
         if self[:port_type] == "input"
@@ -398,7 +398,7 @@ module DTK
     ### object procssing and access functions
     def qualified_attribute_name_aux(node_or_group_name=nil)
       cmp_name = self.has_key?(:component) ? self[:component][:display_name] : nil
-      #strip what will be recipe name
+      # strip what will be recipe name
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/,"") : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name,cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
@@ -421,26 +421,26 @@ module DTK
    public
 
     def self.create_needed_l4_sap_attributes(cmp_id_handle,ipv4_host_addresses)
-      #TODO: cleanup to use newer model access fns
+      # TODO: cleanup to use newer model access fns
       component_id = cmp_id_handle.get_id()
       field_set = Model::FieldSet.new(:component,[:id,:display_name,:attributes])
-     #TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
+     # TODO: allowing feature in until nest features in base services filter = [:and, [:eq, :component__id, component_id],[:eq, :basic_type,"service"]]
       filter = [:and, [:eq, :component__id, component_id]]
       global_wc = {:attribute__semantic_type_summary => "sap_config__l4"}
       ds = SearchObject.create_from_field_set(field_set,cmp_id_handle[:c],filter).create_dataset().where(global_wc)
 
-      #should only be one attribute matching (or none)
+      # should only be one attribute matching (or none)
       component = ds.all.first
       sap_config_attr = (component||{})[:attribute]
       return nil unless sap_config_attr
       sap_config_attr_idh = cmp_id_handle.createIDH(:guid => sap_config_attr[:id],:model_name => :attribute, :parent_model_name => :component)
 
-      #cartesian product of sap_config(s) and host addreses
+      # cartesian product of sap_config(s) and host addreses
       new_sap_value_list = Array.new
-      #TODO: if graph converted hased values into Model types then could just do sap_config_attr[:attribute_value]
+      # TODO: if graph converted hased values into Model types then could just do sap_config_attr[:attribute_value]
       values = sap_config_attr[:value_asserted]||sap_config_attr[:value_derived]
-      #values can be hash or array; determine by looking at semantic_type
-      #TODO: may use instead look up from semantic type
+      # values can be hash or array; determine by looking at semantic_type
+      # TODO: may use instead look up from semantic type
       values = [values] unless values.kind_of?(Array)
       values.each do |sap_config|
         ipv4_host_addresses.each do |ipv4_addr|
@@ -461,7 +461,7 @@ module DTK
            :hidden => true,
            :data_type => "json",
            :description => description,
-           #TODO: need the  => {"application" => service qualification)
+           # TODO: need the  => {"application" => service qualification)
            :semantic_type => {":array" => "sap__l4"},
            :semantic_type_summary => "sap__l4"
          }]
@@ -484,8 +484,8 @@ module DTK
       }
     end
 
-    #sets this attribute derived relation from fn given as input; if error throws trap
-    #TBD: may want to pass in more context about input so that can set fn
+    # sets this attribute derived relation from fn given as input; if error throws trap
+    # TBD: may want to pass in more context about input so that can set fn
     def check_and_set_derived_rel_from_link_fn!(fn)
       return nil if fn.nil?
       if self[:function].nil?
@@ -529,7 +529,7 @@ module XYZ
   class DerivedValueFunction
     class << self
       def sap_from_config_and_ip(ip_addr,sap_config)
-       #TBD: stub; ignores config constraints on sap_config
+       # TBD: stub; ignores config constraints on sap_config
        return nil if ip_addr.nil? or sap_config.nil?
        port = sap_config[:network] ? sap_config[:network][:port] : nil
        return nil if port.nil?
@@ -543,7 +543,7 @@ module XYZ
       
       def sap_ref_from_sap(sap)
         return nil if sap.nil?
-        #TBD: stubbed to only handle limited cases
+        # TBD: stubbed to only handle limited cases
         raise Error::NotImplemented.new("sap to sap ref function where not type 'network'") unless sap[:network]
         raise Error.new("network sap missing port number") unless sap[:network][:port]
         raise Error.new("network sap missing addresses") unless sap[:network][:addresses]

@@ -16,7 +16,7 @@ module XYZ
       @errors = []
       @log_entries = []
 
-      #TBD: what about events and logged msgs
+      # TBD: what about events and logged msgs
     end
    public
     def add_reply_to_info(caller_channel,msg_bus_client)
@@ -45,7 +45,7 @@ module XYZ
     def process_task_finished()
       @status = :complete #TBD: where to we distinguish whether error or not
       if @parent_task
-        #if within parent task, signal this (sub) task finished
+        # if within parent task, signal this (sub) task finished
         # if last task finished and there is a caller channel tehn this
         # below wil reply to caller; so not needed explicitly here
         @parent_task.process_child_task_finished()
@@ -54,14 +54,14 @@ module XYZ
       end
     end
     def add_routing_info(opts)
-      #no op (unless overwritten)
+      # no op (unless overwritten)
     end
     def set_so_can_run_concurrently
-      #no op (unless overwritten)
+      # no op (unless overwritten)
     end
    private
     def reply_to_caller()
-      #no op (unless overwritten)
+      # no op (unless overwritten)
     end
   end
 
@@ -72,8 +72,8 @@ module XYZ
       raise Error.new("cannot call reply_to_caller() if msg_bus_client not set") unless @msg_bus_client
       reply_queue = @msg_bus_client.publish_queue(@caller_channel,:passive => true)
       input_msg_reply = ProcessorMsg.create({:msg_type => :task})
-      #TBD: stub; want to strip out a number of these fields
-      #only send a subset of task info
+      # TBD: stub; want to strip out a number of these fields
+      # only send a subset of task info
       task = WorkerTaskWireSubset.new(self)
       reply_queue.publish(input_msg_reply.marshal_to_message_bus_msg(),
         {:message_id => @caller_channel, :task => task})
@@ -118,7 +118,7 @@ module XYZ
   class WorkerTaskSetConcurrent < WorkerTaskSet 
     def execute()
       if @subtasks.size > 0
-        #process_task_finished() triggered by last complete subtasks
+        # process_task_finished() triggered by last complete subtasks
         @subtasks.each{|task|task.execute()}
       else
         process_task_finished()
@@ -137,7 +137,7 @@ module XYZ
   class WorkerTaskSetSequential < WorkerTaskSet 
     def execute()
       if @subtasks.size > 0
-        #start first sub task and this will set chain that callss subsequent ones
+        # start first sub task and this will set chain that callss subsequent ones
         @subtasks.first.execute()
       else
         process_task_finished()
@@ -169,9 +169,9 @@ module XYZ
     end
 
     def determine_local_and_remote_tasks!(worker)
-      #no op if basic types extended already
+      # no op if basic types extended already
       return nil unless self.class == WorkerTaskBasic
-      #TBD: stub where can optimize by appropriately making thsi local call
+      # TBD: stub where can optimize by appropriately making thsi local call
       extend_as_remote()
     end
    private
@@ -194,21 +194,21 @@ module XYZ
       @queue_name = nil
       @exchange_name = nil
 
-      #opts related to creating queue or exchange
-      #legal values: [:type, :passive, :durable, :exclusive, :auto_delete, :nowait, :internal]
+      # opts related to creating queue or exchange
+      # legal values: [:type, :passive, :durable, :exclusive, :auto_delete, :nowait, :internal]
       @create_opts = {}
 
-      #legal values: [:key, :reply_timeout]
+      # legal values: [:key, :reply_timeout]
       @publish_opts = {}
   
-      #gets task status results back from delagated worker
+      # gets task status results back from delagated worker
       @delegated_task = nil
     end
 
     def add_routing_info(opts)
       @msg_bus_client = opts[:msg_bus_client]
 
-      #TDB: stub to find queue or exchange to publish on
+      # TDB: stub to find queue or exchange to publish on
       if @input_msg.msg_type == :execute_on_node
         @queue_name = @input_msg.key()
         @create_opts[:passive] = true
@@ -246,7 +246,7 @@ module XYZ
       end
     end
    private
-    #can throw an error (e.g., if passive and queue does not exist)
+    # can throw an error (e.g., if passive and queue does not exist)
     def ret_queue_or_exchange()
       if @queue_name
 	@msg_bus_client.publish_queue(@queue_name,@create_opts||{})
@@ -276,7 +276,7 @@ module XYZ
           opts[:work].call()
          rescue  Exception => e
           Log.debug_pp [e,e.backtrace]
-          #TBD: since this can be arbitrary error as stop gap measure converting to_s; ?: should I do same for errors with different tasks or only needed here because can get arbitrary for example chef errors
+          # TBD: since this can be arbitrary error as stop gap measure converting to_s; ?: should I do same for errors with different tasks or only needed here because can get arbitrary for example chef errors
           @errors << WorkerTaskError.new(e.to_s)
           :failed
         end
@@ -288,7 +288,7 @@ module XYZ
     end
 
     def execute()
-      #modified from design pattern from right_link
+      # modified from design pattern from right_link
       callback = proc do |results| 
          @results = results
          @return_code = @errors.empty?() ? :succeeded : :failed
@@ -297,8 +297,8 @@ module XYZ
       if @run_in_new_thread_or_fork
         EM.defer(@work,callback)
       else
-        #TBD: using next_tick is from rightlink design pattern; need to work through all shuffles to
-        #see if this is what we want
+        # TBD: using next_tick is from rightlink design pattern; need to work through all shuffles to
+        # see if this is what we want
         EM.next_tick {callback.call(@work.call())}
       end
     end
@@ -335,8 +335,8 @@ module XYZ
   end
 end
 
-#TBD: reconcile this, what is above in task in db model; this might be same as what is in db; or this may be object in 
-#TBD: may rename WorkTaskStatus, although may be better word because not exactly "snapshot"
+# TBD: reconcile this, what is above in task in db model; this might be same as what is in db; or this may be object in 
+# TBD: may rename WorkTaskStatus, although may be better word because not exactly "snapshot"
 module XYZ
   class WorkerTaskWireSubset < HashObject
     def initialize(tsk)
@@ -353,14 +353,14 @@ module XYZ
         self[:subtasks] = tsk.subtasks.map{|t|WorkerTaskWireSubset.new(t)}
       end
 
-      #TBD: whether results should come back in task info or in other spot, such as
-      #place where it could be called in a block after request
+      # TBD: whether results should come back in task info or in other spot, such as
+      # place where it could be called in a block after request
       self[:results] = tsk.results if tsk.results
     end
 
-    #TBD: rather than having wire object with delegation links, may flatten while producing
-    #TBD: may write so that if subtasks or delegated parts falttened already its a no op
-    #flatten removes the links to delegated
+    # TBD: rather than having wire object with delegation links, may flatten while producing
+    # TBD: may write so that if subtasks or delegated parts falttened already its a no op
+    # flatten removes the links to delegated
     def flatten()
       ret = 
         if self[:delegated_task] 

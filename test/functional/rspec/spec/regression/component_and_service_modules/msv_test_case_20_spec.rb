@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 20: Import service module from remote repo and check its corresponding assemblies
+# Test Case 20: Import service module from remote repo and check its corresponding assemblies
 
 require 'rubygems'
 require 'rest_client'

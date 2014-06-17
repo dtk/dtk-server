@@ -4,12 +4,12 @@ module DTK; class Task
       Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
     end
 
-    #implemented functions
+    # implemented functions
     def long_running?()
       nil
     end
 
-    #returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
+    # returns [adapter_type,adapter_name], adapter name optional in which it wil be looked up from config
     def ret_command_and_control_adapter_info()
      nil
     end
@@ -69,12 +69,12 @@ module DTK; class Task
       # virtual gets overwritten
       # updates object and the tasks in the model
       def get_and_update_attributes!(task)
-        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
+        # raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
       end
 
       # virtual gets overwritten
       def add_internal_guards!(guards)
-        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
+        # raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
       end
 
       def update_state_change_status_aux(task_mh,status,state_change_ids)
@@ -123,7 +123,7 @@ module DTK; class Task
         true
       end
 
-      #generic; can be overwritten
+      # generic; can be overwritten
       def self.node_status(object,opts)
         ret = PrettyPrintHash.new
         node = object[:node]||{}
@@ -162,12 +162,12 @@ module DTK; class Task
       # virtual gets overwritten
       # updates object and the tasks in the model
       def get_and_update_attributes!(task)
-        #raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
+        # raise "You need to implement 'get_and_update_attributes!' method for class #{self.class}"
       end
 
       # virtual gets overwritten
       def add_internal_guards!(guards)
-        #raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
+        # raise "You need to implement 'add_internal_guards!' method for class #{self.class}"
       end
     end
 

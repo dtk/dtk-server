@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#This is DTK Server smoke test used for execution in DTK Release process
+# This is DTK Server smoke test used for execution in DTK Release process
 
 require 'rubygems'
 require 'rest_client'

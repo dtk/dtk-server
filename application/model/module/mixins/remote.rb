@@ -2,12 +2,12 @@ module DTK; module ModuleMixins
   module Remote
   end
   module Remote::Class
-    #install from a dtkn repo; directly in this method handles the module/branc and repo level items
-    #and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
+    # install from a dtkn repo; directly in this method handles the module/branc and repo level items
+    # and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
     def install(project,local_params,remote_params,client_rsa_pub_key,opts={})
       version = remote_params.version
 
-      #Find information about module and see if it exists
+      # Find information about module and see if it exists
       local = local_params.create_local(project)
       local_branch = local.branch_name
       local_module_name = local.module_name
@@ -30,21 +30,21 @@ module DTK; module ModuleMixins
       remote_repo_info = remote_repo_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
       remote.set_repo_name!(remote_repo_info[:git_repo_name])
 
-      #so they are defined outside Transaction scope
+      # so they are defined outside Transaction scope
       module_and_branch_info = commit_sha = parsed = repo_with_branch = nil
-      #outside of transaction only doing read/check operations
+      # outside of transaction only doing read/check operations
       Transaction do
-        #case on whether the module is created already
+        # case on whether the module is created already
         if module_obj
-          #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
+          # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
           raise Error.new("TODO: ModuleBranch::Location; need to right this")
           repo_with_branch = module_obj.get_repo!()
         else
-          #TODO: ModuleBranch::Location: see if this is necessary
+          # TODO: ModuleBranch::Location: see if this is necessary
           remote_repo_handler.authorize_dtk_instance(client_rsa_pub_key)
           
-          #create empty repo on local repo manager; 
-          #need to make sure that tests above indicate whether module exists already since using :delete_if_exists
+          # create empty repo on local repo manager; 
+          # need to make sure that tests above indicate whether module exists already since using :delete_if_exists
           create_opts = {
             :donot_create_master_branch => true,
             :delete_if_exists => true
@@ -53,7 +53,7 @@ module DTK; module ModuleMixins
           repo_with_branch = Repo::WithBranch.create_empty_workspace_repo(project.id_handle(),local,repo_user_acls,create_opts)
         end
         commit_sha = repo_with_branch.initial_sync_with_remote(remote,remote_repo_info)
-        #create object in object model that corresponds to remote repo
+        # create object in object model that corresponds to remote repo
         create_repo_remote_object(repo_with_branch,remote,remote_repo_info[:git_repo_name])
 
         module_and_branch_info = create_module_and_branch_obj?(project,repo_with_branch.id_handle(),local)
@@ -87,7 +87,7 @@ module DTK; module ModuleMixins
   
       if module_obj = get_obj(project.model_handle(model_type),sp_hash)
         repos = module_obj.get_repos().uniq()
-        #TODO: ModuleBranch::Location: below looks broken
+        # TODO: ModuleBranch::Location: below looks broken
         # module_obj.get_repos().each do |repo|
         repos.each do |repo|
           # we remove remote repos
@@ -117,7 +117,7 @@ module DTK; module ModuleMixins
   module Remote::Instance
     class Info < Hash
     end 
-    #raises an access rights usage error if user does not have access to the remote module
+    # raises an access rights usage error if user does not have access to the remote module
     def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
       remote = remote_params.create_remote(project)
       repo_remote_handler = Repo::Remote.new(remote)
@@ -141,7 +141,7 @@ module DTK; module ModuleMixins
 
       ret = Info.new().merge(
           :module_name => remote.module_name,
-          #TODO: will change this key to :remote_ref when upstream uses this                               
+          # TODO: will change this key to :remote_ref when upstream uses this                               
           :remote_repo => remote.remote_ref,
           :remote_repo_url => remote_module_info[:remote_repo_url],
           :remote_branch => remote.branch_name,
@@ -176,13 +176,13 @@ module DTK; module ModuleMixins
       publish_preprocess_raise_error?(module_branch_obj)
 
       # create module on remote repo manager
-      #this wil raise error if it exists already or dont have accsss
+      # this wil raise error if it exists already or dont have accsss
       module_info = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key)
       remote_repo_name = module_info[:git_repo_name]
       remote.set_repo_name!(remote_repo_name)
 
-      #link and push to remote repo
-      #create remote repo object
+      # link and push to remote repo
+      # create remote repo object
       repo = get_workspace_repo() #TODO: ModuleBranch::Location: need to update get_workspace_repo if can have multiple module branches
       repo.link_to_remote(local,remote)
       repo.push_to_remote(local,remote)
@@ -216,7 +216,7 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
       # validate presence of brach
       raise ErrorUsage.new("Not able to find version '#{version}' for module '#{local_module_name}'") unless module_obj.get_module_branch(local_branch)
       
-      #TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
+      # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo or allow it to be linked to multiple remotes
       repo_with_branch = module_obj.get_repo!
       repo_with_branch.initial_sync_with_remote(remote)
 
@@ -227,14 +227,14 @@ TODO: ModuleBranch::Location: currently cannot be called because this wil be don
 =begin
 temporarily removed insatnce methods
 TODO: needs to be redone taking into account versions are at same level as base
-    #this should be called when the module is linked, but the specfic version is not
+    # this should be called when the module is linked, but the specfic version is not
     def import_version(remote_repo_base,version)
       parsed = nil
       module_name = module_name()
       project = get_project()
       aug_head_branch = get_augmented_workspace_branch()
       repo = aug_head_branch && aug_head_branch[:repo] 
-      #TODO:repo.linked_remote? is deprecated
+      # TODO:repo.linked_remote? is deprecated
       unless repo and repo.linked_remote?()
         raise ErrorUsage.new("Cannot pull module (#{module_name}) from remote (#{remote_repo_base}) because it is currently not linked to the remote module")
       end
@@ -244,7 +244,7 @@ TODO: needs to be redone taking into account versions are at same level as base
 
       local_branch_name = ModuleBranch.workspace_branch_name(project,version)
       Transaction do
-        #TODO: may have commit_sha returned in this fn so client can do a reliable pull
+        # TODO: may have commit_sha returned in this fn so client can do a reliable pull
         commit_sha = repo.initial_sync_with_remote(remote)
         local_repo_for_imported_version = aug_head_branch.repo_for_version(repo,version)
 

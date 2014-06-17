@@ -3,7 +3,7 @@ module XYZ
     class << self 
       def single_module_into_directory(compressed_file,repo_name,base_dir,opts)
         raise Error.new("directory (#{base_dir}) does not exist") unless File.directory?(base_dir)
-        #TODO: rmove or make work with windows  raise Error.new("directory (#{base_dir}) is not fully qualified") unless fully_qualified_dir_path?(base_dir)
+        # TODO: rmove or make work with windows  raise Error.new("directory (#{base_dir}) is not fully qualified") unless fully_qualified_dir_path?(base_dir)
         target_dir = "#{base_dir}/#{repo_name}"
         if File.exists?(target_dir)
           raise Error.new("Non-empty directory for repo (#{target_dir}) exists already") unless empty_dir?(target_dir)
@@ -14,7 +14,7 @@ module XYZ
       end
       def into_directory(compressed_file,target_dir,opts={})
         raise Error.new("directory (#{target_dir}) does not exist") unless File.directory?(target_dir)
-        #TODO: rmove or make work with windows raise Error.new("directory (#{target_dir}) is not fully qualified") unless fully_qualified_dir_path?(target_dir)
+        # TODO: rmove or make work with windows raise Error.new("directory (#{target_dir}) is not fully qualified") unless fully_qualified_dir_path?(target_dir)
         load_and_return_adapter_class(compressed_file).into_directory(compressed_file,target_dir,opts)
       end
      private
@@ -23,7 +23,7 @@ module XYZ
         Dir.foreach(path){|f|return nil  unless f =~ /^\./}
         true
       end
-      #TODO: rmove or make work with windows 
+      # TODO: rmove or make work with windows 
       def fully_qualified_dir_path?(path)
         path[0,1] == "/"
       end
@@ -43,12 +43,12 @@ module XYZ
         split[strip_count..split.size-strip_count].join("/")
       end
       def skip(relative_path,opts)
-        #strip out the empty top directory
+        # strip out the empty top directory
         return true if relative_path.empty?
-        #allows strip out .git directories
+        # allows strip out .git directories
         return true if relative_path.split("/").first == ".git"
         return nil unless filter = opts[:filter]
-        #TODO: starting very simple
+        # TODO: starting very simple
         if filter.size == 1 and filter.keys.first == :modules
           not filter[:modules].include?(relative_path.split("/").first)
         else

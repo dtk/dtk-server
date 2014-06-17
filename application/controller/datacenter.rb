@@ -12,8 +12,8 @@ module XYZ
       notification_list.each_with_index do |n,index|
         notification_list[index][:type] = "warning"
       end
-#DEBUG
-#pp [:warnings,notification_list]
+# DEBUG
+# pp [:warnings,notification_list]
       return {:data=>notification_list}
     end
 
@@ -21,10 +21,10 @@ module XYZ
       datacenter = id_handle(datacenter_id,:datacenter).create_object()
       datacenter_id = datacenter.id()
 
-#TODO: how to retrieve fields from instance?
+# TODO: how to retrieve fields from instance?
       dc_hash = get_object_by_id(datacenter_id,:datacenter)
 
-#TODO: revisit when cleaning up toolbar, plugins and user settings
+# TODO: revisit when cleaning up toolbar, plugins and user settings
       tpl = R8Tpl::TemplateR8.new("workspace/notification_list",user_context())
       tpl.set_js_tpl_name("notification_list")
       tpl_info = tpl.render()
@@ -99,16 +99,16 @@ module XYZ
     end
 
     def update_vspace_ui(id)
-#TODO: not used      dc_hash = get_object_by_id(id,:datacenter)
-#pp '*******UPDATING VSPACE UI***************'
-#pp request.params
+# TODO: not used      dc_hash = get_object_by_id(id,:datacenter)
+# pp '*******UPDATING VSPACE UI***************'
+# pp request.params
       update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])})
 #      update_from_hash(id,{:ui=>JSON.parse(request.params["ui"])}) if request.params["ui"].kind_of?(Hash)
       return {}
     end
 
     def add_item(id)
-      #TODO: need to copy in avatar when hash["ui"] is non null
+      # TODO: need to copy in avatar when hash["ui"] is non null
       target = id_handle(id).create_object()
 
       override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
@@ -117,16 +117,16 @@ module XYZ
       new_item_id = target.add_item(model_id_handle,override_attrs)
 #      id = new_id if new_id
 
-#TODO: how do we get field info from model instance?
+# TODO: how do we get field info from model instance?
       dc_hash = get_object_by_id(id,:datacenter)
       dc_ui = dc_hash[:ui].nil? ? {:items=>{}} : dc_hash[:ui]
-#TODO: cleanup later, right now ui req param indexed by dc id from old style
+# TODO: cleanup later, right now ui req param indexed by dc id from old style
       ui_params = JSON.parse(request.params["ui"])
       dc_ui[:items][new_item_id.to_s.to_sym] = ui_params[id.to_s]
-#TODO: any way to update a model from its object once an instance is created?
+# TODO: any way to update a model from its object once an instance is created?
       update_from_hash(id,{:ui=>dc_ui})
 
-#TODO: clean this up,hack to update UI params for newly cloned object
+# TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 
 #      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
@@ -153,16 +153,16 @@ module XYZ
       redirect redirect_route
     end
 
-    #TODO: is this deprecated
+    # TODO: is this deprecated
     def get_links(id)
       datacenter = id_handle(id,:datacenter).create_object()
       item_list = JSON.parse(request.params["item_list"])
       item_list = item_list.reject do |x|
         Log.error("get links missing needed params") unless x["id"] and x["model"]
       end
-#TODO: move this call into underlying get_links call,
+# TODO: move this call into underlying get_links call,
       item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
-#TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
+# TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
       link_list = datacenter.class.get_port_links(item_list,"component_external")
       return {'data'=>link_list}
     end

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value
+# Test Case 19: NEG - dtk.model.yaml with invalid boolean type attribute value
 
 require 'rubygems'
 require 'rest_client'

@@ -13,8 +13,8 @@ module DTK
       end
 
       def process_attribute_overrides(new_objs_info)
-        #TODO: may see if can do more efficiently using attribute_override col assembly_template_id
-        #parent_objs_info has component info keys: :component_template_id, :component_ref_id and (which is the new component instance)
+        # TODO: may see if can do more efficiently using attribute_override col assembly_template_id
+        # parent_objs_info has component info keys: :component_template_id, :component_ref_id and (which is the new component instance)
 
         attr_override_fs = Model::FieldSet.new(:attribute_override,[:display_name,:component_ref_id,{:attribute_value => :value_asserted}])
         attr_override_wc = nil

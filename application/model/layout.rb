@@ -1,4 +1,4 @@
-#TODO: unify with view_def_processor
+# TODO: unify with view_def_processor
 module XYZ
   class Layout < Model
 

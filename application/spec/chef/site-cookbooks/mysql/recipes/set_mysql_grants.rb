@@ -1,4 +1,4 @@
-#TBD: only for debian now
+# TBD: only for debian now
 db_info = Hash.new
 if node[:mysql][:databases]
   node[:mysql][:databases].each do |db| 

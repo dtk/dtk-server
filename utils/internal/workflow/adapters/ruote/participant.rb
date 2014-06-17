@@ -1,6 +1,6 @@
-#TODO: think want to replace some of the DTK::CreateThread.defer_with_session(user_object) do
-#with  create_thread_in_callback_context(task,workitem) 
-#and also do teh same for non threaded callbacks to make sure that have proper bahvior if fail in callback (i.e., canceling task)
+# TODO: think want to replace some of the DTK::CreateThread.defer_with_session(user_object) do
+# with  create_thread_in_callback_context(task,workitem) 
+# and also do teh same for non threaded callbacks to make sure that have proper bahvior if fail in callback (i.e., canceling task)
 module DTK 
   module WorkflowAdapter
     module RuoteParticipant
@@ -33,7 +33,7 @@ module DTK
           task.update_at_task_start()
         end
         def add_start_task_event?(task)
-          #can be overwritten
+          # can be overwritten
           nil
         end
 
@@ -161,7 +161,7 @@ module DTK
           end
         end
 
-        #if use must coordinate with concurrence merge type
+        # if use must coordinate with concurrence merge type
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
         end
@@ -195,7 +195,7 @@ module DTK
 
        private
         def errors_in_result?(result)
-          #result[:statuscode] is for transport errors and data is for errors for agent
+          # result[:statuscode] is for transport errors and data is for errors for agent
           if result[:statuscode] != 0
             ["transport_error"]
           else
@@ -221,7 +221,7 @@ module DTK
         end
         def cancel(fei, flavour)
           pp "cancel called on debug task"
-          #TODO: shut off loop not working
+          # TODO: shut off loop not working
           p @is_on
           @is_on = false
         end

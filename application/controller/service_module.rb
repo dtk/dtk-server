@@ -3,7 +3,7 @@ module DTK
     helper :module_helper
     helper :assembly_helper
     
-    #TODO: for debugging; will be removed
+    # TODO: for debugging; will be removed
     def rest__debug_get_project_trees()
       ServiceModule.get_project_trees(model_handle)
       rest_ok_response
@@ -14,7 +14,7 @@ module DTK
       service_module.get_ports()
       rest_ok_response
     end
-    #end: for debugging; will be removed
+    # end: for debugging; will be removed
 
     #### actions to interact with remote repos ###
     def rest__list_remote()
@@ -39,19 +39,19 @@ module DTK
       rest_ok_response service_module.get_referenced_component_modules(Opts.new(:detail_to_include=>[:versions]))
     end
 
-    #TODO: rename; this is just called by install; import ops call create route
+    # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 
-    #TODO: rename; this is just called by publish
+    # TODO: rename; this is just called by publish
     def rest__export()
       service_module = create_obj(:service_module_id)
       publish_to_dtkn_helper(service_module)
       rest_ok_response 
     end
     
-    #this should be called when the module is linked, but the specfic version is not
+    # this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
@@ -60,7 +60,7 @@ module DTK
     end
 
 
-    #get remote_module_info; throws an access rights usage eerror if user does not have access
+    # get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
       rest_ok_response get_remote_module_info_helper(service_module)

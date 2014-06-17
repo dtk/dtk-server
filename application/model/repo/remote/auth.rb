@@ -5,7 +5,7 @@ module DTK; class Repo
       ACCESS_READ  = 'R'
       ACCESS_WRITE = 'W'
 
-      #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
+      # TODO: ModuleBranch::Location: see why need client_rsa_pub_key
       def authorize_dtk_instance(client_rsa_pub_key = nil, access_rights = nil)
         username     = dtk_instance_remote_repo_username()
         rsa_pub_key  = dtk_instance_rsa_pub_key()

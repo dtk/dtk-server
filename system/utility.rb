@@ -33,12 +33,12 @@ module R8Tpl
       end
 
       def get_i18n_port_name(i18n,port)
-        #TODO: this has implcit assumption that port is associated with a certain attribute and component
+        # TODO: this has implcit assumption that port is associated with a certain attribute and component
         attr_name = port.link_def_name()
         cmp_name = port.component_name()
         attr_i18n = I18nAux::i18n_string_attribute(i18n,attr_name)||attr_name
         cmp_i18n = I18nAux::i18n_string_component(i18n,cmp_name)||cmp_name
-        #TODO: needs revision; also probably move to model/port
+        # TODO: needs revision; also probably move to model/port
         if [ "component_external", "component_internal_external"].include?(port[:type])
           "#{cmp_i18n} / #{attr_i18n}"
         else
@@ -50,12 +50,12 @@ module R8Tpl
         def self.i18n_string_component(i18n,input_string,aux=nil)
           string = translate_input(i18n,:component,input_string)
           return string if string
-          #otherwise use the following heuristic
+          # otherwise use the following heuristic
           input_string.to_s.gsub(XYZ::Model::Delim::RegexpCommon, " ")
         end
 
         def self.i18n_string_attribute(i18n,input_string,component_type=nil)
-          #TODO: stub; not yet using component_type
+          # TODO: stub; not yet using component_type
           proc_input_string,index = ret_removed_array_index(input_string)
           translation = translate_input(i18n,:attribute,proc_input_string)
           ret = (translation ? translation : proc_input_string.to_s)
@@ -70,7 +70,7 @@ module R8Tpl
           i18n[model_name][input_string.to_sym]
         end
     
-        #returns first array index
+        # returns first array index
         def self.ret_removed_array_index(input_string)
           [input_string.to_s.sub(XYZ::Model::Delim::NumericIndexRegexp,""),$1 && $1.to_i]
         end
@@ -137,7 +137,7 @@ module R8Tpl
       end
 
 
-#TODO: build role based cache versions
+# TODO: build role based cache versions
       def build_model_defs_js_cache()
         set_app_def() unless Cache[:app]
 
@@ -150,7 +150,7 @@ module R8Tpl
         File.open(cache_file_name, 'w') {|fhandle|fhandle.write(cache_str)}
       end
 
-#TODO: build language based cache versions
+# TODO: build language based cache versions
       def build_model_i18n_js_cache(user)
         set_app_def() unless Cache[:app]
 

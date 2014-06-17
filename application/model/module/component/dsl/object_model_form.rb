@@ -32,7 +32,7 @@ module DTK; class ComponentDSL
     def self.convert_to_internal_cmp_form(cmp)
       cmp.gsub(Regexp.new(CmpPPDelim),ModCmpDelim)
     end
-    #TODO: above should call DTK::Component methods and not need the Constants here
+    # TODO: above should call DTK::Component methods and not need the Constants here
     def component_print_form(cmp_internal_form)
       self.class.component_print_form(cmp_internal_form)
     end

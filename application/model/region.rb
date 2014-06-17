@@ -11,7 +11,7 @@ module XYZ
       end
     end
   end
-  #TBD: do not include association between region gateway and network region of node since this is inferede through theer connection to a network partition; this also allows for more advanced models where node or gateway spans two differnt regions
+  # TBD: do not include association between region gateway and network region of node since this is inferede through theer connection to a network partition; this also allows for more advanced models where node or gateway spans two differnt regions
   class AssocRegionNetwork < Model
     set_relation_name(:region,:assoc_network_partition)
     class << self

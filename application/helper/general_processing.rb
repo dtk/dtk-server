@@ -1,7 +1,7 @@
 module Ramaze::Helper
   module GeneralProcessing
     def ret_session_context_id()
-      #stub
+      # stub
       2
     end
 
@@ -46,15 +46,15 @@ module Ramaze::Helper
     def initialize
       super
       @cached_user_obj = nil
-      #TODO: see where these are used; remove if not used
+      # TODO: see where these are used; remove if not used
       @public_js_root = R8::Config[:public_js_root]
       @public_css_root = R8::Config[:public_css_root]
       @public_images_root = R8::Config[:public_images_root]
 
-      #TBD: may make a calls fn that declares a cached var to be 'self documenting'
+      # TBD: may make a calls fn that declares a cached var to be 'self documenting'
       @model_name = nil #cached ; called on demand
 
-      #used when action set calls actions
+      # used when action set calls actions
       @parsed_query_string = nil
 
       @css_includes = Array.new
@@ -65,8 +65,8 @@ module Ramaze::Helper
 
       @layout = nil
 
-      #if there is an action set then call by value is used to substitue in child actions; this var
-      #will be set to have av pairs set from global params given in action set call
+      # if there is an action set then call by value is used to substitue in child actions; this var
+      # will be set to have av pairs set from global params given in action set call
       @action_set_param_map = Hash.new
 
       @ctrl_results = nil
@@ -76,7 +76,7 @@ module Ramaze::Helper
       @json_response ||= rest_request?() or ajax_request?() 
     end
     def rest_request?()
-      #TODO: needs to be fixed up; issue is different envs (linux versus windows) give different values for request.env["REQUEST_URI"] 
+      # TODO: needs to be fixed up; issue is different envs (linux versus windows) give different values for request.env["REQUEST_URI"] 
       @rest_request ||= (request.env["REQUEST_URI"] =~ Regexp.new("/rest/") ? true : nil)
     end
     def ajax_request?

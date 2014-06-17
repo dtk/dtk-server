@@ -79,7 +79,7 @@ module DTK
       end
 
       def delete_user(username)
-        #TODO: may want to remove all refs to user in .conf files
+        # TODO: may want to remove all refs to user in .conf files
         ret = username
         key_path = repo_user_public_key_relative_path(username)
         file_deleted = admin_repo.delete_file?(key_path)
@@ -93,7 +93,7 @@ module DTK
         set_user_rights_in_repos(username,repo_names,"")
       end
 
-      #access_rights="" means remove access rights
+      # access_rights="" means remove access rights
       def set_user_rights_in_repos(username,repo_names,access_rights="R")
         repo_names = [repo_names] unless repo_names.kind_of?(Array)
         updated_repos = Array.new
@@ -101,11 +101,11 @@ module DTK
           repo_user_acls = get_existing_repo_user_acls(repo_name)
           match = repo_user_acls.find{|r|r[:repo_username] == username}
           if match
-            #no op if username has specified rights
+            # no op if username has specified rights
             next if match[:access_rights] == access_rights
             repo_user_acls.reject!{|r|r[:repo_username] == username}
           else
-            #no op if username does not appear in repo and access_rights="", meaning remove access rights
+            # no op if username does not appear in repo and access_rights="", meaning remove access rights
             next if access_rights.empty?
           end
           updated_repos << repo_name
@@ -179,7 +179,7 @@ module DTK
         unless raw_content
           raise Error.new("Repo (#{repo_name}) does not exist")
         end
-        #expections is that has form given by ConfigFileTemplate)
+        # expections is that has form given by ConfigFileTemplate)
         raw_content.each_line do |l|
           l.chomp!()
           if l =~ /^[ ]*repo[ ]+([^ ]+)/
@@ -193,7 +193,7 @@ module DTK
               ret << {:access_rights => access_rights, :repo_username => user}
             end
           elsif l.empty?
-            #no op
+            # no op
           else
             raise Error.new("Parsing error: (#{l})")
           end
@@ -202,7 +202,7 @@ module DTK
       end
 
       def generate_config_file_content(repo_name,repo_user_acls)
-        #group users by user rights
+        # group users by user rights
         users_rights = Hash.new
         repo_user_acls.each do |acl|
           (users_rights[acl[:access_rights]] ||= Array.new) << acl[:repo_username]

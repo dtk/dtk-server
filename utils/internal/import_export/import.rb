@@ -1,4 +1,4 @@
-#TODO: unify with file_asset/r8_meta
+# TODO: unify with file_asset/r8_meta
 module DTK
   module CommonInputImport
     def uri_qualified_by_username(relation_type,ref,username)
@@ -16,11 +16,11 @@ module DTK
     end
   end
 
-  #class mixin
+  # class mixin
   module ImportObject
     include CommonInputImport
-    #assumption is that top_container_idh is in uri form
-    #returns [library_idh,implementation_idh]
+    # assumption is that top_container_idh is in uri form
+    # returns [library_idh,implementation_idh]
     def deprecate_create_file_assets_from_dir_els(top_container_idh,module_dir,module_name,config_agent_type)
       library_impl_hash = Implementation::ret_library_implementation_hash(module_dir,module_name,config_agent_type)
       username = CurrentSession.new.get_username()
@@ -35,12 +35,12 @@ module DTK
       }
       input_hash_content_into_model(top_container_idh,hash_content)
       library_ref = users_private_lib_name
-      #assumption is that library_impl_hash only has one impleemntation in it
+      # assumption is that library_impl_hash only has one impleemntation in it
       impl_ref = library_impl_hash.keys.first
       ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
     end
 
-    #TODO: this is somewhat of a hack; better is if input_hash_content_into_model gave this info
+    # TODO: this is somewhat of a hack; better is if input_hash_content_into_model gave this info
     def ret_library_and_impl_id_handles(top_container_idh,library_ref,impl_ref)
       library_uri = "/library/#{library_ref}"
       impl_uri = "#{library_uri}/implementation/#{impl_ref}"
@@ -49,14 +49,14 @@ module DTK
       end
     end
 
-    #assumption is that container_id_handle is in uri form
+    # assumption is that container_id_handle is in uri form
     def import_objects_from_file(container_id_handle,json_file,opts={})
       raise Error.new("file given #{json_file} does not exist") unless File.exists?(json_file)
       hash_content = Aux::hash_from_file_with_json(json_file) 
       import_objects_from_hash(container_id_handle,hash_content,opts)
     end
 
-    #assumption is that container_id_handle is in uri form
+    # assumption is that container_id_handle is in uri form
     def import_objects_from_hash(container_id_handle,hash_content,opts={})
       create_prefix_object_if_needed(container_id_handle,opts)
       return nil unless hash_content
@@ -76,7 +76,7 @@ module DTK
       global_fks = Hash.new
       return_info = nil
       unless container_id_handle.is_top?
-        #TODO: do we need to factor in opts[:username] here?
+        # TODO: do we need to factor in opts[:username] here?
         if opts[:return_info]
           global_fks, return_info = input_into_model(container_id_handle,hash_content,opts) 
         else
@@ -124,27 +124,27 @@ module DTK
           raise Error.new("bad config agent type") unless config_agent_type
           component_hash.each do |local_cmp_type,v|
             cmp_ref = "#{config_agent_type}-#{local_cmp_type}"
-            #TODO: right now; links defs just have internal
+            # TODO: right now; links defs just have internal
             if link_defs = v.delete("link_defs")
               parsed_link_def = LinkDef.parse_serialized_form_local(link_defs,config_agent_type,remote_link_defs)
               (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
             end
-            #TODO: when link_defs have externa;l deprecate below
+            # TODO: when link_defs have externa;l deprecate below
             if ext_link_defs = v.delete("external_link_defs")
-              #TODO: temp hack to put in type = "external"
+              # TODO: temp hack to put in type = "external"
               ext_link_defs.each do |ld|
                 (ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}
               end
               parsed_link_def = LinkDef.parse_serialized_form_local(ext_link_defs,config_agent_type,remote_link_defs)
               (v["link_def"] ||= Hash.new).merge!(parsed_link_def)
-              #TODO: deprecate below
+              # TODO: deprecate below
               v["link_defs"] ||= Hash.new
               v["link_defs"]["external"] = ext_link_defs
             end
             hash["library"][library_ref]["component"][cmp_ref] = v.merge("repo" => repo)
           end
         end
-        #process the link defs for remote components
+        # process the link defs for remote components
         remote_link_defs.each do |remote_cmp_type,remote_link_def|
           config_agent_type = remote_link_def.values.first.delete(:config_agent_type)
           remote_cmp_ref = "#{config_agent_type}-#{remote_cmp_type}"
@@ -182,7 +182,7 @@ module DTK
         impl_repos = indexed_file_paths.keys
         return unless impl_repos
 
-        #add implementation objects to hash
+        # add implementation objects to hash
         implementation_hash = hash["library"][library_ref]["implementation"] ||= Hash.new
         impl_repos.each do |repo|
           next unless file_paths = indexed_file_paths[repo]
@@ -195,8 +195,8 @@ module DTK
           next unless type
 
           cmp_file_assets = file_paths.inject({}) do |h,file_path_x|
-            #if repo is null then want ful file path; otherwise we have repo per repo and
-            #want to strip off leading repo
+            # if repo is null then want ful file path; otherwise we have repo per repo and
+            # want to strip off leading repo
             file_path = repo ? file_path_x.gsub(Regexp.new("^#{repo}/"),"") : file_path_x
             file_name = file_path =~ Regexp.new("/([^/]+$)") ? $1 : file_path
             file_asset = {
@@ -208,7 +208,7 @@ module DTK
             file_asset_ref = file_path.gsub(Regexp.new("/"),"_") #removing "/" since they confuse processing
             h.merge(file_asset_ref => file_asset)
           end
-          #TDOO: simple way of getting implementation
+          # TDOO: simple way of getting implementation
           impl_name = repo.gsub(/^puppet[-_]/,"").gsub(/^chef[-_]/,"")
           implementation_hash[repo] = {
             "display_name" => impl_name,
@@ -219,7 +219,7 @@ module DTK
           }
         end
 
-        #add foreign key to components that reference an implementation
+        # add foreign key to components that reference an implementation
         components_hash = hash["library"][library_ref]["component"]
         components_hash.each_value do |cmp_info|
           next unless repo = cmp_info["repo"]
@@ -227,7 +227,7 @@ module DTK
         end
       end
 
-      #TODO: deprecate
+      # TODO: deprecate
       def self.ret_library_implementation_hash(module_dir,module_name,config_agent_type)
         file_paths = Array.new
         Dir.chdir(module_dir) do

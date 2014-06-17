@@ -54,7 +54,7 @@ module DTK; class Node
       end
 
       def create_new_ports_and_links(opts={})
-        #get the link defs/component_ports associated with components on the node or for assembly, associated with an assembly node
+        # get the link defs/component_ports associated with components on the node or for assembly, associated with an assembly node
         node_link_defs_info = get_relevant_link_def_info()
 
         return if node_link_defs_info.empty?()
@@ -62,7 +62,7 @@ module DTK; class Node
         new_ports = create_new_ports(node_link_defs_info,opts)
 
         unless opts[:donot_create_internal_links]
-          #set internal_node_link_defs_info and add any with new ports
+          # set internal_node_link_defs_info and add any with new ports
           internal_node_link_defs_info = Array.new
           node_id = @node.id()
           node_link_defs_info.each do |r|
@@ -72,7 +72,7 @@ module DTK; class Node
             end
           end
           unless internal_node_link_defs_info.empty?
-            #TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
+            # TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
             LinkDef::AutoComplete.create_internal_links(@node,@component,internal_node_link_defs_info)
           end
         end
@@ -94,7 +94,7 @@ module DTK; class Node
         component_type = @component.get_field?(:component_type)
         component_id = @component.id()
         ndx_ret = Hash.new
-        #prune if duplicate from perspective of link_def_id and remote_component_type
+        # prune if duplicate from perspective of link_def_id and remote_component_type
         link_def_info_to_prune.each do |r|
           link_def = r[:link_def]
           remote_component_type =  (r[:link_def_link]||{})[:remote_component_type] #could be nil
@@ -110,11 +110,11 @@ module DTK; class Node
         ndx_ret.values()
       end
 
-      #This creates either ports on @component or ports connected by link def to @component
+      # This creates either ports on @component or ports connected by link def to @component
       def create_new_ports(node_link_defs_info,opts={})
         ret = Array.new
 
-        #find info about any component/ports belonging to a relevant node of that is connected by link def to @component
+        # find info about any component/ports belonging to a relevant node of that is connected by link def to @component
         ndx_cmps = get_relevant_components(node_link_defs_info).inject(Hash.new){|h,cmp|h.merge(cmp[:component_type] => cmp)}
         get_relevant_ports(ndx_cmps.values).each{|port|@existing_ports.add_port(port)}
         ndx_nodes = @relevant_nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n)}
@@ -123,17 +123,17 @@ module DTK; class Node
         node_link_defs_info.each do |r|
           link_def = r[:link_def]
           possible_port = Port.ret_port_create_hash(link_def,@node,@component,:direction => r[:direction])
-          #returns true if new port taht is added
+          # returns true if new port taht is added
           if @existing_ports.add_if_does_not_exists?(possible_port)
             create_rows << possible_port
           end
           
           if r[:direction] == "input"
             remote_cmp_type = r[:link_def_link][:remote_component_type]
-            #TODO: need to see if this needs enhancement to treat components that take titles
+            # TODO: need to see if this needs enhancement to treat components that take titles
             if remote_cmp = ndx_cmps[remote_cmp_type]
               remote_node = ndx_nodes[remote_cmp[:node_node_id]]
-              #returns true if new port taht is added
+              # returns true if new port taht is added
               possible_port = Port.ret_port_create_hash(link_def,remote_node,remote_cmp,:direction => "output")
               if @existing_ports.add_if_does_not_exists?(possible_port)
                 create_rows << possible_port
@@ -198,11 +198,11 @@ module DTK; class Node
         end
       end
 
-      #TODO: may deprecate; used just for GUI
+      # TODO: may deprecate; used just for GUI
       def materialize_ports!(ports)
         ret = Array.new
         return ret if ports.empty?
-        #TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
+        # TODO: more efficient way to do this; instead include all needed columns in :returning_sql_cols above
         port_mh = @node.child_model_handle(:port)
         external_port_idhs = ports.map do |port_hash|
           port_mh.createIDH(:id => port_hash[:id]) if ["component_internal_external","component_external"].include?(port_hash[:type])

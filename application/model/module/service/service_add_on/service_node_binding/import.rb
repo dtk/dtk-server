@@ -26,7 +26,7 @@ module DTK
         ret
       end
      private
-      #returns [id,ref]
+      # returns [id,ref]
       def find_assembly_node_id_and_ref(assembly_node_ref)
         assembly_name,node_name = parse_assembly_node_ref(assembly_node_ref)
         match = @aug_assembly_nodes.find do |r|
@@ -40,9 +40,9 @@ module DTK
         end
       end
 
-      #returns [assembly_name,node_name]
+      # returns [assembly_name,node_name]
       def parse_assembly_node_ref(assembly_node_ref)
-        #TODO: should also check that assembly_name is the service add on assembly or sub assembly  
+        # TODO: should also check that assembly_name is the service add on assembly or sub assembly  
         if assembly_node_ref =~ Regexp.new("(^[^/]+)/([^/]+$)")
           [$1,$2]
         else

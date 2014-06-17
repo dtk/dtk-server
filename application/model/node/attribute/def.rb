@@ -15,7 +15,7 @@ module DTK; class Node
         @@index_by_canonical_name ||= Hash.new
         Add.new(@@index_by_canonical_name,canonical_attr_name,klass,&block)
         if klass
-          #Interprted def is a node attribute that has additional methods defined on it
+          # Interprted def is a node attribute that has additional methods defined on it
           (@@interpreted_def ||= Hash.new)[klass] = @@index_by_canonical_name[canonical_attr_name]
         end
       end
@@ -49,7 +49,7 @@ module DTK; class Node
           attrs[attr]
         end
         def types(type_description)
-          #for types has a lambda function that if true means the value is legal; if in dsl user gives array we convert this to lambda function
+          # for types has a lambda function that if true means the value is legal; if in dsl user gives array we convert this to lambda function
           lambda_fn = 
             if type_description.kind_of?(Array)
               lambda{|x|type_description.include?(x)}
@@ -118,7 +118,7 @@ end; end
     class Def 
     def self.attribute_fields(type)
       IAAS.hash(:ec2)[:attributes].inject(Hash.new) do |h,(name,attr_def)|
-        #to prune out meta fields from ones that are fields on attribiute object
+        # to prune out meta fields from ones that are fields on attribiute object
         attr_fields_asserted = Aux.hash_subset(attr_def,AttributeFields)
         attr_fields = Fields.new(attr_def[:types]).merge(:display_name => name.to_s).merge(attr_fields_asserted)
         h.merge(name => attr_fields)

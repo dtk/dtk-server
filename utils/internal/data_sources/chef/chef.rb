@@ -4,8 +4,8 @@ require 'mixlib/authentication'
 require 'chef/cookbook/metadata/version'
 require  File.expand_path('mixins/metadata', File.dirname(__FILE__))
 require  File.expand_path('mixins/assembly', File.dirname(__FILE__))
-#TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
-#TODO: improve memory usage by only storing attributes that are needed
+# TODO: written to get around deficiency that chef get node and searchbrings in full node, not partial info
+# TODO: improve memory usage by only storing attributes that are needed
 module XYZ
   module DSConnector
     class Chef < Top
@@ -95,8 +95,8 @@ module XYZ
       end
 
       def get_nodes()
-        #TODO: may be better to make rest call per node or use chef iterator functionality
-        #TODO": this is increemntal yupdate; wil wil be in context where this is needed?
+        # TODO: may be better to make rest call per node or use chef iterator functionality
+        # TODO": this is increemntal yupdate; wil wil be in context where this is needed?
         search_string = "node?q=*:*"
         unless @chef_node_cache.empty?
           search_string = "node?q="+@chef_node_cache.keys.map{|n|"NOT%20name:#{n}"}.join("%20AND%20")
@@ -119,14 +119,14 @@ module XYZ
       end
 
 
-      #TODO: stub
+      # TODO: stub
       def filter_to_only_relevant(node)
         node
       end
 
       def get_cookbook_names()
         # get_rest("cookbooks")
-        #stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
+        # stub that just gets cookbooks from run list; it actually has recipes so can pass this in too
         get_node_recipe_assocs().values.flatten.map{|x|x.gsub(/::.+$/,"")}.uniq
       end
 
@@ -147,13 +147,13 @@ module XYZ
       end
 
       def get_metadata_aux(cookbook_name)
-        #need version number if 0.9
+        # need version number if 0.9
         cookbook = [cookbook_name]
         if ChefVersion.current >= ChefVersion["0.9.0"]
-          #need to get meta first
+          # need to get meta first
           r = get_rest("cookbooks/#{cookbook_name}")
           return nil unless r
-          #get max, in case multiple versions
+          # get max, in case multiple versions
           cookbook << r[cookbook_name].map{|x|ChefVersion[x]}.max.chef_version
         end
 
@@ -164,7 +164,7 @@ module XYZ
       end
 
 
-      #removes attributes like foo when teher also exists foo/k1, foo/k2
+      # removes attributes like foo when teher also exists foo/k1, foo/k2
       def remove_subsuming_attributes!(metadata)
         return metadata unless metadata and metadata["attributes"]
         exploded_keys = metadata["attributes"].keys.map{|x|x.split("/")}
@@ -223,12 +223,12 @@ module XYZ
       def initialize_chef_connection()
         ::Chef::Config.from_file("/root/.chef/knife.rb") #TODO: stub; will replace by passing in relavant paramters
         ::Chef::Log.level(::Chef::Config[:log_level])
-        #Mixlib::Authentication is a gem provided vy Opscode
+        # Mixlib::Authentication is a gem provided vy Opscode
         ::Mixlib::Authentication::Log.logger = ::Chef::Log.logger
         ::Chef::REST.new(::Chef::Config[:chef_server_url], ::Chef::Config[:node_name],::Chef::Config[:client_key])
       end
 
-      #if node is nil means that getting info just from metadata
+      # if node is nil means that getting info just from metadata
       def get_attributes_with_values(recipe_name,metadata,node=nil)
         index = node ? node.name : :recipe
         @attributes_with_values[index] ||= Hash.new
@@ -296,7 +296,7 @@ module XYZ
         end
 
         def <=>(cv)
-          #assume form is "x.y.z"
+          # assume form is "x.y.z"
           v1 = self.chef_version.split(".").map{|x|x.to_i}
           v2 = cv.chef_version.split(".").map{|x|x.to_i}
           for i in 0..2

@@ -2,7 +2,7 @@ require 'sshkey'
 r8_require('../../utils/internal/gitolite_manager')
 
 module DTK
-  #TODO: RepoType should be in common
+  # TODO: RepoType should be in common
   class RepoType < String
     def is_component_module?()
       self =~ /^component_module/
@@ -15,7 +15,7 @@ module DTK
     def initialize(rest_base_url_or_host=nil)
       rest_base_url_or_host ||= R8::Config[:repo][:remote][:host]
       if rest_base_url_or_host =~ /^https?:/
-        #input is rest_base_url
+        # input is rest_base_url
         @rest_base_url = rest_base_url_or_host
         if @rest_base_url =~ Regexp.new("^https?://(.+):[0-9]+$")
           @host = $1
@@ -23,7 +23,7 @@ module DTK
           @host = $1
         end
       else
-        #input is host
+        # input is host
         @host = rest_base_url_or_host
         port = DefaultRestServicePort #TODO: may put in provision that this can be omitted or explicitly passed
         @rest_base_url = "http://#{@host}#{port && ":#{port.to_s}"}"
@@ -318,7 +318,7 @@ module DTK
     def error_msg(response)
       errors = response["errors"]
       if response.kind_of?(Common::Response::Error) and errors
-        #if include_error_code?(errors,"connection_refused") 
+        # if include_error_code?(errors,"connection_refused") 
         "Repo Manager refused the connection; it may be down"
       else
         error_detail = nil
@@ -442,7 +442,7 @@ module DTK
       params_hash
     end
 
-    #repo access
+    # repo access
     class BranchInstance < self
       def initialize(rest_base_url,repo,branch,opts={})
         super(rest_base_url)

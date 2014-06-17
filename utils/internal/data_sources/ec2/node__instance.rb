@@ -4,7 +4,7 @@ module XYZ
     class Ec2
       class NodeInstance < Top 
         extend MonitoringItemsClassMixin
-        #TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
+        # TBD: could write 'lint checker that makes sure that target indexes correspond to schema described in models
         definitions do
           target[:type] = "instance"
           target[:display_name] = source[:id]
@@ -47,7 +47,7 @@ module XYZ
 
           def filter_raw_source_objects(source)
             ret = DBUpdateHash.new
-            #TODO: make this data driven from model -> dependent on what is needed for virtual columns
+            # TODO: make this data driven from model -> dependent on what is needed for virtual columns
             [:groups, :flavor].each{|k|ret[k] = source[k] if source[k]}
             ret
           end

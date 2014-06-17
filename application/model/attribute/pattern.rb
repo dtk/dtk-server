@@ -45,7 +45,7 @@ module DTK; class Attribute
       create(attr_term,base_object,opts).set_parent_and_attributes!(base_object.id_handle(),opts)
     end
 
-    #returns attribute patterns
+    # returns attribute patterns
     def self.set_attributes(base_object,av_pairs,opts={})
       ret = Array.new
       attribute_rows = Array.new
@@ -62,8 +62,8 @@ module DTK; class Attribute
         pattern = create_attr_pattern(base_object,av_pair[:pattern],opts)
         ret << pattern
         attr_idhs = pattern.attribute_idhs
-        #TODO: modify; rather than checking checking datatype; convert attribute value, which might be in string form to right ruby data type
-        #do not need to check value validity if opts[:create] (since checked already)
+        # TODO: modify; rather than checking checking datatype; convert attribute value, which might be in string form to right ruby data type
+        # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
           attr_idhs.each do |attr_idh|
             unless pattern.valid_value?(value,attr_idh)

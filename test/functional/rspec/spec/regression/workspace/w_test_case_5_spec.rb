@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content
+# Test Case 5: Create two nodes (list nodes), delete one node (list nodes again) and purge workspace content
 
 require 'rubygems'
 require 'rest_client'

@@ -1,5 +1,5 @@
 
-#this was example pulled from old tpl tests
+# this was example pulled from old tpl tests
 views.node = {
   :default => {
     :list => {

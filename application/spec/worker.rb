@@ -2,7 +2,7 @@
 require 'rubygems'
 require 'json'
 
-#TBD: below is just temp until make into gems
+# TBD: below is just temp until make into gems
 project = File.expand_path('../', File.dirname(__FILE__)) + "/"
 root = File.expand_path('../../', File.dirname(__FILE__)) + "/"
 SYSTEM_DIR = root + 'system/'
@@ -10,13 +10,13 @@ CORE_MODEL_DIR  = root + 'core_model/'
 
 require root + 'utils/utils'
 
-#TBD: might change, but this needs to be done before otehr includes
+# TBD: might change, but this needs to be done before otehr includes
 XYZ::Config.process_config_file("/etc/reactor8/worker.conf")
 
 require SYSTEM_DIR + 'cache'
 require SYSTEM_DIR + 'messaging'
 
-#TBD: can just include a smaller subset below
+# TBD: can just include a smaller subset below
 require project + 'model/init'
 
 

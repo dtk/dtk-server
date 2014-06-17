@@ -1,12 +1,12 @@
 module XYZ
   module DSNormalizer
     class Top
-      #filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
+      # filter applied when into put in ds_attribute bag gets overwritten for non trivial filter
       def self.filter_raw_source_objects(ds_hash)
         ds_hash
       end
 
-      #default unique_key; can be overwritten
+      # default unique_key; can be overwritten
       def self.unique_keys(ds_hash)
         [relative_distinguished_name(ds_hash)]
       end
@@ -34,12 +34,12 @@ module XYZ
        @condition = condition 
      end
 
-     #top level "conditionals"
+     # top level "conditionals"
      def if_exists(condition,&block)
        context = Context.new(self,:if_exists,condition)
        context.instance_eval(&block) 
      end
-     #sub commands
+     # sub commands
      def target()
        matching_cond_index = class_rules.keys.find{|cond|cond == self}
        class_rules[matching_cond_index || self]
@@ -49,7 +49,7 @@ module XYZ
        target[obj_type] = NestedDefinition.new(obj_type,source_attributes)
      end
 
-     #TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
+     # TBD: need to fix; need to determine if use source attribute path, target attribute path and/or source ds_key to refer to foreign key
      def foreign_key(obj_type,path)
        ForeignKey.new(fn(lambda{|source|"/#{obj_type}/#{source}"},path))
      end
@@ -99,7 +99,7 @@ module XYZ
        @source_attributes = source_attributes
      end
      def normalize(ds_hash_list,parent_ds_object)
-       #TBD: how to avoid this db call
+       # TBD: how to avoid this db call
        ds_object = parent_ds_object.get_directly_contained_objects(:data_source_entry,{:obj_type=>@obj_type.to_s}).first
        raise Error.new("cannot find data source adapter for nested definition for #{@obj_type.to_s}") if ds_object.nil?
        ret = DBUpdateHash.new()
@@ -151,9 +151,9 @@ module XYZ
     def apply(ds_hash)
       evaluated_args = @args.map{|term|apply_to_term(term,ds_hash)}
       if @function_name 
-        #resolve with respect class adapter
-        #TODO: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
-        #TODO: hack to handle when fn eval under if context
+        # resolve with respect class adapter
+        # TODO: where do we put "wired" fns; can put it in DSNormalizerTop if using this path below
+        # TODO: hack to handle when fn eval under if context
         if @context_parent.parent.respond_to?(@function_name)
           @context_parent.parent.send(@function_name,*evaluated_args)
         else

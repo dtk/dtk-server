@@ -2,9 +2,9 @@ module DTK
   module WorkflowAdapter
     module RuoteParticipant
       class CreateNode < Top
-        #LockforDebug = Mutex.new
+        # LockforDebug = Mutex.new
         def consume(workitem)
-          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+          # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
           execution_context(task,workitem,task_start) do

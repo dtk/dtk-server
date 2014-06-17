@@ -42,17 +42,17 @@ module DTK; class Component
       get_obj_helper(:component_module)
     end
 
-    #returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
+    # returns non-nil only if this is a component that takes a title and if so returns the attribute object that stores the title
     def get_title_attribute_name?()
       rows = self.class.get_title_attributes([id_handle])
       rows.first[:display_name] unless rows.empty?
     end
 
-    #for any member of cmp_tmpl_idhs that is a non-singleton, it returns the title attribute
+    # for any member of cmp_tmpl_idhs that is a non-singleton, it returns the title attribute
     def self.get_title_attributes(cmp_tmpl_idhs)
       ret = Array.new
       return ret if cmp_tmpl_idhs.empty?
-      #first see if not only_one_per_node and has the default attribute
+      # first see if not only_one_per_node and has the default attribute
       sp_hash = {
         :cols => [:attribute_default_title_field],
         :filter => [:and,[:eq,:only_one_per_node,false],
@@ -61,9 +61,9 @@ module DTK; class Component
       rows = get_objs(cmp_tmpl_idhs.first.createMH(),sp_hash)
       return ret if rows.empty?
       
-      #rows will have element for each element of cmp_tmpl_idhs that is non-singleton
-      #element key :attribute will be nil if it does not use teh default key; for all 
-      #these we need to make the more expensive call Attribute.get_title_attributes
+      # rows will have element for each element of cmp_tmpl_idhs that is non-singleton
+      # element key :attribute will be nil if it does not use teh default key; for all 
+      # these we need to make the more expensive call Attribute.get_title_attributes
       need_title_attrs_cmp_idhs = rows.select{|r|r[:attribute].nil?}.map{|r|r.id_handle()}
       ret = rows.map{|r|r[:attribute]}.compact
       unless need_title_attrs_cmp_idhs.empty?
@@ -72,7 +72,7 @@ module DTK; class Component
       ret
     end
 
-    #type_version_list is an array with each element having keys :component_type, :version_field
+    # type_version_list is an array with each element having keys :component_type, :version_field
     def self.get_matching_type_and_version(project_idh,type_version_field_list,opts={})
       ret = Array.new
       cmp_types = type_version_field_list.map{|r|r[:component_type]}.uniq
@@ -146,7 +146,7 @@ module DTK; class Component
       check_valid_id_helper(model_handle,id,filter,opts)
     end
 
-    #if title is in the name, this strips it off
+    # if title is in the name, this strips it off
     def self.name_to_id(model_handle,name,version_or_versions=nil)
       if version_or_versions.kind_of?(Array)
         version_or_versions.each do |version|
@@ -161,7 +161,7 @@ module DTK; class Component
     end
 
    private 
-    #if title is in the name, this strips it off
+    # if title is in the name, this strips it off
     def self.name_to_id_aux(model_handle,name,version,opts={})
       display_name = display_name_from_user_friendly_name(name)
       component_type,title =  ComponentTitle.parse_component_display_name(display_name)
@@ -178,15 +178,15 @@ module DTK; class Component
     end
   end
 
-  #TODO: may move to be instance method on Template
+  # TODO: may move to be instance method on Template
   module TemplateMixin
     def update_default(attribute_name,val,field_to_match=:display_name)
       tmpl_attr_obj =  get_virtual_attribute(attribute_name,[:id,:value_asserted],field_to_match)
       raise Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
       update(:updated => true)
       tmpl_attr_obj.update(:value_asserted => val)
-      #update any instance that points to this template, which does not have an instance value asserted
-      #TODO: can be more efficient by doing selct and update at same time
+      # update any instance that points to this template, which does not have an instance value asserted
+      # TODO: can be more efficient by doing selct and update at same time
       base_sp_hash = {
         :model_name => :component,
         :filter => [:eq, :ancestor_id, id()],

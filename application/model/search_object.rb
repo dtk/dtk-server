@@ -36,7 +36,7 @@ module XYZ
     def json()
       sp = self[:search_pattern]
 
-      #TODO: this is for case when get back search objects from get objects; remove when process uniformally meaning non null will always be serach pattern object
+      # TODO: this is for case when get back search objects from get objects; remove when process uniformally meaning non null will always be serach pattern object
       hash_for_json_sp = sp ? (sp.kind_of?(SearchPattern) ? sp.hash_for_json_generate() : sp) : nil 
 
       hash_for_json_generate = {
@@ -64,7 +64,7 @@ Remove
 
       raise Error::NotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
-      #TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
+      # TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
       view.update_cache_for_saved_search()
     end
 
@@ -121,7 +121,7 @@ Remove
     end
 
     def self.is_valid?(input_hash)
-      #TODO: can do finer grain validation
+      # TODO: can do finer grain validation
       (nil_if_empty(input_hash["id"]) or nil_if_empty(input_hash["search_pattern"])) ? true : nil
     end
 

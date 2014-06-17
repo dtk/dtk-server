@@ -1,5 +1,5 @@
 module DTK
-  #TODO: move all dynamic loading to use these helper classes
+  # TODO: move all dynamic loading to use these helper classes
   class DynamicLoader
     def self.load_and_return_adapter_class(adapter_type,adapter_name,opts={})
       begin

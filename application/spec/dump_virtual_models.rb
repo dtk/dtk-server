@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 root = File.expand_path('../', File.dirname(__FILE__))
 require root + '/app'
-#utils/internal/serialize_to_json.rb
+# utils/internal/serialize_to_json.rb
 include XYZ
-#monkey patch
+# monkey patch
 module ActiveSupport
   class OrderedHash < ::Hash
     def pretty_print(q)

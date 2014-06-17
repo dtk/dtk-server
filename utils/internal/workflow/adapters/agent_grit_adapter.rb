@@ -1,4 +1,4 @@
-#TODO: this needs cleanup
+# TODO: this needs cleanup
 module DTK
   module WorkflowAdapter
     class AgentGritAdapter
@@ -26,7 +26,7 @@ module DTK
           # I haven't found a way through grit to set it, but to execute lowest method and make my own command
           repo = ::Grit::Repo.new("#{agent_repo_dir}")
           cmd_opts = {:timeout => GitOpTimeout}
-          #TODO: change call; grit call git.run is being deprecated
+          # TODO: change call; grit call git.run is being deprecated
           repo.git.run("", "--work-tree=#{agent_repo_dir} fetch", "", cmd_opts, {})
           repo.git.run("", "--work-tree=#{agent_repo_dir} merge 'origin/master'", "", cmd_opts, {})
           

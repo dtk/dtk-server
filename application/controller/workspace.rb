@@ -30,8 +30,8 @@ module XYZ
       include_js_tpl(tpl_info[:src])
 
 #==========================
-#Include target specific js that will be needed
-#TODO: move out of here eventually
+# Include target specific js that will be needed
+# TODO: move out of here eventually
       tpl_info_hash = Hash.new
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
@@ -77,8 +77,8 @@ module XYZ
       include_js('plugins/r8.cmdbar.tasks')
 
       projects_json = JSON.generate(projects)
-#TODO: figure out why this user init isnt firing inside of bundle and return
-#DEBUG
+# TODO: figure out why this user init isnt firing inside of bundle and return
+# DEBUG
       run_javascript("R8.User.init();")
       run_javascript("R8.IDE.init(#{projects_json});")
 
@@ -92,23 +92,23 @@ module XYZ
 #      return {:content=>''}
     end
 
-#TODO: move to viewspace controller
+# TODO: move to viewspace controller
     def update_pos(ws_id)
       items_to_save = JSON.parse(request.params["item_list"])
 
       return {} if items_to_save.empty?
       
-#TODO: patch that maps nil model_name to node_group
+# TODO: patch that maps nil model_name to node_group
 items_to_save.values.each{|item|item["model"] ||= "node_group"}
 
-      #partition into model types
+      # partition into model types
       model_names = items_to_save.values.map{|item|item["model"].to_sym}.uniq
       model_names.each do |model_name| 
         model_handle = ModelHandle.new(ret_session_context_id(),model_name)
 
         model_items = items_to_save.reject{|item_id,info|not info["model"].to_sym == model_name}
         
-        #TODO: temp hack; adn expensive call taht shoudl be removed; make sure that items_to_save all have ws_id as parent; hack now assumeing ws_id is just datacenter
+        # TODO: temp hack; adn expensive call taht shoudl be removed; make sure that items_to_save all have ws_id as parent; hack now assumeing ws_id is just datacenter
         parent_field = :datacenter_datacenter_id
         model_items.reject! do |item_id,info|
           idh = id_handle(item_id.to_i,info["model"].to_sym)
@@ -133,7 +133,7 @@ items_to_save.values.each{|item|item["model"] ||= "node_group"}
         end
         Model.update_from_rows(model_handle,update_rows,:partial_value=>true)
         
-#TODO: remove debug statement
+# TODO: remove debug statement
 =begin
 pp [:model_name,model_name]
 pp [:model_items,model_items]
@@ -145,9 +145,9 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 
 =begin
     def index
-#TODO: make call to load the users/system already in use plugins,cmds,etc
+# TODO: make call to load the users/system already in use plugins,cmds,etc
 #      include_js('plugins/search.cmdhandler')
-#TODO: remove this after fully getting viewspaces going
+# TODO: remove this after fully getting viewspaces going
 #      add_js_exe("R8.Workspace.setupNewItems();")
 #      add_js_exe("R8.Toolbar.init({node:'group-01',tools:['quicksearch']});")
       include_js('plugins/search.cmdhandler')
@@ -160,12 +160,12 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 =end
 
     def loaddatacenter(id,parsed_query_string=nil)
-#TODO: make call to load the users/system already in use plugins,cmds,etc
+# TODO: make call to load the users/system already in use plugins,cmds,etc
       include_js('plugins/search.cmdhandler')
 
 =begin
-#TODO: make this generic to load all items for a viewspace, not just loaddatacenter
-      #retrieve the nodes
+# TODO: make this generic to load all items for a viewspace, not just loaddatacenter
+      # retrieve the nodes
       node_list = get_objects(node_name.to_sym,where_clause)
 
       tpl = R8Tpl::TemplateR8.new("node/wspace_list",user_context())
@@ -175,8 +175,8 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       return {:content=>''}
     end
 
-    #This function will be called after the workspace framework is loaded,
-    #probably as part of an action set
+    # This function will be called after the workspace framework is loaded,
+    # probably as part of an action set
     def loadtoolbar
 =begin
       toolbar_items = workspace.get_toolbar_items
@@ -184,22 +184,22 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       assign(@toolbar_items,toolbar_items)
       render 'toolbar_items'
 
-      #build in roles/permission checks here to filter the list
+      # build in roles/permission checks here to filter the list
 =end
     end
 
     def search
       params = request.params.dup
       model_name = params.delete("model_name").to_sym
-      #TODO: hack to get around restriction type = template does not allow one to see assemblies
-      #TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
-      #and then do away with explicitly setting type to "template"
+      # TODO: hack to get around restriction type = template does not allow one to see assemblies
+      # TODO: need to determine how to handle an assembly that is a template; may just assume everything in library is template
+      # and then do away with explicitly setting type to "template"
       params.delete("type") if model_name == :component
       cols = model_class(model_name).common_columns()
       filter_conjuncts = params.map do |name,value|
         [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
-      #restrict results to belong to library and not nested in assembly
+      # restrict results to belong to library and not nested in assembly
       filter_conjuncts += [[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
       sp_hash = {
         :cols => cols,
@@ -209,7 +209,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 
       i18n = get_i18n_mappings_for_models(model_name)
       model_list.each_with_index do |model,index|
-#pp model
+# pp model
         model_list[index][:model_name] = model_name
         body_value = ''
         model_list[index][:ui] ||= {}
@@ -217,14 +217,14 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
         name = model_list[index][:display_name]
         title = name.nil? ? "" : i18n_string(i18n,model_name,name)
 
-        #TDOO: temporary to distingusih between chef and puppet components
+        # TDOO: temporary to distingusih between chef and puppet components
         if model_name == :component
           if config_agent_type = model_list[index][:config_agent_type]
             title += " (#{config_agent_type[0].chr})" 
           end
         end
         
-#TODO: change after implementing all the new types and making generic icons for them
+# TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
         model_type_str = "#{model_type}-#{model_sub_type}"
@@ -245,9 +245,9 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 =end
       end
 
-#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-#pp model_list
-#pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+# pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+# pp model_list
+# pp "^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
       tpl = R8Tpl::TemplateR8.new("workspace/wspace_search_#{model_name}",user_context())
       tpl.set_js_tpl_name("wspace_search_#{model_name}")
@@ -255,7 +255,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
 
       slide_width = 130*model_list.size
       tpl.assign('slide_width',slide_width)
-      #TODO: needed to below back in so template did not barf
+      # TODO: needed to below back in so template did not barf
  # }
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
@@ -267,7 +267,7 @@ pp [:debug_stored_new_pos,get_objects(model_name,SQL.in(:id,model_items.map{|ite
       return tpl_result
     end
 
-    #TODO: datacenter_id=nil is stub
+    # TODO: datacenter_id=nil is stub
     def list_items(datacenter_id=nil)
 
       if datacenter_id.nil?
@@ -300,9 +300,9 @@ pp model_list
 #      tpl.set_js_tpl_name("wspace_list_ng_#{model_name}")
       tpl.assign('node_group_list',model_list)
 
-#TODO: temp
+# TODO: temp
       tpl.assign('datacenter_name','dc1')
-#2
+# 2
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
       tpl.assign("_#{model_name().to_s}",_model_var)
@@ -317,7 +317,7 @@ pp model_list
       }
     end
 
-    #TODO: datacenter_id=nil is stub
+    # TODO: datacenter_id=nil is stub
     def list_items_new(datacenter_id=nil)
       if datacenter_id.nil?
         datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
@@ -338,7 +338,7 @@ pp datacenter
       search_object =  ret_node_group_search_object(filter_params)
 
       model_list = Model.get_objects_from_search_object(search_object)
-#pp model_list
+# pp model_list
 
       top = 100
       left = 100
@@ -351,7 +351,7 @@ pp datacenter
         :tools => user_group_tool_list
       }
 
-#TODO: place holder stubs for ideas on possible future behavior
+# TODO: place holder stubs for ideas on possible future behavior
 #      UI::workspace.add_item(model_list[i])
 #      UI::workspace.render()
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
@@ -381,8 +381,8 @@ pp datacenter
 #        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
       end
 
-#TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
-#right now single toolbar def for all items in list for each type
+# TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
+# right now single toolbar def for all items in list for each type
       #--------Add Node Group List to Workspace-----
       items = Hash.new
       items = {
@@ -400,7 +400,7 @@ pp datacenter
 =begin
       tpl.assign('node_group_list',model_list)
 
-#TODO: temp
+# TODO: temp
       tpl.assign('datacenter_name','dc1')
 
       _model_var = {}
@@ -424,7 +424,7 @@ pp datacenter
 =end
     end
 
-    #TODO: datacenter_id=nil is stub
+    # TODO: datacenter_id=nil is stub
     def list_items_new(datacenter_id=nil)
       if datacenter_id.nil?
         datacenter_id = IDHandle[:c => ret_session_context_id(), :uri => "/datacenter/dc1", :model_name => :datacenter].get_id()
@@ -445,7 +445,7 @@ pp datacenter
       search_object =  ret_node_group_search_object(filter_params)
 
       model_list = Model.get_objects_from_search_object(search_object)
-#pp model_list
+# pp model_list
 
       top = 100
       left = 100
@@ -458,7 +458,7 @@ pp datacenter
         :tools => user_group_tool_list
       }
 
-#TODO: place holder stubs for ideas on possible future behavior
+# TODO: place holder stubs for ideas on possible future behavior
 #      UI::workspace.add_item(model_list[i])
 #      UI::workspace.render()
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_list",user_context())
@@ -488,8 +488,8 @@ pp datacenter
 #        add_js_exe("R8.Toolbar.init({node:'group-#{model_list[index][:id]}',tools:['quicksearch']});")
       end
 
-#TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
-#right now single toolbar def for all items in list for each type
+# TODO: decide if its possible in clean manner to manage toolbar access at item level in ad-hoc ways
+# right now single toolbar def for all items in list for each type
       #--------Add Node Group List to Workspace-----
       items = Hash.new
       items = {
@@ -507,7 +507,7 @@ pp datacenter
 =begin
       tpl.assign('node_group_list',model_list)
 
-#TODO: temp
+# TODO: temp
       tpl.assign('datacenter_name','dc1')
 
       _model_var = {}
@@ -592,7 +592,7 @@ pp datacenter
 =end
 
     def search_2
-#pp request.params
+# pp request.params
       model_name = request.params['model_name']
       field_set = Model::FieldSet.default(model_name.to_sym)
 #      search_query = request.params['sq']
@@ -629,7 +629,7 @@ pp datacenter
       slider_id_prefix = (request.params['slider_id_prefix']) ? request.params['slider_id_prefix'] : model_name
       tpl.assign('slider_id_prefix',slider_id_prefix)
 
-      #TODO: needed to below back in so template did not barf
+      # TODO: needed to below back in so template did not barf
  # }
       _model_var = {}
       _model_var[:i18n] = get_model_i18n(model_name,user_context())
@@ -643,11 +643,11 @@ pp datacenter
       return tpl_result
     end
 
-    #TODO: check if this and its referents are deprecated
+    # TODO: check if this and its referents are deprecated
     def ret_node_group_search_object(filter_params)
       model_name = :node_group
       parent_model_name = :datacenter
-      #for processing :parent_id
+      # for processing :parent_id
       parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
       filter = [:and] + filter_params.map do |k,v|
         [:eq, k == :parent_id ?  parent_id_field_name : k, v]
@@ -663,11 +663,11 @@ pp datacenter
     end
 
 
-    #deprecate
+    # deprecate
     def commit_changes(datacenter_id=nil)
 #      context_type = request.params["context_type"]
-      #TODO: either use param from context id or from what is posted
-      #TODO: move to getting id of top level task
+      # TODO: either use param from context id or from what is posted
+      # TODO: move to getting id of top level task
       context_id = request.params["context_id"]
       datacenter_id ||= context_id
 
@@ -681,14 +681,14 @@ pp datacenter
 
       top_level_task = create_task_from_pending_changes(pending_changes)
 
-      #TODO: need to sync ValidationError with analysis done in group by
+      # TODO: need to sync ValidationError with analysis done in group by
       errors = Violation.find_missing_required_attributes(top_level_task)
-#TODO: removing for time being
+# TODO: removing for time being
 #      if errors
       pp [:errors,errors] if errors
       if false
         error_list = []
-        #TODO: stub
+        # TODO: stub
         i18n = {
           "MissingRequiredAttribute"=>'is missing required Attribute'
         }
@@ -700,7 +700,7 @@ pp datacenter
             when "MissingRequiredAttribute"
               error_description = "Component <b>#{e[:component_name]}</b> on node <b>#{e[:node_name]}</b> "+i18n[error_name]+"#{e[:attribute_name]}"
           end
-#TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
+# TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
           e[:name] = error_name
           e[:target_node_id] = e[:node_id]
           e[:description] = error_description
@@ -728,7 +728,7 @@ pp datacenter
       }
     end
 
-    #TODO: doing redundant work to what is done in commit_ide
+    # TODO: doing redundant work to what is done in commit_ide
     def commit_changes_ide(target_id)
       target_id = target_id.gsub(/editor-target-/,"") #TODO: temp to compensate front end error
 
@@ -737,10 +737,10 @@ pp datacenter
       commit_date = hash.delete("commit_date")
       commit_msg = hash.delete("commit_msg")
 
-      #save any params given
+      # save any params given
       attr_val_hash = hash
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
-      #TODO: if not using c_ prfix remove from view and remobe below
+      # TODO: if not using c_ prfix remove from view and remobe below
       attr_val_hash = attr_val_hash.inject({}) do |h,(k,v)|
         h.merge(k.gsub(/^c__[0-9]+__/,"") => v)
       end
@@ -755,15 +755,15 @@ pp datacenter
 
       top_level_task = Task.create_from_pending_changes(target_idh,pending_changes)
 
-      #TODO: need to sync Violation with analysis done in group by
-      #TODO: just need to check if anything returned missing values
+      # TODO: need to sync Violation with analysis done in group by
+      # TODO: just need to check if anything returned missing values
       errors = Violation.find_missing_required_attributes(top_level_task)
-      #TODO: removing for time being
+      # TODO: removing for time being
       #      if errors
       if false #errors
         pp [:errors,errors]
         error_list = []
-        #TODO: stub
+        # TODO: stub
         i18n = {
           "MissingRequiredAttribute"=>'is missing required Attribute'
         }
@@ -775,7 +775,7 @@ pp datacenter
             when "MissingRequiredAttribute"
               error_description = "Component <b>#{e[:component_name]}</b> on node <b>#{e[:node_name]}</b> "+i18n[error_name]+"#{e[:attribute_name]}"
           end
-#TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
+# TODO: revisit when fully implementing notifications/feed, right now warnings on component add are different then commit errors
           e[:name] = error_name
           e[:target_node_id] = e[:node_id]
           e[:description] = error_description
@@ -807,15 +807,15 @@ pp datacenter
     def commit(datacenter_id=nil)
       commit_tree = Hash.new
       if datacenter_id
-#TODO: Move pending changes retrive inside of create_commit_task
+# TODO: Move pending changes retrive inside of create_commit_task
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
         unless pending_changes.empty?
-#TODO: cleanup interface to tasks/pending changes
+# TODO: cleanup interface to tasks/pending changes
 #          commit_task = create_commit_task()
-#default gets all pending changes since last commit by user
+# default gets all pending changes since last commit by user
 
-#group can be either datacenter, node_group, node,
-#later figure out how to 
+# group can be either datacenter, node_group, node,
+# later figure out how to 
 #          commit_task = create_commit_task(group_id)
           commit_task = create_task_from_pending_changes(pending_changes)
           commit_task.save!()
@@ -826,7 +826,7 @@ POSSIBLE CHANGES TO HASH
 =end
 
 
-#default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
+# default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
 #          commit_tree = top_level_task.render_commit_tree()
 #          commit_tree = top_level_task.render_commit_tree('xml | json')
           commit_tree = commit_task.render_form()
@@ -842,7 +842,7 @@ POSSIBLE CHANGES TO HASH
       tpl = R8Tpl::TemplateR8.new("workspace/commit",user_context())
       tpl.assign(:_app,app_common())
 
-#TODO: using datacenters as environments right now, redo later on
+# TODO: using datacenters as environments right now, redo later on
       dc_hash = get_object_by_id(datacenter_id,:datacenter)
       if dc_hash[:type] == 'production'
         commit_content = '<tr><td class="label">Maintenance Window</td></tr>
@@ -887,7 +887,7 @@ POSSIBLE CHANGES TO HASH
           commit_task = Task.create_from_pending_changes(target_idh,pending_changes)
           commit_task.save!()
 
-          #handle missing required attrs
+          # handle missing required attrs
           augmented_attr_list = Attribute.augmented_attribute_list_from_task(commit_task)
         
           opts = {:types_to_keep => [:required]}
@@ -908,9 +908,9 @@ POSSIBLE CHANGES TO HASH
             }
           end
 
-          #default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
-          #commit_tree = top_level_task.render_commit_tree()
-          #commit_tree = top_level_task.render_commit_tree('xml | json')
+          # default if nothing passed is json, make extensible for xml formatting for tuture possible integrations
+          # commit_tree = top_level_task.render_commit_tree()
+          # commit_tree = top_level_task.render_commit_tree('xml | json')
           commit_tree = commit_task.render_form()
           add_i18n_strings_to_rendered_tasks!(commit_tree)
           delete_instance(commit_task.id())
@@ -930,7 +930,7 @@ POSSIBLE CHANGES TO HASH
       end
       tpl.assign(:required_attr_list,required_attr_list)
 
-#TODO: using datacenters as environments right now, redo later on
+# TODO: using datacenters as environments right now, redo later on
       dc_hash = get_object_by_id(target_id,:datacenter)
       if dc_hash[:type] == 'production'
         commit_content = '<tr><td class="label">Maintenance Window</td></tr>
@@ -966,7 +966,7 @@ POSSIBLE CHANGES TO HASH
       }
     end
 
-    #TODO: just for testing this gets a datacenter id
+    # TODO: just for testing this gets a datacenter id
     def commit_test(datacenter_id=nil)
       if datacenter_id
         pending_changes = flat_list_pending_changes_in_datacenter(datacenter_id.to_i)
@@ -1074,7 +1074,7 @@ POSSIBLE CHANGES TO HASH
 
     def clone_assembly(explicit_hash=nil)
       hash = explicit_hash || request.params
-      #TODO: stub
+      # TODO: stub
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
 
       library_id = hash["library_id"].to_i
@@ -1090,17 +1090,17 @@ POSSIBLE CHANGES TO HASH
       assembly_mh = library_idh.createMH(:model_name=>:component,:parent_model_name=>:library)
       assembly_idh = Model.create_from_row(assembly_mh,create_row,:convert=>true)
 
-      #TODO: getting json rather than hash
+      # TODO: getting json rather than hash
       item_list = JSON.parse(hash["item_list"])
       node_idhs = item_list.map{|item|id_handle(item["id"].to_i,item["model"].to_sym)}
       connected_links,dangling_links = Node.get_external_connected_links(node_idhs)
-      #TODO: raise error to user if dangling link
+      # TODO: raise error to user if dangling link
       Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
       link_idhs = connected_links.map{|link|link.id_handle}
 
       id_handles = node_idhs + link_idhs
       library_object = library_idh.create_object()
-      #TODO: encapsulate some of above so ca just call library_object.clone_into(...
+      # TODO: encapsulate some of above so ca just call library_object.clone_into(...
       library_object.clone_into_library_assembly(assembly_idh,id_handles)
       return {:content => nil}
     end
@@ -1109,7 +1109,7 @@ POSSIBLE CHANGES TO HASH
 raise Error.new("Not implemented")
 =begin
 TODO: rewrite using refactored Assembly::Template.create_or_update_from_instance
-      #TODO: temp hack
+      # TODO: temp hack
       assembly_name, service_id = ret_non_null_request_params(:name,:service_id)
       item_list = JSON.parse(ret_non_null_request_params(:item_list))
       icon_info = {"images" => {"display" => "generic-assembly.png","tiny" => "","tnail" => "generic-assembly.png"}}
@@ -1117,7 +1117,7 @@ TODO: rewrite using refactored Assembly::Template.create_or_update_from_instance
       service = id_handle(service_id,:service_module).create_object.update_object!(:display_name,:library_library_id)
       service_module_name = service[:display_name]
 
-      #TODO remove DEMOHACK
+      # TODO remove DEMOHACK
       node_idhs = item_list.map do |item|
         id = item["id"].to_i
         model = (item["model"].nil? or item["model"].empty?) ? :node : item["model"].to_sym

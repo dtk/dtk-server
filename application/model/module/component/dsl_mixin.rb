@@ -26,9 +26,9 @@ module DTK; class ComponentModule
       previous_dsl_version = new_dsl_integer_version-1 
       module_branch = get_module_branch_matching_version(module_version)
 
-      #create in-memory dsl object using old version
+      # create in-memory dsl object using old version
       component_dsl = ComponentDSL.create_dsl_object(module_branch,previous_dsl_version)
-      #create from component_dsl the new version dsl
+      # create from component_dsl the new version dsl
       dsl_paths_and_content = component_dsl.migrate(module_name(),new_dsl_integer_version,format_type)
       module_branch.serialize_and_save_to_repo(dsl_paths_and_content)
     end
@@ -47,7 +47,7 @@ module DTK; class ComponentModule
       set_dsl_parsed!(true)
     end
 
-    #TODO: for testing
+    # TODO: for testing
     def test_generate_dsl()
       module_branch = get_module_branch_matching_version()
       config_agent_type = :puppet
@@ -58,7 +58,7 @@ module DTK; class ComponentModule
 
   private
     def create_new_version__type_specific(repo_for_new_branch,new_version,opts={})
-      #TODO: push use of local from calling fn
+      # TODO: push use of local from calling fn
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name(),
@@ -73,7 +73,7 @@ module DTK; class ComponentModule
     end
 
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
-      #TODO: used temporarily until get all callers to use local object
+      # TODO: used temporarily until get all callers to use local object
       local = deprecate_ret_local(version)
 Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
@@ -126,12 +126,12 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
       ret
     end
 
-    #returns dsl info
+    # returns dsl info
     def update_model_objs_or_create_dsl?(diffs_summary,module_branch,version,opts={})
       ret = Hash.new
       dsl_created_info = Hash.new
       impl_obj = module_branch.get_implementation()
-      #TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
+      # TODO: make more robust to handle situation where diffs dont cover all changes; think can detect by looking at shas
       impl_obj.modify_file_assets(diffs_summary)
       dsl_created_info = Hash.new
 
@@ -161,11 +161,11 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
       begin
         impl_parse = ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj)
         dsl_generator = ComponentDSL::GenerateFromImpl.create()
-        #refinement_hash is version neutral form gotten from version specfic dsl_generator
+        # refinement_hash is version neutral form gotten from version specfic dsl_generator
         refinement_hash = dsl_generator.generate_refinement_hash(impl_parse,module_name(),impl_obj.id_handle())
         render_hash = refinement_hash.render_hash_form(opts)
        rescue ErrorUsage => e
-        #parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
+        # parsing_error = ErrorUsage.new("Error parsing #{config_agent_type} files to generate meta data")
         parsing_error = e
        rescue => e
         Log.error_pp([:parsing_error,e,e.backtrace[0..10]])

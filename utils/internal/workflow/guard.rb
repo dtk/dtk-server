@@ -26,9 +26,9 @@ module DTK; class Workflow
 
     class AssemblyPortLinks < self
       def self.ret_guards(assembly)
-        #TODO: should share code with Stage::Internode.get_internode_dependencies__port_link_order(
+        # TODO: should share code with Stage::Internode.get_internode_dependencies__port_link_order(
         ret = Array.new
-        #TODO: may want to filter to see if any assembly dependencies not in task
+        # TODO: may want to filter to see if any assembly dependencies not in task
         ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
         return ret if ordered_port_links.empty?
         sp_hash = {
@@ -42,7 +42,7 @@ module DTK; class Workflow
         aug_port_links.map do |pl|
           before = DirIndex[pl[:temporal_order].to_sym][:before_index]
           after = DirIndex[pl[:temporal_order].to_sym][:after_index]
-          #TODO: need to get task_id
+          # TODO: need to get task_id
           task_id = nil
           guard = Element.new(pl[before[:node]],pl[before[:cmp]],task_id)
           guarded = Element.new(pl[after[:node]],pl[after[:cmp]],task_id)
@@ -61,7 +61,7 @@ module DTK; class Workflow
       def self.ret_guards(top_level_task)
         ret = Array.new
         augmented_attr_list = Attribute.augmented_attribute_list_from_task(top_level_task)
-        #augmented_attr_list does not contain node level attributes => attr_out can be null
+        # augmented_attr_list does not contain node level attributes => attr_out can be null
         Attribute.dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
           if guard = create(attr_in,link,attr_out)
             ret << guard
@@ -70,24 +70,24 @@ module DTK; class Workflow
         ret
       end
 
-#TODO: so can temporaily call from inetre_node    private
+# TODO: so can temporaily call from inetre_node    private
       def self.create(guarded_attr,link,guard_attr)
-        #guard_attr can be null if guard refers to node level attr
-        #TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
+        # guard_attr can be null if guard refers to node level attr
+        # TODO: are there any other cases where it can be null; previous text said 'this can happen if guard attribute is in component that ran already'
         unless guard_attr 
-          #TODO: below works if guard is node level attr
+          # TODO: below works if guard is node level attr
           return nil 
         end
-        #guarding attributes that are unset and are feed by dynamic attribute 
-        #TODO: should we assume that what gets here are only requierd attributes
-        #TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
+        # guarding attributes that are unset and are feed by dynamic attribute 
+        # TODO: should we assume that what gets here are only requierd attributes
+        # TODO: removed clause (not guard_attr[:attribute_value]) in case has value that needs to be recomputed
         unless guard_attr[:dynamic] and unset_guarded_attr?(guarded_attr,link)
           return nil
         end
         
-        #TODO: not sure if still needed
+        # TODO: not sure if still needed
         guard_task_type = (guard_attr[:semantic_type_summary] == "sap__l4" and (guard_attr[:item_path]||[]).include?(:host_address)) ? Task::Action::CreateNode : Task::Action::ConfigNode
-        #right now only using config node to config node guards
+        # right now only using config node to config node guards
         return nil if guard_task_type == Task::Action::CreateNode
         
         guard = element(guard_attr,guard_task_type)
@@ -95,7 +95,7 @@ module DTK; class Workflow
         new(:guarded => guarded, :guard => guard, :link => link)
       end
 
-      #if dont know for certain better to err as being a guard
+      # if dont know for certain better to err as being a guard
       def self.unset_guarded_attr?(guarded_attr,link)
         val = guarded_attr[:attribute_value]
         if val.nil?

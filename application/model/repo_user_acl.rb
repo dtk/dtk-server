@@ -16,10 +16,10 @@ module XYZ
       end
     end
 
-    #TODO: see if can simplify and move into Repo using input_hash_content_into_model with nested hash
+    # TODO: see if can simplify and move into Repo using input_hash_content_into_model with nested hash
     def self.modify_model(repo_idh,repo_user_acls)
       repo_id = repo_idh.get_id()
-      #TODO: more efficient if RepoUser.get_by_repo_username takes a list
+      # TODO: more efficient if RepoUser.get_by_repo_username takes a list
       repo_user_mh = repo_idh.createMH(:repo_user)
       rows = repo_user_acls.map do |acl|
         repo_username = acl[:repo_username]

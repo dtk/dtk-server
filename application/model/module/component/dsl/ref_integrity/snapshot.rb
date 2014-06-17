@@ -1,12 +1,12 @@
 module DTK; class ComponentDSL
   class RefIntegrity
     class Snapshot
-#TODO: for testing
+# TODO: for testing
 attr_reader :ndx_cmp_refs,:ports,:port_links
       attr_reader :link_defs
       def initialize(cmp_module)
         @cmp_module = cmp_module
-        #ndx_cmp_refs is component refs indexed by component template; plus augmented info for cmp refs; it has form
+        # ndx_cmp_refs is component refs indexed by component template; plus augmented info for cmp refs; it has form
         # Component::Template:
         #   component_refs:
         #   - ComponentRef:
@@ -30,7 +30,7 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
       def create_link_def_info(new_links_defs)
         link_def_info = LinkDef::Info.new
         
-        #link defs indexed by component template
+        # link defs indexed by component template
         ndx_link_defs = new_links_defs.inject(Hash.new) do |h,ld|
           h.merge(ld[:component_component_id] => ld)
         end
@@ -54,7 +54,7 @@ attr_reader :ndx_cmp_refs,:ports,:port_links
       end
 
      private
-      #writing the get function sso can be passed explicitly refernce object or can use the internal @ vars
+      # writing the get function sso can be passed explicitly refernce object or can use the internal @ vars
       def get_ndx_cmp_refs(cmp_module=nil)
         cmp_module ||= @cmp_module
         cmp_module.get_associated_assembly_cmp_refs()

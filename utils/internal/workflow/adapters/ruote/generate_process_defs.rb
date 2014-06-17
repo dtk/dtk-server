@@ -14,7 +14,7 @@ module XYZ
 
      private
       ####semantic processing
-      #TODO: may make decomposition data driven
+      # TODO: may make decomposition data driven
       def decomposition(task,context)
         action = task[:executable_action]
         if action.kind_of?(Task::Action::PowerOnNode)
@@ -95,7 +95,7 @@ module XYZ
         end
       end
 
-      #formatting fns
+      # formatting fns
       def participant(name,opts={})
         # we set user and session information so that we can reflect that information on newly created threads via Ruote
         opts.merge!(:user_info => { :user => CurrentSession.new.get_user_object.to_json_hash })
@@ -111,7 +111,7 @@ module XYZ
 
       def participants_for_tasks()
         @participants_for_tasks ||= {
-          #TODO: need condition that signifies detect_created_node_is_ready succeeded
+          # TODO: need condition that signifies detect_created_node_is_ready succeeded
           Task::Action::CreateNode => :detect_created_node_is_ready,
           Task::Action::ConfigNode => :execute_on_node
         }
@@ -145,22 +145,22 @@ module XYZ
 
         def get_guard_tasks(action)
           ret = nil
-          #short circuit if no guards
+          # short circuit if no guards
           return ret if @guards.empty?
 
-          #short circuit; must be multiple peers in order there to be guard tasks
+          # short circuit; must be multiple peers in order there to be guard tasks
           return ret if @peer_tasks.size < 2
 
           node_id = action[:node][:id]
           task_type = action.class
-          #find guards for this action
+          # find guards for this action
           matching_guards = @guards.select do |g|
             guarded = g[:guarded]
             guarded[:task_type] == task_type and guarded[:node][:id] == node_id
           end.map{|g|g[:guard]}
           return nil if matching_guards.empty?
           
-          #see if any of the guards are peers
+          # see if any of the guards are peers
           ndx_ret = Hash.new
           @peer_tasks.each do |t|
             task_id = t.id()

@@ -2,7 +2,7 @@ module DTK
   class Workflow
     r8_nested_require('workflow','guard')
 
-    #Rich: moved thess to be in config file so each developer can test different configs
+    # Rich: moved thess to be in config file so each developer can test different configs
     # Configuration for 'inter_node_temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'
     # @@inter_node_temporal_coordination_mode = "STAGES"
     # Configuration for 'intra_node_temporal_coordination_mode'; Values: 'STAGES' 'TOTAL_ORDER'
@@ -43,7 +43,7 @@ module DTK
         raise Error.new("not implemented: putting block in reactor loop when not using eventmachine web server") unless R8EM.reactor_running?
         begin
           pp "starting top_task_id = #{@top_task.id.to_s}"          
-          #RICH-WF: for both Ruote and Simple think we dont need to pass in @top_task.id.to_s
+          # RICH-WF: for both Ruote and Simple think we dont need to pass in @top_task.id.to_s
           execute(@top_task.id.to_s)
          rescue Exception => e
           Log.error("error in commit background job: #{e.inspect}")
@@ -55,7 +55,7 @@ module DTK
       end
     end
 
-    #virtual fns that get ovewritten
+    # virtual fns that get ovewritten
     def execute()
     end
     ######
@@ -106,8 +106,8 @@ module DTK
 
     class Adapter
       def self.klass(top_task=nil)
-        #RICH-WF: not necssary to cache (ie., use @klass)
-        #return @klass if  @klass
+        # RICH-WF: not necssary to cache (ie., use @klass)
+        # return @klass if  @klass
         begin
           type = type(top_task)
           r8_nested_require("workflow","adapters/#{type}")
@@ -119,7 +119,7 @@ module DTK
         end
       end
       private
-      #RICH-WF: stub function to call Simple when top_task is install_agents
+      # RICH-WF: stub function to call Simple when top_task is install_agents
       def self.type(top_task=nil)
         if (top_task||{})[:display_name] == "install_agents"
           :ruote

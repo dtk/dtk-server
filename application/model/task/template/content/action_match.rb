@@ -3,7 +3,7 @@ module DTK; class Task; class Template
     class ActionMatch
       def initialize(insert_action=nil)
         @insert_action = insert_action
-        #the rest of these attributes are about what matched
+        # the rest of these attributes are about what matched
         @action = nil
         @in_multinode_stage = nil
         @internode_stage_index = nil

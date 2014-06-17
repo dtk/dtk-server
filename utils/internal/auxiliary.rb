@@ -22,7 +22,7 @@ module DTK
         ret
       end
 
-      #for hashs and arrays
+      # for hashs and arrays
       def deep_copy(obj)
         if obj.kind_of?(Hash)
           obj.inject({}){|h,kv|h.merge(kv[0] => deep_copy(kv[1]))}
@@ -45,7 +45,7 @@ module DTK
 
       def now_time_stamp()
         SQL.now
-        #TODO: change to use app server clock
+        # TODO: change to use app server clock
       end
 
       def convert_keys_to_symbols(hash)
@@ -79,7 +79,7 @@ module DTK
         end
       end
 
-      #key can be symbol or of form {symbol => symbol} 
+      # key can be symbol or of form {symbol => symbol} 
       def hash_subset(hash,keys,opts={},&block)
         hash_subset_aux(opts[:seed]||Hash.new(),hash,keys,opts,&block)
       end
@@ -112,7 +112,7 @@ module DTK
       end
 
      public
-      #adds to array only if not included
+      # adds to array only if not included
       def array_add?(array,els)
         Array(els).inject(array){|a,el|a.include?(el) ? a : a + [el]}
       end
@@ -185,7 +185,7 @@ module DTK
           begin
             ret = JSON.parse(json)
            rescue Exception => err
-            #use pure json to find parsing error
+            # use pure json to find parsing error
             require 'json/pure'
             begin 
               JSON::Pure::Parser.new(json).parse
@@ -238,7 +238,7 @@ module DTK
         hash.reject{|k,v| array_with_keys_to_remove.include?(k)}
       end
 
-      #object or nesting is scalar, Hash or Array
+      # object or nesting is scalar, Hash or Array
       def objects_equal?(x,y)
         if x.nil?
           y.nil?
@@ -272,7 +272,7 @@ module DTK
           if update.size == basek.size
             update.each_with_index{|upd,i|merge_into_json_col!(basek,i,upd)}
           else
-            #If arrays different size, doing a shallow merge
+            # If arrays different size, doing a shallow merge
             base[key] = update
           end
         else
@@ -294,7 +294,7 @@ module DTK
         begin
           convert_to_symbol_form_aux(JSON.parse(json_or_scalar))
          rescue
-          #primarily to handle scalars
+          # primarily to handle scalars
           json_or_scalar
         end
       end
@@ -311,7 +311,7 @@ module DTK
         end
       end
 
-      #TODO: theer may be some exceptions
+      # TODO: theer may be some exceptions
       def singular?(plural)
         if plural =~ /s$/
           if plural =~ /ies$/
@@ -339,8 +339,8 @@ end
 
 ###for more succinctly handling pattern where class exposes methods on an internal object
 class Class
-  #TODO: consider variant where third argument passed which is lambda indicating how to 
-  #transform inputs before applying to interval method var
+  # TODO: consider variant where third argument passed which is lambda indicating how to 
+  # transform inputs before applying to interval method var
   def expose_methods_from_internal_object(innervar,methods_to_expose,opts={})
     if R8::Config[:benchmark]
       return expose_methods_with_benchmark(innervar,methods_to_expose,opts.merge(:benchmark => R8::Config[:benchmark]))
@@ -356,7 +356,7 @@ class Class
     end
   end
 
-  #TODO: just for testing; 
+  # TODO: just for testing; 
 
   def expose_methods_with_benchmark(innervar,methods_to_expose,opts={})
     b = opts[:benchmark]
@@ -375,7 +375,7 @@ class Class
   end
 end
 
-#for being able to determine the method name in the function call
+# for being able to determine the method name in the function call
 module Kernel
 private
    def this_method
@@ -389,12 +389,12 @@ private
    end
 end
 
-#monkey patch
+# monkey patch
 class Object
-  #dups only if object responds to dup
+  # dups only if object responds to dup
   def dup?()
     return self unless respond_to?(:dup)
-    #put in because bug or unexpected result in respond_to? with boolean instances and nil
+    # put in because bug or unexpected result in respond_to? with boolean instances and nil
     return self if nil? or kind_of?(TrueClass) or kind_of?(FalseClass)
     dup
   end

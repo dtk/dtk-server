@@ -6,8 +6,8 @@ In approach below teher wil be a numeric key genearted which is a handle on obje
 module DTK; class Component
   class Instance
     class Interpreted < self
-      #idempotent; if reassert twice with same valeus it does not change
-      #also if assert with less keys; it delete those ones omitted
+      # idempotent; if reassert twice with same valeus it does not change
+      # also if assert with less keys; it delete those ones omitted
       def self.create_or_update?(node,component_type,attr_hash)
         component_type = component_type.to_s
         raise ErrorUsage.new("Not able to find 'key_name' in provided data, 'key_name' is required field") unless attr_hash[:key_name]
@@ -83,7 +83,7 @@ module DTK; class Component
       end
 
      private
-      #TODO: probably better if this returns a Component::Instance:Interpreted object
+      # TODO: probably better if this returns a Component::Instance:Interpreted object
       def self.get_component(node,component_name,component_type)
         sp_hash = {
           :cols => [:id,:display_name,:group_id],
@@ -109,7 +109,7 @@ module DTK; class Component
         end
        private
         def self.attributes(input_attr_hash, node_id)
-          #what this does is to capture that what is in this is the complete set of attribute 
+          # what this does is to capture that what is in this is the complete set of attribute 
           results = input_attr_hash.inject(DBUpdateHash.new().mark_as_complete()) do |h,(k,v)|
             attr_fields = {
               :display_name => k.to_s,

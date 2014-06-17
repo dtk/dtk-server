@@ -9,8 +9,8 @@ module DTK
       [:id,:group_id,:display_name,:branch,:repo_id,:current_sha,:is_workspace,:type,:version,:ancestor_id,:external_ref]
     end
 
-    #TODO: should change type of self[:external_ref] to json
-    #but before check any side effect of change
+    # TODO: should change type of self[:external_ref] to json
+    # but before check any side effect of change
     def external_ref()
       get_field?(:external_ref) && eval(self[:external_ref])
     end
@@ -44,7 +44,7 @@ module DTK
       get_module().module_name()
     end
 
-    #deletes both local and remore branch
+    # deletes both local and remore branch
     def delete_instance_and_repo_branch()
       RepoManager.delete_branch(self)
       delete_instance(id_handle())
@@ -66,7 +66,7 @@ module DTK
       ret = get_module_repo_info()
       diffs = RepoManager.diff(branch_name_to_merge_from,self)
       diffs_summary = diffs.ret_summary()
-      #TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
+      # TODO: in addition to :any_updates or instead can send the updated sha and have client to use that to determine if client is up to date
       return ret if diffs_summary.no_diffs?()
       ret = ret.merge!(:any_updates => true, :fast_forward_change => true)
 
@@ -95,7 +95,7 @@ module DTK
       ret
     end
 
-    #returns true if actual pull was needed
+    # returns true if actual pull was needed
     def pull_repo_changes?(commit_sha)
       update_object!(:branch,:current_sha)
       if is_set_to_sha?(commit_sha)
@@ -145,7 +145,7 @@ module DTK
       fragment_hash
     end
 
-    #args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
+    # args could be either file_path,hash_content,file_format(optional) or single element which is an array having elements with keys :path, :hash_content, :format 
     def serialize_and_save_to_repo(*args)
       files = 
       if args.size == 1
@@ -189,8 +189,8 @@ module DTK
       R8::Config[:dsl][index][:format_type][:default].to_sym
     end
 
-    #creates if necessary a new branch from this (so new branch and this branch share history)
-    #returns repo for new branch; this just creates repo branch and does not update object model
+    # creates if necessary a new branch from this (so new branch and this branch share history)
+    # returns repo for new branch; this just creates repo branch and does not update object model
     def create_new_branch_from_this_branch?(project,base_repo,new_version)
       branch_name = Location::Server::Local::workspace_branch_name(project,new_version)
       RepoManager.add_branch_and_push?(branch_name,self)
@@ -201,7 +201,7 @@ module DTK
       base_repo #bakes in that different versions share same git repo
     end
 
-    #MOD_RESTRUCT: TODO: deprecate 
+    # MOD_RESTRUCT: TODO: deprecate 
     def self.update_library_from_workspace?(ws_branches,opts={})
       ws_branches = [ws_branches] unless ws_branches.kind_of?(Array)
       ret = Array.new
@@ -222,7 +222,7 @@ module DTK
       end
       matching_branches.map{|augmented_branch|update_library_from_workspace_aux?(augmented_branch)}
     end
-    #TODO: better collapse above and below
+    # TODO: better collapse above and below
     def self.update_workspace_from_library?(ws_branch_obj,lib_branch_obj,opts={})
       ws_branch_obj.update_object!(:repo_id)
       lib_branch_obj.update_object!(:repo_id,:branch)
@@ -291,14 +291,14 @@ module DTK
         }
         ret = lib_branch_obj.merge(lib_branch_augment)
         ws_branch_name = augmented_branch[:branch]
-        #determine if there is any diffs between workspace and library branches
+        # determine if there is any diffs between workspace and library branches
         diff = RepoManager.diff(ws_branch_name,lib_branch_obj)
         diff_summary = diff.ret_summary()
         if diff_summary.no_diffs?()
           return ret
         end
         unless diff_summary.no_added_or_deleted_files?()
-          #find matching implementation and modify file assets
+          # find matching implementation and modify file assets
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
@@ -306,20 +306,20 @@ module DTK
           component_dsl.update_model()
         end
 
-        #update the repo
+        # update the repo
         RepoManager.merge_from_branch(ws_branch_name,lib_branch_obj)
         RepoManager.push_implementation(lib_branch_obj)
         ret
       end
-      #TODO: use below as basis to rewrite above
+      # TODO: use below as basis to rewrite above
       def update_target_from_source?(target_branch_obj,target_impl,source_branch_name)
-        #determine if there is any diffs between source and target branches
+        # determine if there is any diffs between source and target branches
         diff = RepoManager.diff(source_branch_name,target_branch_obj)
         diff_summary = diff.ret_summary()
         return if diff_summary.no_diffs?()
 
         unless diff_summary.no_added_or_deleted_files?()
-          #find matching implementation and modify file assets
+          # find matching implementation and modify file assets
           target_impl.modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
@@ -327,7 +327,7 @@ module DTK
           component_dsl.update_model()
         end
       
-        #update the repo
+        # update the repo
         RepoManager.merge_from_branch(source_branch_name,target_branch_obj)
         RepoManager.push_implementation(target_branch_obj)
       end
@@ -335,14 +335,14 @@ module DTK
   
     def self.get_component_workspace_branches(node_idhs)
       sp_hash = {
-    #MOD_RESTRUCT: after get rid of lib branches might use below
+    # MOD_RESTRUCT: after get rid of lib branches might use below
 #        :cols => [:id,:display_name,:component_ws_module_branches],
         :cols => [:id,:display_name,:component_module_branches], #temp which can return lib branches
         :filter => [:oneof, :id, node_idhs.map{|idh|idh.get_id()}]
       }
       sample_node_idh = node_idhs.first()
       node_rows = get_objs(sample_node_idh.createMH(),sp_hash)
-      #get rid of dups 
+      # get rid of dups 
       node_rows.inject(Hash.new) do |h,r|
         module_branch = r[:module_branch]
         h[module_branch[:id]] ||= module_branch
@@ -377,7 +377,7 @@ module DTK
       ref = branch
       {ref => assigns}
     end
-    #TODO: ModuleBranch::Location: deprecate below for above
+    # TODO: ModuleBranch::Location: deprecate below for above
     def self.ret_workspace_create_hash(project,type,repo_idh,opts={})
       version = opts[:version]
       ancestor_branch_idh = opts[:ancestor_branch_idh]
@@ -395,7 +395,7 @@ module DTK
       {ref => assigns}
     end
 
-    #TODO: clean up; complication is that an augmented branch can be passed
+    # TODO: clean up; complication is that an augmented branch can be passed
     def repo_and_branch()
       repo = self[:repo]
       cols = (self[:repo] ? [:branch] : [:branch,:repo_id])
@@ -411,7 +411,7 @@ module DTK
       [repo_name,self[:branch]]
     end
 
-    #in case we change what schema the module and branch objects under
+    # in case we change what schema the module and branch objects under
     def self.module_id_col(module_type)
       case module_type
         when :service_module then :service_id

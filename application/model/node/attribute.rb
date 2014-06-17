@@ -31,7 +31,7 @@ module DTK
     end
 
     module AttributeClassMixin
-      #node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
+      # node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
      def get_node_level_assembly_attributes(node_idhs,cols=nil)
        cols ||= [:id,:display_name,:node_node_id,:attribute_value]
        add_filter = NodeAttribute.assembly_attribute_filter()
@@ -55,7 +55,7 @@ module DTK
 
       def get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)
         ret = Hash.new
-        #TODO: may be able to avoid this loop
+        # TODO: may be able to avoid this loop
         attrs_to_get.each do |node_id,hash_value|
           attr_info = hash_value[:attribute_info]
           node = hash_value[:node]
@@ -70,7 +70,7 @@ module DTK
         ret
       end
 
-      #TODO: need tp fix up below; maybe able to deprecate
+      # TODO: need tp fix up below; maybe able to deprecate
       def get_node_attribute_values(id_handle,opts={})
 	c = id_handle[:c]
         node_obj = get_object(id_handle,opts)
@@ -102,11 +102,11 @@ module DTK
         Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
       end
 
-      #TODO: stub; see if can use get_node_attributes
+      # TODO: stub; see if can use get_node_attributes
       def get_node_attributes_stub()
         Array.new 
       end
-      #TODO: once see calling contex, remove stub call
+      # TODO: once see calling contex, remove stub call
       def get_node_and_component_attributes(opts={})
         node_attrs = get_node_attributes_stub()
         component_attrs = get_objs(:cols => [:components_and_attrs]).map{|r|r[:attribute]}
@@ -135,7 +135,7 @@ module DTK
         node_attrs = get_node_attributes_stub()
         component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
           attr = r[:attribute]
-          #TODO: more efficient to have sql query do filtering
+          # TODO: more efficient to have sql query do filtering
           if filter_proc.nil? or filter_proc.call(attr)
             display_name_prefix = "#{r[:component].display_name_print_form()}/"
             attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
@@ -153,7 +153,7 @@ module DTK
         }
         get_children_from_sp_hash(:attribute,sp_hash).first
       end
-      #TODO: may write above in terms of below
+      # TODO: may write above in terms of below
       def get_virtual_attributes(attribute_names,cols,field_to_match=:display_name)
         sp_hash = {
           :model_name => :attribute,
@@ -163,8 +163,8 @@ module DTK
         get_children_from_sp_hash(:attribute,sp_hash)
       end
 
-      #attribute on component on node
-      #assumption is that component cannot appear more than once on node
+      # attribute on component on node
+      # assumption is that component cannot appear more than once on node
       def get_virtual_component_attribute(cmp_assign,attr_assign,cols)
         base_sp_hash = {
           :model_name => :component,
@@ -186,7 +186,7 @@ module DTK
 
       ####Things below heer shoudl be cleaned up or deprecated
       #####
-      #TODO: should be centralized
+      # TODO: should be centralized
       def get_contained_attribute_ids(opts={})
         get_directly_contained_object_ids(:attribute)||[]
       end
@@ -206,12 +206,12 @@ module DTK
       end
 
       ################
-      #TODO: may be aqble to deprecate most or all of below
+      # TODO: may be aqble to deprecate most or all of below
       ### helpers
       def ds_attributes(attr_list)
         [:ds_attributes]
       end
-      #TODO: rename subobject to sub_object
+      # TODO: rename subobject to sub_object
       def is_ds_subobject?(relation_type)
         false
       end

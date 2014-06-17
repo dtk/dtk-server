@@ -5,7 +5,7 @@ require 'json'
 require 'restclient'
 
 
-#TBD: below is just temp until make into gems
+# TBD: below is just temp until make into gems
 root = File.expand_path('../../', File.dirname(__FILE__)) + "/"
 SYSTEM_DIR = root + 'system/'
 

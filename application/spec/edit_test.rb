@@ -47,7 +47,7 @@ end
 json_data = RestClient.get("http://127.0.0.1:7000/list_contained_attributes#{container}.json?value_type=asserted")
 
 
-#TBD: moidfied is a misnomer
+# TBD: moidfied is a misnomer
 modified_json = edit_data(json_data)
 modified_hash = JSON.parse(modified_json).to_hash
 modified_values = ret_modified_values(modified_hash)

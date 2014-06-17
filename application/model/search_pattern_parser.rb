@@ -1,9 +1,9 @@
-#TODO: replace with relative dir
+# TODO: replace with relative dir
 r8_require("#{UTILS_DIR}/generate_list_meta_view")
 module XYZ
   class SearchPattern < HashObject
     def self.create(hash_search_pattern)
-      #TODO: case on whether simple or complex
+      # TODO: case on whether simple or complex
       SearchPatternSimple.new(hash_search_pattern)
     end
     def self.create_just_filter(hash_search_pattern)
@@ -23,7 +23,7 @@ module XYZ
   end
 
   module HashSearchPattern
-    #TODO: should unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
+    # TODO: should unify with parsing in utils/internal/dataset_from_search_pattern.rb; and may do away with having to deal with symbol and variant forms
     def self.add_to_filter(hash_search_pattern,hash_filter)
       filter = augment_filter(index(hash_search_pattern,:filter),hash_filter)
       merge(hash_search_pattern,{:filter => filter})
@@ -63,7 +63,7 @@ module XYZ
     end
   end
 
-#TODO: add a more complex search patterm which is joins/link following of simple patterms
+# TODO: add a more complex search patterm which is joins/link following of simple patterms
   class SearchPatternSimple < SearchPattern
     def initialize(hash_search_pattern,opts={})
       super()
@@ -89,7 +89,7 @@ module XYZ
 
     def hash_for_json_generate()
       ret = process_symbols(self)
-      #TODO: would be nice to get rid of this hack
+      # TODO: would be nice to get rid of this hack
       ret[":relation"] =  ret[":relation"] ? ret[":relation"].gsub(/^:/,"") : nil
       ret
     end
@@ -99,7 +99,7 @@ module XYZ
     end
 
     def field_set()
-      #TBD: stub; must take out non scalars
+      # TBD: stub; must take out non scalars
       model_name = relation.kind_of?(Symbol) ? relation : nil
       if columns.empty? 
         model_name ? Model::FieldSet.default(model_name) : nil 
@@ -127,7 +127,7 @@ module XYZ
     end
 
     def create_list_view_meta_hash()
-      #TODO: this is very simple; this will be enhanced
+      # TODO: this is very simple; this will be enhanced
       generate_list_meta_view(columns,relation)
     end
     
@@ -164,7 +164,7 @@ module XYZ
       (opts[:keys] & Array(key_or_keys)).empty?
     end
 
-    #TODO: move to using model_name, not relation
+    # TODO: move to using model_name, not relation
     def ret_relation(hash_input)
       relation_str = find_key_from_input(:relation,hash_input)||find_key_from_input(:model_name,hash_input)
       return nil unless relation_str
@@ -175,8 +175,8 @@ module XYZ
       columns = find_key_from_input(:columns,hash_input)||find_key_from_input(:cols,hash_input)
       return Array.new if columns.nil? or columns.empty?
       raise ErrorParsing.new(:columns,columns) unless columns.kind_of?(Array)
-      #form will be an array with each term either token or {:foo => :alias}; 
-      #TODO: right now only treating col as string or term
+      # form will be an array with each term either token or {:foo => :alias}; 
+      # TODO: right now only treating col as string or term
       columns.map do |col| 
         if col.kind_of?(Symbol) or col.kind_of?(String)
           ret_symbol(col)
@@ -192,7 +192,7 @@ module XYZ
       filter = find_key_from_input(:filter,hash_input)
       return Array.new if filter.nil? or filter.empty?
 
-      #TODO: just treating some subset of patterns
+      # TODO: just treating some subset of patterns
       ret = Array.new
       if filter.kind_of?(Array)
         op,args = get_op_and_args(filter)
@@ -200,14 +200,14 @@ module XYZ
           log_parsing_error_to_skip(:filter_operation,op)
           return ret
         elsif not [:and,:or].include?(op)
-          #assume implicit and
+          # assume implicit and
           args = [[op] + args]
           op = :and
         end
         ret << op
         args.each do |el|
           el_op,el_args = get_op_and_args(el)
-          #processing nested ands and ors
+          # processing nested ands and ors
           if [:and,:or].include?(el_op)
             ret << ret_filter(:filter => el)
           else
@@ -257,25 +257,25 @@ module XYZ
       {:start => start.to_i}.merge(limit ? {:limit => limit.to_i} : {})
     end
 
-    #return op in symbol form and args
+    # return op in symbol form and args
     def get_op_and_args(expr)
       return nil unless expr.kind_of?(Array)
       [ret_symbol(expr.first),expr[1..expr.size-1]]
     end
 
-    #converts if symbol still in string form; otehrwise keeps as string
+    # converts if symbol still in string form; otehrwise keeps as string
     def ret_symbol(term_in_json)
-      #TODO short circuit if parsed already
+      # TODO short circuit if parsed already
       raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
-#TODO: remove patch
+# TODO: remove patch
 return :eq if term_in_json == ":"
-      #complexity due to handle case where have form :":columns"
+      # complexity due to handle case where have form :":columns"
       term_in_json.to_s.gsub(/^[:]+/,'').to_sym 
     end
     
     def ret_scalar(term_in_json)
       raise ErrorParsing.new(:symbol,term_in_json) if [Array,Hash].detect{|t|term_in_json.kind_of?(t)}
-      #complexity due to handle case where have form :":columns"
+      # complexity due to handle case where have form :":columns"
       return term_in_json.to_s.gsub(/^[:]+/,'').to_sym if term_in_json.kind_of?(Symbol)
       return $1.to_sym if (term_in_json.kind_of?(String) and term_in_json =~ /^[:]+(.+)/)
       term_in_json

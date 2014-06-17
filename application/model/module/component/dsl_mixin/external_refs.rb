@@ -40,7 +40,7 @@ module DTK; class ComponentModule
         end
       end
 
-      #TODO: move this to under config_agent/puppet
+      # TODO: move this to under config_agent/puppet
       def parse_dependencies(dependencies)
         dependencies.map do |dep|
           name, version = dep.split(',')
@@ -52,7 +52,7 @@ module DTK; class ComponentModule
         end
       end
       
-      #TODO: move this to under config_agent/puppet
+      # TODO: move this to under config_agent/puppet
       def get_dependency_condition(versions)
         conds, multiple_versions = [], []
         # multiple_versions = versions.split(' ')
@@ -69,8 +69,8 @@ module DTK; class ComponentModule
         conds
       end
  
-      #TODO: factor to seperate into puppet specfic parts and general parts
-      #move puppet specific to under config_agent/puppet
+      # TODO: factor to seperate into puppet specfic parts and general parts
+      # move puppet specific to under config_agent/puppet
       def check_and_ret_external_ref_dependencies?(external_ref,project)
         ret = Hash.new
         unless dependencies = external_ref[:dependencies]
@@ -98,7 +98,7 @@ module DTK; class ComponentModule
                     
             branches.each do |branch|
               unless branch[:external_ref].nil?
-                #TODO: get rid of use of eval
+                # TODO: get rid of use of eval
                 branch_hash = eval(branch[:external_ref])
                 branch_name = branch_hash[:name].gsub('-','/').strip()
                 branch_version = branch_hash[:version]
@@ -109,7 +109,7 @@ module DTK; class ComponentModule
                   
                   evaluated, br_version, constraint_op, req_version, required_version = false, nil, nil, nil, nil
                   if dep_name.eql?(branch_name)
-                    #version_constraints.nil? means no version consttaint
+                    # version_constraints.nil? means no version consttaint
                     if version_constraints.nil?
                       evaluated = true
                     else

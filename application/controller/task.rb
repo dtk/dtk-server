@@ -6,7 +6,7 @@ module XYZ
       task_id,detail_level =  ret_request_params(:task_id,:detail_level)
       detail_level =  (detail_level||:summary).to_sym
       unless task_id
-        #TODO: use Task.get_top_level_most_recent_task(model_handle,filter=nil)
+        # TODO: use Task.get_top_level_most_recent_task(model_handle,filter=nil)
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
         task_id = tasks.first[:id]
       end
@@ -23,12 +23,12 @@ module XYZ
 
     def rest__create_task_from_pending_changes()
       scope_x = ret_request_params(:scope)||{}
-      #TODO: put in check/error that there is no task created already, but not executed, that handles same changes
+      # TODO: put in check/error that there is no task created already, but not executed, that handles same changes
 
-      #process raw scope
+      # process raw scope
       scope = 
         if scope_x["target_ids"]
-          #TODO: stub
+          # TODO: stub
         elsif scope_x["project_id"]
           sp_hash = {
             :cols => [:id],
@@ -37,7 +37,7 @@ module XYZ
           target_ids = Model.get_objs(model_handle(:target),sp_hash).map{|r|r[:id]}
           {:target_ids => target_ids}
         else
-          #TODO: stub if scope by node_id
+          # TODO: stub if scope by node_id
           Log.info("node_id scope given (#{scope_x["node_id"]})") if scope_x["node_id"]
           target_ids = Model.get_objs(model_handle(:target),{:cols => [:id]}).map{|r|r[:id]}
           {:target_ids => target_ids}
@@ -76,8 +76,8 @@ module XYZ
       if node_id
         node_idhs = [id_handle(node_id,:node)]
       else
-        #means get set of nodes
-        #TODO: stub is to get all in target
+        # means get set of nodes
+        # TODO: stub is to get all in target
         sp_hash = {
           :cols => [:id, :display_name],
           :filter => [:neq, :datacenter_datacenter_id, nil]
@@ -106,7 +106,7 @@ module XYZ
     end
 ### end temp for mocking
 
-    #TODO: test stub
+    # TODO: test stub
     def pretty_print(task_id=nil)
       unless task_id
         tasks = Task.get_top_level_tasks(model_handle).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
@@ -132,10 +132,10 @@ module XYZ
       {:content => {}}
     end
 
-    #TODO: templk hack
+    # TODO: templk hack
     def rest__get_logs()
       task_id = ret_request_params(:task_id) 
-      #first time call can have no data because it is going to db and launching background call to nodes
+      # first time call can have no data because it is going to db and launching background call to nodes
       num_tries = 1
       max_tries = 5
       done = false
@@ -150,7 +150,7 @@ module XYZ
       end
       data_reformulated = Array.new
       data.each do |node_id,info|
-        #TODO: :complete is misleading
+        # TODO: :complete is misleading
         info.delete(:complete)
         data_reformulated << info.merge(:node_id => node_id)
       end
@@ -195,7 +195,7 @@ module XYZ
         parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}
       end
       ### end parse logs
-      #put log in hash/array form
+      # put log in hash/array form
       hash_form =  logs_in_hash_form(parsed_logs,node_id.nil?)
 
       #### fidning file id TODO: this shoudl be pushed to lower level
@@ -207,7 +207,7 @@ module XYZ
         end
       end
 
-#TODO: temp hack so notice and err show for puppet logs
+# TODO: temp hack so notice and err show for puppet logs
       if (logs_info.values.first||{})[:type] == "puppet"
         hash_form.each_value do |v|
           (v[:log_segments]||[]).each do |seg|
@@ -236,7 +236,7 @@ module XYZ
       return nil unless file_name
       case type
       when :template
-        #TODO: stub; since does not handle case where multiple versions
+        # TODO: stub; since does not handle case where multiple versions
         "templates/default/#{file_name}"
       when :recipe
         "recipes/#{file_name}"
@@ -257,11 +257,11 @@ module XYZ
               }
             }
           else
-            #TODO: change hash form so do not have to reformulate
+            # TODO: change hash form so do not have to reformulate
             pl = log_info[:parsed_log].hash_form
             log_segments = pl[:log_segments]
 
-            #TODO: see what other chars that need to be removed; once finalize move this to under hash_form
+            # TODO: see what other chars that need to be removed; once finalize move this to under hash_form
             log_segments = log_segments.map do |x|
               line = x[:line] && x[:line].gsub(/["]/,"")
               x.merge(:line => line)
@@ -271,7 +271,7 @@ module XYZ
             if (log_segments.last||{})[:type] == :error 
               error = log_segments.last
 pp [:log_error,error]
-              #TODO: this looks like error; should be log_segments = log_segments[0..log_segments.size-2]
+              # TODO: this looks like error; should be log_segments = log_segments[0..log_segments.size-2]
               log_segments = log_segments[1..log_segments.size-1]
             end
             summary = error ? error : {:type => :ok}
@@ -289,8 +289,8 @@ pp [:log_error,error]
 
     def get_logs_test(level="info",task_id=nil)
       
-      #task_id is nil means get most recent task
-      #TODO: hack
+      # task_id is nil means get most recent task
+      # TODO: hack
      # level = "info" if level == "undefined"
       level = "summary" if level == "undefined"
       level = level.to_sym
@@ -308,8 +308,8 @@ pp [:log_error,error]
 
 #      if R8::Config[:command_and_control][:node_config][:type] == "mcollective"
       if R8::EnvironmentConfig::CommandAndControlMode == "mcollective"
-        #TODO: do cases lower level
-        #logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
+        # TODO: do cases lower level
+        # logs = task ? CommandAndControl.get_logs(task,assoc_nodes) : []
         logs_info = task ? TaskLog.get_and_update_logs_content(task,assoc_nodes,:top_task_id => task.id()) : {}
       else
         logs_info = get_logs_mock(assoc_nodes).inject({}) do |h,(k,v)|
@@ -334,7 +334,7 @@ pp [:log_error,error]
         #          File.open("/tmp/raw#{node_id.to_s}.txt","w"){|f|log.each{|l|f << l+"\n"}}
         ##pp [:file_asset_if_error,pl.ret_file_asset_if_error(model_handle)]
         ##STDOUT << "----------------\n"
-        #TODO: hack whete find error node and if no error node first node
+        # TODO: hack whete find error node and if no error node first node
         type = pl.find{|seg|seg.type == :error} ? :error : :ok
         parsed_logs[type] << {:node_id => node_id, :node_name => node_name,:parsed_log => pl}
       end
@@ -389,7 +389,7 @@ pp [:log_error,error]
         end
         ret.assign(:parsed_logs,pls)
        when :error_detail
-        #just showing error cases
+        # just showing error cases
         errors = Array.new
         each_error_parsed_log(parsed_logs) do |node_info,parsed_log|
           hash_form = parsed_log.error_segment.hash_form()

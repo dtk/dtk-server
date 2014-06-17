@@ -30,7 +30,7 @@ module DTK; class ComponentDSL; class GenerateFromImpl
 
       def self.process_output_attr!(attr_meta,exp_rsc_ps)
         hash_key = hash_key_for_output_attr(exp_rsc_ps)
-        #resassign hash_key because attr_meta.set_hash_key can renumber for dups
+        # resassign hash_key because attr_meta.set_hash_key can renumber for dups
         hash_key = attr_meta.set_hash_key(hash_key)
         name = hash_key
         attr_meta[:include] = nailed(true)
@@ -45,7 +45,7 @@ module DTK; class ComponentDSL; class GenerateFromImpl
 
       def self.process_input_attr!(attr_meta,imp_coll_ps)
         hash_key = hash_key_for_input_attr(imp_coll_ps)
-        #resassign hash_key because attr_meta.set_hash_key can renumber for dups
+        # resassign hash_key because attr_meta.set_hash_key can renumber for dups
         hash_key = attr_meta.set_hash_key(hash_key)
         name = hash_key
         attr_meta[:include] = nailed(true)
@@ -88,8 +88,8 @@ module DTK; class ComponentDSL; class GenerateFromImpl
       end
       def self.augment_ext_ref_for_input_attr!(ext_ref,imp_coll_ps)
         ext_ref["resource_type"] = imp_coll_ps[:type]
-        #TODO: think can deprecate
-        #ext_ref["import_coll_query"] = imp_coll_ps[:query].structured_form()
+        # TODO: think can deprecate
+        # ext_ref["import_coll_query"] = imp_coll_ps[:query].structured_form()
         ext_ref
       end
 
@@ -111,7 +111,7 @@ module DTK; class ComponentDSL; class GenerateFromImpl
         end
         ret = content[:value].variable_list()
         return Array.new if ret.empty?
-        #prune variables that appear already; need parent source
+        # prune variables that appear already; need parent source
         existing_attr_names = (attr_meta.parent_source||{})[:attributes].map{|a|a[:name]}
         ret.reject{|v|existing_attr_names.include?(v)}
       end

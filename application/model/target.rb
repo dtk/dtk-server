@@ -179,7 +179,7 @@ module DTK
       if parent_id = self[:parent_id]
         parent_provider = id_handle(:id => parent_id).create_object(:model_name => :target_instance)
         if parent_iaas_properties = parent_provider.get_field?(:iaas_properties)
-          #specific properties take precedence over the parent's
+          # specific properties take precedence over the parent's
           iaas_properties = parent_iaas_properties.merge(iaas_properties||{})
         end
       end
@@ -206,7 +206,7 @@ module DTK
     end
 
     def add_item(source_id_handle,override_attrs={})
-      #TODO: need to copy in avatar when hash["ui"] is non null
+      # TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs ||= {}
       source_obj = source_id_handle.create_object()
       clone_opts = source_obj.source_clone_info_opts()

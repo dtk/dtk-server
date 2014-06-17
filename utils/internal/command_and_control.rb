@@ -36,7 +36,7 @@ module DTK
       klass.get_mcollective_client()
     end
 
-    #This takes into account what is needed for the node_config_adapter
+    # This takes into account what is needed for the node_config_adapter
     def self.node_config_adapter_install_script(node,bindings)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
@@ -140,7 +140,7 @@ module DTK
       klass = load_for_aux(:node_config,adapter_name)
       klass.send(method,node,callbacks,context)
     end
-    #TODO: convert poll_to_detect_node_ready to use more general form above
+    # TODO: convert poll_to_detect_node_ready to use more general form above
     def self.poll_to_detect_node_ready(node,opts)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
@@ -210,7 +210,7 @@ module DTK
     end
     Adapters = Hash.new
     Lock = Mutex.new
-    #TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
+    # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type,adapter_name)
       (InstanceStyleAdapters[adapter_type.to_sym]||[]).include?(adapter_name.to_sym)
     end

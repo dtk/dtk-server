@@ -2,7 +2,7 @@ module DTK
   class Task; module StatusMixin
     class Status
       def self.get_active_top_level_tasks(model_handle)
-        #TODO: need protection so dont get stake tasks that never came out of executing mode
+        # TODO: need protection so dont get stake tasks that never came out of executing mode
         filter = [:and, [:eq,:status,"executing"],[:or,[:neq,:assembly_id,nil],[:neq,:node_id,nil]]]
         Task.get_top_level_tasks(model_handle,filter)
       end
@@ -12,7 +12,7 @@ module DTK
         model_handle = model_handle.createMH(:task)
         top_level_active = get_active_top_level_tasks(model_handle)
         return ret if top_level_active.empty?
-        #TODO: way to make call Task.get_all_subtasks faster 
+        # TODO: way to make call Task.get_all_subtasks faster 
         ndx_ret = Hash.new
         Task.get_all_subtasks(top_level_active.map{|t|t.id_handle}).each do |sub_task|
           if node = (sub_task[:executable_action] && sub_task[:executable_action][:node])
@@ -34,7 +34,7 @@ module DTK
         
         status_opts = Opts.new
         if status_opts[:detail_level]
-          #TODO: stub; treat passed in detail setting status_optss as function of detail_level
+          # TODO: stub; treat passed in detail setting status_optss as function of detail_level
           status_opts[:no_components] = false
           status_opts[:no_attributes] = true
         else
@@ -156,7 +156,7 @@ module DTK
       el[:id] = self[:id]
       type = (level == 1 ? self[:display_name] : self[:type]||self[:display_name])|| "top"
       # type = self[:display_name]|| "top"
-      #putting idents in
+      # putting idents in
       
       el[:type] = "#{' '*(2*(level-1))}#{type}"
       ndx_errors ||= self.class.get_ndx_errors(hier_task_idhs())
@@ -165,7 +165,7 @@ module DTK
       end
 
       if level == 1
-        #no op
+        # no op
       else
         case self[:executable_action_type]
          when "ConfigNode" 
@@ -188,7 +188,7 @@ module DTK
       end
       ret << el
       num_subtasks = subtasks.size
-      #ret.add(self,:temporal_order) if num_subtasks > 1
+      # ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret += subtasks.sort{|a,b| (a[:position]||0) <=> (b[:position]||0)}.map{|st|st.status_table_form(opts,level+1,ndx_errors)}.flatten(1)
       end
@@ -254,7 +254,7 @@ module DTK
       [id_handle()] + subtasks.map{|r|r.hier_task_idhs()}.flatten
     end
 
-    #TODO: probably better to set when creating
+    # TODO: probably better to set when creating
     def set_and_return_types!()
       type = 
         if self[:task_id].nil?
@@ -264,8 +264,8 @@ module DTK
         elsif self[:display_name]
           self[:display_name]
         else
-          #TODO: probably deprecate below; it at least needs fixing up
-          #assumption that all subtypes some type
+          # TODO: probably deprecate below; it at least needs fixing up
+          # assumption that all subtypes some type
           if sample_st = subtasks.first
             if sample_st[:executable_action_type]
               sample_type = ActionTypeCodes[sample_st[:executable_action_type]]
@@ -289,12 +289,12 @@ module DTK
     end
     protected :hier_task_idhs
 
-    #for debugging
+    # for debugging
     def pretty_print_hash()
       ret = PrettyPrintHash.new
       ret.add(self,:id,:status)
       num_subtasks = subtasks.size
-      #only include :temporal_order if more than 1 subtask
+      # only include :temporal_order if more than 1 subtask
       ret.add(self,:temporal_order) if num_subtasks > 1
       if num_subtasks > 0
         ret.add(self,:subtasks) do |subtasks|

@@ -7,7 +7,7 @@ module DTK; class Repo
       @b_sha = b_sha
     end
 
-    #returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
+    # returns a hash with keys :file_renamed, :file_added, :file_deleted, :file_modified
     def ret_summary()
       DiffTypesAndMethods.inject(Summary.new) do |h,(diff_type, diff_method)|
 #        diff_type, diff_method = tm
@@ -44,7 +44,7 @@ module DTK; class Repo
         self[:files_modified] and !!self[:files_modified].find{|r|path(r) == path}
       end
 
-      #note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
+      # note: in paths_to_add and paths_to_delete rename appears both since rename can be accomplsihed by a add + a delete 
       def paths_to_add()
         (self[:files_added]||[]).map{|r|path(r)} + (self[:files_renamed]||[]).map{|r|r[:new_path]}
       end

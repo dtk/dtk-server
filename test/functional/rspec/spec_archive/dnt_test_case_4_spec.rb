@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 4: Stage node template and converge it (simple)
+# Test Case 4: Stage node template and converge it (simple)
 
 require 'rubygems'
 require 'rest_client'

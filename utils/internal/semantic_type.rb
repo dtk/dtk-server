@@ -1,8 +1,8 @@
-#TODO: move this to under attribute or attribute_link
+# TODO: move this to under attribute or attribute_link
 module DTK
   module CommonSemanticTypeMixin
     def is_array?()
-      #TODO: may have :array+ and :array* to distinguish whether array can be empty
+      # TODO: may have :array+ and :array* to distinguish whether array can be empty
       keys.first == :array
     end
     def is_hash?()
@@ -18,13 +18,13 @@ module DTK
       self.new(convert_hash(semantic_type))
     end
 
-    #TODO: this needs to be fixed; this includes fixing up to handle inputs that are arrays of hashes
+    # TODO: this needs to be fixed; this includes fixing up to handle inputs that are arrays of hashes
     def self.find_link_function(input_attr,output_attr)
       input_type = attribute_index_type__input(input_attr)
       output_type = attribute_index_type__output(output_attr)
       LinkFunctionMatrix[output_type][input_type]
     end
-    #first index is output type, second one is input type
+    # first index is output type, second one is input type
     LinkFunctionMatrix = {
       :scalar => {
         :scalar => "eq", :indexed => "eq_indexed", :array => "array_append"
@@ -43,14 +43,14 @@ module DTK
 
    private
     def self.attribute_index_type__input(attr)
-      #TODO: think may need to look at data type inside array
+      # TODO: think may need to look at data type inside array
       if attr[:input_path] then :indexed
       else attr[:semantic_type_object].is_array?() ? :array : :scalar
       end
     end
 
     def self.attribute_index_type__output(attr)
-      #TODO: may need to look at data type inside array
+      # TODO: may need to look at data type inside array
       if attr[:output_path] then :indexed
       else attr[:semantic_type_object].is_array?() ? :array : :scalar
       end
@@ -74,11 +74,11 @@ module DTK
     end
   end
 
-  #TODO: for input ports may just have constraints, not syntax
+  # TODO: for input ports may just have constraints, not syntax
   module AttributeSemantic
-    #TODO: rather than external may have :internal_only
+    # TODO: rather than external may have :internal_only
     Info =
-      #L4 Saps adn sockets
+      # L4 Saps adn sockets
       {
       "sap_config__l4" => {
         :syntax => {
@@ -131,8 +131,8 @@ rather than having or having two sap refs and user can remove or add to componen
 
       "db_user_access" => {
         :external => true,
-#TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
-#if they have alink; currently if marked as input then they are treated as readonly        
+# TODO: need to rexamine use of :port_type => "input" in light of having attributes that can be read only vs read/write depending
+# if they have alink; currently if marked as input then they are treated as readonly        
 #        :port_type => "input",
         :syntax => {
           "username" => {:required => true, :type => :string},
@@ -142,8 +142,8 @@ rather than having or having two sap refs and user can remove or add to componen
         }
       },
 
-      #TODO deprecate db ones in favor of above
-      #DB params
+      # TODO deprecate db ones in favor of above
+      # DB params
       "db_config" => {
         :external => true,
         :port_type => "output",
@@ -171,7 +171,7 @@ rather than having or having two sap refs and user can remove or add to componen
         :port_type => "input"
       },
 
-      #TODO: may deprecate below
+      # TODO: may deprecate below
       "sap_config__db" => {
       },
       "sap__db" => {
@@ -214,9 +214,9 @@ rather than having or having two sap refs and user can remove or add to componen
       has_key?(:type)
     end
 
-    #returns [array_body_pattern, whether_can_be_empty]
+    # returns [array_body_pattern, whether_can_be_empty]
     def parse_array()
-      #TODO: may have :array+ and :array* to distingusih whether array can be empty
+      # TODO: may have :array+ and :array* to distingusih whether array can be empty
       [values.first,false]
     end
 

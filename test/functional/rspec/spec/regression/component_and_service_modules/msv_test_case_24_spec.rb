@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 24: Import new service module but all component modules for that service module already exist on server and locally
+# Test Case 24: Import new service module but all component modules for that service module already exist on server and locally
 
 require 'rubygems'
 require 'rest_client'

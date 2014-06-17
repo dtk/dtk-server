@@ -25,7 +25,7 @@ module DTK
         end
 
         node_bindings.each do |nb|
-          #TODO: fix so taht have a unique id for each
+          # TODO: fix so taht have a unique id for each
           unique_id = ((nb[:rules].size == 1) && nb[:id])
           nb[:rules].each do |r|
             # Amar & Haris: Skipping node template in case when target name filter is sent in method request from CLI
@@ -55,7 +55,7 @@ module DTK
         @legal_os_types = get_objs(model_handle.createMH(:node),sp_hash).map{|r|r[:os_identifier]}.compact.uniq
       end
 
-      #returns [image_id, os_type]
+      # returns [image_id, os_type]
       def self.find_image_id_and_os_type(os_identifier,target)
         public_library = Library.get_public_library(target.model_handle(:library))
         sp_hash = {
@@ -110,12 +110,12 @@ module DTK
         end
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym
-        #TODO: commented out below until fix DTK-434
-        #unless CommandAndControl.existing_image?(new_image_id,image_type)
+        # TODO: commented out below until fix DTK-434
+        # unless CommandAndControl.existing_image?(new_image_id,image_type)
         #  raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
-        #end
+        # end
 
-        #update daatstructute than model
+        # update daatstructute than model
         matching_node_bindings.each do |nb|
           nb[:rules].each do |r|
             nt = r[:node_template]
@@ -126,7 +126,7 @@ module DTK
         end
         update_from_rows(nb_mh,matching_node_bindings)
 
-        #find and update nodes that are images
+        # find and update nodes that are images
         sp_hash = {
           :cols => [:id,:external_ref],
           :filter => [:eq, :type, "image"]

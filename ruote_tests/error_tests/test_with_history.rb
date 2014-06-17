@@ -28,9 +28,9 @@ engine.register_participant 'bad', ErrorParticipant
 engine.register_participant 'alpha', DefaultParticipant 
 engine.register_participant 'beta', DefaultParticipant 
 engine.register_participant 'gamma', DefaultParticipant 
-#engine.register do
+# engine.register do
 #  catchall DefaultParticipant
-#end
+# end
 
 
 pdef = Ruote.process_definition do

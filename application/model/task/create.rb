@@ -8,7 +8,7 @@ module DTK
 
       component_type = opts[:component_type]||:service
       commit_msg = opts[:commit_msg]
-      #TODO: not doing at this point puppet version per run; it just can be set when node is created
+      # TODO: not doing at this point puppet version per run; it just can be set when node is created
       puppet_version = opts[:puppet_version]
 
       ret = create_new_task(task_mh,:assembly_id => assembly[:id],:display_name => "assembly_converge", :temporal_order => "sequential",:commit_message => commit_msg)
@@ -33,7 +33,7 @@ module DTK
     def create_from_assembly_instance(assembly,opts={})
       component_type = opts[:component_type]||:service
       commit_msg = opts[:commit_msg]
-      #TODO: not doing at this point puppet version per run; it just can be set when node is created
+      # TODO: not doing at this point puppet version per run; it just can be set when node is created
       puppet_version = opts[:puppet_version]
 
       target_idh = target_idh_from_assembly(assembly)
@@ -79,7 +79,7 @@ module DTK
 
       ret = nil
       # opts = {}
-      #for powering on node with no components
+      # for powering on node with no components
       unless assembly_config_changes and not assembly_config_changes.empty?
         unless node = opts[:node]
           raise Error.new("Expected that :node passed in as options")
@@ -158,7 +158,7 @@ module DTK
       end
       ret
     end
-    #TODO: might collapse these different creates for node, node_group, assembly
+    # TODO: might collapse these different creates for node, node_group, assembly
     def create_from_node(node_idh,commit_msg=nil)
       ret = nil
       target_idh = node_idh.get_parent_id_handle_with_auth_info()
@@ -169,7 +169,7 @@ module DTK
       create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh,:node => node)
       create_nodes_task = create_nodes_task(task_mh,create_nodes_changes)
 
-      #TODO: need to update this to :use_task_templates
+      # TODO: need to update this to :use_task_templates
       config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh,:node => node)
       config_nodes_task = config_nodes_task(task_mh,config_nodes_changes)
 
@@ -206,7 +206,7 @@ module DTK
       ret
     end
 
-    #TODO: might deprecate
+    # TODO: might deprecate
     def create_from_pending_changes(parent_idh,state_change_list)
       task_mh = parent_idh.create_childMH(:task)
       grouped_state_changes = group_by_node_and_type(state_change_list)
@@ -217,7 +217,7 @@ module DTK
           next
         end
       end
-      #if have both create_node and config node then top level has two stages create_node then config node
+      # if have both create_node and config node then top level has two stages create_node then config node
       create_nodes_task = create_nodes_task(task_mh,grouped_state_changes[Task::Action::CreateNode])
       config_nodes_task = config_nodes_task(task_mh,grouped_state_changes[Task::Action::ConfigNode])
       if create_nodes_task and config_nodes_task
@@ -279,7 +279,7 @@ module DTK
 
     def create_nodes_task(task_mh,state_change_list)
       return nil unless state_change_list and not state_change_list.empty?
-      #each element will be list with single element
+      # each element will be list with single element
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
@@ -304,7 +304,7 @@ module DTK
       nodes = opts[:nodes]
       nodes_wo_components = []
 
-      #for powering on node with no components
+      # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
           raise Error.new("Expected that :node passed in as options")
@@ -333,7 +333,7 @@ module DTK
         # do not start all nodes but one that command is executed from
         state_change_list = state_change_list.select{|s| s.first[:node][:id]==opts[:node][:id]} if opts[:node]
 
-        #each element will be list with single element
+        # each element will be list with single element
         if state_change_list.size == 1
           executable_action = Task::Action::PowerOnNode.create_from_state_change(state_change_list.first.first)
           all_actions << executable_action
@@ -361,7 +361,7 @@ module DTK
     end
 
     def create_running_node_task(task_mh,state_change_list,opts={})
-      #for powering on node with no components
+      # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
         unless node = opts[:node]
           raise Error.new("Expected that :node passed in as options")
@@ -372,7 +372,7 @@ module DTK
         return create_new_task(task_mh,:executable_action => executable_action)
       end
 
-      #each element will be list with single element
+      # each element will be list with single element
       ret = nil
       all_actions = Array.new
       if state_change_list.size == 1
@@ -392,8 +392,8 @@ module DTK
       ret
     end
 
-    #TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure 
-    #so node is not repeated for each element corresponding to same node
+    # TODO: think asseumption is that each elemnt corresponds to changes to same node; if this is case may change input datastructure 
+    # so node is not repeated for each element corresponding to same node
     def config_nodes_task(task_mh,state_change_list,assembly_idh=nil, stage_index=nil)
       return nil unless state_change_list and not state_change_list.empty?
       ret = nil

@@ -22,7 +22,7 @@
 # limitations under the License.
 #
 require 'pp'
-#begin
+# begin
   # getting normalized information
   
   servers_host_addrs = XYZ::ArrayObject.new
@@ -39,7 +39,7 @@ require 'pp'
   pp [:normalized_checks,normalized_checks]
 
   service_check_assocs = node[:nagios][:service_check_assocs] ? node[:nagios][:service_check_assocs].to_hash : {}
-  #prune service_check_assocs to only have elements from normalized_checks and graft on params from normalized_checks
+  # prune service_check_assocs to only have elements from normalized_checks and graft on params from normalized_checks
   service_check_assocs.reject!{|k,v|not normalized_checks.has_key?(k)}
   normalized_checks.each do |k,v| 
     if service_check_assocs[k]
@@ -63,10 +63,10 @@ require 'pp'
     supports :restart => true, :reload => true
   end
 
-  #host level check instrumentation
+  # host level check instrumentation
   %w{check_mem.sh check_iostat check_memory_profiler_scout}.each{|p|load_plugin p}
 
-  #service level check instrumentation 
+  # service level check instrumentation 
   service_check_assocs.each_value do |info|
     client_info = info["client_side"]
     if client_info and info["is_custom_check"] and info["is_custom_check"] == "client_side"

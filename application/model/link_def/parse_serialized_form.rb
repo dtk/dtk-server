@@ -4,7 +4,7 @@ module DTK; class LinkDef
       ParseSerializedForm.new(config_agent_type,remote_link_defs,local_cmp_ref).parse(link_defs)
     end
 
-    #This is used to convert from add hoc link commands into internal form
+    # This is used to convert from add hoc link commands into internal form
     def parse_serialized_form_attribute_mapping(mapping)
       ParseSerializedForm.new().parse_possible_link_attribute_mapping(mapping)
     end
@@ -148,7 +148,7 @@ module DTK; class LinkDef
       ret
     end
       
-    #returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute
+    # returns node_name, component_name, attribute_name, path; where component_name xor node_name is null depending on whether it is a node or component attribute
     def parse_attribute_term(term_x)
       ret = Hash.new
       term = term_x.to_s.gsub(/^:/,"")

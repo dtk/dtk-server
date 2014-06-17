@@ -6,7 +6,7 @@ module DTK; class ErrorUsage
         replace(hash)
       end
 
-      #array can have as last element a Params arg
+      # array can have as last element a Params arg
       def self.add_to_array(array,hash_params)
         if array.last().kind_of?(Params)
           array[0...array.size-1] + [array.last().dup.merge(hash_params)]
@@ -14,7 +14,7 @@ module DTK; class ErrorUsage
           array + [new(hash_params)]
         end
       end
-      #TODO: collapse these two
+      # TODO: collapse these two
       def self.add_opts(args_x,opts)
         base_opts = (opts.kind_of?(Opts) ? opts : Opts.new(opts))
         if args_x.last.kind_of?(Opts)
@@ -24,7 +24,7 @@ module DTK; class ErrorUsage
         end
       end
 
-      #returns [parsing_error,params,opts]
+      # returns [parsing_error,params,opts]
       def self.process(raw_msg,*args)
         processed_msg = raw_msg.dup
         params = nil
@@ -32,7 +32,7 @@ module DTK; class ErrorUsage
 
         args.each_with_index do |arg, i|
           if arg.kind_of?(Params)
-            #make sure that params,opts are at end
+            # make sure that params,opts are at end
             unless i == (args.size-1) or i == (args.size-2)
               raise Error.new("Args of type (#{arg.class}) must be one of last two args")
             end
@@ -59,7 +59,7 @@ module DTK; class ErrorUsage
       FilePathFreeVar = 'file_path'
 
       def self.any_free_vars?(msg)
-        #only finds first free variable
+        # only finds first free variable
         if msg =~ FreeVariable
           $1
         end

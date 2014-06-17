@@ -5,7 +5,7 @@ module XYZ
         @container_uri = container_uri
         initialize_extra()
       end
-      #this can be overwritten
+      # this can be overwritten
       def initialize_extra()
       end
 

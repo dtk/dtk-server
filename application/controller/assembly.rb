@@ -4,11 +4,11 @@ module DTK
     helper :task_helper
 
     #### create and delete actions ###
-    #TODO: rename to delete_and_destroy
+    # TODO: rename to delete_and_destroy
     def rest__delete()
       assembly_id,subtype = ret_assembly_params_id_and_subtype()
       if subtype == :template
-        #returning module_repo_info so client can update this in its local module
+        # returning module_repo_info so client can update this in its local module
         rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
       else #subtype == :instance
         Assembly::Instance.delete(id_handle(assembly_id),:destroy_nodes => true)
@@ -87,7 +87,7 @@ module DTK
       rest_ok_response assembly.rename(model_handle(), assembly_name, new_assembly_name)
     end
 
-    #TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
+    # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about()
       node_id, component_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :detail_level, :detail_to_include)
       assembly,subtype = ret_assembly_params_object_and_subtype()
@@ -234,7 +234,7 @@ module DTK
       target_attr_term,source_attr_term = ret_non_null_request_params(:target_attribute_term,:source_attribute_term)
       update_meta = ret_request_params(:update_meta)
       opts = Hash.new
-      #update_meta == true is the default
+      # update_meta == true is the default
       unless !update_meta.nil? and !update_meta
         opts.merge!(:update_meta => true)
       end
@@ -260,7 +260,7 @@ module DTK
 
     def rest__list_attribute_mappings()
       port_link = ret_port_link()
-      #TODO: stub
+      # TODO: stub
       ams = port_link.list_attribute_mappings()
       pp ams
       rest_ok_response 
@@ -277,7 +277,7 @@ module DTK
       ret = assembly.list_service_links(opts)
       rest_ok_response ret
     end
-    #TODO: deprecate below for above
+    # TODO: deprecate below for above
     def rest__list_connections()
       assembly = ret_assembly_instance_object()
       find_missing,find_possible = ret_request_params(:find_missing,:find_possible)
@@ -329,15 +329,15 @@ module DTK
     end
 
     #### end: list and info actions ###
-    #TODO: update what input can be
-    #the body has an array each element of form
+    # TODO: update what input can be
+    # the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
-    #pat can be one of three forms
-    #1 - an id
-    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
-    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
+    # pat can be one of three forms
+    # 1 - an id
+    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    # 3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
-    #TODO: this is a minsnomer in that it can be used to just create attributes
+    # TODO: this is a minsnomer in that it can be used to just create attributes
     def rest__set_attributes()
       assembly = ret_assembly_instance_object()
       av_pairs = ret_params_av_pairs()
@@ -355,7 +355,7 @@ module DTK
         end
         opts.merge!(:attribute_properties => create_options) 
       end
-      #update_meta == true is the default
+      # update_meta == true is the default
       update_meta = ret_request_params(:update_meta)
       unless !update_meta.nil? and !update_meta
         opts.merge!(:update_meta => true)
@@ -393,7 +393,7 @@ module DTK
     def rest__add_component()
       assembly = ret_assembly_instance_object()
       component_template, component_title = ret_component_template_and_title_for_assembly(:component_template_id,assembly)
-      #not checking here if node_id points to valid object; check is in add_component
+      # not checking here if node_id points to valid object; check is in add_component
       node_idh = ret_request_param_id_handle(:node_id,Node)
       new_component_idh = assembly.add_component(node_idh,component_template,component_title)
       rest_ok_response(:component_id => new_component_idh.get_id())
@@ -469,7 +469,7 @@ module DTK
 
         nodes_w_components = assembly.remove_empty_nodes(nodes, {:detail_level => 'nodes'})
 
-        #TODO: not doing at this point puppet version per run; it just can be set when node is created
+        # TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
@@ -481,7 +481,7 @@ module DTK
         end
       else
         raise ErrorUsage, "Task is already running on requested nodes. Please wait until task is complete" if assembly.are_nodes_running?
-        #TODO: not doing at this point puppet version per run; it just can be set when node is created
+        # TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
         task = Task.create_from_assembly_instance(assembly,opts)
       end
@@ -606,7 +606,7 @@ module DTK
       unless node_pattern.nil? || node_pattern.empty?
         regex = Regexp.new(node_pattern)
 
-        #temp nodes_list
+        # temp nodes_list
         nodes_list = nodes
 
         nodes = nodes.select { |node| regex =~ node.id.to_s}
@@ -726,7 +726,7 @@ module DTK
       node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
 
-      #Logic for validation
+      # Logic for validation
       # filters only running nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
@@ -737,16 +737,16 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      #Logic for validation
+      # Logic for validation
       # restrict execution of execute-test if tasks are still executing
-      #Commenting out to check if we have other way to get to the bottom of DTK-1477 issue
-      #node_names = nodes.map { |node| node[:display_name] }
-      #tasks_status = Task::Status::Assembly.get_status(id_handle(assembly[:id]),:format => :table)
-      #tasks_status.each do |task_status|
+      # Commenting out to check if we have other way to get to the bottom of DTK-1477 issue
+      # node_names = nodes.map { |node| node[:display_name] }
+      # tasks_status = Task::Status::Assembly.get_status(id_handle(assembly[:id]),:format => :table)
+      # tasks_status.each do |task_status|
       #  return rest_ok_response(:errors => ["Tasks are still executing. Please wait until tasks are completed to use execute-test functionality"]) if task_status[:status] == "executing"
-      #end
+      # end
 
-      #Special case for preventing execution of agent on specific node that is not running
+      # Special case for preventing execution of agent on specific node that is not running
       matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
       if (!node_id.empty? && matching_nodes.empty?)
         error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
@@ -754,7 +754,7 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      #Special case filtering of components from nodes that are not running and passing only those components for the execution
+      # Special case filtering of components from nodes that are not running and passing only those components for the execution
       node_names = Array.new
       nodes.each do |x|
         node_names << x[:display_name]
@@ -777,7 +777,7 @@ module DTK
       node_id, components = ret_non_null_request_params(:node_id, :components)
       assembly = ret_assembly_instance_object()
       project = get_default_project()
-      #Logic for validation
+      # Logic for validation
       # filters only running nodes for this assembly
       nodes = assembly.get_nodes(:id,:display_name,:type,:external_ref,:hostname_external_ref, :admin_op_status)
       assembly_name = Assembly::Instance.pretty_print_name(assembly)
@@ -788,7 +788,7 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      #Special case for preventing execution of agent on specific node that is not running
+      # Special case for preventing execution of agent on specific node that is not running
       matching_nodes = nodes.select { |node| node[:id] == node_id.to_i }
       if (!node_id.empty? && matching_nodes.empty?)
         error_msg = "Serverspec tests cannot be executed on nodes that are not 'running'."
@@ -796,7 +796,7 @@ module DTK
         return rest_ok_response(:errors => [error_msg])
       end
 
-      #Special case filtering of components from nodes that are not running and passing only those components for the execution
+      # Special case filtering of components from nodes that are not running and passing only those components for the execution
       node_names = Array.new
       nodes.each do |x|
         node_names << x[:display_name]
@@ -816,7 +816,7 @@ module DTK
     end
     
     def rest__get_action_results()
-      #TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
+      # TODO: to be safe need to garbage collect on ActionResultsQueue in case miss anything
       action_results_id = ret_non_null_request_params(:action_results_id)
       ret_only_if_complete = ret_request_param_boolean(:return_only_if_complete)
       disable_post_processing = ret_request_param_boolean(:disable_post_processing)
@@ -835,7 +835,7 @@ module DTK
     end
     ### end: mcollective actions
 
-#TDODO: got here in cleanup of rest calls
+# TDODO: got here in cleanup of rest calls
 
     def rest__list_smoketests()
       assembly = ret_assembly_object()
@@ -859,7 +859,7 @@ module DTK
         [:regex,name.to_sym,"^#{value}"] if cols.include?(name.to_sym)
       end.compact
 
-      #restrict results to belong to library and not nested in assembly
+      # restrict results to belong to library and not nested in assembly
       filter_conjuncts += [[:eq,:type,"composite"],[:neq,:library_library_id,nil],[:eq,:assembly_id,nil]]
       sp_hash = {
         :cols => cols,
@@ -876,7 +876,7 @@ module DTK
         name = Assembly.pretty_print_name(component_list[index])
         title = name.nil? ? "" : i18n_string(i18n,:component,name)
         
-#TODO: change after implementing all the new types and making generic icons for them
+# TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
         model_type_str = "#{model_type}-#{model_sub_type}"
@@ -904,18 +904,18 @@ module DTK
       return assemblies
     end
 
-    #TODO: unify with clone(id)
-    #clone assembly from library to target
+    # TODO: unify with clone(id)
+    # clone assembly from library to target
     def stage()
       target_idh = target_idh_with_default(request.params["target_id"])
       assembly_id = ret_request_param_id(:assembly_id,::DTK::Assembly::Template)
       
-      #TODO: if naem given and not unique either reject or generate a -n suffix
+      # TODO: if naem given and not unique either reject or generate a -n suffix
       assembly_name = ret_request_params(:name) 
 
       id_handle = id_handle(assembly_id)
 
-      #TODO: need to copy in avatar when hash["ui"] is non null
+      # TODO: need to copy in avatar when hash["ui"] is non null
       override_attrs = Hash.new
       override_attrs[:display_name] = assembly_name if assembly_name
 
@@ -924,16 +924,16 @@ module DTK
       new_assembly_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
       id = new_assembly_obj && new_assembly_obj.id()
 
-      #compute ui positions
+      # compute ui positions
       nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
-      #TODO: this does not leverage assembly node relative positions
+      # TODO: this does not leverage assembly node relative positions
       nested_objs[:nodes].each do |node|
         target_object.update_ui_for_new_item(node[:id])
       end
       rest_ok_response(:assembly_id => id)
     end
 
-    #clone assembly from library to target
+    # clone assembly from library to target
     def clone(id)
       handle_errors do
         id_handle = id_handle(id)
@@ -947,7 +947,7 @@ module DTK
           return redirect "/xyz/#{model_name()}/display/#{id.to_s}"
         end
 
-        #TODO: need to copy in avatar when hash["ui"] is non null
+        # TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
         clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
@@ -955,10 +955,10 @@ module DTK
         id = new_assembly_obj && new_assembly_obj.id()
         nested_objs = new_assembly_obj.get_node_assembly_nested_objects()
 
-        #just want external ports
+        # just want external ports
         (nested_objs[:nodes]||[]).each{|n|(n[:ports]||[]).reject!{|p|p[:type] == "component_internal"}}
 
-        #TODO: ganglia hack: remove after putting this info in teh r8 meta files
+        # TODO: ganglia hack: remove after putting this info in teh r8 meta files
         (nested_objs[:nodes]||[]).each do |n|
           (n[:ports]||[]).each do |port|
             if port[:display_name] =~ /ganglia__server/
@@ -969,8 +969,8 @@ module DTK
           end
         end
 
-#TODO: get node positions going for assemblies
-        #compute uui positions
+# TODO: get node positions going for assemblies
+        # compute uui positions
         parent_id = request.params["parent_id"]
         assembly_left_pos = request.params["assembly_left_pos"]
 #        node_list = get_objects(:node,{:assembly_id=>id})
@@ -978,7 +978,7 @@ module DTK
         dc_hash = get_object_by_id(parent_id,:datacenter)
         raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
 
-        #get the top most item in the list to set new positions
+        # get the top most item in the list to set new positions
         top_node = {}
         top_most = 2000
       
@@ -1015,7 +1015,7 @@ module DTK
         end
 
         return {:data=>nested_objs}
-#TODO: clean this up,hack to update UI params for newly cloned object
+# TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 
 #      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"

@@ -34,7 +34,7 @@ module DTK; class Task
         ret
       end
 
-      #for debugging
+      # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:node] = (object[:node]||{})[:display_name]
@@ -56,7 +56,7 @@ module DTK; class Task
       end
 
       def self.add_attributes!(attr_mh,action_list)
-        #ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
+        # ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
         ndx_actions = Hash.new
         action_list.each do |config_node_action|
           (config_node_action[:component_actions]||[]).each do |a|
@@ -87,17 +87,17 @@ module DTK; class Task
 
       def get_and_update_attributes!(task)
         task_mh = task.model_handle()
-        #these two below update the ruby obj
+        # these two below update the ruby obj
         get_and_update_attributes__node_ext_ref!(task_mh)
         get_and_update_attributes__cmp_attrs!(task_mh)
         get_and_update_attributes__assembly_attrs!(task_mh)
-        #this updates the task model
+        # this updates the task model
         update_bound_input_attrs!(task)
       end
 
       def get_and_update_attributes__node_ext_ref!(task_mh)
-        #TODO: may treat updating node as regular attribute
-        #no up if already have the node's external ref
+        # TODO: may treat updating node as regular attribute
+        # no up if already have the node's external ref
         unless ((self[:node]||{})[:external_ref]||{})[:instance_id]
           node_id = (self[:node]||{})[:id]
           if node_id
@@ -119,15 +119,15 @@ module DTK; class Task
       end
 
       def get_and_update_attributes__cmp_attrs!(task_mh)
-        #find attributes that can be updated
-        #TODO: right now being conservative in including attributes that may not need to be set
+        # find attributes that can be updated
+        # TODO: right now being conservative in including attributes that may not need to be set
         indexed_attrs_to_update = Hash.new
         (self[:component_actions]||[]).each do |action|
           (action[:attributes]||[]).each do |attr|
-            #TODO: more efficient to just get attributes that can be inputs; right now :is_port does not
-            #reflect this in cases for a3 in example a1 -external -> a2 -internal -> a3
-            #so commenting out below and replacing with less stringent
-            #if attr[:is_port] and not attr[:value_asserted]
+            # TODO: more efficient to just get attributes that can be inputs; right now :is_port does not
+            # reflect this in cases for a3 in example a1 -external -> a2 -internal -> a3
+            # so commenting out below and replacing with less stringent
+            # if attr[:is_port] and not attr[:value_asserted]
             if not attr[:value_asserted]
               indexed_attrs_to_update[attr[:id]] = attr
             end
@@ -203,7 +203,7 @@ module DTK; class Task
             raise Error.new("Unexpected ConfigNode.initialize type")
           end
         super(type,hash,task_idh)
-        #set_intra_node_stages must be done after super
+        # set_intra_node_stages must be done after super
         set_intra_node_stages!(intra_node_stages) if intra_node_stages
       end
     end

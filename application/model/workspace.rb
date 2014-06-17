@@ -1,6 +1,6 @@
 module DTK
   class Workspace < Assembly::Instance
-  #creates both a service, module branch, assembly instance and assembly templaet for the workspace
+  # creates both a service, module branch, assembly instance and assembly templaet for the workspace
     def self.create?(target_idh,project_idh)
       Factory.create?(target_idh,project_idh)
     end

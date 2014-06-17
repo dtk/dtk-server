@@ -5,10 +5,10 @@ module DTK
   class ModuleBranch
     class Location
       r8_nested_require('location','params')
-      #above needed before below
+      # above needed before below
       r8_nested_require('location','local')
       r8_nested_require('location','remote')
-      #above needed before below
+      # above needed before below
       r8_nested_require('location','server')
       r8_nested_require('location','client')
 

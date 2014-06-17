@@ -7,7 +7,7 @@ module DTK; class Task; class Template; class Stage
       end
 
       def create(stage_action_indexes,name=nil)
-        #first break each state into unordered list per node
+        # first break each state into unordered list per node
         ret = InterNode.new(name)
         stage_action_indexes.each do |i|
           action = @action_list.index(i)

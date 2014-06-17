@@ -104,11 +104,11 @@ module DTK
     end
     private_class_method :authorized_users
 
-    #returns an object or calls block (with new or existing object) 
+    # returns an object or calls block (with new or existing object) 
     def self.add_repo_user?(repo_user_type,repo_user_mh,ssh_rsa_keys={},username=nil)
-      #for match on type; use following logic
+      # for match on type; use following logic
       # if ssh public key given look for match on this
-      #otherwise return error if there is multiple matches for node or admin type
+      # otherwise return error if there is multiple matches for node or admin type
       existing_users = get_existing_repo_users(repo_user_mh,:type => repo_user_type.to_s)
       if ssh_rsa_pub_key = ssh_rsa_keys[:public]
         match = existing_users.find{|r|r[:ssh_rsa_pub_key] == ssh_rsa_pub_key}
@@ -200,7 +200,7 @@ module DTK
 
     def self.ret_new_repo_username_and_index(type,existing_matches,username)
       if type == :admin
-        #TODO: r8sserver will eb deprecated
+        # TODO: r8sserver will eb deprecated
         new_repo_username = R8::Config[:admin_repo_user]||"dtk-admin-#{R8::Config[:dtk_instance_user]}"
         new_index = 1
       elsif username

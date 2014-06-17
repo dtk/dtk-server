@@ -16,7 +16,7 @@ module DTK
         merge!(:matches => get_aug_matching_component_refs())
       end
 
-      #gets the component templates that each component ref is pointing to
+      # gets the component templates that each component ref is pointing to
       def get_aug_matching_component_refs()
         node_stub_ids = parent_rels.map{|pr|pr[:old_par_id]}
         sp_hash = {
@@ -33,9 +33,9 @@ module DTK
         :component_template_id
       end
 
-      #for processing component refs in an assembly
+      # for processing component refs in an assembly
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
-        #mapping from component ref to component template 
+        # mapping from component ref to component template 
         component_mh = model_handle.createMH(:component)
         ndx_node_stub_to_instance = parent_rels.inject(Hash.new){|h,r|h.merge(r[:old_par_id] => r[:node_node_id])}
         ndx_to_find_cmp_ref_id = Hash.new
@@ -53,8 +53,8 @@ module DTK
           component_template = ndx_component_templates[m[:component_template_id]]
           component_template_id = component_template[:id]
 
-          #set  ndx_to_find_cmp_ref_id
-          #first index is the associated node instance, second is teh component template
+          # set  ndx_to_find_cmp_ref_id
+          # first index is the associated node instance, second is teh component template
           pntr = ndx_to_find_cmp_ref_id[ndx_node_stub_to_instance[old_par_id]] ||= Hash.new 
           if pntr[m[:display_name]]
             Log.error("unexpected that multiple matches when creating ndx_to_find_cmp_ref_id")
@@ -74,7 +74,7 @@ module DTK
 
         mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
       
-        #all parent_rels will have same cols so taking a sample
+        # all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:assembly_id,:display_name,:ref,:locked_sha] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols({:id => :component_template_id})
         cmp_template_wc = nil

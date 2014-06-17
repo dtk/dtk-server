@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#This is DTK Server smoke test
+# This is DTK Server smoke test
 
 require 'rubygems'
 require 'rest_client'

@@ -20,8 +20,8 @@ module DTK
       end
       private :initialize
 
-      #copy part of clone
-      #targets is a list of id_handles, each with same model_name 
+      # copy part of clone
+      # targets is a list of id_handles, each with same model_name 
       def clone_copy_top_level(source_id_handle_x,targets,recursive_override_attrs={})
         return @ret if targets.empty?
         source_model_name = Model.concrete_model_name(source_id_handle_x[:model_name])
@@ -30,7 +30,7 @@ module DTK
         source_model_handle = source_id_handle.createMH()
         source_parent_id_col = source_model_handle.parent_id_field_name()
 
-        #all targets will have same model handle
+        # all targets will have same model handle
         sample_target =  targets.first
         target_parent_mh = sample_target.createMH()
         target_mh = target_parent_mh.create_childMH(source_model_name)
@@ -49,7 +49,7 @@ module DTK
         
         select_ds = targets_ds.join_table(:inner,source_ds)
         
-        #process overrides
+        # process overrides
         override_attrs = ret_real_columns(source_model_handle,recursive_override_attrs)
         override_attrs = add_to_overrides_null_other_parents(override_attrs,target_mh[:model_name],target_parent_id_col)
         create_override_attrs = override_attrs.merge(:ancestor_id => source_id_handle.get_id()) 
@@ -61,7 +61,7 @@ module DTK
 
         fk_info.add_id_handles(new_id_handles) #TODO: may be more efficient adding only id handles assciated with foreign keys
 
-        #iterate over all nested objects which includes children object plus, for example, components for composite components
+        # iterate over all nested objects which includes children object plus, for example, components for composite components
         get_nested_objects_top_level(source_model_handle,target_parent_mh,new_objs_info,recursive_override_attrs) do |child_context|
           clone_copy_child_objects(child_context)
         end
@@ -76,7 +76,7 @@ module DTK
         @ret
       end
 
-      #optionally overwritten
+      # optionally overwritten
       def service_add_on_proc?()
         nil
       end
@@ -107,11 +107,11 @@ module DTK
       end
 
       def child_context_lib_assembly_top_level(id_handles,target_idh,existing_override_attrs={})
-        #TODO: push this into ChildContext.create_from_hash
-        #assuming all id_handles have same model_handle
+        # TODO: push this into ChildContext.create_from_hash
+        # assuming all id_handles have same model_handle
         sample_idh = id_handles.first
         model_name = sample_idh[:model_name]
-        #so model_handle gets auth context from target_idh
+        # so model_handle gets auth context from target_idh
         model_handle = target_idh.create_childMH(model_name)
 
         par_id_col = DB.parent_field(target_idh[:model_name],model_name)
@@ -154,7 +154,7 @@ module DTK
         dups_allowed_for_cmp = true #TODO stub
         
         returning_sql_cols = [:ancestor_id] 
-        #TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
+        # TODO" may make what are returning sql columns methods in model classes liek do for clone post copy
         case model_name
          when :component then returning_sql_cols << :type
         end

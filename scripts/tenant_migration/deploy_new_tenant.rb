@@ -20,7 +20,7 @@ class Tenant
     @ENDPOINT = "http://#{server}:#{port}"
     @tenant = tenant_number
 
-    #Login to dtk application
+    # Login to dtk application
     response_login = RestClient.post(@ENDPOINT + '/rest/user/process_login', 'username' => username, 'password' => password, 'server_host' => server, 'server_port' => port)
     $opts[:cookies] = response_login.cookies
   end
@@ -30,13 +30,13 @@ class Tenant
     response = resource.post(body)
     response_JSON = JSON.parse(response)
 
-    #If response contains errors, accumulate all errors to error_message
+    # If response contains errors, accumulate all errors to error_message
     unless response_JSON["errors"].nil? 
       @error_message = ""
       response_JSON["errors"].each { |e| @error_message += "#{e['code']}: #{e['message']} "}
     end
 
-    #If response status notok, show error_message
+    # If response status notok, show error_message
     if (response_JSON["status"] == "notok")
       puts "", "Request failed!"
       puts @error_message
@@ -54,7 +54,7 @@ class Tenant
   end
 
   def stage_assembly(assembly_template, assembly_name)
-    #Get list of assembly templates, extract selected template, stage assembly and return its assembly id
+    # Get list of assembly templates, extract selected template, stage assembly and return its assembly id
     puts "Stage assembly:", "---------------"
     assembly_id = nil
     extract_id_regex = /id: (\d+)/
@@ -109,16 +109,16 @@ class Tenant
   end
 
   def set_attribute(assembly_id, attribute_name, attribute_value)
-    #Set attribute on particular assembly
+    # Set attribute on particular assembly
     puts "Set attribute:", "--------------"
     is_attributes_set = false
 
-    #Get attribute id for which value will be set
+    # Get attribute id for which value will be set
     assembly_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>assembly_id})
     pretty_print_JSON(assembly_attributes)
     attribute_id = assembly_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
 
-    #Set attribute value for given attribute id
+    # Set attribute value for given attribute id
     set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>assembly_id, :value=>attribute_value, :pattern=>attribute_id})
 
     if (set_attribute_value_response['status'] == 'ok')
@@ -185,21 +185,21 @@ class Tenant
   end
 end
 
-#Script execution part:
+# Script execution part:
 host = ARGV[0]
 port = ARGV[1]
 user = ARGV[2]
 pass = ARGV[3]
 tenant = ARGV[4]
 
-#Initalize connection towards the server from which new tenant will be deployed
+# Initalize connection towards the server from which new tenant will be deployed
 tenant_deploy = Tenant.new(host, port.to_i, user, pass, tenant)
 
-#Stage tenant assembly
+# Stage tenant assembly
 assembly_id = tenant_deploy.stage_assembly('dtk::tenant',"dtk#{tenant_deploy.tenant}tenant")
 
 
-#Add needed component and set attributes
+# Add needed component and set attributes
 set_attributes_array = []
 set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/common_user/user', "git#{tenant_deploy.tenant}")
 set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/common_user::common_user_ssh_config/user', "dtk#{tenant_deploy.tenant}")
@@ -218,7 +218,7 @@ set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/gitolit
 set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/thin/app_dir', "/home/dtk#{tenant_deploy.tenant}/server/application")
 set_attributes_array << tenant_deploy.set_attribute(assembly_id, 'tenant/thin/daemon_user', "dtk#{tenant_deploy.tenant}")
 
-#If all attribures have been set, proceed with tenant converge
+# If all attribures have been set, proceed with tenant converge
 if !set_attributes_array.include? false
   assembly_converged = tenant_deploy.converge_assembly(assembly_id)
   if assembly_converged == true

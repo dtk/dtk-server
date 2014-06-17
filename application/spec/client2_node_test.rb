@@ -4,7 +4,7 @@ require 'json'
 require 'restclient'
 require 'chef/client'
 require 'pp'
-#Monker patch from rightlink
+# Monker patch from rightlink
 EXCLUDED_OHAI_PLUGINS = [ 'linux::block_device' ]
 
 # Not for the feint of hearts:
@@ -12,7 +12,7 @@ EXCLUDED_OHAI_PLUGINS = [ 'linux::block_device' ]
 # deadlocks (see description of LinuxBlockDevice below).
 # So monkey patch Ohai to add the concept of excluded plugins and add
 # the linux block device plugin to the excluded list.
-#require 'ohai'
+# require 'ohai'
 module Ohai
   class System
     alias :require_all_plugins :require_plugin
@@ -25,7 +25,7 @@ module Ohai
 end
 
 
-#TBD: below is just temp until make into gems
+# TBD: below is just temp until make into gems
 root = File.expand_path('../../', File.dirname(__FILE__)) + "/"
 SYSTEM_DIR = root + 'system/'
 
@@ -35,7 +35,7 @@ XYZ::Config.process_config_file("/etc/reactor8/client.conf")
 require SYSTEM_DIR + 'messaging'
 msg_bus_server = XYZ::Config[:msg_bus_server] || "localhost"
 
-#TBD: move to be on server side or in client library
+# TBD: move to be on server side or in client library
 module XYZ
   class ClientNode
   end
@@ -69,7 +69,7 @@ module XYZ
         end
         ret
       end
-      #if attr_name of form x/y and value is v then returns {x => {y => z}}
+      # if attr_name of form x/y and value is v then returns {x => {y => z}}
       def set_chef_attr_and_value!(ret,chef_attr_name,v)
         set_chef_attr_and_value_aux!(ret,chef_attr_name.split("/"),v)
       end
@@ -83,7 +83,7 @@ module XYZ
         end
       end
 
-    #TBD: deprecate below
+    # TBD: deprecate below
     public
       def convert_rest_call_form_to_chef_form(hash_data)
         return {} if hash_data["component"].nil?
@@ -116,7 +116,7 @@ end
 Chef::Config[:solo] = true
 Chef::Config[:file_cache_path] =  "/tmp/chef-solo"
 Chef::Config[:cookbook_path] = "/root/Reactor8/our_app_installation_cookbooks"
-#Chef::Config[:log_level] = :debug
+# Chef::Config[:log_level] = :debug
 Rest_server = XYZ::Config[:rest_server] || "localhost"
 Node = ARGV[0] || "/library/saved/node/pg"
 
@@ -135,14 +135,14 @@ def run_recipes(chef_attrs_hash)
  }
 end
 
-#print "http://#{Rest_server}:7000/list_node_attributes#{Node}.json\n"
+# print "http://#{Rest_server}:7000/list_node_attributes#{Node}.json\n"
 
 def run_chef_solo(msg_content)
 =begin
 deprecated
  json_data = RestClient.get("http://#{Rest_server}:7000/list_node_attributes#{Node}.json")
 
-  #print json_data.to_s << "\n" 
+  # print json_data.to_s << "\n" 
   hash_data = JSON.parse(json_data.to_s)
 
   chef_attrs_hash = XYZ::ChefClientNode.convert_rest_call_form_to_chef_form(hash_data)

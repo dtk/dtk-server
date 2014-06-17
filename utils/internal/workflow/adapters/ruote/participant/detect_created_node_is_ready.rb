@@ -22,7 +22,7 @@ module DTK
                   node = task[:executable_action][:node]
                   node.update_operational_status!(:running)
                   
-                  #these must be called before get_and_propagate_dynamic_attributes
+                  # these must be called before get_and_propagate_dynamic_attributes
                   node.associate_elastic_ip?()
                   node.associate_persistent_dns?()
                   

@@ -18,12 +18,12 @@ else
 end
 
 
-#require 'rack/contrib'
+# require 'rack/contrib'
 #
 #
-#Ramaze.middleware! :dev do |m|
+# Ramaze.middleware! :dev do |m|
 #  m.use ::Middleware::Banlist
 #  m.run Ramaze.middleware
-#end
+# end
 
 Ramaze.start(:adapter => :thin, :port => server_port, :file => __FILE__)

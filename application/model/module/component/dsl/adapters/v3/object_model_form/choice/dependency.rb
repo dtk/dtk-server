@@ -15,9 +15,9 @@ module DTK; class ComponentDSL; class V3
       def self.dependencies?(choices_array,base_cmp,opts={})
         ret = nil
         choices_array.each do |choices|
-          #can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
+          # can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
           unless choices.find{|choice|not choice.is_internal?()}
-            #TODO: make sure it is ok to just pick one of these
+            # TODO: make sure it is ok to just pick one of these
             choice = choices.first
             ret ||= OutputHash.new
             add_dependency!(ret,choice.dependent_component(),base_cmp)

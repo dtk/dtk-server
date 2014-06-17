@@ -1,19 +1,19 @@
 module XYZ
   module ImportImplementationPackage
-    #this should be precded by fn that adds the component to R8::Config[:repo][:base_directory] location
+    # this should be precded by fn that adds the component to R8::Config[:repo][:base_directory] location
     def self.add(library_idh,impl_name)
       version = "0.0.1" #TODO: stub
       r8meta_type = :yaml #TODO: stub
 
-      #put component meta info in hash
+      # put component meta info in hash
       components_hash = get_r8meta_hash(impl_name,:r8meta_type => r8meta_type)
       library = library_idh.create_object().update_object!(:ref)
 
-      #put implement info in hash
+      # put implement info in hash
       hash_content = {"library" => {library[:ref] => {"component" => components_hash}}}
       Model.add_implementations!(hash_content,version,library[:ref],R8::Config[:repo][:base_directory],impl_name)
 
-      #create in db
+      # create in db
       Model.input_hash_content_into_model(library_idh.create_top(),hash_content)
     end
 
@@ -67,7 +67,7 @@ module XYZ
     end
 
     def self.update_implementation_ids(library_idh,impl_name,component_refs)
-      #TODO: can more effiiently implement witrh update_from_select
+      # TODO: can more effiiently implement witrh update_from_select
       library_id = library_idh.get_id()
       cmp_mh = library_idh.createMH(:component)
       sp_hash = {

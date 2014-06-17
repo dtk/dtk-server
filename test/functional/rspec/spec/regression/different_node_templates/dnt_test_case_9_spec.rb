@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 9: Redis - Master/Slave scenario
+# Test Case 9: Redis - Master/Slave scenario
 
 require 'rubygems'
 require 'rest_client'

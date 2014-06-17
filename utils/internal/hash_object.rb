@@ -1,4 +1,4 @@
-#TODO: This needed to be simplified and cleaned up
+# TODO: This needed to be simplified and cleaned up
 module DTK
   class HashObject < ::Hash
     r8_nested_require('hash_object','model')
@@ -34,7 +34,7 @@ module DTK
       false
     end
    private
-    #converts hashes that are not a HashObject or a child of HashObject
+    # converts hashes that are not a HashObject or a child of HashObject
     def convert_nested_hashes(obj)
       if obj.kind_of?(HashObject)
         obj #no encoding needed
@@ -77,7 +77,7 @@ module DTK
       elements.each{|el|self[el.keys.first] = el.values.first}
     end
     
-    #set unless value is nill
+    # set unless value is nill
     def set_unless_nil(k,v)
       self[k] = v unless v.nil?
     end
@@ -93,16 +93,16 @@ module DTK
   end
 
   class PrettyPrintHash < SimpleOrderedHash
-    #field with '?' suffix means optioanlly add depending on whether name present and non-null in source
-    #if block is given then apply to source[name] rather than returning just source[name]
+    # field with '?' suffix means optioanlly add depending on whether name present and non-null in source
+    # if block is given then apply to source[name] rather than returning just source[name]
     def add(model_object,*keys,&block)
       keys.each do |key|
-        #if marked as optional skip if not present
+        # if marked as optional skip if not present
         if key.to_s =~ /(^.+)\?$/
           key = $1.to_sym
           next unless model_object[key]
         end
-        #special treatment of :id
+        # special treatment of :id
         val = (key == :id ? model_object.id : model_object[key]) 
         self[key] = (block ? block.call(val) : val)
       end
@@ -116,7 +116,7 @@ module DTK
 
   require 'tsort'
   class TSortHash < ::Hash
-    #defining tsort on this
+    # defining tsort on this
     include TSort
     def initialize(initial_val=nil)
       super()
@@ -128,9 +128,9 @@ module DTK
     end
   end
 
-  #Used as input to data source normalizer
+  # Used as input to data source normalizer
   class DataSourceUpdateHash < HashObject::AutoViv  
-    #for efficiency not initializing @completeness_info = nil
+    # for efficiency not initializing @completeness_info = nil
     def constraints()
       @completeness_info ? @completeness_info.constraints : nil
     end
@@ -139,7 +139,7 @@ module DTK
       @completeness_info ? @completeness_info.is_complete? : nil
     end    
 
-    #TODO: may want to make :apply_recursively = true be the default
+    # TODO: may want to make :apply_recursively = true be the default
     def mark_as_complete(constraints={},opts={})
       if constraints.empty?
         @completeness_info ||= HashIsComplete.new()
@@ -182,9 +182,9 @@ module DTK
     end
   end
 
-  #Used as input to db update from hash 
+  # Used as input to db update from hash 
   class DBUpdateHash < DataSourceUpdateHash
-    #for efficiency not initializing @do_not_extend = false
+    # for efficiency not initializing @do_not_extend = false
     def do_not_extend()
       @do_not_extend ? true : false
     end
@@ -193,7 +193,7 @@ end
 
 unless RUBY_VERSION =~ /^1\.9/ then ::Hash
   require 'active_support/ordered_hash'
-  #monkey patch
+  # monkey patch
   module ActiveSupport
     class OrderedHash < ::Hash
       def pretty_print(q)

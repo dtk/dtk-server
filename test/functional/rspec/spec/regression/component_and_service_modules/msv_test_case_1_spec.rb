@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Import component module from remote and use this component in assembly
+# Test Case 1: Import component module from remote and use this component in assembly
 
 require 'rubygems'
 require 'rest_client'

@@ -1,13 +1,13 @@
-#TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
+# TODO: this file naem somewhat of a misnomer; both pending changes but also converging a 'region' such as asssembly, node group, target ..
 module DTK; class StateChange
   r8_nested_require('get_pending_changes','assembly')
   r8_nested_require('get_pending_changes','node_centric')
 
   module GetPendingChangesClassMixin
     def get_ndx_node_config_changes(target_idh)
-      #TODO: there is probably more efficient info to get; this provides too much
+      # TODO: there is probably more efficient info to get; this provides too much
       changes = flat_list_pending_changes(target_idh)
-      #TODO: stub
+      # TODO: stub
       changes.inject({}) do |h,r|
         node_id = r[:node][:id]
         h.merge(node_id => {:state => :changes, :detail => {}})
@@ -51,7 +51,7 @@ module DTK; class StateChange
         :cols => [:id,:relative_order,:type,:created_node,parent_field_name,:state_change_id,:node_id].uniq
       }
       state_change_mh = parent_mh.createMH(:state_change)
-      #using ndx_ret to remove duplicate pending changes fro same node
+      # using ndx_ret to remove duplicate pending changes fro same node
       ndx_ret = Hash.new
       get_objs(state_change_mh,sp_hash).each do |r|
         node_id = r[:node][:id]
@@ -104,7 +104,7 @@ module DTK; class StateChange
       cols = [:id,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base,:implementation_id]
       cmps_in_sc = component_index.values.map{|sc|sc[:component]}
       related_cmps = Component.get_component_instances_related_by_mixins(cmps_in_sc,cols)
-      #TODO: assumption that cmps only appear once in sc_with_direct_cmps
+      # TODO: assumption that cmps only appear once in sc_with_direct_cmps
 
       sc_with_related_cmps = Array.new
       related_cmps.map do |cmp|
@@ -119,11 +119,11 @@ module DTK; class StateChange
 
     def remove_dups_and_proc_related_components(state_changes)
       indexed_ret = Hash.new
-      #remove duplicates wrt component and process linked_ids
+      # remove duplicates wrt component and process linked_ids
       state_changes.each do |sc|
         if sc[:type] == "create_node"
           indexed_ret[sc[:node][:id]] = augment_with_linked_id(sc,sc[:id])
-          #TODO: ordering may do thsis anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
+          # TODO: ordering may do thsis anyway, but do we explicitly want to make sure if both setting adn isnatll use install as type
         elsif ["setting","install_component","update_implementation","converge_component"].include?(sc[:type])
           indexed_ret[sc[:component][:id]] = augment_with_linked_id(indexed_ret[sc[:component][:id]] || sc.reject{|k,v|[:attribute].include?(k)},sc[:id])
         else
@@ -134,7 +134,7 @@ module DTK; class StateChange
     end
 
    private
-    #linked ids is link to relevant stage_change objects
+    # linked ids is link to relevant stage_change objects
     def augment_with_linked_id(state_change,id)
       if linked = state_change[:linked_ids]
         linked.include?(id) ? state_change : state_change.merge(:linked_ids => linked + [id])

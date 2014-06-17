@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 14: dtk.model.yaml with empty array and hash type attribute
+# Test Case 14: dtk.model.yaml with empty array and hash type attribute
 
 require 'rubygems'
 require 'rest_client'

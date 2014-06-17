@@ -11,7 +11,7 @@ module DTK
       
       route = R8::ReactorRoute.validate_route(request.request_method, route_key)
       
-      #return 404 Resource Not Found if route is not valid
+      # return 404 Resource Not Found if route is not valid
       respond("#{route_key}!", 404) unless route
       
       # we set new model
@@ -28,7 +28,7 @@ module DTK
         unless logged_in?
           unless R8::Config[:session][:cookie][:disabled]
             if request.cookies["dtk-user-info"]
-              #Log.debug "Session cookie is beeing used to revive this session"
+              # Log.debug "Session cookie is beeing used to revive this session"
 
               # using cookie to take session information
               # composed data is consistent form user_id, expire timestamp, and tenant id
@@ -56,7 +56,7 @@ module DTK
                 # we set :last_ts as access time for later check
                 session.store(:last_ts, Time.now.to_i)
 
-                #Log.debug "Session cookie has been used to temporary revive user session"
+                # Log.debug "Session cookie has been used to temporary revive user session"
               end
             end
           end
@@ -71,8 +71,8 @@ module DTK
 
       @json_response = true if ajax_request? 
 
-      #seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
-      #first two (or single items make up route_key; the rest are params
+      # seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
+      # first two (or single items make up route_key; the rest are params
 
 
       action_set_def = R8::Routes[route_key] || Hash.new
@@ -80,7 +80,7 @@ module DTK
 
       @layout = (R8::Routes[route_key] ? R8::Routes[route_key][:layout] : nil) || R8::Config[:default_layout]
 
-      #if a config is defined for route, use values from config
+      # if a config is defined for route, use values from config
       if action_set_def[:action_set]
         run_action_set(action_set_def[:action_set],model_name)
       else #create an action set of length one and run it
@@ -108,7 +108,7 @@ module DTK
       [action]
     end
 
-    #parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
+    # parent_model_name only set when top level action decomposed as opposed to when an action set of length one is created
     def run_action_set(action_set,parent_model_name=nil)
       # Amar: PERFORMANCE
       PerformanceService.log("OPERATION=#{action_set.first[:route]}")
@@ -125,7 +125,7 @@ module DTK
 
       @ctrl_results = ControllerResultsWeb.new
 
-      #Execute each of the actions in the action_set and set the returned content
+      # Execute each of the actions in the action_set and set the returned content
       (action_set||[]).each do |action|
         model,method = action[:route].split("/")
         method ||= :index
@@ -135,25 +135,25 @@ module DTK
         ctrl_result = Hash.new
 
         if result and result.length > 0
-          #if a hash is returned, turn make result an array list of one
+          # if a hash is returned, turn make result an array list of one
           if result.kind_of?(Hash) 
             ctrl_result[:content] = [result] 
           else 
             ctrl_result = result
           end
           panel_content_track = {}
-          #for each piece of content set by controller result,make sure panel and assign type is set
+          # for each piece of content set by controller result,make sure panel and assign type is set
           ctrl_result[:content].each_with_index do |item,index|
-            #set the appropriate panel to render results to
+            # set the appropriate panel to render results to
             panel_name = (ctrl_result[:content][index][:panel] || action[:panel] || :main_body).to_sym
             panel_content_track[panel_name] ? panel_content_track[panel_name] +=1 : panel_content_track[panel_name] = 1
             ctrl_result[:content][index][:panel] = panel_name
   
             (panel_content_track[panel_name] == 1) ? dflt_assign_type = :replace : dflt_assign_type = :append
-            #set the appropriate render assignment type (append | prepend | replace)
+            # set the appropriate render assignment type (append | prepend | replace)
             ctrl_result[:content][index][:assign_type] = (ctrl_result[:content][index][:assign_type] || action[:assign_type] || dflt_assign_type).to_sym
   
-            #set js with base cache uri path
+            # set js with base cache uri path
             ctrl_result[:content][index][:src] = "#{R8::Config[:base_js_cache_uri]}/#{ctrl_result[:content][index][:src]}" if !ctrl_result[:content][index][:src].nil?
           end
         end
@@ -177,11 +177,11 @@ module DTK
       rescue DTK::SessionError => e
         auth_unauthorized_response(e.message)
         # TODO: Look into the code so we can return 401 HTTP status
-        #result = rest_notok_response(:message => e.message)
+        # result = rest_notok_response(:message => e.message)
       rescue Exception => e
-        #TODO: put bactrace info in response
+        # TODO: put bactrace info in response
         if e.kind_of?(ErrorUsage)
-          #TODO: respond_to? is probably not needed
+          # TODO: respond_to? is probably not needed
           unless e.respond_to?(:donot_log_error) and e.donot_log_error()
             Log.error_pp([e,e.backtrace[0]])
           end
@@ -230,10 +230,10 @@ module DTK
 
 
     def ret_search_object(processed_params,model_name,parent_model_name=nil)
-      #TODO: assume everything is just equal
+      # TODO: assume everything is just equal
       filter_params = processed_params.select{|p|p.kind_of?(Hash)}
       return nil if filter_params.empty?
-      #for processing :parent_id
+      # for processing :parent_id
       parent_id_field_name = ModelHandle.new(ret_session_context_id(),model_name,parent_model_name).parent_id_field_name()
       filter = [:and] + filter_params.map do |el|
         raw_pair = [el.keys.first,el.values.first]
@@ -252,9 +252,9 @@ module DTK
       processed_params.select{|p|not p.kind_of?(Hash)}
     end
 
-    #does substitution of free variables in raw_params
+    # does substitution of free variables in raw_params
     def process_action_params(raw_params)
-      #short circuit if no params that need substituting
+      # short circuit if no params that need substituting
       return raw_params if @action_set_param_map.empty?
       if raw_params.kind_of?(Array)
         raw_params.map{|p|process_action_params(p)}
@@ -288,8 +288,8 @@ module DTK
     end
 
 
-#TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call
-  #enter the routes defined in config into Ramaze
+# TODO: lets finally kill off the xyz and move route loading into some sort of initialize or route setup call
+  # enter the routes defined in config into Ramaze
 
     Ramaze::Route["route_to_actionset"] = lambda{ |path, request|
       if path =~ Regexp.new("^/xyz") and not path =~ Regexp.new("^/xyz/devtest") 

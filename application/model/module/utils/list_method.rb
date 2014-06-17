@@ -13,11 +13,11 @@ module DTK
           augment_with_remotes_info!(branch_module_rows,module_mh)
         end
         # if there is an external_ref source, use that otherwise look for remote dtkn
-        #there can be duplictes for a module when multiple repos; in which case will agree on all fields
-        #except :repo, :module_branch, and :repo_remotes
-        #index by module
+        # there can be duplictes for a module when multiple repos; in which case will agree on all fields
+        # except :repo, :module_branch, and :repo_remotes
+        # index by module
         ndx_ret = Hash.new
-        #aggregate
+        # aggregate
         branch_module_rows.each do |r|
           module_branch = r[:module_branch]
           module_name = r.module_name()
@@ -51,7 +51,7 @@ module DTK
             end
           end
         end
-        #put in display name form
+        # put in display name form
         ndx_ret.each_value do |mdl|
           if raw_va = mdl.delete(:version_array)
             unless raw_va.size == 1 and raw_va.first == DEFAULT_VERSION
@@ -72,7 +72,7 @@ module DTK
      private 
 
       def self.augment_with_remotes_info!(branch_module_rows,module_mh)
-        #index by repo_id
+        # index by repo_id
         ndx_branch_module_rows = branch_module_rows.inject(Hash.new){|h,r|h.merge(r[:repo][:id] => r)}
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:repo_id,:repo_name,:repo_namespace,:created_at,:is_default],

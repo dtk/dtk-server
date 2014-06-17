@@ -15,9 +15,9 @@ module DTK; class NodeGroup
       get_node_members().each{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
     end
 
-    #clone components and links on this node group to node
+    # clone components and links on this node group to node
     def clone_into_node(node)
-      #get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
+      # get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
       ng_cmps = get_objs(:cols => [:cmps_for_clone_into_node]).map{|r|r[:component]}
       return if ng_cmps.empty?
       node_external_ports = clone_components(ng_cmps,node)
@@ -26,7 +26,7 @@ module DTK; class NodeGroup
    private
     def clone_components(node_group_cmps,node)
       external_ports = Array.new
-      #order components to respect dependencies
+      # order components to respect dependencies
       ComponentOrder.derived_order(node_group_cmps) do |ng_cmp| 
         clone_opts = {
           :ret_new_obj_with_cols => [:id,:display_name],
@@ -44,7 +44,7 @@ module DTK; class NodeGroup
     def clone_external_attribute_links(node_external_ports,node)
       port_link_info = ret_port_link_info(node_external_ports)
       return if port_link_info.empty?
-      #TODO: can also look at approach were if one node member exists already can do simpler copy
+      # TODO: can also look at approach were if one node member exists already can do simpler copy
       port_link_info.each do |pl|
         port_link = pl[:node_group_port_link]
         port_link.create_attr_links!(node.id_handle)
@@ -54,9 +54,9 @@ module DTK; class NodeGroup
     def ret_port_link_info(node_external_ports)
       ret = Array.new
       return ret if node_external_ports.empty?
-      #TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
-      #get the node group ports that correspond to node_external_ports 
-      #TODO: this can be more efficient if made into ajoin
+      # TODO this makes asseumption that can find cooresponding port on node group by matching on port display_name
+      # get the node group ports that correspond to node_external_ports 
+      # TODO: this can be more efficient if made into ajoin
       ng_id = id()
       raise Error.new("Need to check: semantics of :link_def_info has changed to use outer joins")
       sp_hash = {
@@ -66,14 +66,14 @@ module DTK; class NodeGroup
       ng_ports = Model.get_objs(model_handle(:port),sp_hash)
       ng_port_ids = ng_ports.map{|r|r[:id]}
       
-      #get the ng_port links
+      # get the ng_port links
       sp_hash = {
         :cols => [:id, :group_id,:input_id,:output_id,:temporal_order],
         :filter => [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
       }
       ng_port_links = Model.get_objs(model_handle(:port_link),sp_hash)
 
-      #form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports 
+      # form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports 
       ndx_node_port_ids = node_external_ports.inject({}){|h,r|h.merge(r[:display_name] => r[:id])}
       ndx_ng_ports = ng_ports.inject({}){|h,r|h.merge(r[:id] => r)}
       ng_port_links.map do |ng_pl|
@@ -108,10 +108,10 @@ for now in case turns out taking this approach will be more efficient
     end
    private
 
-#this is use technique that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
+# this is use technique that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
 alternative is adding links at time that node to ng link is added and special processing when attribute changed at ng level
      def add_links_between_ng_and_node_components(ng_cmp,node_cmps)
-       #get all the relevant attributes
+       # get all the relevant attributes
        ng_cmp_id = ng_cmp[:id]
        ng_plus_node_cmp_ids = node_cmps.map{|r|r[:id]} + [ng_cmp_id]
        attr_mh = ng_cmp.model_handle(:attribute)
@@ -126,12 +126,12 @@ alternative is adding links at time that node to ng link is added and special pr
        attrs = Model.get_objs(attr_mh,sp_hash)
        return if attrs.empty?
 
-       #partition into attributes on node group and ones on nodes
-       #index by AttrFieldToMatchOn
+       # partition into attributes on node group and ones on nodes
+       # index by AttrFieldToMatchOn
        ng_ndx = attrs.select{|r|r[:component_component_id] == ng_cmp_id}.inject({}) do |h,r|
          h.merge(r[AttrFieldToMatchOn] => r[:id])
        end
-       #build up link rows to create
+       # build up link rows to create
        attr_link_rows = attrs.select{|r|r[:component_component_id] != ng_cmp_id}.map do |r|
          index = r[AttrFieldToMatchOn]
          {

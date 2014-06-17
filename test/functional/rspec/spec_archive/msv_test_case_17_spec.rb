@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 17: Import module from puppet forge
+# Test Case 17: Import module from puppet forge
 
 require 'rubygems'
 require 'rest_client'

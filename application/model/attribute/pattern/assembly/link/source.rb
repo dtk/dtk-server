@@ -1,6 +1,6 @@
 module DTK; class Attribute::Pattern
   class Assembly; class Link
-    #for attribute relation sources
+    # for attribute relation sources
     class Source < self
       def self.create_attr_pattern(base_object,source_attr_term,source_is_antecdent)
         attr_term,fn,node_cmp_type = Simple.parse(source_attr_term) || 
@@ -49,8 +49,8 @@ module DTK; class Attribute::Pattern
         end
 
        private
-        #TODO: need better way to do this; there is alsso an ambiguity if component level attribute host_address
-        #returns [attr_term,node_cmp_type] where last term can be nil
+        # TODO: need better way to do this; there is alsso an ambiguity if component level attribute host_address
+        # returns [attr_term,node_cmp_type] where last term can be nil
         def self.strip_special_symbols(attr_term)
           ret = [attr_term,nil]
           split = attr_term.split('/')
@@ -64,7 +64,7 @@ module DTK; class Attribute::Pattern
 
       module VarEmbeddedInText
         def self.parse(source_term)
-          #TODO: change after fix stripping off of ""
+          # TODO: change after fix stripping off of ""
           if source_term =~ /(^[^\$]*)\$\{([^\}]+)\}(.*)/
             str_part1 = $1
             attr_term = $2

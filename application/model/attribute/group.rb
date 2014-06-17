@@ -1,6 +1,6 @@
 module XYZ
   module AttributeGroupClassMixin
-    #marked with "!" because augments info
+    # marked with "!" because augments info
     def ret_grouped_attributes!(augmented_attr_list,opts={})
       prune_set = opts[:types_to_keep]
       add_missing_info_for_group_attrs!(augmented_attr_list)
@@ -13,7 +13,7 @@ module XYZ
       ret
     end
    private
-    #adds port type info and required
+    # adds port type info and required
     def add_missing_info_for_group_attrs!(augmented_attr_list)
       dependency_analysis(augmented_attr_list) do |attr_in,link,attr_out|
         attr_in.merge!(:port_type => "input")
@@ -32,7 +32,7 @@ module XYZ
       end
     end
 
-    #disjunction of types
+    # disjunction of types
     def type_of?(*types)
       types.find do |type|
         unless type_klass = AttrValTypeMap[type]
@@ -50,7 +50,7 @@ module XYZ
     end
   end
 
-  #TODO: if dont have type hierarchy then can simplify
+  # TODO: if dont have type hierarchy then can simplify
   class AttrValTypeRequired < AttrValType
   end
   class AttrValTypeNotRequired < AttrValType
@@ -70,7 +70,7 @@ module XYZ
   module AttributeGroupInstanceMixin
     def attribute_value_type()
       type = 
-        #TODO: need to clean up special processing of sap__l4 because marked as output port but also input port (from internal connections)
+        # TODO: need to clean up special processing of sap__l4 because marked as output port but also input port (from internal connections)
         if self[:semantic_type_summary] == "sap__l4" then :linked
         elsif self[:dynamic] then :dynamic
         elsif self[:port_type] == "input" then :linked

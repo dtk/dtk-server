@@ -11,7 +11,7 @@ module XYZ
     
     def process_user_info_aux!(type,scalar_assignments,model_or_id_handle,columns=nil)
       to_add = Hash.new
-      #cleanup if everything should come from model or id handle
+      # cleanup if everything should come from model or id handle
       user_obj = CurrentSession.new.get_user_object()
       if user_obj
         update_if_needed!(type,to_add,columns,CONTEXT_ID,user_obj[:c])
@@ -36,7 +36,7 @@ module XYZ
       @auth_context ||= {
         :c => [:c,CONTEXT_ID],
         :user_id => [:id,:owner_id]
-        #special process of :group_id
+        # special process of :group_id
       }
     end
 

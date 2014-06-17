@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#app = node.run_state[:current_app]
+# app = node.run_state[:current_app]
 app = Hash.new
 app[:owner] = "root"
 app[:group] = "root"

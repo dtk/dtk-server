@@ -24,7 +24,7 @@ module DTK
       end
     end
 
-    #name should be of form <node>/<component>, like server/rsyslog::server
+    # name should be of form <node>/<component>, like server/rsyslog::server
     def self.name_to_id(model_handle,name,opts={})
       unless opts[:assembly_idh] and opts[:connection_type]
         raise Error.new("Unexpected options given in Port.name_to_id (#{opts.inspect}")
@@ -43,7 +43,7 @@ module DTK
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 
-    #virtual attribute defs    
+    # virtual attribute defs    
     def name()
       self[:display_name]
     end
@@ -55,7 +55,7 @@ module DTK
     ###########
     RefDelim = "___"
 
-    #this is an augmented port that has keys: node and optionally :link_def and nested_component
+    # this is an augmented port that has keys: node and optionally :link_def and nested_component
     def display_name_print_form()
       info = parse_port_display_name()
       cmp_ref = ((info[:module] == info[:component]) ? info[:component] : "#{info[:module]}::#{info[:component]}")
@@ -66,7 +66,7 @@ module DTK
       "#{node[:display_name]}/#{cmp_ref}"
     end
 
-    #this is an augmented port that has keys: node and optionally :link_def and nested_component
+    # this is an augmented port that has keys: node and optionally :link_def and nested_component
     def print_form_hash()
       ret = {
         :id => self[:id],
@@ -79,7 +79,7 @@ module DTK
       ret
     end
 
-    #TODO: assumption that ref and display_name are the same
+    # TODO: assumption that ref and display_name are the same
     def component_name()
       parse_port_display_name()[:component_type]
     end
@@ -93,7 +93,7 @@ module DTK
       parse_port_display_name()[:title]
     end 
 
-    #TODO: this should be deprecated; 
+    # TODO: this should be deprecated; 
     def ref_num()
 #      self[:display_name].split(RefDelim)[3].to_i
       raise Error.new("using deprecated method port#ref_num")
@@ -107,8 +107,8 @@ module DTK
       self[:port_info] ||= parse_port_display_name()
     end
 
-    #methods related to internal form of display_name/ref
-    #example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn[___title]
+    # methods related to internal form of display_name/ref
+    # example internal form ([output|input]___)component_[internal|external]___hdp-hadoop__namenode___namenode_conn[___title]
     class << self
      private
       def ret_encoded_port_name(type,component_type,link_def,dir,title=nil)
@@ -125,7 +125,7 @@ module DTK
     def self.parse_port_display_name(port_display_name)
 
       ret = Hash.new
-      #TODO: deprecate forms without input or output
+      # TODO: deprecate forms without input or output
       if port_display_name =~ Regexp.new("^input#{RefDelim}(.+$)")
         port_display_name = $1
         ret.merge!(:direction => :input)
@@ -151,12 +151,12 @@ module DTK
 
       ret
     end
-    #end: methods related to internal form of display_name/ref
+    # end: methods related to internal form of display_name/ref
     
-    #this function maps from service ref to internal display name
-    #node_display_name,poss_port_display_names
-    #input is of form form <node>/<component>, like server/rsyslog::server
-    #if error, returns nil
+    # this function maps from service ref to internal display name
+    # node_display_name,poss_port_display_names
+    # input is of form form <node>/<component>, like server/rsyslog::server
+    # if error, returns nil
     def self.parse_to_ret_display_name(service_ref_name,conn_type,opts={})
       if service_ref_name =~ Regexp.new("(^[^/]+)/([^/]+$)")
         node_display_name = $1
@@ -181,7 +181,7 @@ module DTK
         link_def_ref = parsed_port_name[:link_def_ref]
         node_node_id = port[:node_node_id]
         port_title = parsed_port_name[:title]
-        #TODO: check if need to match on version too or can only be one version type per component
+        # TODO: check if need to match on version too or can only be one version type per component
         cmp_match = cmps.find do |cmp|
           if cmp[:component_type] == cmp_type and cmp[:node_node_id] == node_node_id
             if port_title
@@ -200,7 +200,7 @@ module DTK
         if link_def_match = link_defs.find{|ld|link_def_match?(ld,cmp_id,link_def_ref,parsed_port_name[:direction])}
           el.merge(:link_def_id => link_def_match[:id])
         else
-          #TODO: check why after refactor of link_def/deps this before casting nil started causing a postgres problem; looks like this clause always fired so
+          # TODO: check why after refactor of link_def/deps this before casting nil started causing a postgres problem; looks like this clause always fired so
           # may be before change link_def_id only mtached null; to diagnose can change back temporarily to el.merge(:link_def_id => nil)
           el.merge(:link_def_id => SQL::ColRef.null_id)
         end
@@ -237,7 +237,7 @@ module DTK
       "#{type}#{RefDelim}#{stripped_ref}"
     end
    public
-    #returns nil if filtered
+    # returns nil if filtered
     def filter_and_process!(i18n,*types)
       unless types.empty?  
         return nil unless types.include?(self[:type])
@@ -271,7 +271,7 @@ module DTK
           "component_internal"
         end
           
-      #TODO: clean up direction to make it cleaner how you set it
+      # TODO: clean up direction to make it cleaner how you set it
       dir = opts[:direction]||direction_from_local_remote(link_def[:local_or_remote],opts)
       cmp_ref = opts[:component_ref]
       title = cmp_ref && ComponentTitle.title?(cmp_ref)
@@ -288,7 +288,7 @@ module DTK
         :type => type
       }
       row.merge!(:location_asserted => location_asserted) if location_asserted
-      #TODO: not sure if we need opts[:remote_side]
+      # TODO: not sure if we need opts[:remote_side]
       unless dir == "output" or opts[:remote_side] or link_def[:id].nil? 
         row.merge!(:link_def_id => link_def[:id])
       end
@@ -298,7 +298,7 @@ module DTK
     class << self
       private
       def direction_from_local_remote(local_or_remote,opts={})
-        #TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
+        # TODO: just heuristc for computing dir; also need to upport "<>" (bidirectional)
         if opts[:remote_side]
           case local_or_remote 
             when "local" then "output" 
@@ -312,7 +312,7 @@ module DTK
         end
       end
 
-      #TODO: this should be in link defs
+      # TODO: this should be in link defs
       def ret_location_asserted(component_type,link_type)
         (LocationMapping[component_type.to_sym]||{})[link_type.to_sym]
       end
@@ -327,11 +327,11 @@ module DTK
       
     end
 
-    #virtual attribute defs
-    #related to UX direction
+    # virtual attribute defs
+    # related to UX direction
     def location()
       return self[:location_asserted] if self[:location_asserted]
-      #TODO: stub
+      # TODO: stub
       return "east" if self[:display_name] =~ /nagios__server/
       return "east" if self[:display_name] =~ /mysql__master/
       return "west" if self[:display_name] =~ /nagios__client/

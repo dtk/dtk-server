@@ -177,7 +177,7 @@ module DTK; class ComponentDSL; class V2
         end
 
         def self.type(basic_type)
-          #omit default 'service'
+          # omit default 'service'
           (basic_type == "service") ? nil : basic_type
         end
 
@@ -199,13 +199,13 @@ module DTK; class ComponentDSL; class V2
           end
           ret[key] = override_val||ext_ref_assigns[val_attr]
         
-          #get any other attributes in ext_ref
+          # get any other attributes in ext_ref
           (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
           ret
         end
 
         def self.attributes(attrs_assigns)
-          #TODO: may sort alphabetically (same for othter lists)
+          # TODO: may sort alphabetically (same for othter lists)
           attrs_assigns.inject(PrettyPrintHash.new) do |h,(attr,attr_info)|
             h.merge(attr => Attribute.attribute(attr,attr_info))
           end
@@ -279,12 +279,12 @@ module DTK; class ComponentDSL; class V2
             raise Error.new("Do not treat external ref type: #{type}")
           end
           key_val = override_val||ext_ref_assigns[val_attr]
-          #ignore if key_val is same as attribute
+          # ignore if key_val is same as attribute
           unless key_val === attr
             ret[key] = override_val||ext_ref_assigns[val_attr]
           end
 
-          #get any other attributes in ext_ref
+          # get any other attributes in ext_ref
           (ext_ref_assigns.keys - ["type",val_attr]).each{|k|ret[k] = ext_ref_assigns[k]}
           ret.empty? ? nil : ret
         end
@@ -336,7 +336,7 @@ module DTK; class ComponentDSL; class V2
           end
         end
 
-        #if remote_cmp_ref non-null returns [attr_ref,dir], otherwise just returns attr_ref
+        # if remote_cmp_ref non-null returns [attr_ref,dir], otherwise just returns attr_ref
         def self.attribute_mapping_attr_info(var,remote_cmp_ref=nil)
           dir = nil
           attr_ref = nil

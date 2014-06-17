@@ -44,24 +44,24 @@ module DTK
       opts[:subclass] ? ret.create_obj_optional_subclass() : ret
     end
 
-#TODO: stub for feature_node_admin_state
+# TODO: stub for feature_node_admin_state
     def persistent_hostname?()
 #      true
       false
     end
 
 
-#TODO: end stub for feature_node_admin_state
+# TODO: end stub for feature_node_admin_state
 
     ### virtual column defs
     #######################
-    #TODO: write as sql fn for efficiency
+    # TODO: write as sql fn for efficiency
     def has_pending_change()
       ((get_field?(:action)||{})[:count]||0) > 0
     end
 
     def status()
-      #assumes :is_deployed and :operational_status are set
+      # assumes :is_deployed and :operational_status are set
       (not self[:is_deployed]) ? Type::Node.staged : self[:operational_status]
     end
 
@@ -100,12 +100,12 @@ module DTK
     end
 
     def get_aug_node_with_dns_info()
-      #TODO: relying on the keys below being unique; more robust would be to check againts existing names
-      #TODO: to supporting this may want to put in logic that prevents assemblies with explicit names from having same name
+      # TODO: relying on the keys below being unique; more robust would be to check againts existing names
+      # TODO: to supporting this may want to put in logic that prevents assemblies with explicit names from having same name
       sp_hash = {
         :cols => [:r8_dns_info,:id,:group_id,:display_name,:ref,:ref_num]
       }
-      #checking for multiple rows to handle case where multiple dns attributes given
+      # checking for multiple rows to handle case where multiple dns attributes given
       aug_nodes = get_objs(sp_hash,:keep_ref_cols => true)
       aug_nodes.sort do |a,b|
         DNS.attr_rank(a[:attribute_r8_dns_enabled]) <=> DNS.attr_rank(b[:attribute_r8_dns_enabled])
@@ -122,7 +122,7 @@ module DTK
         end
         ret
       end
-      #Assumes that AttributeKeys has been defined already
+      # Assumes that AttributeKeys has been defined already
       RankPos = AttributeKeys.inject(Hash.new) {|h,ak|
         h.merge(ak => AttributeKeys.index(ak))
       }
@@ -198,7 +198,7 @@ module DTK
     end
     private_class_method :user_friendly_name
 
-    #returns [node_name, assembly_name] later which could be nil
+    # returns [node_name, assembly_name] later which could be nil
     def self.parse_user_friendly_name(name)
       node_name = assembly_name = nil
       if name =~ Regexp.new("(^.+)#{AssemblyNodeNameSep}(.+$)")
@@ -224,7 +224,7 @@ module DTK
       if external_ref = info_hash[:external_ref]
         private_dns = external_ref[:private_dns_name]
         if private_dns.kind_of?(Hash)
-          #then :private_dns_name is of form <public dns> => <private dns>
+          # then :private_dns_name is of form <public dns> => <private dns>
           external_ref[:private_dns_name] = private_dns.values.first 
         end
       end
@@ -298,7 +298,7 @@ module DTK
     end
 
     def delete_component(component_idh)
-      #first check that component_idh belongs to this instance
+      # first check that component_idh belongs to this instance
       sp_hash = {
         :cols => [:id, :display_name],
         :filter => [:and, [:eq, :id, component_idh.get_id()], [:eq, :node_node_id, id()]]
@@ -342,7 +342,7 @@ module DTK
     end
 
     def get_and_update_status!()
-      #shortcut
+      # shortcut
       if has_key?(:is_deployed)
         return  Type::Node.staged if not self[:is_deployed]
       end
@@ -363,7 +363,7 @@ module DTK
     end
 
 
-    #attribute on node
+    # attribute on node
     def update_operational_status!(op_status)
       update(:operational_status => op_status.to_s)
       self[:operational_status] = op_status.to_s
@@ -417,7 +417,7 @@ module DTK
     private :get_hostname_external_ref
 
 
-#TODO: these may be depracted
+# TODO: these may be depracted
     def update_ordered_component_ids(order)
       ordered_component_ids = "{ :order => [#{order.join(',')}] }"
       update(:ordered_component_ids => ordered_component_ids)
@@ -429,7 +429,7 @@ module DTK
       return Array.new unless ordered_component_ids
       eval(ordered_component_ids)[:order]
     end
-#end of these may be depracted
+# end of these may be depracted
 
     
     #### related to distinguishing bewteen nodes and node groups
@@ -484,7 +484,7 @@ module DTK
     end
 
     def update_task_templates_when_deleted_node?(assembly)
-      #TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
+      # TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
       sp_hash = {
         #:only_one_per_node,:ref are put in for info needed when getting title
         :cols => [:id, :display_name, :node_node_id,:only_one_per_node,:ref],
@@ -499,7 +499,7 @@ module DTK
       dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
       dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])
 
-      #TODO: if only processing external links, more efficeint to filter in sql query
+      # TODO: if only processing external links, more efficeint to filter in sql query
       ndx_dangling_links_info = Hash.new
       (dangling_links_info_cmps + dangling_links_info_nodes).each do |r|
         link = r[:all_input_links]
@@ -518,9 +518,9 @@ module DTK
         end
       end
       attr_mh = model_handle_with_auth_info(:attribute)
-      #update attributes connected to dangling links on input side
+      # update attributes connected to dangling links on input side
       updated_attrs = AttributeUpdateDerivedValues.update_for_delete_links(attr_mh,ndx_dangling_links_info.values)
-      #add state changes for updated attributes and see if any connected attributes
+      # add state changes for updated attributes and see if any connected attributes
       Attribute.propagate_and_optionally_add_state_changes(attr_mh,updated_attrs,:add_state_changes => true)
     end
     private :update_dangling_links
@@ -530,7 +530,7 @@ module DTK
       input_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :input_port_link_info]).select do |r|
         port_types.include?((r[:port]||{})[:type])
       end
-      #TODO: implement using PortLink.common_columns and materialize
+      # TODO: implement using PortLink.common_columns and materialize
       input_port_rows.each do |r|
         r[:port_link][:ui] ||= {
           :type => R8::Config[:links][:default_type],
@@ -541,7 +541,7 @@ module DTK
       output_port_rows =  get_objs_in_set(id_handles,:columns => [:id, :display_name, :output_port_link_info]).select do |r|
         port_types.include?((r[:port]||{})[:type])
       end
-      #TODO: implement using PortLink.common_columns and materialize
+      # TODO: implement using PortLink.common_columns and materialize
       output_port_rows.each do |r|
         r[:port_link][:ui] ||= {
           :type => R8::Config[:links][:default_type],
@@ -568,7 +568,7 @@ module DTK
     def self.get_output_attrs_to_l4_input_ports(id_handles)
       rows = get_objs_in_set(id_handles,{:cols => [:output_attrs_to_l4_input_ports]},{:keep_ref_cols => true})
       return Hash.new if rows.empty?
-      #restructure so that get mapping from attribute_id to port
+      # restructure so that get mapping from attribute_id to port
       ret = Hash.new
       rows.each do |row|
         attr_id = row[:port_external_output][:external_attribute_id]
@@ -581,7 +581,7 @@ module DTK
     def get_ui_info(datacenter)
       datacenter_id_sym = datacenter[:id].to_s.to_sym
       node_id_sym = self[:id].to_s.to_sym
-      #TODO: hack assumes that canm just take position from first node[:u1]
+      # TODO: hack assumes that canm just take position from first node[:u1]
       ((datacenter[:ui]||{})[:items]||{})[node_id_sym] || (self[:ui]||{})[datacenter_id_sym] || (self[:ui]||{}).values.first
     end
 
@@ -595,7 +595,7 @@ module DTK
     def get_users()
       node_user_list = get_objects_from_sp_hash(:columns => [:users])
       user_list = Array.new
-      #TODO: just putting in username, not uid or gid
+      # TODO: just putting in username, not uid or gid
       node_user_list.map do |u|
         attr = u[:attribute]
         val = attr[:value_asserted]||attr[:value_derived]
@@ -637,12 +637,12 @@ module DTK
     def get_node_service_checks()
       return Array.new if get_objects_from_sp_hash(:columns => [:monitoring_agents]).empty?
 
-      #TODO: i18n treatment of service check names
+      # TODO: i18n treatment of service check names
       get_objects_col_from_sp_hash({:columns => [:monitoring_items__node]},:monitoring_item)
     end
     def get_component_service_checks()
       return Array.new if get_objects_from_sp_hash(:columns => [:monitoring_agents]).empty?
-      #TODO: i18n treatment of service check names
+      # TODO: i18n treatment of service check names
       i18n = get_i18n_mappings_for_models(:component)
 
       get_objects_from_sp_hash(:columns => [:monitoring_items__component]).map do |r|
@@ -652,16 +652,16 @@ module DTK
       end
     end
 
-    #returns external attribute links and port links
-    #returns [connected_links,dangling_links]
+    # returns external attribute links and port links
+    # returns [connected_links,dangling_links]
     def self.get_external_connected_links(id_handles)
       port_link_ret = get_conn_port_links(id_handles)
       attr_link_ret = get_conn_external_attr_links(id_handles)
       [port_link_ret[0]+attr_link_ret[0],port_link_ret[1]+attr_link_ret[1]]
     end
 
-    #return ports links 
-    #returns [connected_links,dangling_links]
+    # return ports links 
+    # returns [connected_links,dangling_links]
     def self.get_conn_port_links(id_handles,opts={})
       ret = [Array.new,Array.new]
       in_port_cols = [:id, :display_name, :input_port_links]
@@ -687,8 +687,8 @@ module DTK
       [connected_links,dangling_links]
     end
 
-    #return externally connected attribute links
-    #returns [connected_links,dangling_links]
+    # return externally connected attribute links
+    # returns [connected_links,dangling_links]
     def self.get_conn_external_attr_links(id_handles)
       ret = [Array.new,Array.new]
 
@@ -719,7 +719,7 @@ module DTK
       [connected_links,dangling_links]
     end
 
-    #TODO: quick hack
+    # TODO: quick hack
     def self.get_wspace_display(id_handle)
       node_id = IDInfoTable.get_id_from_id_handle(id_handle)
       node_mh = id_handle.createMH(:model_name => :node)
@@ -728,7 +728,7 @@ module DTK
       component_mh = node_mh.createMH(:model_name => :component)
       component_ds = get_objects_just_dataset(component_mh,{:node_node_id => node_id})
       attr_where_clause = {:is_port => true}
-      #TODO: can prune what fields included
+      # TODO: can prune what fields included
       attr_fs = Model::FieldSet.default(:attribute).with_added_cols(:component_component_id)
       attribute_mh = node_mh.createMH(:model_name => :attribute)
       attribute_ds = get_objects_just_dataset(attribute_mh,attr_where_clause,FieldSet.opt(attr_fs))
@@ -737,7 +737,7 @@ module DTK
     end
     #######################
 
-#TODO: should this be more generic and centralized?
+# TODO: should this be more generic and centralized?
     def get_objects_associated_components()
       assocs = Model.get_objects(ModelHandle.new(@c,:assoc_node_component),:node_id => self[:id])
       return [] if assocs.nil?

@@ -28,7 +28,7 @@ module DTK
 
           test_cmps_with_version_contexts.each do |hash|
             attrib_array = Array.new
-            #BAKIR: This will be handled better. Need to get real values for test attributes
+            # BAKIR: This will be handled better. Need to get real values for test attributes
             hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
             output_hash[:test_instances] << { 
               :module_name => hash[:version_context][:display_name], 
@@ -72,8 +72,8 @@ BAKIR: Output hash has this form
             end
           }
           
-          #part of the code used to decide which components belong to which nodes. 
-          #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
+          # part of the code used to decide which components belong to which nodes. 
+          # based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
           unless output_hash.empty?
@@ -89,7 +89,7 @@ BAKIR: Output hash has this form
             end
           end
           
-          #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
+          # components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
             components = filter[:components] #TODO: temp
             CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_contexts})
@@ -115,7 +115,7 @@ BAKIR: Output hash has this form
               end
             end
 
-            #Bakir: test_components array should now have list of all test components that are related. Add them to service instance
+            # Bakir: test_components array should now have list of all test components that are related. Add them to service instance
             test_components.uniq!
             test_comp_list = []
             test_components.each do |test_comp| 
@@ -129,13 +129,13 @@ BAKIR: Output hash has this form
                 tst[:node_name] = test_comp[:node_name]
               end
 
-              #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
-              #BAKIR: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is either part of existing assembly or it is never added to the assembly and assembly_id is nil
+              # RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
+              # BAKIR: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is either part of existing assembly or it is never added to the assembly and assembly_id is nil
               test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
             end
-            #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
-            #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
-            #by setting version context above to test modules this will be achieved
+            # RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
+            # rich: the tests should be copied over by the same mechanism that copies ove component modules; 
+            # by setting version context above to test modules this will be achieved
           end 
 
           cmps = []
@@ -168,8 +168,8 @@ BAKIR: Output hash has this form
           return version_contexts
         end
 
-        #TODO: deprecate
-        #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing 
+        # TODO: deprecate
+        # TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing 
         def get_augmented_component_templates(nodes,components)
           ret = Array.new
           if nodes.empty?
@@ -202,7 +202,7 @@ BAKIR: Output hash has this form
           end.compact
           ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
           
-          #only keep matching ones
+          # only keep matching ones
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
               r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]
@@ -214,7 +214,7 @@ BAKIR: Output hash has this form
 
       class ExecuteTests < ActionResultsQueue::Result
         def self.initiate(nodes,action_results_queue, type, components)
-          #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
+          # TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
           cmp_templates = get_component_templates(nodes,components)
           pp [:debug_cmp_templates,cmp_templates]
           version_context = 
@@ -246,8 +246,8 @@ BAKIR: Output hash has this form
             end
           }
           
-          #part of the code used to decide which components belong to which nodes. 
-          #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
+          # part of the code used to decide which components belong to which nodes. 
+          # based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
           unless components.empty?
@@ -264,7 +264,7 @@ BAKIR: Output hash has this form
             end
           end
           
-          #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
+          # components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
             CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components, :version_context => version_context})
           else
@@ -272,9 +272,9 @@ BAKIR: Output hash has this form
           end
         end
         private
-        #TODO: some of this logic can be leveraged by code below node_hash
-        #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing 
-        #strings in components
+        # TODO: some of this logic can be leveraged by code below node_hash
+        # TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing 
+        # strings in components
         def self.get_component_templates(nodes,components)
           ret = Array.new
           if nodes.empty?
@@ -306,7 +306,7 @@ BAKIR: Output hash has this form
           end.compact
           ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
           
-          #only keep matching ones
+          # only keep matching ones
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
                 r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] and r[:component_name] == cmp_template[:display_name]

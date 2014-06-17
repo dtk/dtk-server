@@ -1,7 +1,7 @@
 module XYZ
   class Attribute_linkController < AuthController
 
-    #deprecate for Port_linkController#save
+    # deprecate for Port_linkController#save
     def save(explicit_hash=nil,opts={})
       raise Error.new("TODO: this is now deprecated: PortLink.create_port_and_attr_links has changed")
       hash = explicit_hash || request.params
@@ -16,7 +16,7 @@ module XYZ
 
       handle_errors do
         parent_id_handle = id_handle(hash["parent_id"],hash["parent_model_name"])
-        #TODO: many hacks to return new interface to front end
+        # TODO: many hacks to return new interface to front end
         link = PortLink.create_port_and_attr_links(parent_id_handle,port_link_hash)
         new_id = link.id
 
@@ -43,7 +43,7 @@ module XYZ
 
         output_port = create_object_from_id(link[:output_id],:port)
         output_port.update_and_materialize_object!(*Port.common_columns())
-        #only new ports created on input side
+        # only new ports created on input side
         output_port.merge!(:update_info => "no_change")
           
        ret = {
@@ -84,7 +84,7 @@ module XYZ
       aux_list_on_node_ports([hash["id"].to_i])
     end
 
-    #TODO: temp
+    # TODO: temp
     def aux_list_on_node_ports(node_ids)
       filter = node_ids ? [:and, [:oneof, :id, node_ids]] : nil
       cols = [:id,:display_name,:deprecate_port_links]

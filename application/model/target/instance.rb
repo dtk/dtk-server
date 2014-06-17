@@ -31,11 +31,11 @@ module DTK
             :type => 'instance'
           }
           el = provider.hash_subset(*InheritedProperties).merge(specific_params)
-          #need deep merge for iaas_properties
+          # need deep merge for iaas_properties
           el.merge(:iaas_properties => (el[:iaas_properties]||Hash.new).merge(iaas_properties.properties))
         end
 
-        #check if there are any matching target instances that are created already
+        # check if there are any matching target instances that are created already
         disjunct_array = create_rows.map do |r|
           [:and, [:eq, :parent_id, r[:parent_id]], 
            [:eq, :display_name, r[:display_name]]]
@@ -63,7 +63,7 @@ module DTK
         create_opts = {:convert => true, :ret_obj => {:model_name => :target_instance}}
         create_from_rows(target_mh,create_rows,create_opts)
       end
-      #These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
+      # These properties are inherited ones for target instance: default provider -> target's provider -> target instance (most specific)
       InheritedProperties = [:iaas_type,:iaas_properties,:type,:description]
 
       def self.delete(target)
@@ -91,7 +91,7 @@ module DTK
           #   t[:display_name] << DefaultTargetMark
           # end
         end
-        #sort by 1-whether default, 2-iaas_type, 3-display_name 
+        # sort by 1-whether default, 2-iaas_type, 3-display_name 
         unsorted_rows.sort do |a,b|
           [a[:is_default_target] ? 0 : 1, a[:iaas_type], a[:display_name]] <=>
           [b[:is_default_target] ? 0 : 1, b[:iaas_type], b[:display_name]]
@@ -111,7 +111,7 @@ module DTK
       end
 
      private
-      #TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'
+      # TODO: right now type can be different values for insatnce; may cleanup so its set to 'instance'
       def self.object_type_filter()
         [:neq,:type,'template']
       end

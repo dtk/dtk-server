@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'ruote'
 require 'pp'
-#require 'ruote/storage/hash_storage'
+# require 'ruote/storage/hash_storage'
 
 class WorkQueue
   Queue = Array.new
@@ -21,7 +21,7 @@ class WorkQueue
 end
 
 class MyRemoteParticipant
-  #include Ruote::LocalParticipant
+  # include Ruote::LocalParticipant
  
   def consume(workitem)
     WorkQueue.push(workitem_to_msg(workitem))
@@ -87,6 +87,6 @@ end
 
 
 wfid = engine.launch(pdef)
-#receiver.thread.join
+# receiver.thread.join
 engine.wait_for(wfid)
 

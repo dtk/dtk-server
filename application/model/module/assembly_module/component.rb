@@ -20,7 +20,7 @@ module DTK; class AssemblyModule
 
     def delete_modules?()
       am_version = assembly_module_version()
-      #do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
+      # do not want to use assembly.get_component_modules() to generate component_modules because there can be modules taht do not correspond to component instances
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:component_id],
         :filter => [:eq,:version,am_version]
@@ -68,7 +68,7 @@ module DTK; class AssemblyModule
     def get_for_assembly(opts={})
       ndx_ret = Hash.new
       add_module_branches = opts[:get_version_info]
-      #there is a row for each component; assumption is that all rows belonging to same component with have same branch
+      # there is a row for each component; assumption is that all rows belonging to same component with have same branch
       @assembly.get_objs(:cols=> [:instance_component_module_branches]).each do |r|
         component_module = r[:component_module]
         ndx_ret[component_module[:id]] ||= component_module.merge(add_module_branches ? r.hash_subset(:module_branch) : {})
@@ -78,7 +78,7 @@ module DTK; class AssemblyModule
         add_version_info!(ret)
       end
       
-      #remove branches; they are no longer needed
+      # remove branches; they are no longer needed
       ret.each{|r|r.delete(:module_branch)}
     
       ret
@@ -100,7 +100,7 @@ module DTK; class AssemblyModule
 
     def create_assembly_branch(component_module,am_version)
       opts = {:base_version=>component_module.get_field?(:version),:assembly_module=>true}
-      #TODO: very expensive call; will refine
+      # TODO: very expensive call; will refine
       component_module.create_new_version(am_version,opts)
     end
 
@@ -124,15 +124,15 @@ module DTK; class AssemblyModule
         end
       end
 
-      #for each item with local_copy, check for diff_from_base
+      # for each item with local_copy, check for diff_from_base
       if local_copy_els.empty?
         return modules_with_branches
       end
-      #TODO: check if we are missing anything; maybe when there is just a meta change we dont update what component pointing to
-      #but create a new branch, which we can check with ComponentModule.get_workspace_module_branches with idhs from all els in modules_with_branches
-      #this is related to DTK-1214
+      # TODO: check if we are missing anything; maybe when there is just a meta change we dont update what component pointing to
+      # but create a new branch, which we can check with ComponentModule.get_workspace_module_branches with idhs from all els in modules_with_branches
+      # this is related to DTK-1214
 
-      #get the associated master branch and see if there is any diff
+      # get the associated master branch and see if there is any diff
       mod_idhs = local_copy_els.map{|r|r.id_handle()}
       ndx_workspace_branches = ComponentModule.get_workspace_module_branches(mod_idhs).inject(Hash.new) do |h,r|
         h.merge(r[:module_id] => r)
@@ -163,8 +163,8 @@ need to do a refresh on workspace branch sha in case this was updated in another
             when :local_behind,:local_ahead,:branchpoint
               r[:branch_relationship] = sha_relationship
             when :equal
-              #unequal shas but equal content
-              #TODO: is it possible to reach this
+              # unequal shas but equal content
+              # TODO: is it possible to reach this
               r[:local_copy_diff]  = false
           end
         end
@@ -181,8 +181,8 @@ need to do a refresh on workspace branch sha in case this was updated in another
     def update_impacted_component_instances(cmp_instances,module_branch,project_idh)
       module_branch_id = module_branch[:id]
 
-      #shortcut; do not need to update components that are set already to this module id; and for added protection making
-      #sure that these it does not have :locked_sha set
+      # shortcut; do not need to update components that are set already to this module id; and for added protection making
+      # sure that these it does not have :locked_sha set
       cmp_instances_needing_update = cmp_instances.reject do |cmp|
         (cmp.get_field?(:module_branch_id) == module_branch_id) and
           ((cmp.has_key?(:locked_sha) and cmp[:locked_sha].nil?) or cmp.get_field?(:locked_sha).nil?)

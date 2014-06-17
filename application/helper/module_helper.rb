@@ -80,7 +80,7 @@ module Ramaze::Helper
     end
 
     def pull_from_remote_helper(module_class)
-      #TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
+      # TODO: need to clean this up; right now not called because of code on server; not to clean up term for :remote_repo
       Log.error("Not expecting to call pull_from_remote_helper")
       local_module_name, remote_repo = ret_non_null_request_params(:module_name, :remote_repo)
       version = ret_request_params(:version)
@@ -151,8 +151,8 @@ module Ramaze::Helper
       )
     end
 
-    #this looks at connected remote repos to make an assessment; default_namespace() above is static
-    #if this is used; it is inserted by controller method
+    # this looks at connected remote repos to make an assessment; default_namespace() above is static
+    # if this is used; it is inserted by controller method
     def get_existing_default_namespace?(module_obj,version=nil)
       linked_remote_repos = module_obj.get_linked_remote_repos(:filter => {:version => version})
       default_remote_repo = RepoRemote.ret_default_remote_repo(linked_remote_repos)
@@ -174,7 +174,7 @@ module Ramaze::Helper
     def ret_remote_repo_base()
       (ret_request_params(:remote_repo_base)||Repo::Remote.default_remote_repo_base()).to_sym
     end
-    #TODO: deprecate below when all uses removed; 
+    # TODO: deprecate below when all uses removed; 
     def ret_remote_repo()
       (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
     end

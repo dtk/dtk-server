@@ -7,7 +7,7 @@ module XYZ
             if value.has_key?("external_ref")
               target[key] = process_external_ref(value["external_ref"],node,metadata)
             else 
-              #TODO: this can be a Mash; should probably convert before hand to avoid patch below
+              # TODO: this can be a Mash; should probably convert before hand to avoid patch below
               target[key] ||= HashObject::AutoViv.create() 
               normalize_attribute_values(target[key],value,node,metadata)
             end

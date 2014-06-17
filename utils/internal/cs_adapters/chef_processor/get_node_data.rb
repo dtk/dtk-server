@@ -45,7 +45,7 @@ module XYZ
         }
       end
 
-      #TBD: from Chef code
+      # TBD: from Chef code
       def expand_node(name)
         if name =~ /./
           name = name.dup

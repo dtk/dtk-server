@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 14: Import component module from r8 repo and export to default tenant namespace
+# Test Case 14: Import component module from r8 repo and export to default tenant namespace
 
 require 'rubygems'
 require 'rest_client'

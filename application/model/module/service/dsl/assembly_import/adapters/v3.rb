@@ -2,7 +2,7 @@ module DTK; class ServiceModule
   class AssemblyImport
     r8_require('v2')
     class V3 < V2
-      #returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
+      # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
       def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|

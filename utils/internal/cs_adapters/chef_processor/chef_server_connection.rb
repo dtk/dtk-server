@@ -3,7 +3,7 @@ require 'chef/rest'
 require 'mixlib/authentication'
 module XYZ
   class ChefProcessor
-    #instance mixin
+    # instance mixin
     module ChefServerConnection
       def initialize_chef_connection(chef_server_uri) #TBD: chef_server_uri is stub
         Chef::Config.from_file("/etc/chef/client.rb") #TBD: stub; will replace by passing in relavant paramters

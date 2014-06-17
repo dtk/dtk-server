@@ -7,7 +7,7 @@ version          "0.6.2"
 depends          "php"
 depends          "apache2"
 depends          "mysql"
-#depends          "openssl"
+# depends          "openssl"
 
 recipe "wordpress", "Installs and configures wordpress LAMP stack on a single system"
 

@@ -1,4 +1,4 @@
-#this should maybe be a utils file/class to load and work with language files/strings
+# this should maybe be a utils file/class to load and work with language files/strings
 
 class I18n 
   

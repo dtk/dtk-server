@@ -1,7 +1,7 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class Repo
-    #TODO: may have better class name; this is really a remote repo server handler
+    # TODO: may have better class name; this is really a remote repo server handler
     class Remote
       r8_nested_require('remote','auth')
       include AuthMixin
@@ -93,7 +93,7 @@ module DTK
         ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version
-          #TODO: ModuleBranch::Location: 
+          # TODO: ModuleBranch::Location: 
           raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote.version)
@@ -176,7 +176,7 @@ module DTK
         RepoRemote.repo_base()
       end
 
-      #TODO: deprecate when remove all references to these
+      # TODO: deprecate when remove all references to these
       def default_remote_repo()
         self.class.default_remote_repo_base()
       end
@@ -190,7 +190,7 @@ module DTK
         ::DTK::Common::Aux.running_process_user()
       end
 
-      #TODO: this needs to be cleaned up
+      # TODO: this needs to be cleaned up
       def self.default_namespace()
         self.default_user_namespace()
       end
@@ -201,7 +201,7 @@ module DTK
       # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
 
       # example: 
-      #returns namespace, name, version (optional)
+      # returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
         raise ErrorUsage.new("Please provide module name to publish") unless qualified_name
 
@@ -219,8 +219,8 @@ module DTK
         unless remote_repo.nil? or remote_repo == default_remote_repo()
           raise Error.new("MOD_RESTRUCT:  need to put in logic to treat non default repo_name")
         end
-        #TODO: change config so that it has ability to have multiple repos and use form like
-        #remote = ::R8::Config[:repo][:remote][remote_repo]
+        # TODO: change config so that it has ability to have multiple repos and use form like
+        # remote = ::R8::Config[:repo][:remote][remote_repo]
         remote = ::R8::Config[:repo][:remote]
         is_ssl = remote[:rest_port].to_i == 443
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version
+# Test Case 31: NEG - Import Module A and Module B from git where Module B has dependency on Module A that is satisfied by name but not with version
 
 require 'rubygems'
 require 'active_record'

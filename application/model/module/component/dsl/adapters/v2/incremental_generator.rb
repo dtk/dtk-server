@@ -23,7 +23,7 @@ module DTK; class ComponentDSL; class V2
 
     class Attribute < self
       def generate(attr)
-        #TODO: treat default and external_ref
+        # TODO: treat default and external_ref
         attr.object.update_object!(:display_name,:description,:data_type,:semantic_type,:required,:dynamic,:external_ref)
         ref = attr.required(:display_name)
         content = PrettyPrintHash.new

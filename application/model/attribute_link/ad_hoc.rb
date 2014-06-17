@@ -1,7 +1,7 @@
 module DTK
   class AttributeLink
     class AdHoc < Hash
-      #Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
+      # Logic is if update meta then meta updated as well as ad_hoc updates for existing component instances
       def self.create_adhoc_links(assembly,target_attr_term,source_attr_term,opts={})
         parsed_info = Attribute::Pattern::Assembly::Link.parsed_adhoc_link_info(self,assembly,target_attr_term,source_attr_term)
         unless opts[:update_meta] and parsed_info.meta_update_supported?() 
@@ -10,7 +10,7 @@ module DTK
 
         dep_cmp = parsed_info.dep_component_instance
         peer_cmps = assembly.get_peer_component_instances(dep_cmp)
-        #get_peer_component_instances must be done before AssemblyModule::Component::AdHocLink, which modifies parents
+        # get_peer_component_instances must be done before AssemblyModule::Component::AdHocLink, which modifies parents
         result = AssemblyModule::Component::AdHocLink.update(assembly,parsed_info)
         if link_def_info = result[:link_def_created]
           link_def_hash = link_def_info[:hash_form]
@@ -28,10 +28,10 @@ module DTK
 
       def all_dep_component_instance_hashes(assembly,dep_component,peer_cmps)
         ret = [self]
-        #get peer component instances
+        # get peer component instances
         return ret if peer_cmps.empty?
 
-        #find whether target or source side matches with dep_component
+        # find whether target or source side matches with dep_component
         dep_side,antec_side,dep_attr_field,antec_attr_field = 
           if attribute_pattern(:target).component_instance.id() == dep_component.id() 
             [:target,:source,:input_id,:output_id] 
@@ -39,7 +39,7 @@ module DTK
             [:source,:target,:output_id,:input_id]
           end
 
-        #find the matching attributes on the peer components
+        # find the matching attributes on the peer components
         sp_hash = {
           :cols => [:id,:group_id,:display_name],
           :filter => [:and,[:oneof,:component_component_id,peer_cmps.map{|cmp|cmp.id()}],
@@ -69,12 +69,12 @@ module DTK
       end
 
       def self.create_link_defs_and_service_links(assembly,parsed_adhoc_links,dep_cmp,peer_cmps,antec_cmp,link_def_hash)
-        #This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
-        #adds the link_def to it and then service link between this and antec_cmp
+        # This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
+        # adds the link_def to it and then service link between this and antec_cmp
         dependency_name = link_def_hash.values.first[:link_type]
         antec_cmp_idh = antec_cmp.id_handle()
         ([dep_cmp] + peer_cmps).each do |cmp|
-           #TODO: can be more efficient to combine these two operations and see if can bulk them
+           # TODO: can be more efficient to combine these two operations and see if can bulk them
            cmp_idh = cmp.id_handle()
            Model.input_hash_content_into_model(cmp_idh,:link_def => link_def_hash)
            assembly.add_service_link?(cmp_idh,antec_cmp_idh,:dependency_name => dependency_name)

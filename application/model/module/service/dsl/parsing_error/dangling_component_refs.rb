@@ -3,7 +3,7 @@ module DTK; class ServiceModule
     class ParsingError::DanglingComponentRefs < self
       def initialize(cmp_ref_info_list,opts={})
         super(err_msg(cmp_ref_info_list),opts)
-        #each element can be a component ref object or a hash
+        # each element can be a component ref object or a hash
         @cmp_ref_info_list = cmp_ref_info_list 
       end
 
@@ -11,7 +11,7 @@ module DTK; class ServiceModule
       # Returns list of missing modules with version
       #
       def missing_module_list()
-        #forming hash and then getting its vals to remove dups in same <module,version,namepsace>
+        # forming hash and then getting its vals to remove dups in same <module,version,namepsace>
         module_hash = @cmp_ref_info_list.inject(Hash.new) do |h,r|
           module_name = r[:component_type].split('__').first
           remote_namespace = r[:remote_namespace]

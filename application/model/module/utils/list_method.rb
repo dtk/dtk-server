@@ -1,6 +1,9 @@
 module DTK
-  module ModuleClassMixin
-    class ListMethodHelpers
+  module ModuleUtils
+    class ListMethod
+      
+      DEFAULT_VERSION = 'CURRENT'
+
       def self.aggregate_detail(branch_module_rows,project_idh,model_type,opts)
         project = project_idh.create_object()
         module_mh = project_idh.createMH(model_type)
@@ -37,7 +40,7 @@ module DTK
           mdl.merge!(:is_equal => is_equal)
 
           if opts[:include_versions]
-            (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DefaultVersionString))
+            (mdl[:version_array] ||= Array.new) << module_branch.version_print_form(Opts.new(:default_version_string => DEFAULT_VERSION))
           end
           if external_ref_source = module_branch.external_ref_source()
             mdl[:external_ref_source] = external_ref_source
@@ -51,8 +54,8 @@ module DTK
         #put in display name form
         ndx_ret.each_value do |mdl|
           if raw_va = mdl.delete(:version_array)
-            unless raw_va.size == 1 and raw_va.first == DefaultVersionString
-              version_array = (raw_va.include?(DefaultVersionString) ? [DefaultVersionString] : []) + raw_va.reject{|v|v == DefaultVersionString}.sort
+            unless raw_va.size == 1 and raw_va.first == DEFAULT_VERSION
+              version_array = (raw_va.include?(DEFAULT_VERSION) ? [DEFAULT_VERSION] : []) + raw_va.reject{|v|v == DEFAULT_VERSION}.sort
               mdl.merge!(:versions => version_array.join(", ")) 
             end
           end
@@ -65,7 +68,6 @@ module DTK
         end
         ndx_ret.values
       end
-      DefaultVersionString = 'CURRENT'
 
      private 
 

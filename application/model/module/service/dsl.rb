@@ -97,6 +97,8 @@ module DTK
 
      private
       def update_component_module_refs(module_branch,opts={})
+        # DEBUG SNIPPET >>> REMOVE <<<
+        require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; debugger
         parsed_info = 
           if DSLParser.implements_method?(:parse_directory)
             DSLParser.parse_directory(module_branch,:component_module_refs,opts)

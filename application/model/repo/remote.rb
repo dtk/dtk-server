@@ -33,7 +33,7 @@ module DTK
         client.remove_client_user(username)
       end
 
-      def create_remote_module(client_rsa_pub_key)
+      def publish_to_remote(client_rsa_pub_key)
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
@@ -49,8 +49,9 @@ module DTK
           :name => remote.module_name(),
           :type => type_for_remote_module(remote.module_type),
           :namespace => namespace
-        } 
-        response_data = client.create_module(params, client_rsa_pub_key)
+        }
+        
+        response_data = client.publish_module(params, client_rsa_pub_key)
 
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
@@ -209,6 +210,7 @@ module DTK
          when 1 then [default_namespace(),qualified_name]
          when 2,3 then split
         else
+          qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty? 
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end

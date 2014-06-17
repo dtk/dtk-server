@@ -129,9 +129,9 @@ module DTK; module ModuleMixins
       if client_rsa_pub_key
         case action
         when 'push'
-          repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_WRITE)
+          response = repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_WRITE)
         when 'pull'
-          repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_READ)
+          response = repo_remote_handler.authorize_dtk_instance(client_rsa_pub_key, Repo::Remote::AuthMixin::ACCESS_READ)
         end
       end
 
@@ -145,7 +145,8 @@ module DTK; module ModuleMixins
           :remote_repo => remote.remote_ref,
           :remote_repo_url => remote_module_info[:remote_repo_url],
           :remote_branch => remote.branch_name,
-          :workspace_branch => workspace_branch_obj[:branch]
+          :workspace_branch => workspace_branch_obj[:branch],
+          :dependency_warnings => response['dependency_warnings']
       )
       if version = remote.version
         ret.merge!(:version => version)
@@ -163,12 +164,20 @@ module DTK; module ModuleMixins
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
         raise Error.new("Cannot find module_branch_obj from local")
       end
+  
+      module_branch = get_workspace_module_branch()
+      repo_full_path, branch = RepoManager.repo_full_path_and_branch(module_branch)
+      dir_parser = ::DtkCommon::DSL::DirectoryParser::Git.new(self.module_type(), repo_full_path, branch)
+      file_content = dir_parser.file_content('module_refs.yaml')
+      # DEBUG SNIPPET >>> REMOVE <<<
+      require 'ap'
+      ap file_content
 
       publish_preprocess_raise_error?(module_branch_obj)
 
       # create module on remote repo manager
       #this wil raise error if it exists already or dont have accsss
-      module_info = Repo::Remote.new(remote).create_remote_module(client_rsa_pub_key)
+      module_info = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key)
       remote_repo_name = module_info[:git_repo_name]
       remote.set_repo_name!(remote_repo_name)
 

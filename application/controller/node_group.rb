@@ -32,7 +32,7 @@ module DTK
 
     def rest__delete_component()
       node_group = create_obj(:node_group_id)
-      #not checking here if component_id points to valid object; check is in delete_component
+      # not checking here if component_id points to valid object; check is in delete_component
       component_id = ret_non_null_request_params(:component_id)
       node_group.delete_component(id_handle(component_id,:component))
       rest_ok_response
@@ -51,12 +51,12 @@ module DTK
       rest_ok_response node_group.get_attributes_print_form(Opts.new(:filter => filter))
     end
 
-    #the body has an array each element of form
+    # the body has an array each element of form
     # {:pattern => PAT, :value => VAL}
-    #pat can be one of three forms
-    #1 - an id
-    #2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
-    #3 - a pattern (TODO: give syntax) that can pick out multiple vars
+    # pat can be one of three forms
+    # 1 - an id
+    # 2 - a name of form ASSEM-LEVEL-ATTR or NODE/COMONENT/CMP-ATTR, or 
+    # 3 - a pattern (TODO: give syntax) that can pick out multiple vars
     # this returns same output as info about attributes, pruned for just new ones set
     def rest__set_attributes()
       node_group = create_obj(:node_group_id)
@@ -89,7 +89,7 @@ module DTK
     end
 
 
-    #TODO: old methods that need to be re-evaluated
+    # TODO: old methods that need to be re-evaluated
 
 
     def save()
@@ -117,7 +117,7 @@ module DTK
       rest_ok_response
     end
 
-    #TODO: initially implementing simple version taht takes no parameters and uses the canonical_member_id 
+    # TODO: initially implementing simple version taht takes no parameters and uses the canonical_member_id 
     def rest__clone_and_add_template_node()
       node_group_id = ret_non_null_request_params(:node_group_id)
       node_group = create_object_from_id(node_group_id)

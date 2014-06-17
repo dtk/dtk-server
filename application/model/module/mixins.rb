@@ -1,47 +1,21 @@
+r8_nested_require('mixins','remote')  
+r8_nested_require('mixins','create')  
+r8_nested_require('mixins','gitolite')
+r8_nested_require('utils','list_method')
+
+#
+# Mixins agregation point, and refelected on service_module and component_module classes.
+#
+#
+#
 module DTK
-  class ModuleRepoInfo < Hash
-    def initialize(repo,module_name,module_idh,branch_obj,version=nil)
-      super()
-      repo_name = repo.get_field?(:repo_name)
-      hash = {
-        :repo_id => repo[:id],
-        :repo_name => repo_name,
-        :module_id => module_idh.get_id(),
-        :module_name => module_name,
-        :module_branch_idh => branch_obj.id_handle(),
-        :repo_url => RepoManager.repo_url(repo_name),
-        :workspace_branch => branch_obj.get_field?(:branch),
-        :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
-      }
-      if version
-        hash.merge!(:version => version)
-        if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
-          hash.merge!(:assembly_name => assembly_name)
-        end
-      end
-      replace(hash)
-    end
-  end
-
-  class CloneUpdateInfo < ModuleRepoInfo
-    def initialize(module_obj,version=nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
-      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
-      replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
-      self[:commit_sha] = aug_branch[:current_sha]
-    end
-  end
-
-  #includes for both class and instance mixins
-  module ModuleMixins
-    r8_nested_require('mixins','remote')  
-    r8_nested_require('mixins','create')  
-  end
-    
- #instance mixins
+  #
+  # Instance Mixins
+  #
   module ModuleMixin
     include ModuleMixins::Remote::Instance
     include ModuleMixins::Create::Instance
+    include ModuleMixins::Gitolite
 
     def get_module_branch_from_local_params(local_params,opts={})
       self.class.get_module_branch_from_local(local_params.create_local(get_project()),opts)
@@ -267,6 +241,9 @@ module DTK
       self.class.module_type()
     end
 
+    #
+    # Returns ModuleBranch object for given version
+    # 
     def get_workspace_module_branch(version=nil)
       mb_mh = model_handle().create_childMH(:module_branch)
       sp_hash = {
@@ -340,12 +317,15 @@ module DTK
     end
   end
 
-  #class mixins
+  #
+  # Class Mixins
+  #
   module ModuleClassMixin
-    r8_nested_require('mixins','list_method_helpers')
 
     include ModuleMixins::Remote::Class
     include ModuleMixins::Create::Class
+
+
     def component_type()
       Log.info_pp(["#TODO: ModuleBranch::Location: deprecate for this being in ModuleBranch::Location local params",caller[0..4]])
       case module_type()
@@ -399,7 +379,7 @@ module DTK
 
       filter_list!(response) if respond_to?(:filter_list!)
       response.each{|r|r.merge!(:type => r.component_type()) if r.respond_to?(:component_type)}
-      response = ListMethodHelpers.aggregate_detail(response,project_idh,model_type(),Opts.new(:include_versions => true))
+      response = ModuleUtils::ListMethod.aggregate_detail(response,project_idh,model_type(),Opts.new(:include_versions => true))
 
       ret = response.first || {}
       ret[:versions] = "CURRENT" unless ret[:versions]
@@ -431,7 +411,7 @@ module DTK
           :remote_repo_base => remote_repo_base,
           :diff => diff
         )
-        unsorted_ret = ListMethodHelpers.aggregate_detail(unsorted_ret,project_idh,model_type(),opts_aggr)
+        unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret,project_idh,model_type(),opts_aggr)
       end
       unsorted_ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
     end
@@ -581,6 +561,38 @@ module DTK
         h
       end.values
     end
+  end
 
+  class ModuleRepoInfo < Hash
+    def initialize(repo,module_name,module_idh,branch_obj,version=nil)
+      super()
+      repo_name = repo.get_field?(:repo_name)
+      hash = {
+        :repo_id => repo[:id],
+        :repo_name => repo_name,
+        :module_id => module_idh.get_id(),
+        :module_name => module_name,
+        :module_branch_idh => branch_obj.id_handle(),
+        :repo_url => RepoManager.repo_url(repo_name),
+        :workspace_branch => branch_obj.get_field?(:branch),
+        :branch_head_sha => RepoManager.branch_head_sha(branch_obj)
+      }
+      if version
+        hash.merge!(:version => version)
+        if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
+          hash.merge!(:assembly_name => assembly_name)
+        end
+      end
+      replace(hash)
+    end
+  end
+
+  class CloneUpdateInfo < ModuleRepoInfo
+    def initialize(module_obj,version=nil)
+      aug_branch = module_obj.get_augmented_workspace_branch(:filter => {:version => version})
+      super(aug_branch[:repo],aug_branch[:module_name],module_obj.id_handle(),aug_branch,version)
+      replace(Aux.hash_subset(self,[:repo_name,:repo_url,:module_name,:workspace_branch]))
+      self[:commit_sha] = aug_branch[:current_sha]
+    end
   end
 end

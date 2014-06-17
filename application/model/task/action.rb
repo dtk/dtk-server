@@ -39,12 +39,18 @@ module DTK; class Task
         super(hash)
       end
 
-      def node_id()
-        self[:node][:id]
+
+      ###====== related to node(s); node can be a node group
+      def nodes()
+        if self[:node].is_node_group?()
+          self[:node].get_node_members()
+        else
+          [self[:node]]
+        end
       end
 
-      def attributes_to_set()
-        Array.new
+      def node_id()
+        self[:node][:id]
       end
 
       def get_and_propagate_dynamic_attributes(result,opts={})
@@ -52,6 +58,12 @@ module DTK; class Task
         return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         Attribute.update_and_propagate_dynamic_attributes(attr_mh,dyn_attr_val_info)
+      end
+
+      ###====== end: related to node(s); node can be a node group
+
+      def attributes_to_set()
+        Array.new
       end
 
       # virtual gets overwritten

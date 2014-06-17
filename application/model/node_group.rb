@@ -91,7 +91,7 @@ module DTK
       end
     end
 
-    #returns node group to node mapping for eachnode matching node filter
+    #returns node group to node mapping for each node matching node filter
     # for is {node_id => {ng_id1 => ng1,..}
     # possible that node_id does not appear meaning that this node does not belong to any group
     #TODO: this can potentially be expensive to compute without enhancements

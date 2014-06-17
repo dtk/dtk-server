@@ -1,5 +1,14 @@
 module DTK
   class ServiceNodeGroup < Node
+
+    def get_node_members()
+      sp_hash = {
+        :cols => [:node_members]
+      }
+      rows = get_objs(sp_hash)
+      rows.map{|r|r[:node_member]}
+    end
+
     def self.check_valid_id(model_handle,id)
       IdNameHelper.check_valid_id(model_handle,id)
     end

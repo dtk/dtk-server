@@ -81,6 +81,7 @@ module DTK
       def self.execute(task_idh,top_task_idh,task_action)
 
         node = task_action[:node]
+pp [:node_group_debug,task_action.nodes()]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
 
         target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])

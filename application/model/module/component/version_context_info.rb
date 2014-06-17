@@ -5,7 +5,6 @@ module DTK
         impls = Component::IncludeModule.get_version_context_info(component_idhs,impl_idhs)
         sha_info = get_sha_indexed_by_impl(component_idhs)
         impls.map{|impl|convert_to_hash_form(impl,sha_info[impl[:id]])}
-        pp impls
       end
       def self.get_in_hash_form_from_templates(component_templates)
         impl_idhs = get_implementation_idhs(component_templates)

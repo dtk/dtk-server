@@ -47,7 +47,6 @@ module DTK
           ret[node[:id]] = new_target_refs
         end
         pp [:debug_create_linked_target_refs,ret]
-raise ErrorUsage.new('got here')
       end
 
       def self.create_linked_nodes(target,node,num_needed,num_linked)

@@ -5,29 +5,16 @@ module DTK
         @node = node
       end
 
-      FieldInfo = {
-        :cardinality => {:name => :cardinality, :semantic_type => :integer},
-        :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
-        :puppet_version => {:name => :puppet_version}
-      }
-
-      def self.field_name(name)
-        unless ret = (FieldInfo[:cardinality]||{})[:name]
-          raise Error.new("No node attribute with name (#{name})")
-        end
-        ret.to_s
-      end
-
       def root_device_size()
-        get_value?(FieldInfo[:root_device_size])
+        ret_value?(:root_device_size)
       end
 
-      def cardinality?()
-        get_value?(FieldInfo[:cardinality])
+      def cardinality()
+        ret_value?(:cardinality)||1
       end
       
       def puppet_version()
-        get_value?(FieldInfo[:puppet_version])||R8::Config[:puppet][:version]
+        ret_value?(:puppet_version)||R8::Config[:puppet][:version]
       end
 
       def self.assembly_attribute_filter()
@@ -36,54 +23,83 @@ module DTK
       NodeTemplateAttributes = ['host_addresses_ipv4','node_components','fqdn']
       AssemblyAttributeFilter = [:and] + NodeTemplateAttributes.map{|a|[:neq,:display_name,a]}
 
-      def self.cardinality_field()
-        CardinalityField
+      def self.cache_attribute_values!(nodes,name)
+        nodes_to_query = nodes.reject{|node|Cache.attr_is_set?(node,name)}
+        return if nodes_to_query.empty?
+
+        cols = [:id,:node_node_id,:attribute_value]
+        field_info = field_info(name) 
+        filter =  [:eq,:display_name,field_info[:name].to_s]
+        node_idhs = nodes_to_query.map{|n|n.id_handle()}
+        ndx_attrs =  Node.get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
+          h.merge(a[:node_node_id] => a[:attribute_value])
+        end
+
+        nodes_to_query.each do |node|
+          if raw_val = ndx_attrs[node[:id]]
+            Cache.set!(node,raw_val,field_info)
+          end
+        end
+      end
+
+     private
+      FieldInfo = {
+        :cardinality => {:name => :cardinality, :semantic_type => :integer},
+        :root_device_size => {:name => :root_device_size, :semantic_type => :integer},
+        :puppet_version => {:name => :puppet_version}
+      }
+
+      def self.field_info(name)
+        unless ret = FieldInfo[name.to_sym]
+          raise Error.new("No node attribute with name (#{name})")
+        end
+        ret
+      end
+      def field_info(name)
+        self.class.field_info(name)
+      end
+
+      def ret_value?(name)
+        field_info = field_info(name)
+        if Cache.attr_is_set?(@node,name)
+          Cache.get(@node,name)
+        else
+          raw_val = get_raw_value?(name)
+          Cache.set!(@node,val,field_info)
+        end
+      end
+
+      def get_raw_value?(name)
+        attr = @node.get_node_attribute?(name.to_s,:cols => [:id,:group_id,:attribute_value])
+        attr && attr[:attribute_value]
       end
 
       module Cache
-        def self.val_is_set?(node,name)
+        def self.attr_is_set?(node,name)
           (node[CacheKeyOnNode]||{}).has_key?(name.to_sym)
         end
         def self.get(node,name)
           (node[CacheKeyOnNode]||{})[name.to_sym]
         end
-        def self.set!(node,name,val)
+        def self.set!(node,raw_val,field_info)
+          name = field_info[:name]
+          semantic_data_type = field_info[:semantic_type]
+          val = 
+            if raw_val and semantic_data_type
+              Attribute::SemanticDatatype.convert_to_internal_form(semantic_data_type,raw_val)
+            else
+              raw_val
+            end
           (node[CacheKeyOnNode] ||= Hash.new)[name.to_sym] = val
         end
         CacheKeyOnNode = :attribute_value_cache
-      end
-
-     private
-      def get_value?(field_info)
-        attribute_name = field_info[:name]
-        semantic_data_type = field_info[:semantic_type]
-        attr = @node.get_node_attribute?(attribute_name.to_s,:cols => [:id,:group_id,:attribute_value])
-        value = attr && attr[:attribute_value]
-        if value and semantic_data_type
-          value = Attribute::SemanticDatatype.convert_to_internal_form(semantic_data_type,value)
-        end
-        value
       end
     end
 
     module AttributeClassMixin
       def cache_attribute_values!(nodes,name)
-        nodes_to_query = nodes.reject{|n|n.attribute_value_is_set?(name)}
-        return nodes if nodes_to_query.empty?
-        cols = [:id,:node_node_id,:attribute_value]
-        field_name = NodeAttribute.field_name(name)
-        filter =  [:eq,:display_name,field_name]
-        node_idhs = nodes_to_query.map{|n|n.id_handle()}
-        ndx_attrs =  get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
-          h.merge(a[:node_node_id] => a[:attribute_value])
-        end
-        nodes_to_query.each do |n|
-          if val = ndx_attrs[n[:id]]
-            n.cache_attribute_value!(name,val)
-          end
-        end
+        NodeAttribute.cache_attribute_values!(nodes,name)
       end
-
 
       #node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
      def get_node_level_assembly_attributes(node_idhs,cols=nil)
@@ -238,18 +254,6 @@ module DTK
         row && row[:attribute]
       end
 
-      def cache_attribute_value!(name,val)
-        unless NodeAttribute::Cache.val_is_set?(self,name)
-          NodeAttribute::Cache.set!(self,name,val)
-        end
-        val
-      end
-      def attribute_value(name)
-        NodeAttribute::Cache.get(self,name)
-      end
-      def attribute_value_is_set?(name)
-        NodeAttribute::Cache.val_is_set?(self,name)
-      end
 
 
       ####Things below heer shoudl be cleaned up or deprecated

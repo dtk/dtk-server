@@ -56,7 +56,9 @@ module DTK
         return if nodes.empty?
         Node.cache_attribute_values!(nodes,:cardinality)
         create_state_changes_for_create_node?(target,nodes)
-pp [:debug_aftercache_attribute_values,nodes]
+        #This creates if needed target refs and links to them
+        Node::TargetRef.create_link_target_refs?(target,nodes)
+        raise ErrorUsage.new('got here')
 
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing

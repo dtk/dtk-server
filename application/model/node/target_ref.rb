@@ -2,6 +2,18 @@ module DTK
   class Node
     # This refers to an object that is used to point to an existing node in a target; it is a peer of Node::Template
     class TargetRef < self
+      
+      #This creates if needed target refs and links nodes to them
+      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
+      def self.create_link_target_refs?(target,nodes_x)
+        #TODO: temporary code where just do this for node_groups
+        nodes = nodes_x.select{|n|n.is_node_group?()}
+        return if nodes.empty?
+pp [:debug_nodes,nodes]
+        num_target_nodes_needed = nodes.inject(0){|r,n|r+n.attribute.cardinality}
+pp [:debug_num_target_nodes_needed,num_target_nodes_needed]
+      end
+
       def self.process_import_nodes_input!(inventory_data_hash)
         inventory_data_hash.each_value do |input_node_hash|
           process_import_node_input!(input_node_hash)

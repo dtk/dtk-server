@@ -33,7 +33,7 @@ module DTK
         client.remove_client_user(username)
       end
 
-      def publish_to_remote(client_rsa_pub_key)
+      def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
@@ -44,13 +44,15 @@ module DTK
           namespace = CurrentSession.new.get_user_object().get_namespace()
           Log.error("Unexpected that naemspace was null and used CurrentSession.new.get_user_object().get_namespace(): #{namespace}}")
         end
+
         params = {
           :username => username,
           :name => remote.module_name(),
           :type => type_for_remote_module(remote.module_type),
-          :namespace => namespace
+          :namespace => namespace,
+          :module_refs_content => module_refs_content
         }
-        
+
         response_data = client.publish_module(params, client_rsa_pub_key)
 
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))

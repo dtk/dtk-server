@@ -1,6 +1,10 @@
 module DTK; module ModuleMixins
   module Remote
   end
+
+  MODULE_REFS_FILE_NAME = 'module_refs.yaml'
+
+
   module Remote::Class
     # install from a dtkn repo; directly in this method handles the module/branc and repo level items
     # and then calls install__process_dsl to handle model and implementaion/files parts depending on what type of module it is
@@ -164,20 +168,16 @@ module DTK; module ModuleMixins
       unless module_branch_obj = self.class.get_module_branch_from_local(local)
         raise Error.new("Cannot find module_branch_obj from local")
       end
-  
-      module_branch = get_workspace_module_branch()
-      repo_full_path, branch = RepoManager.repo_full_path_and_branch(module_branch)
-      dir_parser = ::DtkCommon::DSL::DirectoryParser::Git.new(self.module_type(), repo_full_path, branch)
-      file_content = dir_parser.file_content('module_refs.yaml')
-      # DEBUG SNIPPET >>> REMOVE <<<
-      require 'ap'
-      ap file_content
-
+      
       publish_preprocess_raise_error?(module_branch_obj)
+
+      # we need to send Repoman information about modules and we do it here
+      module_branch = get_workspace_module_branch()
+      file_content = repo_file_content(module_branch, MODULE_REFS_FILE_NAME)
 
       # create module on remote repo manager
       # this wil raise error if it exists already or dont have accsss
-      module_info = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key)
+      module_info = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key, file_content)
       remote_repo_name = module_info[:git_repo_name]
       remote.set_repo_name!(remote_repo_name)
 

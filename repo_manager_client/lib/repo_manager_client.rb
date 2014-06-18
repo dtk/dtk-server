@@ -1,5 +1,4 @@
 require 'sshkey'
-r8_require('../../utils/internal/gitolite_manager')
 
 module DTK
   # TODO: RepoType should be in common
@@ -142,10 +141,9 @@ module DTK
     end
 
     def publish_module(params_hash, client_rsa_pub_key = nil)
-      mng = DTK::GitoliteManager.instance()
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+      post_rest_request_data(route,body,:raise_error => true,:timeout => 30)
     end
 
     def delete_module(params_hash, client_rsa_pub_key = nil)

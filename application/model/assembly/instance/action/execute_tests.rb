@@ -28,7 +28,7 @@ module DTK
 
           test_cmps_with_version_contexts.each do |hash|
             attrib_array = Array.new
-            hash[:attributes].each { |attrib| attrib_array << {:display_name=>attrib[:display_name], :value=>attrib[:value_asserted] }}
+            hash[:attributes].each { |attrib| attrib_array << { attrib[:display_name].to_sym =>attrib[:value_asserted] }}
             output_hash[:test_instances] << { 
               :module_name => hash[:version_context][:implementation], 
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
@@ -41,14 +41,13 @@ module DTK
           pp [:debug_output_hash, output_hash]
 =begin
 BAKIR: Output hash has this form
-{:test_instances=>
-  [{:module_name=>nil,
-    :component=>"node1/mongodb",
-    :test_component=>"mongodb_test__network_port_check",
-    :test_name=>"network_port_check_spec.rb",
-    :params=>
-     [{:display_name=>"mongo_port", :value=>"27017"},
-      {:display_name=>"mongo_web_port", :value=>"28017"}]}]}
+[:debug_output_hash,
+ {:test_instances=>
+   [{:module_name=>"mongodb_test",
+     :component=>"node1/mongodb",
+     :test_component=>"mongodb_test__network_port_check",
+     :test_name=>"network_port_check_spec.rb",
+     :params=>[{:mongo_port=>"27017"}, {:mongo_web_port=>"28017"}]}]}]
 =end  
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)

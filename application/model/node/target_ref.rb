@@ -5,13 +5,12 @@ module DTK
       
       #This creates if needed target refs and links nodes to them
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
-      def self.create_linked_target_refs?(target,nodes_x)
+      def self.create_linked_target_refs?(target,nodes)
         #TODO: temporary code where just do this for node_groups
-        nodes = nodes_x.select{|n|n.is_node_group?()}
-pp [:debug_nodes,nodes_x]
-        return if nodes.empty?
+        ndx_target_refs_needed = ndx_num_new_target_refs_needed(target,nodes)
+        pp [:debug_ndx_target_refs_needed,ndx_target_refs_needed]
+        return if ndx_target_refs_needed.empty?
         num_target_nodes_needed = nodes.inject(0){|r,n|r+n.attribute.cardinality}
-pp [:debug_num_target_nodes_needed,num_target_nodes_needed]
 Log.error('got here in work on creating linked target refs for node groups')
 raise ErrorUsage.new('got here')
       end
@@ -42,6 +41,43 @@ raise ErrorUsage.new('got here')
       end
 
      private
+      #returns for each node that needs one or more target ref returns number; ndx is node id
+      def self.ndx_num_new_target_refs_needed(target,nodes)
+        ret = Hash.new
+
+        #TODO: temporary; removes all nodes that are not node groups
+        nodes = nodes.select{|n|n.is_node_group?()}
+        return ret if nodes.empty?
+
+        ndx_linked_target_ref_idhs = ndx_linked_target_ref_idhs(target,nodes)
+        nodes.each do |node|
+          node_id = node[:id]
+          num_linked = (ndx_linked_target_ref_idhs[node_id]||[]).size 
+          num_needed = node.attribute.cardinality - num_linked
+          if num_needed > 0
+            ret[node_id] = num_needed
+          else num_needed < 0
+            Log.error("Unexpected that number of target refs (#{num_linked}) for (#{node[:display_name].to_s}) is graeter than cardinaility (#{node.attribute.cardinality.to_s})")
+          end
+        end
+        ret
+      end
+
+      #indexed by node id
+      def self.ndx_linked_target_ref_idhs(target,nodes)
+        ret = Hash.new
+        sp_hash = {
+          :cols => [:id,:group_id,:display_name,:node_id,:node_group_id],
+          :filter => [:and, 
+                      [:oneof,:node_group_id,nodes.map{|n|n.id}],
+                      [:eq,:datacenter_datacenter_id,target.id]]
+        }
+        node_mh = target.model_handle(:node)
+        get_objs(target.model_handle(:node_group_relation),sp_hash).each do |r|
+          (ret[r[:node_group_id]] ||= Array.new) << node_mh.createIDH(:id => r[:node_id])
+        end
+      end
+
       #returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
       def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
         ret = Hash.new

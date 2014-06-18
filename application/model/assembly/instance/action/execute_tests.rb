@@ -128,7 +128,6 @@ BAKIR: Output hash has this form
               end
             end
 
-            #Bakir: test_components array should now have list of all test components that are related. Add them to service instance
             test_components.uniq!
             test_comp_list = []
             test_components.each do |test_comp| 
@@ -136,20 +135,16 @@ BAKIR: Output hash has this form
                 :cols => Component.common_columns,
                 :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
               }
-              test_comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
-              test_comp_list.each do |tst|
+              comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
+              comp_list.each do |tst|
                 tst[:component_name] = test_comp[:component_name]
                 tst[:node_name] = test_comp[:node_name]
                 tst[:attributes] = test_comp[:attributes]
               end
 
-              #RICH-SMOKETEST wasnt sure what test_comp_list.select! line was for
-              #BAKIR: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is either part of existing assembly or it is never added to the assembly and assembly_id is nil
-              test_comp_list.select! { |tstcmp| tstcmp[:assembly_id] == nil || tstcmp[:assembly_id] == assembly_instance[:id]  }
+              #Bakir: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is never added to the assembly and assembly_id is nil
+              test_comp_list << comp_list.select { |tstcmp| tstcmp[:assembly_id] == nil }.first
             end
-            #RICH-SMOKETEST: BY putting the test component module in teh version_conetxt they will be copied over; tehy wil be on the node under the directory associated with the test module, not the module on component the tets are linked to
-            #rich: the tests should be copied over by the same mechanism that copies ove component modules; 
-            #by setting version context above to test modules this will be achieved
           end
 
           cmps = []

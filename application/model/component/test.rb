@@ -115,11 +115,6 @@ module DTK
         ndx_attribute_mappings = Hash.new
         link_def_links.each do |ld_link|
           am_list = ld_link.attribute_mappings()
-          #unless am_list.size == 1
-          #  Log.error("Unexpected that test link has attribute_mappings wiith size <> 1")
-          #  next
-          #end
-          #am = am_list.first
           pntr = ndx_attribute_mappings[ld_link[:link_def_id]] ||= {:test_component => ld_link[:remote_component_type], :ams => Array.new}
           pntr[:ams] << am_list
         end

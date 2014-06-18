@@ -31,7 +31,7 @@ module DTK
       #TODO: formatting to get right feilds is done on client side now; should be done on server side
       #method Node::TargetRef:InventoryData.new can be removed or modified once that is done
       inventory_data_hash = ret_non_null_request_params(:inventory_data)
-      inventory_data = Node::TargetRef::InventoryData.new(inventory_data_hash)
+      inventory_data = Node::TargetRef::Input::InventoryData.new(inventory_data_hash)
       rest_ok_response Target::Instance.import_nodes(target, inventory_data)
     end
 

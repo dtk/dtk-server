@@ -2,25 +2,6 @@ module DTK
   class Node
     # This refers to an object that is used to point to an existing node in a target; it is a peer of Node::Template
     class TargetRef < self
-      
-      #This creates if needed target refs and links nodes to them
-      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
-      def self.create_linked_target_refs?(target,nodes)
-        #TODO: temporary code where just do this for node_groups
-        ndx_target_refs_needed = ndx_num_new_target_refs_needed(target,nodes)
-        pp [:debug_ndx_target_refs_needed,ndx_target_refs_needed]
-        return if ndx_target_refs_needed.empty?
-        num_target_nodes_needed = nodes.inject(0){|r,n|r+n.attribute.cardinality}
-Log.error('got here in work on creating linked target refs for node groups')
-raise ErrorUsage.new('got here')
-      end
-
-      def self.process_import_nodes_input!(inventory_data_hash)
-        inventory_data_hash.each_value do |input_node_hash|
-          process_import_node_input!(input_node_hash)
-        end
-      end
-
       #these are nodes without any assembly on them
       def self.get_free_nodes(target)
         sp_hash = {
@@ -40,22 +21,67 @@ raise ErrorUsage.new('got here')
         ret_unpruned.reject{|r|ndx_matched_target_refs[r[:id]]}
       end
 
-     private
-      #returns for each node that needs one or more target ref returns number; ndx is node id
-      def self.ndx_num_new_target_refs_needed(target,nodes)
+      #This creates if needed target refs and links nodes to them
+      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
+      def self.create_linked_target_refs?(target,nodes)
+        #returns new idhs indexed by node (id) they linked to
         ret = Hash.new
+        num_target_refs_needed(target,nodes).each do |node_info|
+          node = node_info[:node]
+          num_needed = node_info[:num_needed]
+          num_linked = node_info[:num_linked]
+          new_target_refs = create_linked_nodes(target,node,num_needed,num_linked)
+          ret[node[:id]] = new_target_refs
+        end
+        pp [:debug_create_linked_target_refs,ret]
+raise ErrorUsage.new('got here')
+      end
 
+      def self.create_linked_nodes(target,node,num_needed,num_linked)
+        target_id = target.id
+        base_display_name = node.get_field?(:disply_name)
+        base_ref = node.get_field?(:ref)
+        create_rows = (num_linked+1..num_linked+num_needed).map do |index|
+          {
+            :ref => "#{base_ref}--#{index}",
+            :display_name => "#{base_display_name}--#{index}",
+            :managed => true,
+            :datacenter_datacenter_id => target_id,
+            #TODO: stub for garbage collection
+            :type => 'garb'
+         }
+        end
+
+        #for create model handle needs parent
+        node_mh = target.model_handle().create_childMH(:node) 
+#        new_target_refs = create_from_rows(attr_link_mh,new_link_rows)
+pp [:debug_creating,create_rows]
+      end
+
+
+      def self.process_import_nodes_input!(inventory_data_hash)
+        inventory_data_hash.each_value do |input_node_hash|
+          process_import_node_input!(input_node_hash)
+        end
+      end
+
+     private      
+      #returns for each node that needs one or more target refs the following hash
+      # :node
+      # :num_needed
+      # :num_linked
+      def self.num_target_refs_needed(target,nodes)
+        ret = Array.new
         #TODO: temporary; removes all nodes that are not node groups
         nodes = nodes.select{|n|n.is_node_group?()}
         return ret if nodes.empty?
-
         ndx_linked_target_ref_idhs = ndx_linked_target_ref_idhs(target,nodes)
         nodes.each do |node|
           node_id = node[:id]
           num_linked = (ndx_linked_target_ref_idhs[node_id]||[]).size 
           num_needed = node.attribute.cardinality - num_linked
           if num_needed > 0
-            ret[node_id] = num_needed
+            ret << {:node => node,:num_needed => num_needed,:num_linked => num_linked}
           else num_needed < 0
             Log.error("Unexpected that number of target refs (#{num_linked}) for (#{node[:display_name].to_s}) is graeter than cardinaility (#{node.attribute.cardinality.to_s})")
           end

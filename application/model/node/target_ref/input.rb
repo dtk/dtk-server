@@ -24,6 +24,8 @@ module DTK; class Node
       end
       
       def self.ret_target_ref_hash(inventory_input)
+pp [:got_here,inventory_input]
+raise ErrorUsage.new('got here')
         inventory_input.inject(Hash.new){|h,el|h.merge(el.ret_target_ref_hash())}
       end
       private_class_method :ret_target_ref_hash

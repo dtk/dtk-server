@@ -27,9 +27,12 @@ module DTK
     end
 
     def rest__import_nodes()
-      target_instance = create_obj(:target_id, ::DTK::Target::Instance)
-      inventory_data = ret_non_null_request_params(:inventory_data)
-      rest_ok_response Target::Instance.import_nodes(target_instance, inventory_data)
+      target = create_obj(:target_id, Target::Instance)
+      #TODO: formatting to get right feilds is done on client side now; should be done on server side
+      #method Node::TargetRef:InventoryData.new can be removed or modified once that is done
+      inventory_data_hash = ret_non_null_request_params(:inventory_data)
+      inventory_data = Node::TargetRef::InventoryData.new(inventory_data_hash)
+      rest_ok_response Target::Instance.import_nodes(target, inventory_data)
     end
 
     def rest__install_agents()

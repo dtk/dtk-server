@@ -104,10 +104,8 @@ module DTK
         get_field?(:parent_id).nil?
       end
 
-      def self.import_nodes(target, inventory_data_hash)
-        target_idh = target.id_handle()
-        Node::TargetRef.process_import_nodes_input!(inventory_data_hash)
-        Model.import_objects_from_hash(target_idh, {:node => inventory_data_hash}, :return_info => true)
+      def self.import_nodes(target, inventory_data)
+        Node::TargetRef.create_nodes_from_inventory_data(target, inventory_data)
       end
 
      private

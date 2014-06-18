@@ -259,17 +259,27 @@ module DTK
       #   # :state_change_types=>["install_agent"]
       # }
 
-      ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
+      main = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agents", :temporal_order => "concurrent")
       num_nodes = (opts[:debug_num_nodes]||3).to_i
 
+      subtasks = []
       (1..num_nodes).each do |num|
-        node = nodes.pop
-        executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, node)
-        subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
-        ret.add_subtask(subtask)
+        if node = nodes.pop
+          ret = create_new_task(task_mh, :executable_action_type => "InstallAgent", :target_id => target_idh.get_id(), :display_name => "install_agent", :temporal_order => "sequential")
+
+          executable_action = Task::Action::PhysicalNode.create_from_physical_nodes(target, node)
+          subtask = create_new_task(task_mh, :executable_action_type => "InstallAgent", :executable_action => executable_action, :display_name => "install_agent_#{num.to_s}")#, :temporal_order => "sequential")
+          ret.add_subtask(subtask)
+
+          executable_action = Task::Action::PhysicalNode.create_smoketest_from_physical_nodes(target, node)
+          subtask = create_new_task(task_mh, :executable_action_type => "ExecuteSmoketest", :executable_action => executable_action, :display_name => "execute_smoketest_#{num.to_s}")#, :temporal_order => "sequential")
+          ret.add_subtask(subtask)
+
+          main.add_subtask(ret)
+        end
       end
 
-      ret
+      main
     end
 
    private

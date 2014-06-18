@@ -9,6 +9,7 @@ module DTK
 
         r8_nested_require('participant','create_node')
         r8_nested_require('participant','install_agent')
+        r8_nested_require('participant','execute_smoketest')
         r8_nested_require('participant','detect_created_node_is_ready')
 
         DEBUG_AGENT_RESPONSE = false

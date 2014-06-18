@@ -1,6 +1,6 @@
 module DTK; class Task
 class Action
-  class InstallAgent < PhysicalNode
+  class ExecuteSmoketest < PhysicalNode
       def initialize(type,object,task_idh=nil,assembly_idh=nil)
         hash = 
           case type
@@ -76,7 +76,7 @@ class Action
       end
 
       def ret_command_and_control_adapter_info()
-        [:node_config,:ssh]
+        [:node_config,:smoketest]
         # [:iaas,R8::Config[:command_and_control][:iaas][:type].to_sym]
       end
 

@@ -184,6 +184,10 @@ module DTK
           if ea = self[:executable_action]
             el.merge!(Action::InstallAgent.status(ea,opts))
           end
+         when "ExecuteSmoketest"
+          if ea = self[:executable_action]
+            el.merge!(Action::ExecuteSmoketest.status(ea,opts))
+          end
         end
       end
       ret << el

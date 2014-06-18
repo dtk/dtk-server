@@ -28,6 +28,7 @@ module DTK; class Task
           when "ConfigNode"  then ConfigNode.new(:hash,hash,task_idh)
           when "PowerOnNode" then PowerOnNode.new(:hash,hash,task_idh)
           when "InstallAgent" then InstallAgent.new(:hash,hash,task_idh)
+          when "ExecuteSmoketest" then ExecuteSmoketest.new(:hash,hash,task_idh)
           when "Hash" then InstallAgent.new(:hash,hash,task_idh) #RICH-WF; Aldin compensating form bug in task creation
           else raise Error.new("Unexpected task_action_type (#{task_action_type})")
         end
@@ -159,6 +160,17 @@ module DTK; class Task
         InstallAgent.new(:hash,hash)
       end
 
+      def self.create_smoketest_from_physical_nodes(target, node)
+        node[:datacenter] = target
+        hash = {
+          :node => node,
+          :datacenter => target,
+          :user_object => CurrentSession.new.get_user_object()
+        }
+
+        ExecuteSmoketest.new(:hash,hash)
+      end
+
       # virtual gets overwritten
       # updates object and the tasks in the model
       def get_and_update_attributes!(task)
@@ -176,6 +188,7 @@ module DTK; class Task
     r8_nested_require('action','config_node')
     r8_nested_require('action','on_component')
     r8_nested_require('action','install_agent')
+    r8_nested_require('action','execute_smoketest')
 
     class Result < HashObject
       def initialize(hash={})

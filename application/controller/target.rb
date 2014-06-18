@@ -49,6 +49,7 @@ module DTK
       target_idh = target.id_handle()
 
       unmanaged_nodes = target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
+      return rest_ok_response if unmanaged_nodes.empty?
 
       opts = Hash.new
       if num_nodes = ret_request_params(:num_nodes)

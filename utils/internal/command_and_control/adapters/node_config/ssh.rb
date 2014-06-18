@@ -18,8 +18,7 @@ module DTK
   class SSHDriverTest1
     def self.test_start(task_idh,top_task_idh,task_action,opts)
       @connections = []
-      @mcollective_client ||= MCollective::Client.new('/etc/mcollective/client.cfg')
-      @mcollective_client.options = {}
+      install_script_file_path, upload_error = nil, false
 
       if node = task_action[:node]
         external_ref = node[:external_ref]
@@ -37,23 +36,25 @@ module DTK
 
         EM::Ssh.start(host, user, :password => password) do |connection|
           conn_host = connection.host
-
-          # adding connections to @connections to be able to close them when cancel command is called
-          # @connections << connection
+          home_path = R8.app_user_home()
 
           connection.errback do |err|
             connection.close
             if err.is_a?(EventMachine::Ssh::NegotiationTimeout)
-              msg = {:msg => "CANCEL"}
+              msg = {:msg => "NegotiationTimeout"}
               callbacks[:on_cancel].call(msg)
+            elsif err.is_a?(Net::SSH::AuthenticationFailed)
+              msg = {:msg => "AuthenticationFailed"}
+              callbacks[:on_timeout].call(msg)
             else
-              msg = {:msg => "TIMEOUT"}
+              msg = {:msg => "ConnectionTimeout"}
               callbacks[:on_timeout].call(msg)
             end
           end
+
           connection.callback do |ssh|
-          @connections << {:connection => connection, :ssh => ssh}
-            install_script_file_path, upload_error = nil, false
+            # adding connections to @connections to be able to close them when cancel command is called
+            @connections << {:connection => connection, :ssh => ssh}
 
             ssh.exec!("rm -rf /tmp/dtk-node-agent") do |channel, stream, data|
               STDOUT << "#{conn_host}: #{data}" if stream == :stdout
@@ -64,9 +65,6 @@ module DTK
               install_script_file.write(install_script)
               install_script_file.close
               install_script_file_path = install_script_file.path
-
-              # getting home path on unix system, we will use R8.app_user_home() in code
-              home_path = R8.app_user_home()
 
               # executing upload commands
               ssh.scp.upload!(install_script_file_path, "/tmp", :recursive => true)
@@ -99,18 +97,6 @@ module DTK
 
               ssh.exec!("rm -rf #{install_script_file_path}") do |channel, stream, data|
                 STDOUT << "#{conn_host}: #{data}" if stream == :stdout
-              end
-
-              # send discover call filtered by 'pbuilderid'(node[:ref] == pbuilderid)
-              # if empty array is returned, agent on node is not working as expected
-              filter = {"fact"=>[{:fact=>"pbuilderid",:value=>node[:ref],:operator=>"=="}], "cf_class"=>[], "agent"=>[], "identity"=>[], "compound"=>[]}
-              discovered_data = CommandAndControl.discover(filter, 10, 1, @mcollective_client)
-
-              # set managed = true only if mcollective from node returns valid response
-              if discovered_data.is_a?(Array)
-                node.update(:managed => true) unless discovered_data.empty?
-              else
-                node.update(:managed => true) unless (discovered_data.nil? && discovered_data.payload.nil?)
               end
 
               puts "'#{conn_host}' COMPLETED SUCCESSFULLY!"

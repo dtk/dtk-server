@@ -5,13 +5,15 @@ module DTK
       
       #This creates if needed target refs and links nodes to them
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
-      def self.create_link_target_refs?(target,nodes_x)
+      def self.create_linked_target_refs?(target,nodes_x)
         #TODO: temporary code where just do this for node_groups
         nodes = nodes_x.select{|n|n.is_node_group?()}
+pp [:debug_nodes,nodes_x]
         return if nodes.empty?
-pp [:debug_nodes,nodes]
         num_target_nodes_needed = nodes.inject(0){|r,n|r+n.attribute.cardinality}
 pp [:debug_num_target_nodes_needed,num_target_nodes_needed]
+Log.error('got here in work on creating linked target refs for node groups')
+raise ErrorUsage.new('got here')
       end
 
       def self.process_import_nodes_input!(inventory_data_hash)

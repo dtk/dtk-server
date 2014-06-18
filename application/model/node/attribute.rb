@@ -65,7 +65,7 @@ module DTK
           Cache.get(@node,name)
         else
           raw_val = get_raw_value?(name)
-          Cache.set!(@node,val,field_info)
+          Cache.set!(@node,raw_val,field_info)
         end
       end
 

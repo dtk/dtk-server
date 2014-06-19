@@ -27,10 +27,9 @@ module Ramaze::Helper
       access_rights = ret_access_rights()
       rsa_pub_key,action = ret_non_null_request_params(:rsa_pub_key,:action)
       project = get_default_project()
+      module_ref_content = ret_request_params(:module_ref_content)
 
-
-
-      module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights)
+      module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
     end
 
     def get_service_dependencies(remote_params)

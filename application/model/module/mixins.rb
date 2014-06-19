@@ -1,17 +1,18 @@
-r8_nested_require('mixins','remote')  
-r8_nested_require('mixins','create')  
+r8_nested_require('mixins','remote')
+r8_nested_require('mixins','create')
 r8_nested_require('mixins','gitolite')
 r8_nested_require('utils','list_method')
 
 #
 # Mixins agregation point, and refelected on service_module and component_module classes.
 #
-#
-#
+
 module DTK
+
   #
   # Instance Mixins
   #
+
   module ModuleMixin
     include ModuleMixins::Remote::Instance
     include ModuleMixins::Create::Instance
@@ -39,9 +40,11 @@ module DTK
     def ret_clone_update_info(version=nil)
       CloneUpdateInfo.new(self,version)
     end
+
     #
     # returns Array with: name, namespace, version
     #
+
     def get_basic_info(opts=Opts.new)
       sp_hash = {
         :cols => [:id, :display_name, :version, :remote_repos],
@@ -61,7 +64,7 @@ module DTK
       #
       def self.find_match(rows,opts)
         remote_namespace = opts[:remote_namespace]
-        match = 
+        match =
           if rows.size == 1
             rows.first
           elsif rows.size > 1
@@ -96,12 +99,13 @@ module DTK
     ##
     # Returns local and remote versions for module
     #
+
     def local_and_remote_versions(client_rsa_pub_key = nil, opts={})
       Log.error("TODO: see if namespace treatment must be updated")
       module_name, remote_versions = nil, []
 
-      # get local versions list 
-      local_versions = get_objs(:cols => [:version_info]).map do |r| 
+      # get local versions list
+      local_versions = get_objs(:cols => [:version_info]).map do |r|
         v = r[:module_branch].version()
         v.nil? ? "CURRENT" : v
       end
@@ -109,7 +113,7 @@ module DTK
       info = self.class.info(model_handle(), id(), opts)
       module_name = info[:remote_repos].first[:repo_name].gsub(/\*/,'').strip() unless info[:remote_repos].empty?
       remote_versions = self.class.list_remotes(model_handle, client_rsa_pub_key).select{|r|r[:display_name]==module_name}.collect{|v_remote| ModuleBranch.version_from_version_field(v_remote[:versions])}.map!{|v| v.nil? ? "CURRENT" : v} if module_name
-      
+
       local_hash  = {:namespace => "local", :versions => local_versions.flatten}
       remote_hash = {:namespace => "remote", :versions => remote_versions}
 
@@ -159,8 +163,8 @@ module DTK
     def find_branch(type,branches)
       matches =
         case type
-          when :library then branches.reject{|r|r[:is_workspace]} 
-          when :workspace then branches.select{|r|r[:is_workspace]} 
+          when :library then branches.reject{|r|r[:is_workspace]}
+          when :workspace then branches.select{|r|r[:is_workspace]}
           else raise Error.new("Unexpected type (#{type})")
         end
       if matches.size > 1
@@ -197,11 +201,11 @@ module DTK
      # raises exception if more repos found
     def get_repo!()
       repos = get_repos()
-     
+
       unless repos.size == 1
         raise Error.new("unexpected that number of matching repos is not equal to 1")
       end
-      
+
       return repos.first()
     end
 
@@ -243,7 +247,7 @@ module DTK
 
     #
     # Returns ModuleBranch object for given version
-    # 
+    #
     def get_workspace_module_branch(version=nil)
       mb_mh = model_handle().create_childMH(:module_branch)
       sp_hash = {
@@ -384,7 +388,7 @@ module DTK
       ret = response.first || {}
       ret[:versions] = "CURRENT" unless ret[:versions]
       ret.delete_if { |k,v| [:repo,:module_branch,:repo_remote].include?(k) }
-      # [Haris] Due to join condition with module.branch we can have situations where we have many versions 
+      # [Haris] Due to join condition with module.branch we can have situations where we have many versions
       # of module with same remote branch, with 'uniq' we iron that out
 
       ret.merge!(:remote_repos => namespaces.uniq ) if namespaces
@@ -407,7 +411,7 @@ module DTK
       if include_any_detail
         opts_aggr = Opts.new(
           :include_remotes => include_remotes,
-          :include_versions => include_versions, 
+          :include_versions => include_versions,
           :remote_repo_base => remote_repo_base,
           :diff => diff
         )
@@ -474,7 +478,7 @@ module DTK
     end
 
     # can be overwritten
-    # TODO: ModuleBranch::Location: deprecate 
+    # TODO: ModuleBranch::Location: deprecate
     def module_specific_type(config_agent_type)
       module_type()
     end
@@ -536,7 +540,7 @@ module DTK
       post_filter ? rows.select{|r|post_filter.call(r)} : rows
     end
 
-    
+
     def pp_module_name(module_name,version=nil)
       version ? "#{module_name} (#{version})" : module_name
     end

@@ -167,7 +167,10 @@ module DTK
 
     def get_module_info(params_hash)
       route = collection_route_from_type(params_hash) + '/module_info'
-      get_rest_request_data(route,params_hash,:raise_error => true)
+      response = get_rest_request_data(route,params_hash,:raise_error => true)
+      # we flatten response (due to rest code expectin flat structure)
+      response.symbolize_keys!
+      Hash.new.merge(response[:repo_module]).merge(:dependency_warnings => response[:dependency_warnings])
     end
 
     def get_components_info(params_hash)

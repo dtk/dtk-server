@@ -122,10 +122,14 @@ module DTK; module ModuleMixins
     class Info < Hash
     end 
     # raises an access rights usage error if user does not have access to the remote module
-    def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights)
+    def get_linked_remote_module_info(project,action,remote_params,client_rsa_pub_key,access_rights,module_refs_content=nil)
       remote = remote_params.create_remote(project)
       repo_remote_handler = Repo::Remote.new(remote)
-      remote_module_info = repo_remote_handler.get_remote_module_info?(client_rsa_pub_key,:raise_error=>true)
+      remote_module_info = repo_remote_handler.get_remote_module_info?(
+        client_rsa_pub_key, {
+          :raise_error => true,
+          :module_refs_content => module_refs_content
+        })
 
       # we also check if user has required permissions
       # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk
@@ -150,7 +154,7 @@ module DTK; module ModuleMixins
           :remote_repo_url => remote_module_info[:remote_repo_url],
           :remote_branch => remote.branch_name,
           :workspace_branch => workspace_branch_obj[:branch],
-          :dependency_warnings => response['dependency_warnings']
+          :dependency_warnings => remote_module_info[:dependency_warnings]
       )
       if version = remote.version
         ret.merge!(:version => version)
@@ -171,14 +175,17 @@ module DTK; module ModuleMixins
       
       publish_preprocess_raise_error?(module_branch_obj)
 
-      # we need to send Repoman information about modules and we do it here
-      module_branch = get_workspace_module_branch()
-      file_content = repo_file_content(module_branch, MODULE_REFS_FILE_NAME)
+      file_content = nil
+      if self.module_type() == :service_module
+        # we need to send Repoman information about modules and we do it here
+        module_branch = get_workspace_module_branch()
+        file_content = repo_file_content(module_branch, MODULE_REFS_FILE_NAME)
+      end
 
       # create module on remote repo manager
       # this wil raise error if it exists already or dont have accsss
-      module_info = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key, file_content)
-      remote_repo_name = module_info[:git_repo_name]
+      repoman_response = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key, file_content)
+      remote_repo_name = repoman_response[:git_repo_name]
       remote.set_repo_name!(remote_repo_name)
 
       # link and push to remote repo
@@ -188,7 +195,7 @@ module DTK; module ModuleMixins
       repo.push_to_remote(local,remote)
 
       self.class.create_repo_remote_object(repo,remote,remote_repo_name)
-      remote_repo_name
+      repoman_response
     end
 
    private

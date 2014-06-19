@@ -47,8 +47,7 @@ module DTK
     # TODO: rename; this is just called by publish
     def rest__export()
       service_module = create_obj(:service_module_id)
-      publish_to_dtkn_helper(service_module)
-      rest_ok_response 
+      rest_ok_response publish_to_dtkn_helper(service_module)
     end
     
     # this should be called when the module is linked, but the specfic version is not

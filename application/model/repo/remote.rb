@@ -79,7 +79,8 @@ module DTK
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
           :namespace => remote.namespace,
-          :rsa_pub_key => client_rsa_pub_key
+          :rsa_pub_key => client_rsa_pub_key,
+          :module_refs_content => opts[:module_refs_content]
         } 
         ret = nil
         begin
@@ -92,6 +93,7 @@ module DTK
             return nil
           end
         end
+
         ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version

@@ -151,8 +151,7 @@ module DTK
     # TODO: rename; this is just called by publish
     def rest__export()
       component_module = create_obj(:component_module_id)
-      publish_to_dtkn_helper(component_module)
-      rest_ok_response 
+      rest_ok_response publish_to_dtkn_helper(component_module)
     end
 
 

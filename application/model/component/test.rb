@@ -132,7 +132,7 @@ module DTK
       private
       #TODO: stub
       def self.isa_component_test_link?(ld_link)
-        ld_link.get_field?(:remote_component_type) =~ /^mongodb_test/
+        ld_link.get_field?(:remote_component_type) =~ /test/
       end
       def self.each_link(aug_cmps,&block)
         aug_cmps.each do |cmp|

@@ -236,7 +236,7 @@ module DTK
       repo_user = get_repo_user(ssh_rsa_pub_key)
 
       unless repo_user[:repo_manager_direct_access]
-         create_user(repo_user.owner.username, repo_user.rsa_key_name, ssh_rsa_pub_key)
+         create_user(repo_user.owner.username, ssh_rsa_pub_key, repo_user.rsa_key_name)
       end
 
       repo_user

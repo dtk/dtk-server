@@ -18,7 +18,12 @@ module DTK
         end
       end
 
+      def self.references_image?(node_external_ref)
+        node_external_ref[:type] == "ec2_image" and node_external_ref[:image_id]
+      end
+
       def self.existing_image?(image_id)
+        raise Error.new("existing_image does not take target region as param")
         image(image_id).exists?()
       end
 

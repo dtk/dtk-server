@@ -14,7 +14,7 @@ module DTK; class Node
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
       def self.create_linked_target_refs?(target,nodes)
         #returns new idhs indexed by node (id) they linked to
-        inventory_input = BaseNodes.new()
+        inventory_input = BaseNodes.new(target)
         TargetRef.num_target_refs_needed(target,nodes).each do |node_info|
           inventory_input.add!(node_info)
         end
@@ -24,8 +24,6 @@ module DTK; class Node
       end
       
       def self.ret_target_ref_hash(inventory_input)
-pp [:got_here,inventory_input]
-raise ErrorUsage.new('got here')
         inventory_input.inject(Hash.new){|h,el|h.merge(el.ret_target_ref_hash())}
       end
       private_class_method :ret_target_ref_hash

@@ -11,12 +11,14 @@ module DTK
     r8_nested_require('node','filter')
     r8_nested_require('node','clone')
     r8_nested_require('node','attribute')
+    r8_nested_require('node','external_ref')
 
     include TypeMixin
     include CloneMixin
     extend NodeMetaClassMixin 
     extend AttributeClassMixin
     include AttributeMixin
+    include ExternalRef::Mixin
 
     def self.common_columns()
       [

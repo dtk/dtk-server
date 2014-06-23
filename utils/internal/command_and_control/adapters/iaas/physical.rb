@@ -9,6 +9,10 @@ module DTK
         nil
       end
 
+      def self.references_image?(node_external_ref)
+        nil
+      end
+
       def destroy_node?(node,opts={})
         true #vacuously succeeds
       end

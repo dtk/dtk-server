@@ -53,6 +53,11 @@ module DTK
       klass.existing_image?(image_id)
     end
 
+    def self.references_image?(target,node_external_ref)
+      klass = load_iaas_for(:target => target)
+      klass.references_image?(node_external_ref)
+    end
+
     def self.start_instances(nodes)
       klass = load_iaas_for(:node => nodes.first)
       klass.start_instances(nodes)

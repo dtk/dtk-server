@@ -1,12 +1,14 @@
 module DTK; module CommandAndControlAdapter
   class Ec2 
+    #TODO: these fns that execute per node group member will be put at more asbtract level
     class CreateNode < self
       def self.run(task_action)
         base_node = task_action[:node]
         target = Target.get(base_node.model_handle(:target), task_action[:datacenter][:id])
-        target_ref_nodes(task_action,target).each do |create_single_node|
+        single_run_responses = target_ref_nodes(task_action,target).each do |create_single_node|
           create_single_node.run()
         end
+        aggregate_responses(single_run_responses)
       end
 
      private
@@ -19,16 +21,34 @@ module DTK; module CommandAndControlAdapter
         @target_ref_nodes = nodes.map{|node|TargetRef.new(node,target)}
       end
 
+      def self.aggregate_responses(single_run_responses)
+        if single_run_responses.size == 1
+          single_run_responses.first
+        else
+          #TODO: just finds first error now
+          if first_error = single_run_responses.find{|r|r[:status] == "failed"}
+            first_error
+          else
+            #assuming all ok responses are the same
+            single_run_responses.first
+          end
+        end
+      end
+
+
       class TargetRef
-        #using include on clas mixins because this class is insatnce based, not class based
+        #using include on class mixins because this class is insatnce based, not class based
         include NodeStateClassMixin
         include AddressManagementClassMixin
         include ImageClassMixin
 
-        attr_reader :node, :target
+        attr_reader :node,:target,:flavor_id,:external_ref
         def initialize(node,target)
           @node = node
           @target = target
+          @external_ref = node[:external_ref]||{}
+          @flavor_id = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+
         end
 
         def run()
@@ -50,7 +70,7 @@ module DTK; module CommandAndControlAdapter
             Log.error('need to set node_update_hash :type')
             node_update_hash = {
               :external_ref => updated_external_ref,
-#              :type => Node::Type::Node.instance,
+              :type => Node::Type::Node.instance,
               :is_deployed => true,
               # TODO: better unify these below
               :operational_status => "starting",
@@ -74,7 +94,6 @@ module DTK; module CommandAndControlAdapter
             raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
           end
 
-          flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
           block_device_mapping_from_image = image(ami).block_device_mapping_with_delete_on_termination()
           create_options = {:image_id => ami,:flavor_id => flavor_id }
           # only add block_device_mapping if it was fully generated
@@ -126,10 +145,6 @@ module DTK; module CommandAndControlAdapter
             return {:status => "failed", :error_object => e}
           end
           response
-        end
-
-        def external_ref()
-          @external_ref = node[:external_ref]||{}
         end
 
         def ec2_name_tag()

@@ -31,44 +31,6 @@ module DTK
       end
 
      private      
-      #returns for each node that needs one or more target refs the following hash
-      # :node
-      # :num_needed
-      # :num_linked
-      def self.num_target_refs_needed(target,nodes)
-        ret = Array.new
-        #TODO: temporary; removes all nodes that are not node groups
-        nodes = nodes.select{|n|n.is_node_group?()}
-        return ret if nodes.empty?
-        ndx_linked_target_ref_idhs = ndx_linked_target_ref_idhs(target,nodes)
-        nodes.each do |node|
-          node_id = node[:id]
-          num_linked = (ndx_linked_target_ref_idhs[node_id]||[]).size 
-          num_needed = node.attribute.cardinality - num_linked
-          if num_needed > 0
-            ret << {:node => node,:num_needed => num_needed,:num_linked => num_linked}
-          else num_needed < 0
-            Log.error("Unexpected that number of target refs (#{num_linked}) for (#{node[:display_name].to_s}) is graeter than cardinaility (#{node.attribute.cardinality.to_s})")
-          end
-        end
-        ret
-      end
-
-      #indexed by node id
-      def self.ndx_linked_target_ref_idhs(target,nodes)
-        ret = Hash.new
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:node_id,:node_group_id],
-          :filter => [:and, 
-                      [:oneof,:node_group_id,nodes.map{|n|n.id}],
-                      [:eq,:datacenter_datacenter_id,target.id]]
-        }
-        node_mh = target.model_handle(:node)
-        get_objs(target.model_handle(:node_group_relation),sp_hash).each do |r|
-          (ret[r[:node_group_id]] ||= Array.new) << node_mh.createIDH(:id => r[:node_id])
-        end
-      end
-
       #returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
       def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
         ret = Hash.new

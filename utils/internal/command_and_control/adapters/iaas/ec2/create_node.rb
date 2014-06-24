@@ -32,85 +32,31 @@ module DTK; module CommandAndControlAdapter
         end
 
         def run()
-          external_ref = node[:external_ref]||{}
           instance_id = external_ref[:instance_id]
           
           if instance_id
             Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
           else
-            unless ami = external_ref[:image_id]
-              raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
-            end
-
-            flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
-            block_device_mapping_from_image = image(ami).block_device_mapping_with_delete_on_termination()
-            create_options = {:image_id => ami,:flavor_id => flavor_id }
-            # only add block_device_mapping if it was fully generated
-            create_options.merge!({ :block_device_mapping => block_device_mapping_from_image }) if block_device_mapping_from_image
-            # check priority for security group
-            security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
-            create_options.merge!(:groups => security_group )
-
-            create_options.merge!(:tags => {"Name" => ec2_name_tag(node, target)})
-
-            # check priority of keypair
-            keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
-
-            create_options.merge!(:key_name => keypair)
-            avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
-
-            unless avail_zone.nil? or avail_zone == "automatic"
-              create_options.merge!(:availability_zone => avail_zone)
-            end
-            # end fix up
-
-            unless create_options.has_key?(:user_data)
-              if user_data = CommandAndControl.install_script(node)
-                create_options[:user_data] = user_data
-              end
-            end
-
-            if root_device_size = node.attribute.root_device_size()
-              if device_name = image(ami).block_device_mapping_device_name()
-                create_options[:block_device_mapping].first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
-              else
-                Log.error("Cannot determine device name for ami (#{ami})")
-              end
-            end
-            
-            response = nil
-            
-            # we check if assigned target has aws credentials assigned to it, if so we will use those
-            # credentials to create nodes
-            target_aws_creds = node.get_target_iaas_credentials()
-            
-            begin
-              response = Ec2.conn(target_aws_creds).server_create(create_options)
-            rescue => e
-              # append region to error message
-              region = target.get_region() if target
-              e.message << ". Region: '#{region}'." if region
-
-              Log.error_pp([e,e.backtrace[0..10]])
-              return {:status => "failed", :error_object => e}
-            end
+            response = create_ec2_instance()
             instance_id = response[:id]
             state = response[:state]
-            external_ref = external_ref.merge({
-                                                :instance_id => instance_id,
-                                                :type => "ec2_instance",
-                                                :size => flavor_id
-          })
-            Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
+            updated_external_ref = external_ref.merge({
+              :instance_id => instance_id,
+              :type => "ec2_instance",
+              :size => flavor_id
+            })
+
+            Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
+            Log.error('need to set node_update_hash :type')
             node_update_hash = {
-              :external_ref => external_ref,
-              :type => Node::Type::Node.instance,
+              :external_ref => updated_external_ref,
+#              :type => Node::Type::Node.instance,
               :is_deployed => true,
               # TODO: better unify these below
               :operational_status => "starting",
               :admin_op_status => "pending"
             }
-            update_node!(node,node_update_hash)
+            Ec2.update_node!(node,node_update_hash)
           end
           
           process_addresses__first_boot?(node)
@@ -120,6 +66,103 @@ module DTK; module CommandAndControlAdapter
               :external_ref => external_ref
             }
           }
+        end
+       private
+        def create_ec2_instance()
+          response = nil
+          unless ami = external_ref[:image_id]
+            raise ErrorUsage.new("Cannot find ami for node (#{node[:display_name]})")
+          end
+
+          flavor_id = external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+          block_device_mapping_from_image = image(ami).block_device_mapping_with_delete_on_termination()
+          create_options = {:image_id => ami,:flavor_id => flavor_id }
+          # only add block_device_mapping if it was fully generated
+          create_options.merge!({ :block_device_mapping => block_device_mapping_from_image }) if block_device_mapping_from_image
+          # check priority for security group
+          security_group = target.get_security_group() || external_ref[:security_group_set]||[R8::Config[:ec2][:security_group]]||"default"
+          create_options.merge!(:groups => security_group )
+          
+          create_options.merge!(:tags => {"Name" => ec2_name_tag()})
+          
+          # check priority of keypair
+          keypair = target.get_keypair_name() || R8::Config[:ec2][:keypair]
+
+          create_options.merge!(:key_name => keypair)
+          avail_zone = R8::Config[:ec2][:availability_zone] || external_ref[:availability_zone]
+          
+          unless avail_zone.nil? or avail_zone == "automatic"
+            create_options.merge!(:availability_zone => avail_zone)
+          end
+          # end fix up
+          
+          unless create_options.has_key?(:user_data)
+            if user_data = CommandAndControl.install_script(node)
+              create_options[:user_data] = user_data
+            end
+          end
+          
+          if root_device_size = node.attribute.root_device_size()
+            if device_name = image(ami).block_device_mapping_device_name()
+              create_options[:block_device_mapping].first.merge!({'DeviceName' => device_name, 'Ebs.VolumeSize' => root_device_size})
+            else
+              Log.error("Cannot determine device name for ami (#{ami})")
+            end
+
+          end
+            
+          # we check if assigned target has aws credentials assigned to it, if so we will use those
+          # credentials to create nodes
+          target_aws_creds = node.get_target_iaas_credentials()
+            
+          begin
+            response = Ec2.conn(target_aws_creds).server_create(create_options)
+           rescue => e
+            # append region to error message
+            region = target.get_region() if target
+            e.message << ". Region: '#{region}'." if region
+
+            Log.error_pp([e,e.backtrace[0..10]])
+            return {:status => "failed", :error_object => e}
+          end
+          response
+        end
+
+        def external_ref()
+          @external_ref = node[:external_ref]||{}
+        end
+
+        def ec2_name_tag()
+          assembly = node.get_assembly?()
+          # TO-DO: move the tenant name definition to server configuration
+          tenant = ::DtkCommon::Aux::running_process_user()
+          subs = {
+            :assembly => assembly && assembly.get_field?(:display_name),
+            :node     => node.get_field?(:display_name),
+            :tenant   => tenant,
+            :target   => target[:display_name],
+            :user     => CurrentSession.get_username()
+          }
+          ret = Ec2NameTag[:tag].dup
+          Ec2NameTag[:vars].each do |var|
+            val = subs[var]||var.to_s.upcase
+            ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
+          end
+          ret
+        end
+        Ec2NameTag = {
+          :vars => [:assembly, :node, :tenant, :target, :user],
+          :tag => R8::Config[:ec2][:name_tag][:format]
+        }
+
+        def get_ec2_credentials(iaas_credentials)
+          if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
+            return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
+          end
+        end
+
+        def node_print_form()
+          "#{node[:display_name]} (#{node[:id]}"
         end
       end
     end

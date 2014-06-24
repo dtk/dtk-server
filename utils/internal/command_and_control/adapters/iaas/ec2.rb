@@ -87,7 +87,6 @@ module DTK
       end
       ExecuteMutex = Mutex.new
       def self.execute(task_idh,top_task_idh,task_action)
-        #execute_legacy(task_idh,top_task_idh,task_action)
         CreateNode.run(task_action)
       end
 
@@ -293,10 +292,6 @@ module DTK
       private_class_method :reset_node
       ExternalRefPendingCols = [:image_id,:type,:size,:region]
 
-      def self.node_print_form(node)
-        "#{node[:display_name]} (#{node[:id]}"
-      end
-
       # we can provide this methods set of aws_creds that will be used. We will not use this
       # EC2 client as member, since this is only for this specific deployment
       def self.conn(target_aws_creds=nil)
@@ -308,11 +303,6 @@ module DTK
       end
 
      private
-      def self.get_ec2_credentials(iaas_credentials)
-        if iaas_credentials && (aws_key = iaas_credentials['key']) && (aws_secret = iaas_credentials['secret'])
-          return { :aws_access_key_id => aws_key, :aws_secret_access_key => aws_secret }
-        end
-      end
 
       def self.update_node!(node,update_hash)
         node.merge!(update_hash) 
@@ -324,28 +314,6 @@ module DTK
         node.get_field?(:external_ref)||{}
       end
 
-      def self.ec2_name_tag(node, target)
-        assembly = node.get_assembly?()
-        # TO-DO: move the tenant name definition to server configuration
-        tenant = ::DtkCommon::Aux::running_process_user()
-        subs = {
-          :assembly => assembly && assembly.get_field?(:display_name),
-          :node     => node.get_field?(:display_name),
-          :tenant   => tenant,
-          :target   => target[:display_name],
-          :user     => CurrentSession.get_username()
-        }
-        ret = Ec2NameTag[:tag].dup
-        Ec2NameTag[:vars].each do |var|
-          val = subs[var]||var.to_s.upcase
-          ret.gsub!(Regexp.new("\\$\\{#{var}\\}"),val)
-        end
-        ret
-      end
-      Ec2NameTag = {
-        :vars => [:assembly, :node, :tenant, :target, :user],
-        :tag => R8::Config[:ec2][:name_tag][:format]
-      }
     end
   end
 end

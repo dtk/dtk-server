@@ -88,7 +88,7 @@ module DTK
 
         node = task_action[:node]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
-
+raise ErrorUsage.new('reached here')
         target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])
 
         external_ref = node[:external_ref]||{}

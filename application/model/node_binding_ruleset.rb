@@ -42,7 +42,7 @@ module DTK
         nt = rule[:node_template]
         RuleSetFields.each do |k|
           if ret[k] == :varies
-            #no op
+            # no op
           elsif ret[k]
             ret[k] = :varies if ret[k] != nt[k]
           elsif first_time
@@ -66,7 +66,7 @@ module DTK
       node_template = find_matching_node_template(target)
       override_attrs = opts[:override_attrs]||Hash.new 
 
-      #special processing of :display_name
+      # special processing of :display_name
       display_name = override_attrs[:display_name]||get_field?(:ref)
       override_attrs.merge!(:display_name => Node::Instance.get_unique_instance_name(model_handle(:node),display_name))
 

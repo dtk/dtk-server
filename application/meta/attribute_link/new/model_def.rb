@@ -14,7 +14,7 @@
       :on_delete=>:cascade,
       :on_update=>:cascade
     },
-    #TODO: may remove :default => "external"; if do, need logic in LinkDefLink#process to pick appropiate type
+    # TODO: may remove :default => "external"; if do, need logic in LinkDefLink#process to pick appropiate type
     :type=>{:type=>:varchar, :size=>25, :default => "external"}, # "internal" | "external" | "member"
     :hidden=>{:type=>:boolean, :default => false},
     :function=>{:type=>:json, :default => "eq"},

@@ -25,8 +25,8 @@ module DTK; class Attribute
       end
 
       def valid_value?(value,attribute_idh=nil)
-        #TODO: not testing yet valid_value? for explicit_id type
-        #vacuously true
+        # TODO: not testing yet valid_value? for explicit_id type
+        # vacuously true
         true
       end
       

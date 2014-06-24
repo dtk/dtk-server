@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: Fan-in scenario - $node.host_address from sink component are linked to upstream attributes of source components that exist on different nodes (source1, source2)
+# Test Case 3: Fan-in scenario - $node.host_address from sink component are linked to upstream attributes of source components that exist on different nodes (source1, source2)
 
 require 'rubygems'
 require 'rest_client'

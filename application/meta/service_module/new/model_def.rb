@@ -94,7 +94,7 @@ assembly_nodes  =
       :hidden=>true,
       :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:version])]
     },    
-    #MOD_RESTRUCT: deprecate below for above
+    # MOD_RESTRUCT: deprecate below for above
     :library_repo=>{
       :type=>:json,
       :hidden=>true,
@@ -126,7 +126,7 @@ assembly_nodes  =
        lambda__segment_repos.call(:cols => [:id,:repo_name,:local_dir])
      ]
     },
-    #TODO: not sure if we haev implementations on service modules
+    # TODO: not sure if we haev implementations on service modules
     :implementations=>{
       :type=>:json,
       :hidden=>true,

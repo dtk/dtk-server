@@ -3,7 +3,7 @@ module DTK
     class ParseErrorsCache < ErrorUsage
       def initialize(config_agent_type)
         @config_agent_type = config_agent_type
-        #indexed by file_path
+        # indexed by file_path
         @ndx_error_list = Hash.new
       end
 
@@ -44,7 +44,7 @@ module DTK
       attr_reader :ndx_error_list
      private
       def add_error(error,opts=Opts.new)
-        #opts[:file_path] could be nil
+        # opts[:file_path] could be nil
         ndx = opts[:file_path]
         (@ndx_error_list[ndx] ||= Array.new) << error
         self

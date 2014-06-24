@@ -1,15 +1,15 @@
 module XYZ
   class FileAsset < Model
-    #model apis
+    # model apis
     def get_content()
-      #if content stored in db then return that
+      # if content stored in db then return that
       if cache_content?()
         return self[:content] if self[:content]
       end
       update_object!(:path,:implementation_info)
       content = RepoManager.get_file_content(self,{:implementation => self[:implementation]})
       if cache_content?()
-        #TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
+        # TODO: determine whether makes sense to store newly gotten content in db or just do this if any changes
       end
       content
     end
@@ -20,7 +20,7 @@ module XYZ
       end
       update_object!(:path,:implementation_info)
 
-      #TODO: trap parse errors and then do consitemncy check with meta
+      # TODO: trap parse errors and then do consitemncy check with meta
       config_agent_type = config_agent_type()
       file_path = self[:path]
 #      file_config_type, r8_parse = ConfigAgent.parse_given_file_content(config_agent_type,file_path,content)
@@ -29,7 +29,7 @@ module XYZ
       RepoManager.update_file_content(self,content,{:implementation => impl_obj})
       impl_obj.set_to_indicate_updated()
 
-      #special processing if this the meta file
+      # special processing if this the meta file
       target_impl = self[:implementation]
       if component_dsl = ComponentDSL.create_from_file_obj_hash?(target_impl,self[:path],content)
         component_dsl.update_model()
@@ -37,7 +37,7 @@ module XYZ
       impl_obj.create_pending_changes_and_clear_dynamic_attrs(self)
     end
 
-    #returns sha of remote head
+    # returns sha of remote head
     def self.add_and_push_to_repo(impl_obj,type,path,content,opts={})
       add(impl_obj,type,path,content,opts)
       sha_remote_head = RepoManager.push_implementation(:implementation => impl_obj)

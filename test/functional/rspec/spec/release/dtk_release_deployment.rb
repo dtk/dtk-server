@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#This is DTK artifacts deployment script which is used to deploy all DTK artifacts through DTK Server
+# This is DTK artifacts deployment script which is used to deploy all DTK artifacts through DTK Server
 
 require 'rubygems'
 require 'rest_client'
@@ -15,7 +15,7 @@ assembly_name = 'dtk::release'
 dtk_common = DtkCommon.new(service_name, assembly_name)
 config = YAML::load(File.open("./config/release.yml"))
 
-#Stage service
+# Stage service
 dtk_common.stage_service
 
 begin

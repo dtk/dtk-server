@@ -1,5 +1,5 @@
-#TODO: modify for that the abstract classes do what is below and the hash_render fn is what makes teh difference;
-#this is because dont want to modify interface to front end
+# TODO: modify for that the abstract classes do what is below and the hash_render fn is what makes teh difference;
+# this is because dont want to modify interface to front end
 module DTK; class ComponentDSL; class V1
   Base = ComponentDSL::GenerateFromImpl::DSLObject
   class DSLObject
@@ -38,7 +38,7 @@ module DTK; class ComponentDSL; class V1
           when "puppet_definition" then "definition_name"
           else raise Error.new("unexpected component type (#{ext_ref["type"]})")
           end
-        #TODO: may need to append module name
+        # TODO: may need to append module name
         ret[ext_ref_key] = ext_ref["name"]
         ret["type"] = ext_ref["type"]
         (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
@@ -63,7 +63,7 @@ module DTK; class ComponentDSL; class V1
 
     class Dependency < Base::Dependency
       def render_hash_form(opts={})
-        #TODO: stub
+        # TODO: stub
         ret = RenderHash.new
         ret
       end

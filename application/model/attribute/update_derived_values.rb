@@ -21,12 +21,12 @@ module XYZ
    private
     Lock = Mutex.new
     def self.critical_section(attr_ids,&block)
-      #passing in attr_ids, but not using now; may use if better to lock on per attribute basis
+      # passing in attr_ids, but not using now; may use if better to lock on per attribute basis
       Lock.synchronize{yield}
     end
 
     def self.update_in_critical_section(attr_mh,update_deltas,opts={})
-      #break up by type of row and process and aggregate
+      # break up by type of row and process and aggregate
       return Array.new if update_deltas.empty?
       ndx_update_deltas = update_deltas.inject({}) do |h,r|
         index = Aux::demodulize(r.class.to_s)
@@ -66,7 +66,7 @@ module XYZ
       ret
     end
 
-    #appends value to any array type; if the array does not exist already it creates it from fresh
+    # appends value to any array type; if the array does not exist already it creates it from fresh
     def self.update_attribute_values_array_append(attr_mh,array_slice_rows,opts={})
       ret = Array.new
       attr_link_updates = Array.new
@@ -94,7 +94,7 @@ module XYZ
         attr_updates
       end
 
-      #update the index_maps on the links
+      # update the index_maps on the links
       Model.update_from_rows(attr_mh.createMH(:attribute_link),attr_link_updates)
       ret
     end
@@ -111,8 +111,8 @@ module XYZ
           h.merge(r[:id] => r[:value_derived])
         end
         partial_update_rows.each do |r|
-          #TODO: more efficient if cast out elements taht did not change
-          #TODO: need to validate that this works when theer are multiple nested values for same id
+          # TODO: more efficient if cast out elements taht did not change
+          # TODO: need to validate that this works when theer are multiple nested values for same id
           attr_id = r[:id]
           existing_val = (ndx_ret[attr_id]||{})[:value_derived] || ndx_existing_vals[attr_id]
           p = ndx_ret[attr_id] ||= {
@@ -122,7 +122,7 @@ module XYZ
           }
           p[:value_derived] = r[:index_map].merge_into(existing_val,r[:output_value])
         end
-        #replacement rows
+        # replacement rows
         ndx_ret.values.map{|r|Aux.hash_subset(r,[:id,:value_derived])}
       end
 
@@ -158,10 +158,10 @@ module XYZ
       index_map.first && index_map.first[dir]
     end
 
-    #for processing deleting of links
+    # for processing deleting of links
 
     def self.update_attr_for_delete_link(attr_mh,link_info)
-      #if (input) attribute is array then need to splice out; otherwise just need to set to null
+      # if (input) attribute is array then need to splice out; otherwise just need to set to null
       input_index = input_index(link_info[:deleted_link])
       if input_index.nil? or input_index.empty?
         update_attr_for_delete_link__set_to_null(attr_mh,link_info)
@@ -183,15 +183,15 @@ module XYZ
     def self.update_attr_for_delete_link__splice_out(attr_mh,link_info,input_index)
       pos_to_delete = input_index.first 
 
-      #if this is not an array or last link in output then null out
+      # if this is not an array or last link in output then null out
       if pos_to_delete.kind_of?(String) or link_info[:other_links].empty?
         return update_attr_for_delete_link__set_to_null(attr_mh,link_info)
       end
 
-      #splice out the value from the deleted link
+      # splice out the value from the deleted link
       ret = nil
       Model.select_process_and_update(attr_mh,[:id,:value_derived],[link_info[:input_attribute][:id]]) do |rows|
-        #will only be one row; 
+        # will only be one row; 
         row = rows.first
         val = row[:value_derived]
         ret = {:id => row[:id], :old_value_derived => val.dup?}
@@ -199,7 +199,7 @@ module XYZ
         ret.merge!(:value_derived => val)
         [row] #row with changed :value_derived
       end
-      #renumber other links (ones not deleted) if necessary
+      # renumber other links (ones not deleted) if necessary
       links_to_renumber = link_info[:other_links].select do |other_link| 
         input_index(other_link).first > pos_to_delete
       end

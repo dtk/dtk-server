@@ -33,9 +33,9 @@ r8_nested_require('internal',files)
 
 r8_nested_require('internal/workflow/adapters', 'agent_grit_adapter')
 
-#just load base classes; specific models dynamically loaded on need basis
+# just load base classes; specific models dynamically loaded on need basis
 r8_nested_require('internal','data_sources') 
 
 ##monkey patches; shoudl be last
-#TODO: make sure not patching dyanmically loaded classes
+# TODO: make sure not patching dyanmically loaded classes
 r8_nested_require('internal','timeout') 

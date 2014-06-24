@@ -32,7 +32,7 @@ module XYZ
         is_no_op?(action) ? nil : new(action,status,result)
       end
      private
-      #gets overritten if needed
+      # gets overritten if needed
       def self.is_no_op?(action)
         nil
       end
@@ -47,7 +47,7 @@ module XYZ
     end
   
     class StartCreateNode < Event
-      #TODO: should encapsulate this at workflow or iaas level
+      # TODO: should encapsulate this at workflow or iaas level
       def self.is_no_op?(action)
         ext_ref = action[:node][:external_ref]
         ext_ref[:type] == "ec2_instance" and ext_ref[:instance_id]
@@ -62,7 +62,7 @@ module XYZ
           :node_name => node[:display_name],
           :node_type => ext_ref_type.to_s,
         }
-        #TODO: should encapsulate this in call to iaas sdapter
+        # TODO: should encapsulate this in call to iaas sdapter
         case ext_ref_type
         when "ec2_instance", "ec2_image" #TODO: may chaneg code so dont get ec2_image
           hash.merge!(:image_id => ext_ref[:image_id])
@@ -95,7 +95,7 @@ module XYZ
       end
      private
       def error_msg(result)
-        #TODO: stub
+        # TODO: stub
         if error_obj = result[:error_object]
           error_obj.to_s
         end

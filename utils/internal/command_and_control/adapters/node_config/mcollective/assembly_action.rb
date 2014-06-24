@@ -7,7 +7,7 @@ module DTK
         value_pattern = /^(#{pbuilderids.join('|')})$/
         filter = filter_single_fact("pbuilderid",value_pattern)
         async_context = {:expected_count => pbuilderids.size, :timeout => DefaultTimeout}
-        #TODO: want this to be blocking call
+        # TODO: want this to be blocking call
         async_agent_call(agent.to_s,action.to_s,params,filter,callbacks,async_context)
       end
 
@@ -24,14 +24,14 @@ module DTK
         value_pattern = /^(#{pbuilderids.join('|')})$/
         filter = filter_single_fact("pbuilderid",value_pattern)
         async_context = {:expected_count => pbuilderids.size, :timeout => DefaultTimeout}
-        #TODO: want this to be blocking call
+        # TODO: want this to be blocking call
         async_agent_call(agent.to_s,action.to_s,{:components=>params[:components], :version_context=>params[:version_context]},filter,callbacks,async_context)
       end
 
       DefaultTimeout = 10
       def parse_response__execute_action(nodes,msg)
         ret = Hash.new
-        #TODO: conditionalize on status
+        # TODO: conditionalize on status
         return ret.merge(:status => :notok) unless body = msg[:body]
         payload = body[:data]
         ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok 

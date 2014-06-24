@@ -70,7 +70,7 @@ module DTK
       rest_ok_response response
     end
 
-    #create target instance
+    # create target instance
     def rest__create()
       provider     = create_obj(:provider_id, ::DTK::Target::Template)
       region       = ret_request_params(:region)
@@ -81,7 +81,7 @@ module DTK
       rest_ok_response #TODO: may return info about objects created
     end
 
-    #TODO: modify so no IAAS specfic params processed here (e.g., region)
+    # TODO: modify so no IAAS specfic params processed here (e.g., region)
     def rest__create_provider()
       iaas_type,provider_name = ret_non_null_request_params(:iaas_type,:provider_name)
       selected_region = ret_request_params(:region)
@@ -90,14 +90,14 @@ module DTK
 
       # create provider (target template)
       project_idh  = get_default_project().id_handle()
-      #setting :error_if_exists only if no bootstrap
+      # setting :error_if_exists only if no bootstrap
       opts = {:raise_error_if_exists => no_bootstrap}
       provider = Target::Template.create_provider?(project_idh,iaas_type,provider_name,params_hash,opts)
       # get object since we will need iaas data to copy
       response = {:provider_id => provider.id}
 
       unless no_bootstrap
-        #select_region could be nil
+        # select_region could be nil
         created_targets_info = provider.create_bootstrap_targets?(project_idh,selected_region)
         response.merge!(:created_targets => created_targets_info)
       end
@@ -157,10 +157,10 @@ module DTK
       target = id_handle(target_id,:datacenter).create_object()
       target_id = target.id()
 
-#TODO: how to retrieve fields from instance?
+# TODO: how to retrieve fields from instance?
       target_hash = get_object_by_id(target_id,:datacenter)
 
-#TODO: revisit when cleaning up toolbar, plugins and user settings
+# TODO: revisit when cleaning up toolbar, plugins and user settings
 =begin
       tpl = R8Tpl::TemplateR8.new("workspace/notification_list",user_context())
       tpl.set_js_tpl_name("notification_list")
@@ -289,7 +289,7 @@ module DTK
     end
 
     def add_item(id)
-      #TODO: need to copy in avatar when hash["ui"] is non null
+      # TODO: need to copy in avatar when hash["ui"] is non null
       target = id_handle(id).create_object()
 
       override_attrs = request.params["ui"] ? {:ui=>request.params["ui"]} : {}
@@ -301,22 +301,22 @@ module DTK
       else
         new_item_id = target.add_item(model_id_handle,override_attrs)
       end
-#TODO: how do we get field info from model instance?
+# TODO: how do we get field info from model instance?
       dc_hash = get_object_by_id(id,:datacenter)
       dc_ui = dc_hash[:ui].nil? ? {:items=>{}} : dc_hash[:ui]
-#TODO: cleanup later, right now ui req param indexed by dc id from old style
+# TODO: cleanup later, right now ui req param indexed by dc id from old style
       ui_params = JSON.parse(request.params["ui"])
 #      dc_ui[:items][new_item_id.to_s.to_sym] = ui_params[id.to_s]
       dc_ui[:items][new_item_id.to_s.to_sym] = ui_params[id]
-#TODO: any way to update a model from its object once an instance is created?
+# TODO: any way to update a model from its object once an instance is created?
       update_from_hash(id,{:ui=>dc_ui})
 
 
-#pp '++++++++++++++++++++++++++++++++++++++'
-#pp 'SHOULD HAVE UPDATED FROM HASH FOR TARGET OBJECT:'
-#pp dc_ui
+# pp '++++++++++++++++++++++++++++++++++++++'
+# pp 'SHOULD HAVE UPDATED FROM HASH FOR TARGET OBJECT:'
+# pp dc_ui
 
-#TODO: clean this up,hack to update UI params for newly cloned object
+# TODO: clean this up,hack to update UI params for newly cloned object
 #      update_from_hash(id,{:ui=>hash["ui"]})
 
 #      hash["redirect"] ? redirect_route = "/xyz/#{hash["redirect"]}/#{id.to_s}" : redirect_route = "/xyz/#{model_name()}/display/#{id.to_s}"
@@ -349,9 +349,9 @@ module DTK
       item_list = item_list.reject do |x|
         Log.error("get links missing needed params") unless x["id"] and x["model"]
       end
-#TODO: move this call into underlying get_links call,
+# TODO: move this call into underlying get_links call,
       item_list = item_list.map{|x|id_handle(x["id"].to_i,x["model"].to_sym)}
-#TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
+# TODO: make get_links an instance method, should pull all links from children if item_list is []/nil
       link_list = target.class.get_port_links(item_list,"component_external")
       return {'data'=>link_list}
     end
@@ -362,8 +362,8 @@ module DTK
       notification_list.each_with_index do |n,index|
         notification_list[index][:type] = "warning"
       end
-#DEBUG
-#pp [:warnings,notification_list]
+# DEBUG
+# pp [:warnings,notification_list]
       return {:data=>notification_list}
     end
 

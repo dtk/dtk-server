@@ -13,10 +13,10 @@ module XYZ
         end
       end
 
-      #TBD: for some or all these fns wil be useful to have a variant that deals with id_handles
+      # TBD: for some or all these fns wil be useful to have a variant that deals with id_handles
       def parse_instance_uri(instance_uri)
         instance_uri =~ %r{(.*)/(.+)} ?
-          #instance_ref,factory_uri
+          # instance_ref,factory_uri
           [$2,$1] : nil
       end
 

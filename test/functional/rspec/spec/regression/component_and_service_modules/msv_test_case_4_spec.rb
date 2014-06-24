@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 4: Get list of all assemblies for particular service module
+# Test Case 4: Get list of all assemblies for particular service module
 
 require 'rubygems'
 require 'rest_client'

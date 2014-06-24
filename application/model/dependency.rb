@@ -1,7 +1,7 @@
 module DTK
   class Dependency < Model
-    #because initially Dependency only refered to simple dependencies; introduced Simple and Links and their parent All
-    #TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
+    # because initially Dependency only refered to simple dependencies; introduced Simple and Links and their parent All
+    # TODO: may have what is attached to Model be Dependency::Simple and have Dependency become what is now All  
 
     class All; end
     r8_nested_require('dependency','simple')
@@ -21,7 +21,7 @@ module DTK
       end
     end
 
-    #if this has simple filter, meaning test on same node as dependency then return it, normalizing to convert strings into symbols
+    # if this has simple filter, meaning test on same node as dependency then return it, normalizing to convert strings into symbols
     def simple_filter_triplet?()
       if filter = (self[:search_pattern]||{})[":filter".to_sym]
         if self[:type] == "component" and filter.size == 3 
@@ -37,7 +37,7 @@ module DTK
     SimpleFilterRelations = [:eq]
     SimpleFilterRelationsToS = SimpleFilterRelations.map{|r|":#{r.to_s}"}
 
-    #if its simple component type match returns component type
+    # if its simple component type match returns component type
     def is_simple_filter_component_type?()
       if filter_triplet = simple_filter_triplet?()
         SimpleFilter.create(filter_triplet).component_type?()

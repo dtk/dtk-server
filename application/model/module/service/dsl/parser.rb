@@ -39,7 +39,7 @@ module DTK
           if object.kind_of?(ExtMod::FileParser::OutputArray)
             object.each{|r|self << r}
           elsif object.kind_of?(Hash)
-            #TODO: deprecate
+            # TODO: deprecate
             object.each_pair do |component_module,info|
               self << info.merge(:component_module => component_module)
             end

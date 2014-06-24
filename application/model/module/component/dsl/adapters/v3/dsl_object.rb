@@ -10,8 +10,8 @@ module DTK; class ComponentDSL; class V3
 
      private
       def module_refs(module_branches)
-        #TODO: more efficient to bulk up query 
-        #TODO: checking verskion associated with module branch
+        # TODO: more efficient to bulk up query 
+        # TODO: checking verskion associated with module branch
         unless module_branches.empty?()
           module_branches.map{|mb|mb.get_module()[:display_name]}
         end
@@ -64,7 +64,7 @@ module DTK; class ComponentDSL; class V3
         unless attr_name == value(:id)
           ret[ext_ref["type"]] = attr_name
         end
-        #catchall: ignore proceesed keys and default_variable 
+        # catchall: ignore proceesed keys and default_variable 
         (ext_ref.keys - ["name","type","default_variable"]).each{|k|ret[k] = ext_ref[k]}
         ret.empty? ? nil : ret
       end

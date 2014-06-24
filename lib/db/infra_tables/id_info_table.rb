@@ -1,13 +1,13 @@
-#TODO: unify relation_type and model_name
+# TODO: unify relation_type and model_name
 module XYZ
 
-  #TODO: should this class  be in this file or instead somewhere else
+  # TODO: should this class  be in this file or instead somewhere else
   module CommonMixin
     def [](x)
       super(x.to_sym)
     end
 
-    #used when first creating without id (i.e. created before saving)
+    # used when first creating without id (i.e. created before saving)
     def create_stubIDH()
       args = {:model_name => self[:model_name], :c => self[:c]}
       args.merge!(:group_id => self[:group_id]) if self[:group_id]
@@ -30,7 +30,7 @@ module XYZ
       IDHandle.new(reject{|k,v|[:uri,:guid].include?(k)}.merge(:uri => "/"))
     end
 
-    #has form hash or if just symbol then its the attribute :model_name
+    # has form hash or if just symbol then its the attribute :model_name
     def createMH(x={})
       x = {:model_name => x} if x.kind_of?(Symbol)
       vals = [:c,:model_name,:parent_model_name].inject({}){|h,k|h.merge({k => self[k]})}
@@ -108,7 +108,7 @@ module XYZ
     end
 
     def i18n_language()
-      #TODO: stub
+      # TODO: stub
        R8::Config[:default_language]
     end
 
@@ -131,7 +131,7 @@ module XYZ
     end
 
     def get_parent_id_handle()
-      #TODO: short circuit if parent_guid and parent_model_name are set
+      # TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
       return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] 
@@ -147,7 +147,7 @@ module XYZ
       idh.createIDH(:display_name =>  Model.get_display_name(idh))
     end
 
-    #returns nil if model_name given and top does not mactch it
+    # returns nil if model_name given and top does not mactch it
     def get_top_container_id_handle(model_name=nil,opts={})
       model_name = :datacenter if model_name==:target #TODO: with change to Model.matching_models? in place of == may not need this
       return self if model_name and Model.matching_models?(model_name,self[:model_name])
@@ -174,7 +174,7 @@ module XYZ
 
     def initialize(x,opts={})
       super()
-      #TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and parent_model_nmae
+      # TODO: cleanup to take into account of this can be factory and whether enforce this must has model_name and parent_model_nmae
       if x[:id_info]
         id_info = x[:id_info]
         if id_info[:c] and id_info[:relation_type] and id_info[:id]
@@ -202,7 +202,7 @@ module XYZ
       elsif x[:uri]
         self[:uri]= x[:uri]
         unless x[:model_name]
-          #TODO: cleanup; probably removing id_handle staht can be factory ids
+          # TODO: cleanup; probably removing id_handle staht can be factory ids
           unless x[:is_factory]
             self[:model_name] = RestURI.ret_relation_type_from_instance_uri(x[:uri])
           end
@@ -222,12 +222,12 @@ module XYZ
           if parent_idh
             self[:parent_model_name] = parent_idh[:model_name] 
           else
-           #TODO: commented out beacuse noisy error
-            #Log.error("cannot find parent info from #{self.inspect}")
+           # TODO: commented out beacuse noisy error
+            # Log.error("cannot find parent info from #{self.inspect}")
           end
         end
       end
-      #TODO: removed freeze
+      # TODO: removed freeze
     end
 
     def self.[](x)
@@ -254,7 +254,7 @@ module XYZ
         self[:user_id] = user[:id] if  user[:id]
         self[:group_id] =  user[:group_id] if user[:group_id]
       end
-      #TODO: removed freeze
+      # TODO: removed freeze
     end
 
     def self.create_from_user(user,model_name)
@@ -284,7 +284,7 @@ module XYZ
       DB_REL_DEF[self[:model_name]][:columns]
     end
 
-    #TODO: refactor this, DB.parent_field, and DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
+    # TODO: refactor this, DB.parent_field, and DB.ret_parent_id_field_name and reroot all calls to this fn and variant that takes parent_model_name as arg
     def parent_id_field_name(parent_model_name_or_idh=nil)
       arg = parent_model_name_or_idh #shorthand
       parent_model_name ||= self[:parent_model_name]||(arg && (arg.kind_of?(Symbol) ? arg : arg[:model_name]))
@@ -302,7 +302,7 @@ module XYZ
       IDHandle[CONTEXT_ID => self[CONTEXT_ID], :guid => IDInfoTable::ret_guid_from_id_info(self), :model_name => self[:relation_type]]
     end
 
-    #TOTO rename to ret_id()
+    # TOTO rename to ret_id()
     def ret_db_id()
       IDInfoTable::db_id_from_guid(IDInfoTable::ret_guid_from_id_info(self))
     end
@@ -325,7 +325,7 @@ module XYZ
 
   class IDInfoTable
     class << self
-      #TODO: may have parent class for infra tables
+      # TODO: may have parent class for infra tables
       def set_db(db)
         @db = db
       end
@@ -403,7 +403,7 @@ module XYZ
           par_id_info = get_row_from_uri(parent_uri,c,opts)
           if par_id_info
             insert_factory(relation_type,factory_uri,par_id_info[:relation_type],par_id_info[:id],c)
-            #TODO: more effiienct would be if insert_factory returns new row
+            # TODO: more effiienct would be if insert_factory returns new row
             get_row_from_uri(factory_uri,c,:raise_error => true)
           end
         end
@@ -412,7 +412,7 @@ module XYZ
 
 
         def get_row_from_guid(guid,opts={})
-          #NOTE: contingent on id scheme where guid uniquely picks out row
+          # NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
 	   if ds.empty?
             raise Error::NotFound.new(:guid,guid) if opts[:raise_error]
@@ -453,7 +453,7 @@ module XYZ
           update_ds.update({:uri => uri,:relation_type => model_handle[:model_name].to_s})
 
         end
-       #TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
+       # TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
 	  #  to fill in uri ##TODO: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
 	  parent_id = parent_id_x ? parent_id_x : 0

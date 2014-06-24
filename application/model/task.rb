@@ -6,7 +6,7 @@ module DTK
     r8_nested_require('task','template')
     extend CreateClassMixin
     include StatusMixin
-    #returns list (possibly empty) of subtask idhs that guard this
+    # returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)
       ret = Array.new
       ea = self[:executable_action]
@@ -28,7 +28,7 @@ module DTK
       get_children_objs(:task_error,sp_hash).map{|r|r[:content]}
     end
 
-    #indexed by tasks
+    # indexed by tasks
     def self.get_ndx_errors(task_idhs)
       ret = Array.new
       return ret if task_idhs.empty?
@@ -64,21 +64,21 @@ module DTK
       end
     end
     
-    #returns [event,error-array]
+    # returns [event,error-array]
     def add_event_and_errors(event_type,error_source,errors_in_result)
       ret = [nil,nil]
-      #process errors and strip out from what is passed to add event
+      # process errors and strip out from what is passed to add event
       normalized_errors = 
         if error_source == :config_agent
           config_agent = get_config_agent
           components = component_actions().map{|a|a[:component]}
           errors_in_result.map{|err|config_agent.interpret_error(err,components)}
         else
-          #TODO: stub
+          # TODO: stub
           errors_in_result
         end
       errors = add_errors(normalized_errors)
-      #TODO: want to remove calls in function below from needing to know result format
+      # TODO: want to remove calls in function below from needing to know result format
       event = add_event(event_type,{:data => {:errors => errors_in_result}})
       [event,errors]
     end
@@ -128,11 +128,11 @@ module DTK
     def update_when_failed_preconditions(failed_antecedent_tasks)
       ts = Aux::now_time_stamp()
       update(:status => "preconditions_failed", :started_at => ts, :ended_at => ts)
-      #TODO: put in context about failure in errors
+      # TODO: put in context about failure in errors
     end
 
-    #TODO: update and update_parents can be cleaned up because halfway between update and update_object!
-    #this updates self, which is leaf node, plus all parents
+    # TODO: update and update_parents can be cleaned up because halfway between update and update_object!
+    # this updates self, which is leaf node, plus all parents
     def update(update_hash,opts={})
       super(update_hash)
       unless opts[:dont_update_parents] or (update_hash.keys & [:status,:started_at,:ended_at]).empty?
@@ -142,19 +142,19 @@ module DTK
       end
     end
 
-    #updates parent fields that are fn of children (:status,:started_at,:ended_at)
+    # updates parent fields that are fn of children (:status,:started_at,:ended_at)
     def update_parents(child_hash)
       parent = id_handle.createIDH(:id => child_hash[:task_id]).create_object().update_object!(:status,:started_at,:ended_at,:children_status)
       key = id().to_s.to_sym #TODO: look at avoiding this by having translation of json not make num keys into symbols
       children_status = (parent[:children_status]||{}).merge!(key => child_hash[:status])
 
       parent_updates = {:children_status => children_status}
-      #compute parent start time
+      # compute parent start time
       unless parent[:started_at] or child_hash[:started_at].nil?
         parent_updates.merge!(:started_at => child_hash[:started_at])
       end
 
-      #compute new parent status
+      # compute new parent status
       subtask_status_array = children_status.values
       parent_status = 
         if subtask_status_array.include?("failed") then "failed"
@@ -165,7 +165,7 @@ module DTK
        end
       unless parent_status == parent[:status]
         parent_updates.merge!(:status => parent_status)
-        #compute parent end time which can only change if parent changed to "failed" or "succeeded"
+        # compute parent end time which can only change if parent changed to "failed" or "succeeded"
         if ["failed","succeeded"].include?(parent_status) and child_hash[:ended_at]
           parent_updates.merge!(:ended_at => child_hash[:ended_at])
         end
@@ -178,18 +178,18 @@ module DTK
 
     def update_input_attributes!()
       task_action = self[:executable_action]
-      #updates ruby task object
+      # updates ruby task object
       task_action.get_and_update_attributes!(self)
     end
 
     def add_internal_guards!(guards)
       task_action = self[:executable_action]
-      #updates ruby task object
+      # updates ruby task object
       task_action.add_internal_guards!(guards)
     end
 
     def self.get_top_level_most_recent_task(model_handle,filter=nil)
-      #TODO: can be more efficient if do sql query with order and limit 1
+      # TODO: can be more efficient if do sql query with order and limit 1
       tasks = get_top_level_tasks(model_handle,filter).sort{|a,b| b[:updated_at] <=> a[:updated_at]}
       tasks && tasks.first
     end
@@ -209,9 +209,9 @@ module DTK
 
     def get_per_node_info_for_reporting()
       exec_actions = Array.new
-      #if executable level then get its executable_action
+      # if executable level then get its executable_action
       if self.has_key?(:executable_action_type) 
-        #will have an executable action so if have it already
+        # will have an executable action so if have it already
         if self[:executable_action_type]
           exec_actions << get_field?(:executable_action)
         end
@@ -221,7 +221,7 @@ module DTK
         end
       end
 
-      #if task does not have execuatble actions then get all subtasks
+      # if task does not have execuatble actions then get all subtasks
       if exec_actions.empty?
         exec_actions = get_all_subtasks().map do |t|
           action = t[:executable_action]
@@ -229,7 +229,7 @@ module DTK
         end.compact
       end
       
-      #get all unique nodes; looking for attribute :external_ref
+      # get all unique nodes; looking for attribute :external_ref
       indexed_nodes = Hash.new
       exec_actions.each do |ea|
         next unless node = ea[:node]
@@ -239,7 +239,7 @@ module DTK
         indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
       end
 
-      #need to query db if missing external_refs having instance_id
+      # need to query db if missing external_refs having instance_id
       node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
       unless node_ids_missing_ext_refs.empty?
         sp_hash = {
@@ -253,13 +253,13 @@ module DTK
       indexed_nodes.values
     end
 
-    #TODO: may deprecate below and subsume by above
-    #this also provides the nodes task_id and config_agent_type as extra attribute values
+    # TODO: may deprecate below and subsume by above
+    # this also provides the nodes task_id and config_agent_type as extra attribute values
     def get_associated_nodes()
       exec_actions = Array.new
-      #if executable level then get its executable_action
+      # if executable level then get its executable_action
       if self.has_key?(:executable_action_type) 
-        #will have an executable action so if have it already
+        # will have an executable action so if have it already
         if self[:executable_action_type]
           exec_actions << get_field?(:executable_action)
         end
@@ -269,7 +269,7 @@ module DTK
         end
       end
 
-      #if task does not have execuatble actions then get all subtasks
+      # if task does not have execuatble actions then get all subtasks
       if exec_actions.empty?
         exec_actions = get_all_subtasks().map do |t|
           action = t[:executable_action]
@@ -277,7 +277,7 @@ module DTK
         end.compact
       end
       
-      #get all unique nodes; looking for attribute :external_ref
+      # get all unique nodes; looking for attribute :external_ref
       indexed_nodes = Hash.new
       exec_actions.each do |ea|
         next unless node = ea[:node]
@@ -287,7 +287,7 @@ module DTK
         indexed_nodes[node_id][:config_agent_type] ||= get_config_agent_type(ea)
       end
 
-      #need to query db if missing external_refs having instance_id
+      # need to query db if missing external_refs having instance_id
       node_ids_missing_ext_refs = indexed_nodes.values.reject{|n|(n[:external_ref]||{})[:instance_id]}.map{|n|n[:id]}
       unless node_ids_missing_ext_refs.empty?
         sp_hash = {
@@ -303,7 +303,7 @@ module DTK
 
     def get_config_agent_type(executable_action=nil)
       executable_action ||= self[:executable_action]
-      #just takes one sample since assumes all component actions have same config agent
+      # just takes one sample since assumes all component actions have same config agent
       ((executable_action[:component_actions]||[]).first||{})[:on_node_config_agent_type]
     end
     def get_config_agent()
@@ -311,7 +311,7 @@ module DTK
     end
     private :get_config_agent_type, :get_config_agent
 
-    #recursively walks structure, but returns them in flat list
+    # recursively walks structure, but returns them in flat list
     def get_all_subtasks()
       self.class.get_all_subtasks([id_handle])
     end
@@ -381,7 +381,7 @@ module DTK
     end
 
     def ret_command_and_control_adapter_info()
-      #TODO: stub
+      # TODO: stub
       [:node_config,nil]
     end
 
@@ -390,7 +390,7 @@ module DTK
       # no op if saved already as detected by whether has an id
      return nil if id()
       set_positions!()
-      #for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
+      # for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
       unrolled_tasks = unroll_tasks()
       rows = unrolled_tasks.map do |hash_row|
         executable_action = hash_row[:executable_action]
@@ -410,7 +410,7 @@ module DTK
       new_idhs = Model.create_from_rows(model_handle,rows,{:convert => true,:do_not_update_info_table => true})
       unrolled_tasks.each_with_index{|task,i|task.set_id_handle(new_idhs[i])}
 
-      #set parent relationship and use to set task_id (subtask parent) and children_status
+      # set parent relationship and use to set task_id (subtask parent) and children_status
       par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!()
       par_rel_rows_for_task = par_rel_rows_for_id_info.map{|r|{:id => r[:id], :task_id => r[:parent_id], :children_status => r[:children_status]}}
       
@@ -422,7 +422,7 @@ module DTK
       self[:subtasks]||[]
     end
 
-    #for special tasks that have component actions
+    # for special tasks that have component actions
     def component_actions()
       if self[:executable_action].kind_of?(Action::ConfigNode)
         action = self[:executable_action]
@@ -485,17 +485,17 @@ module DTK
     #### for rending tasks
    public
     def render_form()
-      #may be different forms; this is one that is organized by node_group, node, component, attribute
+      # may be different forms; this is one that is organized by node_group, node, component, attribute
       task_list = render_form_flat(true)
-      #TODO: not yet teating node_group
+      # TODO: not yet teating node_group
       
       Task.render_group_by_node(task_list)
     end
 
    protected
-    #protected, not private, because of recursive call 
+    # protected, not private, because of recursive call 
      def render_form_flat(top=false)
-      #prune out all (sub)tasks except for top and  executable 
+      # prune out all (sub)tasks except for top and  executable 
       return render_executable_tasks() if self[:executable_action]
       (top ? [render_top_task()] : []) + subtasks.map{|e|e.render_form_flat()}.flatten
     end
@@ -545,7 +545,7 @@ module DTK
         :task_id => id(),
         :status => self[:status],
       }
-      #order is important
+      # order is important
       if sc.include?("create_node") then Task.render_tasks_create_node(executable_action,common_vals)
       elsif sc.include?("install_component") then Task.render_tasks_component_op("install_component",executable_action,common_vals)
       elsif sc.include?("setting") then Task.render_tasks_setting(executable_action,common_vals)

@@ -36,7 +36,7 @@ module DTK; class Task; class Template
         InComponentGroup.new(action,index,component_group_num)
       end
 
-      #overwritten by InComponentGroup
+      # overwritten by InComponentGroup
       def component_group_num()
         nil
       end
@@ -67,8 +67,8 @@ module DTK; class Task; class Template
             if component_name_ref.nil?
               true
             else
-              #strip off node_name prefix if it exists
-              #need to handle cases like apt::ppa[ppa:chris/node.js]
+              # strip off node_name prefix if it exists
+              # need to handle cases like apt::ppa[ppa:chris/node.js]
               component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//,'')
               component_name_ref_x ==  serialization_form(:no_node_name_prefix => true)
             end

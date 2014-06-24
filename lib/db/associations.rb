@@ -1,7 +1,7 @@
 
 require 'sequel'
 require File.expand_path('schema_processing', File.dirname(__FILE__))
-#TBD: not clear whetehr this should go here or under models
+# TBD: not clear whetehr this should go here or under models
 module XYZ
   class DB
     module Associations
@@ -41,7 +41,7 @@ module XYZ
   class CloneHelper
     @@fk_refs = {} 
     def self.add_foreign_key_info(fk_relation_type,fk_col,fk_ref_relation_type)
-      #ancestor_id is processed in special way
+      # ancestor_id is processed in special way
       return nil if fk_col == :ancestor_id
 
       @@fk_refs[fk_ref_relation_type] ||= {}

@@ -17,7 +17,7 @@ module DTK; class Target
       unmanaged_nodes = @target.get_objs(:cols => [:unmanaged_nodes]).map{|r|r[:node]}
       servers, install_script, mcollective_client = [], nil, nil
 
-      #TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
+      # TODO: better to use tempfile library; see how it is used in ../server/utils/internal/command_and_control/adapters/node_config/mcollective/config.rb
       install_script_file_path = "#{R8.app_user_home()}/install_script"
       FileUtils.mkdir(install_script_file_path) unless File.directory?(install_script_file_path)
 
@@ -149,7 +149,7 @@ module DTK; class Target
         }
 
 
-        #just to test taht can connect
+        # just to test taht can connect
         begin
           execute_ssh_command("ls /", params)
         rescue Exception => e

@@ -5,7 +5,7 @@ module DTK
         Type::Node.isa?(get_field?(:type))
       end
       def is_node_group?()
-        #short circuit
+        # short circuit
         return true if (kind_of?(NodeGroup) or kind_of?(ServiceNodeGroup))
         Type::NodeGroup.isa?(get_field?(:type))
       end

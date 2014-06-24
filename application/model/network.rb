@@ -25,7 +25,7 @@ module XYZ
     end
   end
 
-  #TBD: might move AddressAccessPoint to node or own model file
+  # TBD: might move AddressAccessPoint to node or own model file
   class AddressAccessPoint < Model
     set_relation_name(:network,:address_access_point)
     class << self

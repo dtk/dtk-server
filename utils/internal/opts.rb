@@ -1,13 +1,13 @@
 module DTK
   class Opts < Hash
-    #if ?foo means include if not null
+    # if ?foo means include if not null
     def self.create?(initial_val)
       new(convert_for_create?(initial_val))
     end
     def initialize(initial_val=nil)
       super()
       if initial_val
-        #add if non null; doing 'deep check for nil'
+        # add if non null; doing 'deep check for nil'
         initial_val.each_pair do |k,v|
           processed_v = remove_nested_nil(v) 
           merge!(k => processed_v) unless processed_v.nil?

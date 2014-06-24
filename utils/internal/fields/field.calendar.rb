@@ -27,20 +27,20 @@ class Fieldcalendar < Fieldbase
   end
 
    # This returns the Edit View of a input of type calendar in HTML form
-   #protected function
+   # protected function
   def get_field_edit_html()
     return '<HTML NOT IMPLEMENT YET>'
   end
 
    # This returns the Edit View of a input of type calendar in Javascript form
-   #protected function
+   # protected function
   def get_field_edit_js()
-#TODO: add JS rendering when generating JS fields class for client side rendering
+# TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 
    # This returns the View of type edit for an input of type calendar in TPL/Smarty form
-   #protected function
+   # protected function
   def get_field_edit_rtpl()
     case @cal_type
       when"basic"
@@ -49,16 +49,16 @@ class Fieldcalendar < Fieldbase
   end
 
    # This returns the View of type edit for an input of type basic calendar in TPL/Smarty form
-   #protected function
+   # protected function
   def get_basic_edit_rtpl()
-#TODO: replace hardcoded calbutton image with dynamic call for to get base file path
-#also replace show calendar with Show "Field String" Calendar, call to i18N func
+# TODO: replace hardcoded calbutton image with dynamic call for to get base file path
+# also replace show calendar with Show "Field String" Calendar, call to i18N func
     size = 'size="' + @columns.to_s + '"'
     btn_id = 'show-' + @id + '-cal'
     btn_title = 'Show Calendar'
 
-    #add the script to register the calendar
-#R8 DEBUG
+    # add the script to register the calendar
+# R8 DEBUG
 #    $GLOBALS['log']->log('debug',"R8.fields.registerCal('".$this->id."','".$btn_id."','".$this->id."-cal');");
 #    $GLOBALS['ctrl']->addJSExeScript(
 #        array(
@@ -76,7 +76,7 @@ class Fieldcalendar < Fieldbase
   end
 
    # This returns the View of type view for an input of type calendar in TPL/Smarty form
-   #protected function
+   # protected function
   def get_field_display_rtpl()
     return '{%=' + @model_name + '[:' + @name + ']%}'
   end
@@ -90,7 +90,7 @@ class Fieldcalendar < Fieldbase
   end
 
   # This returns the View of type list for an input of type calendar in TPL/Smarty form
-  #protected function
+  # protected function
   def get_field_list_rtpl()
     return '{%=' + @model_name + '[:' + @name + ']%}'
   end

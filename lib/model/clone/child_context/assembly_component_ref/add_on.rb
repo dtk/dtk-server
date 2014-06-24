@@ -1,4 +1,4 @@
-#for processing AssemblyComponentRefs when assembly being added is an add-on
+# for processing AssemblyComponentRefs when assembly being added is an add-on
 module DTK;class ChildContext
   class AssemblyComponentRef
     class AddOn < self
@@ -14,12 +14,12 @@ module DTK;class ChildContext
           target_node_id = ndx_template_to_instance_nodes[cmp_ref.delete(:node_node_id)]
           cmp_ref.merge!(:target_node_id => target_node_id)
         end
-        #for each node that is not new, check if there is componenst already on target nodes that match/conflict
+        # for each node that is not new, check if there is componenst already on target nodes that match/conflict
         matches, conflicts = Component::ResourceMatching.find_matches_and_conflicts(aug_cmp_refs)
         unless conflicts.empty?
           raise ErrorUsage.new("TODO: provide conflict message")
         end
-        #remove the matches
+        # remove the matches
         unless matches.empty?
           matching_ids = matches.ids()
           aug_cmp_refs.reject!{|cmp| matching_ids.include?(cmp[:id])}
@@ -27,7 +27,7 @@ module DTK;class ChildContext
         merge!(:matches => aug_cmp_refs)
       end
 
-      #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
+      # MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
       def matching_component_refs__virtual_col()
         :component_templates
       end

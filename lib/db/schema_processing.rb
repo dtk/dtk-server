@@ -31,8 +31,8 @@ module DTK
       end
 
       def modify_column?(db_rel,*args)
-        #TODO: this only checks certain things; right now
-        #just can modify a varhcar's size
+        # TODO: this only checks certain things; right now
+        # just can modify a varhcar's size
         if args[1] == :varchar 
           if size = args[2].kind_of?(Hash) && args[2][:size]
             modify_column_varchar_size?(db_rel,args[0],size)

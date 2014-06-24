@@ -1,4 +1,4 @@
-#TODO: initially enterred through the simple dsl; may then put in model that uses db persistence, but caches this
+# TODO: initially enterred through the simple dsl; may then put in model that uses db persistence, but caches this
 module DTK
   class Attribute 
     class SemanticDatatype
@@ -13,7 +13,7 @@ module DTK
         @parent = nil
         @validation_proc = nil
       end
-      #this must be placed here
+      # this must be placed here
       r8_nested_require('semantic_datatype','asserted_datatypes')
 
       def self.default()

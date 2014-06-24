@@ -19,7 +19,7 @@ module XYZ
         ret = scalar_assigns
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         return ret unless db_rel #to take into account model_name can be an artificial one, for example for array datasets 
-        #shallow copy here is sufficienct because modify_to_reflect_special_processing! only modofies at the top key level
+        # shallow copy here is sufficienct because modify_to_reflect_special_processing! only modofies at the top key level
         ret = scalar_assigns.dup
         modify_to_reflect_special_processing!(ret,db_rel,sql_operation,opts)
         ret
@@ -36,7 +36,7 @@ module XYZ
       end
 
       def modify_to_reflect_special_processing!(scalar_assigns,db_rel,sql_operation,opts={})
-      #TODO: below should be deprecated and use update from select form 
+      # TODO: below should be deprecated and use update from select form 
         if opts[:shift_id_to_ancestor] and db_rel[:has_ancestor_field]
 	  scalar_assigns[:ancestor_id] = scalar_assigns[:id]
         end
@@ -49,9 +49,9 @@ module XYZ
         modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,opts[:id_handle])
 
         if opts[:partial_value] and opts[:id_handle]
-          #should only be applicable to an update
+          # should only be applicable to an update
           if sql_operation == :update
-            #need to get values if there are any json columns being updated and update value is array or hash
+            # need to get values if there are any json columns being updated and update value is array or hash
             cols_to_get = scalar_assigns.reject{|k,v|not ((v.kind_of?(Hash) or v.kind_of?(Array)) and json_table_column?(k,db_rel))}.keys
             unless cols_to_get.empty?
               object = get_object_scalar_columns(opts[:id_handle],Model::FieldSet.opt(cols_to_get,opts[:id_handle][:model_name]))
@@ -88,15 +88,15 @@ module XYZ
 
 
 
-      #if any virtual columns need to remove and populate the actual table 
+      # if any virtual columns need to remove and populate the actual table 
       def modify_for_virtual_columns!(scalar_assigns,db_rel,sql_operation,id_handle)
-        #TODO: see if can leverage FieldSet
+        # TODO: see if can leverage FieldSet
         return nil unless db_rel[:virtual_columns]
         cols = scalar_assigns.keys()
         virtual_col_defs = db_rel[:virtual_columns].reject{|k,v|not cols.include?(k)}
         return nil if virtual_col_defs.empty?
 
-        #if update then must do a select on all real values and set their existing value in scalar_assigns
+        # if update then must do a select on all real values and set their existing value in scalar_assigns
         if sql_operation == :update
           real_cols = virtual_col_defs.values.map{|vc|vc[:path].first if vc[:path]}.compact.uniq
           unless id_handle
@@ -107,7 +107,7 @@ module XYZ
           object.each{|k,v| scalar_assigns[k] = v}
         end
 
-        #delete virtual columns from scalar_assigns and appropriately set real column
+        # delete virtual columns from scalar_assigns and appropriately set real column
         virtual_col_defs.each_key do |vc|
           vc_val = scalar_assigns.delete(vc)
           path = virtual_col_defs[vc][:path]

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 18: NEG - dtk.model.yaml with invalid integer type attribute value
+# Test Case 18: NEG - dtk.model.yaml with invalid integer type attribute value
 
 require 'rubygems'
 require 'rest_client'

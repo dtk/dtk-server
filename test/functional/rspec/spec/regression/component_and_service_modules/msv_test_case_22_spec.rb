@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 22: Ability to list attributes that belong only to specific component in component module
+# Test Case 22: Ability to list attributes that belong only to specific component in component module
 
 require 'rubygems'
 require 'rest_client'

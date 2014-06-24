@@ -5,14 +5,14 @@ module DTK
     r8_nested_require('dsl','generate_from_impl')
     r8_nested_require('dsl','object_model_form')
     r8_nested_require('dsl','incremental_generator')
-    #TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
+    # TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
     r8_nested_require('dsl','ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
     def self.parse_and_update_model(component_module,impl_obj,module_branch_idh,version=nil,opts={})
-      #get associated assembly templates before do any updates and use this to see if any referential integrity
-      #problems within transaction after do update; transaction is aborted if any errors found
+      # get associated assembly templates before do any updates and use this to see if any referential integrity
+      # problems within transaction after do update; transaction is aborted if any errors found
       ref_integrity_snapshot = RefIntegrity.snapshot_associated_assembly_templates(component_module)
       model_parsed = nil
       Transaction do
@@ -39,7 +39,7 @@ module DTK
       info = get_dsl_file_raw_content_and_info(source_impl)
       create_from_file_obj_hash?(target_impl,info[:dsl_filename],info[:content],opts)
     end
-    #creates a ComponentDSL if file_obj_hash is a dtk meta file
+    # creates a ComponentDSL if file_obj_hash is a dtk meta file
     def self.create_from_file_obj_hash?(target_impl,dsl_filename,content,opts={})
       container_idh = opts[:container_idh]
       return nil unless isa_dsl_filename?(dsl_filename)
@@ -57,7 +57,7 @@ module DTK
       end
     end
 
-    #returns [dsl_file_path,hash_content,fragment_hash]
+    # returns [dsl_file_path,hash_content,fragment_hash]
     def self.incremental_generate(module_branch,augmented_objects,context={})
       augmented_objects = [augmented_objects] unless augmented_objects.kind_of?(Array)
       helper = IncrementalGeneratorHelper.new(augmented_objects)
@@ -67,7 +67,7 @@ module DTK
       [info[:dsl_filename],full_hash,fragment_hash]
     end
 
-    #returns array where each element with keys :path,:hash_content
+    # returns array where each element with keys :path,:hash_content
     def migrate(module_name,new_dsl_integer_version,format_type)
       ret = Array.new
       migrate_proc = migrate_processor(module_name,new_dsl_integer_version,input_hash)
@@ -117,10 +117,10 @@ module DTK
     end
 
 
-    #returns parsing_error if parsing error
+    # returns parsing_error if parsing error
 
 
-    #TODO: this might move to a more common area
+    # TODO: this might move to a more common area
     def self.convert_attribute_mapping(input_am,base_cmp,dep_cmp,opts={})
       integer_version = 2 #TODO: fix this being hard coded
       klass = load_and_return_version_adapter_class(integer_version)
@@ -190,10 +190,10 @@ module DTK
     def version_parse_check_and_normalize(version_specific_input_hash)
       integer_version = integer_version(version_specific_input_hash)
       klass = self.class.load_and_return_version_adapter_class(integer_version)
-      #parse_check raises errors if any errors found
+      # parse_check raises errors if any errors found
       klass.parse_check(version_specific_input_hash)
       ret = klass.normalize(version_specific_input_hash)
-      #version below refers to component version not metafile version
+      # version below refers to component version not metafile version
       ret.each_value{|cmp_info|cmp_info["version"] ||= Component.default_version()}
       ret
     end
@@ -268,7 +268,7 @@ module DTK
         pos_val ? pos_val.to_i : default_integer_version()
       end
 
-      #returns hash with keys: :format_type
+      # returns hash with keys: :format_type
       def parse_dsl_filename(filename,dsl_integer_version=nil)
         if filename =~ DSLFilenameRegexp[integer_version(dsl_integer_version)]
           file_extension = $1
@@ -286,7 +286,7 @@ module DTK
         if type = input_hash["module_type"]
           case type
            when "puppet_module" then ConfigAgentTypes[:puppet]
-           #Part of code to handle new serverspec type of module
+           # Part of code to handle new serverspec type of module
            when "serverspec" then ConfigAgentTypes[:serverspec]
            else 
              ParsingError.new("Unexpected module_type (#{type})")

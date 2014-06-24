@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 6: Check possibility to query list of nodes/components/attributes of particular service
+# Test Case 6: Check possibility to query list of nodes/components/attributes of particular service
 
 require 'rubygems'
 require 'rest_client'

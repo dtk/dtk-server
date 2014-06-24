@@ -1,19 +1,19 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module NodeStateClassMixin
-      #assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date  
+      # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date  
       def get_and_update_node_state!(node,attribute_names)
         ret = Hash.new
         unless raw_state_info = raw_state_info!(node)
           return ret 
         end
 
-        #attribute_names in normalized form so need to convert
+        # attribute_names in normalized form so need to convert
         change = nil
         attribute_names.each do |normalized_attr_name|
           attribute_names.each do |attr_name|
             if AttributeMapping.respond_to?(attr_name)
-              #TODO: if can legitimately have nil value then need to change logic
+              # TODO: if can legitimately have nil value then need to change logic
               if val = AttributeMapping.send(attr_name,ret,raw_state_info,node)
                 ret[attr_name] = val
                 change = true
@@ -58,7 +58,7 @@ module DTK; module CommandAndControlAdapter
      
       def get_node_operational_status(node)
         instance_id = get_instance_id_from_object(node)
-        #TODO: see if more targeted get to just get operational status
+        # TODO: see if more targeted get to just get operational status
         state = conn().server_get(instance_id)
         op_status = state && state[:state]
         StateTranslation[op_status] || op_status

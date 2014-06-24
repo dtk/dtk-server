@@ -1,5 +1,5 @@
-#TODO: initially scaffolds SemanticType then will remove semantic type
-#TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
+# TODO: initially scaffolds SemanticType then will remove semantic type
+# TODO: initially form sap from sap config then move to model where datatype has dynamic attribute that gets filled in
 module DTK
   module AttributeDatatype
     def self.ret_datatypes()
@@ -22,7 +22,7 @@ module DTK
     def ret_default_info()
       default = self[:value_asserted]
       return nil unless default
-      #TODO: temparily unraveling arrays
+      # TODO: temparily unraveling arrays
       if is_array?()
         ret = Hash.new
         hash_semantic_type = semantic_type[:array]
@@ -61,8 +61,8 @@ module DTK
 
     def self.attr_def_to_internal_form(hash)
       ret = Hash.new
-      #check if it is an array
-      #TODO: stub fn to check if array
+      # check if it is an array
+      # TODO: stub fn to check if array
       datatype = hash[:datatype]
       return ret unless datatype
       is_array = nil

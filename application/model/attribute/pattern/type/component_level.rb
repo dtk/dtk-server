@@ -57,7 +57,7 @@ module DTK; class Attribute
         end
         @attribute_stacks = attrs.map do |attr|
           cmp = ndx_cmps[attr[:component_component_id]]
-          #TODO: this shoudl be done more internally
+          # TODO: this shoudl be done more internally
           fill_in_external_ref?(attr,cmp)
           {
             :attribute => attr,
@@ -73,7 +73,7 @@ module DTK; class Attribute
           component_type = component.get_field?(:component_type)
           attr_name = attr.get_field?(:display_name)
           external_ref = attr[:external_ref] = {
-            #TODO: hard coded and not centralized logic
+            # TODO: hard coded and not centralized logic
             :type => 'puppet_attribute',
             :path => "node[#{component_type}][#{attr_name}]"
           }

@@ -1,4 +1,4 @@
-#TODO: modify so that types like port can call tehir parents methods
+# TODO: modify so that types like port can call tehir parents methods
 module DTK; class Attribute 
   class SemanticDatatype
     Type :object do
@@ -27,7 +27,7 @@ module DTK; class Attribute
       validation /.*/ #TODO: put validation in here; may need a handle in appropriate place in object model to see what is valid
     end
 
-    #base types
+    # base types
     Type :string do
       basetype :string
       validation /.*/ #so checks that it is scalar 
@@ -50,7 +50,7 @@ module DTK; class Attribute
         end
       }
     end
-    #TODO: may deprecate
+    # TODO: may deprecate
     Type :json do
       basetype :json
     end

@@ -1,7 +1,7 @@
 module DTK; class ModuleBranch
   class Location
     class RemoteParams < Params
-      #keys: :module_type,:module_name,:remote_repo_base,:namespace,:version?
+      # keys: :module_type,:module_name,:remote_repo_base,:namespace,:version?
       def remote_repo_base()
         self[:remote_repo_base]
       end

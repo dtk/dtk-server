@@ -107,7 +107,7 @@ module DTK
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
-      #TODO: deprecate when DSLParser methods stabke
+      # TODO: deprecate when DSLParser methods stabke
       def legacy_component_module_refs_parsed_info(module_branch,opts={})
         ret = Hash.new
         meta_filename_path = ComponentModuleRefs.meta_filename_path()
@@ -143,7 +143,7 @@ module DTK
         assembly_import_helper.import()
       end
 
-      #signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
+      # signature is  assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
       def assembly_meta_file_paths(module_branch,&block)
         assembly_dsl_path_info = AssemblyFilenamePathInfo
         depth = assembly_dsl_path_info[:path_depth]
@@ -161,7 +161,7 @@ module DTK
       }
 
       def ret_with_removed_variants(paths)
-        #if multiple files that match where one is json and one yaml, fafavor the default one
+        # if multiple files that match where one is json and one yaml, fafavor the default one
         two_variants_found = false
         common_paths = Hash.new
         paths.each do |path|
@@ -177,7 +177,7 @@ module DTK
             Log.error("Path (#{path}) has unexpected form; skipping 'removing variants analysis'")
           end
         end
-        #shortcut
+        # shortcut
         return paths unless two_variants_found
         format_type_default = R8::Config[:dsl][:service][:format_type][:default]
         ret = Array.new
@@ -201,9 +201,9 @@ module DTK
       end
 
       def error_cleanup()
-        #TODO: this is wrong; 
-        #ServiceModule.delete(id_handle())
-        #determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed
+        # TODO: this is wrong; 
+        # ServiceModule.delete(id_handle())
+        # determine if there is case where this is appropriate or have delete for other objects; can also case on dsl_parsed
         # TODO: may need to  write error cleanup for service module update that does not parse for service module (#{update_object!(:display_name,:dsl_parsed).inspect})")
       end
     end

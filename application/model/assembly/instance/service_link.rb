@@ -74,7 +74,7 @@ module DTK
       end
 
       def self.print_form_hash(object,opts={})
-        #set the following (some can have nil as legal value)
+        # set the following (some can have nil as legal value)
         service_type = base_ref = required = description = nil
         id = object[:id]
         if object.kind_of?(PortLink)
@@ -85,7 +85,7 @@ module DTK
           if service_type != port_link[:output_port].link_def_name()
             Log.error("input and output link defs are not equal")
           end
-          #TODO: confusing that input/output on port link does not reflect what is logical input/output
+          # TODO: confusing that input/output on port link does not reflect what is logical input/output
           if port_link[:input_port][:direction] == "input"
             base_ref = input_port
             dep_ref = output_port

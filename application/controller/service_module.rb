@@ -2,8 +2,8 @@ module DTK
   class Service_moduleController < AuthController
     helper :module_helper
     helper :assembly_helper
-    
-    #TODO: for debugging; will be removed
+
+    # TODO: for debugging; will be removed
     def rest__debug_get_project_trees()
       ServiceModule.get_project_trees(model_handle)
       rest_ok_response
@@ -14,7 +14,7 @@ module DTK
       service_module.get_ports()
       rest_ok_response
     end
-    #end: for debugging; will be removed
+    # end: for debugging; will be removed
 
     #### actions to interact with remote repos ###
     def rest__list_remote()
@@ -39,19 +39,18 @@ module DTK
       rest_ok_response service_module.get_referenced_component_modules(Opts.new(:detail_to_include=>[:versions]))
     end
 
-    #TODO: rename; this is just called by install; import ops call create route
+    # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
       rest_ok_response install_from_dtkn_helper(:service_module)
     end
 
-    #TODO: rename; this is just called by publish
+    # TODO: rename; this is just called by publish
     def rest__export()
       service_module = create_obj(:service_module_id)
-      publish_to_dtkn_helper(service_module)
-      rest_ok_response 
+      rest_ok_response publish_to_dtkn_helper(service_module)
     end
-    
-    #this should be called when the module is linked, but the specfic version is not
+
+    # this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
       service_module = create_obj(:service_module_id)
       remote_repo = ret_remote_repo()
@@ -60,7 +59,7 @@ module DTK
     end
 
 
-    #get remote_module_info; throws an access rights usage eerror if user does not have access
+    # get remote_module_info; throws an access rights usage eerror if user does not have access
     def rest__get_remote_module_info()
       service_module = create_obj(:service_module_id)
       rest_ok_response get_remote_module_info_helper(service_module)
@@ -158,7 +157,7 @@ module DTK
     def rest__create_new_version()
       service_module = create_obj(:service_module_id)
       version = ret_version()
-      
+
       service_module.create_new_version(version)
       rest_ok_response
     end
@@ -182,7 +181,7 @@ module DTK
       remote_params = remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
       project = get_default_project()
       ServiceModule.delete_remote(project,remote_params,client_rsa_pub_key)
-      rest_ok_response 
+      rest_ok_response
     end
 
     #
@@ -194,7 +193,8 @@ module DTK
       opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
       module_name, namespace, version = service_module.get_basic_info(opts)
       remote_params = remote_params_dtkn(:service_module,namespace,module_name,version)
-      rest_ok_response get_service_dependencies(remote_params)
+      client_rsa_pub_key   = ret_request_params(:rsa_pub_key)
+      rest_ok_response get_service_dependencies(remote_params, client_rsa_pub_key)
     end
 
     def rest__delete_assembly_template()

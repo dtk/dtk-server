@@ -1,7 +1,7 @@
-#This variables need to be set after both defaults and user oevrrides are given
+# This variables need to be set after both defaults and user oevrrides are given
 R8::Config[:base_uri] = "http://#{R8::Config[:server_public_dns]}:#{R8::Config[:server_port].to_s}"
 
-#Application paths.., these should be set/written by templating engine on every call
+# Application paths.., these should be set/written by templating engine on every call
 R8::Config[:base_js_uri] = "#{R8::Config[:base_uri]}/js"
 R8::Config[:base_js_cache_uri] = "#{R8::Config[:base_uri]}/js/cache"
 R8::Config[:base_css_uri] = "#{R8::Config[:base_uri]}/css"

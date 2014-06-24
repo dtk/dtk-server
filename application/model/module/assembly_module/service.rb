@@ -107,7 +107,7 @@ module DTK; class AssemblyModule
         task_action ||= DefaultTaskAction
         ServiceModule.assembly_workflow_meta_filename_path(@assembly_template_name,task_action)
       end
-      #TODO: unify this with code on task/template
+      # TODO: unify this with code on task/template
       DefaultTaskAction = 'converge'
     end
   end

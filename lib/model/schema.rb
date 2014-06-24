@@ -1,12 +1,12 @@
 
-#TODO: move these to admin functions and lose notion of schema/data for the core model
-#Core model should be just everything that is universal to interact with objects including
-#base field defs for id,date_created/modified, created_by user, modified_user, etc
+# TODO: move these to admin functions and lose notion of schema/data for the core model
+# Core model should be just everything that is universal to interact with objects including
+# base field defs for id,date_created/modified, created_by user, modified_user, etc
 
 require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
 module DTK
-  #class methods
-  #TODO partition into public and private
+  # class methods
+  # TODO partition into public and private
   module ModelSchemaClassMixins
     def set_relation_as_top()
       @is_top = true
@@ -80,7 +80,7 @@ module DTK
       @db_rel[:virtual_columns][col_name] = opts
     end
 
-    #TODO: hardwired to ref column id on target table
+    # TODO: hardwired to ref column id on target table
     def foreign_key(col_name,target_rel_type,opts={})
       @db_rel[:columns][col_name] = {:type => ID_TYPES[:id], :foreign_key_rel_type => target_rel_type}.merge(opts)
       CloneHelper.add_foreign_key_info(@relation_type,col_name,target_rel_type)
@@ -96,12 +96,12 @@ module DTK
     end
 
     #------common column defs -----------
-    #for external refs
+    # for external refs
     def external_ref_column_defs()
       column :external_ref, :json
     end
 
-    #for data source attributes
+    # for data source attributes
     def ds_column_defs(*names)
       names.each{|n|ds_column_def(n)}
     end
@@ -109,7 +109,7 @@ module DTK
       if name == :ds_attributes
         column :ds_attributes, :json
       elsif  name == :ds_key
-        #TODO: should this be commented out?: :default => '' so when do 'prune inventory' this column not null
+        # TODO: should this be commented out?: :default => '' so when do 'prune inventory' this column not null
         column :ds_key, :varchar, :default => '', :hidden => true 
       elsif  name == :data_source
         column :data_source, :varchar, :size => 25
@@ -120,11 +120,11 @@ module DTK
     #------common column defs -----------
     include MigrationMethods
 
-      #gets over written for classes with data source attributes
+      # gets over written for classes with data source attributes
       def ds_attributes(attr_list)
        attr_list
       end
-      #gets over written for classes that restrict children
+      # gets over written for classes that restrict children
       def is_ds_subobject?(relation_type)
         true
       end
@@ -142,7 +142,7 @@ module DTK
             models()
           end
         models.each{|model| model.set_db(db)} #TODO: see if we can remove needing to link all children of Model
-        #infra tables
+        # infra tables
         ContextTable.set_db(db)
         IDInfoTable.set_db(db)
       end
@@ -188,7 +188,7 @@ module DTK
         concrete_models.each{|model| model.set_global_db_rel_info()}
         DB_REL_DEF[:datacenter] = DB_REL_DEF[:target] #TODO: remove temp datacenter->target
         concrete_models.each{|model| model.preprocess!()}
-        #returns model_names
+        # returns model_names
         concrete_models.map{|klass|ret_relation_type(klass)}
       end
      #######
@@ -225,7 +225,7 @@ module DTK
           when :up
             create_table_specific_fields?(@db_rel)
           when :down
-            #TODO: not implemented yet
+            # TODO: not implemented yet
         end
       end
 
@@ -234,7 +234,7 @@ module DTK
           when :up
             @db.create_table_associations?(@db_rel)
           when :down
-            #TODO: not implemented yet
+            # TODO: not implemented yet
         end
       end
 
@@ -281,7 +281,7 @@ module DTK
         "#{model_name}__#{field}".to_sym
       end
 
-      #TODO: this would be good place to do parsing to check for errors in vc defs
+      # TODO: this would be good place to do parsing to check for errors in vc defs
       def preprocess!()
         (@db_rel[:virtual_columns]||{}).each_value do |vc|
           remote_deps = vc[:remote_dependencies]
@@ -292,7 +292,7 @@ module DTK
               next unless col.kind_of?(VCShortcutID)
               join_info[:cols][i] = col.val(join_info[:model_name])
             end
-            #TODO: only applying translation  on {k => v} to v side, should apply to k side too
+            # TODO: only applying translation  on {k => v} to v side, should apply to k side too
             (join_info[:join_cond]||{}).each do |k,v|
               next unless v.kind_of?(VCShortcutParent)
               join_info[:join_cond][k] = v.val()
@@ -322,12 +322,12 @@ module DTK
         join_info[:cols] = new_field_set.cols if new_field_set
       end
 
-      #TODO: drive off of  COMMON_REL_COLUMNS  
+      # TODO: drive off of  COMMON_REL_COLUMNS  
       def create_table_common_fields?(db_rel,opts={})
         create_schema_for_db_rel?(db_rel)
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
         @db.create_table?(db_rel) do
-          #TODO: do we want user models indexed by context
+          # TODO: do we want user models indexed by context
           foreign_key CONTEXT_ID, CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:null => false,:type =>  ID_TYPES[:context_id]})
           primary_key :id, :type => ID_TYPES[:id], :null => false
           column :local_id, ID_TYPES[:local_id], :default => Sequel::LiteralString.new(seq_ref), :null => false
@@ -346,7 +346,7 @@ module DTK
         @db.create_table_common_extras?(db_rel)
       end
 
-      #Depedency; must be called after create_table_common_fields?
+      # Depedency; must be called after create_table_common_fields?
       def create_table_specific_fields?(db_rel)
         cols = db_rel[:columns]
         return nil if cols.nil?

@@ -17,7 +17,7 @@ module XYZ
     end
 
 
-    #TODO: encapsulate with other fns that make assumption about guid to id relationship
+    # TODO: encapsulate with other fns that make assumption about guid to id relationship
     def get_row_from_id_handle(id_handle,opts={})
       IDInfoTable.get_row_from_id_handle(id_handle,opts)
     end
@@ -29,9 +29,9 @@ module XYZ
     end
 
   end
-  #End ModelDataClassMixins
+  # End ModelDataClassMixins
 
-  #instance mixins
+  # instance mixins
   module ModelDataInstanceMixins
 
     def get_directly_contained_objects(child_relation_type,where_clause=nil)
@@ -49,7 +49,7 @@ module XYZ
     end
 
     def get_qualified_ref()
-      #first check if have ref attribute (which is more efficient)
+      # first check if have ref attribute (which is more efficient)
       return DB.ret_qualified_ref_from_scalars(self) if self[:ref]
       IDInfoTable.get_row_from_id_handle(id_handle).ret_qualified_ref()
     end
@@ -72,6 +72,6 @@ module XYZ
       self.class.get_object(ret_id_handle_from_db_id(db_id,relation_type))
     end
   end
-  #End ModelDataInstanceMixins
+  # End ModelDataInstanceMixins
 
 end

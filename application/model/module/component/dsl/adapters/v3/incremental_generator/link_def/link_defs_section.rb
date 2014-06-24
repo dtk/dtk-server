@@ -28,7 +28,7 @@ module DTK; class ComponentDSL; class V3
       end
 
      private
-      #returns cmp,link
+      # returns cmp,link
       def choice_info(link_def_link)
         link = Link.new
         cmp = link_component(link_def_link)

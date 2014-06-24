@@ -16,7 +16,7 @@ class Fieldhash < Fieldbase
   end
 
   def get_field_edit_js()
-#TODO: add JS rendering when generating JS fields class for client side rendering
+# TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 

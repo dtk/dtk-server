@@ -14,7 +14,7 @@ module DTK
     end
 
     def repeat(body,index)
-      #emulate pieces of work being completed
+      # emulate pieces of work being completed
       EM.add_timer(Frequency) do
         
         puts "part #{(index).to_s}\n + #{Time.now}"

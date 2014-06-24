@@ -28,7 +28,7 @@ module DTK; class Task
         ret
       end
 
-      #for debugging
+      # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:node] = (object[:node]||{})[:display_name]
@@ -45,7 +45,7 @@ module DTK; class Task
         return ret if av_pairs.empty?
         attrs_to_set.each do |attr|
           attr_name = attr[:display_name].to_sym
-          #TODO: can test and case here whether value changes such as wehetehr new ip address
+          # TODO: can test and case here whether value changes such as wehetehr new ip address
           attr[:attribute_value] = av_pairs[attr_name] if av_pairs.has_key?(attr_name)
           ret << attr
         end
@@ -56,7 +56,7 @@ module DTK; class Task
       def get_dynamic_attributes__node_components!(attr_names)
         ret = Hash.new
         return ret unless attr_names.delete(:node_components)
-        #TODO: hack
+        # TODO: hack
         ipv4_val = CommandAndControl.get_and_update_node_state!(self[:node],[:host_addresses_ipv4])
         return ret if ipv4_val.empty?
         cmps = self[:node].get_objs(:cols => [:components]).map{|r|r[:component][:display_name].gsub("__","::")}
@@ -80,7 +80,7 @@ module DTK; class Task
       end
 
       def update_state_change_status(task_mh,status)
-        #no op if no associated state change 
+        # no op if no associated state change 
         if self[:state_change_id]
           update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
         end
@@ -115,7 +115,7 @@ module DTK; class Task
       def self.node_status(object,opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
-        #TODO: want to include os type and instance id when tasks upadted with this
+        # TODO: want to include os type and instance id when tasks upadted with this
         kv_array = 
           [{:name => node[:display_name]},
            {:id => node[:id]},
@@ -131,7 +131,7 @@ module DTK; class Task
     # Class we are using to execute code which is responsible for handling Node
     # when she moves from pending state to running state.
     ##
-    #TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
+    # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
     class PowerOnNode < CreateNode
     end
   end

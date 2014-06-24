@@ -36,7 +36,7 @@ module DTK
     end
 
     def self.create_port_and_attr_links(parent_idh,port_link_hash,opts={})
-      #get the associated link_def_link TODO: if it does not exist means constraint violation
+      # get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = get_link_def_and_components(parent_idh,port_link_hash)
       raise PortLinkError.new("Illegal link") unless link_def_link
       link_to_create = port_link_hash.merge(:temporal_order => link_def_link[:temporal_order])
@@ -45,10 +45,10 @@ module DTK
       port_link
     end
 
-    #this sets temporal order if have option :set_port_link_temporal_order
+    # this sets temporal order if have option :set_port_link_temporal_order
     def create_attr_links!(parent_idh,opts={})
       update_obj!(:input_id,:output_id)
-      #get the associated link_def_link TODO: if it does not exist means constraint violation
+      # get the associated link_def_link TODO: if it does not exist means constraint violation
       link_def_link, components = self.class.get_link_def_and_components(parent_idh,self)
       raise PortLinkError.new("Illegal link") unless link_def_link
       if opts[:set_port_link_temporal_order] and link_def_link[:temporal_order]
@@ -58,7 +58,7 @@ module DTK
       self
     end
 
-    #TODO: possibly change to using refs w/o ids to make increemntal updates easier
+    # TODO: possibly change to using refs w/o ids to make increemntal updates easier
     def self.ref_from_ids(input_id,output_id)
       "port_link:#{input_id}-#{output_id}"
     end
@@ -88,12 +88,12 @@ module DTK
         }.merge(override_attrs)
       end
       create_opts = {:returning_sql_cols => [:id,:input_id,:output_id]}
-      #TODO: push in use of :c into create_from_rows
+      # TODO: push in use of :c into create_from_rows
       create_from_rows(port_link_mh,rows,create_opts).map{|hash|new(hash,port_link_mh[:c])}
     end
 
     def self.get_link_def_and_components(parent_idh,port_link_hash)
-      #returns [link_def_link,relevant_components]
+      # returns [link_def_link,relevant_components]
       ret = [nil,nil]
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:component_type,:direction,:link_type,:link_def_info,:node_node_id],
@@ -111,10 +111,10 @@ module DTK
       remote_port_cmp_info = remote_port_cmp_rows.first
 
       return ret unless local_port_cmp_info[:link_type] == remote_port_cmp_info[:link_type]
-      #find the matching link_def_link
+      # find the matching link_def_link
       remote_cmp_type = remote_port_cmp_info[:component_type]
 
-      #look for matching link
+      # look for matching link
       components_coreside = (local_port_cmp_info[:node_node_id] == remote_port_cmp_info[:node_node_id])
       match = local_port_cmp_rows.find do |r|
         possible_link = r[:link_def_link]||{}
@@ -128,7 +128,7 @@ module DTK
       end
       return ret unless match
 
-      #get remote component
+      # get remote component
       sp_hash = {
         :cols => [:id,:group_id,:display_name,:node_node_id,:component_type,:implementation_id,:extended_base],
         :filter => [:and,Component::Instance.filter(remote_port_cmp_info.component_type,remote_port_cmp_info.title?()),

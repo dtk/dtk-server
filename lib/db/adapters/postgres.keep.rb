@@ -35,7 +35,7 @@ module XYZ
       create_element_update_trigger?()
       create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
       
-      #custom functions
+      # custom functions
       create_custom_function__append_to_array_value?()
     end
 

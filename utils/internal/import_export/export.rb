@@ -1,7 +1,7 @@
 module XYZ
-  #class mixin
+  # class mixin
   module ExportObject
-    #target_id_handle_x can either be an id_handle or an array of id_handles
+    # target_id_handle_x can either be an id_handle or an array of id_handles
     def export_objects_to_file(target_id_handle_x,json_file,opts={})
       hash_content = 
         if target_id_handle_x.kind_of?(Array)
@@ -35,13 +35,13 @@ module XYZ
         :depth => :deep, 
         :no_hrefs => true, 
         :no_ids => true, 
-        #TODO: do we need this? :no_top_level_scalars => true, 
+        # TODO: do we need this? :no_top_level_scalars => true, 
         :no_null_cols => true, 
         :fk_as_ref => prefix
       }.merge(opts)
       objects = get_instance_or_factory(target_id_handle,nil,get_objs_opts)
 
-      #stripping off "key" which would be the containing object
+      # stripping off "key" which would be the containing object
       objects.values.first
     end
 

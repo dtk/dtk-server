@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content
+# Test Case 6: Create one node, add two components in it (list components), delete one component (list components again) and purge workspace content
 
 require 'rubygems'
 require 'rest_client'

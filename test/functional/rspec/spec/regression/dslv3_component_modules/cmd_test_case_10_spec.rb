@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server
+# Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'

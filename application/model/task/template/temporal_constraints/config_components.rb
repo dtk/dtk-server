@@ -5,10 +5,10 @@ module DTK; class Task; class Template
         ret = new()
         return ret if cmp_action_list.empty?
 
-        #indexed by [node_id][:cmp_id]
+        # indexed by [node_id][:cmp_id]
         ndx_cmp_list = Indexed.new(cmp_action_list)
 
-        #ordering constraint come from teh following sources
+        # ordering constraint come from teh following sources
         # dynamic attributes
         # port links with temporal order set
         # intra_node rels - (from the component_order and dependency rels)
@@ -47,14 +47,14 @@ module DTK; class Task; class Template
         ret = new()
         attr_mh = ndx_cmp_list.model_handle(:attribute)
         filter = [:oneof,:component_component_id,ndx_cmp_list.component_ids]
-        #shortcut if no dynamic attributes
+        # shortcut if no dynamic attributes
         sp_hash = {
           :cols => [:id],
           :filter => [:and, [:eq,:dynamic,true], filter]
         }
         return ret if Model.get_objs(attr_mh,sp_hash).empty?
 
-        #get augmented attr list, needed for dependency analysis
+        # get augmented attr list, needed for dependency analysis
         aug_attr_list = Attribute.get_augmented(attr_mh,filter)
         Attribute.guarded_attribute_rels(aug_attr_list) do |guard_rel|
           guard_attr = guard_rel[:guard_attr]
@@ -70,14 +70,14 @@ module DTK; class Task; class Template
 
       def self.get_intra_node_rels(ndx_cmp_list)
         ret = new()
-        #TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from 
-        #component templates, not component instances
+        # TODO: more efficient way to do this; right now just leevraging existing methods; also these methods draw these relationships from 
+        # component templates, not component instances
         cmp_deps = Component::Instance.get_ndx_intra_node_rels(ndx_cmp_list.component_idhs())
         cmp_deps.reject!{|cmp_id,info|info[:component_dependencies].empty?}
         return ret if cmp_deps.empty?
         
-        #component dependencies just have component type;
-        #TODO: may extend so that it can match on title
+        # component dependencies just have component type;
+        # TODO: may extend so that it can match on title
         cmp_deps.each do |cmp_id,dep_info|
           ndx_cmp_list.els(cmp_id) do |node_id,after_cmp_list_el|
             dep_info[:component_dependencies].each do |before_cmp_type|
@@ -136,7 +136,7 @@ module DTK; class Task; class Template
           (self[node_id]||{})[cmp_id]
         end
 
-        #block has params node_id, cmp_list_el
+        # block has params node_id, cmp_list_el
         def els(cmp_id,&block)
           each_pair do |node_id,ndx_by_cmp|
             if cmp_list_el = ndx_by_cmp[cmp_id]

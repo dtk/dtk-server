@@ -1,4 +1,4 @@
-#Common class with methods used for interaction with dtk server
+# Common class with methods used for interaction with dtk server
 require 'rubygems'
 require 'rest_client'
 require 'pp'
@@ -1505,7 +1505,7 @@ class DtkCommon
 		return list_task_info_check
 	end	
 
-#Following list of methods is used for interaction with provider/target functionality
+# Following list of methods is used for interaction with provider/target functionality
 	
 	def create_target(provider_name, region)
 		puts "Create target:", "--------------"
@@ -1624,7 +1624,7 @@ class DtkCommon
 		puts ""
 	end
 
-#Following list of methods is used for interaction with workspace context
+# Following list of methods is used for interaction with workspace context
 
 	#Method to get workspace id for further interaction with workspace
 	def get_workspace_id

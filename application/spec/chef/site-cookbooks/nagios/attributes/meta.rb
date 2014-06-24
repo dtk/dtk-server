@@ -33,18 +33,18 @@ set[:nagios][:service_check_assocs][:rabbitmq_basic_health] = {
 set[:nagios][:service_check_assocs][:check_hadoop_datanode_remotely] = {
   :service_description => "hadoop_datanode",
   :command_name => "check_hadoop_datanode_remotely",
-  #TBD: make command_line parametrizable by ports 
+  # TBD: make command_line parametrizable by ports 
   :command_line => "$USER1$/check_http -H $HOSTADDRESS$ -u 'http://$HOSTADDRESS$:50075/browseDirectory.jsp?namenodeInfoPort=50070&dir=/' -p 50075 -r HDFS"
 }
 
 set[:nagios][:service_check_assocs][:check_hadoop_namenode_remotely] = {
   :service_description => "hadoop_namenode",
   :command_name => "check_hadoop_namenode_remotely",
-  #TBD: make command_line parametrizable by ports 
+  # TBD: make command_line parametrizable by ports 
   :command_line => "$USER1$/check_http -H $HOSTADDRESS$ -u http://$HOSTADDRESS$:50070/dfshealth.jsp -p 50070 -r NameNode"
 }
 
-#TBD: convert others to this form
+# TBD: convert others to this form
 check="check_hadoop_dfs"
 set[:nagios][:service_check_assocs][check] = {
   :service_description => "hadoop_dfs",

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 5: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server
+# Test Case 5: Clone existing module to local filesystem, do some change on it and use push-clone-changes to push changes from local copy to server
 
 require 'rubygems'
 require 'rest_client'

@@ -74,21 +74,21 @@ def json_print(json)
   ap json if JSON_OUTPUT_ENABLED
 end
 
-#Method that prints DTK server lines since the last restart
+# Method that prints DTK server lines since the last restart
 def log_print()
   start_line = 1
   search_string = "Exiting"
 
-  #get lines of the file into an array (chomp optional)
+  # get lines of the file into an array (chomp optional)
   lines = File.readlines(LOG).map(&:chomp)
 
   #"cut" the deck, as with playing cards, so start_line is first in the array
   lines = lines.slice!(start_line..lines.length) + lines
 
-  #searching backwards can just be searching a reversed array forwards
+  # searching backwards can just be searching a reversed array forwards
   lines.reverse!
 
-  #search through the reversed-array, for the first occurence
+  # search through the reversed-array, for the first occurence
   reverse_occurence = nil
   lines.each_with_index do |line,index|
     if line.include?(search_string)
@@ -97,8 +97,8 @@ def log_print()
     end
   end
 
-  #reverse_occurence is now either "nil" for no match, or a reversed-index
-  #also un-cut the array when calculating the index
+  # reverse_occurence is now either "nil" for no match, or a reversed-index
+  # also un-cut the array when calculating the index
   if reverse_occurence
       occurence = lines.size - reverse_occurence - 1 + start_line
       line = lines[reverse_occurence]
@@ -151,7 +151,7 @@ def deploy_test_assembly(opts)
     puts "Using OS Identifier: #{os_identifier}"
     puts "Using assembly template ID: #{ASSEMBLY_ID}" 
 
-    #listAssembly = send_request('/rest/assembly/list', {},  opts)
+    # listAssembly = send_request('/rest/assembly/list', {},  opts)
 
     # Stage the assembly 
     stageAssembly = send_request('/rest/assembly/stage', {'assembly_id' => ASSEMBLY_ID}, opts)
@@ -209,35 +209,35 @@ def deploy_test_assembly(opts)
     end
 
     # Test node group creation and reconverging
-    #node_group_spin_up(opts)
+    # node_group_spin_up(opts)
     
     # Delete the cloned assembly's instance, this is the must!
     deleteAssembly(assemblyId, opts)
 
-    #abort("Testing failure mail report.")
+    # abort("Testing failure mail report.")
   end
 end
 
 def node_group_spin_up(opts)
   puts "", "Starting node group test"
-  #get the selected component ID
+  # get the selected component ID
   componentListResponse = send_request('/rest/component/list', {}, opts)
   componentTemplateId = JSON.parse(componentListResponse)['data'].select{ |x| x['display_name'] == COMPONENT }.first['id']
 
-  #create the node group
+  # create the node group
   nodeGroupResponse = send_request('/rest/node_group/create', {:spans_target=>true, :display_name=>"all-nodes-jenkins-testing"}, opts)
-  #ap JSON.parse(nodeGroupResponse)
+  # ap JSON.parse(nodeGroupResponse)
 
-  #add component to the node group
+  # add component to the node group
   addComponentResponse = send_request('/rest/node_group/add_component', {:node_group_id=>"all-nodes-jenkins-testing", :component_template_id=>componentTemplateId}, opts)
-  #ap JSON.parse(addComponentResponse)
+  # ap JSON.parse(addComponentResponse)
 
-  #converge the node group
+  # converge the node group
   nodeConvergeResponse = send_request('/rest/node_group/create_task', {:node_group_id=>"all-nodes-jenkins-testing"}, opts)
-  #ap JSON.parse(nodeConvergeResponse)
+  # ap JSON.parse(nodeConvergeResponse)
   $success = execute_task(JSON.parse(nodeConvergeResponse)["data"]["task_id"], opts)
 
-  #delete node group
+  # delete node group
   nodeGroupDeleteResponse = send_request('/rest/node_group/delete', {:node_group_id=>"all-nodes-jenkins-testing"} , opts)
 
 end
@@ -329,11 +329,11 @@ puts "","Script has been started."
 
 deploy_test_assembly(opts)
 
-#module_import(opts)
+# module_import(opts)
 
-#module_create(opts)
+# module_create(opts)
 
-#stage_assembly(opts)
+# stage_assembly(opts)
 
 
 abort("Job failed!") unless $success

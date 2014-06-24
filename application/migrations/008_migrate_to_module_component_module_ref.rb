@@ -3,11 +3,11 @@ require File.expand_path("common", File.dirname(__FILE__))
 require 'pp'
 Sequel.migration do
   up do 
-   #TODO: this is just testing a number of things now
+   # TODO: this is just testing a number of things now
     DTKMigration.dtk_model_context do
       dtk_db_rebuild(:component_module_ref,:module_branch)
 
-      #use :component_module_refs to build :component_module_ref
+      # use :component_module_refs to build :component_module_ref
       cmp_mod_refs = dtk_select(:component_module_refs,:cols => [:id,:ref,:content,:branch_id])
       new_rows = Array.new
       cmp_mod_refs.each do |r|
@@ -32,7 +32,7 @@ Sequel.migration do
       end
       dtk_create(:component_module_ref,:module_branch,new_rows,:component_module_refs)
 
-      #will have to clean this up later
+      # will have to clean this up later
       rename_table :module__component_module_refs,"module__old---component_module_refs".to_sym
 #      cmr = dtk_select(:component_module_ref,:cols => [:id,:owner_id,:group_id,:ref,:ref_num,:created_at,:component_module,:version_info,:branch_id])
  #     pp cmr

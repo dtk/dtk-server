@@ -1,10 +1,10 @@
-#TODO: need to refactor to make more efficient
+# TODO: need to refactor to make more efficient
 module XYZ
   class DB
     module DataProcessingCreate
-      #creates a new instance w/ref_num bumped if needed
-      #TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
-      #TODO: may eventually deprecate this
+      # creates a new instance w/ref_num bumped if needed
+      # TODO: make more efficient by reducing or elimintaing calss to id table as well as using bulk inserts
+      # TODO: may eventually deprecate this
       def create_from_hash(id_handle,hash,opts={})
         if id_handle.is_top?()
           id_handle
@@ -29,27 +29,27 @@ module XYZ
         columns = field_set.cols
         overrides = override_attrs.dup
 
-        #sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
-        #sequel_select = DB.update_create_info_for_user_info!(columns,sequel_select.select(*columns),overrides,model_handle)
-        #todo: is last select(*columns) needed
+        # sequel_select = select_ds.sequel_ds.ungraphed.from_self #ungraphed and from_self just to be safe
+        # sequel_select = DB.update_create_info_for_user_info!(columns,sequel_select.select(*columns),overrides,model_handle)
+        # todo: is last select(*columns) needed
         pre_sequel_select = select_ds.sequel_ds.ungraphed.from_self.select(*columns)
         sequel_select = DB.update_create_info_for_user_info!(columns,pre_sequel_select,overrides,model_handle)
 
-        #TODO: is this needed?; put in this form after removing update_create_info_for_user_info! call
-        #sequel_select = sequel_select.select(*columns)
+        # TODO: is this needed?; put in this form after removing update_create_info_for_user_info! call
+        # sequel_select = sequel_select.select(*columns)
         #
 
-        #parent_id_col can be null
+        # parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
 
-        #DB.update_overrides_and_cols_for_user_info!(overrides,columns,model_handle)
+        # DB.update_overrides_and_cols_for_user_info!(overrides,columns,model_handle)
 
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)
-        #modify sequel_select to reflect duplicate_refs setting
+        # modify sequel_select to reflect duplicate_refs setting
         unless duplicate_refs == :no_check
           match_cols = [:c,:ref,parent_id_col].compact
-          #need special processing of ref override; need to modify match_cols and select_on_match_cols
+          # need special processing of ref override; need to modify match_cols and select_on_match_cols
           ref_override =  overrides.delete(:ref)
           if ref_override
             sequel_select = sequel_select.select(*((columns - [:ref])+[{ref_override => :ref}])).from_self
@@ -59,10 +59,10 @@ module XYZ
            when :prune_duplicates
             sequel_select = sequel_select.join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
            when :error_on_duplicate
-            #TODO: not right yet
+            # TODO: not right yet
             duplicate_count = sequel_select.join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
-              #TODO: make this a specfic error 
+              # TODO: make this a specfic error 
               raise Error.new("found #{duplicate_count.to_s} duplicates")
             end
            when :allow
@@ -75,11 +75,11 @@ module XYZ
           end
         end
 
-        #process overrides
+        # process overrides
         # using has_key? to take into account nil value
         sequel_select_with_cols = sequel_select.from_self.select(*columns.map{|col|overrides.has_key?(col) ? {overrides[col] => col} : col})
 
-        #fn tries to return ids depending on whether db adater supports returning_id
+        # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         if ds.respond_to?(:insert_returning_sql)
           returning_ids = Array.new
@@ -99,15 +99,15 @@ module XYZ
             ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         else
           ds.import(columns,sequel_select_with_cols)
-          #TODO: need to get ids and set 
+          # TODO: need to get ids and set 
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
         end
         ret
       end
       private
        def process_json_fields_in_returning_ids!(returning_ids,db_rel)
-         #convert any json fields
-         #short circuit
+         # convert any json fields
+         # short circuit
          return returning_ids if returning_ids.empty?
          cols_info = db_rel[:columns]
          return returning_ids unless returning_ids.first.find{|k,v|(cols_info[k]||{})[:type] == :json}
@@ -130,7 +130,7 @@ module XYZ
         return uri_id_handle[:uri] if exists? uri_id_handle
         ref,factory_uri = RestURI.parse_instance_uri(uri_id_handle[:uri])
 
-        #create parent if does not exists and this is recursive create
+        # create parent if does not exists and this is recursive create
         if opts[:recursive_create]
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
           parent_idh = uri_id_handle.createIDH(:uri => parent_uri)
@@ -183,7 +183,7 @@ module XYZ
           ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
 
           merge_attrs = {:ref_num => ref_num,parent_id_field => parent_id_info[:id]}
-          #TODO: may fold into  modify_to_reflect_special_processing!, but that require sref_num be computed before this call
+          # TODO: may fold into  modify_to_reflect_special_processing!, but that require sref_num be computed before this call
           if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
             merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
           end

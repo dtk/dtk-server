@@ -32,7 +32,7 @@ module R8Tpl
       end
     end
 
-    #TODO: may need to refactor slightly when this subsumes saved_search refs
+    # TODO: may need to refactor slightly when this subsumes saved_search refs
     class VirtualModelRef < String
      public
       def self.create(virtual_model_ref_str,view_type,user)
@@ -70,7 +70,7 @@ module R8Tpl
       end
     end
     
-    #TODO: temp until deprecate @saved_search_ref
+    # TODO: temp until deprecate @saved_search_ref
     def virtual_model_ref()
       @virtual_model_ref || @saved_search_ref
     end
@@ -79,8 +79,8 @@ module R8Tpl
     end
 
 
-    #returns the appropriate view path
-    #TODO: this bakes in some "ordering with a type; is this right place to put this?
+    # returns the appropriate view path
+    # TODO: this bakes in some "ordering with a type; is this right place to put this?
     def ret_view_path(type)
       case(type)
        when :system 
@@ -88,7 +88,7 @@ module R8Tpl
        when :base 
         ViewPathFile.new("#{R8::Config[:base_views_dir]}/#{@model_name}/#{@profile}.#{@view_name}.rtpl")
        when :meta
-        #first see if there is a meta template for specfic profile type; if not look for default;
+        # first see if there is a meta template for specfic profile type; if not look for default;
         path = ret_if_exists(ViewPathFile.new("#{R8::Config[:meta_templates_root]}/#{@model_name}/view.#{@profile}.#{@view_name}.rb"))
         return path if path
         return nil if @profile.to_sym == :default
@@ -96,7 +96,7 @@ module R8Tpl
        when :meta_db
          ViewPathDB.new(virtual_model_ref)
        when :cache 
-        #TODO: fix so saved_search not hard coded
+        # TODO: fix so saved_search not hard coded
         if virtual_model_ref
           if virtual_model_ref_type() == :virtual_object
             ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.#{virtual_model_ref.view_meta_id.to_s}.rtpl")
@@ -107,7 +107,7 @@ module R8Tpl
           ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.rtpl")
         end
        when :layout
-        #TODO: see if profile is used to qualify
+        # TODO: see if profile is used to qualify
         ViewPathFile.new("#{R8::Config[:app_root_path]}/view/#{@view_name}.rtpl")
        when :css_require
         ViewPathFile.new("#{R8::Config[:app_cache_root]}/view/#{@model_name}/#{@profile}.#{@view_name}.css_include.json")
@@ -119,7 +119,7 @@ module R8Tpl
       end
     end
 
-    #returns the appropriate view path if it exists
+    # returns the appropriate view path if it exists
     def ret_existing_view_path(type)
       ret_if_exists(ret_view_path(type))
     end

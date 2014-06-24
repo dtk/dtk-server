@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 11: NEG - Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server
+# Test Case 11: NEG - Ill-formed yaml content (component instead of components) in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'

@@ -1,7 +1,7 @@
 module DTK
   class ErrorUsage < Error
     r8_nested_require('usage','parsing')
-    #dsl_not_supported must be after parsing
+    # dsl_not_supported must be after parsing
     r8_nested_require('usage','dsl_not_supported')
     r8_nested_require('usage','warning')
     attr_reader :donot_log_error
@@ -21,7 +21,7 @@ module DTK
       ([first]+split).join(' ')
     end
 
-    #TODO: make second argument be polymorphic to handle things like wrong type, wrong name
+    # TODO: make second argument be polymorphic to handle things like wrong type, wrong name
     class BadParamValue < self
       def initialize(param,enum_vals=nil)
         super(msg(param,enum_vals))
@@ -47,7 +47,7 @@ module DTK
     end
   end
 
-  #TODO: nest these also under ErrorUsage
+  # TODO: nest these also under ErrorUsage
   class ErrorsUsage < ErrorUsage
     def initialize()
       @errors = Array.new
@@ -69,7 +69,7 @@ module DTK
     end
   end
 
-  #TODO: move over to use nested classeslike above
+  # TODO: move over to use nested classeslike above
   class ErrorIdInvalid <  ErrorUsage
     def initialize(id,object_type)
       super(msg(id,object_type))

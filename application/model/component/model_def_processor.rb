@@ -1,4 +1,4 @@
-#TODO: replace with common methods in attribute
+# TODO: replace with common methods in attribute
 module DTK
   module ComponentModelDefProcessor
     def get_model_def(attr_filters={:hidden => true})
@@ -13,15 +13,15 @@ module DTK
     def update_field_def(field_def_update)
       ModelDefProcessorInternals.update_field_def(self,field_def_update)
     end
-   #TODO: cleanup uniform way of giving field def; for below just assuming hash display name
+   # TODO: cleanup uniform way of giving field def; for below just assuming hash display name
     def create_or_modify_field_def(field_def)
       ModelDefProcessorInternals.create_or_modify_field_def(self,field_def)
     end
 
   module ModelDefProcessorInternals
-   #TODO: remove extend R8Tpl::Utility::I18n
+   # TODO: remove extend R8Tpl::Utility::I18n
 
-    #returns the list of idhs that have been created or modified
+    # returns the list of idhs that have been created or modified
     def self.create_or_modify_field_def(component,field_def)
       attr_mh = component.model_handle.create_childMH(:attribute)
       attr_hash = Aux::hash_subset(field_def,CreateFields)
@@ -31,21 +31,21 @@ module DTK
       attr_hash[:ref] = attr_hash[:display_name]
       attr_hash[:semantic_data_type] ||= Attribute::SemanticDatatype.default().to_s
       attr_hash[:data_type] ||= Attribute::SemanticDatatype.datatype(attr_hash[:semantic_data_type]).to_s
-      #TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
+      # TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh,component.id_handle,[attr_hash],[:ref],:update_matching => true,:no_delete => true)
     end
     CreateFields = [:display_name,:data_type,:dynamic,:required,:semantic_data_type].map{|sym|{sym.to_s => sym}} + [{'default' => :value_asserted}]
   
     def self.update_field_def(component,field_def_update)
-      #compute default 
+      # compute default 
       default_assign = AttributeComplexType.ravel_raw_post_hash({field_def_update["id"] => field_def_update["default"]},:attribute,component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
       attr_hash = Aux::hash_subset(field_def_update,UpdateFields - %w{default i18n}).merge(default_assign)
       Model.update_from_rows(attr_mh,[attr_hash],:partial_value => true)
 
       field_def = field_def_update["field_def"]
-      #update label
-      #TODO: if now if whether cahnged can be more efficient
+      # update label
+      # TODO: if now if whether cahnged can be more efficient
       label = field_def_update["i18n"]
       component.update_attribute_i18n_label(field_def["name"],label) if label
       field_def.merge(Aux::hash_subset(field_def_update,UpdateFields))

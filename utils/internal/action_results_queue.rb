@@ -1,10 +1,10 @@
 require 'iconv'
 
 module DTK
-  #cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
+  # cross threads may eb seperate requests for new action results queue, but no locking on allocated instance
   class ActionResultsQueue
 
-    #returns :is_complete => is_complete, :results => results
+    # returns :is_complete => is_complete, :results => results
     # since action result queue post processing is specific to netstats results, 
     # you can disable mentioned post processing via flag :disable_post_processing
     def self.get_results(queue_id,ret_only_if_complete,disable_post_processing, sort_key = :port)
@@ -65,7 +65,7 @@ module DTK
       @results[index] = el
     end
     def all_if_complete()
-      #TODO: error message if @results.size > @indexes.size
+      # TODO: error message if @results.size > @indexes.size
       (@results.size >= @indexes.size) ? @results : nil
     end
     
@@ -86,7 +86,7 @@ module DTK
           return results
         end
         ret = Array.new
-        #sort by node name and prune out keys with no results
+        # sort by node name and prune out keys with no results
         pruned_sorted_keys = results.reject{|k,v|v.nil?}.sort{|a,b|a[1].node_name <=> b[1].node_name}.map{|r|r.first}
         pruned_sorted_keys.each do |node_id|
           result = results[node_id]

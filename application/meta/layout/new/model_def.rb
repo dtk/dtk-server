@@ -22,7 +22,7 @@
   },
   :many_to_one=>
   [
-   #TODO put in when used  :node,
+   # TODO put in when used  :node,
    :component
   ],
   :virtual_columns=>{

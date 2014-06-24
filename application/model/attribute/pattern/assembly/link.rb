@@ -23,7 +23,7 @@ module DTK; class Attribute::Pattern
         end
       end
 
-      #returns object of type Info
+      # returns object of type Info
       def self.parsed_adhoc_link_info(parent,assembly,target_attr_term,source_attr_term)
         assembly_idh = assembly.id_handle()
         target_attr_pattern = Target.create_attr_pattern(assembly,target_attr_term)
@@ -43,7 +43,7 @@ module DTK; class Attribute::Pattern
           raise DSLNotSupported::LinkFromComponentWithTitle.create_from_component(source_component_instance)
         end
 
-        #TODO: need to do more checking and processing to include:
+        # TODO: need to do more checking and processing to include:
         #  if has a relation set already and scalar conditionally reject or replace
         # if has relation set already and array, ...
         attr_info = {

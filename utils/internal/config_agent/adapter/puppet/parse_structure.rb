@@ -9,7 +9,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     def config_agent_type()
       :puppet
       end
-    #These all get ovewritten for matching class
+    # These all get ovewritten for matching class
     def is_defined_resource?() 
       nil
     end
@@ -25,13 +25,13 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     ######
     ###hacks for pp
     def pretty_print(q)      
-      #TODO: may return an ordered hash
+      # TODO: may return an ordered hash
       pp_form().pretty_print(q)
     end
     
     def pp_form
       ret =  SimpleOrderedHash.new()
-      #TODO: have each class optionally have klass.pp_key_order
+      # TODO: have each class optionally have klass.pp_key_order
       ret[:r8class] = self[:r8class] || self.class.to_s.gsub("XYZ::Puppet::","").gsub(/PS$/,"").to_sym
       each do |k,v|
         next if k == :r8class
@@ -52,7 +52,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
     end
     
-    #this can be overwritten
+    # this can be overwritten
     def self.ignore?(ast_obj,opts={})
       nil
     end
@@ -99,8 +99,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       @parse_just_signatures ||= R8::Config[:puppet][:parser][:parse_just_signatures] 
     end
 
-    #TODO: move these into seperate files
-    #can be module or file
+    # TODO: move these into seperate files
+    # can be module or file
     class TopPS < self
       def initialize(ast_array=nil,opts={})
         self[:children] = Array.new
@@ -116,7 +116,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
               ComponentPS.create(ast_item,opts)
             elsif puppet_type?(ast_item,[:var_def])
               nil
-              #TODO: should this be ignored?
+              # TODO: should this be ignored?
             else
               raise ParseError.new("Unexpected top level ast type (#{ast_item.class.to_s})")
             end
@@ -135,7 +135,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
 
     class ComponentPS < self
-      #TODO: use opts to specify what to parse and what to ignore
+      # TODO: use opts to specify what to parse and what to ignore
       def initialize(ast_item,opts={})
         type =
           if puppet_type?(ast_item,:hostclass)
@@ -163,9 +163,9 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
      private
       def self.ignore?(ast_obj,opts={})
-        #TODO: make this configurable 
-        #ignore components that have more than one qualification; they are mostly sub classes/defs
-        #ast_obj.name =~ /::.+::/
+        # TODO: make this configurable 
+        # ignore components that have more than one qualification; they are mostly sub classes/defs
+        # ast_obj.name =~ /::.+::/
         nil
       end
 
@@ -228,7 +228,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def parse__resource(ast_item,opts)
-        #TODO: case on opts what is returned; here we are casing on just external resources
+        # TODO: case on opts what is returned; here we are casing on just external resources
         return ExportedResourcePS.create_instances(ast_item,opts) if ast_item.exported
         if ResourcePS.builtin?(ast_item)
         else DefinedResourcePS.create_instances(ast_item,opts)
@@ -244,7 +244,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         end
       end
       def parse__if_statement(ast_item,opts)
-        #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
+        # TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
         ret = Array.new
         IfStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
           ret += parse_child(child_ast_item,opts)
@@ -253,7 +253,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def parse__case_statement(ast_item,opts)
-        #TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
+        # TODO: this flattens the "if call" and returns both sides; whether this shoudl be done may be dependent on ops
         ret = Array.new
         CaseStatementPS.flat_statement_iter(ast_item,opts) do |child_ast_item|
           ret += parse_child(child_ast_item,opts)
@@ -304,7 +304,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
       def ast_title(ast_resource,opts={})
         children = ast_resource.instances.children
-        #if this is called all children will agree on the title
+        # if this is called all children will agree on the title
         sample_child = children.first
         sample_child.title
       end
@@ -375,7 +375,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     class ResourceParamNonTitlePS < ResourceParamPS
       def self.create(ast_rsc_param,opts={})
         case ast_rsc_param.param 
-         #TODO: ccurrently throwing out require; this should be used to look for foreign resources
+         # TODO: ccurrently throwing out require; this should be used to look for foreign resources
          when "require" then nil
          when "stage" then StageResourceParam.create(ast_rsc_param,opts)
          else
@@ -468,7 +468,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
        super
       end
 
-      #returns var bindings if any of there is a match
+      # returns var bindings if any of there is a match
       def match_exported?(exp_rsc)
         return nil unless self[:type] == exp_rsc[:name]
         return VarMatches.new if self[:query].nil?
@@ -492,7 +492,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     
     class CollExprAttributeExpressionPS < CollExprPS
       def initialize(coll_expr_ast,opts)
-        #TODO: if both test1 and test2 are names guessing that first one is attribute name
+        # TODO: if both test1 and test2 are names guessing that first one is attribute name
         name = nil
         value_ast = nil
         if puppet_type?(coll_expr_ast.test1,:name)
@@ -518,7 +518,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       end
 
       def match_exported?(exp_rsc_params)
-        #TODO: treat ops other than  "=="
+        # TODO: treat ops other than  "=="
         return nil unless self[:op] == "=="
         matching_param = exp_rsc_params.find{|p|p[:name] == self[:name]}
         ret = matching_param && matching_param[:value].can_match?(self[:value])
@@ -589,7 +589,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     end
 
     module RequireIncludeClassMixin
-      #defining create to handle case that there could be multiple items created
+      # defining create to handle case that there could be multiple items created
       def create(ast_fn,opts={})
         ast_fn.arguments.children.map do |term_ast|
           if parsed_term = TermPS.create(term_ast,opts)
@@ -855,7 +855,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         if ast_term.kind_of?(VariablePS) 
           VarMatches.new.add(self,ast_term)
         elsif ast_term.kind_of?(ConcatPS)
-          #TODO: can be other ways to match
+          # TODO: can be other ways to match
           return nil unless self[:terms].size == ast_term[:terms].size
           ret = nil
           self[:terms].each_with_index do |t,i|
@@ -888,7 +888,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       def can_match?(ast_term)
         if ast_term.kind_of?(VariablePS) then true
         elsif ast_term.kind_of?(FunctionPS)
-          #TODO: can be other ways to match
+          # TODO: can be other ways to match
           return nil unless self[:name] == ast_term[:name]
           return nil unless self[:terms].size == ast_term[:terms].size
           self[:terms].each_with_index{|t,i|return nil unless t.can_match?(ast_term[:terms][i])}

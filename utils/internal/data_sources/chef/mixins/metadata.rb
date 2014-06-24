@@ -31,7 +31,7 @@ module XYZ
      def get_service_info(recipe_name,meta_service_info)
        ret = HashObject::AutoViv.create()
        if (meta_service_info[:recipe_names]||[]).include?(recipe_name)
-         #TBD: modify use of canonical_service_name
+         # TBD: modify use of canonical_service_name
          ret[:canonical_service_name] = meta_service_info[:service_name]
          ret[:conditions] = meta_service_info[:conditions]
        end
@@ -39,7 +39,7 @@ module XYZ
      end
 
     private
-      #returns [(normalized)attr_name,service_name]
+      # returns [(normalized)attr_name,service_name]
      def get_attribute_and_service_names(attr_name)
        if attr_name =~ Regexp.new("^(.+)/_service/(.+?)/(.+)$")
          ["#{$1}/#{$3}",$2]

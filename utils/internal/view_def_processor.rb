@@ -1,9 +1,9 @@
 module XYZ
   class ViewDefProcessor
-    #returns template path
-    #TODO: hack now that needs saved_search prefix
+    # returns template path
+    # TODO: hack now that needs saved_search prefix
     def self.save_view_in_cache?(type,id_handle,user,opts={})
-      #TODO: make more efficient be just getting view_def_key info first
+      # TODO: make more efficient be just getting view_def_key info first
       cmp_attrs_objs = get_model_info(id_handle,opts)
       view_def_key = cmp_attrs_objs[:view_def_key]
       view_name = "#{type}.#{view_def_key}"
@@ -114,7 +114,7 @@ module XYZ
       end
     end
     def self.field_list_display(attr_objs)
-      #TODO stub
+      # TODO stub
       attr_objs.map do |attr|
         {attr[:display_name].to_sym =>{
             :type => convert_type(attr[:data_type]),
@@ -126,7 +126,7 @@ module XYZ
       end
     end
     def self.field_list_edit(attr_objs)
-      #TODO stub
+      # TODO stub
       attr_objs.map do |attr|
         {attr[:display_name].to_sym =>{
             :type => convert_type(attr[:data_type]),

@@ -1,4 +1,4 @@
-#TODO: see if can collapse or better integrate with dataset_from_search_pattern.rb
+# TODO: see if can collapse or better integrate with dataset_from_search_pattern.rb
 module XYZ
   module FieldSearchPatternInstanceMixin
     class FieldSearchPattern
@@ -9,9 +9,9 @@ module XYZ
         ret = nil
         name_value_pairs.each do |name_x,value|
           name = name_x.to_sym
-          #ignore if empty 
+          # ignore if empty 
           next if (value and value.empty?)
-          #ignore unless column has a basic type
+          # ignore unless column has a basic type
           basic_type = @col_basic_types[name]
           next unless basic_type
           new_el = 
@@ -33,7 +33,7 @@ module XYZ
       end
      private
       def process_numeric(name,value)
-        #TODO: may encapsulate undet SQL class
+        # TODO: may encapsulate undet SQL class
         if value =~ /^<=(.+)$/
           name.to_s.lit <= $1
         elsif value =~ /^>=(.+)$/

@@ -101,7 +101,7 @@ module DTK; class  Assembly
     end
 
     def get_augmented_attribute_mappings()
-      #TODO: once field assembly_id is always populated on attribute.link, can do simpler query
+      # TODO: once field assembly_id is always populated on attribute.link, can do simpler query
       ret = Array.new
       sp_hash = {
         :cols => [:id,:group_id],
@@ -226,7 +226,7 @@ module DTK; class  Assembly
       self.class.get_sub_assemblies([id_handle()])
     end
 
-    #augmented with node, :component  and link def info
+    # augmented with node, :component  and link def info
     def get_augmented_ports(opts={})
       ndx_ret = Hash.new
       ret = get_objs(:cols => [:augmented_ports]).map do |r|
@@ -243,7 +243,7 @@ module DTK; class  Assembly
       ret
     end
 
-    #TODO: more efficient if can do the 'title' match on sql side
+    # TODO: more efficient if can do the 'title' match on sql side
     def get_augmented_ports__matches_on_title?(component,port)
       ret = true
       if cmp_title = ComponentTitle.title?(component)
@@ -253,7 +253,7 @@ module DTK; class  Assembly
     end
     private :get_augmented_ports__matches_on_title?
 
-    #TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
+    # TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
     def get_augmented_ports__mark_unconnected!(aug_ports,opts={})
       port_links = get_port_links()
       connected_ports =  port_links.map{|r|[r[:input_id],r[:output_id]]}.flatten.uniq
@@ -275,11 +275,11 @@ module DTK; class  Assembly
       self.class.op_status_all_pending?(assembly_nodes)
     end
 
-    #returns
+    # returns
     #'running' - if at least one node is running
     #'stopped' - if there is atleast one node stopped and no nodes running
     #'pending' - if all nodes are pending or no nodes
-    #nil - if cant tell
+    # nil - if cant tell
     def self.op_status(assembly_nodes)
       return 'pending' if assembly_nodes.empty?
       stop_found = false
@@ -290,7 +290,7 @@ module DTK; class  Assembly
           when 'stopped'
             stop_found = true
           when 'pending'
-            #no op
+            # no op
           else
             return nil
         end
@@ -340,7 +340,7 @@ module DTK; class  Assembly
       nodes
     end
 
-    #Simple get assembliy instances
+    # Simple get assembliy instances
     def self.get(assembly_mh, opts={})
       target_idhs = (opts[:target_idh] ? [opts[:target_idh]] : opts[:target_idhs])
       target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map{|idh|idh.get_id()}] : [:neq, :datacenter_datacenter_id, nil])
@@ -361,7 +361,7 @@ module DTK; class  Assembly
       ret = get(assembly_mh,{:cols => cols}.merge(opts))
       return ret unless needs_empty_nodes
 
-      #add in in assembly nodes without components on them
+      # add in in assembly nodes without components on them
       nodes_ids = ret.map{|r|(r[:node]||{})[:id]}.compact
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:version,:instance_nodes_and_assembly_template],
@@ -384,7 +384,7 @@ module DTK; class  Assembly
     end
 
 
-    #returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
+    # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]
     def self.list_virtual_column?(detail_level=nil)
       empty_assem_nodes = false
@@ -393,7 +393,7 @@ module DTK; class  Assembly
           nil
         elsif detail_level == "nodes"
           empty_assem_nodes = true
-          #TODO: use below for component detail and introduce a more succinct one for nodes
+          # TODO: use below for component detail and introduce a more succinct one for nodes
           :instance_nodes_and_cmps_summary
         elsif detail_level == "components"
           empty_assem_nodes = true
@@ -416,7 +416,7 @@ module DTK; class  Assembly
       else
         assembly_idhs = [assembly_idhs]
       end
-      #cannot delete workspaces
+      # cannot delete workspaces
       if workspace = assembly_idhs.find{|idh|Workspace.is_workspace?(idh.create_object())}
         raise ErrorUsage.new("Cannot delete a workspace")
       end
@@ -436,14 +436,14 @@ module DTK; class  Assembly
       assembly_ids = assembly_idhs.map{|idh|idh.get_id()}
       idh = assembly_idhs.first
       delete_assembly_modules?(assembly_idhs,opts)
-      #delete_assembly_modules? needs to be done before delete_assembly_nodes
+      # delete_assembly_modules? needs to be done before delete_assembly_nodes
       delete_assembly_nodes(idh.createMH(:node),assembly_ids,opts)
       delete_task_templates(idh.createMH(:task_template),assembly_ids)
     end
 
     def delete_node(node_idh,opts={})
       node =  node_idh.create_object()
-      #TODO: check if cleaning up dangling links when assembly node deleted
+      # TODO: check if cleaning up dangling links when assembly node deleted
       DeleteAndResetHelper.delete_node(node,opts.merge(:update_task_template=>true,:assembly=>self))
     end
 
@@ -466,7 +466,7 @@ module DTK; class  Assembly
         end
       end
 
-      #This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
+      # This only deletes the nodes that the assembly 'owns'; with sub-assemblies, the assembly base will own the node
       def delete_assembly_nodes(node_mh,assembly_ids,opts={})
         DeleteAndResetHelper.delete_nodes(node_mh,assembly_ids,opts)
       end
@@ -478,7 +478,7 @@ module DTK; class  Assembly
         nodes.map{|node|delete_node(node,opts)}
       end
 
-      #TODO: double check if Transactyion needed; if so look at whetehr for same reason put in destoy and reset
+      # TODO: double check if Transactyion needed; if so look at whetehr for same reason put in destoy and reset
       def self.delete_node(node,opts={})
         ret = nil
         Transaction do 
@@ -505,7 +505,7 @@ module DTK; class  Assembly
 
 
     def add_node(node_name,node_binding_rs=nil)
-      #check if node has been added already
+      # check if node has been added already
       if get_node?([:eq,:display_name,node_name])
         raise ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
       end
@@ -524,7 +524,7 @@ module DTK; class  Assembly
     end
 
     def add_component(node_idh,component_template,component_title)
-      #first check that node_idh belongs to this instance
+      # first check that node_idh belongs to this instance
       sp_hash = {
         :cols => [:id, :display_name,:group_id, :ordered_component_ids],
         :filter => [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
@@ -578,7 +578,7 @@ module DTK; class  Assembly
       ret
     end
 =begin
-#TODO: Deprecating DEPENDENCY-ORDER-INDEX
+# TODO: Deprecating DEPENDENCY-ORDER-INDEX
 ...      
       # Amar: Retrieving node object to update components order
       sp_hash = {
@@ -595,7 +595,7 @@ module DTK; class  Assembly
     def add_assembly_template(assembly_template)
       target = get_target()
       assem_id_assign = {:assembly_id => id()}
-      #TODO: want to change node names if dups
+      # TODO: want to change node names if dups
       override_attrs = {:node => assem_id_assign.merge(:component_ref => assem_id_assign),:port_link => assem_id_assign}
       clone_opts = {:ret_new_obj_with_cols => [:id,:type]}
       new_assembly_part_obj = target.clone_into(assembly_template,override_attrs,clone_opts)
@@ -670,7 +670,7 @@ module DTK; class  Assembly
 
     def get_attributes_all_levels()
       assembly_attrs = get_assembly_level_attributes()
-      #TODO: more efficient is they do not need to be augmenetd
+      # TODO: more efficient is they do not need to be augmenetd
       component_attrs = get_augmented_nested_component_attributes()
       node_attrs = get_augmented_node_attributes()
       assembly_attrs + component_attrs + node_attrs
@@ -727,7 +727,7 @@ module DTK; class  Assembly
       name_to_id_helper(model_handle,name,augmented_sp_hash)
     end
 
-    #TODO: probably move to Assembly
+    # TODO: probably move to Assembly
     def model_handle(mn=nil)
       super(mn||:component)
     end
@@ -754,7 +754,7 @@ module DTK; class  Assembly
 
   end
 end 
-#TODO: hack to get around error in lib/model.rb:31:in `const_get
+# TODO: hack to get around error in lib/model.rb:31:in `const_get
 AssemblyInstance = Assembly::Instance
 end
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-#complete hack, but is aux fn
+# complete hack, but is aux fn
 root = File.expand_path('../', File.dirname(__FILE__))
 require root + '/app'
-#utils/internal/serialize_to_json.rb
+# utils/internal/serialize_to_json.rb
 include XYZ
 
 =begin

@@ -1,5 +1,5 @@
-#TODO: bring in a production quality ruby logging capability that gets wrapped here
-#TODO: would put this in config
+# TODO: bring in a production quality ruby logging capability that gets wrapped here
+# TODO: would put this in config
 module XYZ
   module Log
     Config = Hash.new

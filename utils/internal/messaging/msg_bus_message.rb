@@ -14,7 +14,7 @@ module XYZ
     end
   end   
   class MessageBusMsgIn < MessageBusMsg
-    #input so processor_msg can be formed
+    # input so processor_msg can be formed
     def parse()
       {:msg_type => @body[:msg_type],
        :msg_content => @body[:msg_content],
@@ -31,7 +31,7 @@ module XYZ
       @body = body
     end
    
-    #return raw_body,raw_publish_opts
+    # return raw_body,raw_publish_opts
     def marshal_to_wire(publish_opts)
       hash_body = {:body => @body}
       raw_publish_opts = {} 
@@ -45,7 +45,7 @@ module XYZ
       [Aux::marshal_to_wire(hash_body),raw_publish_opts]
     end
 
-    #type can be :attribute or :node
+    # type can be :attribute or :node
     def self.topic(type)
       case type
         when :attribute

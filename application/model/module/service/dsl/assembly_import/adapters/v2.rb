@@ -17,7 +17,7 @@ module DTK; class ServiceModule
       end
 
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports,opts={})
-        #augment ports with parsed display_name
+        # augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
         port_links = parse_component_links(assembly_hash,opts).inject(DBUpdateHash.new) do |h,component_link_info|
           parsed_component_link = component_link_info[:parsed_component_link]
@@ -45,11 +45,11 @@ module DTK; class ServiceModule
 
       def self.import_task_templates(assembly_hash)
         ret = DBUpdateHash.new()
-        #TODO: just treating the default action
-        #TODO: enhance to parse the workflow, such as checking all components in workflow
-        #are defined
+        # TODO: just treating the default action
+        # TODO: enhance to parse the workflow, such as checking all components in workflow
+        # are defined
         if workflow = assembly_hash["workflow"]
-          #its ok to delete from assembly_hash/workflow
+          # its ok to delete from assembly_hash/workflow
           if assembly_action = workflow.delete("assembly_action")
             unless  assembly_action == "create"
               raise ErrorUsage.new("Unexpected workflow task action (#{assembly_action})")
@@ -75,14 +75,14 @@ module DTK; class ServiceModule
         ret
       end
 
-      #pattern that appears in dsl that designates a component title
+      # pattern that appears in dsl that designates a component title
       DSLComponentTitleRegex = /(^.+)\[(.+)\]/
       
       def self.component_ref_parse(cmp)
         ref,type,version = InternalForm.component_ref_type_and_version(cmp.kind_of?(Hash) ?  cmp.keys.first : cmp)
         display_name = ref
 
-        #TODO: move this also to dsl/common
+        # TODO: move this also to dsl/common
         component_title = nil
         if type =~ DSLComponentTitleRegex
           type = $1
@@ -97,7 +97,7 @@ module DTK; class ServiceModule
         ret
       end
 
-      #returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
+      # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
       def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new
         (assembly_hash["nodes"]||{}).each_pair do |input_node_name,node_hash|

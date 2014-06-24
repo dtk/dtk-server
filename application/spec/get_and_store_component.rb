@@ -35,7 +35,7 @@ def remove_defaults!(component)
     end
   end
 end
-#TODO: if make this into real fn; make it datadriven from schema info 
+# TODO: if make this into real fn; make it datadriven from schema info 
 CMP_DEFAULTS = {
   "only_one_per_node" => true
 }

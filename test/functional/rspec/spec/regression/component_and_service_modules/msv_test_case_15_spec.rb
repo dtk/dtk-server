@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 15: Import component module from git repo url
+# Test Case 15: Import component module from git repo url
 
 require 'rubygems'
 require 'rest_client'

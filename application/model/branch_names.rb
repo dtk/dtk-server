@@ -1,5 +1,5 @@
-#TODO: deprecate when get all this logic in ModuleLocation::Target
-#TODO: putting version defaults in now; may move to seperate file or rename to branch_names_and_versions
+# TODO: deprecate when get all this logic in ModuleLocation::Target
+# TODO: putting version defaults in now; may move to seperate file or rename to branch_names_and_versions
 module DTK
   VersionFieldDefault = 'master'
 
@@ -29,12 +29,12 @@ module DTK
       end
     end
 
-    #TODO: deprecate
+    # TODO: deprecate
     def library_branch_name(library_idh,version=nil)
-      #TODO: when have multiple libraries that can host same module will need to refine
+      # TODO: when have multiple libraries that can host same module will need to refine
       #      library = library_idh.create_object().update_object!(:ref)
       #     "library-#{library[:ref]}-v#{new_version.to_s}"
-      #version ? "v#{version}" : VersionFieldDefault
+      # version ? "v#{version}" : VersionFieldDefault
       version_field(version)
     end
 

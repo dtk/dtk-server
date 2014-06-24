@@ -12,12 +12,12 @@ module DTK; class Task
         end
       end
 
-      #for debugging
+      # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:component] = (object[:component]||{})[:display_name]
 
-        #TODO: should get attribute values from attribute object since task info can be stale
+        # TODO: should get attribute values from attribute object since task info can be stale
         
         ret[:attributes]  = (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
@@ -43,7 +43,7 @@ module DTK; class Task
         new(hash)
       end
 
-      #returns component_actions,intra_node_stages
+      # returns component_actions,intra_node_stages
       def self.order_and_group_by_component(state_change_list)
         intra_node_stages = nil
         ndx_cmp_idhs = Hash.new
@@ -67,7 +67,7 @@ module DTK; class Task
         [component_actions,intra_node_stages]
       end
 
-      #returns cmp_ids_with_deps,intra_node_stages
+      # returns cmp_ids_with_deps,intra_node_stages
       def self.get_intra_node_stages(cmp_deps, state_change_list)
         cmp_ids_with_deps = get_cmp_ids_with_deps(cmp_deps).clone
         cd_ppt_stgs, scl_ppt_stgs = Stage::PuppetStageGenerator.generate_stages(cmp_ids_with_deps.dup, state_change_list.dup)
@@ -118,8 +118,8 @@ module DTK; class Task
       end
 
       def self.get_cmp_ids_with_deps(cmp_deps)
-        #TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
-        #first build index from component_type to id
+        # TODO: assumption that only a singleton component can be a dependency -> match on component_type sufficient
+        # first build index from component_type to id
         cmp_type_to_id = Hash.new
         cmp_deps.each do |id,info|
           info[:component_dependencies].each do |ct|
@@ -129,8 +129,8 @@ module DTK; class Task
           end
         end
 
-        #note: dependencies can be omitted if they have already successfully completed; therefore only
-        #looking for non-null deps
+        # note: dependencies can be omitted if they have already successfully completed; therefore only
+        # looking for non-null deps
         cmp_ids_with_deps = cmp_deps.inject({}) do |h,(id,info)|
           non_null_deps = info[:component_dependencies].map{|ct|cmp_type_to_id[ct]}.compact
           h.merge(id => non_null_deps)
@@ -138,7 +138,7 @@ module DTK; class Task
         return cmp_ids_with_deps.nil? ? {} : cmp_ids_with_deps
       end
 
-      #returns array of form [component_id,deps]
+      # returns array of form [component_id,deps]
       def self.generate_component_order(cmp_ids_with_deps)
         ordered_cmp_ids = TSortHash.new(cmp_ids_with_deps).tsort
         ordered_cmp_ids.map do |cmp_id|
@@ -171,7 +171,7 @@ module DTK; class Task
       end
 
       def self.attributes_status(object,opts)
-        #need to query db to get up to date values
+        # need to query db to get up to date values
         (object[:attributes]||[]).map do |attr|
           ret_attr = PrettyPrintHash.new
           ret_attr[:name] = attr[:display_name]
@@ -194,7 +194,7 @@ module DTK; class Task
 
       def self.create_from_state_change(scs_same_cmp,deps)
         state_change = scs_same_cmp.first
-        #TODO: may deprecate need for ||[sc[:id]
+        # TODO: may deprecate need for ||[sc[:id]
         pointer_ids = scs_same_cmp.map{|sc|sc[:linked_ids]||[sc[:id]]}.flatten.compact
         hash = {
           :state_change_pointer_ids => pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
@@ -204,7 +204,7 @@ module DTK; class Task
         }
         hash.merge!(:component_dependencies => deps) if deps
 
-        #TODO: can get more sophsiticated and handle case where some components installed and other are incremental
+        # TODO: can get more sophsiticated and handle case where some components installed and other are incremental
         incremental_change = !scs_same_cmp.find{|sc|not sc[:type] == "setting"}
         if incremental_change
           hash.merge!(:changed_attribute_ids => scs_same_cmp.map{|sc|sc[:attribute_id]}) 

@@ -4,7 +4,7 @@ module DTK
     class FieldSet
       include FieldSearchPatternInstanceMixin
       attr_reader :cols, :model_name
-      #TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
+      # TODO: so fieldset can be more advanced than array of scalrs; can have netsed structure
       def initialize(model_name,cols=Array.new,field_search_pattern=nil)
         @model_name = model_name.to_sym
         @cols = cols 
@@ -15,7 +15,7 @@ module DTK
         @cols.include?(col)
       end
 
-      #TODO: handle also case where col or self contains a hash
+      # TODO: handle also case where col or self contains a hash
       def add_col!(col)
         @cols << col unless @cols.include?(col)
         self
@@ -33,9 +33,9 @@ module DTK
         FieldSet.new(@model_name,@cols - cols)
       end
 
-      #difference between only_including and & is not sysmetric and provides for items in self which are form {alias => col}
+      # difference between only_including and & is not sysmetric and provides for items in self which are form {alias => col}
       def only_including(field_set)
-        #TODO: right now not checking non scalar
+        # TODO: right now not checking non scalar
         FieldSet.new(@model_name,@cols.reject{|col| col.kind_of?(Symbol) and not field_set.cols.include?(col)})
       end
 
@@ -76,7 +76,7 @@ module DTK
       end
 
 
-      #TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
+      # TODO!!!: this does not work properly when two or more virtual attributes point to same column, but not tagged with same dependency def
       def related_remote_column_info(vcol_sql_fns=nil)
         return nil if @cols.empty?
         return nil unless vcolumns = DB_REL_DEF[model_name][:virtual_columns]
@@ -101,7 +101,7 @@ module DTK
         @field_search_pattern ? @field_search_pattern.ret_where_clause_for_search_string(name_value_pairs) : {}
       end          
 
-      #returns foreign key columns in fieldset
+      # returns foreign key columns in fieldset
       def foreign_key_info() 
         db_rel_cols = ((DB_REL_DEF[model_name]||{})[:columns]||[])
         ret = Hash.new
@@ -111,7 +111,7 @@ module DTK
         ret
       end
 
-      #field set in option list
+      # field set in option list
       def self.opt(x,model_name=nil)
         field_set = 
           if x.kind_of?(Symbol) and x == :all
@@ -171,9 +171,9 @@ module DTK
       end
 
      private
-      #returns form [deps,def_name] where later can be null if no defs
+      # returns form [deps,def_name] where later can be null if no defs
       def parse_remote_dependencies(virtual_col_info)
-        #special case is :possible_parents
+        # special case is :possible_parents
         return [convert_to_remote_dependencies(virtual_col_info[:possible_parents]),nil] if virtual_col_info[:possible_parents]
         deps = virtual_col_info[:remote_dependencies]
         return nil unless deps
@@ -183,7 +183,7 @@ module DTK
 
       def parse_local_dependencies(virtual_col_info)
         return [] unless virtual_col_info
-        #special case is :possible_parents
+        # special case is :possible_parents
         return convert_to_local_dependencies(virtual_col_info[:possible_parents]) if virtual_col_info[:possible_parents]
         virtual_col_info[:local_dependencies] || []
       end

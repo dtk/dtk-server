@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 10: Export component module using full name #{component_module_name} to users default namespace and then delete it
+# Test Case 10: Export component module using full name #{component_module_name} to users default namespace and then delete it
 
 require 'rubygems'
 require 'rest_client'

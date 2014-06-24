@@ -1,21 +1,21 @@
 module DTK
   class Clone
     class CopyProcessor
-    #TODO: slight refactor of Output so each child is of form {:parent => <parent>,:child => Output>}
+    # TODO: slight refactor of Output so each child is of form {:parent => <parent>,:child => Output>}
       class Output
         def initialize(source_obj,opts={})
           @source_object = source_obj
           @id_handles = Array.new
           @objects = nil
           @children = Hash.new
-          #TODO: more efficient than making this Boolean is structure that indicates what depth to save children 
+          # TODO: more efficient than making this Boolean is structure that indicates what depth to save children 
           @include_children = opts[:include_children]
           @ret_new_obj_with_cols = opts[:ret_new_obj_with_cols]
         end
         
         attr_reader :source_object, :id_handles, :ret_new_obj_with_cols, :objects
         def model_name()
-        #all id handles wil be of same type
+        # all id handles wil be of same type
           @id_handles.first && @id_handles.first[:model_name]
         end
         
@@ -76,7 +76,7 @@ module DTK
           objs_info.each_with_index do |child_obj,i|
             idh = child_idhs[i] 
             children = level_p[idh[:model_name]] ||= Array.new
-            #clone_parent_id can differ from parent_id if for example node is under an assembly
+            # clone_parent_id can differ from parent_id if for example node is under an assembly
             children << {:id_handle => idh, :clone_parent_id => child_obj[parent_col], :obj_info => child_obj}
           end
           child_idhs

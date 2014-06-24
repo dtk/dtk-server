@@ -1,5 +1,5 @@
 module DTK
-  #This is a provider
+  # This is a provider
   class Target
     class Template < self
       subclass_model :target_template, :target, :print_form => 'provider'
@@ -56,7 +56,7 @@ module DTK
       end
 
       def create_bootstrap_targets?(project_idh,region_or_regions=nil)
-        #for succinctness
+        # for succinctness
         r = region_or_regions
         regions = 
           if r.kind_of?(Array) then r
@@ -90,7 +90,7 @@ module DTK
         Target::Instance.get_objs(model_handle(:target_instance),sp_hash)
       end
 
-      #TODO: move to be processed by IAAS specfic
+      # TODO: move to be processed by IAAS specfic
       def default_target_name(hash_params)
         if Aux.has_just_these_keys?(hash_params,[:region])
           "#{base_name()}-#{hash_params[:region]}"

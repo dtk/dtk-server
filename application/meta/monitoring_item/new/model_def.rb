@@ -19,7 +19,7 @@
     :params=>{
       :type=>:json
     },
-    #TODO: this may be be broken out as children objects
+    # TODO: this may be be broken out as children objects
     :attributes_to_monitor=>{
       :type=>:json
     }

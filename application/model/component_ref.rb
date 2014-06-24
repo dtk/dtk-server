@@ -9,8 +9,8 @@ module DTK
       update_object!(*cols_to_get)
       component_type = self[:component_type] && self[:component_type].gsub(/__/,"::")
       ret = component_type
-      #handle component title
-      #NOTE: ref_num is for dsl versions before v2
+      # handle component title
+      # NOTE: ref_num is for dsl versions before v2
       if title = ComponentTitle.title?(self)||self[:ref_num]
         ret = ComponentTitle.print_form_with_title(ret,title)
       end

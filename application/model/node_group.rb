@@ -6,7 +6,7 @@ module DTK
     def self.get_component_list(nodes,opts={})
       ret = opts[:add_on_to]||opts[:seed]||Array.new
       return ret if nodes.empty? 
-      #find node_to_ng mapping
+      # find node_to_ng mapping
       node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map{|n|n.id_handle()})
       node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group),node_filter)
       node_group_ids = node_to_ng.values.map{|r|r.keys}.flatten.uniq
@@ -25,11 +25,11 @@ module DTK
         pntr = ndx_node_ng_info[r[:id]] ||= {:node_or_ng => r.hash_subset(:id,:display_name)}
         (pntr[:component_ids] ||= Array.new) << cmp_id
       end
-      #add titles to components that are non singletons
+      # add titles to components that are non singletons
       Component::Instance.add_title_fields?(ndx_cmps.values)
 
       nodes.each do |node|
-        #find components on the node group
+        # find components on the node group
         (node_to_ng[node[:id]]||{}).each_key do |ng_id|
           if node_ng_info = ndx_node_ng_info[ng_id]
             node_ng_info[:component_ids].each do |cmp_id|
@@ -42,7 +42,7 @@ module DTK
           end
         end
 
-        #find components on the node
+        # find components on the node
         ((ndx_node_ng_info[node[:id]]||{})[:component_ids]||[]).each do |cmp_id|
           el = ndx_cmps[cmp_id].merge(
             :node => node,
@@ -78,7 +78,7 @@ module DTK
       get_objs(model_handle,sp_hash)
     end
 
-    #TODO: change to having node group having explicit links or using a saved search
+    # TODO: change to having node group having explicit links or using a saved search
     def get_node_members()
       sp_hash = {
         :cols => [:node_members]
@@ -91,13 +91,13 @@ module DTK
       end
     end
 
-    #returns node group to node mapping for each node matching node filter
+    # returns node group to node mapping for each node matching node filter
     # for is {node_id => {ng_id1 => ng1,..}
     # possible that node_id does not appear meaning that this node does not belong to any group
-    #TODO: this can potentially be expensive to compute without enhancements
+    # TODO: this can potentially be expensive to compute without enhancements
     def self.get_node_groups_containing_nodes(mh,node_filter)
       ng_mh = mh.createMH(:node)
-      #TODO: more efficient to push node_filte into sql query
+      # TODO: more efficient to push node_filte into sql query
       sp_hash = {
         :cols => [:id,:group_id, :display_name,:node_members]
       }
@@ -156,13 +156,13 @@ module DTK
     end
 
     def clone_and_add_template_node(template_node)
-      #clone node into node group's target 
+      # clone node into node group's target 
       target_idh = id_handle.get_top_container_id_handle(:target,:auth_info_from_self => true)
       target = target_idh.create_object()
       cloned_node_id = target.add_item(template_node.id_handle)
       target.update_ui_for_new_item(cloned_node_id)
 
-      #add node group relationship
+      # add node group relationship
       cloned_node = model_handle(:node).createIDH(:id => cloned_node_id).create_object()
       add_member(cloned_node,target_idh,:dont_check_redundancy => true)
       cloned_node.id_handle
@@ -171,7 +171,7 @@ module DTK
     def add_member(instance_node,target_idh,opts={})
       node_id = instance_node[:id]
       ng_id = self[:id]
-      #check for redundancy
+      # check for redundancy
       unless opts[:dont_check_redundancy]
         sp_hash = {
           :cols => [:id],
@@ -180,7 +180,7 @@ module DTK
         redundant_links = Model.get_objs(model_handle(:node_group_relation),sp_hash)
         raise Error.new("Node already member of node group") unless redundant_links.empty?
       end
-      #create the node_group_relation item to indicate node group membership
+      # create the node_group_relation item to indicate node group membership
       create_row = {
         :ref => "n#{node_id.to_s}-ng#{ng_id.to_s}",
         :node_id => node_id,
@@ -189,7 +189,7 @@ module DTK
       }
       Model.create_from_rows(model_handle(:node_group_relation),[create_row])
 
-      #clone the components and links associated with node group to teh node
+      # clone the components and links associated with node group to teh node
       clone_into_node(instance_node)
     end
 

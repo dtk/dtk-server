@@ -72,7 +72,7 @@ module DTK
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
               :display_name => r.pretty_print_name(pp_opts), 
               :last_task_run_status => last_task_run_status,                                                         
-              #TODO: will deprecate :execution_status after removing it from smoketests                                                         
+              # TODO: will deprecate :execution_status after removing it from smoketests                                                         
               :execution_status => last_task_run_status||'staged',
               :ndx_nodes => Hash.new
           )
@@ -88,7 +88,7 @@ module DTK
             pntr.merge!(:version => version)
           end
           if template = r[:assembly_template]
-            #just triggers for assembly instances; indicates the assembly templaet that spawned it
+            # just triggers for assembly instances; indicates the assembly templaet that spawned it
             pntr.merge!(:assembly_template => Template.pretty_print_name(template,:version_suffix => true))
           end
           if created_at = r[:created_at]
@@ -154,12 +154,12 @@ module DTK
         has_print_form = opts[:print_form]
         node_ext_ref.each_pair do |k,v|
           if [:secret,:key].include?(k)
-            #omit
+            # omit
           elsif not has_print_form
             ret[k] = v
           else
             if [:dns_name].include?(k) 
-              #no op
+              # no op
             elsif k == :private_dns_name and v.kind_of?(Hash)            
               ret[k] = v.values.first
             else

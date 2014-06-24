@@ -22,7 +22,7 @@ module DTK
     private
      attr_reader :code, :message, :backtrace
     public
-    #its either its a usage or and internal (application error) bug
+    # its either its a usage or and internal (application error) bug
     class Internal < RestError
       def hash_form()
         ret = super.merge(:internal => true)

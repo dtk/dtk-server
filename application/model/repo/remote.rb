@@ -1,7 +1,7 @@
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class Repo
-    #TODO: may have better class name; this is really a remote repo server handler
+    # TODO: may have better class name; this is really a remote repo server handler
     class Remote
       r8_nested_require('remote','auth')
       include AuthMixin
@@ -33,24 +33,27 @@ module DTK
         client.remove_client_user(username)
       end
 
-      def create_remote_module(client_rsa_pub_key)
+      def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
         username        = dtk_instance_remote_repo_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
 
         client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
-        
-        unless namespace = remote.namespace 
+
+        unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()
           Log.error("Unexpected that naemspace was null and used CurrentSession.new.get_user_object().get_namespace(): #{namespace}}")
         end
+
         params = {
           :username => username,
           :name => remote.module_name(),
           :type => type_for_remote_module(remote.module_type),
-          :namespace => namespace
-        } 
-        response_data = client.create_module(params, client_rsa_pub_key)
+          :namespace => namespace,
+          :module_refs_content => module_refs_content
+        }
+
+        response_data = client.publish_module(params, client_rsa_pub_key)
 
         {:remote_repo_namespace => namespace}.merge(Aux.convert_keys_to_symbols(response_data))
       end
@@ -76,23 +79,25 @@ module DTK
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
           :namespace => remote.namespace,
-          :rsa_pub_key => client_rsa_pub_key
-        } 
+          :rsa_pub_key => client_rsa_pub_key,
+          :module_refs_content => opts[:module_refs_content]
+        }
         ret = nil
         begin
           response_data = client.get_module_info(client_params)
           ret = Aux.convert_keys_to_symbols(response_data)
-        rescue 
+        rescue
           if opts[:raise_error]
             raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
           else
             return nil
           end
         end
+
         ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version
-          #TODO: ModuleBranch::Location: 
+          # TODO: ModuleBranch::Location:
           raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote.version)
@@ -102,15 +107,16 @@ module DTK
         ret
       end
 
-      def get_remote_module_components()
+      def get_remote_module_components(client_rsa_pub_key=nil)
         params = {
           :name => remote.module_name,
           :version => remote.version,
           :namespace => remote.namespace,
           :type => remote.module_type,
-          :do_not_raise => true
+          :do_not_raise => true,
+          :dependencies_info => true
         }
-        @client.get_components_info(params)
+        @client.get_components_info(params, client_rsa_pub_key)
       end
 
 
@@ -121,7 +127,7 @@ module DTK
         @remote
       end
       private :remote
-      
+
       def list_module_info(type=nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && {:type => type_for_remote_module(type)}
@@ -163,11 +169,11 @@ module DTK
         if version.nil? or version == HeadBranchName
           HeadBranchName
         else
-          "v#{version}" 
+          "v#{version}"
         end
       end
       HeadBranchName = "master"
-      
+
       def default_remote_repo_base()
         self.class.default_remote_repo_base()
       end
@@ -175,7 +181,7 @@ module DTK
         RepoRemote.repo_base()
       end
 
-      #TODO: deprecate when remove all references to these
+      # TODO: deprecate when remove all references to these
       def default_remote_repo()
         self.class.default_remote_repo_base()
       end
@@ -189,18 +195,18 @@ module DTK
         ::DTK::Common::Aux.running_process_user()
       end
 
-      #TODO: this needs to be cleaned up
+      # TODO: this needs to be cleaned up
       def self.default_namespace()
         self.default_user_namespace()
       end
-      
+
       DefaultsNamespace = "r8" #TODO: have this obtained from config file
 
       # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default
       # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
 
-      # example: 
-      #returns namespace, name, version (optional)
+      # example:
+      # returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
         raise ErrorUsage.new("Please provide module name to publish") unless qualified_name
 
@@ -209,6 +215,7 @@ module DTK
          when 1 then [default_namespace(),qualified_name]
          when 2,3 then split
         else
+          qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end
@@ -217,8 +224,8 @@ module DTK
         unless remote_repo.nil? or remote_repo == default_remote_repo()
           raise Error.new("MOD_RESTRUCT:  need to put in logic to treat non default repo_name")
         end
-        #TODO: change config so that it has ability to have multiple repos and use form like
-        #remote = ::R8::Config[:repo][:remote][remote_repo]
+        # TODO: change config so that it has ability to have multiple repos and use form like
+        # remote = ::R8::Config[:repo][:remote][remote_repo]
         remote = ::R8::Config[:repo][:remote]
         is_ssl = remote[:rest_port].to_i == 443
 
@@ -246,7 +253,7 @@ module DTK
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
         RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key).owner.username
       end
- 
+
     end
   end
 end

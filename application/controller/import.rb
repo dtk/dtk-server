@@ -61,13 +61,13 @@ module XYZ
       pkg_filename = module_upload[:filename]
       tmp_file_handle = module_upload[:tempfile]
 
-      #TODO: module_name; this is hack to get it from tar.gz file name
+      # TODO: module_name; this is hack to get it from tar.gz file name
       module_name = pkg_filename.gsub(/\.tar\.gz$/,"")
       prefixes_to_strip = %w{puppetlabs ghoneycutt} #TODO: complate hack
       prefixes_to_strip.each{|pre|module_name.gsub!(Regexp.new("^#{pre}-"),"")}
       module_name.gsub!(/-[0-9]+\.[0-9]+\.[0-9]+$/,"")
 
-      #mv the tmp file to under CompressedFileStore
+      # mv the tmp file to under CompressedFileStore
       tmp_path = tmp_file_handle.path
       tmp_file_handle.close
       compressed_file = "#{R8::EnvironmentConfig::CompressedFileStore}/#{pkg_filename}"
@@ -82,7 +82,7 @@ module XYZ
       module_dir = repo_obj[:local_dir]
       base_dir = repo_obj[:base_dir]
     
-#EXTRACT AND PARSE CODE-----------------------------
+# EXTRACT AND PARSE CODE-----------------------------
       user_obj = CurrentSession.new.get_user_object()
       username = user_obj[:username]
       repo_name =  "#{username}-#{config_agent_type}-#{module_name}"
@@ -90,26 +90,26 @@ module XYZ
       opts = {:strip_prefix_count => 1} 
       base_dir = R8::Config[:repo][:base_directory]
 
-      #begin capture here so can rerun even after loading in dir already
+      # begin capture here so can rerun even after loading in dir already
       begin
-        #extract tar.gz file into directory
+        # extract tar.gz file into directory
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue Exception => e
-        #raise e
+        # raise e
       end
       
       opts = {:strip_prefix_count => 1} 
-      #begin capture here so can rerun even after loading in dir already
+      # begin capture here so can rerun even after loading in dir already
       begin
-        #extract tar.gz file into directory
+        # extract tar.gz file into directory
         Extract.single_module_into_directory(compressed_file,repo_name,base_dir,opts)
       rescue Exception => e
-        #raise e
+        # raise e
       end
 
       impl_obj.create_file_assets_from_dir_els()
 
-      #parsing
+      # parsing
       begin
         raise Error.new("ConfigAgent.parse_given_module_directory(config_agent_type,module_dir) needs to be converted to form ConfigAgent.parse_given_module_directory(config_agent_type,impl_obj")
         r8_parse = ConfigAgent.parse_given_module_directory(config_agent_type,module_dir)
@@ -117,7 +117,7 @@ module XYZ
         return {
           :data=> {:errors=>error} #TODO: must be changed
         }
-#TODO: deprecated this  rescue R8ParseError => e
+# TODO: deprecated this  rescue R8ParseError => e
        rescue => e
         pp [:r8_parse_error, e.to_s]
         return {
@@ -131,12 +131,12 @@ module XYZ
         :data=> refinement_hash
       }
 
-      #pp refinement_hash
+      # pp refinement_hash
 
-        #in between here refinement has would have through user interaction the user set the needed unknowns
-        #mock_user_updates_hash!(refinement_hash)
+        # in between here refinement has would have through user interaction the user set the needed unknowns
+        # mock_user_updates_hash!(refinement_hash)
       r8meta_hash = refinement_hash.render_hash_form()
-      #TODO: currently version not handled
+      # TODO: currently version not handled
       r8meta_hash.delete("version")
       r8meta_path = "#{module_dir}/r8meta.#{config_agent_type}.yml"
       r8meta_hash.write_yaml(STDOUT)

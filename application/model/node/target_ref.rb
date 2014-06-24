@@ -4,13 +4,13 @@ module DTK
     class TargetRef < self
       r8_nested_require('target_ref','input')
 
-      #these are nodes without any assembly on them
+      # these are nodes without any assembly on them
       def self.get_free_nodes(target)
         sp_hash = {
           :cols => [:id, :display_name, :ref, :type, :assembly_id, :datacenter_datacenter_id, :managed],
-          :filter => [:and, 
+          :filter => [:and,
                         [:eq, :type, type()],
-                        [:eq, :datacenter_datacenter_id, target[:id]], 
+                        [:eq, :datacenter_datacenter_id, target[:id]],
                         [:eq, :managed, true]]
         }
         node_mh = target.model_handle(:node)
@@ -30,12 +30,12 @@ module DTK
         Input.create_linked_target_refs?(target,assembly,nodes)
       end
 
-     private      
-      #returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
+     private
+      # returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
       def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
         ret = Hash.new
         return ret if node_target_ref_idhs.empty?
-        
+
       # object model structure that relates instance to target refs is where instance's :canonical_template_node_id field point to target_ref
         sp_hash = {
           :cols => [:id, :display_name,:canonical_template_node_id],
@@ -52,6 +52,62 @@ module DTK
         TypeField
       end
       TypeField = 'target_ref'
+
+      def self.process_import_node_input!(input_node_hash)
+        unless host_address = input_node_hash["external_ref"]["routable_host_address"]
+          raise Error.new("Missing field input_node_hash['external_ref']['routable_host_address']")
+        end
+
+        # for type use type from external_ref ('physical'), if not then use default type()
+        type = input_node_hash["external_ref"]["type"] if input_node_hash["external_ref"]
+        input_node_hash.merge!("type" => type||type())
+        params = {"host_address" => host_address}
+        input_node_hash.merge!(child_objects(params))
+      end
+
+      # TODO: collapse with application/utility/library_nodes - node_info
+      def self.child_objects(params={})
+        {
+          "attribute"=> {
+            "host_addresses_ipv4"=>{
+              "required"=>false,
+              "read_only"=>true,
+              "is_port"=>true,
+              "cannot_change"=>false,
+              "data_type"=>"json",
+              "value_derived"=>[params["host_address"]],
+              "semantic_type_summary"=>"host_address_ipv4",
+              "display_name"=>"host_addresses_ipv4",
+              "dynamic"=>true,
+              "hidden"=>true,
+              "semantic_type"=>{":array"=>"host_address_ipv4"}
+            },
+            "fqdn"=>{
+              "required"=>false,
+              "read_only"=>true,
+              "is_port"=>true,
+              "cannot_change"=>false,
+              "data_type"=>"string",
+              "display_name"=>"fqdn",
+              "dynamic"=>true,
+              "hidden"=>true,
+            },
+            "node_components"=>{
+              "required"=>false,
+              "read_only"=>true,
+              "is_port"=>true,
+              "cannot_change"=>false,
+              "data_type"=>"json",
+              "display_name"=>"node_components",
+              "dynamic"=>true,
+              "hidden"=>true,
+            }
+          },
+          "node_interface"=>{
+            "eth0"=>{"type"=>"ethernet", "display_name"=>"eth0"}
+          }
+        }
+      end
     end
   end
 end

@@ -1,4 +1,4 @@
-#TODO: figure out how to use routing to select/define specific templates
+# TODO: figure out how to use routing to select/define specific templates
 #      and action_set's to be used for a given route
 r8_require('../../utils/internal/routes/routes')
 
@@ -118,14 +118,14 @@ R8::ReactorRoute.draw do
    # MONITORING_ITEM
   post  'monitoring_item/check_idle' => 'monitoring_item#check_idle'
 
-  #NODE TEMPLATE
+  # NODE TEMPLATE
   post  'node/list' => 'node#list'
   post  'node/image_upgrade' => 'node#image_upgrade'
 
-  #NODE INSTANCE
+  # NODE INSTANCE
   post  'node/start' => 'node#start'
   post  'node/stop' => 'node#stop'
-  #these commands right now should only be called wrt to assembly context
+  # these commands right now should only be called wrt to assembly context
 =begin
   post  'node/find_violations' => 'node#find_violations'
   post  'node/get_attributes' => 'node#get_attributes'
@@ -237,7 +237,7 @@ end
 R8::Routes[:login] = {
   :alias => 'user/login',
 }
-#Routes that correspond to (non-trivial action sets)
+# Routes that correspond to (non-trivial action sets)
 =begin
 R8::Routes["component/display"] = {
   :layout => 'default',

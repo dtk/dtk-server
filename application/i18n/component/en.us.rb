@@ -26,10 +26,10 @@
 
   :actions => 'Actions',
   :details => 'Details',
-#temp for testing
+# temp for testing
   :instance => 'Instance',
 
-#temp strings for component names
+# temp strings for component names
   :hadoop => 'Hadoop',
   :hadoop_hive => 'Hadoop Hive',
   :hadoop_doc => 'Hadoop Docs',
@@ -52,7 +52,7 @@
   :nagios_client => "NRPE",
   :nagios_server => "Nagios3 Server",
 
-#TODO: replace above with new form
+# TODO: replace above with new form
   :hadoop__hive => 'Hadoop Hive',
   :hadoop__doc => 'Hadoop Docs',
   :rabbitmq__edge_stomp => 'Rabbit - Stomp',

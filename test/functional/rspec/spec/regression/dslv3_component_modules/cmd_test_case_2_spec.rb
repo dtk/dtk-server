@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename
+# Test Case 2: Rename existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of rename
 
 require 'rubygems'
 require 'rest_client'

@@ -1,4 +1,4 @@
-#converts serialized form into object form
+# converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
     r8_nested_require('assembly_import','port_ref')
@@ -86,7 +86,7 @@ module DTK; class ServiceModule
     end
 
     def self.import_nodes(container_idh,module_branch,assembly_ref,assembly_hash,node_bindings_hash,component_module_refs,opts={})
-      #compute node_to_nb_rs and nb_rs_to_id
+      # compute node_to_nb_rs and nb_rs_to_id
       node_to_nb_rs = ret_node_to_node_binding_rs(assembly_ref,node_bindings_hash)
       nb_rs_to_id = Hash.new
       unless node_to_nb_rs.empty?
@@ -118,7 +118,7 @@ module DTK; class ServiceModule
             if nb_rs_id = nb_rs_to_id[nb_rs]
               node_output["node_binding_rs_id"] = nb_rs_id
             else
-              #TODO: extend dangling_errors.aggregate_errors to handle this
+              # TODO: extend dangling_errors.aggregate_errors to handle this
               # We want to import module still even if there are bad node references
               # we stop importing nodes when run into bad node reference but still continue with module import
               return ParsingError::BadNodeReference.new(:node_template => nb_rs,:assembly => assembly_hash["name"])
@@ -189,7 +189,7 @@ module DTK; class ServiceModule
       Assembly.internal_assembly_ref(module_name,assembly_name,version_field)
     end
 
-    #return [module_name,assembly_name]
+    # return [module_name,assembly_name]
     def self.parse_serialized_assembly_ref(ref)
       if ref =~ /(^.+)::(.+$)/
         [$1,$2]
@@ -229,8 +229,8 @@ module DTK; class ServiceModule
         h.merge(parse[:ref] => cmp_ref)
       end
 
-      #find and insert component template ids in first component_refs and then for the attribute_overrides
-      #just set component_template_id
+      # find and insert component template ids in first component_refs and then for the attribute_overrides
+      # just set component_template_id
       component_module_refs.set_matching_component_template_info!(ret.values, :donot_set_component_templates=>true)
       set_attribute_template_ids!(ret,container_idh)
       add_title_attribute_overrides!(cmps_with_titles,container_idh)
@@ -244,7 +244,7 @@ module DTK; class ServiceModule
       ret
     end
 
-    #These are attributes at the assembly level, as opposed to being at the component or node level
+    # These are attributes at the assembly level, as opposed to being at the component or node level
     def self.import_assembly_attributes(assembly_attrs_hash,opts={})
       assembly_attrs_hash ||= Hash.new
       unless assembly_attrs_hash.kind_of?(Hash)
@@ -253,8 +253,8 @@ module DTK; class ServiceModule
       import_attributes_helper(assembly_attrs_hash)
     end
 
-    #These are attributes at the node level
-    #returns [type,attributes]
+    # These are attributes at the node level
+    # returns [type,attributes]
     def self.import_type_and_node_attributes(node_hash,opts={})
       type = Node::Type::Node.stub
       attributes = import_node_attributes(node_hash["attributes"],opts)
@@ -269,7 +269,7 @@ module DTK; class ServiceModule
       unless node_attrs_hash.kind_of?(Hash)
         raise ParsingError.new("Node attribute(s) are ill-formed",opts_file_path(opts))
       end
-      #TODO: make sure that each node attribute is legal
+      # TODO: make sure that each node attribute is legal
       import_attributes_helper(node_attrs_hash)
     end
     def self.import_attributes_helper(attr_val_hash)
@@ -324,13 +324,13 @@ module DTK; class ServiceModule
       }
       Model.get_objs(container_idh.createMH(:attribute),sp_hash).each do |r|
         cmp_template_id = r[:component_component_id]
-        #relies on cmp_ref_info[:attribute_override] keys matching display_name
+        # relies on cmp_ref_info[:attribute_override] keys matching display_name
         if match = ndx_attrs[cmp_template_id][:attrs][r[:display_name]]
           match.merge!(:attribute_template_id => r[:id])
         end
       end
       
-      #now check attributes not matched; 
+      # now check attributes not matched; 
       bad_attrs = Array.new
       ndx_attrs.each_value do |r|
         r[:attrs].each_pair do |ref,info|
@@ -340,7 +340,7 @@ module DTK; class ServiceModule
         end
       end
       unless bad_attrs.empty?
-        #TODO: extend dangling_errors.aggregate_errors to handle this
+        # TODO: extend dangling_errors.aggregate_errors to handle this
         bad_attrs_list = bad_attrs.map do |attr_info|
           cmp_name = Component.display_name_print_form(attr_info[:component_display_name])          
           "#{cmp_name}/#{attr_info[:display_name]}"
@@ -351,7 +351,7 @@ module DTK; class ServiceModule
       ret
     end
 
-    #cmps_with_titles is an array of hashes with keys :cmp_ref, :cmp_title
+    # cmps_with_titles is an array of hashes with keys :cmp_ref, :cmp_title
     def self.add_title_attribute_overrides!(cmps_with_titles,container_idh)
       return if cmps_with_titles.empty?
       cmp_mh = container_idh.createMH(:component)
@@ -367,8 +367,8 @@ module DTK; class ServiceModule
           pntr.merge!(import_attribute_overrides(title_attribute[:display_name],r[:cmp_title],:cannot_change => true))
         else
           cmp_name = Component.display_name_print_form(cmp_ref[:display_name])
-          #This should be caught when importing component module and is a component module, 
-          #not a service module problem; so just logging as error here
+          # This should be caught when importing component module and is a component module, 
+          # not a service module problem; so just logging as error here
           Log.error("Component module for #{cmp_name} missing the title field")
         end
       end

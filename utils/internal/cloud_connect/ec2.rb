@@ -50,14 +50,14 @@ module DTK
       def check_for_key_pair(name)
         unless key_pair = @conn.key_pairs.get(name)
           raise ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")
-          #key_pair = @conn.key_pairs.create(:name => name)
+          # key_pair = @conn.key_pairs.create(:name => name)
         end
         return key_pair
       end
 
       def check_for_security_group(name, description = nil)
         unless sc = @conn.security_groups.get(name)
-          #sc = @conn.security_groups.create(:name => name, :description => description)
+          # sc = @conn.security_groups.create(:name => name, :description => description)
           raise ErrorUsage.new("Not able to find IAAS security group with name '#{name}' aborting action, please create necessery security group")
         end
         return sc

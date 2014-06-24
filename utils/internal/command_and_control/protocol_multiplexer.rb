@@ -2,7 +2,7 @@ module XYZ
   module CommandAndControlAdapter
     class ProtocolMultiplexer
       def initialize(protocol_handler=nil)
-        #TODO: might put operations on @protocol_handler in mutex
+        # TODO: might put operations on @protocol_handler in mutex
         @protocol_handler = protocol_handler
         @callbacks_list = Hash.new
         @count_info = Hash.new
@@ -14,7 +14,7 @@ module XYZ
         self
       end
 
-      #TODO: may model more closely to syntax of EM:defer future signature
+      # TODO: may model more closely to syntax of EM:defer future signature
       def process_request(trigger,context)
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
@@ -41,7 +41,7 @@ module XYZ
             Log.error msg
           end
          rescue Exception => e
-          #TODO: this is last resort trap; if this is reached teh user will haev to manually cancel the task
+          # TODO: this is last resort trap; if this is reached teh user will haev to manually cancel the task
           Callbacks.process_error(callbacks,e)
         end
       end
@@ -49,7 +49,7 @@ module XYZ
      private
       def is_cancel_response(msg)
         return false
-        #return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
+        # return msg[:body] && msg[:body][:data] && msg[:body][:data][:status] && msg[:body][:data][:status] == :canceled
       end
 
       def process_request_timeout(request_id)
@@ -77,7 +77,7 @@ module XYZ
           if opts[:force_delete] 
             count = @count_info[request_id] = 0
           else
-            #TODO: protection from obscure error
+            # TODO: protection from obscure error
             if @count_info[request_id]
               count = @count_info[request_id] -= 1
             else

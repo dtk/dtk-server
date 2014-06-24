@@ -75,7 +75,7 @@ module DTK; class Attribute
         end
       end
       def attr_name_special_processing(attr_fragment)
-        #TODO: make this obtained from shared logic
+        # TODO: make this obtained from shared logic
         if attr_fragment == Pattern::Term.canonical_form(:attribute,'host_address')
           Pattern::Term.canonical_form(:attribute,'host_addresses_ipv4')
         else

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-#Test Case 4: Rename and converge service
-#Test Case 6: NEG - Rename service to the workspace name
+# Test Case 4: Rename and converge service
+# Test Case 6: NEG - Rename service to the workspace name
 
 require 'rubygems'
 require 'rest_client'

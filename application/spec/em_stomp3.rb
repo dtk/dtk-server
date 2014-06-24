@@ -1,5 +1,5 @@
 
-#from https://github.com/gmallard/stomp-demo/blob/master/em/sendsub/sendsub.rb
+# from https://github.com/gmallard/stomp-demo/blob/master/em/sendsub/sendsub.rb
 require 'rubygems'
 require 'eventmachine'
 require 'pp'

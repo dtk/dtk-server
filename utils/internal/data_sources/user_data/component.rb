@@ -31,7 +31,7 @@ module XYZ
         end
 
         def self.basic_type(source)
-          #TODO: assumes that user_data has all basic types specfic types
+          # TODO: assumes that user_data has all basic types specfic types
           return source["basic_type"] if source["basic_type"]
           if source["specific_type"]
             basic_type = ComponentTypeHierarchy.basic_type(source["specific_type"])

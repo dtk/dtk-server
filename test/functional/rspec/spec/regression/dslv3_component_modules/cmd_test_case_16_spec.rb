@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 16: dtk.model.yaml with hash type attribute that contains two key value pairs and hash type attribute where key contains array as value
+# Test Case 16: dtk.model.yaml with hash type attribute that contains two key value pairs and hash type attribute where key contains array as value
 
 require 'rubygems'
 require 'rest_client'

@@ -67,7 +67,7 @@ shared_context "Converge" do |dtk_common|
   end
 end
 
-#converge with parametrized max retries
+# converge with parametrized max retries
 shared_context "Converge service" do |dtk_common, max_retries|
   it "converges #{dtk_common.service_name} service" do
     converge = dtk_common.converge_service(dtk_common.service_id, max_retries)

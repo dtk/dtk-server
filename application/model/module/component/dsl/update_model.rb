@@ -33,7 +33,7 @@ module DTK; class ComponentDSL
           info = Hash.new
           cmp_info.each do |k,v|
             case k
-            #TODO: deprecate this case when remove v1  
+            # TODO: deprecate this case when remove v1  
             when "external_link_defs"
               v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
@@ -48,8 +48,8 @@ module DTK; class ComponentDSL
           info.merge!("implementation_id" => impl_id, "module_branch_id" => module_branch_id)
           h.merge(cmp_ref => info)
         end
-        #TODO: think this is no longer needed
-        #process the link defs for remote components
+        # TODO: think this is no longer needed
+        # process the link defs for remote components
         # process_remote_link_defs!(container_idh)
       end
 
@@ -60,7 +60,7 @@ module DTK; class ComponentDSL
         "#{config_agent_type}-#{component_type}"
       end
       def component_ref(config_agent_type,r8_hash_cmp_ref)
-        #TODO: may be better to have these prefixes already in r8 dsl file
+        # TODO: may be better to have these prefixes already in r8 dsl file
         "#{config_agent_type}-#{r8_hash_cmp_ref}"
       end
 
@@ -97,7 +97,7 @@ module DTK; class ComponentDSL
       cmps_hash = parser_proc.components_hash()
       stored_cmps_hash = parser_proc.stored_components_hash()
 
-      #data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items that are removed
+      # data_source_update_hash form used so can annotate subcomponents with "is complete" so will delete items that are removed
       db_update_hash = db_update_form(cmps_hash,stored_cmps_hash,module_branch_idh)
       Model.input_hash_content_into_model(container_idh,db_update_hash)
       sp_hash =  {
@@ -114,7 +114,7 @@ module DTK; class ComponentDSL
     end
 
     def db_update_form(cmps_input_hash,non_complete_cmps_input_hash,module_branch_idh)
-      #TODO: look at use of new recursive delete capability; this may be needed to handle attributes correctly
+      # TODO: look at use of new recursive delete capability; this may be needed to handle attributes correctly
       mark_as_complete_constraint = {
         :module_branch_id=>module_branch_idh.get_id(), #so only delete extra components that belong to same module
         :node_node_id => nil #so only delete component templates and not component instances
@@ -126,7 +126,7 @@ module DTK; class ComponentDSL
     end
 
     def db_update_form_aux(model_name,hash_assigns)
-      #TODO: think the key -> key.to_sym is not needed because they are keys
+      # TODO: think the key -> key.to_sym is not needed because they are keys
       ret = DBUpdateHash.new
       children_model_names = DB_REL_DEF[model_name][:one_to_many]||[]
       hash_assigns.each do |key,child_hash|
@@ -141,7 +141,7 @@ module DTK; class ComponentDSL
           ret[key] = child_hash
         end
       end
-      #mark as complete any child that does not appear in hash_assigns
+      # mark as complete any child that does not appear in hash_assigns
       (children_model_names - hash_assigns.keys.map{|k|k.to_sym}).each do |key|
         ret[key] = DBUpdateHash.new().mark_as_complete()
       end

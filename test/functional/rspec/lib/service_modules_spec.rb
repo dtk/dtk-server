@@ -6,12 +6,12 @@ require 'awesome_print'
 
 STDOUT.sync = true
 
-#shared_context "Import service module" do |dtk_common, service_module_name|
+# shared_context "Import service module" do |dtk_common, service_module_name|
 #  it "imports new service module #{service_module_name}" do
 #    service_module_created = dtk_common.import_new_service_module(service_module_name)
 #    service_module_created.should eq(true)
 #  end
-#end
+# end
 
 shared_context "Import service module" do |service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
@@ -105,19 +105,19 @@ shared_context "List all service modules on remote" do |dtk_common, service_modu
   end
 end
 
-#shared_context "OLD - List all services on remote" do |dtk_common, service_module_name, namespace|
+# shared_context "OLD - List all services on remote" do |dtk_common, service_module_name, namespace|
 #  it "verifies that #{service_module_name} service exists on remote" do
 #    service_exists = dtk_common.check_if_service_exists_on_remote(service_module_name, namespace)
 #    service_exists.should eq(true)
 #  end
-#end
+# end
 
-#shared_context "OLD - Export service" do |dtk_common, service_module_name, namespace|
+# shared_context "OLD - Export service" do |dtk_common, service_module_name, namespace|
 #  it "exports #{service_module_name} service to #{namespace} namespace on remote repo" do
 #    service_exported = dtk_common.export_service_to_remote(service_module_name, namespace)
 #    service_exported.should eq(true)
 #  end
-#end
+# end
 
 shared_context "Export service module" do |dtk_common, service_module_name, namespace|
   it "exports #{service_module_name} service module to #{namespace} namespace on remote repo" do
@@ -174,9 +174,9 @@ shared_context "Delete service module from remote repo" do |dtk_common, service_
   end
 end
 
-#shared_context "OLD - Delete service from remote repo" do |dtk_common, service_module_name, namespace|
+# shared_context "OLD - Delete service from remote repo" do |dtk_common, service_module_name, namespace|
 #  it "deletes #{service_module_name} service with #{namespace} namespace from remote repo" do
 #    service_deleted = dtk_common.delete_service_from_remote(service_module_name, namespace)
 #    service_deleted.should eq(true)
 #  end
-#end
+# end

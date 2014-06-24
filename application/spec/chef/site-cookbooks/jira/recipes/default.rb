@@ -26,7 +26,7 @@
 #   grant all privileges on jiradb.* to '$jira_user'@'localhost' identified by '$jira_password';
 #   flush privileges;
 
-#include_recipe "java_sun"
+# include_recipe "java_sun"
 include_recipe "apache2"
 include_recipe "apache2::mod_rewrite"
 include_recipe "apache2::mod_proxy"
@@ -88,7 +88,7 @@ template "#{node[:jira][:install_path]}/atlassian-jira/WEB-INF/classes/entityeng
   mode 0755
 end
 
-#runit_service "jira"
+# runit_service "jira"
 
 template "#{node[:apache][:dir]}/sites-available/jira.conf" do
   source "apache.conf.erb"

@@ -3,7 +3,7 @@ module DTK
     module RuoteParticipant
       class AuthorizeNode < NodeParticipants
         def consume(workitem)
-          #TODO succeed without sending node request if authorized already
+          # TODO succeed without sending node request if authorized already
           params = get_params(workitem) 
           PerformanceService.start(name(),object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -27,7 +27,7 @@ module DTK
                     set_result_failed(workitem,result,task)
                   else
                     log_participant.end(:complete_succeeded,:task_id=>task_id)
-                    #task[:executable_action][:node].set_authorized()
+                    # task[:executable_action][:node].set_authorized()
                     set_result_succeeded(workitem,result,task,action) if task_end 
                   end
                   delete_task_info(workitem)

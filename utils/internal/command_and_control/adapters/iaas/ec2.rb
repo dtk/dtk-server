@@ -58,15 +58,15 @@ module DTK
 
           # keypair
           keypair_to_use = iaas_properties['keypair_name'] || R8::Config[:ec2][:keypair]
-          #TODO: WORKAROUND: DTK-1426; commented out
-          #connection.check_for_key_pair(keypair_to_use)
+          # TODO: WORKAROUND: DTK-1426; commented out
+          # connection.check_for_key_pair(keypair_to_use)
           
           Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_properties['keypair_name'].nil?})"
 
           # security group
           security_group_to_use = iaas_properties['security_group'] || R8::Config[:ec2][:security_group]
-          #TODO: WORKAROUND: DTK-1426; commented out
-          #connection.check_for_security_group(security_group_to_use)
+          # TODO: WORKAROUND: DTK-1426; commented out
+          # connection.check_for_security_group(security_group_to_use)
 
           Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_properties['security_group'].nil?})"
 
@@ -121,7 +121,7 @@ pp [:node_group_debug,task_action.nodes()]
           unless avail_zone.nil? or avail_zone == "automatic"
             create_options.merge!(:availability_zone => avail_zone)
           end
-          #end fix up
+          # end fix up
 
           unless create_options.has_key?(:user_data)
             if user_data = CommandAndControl.install_script(node)
@@ -165,7 +165,7 @@ pp [:node_group_debug,task_action.nodes()]
             :external_ref => external_ref,
             :type => Node::Type::Node.instance,
             :is_deployed => true,
-            #TODO: better unify these below
+            # TODO: better unify these below
             :operational_status => "starting",
             :admin_op_status => "pending"
           }
@@ -183,7 +183,7 @@ pp [:node_group_debug,task_action.nodes()]
         }
       end
 
-      #destroys the node if it exists
+      # destroys the node if it exists
       def self.destroy_node?(node,opts={})
         node.update_obj!(:external_ref,:hostname_external_ref) 
         instance_id = external_ref(node)[:instance_id]

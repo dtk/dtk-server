@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target
+# Test Case 2: Add new target to existing provider, stage and converge assembly in this target and then delete target
 
 require 'rubygems'
 require 'rest_client'

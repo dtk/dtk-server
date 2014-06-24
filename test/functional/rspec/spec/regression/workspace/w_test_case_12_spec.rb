@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 12: Create one node, add component in it, converge workspace and grep puppet log from node
+# Test Case 12: Create one node, add component in it, converge workspace and grep puppet log from node
 
 require 'rubygems'
 require 'rest_client'

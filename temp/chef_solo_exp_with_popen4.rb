@@ -7,7 +7,7 @@ require 'git'
 require 'json'
 require 'popen4'
 
-#TODO: move to be shared by agents
+# TODO: move to be shared by agents
 ChefSoloLogDir = "/var/log/chef"
 CookbookPath =  "/var/chef/cookbooks"
 
@@ -116,7 +116,7 @@ module MCollective
           most_recent_link = most_recent_file_path()
           File.delete(most_recent_link) if File.exists? most_recent_link
           File.symlink(log_file_path,most_recent_link)
-          #so does not look file json attributes file
+          # so does not look file json attributes file
           Chef::Config[:json_attribs] = nil
 
           chef_client.reconfigure
@@ -155,7 +155,7 @@ module MCollective
         end.compact.join(":")
       end
 
-      #TODO: this should be common accross Agents
+      # TODO: this should be common accross Agents
       class Response < Hash
         def initialize(hash={})
           super()
@@ -204,7 +204,7 @@ module MCollective
             response.set_status_failed!()
             error_info = {
               :error => {
-                #TODO: log the backtrace, rather than returning it
+                # TODO: log the backtrace, rather than returning it
                 #          :backtrace =>  Array(backtrace),
                 :formatted_exception => run_status.formatted_exception
               }

@@ -1,7 +1,7 @@
 require 'sshkey'
 
 module DTK
-  #TODO: RepoType should be in common
+  # TODO: RepoType should be in common
   class RepoType < String
     def is_component_module?()
       self =~ /^component_module/
@@ -14,7 +14,7 @@ module DTK
     def initialize(rest_base_url_or_host=nil)
       rest_base_url_or_host ||= R8::Config[:repo][:remote][:host]
       if rest_base_url_or_host =~ /^https?:/
-        #input is rest_base_url
+        # input is rest_base_url
         @rest_base_url = rest_base_url_or_host
         if @rest_base_url =~ Regexp.new("^https?://(.+):[0-9]+$")
           @host = $1
@@ -22,7 +22,7 @@ module DTK
           @host = $1
         end
       else
-        #input is host
+        # input is host
         @host = rest_base_url_or_host
         port = DefaultRestServicePort #TODO: may put in provision that this can be omitted or explicitly passed
         @rest_base_url = "http://#{@host}#{port && ":#{port.to_s}"}"
@@ -140,10 +140,10 @@ module DTK
       response['collaborators']
     end
 
-    def create_module(params_hash, client_rsa_pub_key = nil)
+    def publish_module(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      post_rest_request_data(route,body,:raise_error => true,:timeout =>30)
+      post_rest_request_data(route,body,:raise_error => true,:timeout => 30)
     end
 
     def delete_module(params_hash, client_rsa_pub_key = nil)
@@ -167,12 +167,15 @@ module DTK
 
     def get_module_info(params_hash)
       route = collection_route_from_type(params_hash) + '/module_info'
-      get_rest_request_data(route,params_hash,:raise_error => true)
+      response = get_rest_request_data(route,params_hash,:raise_error => true)
+      # we flatten response (due to rest code expectin flat structure)
+      response.symbolize_keys!
+      Hash.new.merge(response[:repo_module]).merge(:dependency_warnings => response[:dependency_warnings])
     end
 
-    def get_components_info(params_hash)
+    def get_components_info(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type({:type => 'service'}) + '/component_info'
-      get_rest_request_data(route, params_hash)
+      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash))
     end
 
     def remove_client_user(username)
@@ -188,7 +191,7 @@ module DTK
 
     ###
     ##  Legacy methods
-    # 
+    #
 
     def create_client_user(client_rsa_pub_key)
       client_repo_user = get_repo_user(client_rsa_pub_key)
@@ -216,7 +219,7 @@ module DTK
 
       # Create Client
       create_client_user(client_rsa_pub_key) if client_rsa_pub_key
-    
+
       return tenant_response
     end
 
@@ -269,7 +272,7 @@ module DTK
       # token might be invalid or expired
       if error_code(response) == UNAUTHORIZED_ERROR_CODE
         Log.info("Auth failed (#{error_msg(response)}), creating new session ...")
-        # remove repoman session_id from session obj 
+        # remove repoman session_id from session obj
         session = CurrentSession.new
         session.set_repoman_session_id(nil)
         # repeat request
@@ -316,11 +319,11 @@ module DTK
     def error_msg(response)
       errors = response["errors"]
       if response.kind_of?(Common::Response::Error) and errors
-        #if include_error_code?(errors,"connection_refused") 
+        # if include_error_code?(errors,"connection_refused")
         "Repo Manager refused the connection; it may be down"
       else
         error_detail = nil
-        if errors.kind_of?(Array) and errors.size > 0 
+        if errors.kind_of?(Array) and errors.size > 0
           err_msgs = errors.map{|err|err["message"]}.compact
           unless err_msgs.empty?
             error_detail = err_msgs.join(', ')
@@ -353,7 +356,7 @@ module DTK
       handle_error(opts) do
         RestClientWrapper.post("#{@rest_base_url}#{route}", body, ret_opts(opts))
       end
-    end    
+    end
 
     def delete_rest_request_data(route, body, opts={})
       handle_error(opts) do
@@ -420,7 +423,7 @@ module DTK
     def update_user_params(params_hash)
       if params_hash[:username]
         {
-          :dtk_instance_name => dtk_instance_repo_username(), 
+          :dtk_instance_name => dtk_instance_repo_username(),
           :default_namespace => ::DTK::Common::Aux.running_process_user()
         }.merge(params_hash)
       else
@@ -440,7 +443,7 @@ module DTK
       params_hash
     end
 
-    #repo access
+    # repo access
     class BranchInstance < self
       def initialize(rest_base_url,repo,branch,opts={})
         super(rest_base_url)
@@ -465,7 +468,7 @@ module DTK
         route = "/rest/repo/push_to_mirror"
         body = {:repo_name => @repo,:mirror_host => mirror_host}
         post_rest_request_data(route,body,:raise_error => true)
-      end 
+      end
 
     end
   end

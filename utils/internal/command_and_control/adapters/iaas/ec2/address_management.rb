@@ -10,7 +10,7 @@ module DTK; module CommandAndControlAdapter
       end
 
       def associate_persistent_dns?(node)
-        #check if it needs a persistent dns
+        # check if it needs a persistent dns
         unless persistent_dns = node.persistent_dns()
           return
         end
@@ -65,7 +65,7 @@ module DTK; module CommandAndControlAdapter
 
       def process_addresses__restart(node)
         Log.info("in process_addresses__restart for node #{node[:display_name]}")
-        #TODO: stub for feature_node_admin_state
+        # TODO: stub for feature_node_admin_state
       end
 
       def process_addresses__terminate?(node)

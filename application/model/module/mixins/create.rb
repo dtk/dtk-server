@@ -2,10 +2,10 @@ module DTK; module ModuleMixins
   module Create
   end
   module Create::Class
-    #TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
-    #returns hash with keys :module_idh :module_branch_idh
+    # TODO: ModuleBranch::Location: refactor like ModuleMixins::Remote::Class install
+    # returns hash with keys :module_idh :module_branch_idh
     def create_module(project,module_name,opts={})
-      #TODO: pass local_params in
+      # TODO: pass local_params in
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         :module_type => module_type(),
         :module_name => module_name,
@@ -58,11 +58,11 @@ module DTK; module ModuleMixins
       input_hash_content_into_model(project_idh,create_hash)
       module_branch = get_module_branch_from_local(local)
       module_idh =  project_idh.createIDH(:model_name => model_name(),:id => module_branch[:module_id])
-      #TODO: ModuleBranch::Location: see if after refactor version field needed
-      #TODO: ModuleBranch::Location: ones that come from local can be omitted
+      # TODO: ModuleBranch::Location: see if after refactor version field needed
+      # TODO: ModuleBranch::Location: ones that come from local can be omitted
       {:version => version_field, :module_name => module_name, :module_idh => module_idh,:module_branch_idh => module_branch.id_handle()}
     end
-    #TODO: ModuleBranch::Location: deprecate below for aboce
+    # TODO: ModuleBranch::Location: deprecate below for aboce
     def create_ws_module_and_branch_obj?(project,repo_idh,module_name,input_version,ancestor_branch_idh=nil)
       project_idh = project.id_handle()
       ref = module_name
@@ -100,7 +100,7 @@ module DTK; module ModuleMixins
         raise ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
       end
 
-      #make sure there is a not an existing branch that matches the new one
+      # make sure there is a not an existing branch that matches the new one
       if get_module_branch_matching_version(new_version)
         raise ErrorUsage.new("Version exists already for module (#{pp_module_name(new_version)})")
       end

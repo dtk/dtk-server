@@ -4,7 +4,7 @@ module DTK
       "#{component_name}[#{title.to_s}]"
     end
     
-    #this is for field display_name
+    # this is for field display_name
     def self.display_name_with_title(component_type,title)
       "#{component_type}[#{title}]"
     end
@@ -67,7 +67,7 @@ module DTK
     end
     ComponentTitleRegex = /(^.+)\[(.+)\]$/
 
-    #component can be a hash or object
+    # component can be a hash or object
     def self.title?(component)
       return nil unless component #convienence so dont have to check argument being passed is nil
       display_name = component[:display_name] || (component.kind_of?(Component) && component.get_field?(:display_name))

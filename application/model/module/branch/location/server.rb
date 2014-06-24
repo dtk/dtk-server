@@ -17,7 +17,7 @@ module DTK; class ModuleBranch
         def ret_private_user_repo_name()
           username = CurrentSession.new.get_username()
           repo_name = "#{username}-#{module_name()}"
-          #component_type can be :service_module, :puppet or :chef
+          # component_type can be :service_module, :puppet or :chef
           @component_type == :service_module ? "sm-#{repo_name}" : repo_name
         end
 

@@ -10,10 +10,10 @@ module DTK
       user_object  = ::DTK::CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object) do
         begin
-          #TODO: to allow simpler form where blk does not have a handle parameter
-          #can case on whether this is the case and if not call 
+          # TODO: to allow simpler form where blk does not have a handle parameter
+          # can case on whether this is the case and if not call 
           # data = blk.call()
-          #deferred_body.rest_ok_response(data)
+          # deferred_body.rest_ok_response(data)
           blk.call(deferred_body)
         rescue => e
           deferred_body.rest_notok_response(e)
@@ -31,7 +31,7 @@ module DTK
       signal_eos() 
     end
 
-    #needed by rack/thin
+    # needed by rack/thin
     def each(&blk)
       @body_callback = blk
     end

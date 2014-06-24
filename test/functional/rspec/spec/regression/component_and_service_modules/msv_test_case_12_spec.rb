@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 12: Export service module using full name #{service_module_name} to users default namespace and then delete it
+# Test Case 12: Export service module using full name #{service_module_name} to users default namespace and then delete it
 
 require 'rubygems'
 require 'rest_client'
@@ -61,7 +61,7 @@ describe "(Modules, Services and Versioning) Test Case 12: Export service module
       puts "Copy content of #{existing_service_module_name} to new #{service_module_name} service module:", "-------------------------------------------------------------------------------"
       pass = false
       value = `cp -r #{service_filesystem_location}/#{existing_service_module_name}/* #{service_filesystem_location}/#{service_module_name}/`
-      #not good validation, improve it...
+      # not good validation, improve it...
       pass = !value.include?("some error")
       puts "Content of #{existing_service_module_name} copied to #{service_module_name} service successfully!" if pass == true
       puts "Content of #{existing_service_module_name} was not copied to #{service_module_name} service successfully!" if pass == false

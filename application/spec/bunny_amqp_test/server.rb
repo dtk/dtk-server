@@ -11,12 +11,12 @@ Signal.trap('TERM'){ XYZ::R8EventLoop.graceful_stop("stopped")}
 XYZ::R8EventLoop.start  do #:host => "172.22.101.115" do #:logging => true do
   queue_names.each do |queue_name|
     client = XYZ::MessageBusClient.new()
-    #TBD: put in catch block
+    # TBD: put in catch block
     work_queue = client.subscribe_queue(queue_name,:auto_delete=>true)
     work_queue.subscribe() do |trans_info,msg_bus_msg_in|
       pp [:recieved, trans_info,msg_bus_msg_in]
       work = proc {
-        #do work
+        # do work
         sleep(5)
        result = :succeed
         print "finished with result #{result}\n"

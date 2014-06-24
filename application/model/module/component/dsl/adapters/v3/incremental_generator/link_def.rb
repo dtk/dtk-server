@@ -36,7 +36,7 @@ module DTK; class ComponentDSL; class V3
         (not link_def_link[:required].nil?) and not link_def_link[:required]
       end
 
-      #PossibleLinks has form {cmp1 => LINK(s), cmp2 => LINK(s), ..}
+      # PossibleLinks has form {cmp1 => LINK(s), cmp2 => LINK(s), ..}
       # where LINK(s) ::= LINK | [LINK,LINK,..]
       class PossibleLinks < Hash
         def deep_merge(cmp,link)

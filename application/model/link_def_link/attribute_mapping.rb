@@ -63,14 +63,14 @@ module DTK
       end
 
      private
-      #returns [attribute,unravel_path]
+      # returns [attribute,unravel_path]
       def get_attribute_with_unravel_path(dir,context)
         index_map_path = nil
         attr = nil
         ret = [attr,index_map_path]
         attr = context.find_attribute(self[dir][:term_index])
         index_map_path = self[dir][:path]
-        #TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
+        # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [attr,index_map_path && AttributeLink::IndexMapPath.create_from_array(index_map_path)]
       end
     end

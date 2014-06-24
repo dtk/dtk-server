@@ -14,7 +14,7 @@ module XYZ
         ref.split("__")
       end
 
-      #internal fns for mixin
+      # internal fns for mixin
       class Local
         def initialize(parent)
           @parent = parent
@@ -41,8 +41,8 @@ module XYZ
           @parent.conn()
         end
 
-        #determines whether security group allows unfettered connectivity between its members
-        #TODO: factor this in
+        # determines whether security group allows unfettered connectivity between its members
+        # TODO: factor this in
         def get_unfettered_security_groups()
           security_groups = conn().security_groups_all()
           security_groups.reject{|sg|not is_unfettered_security_group?(sg)}
@@ -51,7 +51,7 @@ module XYZ
           rules =  security_group[:ip_permissions]
           return nil unless rules
           return true #TODO stub
-          #TODO: need to replace; this is rule for right_aws, not fog rules.find{|x|x.has_key?(:group) and x[:group] == sg_name} ? true : nil
+          # TODO: need to replace; this is rule for right_aws, not fog rules.find{|x|x.has_key?(:group) and x[:group] == sg_name} ? true : nil
         end
       end
     end

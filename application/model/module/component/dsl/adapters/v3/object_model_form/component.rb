@@ -21,7 +21,7 @@ module DTK; class ComponentDSL; class V3
         ret
       end
       
-      #processes "link_defs, "dependencies", and "component_order"
+      # processes "link_defs, "dependencies", and "component_order"
       def add_dependent_components!(ret,input_hash,base_cmp,opts={})
         dependencies,link_defs = Choice.deps_and_link_defs(input_hash,base_cmp,opts)
         ret.set_if_not_nil("dependency",dependencies)
@@ -57,7 +57,7 @@ module DTK; class ComponentDSL; class V3
           else
             raise ParsingError.new("Ill-formed attribute data type (?1)",type)
           end
-          #TODO: this will be modified when clean up attribute properties for semantic dataype
+          # TODO: this will be modified when clean up attribute properties for semantic dataype
           if AttributeSemanticType.isa?(nested_type)
             to_add = {
               "data_type" => AttributeSemanticType.datatype("array").to_s,
@@ -88,7 +88,7 @@ module DTK; class ComponentDSL; class V3
           value = info["default"] 
           unless value.nil?
             if semantic_data_type = attr_props["semantic_data_type"]
-              #TODO: currently converting 'integer' -> integer and 'booelan' -> boolean; this may be unnecesary since the object model stores everything as strings
+              # TODO: currently converting 'integer' -> integer and 'booelan' -> boolean; this may be unnecesary since the object model stores everything as strings
               ret = AttributeSemanticType.convert_and_raise_error_if_not_valid(semantic_data_type,value,:attribute_name => attr_props['display_name'])
             end
             ret

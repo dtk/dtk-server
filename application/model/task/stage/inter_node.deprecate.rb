@@ -4,7 +4,7 @@ module DTK
   module Stage
     class InterNode
       # Generating stages in case of inter node component dependencies 
-      #TODO: deprecate
+      # TODO: deprecate
       def self.generate_stages(state_change_list,assembly)
         
         # If 'GUARDS' temporal mode set, don't generate stages workflow
@@ -68,9 +68,9 @@ module DTK
               :guard => {:component => guard[:component], :node => guard[:node]},
               :guarded => {:component => guarded[:component], :node => guarded[:node]}
             }
-            #guarded has to go after guard
-            #flat list of dependencies as oppossed to collecting all deps for one component
-            #attr_guard has relationship between attributes; stripping out attr info; consequently same compoennt relationship can be in more than once
+            # guarded has to go after guard
+            # flat list of dependencies as oppossed to collecting all deps for one component
+            # attr_guard has relationship between attributes; stripping out attr info; consequently same compoennt relationship can be in more than once
             guard_rels << cmp_dep
           end
         end
@@ -88,7 +88,7 @@ module DTK
       
       def self.get_internode_dependencies__port_link_order(state_change_list,assembly,existing_deps)
         ret = Array.new
-        #TODO: should we filter by members of state_change_list
+        # TODO: should we filter by members of state_change_list
         ordered_port_links = assembly.get_port_links(:filter => [:neq,:temporal_order,nil])
         return ret if ordered_port_links.empty?
         sp_hash = {
@@ -117,7 +117,7 @@ module DTK
             Log.error("Unexpected that cannot find the input and output statae changes")
             nil
           else
-            #TODO: see if for component should instead use :component_type; what about also using 'title' for non-singletons? 
+            # TODO: see if for component should instead use :component_type; what about also using 'title' for non-singletons? 
             {
               :node_dependency => { after_sc[:node][:id] => before_sc[:node][:id] },
               :node_dependency_names => { after_sc[:node][:display_name] => before_sc[:node][:display_name] },

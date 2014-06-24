@@ -18,7 +18,7 @@ module DTK; class Task
         Components = :components
         ComponentGroup = :Component_group
       end
-      #TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
+      # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order 
       class OrderedHash < ::Hash
         def initialize(initial_val=nil)
           super()
@@ -54,7 +54,7 @@ module DTK; class Task
       Serialization::OrderedHash.new(hash)
     end
 
-    #returns [ref,create_hash]
+    # returns [ref,create_hash]
     def self.ref_and_create_hash(serialized_content,task_action=nil)
       task_action ||= default_task_action()
       ref = ref(task_action)

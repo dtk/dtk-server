@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 15: dtk.model.yaml with hash type attribute that contains key without value
+# Test Case 15: dtk.model.yaml with hash type attribute that contains key without value
 
 require 'rubygems'
 require 'rest_client'

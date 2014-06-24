@@ -1,4 +1,4 @@
-#TBD: put under module and make as many as possible methods private
+# TBD: put under module and make as many as possible methods private
 
 module R8Tpl
 class FieldR8
@@ -6,12 +6,12 @@ class FieldR8
 
   def initialize(r8_view_ref=nil)
     @r8_view_ref = r8_view_ref
-#TODO: enhance this once profiles are implemented
+# TODO: enhance this once profiles are implemented
   end
 
   # This returns the contents for a provided field array and given view/render mode
   def get_field(view_type, field_meta, renderMode='rtpl')
-    #convert any values that are symbols to strings
+    # convert any values that are symbols to strings
     field_meta.each do |key,value|
       if value.is_a?(Symbol) then field_meta[key] = value.to_s end
     end
@@ -20,17 +20,17 @@ class FieldR8
       when "select","radio"
         field_meta[:options] = self.get_field_options(field_meta)
       when "multiselect"
-        #if view of type edit add the []'s to allow for array to be returned in request for mult selects
+        # if view of type edit add the []'s to allow for array to be returned in request for mult selects
         field_meta[:options] = self.get_field_options(field_meta)
         if(view_type == 'edit' || view_type == 'search') then field_meta[:name] << '[]' end
-#TODO: enhance this once profiles are implemented
+# TODO: enhance this once profiles are implemented
         load_field_file "field.select.rb"
     end
 
-#TODO: enhance this once profiles are implemented
+# TODO: enhance this once profiles are implemented
     load_field_file "field.#{field_meta[:type]}.rb"
     fieldClass = 'Field' + field_meta[:type]
-#TBD: if wrapped in modeule M use form M.const_get
+# TBD: if wrapped in modeule M use form M.const_get
     field_obj = Kernel.const_get(fieldClass).new(field_meta)
     field_obj.set_includes(@r8_view_ref)
 
@@ -43,7 +43,7 @@ class FieldR8
 
     case(field_meta[:type])
       when "radio","select"
-        #classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
+        # classRefId used b/c styling cant be applied to radio itself so applied to reference div wrapper
 #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","classRefId":"' + field_meta[:id] + '-radio-wrapper","type":"' + field_meta[:type] + '","required":' + required + '});'
       else
 #        content = 'R8.forms.addValidator("' + formId + '",{"id":"' + field_meta[:id] + '","type":"' + field_meta[:type] + '","required":' + required + '});'
@@ -56,10 +56,10 @@ class FieldR8
 #    );
   end
 
-#TODO: clean this up when option lists are fully implemented
+# TODO: clean this up when option lists are fully implemented
   def get_field_options(field_meta)
     options_lists = get_model_options(field_meta[:model_name])
-#TODO: decide if list should just be key'd off of name, or a :options value?
+# TODO: decide if list should just be key'd off of name, or a :options value?
     options = options_lists[field_meta[:name].to_sym]
 
 =begin

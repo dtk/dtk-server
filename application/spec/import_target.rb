@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#break this into two functions; one to load the library under user r8_library_user and another to add object sthat wil be under the user (what is in the test data project and target; (write the add user so that it can be used when this is driven from controller)
+# break this into two functions; one to load the library under user r8_library_user and another to add object sthat wil be under the user (what is in the test data project and target; (write the add user so that it can be used when this is driven from controller)
 
 import_file = ARGV[0]
 username = ARGV[1]

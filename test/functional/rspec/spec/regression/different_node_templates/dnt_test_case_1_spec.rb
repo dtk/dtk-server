@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Stage existing assembly with OS ${OS} and MEMOORY_SIZE ${MEMORY_SIZE} combination and then converge it, stop the running instance (nodes) and then delete service
+# Test Case 1: Stage existing assembly with OS ${OS} and MEMOORY_SIZE ${MEMORY_SIZE} combination and then converge it, stop the running instance (nodes) and then delete service
 
 require 'rubygems'
 require 'rest_client'

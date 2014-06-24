@@ -27,7 +27,7 @@ class ErrorHandlerParticipant
  
   def consume(workitem)
 puts "error handler"
-#pp Engine.process(Wfid)
+# pp Engine.process(Wfid)
 error = workitem.error
 pp [error.class,error]
     reply_to_engine(workitem)
@@ -41,9 +41,9 @@ Engine.register_participant 'alpha', DefaultParticipant
 Engine.register_participant 'beta', DefaultParticipant 
 Engine.register_participant 'gamma', DefaultParticipant 
 Engine.register_participant 'error_handler', ErrorHandlerParticipant 
-#Engine.register do
+# Engine.register do
 #  catchall DefaultParticipant
-#end
+# end
 
 
 pdef = Ruote.process_definition do

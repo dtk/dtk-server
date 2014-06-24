@@ -27,7 +27,7 @@ module DTK
         def self.create_mcollective_client()
           config_file_content = mcollective_config_file()
           begin
-            #TODO: see if can pass args and not need to use tempfile
+            # TODO: see if can pass args and not need to use tempfile
             config_file = Tempfile.new("client.cfg")
             config_file.write(config_file_content)
             config_file.close
@@ -108,7 +108,7 @@ eos
         end
 
         class Ssh < self
-          #TODO: validate the R8::Config[:mcollective][:ssh] params
+          # TODO: validate the R8::Config[:mcollective][:ssh] params
           def mcollective_config_file()
             mcollective_config_erubis_object().result(
               :logfile => logfile(),
@@ -124,12 +124,12 @@ eos
          private
 
           def install_script_bindings(node,bindings)
-            #TODO: clean up to have error checking
+            # TODO: clean up to have error checking
             ssh_remote_public_key=File.open(R8::Config[:mcollective][:ssh][:remote][:public_key], 'rb') { |f| f.read }
             ssh_remote_private_key=File.open(R8::Config[:mcollective][:ssh][:remote][:private_key], 'rb') { |f| f.read }
             ssh_local_public_key=File.open(R8::Config[:mcollective][:ssh][:local][:public_key], 'rb') { |f| f.read }
             pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
-            #order of merge does not matter; keys wont conflict
+            # order of merge does not matter; keys wont conflict
             bindings.merge(
               :mcollective_ssh_remote_public_key => ssh_remote_public_key,
               :mcollective_ssh_remote_private_key => ssh_remote_private_key,
@@ -137,7 +137,7 @@ eos
               :mcollective_username => R8::Config[:mcollective][:username],
               :mcollective_password => R8::Config[:mcollective][:password],
               :mcollective_collective => R8::Config[:mcollective][:collective],
-              #TODO: will generalize so not just puppet                           
+              # TODO: will generalize so not just puppet                           
               :puppet_version => get_puppet_version(node),
               :pbuilderid => pbuilderid
             )

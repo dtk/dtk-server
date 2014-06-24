@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 7: Converge assembly with modified module (added new component and new attribute)
+# Test Case 7: Converge assembly with modified module (added new component and new attribute)
 
 require 'rubygems'
 require 'rest_client'

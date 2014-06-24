@@ -33,15 +33,15 @@ module DTK; class Task; class Template; class Stage
         end
       end
 
-      #This is used to include all applicable classes
+      # This is used to include all applicable classes
       class Applicable < self
-        #action_list can be nil for just parsing
+        # action_list can be nil for just parsing
         def parse_and_reify!(action_list)
           ret = self
           return ret unless action_list
           info_per_node = Hash.new #indexed by node_id
           @ordered_components.each do |cmp_ref|
-            #TODO: if there is a title then we need to match on title
+            # TODO: if there is a title then we need to match on title
             cmp_type = cmp_ref
             matching_actions = action_list.select{|a|a.match_component_type?(cmp_type)}
             matching_actions.each do |a|

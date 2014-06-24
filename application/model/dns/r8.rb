@@ -23,7 +23,7 @@ module DTK
       end
 
       def self.dns_address(info)
-        #TODO: should validate ::R8::Config[:dns][:r8][:format]
+        # TODO: should validate ::R8::Config[:dns][:r8][:format]
         format = ::R8::Config[:dns][:r8][:format] || DefaultFormat
         ret = format.dup
         [:node,:assembly,:user,:tenant,:domain].each do |part|

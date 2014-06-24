@@ -17,10 +17,10 @@ module DTK
       def shift_foregn_keys()
         return if @no_fk_processing
         each_fk do |model_handle, fk_model_name, fk_cols|
-          #get (if the set of id mappings for fk_model_name
+          # get (if the set of id mappings for fk_model_name
           id_mappings = get_id_mappings(model_handle,fk_model_name)
           next if id_mappings.empty?
-          #TODO: may be more efficient to shift multiple fk cols at same time
+          # TODO: may be more efficient to shift multiple fk cols at same time
           fk_cols.each{|fk_col|shift_foregn_keys_aux(model_handle,fk_col,id_mappings)}
         end
       end
@@ -34,9 +34,9 @@ module DTK
 
       def add_foreign_keys(model_handle,field_set)
         return if @no_fk_processing
-        #TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
+        # TODO: only putting in once per model; not sure if need to treat instances differently; if not can do this alot more efficiently computing just once
         fks = model_handle_info(model_handle)[:fks]
-        #put in foreign keys that are not special keys like ancestor or assembly_id
+        # put in foreign keys that are not special keys like ancestor or assembly_id
         omit = Global::ForeignKeyOmissions[model_handle[:model_name]]||[]
         field_set.foreign_key_info().each do |fk,fk_info|
           next if fk == :ancestor_id or omit.include?(fk)

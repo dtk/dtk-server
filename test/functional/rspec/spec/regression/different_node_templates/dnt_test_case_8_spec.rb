@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 8: Wordpress - Single node scenario
+# Test Case 8: Wordpress - Single node scenario
 
 require 'rubygems'
 require 'net/http'

@@ -32,10 +32,10 @@ module Ramaze::Helper
       module_obj.get_linked_remote_module_info(project,action,remote_params,rsa_pub_key,access_rights,module_ref_content)
     end
 
-    def get_service_dependencies(remote_params)
+    def get_service_dependencies(remote_params, client_rsa_pub_key=nil)
       project = get_default_project()
-      missing_modules, required_modules = ServiceModule.get_required_and_missing_modules(project,remote_params)
-      { :missing_modules => missing_modules, :required_modules => required_modules }
+      missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key)
+      { :missing_modules => missing_modules, :required_modules => required_modules, :dependency_warnings => dependency_warnings }
     end
 
     def chmod_from_remote_helper()
@@ -46,7 +46,7 @@ module Ramaze::Helper
       remote_namespace = check_remote_namespace(remote_namespace, component_module)
       repoman_client = Repo::Remote.new().repoman_client()
       repoman_client.chmod(module_type(component_module), component_module.display_name, remote_namespace, permission_selector, client_rsa_pub_key)
-    end 
+    end
 
     def chown_from_remote_helper()
       component_module = create_obj(:module_id)
@@ -56,7 +56,7 @@ module Ramaze::Helper
       remote_namespace = check_remote_namespace(remote_namespace, component_module)
       repoman_client = Repo::Remote.new().repoman_client()
       repoman_client.chown(module_type(component_module), component_module.display_name, remote_namespace, remote_user, client_rsa_pub_key)
-    end 
+    end
 
     def collaboration_from_remote_helper
       component_module = create_obj(:module_id)
@@ -93,7 +93,7 @@ module Ramaze::Helper
       remote_params = remote_params_dtkn(module_type,remote_namespace,remote_module_name,version)
 
       local_namespace = remote_params.namespace
-      local_module_name = ret_request_params(:local_module_name)||remote_params.module_name 
+      local_module_name = ret_request_params(:local_module_name)||remote_params.module_name
       project = get_default_project()
       dtk_client_pub_key = ret_request_params(:rsa_pub_key)
 
@@ -104,15 +104,15 @@ module Ramaze::Helper
 
       # check for missing module dependencies
       if module_type == :service_module and !do_not_raise
-        missing_modules, required_modules = ServiceModule.get_required_and_missing_modules(project,remote_params)
+        missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
         # return missing modules if any
-        return { :missing_module_components => missing_modules } unless missing_modules.empty?
+        return { :missing_module_components => missing_modules, :dependency_warnings => dependency_warnings } unless missing_modules.empty?
       end
 
       opts = {:do_not_raise=>do_not_raise, :additional_message=>additional_message, :ignore_component_error=>ignore_component_error}
       response = module_class(module_type).install(project,local_params,remote_params,dtk_client_pub_key,opts)
       return response if response[:does_not_exist]
-      
+
       response.merge( { :namespace => remote_namespace} )
     end
 
@@ -155,7 +155,7 @@ module Ramaze::Helper
     def get_existing_default_namespace?(module_obj,version=nil)
       linked_remote_repos = module_obj.get_linked_remote_repos(:filter => {:version => version})
       default_remote_repo = RepoRemote.ret_default_remote_repo(linked_remote_repos)
-      if default_remote_repo 
+      if default_remote_repo
         Log.info("Found default namespace (#{default_remote_repo[:display_name]})")
         default_remote_repo[:repo_namespace]
       end
@@ -173,7 +173,7 @@ module Ramaze::Helper
     def ret_remote_repo_base()
       (ret_request_params(:remote_repo_base)||Repo::Remote.default_remote_repo_base()).to_sym
     end
-    # TODO: deprecate below when all uses removed; 
+    # TODO: deprecate below when all uses removed;
     def ret_remote_repo()
       (ret_request_params(:remote_repo)||Repo::Remote.default_remote_repo()).to_sym
     end
@@ -198,7 +198,7 @@ module Ramaze::Helper
 
     def module_class(module_type)
       case module_type
-        when :component_module then ComponentModule 
+        when :component_module then ComponentModule
         when :service_module then ServiceModule
         else raise Error.new("Unexpected module_type (#{module_type})")
       end

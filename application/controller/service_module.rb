@@ -2,7 +2,7 @@ module DTK
   class Service_moduleController < AuthController
     helper :module_helper
     helper :assembly_helper
-    
+
     # TODO: for debugging; will be removed
     def rest__debug_get_project_trees()
       ServiceModule.get_project_trees(model_handle)
@@ -49,7 +49,7 @@ module DTK
       service_module = create_obj(:service_module_id)
       rest_ok_response publish_to_dtkn_helper(service_module)
     end
-    
+
     # this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
       service_module = create_obj(:service_module_id)
@@ -157,7 +157,7 @@ module DTK
     def rest__create_new_version()
       service_module = create_obj(:service_module_id)
       version = ret_version()
-      
+
       service_module.create_new_version(version)
       rest_ok_response
     end
@@ -181,7 +181,7 @@ module DTK
       remote_params = remote_params_dtkn(:service_module,remote_namespace,remote_module_name,version)
       project = get_default_project()
       ServiceModule.delete_remote(project,remote_params,client_rsa_pub_key)
-      rest_ok_response 
+      rest_ok_response
     end
 
     #
@@ -193,7 +193,8 @@ module DTK
       opts = Opts.create?(:remote_namespace? => ret_request_params(:remote_namespace))
       module_name, namespace, version = service_module.get_basic_info(opts)
       remote_params = remote_params_dtkn(:service_module,namespace,module_name,version)
-      rest_ok_response get_service_dependencies(remote_params)
+      client_rsa_pub_key   = ret_request_params(:rsa_pub_key)
+      rest_ok_response get_service_dependencies(remote_params, client_rsa_pub_key)
     end
 
     def rest__delete_assembly_template()

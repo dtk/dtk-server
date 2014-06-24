@@ -1,7 +1,7 @@
 module DTK
   class ServiceModule < Model
-    r8_nested_require('service','component_module_ref') 
-    r8_nested_require('service','component_module_refs') 
+    r8_nested_require('service','component_module_ref')
+    r8_nested_require('service','component_module_refs')
     r8_nested_require('service','dsl')
     r8_nested_require('service','service_add_on')
 
@@ -29,11 +29,14 @@ module DTK
       ndx_ret.values
     end
 
-    def self.get_required_and_missing_modules(project,remote_params)
+    def self.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
       remote = remote_params.create_remote(project)
-      response = Repo::Remote.new(remote).get_remote_module_components()
+      response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
       opts = Opts.new(:project_idh => project.id_handle())
-      ComponentModule.cross_reference_modules(opts, response, remote.namespace)
+
+      # this method will return array with missing and required modules
+      module_info_array = ComponentModule.cross_reference_modules(opts, response['component_info'], remote.namespace)
+      module_info_array.push(response['dependency_warnings'])
     end
 
     def get_referenced_component_modules(opts=Opts.new)
@@ -45,7 +48,7 @@ module DTK
 
       if opts.array(:detail_to_include).include?(:versions)
         ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
-        
+
         ret.each do |mod|
           if version_obj = ndx_versions[mod.module_name()]
             mod[:version] = version_obj
@@ -94,7 +97,7 @@ module DTK
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist")
         end
       end
 
@@ -116,9 +119,9 @@ module DTK
     def get_assembly_instances()
       assembly_templates = get_assembly_templates()
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
-      
+
       assoc_assemblies.each do |assoc_assembly|
-        assembly_template = assembly_templates.select{|at| at[:id]==assoc_assembly[:ancestor_id]}  
+        assembly_template = assembly_templates.select{|at| at[:id]==assoc_assembly[:ancestor_id]}
         nodes = assembly_template.first[:nodes]
         assoc_assembly[:nodes] = nodes
       end
@@ -182,7 +185,7 @@ module DTK
           {:targets => ndx_targets[mb_id]||Array.new},
           {:assemblies => Array.new}
          ])
-        h.merge(mb_id => content) 
+        h.merge(mb_id => content)
       end
 
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
@@ -253,7 +256,7 @@ module DTK
       }
       mh = assembly_templates.first.model_handle(:component)
       get_objs(mh,sp_hash)
-    end 
+    end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version=nil)
       info = module_and_branch_info #for succinctness
@@ -283,7 +286,7 @@ module DTK
       end
       is_parsed = true
       unless opts[:donot_update_model_from_dsl]
-        is_parsed = update_model_from_dsl(module_branch,opts) 
+        is_parsed = update_model_from_dsl(module_branch,opts)
       end
       is_parsed
     end

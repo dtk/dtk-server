@@ -39,8 +39,8 @@ module DTK
         rsa_key_name    = dtk_instance_remote_repo_key_name()
 
         client.create_user(username, rsa_pub_key, rsa_key_name, client_rsa_pub_key)
-        
-        unless namespace = remote.namespace 
+
+        unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()
           Log.error("Unexpected that naemspace was null and used CurrentSession.new.get_user_object().get_namespace(): #{namespace}}")
         end
@@ -81,12 +81,12 @@ module DTK
           :namespace => remote.namespace,
           :rsa_pub_key => client_rsa_pub_key,
           :module_refs_content => opts[:module_refs_content]
-        } 
+        }
         ret = nil
         begin
           response_data = client.get_module_info(client_params)
           ret = Aux.convert_keys_to_symbols(response_data)
-        rescue 
+        rescue
           if opts[:raise_error]
             raise ErrorUsage.new("Remote module (#{remote.pp_module_name(:include_namespace=>true)}) does not exists or is not accessible")
           else
@@ -97,7 +97,7 @@ module DTK
         ret.merge!(:remote_repo_url => RepoManagerClient.repo_url_ssh_access(ret[:git_repo_name]))
 
         if remote.version
-          # TODO: ModuleBranch::Location: 
+          # TODO: ModuleBranch::Location:
           raise Error.new("Not versions not implemented")
           versions = branch_names_to_versions_stripped(ret[:branches])
           unless versions and versions.include?(remote.version)
@@ -107,15 +107,16 @@ module DTK
         ret
       end
 
-      def get_remote_module_components()
+      def get_remote_module_components(client_rsa_pub_key=nil)
         params = {
           :name => remote.module_name,
           :version => remote.version,
           :namespace => remote.namespace,
           :type => remote.module_type,
-          :do_not_raise => true
+          :do_not_raise => true,
+          :dependencies_info => true
         }
-        @client.get_components_info(params)
+        @client.get_components_info(params, client_rsa_pub_key)
       end
 
 
@@ -126,7 +127,7 @@ module DTK
         @remote
       end
       private :remote
-      
+
       def list_module_info(type=nil, rsa_pub_key = nil)
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && {:type => type_for_remote_module(type)}
@@ -168,11 +169,11 @@ module DTK
         if version.nil? or version == HeadBranchName
           HeadBranchName
         else
-          "v#{version}" 
+          "v#{version}"
         end
       end
       HeadBranchName = "master"
-      
+
       def default_remote_repo_base()
         self.class.default_remote_repo_base()
       end
@@ -198,13 +199,13 @@ module DTK
       def self.default_namespace()
         self.default_user_namespace()
       end
-      
+
       DefaultsNamespace = "r8" #TODO: have this obtained from config file
 
       # [Haris] We are not using r8 here since we will use tenant id, e.g. "dtk9" as default
       # DefaultsNamespace = self.default_user_namespace() #TODO: have this obtained from config file
 
-      # example: 
+      # example:
       # returns namespace, name, version (optional)
       def self.split_qualified_name(qualified_name)
         raise ErrorUsage.new("Please provide module name to publish") unless qualified_name
@@ -214,7 +215,7 @@ module DTK
          when 1 then [default_namespace(),qualified_name]
          when 2,3 then split
         else
-          qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty? 
+          qualified_name = "NOT PROVIDED" if qualified_name.nil? || qualified_name.empty?
           raise ErrorUsage.new("Module remote name (#{qualified_name}) ill-formed. Must be of form 'name', 'namespace/name' or 'name/namespace/version'")
         end
       end
@@ -252,7 +253,7 @@ module DTK
       def get_end_user_remote_repo_username(mh,ssh_rsa_pub_key)
         RepoUser.match_by_ssh_rsa_pub_key(mh,ssh_rsa_pub_key).owner.username
       end
- 
+
     end
   end
 end

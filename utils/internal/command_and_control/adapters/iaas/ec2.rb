@@ -1,12 +1,14 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControlIAAS
-
       R8_KEY_PAIR = 'admin'
 
       r8_nested_require('ec2','node_state')
       r8_nested_require('ec2','address_management')
       r8_nested_require('ec2','image')
+      #create_node must be below above three
+      r8_nested_require('ec2','create_node')
+
       extend NodeStateClassMixin
       extend AddressManagementClassMixin
       extend ImageClassMixin
@@ -85,10 +87,13 @@ module DTK
       end
       ExecuteMutex = Mutex.new
       def self.execute(task_idh,top_task_idh,task_action)
+        #execute_legacy(task_idh,top_task_idh,task_action)
+        CreateNode.run(task_action)
+      end
 
+      def self.execute_legacy(task_idh,top_task_idh,task_action)
         node = task_action[:node]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
-raise ErrorUsage.new('reached here')
         target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])
 
         external_ref = node[:external_ref]||{}
@@ -182,6 +187,78 @@ raise ErrorUsage.new('reached here')
             :external_ref => external_ref
           }
         }
+      end
+
+      def self.find_matching_node_binding_rule(node_binding_rules,target)
+        node_binding_rules.find do |r|
+          conditions = r[:conditions]
+          (conditions[:type] == "ec2_image") and (conditions[:region] == target[:iaas_properties][:region])
+        end
+      end
+
+      def self.references_image?(node_external_ref)
+        node_external_ref[:type] == "ec2_image" and node_external_ref[:image_id]
+      end
+
+      def self.existing_image?(image_id)
+        raise Error.new("existing_image does not take target region as param")
+        image(image_id).exists?()
+      end
+
+      def self.pbuilderid(node)
+        node.get_external_ref()[:instance_id]
+      end
+
+      def self.start_instances(nodes)
+        nodes.each do |node|
+          conn(node.get_target_iaas_credentials()).server_start(node.instance_id())
+          node.update_admin_op_status!(:pending)
+          Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
+        end
+      end
+
+      def self.stop_instances(nodes)
+        nodes.each do |node|
+          conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
+          node.update_admin_op_status!(:stopped)
+          # we remove dns if it is not persistent dns
+          unless node.persistent_hostname?
+            node.strip_dns_info!()
+          end
+          Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
+        end
+      end
+
+      def self.check_iaas_properties(iaas_properties)
+        begin
+          ec2_creds = get_ec2_credentials(iaas_properties)
+          connection = conn(ec2_creds)
+
+          # keypair
+          keypair_to_use = iaas_properties['keypair_name'] || R8::Config[:ec2][:keypair]
+          # TODO: WORKAROUND: DTK-1426; commented out
+          # connection.check_for_key_pair(keypair_to_use)
+          
+          Log.debug "Fetched needed R8 key pair (#{keypair_to_use}) for newly created target-template. (Default used: #{!iaas_properties['keypair_name'].nil?})"
+
+          # security group
+          security_group_to_use = iaas_properties['security_group'] || R8::Config[:ec2][:security_group]
+          # TODO: WORKAROUND: DTK-1426; commented out
+          # connection.check_for_security_group(security_group_to_use)
+
+          Log.debug "Fetched needed security group (#{security_group_to_use})  for newly created target-template. (Default used: #{!iaas_properties['security_group'].nil?})"
+
+          return {
+            :key            => iaas_properties['key'],
+            :secret         => iaas_properties['secret'],
+            :keypair        => keypair_to_use,
+            :security_group => security_group_to_use,
+            :region         => iaas_properties['region']
+          }
+        rescue Fog::Compute::AWS::Error => e
+          # probabably this will handle credentials failure
+          raise ErrorUsage.new(e.message)
+        end
       end
 
       # destroys the node if it exists

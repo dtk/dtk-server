@@ -57,8 +57,7 @@ module DTK
         Node.cache_attribute_values!(nodes,:cardinality)
         create_state_changes_for_create_node?(target,nodes)
         #This creates if needed target refs and links to them
-#TODO: put back in        
-        Node::TargetRef.create_linked_target_refs?(target,nodes)
+        Node::TargetRef.create_linked_target_refs?(target,assembly,nodes)
 
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing

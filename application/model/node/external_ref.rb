@@ -6,18 +6,15 @@ module DTK
           ExternalRef.new(self)
         end
       end
-      
+
+      attr_reader :hash
       def initialize(node)
         @node = node
+        @hash = @node.get_field?(:external_ref)||{}
       end
       
       def references_image?(target)
-        CommandAndControl.references_image?(target,external_ref())
-      end
-
-     private
-      def external_ref()
-        @node.get_field?(:external_ref)||{}
+        CommandAndControl.references_image?(target,hash())
       end
     end
   end

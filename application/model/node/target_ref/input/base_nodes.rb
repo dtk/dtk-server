@@ -12,19 +12,8 @@ module DTK; class Node; class TargetRef
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
       def create_linked_target_refs?()
         add_to_target = ret_linked_target_ref_hash()
-        pp [:foo,add_to_target]
         target_idh = @target.id_handle()
-#        ret = Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
-        ret = Model.import_objects_from_hash(target_idh, {:node => add_to_target[:node]}, :return_info => true)
-pp [:ret,ret]
-        ret = Model.import_objects_from_hash(target_idh, {:node_group_relation => add_to_target[:node_group_relation]}, :return_info => true)
-        raise Error.new('got here')
-        target_ref_hash = ret_target_ref_hash()
-        ret = Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
-        pp [:ret_target_ref_hash,target_ref_hash]
-        pp [:create_linked_target_refs,ret]
-
-ret
+        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
       end
 
      private
@@ -96,7 +85,7 @@ ret
             node_group_rel_hash = target_ref_hash.keys.inject(Hash.new) do |h,node_ref|
               hash = {
                 "node_group_id" => @node.id,
-                "*node_id" => "/#{node_ref}"
+                "*node_id" => "/node/#{node_ref}"
               }
               ref = node_ref
               h.merge(ref => hash)

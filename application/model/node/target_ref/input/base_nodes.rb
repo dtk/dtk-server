@@ -11,20 +11,33 @@ module DTK; class Node; class TargetRef
       #This creates if needed target refs and links nodes to them
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
       def create_linked_target_refs?()
+        add_to_target = ret_linked_target_ref_hash()
+        pp [:foo,add_to_target]
+        target_idh = @target.id_handle()
+#        ret = Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
+        ret = Model.import_objects_from_hash(target_idh, {:node => add_to_target[:node]}, :return_info => true)
+pp [:ret,ret]
+        ret = Model.import_objects_from_hash(target_idh, {:node_group_relation => add_to_target[:node_group_relation]}, :return_info => true)
+        raise Error.new('got here')
         target_ref_hash = ret_target_ref_hash()
-        pp [:ret_target_ref_hash,target_ref_hash,self]
-        raise ErrorUsage.new('got here')
+        ret = Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
+        pp [:ret_target_ref_hash,target_ref_hash]
+        pp [:create_linked_target_refs,ret]
 
-        target_idh = target.id_handle()
-        Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
+ret
       end
 
      private
       def add!(node_info)
         self << Element.new(node_info)
       end
-      def ret_target_ref_hash()
-        inject(Hash.new){|h,el|h.merge(el.ret_target_ref_hash(@target,@assembly))}
+
+      def ret_linked_target_ref_hash()
+        ret = Hash.new
+        each do |el|
+          target_ref,node_group_relation = el.add_target_ref_and_ngr!(ret,@target,@assembly)
+        end
+        ret
       end
 
       #returns for each node that needs one or more target refs the following hash
@@ -53,7 +66,6 @@ module DTK; class Node; class TargetRef
       #indexed by node id
       def ndx_linked_target_ref_idhs(nodes)
         ret = Hash.new
-        Log.error("need to index by assembly")
         sp_hash = {
           :cols => [:id,:group_id,:display_name,:node_id,:node_group_id],
           :filter => [:and, 
@@ -64,8 +76,8 @@ module DTK; class Node; class TargetRef
         Model.get_objs(@target.model_handle(:node_group_relation),sp_hash).each do |r|
           (ret[r[:node_group_id]] ||= Array.new) << node_mh.createIDH(:id => r[:node_id])
         end
+        ret
       end
-
 
       class Element 
         include ElementMixin
@@ -75,7 +87,25 @@ module DTK; class Node; class TargetRef
           @num_linked = node_info[:num_linked]
           @type = :base_node_link
         end
-        
+
+        # returns [target_ref,node_group_relation]
+        def add_target_ref_and_ngr!(ret,target,assembly)
+          target_ref_hash = ret_target_ref_hash(target,assembly)
+          unless target_ref_hash.empty?
+            (ret[:node] ||= Hash.new).merge!(target_ref_hash)
+            node_group_rel_hash = target_ref_hash.keys.inject(Hash.new) do |h,node_ref|
+              hash = {
+                "node_group_id" => @node.id,
+                "*node_id" => "/#{node_ref}"
+              }
+              ref = node_ref
+              h.merge(ref => hash)
+            end
+            (ret[:node_group_relation] ||= Hash.new).merge!(node_group_rel_hash)
+          end
+          ret
+        end
+
         def ret_target_ref_hash(target,assembly)
           ret = Hash.new
           unless display_name = @node.get_field?(:display_name)

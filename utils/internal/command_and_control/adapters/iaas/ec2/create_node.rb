@@ -3,22 +3,23 @@ module DTK; module CommandAndControlAdapter
     #TODO: these fns that execute per node group member will be put at more asbtract level
     class CreateNode < self
       def self.run(task_action)
-        base_node = task_action[:node]
-        target = Target.get(base_node.model_handle(:target), task_action[:datacenter][:id])
-        single_run_responses = target_ref_nodes(task_action,target).each do |create_single_node|
+        single_run_responses = target_ref_nodes(task_action).map do |create_single_node|
           create_single_node.run()
         end
         aggregate_responses(single_run_responses)
       end
 
      private
-      def self.target_ref_nodes(task_action,target)
+      def self.target_ref_nodes(task_action)
         nodes = task_action.nodes()
         #TODO: more efficient to get these attributes initially
         nodes.each do |node|
           node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
         end
-        @target_ref_nodes = nodes.map{|node|TargetRef.new(node,target)}
+
+        base_node = task_action[:node]
+        target = Target.get(base_node.model_handle(:target), task_action[:datacenter][:id])
+        nodes.map{|node|TargetRef.new(base_node,node,target)}
       end
 
       def self.aggregate_responses(single_run_responses)
@@ -42,8 +43,9 @@ module DTK; module CommandAndControlAdapter
         include AddressManagementClassMixin
         include ImageClassMixin
 
-        attr_reader :node,:target,:flavor_id,:external_ref
-        def initialize(node,target)
+        attr_reader :base_node,:node,:target,:flavor_id,:external_ref
+        def initialize(base_node,node,target)
+          @base_node = base_node
           @node = node
           @target = target
           @external_ref = node[:external_ref]||{}
@@ -67,10 +69,9 @@ module DTK; module CommandAndControlAdapter
             })
 
             Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
-            Log.error('need to set node_update_hash :type')
             node_update_hash = {
               :external_ref => updated_external_ref,
-              :type => Node::Type::Node.instance,
+              :type => base_node.is_node_group? ? Node::Type::NodeGroup.instance : Node::Type::Node.instance,
               :is_deployed => true,
               # TODO: better unify these below
               :operational_status => "starting",

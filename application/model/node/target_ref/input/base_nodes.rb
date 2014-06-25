@@ -129,6 +129,7 @@ module DTK; class Node; class TargetRef
           (1..@num_needed).inject(Hash.new) do |h,index|
             hash = {
               :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
+              :os_type => @node.get_field?(:os_type),
               :type => TargetRef.type(),
               :external_ref => external_ref.hash() 
             }          

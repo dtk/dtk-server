@@ -102,6 +102,8 @@ module Ramaze::Helper
       additional_message = (ret_request_params(:additional_message) ? ret_request_params(:additional_message) : false)
       local_params = local_params_dtkn(module_type,local_namespace,local_module_name,version)
 
+      dependency_warnings = []
+
       # check for missing module dependencies
       if module_type == :service_module and !do_not_raise
         missing_modules, required_modules, dependency_warnings = ServiceModule.get_required_and_missing_modules(project, remote_params, dtk_client_pub_key)
@@ -113,7 +115,7 @@ module Ramaze::Helper
       response = module_class(module_type).install(project,local_params,remote_params,dtk_client_pub_key,opts)
       return response if response[:does_not_exist]
 
-      response.merge( { :namespace => remote_namespace} )
+      response.merge( { :namespace => remote_namespace, :dependency_warnings => dependency_warnings } )
     end
 
     def publish_to_dtkn_helper(module_obj)

@@ -64,6 +64,30 @@ module DTK
         ret
       end
 
+      def find_node_target_ref_matches(target,assembly_template_idh)
+        sp_hash = {
+          :cols => [:id,:display_name,:group_id],
+          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
+        }
+        stub_nodes = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
+
+        free_nodes = Node::TargetRef.get_free_nodes(target)
+        # assuming the free nodes are interchangable; pick one for each match
+        num_free = free_nodes.size
+        num_needed = stub_nodes.size
+        if num_free < num_needed
+          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
+          free = (num_free == 1 ? '1 is' : "#{num_free} are")
+          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
+        end
+        ret = Array.new
+        stub_nodes.each_with_index do |stub_node,i|
+          node_target_ref = free_nodes[i]
+          ret << hash_el_when_match(stub_node,node_target_ref)
+        end
+        ret
+      end
+
       def find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings=nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
         # as will as using, if non-empty, service_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
@@ -104,30 +128,6 @@ module DTK
       #TODO: just temporarly heustic that wil indicate :match if node node bindings in assembly
       def match_or_create_node(target,node,assembly_template_idh,opts)
         opts[:node_binding_ruleset] ? :create : :match
-      end
-
-      def find_node_target_ref_matches(target,assembly_template_idh)
-        sp_hash = {
-          :cols => [:id,:display_name,:group_id],
-          :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
-        }
-        stub_nodes = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
-
-        free_nodes = Node::TargetRef.get_free_nodes(target)
-        # assuming the free nodes are interchangable; pick one for each match
-        num_free = free_nodes.size
-        num_needed = stub_nodes.size
-        if num_free < num_needed
-          num  = (num_needed == 1 ? '1 free node is' : "#{num_needed} free nodes are")
-          free = (num_free == 1 ? '1 is' : "#{num_free} are")
-          raise ErrorUsage.new("Cannot stage the assembly template because #{num} needed, but just #{free} available")
-        end
-        ret = Array.new
-        stub_nodes.each_with_index do |stub_node,i|
-          node_target_ref = free_nodes[i]
-          ret << hash_el_when_match(stub_node,node_target_ref)
-        end
-        ret
       end
 
       def hash_el_when_create(node,node_template)

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Stage existing assembly and then delete service
+# Test Case 1: Stage existing assembly and then delete service
 
 require 'rubygems'
 require 'rest_client'

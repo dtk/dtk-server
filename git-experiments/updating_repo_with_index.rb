@@ -10,5 +10,5 @@ index = repo.index
 index.read_tree('master')
 index.add('mytext.txt', "This is my second text")
 index.commit('Text commit',[repo.commits.first])
-#To 'resync' working directory can issue
-#git checkout master -f
+# To 'resync' working directory can issue
+# git checkout master -f

@@ -17,7 +17,7 @@ module DTK; class Dependency
       aug_link_defs = cmp_template.get_augmented_link_defs()
       if link_def_link = matching_link_def_link?(aug_link_defs,external_or_internal,antec_cmp_template)
         unless link_def_link.matching_attribute_mapping?(target_attr_pattern,source_attr_pattern)
-          #aug_link_defs gets updated as side effect
+          # aug_link_defs gets updated as side effect
           link_def_link.add_attribute_mapping!(attribute_mapping_serialized_form(source_attr_pattern,target_attr_pattern))
           incrementally_update_component_dsl?(cmp_template,aug_link_defs,opts)
           result.merge!(:component_module_updated => true)
@@ -32,8 +32,8 @@ module DTK; class Dependency
     end
 
     def depends_on_print_form?()
-      #link_type may be label or component_type
-      #TODO: assumption that its safe to process label through component_type_print_form
+      # link_type may be label or component_type
+      # TODO: assumption that its safe to process label through component_type_print_form
       Component.component_type_print_form(@link_def[:link_type])
     end
 

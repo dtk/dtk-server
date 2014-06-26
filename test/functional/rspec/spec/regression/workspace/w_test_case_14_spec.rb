@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 14: Create two nodes, add components in it, converge, stop both nodes and then start again
+# Test Case 14: Create two nodes, add components in it, converge, stop both nodes and then start again
 
 require 'rubygems'
 require 'rest_client'

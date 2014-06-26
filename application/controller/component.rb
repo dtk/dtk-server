@@ -37,7 +37,7 @@ module XYZ
     end
 
     def get_posible_link_def_remote_components(link_def_type)
-      #TODO: searching in user's library
+      # TODO: searching in user's library
       library_idh = Model.get_objs(model_handle(:library),{:cols => [:id]}).first.id_handle
       poss_remote_cmps = ComponentTypeHierarchy.possible_link_def_remote_components(link_def_type,library_idh)
       {:data =>poss_remote_cmps}
@@ -59,7 +59,7 @@ module XYZ
     end
 
     def get_by_type(type)
-      #TODO: searching in user's library
+      # TODO: searching in user's library
       library_idh = Model.get_objs(model_handle(:library),{:cols => [:id]}).first.id_handle
       poss_remote_cmps = ComponentTypeHierarchy.possible_link_def_remote_components(type,library_idh)
 pp poss_remote_cmps
@@ -81,9 +81,9 @@ pp poss_remote_cmps
       end.compact
 
       filter_conjuncts += [[:neq,:type,"composite"],[:or, [:neq,:project_project_id,nil],[:neq,:library_library_id,nil]],[:eq,:assembly_id,nil]]
-      #MOD_RESTRUCT: when deprecate component templates in library switch above with below
-      #restrict results to belong to project and not nested in assembly
-      #filter_conjuncts += [[:neq,:type,"composite"],[:neq,:project_project_id,nil],[:eq,:assembly_id,nil]]
+      # MOD_RESTRUCT: when deprecate component templates in library switch above with below
+      # restrict results to belong to project and not nested in assembly
+      # filter_conjuncts += [[:neq,:type,"composite"],[:neq,:project_project_id,nil],[:eq,:assembly_id,nil]]
 
 
       sp_hash = {
@@ -91,7 +91,7 @@ pp poss_remote_cmps
         :filter => [:and] + filter_conjuncts
      }
       component_list = Model.get_objs(model_handle(:component),sp_hash).each{|r|r.materialize!(cols)}
-      #MOD_RESTRUCT: when deprecate component templates in library  remove below
+      # MOD_RESTRUCT: when deprecate component templates in library  remove below
       ndx_component_list = Hash.new
       component_list.each do |r|
         ndx = r[:display_name]
@@ -112,7 +112,7 @@ pp poss_remote_cmps
         title = name.nil? ? "" : i18n_string(i18n,:component,name)
 
 =begin
-        #TDOO: temporary to distingusih between chef and puppet components
+        # TDOO: temporary to distingusih between chef and puppet components
         if model_name == :component
           if config_agent_type = component_list[index][:config_agent_type]
             title += " (#{config_agent_type[0].chr})" 
@@ -120,7 +120,7 @@ pp poss_remote_cmps
         end
 =end
         
-#TODO: change after implementing all the new types and making generic icons for them
+# TODO: change after implementing all the new types and making generic icons for them
         model_type = 'service'
         model_sub_type = 'db'
         model_type_str = "#{model_type}-#{model_sub_type}"
@@ -156,11 +156,11 @@ pp poss_remote_cmps
           return redirect "/xyz/#{model_name()}/display/#{id.to_s}"
         end
 
-        #TODO: need to copy in avatar when hash["ui"] is non null
+        # TODO: need to copy in avatar when hash["ui"] is non null
         override_attrs = hash["ui"] ? {:ui=>hash["ui"]} : {}
         target_object = target_id_handle.create_object()
 
-        #TODO: push in logic that forces us here to pass in real cols and then materialize
+        # TODO: push in logic that forces us here to pass in real cols and then materialize
         clone_opts = {
           :ret_new_obj_with_cols => Component.common_real_columns(),
           :outermost_ports => Array.new
@@ -168,7 +168,7 @@ pp poss_remote_cmps
         component_obj = target_object.clone_into(id_handle.create_object(),override_attrs,clone_opts)
         component_obj.materialize!(Component.common_columns())
         
-        #TODO: ganglia hack: remove after putting this info in teh r8 meta files
+        # TODO: ganglia hack: remove after putting this info in teh r8 meta files
         if component_obj[:display_name] == "ganglia__server"
           (clone_opts[:outermost_ports]||[]).each{|x|x[:location] = "east"}
         elsif component_obj[:display_name] == "ganglia__monitor"
@@ -219,7 +219,7 @@ pp poss_remote_cmps
       _model_var[:i18n] = get_model_i18n(:component,user_context())
       component[:name] = _model_var[:i18n][component[:display_name].to_sym]
 
-#TEMP UNTIL FULLY IMPLEMENTING DEPENDENCIES
+# TEMP UNTIL FULLY IMPLEMENTING DEPENDENCIES
       supported_os_list = [
         {:id=>12345,:name=>'Ubuntu',:version=>'10.4',:ui=>{:images=>{:icon=>'ubuntu-favicon.png'}}},
         {:id=>12345,:name=>'Debian',:version=>'6',:ui=>{:images=>{:icon=>'debian-favicon.png'}}},
@@ -264,7 +264,7 @@ pp cfg_file_list
       component = create_object_from_id(id,:component)
       field_defs = component.get_field_def()
 pp [:field_defs,field_defs]
-#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+# TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
       tpl = R8Tpl::TemplateR8.new("component/edit_field",user_context())
       tpl.set_js_tpl_name("component_edit_field")
       tpl_info = tpl.render()
@@ -297,7 +297,7 @@ pp [:field_defs,field_defs]
     def save_field(id)
       field_def_json = request.params["field_def"]
       field_def_update_x = request.params.merge("field_def" => JSON.parse(field_def_json))
-      #convert "" to nil
+      # convert "" to nil
       field_def_update = field_def_update_x.inject({}) do |h,kv|
         h.merge(kv[0] => (kv[1] && kv[1].empty?) ? nil : kv[1])
       end
@@ -339,7 +339,7 @@ pp [:field_defs,field_defs]
 #      component = create_object_from_id(id,:component)
 #      constraints = component.get_constraints()
 
-#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+# TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
       tpl = R8Tpl::TemplateR8.new("component/constraints",user_context())
 #      tpl.set_js_tpl_name("component_constraints")
 #      tpl_info = tpl.render()
@@ -374,11 +374,11 @@ pp [:field_defs,field_defs]
       tmp_file_handle = upload_param[:tempfile]
       file_content = tmp_file_handle.read 
       tmp_file_handle.close
-#TODO: need to clean up ways to get at and work with objects
+# TODO: need to clean up ways to get at and work with objects
 # create_object_from_id,get_object_by_id,id_handle(id).create_object(), etc
 #      id_handle(id).create_object().add_config_file(cfg_filename,file_content)
       component.add_config_file(cfg_filename,file_content)
-      #TODO: delete /tmp file File.unlink(tmp_file_path)
+      # TODO: delete /tmp file File.unlink(tmp_file_path)
 
 #     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
 
@@ -410,7 +410,7 @@ pp tmp_file.path
       file_content = tmp_file_handle.read 
       tmp_file_handle.close
       id_handle(component_id).create_object().add_config_file(cfg_filename,file_content)
-      #TODO: delete /tmp file File.unlink(tmp_file_path)
+      # TODO: delete /tmp file File.unlink(tmp_file_path)
 
 #     pp [:test,id_handle(component_id).create_object().get_config_file(cfg_filename)] 
 
@@ -430,7 +430,7 @@ pp tmp_file.path
 #      component = create_object_from_id(id,:component)
 #      constraints = component.get_constraints()
 
-#TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
+# TODO: retool include_js to take string or hash, if hash then assumed js tpl and handled differently
       tpl = R8Tpl::TemplateR8.new("component/upload_config_file",user_context())
       tpl.assign("component_id",id)
       tpl.assign(:_app,app_common())
@@ -451,7 +451,7 @@ pp tmp_file.path
     end
 
     def layout_test(id)
-      #assuming that request params has field type
+      # assuming that request params has field type
 #      view_type = request.params["type"]||"wspace-edit" #TODO: stubbed with value wspace-edit
       view_type = request.params["type"]||"dock_display" #TODO: stubbed with value dock_display
 
@@ -491,7 +491,7 @@ pp tmp_file.path
       include_js("#{view_type}.layout_editor.r8")
 
       layout_list = component.get_layouts(view_type)
-#pp [:layout_list,layout_list]
+# pp [:layout_list,layout_list]
 
       tpl.assign(:layout_list,layout_list)
 
@@ -555,8 +555,8 @@ pp request.params
 
     def save(explicit_hash=nil)
       attr_val_hash = explicit_hash || request.params.dup
-      #TODO: can thsi be handled another way
-      #convert empty strings to nils
+      # TODO: can thsi be handled another way
+      # convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
       component_id = attr_val_hash.delete("id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
@@ -591,7 +591,7 @@ pp request.params
       component = create_object_from_id(component_id)
       to_set = {}
       attr_list_x = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
-      #TODO:" temp
+      # TODO:" temp
       attr_list = attr_list_x.map do |a|
         disabled_info = {
           :disabled_attribute => a[:is_readonly] ? "disabled" : "",
@@ -599,7 +599,7 @@ pp request.params
         Aux::hash_subset(a,[:id,:name,:value,:i18n,:is_readonly]).merge(disabled_info)
       end
 
-      #TODO strawman ordering; puts readonly at bottom
+      # TODO strawman ordering; puts readonly at bottom
       ordered_attr_list = attr_list.sort do |a,b|
         if a[:disabled_attribute] == b[:disabled_attribute]
         (a[:name]||"_") <=> (b[:name]||"_")
@@ -618,14 +618,14 @@ pp request.params
 
     def save_attributes_test(explicit_hash=nil)
       attr_val_hash = explicit_hash || request.params.dup
-      #TODO: can thsi be handled another way
-      #convert empty strings to nils
+      # TODO: can thsi be handled another way
+      # convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
       component_id = attr_val_hash.delete("component_id").to_i
       component_idh = id_handle(component_id)
       attr_mh = component_idh.create_childMH(:attribute)
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
-      #TODO: need way to mark which ones are instance vars vs which ones are defaults
+      # TODO: need way to mark which ones are instance vars vs which ones are defaults
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/instance_edit_test/#{component_id.to_s}"
     end
@@ -636,7 +636,7 @@ pp request.params
       component = create_object_from_id(component_id)
       to_set = {}
       attr_list_x = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
-      #TODO:" temp
+      # TODO:" temp
       attr_list = attr_list_x.map do |a|
         disabled_info = {
           :disabled_attribute => a[:is_readonly] ? "disabled" : "",
@@ -644,7 +644,7 @@ pp request.params
         Aux::hash_subset(a,[:id,:name,:value,:i18n,:is_readonly]).merge(disabled_info)
       end
 
-      #TODO strawman ordering; puts readonly at bottom
+      # TODO strawman ordering; puts readonly at bottom
       ordered_attr_list = attr_list.sort do |a,b|
         if a[:disabled_attribute] == b[:disabled_attribute]
         (a[:name]||"_") <=> (b[:name]||"_")
@@ -667,7 +667,7 @@ pp request.params
       to_set = {}
       attr_list = component.get_attributes_unraveled(to_set,:flatten_nil_value => true)
 
-      #TODO The ordering should not matter all that much since the views will be generated by the view defs
+      # TODO The ordering should not matter all that much since the views will be generated by the view defs
       ordered_attr_list = attr_list.sort{|a,b|(a[:i18n]||"_") <=> (b[:i18n]||"_")}
 
       tpl = R8Tpl::TemplateR8.new("component/dock_display",user_context())
@@ -676,17 +676,17 @@ pp request.params
       return {:content => tpl.render()}
     end
 
-#TODO: rename to save
+# TODO: rename to save
     def save_attributes(explicit_hash=nil)
       attr_val_hash = explicit_hash || request.params.dup
-      #TODO: can thsi be handled another way
-      #convert empty strings to nils
+      # TODO: can thsi be handled another way
+      # convert empty strings to nils
       attr_val_hash.each{|k,v|attr_val_hash[k] = nil if v.kind_of?(String) and v.empty?}
       component_id = attr_val_hash.delete("component_id").to_i
       attribute_rows = AttributeComplexType.ravel_raw_post_hash(attr_val_hash,:attribute,component_id)
-      #setting attr_mh this way so get a group id
+      # setting attr_mh this way so get a group id
       attr_mh = id_handle(component_id).createMH(:attribute)
-      #TODO: need way to mark which ones are instance vars vs which ones are defaults
+      # TODO: need way to mark which ones are instance vars vs which ones are defaults
       Attribute.update_and_propagate_attributes(attr_mh,attribute_rows)
       redirect "/xyz/component/dock_edit/#{component_id.to_s}"
     end
@@ -730,7 +730,7 @@ pp request.params
   end
 
     def add_assembly_items(id=nil)
-      #TODO: assuming parent_id is a datacenter_id
+      # TODO: assuming parent_id is a datacenter_id
       parent_id = request.params["parent_id"]
 
       tpl = R8Tpl::TemplateR8.new("node/wspace_display",user_context())
@@ -738,14 +738,14 @@ pp request.params
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
-      #compute uui positions
+      # compute uui positions
       assembly_left_pos = request.params["assembly_left_pos"]
     
       node_list = get_objects(:node,{:assembly_id=>id})
 
       dc_hash = get_object_by_id(parent_id,:datacenter)
       raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
-      #get the top most item in the list to set new positions
+      # get the top most item in the list to set new positions
       top_node = {}
       top_most = 2000
     
@@ -795,7 +795,7 @@ pp request.params
   end
 
     def add_assembly_items_ide(id=nil)
-      #TODO: assuming parent_id is a datacenter_id
+      # TODO: assuming parent_id is a datacenter_id
       parent_id = request.params["parent_id"]
 
       tpl = R8Tpl::TemplateR8.new("node/wspace_display_ide",user_context())
@@ -803,14 +803,14 @@ pp request.params
       tpl_info = tpl.render()
       include_js_tpl(tpl_info[:src])
 
-      #compute uui positions
+      # compute uui positions
       assembly_left_pos = request.params["assembly_left_pos"]
     
       node_list = get_objects(:node,{:assembly_id=>id})
 
       dc_hash = get_object_by_id(parent_id,:datacenter)
       raise Error.new("Not implemented when parent_id is not a datacenter") if dc_hash.nil?
-      #get the top most item in the list to set new positions
+      # get the top most item in the list to set new positions
       top_node = {}
       top_most = 2000
     

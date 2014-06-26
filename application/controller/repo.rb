@@ -6,9 +6,9 @@ module XYZ
       rest_ok_response
     end
 
-    #TODO: using maybe just temporarily to import when adding files
+    # TODO: using maybe just temporarily to import when adding files
     def rest__synchronize_target_repo()
-      #TODO: check that refrershing all appropriate  implemnations by just using project_project_id is not null test 
+      # TODO: check that refrershing all appropriate  implemnations by just using project_project_id is not null test 
       repo_id = ret_non_null_request_params(:repo_id)
       repo = create_object_from_id(repo_id)
       sp_hash = {

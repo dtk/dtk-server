@@ -29,10 +29,10 @@ module DTK
       x && x.attributes 
     end
 
-    #each service has its own mutex
+    # each service has its own mutex
     LockRequest = Hash.new
     def request_context(&block)
-      #TODO: put up in here some handling of errors such as ones that should be handled by doing a retry
+      # TODO: put up in here some handling of errors such as ones that should be handled by doing a retry
       lock = LockRequest[self.class] ||= Mutex.new
       lock.synchronize{yield}
     end

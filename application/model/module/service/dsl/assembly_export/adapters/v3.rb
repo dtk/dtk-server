@@ -18,7 +18,7 @@ module DTK
           if existing_links.kind_of?(Array)
             existing_links << output_target
           else #existing_links.kind_of?(String)
-            #turn into array with existing plus new element
+            # turn into array with existing plus new element
             component_links[link_def_ref] = [component_links[link_def_ref],output_target]
           end
         else

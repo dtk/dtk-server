@@ -5,7 +5,7 @@
     :version_constraint=>{
       :type=>:json
     },
-    #gets set when resolved this to particular version
+    # gets set when resolved this to particular version
     :implementation_id=>{
       :type=>:bigint,
       :foreign_key_rel_type=>:implementation,

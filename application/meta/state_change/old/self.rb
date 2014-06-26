@@ -3,7 +3,7 @@
       column :status, :varchar, :size => 15, :default => "pending" #  | "completed" TODO: may have  "executing" 
       column :type, :varchar, :size => 25# "setting" | "create-node" | "install_component" ?? "delete" | "patch-component" | "upgrade-component" | "rollback-component" 
       column :base_object, :json
-      #TODO; may rename
+      # TODO; may rename
       column :object_type, :varchar, :size => 15 # "attribute" | "node" | "component"
 
       column :change, :json # gives detail about the change
@@ -14,13 +14,13 @@
 
       virtual_column :qualified_parent_name, :type => :varchar, :local_dependencies => [:base_object]
 
-      #one of thse wil be non null and point to object being changed or added
+      # one of thse wil be non null and point to object being changed or added
       foreign_key :node_id, :node, FK_CASCADE_OPT
       foreign_key :attribute_id, :attribute, FK_CASCADE_OPT
       foreign_key :component_id, :component, FK_CASCADE_OPT
-      #TODO: may have here who, when
+      # TODO: may have here who, when
 
-      #TODO: example converted form; apply to rest of vcs
+      # TODO: example converted form; apply to rest of vcs
       virtual_column :created_node,:type => :json, :hidden => true,
         :remote_dependencies =>
         [
@@ -46,14 +46,14 @@
         ]
 
       component_same_type = {
-        #TODO: below used to handle situation where multiple isnatnces of recipe appear on same node
-        #and all parameters forming list is needed
-         #TODO: extend to allow join condition that has not so pruning out component_same_type
+        # TODO: below used to handle situation where multiple isnatnces of recipe appear on same node
+        # and all parameters forming list is needed
+         # TODO: extend to allow join condition that has not so pruning out component_same_type
         :model_name => :component,
         :alias => :component_same_type,
         :filter => [:and, [:eq, :only_one_per_node, false]],
         :join_type => :left_outer,
-        #TODO: need to extend code so can use p and id in statements below
+        # TODO: need to extend code so can use p and id in statements below
         :join_cond=>{:external_ref=> q(:component,:external_ref), :node_node_id => p(:component,:node)},
         :cols=>[:id, :display_name, :external_ref, id(:node), :only_one_per_node]
       }

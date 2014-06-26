@@ -54,7 +54,7 @@ module DTK
                     end
                     # Amar: SyncAgentCode will be skipped 99% of times, 
                     #       So for this subtask, we want to leave upstream tasks executing ignoring any errors
-                    #cancel_upstream_subtasks(workitem)
+                    # cancel_upstream_subtasks(workitem)
                     set_result_failed(workitem,result,task)
                   else
                     node.update_agent_git_commit_id(head_git_commit_id)
@@ -80,7 +80,7 @@ module DTK
                   if event
                     log_participant.end(:timeout,:task_id=>task_id,:event => event, :errors => errors)
                   end
-                  #cancel_upstream_subtasks(workitem)
+                  # cancel_upstream_subtasks(workitem)
                   set_result_timeout(workitem,result,task)
                   delete_task_info(workitem)
                   reply_to_engine(workitem)

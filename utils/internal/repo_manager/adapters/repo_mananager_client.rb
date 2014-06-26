@@ -1,4 +1,4 @@
-#for use when using repo manager for local repo
+# for use when using repo manager for local repo
 r8_require("#{::R8::Config[:sys_root_path]}/repo_manager_client/lib/repo_manager_client")
 module DTK
   class RepoManagerClient < RepoManager

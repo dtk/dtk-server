@@ -10,7 +10,7 @@ module XYZ
     end
 
     def process_user_info_aux(scalar_assigns,model_or_id_handle)
-      #cleanup if everything should come from model or id handle
+      # cleanup if everything should come from model or id handle
       user_obj = CurrentSession.new.get_user_object()
       assigns = Hash.new
       if user_obj
@@ -28,7 +28,7 @@ module XYZ
         raise Error.new("model_or_id_handle[:group_id] not set for #{bad_item}")
       end
       assigns.merge!(:group_id => model_or_id_handle[:group_id])
-      #remove if in overrides or null val
+      # remove if in overrides or null val
       assigns.inject({}){|h,(col,val)| (val and not scalar_assigns.has_key?(col)) ? h.merge(col => val) : h}
     end
     
@@ -36,7 +36,7 @@ module XYZ
       @auth_context ||= {
         :c => [:c,CONTEXT_ID],
         :user_id => [:id,:owner_id]
-        #special process of :group_id
+        # special process of :group_id
       }
     end
 

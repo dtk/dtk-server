@@ -14,7 +14,7 @@ module XYZ
         sleep(5)
       end
 
-      #TODO: look at fog's mock
+      # TODO: look at fog's mock
       class MockEc2Connection
         def server_create(create_options)
           instance_id = generate_unique_instance_id(create_options)
@@ -24,8 +24,8 @@ module XYZ
         
 
         def server_get(instance_id)
-          #TODO stub
-          #hard coding AWS east addresses
+          # TODO stub
+          # hard coding AWS east addresses
           addr = generate_random_ipv4("184.73.0.1","184.73.255.254")
           network_attrs = {
             :ip_address=>addr,
@@ -33,7 +33,7 @@ module XYZ
             :private_ip_address=>"10.248.223.243",
             :dns_name=>"ec2-#{addr.gsub(".","-")}.compute-1.amazonaws.com",
           }
-          #TODO: stub
+          # TODO: stub
           block_device_mapping =
             [{"volumeId"=>"vol-34820c5c",
                "deviceName"=>"/dev/sda1",
@@ -48,7 +48,7 @@ module XYZ
 
       private
       def created_at(instance_id)
-        #TODO: stub
+        # TODO: stub
         "Tue Jan 25 18:57:04 UTC 2011"
       end
 
@@ -95,7 +95,7 @@ module XYZ
         file_contents = JSON.pretty_generate(@@cache_contents)
         File.open(CacheFile, 'w') {|fhandle|fhandle.write(file_contents)}
       end
-      #TODO: may put this in Config file
+      # TODO: may put this in Config file
       CacheFile = "#{R8::Config[:sys_root_path]}/cache/application/ec2_mock.json"
       @@cache_contents = nil
 

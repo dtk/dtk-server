@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 7: Create attribute on workspace (list attributes), set value for this attribute and then unset the value and purge workspace
+# Test Case 7: Create attribute on workspace (list attributes), set value for this attribute and then unset the value and purge workspace
 
 require 'rubygems'
 require 'rest_client'

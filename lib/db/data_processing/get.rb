@@ -5,10 +5,10 @@ module XYZ
         execute_function_aux(fn_name,model_handle[:c],*args)
       end
 
-      #where clause could be hash or string
+      # where clause could be hash or string
       def get_objects_scalar_columns(model_handle,where_clause=nil,opts={})
         model_name =  model_handle[:model_name]
-        #special processing if parent_id given
+        # special processing if parent_id given
         parent_id = opts[:parent_id]
         if parent_id
           parent_id_info = IDInfoTable.get_row_from_guid(parent_id)
@@ -36,14 +36,14 @@ module XYZ
       end
 
 
-      #TODO: may be able to optimze seeing that curerntly uses get_objects
+      # TODO: may be able to optimze seeing that curerntly uses get_objects
       def get_object_scalar_columns(id_handle,opts={})
 	id_info = IDInfoTable.get_row_from_id_handle id_handle, :raise_error => opts[:raise_error], :short_circuit_for_minimal_row => true
 	return unless id_info and id_info[:id]
         get_objects_scalar_columns(id_handle.createMH(id_info[:relation_type]),{:id => id_info[:id]},opts).first
       end
 
-      #TBD: convert so where clause could be hash or string       
+      # TBD: convert so where clause could be hash or string       
       def get_object_ids_wrt_parent(relation_type,parent_id_handle,where_clause=nil)
 	db_rel = DB_REL_DEF[relation_type]
 	parent_id_info = IDInfoTable.get_row_from_id_handle(parent_id_handle)
@@ -67,7 +67,7 @@ module XYZ
       end
 
 
-      #if uri is given, it is relative to href_prefix
+      # if uri is given, it is relative to href_prefix
       # TBD: may put href_prefix in opts or possible just provide one hash arg 'params'
       def get_instance_or_factory(id_handle,href_prefix=nil,opts_x={}) 
 	opts = href_prefix.nil? ? opts_x.merge({:no_hrefs=>true}) : opts_x 
@@ -79,7 +79,7 @@ module XYZ
 	get_instance(href_prefix,id_info,true,opts)
       end
 
-      #TBD: remove form where return {x => y}; just return y
+      # TBD: remove form where return {x => y}; just return y
       def get_instance_scalar_values(id_handle,opts={})
 	id_info = IDInfoTable.get_row_from_id_handle id_handle,  :raise_error => opts[:raise_error]
 	return nil if id_info.nil? 
@@ -94,8 +94,8 @@ module XYZ
 
      private
 
-      #returns factory and additionally children if in opts {:depth == :deep)
-      #TBD: should get_factory (like get_instance wrap everything in top level element?
+      # returns factory and additionally children if in opts {:depth == :deep)
+      # TBD: should get_factory (like get_instance wrap everything in top level element?
       def get_factory(href_prefix,factory_id_info,opts={}) 
         hash = opts[:no_hrefs] ? {} : RestContent.ret_link(:self,factory_id_info[:uri],href_prefix) 
 	hash[:display_name] = "Factory for #{factory_id_info[:relation_type]}" unless opts[:no_hrefs]
@@ -123,7 +123,7 @@ module XYZ
 	#get scalar values
 	hash = (is_top_level and opts[:no_top_level_scalars]) ? {} : get_scalar_values_given_id_info(id_info,opts) 
 
-        #get self link
+        # get self link
 	unless opts[:no_hrefs]
 	  link = RestContent.ret_link(:self,id_info[:uri],href_prefix) 	
           link.each{|k,v|hash[k]=v}
@@ -139,7 +139,7 @@ module XYZ
 	      factory_uri = RestURI.ret_factory_uri(id_info[:uri],child_type)
 	      factory_id_info = IDInfoTable.get_row_from_uri(factory_uri,id_info[:c])
 
-              #TODO: hack until we get rid of factory rows in id info table; this is needed because some create methods dont put in factory rows
+              # TODO: hack until we get rid of factory rows in id info table; this is needed because some create methods dont put in factory rows
               if factory_id_info.nil?
                 IDInfoTable.insert_factory(child_type,factory_uri,id_info[:relation_type],id_info[:id],id_info[:c])
                 Log.info("adding factory #{factory_uri} to id info table")
@@ -170,19 +170,19 @@ module XYZ
       end
        
       def ret_dataset_with_scalar_columns(db_rel,opts={})
-        #if opts[:field_set] then this is taken as is as the selected columns 
+        # if opts[:field_set] then this is taken as is as the selected columns 
         return dataset(db_rel) if opts[:field_set] and opts[:field_set].kind_of?(Model::FieldSetAll)
 
         select_cols = nil
         if opts[:field_set]
-          #TODO: see if can get rid of this special case
+          # TODO: see if can get rid of this special case
           if db_rel[:relation_type] == :id_info
             select_cols = opts[:field_set].cols
           else
             select_cols = opts[:field_set].only_including(Model::FieldSet.all_real(db_rel[:relation_type])).cols
           end
         else
-          #TODO : change below to be in terms of a FieldSet call
+          # TODO : change below to be in terms of a FieldSet call
           select_cols = (db_rel[:columns]||{}).keys 
           select_cols = db_rel[:model_class].ds_attributes(select_cols) if opts[:ds_attrs_only]        
           select_cols.concat([:id,:ref,:description,:display_name,:ref_num])
@@ -191,10 +191,10 @@ module XYZ
 	dataset(db_rel).select(*select_cols)
       end
 
-      #TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
+      # TODO!!! need to determine if this will be passed materialized virtual columns in which case we need to reformulate their types
       def process_raw_scalar_hash!(hash,db_rel,opts={})
 	cols_info = db_rel[:columns]
-        #process the table specific columns
+        # process the table specific columns
 	if cols_info
           hash.each_key do |col|
             next if hash[col].nil?
@@ -207,7 +207,7 @@ module XYZ
               else
                 fk_id_info = IDInfoTable.get_row_from_guid(guid)               
                 hash.delete(col)
-                #add a "*" form if opts[:fk_as_ref] is prefix
+                # add a "*" form if opts[:fk_as_ref] is prefix
                 if opts[:fk_as_ref] == "/"
                   hash[("*" + col.to_s).to_sym] = fk_id_info[:uri] 
                 elsif fk_id_info[:uri] =~ Regexp.new("^#{opts[:fk_as_ref].to_s}(/.+$)")
@@ -221,11 +221,11 @@ module XYZ
           end
 	end
 
-        #common fields
+        # common fields
 	# fill in default display name if not there
-        #TODO: this does not work if dont retrieve :display_name but get :ret
-        #TODO: took out ebcause of error above; think shoudl eb removed permantly
-        #qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
+        # TODO: this does not work if dont retrieve :display_name but get :ret
+        # TODO: took out ebcause of error above; think shoudl eb removed permantly
+        # qualified_ref = DB.ret_qualified_ref_from_scalars(hash)
 	#hash[:display_name] ||= qualified_ref if qualified_ref
 	
 	#fill in id unless :no_ids specified

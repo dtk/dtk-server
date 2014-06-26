@@ -2,10 +2,10 @@ module DTK
   module TargetCloneMixin
     def clone_post_copy_hook(clone_copy_output,opts={})
       case clone_copy_output.model_name()
-       when :component 
+       when :component
         ClonePostCopyHook.component(self,clone_copy_output,opts)
        when :node
-        ClonePostCopyHook.node(self,clone_copy_output,opts)        
+        ClonePostCopyHook.node(self,clone_copy_output,opts)
        else #TODO: catchall that will be expanded
         new_id_handle = clone_copy_output.id_handles.first
         StateChange.create_pending_change_item(:new_item => new_id_handle, :parent => id_handle())
@@ -51,13 +51,13 @@ module DTK
         level = 1
         port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
         assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
-        
-        nodes = clone_copy_output.children_objects(level,:node, :cols=>[:display_name,:external_ref,:type])        
+
+        nodes = clone_copy_output.children_objects(level,:node, :cols=>[:display_name,:external_ref,:type])
         return if nodes.empty?
         Node.cache_attribute_values!(nodes,:cardinality)
         create_state_changes_for_create_node?(target,nodes)
         #This creates if needed target refs and links to them
-#TODO: put back in        Node::TargetRef.create_linked_target_refs?(target,nodes)
+        Node::TargetRef.create_linked_target_refs?(target,assembly,nodes)
 
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
@@ -68,7 +68,7 @@ module DTK
 
         component_child_hashes =  clone_copy_output.children_hash_form(level,:component)
         return if component_child_hashes.empty?
-        component_new_items = component_child_hashes.map do |child_hash| 
+        component_new_items = component_child_hashes.map do |child_hash|
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
         StateChange.create_pending_change_items(component_new_items)
@@ -90,7 +90,7 @@ module DTK
         sao_proc = opts[:service_add_on_proc]
         pl_hashes = sao_proc && sao_proc.get_matching_ports_link_hashes_in_target(clone_copy_output.id_handles.first)
         unless pl_hashes.nil? or pl_hashes.empty?
-          #TODO: more efficient if had bulk create; also may consider better intergrating with creation of the assembly proper's port links
+          # TODO: more efficient if had bulk create; also may consider better intergrating with creation of the assembly proper's port links
           target_idh = target.id_handle()
           pl_hashes.each do |port_link_hash|
             PortLink.create_port_and_attr_links(target_idh,port_link_hash,opts)

@@ -1,6 +1,6 @@
 module XYZ
   module DataSourceAdapterInstanceMixin
-    #Should be overwritten if no dsl
+    # Should be overwritten if no dsl
     def normalize(ds_hash)
       target_obj = DBUpdateHash.create()
       @ds_object_adapter_class.class_rules.each do |condition,top_level_assign|
@@ -59,13 +59,13 @@ module XYZ
       elsif assign.kind_of?(DSNormalizer::ForeignKey)
         process_assignment(target_obj,Object.mark_as_foreign_key(attr,{:create_ref_object => true}),assign.arg,ds_hash)
       elsif assign.kind_of?(Hash)
-        #TBD: use of paranthesis below may be needed because of possible Ruby parser bug
+        # TBD: use of paranthesis below may be needed because of possible Ruby parser bug
         constraints = (assign.kind_of?(DBUpdateHash) ? assign.constraints : nil)
         target_obj[attr].set_constraints(constraints) if constraints
         if assign.empty?
-          #include empty hash if there are constraints associated with it (this wil serve to delet all
+          # include empty hash if there are constraints associated with it (this wil serve to delet all
           # its peers; only including this conditionally is for optimization
-          #dont overwrite will null if  target_obj[attr] already has a value
+          # dont overwrite will null if  target_obj[attr] already has a value
           if constraints and not target_obj.has_key?(attr)
             target_obj[attr] = assign 
           end
@@ -79,8 +79,8 @@ module XYZ
       end
     end
 
-    #only consider complete and thus perform deletes if source is marked as compleet as designated by 
-    #hash_completeness_info and source is golden store
+    # only consider complete and thus perform deletes if source is marked as compleet as designated by 
+    # hash_completeness_info and source is golden store
     def delete_unmarked(container_id_handle,marked,hash_completeness_info)
       return nil unless hash_completeness_info.is_complete?()
       return nil unless ds_is_golden_store()

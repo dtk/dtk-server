@@ -1,7 +1,7 @@
 module DTK; class ErrorUsage
   class Parsing
     class LegalValue
-      #either input_form or legal_values_block will be nil
+      # either input_form or legal_values_block will be nil
       def self.reify(input_form,&legal_values_block)
         if legal_values_block
           class_eval(&legal_values_block)
@@ -14,7 +14,7 @@ module DTK; class ErrorUsage
         end
       end
 
-      #methods that can be evalued in legal_values_block
+      # methods that can be evalued in legal_values_block
       def self.HashWithKey(*keys)
         HashWithKey.new(keys)
       end

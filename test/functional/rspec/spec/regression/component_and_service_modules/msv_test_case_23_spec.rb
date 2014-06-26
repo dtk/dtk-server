@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 23: Import new service module and import all component modules for that service module automatically
+# Test Case 23: Import new service module and import all component modules for that service module automatically
 
 require 'rubygems'
 require 'rest_client'

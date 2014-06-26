@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server
+# Test Case 26: NEG - Import new service module but its referenced component module exists locally but not on server
 
 require 'rubygems'
 require 'rest_client'

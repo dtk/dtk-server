@@ -2,7 +2,7 @@ module Ramaze::Helper
   module ProcessSearchObject
     include XYZ
    private
-    #fns that get _search_object
+    # fns that get _search_object
     def ret_search_object_in_request()
       source = hash = nil
       if request_method_is_post?()
@@ -22,7 +22,7 @@ module Ramaze::Helper
 
  
    def ret_hash_search_object_in_get()
-     #TODO: stub; incomplete
+     # TODO: stub; incomplete
      filter = ret_filter_when_get()
      hash_search_pattern = {
        :relation => model_name()

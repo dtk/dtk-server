@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: Import component module from remote, version it and clone it to local filesystem
+# Test Case 3: Import component module from remote, version it and clone it to local filesystem
 
 require 'rubygems'
 require 'rest_client'

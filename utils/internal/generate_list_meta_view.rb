@@ -1,7 +1,7 @@
-#TODO: should this go in utils/internal dir?
+# TODO: should this go in utils/internal dir?
 module XYZ
   module GenerateListMetaView
-    #TODO: may pass in a sample row to use as default when no fieldset the Ruby datatype
+    # TODO: may pass in a sample row to use as default when no fieldset the Ruby datatype
     def generate_list_meta_view(columns,relation)
       {
         :tr_class => Local.tr_class,

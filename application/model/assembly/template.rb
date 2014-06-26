@@ -62,7 +62,7 @@ module DTK; class Assembly
       }
       assembly_rows = get_objs(mh.createMH(:component),sp_hash)
 
-      #look for version contraints which are on a per component module basis
+      # look for version contraints which are on a per component module basis
       aug_cmp_refs_ndx_by_vc = Hash.new
       assembly_rows.each do |r|
         component_ref = r[:component_ref]
@@ -117,7 +117,7 @@ module DTK; class Assembly
                    ].compact
       }
       ret = get_these_objs(mh,sp_hash)
-      #TODO: may instead make sure that version in assembly is set
+      # TODO: may instead make sure that version in assembly is set
       ret.each{|r|r[:version] ||= (r[:module_branch]||{})[:version]}
       ret
     end
@@ -140,8 +140,8 @@ module DTK; class Assembly
       include_nodes = ["nodes"].include?(opts[:detail_level])
       pp_opts = Aux.hash_subset(opts,[:no_module_prefix,:version_suffix])
       assembly_rows.each do |r|
-        #TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
-        #get_objs do this (using possibly option flag for subtype processing)
+        # TODO: hack to create a Assembly object (as opposed to row which is component); should be replaced by having 
+        # get_objs do this (using possibly option flag for subtype processing)
         pntr = ndx_ret[r[:id]] ||= r.id_handle.create_object().merge(:display_name => pretty_print_name(r,pp_opts),:ndx_nodes => Hash.new)
         pntr.merge!(:module_branch_id => r[:module_branch_id]) if r[:module_branch_id]
         if version = pretty_print_version(r)
@@ -186,10 +186,10 @@ module DTK; class Assembly
     end
 
     def self.delete_and_ret_module_repo_info(assembly_idh)
-      #first delete the dsl files
+      # first delete the dsl files
       module_repo_info = ServiceModule.delete_assembly_dsl?(assembly_idh)
-      #need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes
-      #do not need to delete port links which use a cascade foreign key
+      # need to explicitly delete nodes, but not components since node's parents are not the assembly, while component's parents are the nodes
+      # do not need to delete port links which use a cascade foreign key
       delete_model_objects(assembly_idh)
       module_repo_info
     end
@@ -293,16 +293,16 @@ module DTK; class Assembly
       get_obj(assembly_mh,sp_hash,:keep_ref_cols => true)
     end
 
-     #returns [service_module_name,assembly_name]
+     # returns [service_module_name,assembly_name]
     def self.parse_component_type(component_type)
       component_type.split(ModuleTemplateSep)
     end
 
     def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
-      #get attributes on templates (these are defaults)
+      # get attributes on templates (these are defaults)
       ret = get_default_component_attributes(assembly_mh,template_assembly_rows,opts)
 
-      #get attribute overrides
+      # get attribute overrides
       sp_hash = {
         :cols => [:id,:display_name,:attribute_value,:attribute_template_id],
         :filter => [:oneof, :component_ref_id,template_assembly_rows.map{|r|r[:component_ref][:id]}]
@@ -325,7 +325,7 @@ module DTK; class Assembly
       pp_display_name(get_field?(:component_type))
     end
 
-    #TODO: probably move to Assembly
+    # TODO: probably move to Assembly
     def model_handle(mn=nil)
       super(mn||:component)
     end
@@ -345,6 +345,6 @@ module DTK; class Assembly
 
   end
 end
-#TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get
+# TODO: hack to get around error in /home/dtk/server/system/model.rb:31:in `const_get
 AssemblyTemplate = Assembly::Template
 end

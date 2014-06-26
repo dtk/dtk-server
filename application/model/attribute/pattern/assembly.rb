@@ -4,7 +4,7 @@ module DTK; class Attribute
       r8_nested_require('assembly','link')
 
       def self.create(attr_term,assembly,opts={})
-        #considering attribute id to belong to any format so processing here
+        # considering attribute id to belong to any format so processing here
         if attr_term =~ /^[0-9]+$/
           return Type::ExplicitId.new(attr_term,assembly)
         end
@@ -28,8 +28,8 @@ module DTK; class Attribute
             when 2 
               Type::NodeLevel.new("#{t(:node,tokens[0])}/#{t(:attribute,tokens[1])}")
             else
-              #handling in a way that can correctly parse the case where have node/cmp_type[title]/attr and title can have '/'
-              #This needs to be coorinated with ComponentTitle.parse_component_display_name
+              # handling in a way that can correctly parse the case where have node/cmp_type[title]/attr and title can have '/'
+              # This needs to be coorinated with ComponentTitle.parse_component_display_name
               node_part = tokens.shift
               attr_part = tokens.pop
               cmp_part = tokens.join('/') 
@@ -44,7 +44,7 @@ module DTK; class Attribute
 
       class CanonicalForm
         def self.create(attr_term,opts={})
-          #can be an assembly, node or component level attribute
+          # can be an assembly, node or component level attribute
           if attr_term =~ /^attribute/
             Type::AssemblyLevel.new(attr_term)
           elsif attr_term  =~ /^node[^\/]*\/component/

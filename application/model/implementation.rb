@@ -8,19 +8,19 @@ module XYZ
       paths_to_delete = diff_summary.paths_to_delete
       paths_to_add = diff_summary.paths_to_add
 
-      #find relevant existing files
+      # find relevant existing files
       sp_hash = {
         :cols => [:id,:display_name,:path],
           :filter => [:and,[:eq,:implementation_implementation_id,id()], [:oneof,:path,paths_to_delete+paths_to_add]]
       }
       file_assets = Model.get_objs(model_handle(:file_asset),sp_hash)
-      #delete relevant files
+      # delete relevant files
       files_to_delete = file_assets.select{|r|paths_to_delete.include?(r[:path])}
       unless files_to_delete.empty?
         Model.delete_instances(files_to_delete.map{|r|r.id_handle()})
       end
       
-      #add files not already added
+      # add files not already added
       existing_paths = file_assets.map{|r|r[:path]}
       paths_to_add.reject!{|path|existing_paths.include?(path)}
       unless paths_to_add.empty?
@@ -104,7 +104,7 @@ module XYZ
       end
       return if file_asset_rows.empty?()
 
-      #TODO: need to make create? from rows
+      # TODO: need to make create? from rows
       file_asset_mh = model_handle().create_childMH(:file_asset)
       Model.modify_children_from_rows(file_asset_mh,id_handle,file_asset_rows)
     end
@@ -134,7 +134,7 @@ module XYZ
       get_obj(:cols => [:repo_id,:branch,:module_branch])[:module_branch]
     end
 
-    #TODO: unify with project#get_module_tree()
+    # TODO: unify with project#get_module_tree()
     def get_module_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:type,:project_project_id,:component_template]}
       rows_with_cmps = get_objs(sp_hash)
@@ -142,11 +142,11 @@ module XYZ
       i18n = get_i18n_mappings_for_models(:component)
       cmps = rows_with_cmps.map do |r|
         cmp = r[:component].materialize!(Component.common_columns())
-        #TODO: see if cleaner way to put in i18n names
+        # TODO: see if cleaner way to put in i18n names
         cmp[:name] = i18n_string(i18n,:component, cmp[:name])
         cmp
       end
-      #all rows common on all columns expect for :component
+      # all rows common on all columns expect for :component
       ret_row = rows_with_cmps.first.reject{|k,v|k == :component}
       ret_row.merge!(:components => cmps)
       return [ret_row] unless opts[:include_file_assets]
@@ -156,11 +156,11 @@ module XYZ
       [ret_row]
     end
 
-    #TODO deprecate
+    # TODO deprecate
     def get_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:component_template]}
       rows = get_objs(sp_hash)
-      #all rows agree on everything but col
+      # all rows agree on everything but col
       ret = rows.first.reject{|k,v|k == :component}
       ret.merge!(:components => rows.map{|r|r[:component]})
       if opts[:include_file_assets]
@@ -174,7 +174,7 @@ module XYZ
       FileAsset.ret_hierrachical_file_struct(flat_file_assets)
     end
 
-    #indexed by implementation_id
+    # indexed by implementation_id
     def self.get_indexed_asset_files(id_handles)
       flat_file_assets = get_objs_in_set(id_handles,{:cols => [:id,:file_assets]})
       ret = Hash.new
@@ -200,9 +200,9 @@ module XYZ
     end
 
     def set_to_indicate_updated()
-      #TODO: short cut and avoid setting updated on project templates if impl set to updated already update({:updated => true},{:update_only_if_change => true})
+      # TODO: short cut and avoid setting updated on project templates if impl set to updated already update({:updated => true},{:update_only_if_change => true})
       update(:updated => true)
-      #set updated for the project templates that point to this implemntation
+      # set updated for the project templates that point to this implemntation
       cmp_mh = model_handle(:component)
       filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, "template"]]
       Model.update_rows_meeting_filter(cmp_mh,{:updated => true},filter)
@@ -210,12 +210,12 @@ module XYZ
 
     def create_pending_changes_and_clear_dynamic_attrs(file_asset)
       cmp_rows = get_objs({:cols => [:component_summary_info]})
-      #remove any node groups
+      # remove any node groups
       cmp_rows.reject!{|r|r[:node].is_node_group?}
 
       Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map{|r|r[:component].id_handle()})
 
-      #TODO: make more efficient by using StateChange.create_pending_change_items
+      # TODO: make more efficient by using StateChange.create_pending_change_items
       cmp_rows.each do |r|
         cmp_idh = r[:component].id_handle()
         parent_idh = cmp_idh.createIDH(:model_name => :datacenter, :id => r[:node][:datacenter_datacenter_id])

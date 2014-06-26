@@ -4,7 +4,7 @@ module DTK
       r8_nested_require('v1','parser')
       r8_nested_require('v1','dsl_object')
       def self.parse_check(input_hash)
-        #TODO: stub
+        # TODO: stub
       end
       def self.normalize(input_hash)
         input_hash

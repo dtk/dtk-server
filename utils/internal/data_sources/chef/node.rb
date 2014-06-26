@@ -8,7 +8,7 @@ module XYZ
           if_exists(source["lsb"]) do
             target["os"] = fn(lambda{|x|x ? x.gsub(/"/,String.new) : nil},source["lsb"]["description"])
           end
-          #TODO: whether bloew should be component_instance instead
+          # TODO: whether bloew should be component_instance instead
           nested_definition :component, source["components"]
         end
         class << self

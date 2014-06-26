@@ -18,7 +18,7 @@ module DTK; class Task
         before_index_hash = create_before_index_hash(action_list)
         before_index_hash.tsort_form.tsort()
       end
-      #only uses a constraint if both members belong to action_list
+      # only uses a constraint if both members belong to action_list
       def create_before_index_hash(action_list)
         action_indexes =  action_list.map{|a|a.index}
         ret = BeforeIndexHash.new(action_indexes)
@@ -63,7 +63,7 @@ module DTK; class Task
               ret << action_index
             end
           end
-          #for all indexes in ret, remove them in the before hash
+          # for all indexes in ret, remove them in the before hash
           each_value do |before_hash|
             before_hash.each_key do |before_action_instance|
               if ret.include?(before_action_instance)

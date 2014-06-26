@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 10: Elasticsearch - Simple scenario
+# Test Case 10: Elasticsearch - Simple scenario
 
 require 'rubygems'
 require 'rest_client'

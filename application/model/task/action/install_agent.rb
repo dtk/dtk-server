@@ -28,7 +28,7 @@ class Action
         ret
       end
 
-      #for debugging
+      # for debugging
       def self.pretty_print_hash(object)
         ret = PrettyPrintHash.new
         ret[:node] = (object[:node]||{})[:display_name]
@@ -81,7 +81,7 @@ class Action
       end
 
       def update_state_change_status(task_mh,status)
-        #no op if no associated state change 
+        # no op if no associated state change 
         if self[:state_change_id]
           update_state_change_status_aux(task_mh,status,[self[:state_change_id]])
         end
@@ -116,7 +116,7 @@ class Action
       def self.node_status(object,opts)
         node = object[:node]||{}
         ext_ref = node[:external_ref]||{}
-        #TODO: want to include os type and instance id when tasks upadted with this
+        # TODO: want to include os type and instance id when tasks upadted with this
         kv_array = 
           [{:name => node[:display_name]},
            {:id => node[:id]},

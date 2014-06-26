@@ -4,19 +4,31 @@ module DTK
   class CommandAndControl
     r8_nested_require('command_and_control','install_script')
 
-    def self.execute_task_action(task,top_task_idh,opts={})
-      task_action = task[:executable_action]
-      klass = load_for(task_action)
-      task_idh = task.id_handle()
-      if opts[:initiate_only]
-        klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
-      elsif opts[:cancel_task]
+    def initialize(task,top_task_idh)
+      @task_idh =  task.id_handle()
+      @top_task_idh = top_task_idh
+      @task_action = task[:executable_action]
+      @klass = self.class.load_for(@task_action)
+    end
+    attr_reader :task_idh,:top_task_idh,:task_action,:klass
+
+    def self.execute_task_action(task,top_task_idh)
+      new(task,top_task_idh).execute().merge(:task_id => task.id())
+    end
+    def execute()
+      klass.execute(task_idh,top_task_idh,task_action)
+    end
+
+    def self.initiate_task_action(task,top_task_idh,opts={})
+      new(task,top_task_idh).initiate(opts)
+    end
+    def initiate(opts={})
+      if opts[:cancel_task]
         klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)   
       elsif opts[:sync_agent_task]
         klass.initiate_sync_agent_code(task_idh,top_task_idh,task_action,opts)         
       else
-        result = klass.execute(task_idh,top_task_idh,task_action)
-        result.merge(:task_id => task.id())
+        klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       end
     end
 
@@ -36,7 +48,7 @@ module DTK
       klass.get_mcollective_client()
     end
 
-    #This takes into account what is needed for the node_config_adapter
+    # This takes into account what is needed for the node_config_adapter
     def self.node_config_adapter_install_script(node,bindings)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
@@ -51,6 +63,11 @@ module DTK
     def self.existing_image?(image_id,image_type)
       klass = load_iaas_for(:image_type => image_type)
       klass.existing_image?(image_id)
+    end
+
+    def self.references_image?(target,node_external_ref)
+      klass = load_iaas_for(:target => target)
+      klass.references_image?(node_external_ref)
     end
 
     def self.start_instances(nodes)
@@ -140,7 +157,7 @@ module DTK
       klass = load_for_aux(:node_config,adapter_name)
       klass.send(method,node,callbacks,context)
     end
-    #TODO: convert poll_to_detect_node_ready to use more general form above
+    # TODO: convert poll_to_detect_node_ready to use more general form above
     def self.poll_to_detect_node_ready(node,opts)
       adapter_name = R8::Config[:command_and_control][:node_config][:type]
       klass = load_for_aux(:node_config,adapter_name)
@@ -210,7 +227,7 @@ module DTK
     end
     Adapters = Hash.new
     Lock = Mutex.new
-    #TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
+    # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
     def self.instance_style_adapter?(adapter_type,adapter_name)
       (InstanceStyleAdapters[adapter_type.to_sym]||[]).include?(adapter_name.to_sym)
     end

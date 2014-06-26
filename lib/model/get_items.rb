@@ -1,4 +1,4 @@
-#TODO: should this be put under model directory and pssiblty folded into specfic classes
+# TODO: should this be put under model directory and pssiblty folded into specfic classes
 module XYZ
   module GetItemsInstanceMixins
     def get_items()
@@ -21,7 +21,7 @@ module XYZ
 
     class DefaultPositions
       def initialize(ws_model_name)
-        #TODO: simplifying assumption that these are constant accross all workspaces; ws_model_name param is hook for handling this
+        # TODO: simplifying assumption that these are constant accross all workspaces; ws_model_name param is hook for handling this
         @ws_model_name = ws_model_name
         @positions = deep_copy(StartPositions)
       end

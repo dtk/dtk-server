@@ -29,7 +29,7 @@ when "debian","ubuntu"
     recursive true
   end
 
-  #TBD: might want to handle case where reinstalling mysql and there is already a preseed; problem is that
+  # TBD: might want to handle case where reinstalling mysql and there is already a preseed; problem is that
   # in this scenario teh following wont trigger; want to only trigger when mysql-server needs to be installed
   # can check by an only_if ls command that looks for mysql executable
   execute "preseed mysql-server" do

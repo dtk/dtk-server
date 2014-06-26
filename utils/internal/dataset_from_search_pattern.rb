@@ -1,4 +1,4 @@
-#TODO: see if can collapse or better integrate with field_search_pattern.rb
+# TODO: see if can collapse or better integrate with field_search_pattern.rb
 module XYZ
   module SQL
     class DataSetSearchPattern < Dataset
@@ -52,7 +52,7 @@ module XYZ
             return simple_dataset.paging_and_order(opts)
           end
 
-          #join in any needed tables
+          # join in any needed tables
           graph_ds = simple_dataset.from_self(:alias => model_handle[:model_name])
           (remote_col_info||[]).each do |join_info|
             right_ds = nil
@@ -70,7 +70,7 @@ module XYZ
             graph_ds = graph_ds.graph(join_info[:join_type]||:left_outer,right_ds,join_info[:join_cond],opts)
           end
 
-          #add any global columns or global where clauses
+          # add any global columns or global where clauses
           if vcol_sql_fns 
             wc_exprs = (vcol_sql_fns||[]).map{|vcol,vcol_info| vcol_info[:sql_fn] ? vcol_info[:expr] : nil}.compact
             wc = (wc_exprs.empty? ? nil : SimpleSearchPattern::ret_sequel_filter([:and] + wc_exprs, model_handle))
@@ -100,7 +100,7 @@ module XYZ
             ds = ret_sequel_ds_with_filter(ds,sequel_filter)
             ret_sequel_ds_with_order_by_and_paging(ds,search_pattern)
           end
-          #TODO: better relate these two methods
+          # TODO: better relate these two methods
           def self.ret_sequel_ds(model_handle,search_pattern)
             ds = model_handle.db.empty_dataset()
             ds_add = ret_sequel_ds_with_relation(ds,search_pattern)
@@ -127,20 +127,20 @@ module XYZ
             filter_hash.empty? ?nil : filter_hash
           end
 
-          #if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash
+          # if vcol_sql_fns is passed is nil then this wil not do any special processing on virtual columns; otehrwise it wil take out virtual columns and append unto this filter_hash
           def self.ret_sequel_filter(filter_hash,model_handle,vcol_sql_fns=nil)
-            #TODO: just treating "and", "or", and "implicit "and"
-            #TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
+            # TODO: just treating "and", "or", and "implicit "and"
+            # TODO: some below use Sequel others are wrapper SQL in sql.rb; clean up
             op,args = get_op_and_args(filter_hash)
             unless [:and,:or].include?(op)
-              #impilicit and
+              # impilicit and
               args = [[op] + args]
               op = :and
             end
             and_list = Array.new
             args.each do |el|
               el_op,el_args = get_filter_condition_op_and_args!(vcol_sql_fns,el,model_handle)
-              #processes nested ands and ors
+              # processes nested ands and ors
               if [:or,:and].include?(el_op)
                 and_list << ret_sequel_filter(el,model_handle,vcol_sql_fns)
               else
@@ -208,30 +208,30 @@ module XYZ
             columns = base_field_set.cols
             return ds if columns.empty? 
 
-            #first prune out all non scalar real columns
-            #TODO: make sure no side effects of thios switch
-            #processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
+            # first prune out all non scalar real columns
+            # TODO: make sure no side effects of thios switch
+            # processed_field_set =  base_field_set.only_including(Model::FieldSet.all_real_scalar(model_name))
             processed_field_set = base_field_set.only_including(Model::FieldSet.all_real(model_name))
 
-            #compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
-            #do not have to worry about duplicates because with_added_cols will do that
+            # compute cols_to_add by looking at both local columns and ones that are in join conditions to enable remote columns to be joined in
+            # do not have to worry about duplicates because with_added_cols will do that
             cols_to_add = Array.new
 
             if remote_col_info and not remote_col_info.empty?
               cols_to_add_remote = remote_col_info.map do |r|
                 qualified_col = r[:join_cond].values.first
-                #strip off model_name__ prefix and discard non matching prefixes
+                # strip off model_name__ prefix and discard non matching prefixes
                 (qualified_col.to_s =~ Regexp.new("^(.+)__(.+)$")) ? ($1.to_sym == model_name ? $2.to_sym : nil) : qualified_col  
               end.compact
               cols_to_add = cols_to_add + cols_to_add_remote
             end
 
-            #this fn only adds real columns neededd by base_field set or vcol_sql_fns (vcols with alias processed in process_local_and_remote_dependencies
+            # this fn only adds real columns neededd by base_field set or vcol_sql_fns (vcols with alias processed in process_local_and_remote_dependencies
             cols_to_add_local = base_field_set.extra_local_columns(vcol_sql_fns)
             cols_to_add = cols_to_add + cols_to_add_local if cols_to_add_local
 
             processed_field_set = processed_field_set.with_added_cols(*cols_to_add) 
-            #always include id column
+            # always include id column
             processed_field_set.add_col!(:id)
 
             
@@ -248,7 +248,7 @@ module XYZ
             DB.ret_paging_and_order_added_to_dataset(ds,{:order_by => order_by, :paging => paging})
           end
 
-          #return op in symbol form and args
+          # return op in symbol form and args
           def self.get_op_and_args(expr)
             [expr.first,expr[1..expr.size-1]]
           end

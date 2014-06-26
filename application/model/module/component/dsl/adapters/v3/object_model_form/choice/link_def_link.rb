@@ -30,7 +30,7 @@ module DTK; class ComponentDSL; class V3
         end
         ret_info = {"type" => type.to_s}
         
-        #TODO: pass in order from what is on dependency
+        # TODO: pass in order from what is on dependency
         if order = opts[:order]||order(link_def_link)
           ret_info["order"] = order 
         end

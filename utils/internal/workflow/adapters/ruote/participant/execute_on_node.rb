@@ -2,9 +2,9 @@ module DTK
   module WorkflowAdapter
     module RuoteParticipant
       class ExecuteOnNode < NodeParticipants
-        #LockforDebug = Mutex.new
+        # LockforDebug = Mutex.new
         def consume(workitem)
-          #LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
+          # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
           params = get_params(workitem) 
           PerformanceService.start("#{self.class.to_s.split("::").last}", self.object_id)
           task_id,action,workflow,task,task_start,task_end = %w{task_id action workflow task task_start task_end}.map{|k|params[k]}
@@ -15,7 +15,7 @@ module DTK
           failed_tasks = ret_failed_precondition_tasks(task,workflow.guards[:external])
           unless failed_tasks.empty?
             set_task_to_failed_preconditions(task,failed_tasks)
-            #TODO: stub until
+            # TODO: stub until
             pp ["precondition_failure", task_id] #TODO: stub
             delete_task_info(workitem)
             return reply_to_engine(workitem)
@@ -95,9 +95,9 @@ module DTK
             callbacks = {
                 :on_msg_received => proc do |msg|
                   inspect_agent_response(msg)
-                  #set_result_canceled(wi, task)
-                  #delete_task_info(wi)
-                  #reply_to_engine(wi)
+                  # set_result_canceled(wi, task)
+                  # delete_task_info(wi)
+                  # reply_to_engine(wi)
                 end
             }
             receiver_context = {:callbacks => callbacks, :expected_count => 1}
@@ -123,11 +123,11 @@ module DTK
           Model.get_objs(task.model_handle,sp_hash)
         end
 
-        #TODO: need to turn threading off for now because if dont can have two threads 
-        #eat ech others messages; may solve with existing mechism or go straight to
-        #using stomp event machine
-        #may even not be necessary to thread the consume since very fast
-        #update: with change so taht subscriptions based on thread global; this may be no longer applicable
+        # TODO: need to turn threading off for now because if dont can have two threads 
+        # eat ech others messages; may solve with existing mechism or go straight to
+        # using stomp event machine
+        # may even not be necessary to thread the consume since very fast
+        # update: with change so taht subscriptions based on thread global; this may be no longer applicable
         def do_not_thread
           true
         end

@@ -13,7 +13,7 @@ module DTK; class ServiceModule
           assembly_id = assembly_id_or_opts
         end
 
-        #TODO: may need to update this to handle port refs with titles
+        # TODO: may need to update this to handle port refs with titles
         if port_ref =~ PortRefRegex
           node = $1; cmp_name = $2; link_def_ref = $3
           hash = {:node => node,:component_type => component_type_internal_form(cmp_name),:link_def_ref => link_def_ref}
@@ -52,12 +52,12 @@ module DTK; class ServiceModule
       end
       private_class_method :parsed_endpoint
       def self.component_type_internal_form(cmp_type_ext_form)
-        #TODO: this does not take into account that there could be a version on cmp_type_ext_form
+        # TODO: this does not take into account that there could be a version on cmp_type_ext_form
         InternalForm.component_ref(cmp_type_ext_form)
       end
       private_class_method :component_type_internal_form
 
-      #ports are augmented with field :parsed_port_name
+      # ports are augmented with field :parsed_port_name
       def matching_id(aug_ports,opts={})
         if opts[:is_output]
           if self[:title]
@@ -73,7 +73,7 @@ module DTK; class ServiceModule
               if self[:title] == p[:title] #they both can be nil -> want a match
                 true
               elsif opts[:is_output] and p[:title] and self[:title].nil?
-                #TODO: once add support for LinkFromComponentWithTitle put in error that indicates missing title in component link
+                # TODO: once add support for LinkFromComponentWithTitle put in error that indicates missing title in component link
                 err_class = DSLNotSupported::LinkFromComponentWithTitle
                 return raise_or_ret_error(err_class,[self[:node],self[:component_type],nil],opts)
               end
@@ -98,7 +98,7 @@ module DTK; class ServiceModule
       private :raise_or_ret_error
 
       class AddOn < self
-        #returns assembly ref, port_ref
+        # returns assembly ref, port_ref
         def self.parse(add_on_port_ref,assembly_list)
           assembly_name,port_ref = (add_on_port_ref =~ AOPortRefRegex; [$1,$2])
           unless assembly_match = assembly_list.find{|a|a[:display_name] == assembly_name}

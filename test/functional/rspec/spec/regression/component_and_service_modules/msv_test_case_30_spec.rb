@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 30: NEG - Import component module A from git which has dependency on component module B that does not exist on server yet
+# Test Case 30: NEG - Import component module A from git which has dependency on component module B that does not exist on server yet
 
 require 'rubygems'
 require 'active_record'

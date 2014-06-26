@@ -7,7 +7,7 @@ module DTK; class ErrorUsage
     r8_nested_require('parsing','wrong_type')
     r8_nested_require('parsing','params')
 
-    #args as last arguments, can have
+    # args as last arguments, can have
     # ...Params,Opts
     # ...Params
     # ...Opts
@@ -16,8 +16,8 @@ module DTK; class ErrorUsage
       processed_msg,params,opts = Params.process(msg,*args)
       @params = params
 
-      #if file_path is an option than see if there is an explicit variable in msg for file_path; if so substitue and deleet 
-      #so parent does not add it to end
+      # if file_path is an option than see if there is an explicit variable in msg for file_path; if so substitue and deleet 
+      # so parent does not add it to end
       if file_path = opts[:file_path]
         if Params.substitute_file_path?(processed_msg,file_path)
           opts.delete(:file_path)
@@ -32,7 +32,7 @@ module DTK; class ErrorUsage
         processed_msg = "#{error_prefix}: #{processed_msg}"
       end
       
-      #TODO: cleanup so parent takes opts, rather than opts_or_file_path
+      # TODO: cleanup so parent takes opts, rather than opts_or_file_path
       opts_or_file_path =
         if opts.empty?
           {:caller_info=>true}
@@ -81,7 +81,7 @@ module DTK; class ErrorUsage
         raise new(err_msg,err_params)
       end
     end
-    #TODO: combine these two
+    # TODO: combine these two
     def self.raise_error_unless(object,legal_values_input_form=[],&legal_values_block)
       legal_values = LegalValues.reify(legal_values_input_form,&legal_values_block)
       unless legal_values.match?(object)

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 6: MongoDB - Single node scenario
+# Test Case 6: MongoDB - Single node scenario
 
 require 'rubygems'
 require 'mongo'
@@ -23,7 +23,7 @@ puppet_grep_pattern = 'transaction'
 mongodb_log_location = '/var/log/mongodb/mongodb.log'
 mongodb_grep_pattern = '27017'
 
-#MongoDB specifics
+# MongoDB specifics
 database_name = 'test'
 collection_name = 'test_collection'
 document = {"first_name" => "Bakir", "last_name" => "Jusufbegovic"}

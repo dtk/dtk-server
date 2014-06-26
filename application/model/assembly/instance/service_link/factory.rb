@@ -15,8 +15,8 @@ module DTK
           port_link = nil
           input_port,output_port,new_port_created = add_or_ret_ports?()
           unless new_port_created
-            #see if there is an existing port link
-            #TODO: may also add filter on component_type
+            # see if there is an existing port link
+            # TODO: may also add filter on component_type
             filter = [:and,[:eq,:input_id,input_port.id()],[:eq,:output_id,output_port.id()]]
             pl_matches = @assembly_instance.get_port_links(:filter => filter)
             if pl_matches.size == 1
@@ -30,7 +30,7 @@ module DTK
         end
         
        private
-        #returns input_port,output_port,new_port_created (boolean)
+        # returns input_port,output_port,new_port_created (boolean)
         def add_or_ret_ports?()
           new_port_created = false
           ndx_matching_ports = find_matching_ports?([@input_cmp_idh,@output_cmp_idh]).inject(Hash.new){|h,p|h.merge(p[:component_id] => p)} 

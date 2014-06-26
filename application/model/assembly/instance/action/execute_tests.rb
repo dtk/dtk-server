@@ -6,12 +6,12 @@ module DTK
         def self.initiate(project,assembly_instance,nodes,action_results_queue, type, opts={})
           new(project,assembly_instance,nodes,action_results_queue, type, opts).initiate()
         end
-        
+
         def initialize(project,assembly_instance,nodes,action_results_queue, type, opts={})
           @project = project
           @assembly_instance = assembly_instance
           @nodes = nodes
-          @action_results_queue = action_results_queue 
+          @action_results_queue = action_results_queue
           @type = type
           @filter = opts[:filter]
         end
@@ -19,7 +19,7 @@ module DTK
         def initiate()
           test_components = get_test_components_with_stub()
           version_contexts = get_version_contexts(test_components)
-          test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] = 
+          test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] =
             version_contexts.select { |vc| cmp[:implementation_id] == vc[:id] }.first}
 
           output_hash = {
@@ -29,8 +29,8 @@ module DTK
           test_cmps_with_version_contexts.each do |hash|
             attrib_array = Array.new
             hash[:attributes].each { |attrib| attrib_array << { attrib[:display_name].to_sym =>attrib[:value_asserted] }}
-            output_hash[:test_instances] << { 
-              :module_name => hash[:version_context][:implementation], 
+            output_hash[:test_instances] << {
+              :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
               :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
@@ -48,11 +48,11 @@ BAKIR: Output hash has this form
      :test_component=>"mongodb_test__network_port_check",
      :test_name=>"network_port_check_spec.rb",
      :params=>[{:mongo_port=>"27017"}, {:mongo_web_port=>"28017"}]}]}]
-=end  
+=end
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]}) 
+            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
           callbacks = {
             :on_msg_received => proc do |msg|
@@ -62,14 +62,14 @@ BAKIR: Output hash has this form
                 raw_data = response[:data].map{|r|node_info.merge(r)}
                 packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
                 action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
-              elsif response[:status] != :ok  
-                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]       
+              elsif response[:status] != :ok
+                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 action_results_queue.push(node_info[:id],response[:data])
               end
             end
           }
-          
-          #part of the code used to decide which components belong to which nodes. 
+
+          #part of the code used to decide which components belong to which nodes.
           #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
@@ -85,7 +85,7 @@ BAKIR: Output hash has this form
               node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_contexts}
             end
           end
-          
+
           #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
             components = filter[:components] #TODO: temp
@@ -130,7 +130,7 @@ BAKIR: Output hash has this form
 
             test_components.uniq!
             test_comp_list = []
-            test_components.each do |test_comp| 
+            test_components.each do |test_comp|
               sp_hash = {
                 :cols => Component.common_columns,
                 :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
@@ -142,7 +142,7 @@ BAKIR: Output hash has this form
                 tst[:attributes] = test_comp[:attributes]
               end
 
-              #Bakir: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is never added to the assembly and assembly_id is nil
+              # Bakir: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is never added to the assembly and assembly_id is nil
               test_comp_list << comp_list.select { |tstcmp| tstcmp[:assembly_id] == nil }.first
             end
           end
@@ -156,7 +156,7 @@ BAKIR: Output hash has this form
             attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
 
             attributes.each do |a|
-              name = cmp[:attributes].select do |x| 
+              name = cmp[:attributes].select do |x|
                 x[:related_test_attribute] == a[:display_name]
               end
               a[:value_asserted] = name.first[:component_attribute_value] unless name.empty?
@@ -173,7 +173,7 @@ BAKIR: Output hash has this form
         end
 
         def get_version_contexts(test_components)
-          version_contexts = 
+          version_contexts =
             unless test_components.empty?
               ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(test_components)
             else
@@ -185,7 +185,7 @@ BAKIR: Output hash has this form
         end
 
         #TODO: deprecate
-        #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing 
+        #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing
         def get_augmented_component_templates(nodes,components)
           ret = Array.new
           if nodes.empty?
@@ -202,10 +202,10 @@ BAKIR: Output hash has this form
           if components.nil? or components.empty? or !components.include? "/"
             return ret
           end
-          
+
           cmp_node_names = components.map do |name_pairs|
             if name_pairs.include? "/"
-              split = name_pairs.split('/') 
+              split = name_pairs.split('/')
                 if split.size == 2
                   {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
                 else
@@ -217,7 +217,7 @@ BAKIR: Output hash has this form
             end
           end.compact
           ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
-          
+
           #only keep matching ones
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
@@ -225,7 +225,7 @@ BAKIR: Output hash has this form
             end
           end
         end
-        
+
       end
 
       class ExecuteTests < ActionResultsQueue::Result
@@ -233,7 +233,7 @@ BAKIR: Output hash has this form
           #TODO: Rich: Put in logic here to get component instnces so can call an existing function used for converge to get all
           cmp_templates = get_component_templates(nodes,components)
           pp [:debug_cmp_templates,cmp_templates]
-          version_context = 
+          version_context =
             unless cmp_templates.empty?
               ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
             else
@@ -241,11 +241,11 @@ BAKIR: Output hash has this form
               nil
             end
           pp [:debug_version_context,version_context]
-          
+
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
-            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]}) 
+            h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
           callbacks = {
             :on_msg_received => proc do |msg|
@@ -255,14 +255,14 @@ BAKIR: Output hash has this form
                 raw_data = response[:data].map{|r|node_info.merge(r)}
                 packaged_data = new(node_info[:display_name],raw_data)
                 action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
-              elsif response[:status] != :ok  
-                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]       
+              elsif response[:status] != :ok
+                node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 action_results_queue.push(node_info[:id],response[:data])
               end
             end
           }
-          
-          #part of the code used to decide which components belong to which nodes. 
+
+          #part of the code used to decide which components belong to which nodes.
           #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
@@ -279,7 +279,7 @@ BAKIR: Output hash has this form
               node_hash[node[:id]] = {:components => components_array, :instance_id => node[:external_ref][:instance_id], :version_context => version_context}
             end
           end
-          
+
           #components_including_node_name array will be empty if execute-test agent is triggered from specific node context
           if components_including_node_name.empty?
             CommandAndControl.request__execute_action(:execute_tests,:execute_tests,nodes,callbacks, {:components => components, :version_context => version_context})
@@ -289,7 +289,7 @@ BAKIR: Output hash has this form
         end
         private
         #TODO: some of this logic can be leveraged by code below node_hash
-        #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing 
+        #TODO: even more idea, but we can iterate to it have teh controller/helper methods convert to ids and objects, ratehr than passing
         #strings in components
         def self.get_component_templates(nodes,components)
           ret = Array.new
@@ -306,10 +306,10 @@ BAKIR: Output hash has this form
             if components.nil? or components.empty? or !components.include? "/"
               return ret
             end
-          
+
           cmp_node_names = components.map do |name_pairs|
             if name_pairs.include? "/"
-              split = name_pairs.split('/') 
+              split = name_pairs.split('/')
               if split.size == 2
                 {:node_name => split[0],:component_name => Component.display_name_from_user_friendly_name(split[1])}
               else
@@ -321,7 +321,7 @@ BAKIR: Output hash has this form
             end
           end.compact
           ndx_node_names = nodes.inject(Hash.new){|h,n|h.merge(n[:id] => n[:display_name])}
-          
+
           #only keep matching ones
           ret.select do |cmp_template|
             cmp_node_names.find do |r|
@@ -331,6 +331,6 @@ BAKIR: Output hash has this form
         end
       end
     end
-  end   
+  end
 end
 

@@ -49,7 +49,7 @@ module DTK; class ComponentDSL; class V2
       def converted_external_ref()
         ext_ref = required_value(:external_ref)
         ret = RenderHash.new
-        #ext_ref["type"] will be "puppet_class" or "puppet_definition" for pupppet config agent
+        # ext_ref["type"] will be "puppet_class" or "puppet_definition" for pupppet config agent
         ret[ext_ref["type"]] = ext_ref["name"]
         (ext_ref.keys - ["name","type"]).each{|k|ret[k] = ext_ref[k]}
         ret
@@ -65,7 +65,7 @@ module DTK; class ComponentDSL; class V2
 
     class Dependency < Base::Dependency
       def render_hash_form(opts={})
-        #TODO: stub
+        # TODO: stub
         ret = RenderHash.new
         ret
       end
@@ -114,8 +114,8 @@ module DTK; class ComponentDSL; class V2
         ret = RenderHash.new
         ret.set_unless_nil("description",value(:description))
         ret["type"] = required_value(:type)
-        #better heuristic is to not set dtk default to parsed implementation default
-        #ret.set_unless_nil("default",value(:default_info))
+        # better heuristic is to not set dtk default to parsed implementation default
+        # ret.set_unless_nil("default",value(:default_info))
         ret["required"] = true if value(:required)
         ret.set_unless_nil("dynamic",value(:dynamic))
         ret.set_unless_nil("external_ref",converted_external_ref())
@@ -130,7 +130,7 @@ module DTK; class ComponentDSL; class V2
         unless attr_name == value(:id)
           ret[ext_ref["type"]] = attr_name
         end
-        #do not need its value; just fact that default_variable
+        # do not need its value; just fact that default_variable
         (ext_ref.keys - ["name","type","default_variable"]).each{|k|ret[k] = ext_ref[k]}
         if ext_ref["default_variable"]
           ret["default_variable"] = true

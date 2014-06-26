@@ -11,7 +11,7 @@ module XYZ
     
     ### end: get methods
 
-    #Model apis
+    # Model apis
     def self.create_new_project(model_handle,name,type)
       sp_hash = {
         :cols => [:id],
@@ -33,7 +33,7 @@ module XYZ
       get_objs(model_handle,sp_hash)
     end
 
-    #TODO: this wil be deprecated, but also looks like it gets wrong components
+    # TODO: this wil be deprecated, but also looks like it gets wrong components
     def get_implementaton_tree(opts={})
       sp_hash = {:cols => [:id,:display_name,:type,:implementation_tree]}
       unravelled_ret = get_objs(sp_hash)
@@ -41,17 +41,17 @@ module XYZ
 
       i18n = get_i18n_mappings_for_models(:component)
       unravelled_ret.each do |r|
-        #TODO: hack until determine right way to treat relationship between component and implementation versions
+        # TODO: hack until determine right way to treat relationship between component and implementation versions
         index = r[:component][:component_type]
         cmp = ret_hash[index]
-        #TODO: dont think ids are used; but for consistency using lowest id instance
+        # TODO: dont think ids are used; but for consistency using lowest id instance
         if cmp.nil? or r[:component][:id] < cmp[:id] 
           cmp = ret_hash[index] = r[:component].materialize!(Component.common_columns())
-          #TODO: see if cleaner way to put in i18n names
+          # TODO: see if cleaner way to put in i18n names
           cmp[:name] = i18n_string(i18n,:component, cmp[:name])
         end
         impls = cmp[:implementations] ||= Hash.new
-        #TODO: this is hack taht needs fixing
+        # TODO: this is hack taht needs fixing
         impls[r[:implementation][:id]] ||= r[:implementation].merge(:version => r[:component][:version])
       end
       ret = ret_hash.values.map{|ct|ct.merge(:implementations => ct[:implementations].values)}
@@ -73,7 +73,7 @@ module XYZ
         cmps = (ndx_ret[impl_id] ||= r[:implementation].merge(:components => Array.new))[:components]
         if r[:component]
           cmp = r[:component].materialize!(Component.common_columns())
-          #TODO: see if cleaner way to put in i18n names
+          # TODO: see if cleaner way to put in i18n names
           cmp[:name] = i18n_string(i18n,:component, cmp[:name])
           cmps << cmp
         end
@@ -88,7 +88,7 @@ module XYZ
     end
 
     def get_target_tree()
-      #get and index node group members (index is [target_id][node_group_id]
+      # get and index node group members (index is [target_id][node_group_id]
       ndx_ng_members = Hash.new
       get_objs(:cols => [:id,:node_group_relations]).each do |r|
         pntr = ndx_ng_members[r[:target][:id]] ||= Hash.new

@@ -3,7 +3,7 @@ module DTK
     module ComponentModuleRefsMixin
       def set_component_module_version(component_module,component_version,service_version=nil)
         cmp_module_name = component_module.module_name()
-        #make sure that component_module has version defined
+        # make sure that component_module has version defined
         unless component_mb = component_module.get_module_branch_matching_version(component_version)
           defined_versions = component_module.get_module_branches().map{|r|r.version_print_form()}.compact
           version_info = 
@@ -17,15 +17,15 @@ module DTK
         
         cmp_module_refs = get_component_module_refs(service_version)
         
-        #check if set to this version already; if so no-op
+        # check if set to this version already; if so no-op
         if cmp_module_refs.has_module_version?(cmp_module_name,component_version)
           return ret_clone_update_info(service_version)
         end
 
-        #set in cmp_module_refs the module have specfied value and update both model and service's global refs
+        # set in cmp_module_refs the module have specfied value and update both model and service's global refs
         cmp_module_refs.set_module_version(cmp_module_name,component_version)
         
-        #update the component refs with the new component_template_ids
+        # update the component refs with the new component_template_ids
         cmp_module_refs.update_component_template_ids(component_module)
         
         ret_clone_update_info(service_version)
@@ -69,7 +69,7 @@ module DTK
     end
 
     def update_component_template_ids(component_module)
-      #first get filter so can call get_augmented_component_refs
+      # first get filter so can call get_augmented_component_refs
       assembly_templates = component_module.get_associated_assembly_templates()
       return if assembly_templates.empty?
       filter = [:oneof, :id, assembly_templates.map{|r|r[:id]}]
@@ -85,12 +85,12 @@ module DTK
       Model.update_from_rows(component_module.model_handle(:component_ref),cmp_ref_update_rows)
     end
 
-    #TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
-    #augmented with :component_template key which points to associated component template or nil 
+    # TODO: we may simplify relationship of component ref to compoennt template to simplify and make more efficient below
+    # augmented with :component_template key which points to associated component template or nil 
     def set_matching_component_template_info!(aug_cmp_refs,opts={})
       ret = aug_cmp_refs
       return ret if aug_cmp_refs.empty?
-      #for each element in aug_cmp_ref, want to set cmp_template_id using following rules
+      # for each element in aug_cmp_ref, want to set cmp_template_id using following rules
       # 1) if key 'has_override_version' is set
       #    a) if it points to a component template, use this
       #    b) otherwise look it up using given version
@@ -126,17 +126,17 @@ module DTK
         r[:template_id_synched] = true #marking each item synchronized
       end
 
-      #shortcut if no locked versions and no required elements
+      # shortcut if no locked versions and no required elements
       if component_modules().empty? and not cmp_types_to_check.values.find{|r|r.mapping_required?()}
         return ret
       end
 
-      #Lookup up modules mapping
-      #mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
-      #component_template will be null if no match is found
+      # Lookup up modules mapping
+      # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
+      # component_template will be null if no match is found
       mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys,opts)
 
-      #set the component template ids; raise error if there is a required element that does not have a matching component template
+      # set the component template ids; raise error if there is a required element that does not have a matching component template
       reference_errors = Array.new
       cmp_types_to_check.each do |cmp_type,els|
         els.each do |el|
@@ -213,7 +213,7 @@ module DTK
           if v.kind_of?(ComponentModuleRef)
             h.merge(k.to_sym => ComponentModuleRef.reify(mh,v))
           elsif v.kind_of?(String)
-            #TODO: this clause will be deprecated
+            # TODO: this clause will be deprecated
             h.merge(k.to_sym => ComponentModuleRef.reify(mh,:component_module => k,:version_info => v))
           else
             raise Error.new("Unexpected value associated with component module ref: #{v.class}")
@@ -281,13 +281,13 @@ module DTK
     def get_component_type_to_template_mappings?(cmp_types,opts={})
       ret = Hash.new
       return ret if cmp_types.empty?
-      #first put in ret info about component type and version
+      # first put in ret info about component type and version
       ret = cmp_types.inject(Hash.new) do |h,cmp_type|
         version = ret_selected_version_string(cmp_type)
         h.merge(cmp_type => {:component_type => cmp_type, :version => version, :version_field => ModuleBranch.version_field(version)})
       end
 
-      #get matching component template info and insert matches into ret
+      # get matching component template info and insert matches into ret
       Component::Template.get_matching_type_and_version(project_idh(),ret.values,opts).each do |cmp_template|
         ret[cmp_template[:component_type]].merge!(:component_template => cmp_template) 
       end

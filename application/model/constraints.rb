@@ -1,4 +1,4 @@
-#TODO: simplify by changing target arg to be just idh
+# TODO: simplify by changing target arg to be just idh
 module XYZ
   class Constraints < Array
     def initialize(logical_op=:and,constraints=[])
@@ -107,12 +107,12 @@ module XYZ
       end
     end
     def evaluate_given_target(target,opts={})
-      #if no :search_pattern then this is a 'necessary fail'
+      # if no :search_pattern then this is a 'necessary fail'
       return false unless search_pattern
       dataset = create_dataset(target)
       rows = dataset.all
 
-      #opportunistic gathering of info
+      # opportunistic gathering of info
       update_object_from_info_gathered!(opts[:update_object],rows) if opts[:update_object]
 
       is_empty = rows.empty?
@@ -145,7 +145,7 @@ module XYZ
 
       def self.no_legal_endpoints(external_link_defs)
         eps = external_link_defs.remote_components
-        #no search pattern means 'necessarily fail'
+        # no search pattern means 'necessarily fail'
         dep = {
           :description => "Link must attach to node with a component of type (#{eps.join(", ")})",
           :severity => "error"
@@ -167,14 +167,14 @@ module XYZ
       self[:search_pattern]
     end
 
-    #overrwritten
+    # overrwritten
     def update_object_from_info_gathered!(object,rows)
       raise Error.new("not treating constraint update of object of type #{obj.class.to_s}") 
     end
   end
 
   module ProcessVirtualComponentMixin
-    #converts from form that acts as if attributes are directly attached to component  
+    # converts from form that acts as if attributes are directly attached to component  
     def ret_join_array(join_cond)
       real = Array.new
       virtual = Array.new

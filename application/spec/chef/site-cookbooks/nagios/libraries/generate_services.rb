@@ -24,7 +24,7 @@ module XYZ
             nagios_check_info = @service_check_assocs[m[:name]]
             next unless nagios_check_info
             check_command = nagios_check_info["command_name"]
-            #find all keys of form ARG<n> and sort
+            # find all keys of form ARG<n> and sort
             arg_keys = nagios_check_info.keys.map{|x|$1 if x=~/^ARG(.+)$/}.compact.sort.map{|y|"ARG"+y.to_str}
             unless arg_keys.empty?
               param_values = arg_keys.map{|x|Helper.ret_eval_value(nagios_check_info[x],service_info[:params])}
@@ -54,12 +54,12 @@ module XYZ
 
      class Helper
        class << self
-         #helper fns that may be in arg to evaluae
+         # helper fns that may be in arg to evaluae
          def ret_evalauted_args(attr_val_list,normalized_params)
            ret = Hash.new
            attr_val_list.each do |k,v|
              if k =~ /^ARG[0-9]+$/
-               #TBD: looks like does not matter if eval of class_eval called
+               # TBD: looks like does not matter if eval of class_eval called
                ret[k] = ret_eval_value(v,normalized_params)
              end
            end
@@ -70,7 +70,7 @@ module XYZ
            eval("lambda{|params|#{val}}").call(normalized_params)
          end
 
-         #helper fns
+         # helper fns
          def sap_inet_port(sap_params)
            port_info = ret_inet_port_info(sap_params)
            (port_info[:port] if port_info)

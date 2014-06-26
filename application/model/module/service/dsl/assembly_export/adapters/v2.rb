@@ -19,12 +19,12 @@ module DTK
 
       def assembly_output_hash()
         ret = SimpleOrderedHash.new()
-        #add assembly level attributes
+        # add assembly level attributes
         if assembly_level_attrs = assembly_level_attributes_hash()
           ret[:attributes] = assembly_level_attrs
         end
 
-        #add nodes and components
+        # add nodes and components
         node_ref_to_name = Hash.new
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
           node_name = node_hash[:display_name]
@@ -38,7 +38,7 @@ module DTK
           h.merge(node_name => node_hash_output)
         end
 
-        #add in port links
+        # add in port links
         self[:port_link].values.each do |pl|
           in_parsed_port = parse_port_ref(pl["*input_id"],node_ref_to_name)
           out_parsed_port  = parse_port_ref(pl["*output_id"],node_ref_to_name)
@@ -127,7 +127,7 @@ module DTK
           if existing_links.kind_of?(Array)
             existing_links << output_target
           else #existing_links.kind_of?(String)
-            #turn into array with existing plus new element
+            # turn into array with existing plus new element
             service_links[link_def_ref] = [service_links[link_def_ref],output_target]
           end
         else
@@ -141,7 +141,7 @@ module DTK
           :cols => [:id,:ref],
           :filter => [:oneof, :id, self[:node].values.map{|n|n[:node_binding_rs_id]}]
         }
-        #TODO: may get this info in earlier phase
+        # TODO: may get this info in earlier phase
         node_binding_rows = Model.get_objs(@container_idh.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
         self[:node].inject(Hash.new) do |h,(node_ref,node_hash)|

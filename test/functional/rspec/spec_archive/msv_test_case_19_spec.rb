@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 19: Import module from puppet forge, add its components and converge the assembly
+# Test Case 19: Import module from puppet forge, add its components and converge the assembly
 
 require 'rubygems'
 require 'rest_client'

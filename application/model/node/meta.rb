@@ -1,8 +1,8 @@
-#TODO: temp until move into meta directory
+# TODO: temp until move into meta directory
 module DTK
   class Node
     module DNS
-      #arranged in precedence order
+      # arranged in precedence order
       AttributeKeys = 
         [
          'dtk_dns_enabled',
@@ -17,17 +17,17 @@ module DTK
       external_ref_column_defs()
       virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
       column :tag, :varchar
-      #TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
+      # TODO: may change types; by virtue of being in alibrary we know about item; may need to distingusih between backed images versus barbones one; also may only treat node constraints with search objects
       column :type, :varchar, :size => 25, :default => "instance" # Possible values are Node::Type.types
       column :role, :varchar, :size => 50
       column :os_type, :varchar, :size => 25
       column :os_identifier, :varchar, :size => 50 #augments os_type to identify specifics about os. From os_identier given region one can find unique ami
       column :architecture, :varchar, :size => 10 #e.g., 'i386'
-      #TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
-      #TBD: experimenting whetehr better to make this actual or virtual columns
+      # TBD: in data source specfic now column :manifest, :varchar #e.g.,rnp-chef-server-0816-ubuntu-910-x86_32
+      # TBD: experimenting whetehr better to make this actual or virtual columns
       column :image_size, :numeric, :size=>[8, 3] #in megs
 
-      #TODO: may replace is_deployed and operational_status with status
+      # TODO: may replace is_deployed and operational_status with status
       column :is_deployed, :boolean, :default => false
 
       column :admin_op_status, :varchar, :size => 20, :default => 'pending'
@@ -45,10 +45,10 @@ module DTK
       virtual_column :target_id, :type => ID_TYPES[:id], :local_dependencies => [:datacenter_datacenter_id]
       virtual_column :parent_name, :possible_parents => [:library,:datacenter]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
-      #TODO how to have this conditionally "show up"
+      # TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
-      #can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
+      # can be null; points to the canonical member (a node template in the library) which is used by default when do node_group add_node 
       foreign_key :canonical_template_node_id, :node, FK_SET_NULL_OPT
       virtual_column :canonical_template_node, :type => :json, :hidden => true,
         :remote_dependencies =>
@@ -379,7 +379,7 @@ module DTK
            :cols => [:id,:display_name, :type, :input_id,:output_id]
          }]
 
-      #used when node is deleted to find and update dangling attribute links
+      # used when node is deleted to find and update dangling attribute links
       for_dangling_links =
         [{
            :model_name => :attribute_link,
@@ -527,7 +527,7 @@ module DTK
          [
           {
             :model_name => :action,
-            #TODO: avoiding use of :node__node
+            # TODO: avoiding use of :node__node
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:component__component,{:id => :component_id}).group_and_count(:component__node_node_id)},
             :join_type => :left_outer,
             :join_cond=>{:node_node_id =>:node__id}
@@ -594,9 +594,9 @@ module DTK
          },
         ]
 
-      #TODO: just for testing
+      # TODO: just for testing
       application_basic_types = %w{application service database language extension}
-      #in dock 'applications means wider than basic_type == applicationsn
+      # in dock 'applications means wider than basic_type == applicationsn
       virtual_column :applications, :type => :json, :hidden => true,
       :remote_dependencies => 
         [

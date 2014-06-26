@@ -1,4 +1,4 @@
-#TODO: incomplete; when refactored to use adapter structure; structure looked like mock used all same as grit except for clone branch
+# TODO: incomplete; when refactored to use adapter structure; structure looked like mock used all same as grit except for clone branch
 module XYZ
   class RepoManagerMock < RepoManager
     def self.create(path,branch,opts={})
@@ -31,7 +31,7 @@ module XYZ
       end
     end
 
-    #no ops if dont explicitly have method
+    # no ops if dont explicitly have method
     class << self
       def method_missing(meth, *args, &block)
         nil

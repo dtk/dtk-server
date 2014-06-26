@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: Add new component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of add
+# Test Case 3: Add new component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of add
 
 require 'rubygems'
 require 'rest_client'

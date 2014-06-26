@@ -9,7 +9,7 @@ module XYZ
     end
    private
     def self.ret_ordered_object(obj)
-      #Hashes for Ruby 1.9.x are sorted already; so no-op for tehse
+      # Hashes for Ruby 1.9.x are sorted already; so no-op for tehse
       return obj if RUBY_VERSION =~ /^1\.9\./
 
       return obj unless obj.kind_of?(Hash) or obj.kind_of?(Array)

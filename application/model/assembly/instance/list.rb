@@ -182,10 +182,10 @@ module DTK; class  Assembly
       end
 
       def ret_ndx_component_print_form(aug_cmps,cmps_with_print_form)
-        #has lookup that includes each satisfied_by_component
+        # has lookup that includes each satisfied_by_component
         ret = cmps_with_print_form.inject(Hash.new){|h,cmp|h.merge(cmp[:id] => cmp[:display_name])}
         
-        #see if theer is any components that are nreferenced but not in ret
+        # see if theer is any components that are nreferenced but not in ret
         needed_cmp_ids = Array.new
         aug_cmps.each do |aug_cmp|
           if deps = aug_cmp[:dependencies]

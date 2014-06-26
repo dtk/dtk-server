@@ -1,9 +1,9 @@
-#TODO: determine what in this file is deprecated
+# TODO: determine what in this file is deprecated
 module DTK
   module ComponentClone
     def clone_pre_copy_hook_into_node(node,opts={})
       workspace_cmp = self
-      #check constraints
+      # check constraints
       unless opts[:no_constraint_checking]
         if constraints = workspace_cmp.get_constraints!(:update_object => true)
           target = {"target_node_id_handle" => node.id_handle_with_auth_info()}
@@ -15,7 +15,7 @@ module DTK
     end
 
     def determine_cloned_components_parent(specified_target_idh)
-      #TODO: may deprecate if not using; previously mapped extensions to parents; now putting them with node as tehir parent
+      # TODO: may deprecate if not using; previously mapped extensions to parents; now putting them with node as tehir parent
       return specified_target_idh if SubComponentComponentMapping.empty?
       cmp_fs = FieldSet.opt([:id,:display_name,:component_type],:component)
       specified_target_id = specified_target_idh.get_id()
@@ -89,11 +89,11 @@ module DTK
 
    protected
     def self.compute_sap_db(sap_config_val,par_vals)
-      #TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
+      # TODO: check if it is this simple; also may not need and propagate as byproduct of adding a link 
       par_vals.map{|par_val|sap_config_val.merge(par_val)}
     end
    private
-    #TODO: some of these are redendant of whats in sap_dependency_X like "sap__l4" and "sap__db"
+    # TODO: some of these are redendant of whats in sap_dependency_X like "sap__l4" and "sap__db"
     BasicTypeInfo = {
       "database" => {
         :sap_dependency => :sap_dependency_database,

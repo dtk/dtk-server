@@ -38,7 +38,7 @@ module DTK
         nodes = get_nodes(:id,:display_name,:external_ref)
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         
-        #Special case filtering of nodes that are not running and executing agent only on those that are running
+        # Special case filtering of nodes that are not running and executing agent only on those that are running
         component_nodes = Array.new
         
         unless components.empty? || components.nil?
@@ -58,7 +58,7 @@ module DTK
         nodes = nodes.select { |node| node[:id] == node_id.to_i } unless (node_id.nil? || node_id.empty?)
         opts = {} 
 
-        #Special case filtering of nodes that are not running and executing agent only on those that are running
+        # Special case filtering of nodes that are not running and executing agent only on those that are running
         component_nodes = Array.new
         unless components.empty? || components.nil?
           components.each do |cmp|
@@ -194,7 +194,7 @@ module DTK
             callbacks = {
               :on_msg_received => proc do |msg|
                 response = CommandAndControl.parse_response__execute_action(nodes,msg)
-                #TODO: now ignoring bad results because have time out mechanism; might put errors in queue to terminate earlier
+                # TODO: now ignoring bad results because have time out mechanism; might put errors in queue to terminate earlier
                 if response and response[:pbuilderid] and response[:status] == :ok
                   node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                   raw_data = response[:data].map{|r|node_info.merge(r)}

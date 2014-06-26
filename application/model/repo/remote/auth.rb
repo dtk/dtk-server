@@ -5,7 +5,7 @@ module DTK; class Repo
       ACCESS_READ  = 'R'
       ACCESS_WRITE = 'W'
 
-      #TODO: ModuleBranch::Location: see why need client_rsa_pub_key
+      # TODO: ModuleBranch::Location: see why need client_rsa_pub_key
       def authorize_dtk_instance(client_rsa_pub_key = nil, access_rights = nil)
         username     = dtk_instance_remote_repo_username()
         rsa_pub_key  = dtk_instance_rsa_pub_key()
@@ -32,7 +32,6 @@ module DTK; class Repo
         }
         # TODO: [Haris] We do want to keep API same until repo client since we need to support two clients
         client.grant_user_access_to_module(grant_user_rights_params, client_rsa_pub_key)
-        module_name
       end
 
       # matches namespace from the name remote_repo e.g. "dtk"

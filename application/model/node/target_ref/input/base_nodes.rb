@@ -1,42 +1,97 @@
 module DTK; class Node; class TargetRef
   class Input 
     class BaseNodes < self
+      def initialize(target,assembly,nodes)
+        super()
+        @target = target
+        @assembly = assembly
+        num_target_refs_needed(nodes).each{|node_info|add!(node_info)}
+      end
+
+      #This creates if needed target refs and links nodes to them
+      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
+      def create_linked_target_refs?()
+        add_to_target = ret_linked_target_ref_hash()
+        target_idh = @target.id_handle()
+        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
+      end
+
+     private
       def add!(node_info)
         self << Element.new(node_info)
       end
-      class Element < Hash
+
+      def ret_linked_target_ref_hash()
+        ret = Hash.new
+        each do |el|
+          target_ref,node_group_relation = el.add_target_ref_and_ngr!(ret,@target,@assembly)
+        end
+        ret
+      end
+
+      #returns for each node that needs one or more target refs the following hash
+      # :node
+      # :num_needed
+      def num_target_refs_needed(nodes)
+        ret = Array.new
+        #TODO: temporary; removes all nodes that are not node groups
+        nodes = nodes.select{|n|n.is_node_group?()}
+        nodes.each do |node|
+          node_id = node[:id]
+          num_needed = node.attribute.cardinality
+          if num_needed > 0
+            ret << {:node => node,:num_needed => num_needed}
+          end
+        end
+        ret
+      end
+
+      class Element 
+        include ElementMixin
         def initialize(node_info)
-          super()
-          replace(node_info)
+          @node = node_info[:node]
+          @num_needed = node_info[:num_needed]
+          @type = :base_node_link
+        end
+
+        # returns [target_ref,node_group_relation]
+        def add_target_ref_and_ngr!(ret,target,assembly)
+          target_ref_hash = ret_target_ref_hash(target,assembly)
+          unless target_ref_hash.empty?
+            (ret[:node] ||= Hash.new).merge!(target_ref_hash)
+            node_group_rel_hash = target_ref_hash.keys.inject(Hash.new) do |h,node_ref|
+              hash = {
+                "node_group_id" => @node.id,
+                "*node_id" => "/node/#{node_ref}"
+              }
+              ref = node_ref
+              h.merge(ref => hash)
+            end
+            (ret[:node_group_relation] ||= Hash.new).merge!(node_group_rel_hash)
+          end
+          ret
+        end
+
+        def ret_target_ref_hash(target,assembly)
+          ret = Hash.new
+          unless display_name = @node.get_field?(:display_name)
+            raise Error.new("Unexpected that that node has no name field")
+          end
+          external_ref = @node.external_ref
+          unless external_ref.references_image?(target)
+            raise ErrorUsage.new("Node (#{display_name}) is not in target that supports node creation or does not have needed info")
+          end
+          (1..@num_needed).inject(Hash.new) do |h,index|
+            hash = {
+              :display_name => ret_display_name(display_name,:index => index,:assembly => assembly),
+              :type => TargetRef.type(),
+              :external_ref => external_ref.hash() 
+            }          
+            ref = ret_ref(display_name,:index => index,:assembly => assembly)
+            h.merge(ref => hash)
+          end
         end
       end
     end
   end
 end; end; end
-
-=begin
-      def self.create_linked_nodes(target,node,num_needed,num_linked)
-        target_id = target.id
-        base_display_name = node.get_field?(:disply_name)
-        base_ref = node.get_field?(:ref)
-        create_rows = (num_linked+1..num_linked+num_needed).map do |index|
-          {
-            :ref => "#{base_ref}--#{index}",
-            :display_name => "#{base_display_name}--#{index}",
-            :managed => true,
-            :datacenter_datacenter_id => target_id,
-            #TODO: stub for garbage collection
-            :type => 'garb'
-         }
-        end
-
-        #for create model handle needs parent
-        node_mh = target.model_handle().create_childMH(:node) 
-#        new_target_refs = create_from_rows(attr_link_mh,new_link_rows)
-pp [:debug_creating,create_rows]
-      end
-
-=end
-
-
-

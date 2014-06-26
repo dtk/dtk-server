@@ -2,7 +2,7 @@
 require 'rubygems'
 require 'json'
 
-#TBD: order below matters
+# TBD: order below matters
 root = File.expand_path('../../', File.dirname(__FILE__))
 require root + '/utils/internal/helper/config.rb'
 XYZ::Config.process_config_file("/etc/reactor8/server.conf")

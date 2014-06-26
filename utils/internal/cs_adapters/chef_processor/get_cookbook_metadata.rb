@@ -1,5 +1,5 @@
 require File.expand_path('chef_server_connection', File.dirname(__FILE__))
-#TBD: some of these fns refer to model object clouns; not sure if shoudl move to be on model objects,
+# TBD: some of these fns refer to model object clouns; not sure if shoudl move to be on model objects,
 # but then issue would be that the pasring fns refer to the form of input source
 module XYZ
   class ChefProcessor

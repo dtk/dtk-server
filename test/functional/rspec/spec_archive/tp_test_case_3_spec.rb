@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: Add new target to existing provider, stage two assemblies and check list of assemblies that belong to this target
+# Test Case 3: Add new target to existing provider, stage two assemblies and check list of assemblies that belong to this target
 
 require 'rubygems'
 require 'rest_client'

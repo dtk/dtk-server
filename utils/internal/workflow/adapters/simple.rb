@@ -1,4 +1,4 @@
-#RICH-WF: right now mimicking ruote where have seperate workflow that mirrors task structure and pointer back to task 
+# RICH-WF: right now mimicking ruote where have seperate workflow that mirrors task structure and pointer back to task 
 module DTK 
   module WorkflowAdapter
     class Simple < Workflow
@@ -9,13 +9,13 @@ module DTK
 
       def execute(top_task_id)
         workflow = self.class.generate_workflow(@top_task,@task)
-        #RICH-WF: needs to be writtenm by having each child clas put in logic
+        # RICH-WF: needs to be written by having each child class put in logic
         workflow.follow_workflow()
       end
 
      private
       attr_reader :task
-      #RICH-WF: this function can do the decomposition where there may be a base task that decomposes into multiple ones
+      # RICH-WF: this function can do the decomposition where there may be a base task that decomposes into multiple ones
       def self.generate_workflow(top_task,task)
         if task[:executable_action]
           ExecutableAction.new(top_task,task)
@@ -30,6 +30,7 @@ module DTK
 
       class ExecutableAction < self
         def follow_workflow()
+          #TODO: needs to call workflow#process_executable_action
           process_executable_action(task,top_task_idh)
         end
 
@@ -73,7 +74,7 @@ module DTK
   end
 end
 =begin
-#RICH-WF: below where old methods that intermixed created workflow and execvuting on them; now we need to write
+# RICH-WF: below where old methods that intermixed created workflow and execvuting on them; now we need to write
 follow_workflow for both classes; teh follow workflow for the concurrent one shoudl leevrage the pattern used in spawningthreads to do scp/ssh, but more general to execute any executable action
 
       def process_sequential(task)
@@ -82,11 +83,11 @@ follow_workflow for both classes; teh follow workflow for the concurrent one sho
         task.subtasks.each do |subtask|
           subtask_wf = Simple.new(subtask)
           if mark_as_not_reached
-            #TODO: Workflow#update_task has been removed
+            # TODO: Workflow#update_task has been removed
             subtask_wf.update_task(:status => "not_reached")
           else
             subtask_status = subtask_wf.execute(top_task_idh) 
-            #TODO: what to sent whole task status when failue but not task[:action_on_failure] == "abort"
+            # TODO: what to sent whole task status when failue but not task[:action_on_failure] == "abort"
             if subtask_status == :failed 
               status = :failed
               mark_as_not_reached = true if  task[:action_on_failure] == "abort"
@@ -100,7 +101,7 @@ follow_workflow for both classes; teh follow workflow for the concurrent one sho
       def process_concurrent(task)
         status = :succeeded
         lock = Mutex.new
-        #TODO: not killing concurrent subtasks if one failes
+        # TODO: not killing concurrent subtasks if one failes
         user_object  = ::DTK::CurrentSession.new.user_object()
         threads = task.subtasks.map do |subtask|
           CreateThread.defer_with_session(user_object) do 

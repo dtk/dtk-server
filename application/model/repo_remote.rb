@@ -91,7 +91,7 @@ module DTK
     
     end
     def self.ret_default_remote_repo(repo_remotes)
-      #Making robust in case multiple ones marked default
+      # Making robust in case multiple ones marked default
       pruned = repo_remotes.select{|r|r.get_field?(:is_default)}
       if pruned.empty?
         compute_default_remote_repo(repo_remotes)
@@ -104,12 +104,12 @@ module DTK
     end
 
    private
-    #TODO: deprecate once all data is migrated so :is_default is marked
+    # TODO: deprecate once all data is migrated so :is_default is marked
     def self.compute_default_remote_repo(repo_remotes)
       Log.info("Calling compute_default_remote_repo on (#{repo_remotes.map{|r|r.get_field?(:display_name)}.join(',')})")
       unless (repo_remotes||[]).empty?
-        #TODO: enhance so that default is one taht matche's user's default namespace
-        #set on augmented_module_branch[:repo] fields associated with the default namespace
+        # TODO: enhance so that default is one taht matche's user's default namespace
+        # set on augmented_module_branch[:repo] fields associated with the default namespace
         # we sort descending by created date
         # default is the one which is the oldest
         repo_remotes.each{|r|r.update_object!(:created_at)}

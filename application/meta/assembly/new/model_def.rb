@@ -285,7 +285,7 @@ lambda__instance_nodes_components_assembly_template =
        lambda__segment_component_template.call(:left_outer)
       ]
     },
-    #MOD_RESTRUCT: deprecate below for above
+    # MOD_RESTRUCT: deprecate below for above
     :template_nodes_and_cmps_summary=> {
       :type => :json, 
       :hidden => true,
@@ -330,7 +330,7 @@ lambda__instance_nodes_components_assembly_template =
            :cols => [:id,:component_component_id,:local_or_remote,:link_type,:has_external_link,:has_internal_link]
          }]
     },
-    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
+    # MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     :component_templates=> { 
       :type => :json, 
       :hidden => true,

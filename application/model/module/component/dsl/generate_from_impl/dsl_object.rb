@@ -18,12 +18,12 @@ module DTK; class ComponentDSL
       end
       def t(term)
         term
-        #TODO probably remove return nil if term.nil?
-        #DSLTerm.new(term)
+        # TODO probably remove return nil if term.nil?
+        # DSLTerm.new(term)
       end
       def unknown
         nil
-        #TODO: probably remove DSLTerm.create_unknown
+        # TODO: probably remove DSLTerm.create_unknown
       end
       def nailed(term)
         term #TODO: may also make this a DSLTerm obj
@@ -87,7 +87,7 @@ module DTK; class ComponentDSL
         @context = context
         create_in_object_form(opts[:def]) if opts[:reify]
       end
-      #TODO: make as part of context
+      # TODO: make as part of context
       ScaffoldingStrategy = {
         :no_dynamic_attributes => true,
         :no_defaults => true,
@@ -98,7 +98,7 @@ module DTK; class ComponentDSL
         DSLStructObject.new(type,klass(type).new(parse_struct,@context.merge(opts)))
       end
 
-      #dup used because yaml generation is upstream and dont want string refs
+      # dup used because yaml generation is upstream and dont want string refs
       def required_value(key)
         unless has_key?(key)
           raise Error.new("meta object does not have key #{key}") 
@@ -125,7 +125,7 @@ module DTK; class ComponentDSL
         @context[:source_ref] = parse_struct
       end
 
-      #functions to convert to object form
+      # functions to convert to object form
       def reify(hash)
         type = index(hash,:type)
         content = klass(type).new(nil,@context,{:reify => true, :def => index(hash,:def)})
@@ -133,8 +133,8 @@ module DTK; class ComponentDSL
       end
 
      private
-      #functions to treat object functions
-      #can be overwritten
+      # functions to treat object functions
+      # can be overwritten
       def object_attributes()
         []
       end
@@ -162,7 +162,7 @@ module DTK; class ComponentDSL
           val.each{|el_val| ret << reify(el_val) if selected?(el_val)}
           ret
         else
-          #TODO: no check for selcted here?
+          # TODO: no check for selcted here?
           reify(val)
         end
       end
@@ -185,7 +185,7 @@ module DTK; class ComponentDSL
         version_class.const_get("DSLObject").const_get(cap_type)
       end
 
-      #context
+      # context
       def integer_version()
         (@context||{})[:integer_version]
       end
@@ -206,8 +206,8 @@ module DTK; class ComponentDSL
         (@context||{})[:source_ref]
       end
   
-      #TODO: may deprecate
-      #handles intermediate state where objects may be unknown and just need users input
+      # TODO: may deprecate
+      # handles intermediate state where objects may be unknown and just need users input
       class DSLTerm < SimpleHashObject
         def initialize(value,state=:known)
           self[:value] = value if state == :known
@@ -253,14 +253,14 @@ module DTK; class ComponentDSL
           end
         end
 
-        #TODO: deprecate
+        # TODO: deprecate
         def write_yaml(io)
           require 'yaml'
           YAML::dump(yaml_form(),io)
           io << "\n"
         end
 
-        #since yaml generator is being used want to remove references so dont generate yaml with labels
+        # since yaml generator is being used want to remove references so dont generate yaml with labels
         def yaml_form(level=1)
           ret = RenderHash.new
           each do |k,v|

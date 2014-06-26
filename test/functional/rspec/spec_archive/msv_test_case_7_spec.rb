@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 7: Import new module from remote repo and then import same version-ed module from remote
+# Test Case 7: Import new module from remote repo and then import same version-ed module from remote
 
 require 'rubygems'
 require 'rest_client'

@@ -25,7 +25,7 @@ module DTK; class Attribute
         if semantic_data_type = attr[:semantic_data_type]
           SemanticDatatype.is_valid?(semantic_data_type,value)
         else
-          #vacuously true
+          # vacuously true
           true
         end
       end
@@ -68,7 +68,7 @@ module DTK; class Attribute
           
           return attribute_idhs if attribute_idhs.empty?
           
-          #TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
+          # TODO: can make more efficient by having create_or_modify_field_def return object with cols, rather than id_handles
           sp_hash = {
             :cols => [:id,:group_id,:display_name,:description,:component_component_id,:data_type,:semantic_type,:required,:dynamic,:external_ref,:semantic_data_type],
             :filter => [:oneof,:id,attribute_idhs.map{|idh|idh.get_id()}]
@@ -105,7 +105,7 @@ module DTK; class Attribute
         end
       end
 
-      #parent will be node_idh or assembly_idh
+      # parent will be node_idh or assembly_idh
       def ret_matching_nodes(parent_idh)
         if parent_idh[:model_name] == :node
           return [parent_idh]
@@ -166,7 +166,7 @@ module DTK; class Attribute
         elsif type == :attribute and Attribute.legal_display_name?(display_name)
           [:eq,:display_name,display_name]
         else
-          #TODO: check why have :component_segment
+          # TODO: check why have :component_segment
           raise ErrorUsage::Parsing::Term.new(term,:component_segment)
         end
       end

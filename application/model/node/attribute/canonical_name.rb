@@ -1,4 +1,4 @@
-#TODO: put this in def
+# TODO: put this in def
 module DTK; class Node
   class NodeAttribute
     class CanonicalName < String

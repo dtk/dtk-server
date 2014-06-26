@@ -10,7 +10,7 @@ module DTK; class ServiceModule
       end
 
       def self.import_port_links(assembly_idh,assembly_ref,assembly_hash,ports)
-        #augment ports with parsed display_name
+        # augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
         
         port_links = (assembly_hash["port_links"]||[]).inject(DBUpdateHash.new) do |h,pl|

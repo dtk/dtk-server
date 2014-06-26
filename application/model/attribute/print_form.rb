@@ -22,7 +22,7 @@ module DTK
     end
 
     module Format
-      #possible valeus are [:canonical,:simple]
+      # possible valeus are [:canonical,:simple]
       Default = :simple
     end
 
@@ -155,7 +155,7 @@ module DTK
 
         if value.kind_of?(Array)
           "[#{value.map{|el|value_print_form(:nested_val=>el,:nested=>true)}.join(', ')}]"
-          #value.inspect
+          # value.inspect
         elsif value.kind_of?(Hash)
           comma = ''
           internal = value.inject(String.new) do |s,(k,val)|
@@ -165,7 +165,7 @@ module DTK
             "#{item}#{k}=>#{el}"
           end
           "{#{internal}}"
-          #value.inspect
+          # value.inspect
         elsif [String,Fixnum,TrueClass,FalseClass].find{|t|value.kind_of?(t)}
           value
         else
@@ -176,7 +176,7 @@ module DTK
       PrintValueNil = 'nil'
 
       def datatype_print_form()
-        #TODO: until will populate node/os_identifier attribute with the node_template_type datatype
+        # TODO: until will populate node/os_identifier attribute with the node_template_type datatype
         if  @aug_attr[:display_name] == 'os_identifier' and @aug_attr[:node]
           return 'node_template_type'
         end

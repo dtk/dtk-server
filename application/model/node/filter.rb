@@ -6,11 +6,11 @@ module DTK; class Node
     def include?(node)
       !filter_aux?([node]).empty?
     end
-    class NodeList
+    class NodeList < self
       def initialize(node_idhs)
         @node_ids = node_idhs.map{|n|n.get_id()} 
       end
-      def filter(nodes)
+      def filter_aux?(nodes)
         nodes.select{|n|@node_ids.include?(n[:id])}
       end
     end

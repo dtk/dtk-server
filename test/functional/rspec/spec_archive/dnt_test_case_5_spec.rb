@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 5: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info
+# Test Case 5: Stage node template, add rsync component, set attribute value, converge it and then check get-netstats, get-ps and list-task-info
 
 require 'rubygems'
 require 'rest_client'

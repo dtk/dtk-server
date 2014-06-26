@@ -6,7 +6,7 @@ module DTK; class Component
     r8_nested_require('instance','interpreted')
 
     def self.get_objs(mh,sp_hash,opts={})
-      #TODO: might want to change to just :model_name == component_instance
+      # TODO: might want to change to just :model_name == component_instance
       if [:component,:component_instance].include?(mh[:model_name])
         super(mh.createMH(:component),sp_hash,opts).map{|cmp|create_from_component(cmp)}
       else
@@ -65,7 +65,7 @@ module DTK; class Component
     end
     def self.add_title_fields?(cmps)
       ret = cmps
-      #TODO: for efficiency can look at ref it exsits and see if it indicates a title
+      # TODO: for efficiency can look at ref it exsits and see if it indicates a title
       cmps_needing_titles = cmps.select do |cmp|
         cmp[:title].nil? and cmp.get_field?(:only_one_per_node) == false
       end
@@ -100,7 +100,7 @@ module DTK; class Component
       ComponentOrder.get_ndx_cmp_type_and_derived_order(cmps_with_deps)
     end
 
-    #TODO: may be able to deprecate below seeing that dependencies are on instances
+    # TODO: may be able to deprecate below seeing that dependencies are on instances
     def self.get_components_with_dependency_info(cmp_idhs)
       ret = Array.new
       return ret if cmp_idhs.empty?

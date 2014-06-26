@@ -16,8 +16,8 @@ module DTK; class Task; class Template
       end
     end
 
-    #sets @action_index on self and sets index on action if not set already
-    #assumes that no indexs on action set or all or them, cannot be a mixture of these two cases 
+    # sets @action_index on self and sets index on action if not set already
+    # assumes that no indexs on action set or all or them, cannot be a mixture of these two cases 
     def set_action_indexes!()
       each_with_index do |a,i|
         a.index ||= i
@@ -31,7 +31,7 @@ module DTK; class Task; class Template
     end
 
     def find_matching_node_id(node_name)
-      #there can be multiple matches, but first match is fine since they will all agree on node_id
+      # there can be multiple matches, but first match is fine since they will all agree on node_id
       if match = find_matching_action(node_name)
         unless node_id = match.node_id()
           Log.error("Unexpected that node id is nil for node name (#{node_name})")

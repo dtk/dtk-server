@@ -17,21 +17,21 @@ module DTK
         ret = SimpleOrderedHash.new()
         ret[:name] = assembly_hash()[:display_name]
         ret[:ref] = assembly_ref()
-        #TODO: may put in version info
+        # TODO: may put in version info
         #  "#{impl[:module_name]}-#{version}"
-        #end
+        # end
 
-        #add assembly level attributes
-        #TODO: stub
+        # add assembly level attributes
+        # TODO: stub
       
-        #add nodes and components
+        # add nodes and components
         ret[:nodes] = self[:node].inject(SimpleOrderedHash.new()) do |h,(node_ref,node_hash)|
           node_name = node_hash[:display_name]
           cmp_info = node_hash[:component_ref].values.map{|cmp|component_output_form(cmp)}
           h.merge(node_name => {:components => cmp_info})
         end
 
-        #add port links
+        # add port links
         ret[:port_links] = self[:port_link].values.map do |pl|
            input_qual_port_ref = pl["*input_id"]
            output_qual_port_ref = pl["*output_id"]
@@ -49,7 +49,7 @@ module DTK
           :cols => [:id,:ref],
           :filter => [:oneof, :id, self[:node].values.map{|n|n[:node_binding_rs_id]}]
         }
-        #TODO: may get this info in earlier phase
+        # TODO: may get this info in earlier phase
         node_binding_rows = Model.get_objs(@container_idh.createMH(:node_binding_ruleset),sp_hash,:keep_ref_cols => true)
         node_binding_id_to_ref = node_binding_rows.inject(Hash.new){|h,r|h.merge(r[:id] => r[:ref])}
         assembly_ref = assembly_ref()
@@ -59,8 +59,8 @@ module DTK
       end
 
       def port_output_form(qualified_port_ref,dir)
-        #TODO: does this need fixing up in case a component can appear multiple times
-        #TODO: assumption that port_ref == display_name
+        # TODO: does this need fixing up in case a component can appear multiple times
+        # TODO: assumption that port_ref == display_name
         port_ref = qualified_port_ref.split("/").last
         p = Port.parse_port_display_name(port_ref)
         node_ref = (qualified_port_ref =~ Regexp.new("^/node/([^/]+)");$1)

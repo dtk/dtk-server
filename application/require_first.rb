@@ -99,7 +99,7 @@ def determine_common_folder
 end
 ######
 
-#TODO: deprecate of make thsi applicable to 1.9.3
+# TODO: deprecate of make thsi applicable to 1.9.3
 ##### for upgrading to ruby 1.9.2
 class Hash
   if RUBY_VERSION == "1.9.2"

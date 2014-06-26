@@ -22,15 +22,15 @@ module_name.gsub!(/^puppet-/,"")
 
 include XYZ::PuppetParser
 r8_parse = parse_given_filename(file)
-#pp r8_parse
+# pp r8_parse
 begin
 meta_generator = XYZ::GenerateDSL.create()
-#TODO: should be able to figure this out "puppet" from r8_parse
+# TODO: should be able to figure this out "puppet" from r8_parse
 refinement_hash = meta_generator.generate_refinement_hash(r8_parse,module_name)
 pp refinement_hash
 =begin
-#in between here refinement has would have through user interaction the user set the needed unknowns
-#mock_user_updates_hash!(refinement_hash)
+# in between here refinement has would have through user interaction the user set the needed unknowns
+# mock_user_updates_hash!(refinement_hash)
 render_hash = refinement_hash.render_hash_form()
 require 'yaml'
 YAML::dump(render_hash,STDOUT)

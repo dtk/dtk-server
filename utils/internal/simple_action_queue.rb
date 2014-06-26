@@ -56,7 +56,7 @@ module DTK
     end
 
     def set_result(el)
-      #TODO: Rich: thik this is an error @result = el.data
+      # TODO: Rich: thik this is an error @result = el.data
       @result = el
     end
   end

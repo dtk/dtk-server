@@ -27,7 +27,7 @@ module DTK
         ret = Array.new
         return ret if cmp_idhs.empty?
         ndx_constraints = Component.get_ndx_constraints(cmp_idhs,:when_evaluated => :after_cmp_added)
-        #TODO: this is expensive in that it makes query for each constraint
+        # TODO: this is expensive in that it makes query for each constraint
         nodes_and_cmps.each do |r|
           if constraint_info = ndx_constraints[r[:nested_component][:id]]
             constraint_scope = {"target_node_id_handle" => r[:node].id_handle()}
@@ -69,7 +69,7 @@ module DTK
         ret
       end
 
-      #thjis also serves to set implementation_id on module includes that are not set already
+      # thjis also serves to set implementation_id on module includes that are not set already
       def find_violations__module_includes(cmps)
         ret = Array.new
         return ret if cmps.empty?
@@ -103,7 +103,7 @@ module DTK
           :filter => [:eq, :id, module_branch_id]
         }
         unless branch = Model.get_obj(model_handle(:module_branch),sp_hash)
-        #assembly, such as workspace does not have a branch associated with it
+        # assembly, such as workspace does not have a branch associated with it
           return ret
         end
 

@@ -13,7 +13,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     end
 
     def parse_given_module_directory(impl_obj)
-      #only handling parsing of .pp now
+      # only handling parsing of .pp now
       manifest_file_paths = impl_obj.all_file_paths().select{|path|path =~ /^manifests.+\.pp$/}
       ret = ParseStructure::TopPS.new()
       opts = {:just_krt_code => true}
@@ -33,8 +33,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
       ret
     end
 
-    #returns [config agent type, parse]
-    #types are :component_defs, :template, :r8meta
+    # returns [config agent type, parse]
+    # types are :component_defs, :template, :r8meta
     def parse_given_file_content(file_path,file_content)
       ret = [nil,nil]
       if file_path =~ /\.pp$/
@@ -57,8 +57,8 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
         environment = "production"
         node_env = ::Puppet::Node::Environment.new(environment)
         known_resource_types = ::Puppet::Resource::TypeCollection.new(node_env)
-        #needed to make more complicared because cannot call krt = ::Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
-        #fragment from perform_initial_import call with ::Puppet[:ignoreimport] = true set in middle
+        # needed to make more complicared because cannot call krt = ::Puppet::Node::Environment.new(environment).known_resource_types because perform_initial_import needs import set to false, but rest needs it set to true
+        # fragment from perform_initial_import call with ::Puppet[:ignoreimport] = true set in middle
         parser = ::Puppet::Parser::Parser.new(node_env)
         parser.string = file_content
         ::Puppet[:ignoreimport] = true
@@ -93,7 +93,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
 
     def normalize_puppet_error(puppet_error,file_path)
       file_path ||= puppet_error.file || find_file_path(puppet_error.message)
-      #TODO: strip stuff off error message
+      # TODO: strip stuff off error message
       msg = strip_message(puppet_error.message)
       opts = {:file_path => file_path}
       unless msg_has_line_num?(msg)
@@ -111,7 +111,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
     end
 
     def msg_has_line_num?(msg)
-      #just heursitic
+      # just heursitic
       (!!find_line(msg)) or
         (msg =~ /[0-9]+/ and msg =~ /at line/) 
     end
@@ -131,7 +131,7 @@ module DTK; class ConfigAgent; module Adapter; class Puppet
   end
 end; end; end; end
 
-#monkey patches
+# monkey patches
 class Puppet::Parser::AST::Definition
   attr_reader :name
 end

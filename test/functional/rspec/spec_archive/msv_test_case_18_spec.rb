@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 18: NEG - Import module from puppet forge with incorrect puppet module name
+# Test Case 18: NEG - Import module from puppet forge with incorrect puppet module name
 
 require 'rubygems'
 require 'rest_client'

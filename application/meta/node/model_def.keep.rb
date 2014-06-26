@@ -69,7 +69,7 @@
       column :ui, :json
       virtual_column :parent_name, :possible_parents => [:library,:datacenter,:project]
       virtual_column :disk_size, :path => [:ds_attributes,:flavor,:disk] #in megs
-      #TODO how to have this conditionally "show up"
+      # TODO how to have this conditionally "show up"
       virtual_column :ec2_security_groups, :path => [:ds_attributes,:groups] 
 
       foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT

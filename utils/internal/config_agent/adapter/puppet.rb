@@ -2,9 +2,9 @@ module DTK
   class ConfigAgent; module Adapter
     class Puppet < ConfigAgent
       r8_nested_require('puppet','node_manifest')
-      #TODO: look at condionally loading parse related files
+      # TODO: look at condionally loading parse related files
       r8_nested_require('puppet','parser')
-      #parse needs to be before parse_structure
+      # parse needs to be before parse_structure
       r8_nested_require('puppet','parse_structure')
 
       include ParserMixin
@@ -43,11 +43,11 @@ module DTK
         :puppet
       end
 
-      #tries to normalize error received from node
+      # tries to normalize error received from node
       def interpret_error(error_in_result,components)
         ret = error_in_result
         source = error_in_result["source"]
-        #working under assumption that stage assignment same as order in components
+        # working under assumption that stage assignment same as order in components
         if source =~ Regexp.new("^/Stage\\[([0-9]+)\\]")
           index = ($1.to_i) -1
           if cmp_with_error = components[index]
@@ -85,7 +85,7 @@ module DTK
         return ret unless assembly_attrs
         assembly_attrs.map do |attr|
           val = ret_value(attr)
-          #TODO: hack until can add data types
+          # TODO: hack until can add data types
           val = true if val == "true"
           val = false if val == "false"
           {"name" => attr[:display_name], "value" => val}
@@ -133,7 +133,7 @@ module DTK
         end
       end
 
-      #returns both attributes to set on node and dynmic attributes that get set by the node
+      # returns both attributes to set on node and dynmic attributes that get set by the node
       def ret_attributes(action,internal_guards,attrs_for_guards,node_components=nil)
         ndx_attributes = Hash.new
         dynamic_attrs = Array.new
@@ -142,7 +142,7 @@ module DTK
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
             val = ret_value(attr,node_components)
-            #second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
+            # second clause is to handle case where theer is a default just in puppet and header and since not overwritten acts as dynamic attr
             if attr[:value_asserted].nil? and (attr[:dynamic] or ext_ref[:default_variable]) #TODO: the disjunct 'ext_ref[..]' can be deprecated
               dyn_attr = {:name => array_form_path[1], :id => attr[:id]}
               if ext_ref[:type] == "puppet_exported_resource"
@@ -159,7 +159,7 @@ module DTK
               dynamic_attrs << dyn_attr
             elsif not val.nil?
               add_attribute!(ndx_attributes,array_form_path,val,ext_ref)
-              #info that is used to set the name param for the resource
+              # info that is used to set the name param for the resource
               if rsc_name_path = attr[:external_ref][:name]
                 if rsc_name_val = nested_value(val,rsc_name_path)
                   add_attribute!(ndx_attributes,[array_form_path[0],"name"],rsc_name_val,ext_ref)
@@ -177,7 +177,7 @@ module DTK
         ret
       end
 
-      #TODO: check if this is the right test for connected output attributes
+      # TODO: check if this is the right test for connected output attributes
       def is_connected_output_attribute?(attr)
         attr[:port_type] == 'output'
       end
@@ -206,12 +206,12 @@ module DTK
         return nil unless attr
         return nil unless var_name_path = (attr[:external_ref]||{})[:path]
         ref_array_form_path = to_array_form(var_name_path)
-        #TODO: case on whether teh ref is computed in first stage or second stage
+        # TODO: case on whether teh ref is computed in first stage or second stage
         {"__ref" => ref_array_form_path}
       end
 
 
-      #TDOO: may want to better unify how name is passed heer with 'param' and otehr way by setting node path with name last element]
+      # TDOO: may want to better unify how name is passed heer with 'param' and otehr way by setting node path with name last element]
       def nested_value(val,rsc_name_path)
         array_form = rsc_name_path.gsub(/^param\[/,"").gsub(/\]$/,"").split("][")
         nested_value_aux(val,array_form)
@@ -224,9 +224,9 @@ module DTK
       end
 
 
-      #this is top level; it also class add_attribute_aux for nested values
+      # this is top level; it also class add_attribute_aux for nested values
       def add_attribute!(ndx_attributes,array_form_path_x,val,ext_ref)
-        #strip of first element which is module
+        # strip of first element which is module
         array_form_path = array_form_path_x[1..array_form_path_x.size-1]
         extra_info = Hash.new
         ndx = array_form_path.first
@@ -261,11 +261,11 @@ module DTK
         end
       end
 
-      #TODO: centralize this fn so can be used here and when populate external refs
-      #TODO: assume form is node[component][x1] or node[component][x1][x2] or ..
-      #service[component][x1] or service[component][x1][x2] or ..
+      # TODO: centralize this fn so can be used here and when populate external refs
+      # TODO: assume form is node[component][x1] or node[component][x1][x2] or ..
+      # service[component][x1] or service[component][x1][x2] or ..
       def to_array_form(external_ref_path)
-        #TODO: use regexp disjunction
+        # TODO: use regexp disjunction
         external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
       end
     end

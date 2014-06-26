@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata
+# Test Case 28: Import new module from git (does not have dependencies) and check ModuleFile metadata
 
 require 'rubygems'
 require 'active_record'

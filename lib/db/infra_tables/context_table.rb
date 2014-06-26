@@ -1,7 +1,7 @@
 module XYZ
   class ContextTable
     class << self
-      #TBD: may have parent class for infra tables
+      # TBD: may have parent class for infra tables
       def set_db(db)
         @db = db
       end

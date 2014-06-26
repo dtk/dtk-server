@@ -6,7 +6,7 @@ module DTK
 
     extend PropagateChangesClassMixin
 
-    #virtual attribute defs    
+    # virtual attribute defs    
     def output_index_map()
       index_map_aux(:output)
     end
@@ -54,7 +54,7 @@ module DTK
       
       add_link_fns!(rows_to_create,attr_info)
 
-      #add parent_col and ref
+      # add parent_col and ref
       parent_col = attr_link_mh.parent_id_field_name()
       parent_id = parent_idh.get_id()
       rows_to_create.each do |row|
@@ -67,15 +67,15 @@ module DTK
       override_attrs = {}
       field_set = FieldSet.new(model_name,rows_for_array_ds.first.keys)
       returning_ids = create_from_select(attr_link_mh,field_set,select_ds,override_attrs,:returning_sql_cols=> [:id])
-      #insert the new ids into rows_to_create
+      # insert the new ids into rows_to_create
       returning_ids.each_with_index{|id_info,i|rows_to_create[i][:id] = id_info[:id]}
 
-      #augment attributes with port info; this is needed only if port is external
+      # augment attributes with port info; this is needed only if port is external
       Attribute.update_port_info(attr_mh,rows_to_create) unless opts[:donot_update_port_info]
 
-      #want to use auth_info from parent_idh in case more specific than datacenter
+      # want to use auth_info from parent_idh in case more specific than datacenter
       change_parent_idh = parent_idh.get_top_container_id_handle(:datacenter,:auth_info_from_self => true)
-      #propagate attribute values
+      # propagate attribute values
       ndx_nested_change_hashes = propagate_from_create(attr_mh,attr_info,rows_to_create,change_parent_idh)
       StateChange.create_pending_change_items(ndx_nested_change_hashes.values) unless opts[:donot_create_pending_changes]
     end
@@ -99,8 +99,8 @@ module DTK
       propagate(attr_mh,attrs_links_to_update)
     end
 
-    #mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
-    #must be removed before they are saved
+    # mechanism to compensate for fact that cols arer being added by processing fns to rows_to_create that
+    # must be removed before they are saved
     RemoveKeys = Array.new
     def self.remove_keys()
       RemoveKeys
@@ -119,9 +119,9 @@ module DTK
     end
 
     def self.check_constraints(attr_mh,rows_to_create)
-      #TODO: may modify to get all constraints from  conn_info_list
+      # TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row| 
-        #TODO: right now constraints just on input, not output, attributes
+        # TODO: right now constraints just on input, not output, attributes
         attr = attr_mh.createIDH(:id => row[:input_id]).create_object()
         constraints = Constraints.new()
         if row[:link_defs]
@@ -131,7 +131,7 @@ module DTK
         end
         next if constraints.empty?
         target = {:target_port_id_handle => attr_mh.createIDH(:id => row[:output_id])}
-        #TODO: may treat differently if rows_to_create has multiple rows
+        # TODO: may treat differently if rows_to_create has multiple rows
         constraints.evaluate_given_target(target, :raise_error_when_error_violation => true)
       end
     end
@@ -165,7 +165,7 @@ module DTK
       group_attr_fs = FieldSet.opt([:id,:ref],:attribute)
       group_attr_ds = get_objects_just_dataset(attr_mh,group_attr_wc,group_attr_fs)
 
-      #attribute link has same parent as node_group
+      # attribute link has same parent as node_group
       attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
       attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle()
       attr_link_parent_col = attr_link_mh.parent_id_field_name()
@@ -222,7 +222,7 @@ module DTK
       create_from_rows(attr_link_mh,new_link_rows)
     end
 
-    #TODO: deprecate below after subsuming from above
+    # TODO: deprecate below after subsuming from above
     def self.create_links_l4_sap(new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh)
       attr_link_mh = node_idh.createMH(:model_name => :attribute_link, :parent_model_name => :node)
       new_sap_id,sap_config_id,ipv4_id,node_id = [new_sap_attr_idh,sap_config_attr_idh,ipv4_host_addrs_idh,node_idh].map{|x|x.get_id()}
@@ -273,7 +273,7 @@ module DTK
       def self.generate_from_bounds(lower_bound,upper_bound,offset)
         create_from_array((lower_bound..upper_bound).map{|i|{:output => [i], :input => [i+offset]}})
       end
-      #TODO: may be able to be simplified because may only called be caleld with upper_bound == 0
+      # TODO: may be able to be simplified because may only called be caleld with upper_bound == 0
       def self.generate_for_output_scalar(upper_bound,offset)
         create_from_array((0..upper_bound).map{|i|{:output => [], :input => [i+offset]}})
       end
@@ -357,7 +357,7 @@ module DTK
         end
       end
 
-      #TODO: more efficient and not needed if can be resolved when get index
+      # TODO: more efficient and not needed if can be resolved when get index
       def self.resolve_paths!(path_list,component_mh)
         ndx_cmp_idhs = Hash.new
         path_list.each do |index_map_path|
@@ -422,7 +422,7 @@ module DTK
       o_sem = output_obj[:semantic_type]
       return nil if o_sem.nil?
 
-      #TBD: haven't put in any rules if they have different seamntic types
+      # TBD: haven't put in any rules if they have different seamntic types
       return nil unless i_sem.keys.first == o_sem.keys.first      
       
       sem_type = i_sem.keys.first
@@ -430,7 +430,7 @@ module DTK
     end
 
     def self.ret_function_endpoints_same_type(i,o)
-      #TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
+      # TBD: more robust is allowing for example output to be "database", which matches with "postgresql" and also to have version info, etc
       raise Error.new("mismatched input and output types") unless i[:type] == o[:type]
       return :equal if !i[:is_array] and !o[:is_array]
       return :equal if i[:is_array] and o[:is_array]
@@ -475,5 +475,5 @@ end
         link_ids
       end
 =end
-      #returns function if can determine from semantic type of input and output
-      #throws an error if finds a mismatch
+      # returns function if can determine from semantic type of input and output
+      # throws an error if finds a mismatch

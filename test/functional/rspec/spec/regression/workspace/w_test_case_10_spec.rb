@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 10: Create two nodes, add components in both of them, and create assembly from the workspace content in existing service module, stage and converge this assembly
+# Test Case 10: Create two nodes, add components in both of them, and create assembly from the workspace content in existing service module, stage and converge this assembly
 
 require 'rubygems'
 require 'rest_client'

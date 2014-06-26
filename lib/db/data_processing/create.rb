@@ -1,10 +1,10 @@
-#TODO: need to refactor to make more efficient
+# TODO: need to refactor to make more efficient
 module XYZ
   class DB
     module DataProcessingCreate
-      #creates a new instance w/ref_num bumped if needed
-      #TODO: make more efficient by reducing or elimintaing class to id table as well as using bulk inserts
-      #TODO: may eventually deprecate this
+      # creates a new instance w/ref_num bumped if needed
+      # TODO: make more efficient by reducing or elimintaing class to id table as well as using bulk inserts
+      # TODO: may eventually deprecate this
       def create_from_hash(id_handle,hash,opts={})
         if id_handle.is_top?()
           id_handle
@@ -24,10 +24,10 @@ module XYZ
         end
       end
 
-      #TODO: this can be optimzed and simplified
+      # TODO: this can be optimzed and simplified
       def create_from_select(model_handle,field_set,select_ds,override_attrs={},opts={})
 
-        #TODO: temp for debugging; there are top level objects that can mistakenly trigger this
+        # TODO: temp for debugging; there are top level objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
           unless  (not Model.has_group_id_col?(model_handle)) or 
               [:repo,:datacenter,:library,:task,:repo_user,:repo_user_acl,:repo_remote].include?(model_handle[:model_name])
@@ -39,36 +39,36 @@ module XYZ
         overrides = override_attrs.dup #because can remove elements
         set_updated_at!(overrides)
         set_created_at!(overrides)
-        #TODO: benchmark point pp [:create_from_select,duplicate_refs]
+        # TODO: benchmark point pp [:create_from_select,duplicate_refs]
         user_info_assigns = DB.user_info_for_create_seleect(overrides,model_handle)
         
-        #modify ds and its columns in concert
+        # modify ds and its columns in concert
         select_info = {:cols =>  field_set.cols, :ds => select_ds.sequel_ds.ungraphed.from_self} #ungraphed and from_self just to be safe
-        #processing to take into account c
+        # processing to take into account c
         add_cols_to_select!(select_info,{:c => user_info_assigns[:c]},{:from_self => [:end]})
 
-        #parent_id_col can be null
+        # parent_id_col can be null
         parent_id_col = model_handle.parent_id_field_name()
 
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)
-        #modify sequel_select to reflect duplicate_refs setting
+        # modify sequel_select to reflect duplicate_refs setting
         unless duplicate_refs == :no_check
           match_cols = [:c,:ref,parent_id_col].compact
-          #need special processing of ref override; need to modify match_cols and select_on_match_cols
+          # need special processing of ref override; need to modify match_cols and select_on_match_cols
           if ref_override =  overrides.delete(:ref)
             add_cols_to_select!(select_info,{:ref => ref_override},{:dont_add_cols => true, :from_self => [:end]})
           end
 
           case duplicate_refs
            when :prune_duplicates
-            #TODO: bug here
+            # TODO: bug here
             select_info[:ds] = select_info[:ds].join_table(:left_outer,ds,match_cols,{:table_alias => :existing}).where({:existing__c => nil})
            when :error_on_duplicate
-            #TODO: not right yet
+            # TODO: not right yet
             duplicate_count = select_info[:ds].join_table(:inner,ds,match_cols).count
             if duplicate_count > 0
-              #TODO: make this a specfic error 
+              # TODO: make this a specfic error 
               raise Error.new("found #{duplicate_count.to_s} duplicates")
             end
            when :allow
@@ -81,15 +81,15 @@ module XYZ
           end
         end
 
-        #process overrides
-        #TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
+        # process overrides
+        # TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
         add_cols_to_select!(select_info,user_info_assigns.merge(overrides),{:from_self => [:beg]})
 
         # final ones to select and add  
         sequel_select_with_cols = select_info[:ds]
         columns = select_info[:cols]
 
-        #fn tries to return ids depending on whether db adater supports returning_id
+        # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         if ds.respond_to?(:insert_returning_sql)
           returning_ids = Array.new
@@ -103,7 +103,7 @@ module XYZ
 
           sql = ds.insert_returning_sql(returning_sql_cols,columns,sequel_select_with_cols)
           
-          #TODO: benchmark point pp [:create_from_select,sql]
+          # TODO: benchmark point pp [:create_from_select,sql]
           fetch_raw_sql(sql){|row| returning_ids << row}
           IDInfoTable.update_instances(model_handle,returning_ids) unless opts[:do_not_update_info_table]
           ret = opts[:returning_sql_cols] ? 
@@ -111,7 +111,7 @@ module XYZ
             ret_id_handles_from_create_returning_ids(model_handle,returning_ids)
         else
           ds.import(columns,sequel_select_with_cols)
-          #TODO: need to get ids and set 
+          # TODO: need to get ids and set 
           raise Error.new("have not implemented create_from_select when db adapter does not support insert_returning_sql  not set")
         end
         ret
@@ -131,14 +131,14 @@ module XYZ
         
         db_rel = DB_REL_DEF[model_handle[:model_name]]
         ds = dataset(db_rel)
-        #TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
+        # TODO: may need a from self prefix instead of optional from_self post fix and in general try to remove unnecessay from selfs
         add_cols_to_select!(select_info,{},{:from_self => [:beg]})
 
         # final ones to select and add  
         sequel_select_with_cols = select_info[:ds]
         columns = select_info[:cols]
         
-        #fn tries to return ids depending on whether db adater supports returning_id
+        # fn tries to return ids depending on whether db adater supports returning_id
         ret = nil
         unless ds.respond_to?(:insert_returning_sql)
           raise Error.new("Not supported")
@@ -168,7 +168,7 @@ module XYZ
           cols << col unless opts[:donot_add_cols]
           proc_cols << {val => col}
         end
-        #TODO: see if we can simplify use of from self
+        # TODO: see if we can simplify use of from self
         from_self_beg = opts[:from_self] and opts[:from_self].include?(:beg)
         from_self_end = opts[:from_self] and opts[:from_self].include?(:end)
         select_info[:ds] = select_info[:ds].from_self if from_self_beg
@@ -178,8 +178,8 @@ module XYZ
       end
 
        def process_json_fields_in_returning_ids!(returning_ids,db_rel)
-         #convert any json fields
-         #short circuit
+         # convert any json fields
+         # short circuit
          return returning_ids if returning_ids.empty?
          cols_info = db_rel[:columns]
          return returning_ids unless returning_ids.first.find{|k,v|(cols_info[k]||{})[:type] == :json}
@@ -202,7 +202,7 @@ module XYZ
         return uri_id_handle[:uri] if exists? uri_id_handle
         ref,factory_uri = RestURI.parse_instance_uri(uri_id_handle[:uri])
 
-        #create parent if does not exists and this is recursive create
+        # create parent if does not exists and this is recursive create
         if opts[:recursive_create]
           relation_type,parent_uri = RestURI.parse_factory_uri(factory_uri)
           parent_idh = uri_id_handle.createIDH(:uri => parent_uri)
@@ -254,7 +254,7 @@ module XYZ
           ref_num = compute_ref_num db_rel,ref,c,parent_id_field => parent_id
 
           merge_attrs = {:ref_num => ref_num,parent_id_field => parent_id_info[:id]}
-          #TODO: may fold into  modify_to_reflect_special_processing!, but that requires ref_num be computed before this call
+          # TODO: may fold into  modify_to_reflect_special_processing!, but that requires ref_num be computed before this call
           if opts[:sync_display_name_with_ref] and ref_num and ref_num > 1
             merge_attrs.merge!(:display_name => "#{ref}-#{ref_num.to_s}")
           end

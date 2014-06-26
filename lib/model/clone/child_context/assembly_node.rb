@@ -16,12 +16,12 @@ module DTK
         merge!(:matches => matches) if matches
       end
 
-      #for processing node stubs in an assembly
+      # for processing node stubs in an assembly
       def ret_new_objs_info(field_set_to_copy,create_override_attrs)
         ret = Array.new
         ancestor_rel_ds = SQL::ArrayDataset.create(db(),parent_rels,model_handle.createMH(:target))
       
-        #all parent_rels will have same cols so taking a sample
+        # all parent_rels will have same cols so taking a sample
         remove_cols = [:ancestor_id,:display_name,:type,:ref,:canonical_template_node_id] + parent_rels.first.keys
         node_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(:id => :node_template_id)
         node_template_wc = nil
@@ -34,7 +34,7 @@ module DTK
         }
         target = Model.get_obj(model_handle.createMH(:target),sp_hash)
 
-        #mapping from node stub to node template and overriding appropriate node template columns
+        # mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
           mapping_rows = matches.map do |m|
             node_template_id = m[:node_template_idh].get_id()
@@ -55,7 +55,7 @@ module DTK
           ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
         end
 
-        #add to ret rows for each service add node binding
+        # add to ret rows for each service add node binding
         service_add_additions = @clone_proc.get_service_add_on_mapped_nodes(create_override_attrs,create_opts)
         unless service_add_additions.empty?
           ret += service_add_additions
@@ -64,8 +64,8 @@ module DTK
       end
     
       def find_node_template_matches(target,assembly_template_idh,sao_node_bindings=nil)
-        #find the assembly's stub nodes and then use the node binding to find the node templates
-        #as will as using, if non-empty, ervice_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
+        # find the assembly's stub nodes and then use the node binding to find the node templates
+        # as will as using, if non-empty, ervice_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           :cols => [:id,:display_name,:type,:node_binding_ruleset],
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
@@ -80,7 +80,7 @@ module DTK
 
         # No rules in the node being match the target (/home/dtk18/server/application/model/node_binding_ruleset.rb:22
         node_mh = target.model_handle(:node)
-        #TODO: may be more efficient to get these all at once
+        # TODO: may be more efficient to get these all at once
         node_info.map do |node|
           node_template = Node::Template.find_matching_node_template(target,node[:node_binding_ruleset])
           instance_type = (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
@@ -102,7 +102,7 @@ module DTK
         stub_nodes = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
 
         free_nodes = Node::TargetRef.get_free_nodes(target)
-        #assuming the free nodes are interchangable; pick one for each match
+        # assuming the free nodes are interchangable; pick one for each match
         num_free = free_nodes.size
         num_needed = stub_nodes.size
         if num_free < num_needed

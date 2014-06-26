@@ -1,6 +1,6 @@
 require File.expand_path('msg_bus_message', File.dirname(__FILE__))
 module XYZ
-  #This is the class that the MessageProcessors pass back they get marshalled to and from json
+  # This is the class that the MessageProcessors pass back they get marshalled to and from json
   class ProcessorMsg
     attr_reader :msg_type,:msg_content,:target_object_id
     def initialize(hash)
@@ -11,7 +11,7 @@ module XYZ
       @msg_content = hash[:msg_content] || {}
       @target_object_id = hash[:target_object_id]
     end
-    #TBD: factory in case we want to have subclasses for diffeernt msg types 
+    # TBD: factory in case we want to have subclasses for diffeernt msg types 
     def self.create(hash)
       ProcessorMsg.new(hash)
     end    

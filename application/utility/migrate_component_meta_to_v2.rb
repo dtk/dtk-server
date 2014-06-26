@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#general initial
+# general initial
 require File.expand_path('common', File.dirname(__FILE__))
 module_name = ARGV[0]
 server = R8Server.new("superuser","all")

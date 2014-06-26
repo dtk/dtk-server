@@ -1,4 +1,4 @@
-#TODO: remove or cleanup; determine if we need to persist these
+# TODO: remove or cleanup; determine if we need to persist these
 module DTK
   class Violation < Model
     def self.find_missing_required_attributes(level,commit_task)
@@ -6,7 +6,7 @@ module DTK
       errors = Array.new 
       component_actions.each do |action|
         AttributeComplexType.flatten_attribute_list(action[:attributes],:flatten_nil_value=>true).each do |attr|
-          #TODO: need to distingusih between legitimate nil value and unset
+          # TODO: need to distingusih between legitimate nil value and unset
           if attr[:required] and attr[:attribute_value].nil? and (not attr[:port_type] == "input") and (not attr[:dynamic])
             aug_attr = attr.merge(:nested_component => action[:component], :node => action[:node])
             errors <<  MissingRequiredAttribute.new(aug_attr)
@@ -71,7 +71,7 @@ module DTK
     end
 
     def self.save_list(parent,expression_list,opts={})
-      #each element of expression_list will either be constraint or a disjunction
+      # each element of expression_list will either be constraint or a disjunction
       parent_idh = parent.id_handle_with_auth_info()
       parent_mn = parent_idh[:model_name]
       violation_mh = parent_idh.create_childMH(:violation)

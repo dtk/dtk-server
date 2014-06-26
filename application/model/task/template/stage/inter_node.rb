@@ -16,7 +16,7 @@ module DTK; class Task; class Template
         new(stage_name).add_new_execution_block_for_action!(action)
       end
 
-      #returns all actions generated
+      # returns all actions generated
       def add_subtasks!(parent_task,internode_stage_index,assembly_idh=nil)
         ret = Array.new
         each_node_actions do |node_actions|
@@ -69,7 +69,7 @@ module DTK; class Task; class Template
           else raise Error.new("Unexpected insert_point (#{insert_point})")
         end
       end
-      #TODO: have above subsume below  
+      # TODO: have above subsume below  
       def splice_in_at_beginning!(internode_stage)
         ndx_splice_in_node_ids = internode_stage.node_ids().inject(Hash.new){|h,node_id|h.merge(node_id => true)}
         each_node_id do |node_id|
@@ -90,16 +90,16 @@ module DTK; class Task; class Template
         
         ret = serialized_form_with_name()
         
-        #Dont put in concurrent block if there is just one node
+        # Dont put in concurrent block if there is just one node
         if subtasks.size == 1
           ret.merge(subtasks.first)
         else
           ret.merge(Field::TemporalOrder => Constant::Concurrent, Field::Subtasks => subtasks)
         end
       end
-      #action_list nil can be passed if just concerned with parsing
+      # action_list nil can be passed if just concerned with parsing
       def self.parse_and_reify(serialized_content,action_list,opts={})
-        #content could be either 
+        # content could be either 
         # 1) a concurrent block with multiple nodes, 
         # 2) a single node,
         # 3) a multi-node specification
@@ -124,7 +124,7 @@ module DTK; class Task; class Template
       end
 
       def add_new_execution_block_for_action!(action)
-        #leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
+        # leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
         node_actions = {Constant::OrderedComponents => [action.component_type()]}
         node_name = action.node_name()
         action_list = ActionList.new([action])

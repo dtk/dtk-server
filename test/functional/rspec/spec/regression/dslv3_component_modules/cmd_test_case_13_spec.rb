@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 13: dtk.model.yaml with all correct values for supported types (string, integer, boolean, hash, array, port)
+# Test Case 13: dtk.model.yaml with all correct values for supported types (string, integer, boolean, hash, array, port)
 
 require 'rubygems'
 require 'rest_client'

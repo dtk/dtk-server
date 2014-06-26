@@ -30,7 +30,7 @@ module DTK; class ComponentDSL; class V3
         end
       end
 
-      #returns [dependencies,link_defs]
+      # returns [dependencies,link_defs]
       def self.deps_and_link_defs(input_hash,base_cmp,opts={}) 
         ndx_dep_choices = Dependency.ndx_dep_choices(input_hash["dependencies"],base_cmp,opts)
         ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash["link_defs"],base_cmp,opts)
@@ -90,18 +90,18 @@ module DTK; class ComponentDSL; class V3
         type1.nil? or type2.nil? or type1 == type2        
       end
 
-      #returns spliced_ndx_link_def_links
+      # returns spliced_ndx_link_def_links
       def self.integrate_deps_and_link_defs!(ndx_dep_choices,ndx_link_def_links)
-        #first splice
+        # first splice
         spliced_ndx_link_def_links = splice_link_def_and_dep_info(ndx_link_def_links,ndx_dep_choices)
-        #throw error if there are any unmatched ndx_dep_choices that have a remote location
-        #remove any simple dependencies that match a link def
+        # throw error if there are any unmatched ndx_dep_choices that have a remote location
+        # remove any simple dependencies that match a link def
         ndx_dep_choices.each do |ndx,dep_choices|
           if spliced_ndx_link_def_links[ndx]
-            #the dep matches a link def; we are purposely not matching on location a
+            # the dep matches a link def; we are purposely not matching on location a
             ndx_dep_choices.delete(ndx)
           else
-            #this relies on assumption that if in dsl there is no location given for dep, it is set to location local
+            # this relies on assumption that if in dsl there is no location given for dep, it is set to location local
             if remote_dep_choice = dep_choices.find{|dep_choice|dep_choice.remote_location?()}
               error_msg = "The following dependency on component '?base_cmp' has a remote location, but there is no matching link def: ?dep"
               raise ParsingError::Dependency.create(error_msg,remote_dep_choice)

@@ -38,7 +38,7 @@ module DTK
       create_element_update_trigger?()
       create_sequence?(TOP_LOCAL_ID_SEQ,ID_TYPES[:local_id]) 
       
-      #custom functions
+      # custom functions
       # [none now]
     end
 

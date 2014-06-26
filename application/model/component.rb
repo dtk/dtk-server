@@ -52,7 +52,7 @@ module DTK
     end
 
     def self.check_valid_id(model_handle,id,context={})
-      #TODO: put in check to make sure component instance and not a compoennt template
+      # TODO: put in check to make sure component instance and not a compoennt template
       filter = [:eq,:id,id]
       unless context.empty?
         if assembly_id = context[:assembly_id]
@@ -64,7 +64,7 @@ module DTK
       check_valid_id_helper(model_handle,id,filter)
     end
 
-    #just used for component instances; assumes that there is a node prefix in name
+    # just used for component instances; assumes that there is a node prefix in name
     def self.name_to_id(model_handle,name,context={})
       if context.empty?
         return name_to_id_default(model_handle,name)
@@ -93,7 +93,7 @@ module DTK
       [:id,:node_for_state_change_info,:display_name,:basic_type,:external_ref,:node_node_id,:only_one_per_node,:extended_base_id,:implementation_id,:group_id]
     end
 
-    #TODO: need to maintain relationship fro maintainability
+    # TODO: need to maintain relationship fro maintainability
     def self.common_real_columns()
       [
        :id,
@@ -129,7 +129,7 @@ module DTK
       ret
     end
 
-    #MOD_RESTRUCT: TODO: see if this is what is wanted; now returning what is used in implementation and module branch fields
+    # MOD_RESTRUCT: TODO: see if this is what is wanted; now returning what is used in implementation and module branch fields
     def self.default_version()
       version_field_default()
     end
@@ -139,7 +139,7 @@ module DTK
       user_friendly_name.gsub(/::/,"__")
     end
 
-    #TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
+    # TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
     def display_name_print_form(opts={})
       cols_to_get = [:component_type,:display_name]
       unless opts[:without_version] 
@@ -148,7 +148,7 @@ module DTK
       update_object!(*cols_to_get)
       component_type = component_type_print_form()
 
-      #handle version
+      # handle version
       ret = 
         if opts[:without_version] or has_default_version?()
           component_type
@@ -156,7 +156,7 @@ module DTK
           self.class.name_with_version(component_type,self[:version])
         end 
 
-      #handle component title
+      # handle component title
       if title = ComponentTitle.title?(self)
         ret = ComponentTitle.print_form_with_title(ret,title)
       end
@@ -239,7 +239,7 @@ module DTK
     def instance_extended_base_id()
       extended_base_id(:is_instance => true)
     end
-    #TODO: expiremting with implementing this 'local def differently  
+    # TODO: expiremting with implementing this 'local def differently  
     def extended_base_id(opts={})
       if self[:extended_base] and self[:implementation_id] and (self[:node_node_id] or not opts[:is_instance]) 
         sp_hash = {
@@ -295,7 +295,7 @@ module DTK
         (self[:datacenter_node_group]||{})[:display_name]
      end
 
-    #TODO: write as sql fn for efficiency
+    # TODO: write as sql fn for efficiency
     def has_pending_change()
       ((self[:state_change]||{})[:count]||0) > 0 or ((self[:state_change2]||{})[:count]||0) > 0
     end
@@ -304,7 +304,7 @@ module DTK
     ######### Model apis
 
     def add_config_file(file_name,file_content)
-      #TODO: may check first that object does not have already a config file with same name
+      # TODO: may check first that object does not have already a config file with same name
       parent_col = DB.parent_field(:component,:file_asset)
 
       create_row = {
@@ -372,13 +372,13 @@ module DTK
       self[:extended_base] ? true : false
     end
 
-    #looks at 
+    # looks at 
     # 1) directly directly connected attributes
     # 2) if extension then attributes on teh extenion's base
     # 3) if base then extensions on all its attributes (TODO: NOTE: in which case multiple_instance_clause may be needed)
     def self.get_virtual_attributes__include_mixins(attrs_to_get,cols,field_to_match=:display_name)
       ret = Hash.new
-      #TODO: may be able to avoid this loop
+      # TODO: may be able to avoid this loop
       attrs_to_get.each do |component_id,hash_value|
         attr_info = hash_value[:attribute_info]
         component = hash_value[:component]
@@ -403,8 +403,8 @@ module DTK
       return Array.new if components.empty?
       sample_cmp = components.first
       component_mh = sample_cmp.model_handle()
-      #use base cmp id as equivalence class and find all members of equivalence class to find what each related component is
-      #associated with
+      # use base cmp id as equivalence class and find all members of equivalence class to find what each related component is
+      # associated with
       cmp_id_to_equiv_class = Hash.new
       equiv_class_members = Hash.new
       ext_cmps = Array.new
@@ -426,7 +426,7 @@ module DTK
       indexed_ret = Hash.new
       get_components_related_by_mixins_from_extension(component_mh,ext_cmps,cols).each do |found_base_cmp|
         id = found_base_cmp[:id]
-        #if found_base_cmp in components dont put in result
+        # if found_base_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
           indexed_ret[id] = found_base_cmp.merge(:assoc_component_ids => equiv_class_members[id])
         end
@@ -434,7 +434,7 @@ module DTK
 
       get_components_related_by_mixins_from_base(component_mh,base_cmp_info,cols).each do |found_ext_cmp|
         id = found_ext_cmp[:id]
-        #if found_ext_cmp in components dont put in result
+        # if found_ext_cmp in components dont put in result
         unless cmp_id_to_equiv_class[id]
           indexed_ret[id] = found_ext_cmp.merge(:assoc_component_ids => equiv_class_members[found_ext_cmp[:extended_base_id]])
         end
@@ -570,9 +570,9 @@ module DTK
       Model.update_from_rows(model_handle,[update_hash],:partial_value=>true)
     end
 
-    #self is an instance and it finds a library component
-    #multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
-    #TODO: extend with logic for multiple_instance_clause
+    # self is an instance and it finds a library component
+    # multiple_instance_clause is used in case multiple extensions of same type and need to select particular one
+    # TODO: extend with logic for multiple_instance_clause
     def get_extension_in_library(extension_type,cols=[:id,:display_name],multiple_instance_clause=nil)
       base_sp_hash = {
         :model_name => :implementation,
@@ -607,8 +607,8 @@ module DTK
     end
    public
 
-    #returns hash with ndx component_id and keys :constraints, :component
-    #opts can have key :when_evaluated
+    # returns hash with ndx component_id and keys :constraints, :component
+    # opts can have key :when_evaluated
     def self.get_ndx_constraints(component_idhs,opts={})
       ret = Hash.new
       return ret if component_idhs.empty?
@@ -625,7 +625,7 @@ module DTK
       ret.each_value do |r|
         cmp = r[:component]
         unless opts[:when_evaluated] == :after_cmp_added
-          #these shoudl only be evaluated before component is evaluated
+          # these shoudl only be evaluated before component is evaluated
           r[:constraints] << Constraint::Macro.only_one_per_node(cmp[:component_type]) if cmp[:only_one_per_node]
           r[:constraints] << Constraint::Macro.base_for_extension(cmp) if cmp[:extended_base]
         end
@@ -633,9 +633,9 @@ module DTK
       ret
     end
 
-    #TODO: may deprecate below or write in terms of above
+    # TODO: may deprecate below or write in terms of above
     def get_constraints!(opts={})
-      #TODO: may see if precalculating more is more efficient
+      # TODO: may see if precalculating more is more efficient
       cmp_cols = [:only_one_per_node,:component_type,:extended_base,:implementation_id]
       rows = get_objs(:cols => [:dependencies] + cmp_cols)
       cmp_info = rows.first #just picking first since component info same for all rows
@@ -675,7 +675,7 @@ module DTK
       component.merge(:attributes => attributes)
     end
    private
-    #only filters if value is known
+    # only filters if value is known
     def attribute_is_filtered?(attribute,attr_filters)
       return false if attr_filters.empty?
       attr_filters.each{|k,v|return true if attribute[k] == v}
@@ -693,7 +693,7 @@ module DTK
     end
 
     def get_view_meta_info(view_type)
-      #TODO: can be more efficient (rather than using get_instance_layout_from_db can use something that returns most recent laypout id); also not sure whether if no db hit to return id()
+      # TODO: can be more efficient (rather than using get_instance_layout_from_db can use something that returns most recent laypout id); also not sure whether if no db hit to return id()
       from_db = get_instance_layout_from_db(view_type)
       return [from_db[:id],from_db[:updated_at]] if from_db
       [id(),Time.new()]
@@ -713,12 +713,12 @@ module DTK
    protected
     def get_layouts_from_db(view_type,layout_vc=:layouts)
       unprocessed_rows = get_objects_col_from_sp_hash({:columns => [layout_vc]},:layout)
-      #TODO: more efficient would be to use db sort
+      # TODO: more efficient would be to use db sort
       unprocessed_rows.select{|l|l[:type] == view_type.to_s}.sort{|a,b|b[:updated_at] <=> a[:updated_at]}
     end
 
     def get_instance_layout_from_db(view_type)
-      #TODO: more efficient would be to use db limit 
+      # TODO: more efficient would be to use db limit 
       instance_layout = get_layouts_from_db(view_type,:layouts).first
       return instance_layout if instance_layout
       instance_layout = get_layouts_from_db(view_type,:layouts_from_ancestor).first
@@ -726,13 +726,13 @@ module DTK
     end
    public
 
-    #TODO: wil be deperacted
+    # TODO: wil be deperacted
     def get_info_for_view_def()
       sp_hash = {:columns => [:id,:display_name,:component_type,:basic_type,:attributes_view_def_info]}
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       component = component_and_attrs.first.subset_with_vcs(:id,:display_name,:component_type,:basic_type,:view_def_key)
-      #if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
+      # if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(:attributes => Array.new) unless component_and_attrs.first[:attribute]
       opts = {:flatten_nil_value => true}
       component.merge(:attributes => AttributeComplexType.flatten_attribute_list(component_and_attrs.map{|r|r[:attribute]},opts))
@@ -779,10 +779,10 @@ module DTK
     end
 
     def add_model_specific_override_attrs!(override_attrs,target_obj)
-      #TODO: taking out below to accomidate fact that using ref to qialify whether chef or puppet
-      #TODO: think want to add way for components that can have many attributes to have this based on value of the 
-      #attribut ethat serves as the key
-      #override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
+      # TODO: taking out below to accomidate fact that using ref to qialify whether chef or puppet
+      # TODO: think want to add way for components that can have many attributes to have this based on value of the 
+      # attribut ethat serves as the key
+      # override_attrs[:display_name] ||= SQL::ColRef.qualified_ref 
       into_node = (target_obj.model_handle[:model_name] == :node)
       override_attrs[:type] ||= (into_node ? "instance" : "template")
       override_attrs[:updated] ||= false
@@ -797,7 +797,7 @@ module DTK
       (nested_cmps||[]).map{|cmp|cmp.get_contained_attribute_ids(opts)}.flatten()
     end
 
-    #type can be :asserted, :derived or :value
+    # type can be :asserted, :derived or :value
     def get_contained_attribute_values(type,opts={})
       parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
       nested_cmps = get_objects(ModelHandle.new(id_handle[:c],:component),nil,:parent_id => parent_id)

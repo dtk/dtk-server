@@ -23,7 +23,7 @@ module DTK; class Task; class Template
       end
 
       class NdxActionIndexes < Hash
-        #These are of form
+        # These are of form
         #[:internode|:samenode][:before|:after]
         # which has value {node_id => [action_indexex],,,}
         def get(inter_or_same,before_or_after)
@@ -37,7 +37,7 @@ module DTK; class Task; class Template
       end
 
       def self.insert_strategy_class(insert_strategy=nil)
-        #default insert strategy is to put the new action in the latest existing internode stage at the latest point
+        # default insert strategy is to put the new action in the latest existing internode stage at the latest point
         if insert_strategy 
           unless ret = InsertStrategies[insert_strategy]
             raise Error.new("Illegal insert action strategy (#{insert_strategy})")
@@ -54,7 +54,7 @@ module DTK; class Task; class Template
 
       def compute_before_after_relations!()
         unless new_action_index = @new_action.index
-          #if @new_action does not have an index it means that it is not in action list
+          # if @new_action does not have an index it means that it is not in action list
           Log.error("Cannot find action in action list; using no constraints")
           return
         end

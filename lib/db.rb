@@ -37,14 +37,14 @@ module DTK
     include RestURI unless included_modules.include?(RestURI)
     extend DBAuthorizationClassMixin
 
-    #TODO: may move to dataset_from_search_pattern.rb
+    # TODO: may move to dataset_from_search_pattern.rb
     def self.ret_paging_and_order_added_to_dataset(ds,opts,any_change={})
       ret = ds
       order_by_opts = opts[:order_by]
       if order_by_opts
         any_change[:changed] = true
         order_by_opts.each do |order_by_el|
-          #TBD: check that it is legal field
+          # TBD: check that it is legal field
           col = order_by_el[:field]
           next unless col
           dir = order_by_el[:order] == "DESC" ? "DESC" : "ASC"
@@ -82,7 +82,7 @@ module DTK
       db_class.new({},Opts.new(:sequel_db => sequel_db))
     end
 
-    #TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
+    # TODO: just temp until we get rid of need to convert keys to symbols; right now default is to do so 
     def self.ret_json_hash(raw_value,col_info,opts={})
       begin
         hash = JSON.parse(raw_value)
@@ -93,7 +93,7 @@ module DTK
           ret_keys_as_symbols(hash)
         end
       rescue Exception
-        #primarily to handle scalars
+        # primarily to handle scalars
         raw_value
       end
     end
@@ -101,7 +101,7 @@ module DTK
     def self.parent_field(parent_model_name,model_name)
       ret_parent_id_field_name(DB_REL_DEF[parent_model_name],DB_REL_DEF[model_name])
     end
-    #TODO: deprecate direct call of the two below
+    # TODO: deprecate direct call of the two below
     def self.ret_parent_id_field_name(parent_db_rel,db_rel)
       return nil unless parent_db_rel and db_rel
       parent_db_rel[:schema] == db_rel[:schema] ?

@@ -17,21 +17,21 @@ module DTK; class ConfigAgent; module Adapter
       end
 
      private
-      #this configuration switch is whether anchors are used in generating teh 'class wrapper' for putting definitions in stages
+      # this configuration switch is whether anchors are used in generating teh 'class wrapper' for putting definitions in stages
       UseAnchorsForClassWrapper = false
-      #TODO: best practice would be to use anchors so internal resources dont 'fall out', but to use this requires that stdlib is always include
+      # TODO: best practice would be to use anchors so internal resources dont 'fall out', but to use this requires that stdlib is always include
       # so turning off now
       def use_anchors_for_class_wrappers?()
         UseAnchorsForClassWrapper
       end
 
-      #stage_ids can be of form
+      # stage_ids can be of form
       #[[cmp_id1,cmp_id2],[cmp_id3,cmp_id4,cmp_id5]]
       # or
       ##[[[cmp_id1],[cmp_id2]],[[cmp_id3,cmp_id4],[cmp_id5]]]
-      #In both cases teh top leevl shows sepearte puppet runs
-      #in the first case for each puppet run, each comp wil be in sepearte puppet stage
-      #in case 2, extra grouping shows how components are grouped into puppet stages
+      # In both cases teh top leevl shows sepearte puppet runs
+      # in the first case for each puppet run, each comp wil be in sepearte puppet stage
+      # in case 2, extra grouping shows how components are grouped into puppet stages
       def generate_with_stages(cmps_with_attrs,assembly_attrs,stages_ids)
         stages_ids.map do |stage_ids_exec_block|
           exec_block = Array.new
@@ -100,7 +100,7 @@ module DTK; class ConfigAgent; module Adapter
             if imp_stmt = needs_import_statement?(cmp,module_name)
               @class_lines << imp_stmt 
             end
-            #TODO: see if need \" and quote form
+            # TODO: see if need \" and quote form
             attr_str_array = attrs.map{|k,v|"#{k} => #{process_val(v)}"} + [stage_assign()]
             attr_str = attr_str_array.join(", ")
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
@@ -138,7 +138,7 @@ module DTK; class ConfigAgent; module Adapter
        private
         def add_definition_lines!(ret)
           unless @def_lines.empty?()
-            #putting def in class because defs cannot go in stages
+            # putting def in class because defs cannot go in stages
             ret << "class #{class_wrapper} {"
             if use_anchors_for_class_wrappers?()
               ret << "  #{anchor(:begin)}"
@@ -167,7 +167,7 @@ module DTK; class ConfigAgent; module Adapter
           "Anchor[#{class_wrapper}::#{type}]"
         end
 
-        #removes imported collections and puts them on global array
+        # removes imported collections and puts them on global array
         def process_and_return_attr_name_val_pairs(cmp_with_attrs)
           ret = Hash.new
           return ret unless attrs = cmp_with_attrs["attributes"]
@@ -185,8 +185,8 @@ module DTK; class ConfigAgent; module Adapter
         end
 
         def needs_import_statement?(cmp_or_def,module_name)
-          #TODO: keeping in, in case we decide to do check for import; use of imports are now considered violating Puppet best practices
-          #if wanted to actual check would need to know what manifest files are present
+          # TODO: keeping in, in case we decide to do check for import; use of imports are now considered violating Puppet best practices
+          # if wanted to actual check would need to know what manifest files are present
           return nil #TODO: would put conditional in if doing checks
           ret_import_statement(module_name)
         end
@@ -215,9 +215,9 @@ module DTK; class ConfigAgent; module Adapter
         ret = Array.new
         cmps_with_attrs.each do |cmp_with_attrs|
           (cmp_with_attrs["dynamic_attributes"]||[]).each do |dyn_attr|
-            #only include if the dynamic attribute is connected
-            #TODO: this is mechanism used to avoid duplicate r8::export_variable declarations: making sure downstream that
-            #definitions cannot be connected
+            # only include if the dynamic attribute is connected
+            # TODO: this is mechanism used to avoid duplicate r8::export_variable declarations: making sure downstream that
+            # definitions cannot be connected
             if dyn_attr[:is_connected]
               if dyn_attr[:type] == "default_variable"
                 qualified_var = "#{cmp_with_attrs["name"]}::#{dyn_attr[:name]}"
@@ -231,7 +231,7 @@ module DTK; class ConfigAgent; module Adapter
 
       
       def process_val(val)
-        #a guarded val
+        # a guarded val
         if val.kind_of?(Hash) and val.size == 1 and val.keys.first == "__ref"
           "$#{val.values.join("::")}"
         else

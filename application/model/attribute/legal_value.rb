@@ -8,7 +8,7 @@ module DTK; class Attribute
         if special_processing
           errors << error if error
         else
-          #TODO: stub for normal error processing
+          # TODO: stub for normal error processing
         end
       end
       unless errors.empty?

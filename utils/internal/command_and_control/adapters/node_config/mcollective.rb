@@ -23,7 +23,7 @@ module DTK
         Config.mcollective_client()
       end
 
-      #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
+      # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh,top_task_idh,config_node,opts)
         version_context = get_version_context(config_node)
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
@@ -33,7 +33,7 @@ module DTK
                             :top_task_id => top_task_idh.get_id(), 
                             :version_context => version_context, 
                             :agent_git_details => agent_git_details,
-                            #TODO: not doing at this point puppet version per run; it just can be set when node is created
+                            # TODO: not doing at this point puppet version per run; it just can be set when node is created
                             :puppet_version => config_node[:node][:puppet_version]
                           )
         pbuilderid = Node.pbuilderid(config_node[:node])
@@ -43,7 +43,7 @@ module DTK
         async_agent_call(mcollective_agent(config_agent),"run",msg_content,filter,callbacks,context)
       end
 
-      #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
+      # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_cancelation(task_idh,top_task_idh,config_node,opts)
         msg_content = { :task_id => task_idh.get_id(),:top_task_id => top_task_idh.get_id() }
         pbuilderid = Node.pbuilderid(config_node[:node])
@@ -53,7 +53,7 @@ module DTK
         async_agent_call("puppet_cancel","run",msg_content,filter,callbacks,context)
       end
 
-      #TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
+      # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_sync_agent_code(task_idh,top_task_idh,config_node,opts)
         context = opts[:receiver_context]
 
@@ -140,7 +140,7 @@ module DTK
 
       DefaultTimeoutAuthNode = 5
 
-      #TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
+      # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node,opts)
         count = opts[:count] || PollCountDefault
         rc = opts[:receiver_context]
@@ -186,7 +186,7 @@ module DTK
       GetLogsTimeout = 3
       def self.parse_response__get_logs(msg)
         ret = Hash.new
-        #TODO: conditionalize on status
+        # TODO: conditionalize on status
         return ret.merge(:status => :notok) unless body = msg[:body]
         payload = body[:data]
         ret[:status] = (body[:statuscode] == 0 and payload and payload[:status] == :ok) ? :ok : :notok 

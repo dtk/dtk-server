@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-#TBD: temp hard coded
+# TBD: temp hard coded
 root = '/root/Reactor8/top/'
 require root + '/utils/internal/daemon'
 require root + '/utils/internal/helper/config'

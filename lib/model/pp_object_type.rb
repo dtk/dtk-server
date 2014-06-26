@@ -1,6 +1,6 @@
 module DTK
   class Model
-    #format below can be
+    # format below can be
     # :s - singular (default)
     # :p - plural
     # :pos - plural or singular    

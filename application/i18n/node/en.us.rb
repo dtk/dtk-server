@@ -1,6 +1,6 @@
 
-#dont know proper way to reference, but need distinction that these are strings for node object,
-#there will also be application specific strings, as well as object view specific ones
+# dont know proper way to reference, but need distinction that these are strings for node object,
+# there will also be application specific strings, as well as object view specific ones
 {
   :id => 'ID',
   :display_name => 'Name',

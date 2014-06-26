@@ -15,8 +15,8 @@ class DeferrableBody
   end
 end
 
-#TODO: this needs to detect when listen connection is killed so it can delete that version of the queue
-#may be impossible; so woudl need control and bearer channels
+# TODO: this needs to detect when listen connection is killed so it can delete that version of the queue
+# may be impossible; so woudl need control and bearer channels
 class MyController < Ramaze::Controller
   map '/'
 

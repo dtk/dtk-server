@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content
+# Test Case 1: Create one node, add component in it, converge workspace, inspect info output and task output and purge workspace content
 
 require 'rubygems'
 require 'rest_client'

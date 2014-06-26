@@ -22,7 +22,7 @@ module DTK
         {"type" => ExternalRefType}
       end
       def self.is_constant?(external_ref)
-        #this is specifically a symbol because external_ref's keys are symbols
+        # this is specifically a symbol because external_ref's keys are symbols
         if type = (external_ref||{})[:type]
           type == ExternalRefType
         end

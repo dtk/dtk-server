@@ -9,7 +9,7 @@ module DTK
       def raise_error_if_any_violations(opts={})
         raise_error_if_dangling_cmp_ref(opts)
         raise_error_if_dangling_port_link()
-        #raise_error_if_dangling_cmp_attr_ref()
+        # raise_error_if_dangling_cmp_attr_ref()
       end
 
       def integrity_post_processing()
@@ -25,9 +25,9 @@ module DTK
       def raise_error_if_dangling_cmp_ref(opts={})
         cmp_ref_ids = @snapshot.cmp_ref_ids()
         return if cmp_ref_ids.empty?
-        #this is called within transaction after any deletes are performed (if any)
-        #TODO: have ComponentDSL.parse_and_update_model return if any deletes
-        #below is the conservative thing to do if dont know if any deletes
+        # this is called within transaction after any deletes are performed (if any)
+        # TODO: have ComponentDSL.parse_and_update_model return if any deletes
+        # below is the conservative thing to do if dont know if any deletes
         any_deletes = true
         any_deletes = false if opts[:no_deletes_performed]
         return unless any_deletes
@@ -44,12 +44,12 @@ module DTK
       end
 
       def raise_error_if_dangling_port_link()
-        #TODO: stub
+        # TODO: stub
       end
 
       def add_new_ports_on_component_templates()
-        #find all assembly templates that reference a component template that has a new link def added
-        #this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
+        # find all assembly templates that reference a component template that has a new link def added
+        # this is done by taking a new snapshot (one that is post changes) and seeing in any new link defs
         new_snapshot = Snapshot.new(@cmp_module)
         snapshot_link_def_ids = @snapshot.link_defs.map{|ld|ld[:id]}
         new_links_defs = new_snapshot.link_defs.reject{|ld|snapshot_link_def_ids.include?(ld[:id])}

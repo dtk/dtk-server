@@ -3,7 +3,7 @@ require 'fileutils'
 module DTK
   class RepoManager 
     class << self
-      #admin and repo methods that just pass to lower level object or class
+      # admin and repo methods that just pass to lower level object or class
       RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:hard_reset_to_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?,:branch_head_sha]
       AdminMethods = [:list_repos,:repo_url,:repo_server_dns,:repo_server_ssh_rsa_fingerprint,:repo_name,:set_user_rights_in_repos,:remove_user_rights_in_repos,:add_user,:delete_user,:get_keydir]
 
@@ -26,7 +26,7 @@ module DTK
         get_adapter_repo(context).get_file_content(file_obj_or_path,opts)
       end
 
-      #signature is effectively def add_file(file_obj_or_path,content,commit_msg=nil,context)
+      # signature is effectively def add_file(file_obj_or_path,content,commit_msg=nil,context)
       def add_file(*args)
         context = args.pop
         file_obj_or_path,content,commit_msg = args
@@ -55,7 +55,7 @@ module DTK
     def self.delete_branches(*repo_names)
       klass = load_and_return_adapter_class()
       repo_names.each do |repo_name|
-        #TODO: change so this from Repo if want to put in hooks for per branch auth
+        # TODO: change so this from Repo if want to put in hooks for per branch auth
         klass.get_branches(repo_name).each do |branch|
           next if branch == "master"
           pp "deleting branch (#{branch}) in repo (#{repo_name})"
@@ -82,16 +82,16 @@ module DTK
         adapter_repo.pull_from_remote_repo(remote_name,remote_url,remote_branch,opts)
       end
 
-      #returns :equal, :local_behind, :local_ahead, or :branchpoint 
-      #branch object can be for either sha; result does not matter based on this
+      # returns :equal, :local_behind, :local_ahead, or :branchpoint 
+      # branch object can be for either sha; result does not matter based on this
       def ret_sha_relationship(local_sha,other_sha,branch_obj)
         adapter_repo = get_adapter_repo(branch_obj)
         adapter_repo.ret_sha_relationship(local_sha,other_sha)
       end
 
-      #remote_r - remote_ref
-      #remote_u - remote_url
-      #remote_b - remote_branch
+      # remote_r - remote_ref
+      # remote_u - remote_url
+      # remote_b - remote_branch
       def get_loaded_and_remote_diffs(remote_r, repo_name, module_branch, remote_u, remote_b)
         adapter_repo = get_adapter_repo(context(repo_name,module_branch))
         adapter_repo.is_different_than_remote?(remote_r, remote_u, remote_b)
@@ -129,7 +129,7 @@ module DTK
 
     def self.create_empty_workspace_repo(repo_obj,repo_user_acls,opts)
       klass = load_and_return_adapter_class()
-      #create repo on repo server
+      # create repo on repo server
       klass.create_server_repo(repo_obj,repo_user_acls,opts) 
       if R8::Config[:repo][:workspace][:use_local_clones]
         klass.create_repo_clone(repo_obj,opts)
@@ -142,7 +142,7 @@ module DTK
 
     def self.delete_all_repos()
       klass = load_and_return_adapter_class()
-      #delete all repos on repo server
+      # delete all repos on repo server
       klass.delete_all_server_repos()
       delete_all_local_repos()
     end
@@ -201,9 +201,9 @@ module DTK
         repo_dir = context[:repo_dir]
         branch = context[:branch]
       else
-        #TODO: deprecate after replace use of this pattern
-        #assume that it has hash with :implementation key
-        #TODO: do we still need __top
+        # TODO: deprecate after replace use of this pattern
+        # assume that it has hash with :implementation key
+        # TODO: do we still need __top
         repo_dir = (context[:implementation]||{})[:repo]||"__top"
         branch = (context[:implementation]||{})[:branch]
       end

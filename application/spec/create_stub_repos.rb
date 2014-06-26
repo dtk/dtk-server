@@ -8,7 +8,7 @@ source_dir = ARGV[0]
 target_dir = ARGV[1]
 Dir.foreach(target_dir){|f|raise "#{target_dir} is not an empty directory" unless f =~ /^\./}
 
-#modified from http://iamneato.com/2009/07/28/copy-folders-recursively
+# modified from http://iamneato.com/2009/07/28/copy-folders-recursively
 def recursive_copy(src_dir,dest_dir,level=0)
   Dir.foreach(src_dir) do |file|
     next if file =~ /^\./

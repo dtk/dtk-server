@@ -150,7 +150,7 @@ lambda__segment_impls =
       :hidden=>true,
       :remote_dependencies=>[lambda__segment_module_branches.call(:cols => [:version])]
     },
-    #MOD_RESTRUCT: deprecate below for above
+    # MOD_RESTRUCT: deprecate below for above
     :library_repo=>{
       :type=>:json,
       :hidden=>true,

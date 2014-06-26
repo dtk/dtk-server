@@ -1,11 +1,9 @@
 require 'ruote'
-r8_nested_require('ruote','participant')
-r8_nested_require('ruote','generate_process_defs')
-
 module DTK 
   module WorkflowAdapter
     class Ruote < DTK::Workflow
-
+      r8_nested_require('ruote','participant')
+      r8_nested_require('ruote','generate_process_defs')
       class Worker < ::Ruote::Worker
         def run_in_thread
           Thread.abort_on_exception = true
@@ -16,12 +14,12 @@ module DTK
         end
       end
 
-      #TODO: stubbed storage engine using hash store; look at alternatives like redis and
-      #running with remote worker
+      # TODO: stubbed storage engine using hash store; look at alternatives like redis and
+      # running with remote worker
       include RuoteParticipant
       include RuoteGenerateProcessDefs
       Engine = ::Ruote::Engine.new(Worker.new(::Ruote::HashStorage.new))
-      #register all the classes
+      # register all the classes
       ParticipantList = Array.new
       ObjectSpace.each_object(Module) do |m|
         next unless m.ancestors.include? Top and  m != Top
@@ -37,15 +35,17 @@ module DTK
       def kill()
         Engine.kill_process(@wfid)
       end
+      
+      TopTaskDefaultTimeOut = 60 * 20 # in seconds
 
       def execute(top_task_id)
         begin
           @wfid = Engine.launch(process_def())
 
-          #TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
+          # TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
           Engine.wait_for(@wfid, :timeout => TopTaskDefaultTimeOut)
           
-          #detect if wait for finished due to normal execution or errors 
+          # detect if wait for finished due to normal execution or errors 
           errors = Engine.errors(@wfid)
           if errors.nil? or errors.empty?
             pp :normal_completion
@@ -57,59 +57,19 @@ module DTK
             end
             Log.error "-------- end: intercepted errors ------"
 
-            #different ways to continue
+            # different ways to continue
             # one way is "fix error " ; engine.replay_at_error(err); engine.wait_for(@wfid)
-            #this cancels everything
-            #Engine.cancel_process(@wfid)
+            # this cancels everything
+            # Engine.cancel_process(@wfid)
           end
          rescue Exception => e
           pp "error trap in ruote#execute"
           pp [e,e.backtrace[0..50]]
-          #TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
+          # TODO: if do following Engine.cancel_process(@wfid), need to update task; somhow need to detrmine what task triggered this
          ensure
           TaskInfo.clean(top_task_id)
         end
         nil
-      end
-      #in seconds
-      TopTaskDefaultTimeOut = 60 * 20
-
-      def initiate_executable_action(task,receiver_context)
-        opts = {
-          :initiate_only => true,
-          :receiver_context => receiver_context
-        }
-        CommandAndControl.execute_task_action(task,top_task_idh,opts)
-      end
-
-      def initiate_cancel_action(task,receiver_context)
-        opts = {
-          :cancel_task => true,
-          :receiver_context => receiver_context
-        }
-        CommandAndControl.execute_task_action(task,top_task_idh,opts)
-      end
-
-      def initiate_sync_agent_action(task,receiver_context)
-        opts = {
-          :sync_agent_task => true,
-          :receiver_context => receiver_context
-        }
-        CommandAndControl.execute_task_action(task,top_task_idh,opts)
-      end
-
-      def initiate_node_action(method,node,callbacks,context)
-        CommandAndControl.initiate_node_action(method,node,callbacks,context)
-      end
-      #TODO: convert poll_to_detect_node_ready to use more general form above
-      def poll_to_detect_node_ready(node,receiver_context,opts={})
-        poll_opts = opts.merge({
-          :receiver_context => receiver_context})
-        CommandAndControl.poll_to_detect_node_ready(node,poll_opts)
-      end
-
-      def get_top_task
-        return @top_task
       end
 
      private 
@@ -122,14 +82,14 @@ module DTK
         @process_def #TODO: just for testing so can checkpoint and see what it looks like
       end
 
-      #This works under the assumption that task_ids are never reused
+      # This works under the assumption that task_ids are never reused
       class TaskInfo 
         
         Store = Hash.new
         Lock = Mutex.new
         
         def self.initialize_task_info()
-          #deprecate
+          # deprecate
         end
         
         def self.set(top_task_id, task_id,task_info,task_type=nil)
@@ -152,8 +112,8 @@ module DTK
         def self.clean(top_task_id)
           Lock.synchronize{ Store.delete_if { |key, value| key.match(/#{top_task_id}.*/) } }
           pp [:write_cleanup,Store.keys]
-          #TODO: this needs to clean all keys associated with the task; some handle must be passed in
-          #TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
+          # TODO: this needs to clean all keys associated with the task; some handle must be passed in
+          # TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
         end
 
         def self.get_top_task_id(task_id)
@@ -178,40 +138,11 @@ module DTK
           return ret_key
         end
       end
-=begin
-      #TODO: this does not work for concurrent tasks because @count is not updated at right time
-      class TaskInfo 
-        @@count = 0
-        Store = Hash.new
-        Lock = Mutex.new
-        def self.initialize_task_info()
-          Store[@@count] = Hash.new
-        end
-        def self.set(task_id,task_info,task_type=nil)
-          key = task_key(task_id,task_type)
-          Lock.synchronize{Store[@@count][key] = task_info}
-        end
-        def self.get_and_delete(task_id,task_type=nil)
-          key = task_key(task_id,task_type)
-          ret = nil
-          Lock.synchronize{ret = Store[@@count].delete(key)}
-          ret 
-        end
-        def self.clean()
-          Lock.synchronize{Store[@@count] = nil} 
-          @@count += 1
-        end
-       private
-        def self.task_key(task_id,task_type)
-          task_type ? "#{task_id.to_s}-#{task_type}" : task_id.to_s
-        end
-      end
-=end
     end
   end
 end
 
-#TODO: see if can do this by subclassing DispatchPool rather than monkey patch
+# TODO: see if can do this by subclassing DispatchPool rather than monkey patch
 ###Monkey patches
 # Amar: Additional monkey patching to support instant cancel of concurrent running subtasks on cancel task request
 module Ruote

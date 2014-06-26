@@ -15,11 +15,11 @@ module XYZ
      private
       def get_user_data_objects(type,&block)
         data_file_path = R8::Config[:app_cache_root] + "/data_source.json" #TODO: stub
-        #no op if file does not exists
+        # no op if file does not exists
         hash_all_data = get_user_data_from_file(data_file_path)
         return HashMayNotBeComplete.new() unless hash_all_data
 
-        #find contents under container uri
+        # find contents under container uri
         hash = HashObject.nested_value(hash_all_data,nested_path(hash_all_data))
         return HashMayNotBeComplete.new() unless hash
 
@@ -27,7 +27,7 @@ module XYZ
           qualified_ref = "#{@container_uri}/#{ref}"
           block.call(DataSourceUpdateHash.new(info.merge({"ref" => ref,"qualified_ref" => qualified_ref})))
         end
-        #HashMayNotBeComplete.new() TODO: so can prune what is included 
+        # HashMayNotBeComplete.new() TODO: so can prune what is included 
         HashIsComplete.new()
       end
 

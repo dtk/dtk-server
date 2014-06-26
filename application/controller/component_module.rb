@@ -143,20 +143,19 @@ module DTK
     #### end: list and info actions ###
     
     #### actions to interact with remote repos ###
-    #TODO: rename; this is just called by install; import ops call create route
+    # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
       rest_ok_response install_from_dtkn_helper(:component_module)
     end
 
-    #TODO: rename; this is just called by publish
+    # TODO: rename; this is just called by publish
     def rest__export()
       component_module = create_obj(:component_module_id)
-      publish_to_dtkn_helper(component_module)
-      rest_ok_response 
+      rest_ok_response publish_to_dtkn_helper(component_module)
     end
 
 
-    #this should be called when the module is linked, but the specfic version is not
+    # this should be called when the module is linked, but the specfic version is not
     def rest__import_version()
       component_module = create_obj(:component_module_id)
       remote_repo = ret_remote_repo()
@@ -164,7 +163,7 @@ module DTK
       rest_ok_response component_module.import_version(remote_repo,version)
     end
 
-    #TODO: ModuleBranch::Location: harmonize this signature with one for service module
+    # TODO: ModuleBranch::Location: harmonize this signature with one for service module
     def rest__delete_remote()
       remote_module_name = ret_non_null_request_params(:remote_module_name)
       remote_namespace = ret_request_params(:remote_module_namespace)

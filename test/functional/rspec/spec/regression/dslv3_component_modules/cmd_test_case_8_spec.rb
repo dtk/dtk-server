@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 8: Rename existing attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server
+# Test Case 8: Rename existing attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server
 
 require 'rubygems'
 require 'rest_client'

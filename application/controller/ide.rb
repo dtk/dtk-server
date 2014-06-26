@@ -29,8 +29,8 @@ module XYZ
       include_js_tpl(tpl_info[:src])
 
 #==========================
-#Include target specific js that will be needed
-#TODO: move out of here eventually
+# Include target specific js that will be needed
+# TODO: move out of here eventually
       tpl_info_hash = Hash.new
 
       tpl = R8Tpl::TemplateR8.new("node_group/wspace_display",user_context())
@@ -76,8 +76,8 @@ module XYZ
       include_js('plugins/r8.cmdbar.tasks')
 
       projects_json = JSON.generate(projects)
-#TODO: figure out why this user init isnt firing inside of bundle and return
-#DEBUG
+# TODO: figure out why this user init isnt firing inside of bundle and return
+# DEBUG
       run_javascript("R8.User.init();")
       run_javascript("R8.IDE.init(#{projects_json});")
 

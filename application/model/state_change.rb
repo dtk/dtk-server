@@ -1,11 +1,11 @@
-#TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency; alternatively have state chanegs associated with a "container
+# TODO: may get rid of nested state change structure because of problem such as a "parent is completed, but children arent and effeiciency; alternatively have state chanegs associated with a "container
 module XYZ
   class StateChange < Model
     r8_nested_require('state_change','get_pending_changes')
     extend GetPendingChangesClassMixin
 
     def self.list_pending_changes(target_idh)
-      #TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
+      # TODO: may pass in options so dont get all fields that are returned in flat_list_pending_changes
       pending_changes = flat_list_pending_changes(target_idh)
       ndx_ret = Hash.new
       pending_changes.each do |ch|
@@ -16,7 +16,7 @@ module XYZ
         else
           cmp_id = ch[:component][:id]
           cmp = node[:ndx_cmp_changes][cmp_id] ||= {:component_id => cmp_id, :component_name => ch[:component][:display_name], :changes => Array.new}
-          #TODO stub
+          # TODO stub
           cmp[:changes] << ret_display_name(ch)
         end
       end
@@ -45,7 +45,7 @@ module XYZ
     end
 
 
-    #object processing and access functions
+    # object processing and access functions
     #######################
     def on_node_config_agent_type()
       ret = (self[:component]||{})[:config_agent_type]
@@ -53,7 +53,7 @@ module XYZ
     end
 
     def create_node_config_agent_type()
-      #TODO: stub
+      # TODO: stub
       :ec2
     end
 
@@ -67,13 +67,13 @@ module XYZ
     def self.create_pending_change_item(new_item_hash,opts={})
       create_pending_change_items([new_item_hash],opts).first
     end
-    #assumption is that all parents are of same type and all changed items of same type
+    # assumption is that all parents are of same type and all changed items of same type
     def self.create_pending_change_items(new_item_hashes,opts={})
       ret = Array.new
       return ret if new_item_hashes.empty? 
       parent_model_name = new_item_hashes.first[:parent][:model_name]
 
-      #workaround referenced in PBUILDER-161
+      # workaround referenced in PBUILDER-161
       unless [:target,:datacenter].include?(parent_model_name)
         Log.info("workaround for PBUILDER-161: changing parent_model_name (#{parent_model_name}) to be target (datacenter)")
         parent_idh = new_item_hashes.first[:parent].get_top_container_id_handle(:datacenter)
@@ -137,7 +137,7 @@ module XYZ
       suffix ? "#{type}(#{suffix})" : type
     end
 
-    #called 'stub'  because objects refernced can change
+    # called 'stub'  because objects refernced can change
     def self.ret_stub_display_name(object_model_name,item_display_name)
       display_name_prefix = 
         case object_model_name

@@ -50,7 +50,7 @@ end
 json_data = RestClient.get("http://localhost:7000/list_contained_attributes#{container}.json?value_type=asserted")
 
 
-#TBD: moidfied is a misnomer
+# TBD: moidfied is a misnomer
 modified_json = edit_data(json_data)
 modified_hash = JSON.parse(modified_json).to_hash
 modified_values = ret_modified_values(modified_hash)
@@ -58,7 +58,7 @@ exit if modified_values.nil?
 exit if modified_values.empty?
 print modified_values.inspect << "\n"
 
-#TBD: put in the server
+# TBD: put in the server
 XYZ::R8EventLoop.start(:host => msg_bus_server) do
     msg_bus_client = XYZ::MessageBusClient.new()
     modified_values.each{|x|

@@ -1,8 +1,8 @@
-#TODO!!!: only need to pass params of cookbook included
-#TODO: need to be more sophsicticated on what recipes included (or take simple approach and include all)
-#for example need to include ones in same cookbook; may also want to include cookbook fro monitoring post check
-#TODO: can modify to make more efficient by having single db call
-#TODO: minimal conversion from form where just had change attributes; so room to simplify and make more efficient
+# TODO!!!: only need to pass params of cookbook included
+# TODO: need to be more sophsicticated on what recipes included (or take simple approach and include all)
+# for example need to include ones in same cookbook; may also want to include cookbook fro monitoring post check
+# TODO: can modify to make more efficient by having single db call
+# TODO: minimal conversion from form where just had change attributes; so room to simplify and make more efficient
 module XYZ
   class ConfigAgent; module Adapter
     class Chef < ConfigAgent
@@ -30,9 +30,9 @@ module XYZ
       end
 
      private
-      #TODO: collapse with other versions of this
+      # TODO: collapse with other versions of this
       def to_array_form(external_ref_path,opts={})
-        #TODO: use regexp disjunction
+        # TODO: use regexp disjunction
         ret = external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
         ret.shift if opts[:strip_off_recipe_name]
         ret
@@ -41,7 +41,7 @@ module XYZ
       class Processor 
         attr_reader :attributes
         def initialize(config_node)
-          #TODO: need to preserve order; only complication is removing duplicates
+          # TODO: need to preserve order; only complication is removing duplicates
           @recipe_names = config_node[:component_actions].map{|cmp_action|recipe(cmp_action[:component])}.uniq
           @common_attr_index = Hash.new
           @attributes = Hash.new
@@ -102,7 +102,7 @@ module XYZ
         def add_attribute!(ret,array_form_path,val)
           size = array_form_path.size
           if size == 1
-          #TODO: after testing remove setting nils
+          # TODO: after testing remove setting nils
             ret[array_form_path.first] = val
           else
             ret[array_form_path.first] ||= Hash.new
@@ -110,11 +110,11 @@ module XYZ
           end
         end
 
-        #TODO: centralize this fn so can be used here and when populate external refs
-          #TODO: assume form is node[recipe][x1] or node[recipe][x1][x2] or ..
-          #service[recipe][x1] or service[recipe][x1][x2] or ..
+        # TODO: centralize this fn so can be used here and when populate external refs
+          # TODO: assume form is node[recipe][x1] or node[recipe][x1][x2] or ..
+          # service[recipe][x1] or service[recipe][x1][x2] or ..
         def to_array_form(external_ref_path,opts)
-          #TODO: use regexp disjunction
+          # TODO: use regexp disjunction
           ret = external_ref_path.gsub(/^node\[/,"").gsub(/^service\[/,"").gsub(/\]$/,"").split("][")
           ret.shift if opts[:strip_off_recipe_name]
           ret

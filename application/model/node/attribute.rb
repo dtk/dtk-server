@@ -12,7 +12,7 @@ module DTK
       def cardinality()
         ret_value?(:cardinality)||1
       end
-      
+
       def puppet_version()
         ret_value?(:puppet_version)||R8::Config[:puppet][:version]
       end
@@ -28,7 +28,7 @@ module DTK
         return if nodes_to_query.empty?
 
         cols = [:id,:node_node_id,:attribute_value]
-        field_info = field_info(name) 
+        field_info = field_info(name)
         filter =  [:eq,:display_name,field_info[:name].to_s]
         node_idhs = nodes_to_query.map{|n|n.id_handle()}
         ndx_attrs =  Node.get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
@@ -84,7 +84,7 @@ module DTK
         def self.set!(node,raw_val,field_info)
           name = field_info[:name]
           semantic_data_type = field_info[:semantic_type]
-          val = 
+          val =
             if raw_val and semantic_data_type
               Attribute::SemanticDatatype.convert_to_internal_form(semantic_data_type,raw_val)
             else
@@ -97,18 +97,19 @@ module DTK
     end
 
     module AttributeClassMixin
+
       def cache_attribute_values!(nodes,name)
         NodeAttribute.cache_attribute_values!(nodes,name)
       end
 
-      #node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
-     def get_node_level_assembly_attributes(node_idhs,cols=nil)
-       cols ||= [:id,:display_name,:node_node_id,:attribute_value]
-       add_filter = NodeAttribute.assembly_attribute_filter()
-       get_node_level_attributes(node_idhs,cols,add_filter)
-     end
+      # node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
+      def get_node_level_assembly_attributes(node_idhs,cols=nil)
+        cols ||= [:id,:display_name,:node_node_id,:attribute_value]
+        add_filter = NodeAttribute.assembly_attribute_filter()
+        get_node_level_attributes(node_idhs,cols,add_filter)
+      end
 
-     def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
         ret = Array.new
         return ret if node_idhs.empty?()
         filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
@@ -125,7 +126,7 @@ module DTK
 
       def get_virtual_attributes(attrs_to_get,cols,field_to_match=:display_name)
         ret = Hash.new
-        #TODO: may be able to avoid this loop
+        # TODO: may be able to avoid this loop
         attrs_to_get.each do |node_id,hash_value|
           attr_info = hash_value[:attribute_info]
           node = hash_value[:node]
@@ -140,21 +141,21 @@ module DTK
         ret
       end
 
-      #TODO: need tp fix up below; maybe able to deprecate
+      # TODO: need tp fix up below; maybe able to deprecate
       def get_node_attribute_values(id_handle,opts={})
 	c = id_handle[:c]
         node_obj = get_object(id_handle,opts)
-        raise Error.new("node associated with (#{id_handle}) not found") if node_obj.nil? 	
+        raise Error.new("node associated with (#{id_handle}) not found") if node_obj.nil?
 	ret = node_obj.get_direct_attribute_values(:value) || {}
 
 	cmps = node_obj.get_objects_associated_components()
 	cmps.each{|cmp|
 	  ret[:component]||= {}
 	  cmp_ref = cmp.get_qualified_ref.to_sym
-	  ret[:component][cmp_ref] = 
+	  ret[:component][cmp_ref] =
 	    cmp[:external_ref] ? {:external_ref => cmp[:external_ref]} : {}
 	  values = cmp.get_direct_attribute_values(:value,{:attr_include => [:external_ref]})
-	  ret[:component][cmp_ref][:attribute] = values if values 
+	  ret[:component][cmp_ref][:attribute] = values if values
         }
         ret
       end
@@ -172,11 +173,11 @@ module DTK
         Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
       end
 
-      #TODO: stub; see if can use get_node_attributes
+      # TODO: stub; see if can use get_node_attributes
       def get_node_attributes_stub()
-        Array.new 
+        Array.new
       end
-      #TODO: once see calling contex, remove stub call
+      # TODO: once see calling contex, remove stub call
       def get_node_and_component_attributes(opts={})
         node_attrs = get_node_attributes_stub()
         component_attrs = get_objs(:cols => [:components_and_attrs]).map{|r|r[:attribute]}
@@ -193,9 +194,9 @@ module DTK
           case filter
           when :required_unset_attributes
             get_attributes_print_form_aux(lambda{|a|a.required_unset_attribute?()})
-          else 
+          else
             raise Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
-          end  
+          end
         else
           get_attributes_print_form_aux()
         end
@@ -205,7 +206,7 @@ module DTK
         node_attrs = get_node_attributes_stub()
         component_attrs = get_objs(:cols => [:components_and_attrs]).map do |r|
           attr = r[:attribute]
-          #TODO: more efficient to have sql query do filtering
+          # TODO: more efficient to have sql query do filtering
           if filter_proc.nil? or filter_proc.call(attr)
             display_name_prefix = "#{r[:component].display_name_print_form()}/"
             attr.print_form(Opts.new(:display_name_prefix => display_name_prefix))
@@ -223,7 +224,7 @@ module DTK
         }
         get_children_from_sp_hash(:attribute,sp_hash).first
       end
-      #TODO: may write above in terms of below
+      # TODO: may write above in terms of below
       def get_virtual_attributes(attribute_names,cols,field_to_match=:display_name)
         sp_hash = {
           :model_name => :attribute,
@@ -233,15 +234,15 @@ module DTK
         get_children_from_sp_hash(:attribute,sp_hash)
       end
 
-      #attribute on component on node
-      #assumption is that component cannot appear more than once on node
+      # attribute on component on node
+      # assumption is that component cannot appear more than once on node
       def get_virtual_component_attribute(cmp_assign,attr_assign,cols)
         base_sp_hash = {
           :model_name => :component,
           :filter => [:and, [:eq, cmp_assign.keys.first,cmp_assign.values.first],[:eq, :node_node_id,self[:id]]],
           :cols => [:id]
         }
-        join_array = 
+        join_array =
           [{
              :model_name => :attribute,
              :convert => true,
@@ -258,11 +259,11 @@ module DTK
 
       ####Things below heer shoudl be cleaned up or deprecated
       #####
-      #TODO: should be centralized
+      # TODO: should be centralized
       def get_contained_attribute_ids(opts={})
         get_directly_contained_object_ids(:attribute)||[]
       end
-      
+
       def get_direct_attribute_values(type,opts={})
         parent_id = IDInfoTable.get_id_from_id_handle(id_handle)
         attr_val_array = Model.get_objects(ModelHandle.new(@c,:attribute),nil,:parent_id => parent_id)
@@ -278,12 +279,12 @@ module DTK
       end
 
       ################
-      #TODO: may be aqble to deprecate most or all of below
+      # TODO: may be aqble to deprecate most or all of below
       ### helpers
       def ds_attributes(attr_list)
         [:ds_attributes]
       end
-      #TODO: rename subobject to sub_object
+      # TODO: rename subobject to sub_object
       def is_ds_subobject?(relation_type)
         false
       end
@@ -297,15 +298,15 @@ module DTK
         elsif component_title.nil? and title_attr_name
           cmp_name = component_template.component_type_print_form()
           raise ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
-        end 
-        
+        end
+
         if title_attr_name #and component_title
           component_type = component_template.get_field?(:component_type)
           if existing_cmp = Component::Instance.get_matching?(id_handle(),component_type,component_title)
             raise ErrorUsage.new("Component (#{existing_cmp.print_form()}) already exists")
           end
         end
-        
+
         title_attr_name
       end
     end

@@ -1,9 +1,9 @@
 require 'rubygems'
 require 'pp'
 
-#klass = Object.const_set(class_name,Class.new)
+# klass = Object.const_set(class_name,Class.new)
 
-#taken from http://www.ruby-forum.com/topic/163430
+# taken from http://www.ruby-forum.com/topic/163430
 =begin
 class Class
   def inherited other
@@ -28,7 +28,7 @@ class Top
     pp :works
   end
   def self.inherited(sub)
-    #adapted from  http://www.ruby-forum.com/topic/163430 
+    # adapted from  http://www.ruby-forum.com/topic/163430 
     (@subclasses ||= Array.new).push(sub).uniq!
   end
 
@@ -46,7 +46,7 @@ class Application < Top
 end
 Service.new.test2()
 
-#klass = Object.const_set(class_name,Class.new)
+# klass = Object.const_set(class_name,Class.new)
     TypeHierarchy = {
       :service => {
         :app_server=>{},

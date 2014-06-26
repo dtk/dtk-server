@@ -1,4 +1,4 @@
-#Monkey patch for Timeout
+# Monkey patch for Timeout
 require 'timeout'
 module TimeoutMonkeyPatch
   module Timeout
@@ -43,7 +43,7 @@ module TimeoutMonkeyPatch
     end
 
     timer_adapter = nil
-    #TODO: just treating system time adapter now
+    # TODO: just treating system time adapter now
     if R8::Config[:timer]
       case (R8::Config[:timer][:type])
        when "system_timer"
@@ -62,7 +62,7 @@ module TimeoutMonkeyPatch
     TimerAdapterClass = timer_adapter
   end
 end
-#TODO: if enable need to conditiuonally add require 'mcollective'
+# TODO: if enable need to conditiuonally add require 'mcollective'
 if (R8::Config[:timer]||{})[:type]
   class MCollective::Client
     include TimeoutMonkeyPatch

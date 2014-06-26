@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 16: NEG - Import component module from incorrect git repo url
+# Test Case 16: NEG - Import component module from incorrect git repo url
 
 require 'rubygems'
 require 'rest_client'

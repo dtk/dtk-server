@@ -21,7 +21,7 @@ module XYZ
       end
     end
 
-    #TODO: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import
+    # TODO: using mixed forms (ForeignKeyAttr class and "*" form) now to avoid having to convert "*" form when doing an import
     def mark_as_foreign_key(attr,opts={})
       ForeignKeyAttr.new(attr,opts)
     end
@@ -103,8 +103,8 @@ module XYZ
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
             if col.create_ref_object
-              #TODO: check whether should also populate ds_key; may not be needed because
-              #of relation between ds_key and relative distinguished name
+              # TODO: check whether should also populate ds_key; may not be needed because
+              # of relation between ds_key and relative distinguished name
               idh = IDHandle[:c => c, :uri => ref_uri]
               create_simple_instance?(idh,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(idh)
@@ -113,7 +113,7 @@ module XYZ
                 Log.error("In import_into_model cannot find object with uri #{ref_uri}") 
               else
                 ret_global_fks ||= Hash.new
-                #purposely using fk_rel_uri (rebaselined) but ref_uri_x (raw)
+                # purposely using fk_rel_uri (rebaselined) but ref_uri_x (raw)
                 ret_global_fks[fk_rel_uri] ||= Hash.new
                 ret_global_fks[fk_rel_uri][col] = ref_uri_x
               end
@@ -133,8 +133,8 @@ module XYZ
 	  ref_id_info = get_row_from_id_handle(IDHandle[:c => c, :uri => ref_uri])
           unless ref_id_info and ref_id_info[:id]
             if col.create_ref_object
-              #TODO: check whether should also populate ds_key; may not be needed because
-              #of relation between ds_key and relative distinguished name
+              # TODO: check whether should also populate ds_key; may not be needed because
+              # of relation between ds_key and relative distinguished name
               idh = IDHandle[:c => c, :uri => ref_uri]
               create_simple_instance?(idh,:set_display_name => true)
 	      ref_id_info = get_row_from_id_handle(idh)
@@ -159,11 +159,11 @@ module XYZ
          ref = $2
          stripped_uri = ""
       else
-        #TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
-#TODO        raise Error 
+        # TODO: double check that everything that works heer is fine;being no op seems to work fine when uri_x is "" because it is referencing top level object like aproject
+# TODO        raise Error 
       end
       # find prefix that matches and rebase
-      #TODO: don't think this is exactly right
+      # TODO: don't think this is exactly right
       prefix_matches = []
       prefixes.each{|prefix|
 	prefix =~ %r{^.+/(.+?)/(.+?$)}
@@ -179,7 +179,7 @@ module XYZ
       }
       return prefix_matches[0] + stripped_uri if prefix_matches.size == 1
       raise Error.new("not handling case where not exact, but or more prfix matches") if prefix_matches.size  > 1
-      #if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
+      # if container_uri is non null then uri_x can be wrt container_uri and this is assumed to be the case if reach here
       return container_uri + uri_x if container_uri
       raise Error 
     end

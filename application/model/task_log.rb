@@ -9,15 +9,15 @@ module XYZ
       task_log_mh = task.model_handle.createMH(:task_log)
       task_logs = Model.get_objects_from_sp_hash(task_log_mh,sp_hash)
 
-      #associate logs with task_ids and kick of deferred job to get logs for all nodes that dont haev compleet logs in db
+      # associate logs with task_ids and kick of deferred job to get logs for all nodes that dont haev compleet logs in db
       task_logs.each do |task_log|
         task_id = task_log[:task_id]
-        #implicit assumption that only one log per task
+        # implicit assumption that only one log per task
         ret_info[task_id].merge!(task_log.slice({:content => :log},:status,:type))
       end
       incl_assoc_nodes = ret_info.values.reject{|t|t[:status] == "complete"}.map{|info|info[:node]}
       unless incl_assoc_nodes.empty?
-        #initiate defer task to get logs
+        # initiate defer task to get logs
         task_pbuilderid_index = incl_assoc_nodes.inject({}){|h,n|h.merge(Node.pbuilderid(n) => n[:task_id])}
         config_agent_types = assoc_nodes.inject({}){|h,n|h.merge(n[:task_id] => n[:config_agent_type])}
         callbacks = {
@@ -30,7 +30,7 @@ module XYZ
               TaskLog.create_or_update(task_idh,config_agent_type.to_s,response[:log_content])
             else
               Log.error("error response for request to get log")
-              #TODO: put some subset of this in error msg
+              # TODO: put some subset of this in error msg
               pp msg
             end
           end
@@ -44,7 +44,7 @@ module XYZ
       task_id = task_idh.get_id()
       status = ParseLog.log_complete?(log_type,log_content) ? "complete" : "in_progress"
 
-      #create if needed
+      # create if needed
       sp_hash = {
         :cols => [:id],
         :filter => [:and, [:eq, :task_id, task_id],

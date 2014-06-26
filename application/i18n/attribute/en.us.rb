@@ -15,7 +15,7 @@
   :required_list => 'Req',
   :description_list => 'Descr',
 
-#generic SAP related
+# generic SAP related
   :sap__l4 => 'IPv4 Output',
   :sap_config__l4 => 'SAP Config IPV4',
   :sap__socket => 'SAP Socket',
@@ -28,18 +28,18 @@
   :sap_config__db__name => "DB Name",
   :sap_config__db__owner => "DB User",
   :sap_config__db__password => "DB User Password",
-#TODO: for below should be way to parse with wild card 
+# TODO: for below should be way to parse with wild card 
   :sap_config__db__admin__name => "Admin DB Name",
   :sap_config__db__admin__owner => "DB Admin User",
   :sap_config__db__admin__password => "DB Admin Password",
   :sap_ref_to_master => "Master Reference",
 
-#TODO: temp until finding normal local for all attribute labels
-#JMX related
+# TODO: temp until finding normal local for all attribute labels
+# JMX related
   :jmxremote_port => 'JMX Remote Port',
   :jmxremote_password => 'JMX Remote Password',
 
-#mysql
+# mysql
 =begin
 TODO: put pack in component qualification
   :mysql__server_root_password => 'Server Root Pwrd',
@@ -81,30 +81,30 @@ TODO: put pack in component qualification
   :sap_config_for_slave => "SAP Config for Slave",
 
   :sap__socket__socket_file => "Socket File",
-#mysql slave
+# mysql slave
   :master_log_ref=>"Master Log Ref",
   :sap_ref_to_master__host_address => "Master Addr",
   :sap_ref_to_master__port => "Master Port",
   :sap_ref_to_master__protocol => "Master Proto",
 
-#mysql master
+# mysql master
   :sap_config_for_slave__application__database => "Slave DB Name",
   :sap_config_for_slave__application__password => "Slave DB PW",
   :sap_config_for_slave__application__username => "Slave DB User Name",
   :sap_config_for_slave__port => "Slave Conn Port",
   :sap_config_for_slave__protocol => "Slave Conn Proto",
 
-#postgresql
+# postgresql
   :postgresql__dir => "PostgreSQL Directory",
   :conns_to_real_dbs__port => "DB Conn Port",
   :conns_to_real_dbs__protocol => "DB Conn Proto",
   :conns_to_real_dbs__host_address => "DB Conn Addr",
-#user_account
+# user_account
   :user_account__username => "User Name",
   :user_account__uid => "User ID",
   :user_account__gid => "User's Group ID",
 
-#apache2
+# apache2
  :apache2__servertokens=>"Server Tokens",
  :apache2__dir=>"Directory",
  :apache2__contact=>"Contact",
@@ -119,7 +119,7 @@ TODO: put pack in component qualification
  :apache2__keepalivetimeout=>"Keepalive Timeout",
  :apache2__listen_ports=>"Listen Ports",
 
-#wordpress
+# wordpress
  :db__user=>"DB Username",
  :db__password=>"DB Password",
  :dir=> "App Directory",
@@ -141,12 +141,12 @@ TODO: put pack in component qualification
  :wordpress__checksum=>"Tarball Checksum",
  :wordpress__keys_secure_auth=>"Secure Auth Key",
 
-#haproxy
+# haproxy
  :conns_to_real_servers__host_address => "Real Server Addr",
  :conns_to_real_servers__port => "Real Server Port",
  :conns_to_real_servers__protocol => "Real Server Proto",
 
-#nagios
+# nagios
   :nagios__monitored_client_sap_config => "SAP Config",
   :nagios__monitor_sap_refs => "NRPE SAP Refs",
 }

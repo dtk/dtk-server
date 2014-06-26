@@ -1,7 +1,7 @@
 module DTK
   class ServiceModule < Model
-    r8_nested_require('service','component_module_ref') 
-    r8_nested_require('service','component_module_refs') 
+    r8_nested_require('service','component_module_ref')
+    r8_nested_require('service','component_module_refs')
     r8_nested_require('service','dsl')
     r8_nested_require('service','service_add_on')
 
@@ -29,11 +29,14 @@ module DTK
       ndx_ret.values
     end
 
-    def self.get_required_and_missing_modules(project,remote_params)
+    def self.get_required_and_missing_modules(project, remote_params, client_rsa_pub_key=nil)
       remote = remote_params.create_remote(project)
-      response = Repo::Remote.new(remote).get_remote_module_components()
+      response = Repo::Remote.new(remote).get_remote_module_components(client_rsa_pub_key)
       opts = Opts.new(:project_idh => project.id_handle())
-      ComponentModule.cross_reference_modules(opts, response, remote.namespace)
+
+      # this method will return array with missing and required modules
+      module_info_array = ComponentModule.cross_reference_modules(opts, response['component_info'], remote.namespace)
+      module_info_array.push(response['dependency_warnings'])
     end
 
     def get_referenced_component_modules(opts=Opts.new)
@@ -45,7 +48,7 @@ module DTK
 
       if opts.array(:detail_to_include).include?(:versions)
         ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
-        
+
         ret.each do |mod|
           if version_obj = ndx_versions[mod.module_name()]
             mod[:version] = version_obj
@@ -78,7 +81,7 @@ module DTK
       repos.each{|repo|RepoManager.delete_repo(repo)}
       delete_instances(repos.map{|repo|repo.id_handle()})
 
-      #need to explicitly delete nodes since nodes' parents are not the assembly
+      # need to explicitly delete nodes since nodes' parents are not the assembly
       Assembly::Template.delete_assemblies_nodes(assembly_templates.map{|a|a.id_handle()})
 
       delete_instance(id_handle())
@@ -94,7 +97,7 @@ module DTK
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist") 
+          raise ErrorUsage.new("Version '#{version}' for specified component module does not exist")
         end
       end
 
@@ -116,9 +119,9 @@ module DTK
     def get_assembly_instances()
       assembly_templates = get_assembly_templates()
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
-      
+
       assoc_assemblies.each do |assoc_assembly|
-        assembly_template = assembly_templates.select{|at| at[:id]==assoc_assembly[:ancestor_id]}  
+        assembly_template = assembly_templates.select{|at| at[:id]==assoc_assembly[:ancestor_id]}
         nodes = assembly_template.first[:nodes]
         assoc_assembly[:nodes] = nodes
       end
@@ -182,7 +185,7 @@ module DTK
           {:targets => ndx_targets[mb_id]||Array.new},
           {:assemblies => Array.new}
          ])
-        h.merge(mb_id => content) 
+        h.merge(mb_id => content)
       end
 
       filter = [:oneof, :module_branch_id,mb_idhs.map{|idh|idh.get_id()}]
@@ -194,7 +197,7 @@ module DTK
       end
       ndx_ret.values
     end
-    #TODO: use of SimpleOrderedHash above and below was just used to print out in debuging and could be removed
+    # TODO: use of SimpleOrderedHash above and below was just used to print out in debuging and could be removed
     class << self
       private
       def format_for_get_project_trees__nodes(nodes)
@@ -216,9 +219,9 @@ module DTK
 "component_external","component_internal_external")
     end
 =end
-    #targets indexed by service_module
+    # targets indexed by service_module
     def self.get_ndx_targets(sm_branch_idhs)
-      #TODO: right now: putting in all targets for all service modules;
+      # TODO: right now: putting in all targets for all service modules;
       ret = Array.new
       return ret if sm_branch_idhs.empty?
       sm_branch_mh = sm_branch_idhs.first.createMH()
@@ -253,7 +256,7 @@ module DTK
       }
       mh = assembly_templates.first.model_handle(:component)
       get_objs(mh,sp_hash)
-    end 
+    end
 
     def pull_from_remote__update_from_dsl(repo, module_and_branch_info, version=nil)
       info = module_and_branch_info #for succinctness
@@ -283,13 +286,13 @@ module DTK
       end
       is_parsed = true
       unless opts[:donot_update_model_from_dsl]
-        is_parsed = update_model_from_dsl(module_branch,opts) 
+        is_parsed = update_model_from_dsl(module_branch,opts)
       end
       is_parsed
     end
 
     def update_model_from_clone__type_specific?(commit_sha,diffs_summary,module_branch,version,opts={})
-      #TODO: for more efficiency can push in diffs_summary to below
+      # TODO: for more efficiency can push in diffs_summary to below
       # opts = {:donot_make_repo_changes => true} #clone operation should push any chanegs to repo
       if version.kind_of?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
@@ -305,12 +308,12 @@ module DTK
         raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
       end
 
-      #get module info for every component in an assembly in the service module
+      # get module info for every component in an assembly in the service module
       module_info = get_component_modules_info(module_branch_obj)
 pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
-      #check that all component modules are linked to a remote component module
+      # check that all component modules are linked to a remote component module
 =begin
-      #TODO: ModuleBranch::Location: removed linked_remote; taking out this check until have replacement
+      # TODO: ModuleBranch::Location: removed linked_remote; taking out this check until have replacement
       unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?()}
       unless unlinked_mods.empty?
         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
@@ -318,7 +321,7 @@ pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
 =end
     end
 
-    #returns [module_branch,component_modules]
+    # returns [module_branch,component_modules]
     def get_component_modules_info(module_branch)
       filter = [:eq, :module_branch_id,module_branch[:id]]
       component_templates = Assembly.get_component_templates(model_handle(:component),filter)
@@ -328,8 +331,8 @@ pp [:debug_publish_preprocess_raise_error,:module_info,module_info]
     end
 
     def self.assembly_ref(module_name,assembly_name)
-      #TODO: right now cannot change because node bdings in assembly.json hard coded to this. Need to check if any ambiguity
-      #if have module name with hyphen
+      # TODO: right now cannot change because node bdings in assembly.json hard coded to this. Need to check if any ambiguity
+      # if have module name with hyphen
       "#{module_name}-#{assembly_name}"
     end
   end

@@ -1,6 +1,6 @@
 require 'memcache'
 
-#TBD: may have a set of these that are in different namespaces
+# TBD: may have a set of these that are in different namespaces
 module XYZ
   class MemoryCache
     class << self

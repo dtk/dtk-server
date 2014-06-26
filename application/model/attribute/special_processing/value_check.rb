@@ -1,7 +1,7 @@
 module DTK; class Attribute
   class SpecialProcessing
     class ValueCheck < self
-      #returns [whether_special_processing,nil_or_value_check_error]
+      # returns [whether_special_processing,nil_or_value_check_error]
       def self.error_special_processing?(attr,new_val)
         error = nil
         if special_processing = needs_special_processing?(attr)

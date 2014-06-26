@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Check possibility to create assembly from existing service and then to converge new assembly
+# Test Case 1: Check possibility to create assembly from existing service and then to converge new assembly
 
 require 'rubygems'
 require 'rest_client'

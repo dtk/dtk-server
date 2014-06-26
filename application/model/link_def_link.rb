@@ -22,8 +22,8 @@ module DTK
       self
     end
 
-    #TODO: when add cardinality contrsaints on links, would check it here
-    #assuming that augmented ports have :port_info
+    # TODO: when add cardinality contrsaints on links, would check it here
+    # assuming that augmented ports have :port_info
     def ret_matches(in_aug_port,out_aug_ports)
       ret = Array.new
       cmp_type = self[:remote_component_type]
@@ -62,11 +62,11 @@ module DTK
 
       on_create_events.each{|ev|ev.process!(context)} 
 
-      #TODO: not bulking up procssing multiple node group members because dont yet handle case when
-      #theer are multiple members taht are output that feed into a node attribute
+      # TODO: not bulking up procssing multiple node group members because dont yet handle case when
+      # theer are multiple members taht are output that feed into a node attribute
       links_array = AttributeMapping.ret_links_array(attribute_mappings,context,:raise_error => opts[:raise_error])
       links_array.each do |links|
-        #ret_links returns nil only if error such as not being able to find input_id or output_id
+        # ret_links returns nil only if error such as not being able to find input_id or output_id
         next if links.empty?
         if port_link_idh = opts[:port_link_idh]
           port_link_id = port_link_idh.get_id()
@@ -85,7 +85,7 @@ module DTK
     end
 
     def attribute_mappings()
-      #TODO: may convert to using @attribute_mappings; need to make sure no side-effects
+      # TODO: may convert to using @attribute_mappings; need to make sure no side-effects
       self[:attribute_mappings] ||= (self[:content][:attribute_mappings]||[]).map{|am|AttributeMapping.reify(am)}
     end
 
@@ -118,17 +118,17 @@ module DTK
         component_extension = base_component.get_extension_in_library(self[:extension_type])
         raise Error.new("cannot find library extension of type #{self[:extension_type]} to #{self[:base_component]} in library") unless component_extension
 
-        #find node to clone it into
+        # find node to clone it into
         node = (self[:node] == "local") ? context.local_node : context.remote_node
         raise Error.new("cannot find node of type #{self[:node]} in context") unless node
 
-        #clone component into node
+        # clone component into node
         override_attrs = {:from_on_create_event => true}
-        #TODO: may put in flags to tell clone operation not to do any constraint checking
+        # TODO: may put in flags to tell clone operation not to do any constraint checking
         clone_opts = {:ret_new_obj_with_cols => [:id,:display_name,:extended_base,:implementation_id]}
         new_cmp = node.clone_into(component_extension,override_attrs,clone_opts)
         
-        #if alias is given, update context to reflect this
+        # if alias is given, update context to reflect this
         if self[:alias]
           context.add_component_ref_and_value!(self[:alias],new_cmp)
         end

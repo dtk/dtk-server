@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'ruote'
 require 'pp'
-#require 'ruote/storage/hash_storage'
+# require 'ruote/storage/hash_storage'
 
 class MyRemoteParticipant
   include Ruote::LocalParticipant

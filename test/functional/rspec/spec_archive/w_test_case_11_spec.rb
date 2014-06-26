@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 11: Create two nodes, add components in both of them, link attributes between components on different nodes and check if value is propagated
+# Test Case 11: Create two nodes, add components in both of them, link attributes between components on different nodes and check if value is propagated
 
 require 'rubygems'
 require 'rest_client'

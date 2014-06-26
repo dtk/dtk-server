@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 5: Change optional params on existing attributes in service nodes (values were previously defined)
+# Test Case 5: Change optional params on existing attributes in service nodes (values were previously defined)
 
 require 'rubygems'
 require 'rest_client'

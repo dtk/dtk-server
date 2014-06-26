@@ -1,11 +1,11 @@
 
 require File.expand_path('msg_bus_message', File.dirname(__FILE__))
-#TBD: factor so have dynamically loaded adapters
+# TBD: factor so have dynamically loaded adapters
 require 'mq'
 require 'bunny'
 
 module XYZ
-  #TBD: see if can do same by just doing an an include or extend AMQP
+  # TBD: see if can do same by just doing an an include or extend AMQP
   class R8EventLoop 
     class << self
       attr_reader :connection_opts
@@ -42,7 +42,7 @@ module XYZ
      @native_clients[type].close()
    end
 
-   #using bunny for exchanges and publish queues 
+   # using bunny for exchanges and publish queues 
    def exchange(name,opts={})
      R8ExchangeBunny.new(self,name,opts)
    end
@@ -51,9 +51,9 @@ module XYZ
      R8QueueBunny.new(self,name,opts)
    end
 
-   #using mq for subscribe queues
+   # using mq for subscribe queues
    def subscribe_queue(name,opts={})
-     #TBD: here and analogously; only push in self and dynamically call native_client?(:mq)
+     # TBD: here and analogously; only push in self and dynamically call native_client?(:mq)
      R8QueueMQ.new(self,name,opts)
    end
 
@@ -62,8 +62,8 @@ module XYZ
      publish_queue(queue_name).bind(exchange, bind_opts)
    end
 
-   #returns native client, creates it if does not exist 
-   #TBD: should we fold reconnect logic into this fn?
+   # returns native client, creates it if does not exist 
+   # TBD: should we fold reconnect logic into this fn?
    def native_client?(type)
      if @native_clients[type]
        return @native_clients[type] 
@@ -82,7 +82,7 @@ module XYZ
          ::MQ.new(::AMQP.connect(connection_opts))
        when :bunny
          native_client = ::Bunny.new(connection_opts)
-         #TBD: asymetrical in that mq only staretd when in an event loop
+         # TBD: asymetrical in that mq only staretd when in an event loop
          native_client.start()
          native_client
        else
@@ -97,7 +97,7 @@ end
 
 module XYZ
   module R8ExchangeQueueMixin
-    #TBD: might take out ability to pass in uuid and hide this internally
+    # TBD: might take out ability to pass in uuid and hide this internally
     def publish_with_callback(msg_bus_msg_out,publish_opts_x={},&callback_block)
       uuid = publish_opts_x[:uuid] || MessageBusClient.generate_unique_id()
       reply_timeout = publish_opts_x[:reply_timeout]
@@ -110,7 +110,7 @@ module XYZ
         publish(msg_bus_msg_out,publish_opts)
         set_reply_timeout(reply_timeout,uuid) if reply_timeout
       }
-      #publish put in callback to ensure executed after reply queue created
+      # publish put in callback to ensure executed after reply queue created
       if callback_block.arity == 1
         response_queue.subscribe(:confirm => publish_proc) do |msg_bus_msg_in|
           @got_replies_from[uuid] = true
@@ -129,7 +129,7 @@ module XYZ
     def set_reply_timeout(reply_timeout,reply_queue_name)
       EM.add_timer(reply_timeout) {
         unless @got_replies_from[reply_queue_name]
-          #TBD: msg is stubbed
+          # TBD: msg is stubbed
          print "debug: sending cancled signal\n"
           msg_bus_msg_out = ProcessorMsg.create(:msg_type => :time_out).marshal_to_message_bus_msg()
           timeout_queue = @client.publish_queue(reply_queue_name,:passive => true)
@@ -161,7 +161,7 @@ module XYZ
     def delete(opts={})
       @native_exchange.delete(opts)
     end
-    #TBD: collapse with queue analog 
+    # TBD: collapse with queue analog 
     def publish(msg_bus_msg_out,publish_opts={})
       raw_body_and_publish_opts = msg_bus_msg_out.marshal_to_wire(publish_opts)
       begin
@@ -230,7 +230,7 @@ module XYZ
       @native_queue.delete(opts)
     end
 
-    #TBD: may call form publish_aux that takes num of retries
+    # TBD: may call form publish_aux that takes num of retries
     def publish(msg_bus_msg_out,publish_opts={})
       raw_body_and_publish_opts = msg_bus_msg_out.marshal_to_wire(publish_opts)
       begin
@@ -255,9 +255,9 @@ module XYZ
 end
 
 
-#TBD: not sure if needed now because explicitly seting connection within fork
-#monkey patch that is used when want to call AMPQ.fork and set params like :host
-#TBD: better wrap the classes to hide MQ and posibly to wrap ops like subscribe and publish
+# TBD: not sure if needed now because explicitly seting connection within fork
+# monkey patch that is used when want to call AMPQ.fork and set params like :host
+# TBD: better wrap the classes to hide MQ and posibly to wrap ops like subscribe and publish
 AMQP.class_eval do
   def self.set_settings(opts={})
     settings #to set @settings with defaults

@@ -23,7 +23,7 @@ module DTK
       end
       ConfigAgentType = :puppet #TODO: stub
 
-      #creates a new assembly template if it does not exist
+      # creates a new assembly template if it does not exist
       def self.create_or_update_from_instance(assembly_instance,service_module,assembly_name,opts={})
         assembly_factory = create_assembly_factory(assembly_instance,service_module,assembly_name,opts)
         assembly_factory.create_assembly_template()
@@ -88,9 +88,9 @@ module DTK
           raise ErrorUsage.new("Cannot find any nodes associated with assembly (#{assembly_instance.get_field?(:display_name)})")
         end
 
-        #1) get a content object, 2) modify, and 3) persist
+        # 1) get a content object, 2) modify, and 3) persist
         port_links,dangling_links = Node.get_conn_port_links(node_idhs)
-        #TODO: raise error to user if dangling link
+        # TODO: raise error to user if dangling link
         Log.error("dangling links #{dangling_links.inspect}") unless dangling_links.empty?
 
         task_templates = Task::Template::ConfigComponents.get_existing_or_stub_templates(:assembly,assembly_instance)
@@ -99,18 +99,18 @@ module DTK
         node_mh = node_idhs.first.createMH()
         node_ids = node_idhs.map{|idh|idh.get_id()}
 
-        #get assembly-level attributes
+        # get assembly-level attributes
         assembly_level_attrs = assembly_instance.get_assembly_level_attributes().reject do |a|
           a[:attribute_value].nil?
         end
 
-        #get node-level attributes
+        # get node-level attributes
         ndx_node_level_attrs = Hash.new
         Node.get_node_level_assembly_attributes(node_idhs).each do |r|
           (ndx_node_level_attrs[r[:node_node_id]] ||= Array.new) << r
         end
 
-        #get contained ports
+        # get contained ports
         sp_hash = {
           :cols => [:id,:display_name,:ports_for_clone],
           :filter => [:oneof,:id,node_ids]
@@ -123,7 +123,7 @@ module DTK
           @ndx_ports[port[:id]] = port
         end
 
-        #get contained components-non-default attributes
+        # get contained components-non-default attributes
         sp_hash = {
           :cols => node_scalar_cols + [:cmps_and_non_default_attrs],
           :filter => [:oneof,:id,node_ids]
@@ -165,16 +165,16 @@ module DTK
         self
       end
 
-      #TODO: can collapse above and below; aboves looks like extra intermediate level
+      # TODO: can collapse above and below; aboves looks like extra intermediate level
       def create_assembly_template_aux()
         nodes = self[:nodes].inject(DBUpdateHash.new){|h,node|h.merge(create_node_content(node))}
         port_links = self[:port_links].inject(DBUpdateHash.new){|h,pl|h.merge(create_port_link_content(pl))}
-        #Need to explicitly prune because the port link refs used when creating from import uses ids
+        # Need to explicitly prune because the port link refs used when creating from import uses ids
         prune_duplicate_port_links!(port_links) 
         task_templates = self[:task_templates].inject(DBUpdateHash.new){|h,tt|h.merge(create_task_template_content(tt))}
         assembly_level_attributes = self[:assembly_level_attributes].inject(DBUpdateHash.new){|h,a|h.merge(create_assembly_level_attributes(a))}
 
-        #only need to mark as complete if assembly template exists already
+        # only need to mark as complete if assembly template exists already
         if assembly_template_idh = id_handle_if_object_exists?()
           assembly_template_id = assembly_template_idh.get_id()
           nodes.mark_as_complete({:assembly_id=>assembly_template_id},:apply_recursively => true)

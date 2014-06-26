@@ -1,4 +1,4 @@
-#TODO: finish moving the fns and mixins that relate just to template or instance to these files
+# TODO: finish moving the fns and mixins that relate just to template or instance to these files
 module DTK
   class Assembly < Component
     r8_nested_require('assembly','list')
@@ -66,10 +66,10 @@ module DTK
     end
     private :error_message_condition
 
-    #augmented with the ports and nodes; component_id is on ports
+    # augmented with the ports and nodes; component_id is on ports
     def get_augmented_port_links(opts={})
       rows = get_objs(:cols => [:augmented_port_links])
-      #TODO: remove when have all create port link calls set port_link display name to service type
+      # TODO: remove when have all create port link calls set port_link display name to service type
       rows.each{|r|r[:port_link][:display_name] ||= r[:input_port].link_def_name()}  
       if filter = opts[:filter]
         post_filter =  port_link_filter_lambda_form(filter,opts) 
@@ -90,7 +90,7 @@ module DTK
         lambda{|r|r[:port_link][:id] == port_link_id}
       elsif Aux.has_just_these_keys?(filter,[:input_component_id])
         input_component_id = filter[:input_component_id]
-        #not setting opts[:ret_match_info][:clause] because :input_component_id internally generated
+        # not setting opts[:ret_match_info][:clause] because :input_component_id internally generated
         lambda{|r|r[:input_port][:component_id] == input_component_id}
       elsif Aux.has_only_these_keys?(filter,[:service_type,:input_component_id,:output_component_id])
         unless input_component_id = filter[:input_component_id]
@@ -98,7 +98,7 @@ module DTK
         end
         output_component_id = filter[:output_component_id]
         service_type = filter[:service_type]
-        #not including conjunct with :input_component_id or output_component_id because internally generated
+        # not including conjunct with :input_component_id or output_component_id because internally generated
         if opts[:ret_match_info] and service_type
           opts[:ret_match_info][:clause] = "service_type = '#{service_type}'"
         end
@@ -113,7 +113,7 @@ module DTK
     end
     private :port_link_filter_lambda_form
 
-    #MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
+    # MOD_RESTRUCT: this must be removed or changed to reflect more advanced relationship between component ref and template
     def self.get_component_templates(assembly_mh,filter=nil)
       sp_hash = {
         :cols => [:id, :display_name,:component_type,:component_templates],
@@ -123,7 +123,7 @@ module DTK
       assembly_rows.map{|r|r[:component_template]}
     end
 
-    #this can be overwritten
+    # this can be overwritten
     def self.get_component_attributes(assembly_mh,template_assembly_rows,opts={})
       Array.new
     end
@@ -135,7 +135,7 @@ module DTK
       cmp_ids = assembly_rows.map{|r|(r[:nested_component]||{})[:id]}.compact
       return ret if cmp_ids.empty?
 
-      #by defalut do not include derived values
+      # by defalut do not include derived values
       cols = [:id,:display_name,:value_asserted,:component_component_id,:is_instance_value] + (opts[:include_derived] ? [:value_derived] : [])
       sp_hash = {
         :cols => cols,
@@ -196,8 +196,8 @@ module DTK
     end
 
     ##############
-    #TODO: looks like callers dont need all teh detail; might just provide summarized info or instead pass arg that specifies sumamry level
-    #also make optional whether materialize
+    # TODO: looks like callers dont need all teh detail; might just provide summarized info or instead pass arg that specifies sumamry level
+    # also make optional whether materialize
     def get_node_assembly_nested_objects()
       ndx_nodes = Hash.new
       sp_hash = {:cols => [:instance_nodes_and_cmps]}
@@ -248,8 +248,8 @@ module DTK
       component_and_attrs = get_objects_from_sp_hash(sp_hash)
       return nil if component_and_attrs.empty?
       sample = component_and_attrs.first
-      #TODO: hack until basic_type is populated
-      #component = sample.subset(:id,:display_name,:component_type,:basic_type)
+      # TODO: hack until basic_type is populated
+      # component = sample.subset(:id,:display_name,:component_type,:basic_type)
       component = sample.subset(:id,:display_name,:component_type).merge(:basic_type => "#{assembly_type()}_assembly")
       node_attrs = {:node_id => sample[:node][:id], :node_name => sample[:node][:display_name]} 
       filtered_attrs = component_and_attrs.map do |r|
@@ -264,7 +264,7 @@ module DTK
       component.merge(:attributes => attributes)
     end
     def assembly_type()
-      #TODO: stub; may use basic_type to distinguish between component and node assemblies
+      # TODO: stub; may use basic_type to distinguish between component and node assemblies
       :node
     end
     private :assembly_type

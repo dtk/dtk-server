@@ -4,7 +4,7 @@ module DTK; class Task
       r8_nested_require('config_components','persistence')
 
       def self.update_when_added_component?(assembly,node,new_component,component_title,opts={})
-        #only updating the create action task template and only if it is persisted
+        # only updating the create action task template and only if it is persisted
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions,nil,opts)
           new_action = Action.create(new_component.merge(:node => node,:title => component_title))
@@ -16,8 +16,8 @@ module DTK; class Task
       end
 
       def self.update_when_deleted_component?(assembly,node,component)
-        #TODO: currently only updating the create action task template and only if it is persisted
-        #makes sense to also automtically delete component in other actions
+        # TODO: currently only updating the create action task template and only if it is persisted
+        # makes sense to also automtically delete component in other actions
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         if task_template_content = get_template_content_aux?([:assembly],assembly,assembly_cmp_actions)
           action_to_delete = Action.create(component.add_title_field?().merge(:node => node))
@@ -29,12 +29,12 @@ module DTK; class Task
 
       def self.get_existing_or_stub_templates(action_types,assembly_instance)
         ret = Array.new
-        #TODO: only returning now the task templates for the default (assembly create action)
+        # TODO: only returning now the task templates for the default (assembly create action)
         task_action = default_task_action()
 
-        #getting content from Task::Template::ConfigComponents.get_or_generate and 
-        #template object from assembly_instance.get_task_template of stub and spliciing in content 
-        #with all but assembly actions filtered out
+        # getting content from Task::Template::ConfigComponents.get_or_generate and 
+        # template object from assembly_instance.get_task_template of stub and spliciing in content 
+        # with all but assembly actions filtered out
 
         opts = {:component_type_filter => :service, :task_action => task_action, :dont_persist_generated_template => true}
         unless task_template_content = get_or_generate_template_content(action_types,assembly_instance,opts)
@@ -50,7 +50,7 @@ module DTK; class Task
         ret
       end
 
-      #TODO: do more accurate parse if assembly is non null
+      # TODO: do more accurate parse if assembly is non null
       def self.find_parse_errors(hash_content,assembly=nil)
         begin
           cmp_actions = (assembly && ActionList::ConfigComponents.get(assembly))
@@ -62,7 +62,7 @@ module DTK; class Task
         nil
      end
 
-      #action_types is scalar or array with elements
+      # action_types is scalar or array with elements
       # :assembly
       # :node_centric
       def self.get_or_generate_template_content(action_types,assembly,opts={})
@@ -73,17 +73,17 @@ module DTK; class Task
         action_list_opts = Aux.hash_subset(opts,[:component_type_filter])
         cmp_actions = ActionList::ConfigComponents.get(assembly,action_list_opts)
 
-        #first see if there is a persistent serialized task template for assembly instance and that it should be used
+        # first see if there is a persistent serialized task template for assembly instance and that it should be used
         if template_content = get_template_content_aux?(action_types,assembly,cmp_actions,task_action,opts)
           return template_content
         end
 
-        #otherwise do the temporal processing to generate template_content
+        # otherwise do the temporal processing to generate template_content
         opts_generate = (node_centric_first_stage?() ? {:node_centric_first_stage => true} : Hash.new)
         template_content = generate_from_temporal_contraints([:assembly,:node_centric],assembly,cmp_actions,opts_generate)
 
         unless opts[:dont_persist_generated_template]
-          #persist assembly action part of what is generated
+          # persist assembly action part of what is generated
           Persistence::AssemblyActions.persist(assembly,template_content,task_action)
         end
 

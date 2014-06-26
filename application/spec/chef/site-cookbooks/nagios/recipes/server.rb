@@ -50,7 +50,7 @@ pp normalized_nodes
 
   raise XYZ::ExitRecipe.new("Nagios server's host list is empty") if host_info_list.empty?
 
-  #TBD: right now nagios does not support a display name so have to change name ref to the display name
+  # TBD: right now nagios does not support a display name so have to change name ref to the display name
   host_info_list.each do |host_info|
     host_info[:alias] = host_info[:name]
     host_info[:name] = host_info[:node_display_name] if host_info.has_key?(:node_display_name)
@@ -164,7 +164,7 @@ pp normalized_nodes
   end
 
 
-  #TBD: make contingent on whether service is on some node
+  # TBD: make contingent on whether service is on some node
   service_check_assocs.each_value do |info|
     if info["is_custom_check"] and info["is_custom_check"] == "server_side"
       load_plugin info["command_name"] do
@@ -173,11 +173,11 @@ pp normalized_nodes
     end
   end
 
-  #TBD: first cut; needs work
-  #load ndoutils if flag captures it
+  # TBD: first cut; needs work
+  # load ndoutils if flag captures it
   if node[:nagios][:ndoutils] and node[:nagios][:ndoutils][:enabled] 
-    #TBD: way to make sure mysql is included
-    #TBD: probably need preseed options for mysql
+    # TBD: way to make sure mysql is included
+    # TBD: probably need preseed options for mysql
     package "ndoutils-nagios3-mysql" do
       action :install
     end
@@ -193,11 +193,11 @@ pp normalized_nodes
       action [:enable,:start]
       not_if "pgrep ndo2db"
       notifies :restart, resources(:service => "nagios3")
-      #TBD: does not if "override the subscribes signal?
+      # TBD: does not if "override the subscribes signal?
       subscribes :restart, resources(:template => "/etc/default/ndoutils"), :immediately
     end
   end
-  #TBD: else make sure that ndoutils damons are not running
+  # TBD: else make sure that ndoutils damons are not running
  rescue XYZ::ExitRecipe => e
   Chef::Log.info(e.print_form)
  rescue Exception => e

@@ -1,6 +1,6 @@
 module XYZ
   class DevtestController < AuthController 
-    #using default layout
+    # using default layout
     layout :default
     def initialize
       super
@@ -25,8 +25,8 @@ module XYZ
       raise Error.new("cannot find #{ds_uri}") if parent_id.nil?
       ds_object_objs = Model.get_objects(ModelHandle.new(c,:data_source_entry), nil, :parent_id => parent_id)
       raise Error.new("cannot find any #{ds_type} data source objects in #{container_uri}") if ds_object_objs.empty?
-      #so that cache can be shared accross different ds_object_objs
-      #TODO make more sophisticated
+      # so that cache can be shared accross different ds_object_objs
+      # TODO make more sophisticated
       common_ds_connectors = Hash.new 
       ds_object_objs.each{|x|x.set_and_share_ds_connector!(common_ds_connectors,container_uri)}
       ds_object_objs.each{|x|x.discover_and_update()}
@@ -46,20 +46,20 @@ module XYZ
       @title = uri
       id_handle = IDHandle[:c => c,:uri => uri]
       objs = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
-      #TBD: implement :normalized_attrs_only flag
+      # TBD: implement :normalized_attrs_only flag
       @results = objs
     end
 ################################################################################
 ################################################################################
 ################################################################################
 
-#TODO: move out of here
+# TODO: move out of here
     ACTION_HANDLER_IS_ASYNCHRONOUS = {
 #      :import_chef_recipes => true
     }
 
-    #TODO: might refactor other actions to use this
-    #TODO: want to route to this, not allow direct call; how can we enforce this (maybe route with this prefix leads to unauthorized
+    # TODO: might refactor other actions to use this
+    # TODO: want to route to this, not allow direct call; how can we enforce this (maybe route with this prefix leads to unauthorized
     ACTION_HANDLER_OBJ = {
       :import_chef_recipes => Library,
       :clone_component => Object,
@@ -83,7 +83,7 @@ module XYZ
       :encapsulate_elements_in_project =>  :encapsulate_elements_in_project
     }
 
-    #TODO: starting to bring in new code; hard coded just for list_components
+    # TODO: starting to bring in new code; hard coded just for list_components
     def test__list(*uri_array)
       error_405 unless request.get?
       action = ViewAction::ListObjects
@@ -94,10 +94,10 @@ module XYZ
       
       result_array = ActionSet::Singleton.dispatch_action(action,c,uri,href_prefix,http_opts)
       print JSON.pretty_generate(result_array) # stub
-      #TODO: put in rendering
+      # TODO: put in rendering
     end
 
-    #TODO: starting to bring in new code; hard coded just for import_chef_recipes
+    # TODO: starting to bring in new code; hard coded just for import_chef_recipes
     def action_handler__import_chef_recipes(*uri_array)
       error_405 unless request.post?
       action = :import_chef_recipes
@@ -111,9 +111,9 @@ module XYZ
       redirect route('list/' + redirect_uri) unless redirect_uri.nil?
     end
 
-#TODO: move out of here and modularize
+# TODO: move out of here and modularize
 
-    #TODO: this fn getting too large; will modularize 
+    # TODO: this fn getting too large; will modularize 
     def action_handler(action_x,*uri_array)
       error_405 unless request.post?
       action = action_x.to_sym
@@ -125,11 +125,11 @@ module XYZ
       task = Task.create(ACTION_HANDLER_IS_ASYNCHRONOUS[action] ? c : nil)
       redirect_uri = task[:uri] 
 
-      #TODO: stubbing how variables obj, params, and redirect_uri set (would make this data driven; casing on action)
+      # TODO: stubbing how variables obj, params, and redirect_uri set (would make this data driven; casing on action)
       obj = ACTION_HANDLER_OBJ[action]
-      #TODO: wil replace with data driven logic
+      # TODO: wil replace with data driven logic
       params = nil; opts_added = nil
-      #TODO: what parameters below correspond to is getting obscurred so might have each action in model take one paramter which is a hash and then effect we can specific "call by value" 
+      # TODO: what parameters below correspond to is getting obscurred so might have each action in model take one paramter which is a hash and then effect we can specific "call by value" 
       case action
         when :import_chef_recipes
       	  params = [
@@ -139,7 +139,7 @@ module XYZ
           ]
           redirect_uri ||= request[:library_uri]
         when :update_from_hash
-          #TODO: had problem with restclients encoding of nils/nulls in hash; so sending json as hash attribute
+          # TODO: had problem with restclients encoding of nils/nulls in hash; so sending json as hash attribute
           params = [
             IDHandle[:c => c,:uri => uri],
             JSON.parse(request[:content])
@@ -176,11 +176,11 @@ module XYZ
           ]
           redirect_uri ||= request[:target_uri]
         when :create_simple
-          #TODO: error if request[:uri] is null
+          # TODO: error if request[:uri] is null
           params = [request[:uri],c]
           redirect_uri ||= request[:uri]
         when :delete
-          #TODO: error if request[:uri] is null
+          # TODO: error if request[:uri] is null
           params = [
             IDHandle[:c=> c, :uri => request[:uri]],
             (opts ? opts : {}).merge({:task => task})
@@ -201,7 +201,7 @@ module XYZ
       params << {:task => task} unless opts_added
 
       user_object  = ::DTK::CurrentSession.new.user_object()
-      #dispatcher line
+      # dispatcher line
       if ACTION_HANDLER_IS_ASYNCHRONOUS[action]
         CreateThread.defer_with_session(user_object) {
           begin
@@ -219,7 +219,7 @@ module XYZ
       redirect route('list_temp/' + redirect_uri) unless redirect_uri.nil?
     end
 
-    #TODO: just temp; may want the rest uris to mirror the ui ones; ideally whether rest or ui request handled by same actions, difference just is in opts passed
+    # TODO: just temp; may want the rest uris to mirror the ui ones; ideally whether rest or ui request handled by same actions, difference just is in opts passed
     def rest(*uri_array)
       error_405 unless request.get?
       uri = "/" + uri_array.join("/")
@@ -229,7 +229,7 @@ module XYZ
       @results = Object.get_instance_or_factory(IDHandle[:c => c,:uri => uri],href_prefix,opts)
     end
 
-#TODO: move out of here
+# TODO: move out of here
     def library__public
      error_405 unless request.get?
      uri = "/library/public" 
@@ -240,7 +240,7 @@ module XYZ
      @title = uri
     end
 
-#TODO: move out of here, this doesnt belong in the controller
+# TODO: move out of here, this doesnt belong in the controller
     # for list from id  
     def list_by_guid(guid)
       error_405 unless request.get? 
@@ -251,7 +251,7 @@ module XYZ
       @results = Object.get_instance_or_factory(IDHandle[:c => c,:guid => guid],href_prefix,opts)
     end
 
-    #TODO: temp
+    # TODO: temp
     def list_contained_attributes(*uri_array)
       error_405 unless request.get? 
       uri = "/" + uri_array.join("/")
@@ -262,8 +262,8 @@ module XYZ
       @results = Object.get_contained_attributes(type,IDHandle[:c => c,:uri => uri])
     end
 
-#TODO: move out of here
-    #TODO: temp
+# TODO: move out of here
+    # TODO: temp
     def list_node_attributes(*uri_array)
       error_405 unless request.get? 
       uri = "/" + uri_array.join("/")
@@ -272,8 +272,8 @@ module XYZ
       @results = Node.get_node_attribute_values(IDHandle[:c => c,:uri => uri],opts)
     end
 
-#TODO: move out of here, this seems to belong in the central model handler
-    #TODO: temp
+# TODO: move out of here, this seems to belong in the central model handler
+    # TODO: temp
     def get_guid(*uri_array)
       error_405 unless request.get? 
       uri = "/" + uri_array.join("/")

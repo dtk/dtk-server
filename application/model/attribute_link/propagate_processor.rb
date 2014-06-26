@@ -1,4 +1,4 @@
-#TODO: this needs a lot of cleanup
+# TODO: this needs a lot of cleanup
 module DTK; class AttributeLink
   class PropagateProcessor
     class Output < HashObject
@@ -8,9 +8,9 @@ module DTK; class AttributeLink
     class OutputPartial < Output
     end
 
-    #propagate from output var to input var
+    # propagate from output var to input var
     def propagate()
-      #function 'eq' short circuited
+      # function 'eq' short circuited
       return {:value_derived => output_value_aux()} if function == "eq"
       hash_ret = 
         if function.kind_of?(String)
@@ -19,7 +19,7 @@ module DTK; class AttributeLink
              propagate_when_eq_indexed()
             when "array_append"
               propagate_when_array_append()
-            #TODO: may deprecate rest
+            # TODO: may deprecate rest
              when "select_one"
               propagate_when_select_one()
             when "sap_config__l4" 
@@ -87,9 +87,9 @@ module DTK; class AttributeLink
       end
     end
 
-    #TODO: need to simplify so we dont need all these one ofs
+    # TODO: need to simplify so we dont need all these one ofs
     #######function-specfic propagation
-    #TODO: refactor to use  ret_cartesian_product()
+    # TODO: refactor to use  ret_cartesian_product()
     def propagate_when_sap_config__l4()
       output_v = 
         if output_semantic_type().is_array? 
@@ -101,11 +101,11 @@ module DTK; class AttributeLink
 
       value = nil
       if input_semantic_type().is_array?
-        #cartesian product with host_address 
-        #TODO: may simplify and use flatten form
+        # cartesian product with host_address 
+        # TODO: may simplify and use flatten form
         value = Array.new
         output_v.each do |sap_config|
-#TODO: euqivalent changes may be needed on other cartesion products: removing this for below          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
+# TODO: euqivalent changes may be needed on other cartesion products: removing this for below          value += input_value.map{|input_item|sap_config.merge("host_address" => input_item["host_address"])}
           value += input_value.map{|iv|iv["host_address"]}.uniq.map{|addr|sap_config.merge("host_address" => addr)}
         end
       else #not input_semantic_type().is_array?
@@ -115,7 +115,7 @@ module DTK; class AttributeLink
       {:value_derived => value}
     end
 
-    #TODO: refactor to use  ret_cartesian_product()
+    # TODO: refactor to use  ret_cartesian_product()
     def propagate_when_host_address_ipv4()
       output_v = 
         if output_semantic_type().is_array? 
@@ -127,7 +127,7 @@ module DTK; class AttributeLink
 
       value = nil
       if input_semantic_type().is_array?
-        #cartesian product with host_address 
+        # cartesian product with host_address 
         value = output_v.map{|host_address|input_value.map{|input_item|input_item.merge("host_address" => host_address)}}.flatten     
       else #not input_semantic_type().is_array?
         raise Error.new("propagate_when_host_address_ipv4 does not support input scalar and output array with size > 1") if output_value.size > 1
@@ -149,10 +149,10 @@ module DTK; class AttributeLink
       {:value_derived => output_value ? output_value().first : nil}
     end
 
-    #called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
-    #TODO: can simplify because only will be called when input is not an array
+    # called when it is an equlaity setting between indexed values on input and output side. Can be the null index on one of the sides meaning to take whole value
+    # TODO: can simplify because only will be called when input is not an array
     def propagate_when_eq_indexed()
-      #TODO: may flag more explicitly if from create or propagate vars
+      # TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?) and (@output_path.nil? or @output_path.empty?)
         new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
         OutputArrayAppend.new(:array_slice => new_rows, :attr_link_id => @attr_link_id)
@@ -163,9 +163,9 @@ module DTK; class AttributeLink
       end
     end
 
-    #called when input is an array and each link into it appends teh value in
+    # called when input is an array and each link into it appends teh value in
     def propagate_when_array_append()
-      #TODO: may flag more explicitly if from create or propagate vars
+      # TODO: may flag more explicitly if from create or propagate vars
       if @index_map.nil? and (@input_path.nil? or @input_path.empty?)
         new_rows = output_value().nil? ? [nil] : (output_semantic_type().is_array? ?  output_value() : [output_value()])
         output_is_array = @output_attr[:semantic_type_object].is_array?()

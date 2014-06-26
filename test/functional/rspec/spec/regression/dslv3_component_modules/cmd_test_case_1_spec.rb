@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 1: Remove existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of remove
+# Test Case 1: Remove existing component from dtk.model.yaml file, push-clone-changes to server and list components to see the effect of remove
 
 require 'rubygems'
 require 'rest_client'

@@ -73,7 +73,7 @@ module XYZ
         next_index, rest_path = [$1.to_i,$2]
         change_path << next_index
         ret[index] ||= ArrayObject.new 
-        #make sure that  ret[index] has enough rows
+        # make sure that  ret[index] has enough rows
         while ret[index].size <= next_index
           ret[index] << nil
         end
@@ -96,12 +96,12 @@ module XYZ
       end
     end
     NumericIndexRegexp = Regexp.new("^#{Delim::Common}#{Delim::NumericIndex}([0-9]+)(.*$)")
-#TODO make sure cahging this is right    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)#{Delim::Common}(.+$)")
+# TODO make sure cahging this is right    KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)#{Delim::Common}(.+$)")
     KeyWithRestRegexp = Regexp.new("^#{Delim::Common}([^#{Delim::Char}]+)(#{Delim::Common}.+$)")
     KeyWORestRegexp = Regexp.new("^#{Delim::Common}(.*$)")
 
     def self.has_required_fields?(value_obj,pattern)
-      #care must be taken to make this three-valued
+      # care must be taken to make this three-valued
       if pattern.is_atomic?()
         has_required_fields_when_atomic?(value_obj,pattern)
       elsif pattern.is_array?()
@@ -143,8 +143,8 @@ module XYZ
       true
     end
 
-    #TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
-    #base object in the attribute
+    # TODO: add "index that will be used to tie unravvled attribute back to the base object and make sure
+    # base object in the attribute
     def self.flatten_attribute!(ret,value_obj,attr,pattern,opts={})
       if pattern.nil? 
         flatten_attribute_when_nil_pattern!(ret,value_obj,attr,opts)
@@ -185,10 +185,10 @@ module XYZ
     end
 
     def self.flatten_attribute_when_array!(ret,value_obj,attr,pattern,opts={})
-      #compute child_list and array_pat if no mismitch
+      # compute child_list and array_pat if no mismitch
       child_list = nil
       if pattern.nil?
-        #TODO: this really not a mismatch, but code still handles correctly
+        # TODO: this really not a mismatch, but code still handles correctly
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||[]).empty?
         child_list = value_obj        
       elsif not pattern[:array]
@@ -198,7 +198,7 @@ module XYZ
         return nil
       else
         array_pat = pattern[:array]
-        #if nil value_obj then just assume one row
+        # if nil value_obj then just assume one row
         child_list = (value_obj||[]).empty? ? [nil] : value_obj
       end
 
@@ -215,10 +215,10 @@ module XYZ
     end
 
     def self.flatten_attribute_when_hash!(ret,value_obj,attr,pattern,opts={})
-      #compute child_list if no mismitch
+      # compute child_list if no mismitch
       child_list = nil
       if pattern.nil?
-        #TODO: this really not a mismatch, but code still handles correctly
+        # TODO: this really not a mismatch, but code still handles correctly
         return flatten_attribute_when_mismatch!(ret,value_obj,attr,pattern,opts) if (value_obj||{}).empty?
         child_list = value_obj
       elsif pattern[:array] or ((value_obj||{}).empty? and not opts[:flatten_nil_value])

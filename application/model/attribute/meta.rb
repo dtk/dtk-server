@@ -1,4 +1,4 @@
-#TODO: temp until move into meta directory
+# TODO: temp until move into meta directory
 module XYZ
   module AttributeMetaClassMixin
     def up()
@@ -6,17 +6,17 @@ module XYZ
       virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
       virtual_column :title, :type => :string, :local_dependencies => [:value_asserted,:value_derived,:external_ref,:display_name]
 
-      #columns related to the value
+      # columns related to the value
       column :value_asserted, :json, :ret_keys_as_symbols => false
       column :value_derived, :json, :ret_keys_as_symbols => false
       column :is_instance_value, :boolean, :default => false #to distinguish between when value_asserted is from default versus directly asserted
-      #TODO: not used yet column :value_actual, :json, :ret_keys_as_symbols => false
-      #TODO: may rename attribute_value to desired_value
+      # TODO: not used yet column :value_actual, :json, :ret_keys_as_symbols => false
+      # TODO: may rename attribute_value to desired_value
       virtual_column :attribute_value, :type => :json, :local_dependencies => [:value_asserted,:value_derived],
         :sql_fn => SQL::ColRef.coalesce(:value_asserted,:value_derived)
 
-      #TODO: should collapse the semantic types
-      #columns related to the data/semantic type
+      # TODO: should collapse the semantic types
+      # columns related to the data/semantic type
       column :data_type, :varchar, :size => 25
       column :semantic_data_type, :varchar, :size => 25
       column :semantic_type, :json #points to structural info for a json var 
@@ -24,7 +24,7 @@ module XYZ
       virtual_column :semantic_type_object, :type => :object, :hidden => true, :local_dependencies => [:semantic_type]
 
       ###cols that relate to who or what can or does change the attribute
-      #TODO: need to clearly relate these four; may get rid of read_only
+      # TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, :default => false 
       column :dynamic, :boolean, :default => false #means dynamically set by an executable action
       column :cannot_change, :boolean, :default => false
@@ -33,8 +33,8 @@ module XYZ
       column :required, :boolean, :default => false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
       column :hidden, :boolean, :default => false
 
-      #columns related to links
-      #TODO: for succinctness may use less staorage and colapse a number of port attributes
+      # columns related to links
+      # TODO: for succinctness may use less staorage and colapse a number of port attributes
       column :port_location, :varchar, :size => 10 #if set is override for port direction: east | west | south | north
       column :is_port, :boolean, :default => false
       column :port_type_asserted, :varchar, :size => 10
@@ -89,7 +89,7 @@ module XYZ
            }
           ]
 
-      #finds both component parents with node and dircet node parent
+      # finds both component parents with node and dircet node parent
       virtual_column :node_component_info, :type => :json, :hidden => true,
         :remote_dependencies =>
         [{
@@ -150,7 +150,7 @@ module XYZ
 
       virtual_column :unraveled_attribute_id, :type => :varchar, :hidden => true #TODO put in depenedncies
 
-      #TODO: may deprecate
+      # TODO: may deprecate
       virtual_column :qualified_attribute_name_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_id_under_node, :type => :varchar, :hidden => true #TODO put in depenedncies
       virtual_column :qualified_attribute_name, :type => :varchar, :hidden => true #not giving dependences because assuming right base_object included in col list

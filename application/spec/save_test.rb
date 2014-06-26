@@ -23,7 +23,7 @@ file_name = ARGV[1]
       File.unlink(filename)
       output
     end
-#TBD: not treating arrays in hash yet
+# TBD: not treating arrays in hash yet
 def set_id_ref_mapping!(obj,ret)
   return nil unless obj.kind_of?(Hash)
   obj.each_value{|v|
@@ -43,7 +43,7 @@ def ret_id_ref_mapping(obj)
   ret
 end
 
-#TBD: bug in this code inthat gets confused by columns that are "json attributes"
+# TBD: bug in this code inthat gets confused by columns that are "json attributes"
 def ret_replaced_ids_with_refs(obj,top_is_factory=true,id_ref_mapping=nil)
   id_ref_mapping ||= ret_id_ref_mapping(obj) 
   ret = {}
@@ -59,7 +59,7 @@ def ret_replaced_ids_with_refs(obj,top_is_factory=true,id_ref_mapping=nil)
     elsif v.kind_of?(Array)
       ret[k] = v
     else    
-    #if get here v is a scalar
+    # if get here v is a scalar
       if k =~ %r{^.+_id$}
          ret["*"+k] = id_ref_mapping[v] if id_ref_mapping[v]
       else

@@ -46,7 +46,7 @@ module DTK
       get_objs(ld_link_mh,sp_hash)
     end
 
-    #ports are augmented with link def under :link_def key
+    # ports are augmented with link def under :link_def key
     def self.find_possible_connections(unconnected_aug_ports,output_aug_ports)
       ret = Array.new
       output_aug_ports.each{|r|r.set_port_info!()}
@@ -57,7 +57,7 @@ module DTK
       end
       ret
     end
-    #unc_aug_port and output_aug_ports have keys :node
+    # unc_aug_port and output_aug_ports have keys :node
     def find_possible_connection(unc_aug_port,output_aug_ports,opts={})
       ret = Array.new
       unless opts[:port_info_is_set]

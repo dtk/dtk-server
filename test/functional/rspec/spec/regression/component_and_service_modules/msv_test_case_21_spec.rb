@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 21: Ability to list components and all attributes from the specific component module
+# Test Case 21: Ability to list components and all attributes from the specific component module
 
 require 'rubygems'
 require 'rest_client'

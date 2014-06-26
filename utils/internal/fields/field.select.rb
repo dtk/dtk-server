@@ -22,20 +22,20 @@ class Fieldselect < Fieldbase
   end
 
   # This returns the Edit View of a select HTML form element
-  #protected function
+  # protected function
   def get_field_edit_html()
     return '<HTML NOT IMPLEMENTED YET>'
   end
 
   # This returns the Edit View of a input of type select in Javascript form
-  #protected function
+  # protected function
   def get_field_edit_js()
-#TODO: add JS rendering when generating JS fields class for client side rendering
+# TODO: add JS rendering when generating JS fields class for client side rendering
     return '<JS NOT IMPLEMENT YET>'
   end
 
   # This returns the View of type edit for an input of type select in rtpl form
-  #protected function
+  # protected function
   def get_field_edit_rtpl()
     (!@multiple.nil? && @multiple != '') ? multiple = @multiple : multiple = ''
 
@@ -47,9 +47,9 @@ class Fieldselect < Fieldbase
   end
 
   # This returns the View of type view for an input of type select in TPL/Smarty form
-  #protected function
+  # protected function
   def get_field_display_rtpl()
-#TODO: revisit when implementing save/display of multiselct values
+# TODO: revisit when implementing save/display of multiselct values
 #    if(isset($this->multiple) && $this->multiple != '')
 #      $multiple = $this->multiple;
 #    else $multiple = '';
@@ -59,9 +59,9 @@ class Fieldselect < Fieldbase
   end
 
   # This returns the View of type list for an input of type select in TPL/Smarty form
-  #protected function
+  # protected function
   def get_field_list_rtpl()
-#TODO: revisit when implementing save/display of multiselct values
+# TODO: revisit when implementing save/display of multiselct values
 #    if(!@multiple.nil? && @multiple != '') then
 #      multiple = @multiple
 #    else multiple = ''

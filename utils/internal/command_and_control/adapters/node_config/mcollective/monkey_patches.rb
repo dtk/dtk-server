@@ -40,7 +40,7 @@ module MCollective
       @connection.set_context(:decode_context => self,:multiplexer => multiplexer)
     end
 
-    #changed to specficall take an agent argument
+    # changed to specficall take an agent argument
     def r8_new_request(agent,action, data)
       callerid = @security.callerid
       {:agent  => agent,
@@ -65,15 +65,15 @@ module MCollective
     end
 
     def r8_sendreq_give_reqid(reqid,msg,agent,filter = {},&block)
-      #TODO: see if can put in block form that first generates request id then calss functions that need it
-      #then does subscribe and send
+      # TODO: see if can put in block form that first generates request id then calss functions that need it
+      # then does subscribe and send
 
-      #TODO: rather than below see if can use
-      #following
-      #msg = create_request_message(msg,agent,filter)
-      #msg.encode!
-      #block.call(msg.create_reqid) if block
-      #req = msg.payload
+      # TODO: rather than below see if can use
+      # following
+      # msg = create_request_message(msg,agent,filter)
+      # msg.encode!
+      # block.call(msg.create_reqid) if block
+      # req = msg.payload
 
       target = make_target(agent, :request, collective)
       req = @security.encoderequest(@config.identity, msg, reqid, filter, agent, collective)

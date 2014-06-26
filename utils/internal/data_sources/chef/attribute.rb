@@ -3,7 +3,7 @@ module XYZ
     class Chef
       class Attribute < Top
         definitions do
-          #TBD: assuming that after split first item is cookbook name
+          # TBD: assuming that after split first item is cookbook name
           target[:external_ref] = fn(:external_ref,source)
           target[:display_name] = fn(:display_name,source)
           target[:data_type] = fn(:data_type,source)

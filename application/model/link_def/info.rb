@@ -1,6 +1,6 @@
 module DTK
   class LinkDef
-    #Each element has form
+    # Each element has form
     #   <Assemby::Template>
     #   id: ID
     #   node: NODE 
@@ -43,7 +43,7 @@ module DTK
         self
       end
 
-      #signature generate_link_def_link_pairs do |link_def,link|
+      # signature generate_link_def_link_pairs do |link_def,link|
       def generate_link_def_link_pairs(&body)
         ndx_ld_links_mark = Hash.new
         link_defs().each do |link_def|

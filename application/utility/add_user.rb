@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#adds user, his or her private 
+# adds user, his or her private 
 require File.expand_path('common', File.dirname(__FILE__))
 
 options = Hash.new
@@ -23,7 +23,7 @@ server.create_users_private_library?() if options[:create_private]
 idhs = server.create_users_private_target?(nil,ec2_region)
 
 =begin
-#DEPREACTE
+# DEPREACTE
 if options[:module_names]
   library_impls = server.add_modules_from_external_repo_dir(options[:module_names])
   (idhs[:project_idhs]||[]).each do |project_idh|

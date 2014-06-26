@@ -26,7 +26,7 @@ module DTK; class ComponentDSL
     end
 
     def self.save_dsl_info(meta_info_hash,impl_mh)
-      #TODO: check
+      # TODO: check
       raise Error.new("Need to cehck if meta_info_hash['version'] is right call")
       integer_version = meta_info_hash["version"]
       config_agent_type = meta_info_hash["config_agent_type"]
@@ -51,7 +51,7 @@ module DTK; class ComponentDSL
       r8meta_hash.write_yaml(STDOUT)
       File.open(r8meta_path,"w"){|f|r8meta_hash.write_yaml(f)}
 
-      #this wil add any file_assets that have not been yet added (this will include the r8meta file
+      # this wil add any file_assets that have not been yet added (this will include the r8meta file
       impl_obj.create_file_assets_from_dir_els()
 
       add_components_from_r8meta(library_idh,config_agent_type,impl_idh,r8meta_hash)
@@ -62,7 +62,7 @@ module DTK; class ComponentDSL
     def reify(hash,module_name,config_agent_type)
       context = {
         :integer_version => @integer_version,
-        #TODO: do we neeed module_name and :config_agent_type for reify?
+        # TODO: do we neeed module_name and :config_agent_type for reify?
         :module_name => module_name,
         :config_agent_type => config_agent_type
       }

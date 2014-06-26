@@ -1,6 +1,6 @@
 module DTK; class DB
   module DataProcessingUpdate
-    #classes that support recursive delete
+    # classes that support recursive delete
     class CreateStackArray < Array
       def self.create?(assigns)
         if assigns.kind_of?(HashObject) and assigns.apply_recursively? 
@@ -41,7 +41,7 @@ module DTK; class DB
         super(relation_type)
       end
       def add_to_index!(indexed_create_stack,level)
-        #no op
+        # no op
       end
     end
       
@@ -62,7 +62,7 @@ module DTK; class DB
       end
     end
 
-    #form index is [level][parent_type][child_type][parent_id] and value is array with elements children ids:
+    # form index is [level][parent_type][child_type][parent_id] and value is array with elements children ids:
     class IndexedStackArray < Hash
       def add!(level,parent_stack,child_stack)
         level_pntr = self[level] ||= Hash.new

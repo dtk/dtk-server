@@ -1,4 +1,4 @@
-#TODO: move things common to here and chef to ParseLogAdapter
+# TODO: move things common to here and chef to ParseLogAdapter
 module XYZ
   module ParseLogAdapter
     class Puppet
@@ -31,7 +31,7 @@ module XYZ
          /\/File\[\//,
         ]
 
-      #order is important because of subsumption
+      # order is important because of subsumption
       Pattern =  Aux::ordered_hash(
         [
          {:debug => /\(debug\)/},
@@ -43,7 +43,7 @@ module XYZ
      public
       class LogSegments < ::XYZ::LogSegments
 
-        #TODO: may use just for testing; if so deprecate
+        # TODO: may use just for testing; if so deprecate
         def pp_form_summary()
           if @complete
             if has_error?()
@@ -64,7 +64,7 @@ module XYZ
 
         def post_process!()
           @complete = complete?()
-          #TODO: code to look fro specfic errors
+          # TODO: code to look fro specfic errors
 =begin
           specific_error = nil
           PossibleErrors.each do |err|
@@ -74,7 +74,7 @@ module XYZ
             end
           end
 
-          #cut off everything after error and replace last item with specfic error
+          # cut off everything after error and replace last item with specfic error
           slice!(error_pos+1,size-error_pos)
           self[error_pos] = specific_error if specific_error
 =end
@@ -86,12 +86,12 @@ module XYZ
         end
 
         def has_error?()
-          #TODO: needs tp be written
+          # TODO: needs tp be written
           false
         end
 
        private
-        #TODO: need to unify with self.log_complete?(lines) and run status info
+        # TODO: need to unify with self.log_complete?(lines) and run status info
         def complete?()
           return false if empty?
           return true if last.line =~ /Finished catalog run/
@@ -118,12 +118,12 @@ module XYZ
         end
        private
         def parse!(segments_from_error,prev_segment)
-          #TODO: need sto be written
+          # TODO: need sto be written
           ##@error_detail = ...
         end
       end
 
-      #order makes a differnce for parsing
+      # order makes a differnce for parsing
       PossibleErrors = [ErrorGeneric]
     end
   end

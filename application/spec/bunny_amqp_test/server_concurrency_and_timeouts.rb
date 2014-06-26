@@ -12,8 +12,8 @@ class Work
   include EM::Deferrable
   def initialize(trans_info,msg_bus_msg_in)
     work = proc {
-      #TBD: don't think can put in an amqp call here without embedding EM.next_tick
-      #do work
+      # TBD: don't think can put in an amqp call here without embedding EM.next_tick
+      # do work
       print "started\n"
 #      sleep(10)
 
@@ -36,7 +36,7 @@ XYZ::R8EventLoop.start  do #:host => "172.22.101.115" do #:logging => true do
   client = XYZ::MessageBusClient.new()
   workers = []
   queue_names.each do |queue_name|
-    #TBD: put in catch block
+    # TBD: put in catch block
     work_queue = client.subscribe_queue(queue_name,:auto_delete=>true)
     work_queue.subscribe() do |trans_info,msg_bus_msg_in|
       pp [:recieved, trans_info,msg_bus_msg_in]

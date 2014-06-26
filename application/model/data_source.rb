@@ -12,8 +12,8 @@ module XYZ
 
     #######################
 
-    #TODO: see what below we want to keep
-    #actions
+    # TODO: see what below we want to keep
+    # actions
     class << self
       def create(container_handle_id,ref,hash_content={})
         factory_id_handle = get_factory_id_handle(container_handle_id)
@@ -26,7 +26,7 @@ module XYZ
       end
     end
    private
-    #helper fns
+    # helper fns
     class << self
       DS_defaults = Hash.new #TBD: stub
       def fill_in_defaults(ds_name,hash_content)
@@ -50,7 +50,7 @@ module XYZ
   class DataSourceEntry < Model
     attr_reader :ds_object_adapter
 #    set_relation_name(:data_source,:entry)
-    #actions
+    # actions
     def discover_and_update()
       marked = Array.new
       hash_completeness_info = get_objects() do |source_obj|
@@ -59,7 +59,7 @@ module XYZ
       delete_unmarked(@container_id_handle,marked,hash_completeness_info)
     end
 
-    #helper fns
+    # helper fns
     include DataSourceAdapterInstanceMixin
     include DataSourceConnectorInstanceMixin
 
@@ -67,8 +67,8 @@ module XYZ
       super(hash_scalar_values,c,relation_type)
       raise Error.new(":obj_type should be in hash_scalar_values") if hash_scalar_values[:obj_type].nil?
       raise Error.new(":ds_name should be in hash_scalar_values") if hash_scalar_values[:ds_name].nil?
-      #default is to place in container that the data source root sets in
-      #TBD: logic to override if @objects_location set
+      # default is to place in container that the data source root sets in
+      # TBD: logic to override if @objects_location set
       default_container_obj = get_parent_object().get_parent_object()
       @container_id_handle = default_container_obj.id_handle
       @parent_ds_object = get_parent_object()

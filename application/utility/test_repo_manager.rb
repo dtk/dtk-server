@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#TODO: should be made a rspec procedure
+# TODO: should be made a rspec procedure
 require 'rubygems'
 require 'pp'
 require File.expand_path("../require_first",File.dirname(__FILE__))

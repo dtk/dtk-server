@@ -1,7 +1,7 @@
 module XYZ
   class Library < Model
     ### get methods
-    #MOD_RESTRUCT: deprecate
+    # MOD_RESTRUCT: deprecate
     def get_service_module(module_name)
       sp_hash = {
         :cols => [:id,:group_id,:display_name],
@@ -96,7 +96,7 @@ module XYZ
 
     def clone_post_copy_hook(clone_copy_output,opts={})
       new_id_handle = clone_copy_output.id_handles.first
-      #TODO: hack; this should be optained from clone_copy_output
+      # TODO: hack; this should be optained from clone_copy_output
       new_assembly_obj = new_id_handle.create_object().update_object!(:display_name)
       case new_id_handle[:model_name]
        when :component then clear_dynamic_attributes(new_id_handle,opts)
@@ -130,7 +130,7 @@ module XYZ
       Attribute.clear_dynamic_attributes_and_their_dependents(attrs_to_clear,:add_state_changes => false)
     end
    private
-    #returns attributes that will be cleared
+    # returns attributes that will be cleared
     def get_dynamic_attributes(model_name,new_id_handle)
       if model_name == :component
         col = :node_assembly_parts_cmp_attrs

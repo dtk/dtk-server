@@ -26,12 +26,12 @@ module DTK
         SubclassProcessing.add_subclass_klass_mapping(self,subclass_model_name,opts)
       end
 
-      #model_name could be concrete or subclass name
+      # model_name could be concrete or subclass name
       def concrete_model_name(model_name)
         SubclassProcessing.concrete_model_name(model_name)||model_name
       end
 
-      #TODO: cleanup
+      # TODO: cleanup
       def find_subtype_model_name(id_handle,opts={})
         model_name = id_handle[:model_name]
         return model_name unless SubclassProcessing.subclass_targets().include?(model_name)
@@ -54,7 +54,7 @@ module DTK
       end
 
      private    
-      #so can use calling cobntroller to shortcut needing datbase lookup
+      # so can use calling cobntroller to shortcut needing datbase lookup
       def subclass_controllers(model_name,opts)
         if model_name == :node and opts[:controller_class] == Node_groupController 
           :node_group 
@@ -97,7 +97,7 @@ module DTK
         if ret = model_name_info(model_name)[:subclass_klass]
           return ret
         end
-        #TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form       
         case model_name
           when :assembly then Assembly
           when :assembly_template then Assembly::Template
@@ -122,7 +122,7 @@ module DTK
       def self.subclass_targets()
         @subclass_targets ||= (HardCodedSubClassRelations.values + @model_name_mapping.values.map{|r|r[:concrete_model_name]}).uniq
       end
-      #TODO: move so that subclass_model generates these and get rid of HardCodedSubClassRelations
+      # TODO: move so that subclass_model generates these and get rid of HardCodedSubClassRelations
       HardCodedSubClassRelations = {
         :assembly           => :component,
         :assembly_workspace => :component,
@@ -141,7 +141,7 @@ module DTK
         if ret = subclass_klass_info(model_class)[:model_name]
           return ret
         end
-        #TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form       
         if model_class == Component::Template then :component_template
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
@@ -154,7 +154,7 @@ module DTK
         if ret = subclass_klass_info(model_class)[:print_form]
           return ret
         end
-        #TODO: move over all models to use data-driven form       
+        # TODO: move over all models to use data-driven form       
         if model_class == NodeGroup then 'node group'
         elsif model_class == Assembly::Instance then 'service'
         elsif model_class == Assembly::Template then 'service module'

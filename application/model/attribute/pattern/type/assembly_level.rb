@@ -15,11 +15,11 @@ module DTK; class Attribute
       
       def set_parent_and_attributes!(assembly_idh,opts={})
         attributes = ret_matching_attributes(:component,[assembly_idh],pattern)
-        #if does not exist then create the attribute if create option is true
-        #if exists and create flag exsists we just assign it new value
+        # if does not exist then create the attribute if create option is true
+        # if exists and create flag exsists we just assign it new value
         if attributes.empty? and opts[:create]
           af = ret_filter(pattern,:attribute)
-          #attribute must have simple form 
+          # attribute must have simple form 
           unless af.kind_of?(Array) and af.size == 3 and af[0..1] == [:eq,:display_name]
             raise Error.new("cannot create new attribute from attribute pattern #{pattern}")
           end

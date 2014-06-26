@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 6: Add new component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present
+# Test Case 6: Add new component attribute in dtk.model.yaml file, push-clone-changes to server and check if component attribute present
 
 require 'rubygems'
 require 'rest_client'

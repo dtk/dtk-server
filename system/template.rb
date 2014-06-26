@@ -8,7 +8,7 @@ module R8Tpl
   class TemplateR8 
     include CommonMixin
 
-    #TODO: will refactor to this fn
+    # TODO: will refactor to this fn
     def self.create(model_name,view_name,user,virtual_model_ref_str=nil,source=:cache)
       self.new(nil,nil,nil,model_name,view_name,user,virtual_model_ref_str,source)
     end
@@ -27,7 +27,7 @@ module R8Tpl
 
     START_TAG_REGEX = /\{%\s*/
     #  END_TAG_REGEX = /\s*.*%\}/
-    #TODO: revisit when implementing if and iterators
+    # TODO: revisit when implementing if and iterators
     END_TAG_REGEX = /\s*[\sa-zA-Z0-9_@:\[\]]*%\}/
     CTRL_BLOCK_REGEX = /(#{START_TAG_REGEX}([a-zA-Z_@:\[\]][a-zA-Z0-9_@:\[\]'"=\>\<\|&\(\),.\s\!]*)#{END_TAG_REGEX})/m
     #  /\{%\s*(for|if|end)\s*.*%\}/
@@ -46,11 +46,11 @@ module R8Tpl
       @user = user
       @profile = @user.current_profile
 
-      #TODO: clean up
+      # TODO: clean up
       @model_name = @view_name = String.new
       @saved_search_ref = nil
       vp_parts = view_path.split("/")
-      #TODO: fidn better way to determine isa_saved_search
+      # TODO: fidn better way to determine isa_saved_search
       if vp_parts.size == 2
         if vp_parts[0] == "saved_search"
           @saved_search_ref = vp_parts[1]
@@ -60,21 +60,21 @@ module R8Tpl
           @model_name,@view_name = vp_parts
         end
       elsif vp_parts.size == 3
-#TODO: consider scenario between saved searches stored by user, per model vs. component views which are per view/model_instance
+# TODO: consider scenario between saved searches stored by user, per model vs. component views which are per view/model_instance
         @model_name,@view_name,@model_id = vp_parts
 #        layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type})
 
-#TODO: should return the current layout for the given model, view_type and component
+# TODO: should return the current layout for the given model, view_type and component
         layout_list = get_objects(:layout,{:component_component_id=>model_id,:type=>view_type,:active=>true})
 
-#Should take newest one for now, later have enhancement for 'deployed'/'active' flag or something similar
+# Should take newest one for now, later have enhancement for 'deployed'/'active' flag or something similar
       else
         @view_name = vp_parts.first
       end
 
       initialize_vars()
 
-      #TODO: think of better terminology then path_type
+      # TODO: think of better terminology then path_type
        set_view(path_type)
     end
 
@@ -109,7 +109,7 @@ module R8Tpl
       @ctrl_vars = []
       @loop_vars = []
 
-    #this var is needed b/c of the way DOM rendering needs to be handled during if's, loop's
+    # this var is needed b/c of the way DOM rendering needs to be handled during if's, loop's
       @ctrl_close_stack = []
 
       @element_count = 0
@@ -174,14 +174,14 @@ module R8Tpl
       js_file_handle.write(@indent + contents)
     end
 
-    #private
+    # private
     def tpl_xml_init(view_tpl_contents)
       @tpl_contents << "<div>" << self.clean_tpl(view_tpl_contents) << "</div>"
       @xhtml_document = Nokogiri::XML(@tpl_contents,nil,'xml')
       @root_js_element_var_name = @xhtml_document.root.name + '_tplroot'
     end
 
-    #this will escape &, <, > for xml purposes
+    # this will escape &, <, > for xml purposes
     def clean_tpl(str)
       str.gsub!(/&(?!amp;)/m){|match| match+'amp;'}
       matchStr = str
@@ -205,8 +205,8 @@ module R8Tpl
     end
 
     def tpl_to_js(view_tpl_contents)
-#DEBUG
-#return @js_file_name
+# DEBUG
+# return @js_file_name
     if self.js_tpl_current?
       return nil
     end
@@ -215,7 +215,7 @@ module R8Tpl
 #    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ",renderType) {")
 #    js_queue_push('functionheader', "function " + @js_tpl_callback + "(" + @js_var_header + ") {")
     js_queue_push('functionheader', "R8.Rtpl['" + @js_tpl_callback + "'] = function(" + @js_var_header + ") {")
-    #add local var ref for document object
+    # add local var ref for document object
     js_queue_push('functionbody', "var doc = document;")
     create_root_node()
     render_js_dom_tree(@xhtml_document.root.children,@root_js_hash)
@@ -236,7 +236,7 @@ module R8Tpl
             :attributes => []
           }
 
-          #if the node has value contents its a text node and process said contents
+          # if the node has value contents its a text node and process said contents
           if newJSNode[:elementType] == 'text'
             self.process_node_text(newJSNode[:value],!parentNode.nil? ? parentNode[:jsElementVarName] : '', parentNode[:elementType])
           else
@@ -250,16 +250,16 @@ module R8Tpl
             self.render_js_dom_tree(childrenNodeList, newJSNode)
           end
 
-          #if there are children recurse down the tree
+          # if there are children recurse down the tree
 #          childrenNodeList.length > 0 ? self.render_js_dom_tree(childrenNodeList, newJSNode) : return
 
-          #this is here by itself b/c of methodology of rendering DOM and appending children AFTER all sub children done
+          # this is here by itself b/c of methodology of rendering DOM and appending children AFTER all sub children done
           if !parentNode.nil? && !node.cdata? && newJSNode[:elementType] != 'text'
             self.append_child_js(parentNode[:jsElementVarName],parentNode[:elementType], newJSNode[:jsElementVarName], newJSNode[:elementType])
           end
 
-          #make this check _dev or _production mode
-          #this is temporary, maybe have a general function for adding comments
+          # make this check _dev or _production mode
+          # this is temporary, maybe have a general function for adding comments
           if !node.cdata? && newJSNode[:elementType] != 'text'
             self.js_queue_push('comment',"//end rendering for element " + newJSNode[:jsElementVarName])
           end
@@ -317,8 +317,8 @@ module R8Tpl
         clear_indentation()
         handle_indentation(js_line)
 
-        #jsItem[:jscontent] can be single entry or array of jscontent to be written
-        #right now only textspans will have multiple entries
+        # jsItem[:jscontent] can be single entry or array of jscontent to be written
+        # right now only textspans will have multiple entries
         if js_line[:jscontent].class == Array
            for jsContentItem in js_line[:jscontent] do
              js_file_write(js_file_handle,jsContentItem + "\n")
@@ -346,7 +346,7 @@ module R8Tpl
     self.add_attributes(@xhtml_document.root,newJSNode)
   end
 
-#should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
+# should probably move the appending out of the templating and just have js return DOM ref to JS ctrlr
   def set_js_return()
 #    self.js_queue_push('ifheader', "if(R8.utils.isUndefined(renderType) || renderType !='append') {")
 #    self.js_queue_push('renderClear','doc.getElementById("' + @panel_set_element_id + '").innerHTML="";')
@@ -425,7 +425,7 @@ module R8Tpl
     nodeText.strip!
     while matches = CTRL_BLOCK_REGEX.match(nodeText) do
 =begin
-#R8 Debug
+# R8 Debug
 p "Matched Value(s):"+matches.to_s
 p "Before Matched Value(s):"+matches.pre_match
 p "After Matched Value(s):"+matches.post_match
@@ -437,7 +437,7 @@ p "After Matched Value(s):"+matches.post_match
         end
       end
 
-      #process tpl control match js
+      # process tpl control match js
       self.handle_tpl_ctrl(matches.to_s)
 
       nodeText = matches.post_match
@@ -448,30 +448,30 @@ p "After Matched Value(s):"+matches.post_match
 
   def set_text_span_js(text,parent_node_type, parentVarName='', spanClass='')
     parentVarName.downcase!
-    #option & textarea elements dont like their contents wrapped in <span> so use var.innerHTML=text
+    # option & textarea elements dont like their contents wrapped in <span> so use var.innerHTML=text
     transformedTxt = self.check_for_tpl_vars(text)
     if(transformedTxt == text) then transformedTxt = '"'+transformedTxt+'"' end
 
     self.js_queue_push('innerHTML', self.ret_set_inner_html_js(parentVarName,transformedTxt))
-#DEBUG
-#TODO: revisit, removed this b/c thought it was causing errors in some tree renderings, might not be the case
+# DEBUG
+# TODO: revisit, removed this b/c thought it was causing errors in some tree renderings, might not be the case
 =begin
     case parent_node_type
       when "option", "textarea" then
         self.js_queue_push('innerHTML', self.ret_set_inner_html_js(parentVarName,transformedTxt))
       else
-        #add a unique number to the textspan js varname to avoid conflicts
+        # add a unique number to the textspan js varname to avoid conflicts
         txtSpanNum = @js_render_queue.length.to_s
         jsVarName = 'txtSpan' + txtSpanNum
         jscontentArray = []
         jscontentArray << self.ret_create_element_js('span', jsVarName)
         if spanClass !=''
-          #call to newly created func getJSSetClass
+          # call to newly created func getJSSetClass
         end
         jscontentArray << self.ret_set_inner_html_js(jsVarName, transformedTxt)
         self.js_queue_push('textspan', jscontentArray)
 
-        #if parent name = '' it should be a cntrl statement, else its text that should be appended
+        # if parent name = '' it should be a cntrl statement, else its text that should be appended
         if parentVarName != ''
           self.append_child_js(parentVarName, '', jsVarName, 'span')
         end
@@ -480,19 +480,19 @@ p "After Matched Value(s):"+matches.post_match
   end
 
   def handle_tpl_ctrl(matchResult)
-#R8 DEBUG
-#p 'Going to process ctrl statement:  '+matchResult
+# R8 DEBUG
+# p 'Going to process ctrl statement:  '+matchResult
 #    ctrlRegex = /\{%\s*(for|if|end)(.*)%\}/
     ctrlRegex = /\{%\s*(.*)%\}/
     matches = ctrlRegex.match(matchResult)
     case matches[1].strip
       when 'end' then
-#TODO:switch this to push onto @ctrl_stack (see php class line 599)
+# TODO:switch this to push onto @ctrl_stack (see php class line 599)
         self.js_queue_push('forloopclose', '}')
       else
         self.get_loop_ctrl_js(matches[1])
     end
-#R8 DEBUG
+# R8 DEBUG
 =begin
     for m in 0...matches.length do
 p '    Match '+m.to_s+': '+matches[m]
@@ -504,15 +504,15 @@ p '    Match '+m.to_s+': '+matches[m]
     newLoopHash = {}
     ctrlPieces = ctrlStr.split(' ')
     case ctrlPieces[0]
-#TODO: clean this up to probably use all regex's for case comparisons
+# TODO: clean this up to probably use all regex's for case comparisons
       when 'for' then
 #        loopIndexName = 'lvIndex'+@loop_vars.length.to_s
-#should be checking to see if nested here, do it later
+# should be checking to see if nested here, do it later
         newLoopHash[:ctrlVarName] = ctrlPieces[1].strip
         newLoopHash[:iteratorVarRaw] = ctrlPieces[3].strip
         newLoopHash[:iteratorVar] = ctrlPieces[3].gsub('@','')
         newLoopHash[:loopIndex] = nil
-#DEBUG
+# DEBUG
 =begin
 p '=====Have a forloop to process====='
 p '     LoopContent: '+ctrlPieces.inspect
@@ -581,7 +581,7 @@ p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
 
         jsContent = "for(var " + ctrlVarName + " in " + iteratorVar + ") { "
         self.js_queue_push('forloopheader', jsContent)
-    #end else in case ctrlPieces[0] block
+    # end else in case ctrlPieces[0] block
     end
   end
 
@@ -608,12 +608,12 @@ p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
     if varPostMatchText != varText && varPostMatchText !='' then
        returnText == '' ? (returnText << '"' << varPostMatchText << '"') : (returnText << ' + "' << varPostMatchText << '"')
     end
-#TODO: decide if quote addition can be removed, causing issues when processing attributes
+# TODO: decide if quote addition can be removed, causing issues when processing attributes
     returnText == '' ? (return varText) : (return returnText)
   end
 
   def ret_set_inner_html_js(jsElementVarName, innerContent='')
-#TODO: should make a config option to strip whitespace or not
+# TODO: should make a config option to strip whitespace or not
 #    innerContent.strip!
     retVar = jsElementVarName + '.innerHTML = ' + innerContent + ';'
     return retVar
@@ -624,11 +624,11 @@ p 'Going to parse variables with ctr_vars:  '+@ctrl_vars.inspect
   end
 
 ##################BEGIN NEW TEMPLATE STUBS FOR VIEW HANDLING#################################
-#from_view might need some explanation, used in case of one global Template object for request
+# from_view might need some explanation, used in case of one global Template object for request
 #   used as flag then Template called within meta view cache generation where its not possible to have a metaview
   def set_view(path_type=nil)
-    #TODO treating @model_name when it is nil or empty
-    #check paths in order 
+    # TODO treating @model_name when it is nil or empty
+    # check paths in order 
     ordered_paths = (path_type ? [path_type] : [:base, :meta])
     ordered_paths.each do |path_type|
       path = ret_existing_view_path(path_type)
@@ -736,7 +736,7 @@ class TplVarParser
   end
 
   def to_s
-    #change this to return current representation of rendered hash variable
+    # change this to return current representation of rendered hash variable
     return @var_string
   end
 
@@ -764,7 +764,7 @@ class TplVarParser
       return @js_var_header + "['" + @var_name.gsub('@','') + "']"
     else
       @ctrl_var_mappings.each do |ctrl_var|
-#DEBUG
+# DEBUG
 =begin
 p '++++++++++++++++TEST+++++++++++++++++++'
 p '   var_name:'+@var_name
@@ -906,13 +906,13 @@ class IfElsExpressionParser
   end
 
   def to_s
-    #change this to return current representation of rendered hash variable
+    # change this to return current representation of rendered hash variable
     return @expression_string
   end
 
   def process
     if(self.isComplex?) then
-      #set any leading expression that exists
+      # set any leading expression that exists
       leading_expression = ''
       while !self.atExpressionStart?
         leading_expression << @char
@@ -926,7 +926,7 @@ class IfElsExpressionParser
       xpression_parser.process
       (@js_expression_string != '') ? (@js_expression_string << ' '+xpression_parser.js_expression_string) : (@js_expression_string << xpression_parser.js_expression_string)
 
-      #set any trailing expression that exists
+      # set any trailing expression that exists
       trailing_expression = ''
       while !self.eos?
         trailing_expression << @char
@@ -1019,7 +1019,7 @@ end
       super(nil)
       @js_tpl_callback = js_tpl_name 
       @js_file_name = js_tpl_name+".js" 
-      #TBD: canned for testing
+      # TBD: canned for testing
        @script = [
           {
            "content" => "var logoutArgs = {\"obj\" : \"user\",\"action\" : \"logout\"};"

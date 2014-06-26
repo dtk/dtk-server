@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly
+# Test Case 3: (OS: RedHat, Namenode: hdp) Check possibility to add OS and namenode components and deploy assembly
 
 require 'rubygems'
 require 'rest_client'

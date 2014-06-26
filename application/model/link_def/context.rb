@@ -5,16 +5,16 @@ module XYZ
     end
 
     def initialize(link,link_defs_info)
-      #TODO: if needed put in machanism where terms map to same values so only need to set values once
+      # TODO: if needed put in machanism where terms map to same values so only need to set values once
       @type = nil # can by :internal | :node_to_node | :node_to_node_group
       @node_member_contexts = Hash.new
       @term_mappings = Hash.new
       @node_mappings = Hash.new
       @component_attr_index = Hash.new
-      #TODO: add back in commented out parts
+      # TODO: add back in commented out parts
       # constraints.each{|cnstr|cnstr.get_context_refs!(ret)}
-      #TODO: this is making too many assumptions about form of link_defs_info
-      #and that self has field local_component_type
+      # TODO: this is making too many assumptions about form of link_defs_info
+      # and that self has field local_component_type
       link.attribute_mappings.each do |am|
         add_ref!(am[:input])
         add_ref!(am[:output])
@@ -48,7 +48,7 @@ module XYZ
     end
 
     def add_ref!(term)
-      #TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
+      # TODO: see if there can be name conflicts between different types in which nmay want to prefix with type (type's initials, like CA for componanet attribute)
       term_index = term[:term_index]
       value = @term_mappings[term_index] ||= Value.create(term)
       value.update_component_attr_index!(self)
@@ -72,7 +72,7 @@ module XYZ
    protected
     def add_component_ref_and_value__node!(component_type,component)
       add_ref_component!(component_type).set_component_value!(component)
-      #update all attributes that ref this component
+      # update all attributes that ref this component
       cmp_id = component[:id]
       attrs_to_get = {cmp_id => {:component => component, :attribute_info => @component_attr_index[component_type]}}
       get_and_update_component_virtual_attributes!(attrs_to_get)
@@ -80,9 +80,9 @@ module XYZ
 
    private
     def add_component_ref_and_value__node_group!(component_type,ng_component)
-      #TODO: dont think needed add_ref_component!(component_type).set_component_value!(component) 
-      #TODO: may be more efficient to do this in bulk
-      #get corresponding components on node group members
+      # TODO: dont think needed add_ref_component!(component_type).set_component_value!(component) 
+      # TODO: may be more efficient to do this in bulk
+      # get corresponding components on node group members
       node_ids = @node_member_contexts.keys
       ndx_node_cmps = NodeGroupMember.get_node_member_components(node_ids,ng_component).inject({}) do |h,r|
         h.merge(r[:node_node_id] => r)
@@ -120,10 +120,10 @@ module XYZ
     end
     def set_values__node_to_node_group!(link,cmp_mappings)
       @type =  :node_to_node_group
-      #creates a link def context for each node to node member pair
+      # creates a link def context for each node to node member pair
       @node_member_contexts = NodeGroupMember.create_node_member_contexts(link,@node_mappings,cmp_mappings)
 
-      #below is needed so that create can have ref to component
+      # below is needed so that create can have ref to component
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link,cmp_mappings)
       end
@@ -134,11 +134,11 @@ module XYZ
       @term_mappings.values.each do |v| 
         v.set_component_remote_and_local_value!(link,cmp_mappings)
       end
-      #set component attributes
+      # set component attributes
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueComponentAttribute)
-          #v.component can be null if refers to component created by an event
+          # v.component can be null if refers to component created by an event
           next unless cmp = v.component
           a = (attrs_to_get[cmp[:id]] ||= {:component => cmp, :attribute_info => Array.new})[:attribute_info]
           a << {:attribute_name => v.attribute_ref.to_s, :value_object => v}
@@ -146,7 +146,7 @@ module XYZ
       end
       get_and_update_component_virtual_attributes!(attrs_to_get)
 
-      #set node attributes
+      # set node attributes
       attrs_to_get = Hash.new
       @term_mappings.each_value do |v|
         if v.kind_of?(ValueNodeAttribute)
@@ -203,7 +203,7 @@ module XYZ
         sample_cmp = cmp_mappings[:local]
         node_mh = sample_cmp.model_handle(:node)
         if ndx_node_ids[:local] == ndx_node_ids[:remote] #shortcut if internal
-          #since same node on both sides; just create from one of them
+          # since same node on both sides; just create from one of them
           node = node_mh.createIDH(:id => ndx_node_ids[:local]).create_object()
           new(node)
         else
@@ -249,7 +249,7 @@ module XYZ
           raise Error.new("Only one of local or remote should be node group")
         end
         ng_members = ng_members_x.first
-        #no op if there is side with cardinality == 0
+        # no op if there is side with cardinality == 0
         if ng_members[:nodes].size == 0
           return ret
         end
@@ -268,7 +268,7 @@ module XYZ
       end
 
       private
-      #returns hash where each key is a node member node id and each eleemnt is LinkDefContext relevant to linking node member to other end node
+      # returns hash where each key is a node member node id and each eleemnt is LinkDefContext relevant to linking node member to other end node
       def self.create_node_member_contexts_aux(link,ng_members,cmp_mappings)
         node_cmp_part = {:component=> cmp_mappings[ng_members[:endpoint] == :local ? :remote : :local] }
         node_ids = ng_members[:nodes].map{|n|n[:id]}
@@ -317,10 +317,10 @@ module XYZ
         @component = component
       end
 
-      #no op unless overwritetn
+      # no op unless overwritetn
       def update_component_attr_index!(link_def_context)
       end
-      #overwritten
+      # overwritten
       def value()
       end
     end

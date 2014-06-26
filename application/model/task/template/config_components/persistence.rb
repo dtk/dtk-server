@@ -1,7 +1,7 @@
-#methods used to maintain the peristence of an assembly instance task template
-#The content can be both node centeric and assembly actions; the class Persistence is responsible for both
-#and class AssemblyActions is responsible for just the assembly actions
-#TODO: currently just persisting just the assembly action parts so there is no methods directly under Persistence  
+# methods used to maintain the peristence of an assembly instance task template
+# The content can be both node centeric and assembly actions; the class Persistence is responsible for both
+# and class AssemblyActions is responsible for just the assembly actions
+# TODO: currently just persisting just the assembly action parts so there is no methods directly under Persistence  
 module DTK; class Task; class Template; class ConfigComponents 
   class Persistence
     class AssemblyActions
@@ -40,12 +40,12 @@ module DTK; class Task; class Template; class ConfigComponents
       end
 
       class ReifiedObjectCache
-        #using task_template_id is cache key
+        # using task_template_id is cache key
         @@cache = Hash.new
 
 ###TODO: these are in no op mode until implememnt
         def self.get(assembly,task_action=nil)
-          #TODO: stub; nothing in cache
+          # TODO: stub; nothing in cache
           nil
         end
         def self.add_or_update_item(task_template_idh,content)
@@ -83,7 +83,7 @@ module DTK; class Task; class Template; class ConfigComponents
         end
 
         def self.should_be_removed?(task_template,assembly_update)
-          #TODO: stub: conservative clear everything
+          # TODO: stub: conservative clear everything
           true
         end
 

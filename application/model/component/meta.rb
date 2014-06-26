@@ -1,4 +1,4 @@
-#TODO: temp until move into meta directory
+# TODO: temp until move into meta directory
 module XYZ
   module ComponentMetaClassMixin
     def up()
@@ -7,34 +7,34 @@ module XYZ
       virtual_column :name, :type => :varchar, :local_dependencies => [:display_name]
       virtual_column :config_agent_type, :type => :string, :local_dependencies => [:external_ref]
       
-      #columns related to name/labels
-      #specfic labels of components and its attributes
+      # columns related to name/labels
+      # specfic labels of components and its attributes
       column :keys, :json #only used if only_one_per_node is false; array of keys for displaying component name
       column :i18n_labels, :json, :ret_keys_as_symbols => false
       
-      #columns related to version
-      #TODO: think we want to deprecate these; versioning is at module level
+      # columns related to version
+      # TODO: think we want to deprecate these; versioning is at module level
       column :version, :varchar, :size => 100 #non-normalized: comes from module_branch
       column :updated, :boolean, :default => false
 
-      #columns related to type
+      # columns related to type
       column :type, :varchar, :size => 15, :default => "template" # instance | composite | template
-      #top level in component type hiererarchy
+      # top level in component type hiererarchy
       column :basic_type, :varchar, :size => 25 #service, application, language, application, extension, database, user
-      #leaf type in component type 
+      # leaf type in component type 
       column :specific_type, :varchar, :size => 30 
       column :component_type, :varchar, :size => 50 #this is the exact component type; two instances taht share this can differ by things like defaults
 
       column :locked_sha, :varchar, :size => 50
 
-      #if set to true only one instance of a component (using component_type to determine 'same') can be on a node
+      # if set to true only one instance of a component (using component_type to determine 'same') can be on a node
       column :only_one_per_node, :boolean, :default => true
-      #refernce used when multiple isnatnces of same component type 
-      #TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
+      # refernce used when multiple isnatnces of same component type 
+      # TODO: make sure that this is preserved under clone; case to watch out fro is when cloning for example more dbs in something with dbs
       virtual_column :multiple_instance_ref, :type => :integer ,:local_dependencies => [:ref_num]
       foreign_key :ng_component_id, :component, FK_SET_NULL_OPT #set when created by cloning from component node group
 
-      #used when this component is an extension
+      # used when this component is an extension
       column :extended_base, :varchar, :size => 30
       virtual_column :extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id]
       virtual_column :instance_extended_base_id, :type => ID_TYPES[:id] ,:local_dependencies => [:extended_base,:implementation_id,:node_node_id]
@@ -49,14 +49,14 @@ module XYZ
       foreign_key :assembly_id, :component, FK_SET_NULL_OPT
       column :view_def_ref, :varchar
 
-      #TODO: change if multiple implementations per component
+      # TODO: change if multiple implementations per component
       foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
       foreign_key :module_branch_id, :module_branch, FK_CASCADE_OPT #treated as containment
 
-      #TODO: thionk this can be deprecated
+      # TODO: thionk this can be deprecated
       column :link_defs, :json
-      #deprecate below for above
-      #TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
+      # deprecate below for above
+      # TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
       virtual_column :link_defs_external, :type => :json, :local_dependencies => [:link_defs,:component_type,:specific_type,:basic_type]
       virtual_column :connectivity_profile_internal, :type => :json, :local_dependencies => [:link_defs,:component_type,:specific_type,:basic_type]
       virtual_column :most_specific_type, :type => :varchar, :local_dependencies => [:specific_type,:basic_type]
@@ -117,7 +117,7 @@ module XYZ
            :cols => [:id,:group_id,:display_name]
          }]
 
-     #this wil match if the component has an attribute that uses the default field
+     # this wil match if the component has an attribute that uses the default field
      virtual_column :attribute_default_title_field, :type => :json, :hidden => true,
         :remote_dependencies =>
         [
@@ -259,7 +259,7 @@ module XYZ
            :cols => [:id,:search_pattern,:type,:description,:severity]
          }
         ]
-        #above is direct dependencies; below is inherited ones
+        # above is direct dependencies; below is inherited ones
         virtual_column :inherited_dependencies, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -291,7 +291,7 @@ module XYZ
            :cols => [:id,:after,:conditional,:component_component_id]
          }
         ]
-        #above is direct dependencies; below is inheited ones
+        # above is direct dependencies; below is inheited ones
         virtual_column :inherited_component_order_objs, :type => :json, :hidden => true, 
         :remote_dependencies => 
         [
@@ -371,7 +371,7 @@ module XYZ
          [
           {
             :model_name => :state_change,
-            #TODO: avoiding use of :component_component
+            # TODO: avoiding use of :component_component
             :sequel_def => lambda{|ds|ds.where(:state => "pending").join(:attribute__attribute,{:id => :attribute_id}).group_and_count(:attribute__component_component_id)},
             :join_type => :left_outer,
             :join_cond=>{:component_component_id =>:component__id}
@@ -384,7 +384,7 @@ module XYZ
             }
          ]
 
-      #TODO: needs to be refined since now no node_group_id
+      # TODO: needs to be refined since now no node_group_id
         virtual_column :containing_datacenter, :type => :varchar, :hidden => true,
           :remote_dependencies =>
          [

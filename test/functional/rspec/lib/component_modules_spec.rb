@@ -106,12 +106,12 @@ shared_context "Export component module" do |dtk_common, component_module_name, 
   end
 end
 
-#shared_context "OLD - Export module" do |dtk_common, component_module_name, namespace|
+# shared_context "OLD - Export module" do |dtk_common, component_module_name, namespace|
 #  it "exports #{component_module_name} module to #{namespace} namespace on remote repo" do
 #    module_exported = dtk_common.export_module_to_remote(component_module_name, namespace)
 #    module_exported.should eq(true)
 #  end
-#end
+# end
 
 shared_context "Import versioned component module from remote" do |dtk_common, component_module_name, version|
   it "checks existance of #{component_module_name} component module and imports component module with version #{version} from remote repo" do
@@ -136,7 +136,7 @@ end
 
 shared_context "Get component module components list" do |dtk_common, component_module_name|
   it "gets list of all components in #{component_module_name} component module" do
-    #delete previous elements in array
+    # delete previous elements in array
     dtk_common.component_module_id_list.delete_if { |x| x != nil }
     dtk_common.get_component_module_components_list(component_module_name, "")
     empty_list = dtk_common.component_module_id_list.empty?
@@ -146,7 +146,7 @@ end
 
 shared_context "NEG - Get component module components list" do |dtk_common, component_module_name|
   it "gets empty list of all components since #{component_module_name} component module does not exist" do
-    #delete previous elements in array
+    # delete previous elements in array
     dtk_common.component_module_id_list.delete_if { |x| x != nil }
     dtk_common.get_component_module_components_list(component_module_name, "")
     empty_list = dtk_common.component_module_id_list.empty?
@@ -156,7 +156,7 @@ end
 
 shared_context "Get versioned component module components list" do |dtk_common, component_module_name, version|
   it "gets list of all components for version #{version} of #{component_module_name} component module" do
-    #delete previous elements in array
+    # delete previous elements in array
     dtk_common.component_module_id_list.delete_if { |x| x != nil }
     dtk_common.get_component_module_components_list(component_module_name, version)
     empty_list = dtk_common.component_module_id_list.empty?
@@ -276,12 +276,12 @@ shared_context "Delete component module from remote repo" do |dtk_common, compon
   end
 end
 
-#shared_context "OLD - Delete module from remote repo" do |dtk_common, component_module_name, namespace|
+# shared_context "OLD - Delete module from remote repo" do |dtk_common, component_module_name, namespace|
 #  it "deletes #{component_module_name} module with #{namespace} namespace from remote repo" do
 #    module_deleted = dtk_common.delete_module_from_remote(component_module_name, namespace)
 #    module_deleted.should eq(true)
 #  end
-#end
+# end
 
 shared_context "Create new component module version" do |dtk_common, component_module_name, version|
   it "creates new version #{version} for #{component_module_name} component module on server" do

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#Test Case 3: Create one node, add component in it, converge workspace and check netstats and task info output
+# Test Case 3: Create one node, add component in it, converge workspace and check netstats and task info output
 
 require 'rubygems'
 require 'rest_client'

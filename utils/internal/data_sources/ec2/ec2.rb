@@ -15,12 +15,12 @@ module XYZ
         servers.each do |server|
           block.call(DataSourceUpdateHash.new(server).freeze)
         end
-        #TODO: qualify that comes from ec2 or chef-ec2
+        # TODO: qualify that comes from ec2 or chef-ec2
         return HashIsComplete.new({:type => "instance"}) #TODO; this prunes chef dicovred instances that no longer exist
       end
 
       def get_objects__node__image(&block)
-        #TODO: stubbed so that just brings in images currently used
+        # TODO: stubbed so that just brings in images currently used
         servers = get_servers()
         images = Hash.new
         servers.each do |server|
@@ -33,7 +33,7 @@ module XYZ
         images.values().each do |image|
           block.call(DataSourceUpdateHash.new(image).freeze)
         end
-        #TODO: qualify that comes from ec2
+        # TODO: qualify that comes from ec2
         return HashIsComplete.new({:type => "image"})
       end
 
@@ -58,7 +58,7 @@ module XYZ
       end
 
       def get_objects__node_group_member(&block)
-        #TODO: using now explict links to node group; should dynamic sql be used instead?
+        # TODO: using now explict links to node group; should dynamic sql be used instead?
         get_servers().each do |server|
           next unless server[:network_partition_ref]
           node_ref = server[:id]

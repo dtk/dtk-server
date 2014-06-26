@@ -3,11 +3,11 @@ module DTK; class Task; class Template
     class ExecutionBlock < Array
       include Serialization
       def node()
-        #all the elements have same node so can just pick first
+        # all the elements have same node so can just pick first
         first && first[:node]
       end
       def config_agent_type()
-        #TODO: for now all  elements have same config_agent_type, so can just pick first
+        # TODO: for now all  elements have same config_agent_type, so can just pick first
         first && first.config_agent_type()
       end
       def components()
@@ -66,7 +66,7 @@ module DTK; class Task; class Template
         end
         SerializedComponentGroup.add?(items,component_group)
         unless items.empty?
-          #look for special case where single component group
+          # look for special case where single component group
           if items.size == 1 and items.first.kind_of?(SerializedComponentGroup)
             {Constant::Components => items.first.components()}
           else
@@ -75,7 +75,7 @@ module DTK; class Task; class Template
         end
       end
 
-      #action list can be nil just for parsing
+      # action list can be nil just for parsing
       def self.parse_and_reify(serialized_eb,node_name,action_list,opts={})
         ret = new()
         return ret unless action_list
@@ -84,7 +84,7 @@ module DTK; class Task; class Template
           if lvs.add_and_match?(serialized_eb){HashWithKey(Constant::OrderedComponents)}
             serialized_eb[Constant::OrderedComponents]
           elsif lvs.add_and_match?(serialized_eb){HashWithKey(Constant::Components)}
-            #normalize from component form into ordered_component_form
+            # normalize from component form into ordered_component_form
             [{Constant::ComponentGroup => serialized_eb[Constant::Components]}]
           else
             raise ParsingError::WrongType.new(serialized_eb,lvs)
@@ -135,7 +135,7 @@ module DTK; class Task; class Template
       end
 
      private
-      #has form {Constant::ComponentGroup => [cmp1,cmp2,..]
+      # has form {Constant::ComponentGroup => [cmp1,cmp2,..]
       class SerializedComponentGroup < Hash
         include Serialization
         def self.add?(ret,component_group)
@@ -172,7 +172,7 @@ module DTK; class Task; class Template
 
       class Unordered < self
         def order(intra_node_contraints,strawman_order=nil)
-          #short-cut, no ordering if singleton
+          # short-cut, no ordering if singleton
           if size < 2
             return Ordered.new(self)
           end

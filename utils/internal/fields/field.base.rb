@@ -47,7 +47,7 @@ class Fieldbase
         return self.get_field_list
       when "search" then
         return (defined? self.get_field_search) ? self.get_field_search : self.get_field_edit
-      #if getting to default then its calling a custom view
+      # if getting to default then its calling a custom view
       else
         cstm_view_method = 'get_field_'+ view_type
         return self.send(cstm_view_method.to_sym)

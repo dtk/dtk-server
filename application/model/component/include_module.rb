@@ -1,18 +1,18 @@
 module DTK; class Component
   class IncludeModule < Model
-    #a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
+    # a version context element is hash with keys: :repo,:branch,:implementation, :sha (optional)
     def self.get_version_context_info(component_idhs,impl_idhs)
       ret = impls = get_implementations(impl_idhs)
       include_modules = get_include_mods_with_impls(component_idhs)
       return ret if include_modules.empty?()
 
-      #if any include_module is not linked to a implementation then find implementations for include_modules
+      # if any include_module is not linked to a implementation then find implementations for include_modules
       if include_modules.find{|incl_mod|incl_mod[:implementation].nil?}
         mod_incl_viols = find_violations_and_set_impl(component_idhs,impls,include_modules)
         unless mod_incl_viols.empty?
           raise Error.new("Need to implement code that presents include_module violations (#{mod_incl_viols.inspect})")
         end
-        #TODO: there is more efficient way of doing this than calling get_include_mods_with_impls again
+        # TODO: there is more efficient way of doing this than calling get_include_mods_with_impls again
         include_modules = get_include_mods_with_impls(component_idhs)
       end
 
@@ -27,11 +27,11 @@ module DTK; class Component
       ret
     end
 
-    #TODO: below is done as first part of converge and above is done as part of processing converge node tasks; they have related
-    #logic; may want to consolidate so only done in one place
-    #this method looks for include_modules on a component in component_idhs
-    #for each include_module it finds it looks to find a matching implementation if one does not exist
-    #it returns an array of hashes that has an error code and params related to error key
+    # TODO: below is done as first part of converge and above is done as part of processing converge node tasks; they have related
+    # logic; may want to consolidate so only done in one place
+    # this method looks for include_modules on a component in component_idhs
+    # for each include_module it finds it looks to find a matching implementation if one does not exist
+    # it returns an array of hashes that has an error code and params related to error key
     def self.find_violations_and_set_impl(component_idhs,impls,incl_mods=nil)
       ret = Array.new()
       return ret if component_idhs.empty?
@@ -48,7 +48,7 @@ module DTK; class Component
       end
 
       unless impls_to_set_on_incl_mods.empty? 
-        #not doing updates if any errors
+        # not doing updates if any errors
         if ret.empty?
           incl_mod_mh = component_idhs.first.createMH(:component_include_module)
           update_from_rows(incl_mod_mh,impls_to_set_on_incl_mods)
@@ -58,7 +58,7 @@ module DTK; class Component
       ret
     end
 
-    #three posibilities
+    # three posibilities
     # has :implementation set already -> no op
     # finds a match in impls -> adds to impls_to_set_on_incl_mods and upadtes self
     # finds no match -> add row to incl_mods_to_match
@@ -77,7 +77,7 @@ module DTK; class Component
       nil
     end
 
-    #appropriately updates ret_errors and impls_to_set_on_incl_mods
+    # appropriately updates ret_errors and impls_to_set_on_incl_mods
     def self.find_matching_impls!(ret_errors,impls_to_set_on_incl_mods,impl_mh,incl_mods_to_match)
       disjuncts = incl_mods_to_match.map do |incl_mod_info|
         [:and, [:eq,:module_name,incl_mod_info[:module_name]],
@@ -133,14 +133,14 @@ module DTK; class Component
       get_objs(incl_mod_mh,sp_hash)
     end
 
-    #returns [is_scalar,version]
+    # returns [is_scalar,version]
     def scalar_version?()
       vc = self[:version_constraint]
       is_scalar = (vc.nil? or vc.kind_of?(String))
       [is_scalar,is_scalar && vc]
     end
 
-    #returns [module_name,version]
+    # returns [module_name,version]
     def ret_module_name_and_version()
       is_scalar,version = scalar_version?()
       unless is_scalar

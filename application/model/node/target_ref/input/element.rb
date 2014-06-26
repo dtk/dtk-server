@@ -30,7 +30,7 @@ module DTK; class Node
               raise Error.new("Unexpected type (#{type})")
           end
         end
-        Delim = '/'
+        Delim = ':'
       end
     end
   end

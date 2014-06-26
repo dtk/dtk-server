@@ -4,19 +4,31 @@ module DTK
   class CommandAndControl
     r8_nested_require('command_and_control','install_script')
 
-    def self.execute_task_action(task,top_task_idh,opts={})
-      task_action = task[:executable_action]
-      klass = load_for(task_action)
-      task_idh = task.id_handle()
-      if opts[:initiate_only]
-        klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
-      elsif opts[:cancel_task]
+    def initialize(task,top_task_idh)
+      @task_idh =  task.id_handle()
+      @top_task_idh = top_task_idh
+      @task_action = task[:executable_action]
+      @klass = self.class.load_for(@task_action)
+    end
+    attr_reader :task_idh,:top_task_idh,:task_action,:klass
+
+    def self.execute_task_action(task,top_task_idh)
+      new(task,top_task_idh).execute().merge(:task_id => task.id())
+    end
+    def execute()
+      klass.execute(task_idh,top_task_idh,task_action)
+    end
+
+    def self.initiate_task_action(task,top_task_idh,opts={})
+      new(task,top_task_idh).initiate(opts)
+    end
+    def initiate(opts={})
+      if opts[:cancel_task]
         klass.initiate_cancelation(task_idh,top_task_idh,task_action,opts)   
       elsif opts[:sync_agent_task]
         klass.initiate_sync_agent_code(task_idh,top_task_idh,task_action,opts)         
       else
-        result = klass.execute(task_idh,top_task_idh,task_action)
-        result.merge(:task_id => task.id())
+        klass.initiate_execution(task_idh,top_task_idh,task_action,opts)
       end
     end
 

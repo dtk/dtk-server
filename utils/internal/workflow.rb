@@ -1,12 +1,9 @@
 module DTK
   class Workflow
     r8_nested_require('workflow','guard')
+    r8_nested_require('workflow','call_commands')
+    include CallCommandsMixin
 
-    # Rich: moved thess to be in config file so each developer can test different configs
-    # Configuration for 'inter_node_temporal_coordination_mode'; Values: 'STAGES' 'GUARDS'
-    # @@inter_node_temporal_coordination_mode = "STAGES"
-    # Configuration for 'intra_node_temporal_coordination_mode'; Values: 'STAGES' 'TOTAL_ORDER'
-    # @@intra_node_temporal_coordination_mode = "STAGES"
     class << self
       def guards_mode?
         inter_node_temporal_coordination_mode() == "GUARDS"
@@ -93,17 +90,9 @@ module DTK
       ret
     end
 
-    def process_executable_action(task)
-      self.class.process_executable_action(task,top_task_idh)
-    end
-
     attr_reader :top_task, :guards
 
    private
-    def self.process_executable_action(task,top_task_idh)
-      CommandAndControl.execute_task_action(task,top_task_idh)
-    end
-
     class Adapter
       def self.klass(top_task=nil)
         # RICH-WF: not necssary to cache (ie., use @klass)
@@ -118,7 +107,7 @@ module DTK
           raise.Error.new("cannot find workflow adapter")
         end
       end
-      private
+     private
       # RICH-WF: stub function to call Simple when top_task is install_agents
       def self.type(top_task=nil)
         if (top_task||{})[:display_name] == "install_agents"

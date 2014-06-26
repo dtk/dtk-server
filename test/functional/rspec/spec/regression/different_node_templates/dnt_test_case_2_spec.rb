@@ -12,7 +12,7 @@ require './lib/assembly_and_service_operations_spec'
 STDOUT.sync = true
 
 service_name = 'dnt_test_case_2_instance'
-assembly_name = 'bakir_test::redhat_bigtop_namenode'
+assembly_name = 'bakir_test::bigtop_namenode'
 namenode_port = 8020
 namenode_web_port = 50070
 
@@ -36,7 +36,7 @@ describe "(Different Node Templates) Test Case 2: (OS: CentOS, Namenode: BigTop)
 	end
 
 	context "Converge function" do
-		include_context "Converge", dtk_common
+		include_context "Converge service", dtk_common, 20
 	end
 
 	context "Namenode port #{namenode_port}" do

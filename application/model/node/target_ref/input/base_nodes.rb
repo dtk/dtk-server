@@ -11,71 +11,67 @@ module DTK; class Node; class TargetRef
       #This creates if needed target refs and links nodes to them
       #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
       def create_linked_target_refs?()
-        target_ref_hash = ret_target_ref_hash()
-        pp [:ret_target_ref_hash,target_ref_hash,self]
-        raise ErrorUsage.new('got here')
-
-        target_idh = target.id_handle()
-        Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
+        add_to_target = ret_linked_target_ref_hash()
+        target_idh = @target.id_handle()
+        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
       end
 
      private
       def add!(node_info)
         self << Element.new(node_info)
       end
-      def ret_target_ref_hash()
-        inject(Hash.new){|h,el|h.merge(el.ret_target_ref_hash(@target,@assembly))}
+
+      def ret_linked_target_ref_hash()
+        ret = Hash.new
+        each do |el|
+          target_ref,node_group_relation = el.add_target_ref_and_ngr!(ret,@target,@assembly)
+        end
+        ret
       end
 
       #returns for each node that needs one or more target refs the following hash
       # :node
       # :num_needed
-      # :num_linked
       def num_target_refs_needed(nodes)
         ret = Array.new
         #TODO: temporary; removes all nodes that are not node groups
         nodes = nodes.select{|n|n.is_node_group?()}
-        return ret if nodes.empty?
-        ndx_linked_target_ref_idhs = ndx_linked_target_ref_idhs(nodes)
         nodes.each do |node|
           node_id = node[:id]
-          num_linked = (ndx_linked_target_ref_idhs[node_id]||[]).size 
-          num_needed = node.attribute.cardinality - num_linked
+          num_needed = node.attribute.cardinality
           if num_needed > 0
-            ret << {:node => node,:num_needed => num_needed,:num_linked => num_linked}
-          else num_needed < 0
-            Log.error("Unexpected that number of target refs (#{num_linked}) for (#{node[:display_name].to_s}) is graeter than cardinaility (#{node.attribute.cardinality.to_s})")
+            ret << {:node => node,:num_needed => num_needed}
           end
         end
         ret
       end
-
-      #indexed by node id
-      def ndx_linked_target_ref_idhs(nodes)
-        ret = Hash.new
-        Log.error("need to index by assembly")
-        sp_hash = {
-          :cols => [:id,:group_id,:display_name,:node_id,:node_group_id],
-          :filter => [:and, 
-                      [:oneof,:node_group_id,nodes.map{|n|n.id}],
-                      [:eq,:datacenter_datacenter_id,@target.id]]
-        }
-        node_mh = @target.model_handle(:node)
-        Model.get_objs(@target.model_handle(:node_group_relation),sp_hash).each do |r|
-          (ret[r[:node_group_id]] ||= Array.new) << node_mh.createIDH(:id => r[:node_id])
-        end
-      end
-
 
       class Element 
         include ElementMixin
         def initialize(node_info)
           @node = node_info[:node]
           @num_needed = node_info[:num_needed]
-          @num_linked = node_info[:num_linked]
           @type = :base_node_link
         end
-        
+
+        # returns [target_ref,node_group_relation]
+        def add_target_ref_and_ngr!(ret,target,assembly)
+          target_ref_hash = ret_target_ref_hash(target,assembly)
+          unless target_ref_hash.empty?
+            (ret[:node] ||= Hash.new).merge!(target_ref_hash)
+            node_group_rel_hash = target_ref_hash.keys.inject(Hash.new) do |h,node_ref|
+              hash = {
+                "node_group_id" => @node.id,
+                "*node_id" => "/node/#{node_ref}"
+              }
+              ref = node_ref
+              h.merge(ref => hash)
+            end
+            (ret[:node_group_relation] ||= Hash.new).merge!(node_group_rel_hash)
+          end
+          ret
+        end
+
         def ret_target_ref_hash(target,assembly)
           ret = Hash.new
           unless display_name = @node.get_field?(:display_name)

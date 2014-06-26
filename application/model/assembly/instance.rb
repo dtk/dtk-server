@@ -512,7 +512,7 @@ module DTK; class  Assembly
 
       target = get_target()
 
-      node_template = Node::Template.find_matching_node_template(target,node_binding_rs)
+      node_template = Node::Template.find_matching_node_template(target,:node_binding_ruleset => node_binding_rs)
       
       override_attrs = {
         :display_name => node_name,

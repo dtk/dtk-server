@@ -11,7 +11,8 @@ module DTK
           if target.get_field?(:iaas_type) == 'physical'
             find_node_target_ref_matches(target,assembly_template_idh)
           else
-            find_node_template_matches(target,assembly_template_idh,sao_node_bindings)
+            # can either be node templates, meaning spinning up node, or a match to an existing node 
+            find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings)
           end
         merge!(:matches => matches) if matches
       end
@@ -62,8 +63,8 @@ module DTK
         end
         ret
       end
-    
-      def find_node_template_matches(target,assembly_template_idh,sao_node_bindings=nil)
+
+      def find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings=nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
         # as will as using, if non-empty, service_add_on_node_bindings to see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
@@ -78,20 +79,31 @@ module DTK
           end
         end
 
-        # No rules in the node being match the target (/home/dtk18/server/application/model/node_binding_ruleset.rb:22
         node_mh = target.model_handle(:node)
-        # TODO: may be more efficient to get these all at once
         node_info.map do |node|
-          node_template = Node::Template.find_matching_node_template(target,node[:node_binding_ruleset])
-          instance_type = (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
-          {
-            :instance_type         => instance_type,
-            :node_stub_idh         => node.id_handle, 
-            :instance_display_name => node[:display_name],
-            :instance_ref          => node[:display_name],
-            :node_template_idh     => node_template.id_handle()
-          }
+          nbrs_opts = {:node_binding_ruleset => node[:node_binding_ruleset]}
+          case match_or_create_node(target,node,assembly_template_idh,nbrs_opts)
+            when :create 
+              node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
+              hash_el_when_create(node,node_template)
+            when :match  
+              if node_target_ref = NodeBindings.find_matching_target_ref(target,node,assembly_template_idh)
+                hash_el_when_match(node,node_target_ref)
+              else
+                Log.error('Temp logic as default if cannot find_matching_target_ref then create')
+                node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
+                hash_el_when_create(node,node_template)
+              end
+            else 
+             raise Error.new("Unexpected return value from match_or_create_node")
+          end
         end
+      end
+
+        
+      #TODO: just temporarly heustic that wil indicate :match if node node bindings in assembly
+      def match_or_create_node(target,node,assembly_template_idh,opts)
+        opts[:node_binding_ruleset] ? :create : :match
       end
 
       def find_node_target_ref_matches(target,assembly_template_idh)
@@ -113,15 +125,29 @@ module DTK
         ret = Array.new
         stub_nodes.each_with_index do |stub_node,i|
           node_target_ref = free_nodes[i]
-          ret << {
-            :instance_type         => Node::Type::Node.instance,
-            :node_stub_idh         => stub_node.id_handle, 
-            :instance_display_name => stub_node[:display_name],
-            :instance_ref          => node_target_ref.get_field?(:ref),
-            :node_template_idh     => node_target_ref.id_handle()
-          }
+          ret << hash_el_when_match(stub_node,node_target_ref)
         end
         ret
+      end
+
+      def hash_el_when_create(node,node_template)
+        instance_type = (node.is_node_group?() ? Node::Type::NodeGroup.staged : Node::Type::Node.staged)
+        {
+          :instance_type         => instance_type,
+          :node_stub_idh         => node.id_handle, 
+          :instance_display_name => node[:display_name],
+          :instance_ref          => node[:display_name],
+          :node_template_idh     => node_template.id_handle()
+        }
+      end
+      def hash_el_when_match(node,node_target_ref)
+        {
+          :instance_type         => Node::Type::Node.instance,
+          :node_stub_idh         => node.id_handle, 
+          :instance_display_name => node[:display_name],
+          :instance_ref          => node_target_ref.get_field?(:ref),
+          :node_template_idh     => node_target_ref.id_handle()
+        }
       end
 
       def cleanup_after_error()

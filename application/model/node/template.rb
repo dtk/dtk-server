@@ -85,7 +85,8 @@ module DTK
         end.compact.uniq
       end
 
-      def self.find_matching_node_template(target,node_binding_rs=nil)
+      def self.find_matching_node_template(target,opts={})
+        node_binding_rs = opts[:node_binding_ruleset]
         ret = node_binding_rs && node_binding_rs.find_matching_node_template(target)
         ret || null_node_template(target.model_handle(:node))
       end

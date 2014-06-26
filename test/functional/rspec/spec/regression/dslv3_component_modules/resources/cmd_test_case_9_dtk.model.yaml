@@ -36,4 +36,4 @@ components:
       - dependency_name: member
         attribute_mappings:
         - $node.host_address -> members
-        - param1 -> param2
+        - $param1 -> param2

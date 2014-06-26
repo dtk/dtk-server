@@ -9,7 +9,7 @@ module DTK
 
       def execute(top_task_id)
         workflow = self.class.generate_workflow(@top_task,@task)
-        # RICH-WF: needs to be writtenm by having each child clas put in logic
+        # RICH-WF: needs to be written by having each child class put in logic
         workflow.follow_workflow()
       end
 
@@ -30,6 +30,7 @@ module DTK
 
       class ExecutableAction < self
         def follow_workflow()
+          #TODO: needs to call workflow#process_executable_action
           process_executable_action(task,top_task_idh)
         end
 

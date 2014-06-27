@@ -80,7 +80,7 @@ module XYZ
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
 
         nodes = nil
-        if decompose_in_ruote =  ActionsHandlingNodeGroups.include?(name)
+        if decompose_in_ruote =  !ActionsHandlingNodeGroups.include?(name)
           nodes = task[:executable_action].nodes
           decompose_in_ruote = nodes.size > 1 
         end
@@ -90,7 +90,7 @@ module XYZ
           participant_executable_single_action(name,task,context,args)
         end
       end
-      ActionsHandlingNodeGroups = [:create]
+      ActionsHandlingNodeGroups = [:create_node]
       
       def participant_executable_single_action(name,task,context,args={})
         executable_action = task[:executable_action]
@@ -110,9 +110,9 @@ module XYZ
       # from ruote perspective node group is just item
       def decompose_node_group_in_ruote(nodes,name,task,context,args={})
         single_node_subtasks = nodes.map do |node|
+          Log.error("Need to also change node attributes")
           executable_action = task[:executable_action].merge(:node => node)
           task.merge(:executable_action => executable_action)
-          Log.error("Need to also change node attributes")
         end
         compute_process_body_concurrent(single_node_subtasks,context)
       end

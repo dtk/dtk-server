@@ -43,6 +43,11 @@ module DTK
     def create_obj_optional_subclass()
       is_node_group?() ? create_subclass_obj(node_group_model_name()) : self
     end
+    #This is overwritten by node group subclasses
+    def get_node_members()
+      [self]
+    end
+
     def self.create_from_model_handle(hash_scalar_values,model_handle,opts={})
       ret = super(hash_scalar_values,model_handle)
       opts[:subclass] ? ret.create_obj_optional_subclass() : ret

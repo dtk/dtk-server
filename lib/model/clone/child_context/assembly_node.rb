@@ -111,8 +111,8 @@ module DTK
               node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
               hash_el_when_create(node,node_template)
             when :match  
-              if node_target_ref = NodeBindings.find_matching_target_ref(target,node,assembly_template_idh)
-                hash_el_when_match(node,node_target_ref)
+              if existing_node = NodeBindings.find_matching_existing_node(target,node,assembly_template_idh)
+                hash_el_when_match(node,existing_node)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')
                 node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
@@ -140,13 +140,13 @@ module DTK
           :node_template_idh     => node_template.id_handle()
         }
       end
-      def hash_el_when_match(node,node_target_ref)
+      def hash_el_when_match(node,existing_node)
         {
           :instance_type         => Node::Type::Node.instance,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
-          :instance_ref          => node_target_ref.get_field?(:ref),
-          :node_template_idh     => node_target_ref.id_handle()
+          :instance_ref          => existing_node.get_field?(:ref),
+          :node_template_idh     => existing_node.id_handle()
         }
       end
 

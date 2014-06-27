@@ -75,19 +75,46 @@ module XYZ
       def compute_process_executable_action(task,context)
         decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_start => true, :task_end => true)
       end
+
       def participant_executable_action(name,task,context,args={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
-        executable_action = task[:executable_action]
 
+        nodes = nil
+        if decompose_in_ruote =  ActionsHandlingNodeGroups.include?(name)
+          nodes = task[:executable_action].nodes
+          decompose_in_ruote = nodes.size > 1 
+        end
+        if decompose_in_ruote
+          decompose_node_group_in_ruote(nodes,name,task,context,args)
+        else
+          participant_executable_single_action(name,task,context,args)
+        end
+      end
+      ActionsHandlingNodeGroups = [:create]
+      
+      def participant_executable_single_action(name,task,context,args={})
+        executable_action = task[:executable_action]
         task_info = {
           "action" => executable_action,
           "workflow" => self,
           "task" => task,
           "top_task_idh" => context.top_task_idh
         }
+        
         task_id = task.id()
         Ruote::TaskInfo.set(context.top_task_idh.get_id(), task_id,task_info,args[:task_type])
         participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(args))
+      end
+
+      # TODO: need to see if big performance improvement if rather than decomposing using ruote
+      # from ruote perspective node group is just item
+      def decompose_node_group_in_ruote(nodes,name,task,context,args={})
+        single_node_subtasks = nodes.map do |node|
+          executable_action = task[:executable_action].merge(:node => node)
+          task.merge(:executable_action => executable_action)
+          Log.error("Need to also change node attributes")
+        end
+        compute_process_body_concurrent(single_node_subtasks,context)
       end
 
       def ret_guards(guard_tasks)

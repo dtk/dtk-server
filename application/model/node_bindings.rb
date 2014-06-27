@@ -63,10 +63,10 @@ module DTK
           n.get_field?(:display_name) == @node_name
         end
         unless matching_node
-          raise ErrorUsage.new("Assembly (#{@assembly_name}) does not have node (#{@node_name})")
+          raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) does not have node (#{@node_name})")
         end
-        unless matching_node.get_field?(:type) == 'isntance'
-          raise ErrorUsage.new("Assembly (#{@assembly_name}) node (#{@node_name}) cannot be matched because it is just staged")
+        unless matching_node.get_field?(:type) == 'instance'
+          raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) node (#{@node_name}) cannot be matched because it is just staged")
         end
         matching_node
       end

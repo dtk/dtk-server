@@ -127,6 +127,24 @@ module DTK; class  Assembly
       get_obj_helper(:aug_service_add_ons_from_instance,:service_add_on,:filter_proc => filter_proc, :augmented => true)
     end
 
+    def self.get_nodes_simple(assembly_idhs,opts={})
+      ret = Array.new
+      return ret if assembly_idhs.empty?()
+      sp_hash = {
+        :cols => opts[:cols] || [:id,:display_name,:group_id,:type,:assembly_id],
+        :filter => [:oneof,:assembly_id,assembly_idhs.map{|idh|idh.get_id()}]
+      }
+      node_mh = assembly_idhs.first.createMH(:node)
+      ret = get_objs(node_mh,sp_hash)
+      unless opts[:ret_subclasses]
+        ret
+      else
+        ret.map do |r| 
+          r.is_node_group? ? r.id_handle().create_object(:model_name => :service_node_group).merge(r) : r
+        end
+      end
+    end
+
     def get_node?(filter)
       sp_hash = {
         :cols => [:id,:display_name],

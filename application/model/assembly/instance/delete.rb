@@ -83,11 +83,8 @@ module DTK; class  Assembly
       end
 
       def self.get_nodes_simple(node_mh,assembly_ids)
-        sp_hash = {
-          :cols => [:id,:display_name],
-          :filter => [:oneof,:assembly_id,assembly_ids]
-        }
-        get_objs(node_mh,sp_hash)
+        assembly_idhs = assembly_ids.map{|id|node_mh.createIDH(:id => id,:model_name => :assembly_instance)}
+        Assembly::Instance.get_nodes_simple(assembly_idhs,:ret_subclasses=>true)
       end
 
      private

@@ -1,6 +1,5 @@
 module DTK
   class ServiceNodeGroup < Node
-
     def get_node_members()
       sp_hash = {
         :cols => [:node_members]
@@ -18,6 +17,14 @@ module DTK
     def self.id_to_name(model_handle, id)
       IdNameHelper.id_to_name(model_handle, id)
     end
+
+    def destroy_and_delete(opts={})
+      get_node_members().map{|node|node.destroy_and_delete(opts)}
+    end
+    def delete_object(opts={})
+      get_node_members().map{|node|node.delete_object(opts)}
+    end
+
    private
     module IdNameHelper
       def self.check_valid_id(model_handle,id)

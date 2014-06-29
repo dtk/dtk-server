@@ -5,55 +5,60 @@ module DTK; module WorkflowAdapter
       Store = Hash.new
       Lock = Mutex.new
       
-#      def self.set(top_task_id, task_id,task_info,task_type=nil)
-      def self.set(task_id,task_info,opts={})
-        key = task_key(task_id,opts)
+      def self.set(task_id,top_task_id,task_info,opts={})
+        key = task_key(task_id,top_task_id,opts)
         Lock.synchronize{Store[key] = task_info}
       end
       
-#      def self.get(task_id,task_type=nil,top_task_id=nil)
-      def self.get(task_id,opts={})
-        key = task_key(task_id,opts)
+      def self.get(workitem)
+        key = get_from_workitem(workitem)
         ret = nil
         Lock.synchronize{ret = Store[key]}
+        unless ret
+          Log.error("cannot find match for key: #{key}")
+        end
         ret
       end
       
-#      def self.delete(task_id,task_type=nil,top_task_id=nil)
-      def self.delete(ttask_id,opts={})
-        key = task_key(task_id,opts)
+      def self.delete(workitem)
+        key = get_from_workitem(workitem)
         Lock.synchronize{Store.delete(key)}
       end
       
       def self.clean(top_task_id)
-        Lock.synchronize{ Store.delete_if { |key, value| key.match(/#{top_task_id}.*/) } }
+        Lock.synchronize{ Store.delete_if { |key, value| key.match(Regexp.new("^#{top_task_id.to_s}#{TopTaskDelim}")) }}
         pp [:write_cleanup,Store.keys]
         # TODO: this needs to clean all keys associated with the task; some handle must be passed in
         # TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
       end
-      
-      def self.get_top_task_id(task_id)
-        top_key = task_key(task_id)
-        top_key.split('-')[0] 
+
+      TopTaskDelim = '-'
+
+     private
+      def self.get_from_workitem(workitem)
+        params = workitem.params
+        task_id = params["task_id"]
+        top_task_id = params["top_task_id"]
+        opts = Hash.new
+        if task_type = params["task_type"]
+          opts.merge!(:task_type => task_type)
+        end
+        if override_node_id = params["override_node_id"]
+          opts.merge!(:override_node_id => override_node_id)
+        end
+        task_key(task_id,top_task_id,opts)
       end
-      
-      private
-      # Amar: altered key format to enable top task cleanup by adding top_task_id on front
-#      def self.task_key(task_id,task_type=nil,top_task_id=nil)
-      def self.task_key(task_id,opts={})
-        task_type = opts[:task_type]
-        top_task_id = opts[:top_task_id]
-        override_node = opts[:override_node]
-        ret_key = task_id.to_s
-        ret_key = "#{top_task_id.to_s}-#{ret_key}" if top_task_id
-        ret_key = "#{ret_key}-#{task_type}" if task_type
-        return ret_key if top_task_id
-        
-        Store.keys.each do |key|
-          if key.match(/.*#{ret_key}/)
-            ret_key = key 
-            break
-          end
+
+      # opts can have keys
+      #  :task_type
+      #  ::override_node_id 
+      def self.task_key(task_id,top_task_id,opts={})
+        ret_key = "#{top_task_id.to_s}#{TopTaskDelim}#{task_id.to_s}"
+        if task_type = opts[:task_type]
+          ret_key <<  "--#{task_type}"
+        end
+        if override_node_id = opts[:override_node_id]
+          ret_key << "---#{override_node_id}"
         end
         ret_key
       end

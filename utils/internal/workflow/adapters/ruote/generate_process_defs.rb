@@ -95,25 +95,24 @@ module XYZ
       def participant_executable_single_action(name,task_input,context,opts={})
         override_node = opts[:override_node]
         task = (opts[:override_node] ? task_input.modify_with_node?(override_node) : task_input)
-        top_task_idh = context.top_task_idh
         task_info =  {
           "action" => task[:executable_action],
           "workflow" => self,
-          "task" => task,
-          "top_task_idh" => top_task_idh
+          "task" => task
         }
-        task_id = task.id()
-        task_info_opts = {:top_task_id => top_task_idh.get_id()}
+
+        task_info_opts = Hash.new
         if task_type = opts[:task_type]
           task_info_opts.merge!(:task_type => task_type)
         end
         if override_node
           task_info_opts.merge!(:override_node_id => override_node.id())
         end
-        Ruote::TaskInfo.set(task_id,task_info,task_info_opts)
-        participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(task_info_opts))
+        task_id = task.id()
+        top_task_id = context.top_task_idh.get_id()
+        Ruote::TaskInfo.set(task_id,top_task_id,task_info,task_info_opts)
+        participant(name,{:task_id => task_id,:top_task_id => top_task_id}.merge(task_info_opts))
       end
-
 
       # TODO: need to see if big performance improvement if rather than decomposing using ruote
       # from ruote perspective node group is just item

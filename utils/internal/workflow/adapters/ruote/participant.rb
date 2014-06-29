@@ -166,17 +166,15 @@ module DTK
         def set_result_succeeded__stack(workitem,new_result,task,action)
           workitem.fields["result"] = {:action_completed => action.type}
         end
+
         def get_task_info(workitem)
-          params = workitem.params
-          Ruote::TaskInfo.get(params["task_id"],params["task_type"])
+          Ruote::TaskInfo.get(workitem)
         end
         def delete_task_info(workitem)
-          params = workitem.params
-          Ruote::TaskInfo.delete(params["task_id"],params["task_type"])
+          Ruote::TaskInfo.delete(workitem)
         end
         def get_top_task_id(workitem)
-          params = workitem.params
-          Ruote::TaskInfo.get_top_task_id(params["task_id"])
+          workitem.params["top_task_id"]
         end
         def cancel_upstream_subtasks(workitem)
           # begin-rescue block is required, as multiple concurrent subtasks can initiate this method and only first will do the canceling

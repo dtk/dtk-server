@@ -59,4 +59,4 @@ module DTK; module WorkflowAdapter
       end
     end
   end
-end
+end; end

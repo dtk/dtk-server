@@ -76,7 +76,7 @@ module XYZ
         decomposition(task,context) || participant_executable_action(:execute_on_node,task,context, :task_start => true, :task_end => true)
       end
 
-      def participant_executable_action(name,task,context,args={})
+      def participant_executable_action(name,task,context,opts={})
         raise Error.new("unregistered participant name (#{name})") unless Ruote::ParticipantList.include?(name) 
 
         nodes = nil
@@ -85,30 +85,39 @@ module XYZ
           decompose_in_ruote = nodes.size > 1 
         end
         if decompose_in_ruote
-          decompose_node_group_in_ruote(nodes,name,task,context,args)
+          decompose_node_group_in_ruote(nodes,name,task,context,opts)
         else
-          participant_executable_single_action(name,task,context,args)
+          participant_executable_single_action(name,task,context,opts)
         end
       end
       ActionsHandlingNodeGroups = [:create_node]
       
-      def participant_executable_single_action(name,task,context,args={})
-        executable_action = task[:executable_action]
-        task_info = {
-          "action" => executable_action,
+      def participant_executable_single_action(name,task_input,context,opts={})
+        override_node = opts[:override_node]
+        task = (opts[:override_node] ? task_input.modify_with_node?(override_node) : task_input)
+        top_task_idh = context.top_task_idh
+        task_info =  {
+          "action" => task[:executable_action],
           "workflow" => self,
           "task" => task,
-          "top_task_idh" => context.top_task_idh
+          "top_task_idh" => top_task_idh
         }
-        
         task_id = task.id()
-        Ruote::TaskInfo.set(context.top_task_idh.get_id(), task_id,task_info,args[:task_type])
-        participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(args))
+        task_info_opts = {:top_task_id => top_task_idh.get_id()}
+        if task_type = opts[:task_type]
+          task_info_opts.merge!(:task_type => task_type)
+        end
+        if override_node
+          task_info_opts.merge!(:override_node_id => override_node.id())
+        end
+        Ruote::TaskInfo.set(task_id,task_info,task_info_opts)
+        participant(name,{:task_id => task_id,:top_task_idh => context.top_task_idh}.merge(task_info_opts))
       end
+
 
       # TODO: need to see if big performance improvement if rather than decomposing using ruote
       # from ruote perspective node group is just item
-      def decompose_node_group_in_ruote(nodes,name,task,context,args={})
+      def decompose_node_group_in_ruote(nodes,name,task,context,opts={})
         concurrence_body = nodes.map{|node|participant_executable_single_action(name,task,new_context,:override_node => node)}
         concurrence(concurrence_body)
       end

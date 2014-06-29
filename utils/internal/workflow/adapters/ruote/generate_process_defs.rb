@@ -95,10 +95,12 @@ module XYZ
       def participant_executable_single_action(name,task_input,context,opts={})
         override_node = opts[:override_node]
         task = (opts[:override_node] ? task_input.modify_with_node?(override_node) : task_input)
+        top_task_idh = context.top_task_idh
         task_info =  {
           "action" => task[:executable_action],
           "workflow" => self,
-          "task" => task
+          "task" => task,
+          "top_task_idh" => top_task_idh
         }
 
         task_info_opts = Hash.new
@@ -109,9 +111,18 @@ module XYZ
           task_info_opts.merge!(:override_node_id => override_node.id())
         end
         task_id = task.id()
-        top_task_id = context.top_task_idh.get_id()
+        top_task_id = top_task_idh.get_id()
         Ruote::TaskInfo.set(task_id,top_task_id,task_info,task_info_opts)
-        participant(name,{:task_id => task_id,:top_task_id => top_task_id}.merge(task_info_opts))
+
+        #TODO: figure exactly which of these from opts are needed
+        participant_params = opts.merge(
+          :task_id => task_id,
+          :top_task_id => top_task_id
+        )
+        if override_node
+          participant_param.merge!(:override_node_id => override_node.id())
+        end
+        participant(name,participant_params)
       end
 
       # TODO: need to see if big performance improvement if rather than decomposing using ruote

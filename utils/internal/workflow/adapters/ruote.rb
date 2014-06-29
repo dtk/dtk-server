@@ -2,6 +2,7 @@ require 'ruote'
 module DTK 
   module WorkflowAdapter
     class Ruote < DTK::Workflow
+      r8_nested_require('ruote','task_info')
       r8_nested_require('ruote','participant')
       r8_nested_require('ruote','generate_process_defs')
       class Worker < ::Ruote::Worker
@@ -79,64 +80,6 @@ module DTK
       end
       def process_def()
         @process_def ||= compute_process_def(@top_task,@guards[:external])
-        @process_def #TODO: just for testing so can checkpoint and see what it looks like
-      end
-
-      # This works under the assumption that task_ids are never reused
-      class TaskInfo 
-        
-        Store = Hash.new
-        Lock = Mutex.new
-        
-        def self.initialize_task_info()
-          # deprecate
-        end
-        
-        def self.set(top_task_id, task_id,task_info,task_type=nil)
-          key = task_key(task_id,task_type, top_task_id)
-          Lock.synchronize{Store[key] = task_info}
-        end
-        
-        def self.get(task_id,task_type=nil,top_task_id=nil)
-          key = task_key(task_id,task_type, top_task_id)
-          ret = nil
-          Lock.synchronize{ret = Store[key]}
-          return ret
-        end
-        
-        def self.delete(task_id,task_type=nil,top_task_id=nil)
-          key = task_key(task_id,task_type)
-          Lock.synchronize{Store.delete(key)}
-        end
-
-        def self.clean(top_task_id)
-          Lock.synchronize{ Store.delete_if { |key, value| key.match(/#{top_task_id}.*/) } }
-          pp [:write_cleanup,Store.keys]
-          # TODO: this needs to clean all keys associated with the task; some handle must be passed in
-          # TODO: if run through all the tasks this does not need to be called; so call to cleanup aborted tasks
-        end
-
-        def self.get_top_task_id(task_id)
-          top_key = task_key(task_id)
-          return top_key.split('-')[0] 
-        end
-       
-       private
-       # Amar: altered key format to enable top task cleanup by adding top_task_id on front
-        def self.task_key(task_id,task_type=nil,top_task_id=nil)
-          ret_key = task_id.to_s
-          ret_key = "#{top_task_id.to_s}-#{ret_key}" if top_task_id
-          ret_key = "#{ret_key}-#{task_type}" if task_type
-          return ret_key if top_task_id
-
-          Store.keys.each do |key|
-            if key.match(/.*#{ret_key}/)
-              ret_key = key 
-              break
-            end
-          end
-          return ret_key
-        end
       end
     end
   end
@@ -150,9 +93,9 @@ module Ruote
 
     def retrive_user_info(msg)
       # content generated here can be found in generate_process_defs#participant
-      user = ::DTK::User.from_json(msg['workitem']['fields']['params']['user_info']['user'])
-      return user
+      ::DTK::User.from_json(msg['workitem']['fields']['params']['user_info']['user'])
     end
+
     def do_threaded_dispatch(participant, msg)
       
       msg = Rufus::Json.dup(msg)

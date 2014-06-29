@@ -108,17 +108,8 @@ module XYZ
 
       # TODO: need to see if big performance improvement if rather than decomposing using ruote
       # from ruote perspective node group is just item
-      #TODO: Need to also change node attributes
       def decompose_node_group_in_ruote(nodes,name,task,context,args={})
-        single_node_subtasks = nodes.map do |node|
-          executable_action = task[:executable_action].merge(:node => node)
-          task.merge(:executable_action => executable_action)
-        end
-        new_context = context.new_concurrent_context(single_node_subtasks)
-        concurrence_body = Array.new
-        single_node_subtasks.each_with_index do |t,i|
-          concurrence_body << participant_executable_single_action(name,task,new_context,:task_type => "node_element#{i.to_s}")
-        end
+        concurrence_body = nodes.map{|node|participant_executable_single_action(name,task,new_context,:override_node => node)}
         concurrence(concurrence_body)
       end
 

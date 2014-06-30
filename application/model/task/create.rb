@@ -70,30 +70,39 @@ module DTK
 
     def task_when_nodes_created_and_started_from_assembly(assembly, component_type, opts={})
       assembly_idh = assembly.id_handle()
-      target_idh = target_idh_from_assembly(assembly)
-      task_mh = target_idh.create_childMH(:task)
+      target_idh   = target_idh_from_assembly(assembly)
+      task_mh      = target_idh.create_childMH(:task)
+      all_actions  = Array.new
 
       main_task = create_new_task(task_mh,:assembly_id => assembly_idh.get_id(),:display_name => "power_on_nodes", :temporal_order => "concurrent",:commit_message => nil)
       assembly_config_changes = StateChange::Assembly::component_state_changes(assembly,component_type)
       # running_node_task = create_running_node_task(task_mh, assembly_config_changes)
 
       ret = nil
-      # opts = {}
       # for powering on node with no components
       unless assembly_config_changes and not assembly_config_changes.empty?
-        unless node = opts[:node]
-          raise Error.new("Expected that :node passed in as options")
+        if node = opts[:node]
+          executable_action = Task::Action::PowerOnNode.create_from_node(node)
+          all_actions << executable_action
+          ret = create_new_task(task_mh,:executable_action => executable_action)
+          main_task.add_subtask(ret)
+        elsif nodes = opts[:nodes]
+          nodes.each do |node|
+            executable_action = Task::Action::PowerOnNode.create_from_node(node)
+            all_actions << executable_action
+            ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+            main_task.add_subtask(ret)
+          end
+        else
+          raise Error.new("Expected that :node of :nodes passed in as options")
         end
-        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+
         attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        ret = create_new_task(task_mh,:executable_action => executable_action)
-        main_task.add_subtask(ret)
+        Task::Action::PowerOnNode.add_attributes!(attr_mh,all_actions)
 
         return main_task
       end
 
-      all_actions = Array.new
       if assembly_config_changes.size == 1
         executable_action = Task::Action::PowerOnNode.create_from_state_change(assembly_config_changes.first.first)
         all_actions << executable_action
@@ -316,15 +325,18 @@ module DTK
 
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
-        unless node = opts[:node]
-          raise Error.new("Expected that :node passed in as options")
+        # unless node = opts[:node]
+        #   raise Error.new("Expected that :node passed in as options")
+        # end
+
+        if node = opts[:node]
+          executable_action = Task::Action::PowerOnNode.create_from_node(node)
+          attr_mh = task_mh.createMH(:attribute)
+          Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+          ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+          main_task.add_subtask(ret)
+          return main_task
         end
-        executable_action = Task::Action::PowerOnNode.create_from_node(node)
-        attr_mh = task_mh.createMH(:attribute)
-        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-        ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
-        main_task.add_subtask(ret)
-        return main_task
       end
 
       if nodes

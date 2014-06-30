@@ -471,7 +471,13 @@ module DTK
 
         # TODO: not doing at this point puppet version per run; it just can be set when node is created
         opts = ret_params_hash(:commit_msg,:puppet_version)
-        opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
+        if (nodes_w_components.size == 1)
+          opts.merge!(:node => nodes_w_components.first)
+        else
+          opts.merge!(:nodes => nodes_w_components)
+        end
+
+        # opts.merge!(:node => nodes_w_components.first) if (nodes_w_components.size == 1)
         task = Task.create_and_start_from_assembly_instance(assembly,opts)
 
         user_object = user_object  = ::DTK::CurrentSession.new.user_object()

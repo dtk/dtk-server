@@ -128,7 +128,10 @@ module XYZ
       # TODO: need to see if big performance improvement if rather than decomposing using ruote
       # from ruote perspective node group is just item
       def decompose_node_group_in_ruote(nodes,name,task,context,opts={})
-        concurrence_body = nodes.map{|node|participant_executable_single_action(name,task,new_context,:override_node => node)}
+        unless context.guards.empty?
+          Log.error("Not implemented for guards since not generating new_context = context.new_concurrent_context(...)")
+        end
+        concurrence_body = nodes.map{|node|participant_executable_single_action(name,task,context,:override_node => node)}
         concurrence(concurrence_body)
       end
 
@@ -179,6 +182,7 @@ module XYZ
         end
       end
 
+      #TODO: this is used for guards; if guards removed then can probably remove this
       class Context 
         def initialize(guards,top_task_idh,peer_tasks=nil)
           @guards = guards||[]
@@ -186,7 +190,7 @@ module XYZ
           @peer_tasks = peer_tasks||[]
         end
 
-        attr_reader :top_task_idh
+        attr_reader :top_task_idh, :guards
 
         def get_guard_tasks(action)
           ret = nil

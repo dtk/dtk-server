@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 # dtk gems
-gem 'dtk-common'
+gem 'dtk-common','>= 0.5.13'
 
 # required to start a server
 gem 'bundler','>= 1.1.5'

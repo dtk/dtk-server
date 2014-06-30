@@ -325,18 +325,17 @@ module DTK
 
       # for powering on node with no components
       unless state_change_list and not state_change_list.empty?
-        # unless node = opts[:node]
-        #   raise Error.new("Expected that :node passed in as options")
-        # end
-
-        if node = opts[:node]
-          executable_action = Task::Action::PowerOnNode.create_from_node(node)
-          attr_mh = task_mh.createMH(:attribute)
-          Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
-          ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
-          main_task.add_subtask(ret)
-          return main_task
+        unless node = opts[:node]
+          raise Error.new("Expected that :node passed in as options")
         end
+
+        executable_action = Task::Action::PowerOnNode.create_from_node(node)
+        attr_mh = task_mh.createMH(:attribute)
+        Task::Action::PowerOnNode.add_attributes!(attr_mh,[executable_action])
+        ret = create_new_task(task_mh,:executable_action => executable_action, :display_name => "power_on_node")
+        main_task.add_subtask(ret)
+
+        return main_task
       end
 
       if nodes

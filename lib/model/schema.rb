@@ -32,7 +32,7 @@ module DTK
       model_def = load_model_def()
       relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
       set_relation_name(*relation_name_info)
-      model_def.each{|k,v|@db_rel[k]=v} 
+      model_def.each{|k,v|@db_rel[k]=v}
     end
 
     def set_submodel(submodel_name)
@@ -49,13 +49,13 @@ module DTK
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
       raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
       begin
-        eval(IO.read(model_def_fn)) 
+        eval(IO.read(model_def_fn))
        rescue Exception => e
         raise Error.new("parsing error in #{model_def_fn}: #{e.inspect}")
       end
     end
    public
-    
+
     def db_rel()
       @db_rel ||= (superclass.respond_to?(:db_rel) && superclass.db_rel())
     end
@@ -110,7 +110,7 @@ module DTK
         column :ds_attributes, :json
       elsif  name == :ds_key
         # TODO: should this be commented out?: :default => '' so when do 'prune inventory' this column not null
-        column :ds_key, :varchar, :default => '', :hidden => true 
+        column :ds_key, :varchar, :default => '', :hidden => true
       elsif  name == :data_source
         column :data_source, :varchar, :size => 25
       elsif  name == :ds_source_obj_type
@@ -135,10 +135,10 @@ module DTK
 
       def set_db_for_all_models(db,filter=nil)
         Model.set_db(db)
-        models = 
+        models =
           if filter
             filter.map{|model_name|Model.model_class(model_name)}
-          else         
+          else
             models()
           end
         models.each{|model| model.set_db(db)} #TODO: see if we can remove needing to link all children of Model
@@ -168,15 +168,15 @@ module DTK
         end
 
         concrete_models = ret_concrete_models(filter)
-        (concrete_models-user_models).each do |model| 
-          model.create_column_defs_common_fields?(direction) 
+        (concrete_models-user_models).each do |model|
+          model.create_column_defs_common_fields?(direction)
         end
         concrete_models.each{|model| model.apply_migration_defs(direction)}
         concrete_models.each{|model| model.set_global_db_rel_info()}
         concrete_models.each{|model| model.preprocess!()}
 
-        concrete_models.each do |model| 
-          model.create_column_defs_specific_fields?(direction) 
+        concrete_models.each do |model|
+          model.create_column_defs_specific_fields?(direction)
         end
         concrete_models.each{|model|model.create_associations?(direction)}
       end
@@ -219,7 +219,7 @@ module DTK
             down()
         end
       end
-    
+
       def create_column_defs_specific_fields?(direction)
         case direction
           when :up
@@ -309,7 +309,7 @@ module DTK
         return unless join_info[:cols]
         (join_info[:join_cond]||{}).each_key do |k|
           local_col = k
-          if k.to_s =~ /(^.+)__(.+$)/ 
+          if k.to_s =~ /(^.+)__(.+$)/
             next unless $1.to_sym = join_info[:model_name]
             local_col = $2.to_sym
           end
@@ -322,7 +322,7 @@ module DTK
         join_info[:cols] = new_field_set.cols if new_field_set
       end
 
-      # TODO: drive off of  COMMON_REL_COLUMNS  
+      # TODO: drive off of  COMMON_REL_COLUMNS
       def create_table_common_fields?(db_rel,opts={})
         create_schema_for_db_rel?(db_rel)
         seq_ref = @db.ret_sequence_ref(TOP_LOCAL_ID_SEQ)
@@ -380,13 +380,13 @@ module DTK
         end
       end
 
-      def models 
-        classes = [] 
-        ObjectSpace.each_object(Module) do |m| 
+      def models
+        classes = []
+        ObjectSpace.each_object(Module) do |m|
           classes << m if m.ancestors.include? self and  m != self
         end
-        classes 
-      end 
+        classes
+      end
   end
 end
 

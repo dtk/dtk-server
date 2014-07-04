@@ -64,7 +64,7 @@ module XYZ
 
     def to_s
       model_name = "model_name=#{self[:model_name]||"UNKNOWN"}"
-      uri_or_guid = 
+      uri_or_guid =
         if kind_of?(IDHandle)
           self[:guid] ? "; guid=#{self[:guid].to_s}" : "; uri=#{self[:uri]}"
         else
@@ -134,7 +134,7 @@ module XYZ
       # TODO: short circuit if parent_guid and parent_model_name are set
       c = self[:c]
       id_info = IDInfoTable.get_row_from_id_handle(self)
-      return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id] 
+      return nil unless id_info and id_info[:parent_relation_type] and id_info[:parent_id]
       IDHandle[:c => c, :id => id_info[:parent_id], :model_name => id_info[:parent_relation_type]]
     end
     def get_parent_id_handle_with_auth_info()
@@ -183,7 +183,7 @@ module XYZ
           self[:guid] = IDInfoTable.ret_guid_from_db_id(id_info[:id],model_name)
           self[:model_name] = model_name
           self[:parent_model_name] = get_parent_id_handle()[:model_name] if opts[:set_parent_model_name]
-          return 
+          return
         end
       end
 
@@ -208,7 +208,7 @@ module XYZ
           end
         end
       else
-	raise_has_illegal_form(x) 
+	raise_has_illegal_form(x)
       end
       self[:model_name] = x[:model_name].to_sym if x[:model_name]
       self[:display_name] = x[:display_name] if x[:display_name]
@@ -220,7 +220,7 @@ module XYZ
         unless self[:parent_model_name]
           parent_idh = get_parent_id_handle()
           if parent_idh
-            self[:parent_model_name] = parent_idh[:model_name] 
+            self[:parent_model_name] = parent_idh[:model_name]
           else
            # TODO: commented out beacuse noisy error
             # Log.error("cannot find parent info from #{self.inspect}")
@@ -252,6 +252,7 @@ module XYZ
       self[:parent_model_name] = parent_model_name.to_sym if parent_model_name
       if user
         self[:user_id] = user[:id] if  user[:id]
+        self[:group_id] =  user[:user_group][:id] if user[:user_group] && user[:user_group][:id]
         self[:group_id] =  user[:group_id] if user[:group_id]
       end
       # TODO: removed freeze
@@ -338,9 +339,9 @@ module XYZ
 	    foreign_key CONTEXT_ID,  CONTEXT_TABLE.schema_table_symbol, FK_CASCADE_OPT.merge({:null => false,:type => ID_TYPES[:context_id]})
 	    String :relation_name
 	    column ID_INFO_TABLE[:id], ID_TYPES[:id]
-            column ID_INFO_TABLE[:local_id], ID_TYPES[:local_id] 
-	    String :relation_type, :size => 50 
-	    String :parent_relation_type, :size => 50 
+            column ID_INFO_TABLE[:local_id], ID_TYPES[:local_id]
+	    String :relation_type, :size => 50
+	    String :parent_relation_type, :size => 50
 	    String :ref
             Integer :ref_num
 	    Boolean :is_factory, :default => false
@@ -353,13 +354,13 @@ module XYZ
 	# TODO: must make so that does not add if there already
 	def add_top_factories?()
 	  DB_REL_DEF.each{|key,db_info|
-	    if db_info[:many_to_one].nil? or db_info[:many_to_one].empty? or 
+	    if db_info[:many_to_one].nil? or db_info[:many_to_one].empty? or
                (db_info[:many_to_one] ? db_info[:many_to_one] == [db_info[:relation_type]] : nil)
 	      uri = "/" + key.to_s
 	      context = 2 #TODO : hard wired
 	      if get_row_from_uri(uri,context).nil?
 	        Log.info("adding to top level factory for: #{key}")
-	        insert_factory(key,uri,TOP_RELATION_TYPE.to_s,0,context) 
+	        insert_factory(key,uri,TOP_RELATION_TYPE.to_s,0,context)
 	      end
 	    end
 	  }
@@ -381,13 +382,13 @@ module XYZ
 	  c = id_handle[:c]
 	  return get_row_from_uri(id_handle[:uri],c,opts) if id_handle[:uri]
 	  return get_row_from_guid(id_handle[:guid],opts) if id_handle[:guid]
-	  raise Error.new("no uri or guid given") if opts[:raise_error]	
+	  raise Error.new("no uri or guid given") if opts[:raise_error]
           nil
         end
 
         def get_row_from_uri(uri,c,opts={})
           ds = ds().where(:uri => uri, CONTEXT_ID => c)
-	  if ds.empty? 
+	  if ds.empty?
             if opts[:create_factory_if_needed] # should only be applied for factory uri
               return create_factory(uri,c,:raise_error => true) #not doing recursive create
             end
@@ -443,7 +444,7 @@ module XYZ
           update_ds.update({
              :uri => uri,
              :relation_type => model_handle[:model_name].to_s,
-             :parent_id => :pair_parent_id, 
+             :parent_id => :pair_parent_id,
              :parent_relation_type => :prt_relation_type})
         end
 
@@ -455,14 +456,14 @@ module XYZ
         end
        # TODO: see if bug below to set :parent_relation_type when parent_relation_type.nil?, but not above
         def update_instance(db_rel,id,uri,relation_type,parent_id_x,parent_relation_type)
-	  #  to fill in uri ##TODO: this is split between trigger, which creates it and this code which updates it; may better encapsulate 
+	  #  to fill in uri ##TODO: this is split between trigger, which creates it and this code which updates it; may better encapsulate
 	  parent_id = parent_id_x ? parent_id_x : 0
 	  rel_qn = @db.fully_qualified_rel_name(db_rel)
 	  prt = parent_relation_type.nil? ? TOP_RELATION_TYPE.to_s : parent_relation_type.to_s
 	  uri_id = ds().where(ID_INFO_TABLE[:id] => id, :relation_name => rel_qn).
 	               update(:uri => uri, :relation_type => relation_type.to_s,
 		              :parent_id => parent_id,
-			      :parent_relation_type => prt, 
+			      :parent_relation_type => prt,
 			      :is_factory => false)
 	  raise Error.new("error while processing uri table update") if uri_id.nil?
 	  uri_id
@@ -472,14 +473,14 @@ module XYZ
 	  id = id_x ? id_x : 0
 	  ds().insert(
 	         CONTEXT_ID => c,
-	         :uri => factory_uri, 
+	         :uri => factory_uri,
 		 :relation_type => child_type.to_s,
 		 :parent_id => id,
 		 :parent_relation_type => relation_type.to_s,
 		 :is_factory => true)
 	  nil
 	end
-        
+
         def get_factory_id_handle(parent_id_handle,relation_type)
           parent_uri = parent_id_handle[:uri]
           if parent_uri.nil?
@@ -526,7 +527,7 @@ module XYZ
 	end
        public
 	def ret_guid_from_id_info(id_info)
-	  id_info[:id] 
+	  id_info[:id]
         end
 	def ret_guid_from_db_id(db_id,relation_type)
 	  db_id
@@ -549,17 +550,17 @@ module XYZ
 	   :ref => unformated_row[:ref] ? unformated_row[:ref].to_sym : nil,
 	   :ref_num => unformated_row[:ref_num],
 	   :is_factory => unformated_row[:is_factory],
-	   :db_rel => unformated_row[:relation_name].nil? ? nil :   
-	     (unformated_row[:relation_name] =~ %r{(.+)\.(.+)}) ? 
-	       DBRel[:schema => $1.to_sym, :table => $2.to_sym] : 
+	   :db_rel => unformated_row[:relation_name].nil? ? nil :
+	     (unformated_row[:relation_name] =~ %r{(.+)\.(.+)}) ?
+	       DBRel[:schema => $1.to_sym, :table => $2.to_sym] :
 	       DBRel[:schema => :public, :table => unformated_row[:relation_name].to_sym]]
-        end        
+        end
 
         def get_minimal_row_from_id_handle(id_handle)
           return nil unless id_handle[:model_name] and id_handle[:guid] and id_handle[:c]
           IDInfoRow[CONTEXT_ID => id_handle[:c],:id => db_id_from_guid(id_handle[:guid]),:relation_type => id_handle[:model_name]]
         end
-       
+
 	def ds()
           @db.dataset(ID_INFO_TABLE)
         end

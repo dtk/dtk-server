@@ -6,7 +6,7 @@ module DTK
         ret = create_obj?(repo_mh,local)
         repo_idh = repo_mh.createIDH(:id => ret.id)
         RepoUserAcl.modify_model(repo_idh,repo_user_acls)
-        RepoManager.create_empty_workspace_repo(ret,repo_user_acls,opts) 
+        RepoManager.create_empty_workspace_repo(ret,repo_user_acls,opts)
         ret
       end
 
@@ -14,7 +14,7 @@ module DTK
         unless R8::Config[:repo][:workspace][:use_local_clones]
           raise Error.new("Not implemented yet: initial_sync_with_remote_repo w/o local clones")
         end
-        
+
         remote_url = remote.repo_url()
         remote_ref = remote.remote_ref()
         remote_branch =  remote.branch_name()
@@ -27,7 +27,7 @@ module DTK
         commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(),get_field?(:repo_name),remote_ref,remote_url,remote_branch)
         commit_sha
       end
-      
+
      private
       def self.create_obj?(model_handle,local)
         repo_name = repo_name(local)
@@ -62,7 +62,7 @@ module DTK
       def self.repo_name(local)
         local.private_user_repo_name()
       end
-      
+
       def self.get_objs(mh,sp_hash,opts={})
         model_handle = (mh[:model_name] == :repo_with_branch ? mh.createMH(:repo) : mh)
         super(model_handle,sp_hash,{:subclass_model_name => :repo_with_branch}.merge(opts))

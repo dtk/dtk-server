@@ -175,7 +175,7 @@ module DTK
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type({:type => 'service'}) + '/component_info'
-      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash))
+      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash),:raise_error => true)
     end
 
     def remove_client_user(username)

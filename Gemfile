@@ -1,7 +1,8 @@
 source 'http://rubygems.org'
 
 # dtk gems
-gem 'dtk-common','>= 0.5.13'
+#TODO commented until we solve issue with nee to get latest versions from our geminabox not rubygems
+#gem 'dtk-common','>= 0.5.13'
 
 # required to start a server
 gem 'bundler','>= 1.1.5'

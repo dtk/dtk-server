@@ -17,18 +17,19 @@ module DTK; class ModuleBranch
       end
 
      private
+
       def legal_keys()
         [:module_type,:component_type?,:module_name,:version?,:namespace?]
       end
       def ret_component_type(module_type)
         case module_type()
-         when :service_module 
+         when :service_module
           :service_module
          when :component_module
           :puppet #TODO: hard wired
         end
       end
-    end    
+    end
 
     class Local < LocalParams
       attr_reader :project

@@ -9,7 +9,7 @@ Grit.debug = R8::Config[:debug][:grit]
 module DTK
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
-    
+
     def self.create_repo_clone(repo_obj,opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
@@ -47,7 +47,7 @@ module DTK
     private_class_method :create_without_branch
 
     def self.repo_full_path(path,opts={})
-      if opts[:absolute_path] 
+      if opts[:absolute_path]
         path
       else
         @root ||= R8::Config[:repo][:base_directory]
@@ -72,7 +72,7 @@ module DTK
     #
     def self.git_remote_exists?(remote_url)
       git_object = Grit::Git.new('')
-      
+
       !git_object.native('ls-remote',{},remote_url).empty?
     end
 
@@ -91,8 +91,8 @@ module DTK
 
     def create_local_repo(repo_name,opts={})
       remote_repo = "#{repo_url()}:#{repo_name}"
-      git_command__clone(remote_repo,@path)      
-      @grit_repo = Grit::Repo.new(@path) 
+      git_command__clone(remote_repo,@path)
+      @grit_repo = Grit::Repo.new(@path)
       unless opts[:donot_create_master_branch]
         git_command__empty_commit()
       end
@@ -105,7 +105,7 @@ module DTK
         else
           pattern = "*"
           all_paths = Array.new
-          depth.times do 
+          depth.times do
             all_paths += Dir[pattern]
             pattern = "#{pattern}/*"
           end
@@ -116,7 +116,7 @@ module DTK
           all_paths.select{|p|File.directory?(p)}
         else
           all_paths
-        end  
+        end
       end
     end
 
@@ -197,7 +197,7 @@ module DTK
       commit(message)
       if opts[:push_changes]
         push_changes()
-      end 
+      end
     end
     private :delete_tree__body
 
@@ -243,11 +243,11 @@ module DTK
       remote_name ||= default_remote_name()
       remote_ref = "#{remote_name}/#{remote_branch}"
       merge_rel = ret_merge_relationship(:remote_branch,remote_ref,:fetch_if_needed => true)
-      ret = 
+      ret =
         case merge_rel
          when :equal then :no_change
          when :branchpoint, :local_ahead then :merge_needed
-         when :local_behind then :changed  
+         when :local_behind then :changed
          else raise Error.new("Unexpected merge relation (#{merge_rel})")
         end
       return ret unless ret == :changed
@@ -260,11 +260,11 @@ module DTK
     # returns :no_change, :changed, :merge_needed
     def fast_foward_merge_from_branch(branch_to_merge_from)
       merge_rel = ret_merge_relationship(:local_branch,branch_to_merge_from)
-      ret = 
+      ret =
         case merge_rel
          when :equal then :no_change
          when :branchpoint, :local_ahead then :merge_needed
-         when :local_behind then :changed  
+         when :local_behind then :changed
          else raise Error.new("Unexpected merge relation (#{merge_rel})")
         end
       return ret unless ret == :changed
@@ -289,7 +289,7 @@ module DTK
       git_command__create_empty_branch(@branch)
       pull_changes(remote_name,remote_branch)
 
-      # push to local 
+      # push to local
       push_changes()
     end
 
@@ -344,19 +344,19 @@ module DTK
         git_command__fetch(ref.split("/").first)
       end
 
-      other_grit_ref = 
+      other_grit_ref =
         case type
          when :remote_branch
           @grit_repo.remotes.find{|r|r.name == ref}
          when :local_branch
           @grit_repo.heads.find{|r|r.name == ref}
          else
-          raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
+          raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship")
         end
       unless other_grit_ref
         raise Error.new("Cannot find git ref (#{ref})")
       end
-      
+
       other_sha = other_grit_ref.commit.id
       local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
       ret_sha_relationship(local_sha,other_sha)
@@ -364,7 +364,7 @@ module DTK
 
     # returns :equal, :local_behind, :local_ahead, or :branchpoint
     def ret_sha_relationship(local_sha,other_sha)
-      if other_sha == local_sha 
+      if other_sha == local_sha
         :equal
       else
         # shas can be different but  they can have same content so do a git diff
@@ -389,7 +389,7 @@ module DTK
         initial_sync_with_remote_repo(remote_name,remote_url,remote_branch)
         git_command__fetch(remote_name)
       end
-      
+
       remote = @grit_repo.remotes.find{|r|r.name.include?(remote_name.to_s)}
       local  = @grit_repo.heads.first
 
@@ -398,7 +398,7 @@ module DTK
       remote_sha = remote.commit.id
       local_sha = local.commit.id
 
-      if remote_sha == local_sha 
+      if remote_sha == local_sha
         true
       else
         !any_diffs?(local_sha,remote_sha)
@@ -410,7 +410,7 @@ module DTK
     end
 
     def pull_changes(remote_name=nil,remote_branch=nil)
-      # note: even though generated git comamdn hash --git-dor set, need to chdir 
+      # note: even though generated git comamdn hash --git-dor set, need to chdir
       Dir.chdir(@path) do
         git_command__pull(@branch,remote_branch||@branch,remote_name)
       end
@@ -475,8 +475,8 @@ module DTK
       end
     end
     def delete_branch_aux(remote_name=nil)
-      git_command__delete_local_branch?(@branch)      
-      git_command__delete_remote_branch?(@branch,remote_name)      
+      git_command__delete_local_branch?(@branch)
+      git_command__delete_remote_branch?(@branch,remote_name)
     end
     private :delete_branch_aux
 
@@ -504,10 +504,10 @@ module DTK
    private
     attr_reader :grit_repo
     def initialize(path,branch,opts={})
-      @branch = branch 
+      @branch = branch
       @path = path
       unless opts[:repo_does_not_exist]
-        @grit_repo = Grit::Repo.new(path) 
+        @grit_repo = Grit::Repo.new(path)
       end
     end
 
@@ -641,7 +641,7 @@ module DTK
       # took out because could not pass in time out @grit_repo.add(file_path)
     end
     def git_command__rm(file_path)
-      # git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so 
+      # git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so
       # need to use os comamdn to dleet file and just delete the file from the index
       git_command.rm(cmd_opts(),"--cached",file_path)
       FileUtils.rm_f full_path(file_path)
@@ -671,7 +671,7 @@ module DTK
     # returns sha of remote haed
     def git_command__push(branch_name,remote_name=nil,remote_branch=nil,opts={})
       ret = nil
-      Git_command__push_mutex.synchronize do 
+      Git_command__push_mutex.synchronize do
         remote_name ||= default_remote_name()
         remote_branch ||= branch_name
         args = [cmd_opts(),remote_name,"#{branch_name}:refs/heads/#{remote_branch}"]
@@ -692,7 +692,7 @@ module DTK
       remote_name ||= default_remote_name()
       git_command.pull(cmd_opts(),remote_name,"#{remote_branch}:#{local_branch}")
     end
-    
+
     # MOD_RESTRUCT-NEW deprecate below
     def git_command__pull__checkout_form(branch_name,remote_name=nil)
       remote_name ||= default_remote_name()

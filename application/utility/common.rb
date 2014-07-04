@@ -14,9 +14,9 @@ class R8Server
     @user_mh = model_handle(:user)
     @user_obj = User.create_user_in_groups?(user_mh,username)
     user_group_mh = user_mh.createMH(:user_group)
-    group_obj = 
-      case groupname 
-       when "all" then UserGroup.get_all_group(user_group_mh) 
+    group_obj =
+      case groupname
+       when "all" then UserGroup.get_all_group(user_group_mh)
        when "private" then UserGroup.get_private_group(user_group_mh,username)
        else raise "Group (#{groupname})not treated"
       end
@@ -59,7 +59,7 @@ class R8Server
   def create_public_library_nodes?()
     container_idh = pre_execute(:top)
     hash_content = LibraryNodes.get_hash(:in_library => "public")
-    hash_content["library"]["public"]["display_name"] ||= "public" 
+    hash_content["library"]["public"]["display_name"] ||= "public"
     Model.import_objects_from_hash(container_idh,hash_content)
   end
 
@@ -77,7 +77,7 @@ class R8Server
 
     # return idhs of new targets and new projects
     ret = {
-      :target_idhs => ret_idhs("datacenter",hash_content,container_idh), 
+      :target_idhs => ret_idhs("datacenter",hash_content,container_idh),
       :project_idhs => ret_idhs("project",hash_content,container_idh)
     }
 
@@ -89,7 +89,7 @@ class R8Server
     if ret[:project_idhs].size > 1
       Log.error("Unexpected taht multiple projects found; pikcing arbirary one for workspace")
     end
-    (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh,project_idh)} 
+    (ret[:target_idhs]||[]).each{|target_idh|Workspace.create?(target_idh,project_idh)}
 
     ret
   end
@@ -112,7 +112,7 @@ class R8Server
       "is_default_target": true,
       "iaas_properties" : {
         "region" : "<%= ec2_region %>"
-      },     
+      },
       "type": "staging",
       "*project_id": "/project/<%= project_ref %>"
     }
@@ -123,7 +123,7 @@ eos
   def create_new_target?(target_name,ec2_region=nil)
     # TODO: this is hack that should be fixed up
     container_idh = pre_execute(:top)
-    template_path ||= "#{Root}/spec/test_data/new_target.erb" 
+    template_path ||= "#{Root}/spec/test_data/new_target.erb"
     template = File.open(template_path){|f|f.read}
     erubis = Erubis::Eruby.new(template)
     users_ref = "private-#{username}"
@@ -131,7 +131,7 @@ eos
     hash_content = JSON.parse(json_content)
     Model.import_objects_from_hash(container_idh,hash_content)
 
-    # return idhs of new targets 
+    # return idhs of new targets
     {
       :target_idhs => ret_idhs("datacenter",hash_content,container_idh)
     }
@@ -160,7 +160,7 @@ eos
     impl = impls.first
 
     dsl = ComponentDSL.create_dsl_object_from_impl(impl)
-    new_integer_version = 2 
+    new_integer_version = 2
     hash_content = DTK::ComponentDSL::migrate_processor(module_name,new_integer_version,dsl.input_hash).generate_new_version_hash()
     content = JSON.pretty_generate(hash_content)
     new_path = "dtk-meta.puppet.json"
@@ -189,7 +189,7 @@ eos
   end
   def pre_execute(model_name=nil)
     CurrentSession.new.set_user_object(user_obj)
-    if model_name 
+    if model_name
       model_name == :top ? user_mh.create_top() : user_mh.createMH(model_name)
     end
   end

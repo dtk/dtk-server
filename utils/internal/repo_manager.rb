@@ -1,7 +1,9 @@
 require 'fileutils'
 
 module DTK
-  class RepoManager 
+
+  class RepoManager
+
     class << self
       # admin and repo methods that just pass to lower level object or class
       RepoMethods = [:add_all_files,:push_changes,:push_implementation,:add_branch,:add_branch?,:add_branch_and_push?,:merge_from_branch,:delete_branch,:add_remote,:pull_changes,:diff,:ls_r,:fast_foward_merge_from_branch,:hard_reset_to_branch,:fetch_all,:rebase_from_remote,:diff,:fast_foward_pull,:delete_file?,:delete_directory?,:branch_head_sha]
@@ -12,7 +14,7 @@ module DTK
           context = args.pop
           return get_adapter_repo(context).send(name,*args,&block)
         end
-        if klass = class_if_admin_method?(name) 
+        if klass = class_if_admin_method?(name)
           return klass.send(name,*args,&block)
         end
         super
@@ -37,7 +39,7 @@ module DTK
         file_obj_or_path = {:path => file_obj_or_path} if file_obj_or_path.kind_of?(String)
         get_adapter_repo(context).update_file_content(file_obj_or_path,content)
       end
-      
+
      private
       def defined_method?(name)
         RepoMethods.include?(name) or !!class_if_admin_method?(name)
@@ -73,16 +75,16 @@ module DTK
     ### for dealing with actual repos
     class << self
       def initial_sync_with_remote_repo(branch,repo_name,remote_name,remote_url,remote_branch,opts={})
-        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo = get_adapter_repo(context(repo_name,branch))
         adapter_repo.initial_sync_with_remote_repo(remote_name,remote_url,remote_branch,opts)
       end
 
      def pull_from_remote_repo(branch,repo_name,remote_name,remote_url,remote_branch,opts={})
-        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo = get_adapter_repo(context(repo_name,branch))
         adapter_repo.pull_from_remote_repo(remote_name,remote_url,remote_branch,opts)
       end
 
-      # returns :equal, :local_behind, :local_ahead, or :branchpoint 
+      # returns :equal, :local_behind, :local_ahead, or :branchpoint
       # branch object can be for either sha; result does not matter based on this
       def ret_sha_relationship(local_sha,other_sha,branch_obj)
         adapter_repo = get_adapter_repo(branch_obj)
@@ -98,7 +100,7 @@ module DTK
       end
 
       def push_to_remote_repo(repo_name,branch,remote_name,remote_branch=nil)
-        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo = get_adapter_repo(context(repo_name,branch))
         adapter_repo.push_changes({:remote_name=>remote_name,:remote_branch=>remote_branch})
         repo_name
       end
@@ -109,7 +111,7 @@ module DTK
       end
 
       def link_to_remote_repo(repo_name,branch,remote_name,remote_url)
-        adapter_repo = get_adapter_repo(context(repo_name,branch))      
+        adapter_repo = get_adapter_repo(context(repo_name,branch))
         adapter_repo.add_or_update_remote(remote_name,remote_url)
         repo_name
       end
@@ -130,13 +132,13 @@ module DTK
     def self.create_empty_workspace_repo(repo_obj,repo_user_acls,opts)
       klass = load_and_return_adapter_class()
       # create repo on repo server
-      klass.create_server_repo(repo_obj,repo_user_acls,opts) 
+      klass.create_server_repo(repo_obj,repo_user_acls,opts)
       if R8::Config[:repo][:workspace][:use_local_clones]
         klass.create_repo_clone(repo_obj,opts)
       elsif R8::Config[:repo][:workspace][:update_bare_repo]
         raise Error.new("Have not implemented yet: R8::Config[:repo][:workspace][:update_bare_repo]")
       else
-        raise Error.new("shoudl not reach heer")
+        raise Error.new("Should not reach here!")
       end
     end
 
@@ -162,13 +164,13 @@ module DTK
         repo_base_dir = R8::Config[:repo][:base_directory]
         if File.directory?(repo_base_dir)
           Dir.chdir(R8::Config[:repo][:base_directory]) do
-            Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir} 
+            Dir["*"].each{|local_repo_dir|FileUtils.rm_rf local_repo_dir}
           end
         end
       end
       private :delete_local_repo,:delete_all_local_repos
     end
-    
+
     ##########
     def self.get_adapter_repo(context)
       repo_dir,branch = ret_repo_dir_and_branch(context)
@@ -218,7 +220,7 @@ module DTK
     end
 
     def self.load_and_create(repo_dir,branch)
-      klass = load_and_return_adapter_class() 
+      klass = load_and_return_adapter_class()
       klass.create(repo_dir,branch)
     end
 
@@ -227,7 +229,7 @@ module DTK
     end
   end
 
-  class RemoteRepoManager < RepoManager 
+  class RemoteRepoManager < RepoManager
     def self.load_and_return_adapter_class()
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = "remote_repo"

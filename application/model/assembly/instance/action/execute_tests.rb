@@ -38,17 +38,6 @@ module DTK
             }
           end
 
-          pp [:debug_output_hash, output_hash]
-=begin
-BAKIR: Output hash has this form
-[:debug_output_hash,
- {:test_instances=>
-   [{:module_name=>"mongodb_test",
-     :component=>"node1/mongodb",
-     :test_component=>"mongodb_test__network_port_check",
-     :test_name=>"network_port_check_spec.rb",
-     :params=>[{:mongo_port=>"27017"}, {:mongo_web_port=>"28017"}]}]}]
-=end
           indexes = nodes.map{|r|r[:id]}
           action_results_queue.set_indexes!(indexes)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -97,64 +86,69 @@ BAKIR: Output hash has this form
        private
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
-          if linked_tests_array = get_test_components()
-            test_components = []
-            test_params = []
-            linked_tests_array.each do |linked_tests|
-              linked_test_data = linked_tests.find_test_parameters.var_mappings_hash
-              linked_test_data[:node_data] = linked_tests.node
-              linked_test_data[:component_data] = linked_tests.component
-              test_params << linked_test_data
+          ret = Array.new
+          linked_tests_array = get_test_components()
+          if linked_tests_array.empty?
+            return ret
+          end
 
-              test_params.each do |params|
-                k, v = params.first
-                test_component_name = v.map { |x| x.split(".").first }.first
-                attribute_names = k.map { |x| x.split(".").last }
-                related_test_attribute = v.map { |x| x.split(".").last }
-                component_id = params[:component_data][:id]
-
-                attributes = []
-                attribute_names.each_with_index do |attribute_name, idx|
-                  sp_hash = {
-                    :cols => [:display_name, :value_asserted],
-                    :filter => [:and,[:eq, :component_component_id,component_id],[:eq, :display_name, attribute_name]]
-                  }
-
-                  attribute_content = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash).first
-                  attribute = { :component_attribute_name => attribute_content[:display_name], :component_attribute_value => attribute_content[:value_asserted], :related_test_attribute => related_test_attribute[idx] }
-                  attributes << attribute
-                end
-                test_components << { :test_component_name => test_component_name, :attributes => attributes, :component_name => params[:component_data][:display_name], :node_name => params[:node_data][:display_name] }
+          test_components = []
+          test_params = []
+          linked_tests_array.each do |linked_tests|
+            linked_test_data = linked_tests.find_test_parameters.var_mappings_hash
+            linked_test_data[:node_data] = linked_tests.node
+            linked_test_data[:component_data] = linked_tests.component
+            test_params << linked_test_data
+            
+            test_params.each do |params|
+              k, v = params.first
+              test_component_name = v.map { |x| x.split(".").first }.first
+              attribute_names = k.map { |x| x.split(".").last }
+              related_test_attribute = v.map { |x| x.split(".").last }
+              component_id = params[:component_data][:id]
+              
+              attributes = []
+              attribute_names.each_with_index do |attribute_name, idx|
+                sp_hash = {
+                  :cols => [:display_name, :value_asserted],
+                  :filter => [:and,[:eq, :component_component_id,component_id],[:eq, :display_name, attribute_name]]
+                }
+                
+                attribute_content = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash).first
+                attribute = { :component_attribute_name => attribute_content[:display_name], :component_attribute_value => attribute_content[:value_asserted], :related_test_attribute => related_test_attribute[idx] }
+                attributes << attribute
               end
-            end
-
-            test_components.uniq!
-            test_comp_list = []
-            test_components.each do |test_comp|
-              sp_hash = {
-                :cols => Component.common_columns,
-                :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
-              }
-              comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
-              comp_list.each do |tst|
-                tst[:component_name] = test_comp[:component_name]
-                tst[:node_name] = test_comp[:node_name]
-                tst[:attributes] = test_comp[:attributes]
-              end
-
-              # Bakir: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is never added to the assembly and assembly_id is nil
-              test_comp_list << comp_list.select { |tstcmp| tstcmp[:assembly_id] == nil }.first
+              test_components << { :test_component_name => test_component_name, :attributes => attributes, :component_name => params[:component_data][:display_name], :node_name => params[:node_data][:display_name] }
             end
           end
 
-          cmps = []
-          test_comp_list.each do |cmp|
+          test_components.uniq!
+
+          #get info about each test component
+          sp_hash = {
+            :cols => Component.common_columns,
+            :filter => [:and, 
+                        [:eq,:assembly_id,nil],
+                        [:eq,:project_project_id,project.id],
+                        [:oneof,:component_type,test_components.map{|t|t[:test_component_name]}]]
+          }
+          
+          test_cmp_info = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
+          bad_components = test_components.reject{|t|test_cmp_info.find{|info|t[:test_component_name]==info[:component_type]}}
+          unless bad_components.empty?
+              bad_cmp_names = bad_components.map{|cmp|cmp[:test_component_name]}
+            Log.error("Dangling refernce to test components (#{bad_cmp_names.join(',')}")
+          end
+          
+          
+          test_cmp_info.map do |cmp|
+            #TODO: rewrite so just one call that gets all attribute info  
             sp_hash = {
               :cols => Attribute.common_columns,
               :filter => [:eq,:component_component_id,cmp[:id]]
             }
             attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
-
+            
             attributes.each do |a|
               name = cmp[:attributes].select do |x|
                 x[:related_test_attribute] == a[:display_name]
@@ -162,10 +156,9 @@ BAKIR: Output hash has this form
               a[:value_asserted] = name.first[:component_attribute_value] unless name.empty?
             end
             cmp[:attributes] = attributes
-            cmps << cmp
+            cmp
           end
 
-          return cmps
         end
 
         def get_test_components()
@@ -180,8 +173,7 @@ BAKIR: Output hash has this form
               Log.error("Unexpected that test_components is empty")
               nil
             end
-          pp [:debug_version_context,version_contexts]
-          return version_contexts
+          version_contexts
         end
 
         #TODO: deprecate

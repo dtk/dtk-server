@@ -122,9 +122,10 @@ module DTK
         ndx_ret = Hash.new
         each_link(aug_cmps) do |cmp,link|
           cmp_id = cmp.id
-          test_info = ndx_attribute_mappings[link[:id]]
-          linked_tests = ndx_ret[cmp_id] ||= LinkedTests.new(cmp)
-          linked_tests.add_test!(test_info[:test_component],test_info[:ams])
+          if test_info = ndx_attribute_mappings[link[:id]]
+            linked_tests = ndx_ret[cmp_id] ||= LinkedTests.new(cmp)
+            linked_tests.add_test!(test_info[:test_component],test_info[:ams])
+          end
         end
         ndx_ret.values
       end

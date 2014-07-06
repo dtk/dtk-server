@@ -128,34 +128,19 @@ module DTK
         end
 
         def dup_and_substitute_attribute_values(test_cmp,attr_info)
-          ret = test_cmp.id_handle().create_object().merge(test_cmp.hash_subset(:display_name,:component_type))
-          ret.merge!(:attributes => Array.new).merge!(attr_info.hash_subset(:component_name,:node_name))
+          ret = test_cmp.shallow_dup(:display_name,:component_type)
+          ret.merge!(Aux.hash_subset(attr_info,[:component_name,:node_name]))
+          ret[:attributes] = test_cmp[:attributes].map do |attr|
+            attr_dup = attr.shallow_dup(:display_name)
+            attr_name = attr_dup[:display_name]
+            if matching_attr = attr_info[:attributes].find{|a|a[:related_test_attribute] == attr_name}
+              attr_dup[:value_asserted] = matching_attr[:component_attribute_value]
+            end
+            attr_dup
+          end
           ret
         end
 
-=begin            
-            attributes.each do |a|
-              name = cmp[:attributes].select do |x|
-                x[:related_test_attribute] == a[:display_name]
-              end
-              a[:value_asserted] = name.first[:component_attribute_value] unless name.empty?
-            end
-            cmp[:attributes] = attributes
-            cmp
-          end
-
-            end
-          end
-          
-
-          ret.each do |cmp|
-            cmp[:attributes].each do |attr|
-              pp attr
-            end
-          end
-
-        end
-=end
 
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form

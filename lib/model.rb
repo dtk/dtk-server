@@ -296,6 +296,15 @@ module DTK
       id_handle().create_object().merge(av_hash)
     end
 
+    def shallow_dup(*cols)
+      update_object!(*cols)
+      ret = id_handle().create_object()
+      ([:id]+cols).uniq.each do |col|
+        ret[col] = self[col]
+      end
+      ret
+    end
+
     def model_handle(mn=nil)
       group_id = group_id()
       user_info = (group_id ? {:group_id => group_id} : nil)

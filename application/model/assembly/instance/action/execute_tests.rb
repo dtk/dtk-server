@@ -17,7 +17,7 @@ module DTK
         end
 
         def initiate()
-          test_components = get_test_components_with_stub()
+          test_components = get_test_components_with_bindings()
           version_contexts = get_version_contexts(test_components)
           test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] =
             version_contexts.select { |vc| cmp[:implementation_id] == vc[:id] }.first}
@@ -85,38 +85,55 @@ module DTK
         end
        private
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
-        def get_test_components_with_stub()
+        # returns array of augmented (test) components where augmented data 
+        # {:attributes => ARRAY[attribute objs),
+        #  :node_name => STRING #node associated with base component name
+        #  :component_name => STRING #base component name
+        # there can be multiple entries for same test component for each base component instance 
+        def get_test_components_with_bindings()
           ret = Array.new
-          test_components = get_test_components()
-          if test_components.empty?
+          test_cmp_attrs = get_test_component_attributes()
+          if test_cmp_attrs.empty?
             return ret
           end
 
           #get info about each test component
           sp_hash = {
-            :cols => Component.common_columns,
+            :cols => [:id,:group_id,:display_name,:attributes,:component_type],
             :filter => [:and, 
                         [:eq,:assembly_id,nil],
                         [:eq,:project_project_id,project.id],
-                        [:oneof,:component_type,test_components.map{|t|t[:test_component_name]}]]
+                        [:oneof,:component_type,test_cmp_attrs.map{|t|t[:test_component_name]}]]
           }
-          
-          test_cmp_info = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
-          bad_components = test_components.reject{|t|test_cmp_info.find{|info|t[:test_component_name]==info[:component_type]}}
-          unless bad_components.empty?
-              bad_cmp_names = bad_components.map{|cmp|cmp[:test_component_name]}
-            Log.error("Dangling refernce to test components (#{bad_cmp_names.join(',')}")
+          ndx_test_cmps = Hash.new #test cmps indexed by component type
+          Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
+            ndx = r[:component_type]
+            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type).merge(:attributes => Array.new)
+            cmp[:attributes] << r[:attribute]
           end
-          
-          
-          test_cmp_info.map do |cmp|
-            #TODO: rewrite so just one call that gets all attribute info  
-            sp_hash = {
-              :cols => Attribute.common_columns,
-              :filter => [:eq,:component_component_id,cmp[:id]]
-            }
-            attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
-            
+
+          # for each binding return at top level the matching test component with attributes substituted with binding value
+          # and augmented columns :node_name and component_name
+          test_cmp_attrs.each do |r|
+            ndx = test_component_name = r[:test_component_name]
+            test_cmp = ndx_test_cmps[ndx]
+            unless test_cmp
+              Log.error("Dangling reference to test components (#{test_component_name})")
+            else
+              #substitue in values from test_cmp_attrs               
+              ret << dup_and_substitute_attribute_values(test_cmp,r)
+            end
+          end
+          ret
+        end
+
+        def dup_and_substitute_attribute_values(test_cmp,attr_info)
+          ret = test_cmp.id_handle().create_object().merge(test_cmp.hash_subset(:display_name,:component_type))
+          ret.merge!(:attributes => Array.new).merge!(attr_info.hash_subset(:component_name,:node_name))
+          ret
+        end
+
+=begin            
             attributes.each do |a|
               name = cmp[:attributes].select do |x|
                 x[:related_test_attribute] == a[:display_name]
@@ -127,16 +144,27 @@ module DTK
             cmp
           end
 
-        end
+            end
+          end
+          
 
+          ret.each do |cmp|
+            cmp[:attributes].each do |attr|
+              pp attr
+            end
+          end
+
+        end
+=end
 
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form
         # {:test_component_name=>String,
+        #  :test_component_id=>ID,
         #  :component_name=>String,
         #  :node_name=>String,
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
-        def get_test_components()
+        def get_test_component_attributes()
           ret = Array.new
           linked_tests = Component::Test.get_linked_tests(assembly_instance)
           if linked_tests.empty?

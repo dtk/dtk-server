@@ -87,42 +87,10 @@ module DTK
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
         def get_test_components_with_stub()
           ret = Array.new
-          linked_tests_array = get_test_components()
-          if linked_tests_array.empty?
+          test_components = get_test_components()
+          if test_components.empty?
             return ret
           end
-
-          test_components = []
-          test_params = []
-          linked_tests_array.each do |linked_tests|
-            linked_test_data = linked_tests.find_test_parameters.var_mappings_hash
-            linked_test_data[:node_data] = linked_tests.node
-            linked_test_data[:component_data] = linked_tests.component
-            test_params << linked_test_data
-            
-            test_params.each do |params|
-              k, v = params.first
-              test_component_name = v.map { |x| x.split(".").first }.first
-              attribute_names = k.map { |x| x.split(".").last }
-              related_test_attribute = v.map { |x| x.split(".").last }
-              component_id = params[:component_data][:id]
-              
-              attributes = []
-              attribute_names.each_with_index do |attribute_name, idx|
-                sp_hash = {
-                  :cols => [:display_name, :value_asserted],
-                  :filter => [:and,[:eq, :component_component_id,component_id],[:eq, :display_name, attribute_name]]
-                }
-                
-                attribute_content = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash).first
-                attribute = { :component_attribute_name => attribute_content[:display_name], :component_attribute_value => attribute_content[:value_asserted], :related_test_attribute => related_test_attribute[idx] }
-                attributes << attribute
-              end
-              test_components << { :test_component_name => test_component_name, :attributes => attributes, :component_name => params[:component_data][:display_name], :node_name => params[:node_data][:display_name] }
-            end
-          end
-
-          test_components.uniq!
 
           #get info about each test component
           sp_hash = {
@@ -161,8 +129,59 @@ module DTK
 
         end
 
+
+        # returns array having test components that are linked to a component in assembly_instance
+        # each element has form
+        # {:test_component_name=>String,
+        #  :component_name=>String,
+        #  :node_name=>String,
+        #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
         def get_test_components()
-          Component::Test.get_linked_tests(assembly_instance)
+          ret = Array.new
+          linked_tests = Component::Test.get_linked_tests(assembly_instance)
+          if linked_tests.empty?
+            return ret
+          end
+
+          test_params = linked_tests.map do |t|
+            var_mappings = t.find_test_parameters.var_mappings_hash
+            var_mappings.merge(:node_data => t.node, :component_data => t.component)
+          end
+            
+          attr_mh = assembly_instance.model_handle(:attribute)
+          test_params.map do |params|
+            k, v = params.first
+            related_test_attribute = v.map { |x| x.split(".").last }
+            test_component_name = v.map { |x| x.split(".").first }.first
+            attribute_names = k.map { |x| x.split(".").last }
+            component_id = params[:component_data][:id]
+            #TODO: more efficient to get in bulk outside of test_params loop
+            sp_hash = {
+              :cols => [:display_name, :value_asserted],
+              :filter => [:and,
+                          [:eq, :component_component_id,component_id],
+                          [:oneof, :display_name, attribute_names]]
+            }
+            ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
+              h.merge(a[:display_name] => a[:value_asserted])
+            end
+            attributes = Array.new
+            attribute_names.each_with_index do |attribute_name, idx|
+              if val = ndx_attr_vals[attribute_name]
+                attributes << {
+                  :component_attribute_name => attribute_name,
+                  :component_attribute_value => val,
+                  :related_test_attribute => related_test_attribute[idx] 
+                }
+              end
+            end
+            { 
+              :test_component_name => test_component_name, 
+              :attributes => attributes, 
+              :component_name => params[:component_data][:display_name], 
+              :node_name => params[:node_data][:display_name] 
+            }
+          end
         end
 
         def get_version_contexts(test_components)

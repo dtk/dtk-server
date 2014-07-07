@@ -52,6 +52,7 @@ describe "(Workspace) Test Case 15: Create two nodes, add components in it, conv
 	end
 
 	context "Start workspace node" do
+		sleep 10 #Just to make sure nodes are stopped on aws
 		include_context "Start workspace node", dtk_common, node_name_1
 	end
 

@@ -11,7 +11,7 @@ STDOUT.sync = true
 class DtkCommon
 
 	attr_accessor :SERVER, :PORT, :ENDPOINT, :USERNAME, :PASSWORD
-	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log
+	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key
 	attr_accessor :component_module_id_list
 
 	$opts = {
@@ -32,6 +32,7 @@ class DtkCommon
 		@USERNAME = config_yml['r8server']['username']
 	  @PASSWORD = config_yml['r8server']['password']
 	  @server_log = config_yml['r8server']['log']
+	  @ssh_key = config_yml['r8server']['ssh_key']
 
 		#used as placeholder for component ids for specific module that are accumulated
 		@component_module_id_list = Array.new()
@@ -102,12 +103,6 @@ class DtkCommon
 				puts "", "Backtrace:"
 				pretty_print_JSON(response_JSON["errors"].first["backtrace"])				
 			end
-			puts "", ""
-			puts "Server log part:"
-			puts "----------------"
-			puts server_log_print()
-			puts "----------------"
-			puts "", ""
 		else
 			@error_message = ""
 		end
@@ -410,7 +405,7 @@ class DtkCommon
 		return dependency_found
 	end
 
-	def converge_service(service_id, max_num_of_retries=10)
+	def converge_service(service_id, max_num_of_retries=15)
 		puts "Converge service:", "-----------------"
 		service_converged = false
 		puts "Converge process for service with id #{service_id} started!"
@@ -741,6 +736,192 @@ class DtkCommon
 		end
 		puts ""
 		return component_module_imported
+	end
+
+	def delete_module_from_remote(component_module, namespace)
+		puts "Delete component module from remote:", "----------------------------------"
+		component_module_deleted = false
+
+		response = send_request('/rest/component_module/delete_remote', {:remote_module_name => component_module, :remote_module_namespace => namespace, :rsa_pub_key => self.ssh_key})
+
+		if response['status'] == 'ok'
+			puts "Component module #{component_module} has been deleted from remote successfully!"
+			component_module_deleted = true
+		else
+			pretty_print_JSON(response)
+			puts "Unable to delete component module #{component_module} from remote"
+		end
+		puts ""
+		return component_module_deleted
+	end
+
+	def make_component_module_private(component_module)
+		puts "Make component module private:", "------------------------------"
+		component_module_private = false
+		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => "o-rwd", :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		if response['status'] == 'ok'
+			puts "Component module #{component_module} is now private"
+			component_module_private = true
+		else
+			pretty_print_JSON(response)
+			puts "Unable to set component module #{component_module} as private"
+		end
+		puts ""
+		return component_module_private
+	end
+
+	def make_component_module_public(component_module)
+		puts "Make component module public:", "-----------------------------"
+		component_module_public = false
+		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => "o+r", :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		if response['status'] == 'ok'
+			puts "Component module #{component_module} is now public"
+			component_module_public = true
+		else
+			pretty_print_JSON(response)
+			puts "Unable to set component module #{component_module} as public"
+		end
+		puts ""
+		return component_module_public
+	end
+
+	def set_chmod_for_component_module(component_module, permission_set)
+		puts "Set chmod for component module:", "-------------------------------"
+		chmod_set = false
+		response = send_request('/rest/component_module/remote_chmod', {:module_id => component_module, :permission_selector => permission_set, :rsa_pub_key => self.ssh_key, :remote_module_namespace => nil})
+		if response['status'] == 'ok'
+			puts "Chmod #{permission_set} has been set for component module #{component_module} successfully"
+			chmod_set = true
+		else
+			pretty_print_JSON(response)
+			puts "Unable to set chmod #{permission_set} for component module #{component_module}"
+		end
+		puts ""
+		return chmod_set
+	end
+
+	def add_collaborators(component_module, collaborators, collaborator_type)
+		puts "Add collaborators to component module:", "-------------------------------------"
+		collaborators_added = false
+
+		if collaborator_type == "groups"
+			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => nil, :groups => collaborators, :action => :add, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			pretty_print_JSON(response)
+			if response['status'] == 'ok'
+				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
+				collaborators_added = true
+			else
+				pretty_print_JSON(response)
+				puts "Unable to add collaborators #{collaborators} to component_module #{component_module}"
+			end
+		end
+
+		if collaborator_type == "users"
+			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => collaborators, :groups => nil, :action => :add, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			pretty_print_JSON(response)
+			if response['status'] == 'ok'
+				puts "Collaborators #{collaborators} have been added to component module #{component_module} successfully"
+				collaborators_added = true
+			else
+				pretty_print_JSON(response)
+				puts "Unable to add collaborators #{collaborators} to component_module #{component_module}"
+			end
+		end
+		puts ""
+		return collaborators_added
+	end
+
+	def remove_collaborators(component_module, collaborators, collaborator_type)
+		puts "Remove collaborators to component module:", "----------------------------------------"
+		collaborators_removed = false
+
+		if collaborator_type == "groups"
+			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => nil, :groups => collaborators, :action => :remove, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			pretty_print_JSON(response)
+			if response['status'] == 'ok'
+				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
+				collaborators_removed = true
+			else
+				pretty_print_JSON(response)
+				puts "Unable to remove collaborators #{collaborators} from component_module #{component_module}"
+			end
+		end
+
+		if collaborator_type == "users"
+			response = send_request('/rest/component_module/remote_collaboration', {:module_id => component_module, :users => collaborators, :groups => nil, :action => :remove, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})			
+			pretty_print_JSON(response)
+			if response['status'] == 'ok'
+				puts "Collaborators #{collaborators} have been removed from component module #{component_module} successfully"
+				collaborators_removed = true
+			else
+				pretty_print_JSON(response)
+				puts "Unable to remove collaborators #{collaborators} from component_module #{component_module}"
+			end
+		end
+		puts ""
+		return collaborators_removed
+	end
+
+	def check_collaborators(component_module, collaborators, collaborator_type, filter)
+		puts "Check collaborators on component module:", "----------------------------------------"
+		collaborators_exist = true
+
+		response = send_request('/rest/component_module/list_remote_collaboration', {:module_id => component_module, :remote_module_namespace => nil, :rsa_pub_key => self.ssh_key})		
+		pretty_print_JSON(response)
+
+		if filter == :name
+			collaborators.each do |c|
+				collaborators_exist = false if response['data'].select { |x| (x['owner_name'] == c) && (x['owner_type'] == collaborator_type)}.empty?
+			end
+		end
+
+		if filter == :email
+			collaborators.each do |c|
+				collaborators_exist = false if response['data'].select { |x| (x['owner_email'] == c) && (x['owner_type'] == collaborator_type)}.empty?
+			end
+		end
+		
+		puts "All collaborators exists in list of collaborators" if collaborators_exist == true
+		puts "All collaborators does not exist in list of collaborators" if collaborators_exist == false
+		puts ""
+		return collaborators_exist
+	end
+
+	def check_if_component_module_visible_on_remote(component_module)
+		puts "Check if component module is visible on remote:", "--------------------------------------------"
+		component_module_visible = false
+		response = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :diff => {}})
+		pretty_print_JSON(response)
+		component_module_found = response['data'].select { |x| x['display_name'] == component_module }
+		unless component_module_found.empty?
+			puts "Component module #{component_module} is visible"
+			component_module_visible = true
+		else
+			puts "Component module #{component_module} is not visible"
+		end
+		puts ""
+		return component_module_visible
+	end
+
+	def check_module_permissions(component_module, permissions_set)
+		puts "Check module permissions:", "-------------------------"
+		module_permissions_set = false
+		response = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :diff => {}})
+		component_module_found = response['data'].select { |x| x['display_name'] == component_module }.first
+		unless component_module_found.nil?
+			puts "Component module #{component_module} exists. Check module permissions..."
+			pretty_print_JSON(component_module_found)
+			if permissions_set == component_module_found['permissions']
+				puts "Permissions #{permissions_set} exist on component module #{component_module}"
+				module_permissions_set = true
+			else
+				puts "Permissions #{permissions_set} dont exist on component module #{component_module}"
+			end
+		else
+			puts "Component module #{component_module} does not exist or it is not visible"
+		end
+		puts ""
+		return module_permissions_set
 	end
 
 	def check_if_component_module_exists(component_module_name)

@@ -14,10 +14,7 @@ module DTK
         end
         def find_mapped_component_test_attributes(cmp_attrs)
           # This function flows the cmp_attribute values through component_To_test_attribute_mappings
-          mappings = component_to_test_attribute_mappings()
-          pp [:debug,:mappings,mappings]
-          # code should go here that finds assignments to the test components
-          return mappings
+          component_to_test_attribute_mappings()
         end
 
        private
@@ -72,13 +69,11 @@ module DTK
 
         def find_test_parameters()
           # find the relevant parameters on @test_component by looking at attribute mappings
-          pp "debug: finding needed params for #{@component[:display_name]}"
           cmp_attribute_names = Array.new
           @test_array.each do |test|
             cmp_attribute_names += test.get_component_attributes()
           end
           cmp_attribute_names.uniq!
-          pp "debug: cmp_attribute_names: #{cmp_attribute_names.inspect}"
           # Compute the component attribute vars that correspond to cmp_attribute_names
           cmp_attr_vals = nil
           find_mapped_component_test_attributes(cmp_attr_vals)

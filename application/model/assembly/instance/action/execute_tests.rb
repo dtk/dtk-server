@@ -38,8 +38,8 @@ module DTK
               :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
-              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
-#              :test_name => "datanode_spec.rb",
+#              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+              :test_name => "datanode_spec.rb",
               :params => attrib_array
             }
           end
@@ -85,6 +85,7 @@ module DTK
             components = filter[:components] #TODO: temp
             CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_contexts})
           else
+            Log.info_pp(:execute_tests_v2 => node_hash)
             CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
           end
         end
@@ -177,13 +178,13 @@ module DTK
             component_id = params[:component_data][:id]
             #TODO: more efficient to get in bulk outside of test_params loop
             sp_hash = {
-              :cols => [:display_name, :value_asserted],
+              :cols => [:display_name, :attribute_value],
               :filter => [:and,
                           [:eq, :component_component_id,component_id],
                           [:oneof, :display_name, attribute_names]]
             }
             ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
-              h.merge(a[:display_name] => a[:value_asserted])
+              h.merge(a[:display_name] => a[:attribute_value])
             end
             attributes = Array.new
             attribute_names.each_with_index do |attribute_name, idx|

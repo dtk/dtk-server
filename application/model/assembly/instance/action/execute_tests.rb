@@ -38,15 +38,14 @@ module DTK
               :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
-              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
-#              :test_name => "datanode_spec.rb",
+#              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+              :test_name => "datanode_spec.rb",
               :params => attrib_array
             }
           end
-          ndx_node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}
-          nodes_with_tests =  nodes.select{|n|ndx_node_ids_with_tests[n[:id]]}
-          action_results_queue.set_indexes!(ndx_node_ids_with_tests.keys)
-          ndx_pbuilderid_to_node_info =  nodes_with_tests.inject(Hash.new) do |h,n|
+          node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
+          action_results_queue.set_indexes!(node_ids_with_tests)
+          ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
             h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
           callbacks = {

@@ -11,11 +11,12 @@
     :network,
     :node_group,
     :node,
+    :namespace,
     :region,
     :search_object,
     :search_pattern_parser,
     :state_change,
     :task,
-    :user                 
+    :user
   ]
 }

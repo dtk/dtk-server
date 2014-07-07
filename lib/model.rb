@@ -8,9 +8,10 @@ r8_nested_require('model','get_items')
 
 r8_nested_require('model','schema')
 r8_nested_require('model','data')
+r8_nested_require('model','rails_class')
 
 module DTK
-  class Model < HashObject::Model 
+  class Model < HashObject::Model
     r8_nested_require('model','subclass_processing')
     extend SubclassProcessingClassMixin
     include SubclassProcessingMixin
@@ -24,6 +25,8 @@ module DTK
 
     extend ImportObject
     extend ExportObject
+
+    extend RailsClass
 
     @@debug_dev_flag = false
 
@@ -55,7 +58,7 @@ module DTK
         end
       end
     end
-    
+
     def ret_parent_name(possible_parents)
       # one complication is if parent is same type as self then looking for "p2", rather than p; this is due
       # to how we got around problem of having unique table names when joining table to itself
@@ -92,7 +95,7 @@ module DTK
           # el = r[result_col]
           el = r
           if filter_proc.call(el)
-            opts[:augmented] ? augmented_form(r,result_col) : el 
+            opts[:augmented] ? augmented_form(r,result_col) : el
           end
         end.compact
       elsif opts[:augmented]
@@ -105,7 +108,7 @@ module DTK
     def self.enable_debug
       @@debug_dev_flag = true
     end
-    
+
     def self.debug_flag?
       @@debug_dev_flag
     end
@@ -119,7 +122,7 @@ module DTK
       result_col ||= virtual_attr
       rows = get_objs_helper(virtual_attr,result_col,opts)
       if rows.size > 1
-        filter = (opts[:sql_filter] ? " #{opts[:sql_filter]} " : "") 
+        filter = (opts[:sql_filter] ? " #{opts[:sql_filter]} " : "")
         Log.error("call to get_obj for #{model_handle[:model_name]} (virtual_attr=#{virtual_attr}#{filter}) returned more than one row")
       end
       rows.first
@@ -142,7 +145,7 @@ module DTK
       @model_name ||= model_name_helper(self)
     end
     def model_name()
-      @relation_type || self.class.model_name() 
+      @relation_type || self.class.model_name()
     end
 
     def self.model_name_with_subclass()
@@ -234,7 +237,7 @@ module DTK
         else
           nil
         end
-      if @id_handle 
+      if @id_handle
         @id_handle[:group_id] ||= hash_scalar_values[:group_id] if hash_scalar_values[:group_id]
       end
     end
@@ -275,7 +278,7 @@ module DTK
     end
 
     def id_handle(hash_info=nil)
-      hash_info ? @id_handle.createIDH(hash_info) : @id_handle 
+      hash_info ? @id_handle.createIDH(hash_info) : @id_handle
     end
 
     def id_handle_with_auth_info()
@@ -411,7 +414,7 @@ module DTK
       if existing.empty? #shortcut
         create_rows = rows.map{|r|parent_fields.merge(r)}
         model_handle_with_par = model_handle
-        unless model_handle_with_par[:parent_model_name] 
+        unless model_handle_with_par[:parent_model_name]
           model_handle_with_par = model_handle_with_par.merge(:parent_model_name => parent_idh[:model_name])
         end
         return create_from_rows(model_handle_with_par,create_rows,:duplicate_refs => :no_check)
@@ -431,7 +434,7 @@ module DTK
           pruned_rows << r
         end
       end
-    
+
       unless updated_rows.empty?
         ret += update_from_rows(model_handle,updated_rows)||[]
       end
@@ -439,9 +442,9 @@ module DTK
       # add only ones not existing
       unless pruned_rows.empty?
         create_rows = pruned_rows.map{|r|parent_fields.merge(r)}
-        ret += create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check) 
+        ret += create_from_rows(model_handle,create_rows,:duplicate_refs => :no_check)
       end
-      
+
       # delete ones that not in rows
       unless opts[:no_delete]
         delete_idhs = existing.reject{|r|match_found(r,rows,match_cols)}.map{|r|model_handle.createIDH(:id => r[:id])}
@@ -452,7 +455,7 @@ module DTK
 
 
     # TODO: think may subsume below by above
-    # creates if does not exist using match_assigns; in eitehr case returns id_handle 
+    # creates if does not exist using match_assigns; in eitehr case returns id_handle
     # if block is given, called only if new row is created
     def self.create_from_row?(model_handle,ref,match_assigns,other_assigns={},opts={},&pre_create_row_block)
       sp_hash = {
@@ -503,7 +506,7 @@ module DTK
 
 
     def self.get_objects_from_search_object(search_object,opts={})
-      
+
       PerformanceService.start("PERF_SQL", search_object.object_id)
       dataset = search_object.create_dataset()
       # [Haris] DEBUG SQL DEBUG HERE
@@ -514,12 +517,12 @@ module DTK
         ap "OUTPUT:"
         ap dataset.all(opts) if dataset
       end
-      
+
       ret_val = dataset ? dataset.all(opts) : nil
 
       PerformanceService.end("PERF_SQL", search_object.object_id)
       PerformanceService.log("TABLE=#{search_object[:search_pattern][:relation]}")
-      PerformanceService.log("SQL="+dataset.sequel_ds.sql.gsub(/"/,'')) 
+      PerformanceService.log("SQL="+dataset.sequel_ds.sql.gsub(/"/,''))
 
       return ret_val
     end
@@ -556,7 +559,7 @@ module DTK
           if cols.include?(k)
             self[k] = v
           end
-        end 
+        end
       end
       @id_handle[:group_id] ||= group_id()
       self
@@ -572,7 +575,7 @@ module DTK
           if cols.include?(k)
             self[k] = v
           end
-        end 
+        end
       end
       if cols.include?(:group_id)
         @id_handle[:group_id] ||= group_id()
@@ -585,7 +588,7 @@ module DTK
         Log.info_pp([:debug_mode_possible_extra_db_calls,tag,self.class,self,cols_to_get,caller[0..7]])
       end
     end
-    
+
     # this returns field if exists, otherways gets it
     def get_field?(field)
       self[field]||update_obj!(field)[field]
@@ -622,7 +625,7 @@ module DTK
       end
       rows.first
     end
-    
+
     def get_objs(sp_hash_x,opts={})
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x,[:eq, :id, id()])
       mh = opts[:model_handle]||model_handle()
@@ -725,7 +728,7 @@ module DTK
     end
 
     def self.get_object_scalar_columns(id_handle,cols)
-      id = id_handle && id_handle.get_id() 
+      id = id_handle && id_handle.get_id()
       return nil unless id
       @db.get_objects_scalar_columns(id_handle.createMH,{:id => id}, FieldSet.opt(cols,id_handle[:model_name])).first
     end
@@ -790,12 +793,12 @@ module DTK
    protected
     # inherited virtual coulmn defs
     def parent_id()
-      return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit 
+      return id_handle()[:guid] if id_handle() and id_handle()[:guid] #short circuit
       id_handle().get_parent_id_info()[:id]
     end
 
     def parent_path()
-      return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit 
+      return id_handle()[:uri] if id_handle() and id_handle()[:uri] #short circuit
       id_handle().get_parent_id_info()[:uri]
     end
   end

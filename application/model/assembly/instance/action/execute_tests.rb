@@ -53,6 +53,15 @@ module DTK
               if response and response[:pbuilderid] and response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 raw_data = response[:data].map{|r|node_info.merge(r)}
+                #TODO: find better place to put this
+                raw_data.each do |r|
+                  if r[:component_name]
+                    r[:component_name].gsub!(/__/,'::')
+                  end
+                  if r[:test_component_name]
+                    r[:test_component_name].gsub!(/__/,'::')
+                  end
+                end
                 packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
                 action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
               elsif response[:status] != :ok

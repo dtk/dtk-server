@@ -18,9 +18,14 @@ module DTK
 
         def initiate()
           test_components = get_test_components_with_bindings()
+          if test_components.empty?
+            return
+          end
+
           version_contexts = get_version_contexts(test_components)
-          test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] =
-            version_contexts.select { |vc| cmp[:implementation_id] == vc[:id] }.first}
+          test_cmps_with_version_contexts = test_components.each do |cmp| 
+            cmp[:version_context] = version_contexts.find { |vc| cmp[:implementation_id] == vc[:id] }
+          end
 
           output_hash = {
             :test_instances => []
@@ -38,10 +43,10 @@ module DTK
               :params => attrib_array
             }
           end
-
-          indexes = nodes.map{|r|r[:id]}
-          action_results_queue.set_indexes!(indexes)
-          ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
+          ndx_node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}
+          nodes_with_tests =  nodes.select{|n|ndx_node_ids_with_tests[n[:id]]}
+          action_results_queue.set_indexes!(ndx_node_ids_with_tests.keys)
+          ndx_pbuilderid_to_node_info =  nodes_with_tests.inject(Hash.new) do |h,n|
             h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
           callbacks = {
@@ -89,7 +94,9 @@ module DTK
         # returns array of augmented (test) components where augmented data 
         # {:attributes => ARRAY[attribute objs),
         #  :node_name => STRING #node associated with base component name
+        #  :node_id => ID
         #  :component_name => STRING #base component name
+        #  :component_id => ID
         # there can be multiple entries for same test component for each base component instance 
         def get_test_components_with_bindings()
           ret = Array.new
@@ -130,7 +137,7 @@ module DTK
 
         def dup_and_substitute_attribute_values(test_cmp,attr_info)
           ret = test_cmp.shallow_dup(:display_name,:component_type)
-          ret.merge!(Aux.hash_subset(attr_info,[:component_name,:node_name]))
+          ret.merge!(Aux.hash_subset(attr_info,[:component_name,:component_id,:node_name,:node_id]))
           ret[:attributes] = test_cmp[:attributes].map do |attr|
             attr_dup = attr.shallow_dup(:display_name)
             attr_name = attr_dup[:display_name]
@@ -192,8 +199,10 @@ module DTK
             { 
               :test_component_name => test_component_name, 
               :attributes => attributes, 
+              :component_id => params[:component_data][:id],
               :component_name => params[:component_data][:display_name], 
-              :node_name => params[:node_data][:display_name] 
+              :node_id => params[:node_data][:id],
+              :node_name => params[:node_data][:display_name]
             }
           end
         end

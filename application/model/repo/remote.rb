@@ -49,9 +49,10 @@ module DTK
           :username => username,
           :name => remote.module_name(),
           :type => type_for_remote_module(remote.module_type),
-          :namespace => namespace,
-          :module_refs_content => module_refs_content
+          :namespace => namespace
         }
+
+        params.merge!(:module_refs_content => module_refs_content) unless is_empty?(module_refs_content)
 
         response_data = client.publish_module(params, client_rsa_pub_key)
 
@@ -79,9 +80,11 @@ module DTK
           :name => remote.module_name,
           :type => type_for_remote_module(remote.module_type),
           :namespace => remote.namespace,
-          :rsa_pub_key => client_rsa_pub_key,
-          :module_refs_content => opts[:module_refs_content]
+          :rsa_pub_key => client_rsa_pub_key
         }
+
+        client_params.merge!(:module_refs_content => opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
+
         ret = nil
         begin
           response_data = client.get_module_info(client_params)
@@ -237,6 +240,11 @@ module DTK
 
       def type_for_remote_module(module_type)
         module_type.to_s.gsub(/_module$/,"")
+      end
+
+      def is_empty?(string_value)
+        return true if string_value.nil?
+        string_value.empty? ? true : false
       end
 
       def dtk_instance_rsa_pub_key()

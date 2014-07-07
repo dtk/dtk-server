@@ -82,11 +82,10 @@ module DTK
           raise ErrorUsage.new(e.message)
         end
       end
-
+      ExecuteMutex = Mutex.new
       def self.execute(task_idh,top_task_idh,task_action)
 
         node = task_action[:node]
-pp [:node_group_debug,task_action.nodes()]
         node.update_object!(:os_type,:external_ref,:hostname_external_ref,:display_name,:assembly_id)
 
         target = Target.get(node.model_handle(:target), task_action[:datacenter][:id])
@@ -142,34 +141,35 @@ pp [:node_group_debug,task_action.nodes()]
           # we check if assigned target has aws credentials assigned to it, if so we will use those
           # credentials to create nodes
           target_aws_creds = node.get_target_iaas_credentials()
-
-          begin
-            response = Ec2.conn(target_aws_creds).server_create(create_options)
-          rescue => e
-            # append region to error message
-            region = target.get_region() if target
-            e.message << ". Region: '#{region}'." if region
-
-            Log.error_pp([e,e.backtrace[0..10]])
-            return {:status => "failed", :error_object => e}
-          end
-          instance_id = response[:id]
-          state = response[:state]
-          external_ref = external_ref.merge({
-            :instance_id => instance_id,
-            :type => "ec2_instance",
-            :size => flavor_id
-          })
-          Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
-          node_update_hash = {
-            :external_ref => external_ref,
-            :type => Node::Type::Node.instance,
-            :is_deployed => true,
-            # TODO: better unify these below
-            :operational_status => "starting",
-            :admin_op_status => "pending"
-          }
-          update_node!(node,node_update_hash)
+          ExecuteMutex.synchronize do
+            begin
+              response = Ec2.conn(target_aws_creds).server_create(create_options)
+            rescue => e
+              # append region to error message
+              region = target.get_region() if target
+              e.message << ". Region: '#{region}'." if region
+              
+              Log.error_pp([e,e.backtrace[0..10]])
+              return {:status => "failed", :error_object => e}
+            end
+            instance_id = response[:id]
+            state = response[:state]
+            external_ref = external_ref.merge({
+              :instance_id => instance_id,
+              :type => "ec2_instance",
+              :size => flavor_id
+            })
+            Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
+            node_update_hash = {
+              :external_ref => external_ref,
+              :type => Node::Type::Node.instance,
+              :is_deployed => true,
+              # TODO: better unify these below
+              :operational_status => "starting",
+              :admin_op_status => "pending"
+            }
+            update_node!(node,node_update_hash)
+          end #mutex
         else
           Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
         end

@@ -17,40 +17,33 @@ module DTK
         end
 
         def initiate()
-          test_components = get_test_components_with_stub()
+          test_components = get_test_components_with_bindings()
+          if test_components.empty?
+            return
+          end
+
           version_contexts = get_version_contexts(test_components)
-          test_cmps_with_version_contexts = test_components.each { |cmp| cmp[:version_context] =
-            version_contexts.select { |vc| cmp[:implementation_id] == vc[:id] }.first}
+          test_cmps_with_version_contexts = test_components.each do |cmp| 
+            cmp[:version_context] = version_contexts.find { |vc| cmp[:implementation_id] == vc[:id] }
+          end
 
           output_hash = {
             :test_instances => []
           }
 
           test_cmps_with_version_contexts.each do |hash|
-            attrib_array = Array.new
-            hash[:attributes].each { |attrib| attrib_array << { attrib[:display_name].to_sym =>attrib[:value_asserted] }}
+            attrib_array = hash[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
             output_hash[:test_instances] << {
               :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
               :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+#              :test_name => "datanode_spec.rb",
               :params => attrib_array
             }
           end
-
-          pp [:debug_output_hash, output_hash]
-=begin
-BAKIR: Output hash has this form
-[:debug_output_hash,
- {:test_instances=>
-   [{:module_name=>"mongodb_test",
-     :component=>"node1/mongodb",
-     :test_component=>"mongodb_test__network_port_check",
-     :test_name=>"network_port_check_spec.rb",
-     :params=>[{:mongo_port=>"27017"}, {:mongo_web_port=>"28017"}]}]}]
-=end
-          indexes = nodes.map{|r|r[:id]}
-          action_results_queue.set_indexes!(indexes)
+          node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
+          action_results_queue.set_indexes!(node_ids_with_tests)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
             h.merge(n.pbuilderid => {:id => n[:id].to_s, :display_name => n[:display_name]})
           end
@@ -91,85 +84,126 @@ BAKIR: Output hash has this form
             components = filter[:components] #TODO: temp
             CommandAndControl.request__execute_action(:execute_tests_v2,:execute_tests_v2,nodes,callbacks, {:components => components, :version_context => version_contexts})
           else
+            Log.info_pp(:execute_tests_v2 => node_hash)
             CommandAndControl.request__execute_action_per_node(:execute_tests_v2,:execute_tests_v2,node_hash,callbacks)
           end
         end
        private
         attr_reader :project,:assembly_instance, :nodes, :action_results_queue, :type, :filter
-        def get_test_components_with_stub()
-          if linked_tests_array = get_test_components()
-            test_components = []
-            test_params = []
-            linked_tests_array.each do |linked_tests|
-              linked_test_data = linked_tests.find_test_parameters.var_mappings_hash
-              linked_test_data[:node_data] = linked_tests.node
-              linked_test_data[:component_data] = linked_tests.component
-              test_params << linked_test_data
-
-              test_params.each do |params|
-                k, v = params.first
-                test_component_name = v.map { |x| x.split(".").first }.first
-                attribute_names = k.map { |x| x.split(".").last }
-                related_test_attribute = v.map { |x| x.split(".").last }
-                component_id = params[:component_data][:id]
-
-                attributes = []
-                attribute_names.each_with_index do |attribute_name, idx|
-                  sp_hash = {
-                    :cols => [:display_name, :value_asserted],
-                    :filter => [:and,[:eq, :component_component_id,component_id],[:eq, :display_name, attribute_name]]
-                  }
-
-                  attribute_content = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash).first
-                  attribute = { :component_attribute_name => attribute_content[:display_name], :component_attribute_value => attribute_content[:value_asserted], :related_test_attribute => related_test_attribute[idx] }
-                  attributes << attribute
-                end
-                test_components << { :test_component_name => test_component_name, :attributes => attributes, :component_name => params[:component_data][:display_name], :node_name => params[:node_data][:display_name] }
-              end
-            end
-
-            test_components.uniq!
-            test_comp_list = []
-            test_components.each do |test_comp|
-              sp_hash = {
-                :cols => Component.common_columns,
-                :filter => [:and, [:eq,:project_project_id,project.id],[:eq,:component_type,test_comp[:test_component_name]]]
-              }
-              comp_list = Model.get_objs(assembly_instance.model_handle(:component),sp_hash)
-              comp_list.each do |tst|
-                tst[:component_name] = test_comp[:component_name]
-                tst[:node_name] = test_comp[:node_name]
-                tst[:attributes] = test_comp[:attributes]
-              end
-
-              # Bakir: There is a possibility that test components with same name can be found on different assemblies. We want to pick test component that is never added to the assembly and assembly_id is nil
-              test_comp_list << comp_list.select { |tstcmp| tstcmp[:assembly_id] == nil }.first
-            end
+        # returns array of augmented (test) components where augmented data 
+        # {:attributes => ARRAY[attribute objs),
+        #  :node_name => STRING #node associated with base component name
+        #  :node_id => ID
+        #  :component_name => STRING #base component name
+        #  :component_id => ID
+        # there can be multiple entries for same test component for each base component instance 
+        def get_test_components_with_bindings()
+          ret = Array.new
+          test_cmp_attrs = get_test_component_attributes()
+          if test_cmp_attrs.empty?
+            return ret
           end
 
-          cmps = []
-          test_comp_list.each do |cmp|
-            sp_hash = {
-              :cols => Attribute.common_columns,
-              :filter => [:eq,:component_component_id,cmp[:id]]
-            }
-            attributes = Model.get_objs(assembly_instance.model_handle(:attribute),sp_hash)
-
-            attributes.each do |a|
-              name = cmp[:attributes].select do |x|
-                x[:related_test_attribute] == a[:display_name]
-              end
-              a[:value_asserted] = name.first[:component_attribute_value] unless name.empty?
-            end
-            cmp[:attributes] = attributes
-            cmps << cmp
+          #get info about each test component
+          sp_hash = {
+            :cols => [:id,:group_id,:display_name,:attributes,:component_type],
+            :filter => [:and, 
+                        [:eq,:assembly_id,nil],
+                        [:eq,:project_project_id,project.id],
+                        [:oneof,:component_type,test_cmp_attrs.map{|t|t[:test_component_name]}]]
+          }
+          ndx_test_cmps = Hash.new #test cmps indexed by component type
+          Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
+            ndx = r[:component_type]
+            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type).merge(:attributes => Array.new)
+            cmp[:attributes] << r[:attribute]
           end
 
-          return cmps
+          # for each binding return at top level the matching test component with attributes substituted with binding value
+          # and augmented columns :node_name and component_name
+          test_cmp_attrs.each do |r|
+            ndx = test_component_name = r[:test_component_name]
+            test_cmp = ndx_test_cmps[ndx]
+            unless test_cmp
+              Log.error("Dangling reference to test components (#{test_component_name})")
+            else
+              #substitue in values from test_cmp_attrs               
+              ret << dup_and_substitute_attribute_values(test_cmp,r)
+            end
+          end
+          ret
         end
 
-        def get_test_components()
-          Component::Test.get_linked_tests(assembly_instance)
+        def dup_and_substitute_attribute_values(test_cmp,attr_info)
+          ret = test_cmp.shallow_dup(:display_name,:component_type)
+          ret.merge!(Aux.hash_subset(attr_info,[:component_name,:component_id,:node_name,:node_id]))
+          ret[:attributes] = test_cmp[:attributes].map do |attr|
+            attr_dup = attr.shallow_dup(:display_name)
+            attr_name = attr_dup[:display_name]
+            if matching_attr = attr_info[:attributes].find{|a|a[:related_test_attribute] == attr_name}
+              attr_dup[:attribute_value] = matching_attr[:component_attribute_value]
+            end
+            attr_dup
+          end
+          ret
+        end
+
+
+        # returns array having test components that are linked to a component in assembly_instance
+        # each element has form
+        # {:test_component_name=>String,
+        #  :test_component_id=>ID,
+        #  :component_name=>String,
+        #  :node_name=>String,
+        #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
+        def get_test_component_attributes()
+          ret = Array.new
+          linked_tests = Component::Test.get_linked_tests(assembly_instance)
+          if linked_tests.empty?
+            return ret
+          end
+
+          test_params = linked_tests.map do |t|
+            var_mappings = t.find_test_parameters.var_mappings_hash
+            var_mappings.merge(:node_data => t.node, :component_data => t.component)
+          end
+            
+          attr_mh = assembly_instance.model_handle(:attribute)
+          test_params.map do |params|
+            k, v = params.first
+            related_test_attribute = v.map { |x| x.split(".").last }
+            test_component_name = v.map { |x| x.split(".").first }.first
+            attribute_names = k.map { |x| x.split(".").last }
+            component_id = params[:component_data][:id]
+            #TODO: more efficient to get in bulk outside of test_params loop
+            sp_hash = {
+              :cols => [:display_name, :attribute_value],
+              :filter => [:and,
+                          [:eq, :component_component_id,component_id],
+                          [:oneof, :display_name, attribute_names]]
+            }
+            ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
+              h.merge(a[:display_name] => a[:attribute_value])
+            end
+            attributes = Array.new
+            attribute_names.each_with_index do |attribute_name, idx|
+              if val = ndx_attr_vals[attribute_name]
+                attributes << {
+                  :component_attribute_name => attribute_name,
+                  :component_attribute_value => val,
+                  :related_test_attribute => related_test_attribute[idx] 
+                }
+              end
+            end
+            { 
+              :test_component_name => test_component_name, 
+              :attributes => attributes, 
+              :component_id => params[:component_data][:id],
+              :component_name => params[:component_data][:display_name], 
+              :node_id => params[:node_data][:id],
+              :node_name => params[:node_data][:display_name]
+            }
+          end
         end
 
         def get_version_contexts(test_components)
@@ -180,8 +214,7 @@ BAKIR: Output hash has this form
               Log.error("Unexpected that test_components is empty")
               nil
             end
-          pp [:debug_version_context,version_contexts]
-          return version_contexts
+          version_contexts
         end
 
         #TODO: deprecate

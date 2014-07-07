@@ -32,14 +32,13 @@ module DTK
           }
 
           test_cmps_with_version_contexts.each do |hash|
-            attrib_array = Array.new
-            hash[:attributes].each { |attrib| attrib_array << { attrib[:display_name].to_sym =>attrib[:value_asserted] }}
+            attrib_array = hash[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
             output_hash[:test_instances] << {
               :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
-#              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
-              :test_name => "datanode_spec.rb",
+              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+#              :test_name => "datanode_spec.rb",
               :params => attrib_array
             }
           end
@@ -142,7 +141,7 @@ module DTK
             attr_dup = attr.shallow_dup(:display_name)
             attr_name = attr_dup[:display_name]
             if matching_attr = attr_info[:attributes].find{|a|a[:related_test_attribute] == attr_name}
-              attr_dup[:value_asserted] = matching_attr[:component_attribute_value]
+              attr_dup[:attribute_value] = matching_attr[:component_attribute_value]
             end
             attr_dup
           end

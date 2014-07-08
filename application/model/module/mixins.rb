@@ -337,6 +337,8 @@ module DTK
         :service_module
        when :component_module
         :puppet #TODO: hard wired
+       when :test_module
+        :puppet #TODO: hard wired
       end
     end
 

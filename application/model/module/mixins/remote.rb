@@ -108,6 +108,9 @@ module DTK; module ModuleMixins
     end
 
     def list_remotes(model_handle, rsa_pub_key = nil)
+      require 'debugger'
+      Debugger.start
+      debugger
       Repo::Remote.new.list_module_info(module_type(), rsa_pub_key)
     end
 

@@ -1,5 +1,6 @@
 GEM
   remote: http://rubygems.org/
+  remote: http://dtkuser:g3msdtk@gems.r8network.com/
   specs:
     activesupport (3.0.20)
     awesome_print (1.1.0)

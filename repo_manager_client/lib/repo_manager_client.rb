@@ -61,7 +61,8 @@ module DTK
     def list_modules(filter=nil, client_rsa_pub_key = nil)
       repo_user = get_approved_repouser(client_rsa_pub_key)
 
-      if filter[:type].eql? "component"
+      # added 'test' to list component_modules until we implement test_modules on repo_manager
+      if filter[:type].eql?('component') || filter[:type].eql?('test')
         response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
       else
         response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
@@ -141,6 +142,9 @@ module DTK
     end
 
     def publish_module(params_hash, client_rsa_pub_key = nil)
+      require 'debugger'
+      Debugger.start
+      debugger
       route = collection_route_from_type(params_hash)
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
       post_rest_request_data(route,body,:raise_error => true,:timeout => 30)
@@ -253,6 +257,15 @@ module DTK
     # collection route - plural
     #
     def collection_route_from_type(params_hash)
+      # params_hash[:type].eql?("component") ? '/v1/component_modules' : '/v1/service_modules'
+      case params_hash[:type]
+        when 'component'
+          return '/v1/component_modules'
+        when 'test'
+          return '/v1/component_modules'
+        else
+          '/v1/service_modules'
+        end
       params_hash[:type].eql?("component") ? '/v1/component_modules' : '/v1/service_modules'
     end
 

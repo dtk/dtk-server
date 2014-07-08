@@ -13,7 +13,7 @@ lambda__segment_module_branches =
 lambda__segment_components =
   lambda{|args|
   ret = {
-    :model_name=>:test,
+    :model_name=>:component,
     :convert => true,
     :join_type=>:inner,
     :join_cond=>{:module_branch_id =>:module_branch__id},
@@ -26,11 +26,11 @@ lambda__segment_components =
 lambda__segment_instances =
   lambda{|args|
   ret = {
-    :model_name=>:test,
+    :model_name=>:component,
     :convert => true,
     :join_type=>:inner,
-    :alias => :test_instance,
-    :join_cond=>{:ancestor_id =>:test__id},
+    :alias => :component_instance,
+    :join_cond=>{:ancestor_id =>:component__id},
     :cols=>args[:cols]
   }
 
@@ -42,11 +42,11 @@ lambda__segment_instances =
 lambda__segment_assembly =
   lambda{|args|
   ret = {
-    :model_name=>:test,
+    :model_name=>:component,
     :convert => true,
     :join_type=>:inner,
     :alias => :assembly,
-    :join_cond=>{:id =>:test_instance__assembly_id},
+    :join_cond=>{:id =>:component_instance__assembly_id},
     :cols=>args[:cols]
   }
 
@@ -62,7 +62,7 @@ lambda__segment_node =
     :convert => true,
     :join_type=>:inner,
     :alias => :node,
-    :join_cond=>{:id =>:test_instance__node_node_id},
+    :join_cond=>{:id =>:component_instance__node_node_id},
     :cols=>args[:cols]
   }
 
@@ -77,7 +77,7 @@ lambda__segment_attributes =
     :model_name=>:attribute,
     :convert => true,
     :join_type=>:inner,
-    :join_cond=>{:test_test_id => :test__id},
+    :join_cond=>{:component_component_id => :component__id},
     :cols=>args[:cols]
   }
   ret[:filter] = args[:filter] if args[:filter]
@@ -243,7 +243,7 @@ lambda__segment_impls =
          :cols=>[:id,:display_name,:group_id,:assembly_id]
        },
        {
-         :model_name=>:component,
+         :model_name=>:test_module,
          :alias => :assembly_template,
          :convert => true,
          :join_type=>:inner,

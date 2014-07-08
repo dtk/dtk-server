@@ -18,7 +18,8 @@ module XYZ
       else
         assigns.merge!(CONTEXT_ID => model_or_id_handle[:c])
       end
-      unless model_or_id_handle[:group_id] or [:user,:user_group,:user_group_relation].include?( model_or_id_handle[:model_name])#TODO: temp until make sure that this is alwats set
+
+      unless model_or_id_handle[:group_id] or [:user,:user_group,:user_group_relation,:repo_remote].include?( model_or_id_handle[:model_name])#TODO: temp until make sure that this is alwats set
         bad_item =
           if model_or_id_handle.kind_of?(IDHandle)
             "id handle with type (#{model_or_id_handle[:model_name]}) and id (#{model_or_id_handle.get_id()})"

@@ -202,6 +202,7 @@ module Ramaze::Helper
       case module_type
         when :component_module then ComponentModule
         when :service_module then ServiceModule
+        when :test_module then TestModule
         else raise Error.new("Unexpected module_type (#{module_type})")
       end
     end

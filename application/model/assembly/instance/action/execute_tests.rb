@@ -37,8 +37,8 @@ module DTK
               :module_name => hash[:version_context][:implementation],
               :component => "#{hash[:node_name]}/#{hash[:component_name]}",
               :test_component => hash[:display_name],
-#              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
-              :test_name => "datanode_spec.rb",
+              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
+#              :test_name => "datanode_spec.rb",
               :params => attrib_array
             }
           end

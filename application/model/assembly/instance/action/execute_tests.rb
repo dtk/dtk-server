@@ -49,7 +49,7 @@ module DTK
           end
           callbacks = {
             :on_msg_received => proc do |msg|
-              response = CommandAndControl.parse_response__execute_action(nodes,msg)
+              response = CommandAndControl.parse_response__execute_action(nodes,msg)  
               if response and response[:pbuilderid] and response[:status] == :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 raw_data = response[:data].map{|r|node_info.merge(r)}
@@ -62,8 +62,11 @@ module DTK
                     r[:test_component_name].gsub!(/__/,'::')
                   end
                 end
-                packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
-                action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                #just for a safe side to filter out empty response, it causes further an error on the client side
+                unless response[:data].empty? or response[:data].nil?       
+                  packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
+                  action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
+                end
               elsif response[:status] != :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
                 action_results_queue.push(node_info[:id],response[:data])

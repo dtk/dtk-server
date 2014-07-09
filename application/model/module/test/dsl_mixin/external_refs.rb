@@ -137,7 +137,6 @@ module DTK; class TestModule
                 all_possibly_missing << dep_name
               end
             end
-
           end
         end
         all_inconsistent = (all_inconsistent - all_match_hashes.keys)

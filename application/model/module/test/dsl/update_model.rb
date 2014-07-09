@@ -38,6 +38,7 @@ module DTK; class TestDSL
               v.each{|ld|(ld["possible_links"]||[]).each{|pl|pl.values.first["type"] = "external"}} #TODO: temp hack to put in type = "external"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
               (info["link_def"] ||= Hash.new).merge!(parsed_link_def)
+
             when "link_defs"
               parsed_link_def = LinkDef.parse_serialized_form_local(v,config_agent_type,@remote_link_defs,cmp_ref)
               (info["link_def"] ||= Hash.new).merge!(parsed_link_def)

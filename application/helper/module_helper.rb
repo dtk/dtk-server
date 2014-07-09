@@ -125,7 +125,7 @@ module Ramaze::Helper
       local_module_name = module_obj.module_name()
       # [Amar & Haris] this is temp restriction until rest of logic is properly fixed
       if local_module_name != remote_module_name
-        raise ErrorUsage.new("Export with remote module name (#{remote_module_name}) unequal to local module name (#{local_module_name}) is currently not supported.")
+        raise ErrorUsage.new("Publish with remote module name (#{remote_module_name}) unequal to local module name (#{local_module_name}) is currently not supported.")
       end
       module_type = module_obj.module_type
       remote_params = remote_params_dtkn(module_type,namespace,remote_module_name,version)

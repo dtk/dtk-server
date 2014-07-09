@@ -22,26 +22,26 @@ module DTK
             return
           end
 
-          version_contexts = get_version_contexts(test_components)
-          test_cmps_with_version_contexts = test_components.each do |cmp| 
-            cmp[:version_context] = version_contexts.find { |vc| cmp[:implementation_id] == vc[:id] }
-          end
-
-          output_hash = {
-            :test_instances => []
-          }
-
-          test_cmps_with_version_contexts.each do |hash|
-            attrib_array = hash[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
-            output_hash[:test_instances] << {
-              :module_name => hash[:version_context][:implementation],
-              :component => "#{hash[:node_name]}/#{hash[:component_name]}",
-              :test_component => hash[:display_name],
-              :test_name => "network_port_check_spec.rb", #Currently hardcoded but should be available on test component level
-#              :test_name => "datanode_spec.rb",
+          ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
+          version_contexts = ndx_version_contexts.values
+          test_instances = test_components.map do |test_cmp|
+            unless version_context = ndx_version_contexts[test_cmp[:implementation_id]]
+              raise Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
+            end
+            attrib_array = test_cmp[:attributes].map{|a|{a[:display_name].to_sym =>a[:attribute_value]}}
+            unless  test_name = (test_cmp[:external_ref]||{})[:test_name]
+              Log.error("deprecate: in external_ref put in test name")
+              test_name = "network_port_check_spec.rb"
+            end
+            {
+              :module_name =>version_context[:implementation],
+              :component => "#{test_cmp[:node_name]}/#{test_cmp[:component_name]}",
+              :test_component => test_cmp[:display_name],
+              :test_name => test_name,
               :params => attrib_array
-            }
-          end
+            } 
+          end           
+
           node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
           action_results_queue.set_indexes!(node_ids_with_tests)
           ndx_pbuilderid_to_node_info =  nodes.inject(Hash.new) do |h,n|
@@ -75,10 +75,10 @@ module DTK
           #based on that fact, serverspec tests will be triggered on node only for components that actually belong to that specific node
           node_hash = {}
           components_including_node_name = []
-          unless output_hash.empty?
+          unless test_instances.empty?
             nodes.each do |node|
               components_array = []
-              output_hash[:test_instances].each do |comp|
+              test_instances.each do |comp|
                 if comp[:component].include? "#{node[:display_name]}/"
                   components_array << comp
                   components_including_node_name << comp
@@ -115,7 +115,7 @@ module DTK
 
           #get info about each test component
           sp_hash = {
-            :cols => [:id,:group_id,:display_name,:attributes,:component_type],
+            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref],
             :filter => [:and, 
                         [:eq,:assembly_id,nil],
                         [:eq,:project_project_id,project.id],
@@ -124,7 +124,7 @@ module DTK
           ndx_test_cmps = Hash.new #test cmps indexed by component type
           Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
             ndx = r[:component_type]
-            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type).merge(:attributes => Array.new)
+            cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type,:external_ref).merge(:attributes => Array.new)
             cmp[:attributes] << r[:attribute]
           end
 
@@ -144,7 +144,7 @@ module DTK
         end
 
         def dup_and_substitute_attribute_values(test_cmp,attr_info)
-          ret = test_cmp.shallow_dup(:display_name,:component_type)
+          ret = test_cmp.shallow_dup(:display_name,:component_type,:external_ref)
           ret.merge!(Aux.hash_subset(attr_info,[:component_name,:component_id,:node_name,:node_id]))
           ret[:attributes] = test_cmp[:attributes].map do |attr|
             attr_dup = attr.shallow_dup(:display_name)

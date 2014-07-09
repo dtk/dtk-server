@@ -126,6 +126,7 @@ module DTK; class ComponentDSL; class V2
           case type 
             when "puppet_class" then "class_name" 
             when "puppet_definition" then "definition_name" 
+            when "serverspec_test" then "test_name" 
           else raise ParsingError.new("Component (?1) external_ref has illegal type (?2)",cmp,type)
           end
         name = input_hash.values.first

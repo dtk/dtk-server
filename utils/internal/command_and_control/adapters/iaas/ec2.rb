@@ -19,7 +19,8 @@ module DTK
       end
 
       def self.references_image?(node_external_ref)
-        node_external_ref[:type] == "ec2_image" and node_external_ref[:image_id]
+        ["ec2_image","ec2_instance"].include?(node_external_ref[:type]) and 
+          node_external_ref[:image_id]
       end
 
       def self.existing_image?(image_id)

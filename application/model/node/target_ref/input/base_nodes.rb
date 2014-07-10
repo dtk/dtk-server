@@ -13,21 +13,43 @@ module DTK; class Node; class TargetRef
           return nodes
         end
 
+        ndx_existing_target_refs = get_ndx_matching_target_refs(nodes)
         create_objects_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
-          num_needed = node.attribute.cardinality
+          cardinality = node.attribute.cardinality
+          target_refs = ndx_existing_target_refs[node_id]||[]
+          num_needed = cardinality - target_refs.size
           if num_needed > 0
-            element_to_create = Element.new(:node => node,:num_needed => num_needed)
-            element_to_create.add_target_ref_and_ngr!(create_objects_hash,target,assembly)
+            el = Element.new(:node => node,:num_needed => num_needed)
+            el.add_target_ref_and_ngr!(create_objects_hash,target,assembly)
+          elsif num_needed == 0
+            if cardinality > 0
+              ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
+            end
+          else # num_needed < 0
+            Log.error("Unexpected that more target refs than needed")
+            ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
           end
         end
-        target_idh = @target.id_handle()
-        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
+        
+        unless create_objects_hash.empty?
+          target_idh = target.id_handle()
+          x = Model.import_objects_from_hash(target_idh,create_objects_hash,:return_info => true)
+          pp x
+        end
+        raise Error.new('got here')
+        ret
+      end
+      private
+      def self.get_ndx_matching_target_refs(nodes)
+        #TODO: stub
+        []
       end
 
       class Element 
         include ElementMixin
+        attr_reader :node,:num_needed
         def initialize(node_info)
           @node = node_info[:node]
           @num_needed = node_info[:num_needed]

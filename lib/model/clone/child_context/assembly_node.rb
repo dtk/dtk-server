@@ -11,7 +11,8 @@ module DTK
           if target.get_field?(:iaas_type) == 'physical'
             find_node_target_ref_matches(target,assembly_template_idh)
           else
-            # can either be node templates, meaning spinning up node, or a match to an existing node 
+            # can either be node templates, meaning spinning up node, or
+            #  a match to an existing node in which case the existing node target ref is returned 
             find_matches_for_nodes(target,assembly_template_idh,sao_node_bindings)
           end
         merge!(:matches => matches) if matches
@@ -111,8 +112,8 @@ module DTK
               node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
               hash_el_when_create(node,node_template)
             when :match  
-              if existing_node = NodeBindings.find_matching_existing_node(target,node,assembly_template_idh)
-                hash_el_when_match(node,existing_node)
+              if node_target_ref = NodeBindings.find_matching_node_target_ref(target,node,assembly_template_idh)
+                hash_el_when_match(node,node_target_ref)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')
                 node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
@@ -140,13 +141,13 @@ module DTK
           :node_template_idh     => node_template.id_handle()
         }
       end
-      def hash_el_when_match(node,existing_node)
+      def hash_el_when_match(node,node_target_ref)
         {
           :instance_type         => Node::Type::Node.instance,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
-          :instance_ref          => existing_node.get_field?(:ref),
-          :node_template_idh     => existing_node.id_handle()
+          :instance_ref          => node_target_ref.get_field?(:ref),
+          :node_template_idh     => node_target_ref.id_handle()
         }
       end
 

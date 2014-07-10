@@ -1,24 +1,34 @@
 module DTK
   class NodeBindings
-    def self.find_matching_existing_node(target,node,assembly_template_idh)
+    def self.find_matching_node_target_ref(target,node,assembly_template_idh)
       unless R8::Config[:test_node_bindings]
         return nil
       end
       if node_bindings = get_node_bindings(assembly_template_idh)
-        node_bindings.find_match(target,node)
+        assembly_instance,node_instance = node_bindings.find_matching_instance_info(target,node)
+        if node_instance
+          create_linked_target_ref?(target,assembly_instance,node_instance)
+        end
       end
     end
     def initialize(hash)
       @parsed_form = parse_and_reify(hash)
     end
 
-    def find_match(target,node)
+    #returns if match [assembly_instance,node_instance]
+    def find_matching_instance_info(target,node)
       if single_node = @parsed_form[node.get_field?(:display_name)]
-        single_node.find_match(target,node)
+        single_node.find_matching_instance_info(target,node)
       end
     end
 
    private
+    def self.create_linked_target_ref?(target,assembly,node)
+x=      Node::TargetRef.create_linked_target_refs?(target,assembly,[node])
+pp x
+raise Error.new("got here")
+    end
+
     def self.get_node_bindings(assembly_template_idh)
       #TODO: this will be in object model; here we get it from the following file on server under /tmp/nodes_bindings.yaml
       #whose syntax is at bottom of this file
@@ -48,7 +58,8 @@ module DTK
         @node_name = hash[:node_name]
       end
 
-      def find_match(target,stub_node)
+      #returns if match [assembly_instance,node_instance]
+      def find_matching_instance_info(target,stub_node)
         #see if in target there is an assembly that matches @assembly
         assembly_instances = find_matching_assembly_instances(target)
         if assembly_instances.size == 0
@@ -59,16 +70,16 @@ module DTK
           return nil
         end
         assembly_instance = assembly_instances.first
-        matching_node = assembly_instance.get_nodes().find do |n|
+        matching_node_instance = assembly_instance.get_nodes().find do |n|
           n.get_field?(:display_name) == @node_name
         end
-        unless matching_node
+        unless matching_node_instance
           raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) does not have node (#{@node_name})")
         end
-        unless matching_node.get_field?(:type) == 'instance'
+        unless matching_node_instance.get_field?(:type) == 'instance'
           raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) node (#{@node_name}) cannot be matched because it is just staged")
         end
-        matching_node
+        [assembly_instance,matching_node_instance]
       end
 
      private
@@ -105,7 +116,7 @@ Strawman how node bindings will look when in service module
 $:~/dtk/service_modules/test_shared_nodes/assemblies/tenant>cat node_bindings.yaml
 ---
 The following would match on an asssembly test_shared_nodes::tenant and for node node1 in this assembly
-would set it so that it uses the node node2 from deployed service insatnce from assembly template test_shared_nodes::base
+would set it so that it uses the node node2 from deployed service instance from assembly template test_shared_nodes::base
 
 assembly: test_shared_nodes::tenant 
 node_bindings:

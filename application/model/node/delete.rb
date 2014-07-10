@@ -3,18 +3,15 @@ module DTK
     module DeleteMixin
       def destroy_and_delete(opts={})
         suceeeded = true
-        destroy_node = false
 
         target_ref_info = TargetRef.get_linked_target_ref_info_single_node(self)
-        target_ref = target_ref_info.target_ref
-#DEBUG
-if target_ref
         if target_ref_info.ref_count < 2
           suceeeded = CommandAndControl.destroy_node?(self)
         end
-end        
+
         if suceeeded
           opts_delete = opts
+          target_ref = target_ref_info.target_ref
           if target_ref and target_ref_info.ref_count == 1
             opts_delete.merge(:delete_target_ref => target_ref.id_handle())
           end

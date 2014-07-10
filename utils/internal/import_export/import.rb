@@ -72,7 +72,8 @@ module DTK
       input_hash_content_into_model(container_id_handle,hash_content,opts)
     end
 
-    def input_hash_content_into_model(container_id_handle,hash_content,opts={})
+    def input_hash_content_into_model(container_id_handle,hash_content,opts_x={})
+      opts = (opts_x[:return_idhs] ? {:return_info => true}.merge(opts_x) : opts_x)
       global_fks = Hash.new
       return_info = nil
       unless container_id_handle.is_top?

@@ -1,7 +1,8 @@
 module XYZ
   module InputIntoModelClassMixins
     include CommonInputImport
-    def input_into_model(container_id_handle,hash_with_assocs,opts={})
+    def input_into_model(container_id_handle,hash_with_assocs,opts_x={})
+      opts = (opts_x[:return_idhs] ? {:return_info => true}.merge(opts_x) : opts_x)
       fks = Hash.new
       hash_assigns = remove_fks_and_return_fks!(hash_with_assocs,fks,opts)
       prefixes = update_from_hash_assignments(container_id_handle,hash_assigns)
@@ -15,9 +16,10 @@ module XYZ
       end
 
       if opts[:return_info]
-        return ret_global_fks, prefixes
+        return_info = (opts[:return_idhs] ? return_id_handles(container_id_handle,prefixes) : prefixes)
+        [ret_global_fks, return_info]
       else
-        return ret_global_fks
+        ret_global_fks
       end
     end
 
@@ -26,6 +28,10 @@ module XYZ
       ForeignKeyAttr.new(attr,opts)
     end
    private
+    def return_id_handles(container_id_handle,fully_qual_uris)
+      IDInfoTable.get_id_handles_matching_uris(container_id_handle,fully_qual_uris)
+    end
+
     def is_foreign_key_attr?(attr)
       attr.kind_of?(ForeignKeyAttr) or (attr.kind_of?(String) and attr[0,1] == "*")
     end

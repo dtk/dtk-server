@@ -504,6 +504,14 @@ module XYZ
 	#### map the db representation of id to guid form
 	# currently set so to reflect that a db id is a guid; other possibilities are when guid is id_db_relation + db_id
 
+        def get_id_handles_matching_uris(parent_idh,fully_qual_uris)
+          unformated_rows = ds().where(CONTEXT_ID => parent_idh[CONTEXT_ID], :uri => fully_qual_uris, :is_factory=>false).all()
+          unformated_rows.map do |r|
+            mh = parent_idh.create_childMH(r[:relation_type].to_sym)
+            mh.createIDH(:id => r[:relation_id])
+          end
+        end
+
         def get_ndx_ids_matching_relative_uris(parent_idh,parent_uri,child_relative_uris)
           ndx_uris = child_relative_uris.inject(Hash.new) do |h,child_uri|
             uri = RestURI.ret_child_uri_from_qualified_ref(parent_uri,child_uri)

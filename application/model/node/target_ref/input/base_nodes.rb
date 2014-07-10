@@ -33,11 +33,14 @@ module DTK; class Node; class TargetRef
           end
         end
         
+        new_target_ref_idhs = Array.new
         unless create_objects_hash.empty?
           target_idh = target.id_handle()
-          x = Model.import_objects_from_hash(target_idh,create_objects_hash,:return_info => true)
-          pp x
+          all_idhs = Model.input_hash_content_into_model(target_idh,create_objects_hash,:return_idhs => true)
+          #all idhs have both nodes and node_group_rels, so need to filter
+          new_target_ref_idhs = all_idhs.select{|idh|idh[:model_name] == :node}
         end
+        pp [:new_target_ref_idhs,new_target_ref_idhs]
         raise Error.new('got here')
         ret
       end

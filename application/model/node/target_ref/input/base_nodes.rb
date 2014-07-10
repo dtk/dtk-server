@@ -12,13 +12,13 @@ module DTK; class Node; class TargetRef
         if nodes.empty?
           return nodes
         end
+        ndx_target_refs = TargetRef.ndx_matching_target_refs(:node_instance_idhs => nodes.map{|n|n.id_handle})
 
-        ndx_existing_target_refs = get_ndx_matching_target_refs(nodes)
         create_objects_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
           cardinality = node.attribute.cardinality
-          target_refs = ndx_existing_target_refs[node_id]||[]
+          target_refs = ndx_target_refs[node_id]||[]
           num_needed = cardinality - target_refs.size
           if num_needed > 0
             el = Element.new(:node => node,:num_needed => num_needed)
@@ -32,34 +32,22 @@ module DTK; class Node; class TargetRef
             ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
           end
         end
-
-        #Create needed target refs and add them to ret hash
-        unless create_objects_hash.empty?
-          target_idh = target.id_handle()
-          all_idhs = Model.input_hash_content_into_model(target_idh,create_objects_hash,:return_idhs => true)
-          #all idhs have both nodes and node_group_rels
-          ndx_ngr_ids = all_idhs.map do |idh|
-            idh.get_id() if idh[:model_name] == :node_group_relation
-          end.compact
-          sp_hash = {
-            :cols => [:node_id,:node_group_id],
-            :filter => [:oneof,:id,ndx_ngr_ids]
-          }
-          target_ref_mh = target_idh.create_childMH(:node)
-          ngr_mh = target_idh.create_childMH(:node_group_relation)
-          Model.get_objs(ngr_mh,sp_hash).each do |r|
-            #purposely setting node_id to node_group_id in r
-            node_id = r[:node_group_id]
-            (ret[node_id] ||= Array.new) << target_ref_mh.createIDH(:id => r[:node_id])
-          end
-        end
+        
+        create_and_add_needed_target_refs!(ret,target,create_objects_hash)
         ret
       end
 
      private
-      def self.get_ndx_matching_target_refs(nodes)
-        #TODO: stub
-        []
+      def self.create_and_add_needed_target_refs!(ret,target,create_objects_hash)
+        if create_objects_hash.empty?
+          return ret
+        end
+
+        target_idh = target.id_handle()
+        all_idhs = Model.input_hash_content_into_model(target_idh,create_objects_hash,:return_idhs => true)
+        #all idhs have both nodes and node_group_rels
+        ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
+        TargetRef.ndx_matching_target_refs(:node_group_relation_idhs => ngr_idhs)
       end
 
       class Element 

@@ -16,7 +16,7 @@ module DTK
         node_mh = target.model_handle(:node)
         ret_unpruned = get_objs(node_mh,sp_hash,:keep_ref_cols => true)
 
-        ndx_matched_target_refs = ndx_target_refs_matching_instances(ret_unpruned.map{|r|r.id_handle})
+        ndx_matched_target_refs = ndx_target_refs_to_their_instances(ret_unpruned.map{|r|r.id_handle})
         if ndx_matched_target_refs.empty?
           return ret_unpruned
         end
@@ -27,21 +27,59 @@ module DTK
         Input.create_nodes_from_inventory_data(target, inventory_data)
       end
 
+      # This creates if needed target refs and links nodes to them
+      # returns new idhs indexed by node (id) they linked to
+      # or if they exist their idhs
       def self.create_linked_target_refs?(target,assembly,nodes,opts={})
         Input::BaseNodes.create_linked_target_refs?(target,assembly,nodes,opts)
       end
 
+      # returns hash of form {NodeInstanceId -> [target_refe_idh1,...],,}
+      # filter can be of form
+      #  {:node_instance_idhs => [idh1,,]}, or
+      #  {:node_group_relation_idhs => [idh1,,]}
+      def self.ndx_matching_target_refs(filter)
+        ret = Hash.new
+        filter_rel = sample_idh = nil
+        if filter[:node_instance_idhs]
+          idhs = filter[:node_instance_idhs]
+          filter_rel = :node
+        elsif filter[:node_group_relation_idhs]
+          idhs = filter[:node_group_relation_idhs]
+          filter_rel = :node_group_relation
+        else
+          raise Error.new("Unexpected filter: #{filter.inspect}")
+        end
+        if idhs.empty?
+          return ret
+        end
+
+        #node_group_id matches on instance side and noe_id on target ref side
+        sp_hash = {
+          :cols => [:node_id,:node_group_id],
+          :filter => [:oneof,filter_rel,idhs.map{|n|n.get_id}]
+        }
+        sample_idh = idhs.first
+        target_ref_mh = sample_idh.createMH(:node)
+        ngr_mh = sample_idh.createMH(:node_group_relation)
+        Model.get_objs(ngr_mh,sp_hash).each do |r|
+          node_id = r[:node_group_id]
+          (ret[node_id] ||= Array.new) << target_ref_mh.createIDH(:id => r[:node_id])
+        end
+        ret
+      end
+
      private
-      # returns hash of form {TargetRefId => [matching_node_insatnce1,,],}
-      def self.ndx_target_refs_matching_instances(node_target_ref_idhs)
+      # returns hash of form {TargetRefId => [matching_node_instance1,,],}
+      def self.ndx_target_refs_to_their_instances(node_target_ref_idhs)
         ret = Hash.new
         return ret if node_target_ref_idhs.empty?
-
       # object model structure that relates instance to target refs is where instance's :canonical_template_node_id field point to target_ref
         sp_hash = {
           :cols => [:id, :display_name,:canonical_template_node_id],
           :filter => [:oneof,:canonical_template_node_id,node_target_ref_idhs.map{|idh|idh.get_id()}]
         }
+Log.error("see why this is using :canonical_template_node_id and not node_group_relation")
         node_mh = node_target_ref_idhs.first.createMH()
         get_objs(node_mh,sp_hash).each do |r|
           (ret[r[:canonical_template_node_id]] ||= Array.new) << r

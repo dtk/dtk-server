@@ -7,7 +7,7 @@ module DTK
       if node_bindings = get_node_bindings(assembly_template_idh)
         assembly_instance,node_instance = node_bindings.find_matching_instance_info(target,node)
         if node_instance
-          create_linked_target_ref?(target,assembly_instance,node_instance)
+          Node::Instance.create_linked_target_ref?(target,node_instance,assembly_instance)
         end
       end
     end
@@ -23,12 +23,6 @@ module DTK
     end
 
    private
-    def self.create_linked_target_ref?(target,assembly,node)
-x=      Node::TargetRef.create_linked_target_refs?(target,assembly,[node])
-pp x
-raise Error.new("got here")
-    end
-
     def self.get_node_bindings(assembly_template_idh)
       #TODO: this will be in object model; here we get it from the following file on server under /tmp/nodes_bindings.yaml
       #whose syntax is at bottom of this file

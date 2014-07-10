@@ -32,19 +32,31 @@ module DTK; class Node; class TargetRef
             ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
           end
         end
-        
-        new_target_ref_idhs = Array.new
+
+        #Create needed target refs and add them to ret hash
         unless create_objects_hash.empty?
           target_idh = target.id_handle()
           all_idhs = Model.input_hash_content_into_model(target_idh,create_objects_hash,:return_idhs => true)
-          #all idhs have both nodes and node_group_rels, so need to filter
-          new_target_ref_idhs = all_idhs.select{|idh|idh[:model_name] == :node}
+          #all idhs have both nodes and node_group_rels
+          ndx_ngr_ids = all_idhs.map do |idh|
+            idh.get_id() if idh[:model_name] == :node_group_relation
+          end.compact
+          sp_hash = {
+            :cols => [:node_id,:node_group_id],
+            :filter => [:oneof,:id,ndx_ngr_ids]
+          }
+          target_ref_mh = target_idh.create_childMH(:node)
+          ngr_mh = target_idh.create_childMH(:node_group_relation)
+          Model.get_objs(ngr_mh,sp_hash).each do |r|
+            #purposely setting node_id to node_group_id in r
+            node_id = r[:node_group_id]
+            (ret[node_id] ||= Array.new) << target_ref_mh.createIDH(:id => r[:node_id])
+          end
         end
-        pp [:new_target_ref_idhs,new_target_ref_idhs]
-        raise Error.new('got here')
         ret
       end
-      private
+
+     private
       def self.get_ndx_matching_target_refs(nodes)
         #TODO: stub
         []

@@ -85,9 +85,7 @@ module DTK
         :cols => [:id,:group_id,:display_name] + additional_columns,
         :filter => [:eq,:id,target_id()]
       }
-      target = Model.get_obj(model_handle(:target),sp_hash)
-
-      return target
+      Model.get_obj(model_handle(:target),sp_hash)
     end
 
     def get_target_iaas_type()

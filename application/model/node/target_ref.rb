@@ -40,13 +40,13 @@ module DTK
       #  {:node_group_relation_idhs => [idh1,,]}
       def self.ndx_matching_target_refs(filter)
         ret = Hash.new
-        filter_rel = sample_idh = nil
+        filter_field = sample_idh = nil
         if filter[:node_instance_idhs]
           idhs = filter[:node_instance_idhs]
-          filter_rel = :node
+          filter_field = :node_group_id
         elsif filter[:node_group_relation_idhs]
           idhs = filter[:node_group_relation_idhs]
-          filter_rel = :node_group_relation
+          filter_field = :id
         else
           raise Error.new("Unexpected filter: #{filter.inspect}")
         end
@@ -54,10 +54,10 @@ module DTK
           return ret
         end
 
-        #node_group_id matches on instance side and noe_id on target ref side
+        #node_group_id matches on instance side and node_id on target ref side
         sp_hash = {
           :cols => [:node_id,:node_group_id],
-          :filter => [:oneof,filter_rel,idhs.map{|n|n.get_id}]
+          :filter => [:oneof,filter_field,idhs.map{|n|n.get_id}]
         }
         sample_idh = idhs.first
         target_ref_mh = sample_idh.createMH(:node)

@@ -14,7 +14,7 @@ module DTK; class Node; class TargetRef
         end
         ndx_target_refs = TargetRef.ndx_matching_target_refs(:node_instance_idhs => nodes.map{|n|n.id_handle})
 
-        create_objects_hash = Hash.new
+        create_objs_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
           cardinality = node.attribute.cardinality
@@ -22,7 +22,7 @@ module DTK; class Node; class TargetRef
           num_needed = cardinality - target_refs.size
           if num_needed > 0
             el = Element.new(:node => node,:num_needed => num_needed)
-            el.add_target_ref_and_ngr!(create_objects_hash,target,assembly)
+            el.add_target_ref_and_ngr!(create_objs_hash,target,assembly)
           elsif num_needed == 0
             if cardinality > 0
               ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
@@ -33,21 +33,13 @@ module DTK; class Node; class TargetRef
           end
         end
         
-        create_and_add_needed_target_refs!(ret,target,create_objects_hash)
-        ret
-      end
-
-     private
-      def self.create_and_add_needed_target_refs!(ret,target,create_objects_hash)
-        if create_objects_hash.empty?
-          return ret
+        unless create_objs_hash.empty?
+          all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
+          #all idhs have both nodes and node_group_rels
+          ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
+          ret.merge!(TargetRef.ndx_matching_target_refs(:node_group_relation_idhs => ngr_idhs))
         end
-
-        target_idh = target.id_handle()
-        all_idhs = Model.input_hash_content_into_model(target_idh,create_objects_hash,:return_idhs => true)
-        #all idhs have both nodes and node_group_rels
-        ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
-        TargetRef.ndx_matching_target_refs(:node_group_relation_idhs => ngr_idhs)
+        ret
       end
 
       class Element 

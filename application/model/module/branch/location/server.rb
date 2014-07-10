@@ -22,7 +22,15 @@ module DTK; class ModuleBranch
           username = CurrentSession.new.get_username()
           repo_name = "#{username}-local-#{module_name()}"
           # component_type can be :service_module, :puppet or :chef
-          @component_type == :service_module ? "sm-#{repo_name}" : repo_name
+          # @component_type == :service_module ? "sm-#{repo_name}" : repo_name
+          case @component_type
+            when :service_module
+              return "sm-#{repo_name}"
+            when :test_module
+              return "test-#{repo_name}"
+            else
+             repo_name
+           end
         end
 
         #===== helper methods

@@ -80,7 +80,7 @@ module DTK
         end
        private
         def find_mapped_component_test_attributes(cmp_attr_vals)        
-          @test_array.find{|test|test.find_mapped_component_test_attributes(cmp_attr_vals)}
+          @test_array.select {|test|test.find_mapped_component_test_attributes(cmp_attr_vals)}
         end
       end
 

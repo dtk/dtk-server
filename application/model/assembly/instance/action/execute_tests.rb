@@ -24,6 +24,7 @@ module DTK
 
           ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
           version_contexts = ndx_version_contexts.values
+
           test_instances = test_components.map do |test_cmp|
             unless version_context = ndx_version_contexts[test_cmp[:implementation_id]]
               raise Error.new("Cannot find version context for #{test_cmp[:dispaly_name]}")
@@ -160,7 +161,6 @@ module DTK
           ret
         end
 
-
         # returns array having test components that are linked to a component in assembly_instance
         # each element has form
         # {:test_component_name=>String,
@@ -170,52 +170,63 @@ module DTK
         #  :attributes=>[{:component_attribute_name=>String, :component_attribute_value=>String,:related_test_attribute=>String}
         def get_test_component_attributes()
           ret = Array.new
+
           linked_tests = Component::Test.get_linked_tests(assembly_instance)
           if linked_tests.empty?
             return ret
           end
 
           test_params = linked_tests.map do |t|
-            var_mappings = t.find_test_parameters.var_mappings_hash
-            var_mappings.merge(:node_data => t.node, :component_data => t.component)
+            var_mappings = t.find_test_parameters.map { |test_param| test_param.var_mappings_hash } 
+            mappings = { :var_mappings => var_mappings }.merge!(:node_data => t.node, :component_data => t.component)
           end
-            
+
           attr_mh = assembly_instance.model_handle(:attribute)
-          test_params.map do |params|
-            k, v = params.first
-            related_test_attribute = v.map { |x| x.split(".").last }
-            test_component_name = v.map { |x| x.split(".").first }.first
-            attribute_names = k.map { |x| x.split(".").last }
-            component_id = params[:component_data][:id]
-            #TODO: more efficient to get in bulk outside of test_params loop
-            sp_hash = {
-              :cols => [:display_name, :attribute_value],
-              :filter => [:and,
-                          [:eq, :component_component_id,component_id],
-                          [:oneof, :display_name, attribute_names]]
-            }
-            ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
-              h.merge(a[:display_name] => a[:attribute_value])
-            end
-            attributes = Array.new
-            attribute_names.each_with_index do |attribute_name, idx|
-              if val = ndx_attr_vals[attribute_name]
-                attributes << {
-                  :component_attribute_name => attribute_name,
-                  :component_attribute_value => val,
-                  :related_test_attribute => related_test_attribute[idx] 
-                }
+          all_test_params = []
+
+          test_params.each do |params|
+            params[:var_mappings].each do |par|
+              k, v = par.first
+              related_test_attribute = v.map { |x| x.split(".").last }
+              test_component_name = v.map { |x| x.split(".").first }.first
+              attribute_names = k.map { |x| x.split(".").last }
+
+              component_id = params[:component_data][:id]
+              # TODO: more efficient to get in bulk outside of test_params loop
+              # Bakir: left this here, know there could be many db queries instead of bulk query, will try to move it out of the loop
+              # Bakir: currently, we make db query for each attribute mapping group which contain one or more attributes
+              sp_hash = {
+                :cols => [:display_name, :attribute_value],
+                :filter => [:and,
+                            [:eq, :component_component_id,component_id],
+                            [:oneof, :display_name, attribute_names]]
+              }
+              ndx_attr_vals  = Model.get_objs(attr_mh,sp_hash).inject(Hash.new) do |h,a|
+                h.merge(a[:display_name] => a[:attribute_value])
               end
+              attributes = Array.new
+
+              attribute_names.each_with_index do |attribute_name, idx|
+                if val = ndx_attr_vals[attribute_name]
+                  attributes << {
+                    :component_attribute_name => attribute_name,
+                    :component_attribute_value => val,
+                    :related_test_attribute => related_test_attribute[idx]
+                  }
+                end
+              end
+              hash = { 
+                :test_component_name => test_component_name, 
+                :attributes => attributes, 
+                :component_id => params[:component_data][:id],
+                :component_name => params[:component_data][:display_name], 
+                :node_id => params[:node_data][:id],
+                :node_name => params[:node_data][:display_name]
+              }
+              all_test_params << hash
             end
-            { 
-              :test_component_name => test_component_name, 
-              :attributes => attributes, 
-              :component_id => params[:component_data][:id],
-              :component_name => params[:component_data][:display_name], 
-              :node_id => params[:node_data][:id],
-              :node_name => params[:node_data][:display_name]
-            }
           end
+          return all_test_params
         end
 
         def get_version_contexts(test_components)

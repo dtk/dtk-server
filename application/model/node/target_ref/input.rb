@@ -9,13 +9,6 @@ module DTK; class Node
         inventory_data.create_nodes_from_inventory_data(target)
       end
       
-      #This creates if needed target refs and links nodes to them
-      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
-      def self.create_linked_target_refs?(target,assembly,nodes)
-        #returns new idhs indexed by node (id) they linked to
-        BaseNodes.new(target,assembly,nodes).create_linked_target_refs?()
-      end
-
       #TODO: collapse with application/utility/library_nodes - node_info
       def self.child_objects(params={})
         {

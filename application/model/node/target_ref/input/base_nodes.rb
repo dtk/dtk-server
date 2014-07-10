@@ -1,49 +1,29 @@
 module DTK; class Node; class TargetRef
   class Input 
     class BaseNodes < self
-      def initialize(target,assembly,nodes)
-        super()
-        @target = target
-        @assembly = assembly
-        num_target_refs_needed(nodes).each{|node_info|add!(node_info)}
-      end
-
-      #This creates if needed target refs and links nodes to them
-      #TODO: now creating new ones as opposed to case where overlaying asssembly on existing nodes
-      def create_linked_target_refs?()
-        add_to_target = ret_linked_target_ref_hash()
-        target_idh = @target.id_handle()
-        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
-      end
-
-     private
-      def add!(node_info)
-        self << Element.new(node_info)
-      end
-
-      def ret_linked_target_ref_hash()
+      # This creates if needed target refs and links nodes to them
+      # returns new idhs indexed by node (id) they linked to
+      # or if they exist their idhs
+      def self.create_linked_target_refs?(target,assembly,nodes,opts={})
         ret = Hash.new
-        each do |el|
-          target_ref,node_group_relation = el.add_target_ref_and_ngr!(ret,@target,@assembly)
+        if opts[:node_groups_only]
+          nodes = nodes.select{|n|n.is_node_group?()}
         end
-        ret
-      end
+        if nodes.empty?
+          return nodes
+        end
 
-      #returns for each node that needs one or more target refs the following hash
-      # :node
-      # :num_needed
-      def num_target_refs_needed(nodes)
-        ret = Array.new
-        #TODO: temporary; removes all nodes that are not node groups
-        nodes = nodes.select{|n|n.is_node_group?()}
+        create_objects_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
           num_needed = node.attribute.cardinality
           if num_needed > 0
-            ret << {:node => node,:num_needed => num_needed}
+            element_to_create = Element.new(:node => node,:num_needed => num_needed)
+            element_to_create.add_target_ref_and_ngr!(create_objects_hash,target,assembly)
           end
         end
-        ret
+        target_idh = @target.id_handle()
+        Model.import_objects_from_hash(target_idh, add_to_target, :return_info => true)
       end
 
       class Element 

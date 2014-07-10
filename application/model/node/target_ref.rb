@@ -26,8 +26,9 @@ module DTK
       def self.create_nodes_from_inventory_data(target, inventory_data)
         Input.create_nodes_from_inventory_data(target, inventory_data)
       end
-      def self.create_linked_target_refs?(target,assembly,nodes)
-        Input.create_linked_target_refs?(target,assembly,nodes)
+
+      def self.create_linked_target_refs?(target,assembly,nodes,opts={})
+        Input::BaseNodes.create_linked_target_refs?(target,assembly,nodes,opts)
       end
 
      private

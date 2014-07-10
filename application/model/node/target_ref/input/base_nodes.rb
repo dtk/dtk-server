@@ -12,24 +12,24 @@ module DTK; class Node; class TargetRef
         if nodes.empty?
           return nodes
         end
-        ndx_target_refs = TargetRef.ndx_matching_target_refs(:node_instance_idhs => nodes.map{|n|n.id_handle})
+        ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(:node_instance_idhs => nodes.map{|n|n.id_handle})
 
         create_objs_hash = Hash.new
         nodes.each do |node|
           node_id = node[:id]
           cardinality = node.attribute.cardinality
-          target_refs = ndx_target_refs[node_id]||[]
-          num_needed = cardinality - target_refs.size
+          target_ref_idhs = ndx_target_ref_idhs[node_id]||[]
+          num_needed = cardinality - target_ref_idhs.size
           if num_needed > 0
             el = Element.new(:node => node,:num_needed => num_needed)
             el.add_target_ref_and_ngr!(create_objs_hash,target,assembly)
           elsif num_needed == 0
             if cardinality > 0
-              ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
+              ret.merge!(node_id => target_ref_idhs)
             end
           else # num_needed < 0
             Log.error("Unexpected that more target refs than needed")
-            ret.merge!(node_id => target_refs.map{|r|r.id_handle()})
+            ret.merge!(node_id => target_ref_idhs)
           end
         end
         
@@ -37,7 +37,7 @@ module DTK; class Node; class TargetRef
           all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
           #all idhs have both nodes and node_group_rels
           ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
-          ret.merge!(TargetRef.ndx_matching_target_refs(:node_group_relation_idhs => ngr_idhs))
+          ret.merge!(TargetRef.ndx_matching_target_ref_idhs(:node_group_relation_idhs => ngr_idhs))
         end
         ret
       end

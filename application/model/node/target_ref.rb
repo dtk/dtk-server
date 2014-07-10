@@ -38,7 +38,7 @@ module DTK
       # filter can be of form
       #  {:node_instance_idhs => [idh1,,]}, or
       #  {:node_group_relation_idhs => [idh1,,]}
-      def self.ndx_matching_target_refs(filter)
+      def self.ndx_matching_target_ref_idhs(filter)
         ret = Hash.new
         filter_field = sample_idh = nil
         if filter[:node_instance_idhs]

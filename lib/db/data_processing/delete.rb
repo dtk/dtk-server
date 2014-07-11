@@ -46,13 +46,6 @@ module XYZ
 
         filter = SQL.and({CONTEXT_ID => parent_id_handle[:c]},SQL.or(*disjuncts_array))
 	ds = dataset(DB_REL_DEF[child_rel_type]).filter(filter)
-        # Debugging
-        pp "------------------------------"
-        pp [:recursive_update_hash_delete, child_rel_type]
-        pp [:id_rels,id_rels]
-        pp [:deleting, ds.select(:ref,:id).all]
-        pp "------------------------------"
-        ######
 	ds.delete
 	nil
       end

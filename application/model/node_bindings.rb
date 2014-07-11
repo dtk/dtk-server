@@ -1,5 +1,7 @@
 module DTK
   class NodeBindings
+    r8_nested_require('node_bindings','dsl')
+
     def self.create_linked_target_ref?(target,node,assembly_template_idh)
       unless R8::Config[:test_node_bindings]
         return nil

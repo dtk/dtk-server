@@ -97,7 +97,7 @@ module DTK
           :filter => [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node),sp_hash)
-        if sao_node_bindings
+        unless sao_node_bindings.empty?
           stubs_to_omit = sao_node_bindings.map{|r|r[:sub_assembly_node_id]}
           unless stubs_to_omit.empty?
             node_info.reject!{|n|stubs_to_omit.include?(n[:id])}
@@ -112,7 +112,7 @@ module DTK
               node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
               hash_el_when_create(node,node_template)
             when :match  
-              if node_target_ref = NodeBindings.find_matching_node_target_ref(target,node,assembly_template_idh)
+              if node_target_ref = NodeBindings.create_linked_target_ref?(target,node,assembly_template_idh)
                 hash_el_when_match(node,node_target_ref)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')

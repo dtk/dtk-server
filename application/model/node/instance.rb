@@ -1,17 +1,6 @@
 module DTK
   class Node
     class Instance < self
-      def self.create_linked_target_ref?(target,node,assembly)
-        ndx_node_target_ref_array = Node::TargetRef.create_linked_target_refs?(target,assembly,[node])
-        unless target_ref_array = ndx_node_target_ref_array[node[:id]]
-          raise Error.new("Unexpected that create_linked_target_ref does not return element matching node[:id]")
-        end
-        unless target_ref_array.size == 1
-          raise Error.new("Unexpected that ndx_node_target_ref_array.size not equal 1")
-        end
-        target_ref_array.first.create_object()
-      end
-
       def self.component_list_fields()
         [:id,:display_name,:group_id,:external_ref,:ordered_component_ids]
       end

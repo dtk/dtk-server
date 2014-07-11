@@ -1,13 +1,13 @@
 module DTK
   class NodeBindings
-    def self.find_matching_node_target_ref(target,node,assembly_template_idh)
+    def self.create_linked_target_ref?(target,node,assembly_template_idh)
       unless R8::Config[:test_node_bindings]
         return nil
       end
       if node_bindings = get_node_bindings(assembly_template_idh)
         assembly_instance,node_instance = node_bindings.find_matching_instance_info(target,node)
         if node_instance
-          Node::Instance.create_linked_target_ref?(target,node_instance,assembly_instance)
+          Node::TargetRef::Input::BaseNodes.create_linked_target_ref?(target,node_instance,assembly_instance)
         end
       end
     end

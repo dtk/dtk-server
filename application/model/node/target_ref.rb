@@ -27,13 +27,6 @@ module DTK
         Input.create_nodes_from_inventory_data(target, inventory_data)
       end
 
-      # This creates if needed target refs and links nodes to them
-      # returns new idhs indexed by node (id) they linked to
-      # or if they exist their idhs
-      def self.create_linked_target_refs?(target,assembly,nodes,opts={})
-        Input::BaseNodes.create_linked_target_refs?(target,assembly,nodes,opts)
-      end
-
       class Info
         attr_reader :target_ref,:ref_count
         def initialize(target_ref)

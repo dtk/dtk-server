@@ -57,7 +57,7 @@ module DTK
         Node.cache_attribute_values!(nodes,:cardinality)
         create_state_changes_for_create_node?(target,nodes)
         #This creates if needed target refs and links to them
-        Node::TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,nodes,:node_groups_only => true)
+        create_target_refs_and_links?(target,assembly,nodes)
         level = 2
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
 #TODO: one alternative is to make minimal changes that just creates the assembly branch and feeds it to the config_node implementation id
@@ -71,6 +71,47 @@ module DTK
           {:new_item => child_hash[:id_handle], :parent => target.id_handle()}
         end
         StateChange.create_pending_change_items(component_new_items)
+      end
+
+      # this creates needed target refs and their links to them
+      # there are a number of cases treated on a node by node basis (i.e., member of nodes)
+      #  if node is a group then creating new target refs for it as function of its cardinality
+      #  if node has been desiganted as matched to an existing target ref, need to create links to these
+      #  otherwise no op
+      def self.create_target_refs_and_links?(target,assembly,nodes)
+        to_create = Array.new
+        to_link = Hash.new
+
+        partition = [to_create,Array.new]
+        nodes.each{|node|partition[node.is_node_group?() ? 0 : 1] << node}
+
+        # partition[1] are non node groups; elements we want to see if point to a node_template that is a target ref
+        unless partition[1].empty?
+          ndx_node_template__node = partition[1].inject(Hash.new) do |h,n|
+            n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
+          end
+          unless ndx_node_template__node.empty?
+            sp_hash = {
+              :cols => [:id,:display_name,:type],
+              :filter => [:oneof,:id,ndx_node_template__node.keys]
+            }
+            Model.get_objs(target.model_handle(:node),sp_hash).each do |nt|
+              if nt[:type] == Node::TargetRef.type()
+                to_link.merge!(ndx_node_template__node[nt[:id]] => nt)
+              end
+            end
+          end 
+        end
+  pp [:annotated_nodes,{:to_link => to_link,:to_create => to_create}]
+  raise Error.new('got here')
+
+        unless to_link.empty? and to_create.empty?
+          annotated_nodes = {
+            :to_link => to_link,
+            :to_create => to_create
+          }
+          Node::TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes)
+        end
       end
 
       def self.create_state_changes_for_create_node?(target,nodes)

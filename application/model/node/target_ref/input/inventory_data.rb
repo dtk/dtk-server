@@ -7,14 +7,14 @@ module DTK; class Node; class TargetRef
       end
 
       def create_nodes_from_inventory_data(target)
-        target_ref_hash = ret_target_ref_hash()
+        target_ref_hash = target_ref_hash()
         target_idh = target.id_handle()
         Model.import_objects_from_hash(target_idh, {:node => target_ref_hash}, :return_info => true)
       end
 
      private
-      def ret_target_ref_hash()
-        inject(Hash.new){|h,el|h.merge(el.ret_target_ref_hash())}
+      def target_ref_hash()
+        inject(Hash.new){|h,el|h.merge(el.target_ref_hash())}
       end
       
       #TODO: this is just temp until move from client formating data; right now hash is of form
@@ -35,7 +35,7 @@ module DTK; class Node; class TargetRef
           end
         end
         
-        def ret_target_ref_hash()
+        def target_ref_hash()
           unless name = self['name']||self['display_name']
             raise Error.new("Unexpected that that element (#{inspect}) has no name field")
           end

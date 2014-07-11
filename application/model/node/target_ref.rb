@@ -5,8 +5,18 @@ module DTK
       r8_nested_require('target_ref','input')
 
       AnnotatedNodes = Struct.new(:to_link,:to_create)
-      def self.create_target_refs_and_links?(target,assembly,annotated_nodes)
-        Input::BaseNodes.create_target_refs_and_links?(target,assembly,annotated_nodes)
+      def self.create_target_refs_and_links?(target,assembly,annotated_nodes,opts={})
+pp [:annotated_nodes,annotated_nodes]
+        unless annotated_nodes.to_create.empty?
+          Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes.to_create)
+        end
+        unless annotated_nodes.to_link.empty?
+          if opts[:do_not_check_link_exists]
+            Input::BaseNodes.link_to_target_refs(target,annotated_nodes.to_link)
+          else
+            raise Error.new("Not support: create_target_refs_and_links? w/o {:do_not_check_link_exists => true}")
+          end
+        end
       end
 
       # these are nodes without any assembly on them

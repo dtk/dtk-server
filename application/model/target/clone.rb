@@ -106,7 +106,8 @@ module DTK
 
         unless to_link.empty? and to_create.empty?
           annotated_nodes = Node::TargetRef::AnnotatedNodes.new(to_link,to_create)
-          Node::TargetRef.create_target_refs_and_links?(target,assembly,annotated_nodes)
+          opts_target_ref = {:do_not_check_link_exists => true} #know that link does not exist since new node instances
+          Node::TargetRef.create_target_refs_and_links?(target,assembly,annotated_nodes,opts_target_ref)
         end
       end
 

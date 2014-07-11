@@ -59,6 +59,7 @@ module DTK
         #This creates if needed target refs and links to them
         create_target_refs_and_links?(target,assembly,nodes)
         level = 2
+
 #TODO: more efficient to just do this when there is an edit; but helpful to have this here for testing
 #TODO: one alternative is to make minimal changes that just creates the assembly branch and feeds it to the config_node implementation id
 #component_instances = clone_copy_output.children_objects(level,:component_instance)
@@ -102,15 +103,10 @@ module DTK
             end
           end 
         end
-  pp [:annotated_nodes,{:to_link => to_link,:to_create => to_create}]
-  raise Error.new('got here')
 
         unless to_link.empty? and to_create.empty?
-          annotated_nodes = {
-            :to_link => to_link,
-            :to_create => to_create
-          }
-          Node::TargetRef::Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes)
+          annotated_nodes = Node::TargetRef::AnnotatedNodes.new(to_link,to_create)
+          Node::TargetRef.create_target_refs_and_links?(target,assembly,annotated_nodes)
         end
       end
 

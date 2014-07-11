@@ -4,6 +4,11 @@ module DTK
     class TargetRef < self
       r8_nested_require('target_ref','input')
 
+      AnnotatedNodes = Struct.new(:to_link,:to_create)
+      def self.create_target_refs_and_links?(target,assembly,annotated_nodes)
+        Input::BaseNodes.create_target_refs_and_links?(target,assembly,annotated_nodes)
+      end
+
       # these are nodes without any assembly on them
       def self.get_free_nodes(target)
         sp_hash = {

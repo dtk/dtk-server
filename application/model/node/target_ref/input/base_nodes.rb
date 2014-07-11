@@ -17,24 +17,54 @@ module DTK; class Node; class TargetRef
       # returns new idhs indexed by node (id) they linked to
       # or if they exist their idhs
       def self.create_linked_target_refs?(target,assembly,nodes,opts={})
+        Log.error("deprecate this for create_target_refs_and_links?")
 =begin
 might have option to force calculation; otherwise; we want to eitehr link to new target refs or existing ones dependeing on whether nodes.map{|n|n[:node_template_id] point to target refs; might pass this in seperately
 also need to fix ref key for node group relation so can have multiple things pointing to same target ref
 =end
 #nodes.map{|n|n.update_object!(:node_template_id)}
-pp [:nodes,nodes]
-sp_hash = {
-  :cols => [:id,:display_name,:type],
-  :filter => [:oneof,:id,nodes.map{|n|n[:node_template_id]}.compact]
-}
-pp [:node_templates,Model.get_objs(target.model_handle(:node),sp_hash)]
-if opts[:node_groups_only]
-  raise Error.new('got here')
-end
         ret = Hash.new
         if opts[:node_groups_only]
           nodes = nodes.select{|n|n.is_node_group?()}
         end
+        if nodes.empty?
+          return ret
+        end
+        ndx_target_ref_idhs = TargetRef.ndx_matching_target_ref_idhs(:node_instance_idhs => nodes.map{|n|n.id_handle})
+
+        create_objs_hash = Hash.new
+        nodes.each do |node|
+          node_id = node[:id]
+          cardinality = node.attribute.cardinality
+          target_ref_idhs = ndx_target_ref_idhs[node_id]||[]
+          num_needed = cardinality - target_ref_idhs.size
+          if num_needed > 0
+            el = Element.new(:node => node,:num_needed => num_needed)
+            el.add_target_ref_and_ngr!(create_objs_hash,target,assembly,opts)
+          elsif num_needed == 0
+            if cardinality > 0
+              ret.merge!(node_id => target_ref_idhs)
+            end
+          else # num_needed < 0
+            Log.error("Unexpected that more target refs than needed")
+            ret.merge!(node_id => target_ref_idhs)
+          end
+        end
+
+        unless create_objs_hash.empty?
+          all_idhs = Model.input_hash_content_into_model(target.id_handle(),create_objs_hash,:return_idhs => true)
+          #all idhs have both nodes and node_group_rels
+          ngr_idhs = all_idhs.select{|idh|idh[:model_name] == :node_group_relation}
+          ret.merge!(TargetRef.ndx_matching_target_ref_idhs(:node_group_relation_idhs => ngr_idhs))
+        end
+        ret
+      end
+
+      def self.create_target_refs_and_links?(target,assembly,annotated_nodes)
+pp [:annotated_nodes,annotated_nodes]
+raise Error.new('got here')
+        ret = Hash.new
+
         if nodes.empty?
           return ret
         end

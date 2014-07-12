@@ -107,7 +107,7 @@ module DTK
         ComponentModuleRefs.update_from_dsl_parsed_info(module_branch,parsed_info,opts)
       end
 
-      # TODO: deprecate when DSLParser methods stabke
+      # TODO: deprecate when DSLParser methods stable
       def legacy_component_module_refs_parsed_info(module_branch,opts={})
         ret = Hash.new
         meta_filename_path = ComponentModuleRefs.meta_filename_path()
@@ -122,6 +122,7 @@ module DTK
         module_name = module_name()
         module_branch_idh = module_branch.id_handle()
         assembly_import_helper = AssemblyImport.new(project_idh,module_branch,module_name,component_module_refs)
+        #TODO: make more general than just aggregating DanglingComponentRefs
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new(:error_cleanup => proc{error_cleanup()})
         assembly_meta_file_paths(module_branch) do |meta_file,default_assembly_name|
           dangling_errors.aggregate_errors!()  do
@@ -131,8 +132,6 @@ module DTK
             
             hash_content = Aux.convert_to_hash(file_content,format_type,opts)||{}
             return hash_content if ParsingError.is_error?(hash_content)
-
-            # if assembly/node import returns error continue with module import
             imported = assembly_import_helper.process(module_name,hash_content,opts)
             return imported if ParsingError.is_error?(imported)
           end

@@ -21,13 +21,18 @@ module DTK; class ServiceModule
     def process(module_name,hash_content,opts={})
       integer_version = determine_integer_version(hash_content,opts)
       version_proc_class = load_and_return_version_adapter_class(integer_version)
-      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash|
+      #TODO: will collapse node_bindings_hash and node_mapping_hash
+      version_proc_class.assembly_iterate(module_name,hash_content) do |assemblies_hash,node_bindings_hash,node_mappings_hash|
         dangling_errors = ParsingError::DanglingComponentRefs::Aggregate.new()
         assemblies_hash.each do |ref,assem|
           if file_path = opts[:file_path]
             @ndx_assembly_file_paths[ref] = file_path
           end
           dangling_errors.aggregate_errors! do
+            if node_mappings_hash
+              #TODO: stub
+              NodeBindings::DSL.parse(node_mappings_hash)
+            end
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)

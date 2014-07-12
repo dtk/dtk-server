@@ -2,6 +2,16 @@ module DTK; class ServiceModule
   class AssemblyImport
     r8_require('v2')
     class V3 < V2
+      def self.assembly_iterate(module_name,hash_content,&block)
+        assembly_hash = (hash_content["assembly"]||{}).merge(Aux::hash_subset(hash_content,["name","workflow"]))
+        assembly_ref = ServiceModule.assembly_ref(module_name,hash_content["name"])
+        assemblies_hash = {assembly_ref => assembly_hash}
+        #TODO: wil collapse node_bindings_hash and node_mappings_hash
+        node_bindings_hash = hash_content["node_bindings"]
+        node_mappings_hash = NodeBindings::DSL.node_mappings_in_assembly?(hash_content)
+        block.call(assemblies_hash,node_bindings_hash,node_mappings_hash)
+      end
+
       # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
       def self.parse_component_links(assembly_hash,opts={})
         ret = Array.new

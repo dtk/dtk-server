@@ -1,19 +1,21 @@
 module DTK
   class NodeBindings
     class DSL
-      r8_nested_require('dsl','parsing_error')
-      r8_nested_require('dsl','parse')
+      r8_nested_require('dsl','parse_input')
       r8_nested_require('dsl','generate')
-      def self.parse(hash)
-        Parse.parse(hash)
+      def self.parse_and_remove_non_legacy!(node_bindings_hash)
+       parse_input_hash = Hash.new
+        node_bindings_hash.each_pair do |node,node_target|
+          unless node_target.kind_of?(String) and not node_target =~ /\//
+            parse_input_hash[node] = node_bindings_hash.delete(node)
+          end
+        end
+        parse(parse_input_hash)
       end
-      def self.node_mappings_in_assembly?(assembly_hash)
-        assembly_hash[AssemblyHashKey]
+
+      def self.parse(parse_input_hash) 
+        NodeBindings.parse(ParseInput.new(parse_input_hash))
       end
-      AssemblyHashKey = 'node_mappings'
     end
   end
 end
-=begin
-"node_mappings"=>{"test1"=>"assembly/dtk::tenant-nginx/tenant"},
-=end

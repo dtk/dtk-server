@@ -70,7 +70,19 @@ module DTK
                 end
               elsif response[:status] != :ok
                 node_info = ndx_pbuilderid_to_node_info[response[:pbuilderid]]
-                action_results_queue.push(node_info[:id],response[:data])
+                raw_data = []
+                raw_data << node_info.merge(response[:data])
+                #TODO: find better place to put this
+                raw_data.each do |r|
+                  if r[:component_name]
+                    r[:component_name].gsub!(/__/,'::')
+                  end
+                  if r[:test_component_name]
+                    r[:test_component_name].gsub!(/__/,'::')
+                  end
+                end
+                packaged_data = DTK::ActionResultsQueue::Result.new(node_info[:display_name],raw_data)
+                action_results_queue.push(node_info[:id], (type == :node) ? packaged_data.data : packaged_data)
               end
             end
           }

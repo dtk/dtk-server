@@ -512,7 +512,8 @@
       "component_name",
       "test_component_name",
       "test_result",
-      "status"
+      "status",
+      "errors"
     ],
     "mapping": {
       "node_name": "display_name",
@@ -522,7 +523,8 @@
       "test_component_name": "test_component_name",
       "test_name": "test_name",
       "test_result": "test_result",
-      "status": "status"
+      "status": "status",
+      "errors": "errors.message"
     }
   },
   "module_version": {

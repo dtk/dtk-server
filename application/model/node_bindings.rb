@@ -1,7 +1,7 @@
 module DTK
   class NodeBindings
     r8_nested_require('node_bindings','dsl')
-    r8_nested_require('node_bindings','node_target')
+    r8_nested_require('node_bindings','target')
 
     def self.create_linked_target_ref?(target,node,assembly_template_idh)
       unless R8::Config[:test_node_bindings]
@@ -29,6 +29,12 @@ module DTK
       unless parse_input.type?(Hash)
         raise parse_input.error("Node Bindings section has an illegal form: ?input")
       end
+      #TODO: check each node belongs to assembly
+      ret = parse_input.input.inject(Hash.new) do |h,(node,node_target)|
+        h.merge(node => Target.parse(parse_input.child(node_target)))
+      end
+      pp [:debug_parse,ret]
+      ret
     end
 
 

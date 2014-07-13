@@ -5,6 +5,10 @@ module DTK; class NodeBindings
       def initialize(input_ruby_object)
         @input = input_ruby_object
       end
+      def child(input_ruby_object)
+        #TODO: stub to copy from self context taht gets passed to child
+        self.class.new(input_ruby_object)
+      end
       def type?(klass)
         @input.kind_of?(klass)
       end

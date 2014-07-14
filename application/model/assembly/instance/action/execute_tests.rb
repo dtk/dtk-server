@@ -35,13 +35,14 @@ module DTK
               test_name = "network_port_check_spec.rb"
             end
             {
-              :module_name =>version_context[:implementation],
+              # :module_name =>"tm-#{version_context[:implementation]}",
+              :module_name => version_context[:implementation],
               :component => "#{test_cmp[:node_name]}/#{test_cmp[:component_name]}",
               :test_component => test_cmp[:display_name],
               :test_name => test_name,
               :params => attrib_array
             } 
-          end           
+          end
 
           node_ids_with_tests = test_components.inject(Hash.new){|h,tc|h.merge(tc[:node_id] => true)}.keys
           action_results_queue.set_indexes!(node_ids_with_tests)

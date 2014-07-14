@@ -26,12 +26,14 @@ module DTK
         IntegerVersionToVersion[integer_version]
       end
       VersionToIntegerVersion  = {
-        "0.9.1" => 3
+        "0.9.1" => 3,
+        "1.0.0" => 4
       }
       IntegerVersionToVersion = {
         1 => nil, #1 and 2 do not have a version stamped in file
         2 => nil,
-        3 => "0.9.1"
+        3 => "0.9.1",
+        4 => "1.0.0"
       }
     end
 

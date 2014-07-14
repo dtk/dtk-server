@@ -24,7 +24,7 @@ module DTK; class ModuleBranch
           # component_type can be :service_module, :puppet or :chef
           # @component_type == :service_module ? "sm-#{repo_name}" : repo_name
 
-          case @component_type
+          case @component_type 
             when :service_module
               return "sm-#{repo_name}"
             when :test

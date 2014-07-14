@@ -82,6 +82,7 @@ module DTK; class TestDSL; class V3
       def dynamic_default_variable?(info)
         default_indicates_dynamic_default_variable?(info)
       end
+
       def value_asserted(info,attr_props)
         unless default_indicates_dynamic_default_variable?(info)
           ret = nil

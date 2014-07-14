@@ -153,10 +153,10 @@ module DTK; class AssemblyModule
         end
         r[:local_copy_diff]  = (assembly_mod_sha != workspace_mod_sha)
 =begin
-TODO: code to put in when
+TODO: code to put in when 
 want to check case when :local_behind and :branchpoint
 In order to do this must ireate all branches, not just changed ones and
-need to do a refresh on workspace branch sha in case this was updated in another branch
+need to do a refresh on workspace branch sha in case this was updated in another branch 
         if r[:local_copy_diff]
           sha_relationship = RepoManager.ret_sha_relationship(assembly_mod_sha,workspace_mod_sha,assembly_mod_branch)
           case sha_relationship

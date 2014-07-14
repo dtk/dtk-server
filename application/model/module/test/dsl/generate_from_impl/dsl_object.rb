@@ -213,6 +213,7 @@ module DTK; class TestDSL
           self[:value] = value if state == :known
           self[:state] = state
         end
+
         def self.create_unknown()
           new(nil,:unknown)
         end

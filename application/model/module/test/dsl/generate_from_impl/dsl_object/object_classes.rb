@@ -125,7 +125,8 @@ module DTK; class TestDSL
           return if opts[:reify]
           processed_name = component_ps[:name]
           # if qualified name make sure matches module name
-         if processed_name =~ /(^[^:]+)::(.+$)/
+
+          if processed_name =~ /(^[^:]+)::(.+$)/
             prefix = $1
             unqual_name = $2
             unless prefix == module_name

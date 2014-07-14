@@ -25,6 +25,7 @@ module DTK; class TestDSL; class GenerateFromImpl
         rescue
           raise Error.new("processor for builtin type (#{type}) not treated yet")
         end
+
         ret
       end
 

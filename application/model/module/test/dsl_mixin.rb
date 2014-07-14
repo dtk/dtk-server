@@ -23,6 +23,7 @@ module DTK; class TestModule
       unless new_dsl_integer_version == 2
         raise Error.new("component_module.create_new_dsl_version only implemented when target version is 2")
       end
+
       previous_dsl_version = new_dsl_integer_version-1
       module_branch = get_module_branch_matching_version(module_version)
 
@@ -171,6 +172,7 @@ Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,cal
         Log.error_pp([:parsing_error,e,e.backtrace[0..10]])
         raise e
       end
+
       if render_hash
         format_type = TestDSL.default_format_type()
         content = render_hash.serialize(format_type)

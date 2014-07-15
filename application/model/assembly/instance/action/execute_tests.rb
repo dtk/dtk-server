@@ -19,7 +19,8 @@ module DTK
         def initiate()
           test_components = get_test_components_with_bindings()
           if test_components.empty?
-            return
+            # return
+            raise Error.new("Cannot find components that belongs to required test-modules.")
           end
 
           ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}
@@ -117,7 +118,7 @@ module DTK
 
           #get info about each test component
           sp_hash = {
-            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref],
+            :cols => [:id,:group_id,:display_name,:attributes,:component_type,:external_ref,:module_branch_id],
             :filter => [:and, 
                         [:eq,:assembly_id,nil],
                         [:eq,:project_project_id,project.id],
@@ -125,6 +126,15 @@ module DTK
           }
           ndx_test_cmps = Hash.new #test cmps indexed by component type
           Model.get_objs(assembly_instance.model_handle(:component),sp_hash).each do |r|
+          # added to check if component belongs to test module, if not then skip that component
+            sp_h = {
+              :cols => [:id,:display_name,:test_id],
+              :filter => [:eq,:id,r[:module_branch_id]]
+            }
+
+            m_branch = Model.get_obj(assembly_instance.model_handle(:module_branch),sp_h)
+            next unless m_branch[:test_id]
+
             ndx = r[:component_type]
             cmp = ndx_test_cmps[ndx] ||= r.hash_subset(:id,:group_id,:display_name,:component_type,:external_ref).merge(:attributes => Array.new)
             cmp[:attributes] << r[:attribute]

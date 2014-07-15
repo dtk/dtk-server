@@ -1,5 +1,5 @@
-module DTK; class NodeBindings
-  class DSL
+module DTK
+  class NodeBindings
     class ParseInput
       attr_reader :input
       def initialize(input_ruby_object)
@@ -18,5 +18,5 @@ module DTK; class NodeBindings
       end
     end
   end
-end; end
+end
 

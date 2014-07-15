@@ -1,8 +1,6 @@
 module DTK
   class NodeBindings
     class DSL
-      r8_nested_require('dsl','parse_input')
-      r8_nested_require('dsl','generate')
       def self.parse_and_remove_non_legacy!(node_bindings_hash)
        parse_input_hash = Hash.new
         node_bindings_hash.each_pair do |node,node_target|
@@ -10,11 +8,11 @@ module DTK
             parse_input_hash[node] = node_bindings_hash.delete(node)
           end
         end
-        parse(parse_input_hash)
+        parse_and_reify(parse_input_hash)
       end
 
-      def self.parse(parse_input_hash) 
-        NodeBindings.parse(ParseInput.new(parse_input_hash))
+      def self.parse_and_reify(parse_input_hash) 
+        Content.parse_and_reify(ParseInput.new(parse_input_hash))
       end
     end
   end

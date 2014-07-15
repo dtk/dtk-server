@@ -30,7 +30,8 @@ module DTK; class ServiceModule
           dangling_errors.aggregate_errors! do
             @db_updates_assemblies["component"].merge!(version_proc_class.import_assembly_top(ref,assem,@module_branch,@module_name,opts))
             # parse_node_bindings_hash! removes elements of node_bindings_hash that are not of form: {node => node_template}
-            version_proc_class.parse_node_bindings_hash!(node_bindings_hash)
+            node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash)
+
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh,@module_branch,ref,assem,node_bindings_hash,@component_module_refs,opts)
             return imported_nodes if ParsingError.is_error?(imported_nodes)
@@ -39,6 +40,9 @@ module DTK; class ServiceModule
               if parse_errors = Task::Template::ConfigComponents.find_parse_errors(workflow_hash)
                 return parse_errors
               end
+            end
+            if node_bindings
+              assem.merge!("node_bindings" => node_bindings.hash_form())
             end
             @db_updates_assemblies["node"].merge!(imported_nodes) 
             @ndx_assembly_hashes[ref] ||= assem

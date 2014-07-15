@@ -9,7 +9,7 @@ module DTK
           end
         end
         if content = Content.parse_and_reify(ParseInput.new(parse_input_hash))
-          {node_bindings_ref(content) => content.hash_form()}
+          {node_bindings_ref(content) => {:content => content.hash_form()}}
         end
       end
     end

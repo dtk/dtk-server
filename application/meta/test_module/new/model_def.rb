@@ -243,7 +243,7 @@ lambda__segment_impls =
          :cols=>[:id,:display_name,:group_id,:assembly_id]
        },
        {
-         :model_name=>:test_module,
+         :model_name=>:component,
          :alias => :assembly_template,
          :convert => true,
          :join_type=>:inner,

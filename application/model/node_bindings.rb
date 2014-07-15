@@ -26,7 +26,7 @@ module DTK
       if self[:content].kind_of?(Content)
         self[:content]
       elsif content_hash = get_field?(:content)
-        Content.parse_and_reify(ParseInput.new(content_hash))
+        Content.parse_and_reify(ParseInput.new(content_hash,:content_field=>true))
       end
     end
 

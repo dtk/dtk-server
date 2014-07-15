@@ -2,19 +2,27 @@ module DTK
   class NodeBindings
     class ParseInput
       attr_reader :input
-      def initialize(input_ruby_object)
-        @input = input_ruby_object
+      def initialize(input,opts={})
+        @input = (opts[:content_field] ? ContentField.new(input) : input)
       end
-      def child(input_ruby_object)
-        #TODO: stub to copy from self context taht gets passed to child
-        self.class.new(input_ruby_object)
+      def child(input)
+        self.class.new(input,:content_field => @input.kind_of?(ContentField))
       end
+
       def type?(klass)
         @input.kind_of?(klass)
       end
+
       def error(msg)
         input_param = ErrorUsage::Parsing::Params.new(:input => @input)
         ServiceModule::ParsingError.new(msg,input_param)
+      end
+    end
+
+    class ContentField < Hash
+      def initialize(content_hash)
+        super()
+        replace(content_hash)
       end
     end
   end

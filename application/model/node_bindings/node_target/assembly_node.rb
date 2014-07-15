@@ -1,12 +1,33 @@
 module DTK; class NodeBindings
   class NodeTarget
-    class AssemblyNode
+    class AssemblyNode < self
       def initialize(hash)
+        super(Type)
         @assembly_name = hash[:assembly_name]
         @node_name = hash[:node_name]
       end
+      Type = :assembly_node
       def hash_form()
-        {:assembly_name => @assembly_name, :node_name => @node_name} 
+        {:type => type().to_s, :assembly_name => @assembly_name, :node_name => @node_name} 
+      end
+
+      def self.parse_and_reify(parse_input,opts={})
+        ret = nil
+        if parse_input.type?(ContentField)
+          input = parse_input.input
+          if input[:type].to_sym == Type
+            ret = new(input)
+          end
+        elsif parse_input.type?(String)
+          input = parse_input.input
+          if input.split('/').size == 3 and input =~ /^assembly\//
+            split = input.split('/')
+            assembly_name = split[1]
+            node_name = split[2]
+            ret = new(:assembly_name => assembly_name,:node_name => node_name)
+          end
+        end
+        ret
       end
 
       #returns if match [assembly_instance,node_instance]
@@ -31,20 +52,6 @@ module DTK; class NodeBindings
           raise ErrorUsage.new("Assembly (#{assembly_instance[:display_name]}) node (#{@node_name}) cannot be matched because it is just staged")
         end
         [assembly_instance,matching_node_instance]
-      end
-
-      def self.class_of?(parse_input)
-        if parse_input.type?(String)
-          input = parse_input.input
-          input.split('/').size == 3 and input =~ /^assembly\//
-        end
-      end
-      def self.parse_and_reify(parse_input)
-        input = parse_input.input
-        split = input.split('/')
-        assembly_name = split[1]
-        node_name = split[2]
-        new(:assembly_name => assembly_name,:node_name => node_name)
       end
 
      private

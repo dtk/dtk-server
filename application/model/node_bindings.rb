@@ -1,5 +1,5 @@
 module DTK
-  class NodeBindings
+  class NodeBindings < Model
     r8_nested_require('node_bindings','content')
     r8_nested_require('node_bindings','parse_input')
     r8_nested_require('node_bindings','dsl')
@@ -29,6 +29,12 @@ module DTK
         Content.parse_and_reify(ParseInput.new(content_hash))
       end
     end
+
+    #since only one per assembly can use constant
+    def self.node_bindings_ref(content)
+      NodeBindingRef
+    end
+    NodeBindingRef = 'node_bindings_ref'
 
     def self.get_node_bindings(assembly_template_idh)
       sp_hash = {

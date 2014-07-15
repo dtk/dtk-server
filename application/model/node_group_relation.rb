@@ -1,4 +1,4 @@
-module XYZ
+module DTK
   class NodeGroupRelation < Model
     def spans_target?()
       update_object!(:datacenter_datacenter_id,:node_id)

@@ -19,8 +19,7 @@ module DTK
         def initiate()
           test_components = get_test_components_with_bindings()
           if test_components.empty?
-            # return
-            raise Error.new("Cannot find components that belongs to required test-modules.")
+            return {:error => "Unable to execute tests. There are no links to test components"}
           end
 
           ndx_version_contexts = get_version_contexts(test_components).inject(Hash.new){|h,vc|h.merge(vc[:id]=>vc)}

@@ -208,7 +208,17 @@ module Ramaze::Helper
     end
 
     def module_type(component_module)
-      component_module.is_a?(ComponentModule) ? :component_module : :service_module
+      # component_module.is_a?(ComponentModule) ? :component_module : :service_module
+      case component_module
+        when ComponentModule
+          return :component_module
+        when ServiceModule
+          return :service_module
+        when TestModule
+          return :test_module
+        else
+          raise ErrorUsage.new("Module type '#{component_module}' is not valid")
+        end
     end
 
     def check_remote_namespace(remote_namespace, component_module)

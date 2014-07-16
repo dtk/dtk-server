@@ -18,7 +18,7 @@ module DTK; module ModuleMixins
 
       is_parsed   = false
       if module_exists = module_exists?(project_idh,module_name)
-        is_parsed = module_exists[:dsl_parsed] 
+        is_parsed = module_exists[:dsl_parsed]
       end
 
       if is_parsed and not opts[:no_error_if_exists]

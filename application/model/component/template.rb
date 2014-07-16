@@ -108,13 +108,26 @@ module DTK; class Component
       unless project_idh = opts[:project_idh]
         raise Error.new("Requires opts[:project_idh]")
       end
+
       sp_hash = {
-        :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum],
+        :cols => [:id, :type, :display_name, :description, :component_type, :version, :refnum, :module_branch_id],
         :filter => [:and, [:eq, :type, "template"], 
                     [:eq, :assembly_id, nil], #so get component templates, not components on assembly instances
                     [:eq, :project_project_id, project_idh.get_id()]]
       }
-      ret = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+      cmps = get_objs(project_idh.createMH(:component),sp_hash,:keep_ref_cols => true)
+
+      ingore_type = opts[:ignore]
+      ret = []
+      cmps.each do |r|
+        sp_h = {
+          :cols => [:id, :type, :display_name],
+          :filter => [:eq, :id, r[:module_branch_id]]
+        }
+        m_branch = Model.get_obj(project_idh.createMH(:module_branch),sp_h)
+        ret << r unless m_branch[:type].eql?(ingore_type)
+      end
+
       if constraint = opts[:component_version_constraints]
         ret = ret.select{|r|constraint.meets_constraint?(r)}
       end

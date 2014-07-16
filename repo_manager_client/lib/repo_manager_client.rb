@@ -9,6 +9,9 @@ module DTK
     def is_service_module?()
       self =~ /^service_module/
     end
+    def is_test_module?()
+      self =~ /^test_module/
+    end
   end
   class RepoManagerClient
     def initialize(rest_base_url_or_host=nil)
@@ -58,14 +61,31 @@ module DTK
       response
     end
 
+    def list_test_modules(username, client_rsa_pub_key)
+      response = get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response
+    end
+
     def list_modules(filter=nil, client_rsa_pub_key = nil)
       repo_user = get_approved_repouser(client_rsa_pub_key)
 
-      if filter[:type].eql? "component"
-        response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
-      else
-        response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
-      end
+      # added 'test' to list component_modules until we implement test_modules on repo_manager
+      # if filter[:type].eql?('component') || filter[:type].eql?('test')
+      #   response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
+      # else
+      #   response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
+      # end
+
+      case filter[:type]
+        when 'component'
+          response = list_component_modules(repo_user.owner_username, client_rsa_pub_key)
+        when 'service'
+          response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
+        when 'test'
+          response = list_test_modules(repo_user.owner_username, client_rsa_pub_key)
+        else
+          raise ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
+        end
 
       response
     end
@@ -78,7 +98,8 @@ module DTK
         :permission_selector => permission_selector
       }
 
-      url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
+      # url = type == :component_module ? '/v1/component_modules/chmod' : '/v1/service_modules/chmod'
+      url = collection_route_from_type({:type => type}) + '/chmod'
 
       post_rest_request_data(
         url,
@@ -95,7 +116,8 @@ module DTK
         :remote_user => remote_user
       }
 
-      url = type == :component_module ? '/v1/component_modules/chown' : '/v1/service_modules/chown'
+      # url = type == :component_module ? '/v1/component_modules/chown' : '/v1/service_modules/chown'
+      url = collection_route_from_type({:type => type}) + '/chown'
 
       post_rest_request_data(
         url,
@@ -114,7 +136,8 @@ module DTK
         :collaboration_groups => groups
       }
 
-      url = type == :component_module ? '/v1/component_modules/collaboration' : '/v1/service_modules/collaboration'
+      # url = type == :component_module ? '/v1/component_modules/collaboration' : '/v1/service_modules/collaboration'
+      url = collection_route_from_type({:type => type}) + '/collaboration'
 
       post_rest_request_data(
         url,
@@ -130,7 +153,8 @@ module DTK
         :namespace   => module_namespace
       }
 
-      url = type == :component_module ? '/v1/component_modules/list_collaboration' : '/v1/service_modules/list_collaboration'
+      # url = type == :component_module ? '/v1/component_modules/list_collaboration' : '/v1/service_modules/list_collaboration'
+      url = collection_route_from_type({:type => type}) + '/list_collaboration'
 
       response = post_rest_request_data(
         url,
@@ -253,7 +277,17 @@ module DTK
     # collection route - plural
     #
     def collection_route_from_type(params_hash)
-      params_hash[:type].eql?("component") ? '/v1/component_modules' : '/v1/service_modules'
+      # params_hash[:type].eql?("component") ? '/v1/component_modules' : '/v1/service_modules'
+      case params_hash[:type].to_s
+        when 'component','component_module'
+          return '/v1/component_modules'
+        when 'service','service_module'
+          return '/v1/service_modules'
+        when 'test','test_module'
+          return '/v1/test_modules'
+        else
+          raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
+        end
     end
 
     #
@@ -261,7 +295,16 @@ module DTK
     # member route - singular
     #
     def member_route_from_type(params_hash)
-      params_hash[:type].eql?("component") ? '/v1/component_module' : '/v1/service_module'
+      case params_hash[:type]
+        when 'component'
+          return '/v1/component_module'
+        when 'service'
+          return '/v1/service_module'
+        when 'test'
+          return '/v1/test_module'
+        else
+          raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
+        end
     end
 
     UNAUTHORIZED_ERROR_CODE = 1001

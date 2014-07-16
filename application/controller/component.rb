@@ -17,9 +17,11 @@ module XYZ
 
     def rest__list()
       project = get_default_project()
+      ignore = ret_request_params(:ignore)
       cmp_version_constraints = get_component_filter_constraints?()
       opts = Opts.new(:project_idh => project.id_handle())
       opts.merge!(:component_version_constraints => cmp_version_constraints) if cmp_version_constraints
+      opts.merge!(:ignore => ignore) if ignore
       rest_ok_response Component::Template.list(model_handle(),opts)
     end
 

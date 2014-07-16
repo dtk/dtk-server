@@ -278,6 +278,11 @@ module DTK
 
     def add_component(component_template,component_title=nil)
       component_template.update_with_clone_info!()
+
+      if module_branch = component_template[:module_branch]
+        raise ErrorUsage.new("You are not allowed to add component '#{component_template[:display_name]}' that belongs to test-module.") if module_branch[:type].eql?('test_module')
+      end
+
       override_attrs = {:locked_sha => component_template.get_current_sha!()}
       if title_attr_name = check_and_ret_title_attribute_name?(component_template,component_title)
         component_type = component_template.get_field?(:component_type)

@@ -817,7 +817,9 @@ module DTK
       end
 
       queue = ActionResultsQueue.new
-      assembly.initiate_execute_tests_v2(project,queue, node_id, components)
+      response = assembly.initiate_execute_tests_v2(project,queue, node_id, components)
+
+      return rest_ok_response(:errors => [response[:error]]) if response[:error]
       rest_ok_response :action_results_id => queue.id
     end
     

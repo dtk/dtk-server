@@ -11,6 +11,7 @@ module DTK
 
     #### create and delete actions ###
     def rest__create()
+      # setup needed data
       module_name = ret_non_null_request_params(:module_name)
       config_agent_type =  ret_config_agent_type()
       project = get_default_project()
@@ -141,7 +142,7 @@ module DTK
     AboutEnum = [:components, :attributes, :instances]
 
     #### end: list and info actions ###
-    
+
     #### actions to interact with remote repos ###
     # TODO: rename; this is just called by install; import ops call create route
     def rest__import()
@@ -171,7 +172,7 @@ module DTK
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)
       project = get_default_project()
       ComponentModule.delete_remote(project,remote_params,client_rsa_pub_key)
-      rest_ok_response 
+      rest_ok_response
     end
 
     def rest__list_remote()
@@ -199,10 +200,10 @@ module DTK
     def rest__create_new_dsl_version()
       component_module = create_obj(:component_module_id)
       dsl_version = ret_non_null_request_params(:dsl_version).to_i
-      module_version = ret_version() 
+      module_version = ret_version()
       format = :json
       component_module.create_new_dsl_version(dsl_version,format,module_version)
-      rest_ok_response 
+      rest_ok_response
     end
 
     #### end: actions to manage workspace and promote changes from workspace to library ###

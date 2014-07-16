@@ -2,7 +2,7 @@ module DTK
   class NodeBindings
     class Content < Hash
       def has_node_target?(node)
-        self[node.get_field?(:display_name)]
+        self[node.get_field?(:display_name).to_sym]
       end
 
       def hash_form()

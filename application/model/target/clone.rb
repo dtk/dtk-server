@@ -96,8 +96,8 @@ module DTK
             }
             Model.get_objs(target.model_handle(:node),sp_hash).each do |nt|
               if nt[:type] == Node::TargetRef.type()
-                node_id = nt[:id]
-                tr_link.merge!(ndx_node_template__node[node_id] => nt)
+                node_id = ndx_node_template__node[nt[:id]]
+                tr_link.merge!(node_id => nt)
                 ndx_needs_sc[node_id] = nil
               end
             end

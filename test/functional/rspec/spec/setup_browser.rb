@@ -27,7 +27,7 @@ RSpec.configure do |config|
 end
 
 def load_configs
-  rspec_file = '.rspec' 
+  rspec_file = '.rspec'
   env = nil
   File.open(rspec_file).each do |line|
     if (line.match('--options\s?.+_ENV'))

@@ -345,3 +345,108 @@ shared_context "Replace dtk.model.yaml file with new one" do |component_module_n
     pass.should eq(true)
   end
 end
+
+shared_context "Make private component module" do |dtk_common, component_module_name|
+  it "makes #{component_module_name} component module private" do
+    component_module_private = dtk_common.make_component_module_private(component_module_name)
+    component_module_private.should eq(true)
+  end
+end
+
+shared_context "NEG - Make private component module" do |dtk_common, component_module_name|
+  it "does not make #{component_module_name} component module private because of lack of permissions" do
+    component_module_private = dtk_common.make_component_module_private(component_module_name)
+    component_module_private.should eq(false)
+  end
+end
+
+shared_context "Make public component module" do |dtk_common, component_module_name|
+  it "makes #{component_module_name} component module public" do
+    component_module_public = dtk_common.make_component_module_public(component_module_name)
+    component_module_public.should eq(true)
+  end
+end
+
+shared_context "NEG - Make public component module" do |dtk_common, component_module_name|
+  it "does not make #{component_module_name} component module public" do
+    component_module_public = dtk_common.make_component_module_public(component_module_name)
+    component_module_public.should eq(false)
+  end
+end
+
+shared_context "Chmod component module" do |dtk_common, component_module_name, permission_set|
+  it "set #{permission_set} permissions for #{component_module_name} component module" do
+    component_module_chmod_set = dtk_common.set_chmod_for_component_module(component_module_name, permission_set)
+    component_module_chmod_set.should eq(true)
+  end
+end
+
+shared_context "NEG - Chmod component module" do |dtk_common, component_module_name, permission_set|
+  it "does not set #{permission_set} permissions for #{component_module_name} component module" do
+    component_module_chmod_set = dtk_common.set_chmod_for_component_module(component_module_name, permission_set)
+    component_module_chmod_set.should eq(false)
+  end
+end
+
+shared_context "List remote modules" do |dtk_common, component_module_name|
+  it "checks that #{component_module_name} component module is visible" do
+    component_module_visible = dtk_common.check_if_component_module_visible_on_remote(component_module_name)
+    component_module_visible.should eq(true)
+  end
+end
+
+shared_context "NEG - List remote modules" do |dtk_common, component_module_name|
+  it "checks that #{component_module_name} component module is not visible" do
+    component_module_visible = dtk_common.check_if_component_module_visible_on_remote(component_module_name)
+    component_module_visible.should eq(false)
+  end
+end
+
+shared_context "Add collaborators on module" do |dtk_common, component_module_name, collaborators, collaborator_type|
+  it "adds #{collaborators} collaborators to #{component_module_name} component module" do
+    collaborators_added = dtk_common.add_collaborators(component_module_name, collaborators, collaborator_type)
+    collaborators_added.should eq(true)
+  end
+end
+
+shared_context "NEG - Add collaborators on module" do |dtk_common, component_module_name, collaborators, collaborator_type|
+  it "does not add #{collaborators} collaborators to #{component_module_name} component module" do
+    collaborators_added = dtk_common.add_collaborators(component_module_name, collaborators, collaborator_type)
+    collaborators_added.should eq(false)
+  end
+end
+
+shared_context "Remove collaborators from module" do |dtk_common, component_module_name, collaborators, collaborator_type|
+  it "removes #{collaborators} collaborators from #{component_module_name} component module" do
+    collaborators_removed = dtk_common.remove_collaborators(component_module_name, collaborators, collaborator_type)
+    collaborators_removed.should eq(true)
+  end
+end
+
+shared_context "NEG - Remove collaborators from module" do |dtk_common, component_module_name, collaborators, collaborator_type|
+  it "does not remove #{collaborators} collaborators from #{component_module_name} component module" do
+    collaborators_removed = dtk_common.remove_collaborators(component_module_name, collaborators, collaborator_type)
+    collaborators_removed.should eq(false)
+  end
+end
+
+shared_context "Check collaborators on module" do |dtk_common, component_module_name, collaborators, collaborator_type, filter|
+  it "checks that #{collaborators} collaborators exist on #{component_module_name} component module" do
+    collaborators_exist = dtk_common.check_collaborators(component_module_name, collaborators, collaborator_type, filter)
+    collaborators_exist.should eq(true)
+  end
+end
+
+shared_context "NEG - Check collaborators on module" do |dtk_common, component_module_name, collaborators, collaborator_type, filter|
+  it "check that #{collaborators} collaborators dont not exist on #{component_module_name} component module" do
+    collaborators_exist = dtk_common.check_collaborators(component_module_name, collaborators, collaborator_type, filter)
+    collaborators_exist.should eq(false)
+  end
+end
+
+shared_context "Check module permissions" do |dtk_common, component_module_name, permissions_set|
+  it "checks that #{permissions_set} exist on #{component_module_name} component module" do
+    permission_set_correctly = dtk_common.check_module_permissions(component_module_name, permissions_set)
+    permission_set_correctly.should eq(true)
+  end
+end

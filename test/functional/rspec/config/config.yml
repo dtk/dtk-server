@@ -5,9 +5,30 @@ r8server:
   username: dtk17-client
   password: r8server
   log: /home/dtk17/thin/log/thin.log
+  ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCkfRjIJPunPenoNwkCKtKWxwUdlk8TbCAJeF73F5LAeQAEW+ov/Jd0Ewb10plNrxqZsZ4S2hOqi9+5J8KMImLL94pLEDWmGZ+pcfpICleOoMz3is3ticF3INLgv5Vx/eioJoHXBvXXKxWrcBpz2C3eczDdtIa9++Js/JA/jQkRaAXLTkoiIfSwf/tbSNpYtF0xoWGWspqTvoBhJKuVhfOGhKtlUXI24FMy7I0kvOX66m4z+3/CN5xNkZ564uEMGMjrkUoEsPj1DvV4tiQZ7uEUlga1A9vYGmNLogpzqd8UtNLdt9plluV7p68VfLIlQrAGgil3sR3+lWldvUuU+YJL dtk17-client@dtk17-server"
 dtkserverdbconnection:
   adapter: postgresql
   database: dtk17
   username: postgres
   host: localhost
   port: 5432
+LINUX_ENV:
+  environment:
+    full_host: 'https://admin.dtk.io'
+  target:
+    os: 'Linux'
+    browser: 'ff'
+  account:
+    username: 'dtk-admin'
+    password: 'r8server'
+  headless: true
+LOCAL_ENV:
+  environment:
+    full_host: 'https://admin.dtk.io'
+  target:
+    os: 'Windows'
+    browser: 'chrome'
+  account:
+    username: 'dtk-admin'
+    password: 'r8server'
+  headless: false

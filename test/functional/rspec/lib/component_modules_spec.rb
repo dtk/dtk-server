@@ -276,12 +276,19 @@ shared_context "Delete component module from remote repo" do |dtk_common, compon
   end
 end
 
-# shared_context "OLD - Delete module from remote repo" do |dtk_common, component_module_name, namespace|
-#  it "deletes #{component_module_name} module with #{namespace} namespace from remote repo" do
-#    module_deleted = dtk_common.delete_module_from_remote(component_module_name, namespace)
-#    module_deleted.should eq(true)
-#  end
-# end
+shared_context "Delete component module from remote" do |dtk_common, component_module_name, namespace|
+  it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
+    module_deleted = dtk_common.delete_module_from_remote(component_module_name, namespace)
+    module_deleted.should eq(true)
+  end
+end
+
+shared_context "NEG - Delete component module from remote" do |dtk_common, component_module_name, namespace|
+  it "does not delete #{component_module_name} component module with #{namespace} namespace from remote repo" do
+    module_deleted = dtk_common.delete_module_from_remote(component_module_name, namespace)
+    module_deleted.should eq(false)
+  end
+end
 
 shared_context "Create new component module version" do |dtk_common, component_module_name, version|
   it "creates new version #{version} for #{component_module_name} component module on server" do

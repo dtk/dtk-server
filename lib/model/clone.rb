@@ -25,6 +25,10 @@ module DTK
       clone_source_object.add_model_specific_override_attrs!(override_attrs,self)
       proc = Clone::CopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
+
+#TODO: for debugging
+#stop = true
+#if stop then raise Error.new('stop for testing'); end
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
 

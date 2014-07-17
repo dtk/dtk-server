@@ -126,7 +126,7 @@ module DTK
       end
 
         
-      #TODO: just temporarly heustic that wil indicate :match if node node bindings in assembly
+      #TODO: just temporarly heustic that wil indicate :match if no node bindings in assembly
       def match_or_create_node(target,node,assembly_template_idh,opts)
         opts[:node_binding_ruleset] ? :create : :match
       end
@@ -137,7 +137,7 @@ module DTK
           :instance_type         => instance_type,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
-          :instance_ref          => node[:display_name],
+          :instance_ref          => instance_ref(node[:display_name]),
           :node_template_idh     => node_template.id_handle()
         }
       end
@@ -146,9 +146,13 @@ module DTK
           :instance_type         => Node::Type::Node.instance,
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
-          :instance_ref          => node_target_ref.get_field?(:ref),
+          :instance_ref          => instance_ref(node[:display_name]),
           :node_template_idh     => node_target_ref.id_handle()
         }
+      end
+      
+      def instance_ref(node_ref_part)
+        "assembly--#{self[:assembly_obj_info][:display_name]}--#{node_ref_part}"
       end
 
       def cleanup_after_error()

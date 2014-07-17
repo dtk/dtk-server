@@ -3,7 +3,7 @@ module DTK
     r8_nested_require('test','dsl_mixin')
     r8_nested_require('test','dsl')
 
-    # r8_nested_require('component','version_context_info')
+    r8_nested_require('test','version_context_info')
     r8_nested_require('test','delete_mixin')
 
     include DeleteMixin

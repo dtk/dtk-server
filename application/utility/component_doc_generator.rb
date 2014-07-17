@@ -7,7 +7,6 @@ module DTK
       server = R8Server.new("superuser","all")
       parsed_as_hash = server.parse_dtk_model_file(dtk_model_yaml_path)
       template = File.open(File.expand_path('component_doc_generator.md.erb',File.dirname(__FILE__))).read
-pp parsed_as_hash
       STDOUT << Erubis::Eruby.new(template).result(:cmp_module => ComponentModule.new(parsed_as_hash))
     end
     class Top < Hash
@@ -60,13 +59,14 @@ pp parsed_as_hash
         self["name"]
       end
       def type()
-        self["type"]||''
+        self["type"]
       end
-      def default()
-:default #        self["default"]||''
+      #TODO: looks like Erubis bug when default method used
+      def default_value()
+        self["default"]
       end
       def description()
-:description #        self["description"]||''
+        self["description"]
       end
     end
   end

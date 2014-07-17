@@ -1,0 +1,43 @@
+## Configuration Module - bigtop/hadoop 
+
+Bigtop is an Apache Foundation top level project for the development of packaging and tests of the Apache Hadoop ecosystem. The bigtop/hadoop module is the defacto go-to configuration library for those wishing to manage their Hadoop stack and related services with puppet backed automation.  For more about the bigtop project see: [http://bigtop.apache.org](http://bigtop.apache.org)
+
+**DTK DSL Version:** 0.9.1
+**Type:** puppet
+
+## Components  {#components}
+
+*   [datanode](#component-datanode)
+*   [namenode](#component-namenode)
+*   [nodemanager](#component-nodemanager)
+*   [resourcemanager](#component-resourcemanager)
+*   [historyserver](#component-historyserver)
+
+
+### Datanode  {#component-datanode}
+
+**DTK External Reference:** hadoop::datanode
+
+<description here if available>
+
+#### Attributes  {#component-datanode-attributes}
+
+| Name | Type | Default | Description |
+| ---- | ---- | ------- | ------ |
+| namenode_port | port | 1234 | Port of the namenode the datanode instance needs to connect to |
+| namenode_host | string | <empty> | Hostname of the namenode the datanode instance needs to connect to |
+| dirs |  array | [] | List of datanode defined directories |
+
+#### Dependencies  {#component-datanode-dependencies}
+| Name | Type | Description |
+| ---- | ---- | ------ |
+| bigtop_base | Component | |
+| namenode_conn | Component Link | Required component link connections with hadoop::namenode (local or remote) |
+
+#### Link Definitions  {#component-datanode-link-defs}
+#####hadoop::namenode
+######Attribute Mappings {#component-datanode-link-defs-attribute-mappings}
+| Attr | Direction | Attr |
+| ---- | ---- | ------ |
+| $node.host_address | -> | namenode_host |
+| $port | -> | namenode_port |

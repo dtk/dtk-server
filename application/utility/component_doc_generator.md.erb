@@ -1,21 +1,21 @@
-## Component Module - <%= cmp_module.name() %>
+## Component Module - <%= cmp_module.name.capitalize %>
 
-**DTK DSL Version:** <%= cmp_module.dsl_version() %>
-**Type:** <%= cmp_module.type() %>
+**DTK DSL Version:** <%= cmp_module.dsl_version %>
+**Type:** <%= cmp_module.type %>
 
 ## Components  
 <% cmp_module.components.each do |cmp| -%>
-*   [<%= cmp.name() %>]
+*   [<%= cmp.name %>]
 <% end -%>
 
 <% cmp_module.components.each do |cmp| -%>
-### <%= cmp.name().upcase %>
+### <%= cmp.name.capitalize %>
 
 #### Attributes  
-<% cmp.attributes.each do |a| -%>
 | Name | Type | Default | Description |
 | ---- | ---- | ------- | ------ |
-| <%= a.name() %> | <%= a.type() %> | <%= a.default() %> | <%= a.description() %>
+<% cmp.attributes.each do |a| -%>
+| <%= a.name %> | <%= a.type %> | <%= a.default_value %> | <%= a.description %>
 <% end -%>
 
 <% end -%>

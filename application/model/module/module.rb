@@ -1,31 +1,15 @@
 module DTK
-  class TestModule < Model
-    r8_nested_require('test','dsl_mixin')
-    r8_nested_require('test','dsl')
+  class Module < Model
+    r8_nested_require('module','dsl_mixin')
+    r8_nested_require('module','dsl')
 
-    r8_nested_require('test','version_context_info')
-    r8_nested_require('test','delete_mixin')
+    r8_nested_require('module','version_context_info')
+    r8_nested_require('module','delete_mixin')
 
     include DeleteMixin
     extend ModuleClassMixin
     include ModuleMixin
     include DSLMixin
-
-    def self.model_type()
-      :test_module
-    end
-
-    def self.component_type()
-      :puppet #hardwired
-    end
-
-    def component_type()
-      :puppet #hardwired
-    end
-
-    def self.module_specific_type(config_agent_type)
-      config_agent_type
-    end
 
     def get_associated_assembly_templates()
       ndx_ret = Hash.new
@@ -36,6 +20,13 @@ module DTK
       ndx_ret.values
     end
 
+    # each of the module's component_templates associated with zero or more assembly template component references
+    # component refs indexed by component template; plus augmented info for cmp refs; it has form
+    # Component::Template:
+    #   component_refs:
+    #   - ComponentRef:
+    #      node: Node
+    #      assembly_template: Assembly::Template
     def get_associated_assembly_cmp_refs()
       ndx_ret = Hash.new
       get_objs(:cols => [:assembly_templates]).each do |r|
@@ -70,7 +61,7 @@ module DTK
         ret = results.inject([]) do |transformed, element|
           attribute = element[:attribute]
           branch = element[:module_branch]
-          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.version_print_form()}
+          transformed << { :id => attribute[:id], :display_name => attribute.print_path(element[:component]), :value => attribute[:value_asserted], :version=> branch.version_print_form()}            
         end
         return ret.sort{|a,b|a[:display_name] <=> b[:display_name]}
       when :instances
@@ -82,19 +73,35 @@ module DTK
         results.each do |el|
           title_elements = [el[:node][:display_name],el[:component_instance][:display_name]]
           title_elements.unshift(el[:assembly][:display_name]) if el[:assembly]
-          ret << {
-            :id => el[:component_instance][:id],
-            :display_name => title_elements.join('/'),
+          ret << { 
+            :id => el[:component_instance][:id], 
+            :display_name => title_elements.join('/'), 
             :version => ModuleBranch.version_from_version_field(el[:component_instance][:version])
           }
         end
 
         return ret
       else
-        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")
+        raise Error.new("TODO: not implemented yet: processing of info_about(#{about})")        
       end
     end
 
+    def self.model_type()
+      :component_module
+    end
+    def self.component_type()
+      :puppet #hardwired
+    end
+    def component_type()
+      :puppet #hardwired
+    end
+
+    def self.module_specific_type(config_agent_type)
+      config_agent_type
+    end
+
+    # Method will check if given component modules are present on the system
+    # returns [missing_modules, found_modules]
     def self.cross_reference_modules(opts, required_modules, service_namespace)
       project_idh = opts.required(:project_idh)
 
@@ -117,13 +124,13 @@ module DTK
         namespace = r_module["remote_namespace"]
 
         is_found = installed_modules.find do |i_module|
-          name.eql?(i_module[:display_name]) and
+          name.eql?(i_module[:display_name]) and 
           ModuleVersion.versions_same?(version, i_module.fetch(:module_branch,{})[:version]) and
           (namespace.nil? or namespace.eql?(i_module.fetch(:repo_remote,{})[:repo_namespace]))
         end
         data = { :name => name, :version => version, :namespace => namespace||service_namespace}
         if is_found
-        found_modules << data
+        found_modules << data 
         else
           missing_modules << data
         end
@@ -143,7 +150,7 @@ module DTK
       unless repos.size == 1
         raise Error.new("unexpected that number of matching repos is not equal to 1")
       end
-
+      
       return repos.first()
     end
 
@@ -165,6 +172,6 @@ module DTK
         raise ErrorUsage.new("Unable to publish module that has parsing errors. Please fix errors and try to publish again.")
       end
     end
-
+    
   end
 end

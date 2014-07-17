@@ -239,7 +239,7 @@ module DTK
         def get_version_contexts(test_components)
           version_contexts =
             unless test_components.empty?
-              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(test_components)
+              TestModule::VersionContextInfo.get_in_hash_form_from_templates(test_components)
             else
               Log.error("Unexpected that test_components is empty")
               nil
@@ -298,7 +298,7 @@ module DTK
           pp [:debug_cmp_templates,cmp_templates]
           version_context =
             unless cmp_templates.empty?
-              ComponentModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
+              TestModule::VersionContextInfo.get_in_hash_form_from_templates(cmp_templates)
             else
               Log.error("Unexpected that cmp_instances is empty")
               nil

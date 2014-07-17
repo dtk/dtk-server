@@ -6,7 +6,6 @@ module DTK
 
       AnnotatedNodes = Struct.new(:to_link,:to_create)
       def self.create_target_refs_and_links?(target,assembly,annotated_nodes,opts={})
-pp [:annotated_nodes,annotated_nodes]
         unless annotated_nodes.to_create.empty?
           Input::BaseNodes.create_linked_target_refs?(target,assembly,annotated_nodes.to_create)
         end

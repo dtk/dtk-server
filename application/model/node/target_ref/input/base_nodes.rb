@@ -12,6 +12,7 @@ module DTK; class Node; class TargetRef
         Model.input_hash_content_into_model(target.id_handle(),create_objs_hash)
       end
 
+      #This creates if needed a new target ref, links node to it and moves the node's attributes to the target ref
       def self.create_linked_target_ref?(target,node,assembly)
         ndx_node_target_ref_array = create_linked_target_refs?(target,assembly,[node])
         unless target_ref_array = ndx_node_target_ref_array[node[:id]]
@@ -20,7 +21,11 @@ module DTK; class Node; class TargetRef
         unless target_ref_array.size == 1
           raise Error.new("Unexpected that ndx_node_target_ref_array.size not equal 1")
         end
-        target_ref_array.first.create_object()
+        target_ref = target_ref_array.first.create_object()
+        #TODO: can be more efficienct and avoid calling below if create_linked_target_refs? finds as opposed to creates
+        # target refs
+        move_node_attributes_to_target_refs(target,[{:node_instance => node,:target_ref => target_ref}])
+        target_ref
       end
 
       # This creates if needed target refs and links nodes to them
@@ -59,6 +64,24 @@ module DTK; class Node; class TargetRef
       end
 
      private
+      # to_link_array is of form [{:node_instance => node,:target_ref => target_ref},..]
+      def self.move_node_attributes_to_target_refs(target,to_link_array)
+        return if to_link_array.empty?
+        sp_hash = {
+          :cols => [:id,:display_name,:node_node_id],
+          :filter => [:oneof,:node_node_id,to_link_array.map{|n|n[:node_instance].id()}]
+        }
+        attr_mh = target.model_handle(:attribute)
+        attrs = Model.get_objs(attr_mh,sp_hash)
+        return if attrs.empty?
+        to_link_hash = to_link_array.inject(Hash.new){|h,r|h.merge(r[:node_instance].id => r[:target_ref].id)}
+        rows_to_update = attrs.map do |r|
+          {:id => r[:id], :node_node_id => to_link_hash[r[:node_node_id]]}
+        end
+        Log.error("need to also update top.id_info since parent field is being updated")
+        Model.update_from_rows(attr_mh,rows_to_update)
+      end
+
       # node_instance and target_ref can be ids or be uri paths
       def self.target_ref_link_hash(node_instance,target_ref)
         hash = Link.attr_asignment(:node_group_id,node_instance).merge(Link.attr_asignment(:node_id,target_ref))

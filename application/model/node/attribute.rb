@@ -170,7 +170,7 @@ module DTK
         get_node_attributes(opts.merge(:filter => [:eq,:display_name,attribute_name])).first
       end
       def get_node_attributes(opts={})
-        Node.get_node_level_attributes([id_handle()],opts[:cols],opts[:filter])
+        Node.get_node_level_attributes([id_handle()],:cols=>opts[:cols],:add_filter=>opts[:filter])
       end
 
       # TODO: stub; see if can use get_node_attributes

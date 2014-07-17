@@ -24,6 +24,11 @@ class R8Server
   end
 
   ###actions
+  def parse_dtk_model_file(file_path)
+    content = File.open(file_path).read()
+    Aux.convert_to_hash(content,:yaml)    
+  end
+
   def create_repo_user_instance_admin?()
     repo_user_mh = pre_execute(:repo_user)
     RepoUser.add_repo_user?(:admin,repo_user_mh)

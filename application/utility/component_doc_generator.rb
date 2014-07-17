@@ -61,7 +61,7 @@ module DTK
       def type()
         self["type"]
       end
-      #TODO: looks like Erubis bug when default method used
+      #TODO: looks like Erubis bug when method called 'default' used
       def default_value()
         self["default"]
       end

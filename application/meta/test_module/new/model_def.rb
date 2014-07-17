@@ -10,6 +10,17 @@ lambda__segment_module_branches =
   ret[:filter] = args[:filter] if args[:filter]
   ret
 }
+lambda__segment_namespace =
+  lambda{|args|
+  ret = {
+    :model_name=>:namespace,
+    :convert => true,
+    :join_type=>:inner,
+    :join_cond=>{:id =>:namespace__id},
+    :cols=>args[:cols]
+  }
+  ret
+}
 lambda__segment_components =
   lambda{|args|
   ret = {
@@ -121,9 +132,20 @@ lambda__segment_impls =
   :schema=>:module,
   :table=>:test,
   :columns=>{
-    :dsl_parsed => {:type=>:boolean,:default=>false} # set to true if dsl has successfully parsed
+    :dsl_parsed => {:type=>:boolean,:default=>false}, # set to true if dsl has successfully parsed
+    :namespace_id=>{
+      :type=>:bigint,
+      :foreign_key_rel_type=>:namespace,
+      :on_delete=>:set_null,
+      :on_update=>:set_null
+    }
   },
   :virtual_columns=>{
+    :namespace=>{
+      :type => :json,
+      :hidden => true,
+      :remote_dependencies=>[lambda__segment_namespace.call(:cols => Namespace.common_columns())]
+    },
     :module_branches=>{
       :type=>:json,
       :hidden=>true,

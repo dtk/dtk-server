@@ -257,7 +257,7 @@ module DTK
         node_idhs = ndx_nodes.values.map{|n|n.id_handle()}
         add_filter = [:eq,:required,true]
         cols = [:id,:group_id,:display_name,:node_node_id,:required,:value_derived,:value_asserted,:dynamic,:port_type_asserted,:is_port,:semantic_type_summary]
-        Node.get_node_level_attributes(node_idhs,cols,add_filter).each do |attr|
+        Node.get_node_level_attributes(node_idhs,:cols => cols,:add_filter => add_filter).each do |attr|
           ret << attr.merge(:node => ndx_nodes[attr[:node_node_id]],:task_id => task[:id])
         end
       end

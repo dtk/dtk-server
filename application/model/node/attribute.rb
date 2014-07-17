@@ -31,7 +31,7 @@ module DTK
         field_info = field_info(name)
         filter =  [:eq,:display_name,field_info[:name].to_s]
         node_idhs = nodes_to_query.map{|n|n.id_handle()}
-        ndx_attrs =  Node.get_node_level_attributes(node_idhs,cols,filter).inject(Hash.new) do |h,a|
+        ndx_attrs =  Node.get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>filter).inject(Hash.new) do |h,a|
           h.merge(a[:node_node_id] => a[:attribute_value])
         end
 
@@ -103,21 +103,21 @@ module DTK
       end
 
       # node_level_assembly_attributes are ones that are persited on assembly logical nodes, not node template
-      def get_node_level_assembly_attributes(node_idhs,cols=nil)
-        cols ||= [:id,:display_name,:node_node_id,:attribute_value]
+      def get_node_level_assembly_attributes(node_idhs,opts={})
+        cols = opts[:cols] || [:id,:display_name,:node_node_id,:attribute_value]
         add_filter = NodeAttribute.assembly_attribute_filter()
-        get_node_level_attributes(node_idhs,cols,add_filter)
+        get_node_level_attributes(node_idhs,:cols=>cols,:add_filter=>add_filter)
       end
 
-      def get_node_level_attributes(node_idhs,cols=nil,add_filter=nil)
+      def get_node_level_attributes(node_idhs,opts={})
         ret = Array.new
         return ret if node_idhs.empty?()
         filter = [:oneof,:node_node_id,node_idhs.map{|idh|idh.get_id()}]
-        if add_filter
+        if add_filter = opts[:add_filter]
           filter = [:and,filter,add_filter]
         end
         sp_hash = {
-          :cols => cols||[:id,:group_id,:display_name,:required],
+          :cols => opts[:cols] || [:id,:group_id,:display_name,:required],
           :filter => filter,
         }
         attr_mh = node_idhs.first.createMH(:attribute)

@@ -434,33 +434,6 @@ module DTK
     end
 # end of these may be depracted
 
-
-    #### related to distinguishing bewteen nodes and node groups
-
-    def self.get_node_or_ng_summary(node_mh,node_ids)
-      ret = Hash.new
-      return ret if node_ids.empty?
-      sp_hash = {
-        :cols => [:id,:type,:node_or_ng_summary],
-        :filter => [:oneof, :id, node_ids]
-      }
-      get_objs(node_mh,sp_hash).inject({}) do |ret,n|
-        n.delete(:node_group_relation)
-        node_member = n.delete(:node_member)
-        node_id = n[:id]
-        if n.is_node_group?()
-          pntr = ret[node_id] ||= NodeGroup.create_as(n).merge(:node_group_members => Array.new)
-          pntr[:node_group_members] << node_member if node_member
-          ret
-        else
-          ret.merge(node_id => n)
-        end
-      end
-    end
-
-
-    #### end: related to distinguishing bewteen nodes and node groups
-
     def update_dangling_links()
       dangling_links_info_cmps = get_objs(:cols => [:dangling_input_links_from_components])
       dangling_links_info_nodes = get_objs(:cols => [:dangling_input_links_from_nodes])

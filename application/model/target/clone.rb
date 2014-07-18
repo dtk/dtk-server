@@ -48,10 +48,7 @@ module DTK
         #TODO: currently not used; may deprecate create_add_on_port_and_attr_links?(target,clone_copy_output,opts)
 
         level = 1
-        port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
-        assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
-
-        nodes = clone_copy_output.children_objects(level,:node, :cols=>[:display_name,:external_ref,:type])
+        nodes = clone_copy_output.children_objects(level,:node,:cols=>[:display_name,:external_ref,:type])
         return if nodes.empty?
 
         Node.cache_attribute_values!(nodes,:cardinality)
@@ -59,6 +56,11 @@ module DTK
         # This creates if needed target refs and links to them
         # and moves node attributes to the target refs
         create_target_refs_and_links?(target,assembly,nodes)
+
+        # Computing port_links (and also attribute links after create_target_refs_and_links
+        # because relying on the node attributes to be shifted to target refs if connected to target refs
+        port_link_idhs = clone_copy_output.children_id_handles(level,:port_link)
+        assembly__port_links(target,clone_copy_output,port_link_idhs,opts)
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level,:component)

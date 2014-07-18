@@ -4,6 +4,24 @@ module DTK
     class TargetRef < self
       r8_nested_require('target_ref','input')
 
+      # returns hash of form {node_id => NodeWithTargetRefs,..}
+      NodeWithTargetRefs = Struct.new(:node,:target_refs)
+      def self.get_ndx_linked_target_refs(node_mh,node_ids)
+        ret = Hash.new
+        return ret if node_ids.empty?
+        sp_hash = {
+          :cols => [:id,:display_name,:type,:linked_target_refs],
+          :filter => [:oneof, :id, node_ids]
+        }
+        get_objs(node_mh,sp_hash).each do |n|
+          n.delete(:node_group_relation)
+          target_ref = n.delete(:target_ref)
+          pntr = ret[n[:id]] ||= NodeWithTargetRefs.new(n,Array.new)
+          pntr.target_refs << target_ref if target_ref
+        end
+        ret
+      end
+
       AnnotatedNodes = Struct.new(:to_link,:to_create)
       def self.create_target_refs_and_links?(target,assembly,annotated_nodes,opts={})
         unless annotated_nodes.to_create.empty?

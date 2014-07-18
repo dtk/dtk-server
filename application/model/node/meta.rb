@@ -86,7 +86,7 @@ module DTK
            :cols => [:id,:display_name]
          }]
 
-      virtual_column :node_or_ng_summary, :type=>:json, :hidden=>true,
+      virtual_column :linked_target_refs, :type=>:json, :hidden=>true,
       :remote_dependencies=>
         [{
            :model_name=>:node_group_relation,
@@ -96,7 +96,7 @@ module DTK
        },
        {
            :model_name=>:node,
-           :alias => :node_member,
+           :alias => :target_ref,
            :convert => true,
            :join_type=>:left_outer,
            :join_cond=>{:id => q(:node_group_relation,:node_id)},

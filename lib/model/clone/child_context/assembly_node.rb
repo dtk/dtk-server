@@ -2,6 +2,10 @@ module DTK
   class ChildContext
     class AssemblyNode < self
      private
+      def include_list()
+        [:attribute_link,:component,:component_ref,:node_interface,:port]
+      end
+
       def initialize(clone_proc,hash)
         super
         assembly_template_idh = model_handle.createIDH(:model_name => :component, :id => hash[:ancestor_id])

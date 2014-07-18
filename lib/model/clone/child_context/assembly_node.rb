@@ -38,23 +38,31 @@ module DTK
 
         # mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
-          mapping_rows = matches.map do |m|
+          ndx_matches = Hash.new
+          ndx_mapping_rows = matches.inject(Hash.new) do |h,m|
+            display_name = m[:instance_display_name]
+            ndx_matches.merge!(display_name => m)
             node_template_id = m[:node_template_idh].get_id()
-            {
+            el = {
               :type => m[:instance_type],
               :ancestor_id => m[:node_stub_idh].get_id(),
               :canonical_template_node_id => node_template_id,
               :node_template_id => node_template_id,
-              :display_name => m[:instance_display_name],
+              :display_name => display_name,
               :ref => m[:instance_ref]
             }
+            h.merge(display_name => el)
           end
-          mapping_ds = SQL::ArrayDataset.create(db(),mapping_rows,model_handle.createMH(:mapping))
+          mapping_ds = SQL::ArrayDataset.create(db(),ndx_mapping_rows.values,model_handle.createMH(:mapping))
           
           select_ds = ancestor_rel_ds.join_table(:inner,node_template_ds).join_table(:inner,mapping_ds,[:node_template_id])
           ret = Model.create_from_select(model_handle,field_set_to_copy,select_ds,create_override_attrs,create_opts)
 
-          ret.each{|r|r[:node_template_id] = (mapping_rows.find{|mr|mr[:display_name] == r[:display_name]}||{})[:node_template_id]}
+          ret.each do |r|
+            display_name = r[:display_name]
+            r[:node_template_id] = (ndx_mapping_rows[display_name]||{})[:node_template_id]
+            r[:donot_clone] = ndx_matches[display_name][:donot_clone]
+          end
         end
 
         # add to ret rows for each service add node binding
@@ -147,7 +155,8 @@ module DTK
           :node_stub_idh         => node.id_handle, 
           :instance_display_name => node[:display_name],
           :instance_ref          => instance_ref(node[:display_name]),
-          :node_template_idh     => node_target_ref.id_handle()
+          :node_template_idh     => node_target_ref.id_handle(),
+          :donot_clone           => [:attribute]
         }
       end
       

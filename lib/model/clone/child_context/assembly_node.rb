@@ -3,7 +3,7 @@ module DTK
     class AssemblyNode < self
      private
       def include_list()
-        [:attribute_link,:component,:component_ref,:node_interface,:port]
+        [:attribute,:attribute_link,:component,:component_ref,:node_interface,:port]
       end
 
       def initialize(clone_proc,hash)

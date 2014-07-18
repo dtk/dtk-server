@@ -26,9 +26,6 @@ module DTK
       proc = Clone::CopyProcessor.create(self,clone_source_object,opts.merge(:include_children => true))
       clone_copy_output = proc.clone_copy_top_level(clone_source_object.id_handle,[target_id_handle],override_attrs)
 
-#TODO: for debugging
-#stop = true
-#if stop then raise Error.new('stop for testing'); end
       new_id_handle = clone_copy_output.id_handles.first
       return nil unless new_id_handle
 
@@ -37,6 +34,9 @@ module DTK
         opts.merge!(:service_add_on_proc => service_add_on_proc)
       end
       clone_post_copy_hook(clone_copy_output,opts)
+#TODO: for debugging
+stop = true
+if stop then raise Error.new('stop for testing'); end
 
       if clone_source_object.class == Component and target_id_handle[:model_name] == :node
         Violation.update_violations([target_id_handle])

@@ -1,5 +1,5 @@
 module DTK
-  class Module < Model
+  class BaseModule < Model
     class VersionContextInfo
       def self.get_in_hash_form(component_idhs,impl_idhs)
         impls = Component::IncludeModule.get_version_context_info(component_idhs,impl_idhs)

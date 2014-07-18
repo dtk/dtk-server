@@ -1,4 +1,4 @@
-module DTK; class Module
+module DTK; class BaseModule
   module DeleteMixin
     def delete_object()
       assembly_templates = get_associated_assembly_templates()

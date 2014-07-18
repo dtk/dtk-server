@@ -1,5 +1,7 @@
+r8_require('mixins')
+
 module DTK
-  class Module < Model
+  class BaseModule < Model
     r8_nested_require('module','dsl_mixin')
     r8_nested_require('module','dsl')
 

@@ -1,4 +1,4 @@
-module DTK; class Module
+module DTK; class BaseModule
   module DSLMixin
     r8_nested_require('dsl_mixin','external_refs')
     include ExternalRefsMixin
@@ -75,7 +75,7 @@ module DTK; class Module
     def deprecate_create_needed_objects_and_dsl?(repo,version,opts={})
       # TODO: used temporarily until get all callers to use local object
       local = deprecate_ret_local(version)
-Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
+      Log.info_pp(["Using deprecate_create_needed_objects_and_dsl?; local =",local,caller[0..4]])
       create_needed_objects_and_dsl?(repo,local,opts)
     end
     def deprecate_ret_local(version)

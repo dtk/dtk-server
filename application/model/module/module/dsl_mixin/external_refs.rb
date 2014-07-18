@@ -1,4 +1,4 @@
-module DTK; class Module
+module DTK; class BaseModule
               
   class ExternalDependencies < Hash
     def initialize(match_hashes,inconsistent,possibly_missing)

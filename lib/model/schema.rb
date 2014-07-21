@@ -30,6 +30,8 @@ module DTK
 
     def up()
       model_def = load_model_def()
+      return unless model_def
+
       relation_name_info = [model_def[:schema]].compact + [model_def[:table]]
       set_relation_name(*relation_name_info)
       model_def.each{|k,v|@db_rel[k]=v}
@@ -46,6 +48,9 @@ module DTK
 
    private
     def load_model_def(model_nm=model_name())
+      # special case: base_module is superclass for modules (component_module, test_module, etc.)
+      return if model_nm == :base_module
+
       model_def_fn = "#{R8::Config[:meta_templates_root]}/#{model_nm}/new/model_def.rb"
       raise Error.new("cannot find model def file #{model_def_fn} for #{model_name()}") unless  File.exists?(model_def_fn)
       begin
@@ -194,7 +199,9 @@ module DTK
      #######
      protected
       def ret_concrete_models(filter=nil)
-        ret = models.reject {|m|m.top? or not m.superclass == Model}
+        # ret = models.reject {|m|m.top? or not m.superclass == Model}
+        # count BaseModule as a Model superclass because it is used as a superclass for component_module, test_module, etc.
+        ret = models.reject {|m|m.top? or not m.superclass == Model and m.superclass != BaseModule}
         if filter
           model_classes = filter.map{|model_name|Model.model_class(model_name)}
           ret.reject!{|m|!model_classes.include?(m)}
@@ -385,6 +392,14 @@ module DTK
         ObjectSpace.each_object(Module) do |m|
           classes << m if m.ancestors.include? self and  m != self
         end
+
+        # count BaseModule as a Model superclass because it is used as a superclass for component_module, test_module, etc.
+        ObjectSpace.each_object(BaseModule) do |m|
+          classes << m if m.ancestors.include? self and  m != self
+        end
+
+        # remove BaseModule from models list because it's only used as a superclass for other module types
+        classes.reject! { |c| c == BaseModule }
         classes
       end
   end

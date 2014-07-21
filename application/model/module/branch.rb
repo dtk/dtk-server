@@ -140,7 +140,7 @@ module DTK
     end
 
     def incrementally_update_component_dsl(augmented_objects,context={})
-      dsl_path,hash_content,fragment_hash = ComponentDSL.incremental_generate(self,augmented_objects,context)
+      dsl_path,hash_content,fragment_hash = ModuleDSL.incremental_generate(self,augmented_objects,context)
       serialize_and_save_to_repo(dsl_path,hash_content)
       fragment_hash
     end
@@ -302,7 +302,7 @@ module DTK
           augmented_branch[:implementation].modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_dsl = ComponentDSL.create_dsl_object_from_impl(augmented_branch[:implementation])
+          component_dsl = ModuleDSL.create_dsl_object_from_impl(augmented_branch[:implementation])
           component_dsl.update_model()
         end
 
@@ -323,7 +323,7 @@ module DTK
           target_impl.modify_file_assets(diff_summary)
         end
         if diff_summary.meta_file_changed?()
-          component_dsl = ComponentDSL.create_dsl_object_from_impl(target_impl)
+          component_dsl = ModuleDSL.create_dsl_object_from_impl(target_impl)
           component_dsl.update_model()
         end
       

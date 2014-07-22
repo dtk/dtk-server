@@ -116,19 +116,22 @@ module DTK
           end
         end
 
+        node_bindings = NodeBindings.get_node_bindings(assembly_template_idh) 
         node_mh = target.model_handle(:node)
         node_info.map do |node|
-          nbrs_opts = {:node_binding_ruleset => node[:node_binding_ruleset]}
-          case match_or_create_node(target,node,assembly_template_idh,nbrs_opts)
+          nb_ruleset = node[:node_binding_ruleset]
+          node_target = node_bindings && node_bindings.has_node_target?(node)
+          case match_or_create_node?(target,node,node_target,nb_ruleset)
             when :create 
-              node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
+              opts_fm = {:node_binding_ruleset => nb_ruleset, :node_target => node_target}
+              node_template = Node::Template.find_matching_node_template(target,opts_fm)
               hash_el_when_create(node,node_template)
             when :match  
-              if node_target_ref = NodeBindings.create_linked_target_ref?(target,node,assembly_template_idh)
+              if node_target_ref = NodeBindings.create_linked_target_ref?(target,node,node_target)
                 hash_el_when_match(node,node_target_ref)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')
-                node_template = Node::Template.find_matching_node_template(target,nbrs_opts)
+                node_template = Node::Template.find_matching_node_template(target,:node_binding_ruleset => nb_ruleset)
                 hash_el_when_create(node,node_template)
               end
             else 
@@ -137,10 +140,12 @@ module DTK
         end
       end
 
-        
-      #TODO: just temporarly heustic that wil indicate :match if no node bindings in assembly
-      def match_or_create_node(target,node,assembly_template_idh,opts)
-        opts[:node_binding_ruleset] ? :create : :match
+      def match_or_create_node?(target,node,node_target,nb_ruleset)
+        if nb_ruleset
+          :create
+        else
+          node_target.match_or_create_node?(target)
+        end
       end
 
       def hash_el_when_create(node,node_template)

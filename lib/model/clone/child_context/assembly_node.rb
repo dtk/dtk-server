@@ -143,8 +143,10 @@ module DTK
       def match_or_create_node?(target,node,node_target,nb_ruleset)
         if nb_ruleset
           :create
-        else
+        elsif node_target
           node_target.match_or_create_node?(target)
+        else
+          :create
         end
       end
 

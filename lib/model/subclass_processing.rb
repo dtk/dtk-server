@@ -111,6 +111,7 @@ module DTK
           when :repo_with_branch then Repo::WithBranch
           when :component_module then ComponentModule
           when :test_module then TestModule
+          when :node_module then NodeModule
         end
       end
 

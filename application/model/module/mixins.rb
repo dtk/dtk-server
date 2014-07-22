@@ -339,6 +339,8 @@ module DTK
         :puppet #TODO: hard wired
        when :test_module
         :puppet #TODO: hard wired
+       when :node_module
+        :puppet #TODO: hard wired
       end
     end
 

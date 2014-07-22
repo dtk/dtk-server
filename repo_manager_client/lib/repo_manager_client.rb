@@ -12,6 +12,9 @@ module DTK
     def is_test_module?()
       self =~ /^test_module/
     end
+    def is_node_module?()
+      self =~ /^node_module/
+    end
   end
   class RepoManagerClient
     def initialize(rest_base_url_or_host=nil)
@@ -66,6 +69,11 @@ module DTK
       response
     end
 
+    def list_node_modules(username, client_rsa_pub_key)
+      response = get_rest_request_data('/v1/node_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), :raise_error => true)
+      response
+    end
+
     def list_modules(filter=nil, client_rsa_pub_key = nil)
       repo_user = get_approved_repouser(client_rsa_pub_key)
 
@@ -83,6 +91,8 @@ module DTK
           response = list_service_modules(repo_user.owner_username, client_rsa_pub_key)
         when 'test'
           response = list_test_modules(repo_user.owner_username, client_rsa_pub_key)
+        when 'node'
+          response = list_node_modules(repo_user.owner_username, client_rsa_pub_key)
         else
           raise ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
         end
@@ -290,6 +300,8 @@ module DTK
           return '/v1/service_modules'
         when 'test','test_module'
           return '/v1/test_modules'
+        when 'node','node_module'
+          return '/v1/node_modules'
         else
           raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
         end
@@ -307,6 +319,8 @@ module DTK
           return '/v1/service_module'
         when 'test'
           return '/v1/test_module'
+        when 'node'
+          return '/v1/node_module'
         else
           raise ErrorUsage.new("Provided module type '#{params_hash[:type]}' is not valid")
         end

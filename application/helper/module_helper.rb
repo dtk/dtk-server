@@ -203,6 +203,7 @@ module Ramaze::Helper
         when :component_module then ComponentModule
         when :service_module then ServiceModule
         when :test_module then TestModule
+        when :node_module then NodeModule
         else raise Error.new("Unexpected module_type (#{module_type})")
       end
     end
@@ -216,6 +217,8 @@ module Ramaze::Helper
           return :service_module
         when TestModule
           return :test_module
+        when NodeModule
+          return :node_module
         else
           raise ErrorUsage.new("Module type '#{component_module}' is not valid")
         end

@@ -29,6 +29,8 @@ module DTK; class ModuleBranch
           :puppet #TODO: hard wired
          when :test_module
           :test #TODO: hard wired
+         when :node_module
+          :node_module #TODO: hard wired
         end
       end
     end

@@ -79,16 +79,25 @@ module DTK
       def self.create_target_refs_and_links?(target,assembly,nodes)
         tr_create = Array.new
         tr_link = Hash.new
+        # ndx_needs_state_change is used to find nodes that need a state change object
+        # meaning model is annoatted so these when a task is run will cause a node to be created
+        # initiallly set ndx_needs_state_change to have all nodes and then in loop below remove ones 
+        # that are linked to existing nodes
+
+        # TODO: assuming that node groups need to be created; think node groups may be able to point to
+        # - all nodes that need to be created
+        # - all nodes that exist
+        # - mixture
         ndx_needs_sc = Hash.new
 
         partition = [tr_create,Array.new]
-        nodes.each{|node|partition[node.is_node_group?() ? 0 : 1] << node}
+        nodes.each do |node|
+          partition[node.is_node_group?() ? 0 : 1] << node
+          ndx_needs_sc.merge!(node[:id] => node)
+        end
 
         # partition[1] are non node groups; elements we want to see if point to a node_template that is a target ref
         unless partition[1].empty?
-          #initiallly set ndx_needs_state_change to true
-          ndx_needs_sc = partition[1].inject(Hash.new){|h,n|h.merge(n[:id] => n)}
-
           ndx_node_template__node = partition[1].inject(Hash.new) do |h,n|
             n[:node_template_id] ? h.merge!(n[:node_template_id] => n[:id]) : h
           end
